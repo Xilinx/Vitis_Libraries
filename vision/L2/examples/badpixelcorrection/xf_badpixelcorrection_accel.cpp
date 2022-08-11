@@ -33,11 +33,11 @@ void badpixelcorrection_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> in_mat(rows, cols);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> in_mat(rows, cols);
     // clang-format off
     // clang-format on
 
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> _dst(rows, cols);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _dst(rows, cols);
 // clang-format off
 // clang-format on
 
@@ -45,10 +45,10 @@ void badpixelcorrection_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1>(img_inp, in_mat);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(img_inp, in_mat);
 
-    xf::cv::badpixelcorrection<IN_TYPE, HEIGHT, WIDTH, NPC1, 0, 0>(in_mat, _dst);
+    xf::cv::badpixelcorrection<IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT, 0, 0>(in_mat, _dst);
 
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1>(_dst, img_out);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_dst, img_out);
 }
 }

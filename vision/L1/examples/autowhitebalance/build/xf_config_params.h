@@ -22,3 +22,7 @@
 #define T_16U 1
 #define T_12U 0
 #define T_10U 0
+
+#define XF_CV_DEPTH_IN_1 1
+#define XF_CV_DEPTH_IN_2 2
+#define XF_CV_DEPTH_OUT_1 3

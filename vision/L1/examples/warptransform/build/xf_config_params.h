@@ -21,6 +21,8 @@
 #define HEIGHT 128
 // Number of columns in  in the input image
 #define WIDTH 128
+#define XF_CV_DEPTH_OUT 2
+#define XF_CV_DEPTH_IN 2
 
 // Number of rows of input image to be stored
 #define NUM_STORE_ROWS 100

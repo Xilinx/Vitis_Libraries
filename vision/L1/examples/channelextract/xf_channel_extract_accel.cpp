@@ -31,12 +31,12 @@ void channel_extract_accel(
     #pragma HLS INTERFACE s_axilite port=return              bundle=control
     // clang-format on
 
-    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, XF_NPPC1> imgInput0;
+    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, XF_NPPC1, XF_CV_DEPTH_IN_1> imgInput0;
 
     imgInput0.rows = rows;
     imgInput0.cols = cols;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> imgOutput0;
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1, XF_CV_DEPTH_OUT_1> imgOutput0;
 
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
@@ -44,7 +44,8 @@ void channel_extract_accel(
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC4, HEIGHT, WIDTH, XF_NPPC1>(img_rgba, imgInput0);
-    xf::cv::extractChannel<XF_8UC4, XF_8UC1, HEIGHT, WIDTH, XF_NPPC1>(imgInput0, imgOutput0, channel);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, XF_NPPC1>(imgOutput0, img_gray);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC4, HEIGHT, WIDTH, XF_NPPC1, XF_CV_DEPTH_IN_1>(img_rgba, imgInput0);
+    xf::cv::extractChannel<XF_8UC4, XF_8UC1, HEIGHT, WIDTH, XF_NPPC1, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_OUT_1>(
+        imgInput0, imgOutput0, channel);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, XF_NPPC1, XF_CV_DEPTH_OUT_1>(imgOutput0, img_gray);
 }

@@ -30,3 +30,7 @@
 #define OUTPUT_PTR_WIDTH 256
 
 #define XF_USE_URAM false
+
+#define XF_CV_DEPTH_IN 3
+#define XF_CV_DEPTH_OUT_0 3
+#define XF_CV_DEPTH_OUT_1 3

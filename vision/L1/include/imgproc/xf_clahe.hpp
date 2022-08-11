@@ -37,6 +37,8 @@ template <int IN_TYPE,
           int CLIPLIMIT,
           int TILES_Y_MAX,
           int TILES_X_MAX,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int TILES_Y_MIN = 4,
           int TILES_X_MIN = 4>
 class CLAHETile {
@@ -86,8 +88,9 @@ class CLAHETile {
     }
 };
 
-#define _CLAHE_TILE \
-    CLAHETile<IN_TYPE, HEIGHT, WIDTH, NPC, CLIPLIMIT, TILES_Y_MAX, TILES_X_MAX, TILES_Y_MIN, TILES_X_MIN>
+#define _CLAHE_TILE                                                                                              \
+    CLAHETile<IN_TYPE, HEIGHT, WIDTH, NPC, CLIPLIMIT, TILES_Y_MAX, TILES_X_MAX, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1, \
+              TILES_Y_MIN, TILES_X_MIN>
 template <int IN_TYPE,
           int HEIGHT,
           int WIDTH,
@@ -95,6 +98,8 @@ template <int IN_TYPE,
           int CLIPLIMIT,
           int TILES_Y_MAX,
           int TILES_X_MAX,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int TILES_Y_MIN = 4,
           int TILES_X_MIN = 4>
 class CLAHEImpl {
@@ -215,9 +220,9 @@ class CLAHEImpl {
         }
     }
 
-    void populateLutBlk(xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC>& in,
+    void populateLutBlk(xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC, XFCVDEPTH_IN_1>& in,
                         _CLAHE_TILE& Tile,
-                        xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC>& in_copy,
+                        xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC, XFCVDEPTH_IN_1>& in_copy,
                         ap_uint<HIST_COUNTER_BITS> _lut[TILES_Y_MAX][TILES_X_MAX][(XF_NPIXPERCYCLE(NPC) << 1)]
                                                        [1 << XF_DTPIXELDEPTH(IN_TYPE, NPC)],
                         ap_uint<CLIP_COUNTER_BITS> _clipCounter[TILES_Y_MAX][TILES_X_MAX]) {
@@ -297,9 +302,9 @@ class CLAHEImpl {
         }
     }
 
-    void populateLut(xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC>& in,
+    void populateLut(xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC, XFCVDEPTH_IN_1>& in,
                      _CLAHE_TILE& Tile,
-                     xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC>& in_copy,
+                     xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC, XFCVDEPTH_IN_1>& in_copy,
                      ap_uint<HIST_COUNTER_BITS> _lut[TILES_Y_MAX][TILES_X_MAX][(XF_NPIXPERCYCLE(NPC) << 1)]
                                                     [1 << XF_DTPIXELDEPTH(IN_TYPE, NPC)],
                      ap_uint<CLIP_COUNTER_BITS> _clipCounter[TILES_Y_MAX][TILES_X_MAX]) {
@@ -318,11 +323,11 @@ class CLAHEImpl {
         clipLut(Tile, _lut, _clipCounter);
     }
 
-    void interpolate(xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC>& in,
+    void interpolate(xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC, XFCVDEPTH_IN_1>& in,
                      _CLAHE_TILE& Tile,
                      ap_uint<HIST_COUNTER_BITS> _lut[TILES_Y_MAX][TILES_X_MAX][(XF_NPIXPERCYCLE(NPC) << 1)]
                                                     [1 << XF_DTPIXELDEPTH(IN_TYPE, NPC)],
-                     xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC>& dst) {
+                     xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC, XFCVDEPTH_OUT_1>& dst) {
         int counterY = Tile.mTileHeight >> 1;
         int histY = -1;
         int counterX;
@@ -408,15 +413,15 @@ class CLAHEImpl {
         }
     }
 
-    void process_i(xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC>& dst,
-                   xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC>& in,
+    void process_i(xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC, XFCVDEPTH_OUT_1>& dst,
+                   xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC, XFCVDEPTH_IN_1>& in,
                    _CLAHE_TILE& Tile,
                    ap_uint<HIST_COUNTER_BITS> _lutw[TILES_Y_MAX][TILES_X_MAX][(XF_NPIXPERCYCLE(NPC) << 1)]
                                                    [1 << XF_DTPIXELDEPTH(IN_TYPE, NPC)],
                    ap_uint<HIST_COUNTER_BITS> _lutr[TILES_Y_MAX][TILES_X_MAX][(XF_NPIXPERCYCLE(NPC) << 1)]
                                                    [1 << XF_DTPIXELDEPTH(IN_TYPE, NPC)],
                    ap_uint<CLIP_COUNTER_BITS> _clipCounter[TILES_Y_MAX][TILES_X_MAX]) {
-        xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC> in_copy(in.rows, in.cols);
+        xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC, XFCVDEPTH_IN_1> in_copy(in.rows, in.cols);
 
 // clang-format off
     #pragma HLS DATAFLOW
@@ -425,8 +430,8 @@ class CLAHEImpl {
         interpolate(in_copy, Tile, _lutr, dst);
     }
 
-    void process(xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC>& dst,
-                 xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC>& in,
+    void process(xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC, XFCVDEPTH_OUT_1>& dst,
+                 xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC, XFCVDEPTH_IN_1>& in,
                  ap_uint<HIST_COUNTER_BITS> _lutw[TILES_Y_MAX][TILES_X_MAX][(XF_NPIXPERCYCLE(NPC) << 1)]
                                                  [1 << XF_DTPIXELDEPTH(IN_TYPE, NPC)],
                  ap_uint<HIST_COUNTER_BITS> _lutr[TILES_Y_MAX][TILES_X_MAX][(XF_NPIXPERCYCLE(NPC) << 1)]

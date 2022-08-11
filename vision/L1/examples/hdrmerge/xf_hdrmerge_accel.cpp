@@ -22,8 +22,9 @@
  * Return:      None
  * Description: Read data from multiple pixel/clk AXI stream into user defined stream
  ************************************************************************************/
-template <int TYPE, int ROWS, int COLS, int NPPC>
-void AXIVideo2BayerMat(InVideoStrm_t_e_s& bayer_strm, xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& bayer_mat) {
+template <int TYPE, int ROWS, int COLS, int NPPC, int XF_CV_DEPTH_BAYER>
+void AXIVideo2BayerMat(InVideoStrm_t_e_s& bayer_strm,
+                       xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XF_CV_DEPTH_BAYER>& bayer_mat) {
 // clang-format off
 #pragma HLS INLINE OFF
     // clang-format on
@@ -89,8 +90,8 @@ loop_row_axi2mat:
     return;
 }
 
-template <int TYPE, int ROWS, int COLS, int NPPC>
-void GRAYMat2AXIvideo(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& gray_mat, OutVideoStrm_t_e_s& gray_strm) {
+template <int TYPE, int ROWS, int COLS, int NPPC, int XF_CV_DEPTH_GRAY>
+void GRAYMat2AXIvideo(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XF_CV_DEPTH_GRAY>& gray_mat, OutVideoStrm_t_e_s& gray_strm) {
 // clang-format off
 #pragma HLS INLINE OFF
     // clang-format on
@@ -171,20 +172,20 @@ void hdrmerge_accel(InVideoStrm_t_e_s& img_in1,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPIX> imgInput1(rows, cols);
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPIX> imgInput2(rows, cols);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_IN_1> imgInput1(rows, cols);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_IN_2> imgInput2(rows, cols);
 
-    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPIX> imgOutput(rows, cols);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_OUT> imgOutput(rows, cols);
 
 // clang-format off
 #pragma HLS DATAFLOW
     // clang-format on
 
-    AXIVideo2BayerMat<IN_TYPE, HEIGHT, WIDTH, NPIX>(img_in1, imgInput1);
-    AXIVideo2BayerMat<IN_TYPE, HEIGHT, WIDTH, NPIX>(img_in2, imgInput2);
+    AXIVideo2BayerMat<IN_TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_IN_1>(img_in1, imgInput1);
+    AXIVideo2BayerMat<IN_TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_IN_2>(img_in2, imgInput2);
 
-    xf::cv::Hdrmerge_bayer<IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPIX, NO_EXPS, W_B_SIZE>(imgInput1, imgInput2, imgOutput,
-                                                                                      wr_hls);
+    xf::cv::Hdrmerge_bayer<IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2, XF_CV_DEPTH_OUT,
+                           NO_EXPS, W_B_SIZE>(imgInput1, imgInput2, imgOutput, wr_hls);
 
-    GRAYMat2AXIvideo<IN_TYPE, HEIGHT, WIDTH, NPIX>(imgOutput, img_out);
+    GRAYMat2AXIvideo<IN_TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_OUT>(imgOutput, img_out);
 }

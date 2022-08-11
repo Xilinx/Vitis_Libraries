@@ -33,3 +33,6 @@
 
 /* Number of directions */
 #define NUM_DIR 4
+#define XF_CV_DEPTH_IN_L 2
+#define XF_CV_DEPTH_IN_R 2
+#define XF_CV_DEPTH_OUT 2

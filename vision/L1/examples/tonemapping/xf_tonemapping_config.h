@@ -17,6 +17,7 @@
 #ifndef _XF_LTM_CONFIG_HPP_
 #define _XF_LTM_CONFIG_HPP_
 #include "imgproc/xf_ltm.hpp"
+#include "build/xf_config_params.h"
 
 /*  User configurable parameters */
 static constexpr int HEIGHT = 512;

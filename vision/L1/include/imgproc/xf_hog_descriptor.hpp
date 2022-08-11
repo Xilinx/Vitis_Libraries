@@ -44,8 +44,11 @@ template <int WIN_HEIGHT,
           int ROWS,
           int COLS,
           int NPC = XF_NPPC1,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_DESC = _XFCVDEPTH_DEFAULT,
           bool USE_URAM = false>
-void HOGDescriptor(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _in_mat, xf::cv::Mat<DST_T, 1, DESC_SIZE, NPC>& _desc_mat) {
+void HOGDescriptor(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _in_mat,
+                   xf::cv::Mat<DST_T, 1, DESC_SIZE, NPC, XFCVDEPTH_DESC>& _desc_mat) {
     hls::stream<XF_TNAME(SRC_T, NPC)> in_strm;
     hls::stream<XF_CTUNAME(SRC_T, NPC)> in[IMG_COLOR];
     hls::stream<XF_SNAME(XF_576UW)> _block_strm;

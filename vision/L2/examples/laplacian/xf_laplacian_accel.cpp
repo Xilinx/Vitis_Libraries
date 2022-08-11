@@ -36,25 +36,23 @@ void laplacian(ap_uint<PTR_IN_WIDTH>* img_in,
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<INTYPE, HEIGHT, WIDTH, NPC1> imgInput(rows, cols);
-    xf::cv::Mat<OUTTYPE, HEIGHT, WIDTH, NPC1> imgOutput(rows, cols);
+    xf::cv::Mat<INTYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> imgInput(rows, cols);
+    xf::cv::Mat<OUTTYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> imgOutput(rows, cols);
 
 // clang-format off
- #pragma HLS STREAM variable=imgInput.data depth=2
- #pragma HLS STREAM variable=imgOutput.data depth=2
 // clang-format on
 
 #pragma HLS DATAFLOW
 
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<PTR_IN_WIDTH, INTYPE, HEIGHT, WIDTH, NPC1>(img_in, imgInput);
+    xf::cv::Array2xfMat<PTR_IN_WIDTH, INTYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(img_in, imgInput);
 
     // Run xfOpenCV kernel:
-    xf::cv::filter2D<XF_BORDER_CONSTANT, FILTER_WIDTH, FILTER_HEIGHT, INTYPE, OUTTYPE, HEIGHT, WIDTH, NPC1>(
-        imgInput, imgOutput, filter, shift);
+    xf::cv::filter2D<XF_BORDER_CONSTANT, FILTER_WIDTH, FILTER_HEIGHT, INTYPE, OUTTYPE, HEIGHT, WIDTH, NPC1,
+                     XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(imgInput, imgOutput, filter, shift);
 
     // Convert _dst xf::cv::Mat object to output array:
-    xf::cv::xfMat2Array<PTR_OUT_WIDTH, OUTTYPE, HEIGHT, WIDTH, NPC1>(imgOutput, img_out);
+    xf::cv::xfMat2Array<PTR_OUT_WIDTH, OUTTYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(imgOutput, img_out);
 
     return;
 } // End of kernel

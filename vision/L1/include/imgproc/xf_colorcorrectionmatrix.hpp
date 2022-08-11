@@ -119,12 +119,13 @@ template <int SRC_T,
           int COLS,
           int DEPTH,
           int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
-          int COLS_TRIP,
-          int S_DEPTH>
-void xfccmkernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, S_DEPTH>& _src_mat,
-                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat,
+          int COLS_TRIP>
+void xfccmkernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst_mat,
                  ap_uint<8> _ccm_type,
                  unsigned short height,
                  unsigned short width) {
@@ -297,9 +298,16 @@ rowLoop:
  * @param _src_mat input image
  * @param _dst_mat output image
  */
-template <int CCM_TYPE, int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int S_DEPTH = 2>
-void colorcorrectionmatrix(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, S_DEPTH>& _src_mat,
-                           xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat) {
+template <int CCM_TYPE,
+          int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void colorcorrectionmatrix(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+                           xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst_mat) {
     unsigned short width = _src_mat.cols >> XF_BITSHIFT(NPC);
     unsigned short height = _src_mat.rows;
     assert(((height <= ROWS) && (width <= COLS)) && "ROWS and COLS should be greater than input image");
@@ -308,8 +316,8 @@ void colorcorrectionmatrix(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, S_DEPTH>& _src_ma
 #pragma HLS INLINE OFF
     // clang-format on
 
-    xfccmkernel<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC),
-                (COLS >> XF_BITSHIFT(NPC)), S_DEPTH>(_src_mat, _dst_mat, CCM_TYPE, height, width);
+    xfccmkernel<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1, XF_WORDWIDTH(SRC_T, NPC),
+                XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(_src_mat, _dst_mat, CCM_TYPE, height, width);
 }
 } // namespace cv
 } // namespace xf

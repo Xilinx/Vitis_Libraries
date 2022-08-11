@@ -29,7 +29,16 @@
 namespace xf {
 namespace cv {
 
-template <int SRC_T, int N_ROWS, int N_COLS, int MAX_ROWS, int MAX_COLS, int NPPC = XF_NPPC1, int USE_URAM = 0>
+template <int SRC_T,
+          int N_ROWS,
+          int N_COLS,
+          int MAX_ROWS,
+          int MAX_COLS,
+          int NPPC = XF_NPPC1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_LEF = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_SEF = _XFCVDEPTH_DEFAULT,
+          int USE_URAM = 0>
 class ExposureFramesExtract {
    public:
     // Internal buffers, registers
@@ -83,9 +92,9 @@ class ExposureFramesExtract {
     //   This function synchronizes input frames of different exposures by storing initial
     //   blank lines into temporary buffer (BRAM or URAM)
     // ....................................................................................
-    void extract(xf::cv::Mat<SRC_T, MAX_ROWS * 2, MAX_COLS + N_COLS, NPPC>& _hdrSrc,
-                 xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPPC>& _lefSrc,
-                 xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPPC>& _sefSrc) {
+    void extract(xf::cv::Mat<SRC_T, MAX_ROWS * 2, MAX_COLS + N_COLS, NPPC, XFCVDEPTH_IN_1>& _hdrSrc,
+                 xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPPC, XFCVDEPTH_LEF>& _lefSrc,
+                 xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPPC, XFCVDEPTH_SEF>& _sefSrc) {
 // clang-format off
             #pragma HLS INLINE OFF
         // clang-format on
@@ -193,15 +202,26 @@ class ExposureFramesExtract {
 };
 
 // Extract HDR exposure frames
-template <int SRC_T, int N_ROWS, int N_COLS, int MAX_ROWS, int MAX_COLS, int NPPC = XF_NPPC1, int USE_URAM = 0>
-void extractExposureFrames(xf::cv::Mat<SRC_T, MAX_ROWS * 2, MAX_COLS + N_COLS, NPPC>& _hdrSrc,
-                           xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPPC>& _lefSrc,
-                           xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPPC>& _sefSrc) {
+template <int SRC_T,
+          int N_ROWS,
+          int N_COLS,
+          int MAX_ROWS,
+          int MAX_COLS,
+          int NPPC = XF_NPPC1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_LEF = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_SEF = _XFCVDEPTH_DEFAULT,
+          int USE_URAM = 0>
+void extractExposureFrames(xf::cv::Mat<SRC_T, MAX_ROWS * 2, MAX_COLS + N_COLS, NPPC, XFCVDEPTH_IN_1>& _hdrSrc,
+                           xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPPC, XFCVDEPTH_LEF>& _lefSrc,
+                           xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPPC, XFCVDEPTH_SEF>& _sefSrc) {
 // clang-format off
         #pragma HLS INLINE OFF
     // clang-format on
 
-    xf::cv::ExposureFramesExtract<SRC_T, N_ROWS, N_COLS, MAX_ROWS, MAX_COLS, NPPC, USE_URAM> extractor;
+    xf::cv::ExposureFramesExtract<SRC_T, N_ROWS, N_COLS, MAX_ROWS, MAX_COLS, NPPC, XFCVDEPTH_IN_1, XFCVDEPTH_LEF,
+                                  XFCVDEPTH_SEF, USE_URAM>
+        extractor;
 
     extractor.extract(_hdrSrc, _lefSrc, _sefSrc);
 

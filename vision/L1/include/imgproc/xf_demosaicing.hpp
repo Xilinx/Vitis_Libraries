@@ -217,8 +217,17 @@ void Core_Process(XF_DTUNAME(SRC_T, NPC) imgblock[5][buf_size], int& b, int& g, 
     }
 }
 
-template <int BFORMAT, int SRC_T, int DST_T, int ROWS, int COLS, int NPC, bool USE_URAM>
-void demosaicing(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_mat, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst_mat) {
+template <int BFORMAT,
+          int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+          bool USE_URAM>
+void demosaicing(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src_mat,
+                 xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst_mat) {
 #ifndef __SYNTHESIS__
     assert(((BFORMAT == XF_BAYER_BG) || (BFORMAT == XF_BAYER_GB) || (BFORMAT == XF_BAYER_GR) ||
             (BFORMAT == XF_BAYER_RG)) &&

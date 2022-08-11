@@ -29,17 +29,17 @@ void histogram_accel(ap_uint<PTR_WIDTH>* img_in, unsigned int* histogram, int ro
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(rows, cols);
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> imgInput(rows, cols);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1>(img_in, imgInput);
+    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(img_in, imgInput);
 
     // Run xfOpenCV kernel:
-    xf::cv::calcHist<TYPE, HEIGHT, WIDTH, NPC1>(imgInput, histogram);
+    xf::cv::calcHist<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, histogram);
 
     return;
 } // End of kernel

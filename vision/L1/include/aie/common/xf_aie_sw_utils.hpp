@@ -110,6 +110,105 @@ void analyzeDiff(::cv::Mat& diff_img, int err_thresh, float& err_per) {
     std::cout << "\tNumber of pixels above error threshold = " << cnt << std::endl;
     std::cout << "\tPercentage of pixels above error threshold = " << err_per << std::endl;
 }
+
+// This function computes the peak signal-to-noise ratio between the given images I1, I2.
+// It is expressed as a logarithmic quantity using the decibel scale.
+// PSNR is defined via the mean squared error (MSE): PSNR = 10 * log10(MAX^2/MSE)
+// For 8-bit data typical values for the PSNR are between 30 and 50 dB.
+// For 16-bit data typical values for the PSNR are between 60 and 80 dB.
+double getPSNR(const cv::Mat& I1, const cv::Mat& I2) {
+    int cv_bitdepth;
+    if (I1.depth() == CV_8U) {
+        cv_bitdepth = 8;
+    } else if (I1.depth() == CV_16U || I1.depth() == CV_16S) {
+        cv_bitdepth = 16;
+    } else if (I1.depth() == CV_32S || I1.depth() == CV_32F) {
+        cv_bitdepth = 32;
+    } else {
+        fprintf(stderr, "OpenCV image's depth not supported for this function\n ");
+        return 0;
+    }
+
+    cv::Mat s1;
+    cv::absdiff(I1, I2, s1); // |I1 - I2|
+    s1.convertTo(s1, CV_32F);
+    s1 = s1.mul(s1); // |I1 - I2|^2
+
+    cv::Scalar s = cv::sum(s1); // sum elements per channel
+    double sse = 0.0;
+    if (I1.channels() == 1) {
+        sse = s.val[0];
+    } else {
+        sse = s.val[0] + s.val[1] + s.val[2]; // sum channels
+    }
+
+    if (sse <= 1e-10) {
+        // for small values return zero
+        return 0;
+    } else {
+        double mse = sse / (double)(I1.channels() * I1.total());
+
+        double psnr = 0;
+        double maxval = std::pow(2, cv_bitdepth) - 1.0;
+        psnr = 10.0 * std::log10((maxval * maxval) / mse);
+        return psnr;
+    }
+}
+
+// This function will return a similarity index for each channel of the image
+// and value is between zero and one, where one corresponds to perfect fit.
+cv::Scalar getMSSIM(const cv::Mat& I1, const cv::Mat& I2) {
+    int cv_bitdepth;
+    if (I1.depth() == CV_8U) {
+        cv_bitdepth = 8;
+    } else if (I1.depth() == CV_16U || I1.depth() == CV_16S) {
+        cv_bitdepth = 16;
+    } else if (I1.depth() == CV_32S || I1.depth() == CV_32F) {
+        cv_bitdepth = 32;
+    } else {
+        fprintf(stderr, "OpenCV image's depth not supported for this function\n ");
+        return 0;
+    }
+
+    double C1 = 0.01 * (std::pow(2, cv_bitdepth) - 1.0);
+    C1 = C1 * C1;
+
+    double C2 = 0.03 * (std::pow(2, cv_bitdepth) - 1.0);
+    C2 = C2 * C2;
+
+    int d = CV_32F;
+    cv::Mat i1, i2;
+    I1.convertTo(i1, d); // cannot calculate on one byte large values
+    I2.convertTo(i2, d);
+    cv::Mat i2_2 = i2.mul(i2);  // i2^2
+    cv::Mat i1_2 = i1.mul(i1);  // i1^2
+    cv::Mat i1_i2 = i1.mul(i2); // i1 * i2
+
+    cv::Mat mu1, mu2; // PRELIMINARY COMPUTING
+    cv::GaussianBlur(i1, mu1, cv::Size(11, 11), 1.5);
+    cv::GaussianBlur(i2, mu2, cv::Size(11, 11), 1.5);
+    cv::Mat mu1_2 = mu1.mul(mu1);
+    cv::Mat mu2_2 = mu2.mul(mu2);
+    cv::Mat mu1_mu2 = mu1.mul(mu2);
+    cv::Mat sigma1_2, sigma2_2, sigma12;
+    cv::GaussianBlur(i1_2, sigma1_2, cv::Size(11, 11), 1.5);
+    sigma1_2 -= mu1_2;
+    cv::GaussianBlur(i2_2, sigma2_2, cv::Size(11, 11), 1.5);
+    sigma2_2 -= mu2_2;
+    cv::GaussianBlur(i1_i2, sigma12, cv::Size(11, 11), 1.5);
+    sigma12 -= mu1_mu2;
+    cv::Mat t1, t2, t3;
+    t1 = 2 * mu1_mu2 + C1;
+    t2 = 2 * sigma12 + C2;
+    t3 = t1.mul(t2); // t3 = ((2*mu1_mu2 + C1).*(2*sigma12 + C2))
+    t1 = mu1_2 + mu2_2 + C1;
+    t2 = sigma1_2 + sigma2_2 + C2;
+    t1 = t1.mul(t2); // t1 =((mu1_2 + mu2_2 + C1).*(sigma1_2 + sigma2_2 + C2))
+    cv::Mat ssim_map;
+    cv::divide(t3, t1, ssim_map);          // ssim_map =  t3./t1;
+    cv::Scalar mssim = cv::mean(ssim_map); // mssim = average of ssim map
+    return mssim;
+}
 }
 
 #endif

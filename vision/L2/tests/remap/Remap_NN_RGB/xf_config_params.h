@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+#define XF_CV_DEPTH_IN_1 3
+#define XF_CV_DEPTH_IN_2 3
+#define XF_CV_DEPTH_IN_3 3
+#define XF_CV_DEPTH_OUT 3
+
 // Configure this based on the number of rows needed for the remap purpose
 // e.g., If its a right to left flip two rows are enough
 #define XF_WIN_ROWS 8

@@ -1049,30 +1049,7 @@ static ap_int<16> cubic_wts[16384] = {
     0,   -1,    -12,   0,   -1,    21,    404,   -17,   -45,   857,   16210, -674,  1,   -19,   -357,  15,
     0,   0,     -12,   0,   0,     10,    407,   -9,    -12,   407,   16313, -360,  0,   -9,    -360,  8};
 
-#define _SUBFUNCT_TPLT_DEC                                                                                       \
-    template <int IMG_FBITS = 0, int FLOW_FBITS = 8, int IMG_T = XF_8UC1, int FLOW_T = XF_16SC1, int ROWS = 126, \
-              int COLS = 224, int NPC = 1, int ERR_BW = 32>
-#define _ESTDUAL_TPLT_DEC                                                                                        \
-    template <int IMG_FBITS = 0, int FLOW_FBITS = 8, int IMG_T = XF_8UC1, int FLOW_T = XF_16SC1, int ROWS = 126, \
-              int COLS = 224, int NPC = 1, int ERR_BW = 32, int PIN_DEPTH = 2, int FLOW_BW>
-#define _UPDATEU_TPLT_DEC                                                                                        \
-    template <int IMG_FBITS = 0, int FLOW_FBITS = 8, int IMG_T = XF_8UC1, int FLOW_T = XF_16SC1, int ROWS = 126, \
-              int COLS = 224, int NPC = 1, int ERR_BW = 32, int U_DEPTH = 2, int FLOW_BW>
-#define _ESTV_TPLT_DEC                                                                                           \
-    template <int IMG_FBITS = 0, int FLOW_FBITS = 8, int IMG_T = XF_8UC1, int FLOW_T = XF_16SC1, int ROWS = 126, \
-              int COLS = 224, int NPC = 1, int ERR_BW = 32, int U_DEPTH = 2, int FLOW_BW>
-#define _CALCGRAD_TPLT_DEC                                                                                       \
-    template <int IMG_FBITS = 0, int FLOW_FBITS = 8, int IMG_T = XF_8UC1, int FLOW_T = XF_16SC1, int ROWS = 126, \
-              int COLS = 224, int NPC = 1, int ERR_BW = 32, int I1W_DEPTH = 2, int U_DEPTH = 2>
 #define _RNDSATURN_TPLT_DEC template <int IN_BW, int OUT_BW, int IN_FBITS, int OUT_FBITS, bool EN_RND = 1>
-#define _DUPMAT2_TPLT_DEC \
-    template <int TYPE = XF_16SC1, int ROWS = 224, int COLS = 224, int NPC = 1, int DEPTH1 = 2, int DEPTH2 = 2>
-#define _DUPMAT4_TPLT_DEC                                                                                       \
-    template <int TYPE = XF_16SC1, int ROWS = 224, int COLS = 224, int NPC = 1, int DEPTH1 = 2, int DEPTH2 = 2, \
-              int DEPTH3 = 2, int DEPTH4 = 2>
-#define _MULFUNCT_TPLT_DEC \
-    template <int FLOW_T = XF_16SC1, int FLOW_FBITS = 8, int ROWS = 126, int COLS = 224, int NPC = 1, int SCALE_BW = 16>
-
 namespace xf {
 namespace cv {
 
@@ -1097,15 +1074,17 @@ namespace cv {
 // Some macros related to template (for easiness of coding)
 #define _GENERIC_REMAP_TPLT_DEC                                                                                    \
     template <typename F, int SRC_T, int DST_T, int FLOW_T, int MFV, int U_FBITS, int I_FBITS, int ROWS, int COLS, \
-              int K_ROWS, int K_COLS, int NPPC = 1, int BORDER_T = XF_BORDER_REFLECT_101, int USE_URAM = 0,        \
-              int USE_MAT = 1, int U_FIFO_DEPTH = 2, int OUT_FIFO_DEPTH = 2>
+              int K_ROWS, int K_COLS, int NPPC = 1, int XFCVDEPTH_src = _XFCVDEPTH_DEFAULT,                        \
+              int XFCVDEPTH_Ux = _XFCVDEPTH_DEFAULT, int XFCVDEPTH_Uy = _XFCVDEPTH_DEFAULT,                        \
+              int XFCVDEPTH_dst = _XFCVDEPTH_DEFAULT, int BORDER_T = XF_BORDER_REFLECT_101, int USE_URAM = 0,      \
+              int USE_MAT = 1>
 #define _GENERIC_REMAP_TPLT                                                                                        \
     template <typename F, int SRC_T, int DST_T, int FLOW_T, int MFV, int U_FBITS, int I_FBITS, int ROWS, int COLS, \
-              int K_ROWS, int K_COLS, int NPPC, int BORDER_T, int USE_URAM, int USE_MAT, int U_FIFO_DEPTH,         \
-              int OUT_FIFO_DEPTH>
-#define _GENERIC_REMAP                                                                                                 \
-    GenericREMAP<F, SRC_T, DST_T, FLOW_T, MFV, U_FBITS, I_FBITS, ROWS, COLS, K_ROWS, K_COLS, NPPC, BORDER_T, USE_URAM, \
-                 USE_MAT, U_FIFO_DEPTH, OUT_FIFO_DEPTH>
+              int K_ROWS, int K_COLS, int NPPC, int XFCVDEPTH_src, int XFCVDEPTH_Ux, int XFCVDEPTH_Uy,             \
+              int XFCVDEPTH_dst, int BORDER_T, int USE_URAM, int USE_MAT>
+#define _GENERIC_REMAP                                                                                            \
+    GenericREMAP<F, SRC_T, DST_T, FLOW_T, MFV, U_FBITS, I_FBITS, ROWS, COLS, K_ROWS, K_COLS, NPPC, XFCVDEPTH_src, \
+                 XFCVDEPTH_Ux, XFCVDEPTH_Uy, XFCVDEPTH_dst, BORDER_T, USE_URAM, USE_MAT>
 
 // Some global constants
 #define CH_IDX_T uint8_t
@@ -1150,24 +1129,24 @@ _GENERIC_REMAP_TPLT_DEC class GenericREMAP {
     }
 
     // Internal functions
-    void initialize(xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _src);
+    void initialize(xf::cv::Mat<SRC_T, ROWS, COLS, NPPC, XFCVDEPTH_src>& _src);
 
     void process_row_remap(ROW_IDX_T rin,
                            ROW_IDX_T rout,
-                           xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _src,
-                           xf::cv::Mat<FLOW_T, ROWS, COLS, NPPC, U_FIFO_DEPTH>& _Ux,
-                           xf::cv::Mat<FLOW_T, ROWS, COLS, NPPC, U_FIFO_DEPTH>& _Uy,
-                           xf::cv::Mat<DST_T, ROWS, COLS, NPPC, OUT_FIFO_DEPTH>& _dst);
-    void process_image_remap(xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _src,
-                             xf::cv::Mat<FLOW_T, ROWS, COLS, NPPC, U_FIFO_DEPTH>& _Ux,
-                             xf::cv::Mat<FLOW_T, ROWS, COLS, NPPC, U_FIFO_DEPTH>& _Uy,
-                             xf::cv::Mat<DST_T, ROWS, COLS, NPPC, OUT_FIFO_DEPTH>& _dst);
+                           xf::cv::Mat<SRC_T, ROWS, COLS, NPPC, XFCVDEPTH_src>& _src,
+                           xf::cv::Mat<FLOW_T, ROWS, COLS, NPPC, XFCVDEPTH_Ux>& _Ux,
+                           xf::cv::Mat<FLOW_T, ROWS, COLS, NPPC, XFCVDEPTH_Uy>& _Uy,
+                           xf::cv::Mat<DST_T, ROWS, COLS, NPPC, XFCVDEPTH_dst>& _dst);
+    void process_image_remap(xf::cv::Mat<SRC_T, ROWS, COLS, NPPC, XFCVDEPTH_src>& _src,
+                             xf::cv::Mat<FLOW_T, ROWS, COLS, NPPC, XFCVDEPTH_Ux>& _Ux,
+                             xf::cv::Mat<FLOW_T, ROWS, COLS, NPPC, XFCVDEPTH_Uy>& _Uy,
+                             xf::cv::Mat<DST_T, ROWS, COLS, NPPC, XFCVDEPTH_dst>& _dst);
 };
 
 // -----------------------------------------------------------------------------------
 // Function to initialize internal registers and buffers
 // -----------------------------------------------------------------------------------
-_GENERIC_REMAP_TPLT void _GENERIC_REMAP::initialize(xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _src) {
+_GENERIC_REMAP_TPLT void _GENERIC_REMAP::initialize(xf::cv::Mat<SRC_T, ROWS, COLS, NPPC, XFCVDEPTH_src>& _src) {
 // clang-format off
 #pragma HLS inline
     // clang-format on
@@ -1235,10 +1214,10 @@ _RNDSATURN_TPLT_DEC ap_int<OUT_BW> rounding_n_saturation(ap_int<IN_BW> input) {
 // -----------------------------------------------------------------------------------
 _GENERIC_REMAP_TPLT void _GENERIC_REMAP::process_row_remap(ROW_IDX_T rin,
                                                            ROW_IDX_T rout,
-                                                           xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _src,
-                                                           xf::cv::Mat<FLOW_T, ROWS, COLS, NPPC, U_FIFO_DEPTH>& _Ux,
-                                                           xf::cv::Mat<FLOW_T, ROWS, COLS, NPPC, U_FIFO_DEPTH>& _Uy,
-                                                           xf::cv::Mat<DST_T, ROWS, COLS, NPPC, OUT_FIFO_DEPTH>& _dst) {
+                                                           xf::cv::Mat<SRC_T, ROWS, COLS, NPPC, XFCVDEPTH_src>& _src,
+                                                           xf::cv::Mat<FLOW_T, ROWS, COLS, NPPC, XFCVDEPTH_Ux>& _Ux,
+                                                           xf::cv::Mat<FLOW_T, ROWS, COLS, NPPC, XFCVDEPTH_Uy>& _Uy,
+                                                           xf::cv::Mat<DST_T, ROWS, COLS, NPPC, XFCVDEPTH_dst>& _dst) {
 // clang-format off
 #pragma HLS inline
     // clang-format on
@@ -1403,10 +1382,10 @@ COL_LOOP:
 // Main function that runs the filter over the image
 // -----------------------------------------------------------------------------------
 _GENERIC_REMAP_TPLT void _GENERIC_REMAP::process_image_remap(
-    xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _src,
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPPC, U_FIFO_DEPTH>& _Ux,
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPPC, U_FIFO_DEPTH>& _Uy,
-    xf::cv::Mat<DST_T, ROWS, COLS, NPPC, OUT_FIFO_DEPTH>& _dst) {
+    xf::cv::Mat<SRC_T, ROWS, COLS, NPPC, XFCVDEPTH_src>& _src,
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPPC, XFCVDEPTH_Ux>& _Ux,
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPPC, XFCVDEPTH_Uy>& _Uy,
+    xf::cv::Mat<DST_T, ROWS, COLS, NPPC, XFCVDEPTH_dst>& _dst) {
 // clang-format off
 #pragma HLS inline off
 
@@ -1606,23 +1585,25 @@ template <int IN_TYPE,
           int COLS,
           int K_SIZE,
           int NPPC = 1,
+          int XFCVDEPTH_src = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_Ux = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_Uy = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_dst = _XFCVDEPTH_DEFAULT,
           int BORDER_T = XF_BORDER_REFLECT_101,
           int USE_URAM = 0,
           int MAXFLOWVALUE,
           int FLOW_FBITS,
-          int IMG_FBITS,
-          int U_FIFODEPTH = 2,
-          int OUT_FIFODEPTH = 2>
-void Remap_Bicubic(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPPC>& _src,
-                   xf::cv::Mat<FLOW_TYPE, ROWS, COLS, NPPC, U_FIFODEPTH>& _Ux,
-                   xf::cv::Mat<FLOW_TYPE, ROWS, COLS, NPPC, U_FIFODEPTH>& _Uy,
-                   xf::cv::Mat<OUT_TYPE, ROWS, COLS, NPPC, OUT_FIFODEPTH>& _dst) {
+          int IMG_FBITS>
+void Remap_Bicubic(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPPC, XFCVDEPTH_src>& _src,
+                   xf::cv::Mat<FLOW_TYPE, ROWS, COLS, NPPC, XFCVDEPTH_Ux>& _Ux,
+                   xf::cv::Mat<FLOW_TYPE, ROWS, COLS, NPPC, XFCVDEPTH_Uy>& _Uy,
+                   xf::cv::Mat<OUT_TYPE, ROWS, COLS, NPPC, XFCVDEPTH_dst>& _dst) {
 // clang-format off
 #pragma HLS inline off
     // clang-format on
 
     xf::cv::GenericREMAP<_REMAP_, IN_TYPE, OUT_TYPE, FLOW_TYPE, MAXFLOWVALUE, FLOW_FBITS, IMG_FBITS, ROWS, COLS, K_SIZE,
-                         K_SIZE, NPPC, BORDER_T, USE_URAM, 1, U_FIFODEPTH, OUT_FIFODEPTH>
+                         K_SIZE, NPPC, XFCVDEPTH_src, XFCVDEPTH_Ux, XFCVDEPTH_Uy, XFCVDEPTH_dst, BORDER_T, USE_URAM, 1>
         remap;
 
     remap.process_image_remap(_src, _Ux, _Uy, _dst);
@@ -1632,16 +1613,32 @@ void Remap_Bicubic(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPPC>& _src,
 
 #undef _REMAP_
 
-_CALCGRAD_TPLT_DEC int calcgrad(xf::cv::Mat<IMG_T, ROWS, COLS, NPC>& I0,
-                                xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, I1W_DEPTH>& I1w,
-                                xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& I1wx,
-                                xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& I1wy,
-                                xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, U_DEPTH>& U1,
-                                xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, U_DEPTH>& U2,
-                                xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& grad,
-                                xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& rhoc,
-                                unsigned short height,
-                                unsigned short width_ncpr) {
+template <int IMG_FBITS = 0,
+          int FLOW_FBITS = 8,
+          int IMG_T = XF_8UC1,
+          int FLOW_T = XF_16SC1,
+          int ROWS = 126,
+          int COLS = 224,
+          int NPC = 1,
+          int XFCVDEPTH_I0 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_I1w = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_I1wx = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_I1wy = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_grad = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_rhoc = _XFCVDEPTH_DEFAULT,
+          int ERR_BW = 32>
+int calcgrad(xf::cv::Mat<IMG_T, ROWS, COLS, NPC, XFCVDEPTH_I0>& I0,
+             xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_I1w>& I1w,
+             xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_I1wx>& I1wx,
+             xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_I1wy>& I1wy,
+             xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_U1>& U1,
+             xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_U2>& U2,
+             xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_grad>& grad,
+             xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_rhoc>& rhoc,
+             unsigned short height,
+             unsigned short width_ncpr) {
 // clang-format off
 #pragma HLS inline off
     // clang-format on
@@ -1763,19 +1760,38 @@ ap_int<OUT_BW> fxdpt_div(ap_int<IN1_BW> in1, ap_int<IN2_BW> in2) {
     return div_out;
 }
 
-_ESTV_TPLT_DEC int estimateV(xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& Iwx,
-                             xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& Iwy,
-                             xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& U1,
-                             xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& U2,
-                             xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& U1_pass,
-                             xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& U2_pass,
-                             xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& grad,
-                             xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& rhoc,
-                             xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& V1,
-                             xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& V2,
-                             ap_int<FLOW_BW> _lt,
-                             unsigned short height,
-                             unsigned short width) {
+template <int IMG_FBITS = 0,
+          int FLOW_FBITS = 8,
+          int IMG_T = XF_8UC1,
+          int FLOW_T = XF_16SC1,
+          int ROWS = 126,
+          int COLS = 224,
+          int NPC = 1,
+          int XFCVDEPTH_Iwx = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_Iwy = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U1_pass = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U2_pass = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_grad = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_rhoc = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_V1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_V2 = _XFCVDEPTH_DEFAULT,
+          int ERR_BW = 32,
+          int FLOW_BW>
+int estimateV(xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_Iwx>& Iwx,
+              xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_Iwy>& Iwy,
+              xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_U1>& U1,
+              xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_U2>& U2,
+              xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_U1_pass>& U1_pass,
+              xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_U2_pass>& U2_pass,
+              xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_grad>& grad,
+              xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_rhoc>& rhoc,
+              xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_V1>& V1,
+              xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_V2>& V2,
+              ap_int<FLOW_BW> _lt,
+              unsigned short height,
+              unsigned short width) {
 // clang-format off
 #pragma HLS inline off
     // clang-format on
@@ -1906,14 +1922,27 @@ RowColLoop:
     return 0;
 } // estimateV
 
-_SUBFUNCT_TPLT_DEC int divergence(xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& P1,
-                                  xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& P2,
-                                  xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& divP,
-                                  xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& P1_pass,
-                                  xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& P2_pass,
-                                  unsigned short height,
-                                  unsigned short width,
-                                  bool intilize_P_with_zeros) {
+template <int IMG_FBITS = 0,
+          int FLOW_FBITS = 8,
+          int IMG_T = XF_8UC1,
+          int FLOW_T = XF_16SC1,
+          int ROWS = 126,
+          int COLS = 224,
+          int NPC = 1,
+          int XFCVDEPTH_P1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_P2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_divP = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_P1_pass = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_P2_pass = _XFCVDEPTH_DEFAULT,
+          int ERR_BW = 32>
+int divergence(xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_P1>& P1,
+               xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_P2>& P2,
+               xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_divP>& divP,
+               xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_P1_pass>& P1_pass,
+               xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_P2_pass>& P2_pass,
+               unsigned short height,
+               unsigned short width,
+               bool intilize_P_with_zeros) {
 // clang-format off
 #pragma HLS inline off
     // clang-format on
@@ -2013,28 +2042,55 @@ RowColLoop:
     return 0;
 } // divergence
 
-_UPDATEU_TPLT_DEC int updateU(xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& V1,
-                              xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& V2,
-                              xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& divP1,
-                              xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& divP2,
-                              xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& U1_in,
-                              xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& U2_in,
-                              xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& U1_out,
-                              xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& U2_out,
-                              xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& U1_out_ddr,
-                              xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& U2_out_ddr,
-                              xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& P11_in,
-                              xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& P12_in,
-                              xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& P21_in,
-                              xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& P22_in,
-                              xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& P11_pass,
-                              xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& P12_pass,
-                              xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& P21_pass,
-                              xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& P22_pass,
-                              ap_int<ERR_BW>* error,
-                              ap_int<FLOW_BW> _theta,
-                              unsigned short height,
-                              unsigned short width) {
+template <int IMG_FBITS = 0,
+          int FLOW_FBITS = 8,
+          int IMG_T = XF_8UC1,
+          int FLOW_T = XF_16SC1,
+          int ROWS = 126,
+          int COLS = 224,
+          int NPC = 1,
+          int XFCVDEPTH_V1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_V2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_divP1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_divP2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U1_in = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U2_in = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U1_out = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U2_out = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U1_out_ddr = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U2_out_ddr = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_P11_in = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_P12_in = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_P21_in = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_P22_in = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_P11_pass = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_P12_pass = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_P21_pass = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_P22_pass = _XFCVDEPTH_DEFAULT,
+          int ERR_BW = 32,
+          int FLOW_BW>
+int updateU(xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_V1>& V1,
+            xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_V2>& V2,
+            xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_divP1>& divP1,
+            xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_divP2>& divP2,
+            xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_U1_in>& U1_in,
+            xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_U2_in>& U2_in,
+            xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_U1_out>& U1_out,
+            xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_U2_out>& U2_out,
+            xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_U1_out_ddr>& U1_out_ddr,
+            xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_U2_out_ddr>& U2_out_ddr,
+            xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_P11_in>& P11_in,
+            xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_P12_in>& P12_in,
+            xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_P21_in>& P21_in,
+            xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_P22_in>& P22_in,
+            xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_P11_pass>& P11_pass,
+            xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_P12_pass>& P12_pass,
+            xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_P21_pass>& P21_pass,
+            xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_P22_pass>& P22_pass,
+            ap_int<ERR_BW>* error,
+            ap_int<FLOW_BW> _theta,
+            unsigned short height,
+            unsigned short width) {
 // clang-format off
 #pragma HLS inline off
     // clang-format on
@@ -2143,15 +2199,30 @@ RowColLoop:
     return 0;
 } // updateU
 
-_SUBFUNCT_TPLT_DEC int forwardgradient(xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& U1,
-                                       xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& U1x,
-                                       xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& U1y,
-                                       xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& P1,
-                                       xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& P2,
-                                       xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& P1_pass,
-                                       xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& P2_pass,
-                                       unsigned short height,
-                                       unsigned short width) {
+template <int IMG_FBITS = 0,
+          int FLOW_FBITS = 8,
+          int IMG_T = XF_8UC1,
+          int FLOW_T = XF_16SC1,
+          int ROWS = 126,
+          int COLS = 224,
+          int NPC = 1,
+          int XFCVDEPTH_U1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U1x = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U1y = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_P1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_P2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_P1_pass = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_P2_pass = _XFCVDEPTH_DEFAULT,
+          int ERR_BW = 32>
+int forwardgradient(xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_U1>& U1,
+                    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_U1x>& U1x,
+                    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_U1y>& U1y,
+                    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_P1>& P1,
+                    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_P2>& P2,
+                    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_P1_pass>& P1_pass,
+                    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_P2_pass>& P2_pass,
+                    unsigned short height,
+                    unsigned short width) {
 // clang-format off
 #pragma HLS inline off
     // clang-format on
@@ -2277,11 +2348,22 @@ RowColLoop:
     return 0;
 } // forwardgradient
 
-_SUBFUNCT_TPLT_DEC int centeredgradient(xf::cv::Mat<IMG_T, ROWS, COLS, NPC>& I1,
-                                        xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& I1x,
-                                        xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& I1y,
-                                        unsigned short height,
-                                        unsigned short width_ncpr) {
+template <int IMG_FBITS = 0,
+          int FLOW_FBITS = 8,
+          int IMG_T = XF_8UC1,
+          int FLOW_T = XF_16SC1,
+          int ROWS = 126,
+          int COLS = 224,
+          int NPC = 1,
+          int XFCVDEPTH_I1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_I1x = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_I1y = _XFCVDEPTH_DEFAULT,
+          int ERR_BW = 32>
+int centeredgradient(xf::cv::Mat<IMG_T, ROWS, COLS, NPC, XFCVDEPTH_I1>& I1,
+                     xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_I1x>& I1x,
+                     xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_I1y>& I1y,
+                     unsigned short height,
+                     unsigned short width_ncpr) {
 // clang-format off
 #pragma HLS inline off
     // clang-format on
@@ -2453,22 +2535,43 @@ ap_int<32> tvl_isqrt(ap_int<32> num) {
     return res;
 } // tvl_isqrt
 
-_ESTDUAL_TPLT_DEC int estimatedualvariables(xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& U1x,
-                                            xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& U1y,
-                                            xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& U2x,
-                                            xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& U2y,
-                                            xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& P11_in,
-                                            xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& P12_in,
-                                            xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& P21_in,
-                                            xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& P22_in,
-                                            xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& P11_out,
-                                            xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& P12_out,
-                                            xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& P21_out,
-                                            xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& P22_out,
-                                            ap_int<FLOW_BW> taut,
-                                            bool intilize_P_with_zeros,
-                                            unsigned short height,
-                                            unsigned short width) {
+template <int IMG_FBITS = 0,
+          int FLOW_FBITS = 8,
+          int IMG_T = XF_8UC1,
+          int FLOW_T = XF_16SC1,
+          int ROWS = 126,
+          int COLS = 224,
+          int NPC = 1,
+          int XFCVDEPTH_U1x = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U1y = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U2x = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U2y = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_P11_in = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_P12_in = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_P21_in = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_P22_in = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_P11_out = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_P12_out = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_P21_out = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_P22_out = _XFCVDEPTH_DEFAULT,
+          int ERR_BW = 32,
+          int FLOW_BW>
+int estimatedualvariables(xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_U1x>& U1x,
+                          xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_U1y>& U1y,
+                          xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_U2x>& U2x,
+                          xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_U2y>& U2y,
+                          xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_P11_in>& P11_in,
+                          xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_P12_in>& P12_in,
+                          xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_P21_in>& P21_in,
+                          xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_P22_in>& P22_in,
+                          xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_P11_out>& P11_out,
+                          xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_P12_out>& P12_out,
+                          xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_P21_out>& P21_out,
+                          xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_P22_out>& P22_out,
+                          ap_int<FLOW_BW> taut,
+                          bool intilize_P_with_zeros,
+                          unsigned short height,
+                          unsigned short width) {
 // clang-format off
 #pragma HLS inline off
     // clang-format on
@@ -2603,11 +2706,18 @@ EstDualRowColLoop:
     return 0;
 } // estimateDualVariables
 
-_DUPMAT2_TPLT_DEC int dupMat(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& Min,
-                             xf::cv::Mat<TYPE, ROWS, COLS, NPC, DEPTH1>& Mout1,
-                             xf::cv::Mat<TYPE, ROWS, COLS, NPC, DEPTH2>& Mout2,
-                             unsigned short height,
-                             unsigned short width) {
+template <int TYPE = XF_16SC1,
+          int ROWS = 224,
+          int COLS = 224,
+          int NPC = 1,
+          int XFCVDEPTH_Min = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_Mout1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_Mout2 = _XFCVDEPTH_DEFAULT>
+int dupMat(xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_Min>& Min,
+           xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_Mout1>& Mout1,
+           xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_Mout2>& Mout2,
+           unsigned short height,
+           unsigned short width) {
 // clang-format off
 #pragma HLS inline off
     // clang-format on
@@ -2634,13 +2744,22 @@ RowColLoop:
     return 0;
 } // dupMat
 
-_DUPMAT4_TPLT_DEC int dupMat(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& Min,
-                             xf::cv::Mat<TYPE, ROWS, COLS, NPC, DEPTH1>& Mout1,
-                             xf::cv::Mat<TYPE, ROWS, COLS, NPC, DEPTH2>& Mout2,
-                             xf::cv::Mat<TYPE, ROWS, COLS, NPC, DEPTH3>& Mout3,
-                             xf::cv::Mat<TYPE, ROWS, COLS, NPC, DEPTH4>& Mout4,
-                             unsigned short height,
-                             unsigned short width) {
+template <int TYPE = XF_16SC1,
+          int ROWS = 224,
+          int COLS = 224,
+          int NPC = 1,
+          int XFCVDEPTH_Min = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_Mout1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_Mout2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_Mout3 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_Mout4 = _XFCVDEPTH_DEFAULT>
+int dupMat(xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_Min>& Min,
+           xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_Mout1>& Mout1,
+           xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_Mout2>& Mout2,
+           xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_Mout3>& Mout3,
+           xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_Mout4>& Mout4,
+           unsigned short height,
+           unsigned short width) {
 // clang-format off
 #pragma HLS inline off
     // clang-format on
@@ -2669,13 +2788,23 @@ RowColLoop:
     return 0;
 } // dupMat
 
-_MULFUNCT_TPLT_DEC int multiplyU(xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& U1_in,
-                                 xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& U2_in,
-                                 xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& U1_out,
-                                 xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& U2_out,
-                                 ap_int<SCALE_BW> scale,
-                                 unsigned short height,
-                                 unsigned short width_ncpr) {
+template <int FLOW_T = XF_16SC1,
+          int FLOW_FBITS = 8,
+          int ROWS = 126,
+          int COLS = 224,
+          int NPC = 1,
+          int XFCVDEPTH_U1_in = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U2_in = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U1_out = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U2_out = _XFCVDEPTH_DEFAULT,
+          int SCALE_BW = 16>
+int multiplyU(xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_U1_in>& U1_in,
+              xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_U2_in>& U2_in,
+              xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_U1_out>& U1_out,
+              xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_U2_out>& U2_out,
+              ap_int<SCALE_BW> scale,
+              unsigned short height,
+              unsigned short width_ncpr) {
 // clang-format off
 #pragma HLS inline off
     // clang-format on
@@ -2743,10 +2872,18 @@ RowLoop:
     return 0;
 } // multiplyU
 
-template <int FLOW_T, int OUT_T, int ROWS, int COLS, int NPC, int FLOW_FBITS>
-int mergeU(xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& U1,
-           xf::cv::Mat<FLOW_T, ROWS, COLS, NPC>& U2,
-           xf::cv::Mat<OUT_T, ROWS, COLS, NPC>& U12,
+template <int FLOW_T,
+          int OUT_T,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_U1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U12 = _XFCVDEPTH_DEFAULT,
+          int FLOW_FBITS>
+int mergeU(xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_U1>& U1,
+           xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XFCVDEPTH_U2>& U2,
+           xf::cv::Mat<OUT_T, ROWS, COLS, NPC, XFCVDEPTH_U12>& U12,
            unsigned short height,
            unsigned short width) {
 // clang-format off
@@ -2808,9 +2945,17 @@ RowColLoop:
     return 0;
 } // mergeU
 
-template <int IN_T, int OUT_T, int ROWS, int COLS, int NPC, int IN_FBITS, int OUT_FBITS>
-int ConvertType(xf::cv::Mat<IN_T, ROWS, COLS, NPC>& in,
-                xf::cv::Mat<OUT_T, ROWS, COLS, NPC>& out,
+template <int IN_T,
+          int OUT_T,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_in = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_out = _XFCVDEPTH_DEFAULT,
+          int IN_FBITS,
+          int OUT_FBITS>
+int ConvertType(xf::cv::Mat<IN_T, ROWS, COLS, NPC, XFCVDEPTH_in>& in,
+                xf::cv::Mat<OUT_T, ROWS, COLS, NPC, XFCVDEPTH_out>& out,
                 unsigned short height,
                 unsigned short width_ncpr) {
 // clang-format off

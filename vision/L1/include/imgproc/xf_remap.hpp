@@ -32,11 +32,23 @@
 namespace xf {
 namespace cv {
 
-template <int SRC_T, int DST_T, int PLANES, int MAP_T, int WIN_ROW, int ROWS, int COLS, int NPC, bool USE_URAM>
-void xFRemapNNI(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
-                xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
-                xf::cv::Mat<MAP_T, ROWS, COLS, NPC>& mapx,
-                xf::cv::Mat<MAP_T, ROWS, COLS, NPC>& mapy,
+template <int SRC_T,
+          int DST_T,
+          int PLANES,
+          int MAP_T,
+          int WIN_ROW,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_Remapped = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_MAPX = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_MAPY = _XFCVDEPTH_DEFAULT,
+          bool USE_URAM>
+void xFRemapNNI(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
+                xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_Remapped>& dst,
+                xf::cv::Mat<MAP_T, ROWS, COLS, NPC, XFCVDEPTH_MAPX>& mapx,
+                xf::cv::Mat<MAP_T, ROWS, COLS, NPC, XFCVDEPTH_MAPY>& mapy,
                 uint16_t rows,
                 uint16_t cols) {
     XF_TNAME(DST_T, NPC) buf[WIN_ROW][COLS];
@@ -146,11 +158,23 @@ loop_height:
 }
 
 #define TWO_POW_16 65536
-template <int SRC_T, int DST_T, int PLANES, int MAP_T, int WIN_ROW, int ROWS, int COLS, int NPC, bool USE_URAM>
-void xFRemapLI(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
-               xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
-               xf::cv::Mat<MAP_T, ROWS, COLS, NPC>& mapx,
-               xf::cv::Mat<MAP_T, ROWS, COLS, NPC>& mapy,
+template <int SRC_T,
+          int DST_T,
+          int PLANES,
+          int MAP_T,
+          int WIN_ROW,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_Remapped = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_MAPX = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_MAPY = _XFCVDEPTH_DEFAULT,
+          bool USE_URAM>
+void xFRemapLI(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
+               xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_Remapped>& dst,
+               xf::cv::Mat<MAP_T, ROWS, COLS, NPC, XFCVDEPTH_MAPX>& mapx,
+               xf::cv::Mat<MAP_T, ROWS, COLS, NPC, XFCVDEPTH_MAPY>& mapy,
                uint16_t rows,
                uint16_t cols) {
     // Add one to always get zero for boundary interpolation. Maybe need
@@ -427,11 +451,15 @@ template <int WIN_ROWS,
           int ROWS,
           int COLS,
           int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_Remapped = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_MAPX = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_MAPY = _XFCVDEPTH_DEFAULT,
           bool USE_URAM = false>
-void remap(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-           xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _remapped_mat,
-           xf::cv::Mat<MAP_T, ROWS, COLS, NPC>& _mapx_mat,
-           xf::cv::Mat<MAP_T, ROWS, COLS, NPC>& _mapy_mat) {
+void remap(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+           xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_Remapped>& _remapped_mat,
+           xf::cv::Mat<MAP_T, ROWS, COLS, NPC, XFCVDEPTH_MAPX>& _mapx_mat,
+           xf::cv::Mat<MAP_T, ROWS, COLS, NPC, XFCVDEPTH_MAPY>& _mapy_mat) {
 // clang-format off
     #pragma HLS inline off
     #pragma HLS dataflow
@@ -451,11 +479,13 @@ void remap(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     uint16_t cols = _src_mat.cols;
 
     if (INTERPOLATION_TYPE == XF_INTERPOLATION_NN) {
-        xFRemapNNI<SRC_T, DST_T, XF_CHANNELS(SRC_T, NPC), MAP_T, WIN_ROWS, ROWS, COLS, NPC, USE_URAM>(
-            _src_mat, _remapped_mat, _mapx_mat, _mapy_mat, rows, cols);
+        xFRemapNNI<SRC_T, DST_T, XF_CHANNELS(SRC_T, NPC), MAP_T, WIN_ROWS, ROWS, COLS, NPC, XFCVDEPTH_IN,
+                   XFCVDEPTH_Remapped, XFCVDEPTH_MAPX, XFCVDEPTH_MAPY, USE_URAM>(_src_mat, _remapped_mat, _mapx_mat,
+                                                                                 _mapy_mat, rows, cols);
     } else if (INTERPOLATION_TYPE == XF_INTERPOLATION_BILINEAR) {
-        xFRemapLI<SRC_T, DST_T, XF_CHANNELS(SRC_T, NPC), MAP_T, WIN_ROWS, ROWS, COLS, NPC, USE_URAM>(
-            _src_mat, _remapped_mat, _mapx_mat, _mapy_mat, rows, cols);
+        xFRemapLI<SRC_T, DST_T, XF_CHANNELS(SRC_T, NPC), MAP_T, WIN_ROWS, ROWS, COLS, NPC, XFCVDEPTH_IN,
+                  XFCVDEPTH_Remapped, XFCVDEPTH_MAPX, XFCVDEPTH_MAPY, USE_URAM>(_src_mat, _remapped_mat, _mapx_mat,
+                                                                                _mapy_mat, rows, cols);
     } else {
 #ifndef __SYNTHESIS__
         assert(((INTERPOLATION_TYPE == XF_INTERPOLATION_NN) || (INTERPOLATION_TYPE == XF_INTERPOLATION_BILINEAR)) &&

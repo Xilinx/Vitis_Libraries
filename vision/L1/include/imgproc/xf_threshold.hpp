@@ -37,9 +37,18 @@ namespace cv {
  * Input   : _src_mat, _thresh_type, _binary_thresh_val,  _upper_range and _lower_range
  * Output  : _dst_mat
  */
-template <int SRC_T, int ROWS, int COLS, int DEPTH, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int COLS_TRIP>
-void xFThresholdKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                       xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat,
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH_SRC,
+          int WORDWIDTH_DST,
+          int COLS_TRIP>
+void xFThresholdKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+                       xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst_mat,
                        ap_uint<8> _thresh_type,
                        short int _thresh,
                        short int maxval,
@@ -102,9 +111,15 @@ rowLoop:
     }
 }
 
-template <int THRESHOLD_TYPE, int SRC_T, int ROWS, int COLS, int NPC = 1>
-void Threshold(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-               xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat,
+template <int THRESHOLD_TYPE,
+          int SRC_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void Threshold(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+               xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst_mat,
                short int thresh,
                short int maxval) {
     unsigned short width = _src_mat.cols >> XF_BITSHIFT(NPC);
@@ -127,8 +142,9 @@ void Threshold(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     #pragma HLS INLINE OFF
     // clang-format on
 
-    xFThresholdKernel<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC),
-                      (COLS >> XF_BITSHIFT(NPC))>(_src_mat, _dst_mat, THRESHOLD_TYPE, thresh, maxval, height, width);
+    xFThresholdKernel<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT,
+                      XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(
+        _src_mat, _dst_mat, THRESHOLD_TYPE, thresh, maxval, height, width);
 }
 } // namespace cv
 } // namespace xf

@@ -373,8 +373,8 @@ void KF_add(float in1[PROC], float in2[PROC], float out[PROC]) {
     }
 }
 
-template <int N_STATE, int TYPE, int NPC>
-void KF_X_write(float xu_vector[512], xf::cv::Mat<TYPE, N_STATE, 1, NPC>& Xout_mat) {
+template <int N_STATE, int TYPE, int NPC, int XFCVDEPTH_XOUT = _XFCVDEPTH_DEFAULT>
+void KF_X_write(float xu_vector[512], xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_XOUT>& Xout_mat) {
 // clang-format off
     #pragma HLS inline off
     // clang-format on
@@ -386,11 +386,18 @@ void KF_X_write(float xu_vector[512], xf::cv::Mat<TYPE, N_STATE, 1, NPC>& Xout_m
     }
 }
 
-template <int N_STATE, int PROC_MU, int DEPTH_MU, int UMAT_DEPTH, int TYPE, int NPC>
+template <int N_STATE,
+          int PROC_MU,
+          int DEPTH_MU,
+          int UMAT_DEPTH,
+          int TYPE,
+          int NPC,
+          int XFCVDEPTH_UOUT = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_DOUT = _XFCVDEPTH_DEFAULT>
 void KF_UD_write(float U_matrix[PROC_MU][UMAT_DEPTH],
                  float D_vector[512],
-                 xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC>& Uout_mat,
-                 xf::cv::Mat<TYPE, N_STATE, 1, NPC>& Dout_mat) {
+                 xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_UOUT>& Uout_mat,
+                 xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_DOUT>& Dout_mat) {
 // clang-format off
     #pragma HLS inline off
     // clang-format on
@@ -821,21 +828,28 @@ template <int N_STATE,
           bool URAM_EN,
           bool EKF_EN,
           int TYPE,
-          int NPC>
+          int NPC,
+          int XFCVDEPTH_U = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_Y = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_R = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_H = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_XOUT = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_UOUT = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_DOUT = _XFCVDEPTH_DEFAULT>
 void MeasUpdate(float U_matrix[PROC_MU][UMAT_DEPTH],
                 float H_matrix[PROC_MU][HMAT_DEPTH],
                 float D_vector[512],
                 float xu_vector[512],
                 float ry_vector[512],
 #if KF_C != 0
-                xf::cv::Mat<TYPE, C_CTRL, 1, NPC>& u_mat,
+                xf::cv::Mat<TYPE, C_CTRL, 1, NPC, XFCVDEPTH_U>& u_mat,
 #endif
-                xf::cv::Mat<TYPE, M_MEAS, 1, NPC>& y_mat,
-                xf::cv::Mat<TYPE, M_MEAS, 1, NPC>& R_mat,
-                xf::cv::Mat<TYPE, M_MEAS, N_STATE, NPC>& H_mat,
-                xf::cv::Mat<TYPE, N_STATE, 1, NPC>& Xout_mat,
-                xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC>& Uout_mat,
-                xf::cv::Mat<TYPE, N_STATE, 1, NPC>& Dout_mat,
+                xf::cv::Mat<TYPE, M_MEAS, 1, NPC, XFCVDEPTH_Y>& y_mat,
+                xf::cv::Mat<TYPE, M_MEAS, 1, NPC, XFCVDEPTH_R>& R_mat,
+                xf::cv::Mat<TYPE, M_MEAS, N_STATE, NPC, XFCVDEPTH_H>& H_mat,
+                xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_XOUT>& Xout_mat,
+                xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_UOUT>& Uout_mat,
+                xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_DOUT>& Dout_mat,
                 bool X_write_en,
                 bool UD_write_en) {
     if (URAM_EN == 0) {
@@ -980,11 +994,12 @@ LOOP2:
     }
 
     //###### Write X corrected state vector
-    if (X_write_en) KF_X_write<N_STATE, TYPE, NPC>(xu_vector, Xout_mat);
+    if (X_write_en) KF_X_write<N_STATE, TYPE, NPC, XFCVDEPTH_XOUT>(xu_vector, Xout_mat);
 
     //###### Write P corrected state vector
     if (UD_write_en)
-        KF_UD_write<N_STATE, PROC_MU, DEPTH_MU, UMAT_DEPTH, TYPE, NPC>(U_matrix, D_vector, Uout_mat, Dout_mat);
+        KF_UD_write<N_STATE, PROC_MU, DEPTH_MU, UMAT_DEPTH, TYPE, NPC, XFCVDEPTH_UOUT, XFCVDEPTH_DOUT>(
+            U_matrix, D_vector, Uout_mat, Dout_mat);
 }
 
 template <int N_STATE,
@@ -1001,7 +1016,14 @@ template <int N_STATE,
           bool URAM_EN,
           bool EKF_EN,
           int TYPE,
-          int NPC>
+          int NPC,
+          int XFCVDEPTH_U = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_Y = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_R = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_H = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_XOUT = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_UOUT = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_DOUT = _XFCVDEPTH_DEFAULT>
 void MeasUpdate_wrapper(float U_matrix[PROC_MU][UMAT_DEPTH],
                         float H_matrix[PROC_MU][HMAT_DEPTH],
                         float D_vector[512],
@@ -1010,14 +1032,14 @@ void MeasUpdate_wrapper(float U_matrix[PROC_MU][UMAT_DEPTH],
                         float T_matrix[PROC_TU][TMAT_DEPTH],
                         float Uq_matrix[UQMAT_DEPTH],
 #if KF_C != 0
-                        xf::cv::Mat<TYPE, C_CTRL, 1, NPC>& u_mat,
+                        xf::cv::Mat<TYPE, C_CTRL, 1, NPC, XFCVDEPTH_U>& u_mat,
 #endif
-                        xf::cv::Mat<TYPE, M_MEAS, 1, NPC>& y_mat,
-                        xf::cv::Mat<TYPE, M_MEAS, 1, NPC>& R_mat,
-                        xf::cv::Mat<TYPE, M_MEAS, N_STATE, NPC>& H_mat,
-                        xf::cv::Mat<TYPE, N_STATE, 1, NPC>& Xout_mat,
-                        xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC>& Uout_mat,
-                        xf::cv::Mat<TYPE, N_STATE, 1, NPC>& Dout_mat,
+                        xf::cv::Mat<TYPE, M_MEAS, 1, NPC, XFCVDEPTH_Y>& y_mat,
+                        xf::cv::Mat<TYPE, M_MEAS, 1, NPC, XFCVDEPTH_R>& R_mat,
+                        xf::cv::Mat<TYPE, M_MEAS, N_STATE, NPC, XFCVDEPTH_H>& H_mat,
+                        xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_XOUT>& Xout_mat,
+                        xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_UOUT>& Uout_mat,
+                        xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_DOUT>& Dout_mat,
                         bool X_write_en,
                         bool UD_write_en) {
     if (URAM_EN == 0) {
@@ -1062,7 +1084,8 @@ LOOP1:
     for (int itr1 = 0; itr1 < 1; itr1++) {
         load_Uq<N_STATE, PROC_TU, DEPTH_TU, TMAT_DEPTH, UQMAT_DEPTH, URAM_EN>(T_matrix, Uq_matrix);
 
-        MeasUpdate<N_STATE, C_CTRL, M_MEAS, PROC_MU, DEPTH_MU, UMAT_DEPTH, HMAT_DEPTH, URAM_EN, EKF_EN, TYPE, NPC>(
+        MeasUpdate<N_STATE, C_CTRL, M_MEAS, PROC_MU, DEPTH_MU, UMAT_DEPTH, HMAT_DEPTH, URAM_EN, EKF_EN, TYPE, NPC,
+                   XFCVDEPTH_U, XFCVDEPTH_Y, XFCVDEPTH_R, XFCVDEPTH_H, XFCVDEPTH_XOUT, XFCVDEPTH_UOUT, XFCVDEPTH_DOUT>(
             U_matrix, H_matrix, D_vector, xu_vector, ry_vector,
 #if KF_C != 0
             u_mat,
@@ -1071,10 +1094,10 @@ LOOP1:
     }
 }
 
-template <int N_STATE, int U_SIZE, int TYPE, int NPC>
+template <int N_STATE, int U_SIZE, int TYPE, int NPC, int XFCVDEPTH_U = _XFCVDEPTH_DEFAULT>
 void load_control_input(
 #if KF_C != 0
-    xf::cv::Mat<TYPE, U_SIZE, 1, NPC>& control_input,
+    xf::cv::Mat<TYPE, U_SIZE, 1, NPC, XFCVDEPTH_U>& control_input,
 #endif
     float xu_vector[512]) {
     for (ap_uint<8> idx = 0; idx < U_SIZE; idx++) {
@@ -1672,18 +1695,22 @@ template <int N_STATE,
           bool URAM_EN,
           bool EKF_EN,
           int TYPE,
-          int NPC>
+          int NPC,
+          int XFCVDEPTH_U = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_XOUT = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_UOUT = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_DOUT = _XFCVDEPTH_DEFAULT>
 void TimeUpdate(float T_matrix[PROC_TU][TMAT_DEPTH],
                 float AB_matrix[PROC_MU][ABMAT_DEPTH],
                 float xu_vector[512],
                 float U_matrix[PROC_MU][UMAT_DEPTH],
                 float D_vector[512],
 #if KF_C != 0
-                xf::cv::Mat<TYPE, C_CTRL, 1, NPC>& u_mat,
+                xf::cv::Mat<TYPE, C_CTRL, 1, NPC, XFCVDEPTH_U>& u_mat,
 #endif
-                xf::cv::Mat<TYPE, N_STATE, 1, NPC>& Xout_mat,
-                xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC>& Uout_mat,
-                xf::cv::Mat<TYPE, N_STATE, 1, NPC>& Dout_mat,
+                xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_XOUT>& Xout_mat,
+                xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_UOUT>& Uout_mat,
+                xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_DOUT>& Dout_mat,
                 bool X_write_en,
                 bool UD_write_en) {
 
@@ -1694,7 +1721,7 @@ void TimeUpdate(float T_matrix[PROC_TU][TMAT_DEPTH],
 LOOP1:
     for (int itr1 = 0; itr1 < 1; itr1++) {
 #if KF_C != 0
-        if (EKF_EN == 0) load_control_input<N_STATE, C_CTRL, TYPE, NPC>(u_mat, xu_vector);
+        if (EKF_EN == 0) load_control_input<N_STATE, C_CTRL, TYPE, NPC, XFCVDEPTH_U>(u_mat, xu_vector);
 #endif
         AU_compute<N_STATE, PROC_TU, DEPTH_TU, PROC_MU, DEPTH_MU, ABMAT_DEPTH, UMAT_DEPTH, TMAT_DEPTH, URAM_EN>(
             AB_matrix, U_matrix, T_matrix);
@@ -1710,10 +1737,11 @@ LOOP2:
             T_matrix, U_matrix, D_vector);
     }
 
-    if (X_write_en) KF_X_write<N_STATE, TYPE, NPC>(xu_vector, Xout_mat);
+    if (X_write_en) KF_X_write<N_STATE, TYPE, NPC, XFCVDEPTH_XOUT>(xu_vector, Xout_mat);
 
     if (UD_write_en)
-        KF_UD_write<N_STATE, PROC_MU, DEPTH_MU, UMAT_DEPTH, TYPE, NPC>(U_matrix, D_vector, Uout_mat, Dout_mat);
+        KF_UD_write<N_STATE, PROC_MU, DEPTH_MU, UMAT_DEPTH, TYPE, NPC, XFCVDEPTH_UOUT, XFCVDEPTH_DOUT>(
+            U_matrix, D_vector, Uout_mat, Dout_mat);
 }
 
 template <int N_STATE,
@@ -1733,18 +1761,27 @@ template <int N_STATE,
           bool URAM_EN,
           bool EKF_EN,
           int TYPE,
-          int NPC>
-void initialization(xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC>& A_mat,
+          int NPC,
+          int XFCVDEPTH_A = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_B = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_UQ = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_DQ = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_H = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_X0 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U0 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_D0 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_R = _XFCVDEPTH_DEFAULT>
+void initialization(xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_A>& A_mat,
 #if KF_C != 0
-                    xf::cv::Mat<TYPE, N_STATE, C_CTRL, NPC>& B_mat,
+                    xf::cv::Mat<TYPE, N_STATE, C_CTRL, NPC, XFCVDEPTH_B>& B_mat,
 #endif
-                    xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC>& Uq_mat,
-                    xf::cv::Mat<TYPE, N_STATE, 1, NPC>& Dq_mat,
-                    xf::cv::Mat<TYPE, M_MEAS, N_STATE, NPC>& H_mat,
-                    xf::cv::Mat<TYPE, N_STATE, 1, NPC>& X0_mat,
-                    xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC>& U0_mat,
-                    xf::cv::Mat<TYPE, N_STATE, 1, NPC>& D0_mat,
-                    xf::cv::Mat<TYPE, M_MEAS, 1, NPC>& R_mat,
+                    xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_UQ>& Uq_mat,
+                    xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_DQ>& Dq_mat,
+                    xf::cv::Mat<TYPE, M_MEAS, N_STATE, NPC, XFCVDEPTH_H>& H_mat,
+                    xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_X0>& X0_mat,
+                    xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_U0>& U0_mat,
+                    xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_D0>& D0_mat,
+                    xf::cv::Mat<TYPE, M_MEAS, 1, NPC, XFCVDEPTH_R>& R_mat,
                     float H_matrix[PROC_MU][HMAT_DEPTH],
                     float U_matrix[PROC_MU][UMAT_DEPTH],
                     float xu_vector[512],
@@ -2053,25 +2090,47 @@ LOOPI_UQ:
     }
 }
 
-template <int N_STATE, int M_MEAS, int C_CTRL, int PROC_TU, int PROC_MU, bool URAM_EN, bool EKF_EN, int TYPE, int NPC>
-void KalmanFilter_def(xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC>& A_mat,
+template <int N_STATE,
+          int M_MEAS,
+          int C_CTRL,
+          int PROC_TU,
+          int PROC_MU,
+          bool URAM_EN,
+          bool EKF_EN,
+          int TYPE,
+          int NPC,
+          int XFCVDEPTH_A = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_B = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_UQ = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_DQ = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_H = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_X0 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U0 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_D0 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_R = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_Y = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_XOUT = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_UOUT = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_DOUT = _XFCVDEPTH_DEFAULT>
+void KalmanFilter_def(xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_A>& A_mat,
 #if KF_C != 0
-                      xf::cv::Mat<TYPE, N_STATE, C_CTRL, NPC>& B_mat,
+                      xf::cv::Mat<TYPE, N_STATE, C_CTRL, NPC, XFCVDEPTH_B>& B_mat,
 #endif
-                      xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC>& Uq_mat,
-                      xf::cv::Mat<TYPE, N_STATE, 1, NPC>& Dq_mat,
-                      xf::cv::Mat<TYPE, M_MEAS, N_STATE, NPC>& H_mat,
-                      xf::cv::Mat<TYPE, N_STATE, 1, NPC>& X0_mat,
-                      xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC>& U0_mat,
-                      xf::cv::Mat<TYPE, N_STATE, 1, NPC>& D0_mat,
-                      xf::cv::Mat<TYPE, M_MEAS, 1, NPC>& R_mat,
+                      xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_UQ>& Uq_mat,
+                      xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_DQ>& Dq_mat,
+                      xf::cv::Mat<TYPE, M_MEAS, N_STATE, NPC, XFCVDEPTH_H>& H_mat,
+                      xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_X0>& X0_mat,
+                      xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_U0>& U0_mat,
+                      xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_D0>& D0_mat,
+                      xf::cv::Mat<TYPE, M_MEAS, 1, NPC, XFCVDEPTH_R>& R_mat,
 #if KF_C != 0
-                      xf::cv::Mat<TYPE, C_CTRL, 1, NPC>& u_mat,
+                      xf::cv::Mat<TYPE, C_CTRL, 1, NPC, XFCVDEPTH_U>& u_mat,
 #endif
-                      xf::cv::Mat<TYPE, M_MEAS, 1, NPC>& y_mat,
-                      xf::cv::Mat<TYPE, N_STATE, 1, NPC>& Xout_mat,
-                      xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC>& Uout_mat,
-                      xf::cv::Mat<TYPE, N_STATE, 1, NPC>& Dout_mat,
+                      xf::cv::Mat<TYPE, M_MEAS, 1, NPC, XFCVDEPTH_Y>& y_mat,
+                      xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_XOUT>& Xout_mat,
+                      xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_UOUT>& Uout_mat,
+                      xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_DOUT>& Dout_mat,
                       unsigned char flag) {
 // clang-format off
     #pragma HLS inline off
@@ -2157,26 +2216,29 @@ void KalmanFilter_def(xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC>& A_mat,
 
     if (flag_reg[0])
         initialization<N_STATE, M_MEAS, C_CTRL, PROC_TU, DEPTH_TU, PROC_MU, DEPTH_MU, DEPTH_MU_CTRL, UMAT_DEPTH,
-                       HMAT_DEPTH, ABMAT_DEPTH, DPDQ_DEPTH, TMAT_DEPTH, UQMAT_DEPTH, URAM_EN, EKF_EN, TYPE, NPC>(
-            A_mat,
+                       HMAT_DEPTH, ABMAT_DEPTH, DPDQ_DEPTH, TMAT_DEPTH, UQMAT_DEPTH, URAM_EN, EKF_EN, TYPE, NPC,
+                       XFCVDEPTH_A, XFCVDEPTH_B, XFCVDEPTH_UQ, XFCVDEPTH_DQ, XFCVDEPTH_H, XFCVDEPTH_X0, XFCVDEPTH_U0,
+                       XFCVDEPTH_D0, XFCVDEPTH_R>(A_mat,
 #if KF_C != 0
-            B_mat,
+                                                  B_mat,
 #endif
-            Uq_mat, Dq_mat, H_mat, X0_mat, U0_mat, D0_mat, R_mat, H_matrix, U_matrix, xu_vector, ry_vector, D_vector,
-            AB_matrix, T_matrix, Uq_matrix, flag_reg[7]);
+                                                  Uq_mat, Dq_mat, H_mat, X0_mat, U0_mat, D0_mat, R_mat, H_matrix,
+                                                  U_matrix, xu_vector, ry_vector, D_vector, AB_matrix, T_matrix,
+                                                  Uq_matrix, flag_reg[7]);
 
     if (flag_reg[1])
         TimeUpdate<N_STATE, M_MEAS, C_CTRL, PROC_TU, DEPTH_TU, PROC_MU, DEPTH_MU, DEPTH_MU_CTRL, UMAT_DEPTH,
-                   ABMAT_DEPTH, DPDQ_DEPTH, TMAT_DEPTH, URAM_EN, EKF_EN, TYPE, NPC>(
-            T_matrix, AB_matrix, xu_vector, U_matrix, D_vector,
+                   ABMAT_DEPTH, DPDQ_DEPTH, TMAT_DEPTH, URAM_EN, EKF_EN, TYPE, NPC, XFCVDEPTH_U, XFCVDEPTH_XOUT,
+                   XFCVDEPTH_UOUT, XFCVDEPTH_DOUT>(T_matrix, AB_matrix, xu_vector, U_matrix, D_vector,
 #if KF_C != 0
-            u_mat,
+                                                   u_mat,
 #endif
-            Xout_mat, Uout_mat, Dout_mat, flag_reg[3], flag_reg[4]);
+                                                   Xout_mat, Uout_mat, Dout_mat, flag_reg[3], flag_reg[4]);
 
     if (flag_reg[2])
         MeasUpdate_wrapper<N_STATE, C_CTRL, M_MEAS, PROC_TU, DEPTH_TU, PROC_MU, DEPTH_MU, UMAT_DEPTH, HMAT_DEPTH,
-                           TMAT_DEPTH, UQMAT_DEPTH, URAM_EN, EKF_EN, TYPE, NPC>(
+                           TMAT_DEPTH, UQMAT_DEPTH, URAM_EN, EKF_EN, TYPE, NPC, XFCVDEPTH_U, XFCVDEPTH_Y, XFCVDEPTH_R,
+                           XFCVDEPTH_H, XFCVDEPTH_XOUT, XFCVDEPTH_UOUT, XFCVDEPTH_DOUT>(
             U_matrix, H_matrix, D_vector, xu_vector, ry_vector, T_matrix, Uq_matrix,
 #if KF_C != 0
             u_mat,
@@ -2201,25 +2263,39 @@ template <int N_STATE,
           bool USE_URAM = 0,
           bool EKF_EN = 0,
           int TYPE,
-          int NPC = 1>
-void KalmanFilter(xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC>& A_mat,
+          int NPC = 1,
+          int XFCVDEPTH_A = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_B = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_UQ = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_DQ = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_H = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_X0 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U0 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_D0 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_R = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_Y = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_XOUT = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_UOUT = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_DOUT = _XFCVDEPTH_DEFAULT>
+void KalmanFilter(xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_A>& A_mat,
 #if KF_C != 0
-                  xf::cv::Mat<TYPE, N_STATE, C_CTRL, NPC>& B_mat,
+                  xf::cv::Mat<TYPE, N_STATE, C_CTRL, NPC, XFCVDEPTH_B>& B_mat,
 #endif
-                  xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC>& Uq_mat,
-                  xf::cv::Mat<TYPE, N_STATE, 1, NPC>& Dq_mat,
-                  xf::cv::Mat<TYPE, M_MEAS, N_STATE, NPC>& H_mat,
-                  xf::cv::Mat<TYPE, N_STATE, 1, NPC>& X0_mat,
-                  xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC>& U0_mat,
-                  xf::cv::Mat<TYPE, N_STATE, 1, NPC>& D0_mat,
-                  xf::cv::Mat<TYPE, M_MEAS, 1, NPC>& R_mat,
+                  xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_UQ>& Uq_mat,
+                  xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_DQ>& Dq_mat,
+                  xf::cv::Mat<TYPE, M_MEAS, N_STATE, NPC, XFCVDEPTH_H>& H_mat,
+                  xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_X0>& X0_mat,
+                  xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_U0>& U0_mat,
+                  xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_D0>& D0_mat,
+                  xf::cv::Mat<TYPE, M_MEAS, 1, NPC, XFCVDEPTH_R>& R_mat,
 #if KF_C != 0
-                  xf::cv::Mat<TYPE, C_CTRL, 1, NPC>& u_mat,
+                  xf::cv::Mat<TYPE, C_CTRL, 1, NPC, XFCVDEPTH_U>& u_mat,
 #endif
-                  xf::cv::Mat<TYPE, M_MEAS, 1, NPC>& y_mat,
-                  xf::cv::Mat<TYPE, N_STATE, 1, NPC>& Xout_mat,
-                  xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC>& Uout_mat,
-                  xf::cv::Mat<TYPE, N_STATE, 1, NPC>& Dout_mat,
+                  xf::cv::Mat<TYPE, M_MEAS, 1, NPC, XFCVDEPTH_Y>& y_mat,
+                  xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_XOUT>& Xout_mat,
+                  xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_UOUT>& Uout_mat,
+                  xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_DOUT>& Dout_mat,
                   unsigned char flag) {
     assert((N_STATE > 0 && N_STATE <= 128) && "For N_STATE, possible options are 1 to 128");
     assert((M_MEAS > 0 && M_MEAS <= 128) && "For M_MEAS, possible options are 1 to 128");
@@ -2248,7 +2324,9 @@ void KalmanFilter(xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC>& A_mat,
     assert((TYPE == XF_32FC1) && "TYPE must be XF_32FC1");
     assert((NPC == XF_NPPC1) && "NPC must be XF_NPPC1");
 
-    KalmanFilter_def<N_STATE, M_MEAS, C_CTRL, MTU, MMU, USE_URAM, EKF_EN, TYPE, NPC>(
+    KalmanFilter_def<N_STATE, M_MEAS, C_CTRL, MTU, MMU, USE_URAM, EKF_EN, TYPE, NPC, XFCVDEPTH_A, XFCVDEPTH_B,
+                     XFCVDEPTH_UQ, XFCVDEPTH_DQ, XFCVDEPTH_H, XFCVDEPTH_X0, XFCVDEPTH_U0, XFCVDEPTH_D0, XFCVDEPTH_R,
+                     XFCVDEPTH_U, XFCVDEPTH_Y, XFCVDEPTH_XOUT, XFCVDEPTH_UOUT, XFCVDEPTH_DOUT>(
         A_mat,
 #if KF_C != 0
         B_mat,

@@ -12,19 +12,28 @@ and an IR image from input RGB-IR combined mosaic image.
 
 .. code:: c
 
-	template <int FSIZE1 = 5, int FSIZE2 = 3, int BFORMAT = 0,
-          int TYPE, int ROWS, int COLS, int NPPC = 1,
-          int XFCV_DEPTH, int BORDER_T = XF_BORDER_CONSTANT,
-          int USE_URAM = 0>
-	void rgbir2bayer(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& _src,
+    template <int FSIZE1 = 5,
+            int FSIZE2 = 3,
+            int BFORMAT = 0,
+            int TYPE,
+            int ROWS,
+            int COLS,
+            int NPPC = 1,
+            int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+            int XFCVDEPTH_OUT_0 = _XFCVDEPTH_DEFAULT,
+            int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+            int XFCVDEPTH_OUT_2 = _XFCVDEPTH_DEFAULT,
+            int BORDER_T = XF_BORDER_CONSTANT,
+            int USE_URAM = 0>
+    void rgbir2bayer(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN>& _src,
                     char R_IR_C1_wgts[FSIZE1 * FSIZE1],
                     char R_IR_C2_wgts[FSIZE1 * FSIZE1],
                     char B_at_R_wgts[FSIZE1 * FSIZE1],
                     char IR_at_R_wgts[FSIZE2 * FSIZE2],
                     char IR_at_B_wgts[FSIZE2 * FSIZE2],
                     char sub_wgts[4],
-                    xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& _dst_rggb,
-                    xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& _dst_ir)
+                    xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT_0>& _dst_rggb,
+                    xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT_1>& _dst_ir)
 
 .. rubric:: Parameter Descriptions
 
@@ -56,7 +65,13 @@ The following table describes the template and the function parameters.
    | NPPC              | Number of pixels to be processed per cycle,      |
    |                   | possible options are XF_NPPC1 only.              |
    +-------------------+--------------------------------------------------+
-   | XFCV_DEPTH        | Depth of the hls::stream formed by the xf::Mat   |
+   | XFCVDEPTH_IN      | Depth of Input image                             |
+   +-------------------+--------------------------------------------------+
+   | XFCVDEPTH_OUT_0   | Depth of Output image                            | 
+   +-------------------+--------------------------------------------------+
+   | XFCVDEPTH_OUT_1   | Depth of Output image                            |
+   +-------------------+--------------------------------------------------+
+   | XFCVDEPTH_OUT_2   | Depth of the hls::stream formed by the xf::Mat   |
    +-------------------+--------------------------------------------------+
    | BORDER_T          | Border handling type. Fixed to XF_BORDER_CONSTANT|
    +-------------------+--------------------------------------------------+

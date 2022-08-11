@@ -24,3 +24,5 @@
 /*  set the height and weight  */
 #define HEIGHT 2160
 #define WIDTH 3840
+#define XF_CV_DEPTH_IN 3
+#define XF_CV_DEPTH_OUT 3

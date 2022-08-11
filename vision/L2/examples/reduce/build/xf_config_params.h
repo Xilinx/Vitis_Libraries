@@ -28,3 +28,5 @@
 #define DIM 0
 
 #define REDUCTION_OP XF_REDUCE_AVG
+#define XF_CV_DEPTH_IN 3
+#define XF_CV_DEPTH_OUT 3

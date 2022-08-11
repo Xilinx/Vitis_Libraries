@@ -36,3 +36,5 @@
 /* Input image Dimensions */
 #define WIDTH 1024 // Maximum Input image width
 #define HEIGHT 676 // Maximum Input image height
+#define XF_CV_DEPTH_IN 3
+#define XF_CV_DEPTH_OUT 3

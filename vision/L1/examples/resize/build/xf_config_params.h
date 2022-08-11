@@ -40,3 +40,5 @@
 /* Output image Dimensions */
 #define NEWWIDTH 64  // Maximum output image width
 #define NEWHEIGHT 64 // Maximum output image height
+#define XF_CV_DEPTH_IN 3
+#define XF_CV_DEPTH_OUT 3

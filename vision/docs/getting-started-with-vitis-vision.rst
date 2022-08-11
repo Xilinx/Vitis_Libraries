@@ -159,11 +159,11 @@ first pixel of the next row.
 
    //Without Line stride support
    template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
-   void Array2xfMat(ap_uint< PTR_WIDTH > *srcPtr, xf::cv::Mat<MAT_T,ROWS,COLS,NPC>& dstMat)
+   void Array2xfMat(ap_uint< PTR_WIDTH > *srcPtr, xf::cv::Mat<MAT_T,ROWS,COLS,NPC,XFCVDEPTH>& dstMat)
    
    //With Line stride support
    template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
-   void Array2xfMat(ap_uint< PTR_WIDTH > *srcPtr, xf::cv::Mat<MAT_T,ROWS,COLS,NPC>& dstMat, int stride)
+   void Array2xfMat(ap_uint< PTR_WIDTH > *srcPtr, xf::cv::Mat<MAT_T,ROWS,COLS,NPC,XFCVDEPTH>& dstMat, int stride)
 
 .. table:: Table. Array2xfMat Parmater Description
 
@@ -184,6 +184,8 @@ first pixel of the next row.
    | NPC                               | Number of pixels computed in      |
    |                                   | parallel. Example XF_NPPC1,       |
    |                                   | XF_NPPC8                          |
+   +-----------------------------------+-----------------------------------+
+   | XFCVDEPTH                         | Depth of the Output image.        |
    +-----------------------------------+-----------------------------------+
    | srcPtr                            | Input pointer. Type of the        |
    |                                   | pointer based on the PTR_WIDTH.   |
@@ -207,12 +209,12 @@ first pixel of the next row.
 .. code:: c
 
    //Without Line stride support
-   template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC, int FILLZERO = 1>
-   void xfMat2Array(xf::cv::Mat<MAT_T,ROWS,COLS,NPC>& srcMat, ap_uint< PTR_WIDTH > *dstPtr)
+   template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC, int XFCVDEPTH = _XFCVDEPTH_DEFAULT, int FILLZERO = 1>
+   void xfMat2Array(xf::cv::Mat<MAT_T,ROWS,COLS,NPC,XFCVDEPTH>& srcMat, ap_uint< PTR_WIDTH > *dstPtr)
    
    //With Line stride support
-   template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC, int FILLZERO = 1>
-   void xfMat2Array(xf::cv::Mat<MAT_T,ROWS,COLS,NPC>& srcMat, ap_uint< PTR_WIDTH > *dstPtr, int stride)
+   template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC, int XFCVDEPTH = _XFCVDEPTH_DEFAULT, int FILLZERO = 1>
+   void xfMat2Array(xf::cv::Mat<MAT_T,ROWS,COLS,NPC,XFCVDEPTH>& srcMat, ap_uint< PTR_WIDTH > *dstPtr, int stride)
    
 .. table:: Table . xfMat2Array Parameter Description
 
@@ -233,6 +235,8 @@ first pixel of the next row.
    | NPC                               | Number of pixels computed in      |
    |                                   | parallel. Example XF_NPPC1,       |
    |                                   | XF_NPPC8                          |
+   +-----------------------------------+-----------------------------------+
+   | XFCVDEPTH                         | Depth of the Input image.         |
    +-----------------------------------+-----------------------------------+
    | FILLZERO                          | Line padding Flag. Use when line  |
    |                                   | stride support is needed.         |

@@ -31,24 +31,21 @@ void box_filter_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp, ap_uint<OUTPUT_PTR_WIDT
     const int pCOLS = WIDTH;
     const int pNPC1 = NPIX;
 
-    xf::cv::Mat<IN_T, HEIGHT, WIDTH, NPIX> in_mat(rows, cols);
-// clang-format off
-    #pragma HLS stream variable=in_mat.data depth=2
+    xf::cv::Mat<IN_T, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_IN_1> in_mat(rows, cols);
+    // clang-format off
     // clang-format on
 
-    xf::cv::Mat<IN_T, HEIGHT, WIDTH, NPIX> _dst(rows, cols);
-// clang-format off
-    #pragma HLS stream variable=_dst.data depth=2
-// clang-format on
+    xf::cv::Mat<IN_T, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_OUT_1> _dst(rows, cols);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_T, HEIGHT, WIDTH, NPIX>(img_inp, in_mat);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_T, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_IN_1>(img_inp, in_mat);
 
-    xf::cv::boxFilter<XF_BORDER_CONSTANT, FILTER_WIDTH, IN_T, HEIGHT, WIDTH, NPIX, XF_USE_URAM>(in_mat, _dst);
+    xf::cv::boxFilter<XF_BORDER_CONSTANT, FILTER_WIDTH, IN_T, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_OUT_1,
+                      XF_USE_URAM>(in_mat, _dst);
 
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, IN_T, HEIGHT, WIDTH, NPIX>(_dst, img_out);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, IN_T, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_OUT_1>(_dst, img_out);
 }
 }

@@ -35,6 +35,9 @@ template <int SRC_T,
           int ROWS,
           int COLS,
           int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int PLANES,
           int DEPTH_SRC,
           int DEPTH_DST,
@@ -42,9 +45,9 @@ template <int SRC_T,
           int WORDWIDTH_DST,
           int TC>
 
-int AccumulateImageKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
-                          xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src2,
-                          xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
+int AccumulateImageKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
+                          xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& src2,
+                          xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst,
                           uint16_t height,
                           uint16_t width) {
     ap_uint<13> i, j, k, l;
@@ -84,10 +87,17 @@ RowLoop:
     return 0;
 }
 
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
-void accumulate(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
-                xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src2,
-                xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst) {
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void accumulate(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
+                xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& src2,
+                xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst) {
 #ifndef __SYNTHESIS__
     assert(((src1.rows <= ROWS) && (src1.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert(((src2.rows <= ROWS) && (src2.cols <= COLS)) && "ROWS and COLS should be greater than input image");
@@ -102,9 +112,9 @@ void accumulate(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
     #pragma HLS INLINE OFF
     // clang-format on
 
-    AccumulateImageKernel<SRC_T, DST_T, ROWS, COLS, NPC, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC),
-                          XF_DEPTH(DST_T, NPC), XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
-                          (COLS >> XF_BITSHIFT(NPC))>(src1, src2, dst, src1.rows, lwidth);
+    AccumulateImageKernel<SRC_T, DST_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_IN_2, XFCVDEPTH_OUT_1,
+                          XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), XF_DEPTH(DST_T, NPC), XF_WORDWIDTH(SRC_T, NPC),
+                          XF_WORDWIDTH(DST_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(src1, src2, dst, src1.rows, lwidth);
 }
 } // namespace cv
 } // namespace xf

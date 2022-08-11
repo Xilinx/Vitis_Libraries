@@ -66,10 +66,20 @@ Apply_dilate_Loop:
     return;
 }
 
-template <int ROWS, int COLS, int PLANES, int TYPE, int NPC, int WORDWIDTH, int TC, int K_ROWS, int K_COLS>
-void Process_function(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat,
+template <int ROWS,
+          int COLS,
+          int PLANES,
+          int TYPE,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH,
+          int TC,
+          int K_ROWS,
+          int K_COLS>
+void Process_function(xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
                       unsigned char kernel[K_ROWS][K_COLS],
-                      xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _out_mat,
+                      xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _out_mat,
                       XF_TNAME(TYPE, NPC) buf[K_ROWS][(COLS >> XF_BITSHIFT(NPC))],
                       XF_PTUNAME(TYPE) src_buf[K_ROWS][XF_NPIXPERCYCLE(NPC) + (K_COLS - 1)],
                       XF_TNAME(TYPE, NPC) & P0,
@@ -230,9 +240,19 @@ Col_Loop:
 
 } //	end of processDilate
 
-template <int ROWS, int COLS, int PLANES, int TYPE, int NPC, int WORDWIDTH, int TC, int K_ROWS, int K_COLS>
-void xferode(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src,
-             xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _dst,
+template <int ROWS,
+          int COLS,
+          int PLANES,
+          int TYPE,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH,
+          int TC,
+          int K_ROWS,
+          int K_COLS>
+void xferode(xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src,
+             xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst,
              uint16_t img_height,
              uint16_t img_width,
              unsigned char kernel[K_ROWS][K_COLS]) {
@@ -309,7 +329,7 @@ Row_Loop:
         // clang-format on
 
         P0 = 0;
-        Process_function<ROWS, COLS, PLANES, TYPE, NPC, WORDWIDTH, TC, K_ROWS, K_COLS>(
+        Process_function<ROWS, COLS, PLANES, TYPE, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1, WORDWIDTH, TC, K_ROWS, K_COLS>(
             _src, kernel, _dst, buf, src_buf, P0, img_width, img_height, shift_x, row_ind, row, rd_ind, wr_ind);
 
         // update indices (by cyclic shifting )
@@ -333,9 +353,11 @@ template <int BORDER_TYPE,
           int K_ROWS,
           int K_COLS,
           int ITERATIONS,
-          int NPC = 1>
-void erode(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src,
-           xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _dst,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void erode(xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src,
+           xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst,
            unsigned char _kernel[K_ROWS * K_COLS]) {
 // clang-format off
     #pragma HLS INLINE OFF
@@ -362,8 +384,9 @@ void erode(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src,
             }
         }
 
-        xferode<ROWS, COLS, XF_CHANNELS(TYPE, NPC), TYPE, NPC, 0, (COLS >> XF_BITSHIFT(NPC)) + (NEW_K_ROWS >> 1),
-                NEW_K_ROWS, NEW_K_COLS>(_src, _dst, imgheight, imgwidth, kernel_new);
+        xferode<ROWS, COLS, XF_CHANNELS(TYPE, NPC), TYPE, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1, 0,
+                (COLS >> XF_BITSHIFT(NPC)) + (NEW_K_ROWS >> 1), NEW_K_ROWS, NEW_K_COLS>(_src, _dst, imgheight, imgwidth,
+                                                                                        kernel_new);
     } else {
         unsigned char kernel[K_ROWS][K_COLS];
 // clang-format off
@@ -374,8 +397,8 @@ void erode(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src,
                 kernel[i][j] = _kernel[i * K_COLS + j];
             }
         }
-        xferode<ROWS, COLS, XF_CHANNELS(TYPE, NPC), TYPE, NPC, 0, (COLS >> XF_BITSHIFT(NPC)) + (K_COLS >> 1), K_ROWS,
-                K_COLS>(_src, _dst, imgheight, imgwidth, kernel);
+        xferode<ROWS, COLS, XF_CHANNELS(TYPE, NPC), TYPE, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1, 0,
+                (COLS >> XF_BITSHIFT(NPC)) + (K_COLS >> 1), K_ROWS, K_COLS>(_src, _dst, imgheight, imgwidth, kernel);
     }
 
     return;

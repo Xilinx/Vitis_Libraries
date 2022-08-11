@@ -21,8 +21,8 @@
 #include "ap_int.h"
 #include "common/xf_common.hpp"
 #include "common/xf_utility.hpp"
+#include "build/xf_config_params.h"
 #include "imgproc/xf_houghlines.hpp"
-//#include "xf_config_params.h"
 
 #define HEIGHT 128
 #define WIDTH 128

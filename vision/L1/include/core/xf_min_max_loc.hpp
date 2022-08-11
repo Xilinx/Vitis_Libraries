@@ -36,8 +36,15 @@
 namespace xf {
 namespace cv {
 
-template <int SRC_T, int ROWS, int COLS, int DEPTH, int NPC, int WORDWIDTH, int COL_TRIP>
-void xFMinMaxLocKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH,
+          int COL_TRIP>
+void xFMinMaxLocKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src,
                        int& _minval1,
                        int& _maxval1,
                        unsigned short int& _minlocx,
@@ -206,8 +213,8 @@ trackLoop:
     _maxval1 = _maxval;
 }
 
-template <int SRC_T, int ROWS, int COLS, int NPC = 0>
-void minMaxLoc(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
+template <int SRC_T, int ROWS, int COLS, int NPC = 0, int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT>
+void minMaxLoc(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src,
                int32_t* min_value,
                int32_t* max_value,
                uint16_t* _minlocx,
@@ -227,7 +234,7 @@ void minMaxLoc(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
     uint16_t height = _src.rows;
     uint16_t width = _src.cols >> XF_BITSHIFT(NPC);
 
-    xFMinMaxLocKernel<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
+    xFMinMaxLocKernel<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN, XF_WORDWIDTH(SRC_T, NPC),
                       (COLS >> XF_BITSHIFT(NPC))>(_src, _min_val, _max_val, _min_locx, _min_locy, _max_locx, _max_locy,
                                                   height, width);
 

@@ -39,7 +39,12 @@ namespace xf {
 namespace cv {
 
 // function to store the image in 4 memories of a combined size of (0:STORE_LINES-1,0:COLS-1)
-template <int COLS, int STORE_LINES, int DEPTH, int NPC>
+template <int COLS,
+          int STORE_LINES,
+          int DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
 void store_EvOd_image1(XF_TNAME(DEPTH, NPC) in_pixel,
                        ap_uint<16> i,
                        ap_uint<16> j,
@@ -79,7 +84,13 @@ void store_EvOd_image1(XF_TNAME(DEPTH, NPC) in_pixel,
     }
 };
 
-template <int COLS, int PLANES, int STORE_LINES, int DEPTH, int NPC>
+template <int COLS,
+          int PLANES,
+          int STORE_LINES,
+          int DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
 XF_TNAME(DEPTH, NPC)
 retrieve_EvOd_image1(int i,
                      int j,
@@ -129,7 +140,13 @@ retrieve_EvOd_image1(int i,
     return return_val;
 };
 // function to store the image in 4 memories of a combined size of (0:STORE_LINES-1,0:COLS-1)
-template <int COLS, int PLANES, int STORE_LINES, int DEPTH, int NPC>
+template <int COLS,
+          int PLANES,
+          int STORE_LINES,
+          int DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
 XF_TNAME(DEPTH, NPC)
 retrieve_EvOd_image4x1(int i,
                        int j,
@@ -274,7 +291,13 @@ retrieve_EvOd_image4x1(int i,
     return XF_TNAME(DEPTH, NPC)(op_val);
 };
 
-template <int COLS, int PLANES, int STORE_LINES, int DEPTH, int NPC>
+template <int COLS,
+          int PLANES,
+          int STORE_LINES,
+          int DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
 void store_in_UramNN(XF_TNAME(DEPTH, NPC) in_pixel,
                      ap_uint<16> i,
                      ap_uint<16> j,
@@ -292,7 +315,13 @@ void store_in_UramNN(XF_TNAME(DEPTH, NPC) in_pixel,
         for (int k = 0; k < 8; k++) bufUram[pl][i][j / 8](k * 8 + 7, k * 8) = sx8[k](bit + 7, bit);
 };
 
-template <int COLS, int PLANES, int STORE_LINES, int DEPTH, int NPC>
+template <int COLS,
+          int PLANES,
+          int STORE_LINES,
+          int DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
 void store_in_UramBL(hls::stream<XF_TNAME(DEPTH, NPC)>& input_image,
                      ap_uint<16> i,
                      ap_uint<16> j,
@@ -377,7 +406,13 @@ void store_in_UramBL(hls::stream<XF_TNAME(DEPTH, NPC)>& input_image,
     }
 };
 
-template <int COLS, int PLANES, int STORE_LINES, int DEPTH, int NPC>
+template <int COLS,
+          int PLANES,
+          int STORE_LINES,
+          int DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
 XF_TNAME(DEPTH, NPC)
 retrieve_UramNN(int i, int j, ap_uint<64> bufUram[PLANES][STORE_LINES][(COLS + 7) / 8]) {
 // clang-format off
@@ -394,7 +429,13 @@ retrieve_UramNN(int i, int j, ap_uint<64> bufUram[PLANES][STORE_LINES][(COLS + 7
     return dx8[j % 8];
 };
 
-template <int COLS, int PLANES, int STORE_LINES, int DEPTH, int NPC>
+template <int COLS,
+          int PLANES,
+          int STORE_LINES,
+          int DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
 XF_TNAME(DEPTH, NPC)
 retrieve_UramBL(
     int i, int j, int A, int B, int C, int D, ap_uint<72> bufUram[PLANES][(STORE_LINES + 1) / 2][(COLS + 1) / 2]) {
@@ -445,6 +486,8 @@ retrieve_UramBL(
 // };
 
 template <int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
           int ROWS,
           int COLS,
           int PLANES,
@@ -616,18 +659,18 @@ MAIN_ROWS:
                 // computing i-l to snap the writes to STORE_LINES size buffer
                 if (USE_URAM)
                     if (INTERPOLATION_TYPE)
-                        store_in_UramBL<COLS, PLANES, STORE_LINES, DEPTH, NPC>(input_image, i - l, j, bufUramBL,
-                                                                               img_cols, store_row, store_col, temppix,
-                                                                               pixval, pixval_2, prev_pixval);
+                        store_in_UramBL<COLS, PLANES, STORE_LINES, DEPTH, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT>(
+                            input_image, i - l, j, bufUramBL, img_cols, store_row, store_col, temppix, pixval, pixval_2,
+                            prev_pixval);
                     else {
                         if (j < img_cols)
-                            store_in_UramNN<COLS, PLANES, STORE_LINES, DEPTH, NPC>(input_image.read(), i - l, j,
-                                                                                   bufUramNN);
+                            store_in_UramNN<COLS, PLANES, STORE_LINES, DEPTH, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT>(
+                                input_image.read(), i - l, j, bufUramNN);
                     }
                 else if (j < img_cols)
-                    store_EvOd_image1<COLS, STORE_LINES, DEPTH, NPC>(input_image.read(), i - l, j, store1_pt_2EvR_EvC,
-                                                                     store1_pt_2EvR_OdC, store1_pt_2OdR_EvC,
-                                                                     store1_pt_2OdR_OdC);
+                    store_EvOd_image1<COLS, STORE_LINES, DEPTH, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT>(
+                        input_image.read(), i - l, j, store1_pt_2EvR_EvC, store1_pt_2EvR_OdC, store1_pt_2OdR_EvC,
+                        store1_pt_2OdR_OdC);
                 store_col = !(store_col);
             }
 
@@ -720,19 +763,24 @@ MAIN_ROWS:
                     I1 = I - m;
                     if (INTERPOLATION_TYPE == 0) {
                         if (USE_URAM)
-                            op_val = retrieve_UramNN<COLS, PLANES, STORE_LINES, DEPTH, NPC>(I1, J, bufUramNN);
+                            op_val =
+                                retrieve_UramNN<COLS, PLANES, STORE_LINES, DEPTH, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT>(
+                                    I1, J, bufUramNN);
                         else
-                            op_val = retrieve_EvOd_image1<COLS, PLANES, STORE_LINES, DEPTH, NPC>(
-                                I1, J, store1_pt_2EvR_EvC, store1_pt_2EvR_OdC, store1_pt_2OdR_EvC, store1_pt_2OdR_OdC);
+                            op_val = retrieve_EvOd_image1<COLS, PLANES, STORE_LINES, DEPTH, NPC, XFCVDEPTH_IN,
+                                                          XFCVDEPTH_OUT>(I1, J, store1_pt_2EvR_EvC, store1_pt_2EvR_OdC,
+                                                                         store1_pt_2OdR_EvC, store1_pt_2OdR_OdC);
                     } else {
                         // calling the read function with interpolation
                         if (USE_URAM)
                             op_val =
-                                retrieve_UramBL<COLS, PLANES, STORE_LINES, DEPTH, NPC>(I1, J, A, B, C, D, bufUramBL);
+                                retrieve_UramBL<COLS, PLANES, STORE_LINES, DEPTH, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT>(
+                                    I1, J, A, B, C, D, bufUramBL);
                         else
-                            op_val = retrieve_EvOd_image4x1<COLS, PLANES, STORE_LINES, DEPTH, NPC>(
-                                I1, J, A, B, C, D, store1_pt_2EvR_EvC, store1_pt_2EvR_OdC, store1_pt_2OdR_EvC,
-                                store1_pt_2OdR_OdC);
+                            op_val = retrieve_EvOd_image4x1<COLS, PLANES, STORE_LINES, DEPTH, NPC, XFCVDEPTH_IN,
+                                                            XFCVDEPTH_OUT>(I1, J, A, B, C, D, store1_pt_2EvR_EvC,
+                                                                           store1_pt_2EvR_OdC, store1_pt_2OdR_EvC,
+                                                                           store1_pt_2OdR_OdC);
                     }
                 } else {
                     // change this to an input if the border
@@ -756,9 +804,11 @@ template <int STORE_LINES,
           int ROWS,
           int COLS,
           int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
           bool USE_URAM = false>
-void warpTransformKrnl(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat,
-                       xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _dst_mat,
+void warpTransformKrnl(xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+                       xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst_mat,
                        float P_matrix[9]) {
 // clang-format off
 #pragma HLS DATAFLOW
@@ -780,8 +830,9 @@ void warpTransformKrnl(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat,
         }
     }
 
-    xFwarpTransformKernel<NPC, ROWS, COLS, XF_CHANNELS(TYPE, NPC), TYPE, STORE_LINES, START_ROW, TRANSFORM,
-                          INTERPOLATION_TYPE, USE_URAM>(in_stream, out_stream, P_matrix, _src_mat.rows, _src_mat.cols);
+    xFwarpTransformKernel<NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT, ROWS, COLS, XF_CHANNELS(TYPE, NPC), TYPE, STORE_LINES,
+                          START_ROW, TRANSFORM, INTERPOLATION_TYPE, USE_URAM>(in_stream, out_stream, P_matrix,
+                                                                              _src_mat.rows, _src_mat.cols);
 
     for (int i = 0; i < _dst_mat.rows; i++) {
 // clang-format off
@@ -807,15 +858,17 @@ template <int STORE_LINES,
           int ROWS,
           int COLS,
           int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
           bool USE_URAM = false>
-void warpTransform(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat,
-                   xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _dst_mat,
+void warpTransform(xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+                   xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst_mat,
                    float P_matrix[9]) {
 // clang-format off
     #pragma HLS INLINE OFF
 
-	warpTransformKrnl<STORE_LINES, START_ROW, TRANSFORM, INTERPOLATION_TYPE, TYPE, ROWS, COLS, NPC,
-                          USE_URAM>(_src_mat, _dst_mat, P_matrix);
+	warpTransformKrnl<STORE_LINES, START_ROW, TRANSFORM, INTERPOLATION_TYPE, TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT,
+                            USE_URAM>(_src_mat, _dst_mat, P_matrix);
 }
 } // namespace cv
 } // namespace xf

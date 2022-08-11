@@ -30,11 +30,13 @@ template <int SRC_T,
           int PLANES,
           int DEPTH,
           int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int COLS_TRIP>
-void xFGAMMAKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
-                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst,
+void xFGAMMAKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src,
+                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst,
                    unsigned char lut_table[256 * PLANES],
                    uint16_t height,
                    uint16_t width) {
@@ -95,9 +97,15 @@ rowLoop:
         }
     }
 }
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
-void gammacorrection(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
-                     xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void gammacorrection(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src,
+                     xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst,
                      unsigned char lut_table[256 * XF_CHANNELS(SRC_T, NPC)]) {
 // clang-format off
 #pragma HLS INLINE OFF
@@ -106,8 +114,9 @@ void gammacorrection(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
     unsigned short height = src.rows;
     unsigned short width = src.cols >> XF_BITSHIFT(NPC);
 
-    xFGAMMAKernel<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                  XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(src, dst, lut_table, height, width);
+    xFGAMMAKernel<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1,
+                  XFCVDEPTH_OUT_1, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(
+        src, dst, lut_table, height, width);
 }
 }
 }

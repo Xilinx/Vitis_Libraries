@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+#define XF_CV_DEPTH_IN_0 3
+#define XF_CV_DEPTH_IN_1 3
+#define XF_CV_DEPTH_OUT 3
+
 #define SAD_WINDOW_SIZE 9
 
 /* NO_OF_DISPARITIES must be greater than '0' and less than the image width */

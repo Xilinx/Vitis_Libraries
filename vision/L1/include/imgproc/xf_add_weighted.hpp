@@ -34,18 +34,21 @@ template <int SRC_T,
           int ROWS,
           int COLS,
           int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int PLANES,
           int DEPTH_SRC,
           int DEPTH_DST,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int TC>
-int AddWeightedKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
+int AddWeightedKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
                       float alpha,
-                      xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src2,
+                      xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& src2,
                       float beta,
                       float gama,
-                      xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
+                      xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst,
                       uint16_t height,
                       uint16_t width) {
     ap_uint<13> i, j, k, l;
@@ -98,13 +101,20 @@ RowLoop:
     return 0;
 }
 
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
-void addWeighted(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void addWeighted(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
                  float alpha,
-                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src2,
+                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& src2,
                  float beta,
                  float gama,
-                 xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst) {
+                 xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst) {
 #ifndef __SYNTHESIS__
     assert(((SRC_T == XF_8UC1) || (SRC_T == XF_8UC3)) &&
            "Input TYPE must be XF_8UC1 for 1-channel, XF_8UC3 for 3-channel");
@@ -118,9 +128,10 @@ void addWeighted(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
 #endif
     short width = src1.cols >> XF_BITSHIFT(NPC);
 
-    AddWeightedKernel<SRC_T, DST_T, ROWS, COLS, NPC, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC),
-                      XF_DEPTH(DST_T, NPC), XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
-                      (COLS >> XF_BITSHIFT(NPC))>(src1, alpha, src2, beta, gama, dst, src1.rows, width);
+    AddWeightedKernel<SRC_T, DST_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_IN_2, XFCVDEPTH_OUT_1,
+                      XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), XF_DEPTH(DST_T, NPC), XF_WORDWIDTH(SRC_T, NPC),
+                      XF_WORDWIDTH(DST_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(src1, alpha, src2, beta, gama, dst,
+                                                                            src1.rows, width);
 }
 } // namespace cv
 } // namespace xf

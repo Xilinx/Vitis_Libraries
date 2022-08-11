@@ -35,30 +35,28 @@ void scharr_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> in_mat(rows, cols);
-// clang-format off
-    #pragma HLS stream variable=in_mat.data depth=2
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> in_mat(rows, cols);
+    // clang-format off
     // clang-format on
 
-    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> _dstgx(rows, cols);
-// clang-format off
-    #pragma HLS stream variable=_dstgx.data depth=2
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> _dstgx(rows, cols);
+    // clang-format off
     // clang-format on
 
-    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> _dstgy(rows, cols);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_2> _dstgy(rows, cols);
 // clang-format off
-    #pragma HLS stream variable=_dstgy.data depth=2
 // clang-format on
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1>(img_inp, in_mat);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(img_inp, in_mat);
 
-    xf::cv::Scharr<XF_BORDER_CONSTANT, IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPC1>(in_mat, _dstgx, _dstgy);
+    xf::cv::Scharr<XF_BORDER_CONSTANT, IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT_1,
+                   XF_CV_DEPTH_OUT_2>(in_mat, _dstgx, _dstgy);
 
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPC1>(_dstgx, img_out1);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPC1>(_dstgy, img_out2);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(_dstgx, img_out1);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_2>(_dstgy, img_out2);
 }
 }

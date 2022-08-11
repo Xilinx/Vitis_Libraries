@@ -38,7 +38,7 @@ set_part $XPART
 create_clock -period $CLKP
 
 if {$CSIM == 1} {
-  csim_design -ldflags "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d" -argv " ${XF_PROJ_ROOT}/data/lkof_im0_512x512.png ${XF_PROJ_ROOT}/data/lkof_im1_512x512.png "
+  csim_design -ldflags "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d -lopencv_videoio -lopencv_video -lopencv_calib3d" -argv " ${XF_PROJ_ROOT}/data/lkof_im0_512x512.png ${XF_PROJ_ROOT}/data/lkof_im1_512x512.png "
 }
 
 if {$CSYNTH == 1} {
@@ -46,7 +46,7 @@ if {$CSYNTH == 1} {
 }
 
 if {$COSIM == 1} {
-  cosim_design -ldflags "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d" -argv " ${XF_PROJ_ROOT}/data/lkof_im0_512x512.png ${XF_PROJ_ROOT}/data/lkof_im1_512x512.png "
+  cosim_design -ldflags "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d -lopencv_videoio -lopencv_video -lopencv_calib3d" -argv " ${XF_PROJ_ROOT}/data/lkof_im0_512x512.png ${XF_PROJ_ROOT}/data/lkof_im1_512x512.png "
 }
 
 if {$VIVADO_SYN == 1} {

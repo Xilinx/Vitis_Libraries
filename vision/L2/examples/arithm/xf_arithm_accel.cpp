@@ -38,21 +38,21 @@ void arithm_accel(
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput1(height, width);
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgOutput(height, width);
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1> imgInput1(height, width);
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> imgOutput(height, width);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1>(img_in1, imgInput1);
+    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1>(img_in1, imgInput1);
 
     // Run xfOpenCV kernel:
-    xf::cv::FUNCT_NAME<TYPE, HEIGHT, WIDTH, NPC1>(imgInput1, imgOutput);
+    xf::cv::FUNCT_NAME<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_OUT_1>(imgInput1, imgOutput);
 
     // Convert _dst xf::cv::Mat object to output array:
-    xf::cv::xfMat2Array<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1>(imgOutput, img_out);
+    xf::cv::xfMat2Array<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(imgOutput, img_out);
 
     return;
 } // End of kernel
@@ -83,32 +83,34 @@ void arithm_accel(ap_uint<PTR_WIDTH>* img_in1,
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput1(height, width);
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput2(height, width);
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgOutput(height, width);
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1> imgInput1(height, width);
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_2> imgInput2(height, width);
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> imgOutput(height, width);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1>(img_in1, imgInput1);
-    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1>(img_in2, imgInput2);
+    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1>(img_in1, imgInput1);
+    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_2>(img_in2, imgInput2);
 
 // Run xfOpenCV kernel:
 #ifdef EXTRA_PARM
-    xf::cv::FUNCT_NAME<EXTRA_PARM, TYPE, HEIGHT, WIDTH, NPC1>(imgInput1, imgInput2, imgOutput
+    xf::cv::FUNCT_NAME<EXTRA_PARM, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2, XF_CV_DEPTH_OUT_1>(
+        imgInput1, imgInput2, imgOutput
 #ifdef FUNCT_MULTIPLY
-                                                              ,
-                                                              scale
+        ,
+        scale
 #endif
-                                                              );
+        );
 #else
-    xf::cv::FUNCT_NAME<TYPE, HEIGHT, WIDTH, NPC1>(imgInput1, imgInput2, imgOutput);
+    xf::cv::FUNCT_NAME<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2, XF_CV_DEPTH_OUT_1>(
+        imgInput1, imgInput2, imgOutput);
 #endif
 
     // Convert _dst xf::cv::Mat object to output array:
-    xf::cv::xfMat2Array<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1>(imgOutput, img_out);
+    xf::cv::xfMat2Array<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(imgOutput, img_out);
 
     return;
 } // End of kernel
@@ -128,9 +130,9 @@ void arithm_accel(
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput1(height, width);
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1> imgInput1(height, width);
     unsigned char scl[XF_CHANNELS(TYPE, NPC1)];
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgOutput(height, width);
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> imgOutput(height, width);
 
     for (unsigned int i = 0; i < XF_CHANNELS(TYPE, NPC1); ++i) {
         scl[i] = scl_in[i];
@@ -140,17 +142,17 @@ void arithm_accel(
     #pragma HLS DATAFLOW
     // clang-format on
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1>(img_in1, imgInput1);
+    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1>(img_in1, imgInput1);
 
     // Run xfOpenCV kernel:
     xf::cv::FUNCT_NAME<
 #ifdef EXTRA_PARM
         EXTRA_PARM,
 #endif
-        TYPE, HEIGHT, WIDTH, NPC1>(imgInput1, scl, imgOutput);
+        TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_OUT_1>(imgInput1, scl, imgOutput);
 
     // Convert _dst xf::cv::Mat object to output array:
-    xf::cv::xfMat2Array<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1>(imgOutput, img_out);
+    xf::cv::xfMat2Array<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(imgOutput, img_out);
 
     return;
 } // End of kernel

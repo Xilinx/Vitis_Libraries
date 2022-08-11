@@ -32,19 +32,20 @@ void gammacorrection_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
 #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> in_mat(rows, cols);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1> in_mat(rows, cols);
     // clang-format off
     // clang-format on
 
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> out_mat(rows, cols);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> out_mat(rows, cols);
 // clang-format off
 // clang-format on
 
 #pragma HLS DATAFLOW
 
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1>(img_inp, in_mat);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1>(img_inp, in_mat);
 
-    xf::cv::gammacorrection<IN_TYPE, IN_TYPE, HEIGHT, WIDTH, NPC1>(in_mat, out_mat, gamma_lut);
+    xf::cv::gammacorrection<IN_TYPE, IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_OUT_1>(in_mat, out_mat,
+                                                                                                        gamma_lut);
 
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1>(out_mat, img_out);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(out_mat, img_out);
 }

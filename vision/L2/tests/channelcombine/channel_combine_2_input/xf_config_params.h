@@ -21,3 +21,9 @@
 #define FOUR_INPUT 0
 
 #define NPC XF_NPPC1
+
+#define XF_CV_DEPTH_IN_1 2
+#define XF_CV_DEPTH_IN_2 2
+#define XF_CV_DEPTH_IN_3 2
+#define XF_CV_DEPTH_IN_4 2
+#define XF_CV_DEPTH_OUT 2

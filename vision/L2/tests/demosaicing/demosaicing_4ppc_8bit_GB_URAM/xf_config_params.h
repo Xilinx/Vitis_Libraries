@@ -25,3 +25,6 @@
 #define BPATTERN XF_BAYER_GB
 
 #define XF_USE_URAM 1
+
+#define XF_CV_DEPTH_IN_1 1
+#define XF_CV_DEPTH_OUT_1 3

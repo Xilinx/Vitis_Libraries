@@ -30,12 +30,11 @@ void minmaxloc_accel(
     // clang-format on
 
     // Local objects:
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(height, width);
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> imgInput(height, width);
     int32_t min_value, max_value;
     uint16_t _min_locx, _min_locy, _max_locx, _max_locy;
 
 // clang-format off
-    #pragma HLS STREAM variable=imgInput.data depth=2
 // clang-format on
 
 // clang-format off
@@ -43,11 +42,11 @@ void minmaxloc_accel(
     // clang-format on
 
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1>(img_in, imgInput);
+    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(img_in, imgInput);
 
     // Run xfOpenCV kernel:
-    xf::cv::minMaxLoc<TYPE, HEIGHT, WIDTH, NPC1>(imgInput, &min_value, &max_value, &_min_locx, &_min_locy, &_max_locx,
-                                                 &_max_locy);
+    xf::cv::minMaxLoc<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, &min_value, &max_value, &_min_locx,
+                                                                 &_min_locy, &_max_locx, &_max_locy);
 
     // Copy local outputs to global pointer:
     min_max_value[0] = min_value;

@@ -35,10 +35,18 @@
 namespace xf {
 namespace cv {
 
-template <int SRC_T, int ROWS, int COLS, int DEPTH, int NPC, int WORDWIDTH, int SRC_TC>
-void xFEqualize(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH,
+          int SRC_TC>
+void xFEqualize(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src1,
                 uint32_t hist_stream[0][256],
-                xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat,
+                xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst_mat,
                 uint16_t img_height,
                 uint16_t img_width) {
     XF_SNAME(WORDWIDTH)
@@ -127,10 +135,16 @@ NORMALISE_ROW_LOOP:
  * equalizeHist : Wrapper function which calls the main kernel
  ****************************************************************/
 
-template <int SRC_T, int ROWS, int COLS, int NPC = 1>
-void equalizeHist(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
-                  xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
-                  xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void equalizeHist(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src,
+                  xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src1,
+                  xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst) {
 // clang-format off
     #pragma HLS inline off
     // clang-format on
@@ -146,12 +160,12 @@ void equalizeHist(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
     uint32_t histogram[1][256];
 
     img_width = img_width >> XF_BITSHIFT(NPC);
-    xFHistogramKernel<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
+    xFHistogramKernel<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN, XF_WORDWIDTH(SRC_T, NPC),
                       ((COLS >> (XF_BITSHIFT(NPC))) >> 1), XF_CHANNELS(SRC_T, NPC)>(_src, histogram, img_height,
                                                                                     img_width);
 
-    xFEqualize<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(
-        _src1, histogram, _dst, img_height, img_width);
+    xFEqualize<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT, XF_WORDWIDTH(SRC_T, NPC),
+               (COLS >> XF_BITSHIFT(NPC))>(_src1, histogram, _dst, img_height, img_width);
 }
 } // namespace cv
 } // namespace xf

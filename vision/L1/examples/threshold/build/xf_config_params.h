@@ -16,6 +16,8 @@
 
 #define NO 1 // Normal Operation
 #define RO 0 // Resource Optimized
+#define XF_CV_DEPTH_IN 2
+#define XF_CV_DEPTH_OUT 2
 
 /*  set the type of thresholding*/
 #define THRESH_TYPE XF_THRESHOLD_TYPE_BINARY

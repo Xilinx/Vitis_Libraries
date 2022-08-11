@@ -1009,8 +1009,8 @@ template <BayerPattern _b, int INPUT_TILE_ELEMENTS>
 inline void DemosaicRGBA<_b, INPUT_TILE_ELEMENTS>::xfSetRGBAMetaData(void* img_ptr) {
     xfSetTileWidth(img_ptr, xfGetTileWidth(img_ptr) * 4);
     xfSetTilePosH(img_ptr, xfGetTilePosH(img_ptr) * 4);
-    xfSetTileCrctPosH(img_ptr, xfGetTileCrctPosH(img_ptr) * 4);
-    xfSetTileCrctTWidth(img_ptr, xfGetTileCrctTWidth(img_ptr) * 4);
+    xfSetTileOutPosH(img_ptr, xfGetTileOutPosH(img_ptr) * 4);
+    xfSetTileOutTWidth(img_ptr, xfGetTileOutTWidth(img_ptr) * 4);
     xfSetTileOVLP_HL(img_ptr, xfGetTileOVLP_HL(img_ptr) * 4);
     xfSetTileOVLP_HR(img_ptr, xfGetTileOVLP_HR(img_ptr) * 4);
 }

@@ -21,3 +21,17 @@
 #define KF_MMU 2
 #define XF_USE_URAM 0
 #define KF_EKF 0
+#define XF_CV_DEPTH_A 3
+#define XF_CV_DEPTH_B 3
+#define XF_CV_DEPTH_UQ 3
+#define XF_CV_DEPTH_DQ 3
+#define XF_CV_DEPTH_H 3
+#define XF_CV_DEPTH_X0 3
+#define XF_CV_DEPTH_U0 3
+#define XF_CV_DEPTH_D0 3
+#define XF_CV_DEPTH_R 3
+#define XF_CV_DEPTH_U 3
+#define XF_CV_DEPTH_Y 3
+#define XF_CV_DEPTH_XOUT 3
+#define XF_CV_DEPTH_UOUT 3
+#define XF_CV_DEPTH_DOUT 3

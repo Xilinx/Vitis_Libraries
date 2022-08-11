@@ -59,9 +59,20 @@ Suppression_Loop:
     }
 }
 
-template <int SRC_T, int DST_T, int ROWS, int COLS, int IN_DEPTH, int OUT_DEPTH, int NPC, int IN_WW, int OUT_WW, int TC>
-void ProcessMax1(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                 xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_mat,
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int IN_DEPTH,
+          int OUT_DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
+          int IN_WW,
+          int OUT_WW,
+          int TC>
+void ProcessMax1(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+                 xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst_mat,
                  XF_SNAME(IN_WW) buf[3][(COLS >> XF_BITSHIFT(NPC))],
                  XF_PTNAME(IN_DEPTH) l00_buf[XF_NPIXPERCYCLE(NPC) + 2],
                  XF_PTNAME(IN_DEPTH) l10_buf[XF_NPIXPERCYCLE(NPC) + 2],
@@ -129,9 +140,20 @@ Col_Loop:
  * _src_mat : input image
  * _dst_mat : output image
  */
-template <int SRC_T, int DST_T, int ROWS, int COLS, int IN_DEPTH, int OUT_DEPTH, int NPC, int IN_WW, int OUT_WW, int TC>
-void xFMaxSuppressionRad1(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                          xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_mat,
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int IN_DEPTH,
+          int OUT_DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
+          int IN_WW,
+          int OUT_WW,
+          int TC>
+void xFMaxSuppressionRad1(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+                          xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst_mat,
                           uint16_t img_height,
                           uint16_t img_width) {
     ap_uint<13> row_ind, row, col;
@@ -198,7 +220,7 @@ Row_Loop:
         l10_buf[0] = l10_buf[1] = 0;
         l20_buf[0] = l20_buf[1] = 0;
         P0 = 0;
-        ProcessMax1<SRC_T, DST_T, ROWS, COLS, IN_DEPTH, OUT_DEPTH, NPC, IN_WW, OUT_WW, TC>(
+        ProcessMax1<SRC_T, DST_T, ROWS, COLS, IN_DEPTH, OUT_DEPTH, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT, IN_WW, OUT_WW, TC>(
             _src_mat, _dst_mat, buf, l00_buf, l10_buf, l20_buf, Array, P0, img_width, row_ind, shift, tp, mid, bottom,
             true, read_index, write_index);
 
@@ -260,7 +282,7 @@ Clear_Row_Loop:
         // clang-format on
         buf[bottom][col] = 0;
     }
-    ProcessMax1<SRC_T, DST_T, ROWS, COLS, IN_DEPTH, OUT_DEPTH, NPC, IN_WW, OUT_WW, TC>(
+    ProcessMax1<SRC_T, DST_T, ROWS, COLS, IN_DEPTH, OUT_DEPTH, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT, IN_WW, OUT_WW, TC>(
         _src_mat, _dst_mat, buf, l00_buf, l10_buf, l20_buf, Array, P0, img_width, row_ind, shift, tp, mid, bottom,
         false, read_index, write_index);
 
@@ -341,9 +363,20 @@ Suppression_Loop:
 }
 // xFSuppressionRad2
 
-template <int SRC_T, int DST_T, int ROWS, int COLS, int IN_DEPTH, int OUT_DEPTH, int NPC, int IN_WW, int OUT_WW, int TC>
-void ProcessRad2(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                 xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_mat,
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int IN_DEPTH,
+          int OUT_DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
+          int IN_WW,
+          int OUT_WW,
+          int TC>
+void ProcessRad2(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+                 xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst_mat,
                  XF_SNAME(IN_WW) buf[5][(COLS >> XF_BITSHIFT(NPC))],
                  XF_PTNAME(IN_DEPTH) l00_buf[XF_NPIXPERCYCLE(NPC) + 4],
                  XF_PTNAME(IN_DEPTH) l10_buf[XF_NPIXPERCYCLE(NPC) + 4],
@@ -428,9 +461,20 @@ Col_Loop:
  * _src_mat	: Input image
  * _dst_mat	: Output image
  */
-template <int SRC_T, int DST_T, int ROWS, int COLS, int IN_DEPTH, int OUT_DEPTH, int NPC, int IN_WW, int OUT_WW, int TC>
-void xFMaxSuppressionRad2(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                          xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_mat,
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int IN_DEPTH,
+          int OUT_DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
+          int IN_WW,
+          int OUT_WW,
+          int TC>
+void xFMaxSuppressionRad2(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+                          xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst_mat,
                           uint16_t img_height,
                           uint16_t img_width) {
     ap_uint<13> row_ind, row, col;
@@ -535,7 +579,7 @@ Row_Loop:
         l40_buf[0] = l40_buf[1] = l40_buf[2] = l40_buf[3] = 0;
         inter_valx = 0;
 
-        ProcessRad2<SRC_T, DST_T, ROWS, COLS, IN_DEPTH, OUT_DEPTH, NPC, IN_WW, OUT_WW, TC>(
+        ProcessRad2<SRC_T, DST_T, ROWS, COLS, IN_DEPTH, OUT_DEPTH, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT, IN_WW, OUT_WW, TC>(
             _src_mat, _dst_mat, buf, l00_buf, l10_buf, l20_buf, l30_buf, l40_buf, Array, inter_valx, img_width, row_ind,
             shift, tp1, tp2, mid, bottom1, bottom2, true, read_pointer, write_pointer);
 
@@ -661,7 +705,7 @@ Border_Row_Loop:
         l30_buf[0] = l30_buf[1] = l30_buf[2] = l30_buf[3] = 0;
         l40_buf[0] = l40_buf[1] = l40_buf[2] = l40_buf[3] = 0;
 
-        ProcessRad2<SRC_T, DST_T, ROWS, COLS, IN_DEPTH, OUT_DEPTH, NPC, IN_WW, OUT_WW, TC>(
+        ProcessRad2<SRC_T, DST_T, ROWS, COLS, IN_DEPTH, OUT_DEPTH, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT, IN_WW, OUT_WW, TC>(
             _src_mat, _dst_mat, buf, l00_buf, l10_buf, l20_buf, l30_buf, l40_buf, Array, inter_valx, img_width, row_ind,
             shift, tp1, tp2, mid, bottom1, bottom2, false, read_pointer, write_pointer);
 
@@ -718,9 +762,19 @@ Border_Row_Loop:
 /*********************************************************************
  * xFMaxSuppression : Calls the Main Function depend on Requirements
  *********************************************************************/
-template <int SRC_T, int DST_T, int ROWS, int COLS, int IN_DEPTH, int OUT_DEPTH, int NPC, int IN_WW, int OUT_WW>
-void xFMaxSuppression(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                      xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_mat,
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int IN_DEPTH,
+          int OUT_DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
+          int IN_WW,
+          int OUT_WW>
+void xFMaxSuppression(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+                      xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst_mat,
                       uint8_t _nms_radius,
                       uint16_t img_height,
                       uint16_t img_width) {
@@ -734,11 +788,11 @@ void xFMaxSuppression(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     img_width = img_width >> XF_BITSHIFT(NPC);
 
     if (_nms_radius == XF_NMS_RADIUS_1) {
-        xFMaxSuppressionRad1<SRC_T, DST_T, ROWS, COLS, IN_DEPTH, OUT_DEPTH, NPC, IN_WW, OUT_WW,
-                             (COLS >> XF_BITSHIFT(NPC))>(_src_mat, _dst_mat, img_height, img_width);
+        xFMaxSuppressionRad1<SRC_T, DST_T, ROWS, COLS, IN_DEPTH, OUT_DEPTH, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT, IN_WW,
+                             OUT_WW, (COLS >> XF_BITSHIFT(NPC))>(_src_mat, _dst_mat, img_height, img_width);
     } else {
-        xFMaxSuppressionRad2<SRC_T, DST_T, ROWS, COLS, IN_DEPTH, OUT_DEPTH, NPC, IN_WW, OUT_WW,
-                             (COLS >> XF_BITSHIFT(NPC))>(_src_mat, _dst_mat, img_height, img_width);
+        xFMaxSuppressionRad2<SRC_T, DST_T, ROWS, COLS, IN_DEPTH, OUT_DEPTH, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT, IN_WW,
+                             OUT_WW, (COLS >> XF_BITSHIFT(NPC))>(_src_mat, _dst_mat, img_height, img_width);
     }
 }
 

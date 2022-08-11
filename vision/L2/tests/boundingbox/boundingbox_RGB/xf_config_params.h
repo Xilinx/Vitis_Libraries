@@ -27,3 +27,5 @@
 
 #define INPUT_PTR_WIDTH 32
 #define OUTPUT_PTR_WIDTH 32
+
+#define XF_CV_DEPTH_IN -1

@@ -140,17 +140,19 @@ template <int FSIZE1 = 5,
           int ROWS,
           int COLS,
           int NPPC = 1,
-          int XFCV_DEPTH = 2,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_0 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int BORDER_T = XF_BORDER_CONSTANT,
           int USE_URAM = 0>
-void xf_form_mosaic(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& _src,
+void xf_form_mosaic(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN>& _src,
                     char R_IR_C1_wgts[FSIZE1 * FSIZE1],
                     char R_IR_C2_wgts[FSIZE1 * FSIZE1],
                     char B_at_R_wgts[FSIZE1 * FSIZE1],
                     char IR_at_R_wgts[FSIZE2 * FSIZE2],
                     char IR_at_B_wgts[FSIZE2 * FSIZE2],
-                    xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCV_DEPTH>& _dst_rggb,
-                    xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& _half_ir) {
+                    xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT_0>& _dst_rggb,
+                    xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT_1>& _half_ir) {
 #ifndef __SYNTHESIS__
     assert(((BFORMAT == XF_BAYER_BG) || (BFORMAT == XF_BAYER_GB) || (BFORMAT == XF_BAYER_GR) ||
             (BFORMAT == XF_BAYER_RG)) &&
@@ -426,18 +428,21 @@ template <int FSIZE1 = 5,
           int ROWS,
           int COLS,
           int NPPC = 1,
-          int XFCV_DEPTH,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_0 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_2 = _XFCVDEPTH_DEFAULT,
           int BORDER_T = XF_BORDER_CONSTANT,
           int USE_URAM = 0>
-void rgbir2bayer(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& _src,
+void rgbir2bayer(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN>& _src,
                  char R_IR_C1_wgts[FSIZE1 * FSIZE1],
                  char R_IR_C2_wgts[FSIZE1 * FSIZE1],
                  char B_at_R_wgts[FSIZE1 * FSIZE1],
                  char IR_at_R_wgts[FSIZE2 * FSIZE2],
                  char IR_at_B_wgts[FSIZE2 * FSIZE2],
                  char sub_wgts[4],
-                 xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& _dst_rggb,
-                 xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& _dst_ir) {
+                 xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT_0>& _dst_rggb,
+                 xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT_1>& _dst_ir) {
 #ifndef __SYNTHESIS__
     assert(((BFORMAT == XF_BAYER_BG) || (BFORMAT == XF_BAYER_GB) || (BFORMAT == XF_BAYER_GR) ||
             (BFORMAT == XF_BAYER_RG)) &&
@@ -450,17 +455,19 @@ void rgbir2bayer(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& _src,
 #endif
 
 #pragma HLS DATAFLOW
-    xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCV_DEPTH> rggbOutput(_src.rows, _src.cols);
-    xf::cv::Mat<TYPE, ROWS, COLS, NPPC> halfIrOutput(_src.rows, _src.cols);
-    xf::cv::Mat<TYPE, ROWS, COLS, NPPC> fullIrOutput(_src.rows, _src.cols);
-    xf::cv::Mat<TYPE, ROWS, COLS, NPPC> fullIrOutput_copy1(_src.rows, _src.cols);
+    xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT_2> rggbOutput(_src.rows, _src.cols);
+    xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT_1> halfIrOutput(_src.rows, _src.cols);
+    xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT_1> fullIrOutput(_src.rows, _src.cols);
+    xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT_1> fullIrOutput_copy1(_src.rows, _src.cols);
 
-    xf_form_mosaic<FSIZE1, FSIZE2, BFORMAT, TYPE, ROWS, COLS, NPPC, XFCV_DEPTH, BORDER_T, USE_URAM>(
-        _src, R_IR_C1_wgts, R_IR_C2_wgts, B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts, rggbOutput, halfIrOutput);
-    xf::cv::xf_ir_bilinear<TYPE, ROWS, COLS, NPPC, BFORMAT, USE_URAM>(halfIrOutput, fullIrOutput);
+    xf_form_mosaic<FSIZE1, FSIZE2, BFORMAT, TYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN, XFCVDEPTH_OUT_2, XFCVDEPTH_OUT_1,
+                   BORDER_T, USE_URAM>(_src, R_IR_C1_wgts, R_IR_C2_wgts, B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts,
+                                       rggbOutput, halfIrOutput);
+    xf::cv::xf_ir_bilinear<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT_1, XFCVDEPTH_OUT_1, BFORMAT, USE_URAM>(halfIrOutput,
+                                                                                                        fullIrOutput);
     xf::cv::duplicateMat(fullIrOutput, fullIrOutput_copy1, _dst_ir);
-    xf::cv::weightedSub<BFORMAT, TYPE, ROWS, COLS, NPPC, XFCV_DEPTH>(sub_wgts, rggbOutput, fullIrOutput_copy1,
-                                                                     _dst_rggb);
+    xf::cv::weightedSub<BFORMAT, TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT_2, XFCVDEPTH_OUT_1, XFCVDEPTH_OUT_0>(
+        sub_wgts, rggbOutput, fullIrOutput_copy1, _dst_rggb);
 }
 
 } // namespace cv

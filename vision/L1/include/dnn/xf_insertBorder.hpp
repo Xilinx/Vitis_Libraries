@@ -42,9 +42,16 @@ namespace cv {
  * @param insert_pad_val insert pad value
  */
 
-template <int TYPE, int SRC_ROWS, int SRC_COLS, int DST_ROWS, int DST_COLS, int NPC>
-void insertBorder(xf::cv::Mat<TYPE, SRC_ROWS, SRC_COLS, NPC>& _src,
-                  xf::cv::Mat<TYPE, DST_ROWS, DST_COLS, NPC>& _dst,
+template <int TYPE,
+          int SRC_ROWS,
+          int SRC_COLS,
+          int DST_ROWS,
+          int DST_COLS,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void insertBorder(xf::cv::Mat<TYPE, SRC_ROWS, SRC_COLS, NPC, XFCVDEPTH_IN>& _src,
+                  xf::cv::Mat<TYPE, DST_ROWS, DST_COLS, NPC, XFCVDEPTH_OUT>& _dst,
                   int insert_pad_val) {
 // clang-format off
 #pragma HLS INLINE OFF

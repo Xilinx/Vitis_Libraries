@@ -21,6 +21,7 @@
 #include "hls_stream.h"
 #include "common/xf_common.hpp"
 #include "common/xf_utility.hpp"
+//#include "xf_config_params.h"
 #include "imgproc/xf_duplicateimage.hpp"
 #include "hls_math.h"
 #include <type_traits>
@@ -197,7 +198,15 @@ class is_floating_point<XF_32FC3> {
     static constexpr bool value = true;
 };
 
-template <int IN_TYPE, int OUT_TYPE, int BLK_ROWS, int BLK_COLS, int ROWS, int COLS, int NPC>
+template <int IN_TYPE,
+          int OUT_TYPE,
+          int BLK_ROWS,
+          int BLK_COLS,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
 class LTM {
    public:
     static constexpr int BILINEAR_INTERPOLATE_TYPE = XF_32FC1;
@@ -267,9 +276,9 @@ class LTM {
         return ret;
     }
 
-    static void getMaxImage(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC>& in,
+    static void getMaxImage(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& in,
                             LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>& Tile,
-                            xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC>& in_copy,
+                            xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& in_copy,
                             hls::stream<ap_uint<XF_DTPIXELDEPTH(IN_TYPE, NPC) * XF_NPIXPERCYCLE(NPC)> >& in_max) {
         int addr = 0;
     R:
@@ -474,11 +483,11 @@ class LTM {
         return ret;
     }
 
-    static void compute(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC>& in,
+    static void compute(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& in,
                         LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>& Tile,
                         hls::stream<XF_TNAME(BILINEAR_INTERPOLATE_TYPE, NPC)>& interpolateMin,
                         hls::stream<XF_TNAME(BILINEAR_INTERPOLATE_TYPE, NPC)>& interpolateMax,
-                        xf::cv::Mat<OUT_TYPE, ROWS, COLS, NPC>& out) {
+                        xf::cv::Mat<OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& out) {
         int addr = 0;
     R4:
         for (int i = 0; i < Tile.getInputRows(); i++) {
@@ -540,14 +549,14 @@ class LTM {
         }
     }
 
-    static void process_i(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC>& in,
+    static void process_i(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& in,
                           LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>& Tile,
                           XF_CTUNAME(IN_TYPE, NPC) omin_r[MinMaxVArrSize][MinMaxHArrSize],
                           XF_CTUNAME(IN_TYPE, NPC) omax_r[MinMaxVArrSize][MinMaxHArrSize],
                           XF_CTUNAME(IN_TYPE, NPC) omin_w[MinMaxVArrSize][MinMaxHArrSize],
                           XF_CTUNAME(IN_TYPE, NPC) omax_w[MinMaxVArrSize][MinMaxHArrSize],
-                          xf::cv::Mat<OUT_TYPE, ROWS, COLS, NPC>& out) {
-        xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC> in_copy(in.rows, in.cols);
+                          xf::cv::Mat<OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& out) {
+        xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN_1> in_copy(in.rows, in.cols);
         hls::stream<ap_uint<XF_DTPIXELDEPTH(IN_TYPE, NPC) * XF_NPIXPERCYCLE(NPC)> > in_max;
         hls::stream<XF_TNAME(BILINEAR_INTERPOLATE_TYPE, NPC)> interpolateMin;
         hls::stream<XF_TNAME(BILINEAR_INTERPOLATE_TYPE, NPC)> interpolateMax;
@@ -562,12 +571,12 @@ class LTM {
         compute(in_copy, Tile, interpolateMin, interpolateMax, out);
     }
 
-    static void process(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC>& in,
+    static void process(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& in,
                         XF_CTUNAME(IN_TYPE, NPC) omin_r[MinMaxVArrSize][MinMaxHArrSize],
                         XF_CTUNAME(IN_TYPE, NPC) omax_r[MinMaxVArrSize][MinMaxHArrSize],
                         XF_CTUNAME(IN_TYPE, NPC) omin_w[MinMaxVArrSize][MinMaxHArrSize],
                         XF_CTUNAME(IN_TYPE, NPC) omax_w[MinMaxVArrSize][MinMaxHArrSize],
-                        xf::cv::Mat<OUT_TYPE, ROWS, COLS, NPC>& out) {
+                        xf::cv::Mat<OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& out) {
         LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC> Tile(in.rows, in.cols);
 // clang-format off
 #pragma HLS ARRAY_PARTITION variable=Tile.mVBlkSize dim=1 complete
@@ -576,14 +585,14 @@ class LTM {
         process_i(in, Tile, omin_r, omax_r, omin_w, omax_w, out);
     }
 
-    static void process(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC>& in,
+    static void process(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& in,
                         int block_rows,
                         int block_cols,
                         XF_CTUNAME(IN_TYPE, NPC) omin_r[MinMaxVArrSize][MinMaxHArrSize],
                         XF_CTUNAME(IN_TYPE, NPC) omax_r[MinMaxVArrSize][MinMaxHArrSize],
                         XF_CTUNAME(IN_TYPE, NPC) omin_w[MinMaxVArrSize][MinMaxHArrSize],
                         XF_CTUNAME(IN_TYPE, NPC) omax_w[MinMaxVArrSize][MinMaxHArrSize],
-                        xf::cv::Mat<OUT_TYPE, ROWS, COLS, NPC>& out) {
+                        xf::cv::Mat<OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& out) {
         LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC> Tile(in.rows, in.cols, block_rows, block_cols);
 // clang-format off
 #pragma HLS ARRAY_PARTITION variable=Tile.mVBlkSize dim=1 complete

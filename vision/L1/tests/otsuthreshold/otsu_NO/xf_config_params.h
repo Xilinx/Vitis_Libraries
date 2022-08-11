@@ -16,3 +16,4 @@
 
 #define NO 1
 #define RO 0
+#define XF_CV_DEPTH_IN 3

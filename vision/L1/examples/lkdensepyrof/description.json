@@ -29,7 +29,7 @@
             "${XF_PROJ_ROOT}/L1/examples/lkdensepyrof/xf_pyr_dense_optical_flow_tb.cpp"
         ], 
         "cflags": " -I ${XF_PROJ_ROOT}/L1/examples/lkdensepyrof/build -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x", 
-        "ldflags": "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d", 
+        "ldflags": "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d -lopencv_videoio -lopencv_video -lopencv_calib3d", 
         "argv": {
             "hls_csim": " ${XF_PROJ_ROOT}/data/im0.png ${XF_PROJ_ROOT}/data/im1.png ", 
             "hls_cosim": " ${XF_PROJ_ROOT}/data/im0.png ${XF_PROJ_ROOT}/data/im1.png "

@@ -61,11 +61,13 @@ template <int SRC_T,
           int MAX_ROWS,
           int MAX_COLS,
           int NPPC = XF_NPPC1,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
           int MUL_VALUE_WIDTH = 16,
           int FL_POS = 15,
           int USE_DSP = 1>
-void blackLevelCorrection(xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPPC>& _Src,
-                          xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPPC>& _Dst,
+void blackLevelCorrection(xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPPC, XFCVDEPTH_IN>& _Src,
+                          xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPPC, XFCVDEPTH_OUT>& _Dst,
                           XF_CTUNAME(SRC_T, NPPC) black_level,
                           float mul_value // ap_uint<MUL_VALUE_WIDTH> mul_value
                           ) {

@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#define XF_CV_DEPTH_IN_L 2
+#define XF_CV_DEPTH_IN_R 2
+#define XF_CV_DEPTH_OUT 2
 
 #define SAD_WINDOW_SIZE 5
 

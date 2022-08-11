@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#define XF_CV_DEPTH_IN 3
 
 #define NO 0 // Normal Operation
 #define RO 1 // Resource Optimized
@@ -21,3 +22,6 @@
 #define GRAY 1
 /* Filter window size*/
 #define WINDOW_SIZE 7
+
+#define XF_CV_DEPTH_IN 3
+#define XF_CV_DEPTH_OUT 3

@@ -26,16 +26,17 @@ void lensshading_accel(ap_uint<INPUT_PTR_WIDTH>* src, ap_uint<OUTPUT_PTR_WIDTH>*
 #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPIX> imgInput(rows, cols);
-    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPIX> imgOutput(rows, cols);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_IN> imgInput(rows, cols);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_OUT> imgOutput(rows, cols);
 
 // clang-format off
 #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPIX>(src, imgInput);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_IN>(src, imgInput);
 
-    xf::cv::Lscdistancebased<IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPIX>(imgInput, imgOutput);
+    xf::cv::Lscdistancebased<IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(imgInput,
+                                                                                                      imgOutput);
 
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPIX>(imgOutput, dst);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_OUT>(imgOutput, dst);
 }

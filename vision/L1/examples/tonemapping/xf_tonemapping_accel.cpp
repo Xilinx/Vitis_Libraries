@@ -39,17 +39,17 @@ void tonemapping_accel_i(ap_uint<IN_PTR_WIDTH>* in_ptr,
 #pragma HLS INLINE OFF
     // clang-format on
 
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC> imgInput(height, width);
-    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC> imgOutput(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_IN_1> imgInput(height, width);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_OUT_1> imgOutput(height, width);
 
 // clang-format off
 #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<IN_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC>(in_ptr, imgInput);
-    xf::cv::LTM<IN_TYPE, OUT_TYPE, BLOCK_HEIGHT, BLOCK_WIDTH, HEIGHT, WIDTH, NPC>::process(
-        imgInput, blk_height, blk_width, omin_r, omax_r, omin_w, omax_w, imgOutput);
-    xf::cv::xfMat2Array<OUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPC>(imgOutput, out_ptr);
+    xf::cv::Array2xfMat<IN_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_IN_1>(in_ptr, imgInput);
+    xf::cv::LTM<IN_TYPE, OUT_TYPE, BLOCK_HEIGHT, BLOCK_WIDTH, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_IN_1,
+                XF_CV_DEPTH_OUT_1>::process(imgInput, blk_height, blk_width, omin_r, omax_r, omin_w, omax_w, imgOutput);
+    xf::cv::xfMat2Array<OUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_OUT_1>(imgOutput, out_ptr);
 }
 
 void tonemapping_accel(ap_uint<IN_PTR_WIDTH>* in_ptr,

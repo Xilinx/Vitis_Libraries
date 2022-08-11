@@ -34,3 +34,7 @@
 #endif
 
 #define XF_USE_URAM false
+
+#define XF_CV_DEPTH_IN_1 1
+
+#define XF_CV_DEPTH_OUT_1 3

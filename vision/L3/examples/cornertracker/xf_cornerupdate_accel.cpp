@@ -38,9 +38,10 @@ void cornerupdate_accel(unsigned long* list_fix,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_32UC1, HEIGHT, WIDTH, XF_NPPC1> flow_mat(flow_rows, flow_cols, flow_vectors);
+    xf::cv::Mat<XF_32UC1, HEIGHT, WIDTH, XF_NPPC1, XF_CV_DEPTH_CORNER_UPDATE> flow_mat(flow_rows, flow_cols,
+                                                                                       flow_vectors);
 
-    xf::cv::cornerUpdate<MAXCORNERS, XF_32UC1, HEIGHT, WIDTH, XF_NPPC1>(list_fix, list, nCorners, flow_mat,
-                                                                        (ap_uint<1>)(harris_flag));
+    xf::cv::cornerUpdate<MAXCORNERS, XF_32UC1, HEIGHT, WIDTH, XF_NPPC1, XF_CV_DEPTH_CORNER_UPDATE>(
+        list_fix, list, nCorners, flow_mat, (ap_uint<1>)(harris_flag));
 }
 }

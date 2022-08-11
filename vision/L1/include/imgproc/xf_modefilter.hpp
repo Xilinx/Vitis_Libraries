@@ -120,9 +120,19 @@ Compute_Grad_Loop:
     return;
 }
 
-template <int ROWS, int COLS, int PLANES, int TYPE, int NPC, int WORDWIDTH, int TC, int WIN_SZ, int WIN_SZ_SQ>
-void ProcessModeNxN(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat,
-                    xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _out_mat,
+template <int ROWS,
+          int COLS,
+          int PLANES,
+          int TYPE,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH,
+          int TC,
+          int WIN_SZ,
+          int WIN_SZ_SQ>
+void ProcessModeNxN(xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+                    xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _out_mat,
                     XF_TNAME(TYPE, NPC) buf[WIN_SZ][(COLS >> XF_BITSHIFT(NPC))],
                     XF_PTUNAME(TYPE) src_buf[WIN_SZ][XF_NPIXPERCYCLE(NPC) + (WIN_SZ - 1)],
                     XF_PTUNAME(TYPE) OutputValues[XF_NPIXPERCYCLE(NPC)],
@@ -349,9 +359,19 @@ Col_Loop:
     } // Col_Loop
 }
 
-template <int ROWS, int COLS, int PLANES, int TYPE, int NPC, int WORDWIDTH, int TC, int WIN_SZ, int WIN_SZ_SQ>
-void xFModeNxN(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src,
-               xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _dst,
+template <int ROWS,
+          int COLS,
+          int PLANES,
+          int TYPE,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH,
+          int TC,
+          int WIN_SZ,
+          int WIN_SZ_SQ>
+void xFModeNxN(xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src,
+               xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst,
                ap_uint<8> win_size,
                uint16_t img_height,
                uint16_t img_width) {
@@ -430,7 +450,7 @@ Row_Loop:
 
         if (row == (img_height + (win_size >> 1) - 1)) int a = 0;
         P0 = 0;
-        ProcessModeNxN<ROWS, COLS, PLANES, TYPE, NPC, WORDWIDTH, TC, WIN_SZ, WIN_SZ_SQ>(
+        ProcessModeNxN<ROWS, COLS, PLANES, TYPE, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT, WORDWIDTH, TC, WIN_SZ, WIN_SZ_SQ>(
             _src, _dst, buf, src_buf, OutputValues, P0, img_width, img_height, shift_x, row_ind, row, win_size, rd_ind,
             wr_ind);
 
@@ -456,8 +476,16 @@ Row_Loop:
  * @param _src input image
  * @param _dst output image
  */
-template <int FILTER_SIZE, int BORDER_TYPE, int TYPE, int ROWS, int COLS, int NPC = 1>
-void modefilter(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src, xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _dst) {
+template <int FILTER_SIZE,
+          int BORDER_TYPE,
+          int TYPE,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void modefilter(xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src,
+                xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst) {
 // clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
@@ -469,8 +497,9 @@ void modefilter(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src, xf::cv::Mat<TYPE, ROWS
 
     assert(((imgheight <= ROWS) && (imgwidth <= COLS)) && "ROWS and COLS should be greater than input image");
 
-    xFModeNxN<ROWS, COLS, XF_CHANNELS(TYPE, NPC), TYPE, NPC, 0, (COLS >> XF_BITSHIFT(NPC)) + (FILTER_SIZE >> 1),
-              FILTER_SIZE, FILTER_SIZE * FILTER_SIZE>(_src, _dst, FILTER_SIZE, imgheight, imgwidth);
+    xFModeNxN<ROWS, COLS, XF_CHANNELS(TYPE, NPC), TYPE, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT, 0,
+              (COLS >> XF_BITSHIFT(NPC)) + (FILTER_SIZE >> 1), FILTER_SIZE, FILTER_SIZE * FILTER_SIZE>(
+        _src, _dst, FILTER_SIZE, imgheight, imgwidth);
 
     return;
 }

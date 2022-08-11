@@ -39,15 +39,15 @@ void pyr_dense_optical_flow_pyr_down_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPPC> in_mat(in_rows, in_cols);
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPPC> out_mat(out_rows, out_cols);
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPPC, XF_CV_DEPTH_IN> in_mat(in_rows, in_cols);
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPPC, XF_CV_DEPTH_OUT> out_mat(out_rows, out_cols);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPPC>(img_inp, in_mat);
-    xf::cv::pyrDown<TYPE, HEIGHT, WIDTH, NPPC, XF_USE_URAM>(in_mat, out_mat);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPPC>(out_mat, img_out);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPPC, XF_CV_DEPTH_IN>(img_inp, in_mat);
+    xf::cv::pyrDown<TYPE, HEIGHT, WIDTH, NPPC, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT, XF_USE_URAM>(in_mat, out_mat);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPPC, XF_CV_DEPTH_OUT>(out_mat, img_out);
 }
 
 void pyr_dense_optical_flow_accel(ap_uint<INPUT_PTR_WIDTH>* _current_img,
@@ -89,24 +89,29 @@ void pyr_dense_optical_flow_accel(ap_uint<INPUT_PTR_WIDTH>* _current_img,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPPC> current_img_mat(cur_img_rows, cur_img_cols);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPPC, XF_CV_DEPTH_CURR_IMG> current_img_mat(cur_img_rows, cur_img_cols);
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPPC> next_img_mat(next_img_rows, next_img_cols);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPPC, XF_CV_DEPTH_NEXT_IMG> next_img_mat(next_img_rows, next_img_cols);
 
-    xf::cv::Mat<XF_32UC1, HEIGHT, WIDTH, NPPC> streamFlowin_mat(flow_rows, flow_cols);
+    xf::cv::Mat<XF_32UC1, HEIGHT, WIDTH, NPPC, XF_CV_DEPTH_STREAM_IN> streamFlowin_mat(flow_rows, flow_cols);
 
-    xf::cv::Mat<XF_32UC1, HEIGHT, WIDTH, NPPC> streamFlowout_mat(flow_iter_rows, flow_iter_cols);
+    xf::cv::Mat<XF_32UC1, HEIGHT, WIDTH, NPPC, XF_CV_DEPTH_STREAM_OUT> streamFlowout_mat(flow_iter_rows,
+                                                                                         flow_iter_cols);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPPC>(_current_img, current_img_mat);
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPPC>(_next_image, next_img_mat);
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_32UC1, HEIGHT, WIDTH, NPPC>(_streamFlowin, streamFlowin_mat);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPPC, XF_CV_DEPTH_CURR_IMG>(_current_img,
+                                                                                             current_img_mat);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPPC, XF_CV_DEPTH_NEXT_IMG>(_next_image, next_img_mat);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_32UC1, HEIGHT, WIDTH, NPPC, XF_CV_DEPTH_STREAM_IN>(_streamFlowin,
+                                                                                               streamFlowin_mat);
 
     xf::cv::densePyrOpticalFlow<NUM_LEVELS, NUM_LINES_FINDIT, WINSIZE_OFLOW, TYPE_FLOW_WIDTH, TYPE_FLOW_INT, XF_8UC1,
-                                HEIGHT, WIDTH, NPPC, XF_USE_URAM>(
+                                HEIGHT, WIDTH, NPPC, XF_CV_DEPTH_CURR_IMG, XF_CV_DEPTH_NEXT_IMG, XF_CV_DEPTH_STREAM_IN,
+                                XF_CV_DEPTH_STREAM_OUT, XF_USE_URAM>(
         current_img_mat, next_img_mat, streamFlowin_mat, streamFlowout_mat, level, scale_up_flag, scale_in, init_flag);
 
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_32UC1, HEIGHT, WIDTH, NPPC>(streamFlowout_mat, _streamFlowout);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_32UC1, HEIGHT, WIDTH, NPPC, XF_CV_DEPTH_STREAM_OUT>(streamFlowout_mat,
+                                                                                                 _streamFlowout);
 }

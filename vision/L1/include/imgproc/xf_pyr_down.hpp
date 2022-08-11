@@ -25,9 +25,16 @@
 namespace xf {
 namespace cv {
 
-template <unsigned int ROWS, unsigned int COLS, unsigned int TYPE, unsigned int NPC, int PLANES, bool USE_URAM>
-void xFpyrDownKernel(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src,
-                     xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _dst,
+template <unsigned int ROWS,
+          unsigned int COLS,
+          unsigned int TYPE,
+          unsigned int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
+          int PLANES,
+          bool USE_URAM>
+void xFpyrDownKernel(xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src,
+                     xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst,
                      unsigned short in_rows,
                      unsigned short in_cols) {
 // clang-format off
@@ -72,14 +79,22 @@ void xFpyrDownKernel(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src,
     return;
 }
 
-template <int TYPE, int ROWS, int COLS, int NPC, bool USE_URAM = false>
-void pyrDown(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src, xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _dst) {
+template <int TYPE,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
+          bool USE_URAM = false>
+void pyrDown(xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src,
+             xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst) {
 // clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
     unsigned short input_height = _src.rows;
     unsigned short input_width = _src.cols;
-    xFpyrDownKernel<ROWS, COLS, TYPE, NPC, XF_CHANNELS(TYPE, NPC), USE_URAM>(_src, _dst, input_height, input_width);
+    xFpyrDownKernel<ROWS, COLS, TYPE, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT, XF_CHANNELS(TYPE, NPC), USE_URAM>(
+        _src, _dst, input_height, input_width);
     return;
 }
 } // namespace cv

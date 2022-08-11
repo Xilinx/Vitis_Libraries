@@ -65,8 +65,15 @@ namespace cv {
  * @param src input image
  * @param dst output image
  */
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
-void Lscdistancebased(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst) {
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void Lscdistancebased(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
+                      xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& dst) {
     int rows = src.rows;
     int cols = src.cols >> XF_BITSHIFT(NPC);
 

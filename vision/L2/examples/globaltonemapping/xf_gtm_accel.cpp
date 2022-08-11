@@ -46,19 +46,19 @@ void gtm_kernel(ap_uint<INPUT_PTR_WIDTH>* src,
 #pragma HLS INLINE OFF
     // clang-format on
 
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput(height, width);
-    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgOutput(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1> imgInput(height, width);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> imgOutput(height, width);
 
 // clang-format off
 #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1>(src, imgInput);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1>(src, imgInput);
 
-    gtm<IN_TYPE, OUT_TYPE, SIN_CHANNEL_IN_TYPE, SIN_CHANNEL_OUT_TYPE, HEIGHT, WIDTH, NPC1>(
-        imgInput, imgOutput, mean1, mean2, L_max1, L_max2, L_min1, L_min2, c1, c2);
+    gtm<IN_TYPE, OUT_TYPE, SIN_CHANNEL_IN_TYPE, SIN_CHANNEL_OUT_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1,
+        XF_CV_DEPTH_OUT_1>(imgInput, imgOutput, mean1, mean2, L_max1, L_max2, L_min1, L_min2, c1, c2);
 
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPC1>(imgOutput, dst);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(imgOutput, dst);
 }
 extern "C" {
 void gtm_accel(

@@ -26,15 +26,18 @@ using namespace adf;
 class myGraph : public adf::graph {
    public:
     kernel k1;
-    port<input> inptr;
-    port<output> outptr;
+    input_plio inptr;
+    output_plio outptr;
     port<input> kernelCoefficients;
 
     myGraph() {
         k1 = kernel::create(filter2D);
-        adf::connect<window<TILE_WINDOW_SIZE> >(inptr, k1.in[0]);
+        inptr = input_plio::create(adf::plio_128_bits, "data/input.txt");
+        outptr = output_plio::create(adf::plio_128_bits, "data/output.txt");
+
+        adf::connect<window<TILE_WINDOW_SIZE> >(inptr.out[0], k1.in[0]);
         adf::connect<parameter>(kernelCoefficients, async(k1.in[1]));
-        adf::connect<window<TILE_WINDOW_SIZE> >(k1.out[0], outptr);
+        adf::connect<window<TILE_WINDOW_SIZE> >(k1.out[0], outptr.in[0]);
 
         source(k1) = "xf_filter2d.cc";
         // Initial mapping

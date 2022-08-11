@@ -33,9 +33,16 @@ namespace cv {
  *	_dst	  :	 destination image as stream
  * 	_channel :  enumeration specified in < xf_channel_extract_e >
  ****************************************************************************/
-template <int ROWS, int COLS, int SRC_T, int DST_T, int NPC, int TC>
-void xfChannelExtractKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                            xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_mat,
+template <int ROWS,
+          int COLS,
+          int SRC_T,
+          int DST_T,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+          int TC>
+void xfChannelExtractKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+                            xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst_mat,
                             uint16_t _channel,
                             uint16_t height,
                             uint16_t width) {
@@ -92,9 +99,15 @@ RowLoop:
     }     // RowLoop
 }
 
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
-void extractChannel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                    xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_mat,
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void extractChannel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+                    xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst_mat,
                     uint16_t _channel) {
 #ifndef __SYNTHESIS__
     assert(((_channel == XF_EXTRACT_CH_0) || (_channel == XF_EXTRACT_CH_1) || (_channel == XF_EXTRACT_CH_2) ||
@@ -114,8 +127,8 @@ void extractChannel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     #pragma HLS INLINE OFF
     // clang-format on
 
-    xfChannelExtractKernel<ROWS, COLS, SRC_T, DST_T, NPC, (COLS >> XF_BITSHIFT(NPC))>(_src_mat, _dst_mat, _channel,
-                                                                                      _src_mat.rows, width);
+    xfChannelExtractKernel<ROWS, COLS, SRC_T, DST_T, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1, (COLS >> XF_BITSHIFT(NPC))>(
+        _src_mat, _dst_mat, _channel, _src_mat.rows, width);
 }
 } // namespace cv
 } // namespace xf

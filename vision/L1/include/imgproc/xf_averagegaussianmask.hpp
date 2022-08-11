@@ -77,9 +77,18 @@ Compute_Grad_Loop:
     }
 }
 
-template <int SRC_T, int DST_T, int ROWS, int COLS, int DEPTH, int NPC, int WORDWIDTH, int TC>
-void ProcessAverageGaussian3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                               xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _out_mat,
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH,
+          int TC>
+void ProcessAverageGaussian3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+                               xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _out_mat,
                                XF_SNAME(WORDWIDTH) buf[3][(COLS >> XF_BITSHIFT(NPC))],
                                XF_PTNAME(DEPTH) src_buf1[XF_NPIXPERCYCLE(NPC) + 2],
                                XF_PTNAME(DEPTH) src_buf2[XF_NPIXPERCYCLE(NPC) + 2],
@@ -155,9 +164,18 @@ Col_Loop:
  * _src_mat		: Input image
  * _dst_mat	    : Result
  */
-template <int SRC_T, int DST_T, int ROWS, int COLS, int DEPTH_SRC, int NPC, int WORDWIDTH_SRC, int TC>
-void xFAverageGaussianMask3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                              xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _out_mat,
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int DEPTH_SRC,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH_SRC,
+          int TC>
+void xFAverageGaussianMask3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+                              xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _out_mat,
                               uint16_t img_height,
                               uint16_t img_width) {
     img_width = img_width >> XF_BITSHIFT(NPC);
@@ -229,9 +247,10 @@ Row_Loop:
         src_buf3[0] = src_buf3[1] = 0;
 
         P0 = 0;
-        ProcessAverageGaussian3x3<SRC_T, DST_T, ROWS, COLS, DEPTH_SRC, NPC, WORDWIDTH_SRC, TC>(
-            _src_mat, _out_mat, buf, src_buf1, src_buf2, src_buf3, OutputValues, P0, img_width, img_height, shift_x, tp,
-            mid, bottom, row, in_index_new, out_index);
+        ProcessAverageGaussian3x3<SRC_T, DST_T, ROWS, COLS, DEPTH_SRC, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1,
+                                  WORDWIDTH_SRC, TC>(_src_mat, _out_mat, buf, src_buf1, src_buf2, src_buf3,
+                                                     OutputValues, P0, img_width, img_height, shift_x, tp, mid, bottom,
+                                                     row, in_index_new, out_index);
 
         if ((NPC == XF_NPPC8) || (NPC == XF_NPPC16)) {
             OutputValues[0] = xFGaussianFixed3x3<DEPTH_SRC>(src_buf1[buf_size - 2], src_buf1[buf_size - 1], 0,

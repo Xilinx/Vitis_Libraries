@@ -35,8 +35,8 @@ void svm_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<IN_TYPE, IN_ARRAY_SIZE_1, IN_ARRAY_SIZE_1, NPC1> imgInput1;
-    xf::cv::Mat<IN_TYPE, IN_ARRAY_SIZE_2, IN_ARRAY_SIZE_2, NPC1> imgInput2;
+    xf::cv::Mat<IN_TYPE, IN_ARRAY_SIZE_1, IN_ARRAY_SIZE_1, NPC1, XF_CV_DEPTH_IN_1> imgInput1;
+    xf::cv::Mat<IN_TYPE, IN_ARRAY_SIZE_2, IN_ARRAY_SIZE_2, NPC1, XF_CV_DEPTH_IN_2> imgInput2;
 
     // Retrieve all the params:
     unsigned short index1 = params[0];
@@ -48,13 +48,15 @@ void svm_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
 #pragma HLS DATAFLOW
 
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, IN_ARRAY_SIZE_1, IN_ARRAY_SIZE_1, NPC1>(img_in1, imgInput1);
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, IN_ARRAY_SIZE_2, IN_ARRAY_SIZE_2, NPC1>(img_in2, imgInput2);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, IN_ARRAY_SIZE_1, IN_ARRAY_SIZE_1, NPC1, XF_CV_DEPTH_IN_1>(img_in1,
+                                                                                                            imgInput1);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, IN_ARRAY_SIZE_2, IN_ARRAY_SIZE_2, NPC1, XF_CV_DEPTH_IN_2>(img_in2,
+                                                                                                            imgInput2);
 
     // Run xfOpenCV kernel:
     xf::cv::SVM<IN_TYPE, IN_TYPE, OUTPUT_PTR_WIDTH, IN_ARRAY_SIZE_1, IN_ARRAY_SIZE_1, IN_ARRAY_SIZE_2, IN_ARRAY_SIZE_2,
-                NPC1, NO_OF_KERNEL_ELEMENTS>(imgInput1, imgInput2, index1, index2, frac1, frac2, n, fractional_out,
-                                             result_out);
+                NPC1, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2, NO_OF_KERNEL_ELEMENTS>(
+        imgInput1, imgInput2, index1, index2, frac1, frac2, n, fractional_out, result_out);
 
     return;
 } // End of kernel

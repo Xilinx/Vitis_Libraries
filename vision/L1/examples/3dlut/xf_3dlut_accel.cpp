@@ -37,22 +37,22 @@ void lut3d_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInput(height, width);
-    xf::cv::Mat<XF_32FC3, SQ_LUTDIM, LUT_DIM, NPC1> lutMat(lutDim * lutDim, lutDim);
-    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgOutput(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1> imgInput(height, width);
+    xf::cv::Mat<XF_32FC3, SQ_LUTDIM, LUT_DIM, NPC1, XF_CV_DEPTH_IN_2> lutMat(lutDim * lutDim, lutDim);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> imgOutput(height, width);
 
 #pragma HLS DATAFLOW
 
     // Retrieve xf::cv::Mat objects from img_in, lut data:
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1>(img_in, imgInput);
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_32FC3, SQ_LUTDIM, LUT_DIM, NPC1>(lut, lutMat);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1>(img_in, imgInput);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_32FC3, SQ_LUTDIM, LUT_DIM, NPC1, XF_CV_DEPTH_IN_2>(lut, lutMat);
 
     // Run xfOpenCV kernel:
-    xf::cv::lut3d<LUT_DIM, SQ_LUTDIM, IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPC1, XF_USE_URAM>(imgInput, lutMat, imgOutput,
-                                                                                           lutDim);
+    xf::cv::lut3d<LUT_DIM, SQ_LUTDIM, IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2,
+                  XF_CV_DEPTH_OUT_1, XF_USE_URAM>(imgInput, lutMat, imgOutput, lutDim);
 
     // Convert _dst xf::cv::Mat object to output array:
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPC1>(imgOutput, img_out);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(imgOutput, img_out);
 
     return;
 } // End of kernel

@@ -28,3 +28,12 @@
 #define XF_REMAP_BUFSIZE 128
 
 #define XF_USE_URAM true
+#define XF_CV_DEPTH_L 2
+#define XF_CV_DEPTH_R 2
+#define XF_CV_DEPTH_disp 2
+#define XF_CV_DEPTH_mapxL 2
+#define XF_CV_DEPTH_mapyL 2
+#define XF_CV_DEPTH_mapxR 2
+#define XF_CV_DEPTH_mapyR 2
+#define XF_CV_DEPTH_leftRemapped 2
+#define XF_CV_DEPTH_rightRemapped 2

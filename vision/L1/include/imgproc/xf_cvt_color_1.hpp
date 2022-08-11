@@ -27,9 +27,18 @@
 
 #include "xf_cvt_color_utils.hpp"
 
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int TC, int TCC>
-void write_y(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
-             xf::cv::Mat<DST_T, ROWS, COLS, NPC>& out_y,
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_IN_Y = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_Y = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH_SRC,
+          int TC,
+          int TCC>
+void write_y(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_Y>& src_y,
+             xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_Y>& out_y,
              uint16_t height,
              uint16_t width) {
     XF_SNAME(WORDWIDTH_SRC) tmp;
@@ -48,10 +57,21 @@ void write_y(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_y,
         }
     }
 }
-template <int SRC_T, int UV_T, int ROWS, int COLS, int NPC, int NPC_UV, int WORDWIDTH_UV, int WORDWIDTH_DST, int TC>
-void KernNv122Yuv4(xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv,
-                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _u,
-                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _v,
+template <int SRC_T,
+          int UV_T,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int NPC_UV,
+          int XFCVDEPTH_UV = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_V = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH_UV,
+          int WORDWIDTH_DST,
+          int TC>
+void KernNv122Yuv4(xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV, XFCVDEPTH_UV>& _uv,
+                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_U>& _u,
+                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_V>& _v,
                    uint16_t height,
                    uint16_t width) {
     XF_PTNAME(XF_16UP) uv;
@@ -101,12 +121,15 @@ template <int SRC_T,
           int COLS,
           int NPC,
           int NPC_UV,
+          int XFCVDEPTH_Y = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_UV = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_RGBA = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_Y,
           int WORDWIDTH_UV,
           int WORDWIDTH_DST>
-void KernNv122Rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _y,
-                   xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv,
-                   xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _rgba,
+void KernNv122Rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_Y>& _y,
+                   xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV, XFCVDEPTH_UV>& _uv,
+                   xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_RGBA>& _rgba,
                    uint16_t height,
                    uint16_t width) {
     hls::stream<XF_SNAME(WORDWIDTH_UV)> uvStream;
@@ -182,10 +205,21 @@ RowLoop:
     }
 }
 
-template <int SRC_T, int UV_T, int ROWS, int COLS, int NPC, int NPC_UV, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
-void KernNv122Iyuv(xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv,
-                   xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC>& _u,
-                   xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC>& _v,
+template <int SRC_T,
+          int UV_T,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int NPC_UV,
+          int XFCVDEPTH_UV = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_V = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH_SRC,
+          int WORDWIDTH_DST,
+          int TC>
+void KernNv122Iyuv(xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV, XFCVDEPTH_UV>& _uv,
+                   xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC, XFCVDEPTH_U>& _u,
+                   xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC, XFCVDEPTH_V>& _v,
                    uint16_t height,
                    uint16_t width) {
     XF_PTNAME(XF_8UP) u, v;
@@ -214,10 +248,21 @@ RowLoop:
     }
 }
 
-template <int SRC_T, int UV_T, int ROWS, int COLS, int NPC, int NPC_UV, int WORDWIDTH_VU, int WORDWIDTH_DST, int TC>
-void KernNv212Yuv4(xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _vu,
-                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _u,
-                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _v,
+template <int SRC_T,
+          int UV_T,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int NPC_UV,
+          int XFCVDEPTH_VU = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_V = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH_VU,
+          int WORDWIDTH_DST,
+          int TC>
+void KernNv212Yuv4(xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV, XFCVDEPTH_VU>& _vu,
+                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_U>& _u,
+                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_V>& _v,
                    uint16_t height,
                    uint16_t width) {
     XF_PTNAME(XF_16UP) uv;
@@ -267,12 +312,15 @@ template <int SRC_T,
           int COLS,
           int NPC,
           int NPC_UV,
+          int XFCVDEPTH_Y = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_VU = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_RGBA = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_Y,
           int WORDWIDTH_VU,
           int WORDWIDTH_DST>
-void KernNv212Rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _y,
-                   xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _vu,
-                   xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _rgba,
+void KernNv212Rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_Y>& _y,
+                   xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV, XFCVDEPTH_VU>& _vu,
+                   xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_RGBA>& _rgba,
                    uint16_t height,
                    uint16_t width) {
     hls::stream<XF_SNAME(WORDWIDTH_VU)> vuStream;
@@ -351,10 +399,21 @@ RowLoop:
     }
 }
 
-template <int SRC_T, int UV_T, int ROWS, int COLS, int NPC, int NPC_UV, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
-void KernNv212Iyuv(xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _vu,
-                   xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC>& _u,
-                   xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC>& _v,
+template <int SRC_T,
+          int UV_T,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int NPC_UV,
+          int XFCVDEPTH_VU = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_V = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH_SRC,
+          int WORDWIDTH_DST,
+          int TC>
+void KernNv212Iyuv(xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV, XFCVDEPTH_VU>& _vu,
+                   xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC, XFCVDEPTH_U>& _u,
+                   xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC, XFCVDEPTH_V>& _v,
                    uint16_t height,
                    uint16_t width) {
     ap_uint<13> i, j;
@@ -382,11 +441,22 @@ RowLoop:
     }
 }
 
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
-void KernIyuv2Rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _y,
-                   xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC>& _u,
-                   xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC>& _v,
-                   xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _rgba,
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_Y = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_V = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_RGBA = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH_SRC,
+          int WORDWIDTH_DST,
+          int TC>
+void KernIyuv2Rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_Y>& _y,
+                   xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC, XFCVDEPTH_U>& _u,
+                   xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC, XFCVDEPTH_V>& _v,
+                   xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_RGBA>& _rgba,
                    uint16_t height,
                    uint16_t width) {
     unsigned long long int idx = 0, idx1 = 0;
@@ -457,11 +527,21 @@ RowLoop:
     }
 }
 
-template <int SRC_T, int ROWS, int COLS, int NPC, int WORDWIDTH, int rTC, int cTC>
-void KernIyuv2Yuv4(xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC>& _in_u,
-                   xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC>& _in_v,
-                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _u_image,
-                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _v_image,
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_IN_U = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_V = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U_IMAGE = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_V_IMAGE = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH,
+          int rTC,
+          int cTC>
+void KernIyuv2Yuv4(xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC, XFCVDEPTH_IN_U>& _in_u,
+                   xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC, XFCVDEPTH_IN_V>& _in_v,
+                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_U_IMAGE>& _u_image,
+                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_V_IMAGE>& _v_image,
                    uint16_t height,
                    uint16_t width) {
     hls::stream<XF_SNAME(WORDWIDTH)> inter_u;
@@ -521,13 +601,16 @@ template <int SRC_T,
           int COLS,
           int NPC,
           int NPC_UV,
+          int XFCVDEPTH_U = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_V = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_UV = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_UV,
           int rTC,
           int cTC>
-void KernIyuv2Nv12(xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC>& _u,
-                   xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC>& _v,
-                   xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv,
+void KernIyuv2Nv12(xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC, XFCVDEPTH_U>& _u,
+                   xf::cv::Mat<SRC_T, ROWS / 4, COLS, NPC, XFCVDEPTH_V>& _v,
+                   xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV, XFCVDEPTH_UV>& _uv,
                    uint16_t height,
                    uint16_t width) {
     ap_uint<13> i, j;
@@ -557,11 +640,21 @@ RowLoop:
     }
 }
 
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST>
-void KernRgba2Yuv4(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _rgba,
-                   xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _y,
-                   xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _u,
-                   xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _v,
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_RGBA = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_Y = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_V = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH_SRC,
+          int WORDWIDTH_DST>
+void KernRgba2Yuv4(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_RGBA>& _rgba,
+                   xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_Y>& _y,
+                   xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_U>& _u,
+                   xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_V>& _v,
                    uint16_t height,
                    uint16_t width) {
     XF_SNAME(XF_32UW) rgba;
@@ -597,14 +690,18 @@ template <int SRC_T,
           int ROWS,
           int COLS,
           int NPC,
+          int XFCVDEPTH_RGBA = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_Y = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_V = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int ROWS_U,
           int ROWS_V>
-void KernRgba2Iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _rgba,
-                   xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _y,
-                   xf::cv::Mat<DST_T, ROWS / 4, COLS, NPC>& _u,
-                   xf::cv::Mat<DST_T, ROWS / 4, COLS, NPC>& _v,
+void KernRgba2Iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_RGBA>& _rgba,
+                   xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_Y>& _y,
+                   xf::cv::Mat<DST_T, ROWS / 4, COLS, NPC, XFCVDEPTH_U>& _u,
+                   xf::cv::Mat<DST_T, ROWS / 4, COLS, NPC, XFCVDEPTH_V>& _v,
                    uint16_t height,
                    uint16_t width) {
     XF_SNAME(XF_32UW) rgba;
@@ -653,12 +750,15 @@ template <int SRC_T,
           int COLS,
           int NPC,
           int NPC_UV,
+          int XFCVDEPTH_RGBA = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_Y = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_UV = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_Y,
           int WORDWIDTH_UV>
-void KernRgba2Nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _rgba,
-                   xf::cv::Mat<Y_T, ROWS, COLS, NPC>& _y,
-                   xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv,
+void KernRgba2Nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_RGBA>& _rgba,
+                   xf::cv::Mat<Y_T, ROWS, COLS, NPC, XFCVDEPTH_Y>& _y,
+                   xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV, XFCVDEPTH_UV>& _uv,
                    uint16_t height,
                    uint16_t width) {
     //	XF_SNAME(XF_32UW) rgba;
@@ -711,12 +811,15 @@ template <int SRC_T,
           int COLS,
           int NPC,
           int NPC_UV,
+          int XFCVDEPTH_RGBA = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_Y = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_VU = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_Y,
           int WORDWIDTH_VU>
-void KernRgba2Nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _rgba,
-                   xf::cv::Mat<Y_T, ROWS, COLS, NPC>& _y,
-                   xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _vu,
+void KernRgba2Nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_RGBA>& _rgba,
+                   xf::cv::Mat<Y_T, ROWS, COLS, NPC, XFCVDEPTH_Y>& _y,
+                   xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV, XFCVDEPTH_VU>& _vu,
                    uint16_t height,
                    uint16_t width) {
     width = width >> XF_BITSHIFT(NPC);
@@ -757,9 +860,18 @@ RowLoop:
 }
 
 // Yuyv2Rgba
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
-void KernYuyv2Rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _yuyv,
-                   xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _rgba,
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_YUYV = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_RGBA = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH_SRC,
+          int WORDWIDTH_DST,
+          int TC>
+void KernYuyv2Rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_YUYV>& _yuyv,
+                   xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_RGBA>& _rgba,
                    uint16_t height,
                    uint16_t width) {
     XF_SNAME(WORDWIDTH_DST) rgba;
@@ -819,13 +931,16 @@ template <int SRC_T,
           int COLS,
           int NPC,
           int NPC_UV,
+          int XFCVDEPTH_YUYV = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_Y = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_UV = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_Y,
           int WORDWIDTH_UV,
           int TC>
-void KernYuyv2Nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _yuyv,
-                   xf::cv::Mat<Y_T, ROWS, COLS, NPC>& _y,
-                   xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv,
+void KernYuyv2Nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_YUYV>& _yuyv,
+                   xf::cv::Mat<Y_T, ROWS, COLS, NPC, XFCVDEPTH_Y>& _y,
+                   xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV, XFCVDEPTH_UV>& _uv,
                    uint16_t height,
                    uint16_t width) {
     XF_SNAME(WORDWIDTH_SRC) yu, yv;
@@ -871,13 +986,16 @@ template <int SRC_T,
           int COLS,
           int NPC,
           int NPC_UV,
+          int XFCVDEPTH_YUYV = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_Y = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_UV = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_Y,
           int WORDWIDTH_UV,
           int TC>
-void KernYuyv2Nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _yuyv,
-                   xf::cv::Mat<Y_T, ROWS, COLS, NPC>& _y,
-                   xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& _uv,
+void KernYuyv2Nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_YUYV>& _yuyv,
+                   xf::cv::Mat<Y_T, ROWS, COLS, NPC, XFCVDEPTH_Y>& _y,
+                   xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV, XFCVDEPTH_UV>& _uv,
                    uint16_t height,
                    uint16_t width) {
     XF_SNAME(WORDWIDTH_SRC) yu, yv;
@@ -917,11 +1035,22 @@ RowLoop:
 }
 
 // Yuyv2Iyuv
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
-void KernYuyv2Iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _yuyv,
-                   xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _y,
-                   xf::cv::Mat<DST_T, ROWS / 4, COLS, NPC>& _u,
-                   xf::cv::Mat<DST_T, ROWS / 4, COLS, NPC>& _v,
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_YUYV = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_Y = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_V = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH_SRC,
+          int WORDWIDTH_DST,
+          int TC>
+void KernYuyv2Iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_YUYV>& _yuyv,
+                   xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_Y>& _y,
+                   xf::cv::Mat<DST_T, ROWS / 4, COLS, NPC, XFCVDEPTH_U>& _u,
+                   xf::cv::Mat<DST_T, ROWS / 4, COLS, NPC, XFCVDEPTH_V>& _v,
                    uint16_t height,
                    uint16_t width) {
     XF_SNAME(WORDWIDTH_SRC) yu, yv;
@@ -964,11 +1093,22 @@ RowLoop:
     }
 }
 
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
-void KernUyvy2Iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _uyvy,
-                   xf::cv::Mat<DST_T, ROWS, COLS, NPC>& y_plane,
-                   xf::cv::Mat<DST_T, ROWS / 4, COLS, NPC>& u_plane,
-                   xf::cv::Mat<DST_T, ROWS / 4, COLS, NPC>& v_plane,
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_UYVY = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_Y_PLANE = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U_PLANE = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_V_PLANE = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH_SRC,
+          int WORDWIDTH_DST,
+          int TC>
+void KernUyvy2Iyuv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_UYVY>& _uyvy,
+                   xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_Y_PLANE>& y_plane,
+                   xf::cv::Mat<DST_T, ROWS / 4, COLS, NPC, XFCVDEPTH_U_PLANE>& u_plane,
+                   xf::cv::Mat<DST_T, ROWS / 4, COLS, NPC, XFCVDEPTH_V_PLANE>& v_plane,
                    uint16_t height,
                    uint16_t width) {
     XF_SNAME(WORDWIDTH_SRC) uy, vy;
@@ -1023,13 +1163,16 @@ template <int SRC_T,
           int COLS,
           int NPC,
           int NPC_UV,
+          int XFCVDEPTH_UYVY = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_Y_PLANE = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_UV_PLANE = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_Y,
           int WORDWIDTH_UV,
           int TC>
-void KernUyvy2Nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& uyvy,
-                   xf::cv::Mat<Y_T, ROWS, COLS, NPC>& y_plane,
-                   xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& uv_plane,
+void KernUyvy2Nv12(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_UYVY>& uyvy,
+                   xf::cv::Mat<Y_T, ROWS, COLS, NPC, XFCVDEPTH_Y_PLANE>& y_plane,
+                   xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV, XFCVDEPTH_UV_PLANE>& uv_plane,
                    uint16_t height,
                    uint16_t width) {
     XF_SNAME(WORDWIDTH_SRC) uy, vy;
@@ -1079,13 +1222,16 @@ template <int SRC_T,
           int COLS,
           int NPC,
           int NPC_UV,
+          int XFCVDEPTH_UYVY = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_Y_PLANE = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_UV_PLANE = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_Y,
           int WORDWIDTH_UV,
           int TC>
-void KernUyvy2Nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& uyvy,
-                   xf::cv::Mat<Y_T, ROWS, COLS, NPC>& y_plane,
-                   xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV>& uv_plane,
+void KernUyvy2Nv21(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_UYVY>& uyvy,
+                   xf::cv::Mat<Y_T, ROWS, COLS, NPC, XFCVDEPTH_Y_PLANE>& y_plane,
+                   xf::cv::Mat<UV_T, ROWS / 2, COLS / 2, NPC_UV, XFCVDEPTH_UV_PLANE>& uv_plane,
                    uint16_t height,
                    uint16_t width) {
     XF_SNAME(WORDWIDTH_SRC) uy, vy;
@@ -1128,9 +1274,18 @@ RowLoop:
     }
 }
 // Uyvy2Rgba
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
-void KernUyvy2Rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _uyvy,
-                   xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _rgba,
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_UYVY = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_RGBA = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH_SRC,
+          int WORDWIDTH_DST,
+          int TC>
+void KernUyvy2Rgba(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_UYVY>& _uyvy,
+                   xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_RGBA>& _rgba,
                    uint16_t height,
                    uint16_t width) {
     XF_SNAME(WORDWIDTH_DST) rgba;

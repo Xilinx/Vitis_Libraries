@@ -215,9 +215,19 @@ void xFfastProc(XF_PTNAME(DEPTH) OutputValues[XF_NPIXPERCYCLE(NPC)],
     return;
 }
 
-template <int SRC_T, int ROWS, int COLS, int DEPTH, int NPC, int WORDWIDTH, int TC, int WIN_SZ, int WIN_SZ_SQ>
-void ProcessFast(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _out_mat,
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH,
+          int TC,
+          int WIN_SZ,
+          int WIN_SZ_SQ>
+void ProcessFast(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _out_mat,
                  XF_SNAME(WORDWIDTH) buf[WIN_SZ][(COLS >> XF_BITSHIFT(NPC))],
                  XF_PTNAME(DEPTH) src_buf[WIN_SZ][XF_NPIXPERCYCLE(NPC) + (WIN_SZ - 1)],
                  XF_PTNAME(DEPTH) OutputValues[XF_NPIXPERCYCLE(NPC)],
@@ -455,9 +465,19 @@ Col_Loop:
     } // Col_Loop
 }
 
-template <int SRC_T, int ROWS, int COLS, int DEPTH, int NPC, int WORDWIDTH, int TC, int WIN_SZ, int WIN_SZ_SQ>
-void xFfast7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-               xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _out_mat,
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH,
+          int TC,
+          int WIN_SZ,
+          int WIN_SZ_SQ>
+void xFfast7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+               xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _out_mat,
                ap_uint<8> win_size,
                uint16_t img_height,
                uint16_t img_width,
@@ -538,7 +558,7 @@ Row_Loop:
         // clang-format on
 
         P0 = 0;
-        ProcessFast<SRC_T, ROWS, COLS, DEPTH, NPC, WORDWIDTH, TC, WIN_SZ, WIN_SZ_SQ>(
+        ProcessFast<SRC_T, ROWS, COLS, DEPTH, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1, WORDWIDTH, TC, WIN_SZ, WIN_SZ_SQ>(
             _src_mat, _out_mat, buf, src_buf, OutputValues, P0, img_width, img_height, shift_x, row_ind, row, win_size,
             _threshold, pack_corners, read_index, write_index);
 
@@ -582,9 +602,19 @@ void xFnmsProc(XF_PTNAME(DEPTH) OutputValues[XF_NPIXPERCYCLE(NPC)],
     return;
 }
 
-template <int SRC_T, int ROWS, int COLS, int DEPTH, int NPC, int WORDWIDTH, int TC, int WIN_SZ, int WIN_SZ_SQ>
-void Processfastnms(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                    xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _out_mat,
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH,
+          int TC,
+          int WIN_SZ,
+          int WIN_SZ_SQ>
+void Processfastnms(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+                    xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _out_mat,
                     XF_SNAME(WORDWIDTH) buf[WIN_SZ][(COLS >> XF_BITSHIFT(NPC))],
                     XF_PTNAME(DEPTH) src_buf[WIN_SZ][XF_NPIXPERCYCLE(NPC) + (WIN_SZ - 1)],
                     XF_PTNAME(DEPTH) OutputValues[XF_NPIXPERCYCLE(NPC)],
@@ -799,9 +829,19 @@ Col_Loop:
     } // Col_Loop
 }
 
-template <int SRC_T, int ROWS, int COLS, int DEPTH, int NPC, int WORDWIDTH, int TC, int WIN_SZ, int WIN_SZ_SQ>
-void xFfastnms(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-               xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _out_mat,
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH,
+          int TC,
+          int WIN_SZ,
+          int WIN_SZ_SQ>
+void xFfastnms(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+               xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _out_mat,
                ap_uint<8> win_size,
                uint16_t img_height,
                uint16_t img_width) {
@@ -878,9 +918,9 @@ Row_Loop:
         // clang-format on
 
         P0 = 0;
-        Processfastnms<SRC_T, ROWS, COLS, DEPTH, NPC, WORDWIDTH, TC, WIN_SZ, WIN_SZ_SQ>(
-            _src_mat, _out_mat, buf, src_buf, OutputValues, P0, img_width, img_height, shift_x, row_ind, row, win_size,
-            readind_val, writeind_val);
+        Processfastnms<SRC_T, ROWS, COLS, DEPTH, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1, WORDWIDTH, TC, WIN_SZ,
+                       WIN_SZ_SQ>(_src_mat, _out_mat, buf, src_buf, OutputValues, P0, img_width, img_height, shift_x,
+                                  row_ind, row, win_size, readind_val, writeind_val);
 
         // update indices
         ap_uint<13> zero_ind = row_ind[0];
@@ -895,9 +935,18 @@ Row_Loop:
     } // Row_Loop
 }
 
-template <int SRC_T, int ROWS, int COLS, int DEPTH, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int NMSVAL>
-void xFFastCornerDetection(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                           xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat,
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH_SRC,
+          int WORDWIDTH_DST,
+          int NMSVAL>
+void xFFastCornerDetection(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+                           xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst_mat,
                            unsigned short _image_height,
                            unsigned short _image_width,
                            uchar_t _threshold) {
@@ -911,26 +960,33 @@ void xFFastCornerDetection(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     assert(((_image_height <= ROWS) && (_image_width <= COLS)) && "ROWS and COLS should be greater than input image");
 #endif
 
-    xf::cv::Mat<SRC_T, ROWS, COLS, NPC> _dst(_image_height, _image_width);
+    xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1> _dst(_image_height, _image_width);
 // clang-format off
         #pragma HLS DATAFLOW
-// clang-format on
-#pragma HLS stream variable = _dst.data depth = 2
+    // clang-format on
 
     if (NMSVAL == 1) {
-        xFfast7x7<SRC_T, ROWS, COLS, DEPTH, NPC, WORDWIDTH_SRC, (COLS >> XF_BITSHIFT(NPC)) + (7 >> 1), 7, 7 * 7>(
-            _src_mat, _dst, 7, _image_height, _image_width, _threshold);
-        xFfastnms<SRC_T, ROWS, COLS, DEPTH, NPC, WORDWIDTH_SRC, (COLS >> XF_BITSHIFT(NPC)) + (3 >> 1), 3, 3 * 3>(
-            _dst, _dst_mat, 3, _image_height, _image_width);
+        xFfast7x7<SRC_T, ROWS, COLS, DEPTH, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1, WORDWIDTH_SRC,
+                  (COLS >> XF_BITSHIFT(NPC)) + (7 >> 1), 7, 7 * 7>(_src_mat, _dst, 7, _image_height, _image_width,
+                                                                   _threshold);
+        xFfastnms<SRC_T, ROWS, COLS, DEPTH, NPC, XFCVDEPTH_OUT_1, XFCVDEPTH_OUT_1, WORDWIDTH_SRC,
+                  (COLS >> XF_BITSHIFT(NPC)) + (3 >> 1), 3, 3 * 3>(_dst, _dst_mat, 3, _image_height, _image_width);
     } else if (NMSVAL == 0) {
-        xFfast7x7<SRC_T, ROWS, COLS, DEPTH, NPC, WORDWIDTH_SRC, (COLS >> XF_BITSHIFT(NPC)) + (7 >> 1), 7, 7 * 7>(
-            _src_mat, _dst_mat, 7, _image_height, _image_width, _threshold);
+        xFfast7x7<SRC_T, ROWS, COLS, DEPTH, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1, WORDWIDTH_SRC,
+                  (COLS >> XF_BITSHIFT(NPC)) + (7 >> 1), 7, 7 * 7>(_src_mat, _dst_mat, 7, _image_height, _image_width,
+                                                                   _threshold);
     }
 }
 
-template <int NMS, int SRC_T, int ROWS, int COLS, int NPC = 1>
-void fast(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-          xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat,
+template <int NMS,
+          int SRC_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void fast(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+          xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst_mat,
           unsigned char _threshold) {
 // clang-format off
     #pragma HLS inline off
@@ -939,8 +995,9 @@ void fast(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     // clang-format off
     // clang-format on
 
-    xFFastCornerDetection<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC), XF_32UW, NMS>(
-        _src_mat, _dst_mat, _src_mat.rows, _src_mat.cols, _threshold);
+    xFFastCornerDetection<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1,
+                          XF_WORDWIDTH(SRC_T, NPC), XF_32UW, NMS>(_src_mat, _dst_mat, _src_mat.rows, _src_mat.cols,
+                                                                  _threshold);
 }
 } // namespace cv
 } // namespace xf

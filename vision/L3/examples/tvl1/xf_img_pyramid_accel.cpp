@@ -31,15 +31,17 @@ void ResizeStageN(
 #pragma HLS INLINE OFF
     // clang-format on
 
-    xf::cv::Mat<IMG_TYPE_P, HEIGHT, WIDTH, NPC_PYRAMID> in_mat(rows_i, cols_i);
-    xf::cv::Mat<IMG_TYPE_P, NEWHEIGHT, NEWWIDTH, NPC_PYRAMID> out_mat(rows_o, cols_o);
+    xf::cv::Mat<IMG_TYPE_P, HEIGHT, WIDTH, NPC_PYRAMID, XF_CV_DEPTH_in_mat> in_mat(rows_i, cols_i);
+    xf::cv::Mat<IMG_TYPE_P, NEWHEIGHT, NEWWIDTH, NPC_PYRAMID, XF_CV_DEPTH_out_mat> out_mat(rows_o, cols_o);
 // clang-format off
 #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<IMAGE_PTR_WIDTH_P, IMG_TYPE_P, HEIGHT, WIDTH, NPC_PYRAMID>(resize_img_i, in_mat);
-    xf::cv::resize<INTERPOLATION_P, IMG_TYPE_P, HEIGHT, WIDTH, NEWHEIGHT, NEWWIDTH, NPC_PYRAMID, MAXDOWNSCALE_P>(
-        in_mat, out_mat);
-    xf::cv::xfMat2Array<IMAGE_PTR_WIDTH_P, IMG_TYPE_P, NEWHEIGHT, NEWWIDTH, NPC_PYRAMID>(out_mat, resize_img_o);
+    xf::cv::Array2xfMat<IMAGE_PTR_WIDTH_P, IMG_TYPE_P, HEIGHT, WIDTH, NPC_PYRAMID, XF_CV_DEPTH_in_mat>(resize_img_i,
+                                                                                                       in_mat);
+    xf::cv::resize<INTERPOLATION_P, IMG_TYPE_P, HEIGHT, WIDTH, NEWHEIGHT, NEWWIDTH, NPC_PYRAMID, XF_CV_DEPTH_in_mat,
+                   XF_CV_DEPTH_out_mat, MAXDOWNSCALE_P>(in_mat, out_mat);
+    xf::cv::xfMat2Array<IMAGE_PTR_WIDTH_P, IMG_TYPE_P, NEWHEIGHT, NEWWIDTH, NPC_PYRAMID, XF_CV_DEPTH_out_mat>(
+        out_mat, resize_img_o);
 
 } // ResizeStageN
 } // namespace cv

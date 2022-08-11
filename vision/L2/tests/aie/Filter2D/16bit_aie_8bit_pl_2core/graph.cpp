@@ -17,38 +17,8 @@
 #include <array>
 #include "graph.h"
 
-static constexpr int CORES = 2;
-// Virtual platform ports
-PLIO* in1 = new PLIO("DataIn1", adf::plio_128_bits, "data/input.txt");
-PLIO* in2 = new PLIO("DataIn2", adf::plio_128_bits, "data/input.txt");
-PLIO* out1 = new PLIO("DataOut1", adf::plio_128_bits, "data/output1.txt");
-PLIO* out2 = new PLIO("DataOut2", adf::plio_128_bits, "data/output2.txt");
-
-simulation::platform<CORES, CORES> platform(in1, in2, out1, out2);
-
 // Graph object
-myGraph filter_graph[CORES];
-
-// Virtual platform connectivity
-auto neti = []() {
-    std::array<connect<>*, CORES> r;
-    int i = 0;
-    for (auto& x : r) {
-        x = new connect<>(platform.src[i], filter_graph[i].inptr);
-        i++;
-    }
-    return r;
-}();
-
-auto neto = []() {
-    std::array<connect<>*, CORES> r;
-    int i = 0;
-    for (auto& x : r) {
-        x = new connect<>(filter_graph[i].outptr, platform.sink[i]);
-        i++;
-    }
-    return r;
-}();
+myGraph filter_graph[AIE_CORES];
 
 #define SRS_SHIFT 10
 float kData[9] = {0.0625, 0.1250, 0.0625, 0.125, 0.25, 0.125, 0.0625, 0.125, 0.0625};
@@ -71,19 +41,21 @@ auto float2fixed_coeff(float data[9]) {
 }
 
 #if defined(__AIESIM__) || defined(__X86SIM__)
+#include <iostream>
 int main(int argc, char** argv) {
-    for (int i = 0; i < CORES; i++) {
+    for (int i = 0; i < AIE_CORES; i++) {
         filter_graph[i].init();
     }
 
-    for (int i = 0; i < CORES; i++) {
+    for (int i = 0; i < AIE_CORES; i++) {
         filter_graph[i].update(filter_graph[i].kernelCoefficients, float2fixed_coeff<10, 16>(kData).data(), 16);
         filter_graph[i].run(1);
     }
 
-    for (int i = 0; i < CORES; i++) {
+    for (int i = 0; i < AIE_CORES; i++) {
         filter_graph[i].end();
     }
+
     return 0;
 }
 #endif

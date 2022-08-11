@@ -60,14 +60,16 @@ template <int SRC_T,
           int ROWS,
           int COLS,
           int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int PLANES,
           int DEPTH_SRC,
           int DEPTH_DST,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int TC>
-void AWBGainUpdateKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
-                         xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
+void AWBGainUpdateKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
+                         xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst,
                          float thresh,
                          int i_gain[3]) {
     int width = src1.cols >> XF_BITSHIFT(NPC);
@@ -113,14 +115,16 @@ template <int SRC_T,
           int ROWS,
           int COLS,
           int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int PLANES,
           int DEPTH_SRC,
           int DEPTH_DST,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int TC>
-void AWBChannelGainKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
-                          xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
+void AWBChannelGainKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
+                          xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst,
                           float thresh,
                           int i_gain[3]) {
     int width = src1.cols >> XF_BITSHIFT(NPC);
@@ -262,9 +266,18 @@ Row_Loop:
     i_gain[2] = (dinR1 * (1 << STEP));
 }
 
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int DEPTH_SRC, int WB_TYPE, int HIST_SIZE, int S_DEPTH>
-void AWBNormalizationkernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
-                            xf::cv::Mat<DST_T, ROWS, COLS, NPC, S_DEPTH>& dst,
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+          int DEPTH_SRC,
+          int WB_TYPE,
+          int HIST_SIZE>
+void AWBNormalizationkernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src,
+                            xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst,
                             uint32_t hist[3][HIST_SIZE],
                             float p,
                             float inputMin,
@@ -408,9 +421,18 @@ Row_Loop1:
     }
 }
 
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int DEPTH_SRC, int WB_TYPE, int HIST_SIZE>
-void AWBhistogramkernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
-                        xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src2,
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int DEPTH_SRC,
+          int WB_TYPE,
+          int HIST_SIZE>
+void AWBhistogramkernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
+                        xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& src2,
                         uint32_t hist[3][HIST_SIZE],
                         float p,
                         float inputMin,
@@ -606,9 +628,17 @@ MERGE_HIST_LOOP:
     }
 }
 
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int WB_TYPE, int HIST_SIZE>
-void AWBhistogram(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
-                  xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src2,
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+          int WB_TYPE,
+          int HIST_SIZE>
+void AWBhistogram(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
+                  xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& src2,
                   uint32_t histogram[3][HIST_SIZE],
                   float thresh,
                   float inputMin,
@@ -619,13 +649,21 @@ void AWBhistogram(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
 #pragma HLS INLINE OFF
     // clang-format on
 
-    AWBhistogramkernel<SRC_T, SRC_T, ROWS, COLS, NPC, XF_DEPTH(SRC_T, NPC), 1, HIST_SIZE>(
-        src1, src2, histogram, thresh, inputMin, inputMax, outputMin, outputMax);
+    AWBhistogramkernel<SRC_T, SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1, XF_DEPTH(SRC_T, NPC), 1,
+                       HIST_SIZE>(src1, src2, histogram, thresh, inputMin, inputMax, outputMin, outputMax);
 }
 
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int WB_TYPE, int HIST_SIZE>
-void AWBNormalization(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
-                      xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+          int WB_TYPE,
+          int HIST_SIZE>
+void AWBNormalization(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src,
+                      xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst,
                       uint32_t histogram[3][HIST_SIZE],
                       float thresh,
                       float inputMin,
@@ -636,28 +674,43 @@ void AWBNormalization(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 #pragma HLS INLINE OFF
     // clang-format on
 
-    AWBNormalizationkernel<SRC_T, SRC_T, ROWS, COLS, NPC, XF_DEPTH(SRC_T, NPC), 1, HIST_SIZE>(
-        src, dst, histogram, thresh, inputMin, inputMax, outputMin, outputMax);
+    AWBNormalizationkernel<SRC_T, SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1, XF_DEPTH(SRC_T, NPC), 1,
+                           HIST_SIZE>(src, dst, histogram, thresh, inputMin, inputMax, outputMin, outputMax);
 }
 
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int WB_TYPE>
-void AWBGainUpdate(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
-                   xf::cv::Mat<DST_T, ROWS, COLS, NPC>& src2,
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+          int WB_TYPE>
+void AWBGainUpdate(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
+                   xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& src2,
                    float thresh,
                    int i_gain[3]) {
-    xf::cv::AWBGainUpdateKernel<SRC_T, SRC_T, ROWS, COLS, NPC, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC),
-                                XF_DEPTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC),
-                                (COLS >> XF_BITSHIFT(NPC))>(src1, src2, thresh, i_gain);
+    xf::cv::AWBGainUpdateKernel<SRC_T, SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1, XF_CHANNELS(SRC_T, NPC),
+                                XF_DEPTH(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC),
+                                XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(src1, src2, thresh, i_gain);
 }
 
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int WB_TYPE>
-void AWBChannelGain(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
-                    xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+          int WB_TYPE>
+void AWBChannelGain(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src,
+                    xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst,
                     float thresh,
                     int i_gain[3]) {
-    xf::cv::AWBChannelGainKernel<SRC_T, SRC_T, ROWS, COLS, NPC, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC),
-                                 XF_DEPTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC),
-                                 (COLS >> XF_BITSHIFT(NPC))>(src, dst, thresh, i_gain);
+    xf::cv::AWBChannelGainKernel<SRC_T, SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1,
+                                 XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), XF_DEPTH(SRC_T, NPC),
+                                 XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(
+        src, dst, thresh, i_gain);
 }
 }
 }

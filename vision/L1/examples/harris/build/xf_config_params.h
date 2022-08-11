@@ -24,3 +24,6 @@
 #define MAXCORNERS 1024
 
 #define XF_USE_URAM false
+
+#define XF_CV_DEPTH_IN 3
+#define XF_CV_DEPTH_OUT 3

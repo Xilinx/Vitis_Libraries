@@ -128,14 +128,16 @@ template <int TYPE,
           int PLANES,
           int DEPTH,
           int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH,
           int TC,
           int WIN_SZ,
           int WIN_SZ_SQ,
           int NUM_DIST,
           int FPRES_SC>
-static void ProcessBilateralNXN(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat,
-                                xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _dst_mat,
+static void ProcessBilateralNXN(xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+                                xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst_mat,
                                 XF_TNAME(DEPTH, NPC) buf[WIN_SZ][(COLS >> XF_BITSHIFT(NPC))],
                                 XF_DTUNAME(DEPTH, NPC) src_buf[WIN_SZ][XF_NPIXPERCYCLE(NPC) + (WIN_SZ - 1)],
                                 XF_DTUNAME(DEPTH, NPC) OutputValues[XF_NPIXPERCYCLE(NPC)],
@@ -361,14 +363,16 @@ template <int TYPE,
           int PLANES,
           int DEPTH,
           int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH,
           int TC,
           int WIN_SZ,
           int WIN_SZ_SQ,
           int NUM_DIST,
           int FPRES_SC>
-static void xFBilateralFilterNXN(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat,
-                                 xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _dst_mat,
+static void xFBilateralFilterNXN(xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+                                 xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst_mat,
                                  ap_uint<8> win_size,
                                  uint16_t img_height,
                                  uint16_t img_width,
@@ -449,7 +453,8 @@ Row_Loop:
         // clang-format on
 
         P0 = 0;
-        ProcessBilateralNXN<TYPE, ROWS, COLS, PLANES, DEPTH, NPC, WORDWIDTH, TC, WIN_SZ, WIN_SZ_SQ, NUM_DIST, FPRES_SC>(
+        ProcessBilateralNXN<TYPE, ROWS, COLS, PLANES, DEPTH, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1, WORDWIDTH, TC,
+                            WIN_SZ, WIN_SZ_SQ, NUM_DIST, FPRES_SC>(
             _src_mat, _dst_mat, buf, src_buf, OutputValues, P0, img_width, img_height, shift_x, row_ind, row, win_size,
             exp_lut_sigma_color, distances_array_revmap, rd_ind, wr_ind);
 
@@ -466,9 +471,18 @@ Row_Loop:
     } // Row_Loop
 }
 
-template <int TYPE, int ROWS, int COLS, int PLANES, int DEPTH, int NPC, int WORDWIDTH, int WIN_SZ>
-static void xFbilateralFilterKernel(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat,
-                                    xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _dst_mat,
+template <int TYPE,
+          int ROWS,
+          int COLS,
+          int PLANES,
+          int DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH,
+          int WIN_SZ>
+static void xFbilateralFilterKernel(xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+                                    xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst_mat,
                                     int _border_type,
                                     uint16_t imgheight,
                                     uint16_t imgwidth,
@@ -586,23 +600,30 @@ static void xFbilateralFilterKernel(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat
             }
         }
     }
-    xFBilateralFilterNXN<TYPE, ROWS, COLS, PLANES, DEPTH, NPC, WORDWIDTH, (COLS >> (XF_BITSHIFT(NPC))) + (WIN_SZ >> 1),
-                         WIN_SZ, WIN_SZ * WIN_SZ, NUM_DIST, FPRES_SC>(_src_mat, _dst_mat, WIN_SZ, imgheight, imgwidth,
-                                                                      exp_lut_sigma_color, distances_array_revmap);
+    xFBilateralFilterNXN<TYPE, ROWS, COLS, PLANES, DEPTH, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1, WORDWIDTH,
+                         (COLS >> (XF_BITSHIFT(NPC))) + (WIN_SZ >> 1), WIN_SZ, WIN_SZ * WIN_SZ, NUM_DIST, FPRES_SC>(
+        _src_mat, _dst_mat, WIN_SZ, imgheight, imgwidth, exp_lut_sigma_color, distances_array_revmap);
 }
 
-template <int WINDOW_SIZE, int BORDER_TYPE, int TYPE, int ROWS, int COLS, int NPC = 1>
-void bilateralFilter(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat,
-                     xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _dst_mat,
+template <int WINDOW_SIZE,
+          int BORDER_TYPE,
+          int TYPE,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void bilateralFilter(xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+                     xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst_mat,
                      float sigma_color,
                      float sigma_space) {
 // clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
 
-    xFbilateralFilterKernel<TYPE, ROWS, COLS, XF_CHANNELS(TYPE, NPC), TYPE, NPC, (TYPE << (XF_BITSHIFT(NPC))),
-                            WINDOW_SIZE>(_src_mat, _dst_mat, BORDER_TYPE, _src_mat.rows, _src_mat.cols, sigma_color,
-                                         sigma_space);
+    xFbilateralFilterKernel<TYPE, ROWS, COLS, XF_CHANNELS(TYPE, NPC), TYPE, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1,
+                            (TYPE << (XF_BITSHIFT(NPC))), WINDOW_SIZE>(_src_mat, _dst_mat, BORDER_TYPE, _src_mat.rows,
+                                                                       _src_mat.cols, sigma_color, sigma_space);
 }
 } // namespace cv
 } // namespace xf

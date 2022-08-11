@@ -63,14 +63,16 @@ template <int SRC_T,
           int ROWS,
           int COLS,
           int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int PLANES,
           int DEPTH_SRC,
           int DEPTH_DST,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int TC>
-void gaincontrolkernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
-                       xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& dst,
+void gaincontrolkernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
+                       xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst,
                        uint16_t height,
                        uint16_t width,
                        unsigned short rgain,
@@ -178,9 +180,14 @@ RowLoop:
     }
 }
 
-template <int SRC_T, int ROWS, int COLS, int NPC = 1>
-void gaincontrol(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
-                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& dst,
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void gaincontrol(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
+                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst,
                  unsigned short rgain,
                  unsigned short bgain,
                  unsigned short ggain,
@@ -192,9 +199,9 @@ void gaincontrol(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
 #endif
     short width = src1.cols >> XF_BITSHIFT(NPC);
 
-    gaincontrolkernel<SRC_T, ROWS, COLS, NPC, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), XF_DEPTH(SRC_T, NPC),
-                      XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(
-        src1, dst, src1.rows, width, rgain, bgain, ggain, bayer_p);
+    gaincontrolkernel<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1, XF_CHANNELS(SRC_T, NPC),
+                      XF_DEPTH(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC),
+                      (COLS >> XF_BITSHIFT(NPC))>(src1, dst, src1.rows, width, rgain, bgain, ggain, bayer_p);
 }
 }
 }

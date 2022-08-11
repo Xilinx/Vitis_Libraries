@@ -42,9 +42,11 @@ template <int SRC_T,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int TRIP_CNT>
-void xfConvertBitDepthKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                             xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_mat,
+void xfConvertBitDepthKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+                             xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst_mat,
                              ap_uint<4> _convert_type,
                              int _shift,
                              unsigned short _height,
@@ -115,9 +117,15 @@ ROW_LOOP:
     }
 }
 
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
-void convertTo(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-               xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_mat,
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void convertTo(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+               xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst_mat,
                ap_uint<4> _convert_type,
                int _shift) {
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
@@ -139,8 +147,8 @@ void convertTo(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     uint16_t height = _src_mat.rows;
 
     xfConvertBitDepthKernel<SRC_T, DST_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), XF_DEPTH(DST_T, NPC),
-                            XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC), NPC, (COLS >> XF_BITSHIFT(NPC))>(
-        _src_mat, _dst_mat, _convert_type, _shift, height, width);
+                            XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC), NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1,
+                            (COLS >> XF_BITSHIFT(NPC))>(_src_mat, _dst_mat, _convert_type, _shift, height, width);
 }
 } // namespace cv
 } // namespace xf

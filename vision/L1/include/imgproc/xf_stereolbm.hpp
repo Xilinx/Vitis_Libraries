@@ -605,8 +605,16 @@ void xFImageClipUtility(int i, int j, int k, int height, int width, int* pix) {
 }
 
 /* Clips the Output from the Sobel function based on the Cap value input */
-template <int ROWS, int COLS, int NPC, int DEPTH_SRC, int DEPTH_DST, int SRC_T, int DST_T, int COLS_TC>
-void xFImageClip(xf::cv::Mat<SRC_T, ROWS, COLS, 1>& src,
+template <int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int DEPTH_SRC,
+          int DEPTH_DST,
+          int SRC_T,
+          int DST_T,
+          int COLS_TC>
+void xFImageClip(xf::cv::Mat<SRC_T, ROWS, COLS, 1, XFCVDEPTH_IN>& src,
                  hls::stream<XF_TNAME(DST_T, 1)>& dst,
                  int cap,
                  short int height,
@@ -644,8 +652,15 @@ loop_row_clip:
 }
 
 /* For reading the Gradient-Y stream, rather than letting the stream dangling */
-template <int ROWS, int COLS, int NPC, int DEPTH_SRC, int DEPTH_DST, int SRC_T, int COLS_TC>
-void xFReadOutStream(xf::cv::Mat<SRC_T, ROWS, COLS, 1>& src, short int height, short int width) {
+template <int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int DEPTH_SRC,
+          int DEPTH_DST,
+          int SRC_T,
+          int COLS_TC>
+void xFReadOutStream(xf::cv::Mat<SRC_T, ROWS, COLS, 1, XFCVDEPTH_IN>& src, short int height, short int width) {
 loop_row_clip:
     for (short i = 0; i < height; i++) {
 // clang-format off
@@ -664,8 +679,8 @@ loop_row_clip:
 }
 
 /* Sobel gradient and Clipping */
-template <int ROWS, int COLS, int SRC_T, int FILTER_T, int DST_T, bool USE_URAM>
-void xFStereoPreProcess(xf::cv::Mat<SRC_T, ROWS, COLS, 1>& in_mat,
+template <int ROWS, int COLS, int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT, int SRC_T, int FILTER_T, int DST_T, bool USE_URAM>
+void xFStereoPreProcess(xf::cv::Mat<SRC_T, ROWS, COLS, 1, XFCVDEPTH_IN>& in_mat,
                         hls::stream<XF_TNAME(DST_T, 1)>& clipped_strm,
                         int preFilterType,
                         int preFilterCap,
@@ -674,20 +689,18 @@ void xFStereoPreProcess(xf::cv::Mat<SRC_T, ROWS, COLS, 1>& in_mat,
 // clang-format off
     #pragma HLS INLINE
     // clang-format on
-    xf::cv::Mat<FILTER_T, ROWS, COLS, 1> in_sobel_x(height, width);
-// clang-format off
-    #pragma HLS stream variable=in_sobel_x.data depth=2
+    xf::cv::Mat<FILTER_T, ROWS, COLS, 1, XFCVDEPTH_IN> in_sobel_x(height, width);
+    // clang-format off
     // clang-format on
-    xf::cv::Mat<FILTER_T, ROWS, COLS, 1> in_sobel_y(height, width);
-// clang-format off
-    #pragma HLS stream variable=in_sobel_y.data depth=2
+    xf::cv::Mat<FILTER_T, ROWS, COLS, 1, XFCVDEPTH_IN> in_sobel_y(height, width);
+    // clang-format off
     // clang-format on
 
-    xf::cv::Sobel<XF_BORDER_CONSTANT, XF_FILTER_3X3, SRC_T, FILTER_T, ROWS, COLS, XF_NPPC1, USE_URAM>(
-        in_mat, in_sobel_x, in_sobel_y);
-    xFImageClip<ROWS, COLS, XF_NPPC1, XF_16SP, XF_8UP, FILTER_T, DST_T, COLS>(in_sobel_x, clipped_strm, preFilterCap,
-                                                                              height, width);
-    xFReadOutStream<ROWS, COLS, XF_NPPC1, XF_16SP, XF_8UP, FILTER_T, COLS>(in_sobel_y, height, width);
+    xf::cv::Sobel<XF_BORDER_CONSTANT, XF_FILTER_3X3, SRC_T, FILTER_T, ROWS, COLS, XF_NPPC1, XFCVDEPTH_IN, XFCVDEPTH_IN,
+                  XFCVDEPTH_IN, USE_URAM>(in_mat, in_sobel_x, in_sobel_y);
+    xFImageClip<ROWS, COLS, XF_NPPC1, XFCVDEPTH_IN, XF_16SP, XF_8UP, FILTER_T, DST_T, COLS>(
+        in_sobel_x, clipped_strm, preFilterCap, height, width);
+    xFReadOutStream<ROWS, COLS, XF_NPPC1, XFCVDEPTH_IN, XF_16SP, XF_8UP, FILTER_T, COLS>(in_sobel_y, height, width);
 }
 
 /* This function performs preprocessing and disparity computation for NO mode */
@@ -696,6 +709,8 @@ template <int ROWS,
           int SRC_T,
           int DST_T,
           int NPC,
+          int XFCVDEPTH_left = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_right = _XFCVDEPTH_DEFAULT,
           int WSIZE,
           int NDISP,
           int NDISP_UNIT,
@@ -711,13 +726,11 @@ void xFFindStereoCorrespondenceLBMNO_pipeline(hls::stream<XF_TNAME(SRC_T, NPC)>&
     #pragma HLS INLINE
     // clang-format on
 
-    xf::cv::Mat<SRC_T, ROWS, COLS, NPC> _left_mat(height, width);
-// clang-format off
-    #pragma HLS stream variable=_left_mat.data depth=2
+    xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_left> _left_mat(height, width);
+    // clang-format off
     // clang-format on
-    xf::cv::Mat<SRC_T, ROWS, COLS, NPC> _right_mat(height, width);
-// clang-format off
-    #pragma HLS stream variable=_right_mat.data depth=2
+    xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_right> _right_mat(height, width);
+    // clang-format off
     // clang-format on
 
     hls::stream<XF_TNAME(SRC_T, NPC)> left_clipped("left_clipped");
@@ -740,10 +753,10 @@ void xFFindStereoCorrespondenceLBMNO_pipeline(hls::stream<XF_TNAME(SRC_T, NPC)>&
     }
 
     /* Sobel and Clipping */
-    xFStereoPreProcess<ROWS, COLS, SRC_T, XF_16SC1, SRC_T>(_left_mat, left_clipped, sbmstate.preFilterType,
-                                                           sbmstate.preFilterCap, height, width);
-    xFStereoPreProcess<ROWS, COLS, SRC_T, XF_16SC1, SRC_T>(_right_mat, right_clipped, sbmstate.preFilterType,
-                                                           sbmstate.preFilterCap, height, width);
+    xFStereoPreProcess<ROWS, COLS, XFCVDEPTH_left, SRC_T, XF_16SC1, SRC_T>(
+        _left_mat, left_clipped, sbmstate.preFilterType, sbmstate.preFilterCap, height, width);
+    xFStereoPreProcess<ROWS, COLS, XFCVDEPTH_right, SRC_T, XF_16SC1, SRC_T>(
+        _right_mat, right_clipped, sbmstate.preFilterType, sbmstate.preFilterCap, height, width);
 
     /* SAD and disparity computation */
     xFSADBlockMatching<ROWS, COLS, SRC_T, DST_T, WSIZE, NDISP, NDISP_UNIT, SWEEP_FACT, ROWS + WSIZE - 1,
@@ -765,14 +778,17 @@ template <int ROWS,
           int SRC_T,
           int DST_T,
           int NPC,
+          int XFCVDEPTH_left = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_right = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_disp = _XFCVDEPTH_DEFAULT,
           int WSIZE,
           int NDISP,
           int NDISP_UNIT,
           int SWEEP_FACT,
           bool USE_URAM>
-void xFFindStereoCorrespondenceLBMNO(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _left_mat,
-                                     xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _right_mat,
-                                     xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _disp_mat,
+void xFFindStereoCorrespondenceLBMNO(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_left>& _left_mat,
+                                     xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_right>& _right_mat,
+                                     xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_disp>& _disp_mat,
                                      xf::cv::xFSBMState<WSIZE, NDISP, NDISP_UNIT>& sbmstate,
                                      short int height,
                                      short int width) {
@@ -787,10 +803,10 @@ void xFFindStereoCorrespondenceLBMNO(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _left_
     const int TC = (ROWS * COLS);
 
     /* Sobel and Clipping */
-    xFStereoPreProcess<ROWS, COLS, SRC_T, XF_16SC1, SRC_T, USE_URAM>(_left_mat, left_clipped, sbmstate.preFilterType,
-                                                                     sbmstate.preFilterCap, height, width);
-    xFStereoPreProcess<ROWS, COLS, SRC_T, XF_16SC1, SRC_T, USE_URAM>(_right_mat, right_clipped, sbmstate.preFilterType,
-                                                                     sbmstate.preFilterCap, height, width);
+    xFStereoPreProcess<ROWS, COLS, XFCVDEPTH_left, SRC_T, XF_16SC1, SRC_T, USE_URAM>(
+        _left_mat, left_clipped, sbmstate.preFilterType, sbmstate.preFilterCap, height, width);
+    xFStereoPreProcess<ROWS, COLS, XFCVDEPTH_right, SRC_T, XF_16SC1, SRC_T, USE_URAM>(
+        _right_mat, right_clipped, sbmstate.preFilterType, sbmstate.preFilterCap, height, width);
 
     /* SAD and disparity computation */
     xFSADBlockMatching<ROWS, COLS, SRC_T, DST_T, WSIZE, NDISP, NDISP_UNIT, SWEEP_FACT, ROWS + WSIZE - 1,
@@ -838,10 +854,21 @@ void xFFindStereoCorrespondenceLBM_pipeline(hls::stream<XF_TNAME(SRC_T, NPC)>& _
 }
 
 /* Calls the functions based on the PIXEL PARALLELISM configuration */
-template <int ROWS, int COLS, int SRC_T, int DST_T, int NPC, int WSIZE, int NDISP, int NDISP_UNIT, bool USE_URAM>
-void xFFindStereoCorrespondenceLBM(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _left_mat,
-                                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _right_mat,
-                                   xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _disp_mat,
+template <int ROWS,
+          int COLS,
+          int SRC_T,
+          int DST_T,
+          int NPC,
+          int XFCVDEPTH_left = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_right = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_disp = _XFCVDEPTH_DEFAULT,
+          int WSIZE,
+          int NDISP,
+          int NDISP_UNIT,
+          bool USE_URAM>
+void xFFindStereoCorrespondenceLBM(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_left>& _left_mat,
+                                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_right>& _right_mat,
+                                   xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_disp>& _disp_mat,
                                    xf::cv::xFSBMState<WSIZE, NDISP, NDISP_UNIT>& sbmstate,
                                    short int height,
                                    short int width) {
@@ -859,9 +886,9 @@ void xFFindStereoCorrespondenceLBM(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _left_ma
     assert(sbmstate.preFilterType == XF_STEREO_PREFILTER_SOBEL_TYPE);
 #endif
 
-    xFFindStereoCorrespondenceLBMNO<ROWS, COLS, SRC_T, DST_T, NPC, WSIZE, NDISP, NDISP_UNIT,
-                                    (NDISP / NDISP_UNIT) + ((NDISP % NDISP_UNIT) != 0), USE_URAM>(
-        _left_mat, _right_mat, _disp_mat, sbmstate, height, width);
+    xFFindStereoCorrespondenceLBMNO<ROWS, COLS, SRC_T, DST_T, NPC, XFCVDEPTH_left, XFCVDEPTH_right, XFCVDEPTH_disp,
+                                    WSIZE, NDISP, NDISP_UNIT, (NDISP / NDISP_UNIT) + ((NDISP % NDISP_UNIT) != 0),
+                                    USE_URAM>(_left_mat, _right_mat, _disp_mat, sbmstate, height, width);
 }
 
 template <int WSIZE,
@@ -872,17 +899,21 @@ template <int WSIZE,
           int ROWS,
           int COLS,
           int NPC,
+          int XFCVDEPTH_left = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_right = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_disp = _XFCVDEPTH_DEFAULT,
           bool USE_URAM = false>
-void StereoBM(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _left_mat,
-              xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _right_mat,
-              xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _disp_mat,
+void StereoBM(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_left>& _left_mat,
+              xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_right>& _right_mat,
+              xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_disp>& _disp_mat,
               xf::cv::xFSBMState<WSIZE, NDISP, NDISP_UNIT>& sbmstate) {
 // clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
 
-    xFFindStereoCorrespondenceLBM<ROWS, COLS, SRC_T, DST_T, NPC, WSIZE, NDISP, NDISP_UNIT, USE_URAM>(
-        _left_mat, _right_mat, _disp_mat, sbmstate, _left_mat.rows, _left_mat.cols);
+    xFFindStereoCorrespondenceLBM<ROWS, COLS, SRC_T, DST_T, NPC, XFCVDEPTH_left, XFCVDEPTH_right, XFCVDEPTH_disp, WSIZE,
+                                  NDISP, NDISP_UNIT, USE_URAM>(_left_mat, _right_mat, _disp_mat, sbmstate,
+                                                               _left_mat.rows, _left_mat.cols);
 }
 } // namespace cv
 } // namespace xf

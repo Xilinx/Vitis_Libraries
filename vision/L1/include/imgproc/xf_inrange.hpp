@@ -78,11 +78,13 @@ template <int SRC_T,
           int DEPTH_SRC,
           int DEPTH_DST,
           int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int COLS_TRIP>
-void xFinRangeKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                     xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_mat,
+void xFinRangeKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+                     xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst_mat,
                      unsigned char lower_thresh[XF_CHANNELS(SRC_T, NPC)],
                      unsigned char upper_thresh[XF_CHANNELS(SRC_T, NPC)],
                      unsigned short height,
@@ -125,11 +127,17 @@ rowLoop:
     }
 }
 
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
-void inRange(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void inRange(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
              unsigned char lower_thresh[XF_CHANNELS(SRC_T, NPC)],
              unsigned char upper_thresh[XF_CHANNELS(SRC_T, NPC)],
-             xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst) {
+             xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& dst) {
     unsigned short width = src.cols >> XF_BITSHIFT(NPC);
     unsigned short height = src.rows;
 
@@ -147,9 +155,9 @@ void inRange(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
   #pragma HLS INLINE OFF
     // clang-format on
 
-    xFinRangeKernel<SRC_T, DST_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), XF_DEPTH(DST_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                    XF_WORDWIDTH(DST_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(src, dst, lower_thresh, upper_thresh, height,
-                                                                          width);
+    xFinRangeKernel<SRC_T, DST_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), XF_DEPTH(DST_T, NPC), NPC, XFCVDEPTH_IN,
+                    XFCVDEPTH_OUT, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(
+        src, dst, lower_thresh, upper_thresh, height, width);
 }
 } // namespace cv
 } // namespace xf

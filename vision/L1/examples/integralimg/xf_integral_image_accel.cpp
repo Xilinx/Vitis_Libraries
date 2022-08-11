@@ -29,15 +29,15 @@ void integral_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp, ap_uint<OUTPUT_PTR_WIDTH>
     #pragma HLS INTERFACE s_axilite port=return   bundle=control
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> in_mat(rows, cols);
-    xf::cv::Mat<XF_32UC1, HEIGHT, WIDTH, NPC1> out_mat(rows, cols);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> in_mat(rows, cols);
+    xf::cv::Mat<XF_32UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> out_mat(rows, cols);
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(img_inp, in_mat);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(img_inp, in_mat);
 
-    xf::cv::integral<XF_8UC1, XF_32UC1, HEIGHT, WIDTH, XF_NPPC1>(in_mat, out_mat);
+    xf::cv::integral<XF_8UC1, XF_32UC1, HEIGHT, WIDTH, XF_NPPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(in_mat, out_mat);
 
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_32UC1, HEIGHT, WIDTH, NPC1>(out_mat, img_out);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_32UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(out_mat, img_out);
 }

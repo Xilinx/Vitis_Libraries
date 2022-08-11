@@ -18,3 +18,6 @@
 #define RO 0 // Resource Optimized
 
 #define T_8U 1
+
+#define XF_CV_DEPTH_IN 1
+#define XF_CV_DEPTH_OUT 3

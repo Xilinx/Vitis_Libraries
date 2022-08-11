@@ -36,8 +36,8 @@ namespace cv {
  * Output      : cnt, final_pix, pix_pos, temp
  */
 
-template <int SRC_T, int ROWS, int COLS, int DEPTH, int NPC, int COLS_TRIP>
-void read_roi_row(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
+template <int SRC_T, int ROWS, int COLS, int DEPTH, int NPC, int XF_CV_DEPTH_IN, int COLS_TRIP>
+void read_roi_row(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XF_CV_DEPTH_IN>& _src_mat,
                   int offset,
                   int col_loop_cnt,
                   int& cnt,
@@ -97,11 +97,11 @@ void read_roi_row(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
  * Input       : temp, offset, write_offset, end_loc, start_loc, left_over_pix
  * Output      : _dst_mat
  */
-template <int SRC_T, int ROWS, int COLS, int DEPTH, int NPC, int COLS_TRIP>
+template <int SRC_T, int ROWS, int COLS, int DEPTH, int NPC, int XF_CV_DEPTH_OUT, int COLS_TRIP>
 void write_roi_row(int cnt,
                    XF_TNAME(SRC_T, NPC) temp[COLS >> XF_BITSHIFT(NPC)],
                    int write_offset,
-                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat) {
+                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XF_CV_DEPTH_OUT>& _dst_mat) {
 // clang-format off
     #pragma HLS INLINE off
     // clang-format on
@@ -119,9 +119,18 @@ void write_roi_row(int cnt,
  * Input       : _src_mat, roi
  * Output      : _dst_mat
  */
-template <int SRC_T, int ROWS, int COLS, int DEPTH, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int COLS_TRIP>
-void xFcropkernel_memorymapped(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                               xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat,
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int DEPTH,
+          int NPC,
+          int XF_CV_DEPTH_IN,
+          int XF_CV_DEPTH_OUT,
+          int WORDWIDTH_SRC,
+          int WORDWIDTH_DST,
+          int COLS_TRIP>
+void xFcropkernel_memorymapped(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XF_CV_DEPTH_IN>& _src_mat,
+                               xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XF_CV_DEPTH_OUT>& _dst_mat,
                                xf::cv::Rect_<unsigned int>& roi,
                                unsigned short height,
                                unsigned short width) {
@@ -178,8 +187,8 @@ void xFcropkernel_memorymapped(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     }
 
     offset = (r * width) + col_offset;
-    read_roi_row<SRC_T, ROWS, COLS, DEPTH, NPC, COLS_TRIP>(_src_mat, offset, col_loop_cnt, cnt, end_loc, start_loc,
-                                                           pix_pos, left_over_pix, final_pix, buf0);
+    read_roi_row<SRC_T, ROWS, COLS, DEPTH, NPC, XF_CV_DEPTH_IN, COLS_TRIP>(
+        _src_mat, offset, col_loop_cnt, cnt, end_loc, start_loc, pix_pos, left_over_pix, final_pix, buf0);
 
 rowLoop:
     for (ap_uint<32> i = 1; i < roi.height; i++) {
@@ -197,15 +206,15 @@ rowLoop:
         offset += width;
 
         if (toggle_flag) {
-            write_roi_row<SRC_T, ROWS, COLS, DEPTH, NPC, COLS_TRIP>(cnt, buf0, write_offset, _dst_mat);
+            write_roi_row<SRC_T, ROWS, COLS, DEPTH, NPC, XF_CV_DEPTH_OUT, COLS_TRIP>(cnt, buf0, write_offset, _dst_mat);
             write_offset += cnt;
-            read_roi_row<SRC_T, ROWS, COLS, DEPTH, NPC, COLS_TRIP>(_src_mat, offset, col_loop_cnt, cnt, end_loc,
-                                                                   start_loc, pix_pos, left_over_pix, final_pix, buf1);
+            read_roi_row<SRC_T, ROWS, COLS, DEPTH, NPC, XF_CV_DEPTH_IN, COLS_TRIP>(
+                _src_mat, offset, col_loop_cnt, cnt, end_loc, start_loc, pix_pos, left_over_pix, final_pix, buf1);
         } else {
-            write_roi_row<SRC_T, ROWS, COLS, DEPTH, NPC, COLS_TRIP>(cnt, buf1, write_offset, _dst_mat);
+            write_roi_row<SRC_T, ROWS, COLS, DEPTH, NPC, XF_CV_DEPTH_OUT, COLS_TRIP>(cnt, buf1, write_offset, _dst_mat);
             write_offset += cnt;
-            read_roi_row<SRC_T, ROWS, COLS, DEPTH, NPC, COLS_TRIP>(_src_mat, offset, col_loop_cnt, cnt, end_loc,
-                                                                   start_loc, pix_pos, left_over_pix, final_pix, buf0);
+            read_roi_row<SRC_T, ROWS, COLS, DEPTH, NPC, XF_CV_DEPTH_IN, COLS_TRIP>(
+                _src_mat, offset, col_loop_cnt, cnt, end_loc, start_loc, pix_pos, left_over_pix, final_pix, buf0);
         }
 
         // toogle_flag = ~toggle_flag;
@@ -213,11 +222,11 @@ rowLoop:
     }
     // For last row
     if (roi.height == 1) {
-        write_roi_row<SRC_T, ROWS, COLS, DEPTH, NPC, COLS_TRIP>(cnt, buf0, write_offset, _dst_mat);
+        write_roi_row<SRC_T, ROWS, COLS, DEPTH, NPC, XF_CV_DEPTH_OUT, COLS_TRIP>(cnt, buf0, write_offset, _dst_mat);
     } else if (toggle_flag == 1) {
-        write_roi_row<SRC_T, ROWS, COLS, DEPTH, NPC, COLS_TRIP>(cnt, buf0, write_offset, _dst_mat);
+        write_roi_row<SRC_T, ROWS, COLS, DEPTH, NPC, XF_CV_DEPTH_OUT, COLS_TRIP>(cnt, buf0, write_offset, _dst_mat);
     } else {
-        write_roi_row<SRC_T, ROWS, COLS, DEPTH, NPC, COLS_TRIP>(cnt, buf1, write_offset, _dst_mat);
+        write_roi_row<SRC_T, ROWS, COLS, DEPTH, NPC, XF_CV_DEPTH_OUT, COLS_TRIP>(cnt, buf1, write_offset, _dst_mat);
     }
 
     if (pix_pos != 0) {
@@ -229,9 +238,18 @@ rowLoop:
  * Input       : _src_mat, roi
  * Output      : _dst_mat
  */
-template <int SRC_T, int ROWS, int COLS, int DEPTH, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int COLS_TRIP>
-void xFcropkernel_stream(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                         xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat,
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int DEPTH,
+          int NPC,
+          int XF_CV_DEPTH_IN,
+          int XF_CV_DEPTH_OUT,
+          int WORDWIDTH_SRC,
+          int WORDWIDTH_DST,
+          int COLS_TRIP>
+void xFcropkernel_stream(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XF_CV_DEPTH_IN>& _src_mat,
+                         xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XF_CV_DEPTH_OUT>& _dst_mat,
                          xf::cv::Rect_<unsigned int>& roi,
                          unsigned short height,
                          unsigned short width) {
@@ -292,9 +310,9 @@ rowLoop:
     }
 }
 
-template <int SRC_T, int ROWS, int COLS, int ARCH_TYPE = 0, int NPC = 1>
-void crop(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-          xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat,
+template <int SRC_T, int ROWS, int COLS, int ARCH_TYPE = 0, int NPC = 1, int XF_CV_DEPTH_IN, int XF_CV_DEPTH_OUT>
+void crop(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XF_CV_DEPTH_IN>& _src_mat,
+          xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XF_CV_DEPTH_OUT>& _dst_mat,
           xf::cv::Rect_<unsigned int>& roi) {
     unsigned short width = _src_mat.cols;
     unsigned short height = _src_mat.rows;
@@ -314,13 +332,13 @@ void crop(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     // clang-format on
 
     if (ARCH_TYPE == XF_MEMORYMAPPED) {
-        xFcropkernel_memorymapped<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                                  XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(_src_mat, _dst_mat, roi, height,
-                                                                                        width);
+        xFcropkernel_memorymapped<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT,
+                                  XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(
+            _src_mat, _dst_mat, roi, height, width);
     } else {
-        xFcropkernel_stream<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                            XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(_src_mat, _dst_mat, roi, height,
-                                                                                  width);
+        xFcropkernel_stream<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT,
+                            XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(
+            _src_mat, _dst_mat, roi, height, width);
     }
 
 } // crop

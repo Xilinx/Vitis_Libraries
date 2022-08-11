@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#define XF_CV_DEPTH_IN_1 1
+#define XF_CV_DEPTH_OUT 3
+#define XF_CV_DEPTH_IN_2 2
 
 #define RO 1 // Resource Optimized (8-pixel implementation)
 #define NO 0 // Normal Operation (1-pixel implementation)

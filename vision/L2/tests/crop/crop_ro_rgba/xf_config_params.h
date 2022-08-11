@@ -22,6 +22,12 @@
 /*  set the type of input image*/
 #define GRAY 0
 
+#define XF_CV_DEPTH_IN -1
+#define XF_CV_DEPTH_OUT -1
+
+#define XF_CV_DEPTH_OUT_1 -1
+#define XF_CV_DEPTH_OUT_2 -1
+
 #define NUM_ROI 3
 
 #define INPUT_PTR_WIDTH 256

@@ -15,7 +15,7 @@
                     ]
                 }, 
                 "linker": {
-                    "clflags": [
+                    "ldclflags": [
                         "--config PROJECT/system.cfg"
                     ]
                 }, 

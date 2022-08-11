@@ -50,6 +50,6 @@ void boundingbox_accel(
         }
     }
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPIX> in_mat(height, width, in_img);
-    xf::cv::boundingbox<TYPE, HEIGHT, WIDTH, MAX_BOXES, NPIX>(in_mat, _roi, color, num_box);
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_IN> in_mat(height, width, in_img);
+    xf::cv::boundingbox<TYPE, HEIGHT, WIDTH, MAX_BOXES, NPIX, XF_CV_DEPTH_IN>(in_mat, _roi, color, num_box);
 }

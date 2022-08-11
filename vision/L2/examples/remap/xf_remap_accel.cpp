@@ -30,10 +30,10 @@ void remap_accel(
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC> imgInput(rows, cols);
-    xf::cv::Mat<TYPE_XY, HEIGHT, WIDTH, NPC> mapX(rows, cols);
-    xf::cv::Mat<TYPE_XY, HEIGHT, WIDTH, NPC> mapY(rows, cols);
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC> imgOutput(rows, cols);
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_IN_1> imgInput(rows, cols);
+    xf::cv::Mat<TYPE_XY, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_IN_2> mapX(rows, cols);
+    xf::cv::Mat<TYPE_XY, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_IN_3> mapY(rows, cols);
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_OUT> imgOutput(rows, cols);
 
     const int HEIGHT_WIDTH_LOOPCOUNT = HEIGHT * WIDTH / XF_NPIXPERCYCLE(NPC);
     for (unsigned int i = 0; i < rows * cols; ++i) {
@@ -48,10 +48,6 @@ void remap_accel(
     }
 
 // clang-format off
-    #pragma HLS STREAM variable=imgInput.data depth=2
-    #pragma HLS STREAM variable=mapX.data depth=2
-    #pragma HLS STREAM variable=mapY.data depth=2
-    #pragma HLS STREAM variable=imgOutput.data depth=2
 // clang-format on
 
 // clang-format off
@@ -59,14 +55,14 @@ void remap_accel(
     // clang-format on
 
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<PTR_IMG_WIDTH, TYPE, HEIGHT, WIDTH, NPC>(img_in, imgInput);
+    xf::cv::Array2xfMat<PTR_IMG_WIDTH, TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_IN_1>(img_in, imgInput);
 
     // Run xfOpenCV kernel:
-    xf::cv::remap<XF_WIN_ROWS, XF_INTERPOLATION_TYPE, TYPE, TYPE_XY, TYPE, HEIGHT, WIDTH, NPC, XF_USE_URAM>(
-        imgInput, imgOutput, mapX, mapY);
+    xf::cv::remap<XF_WIN_ROWS, XF_INTERPOLATION_TYPE, TYPE, TYPE_XY, TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_IN_1,
+                  XF_CV_DEPTH_IN_2, XF_CV_DEPTH_IN_3, XF_CV_DEPTH_OUT, XF_USE_URAM>(imgInput, imgOutput, mapX, mapY);
 
     // Convert _dst xf::cv::Mat object to output array:
-    xf::cv::xfMat2Array<PTR_IMG_WIDTH, TYPE, HEIGHT, WIDTH, NPC>(imgOutput, img_out);
+    xf::cv::xfMat2Array<PTR_IMG_WIDTH, TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_OUT>(imgOutput, img_out);
 
     return;
 } // End of kernel

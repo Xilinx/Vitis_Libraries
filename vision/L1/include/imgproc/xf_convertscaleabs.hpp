@@ -33,14 +33,16 @@ template <int SRC_T,
           int ROWS,
           int COLS,
           int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int PLANES,
           int DEPTH_SRC,
           int DEPTH_DST,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int TC>
-int convertScaleAbsKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
-                          xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
+int convertScaleAbsKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
+                          xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst,
                           float scale,
                           float shift,
                           uint16_t height,
@@ -88,9 +90,15 @@ RowLoop:
     return 0;
 }
 
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
-void convertScaleAbs(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
-                     xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void convertScaleAbs(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
+                     xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst,
                      float scale,
                      float shift) {
 #ifndef __SYNTHESIS__
@@ -102,9 +110,10 @@ void convertScaleAbs(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
 #endif
     short width = src1.cols >> XF_BITSHIFT(NPC);
 
-    convertScaleAbsKernel<SRC_T, DST_T, ROWS, COLS, NPC, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC),
-                          XF_DEPTH(DST_T, NPC), XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
-                          (COLS >> XF_BITSHIFT(NPC))>(src1, dst, scale, shift, src1.rows, width);
+    convertScaleAbsKernel<SRC_T, DST_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1, XF_CHANNELS(SRC_T, NPC),
+                          XF_DEPTH(SRC_T, NPC), XF_DEPTH(DST_T, NPC), XF_WORDWIDTH(SRC_T, NPC),
+                          XF_WORDWIDTH(DST_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(src1, dst, scale, shift, src1.rows,
+                                                                                width);
 }
 } // namespace cv
 } // namespace xf

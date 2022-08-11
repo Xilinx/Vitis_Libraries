@@ -36,3 +36,18 @@
 #define BLOCK_WIDTH 3
 #define NMS_RADIUS 1
 #define MAXCORNERS 10000
+
+#define XF_CV_DEPTH_IN_HARRIS 1
+#define XF_CV_DEPTH_OUT_HARRIS 3
+
+#define XF_CV_DEPTH_CORNER_UPDATE -1
+
+#define XF_CV_DEPTH_PDOF_1 3
+#define XF_CV_DEPTH_PDOF_2 3
+#define XF_CV_DEPTH_PDOF_3 3
+#define XF_CV_DEPTH_PDOF_4 3
+
+#define XF_CV_DEPTH_PD_1 3
+#define XF_CV_DEPTH_PD_2 3
+#define XF_CV_DEPTH_PD_3 3
+#define XF_CV_DEPTH_PD_4 3

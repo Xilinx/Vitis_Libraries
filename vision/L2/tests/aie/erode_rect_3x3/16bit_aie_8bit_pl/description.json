@@ -15,7 +15,7 @@
                     ]
                 }, 
                 "linker": {
-                    "clflags": [
+                    "ldclflags": [
                         "--clock.freqHz 300000000:Tiler_top_1", 
                         "--clock.freqHz 300000000:stitcher_top_1", 
                         "--clock.defaultTolerance 0.001", 

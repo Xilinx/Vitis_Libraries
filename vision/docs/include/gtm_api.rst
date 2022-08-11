@@ -13,17 +13,25 @@ This implementaion is based on the algorithm proposed by Min H. Kim and Jan Kaut
 
 .. code:: c
 
-	template <int SRC_T, int DST_T, int SIN_CHANNEL_IN_TYPE, int SIN_CHANNEL_OUT_TYPE, int ROWS, int COLS, int NPC>
-	void gtm(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
-			 xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
-			 ap_ufixed<16, 4>& mean1,
-			 ap_ufixed<16, 4>& mean2,
-			 ap_ufixed<16, 4>& L_max1,
-			 ap_ufixed<16, 4>& L_max2,
-			 ap_ufixed<16, 4>& L_min1,
-			 ap_ufixed<16, 4>& L_min2,
-			 float c1,
-			 float c2)
+    template <int SRC_T,
+            int DST_T,
+            int SIN_CHANNEL_IN_TYPE,
+            int SIN_CHANNEL_OUT_TYPE,
+            int ROWS,
+            int COLS,
+            int NPC,
+            int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+            int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+    void gtm(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
+            xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& dst,
+            ap_ufixed<16, 4>& mean1,
+            ap_ufixed<16, 4>& mean2,
+            ap_ufixed<16, 4>& L_max1,
+            ap_ufixed<16, 4>& L_max2,
+            ap_ufixed<16, 4>& L_min1,
+            ap_ufixed<16, 4>& L_min2,
+            float c1,
+            float c2)
 
 The following table describes the template and the function parameters.
 
@@ -50,6 +58,10 @@ The following table describes the template and the function parameters.
     +----------------------+-------------------------------------------------------------+
     | NPC                  | Number of Pixels to be processed per cycle. NPPC1 and NPPC2 |
     |                      | are supported.                                              |
+    +----------------------+-------------------------------------------------------------+
+    | XFCVDEPTH_IN         | Depth of Input image                                        |
+    +----------------------+-------------------------------------------------------------+
+    | XFCVDEPTH_OUT        | Depth of Output image                                       |
     +----------------------+-------------------------------------------------------------+
     | src                  | Input Image                                                 |
     +----------------------+-------------------------------------------------------------+

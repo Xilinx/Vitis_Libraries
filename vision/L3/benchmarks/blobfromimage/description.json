@@ -97,7 +97,7 @@
     "launch": [
         {
             "target": "sw_emu", 
-            "cmd_args": "PROJECT/im0.png 224 224", 
+            "cmd_args": "LIB_DIR/data/im0.png 224 224", 
             "name": "sw_emu", 
             "ld_library_path": [
                 "$(OPENCV_LIB)", 
@@ -107,7 +107,7 @@
         }, 
         {
             "target": "hw_emu", 
-            "cmd_args": "PROJECT/im0.png 224 224", 
+            "cmd_args": "LIB_DIR/data/im0.png 224 224", 
             "name": "hw_emu", 
             "ld_library_path": [
                 "$(OPENCV_LIB)", 
@@ -117,7 +117,7 @@
         }, 
         {
             "target": "hw", 
-            "cmd_args": "PROJECT/im0.png 224 224", 
+            "cmd_args": "LIB_DIR/data/im0.png 224 224", 
             "name": "Hardware", 
             "ld_library_path": [
                 "$(OPENCV_LIB)", 
@@ -127,7 +127,7 @@
         }
     ], 
     "data": [
-        "PROJECT/im0.png"
+        "LIB_DIR/data/im0.png"
     ], 
     "host": {
         "host_exe": "blobfromimage", 

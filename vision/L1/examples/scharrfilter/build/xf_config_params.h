@@ -24,3 +24,7 @@
 #define T_16S 1
 
 #define XF_USE_URAM false
+
+#define XF_CV_DEPTH_IN 2
+#define XF_CV_DEPTH_OUT_GX 2
+#define XF_CV_DEPTH_OUT_GY 2

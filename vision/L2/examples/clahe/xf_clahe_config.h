@@ -17,6 +17,7 @@
 #ifndef _XF_CLAHE_CONFIG_HPP_
 #define _XF_CLAHE_CONFIG_HPP_
 #include "imgproc/xf_clahe.hpp"
+#include "build/xf_config_params.h"
 
 /*  User configurable parameters */
 static constexpr int IN_TYPE = XF_8UC1;

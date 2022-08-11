@@ -101,6 +101,21 @@ void compute_gamma(float r_g, float g_g, float b_g, uchar gamma_lut[256 * 3]) {
     }
 }
 
+void gammacorrection_ref(
+    cv::Mat in_gray, cv::Mat ocv_ref, uchar gam_r[256], uchar gam_g[256], uchar gam_b[256], int height, int width) {
+    uchar in_r = 0, in_g = 0, in_b = 0;
+    for (int x = 0; x < width; x++) {      // width = cols = x
+        for (int y = 0; y < height; y++) { // height = rows = y
+            in_r = in_gray.at<cv::Vec3b>(y, x)[0];
+            in_g = in_gray.at<cv::Vec3b>(y, x)[1];
+            in_b = in_gray.at<cv::Vec3b>(y, x)[2];
+            ocv_ref.at<cv::Vec3b>(y, x)[0] = gam_r[in_r];
+            ocv_ref.at<cv::Vec3b>(y, x)[1] = gam_g[in_g];
+            ocv_ref.at<cv::Vec3b>(y, x)[2] = gam_b[in_b];
+        }
+    }
+}
+
 int main(int argc, char** argv) {
     if (argc != 2) {
         fprintf(stderr, "Invalid Number of Arguments!\nUsage:\n");
@@ -137,6 +152,39 @@ int main(int argc, char** argv) {
                           height, width);
 
     cv::imwrite("out_hls.jpg", out_gray);
+
+    // ------------------------------------------------------
+    // OpenCV function
+    unsigned char gam_r[256], gam_g[256], gam_b[256];
+    for (int i = 0; i < 256; i++) {
+        gam_r[i] = gamma_lut[i];
+        gam_g[i] = gamma_lut[i + 256];
+        gam_b[i] = gamma_lut[i + 512];
+    }
+
+    gammacorrection_ref(in_gray, ocv_ref, gam_r, gam_g, gam_b, height, width);
+
+    // Write OpenCV reference image
+    cv::imwrite("out_ocv.jpg", ocv_ref);
+
+    // Compute absolute difference image
+    absdiff(out_gray, ocv_ref, diff);
+
+    // Save the difference image
+    imwrite("diff.png", diff);
+
+    // Results verification:
+
+    float err_per;
+    static constexpr int ERROR_THRESHOLD = 1;
+    xf::cv::analyzeDiff(diff, ERROR_THRESHOLD, err_per);
+
+    if (err_per > 0.0f) {
+        std::cout << "Testcase failed" << std::endl;
+        return 1;
+    }
+
+    std::cout << "Testcase passed" << std::endl;
 
     return 0;
 }

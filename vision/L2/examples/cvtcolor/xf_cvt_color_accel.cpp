@@ -42,31 +42,23 @@ void cvtcolor_rgba2iyuv(ap_uint<INPUT_PTR_WIDTH>* img_rgba,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_rgba;
     imgInput0.cols = cols_rgba;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_y;
     imgOutput0.cols = cols_y;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1> imgOutput1;
-// clang-format off
-    #pragma HLS stream variable=imgOutput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> imgOutput1;
+
     imgOutput1.rows = rows_uv;
     imgOutput1.cols = cols_uv;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1> imgOutput2;
-// clang-format off
-    #pragma HLS stream variable=imgOutput2.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_OUT_2> imgOutput2;
+
     imgOutput2.rows = rows_uv;
     imgOutput2.cols = cols_uv;
 
@@ -74,11 +66,12 @@ void cvtcolor_rgba2iyuv(ap_uint<INPUT_PTR_WIDTH>* img_rgba,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC4, HEIGHT, WIDTH, NPC1>(img_rgba, imgInput0);
-    xf::cv::rgba2iyuv<XF_8UC4, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0, imgOutput1, imgOutput2);
-    obj_iny.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, img_y);
-    obj_inu.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1>(imgOutput1, img_u);
-    obj_inv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1>(imgOutput2, img_v);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_rgba, imgInput0);
+    xf::cv::rgba2iyuv<XF_8UC4, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_1,
+                      XF_CV_DEPTH_OUT_2>(imgInput0, imgOutput0, imgOutput1, imgOutput2);
+    obj_iny.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_y);
+    obj_inu.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(imgOutput1, img_u);
+    obj_inv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_OUT_2>(imgOutput2, img_v);
 }
 #endif
 #if RGBA2NV12
@@ -108,24 +101,18 @@ void cvtcolor_rgba2nv12(ap_uint<INPUT_PTR_WIDTH>* img_rgba,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_rgba;
     imgInput0.cols = cols_rgba;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_y;
     imgOutput0.cols = cols_y;
 
-    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2> imgOutput1;
-// clang-format off
-    #pragma HLS stream variable=imgOutput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_OUT_1> imgOutput1;
+
     imgOutput1.rows = rows_uv;
     imgOutput1.cols = cols_uv;
 
@@ -133,10 +120,11 @@ void cvtcolor_rgba2nv12(ap_uint<INPUT_PTR_WIDTH>* img_rgba,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC4, HEIGHT, WIDTH, NPC1>(img_rgba, imgInput0);
-    xf::cv::rgba2nv12<XF_8UC4, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(imgInput0, imgOutput0, imgOutput1);
-    obj_y.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, img_y);
-    obj_uv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2>(imgOutput1, img_uv);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_rgba, imgInput0);
+    xf::cv::rgba2nv12<XF_8UC4, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0,
+                      XF_CV_DEPTH_OUT_1>(imgInput0, imgOutput0, imgOutput1);
+    obj_y.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_y);
+    obj_uv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_OUT_1>(imgOutput1, img_uv);
 }
 #endif
 #if RGBA2NV21
@@ -166,24 +154,18 @@ void cvtcolor_rgba2nv21(ap_uint<INPUT_PTR_WIDTH>* img_rgba,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_rgba;
     imgInput0.cols = cols_rgba;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_y;
     imgOutput0.cols = cols_y;
 
-    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2> imgOutput1;
-// clang-format off
-    #pragma HLS stream variable=imgOutput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_OUT_1> imgOutput1;
+
     imgOutput1.rows = rows_uv;
     imgOutput1.cols = cols_uv;
 
@@ -191,10 +173,11 @@ void cvtcolor_rgba2nv21(ap_uint<INPUT_PTR_WIDTH>* img_rgba,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC4, HEIGHT, WIDTH, NPC1>(img_rgba, imgInput0);
-    xf::cv::rgba2nv21<XF_8UC4, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(imgInput0, imgOutput0, imgOutput1);
-    obj_y.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, img_y);
-    obj_uv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2>(imgOutput1, img_uv);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_rgba, imgInput0);
+    xf::cv::rgba2nv21<XF_8UC4, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0,
+                      XF_CV_DEPTH_OUT_1>(imgInput0, imgOutput0, imgOutput1);
+    obj_y.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_y);
+    obj_uv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_OUT_1>(imgOutput1, img_uv);
 }
 #endif
 #if RGBA2YUV4
@@ -226,42 +209,35 @@ void cvtcolor_rgba2yuv4(ap_uint<INPUT_PTR_WIDTH>* img_rgba,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_rgba;
     imgInput0.cols = cols_rgba;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_y;
     imgOutput0.cols = cols_y;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput1;
-// clang-format off
-    #pragma HLS stream variable=imgOutput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> imgOutput1;
+
     imgOutput1.rows = rows_uv;
     imgOutput1.cols = cols_uv;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput2;
-// clang-format off
-    #pragma HLS stream variable=imgOutput2.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_2> imgOutput2;
+
     imgOutput2.rows = rows_uv;
     imgOutput2.cols = cols_uv;
     xf::cv::accel_utils obj_y, obj_u, obj_v;
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC4, HEIGHT, WIDTH, NPC1>(img_rgba, imgInput0);
-    xf::cv::rgba2yuv4<XF_8UC4, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0, imgOutput1, imgOutput2);
-    obj_y.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, img_y);
-    obj_u.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput1, img_u);
-    obj_v.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput2, img_v);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_rgba, imgInput0);
+    xf::cv::rgba2yuv4<XF_8UC4, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_1,
+                      XF_CV_DEPTH_OUT_2>(imgInput0, imgOutput0, imgOutput1, imgOutput2);
+    obj_y.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_y);
+    obj_u.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(imgOutput1, img_u);
+    obj_v.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_2>(imgOutput2, img_v);
 }
 #endif
 
@@ -291,31 +267,23 @@ void cvtcolor_rgb2iyuv(ap_uint<INPUT_PTR_WIDTH>* img_rgb,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_rgb;
     imgInput0.cols = cols_rgb;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_y;
     imgOutput0.cols = cols_y;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1> imgOutput1;
-// clang-format off
-    #pragma HLS stream variable=imgOutput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> imgOutput1;
+
     imgOutput1.rows = rows_uv;
     imgOutput1.cols = cols_uv;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1> imgOutput2;
-// clang-format off
-    #pragma HLS stream variable=imgOutput2.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_OUT_2> imgOutput2;
+
     imgOutput2.rows = rows_uv;
     imgOutput2.cols = cols_uv;
 
@@ -324,11 +292,12 @@ void cvtcolor_rgb2iyuv(ap_uint<INPUT_PTR_WIDTH>* img_rgb,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_rgb, imgInput0);
-    xf::cv::rgb2iyuv<XF_8UC3, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0, imgOutput1, imgOutput2);
-    obj_y.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, img_y);
-    obj_u.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1>(imgOutput1, img_u);
-    obj_v.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1>(imgOutput2, img_v);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_rgb, imgInput0);
+    xf::cv::rgb2iyuv<XF_8UC3, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_1,
+                     XF_CV_DEPTH_OUT_2>(imgInput0, imgOutput0, imgOutput1, imgOutput2);
+    obj_y.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_y);
+    obj_u.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(imgOutput1, img_u);
+    obj_v.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_OUT_2>(imgOutput2, img_v);
 }
 #endif
 #if RGB2NV12
@@ -358,24 +327,18 @@ void cvtcolor_rgb2nv12(ap_uint<INPUT_PTR_WIDTH>* img_rgb,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_rgb;
     imgInput0.cols = cols_rgb;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_y;
     imgOutput0.cols = cols_y;
 
-    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2> imgOutput1;
-// clang-format off
-    #pragma HLS stream variable=imgOutput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_OUT_1> imgOutput1;
+
     imgOutput1.rows = rows_uv;
     imgOutput1.cols = cols_uv;
 
@@ -384,10 +347,11 @@ void cvtcolor_rgb2nv12(ap_uint<INPUT_PTR_WIDTH>* img_rgb,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_rgb, imgInput0);
-    xf::cv::rgb2nv12<XF_8UC3, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(imgInput0, imgOutput0, imgOutput1);
-    obj_y.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, img_y);
-    obj_uv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2>(imgOutput1, img_uv);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_rgb, imgInput0);
+    xf::cv::rgb2nv12<XF_8UC3, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0,
+                     XF_CV_DEPTH_OUT_1>(imgInput0, imgOutput0, imgOutput1);
+    obj_y.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_y);
+    obj_uv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_OUT_1>(imgOutput1, img_uv);
 }
 #endif
 #if BGR2NV12
@@ -417,24 +381,18 @@ void cvtcolor_bgr2nv12(ap_uint<INPUT_PTR_WIDTH>* img_rgb,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_rgb;
     imgInput0.cols = cols_rgb;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_y;
     imgOutput0.cols = cols_y;
 
-    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2> imgOutput1;
-// clang-format off
-    #pragma HLS stream variable=imgOutput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_OUT_1> imgOutput1;
+
     imgOutput1.rows = rows_uv;
     imgOutput1.cols = cols_uv;
 
@@ -443,10 +401,11 @@ void cvtcolor_bgr2nv12(ap_uint<INPUT_PTR_WIDTH>* img_rgb,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_rgb, imgInput0);
-    xf::cv::bgr2nv12<XF_8UC3, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(imgInput0, imgOutput0, imgOutput1);
-    obj_y.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, img_y);
-    obj_uv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2>(imgOutput1, img_uv);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_rgb, imgInput0);
+    xf::cv::bgr2nv12<XF_8UC3, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0,
+                     XF_CV_DEPTH_OUT_1>(imgInput0, imgOutput0, imgOutput1);
+    obj_y.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_y);
+    obj_uv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_OUT_1>(imgOutput1, img_uv);
 }
 #endif
 #if RGB2NV21
@@ -476,24 +435,18 @@ void cvtcolor_rgb2nv21(ap_uint<INPUT_PTR_WIDTH>* img_rgb,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_rgb;
     imgInput0.cols = cols_rgb;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_y;
     imgOutput0.cols = cols_y;
 
-    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2> imgOutput1;
-// clang-format off
-    #pragma HLS stream variable=imgOutput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_OUT_1> imgOutput1;
+
     imgOutput1.rows = rows_uv;
     imgOutput1.cols = cols_uv;
 
@@ -502,10 +455,11 @@ void cvtcolor_rgb2nv21(ap_uint<INPUT_PTR_WIDTH>* img_rgb,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_rgb, imgInput0);
-    xf::cv::rgb2nv21<XF_8UC3, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(imgInput0, imgOutput0, imgOutput1);
-    obj_y.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, img_y);
-    obj_uv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2>(imgOutput1, img_uv);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_rgb, imgInput0);
+    xf::cv::rgb2nv21<XF_8UC3, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0,
+                     XF_CV_DEPTH_OUT_1>(imgInput0, imgOutput0, imgOutput1);
+    obj_y.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_y);
+    obj_uv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_OUT_1>(imgOutput1, img_uv);
 }
 #endif
 #if BGR2NV21
@@ -535,24 +489,18 @@ void cvtcolor_bgr2nv21(ap_uint<INPUT_PTR_WIDTH>* img_rgb,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_rgb;
     imgInput0.cols = cols_rgb;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_y;
     imgOutput0.cols = cols_y;
 
-    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2> imgOutput1;
-// clang-format off
-    #pragma HLS stream variable=imgOutput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_OUT_1> imgOutput1;
+
     imgOutput1.rows = rows_uv;
     imgOutput1.cols = cols_uv;
 
@@ -561,10 +509,11 @@ void cvtcolor_bgr2nv21(ap_uint<INPUT_PTR_WIDTH>* img_rgb,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_rgb, imgInput0);
-    xf::cv::bgr2nv21<XF_8UC3, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(imgInput0, imgOutput0, imgOutput1);
-    obj_y.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, img_y);
-    obj_uv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2>(imgOutput1, img_uv);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_rgb, imgInput0);
+    xf::cv::bgr2nv21<XF_8UC3, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0,
+                     XF_CV_DEPTH_OUT_1>(imgInput0, imgOutput0, imgOutput1);
+    obj_y.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_y);
+    obj_uv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_OUT_1>(imgOutput1, img_uv);
 }
 #endif
 #if RGB2YUV4
@@ -596,31 +545,23 @@ void cvtcolor_rgb2yuv4(ap_uint<INPUT_PTR_WIDTH>* img_rgb,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_rgb;
     imgInput0.cols = cols_rgb;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_y;
     imgOutput0.cols = cols_y;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput1;
-// clang-format off
-    #pragma HLS stream variable=imgOutput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> imgOutput1;
+
     imgOutput1.rows = rows_uv;
     imgOutput1.cols = cols_uv;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput2;
-// clang-format off
-    #pragma HLS stream variable=imgOutput2.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_2> imgOutput2;
+
     imgOutput2.rows = rows_uv;
     imgOutput2.cols = cols_uv;
 
@@ -628,11 +569,12 @@ void cvtcolor_rgb2yuv4(ap_uint<INPUT_PTR_WIDTH>* img_rgb,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_rgb, imgInput0);
-    xf::cv::rgb2yuv4<XF_8UC3, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0, imgOutput1, imgOutput2);
-    obj_y.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, img_y);
-    obj_u.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput1, img_u);
-    obj_v.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput2, img_v);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_rgb, imgInput0);
+    xf::cv::rgb2yuv4<XF_8UC3, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_1,
+                     XF_CV_DEPTH_OUT_2>(imgInput0, imgOutput0, imgOutput1, imgOutput2);
+    obj_y.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_y);
+    obj_u.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(imgOutput1, img_u);
+    obj_v.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_2>(imgOutput2, img_v);
 }
 #endif
 
@@ -647,25 +589,22 @@ void cvtcolor_rgb2yuyv(ap_uint<INPUT_PTR_WIDTH>* img_rgb, ap_uint<OUTPUT_PTR_WID
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_rgb, imgInput0);
-    xf::cv::rgb2yuyv<XF_8UC3, XF_16UC1, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, img_yuyv);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_rgb, imgInput0);
+    xf::cv::rgb2yuyv<XF_8UC3, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0,
+                                                                                                  imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_yuyv);
 }
 #endif
 #if BGR2YUYV
@@ -679,25 +618,22 @@ void cvtcolor_bgr2yuyv(ap_uint<INPUT_PTR_WIDTH>* img_rgb, ap_uint<OUTPUT_PTR_WID
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_rgb, imgInput0);
-    xf::cv::bgr2yuyv<XF_8UC3, XF_16UC1, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, img_yuyv);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_rgb, imgInput0);
+    xf::cv::bgr2yuyv<XF_8UC3, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0,
+                                                                                                  imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_yuyv);
 }
 #endif
 #if RGB2UYVY
@@ -711,25 +647,22 @@ void cvtcolor_rgb2uyvy(ap_uint<INPUT_PTR_WIDTH>* img_rgb, ap_uint<OUTPUT_PTR_WID
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_rgb, imgInput0);
-    xf::cv::rgb2uyvy<XF_8UC3, XF_16UC1, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, img_uyvy);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_rgb, imgInput0);
+    xf::cv::rgb2uyvy<XF_8UC3, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0,
+                                                                                                  imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_uyvy);
 }
 #endif
 #if BGR2UYVY
@@ -743,25 +676,22 @@ void cvtcolor_bgr2uyvy(ap_uint<INPUT_PTR_WIDTH>* img_rgb, ap_uint<OUTPUT_PTR_WID
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_rgb, imgInput0);
-    xf::cv::bgr2uyvy<XF_8UC3, XF_16UC1, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, img_uyvy);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_rgb, imgInput0);
+    xf::cv::bgr2uyvy<XF_8UC3, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0,
+                                                                                                  imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_uyvy);
 }
 #endif
 #if IYUV2NV12
@@ -798,38 +728,28 @@ void cvtcolor_iyuv2nv12(ap_uint<INPUT_PTR_WIDTH>* img_y,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1> imgInput1;
-// clang-format off
-    #pragma HLS stream variable=imgInput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_IN_1> imgInput1;
+
     imgInput1.rows = rows_u;
     imgInput1.cols = cols_u;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1> imgInput2;
-// clang-format off
-    #pragma HLS stream variable=imgInput2.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_IN_2> imgInput2;
+
     imgInput2.rows = rows_v;
     imgInput2.cols = cols_v;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
-    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2> imgOutput1;
-// clang-format off
-    #pragma HLS stream variable=imgOutput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_OUT_1> imgOutput1;
+
     imgOutput1.rows = rows_uv;
     imgOutput1.cols = cols_uv;
 
@@ -838,15 +758,15 @@ void cvtcolor_iyuv2nv12(ap_uint<INPUT_PTR_WIDTH>* img_y,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(img_y, imgInput0);
-    obj_inu.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1>(img_u, imgInput1);
-    obj_inv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1>(img_v, imgInput2);
+    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_y, imgInput0);
+    obj_inu.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_IN_1>(img_u, imgInput1);
+    obj_inv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_IN_2>(img_v, imgInput2);
 
-    xf::cv::iyuv2nv12<XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(imgInput0, imgInput1, imgInput2, imgOutput0,
-                                                                   imgOutput1);
+    xf::cv::iyuv2nv12<XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2,
+                      XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_1>(imgInput0, imgInput1, imgInput2, imgOutput0, imgOutput1);
 
-    obj_y.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, out_img_y);
-    obj_uv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2>(imgOutput1, img_uv);
+    obj_y.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, out_img_y);
+    obj_uv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_OUT_1>(imgOutput1, img_uv);
 }
 #endif
 #if IYUV2RGBA
@@ -880,42 +800,35 @@ void cvtcolor_iyuv2rgba(ap_uint<INPUT_PTR_WIDTH>* img_y,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1> imgInput1;
-// clang-format off
-    #pragma HLS stream variable=imgInput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_IN_1> imgInput1;
+
     imgInput1.rows = rows_u;
     imgInput1.cols = cols_u;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1> imgInput2;
-// clang-format off
-    #pragma HLS stream variable=imgInput2.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_IN_2> imgInput2;
+
     imgInput2.rows = rows_v;
     imgInput2.cols = cols_v;
 
-    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
     xf::cv::accel_utils obj_iny, obj_inu, obj_inv;
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(img_y, imgInput0);
-    obj_inu.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1>(img_u, imgInput1);
-    obj_inv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1>(img_v, imgInput2);
-    xf::cv::iyuv2rgba<XF_8UC1, XF_8UC4, HEIGHT, WIDTH, NPC1>(imgInput0, imgInput1, imgInput2, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC4, HEIGHT, WIDTH, NPC1>(imgOutput0, img_rgba);
+    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_y, imgInput0);
+    obj_inu.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_IN_1>(img_u, imgInput1);
+    obj_inv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_IN_2>(img_v, imgInput2);
+    xf::cv::iyuv2rgba<XF_8UC1, XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2,
+                      XF_CV_DEPTH_OUT_0>(imgInput0, imgInput1, imgInput2, imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_rgba);
 }
 
 #endif
@@ -950,31 +863,23 @@ void cvtcolor_iyuv2rgb(ap_uint<INPUT_PTR_WIDTH>* img_y,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1> imgInput1;
-// clang-format off
-    #pragma HLS stream variable=imgInput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_IN_1> imgInput1;
+
     imgInput1.rows = rows_u;
     imgInput1.cols = cols_u;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1> imgInput2;
-// clang-format off
-    #pragma HLS stream variable=imgInput2.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_IN_2> imgInput2;
+
     imgInput2.rows = rows_v;
     imgInput2.cols = cols_v;
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
@@ -983,13 +888,14 @@ void cvtcolor_iyuv2rgb(ap_uint<INPUT_PTR_WIDTH>* img_y,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(img_y, imgInput0);
-    obj_inu.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1>(img_u, imgInput1);
-    obj_inv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1>(img_v, imgInput2);
+    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_y, imgInput0);
+    obj_inu.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_IN_1>(img_u, imgInput1);
+    obj_inv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_IN_2>(img_v, imgInput2);
 
-    xf::cv::iyuv2rgb<XF_8UC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput0, imgInput1, imgInput2, imgOutput0);
+    xf::cv::iyuv2rgb<XF_8UC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2,
+                     XF_CV_DEPTH_OUT_0>(imgInput0, imgInput1, imgInput2, imgOutput0);
 
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgOutput0, img_rgb);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_rgb);
 }
 #endif
 
@@ -1031,43 +937,31 @@ void cvtcolor_iyuv2yuv4(ap_uint<INPUT_PTR_WIDTH>* img_y,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1> imgInput1;
-// clang-format off
-    #pragma HLS stream variable=imgInput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_IN_1> imgInput1;
+
     imgInput1.rows = rows_u;
     imgInput1.cols = cols_u;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1> imgInput2;
-// clang-format off
-    #pragma HLS stream variable=imgInput2.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_IN_2> imgInput2;
+
     imgInput2.rows = rows_v;
     imgInput2.cols = cols_v;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput1;
-// clang-format off
-    #pragma HLS stream variable=imgOutput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> imgOutput1;
+
     imgOutput1.rows = rows;
     imgOutput1.cols = cols;
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput2;
-// clang-format off
-    #pragma HLS stream variable=imgOutput2.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_2> imgOutput2;
+
     imgOutput2.rows = rows;
     imgOutput2.cols = cols;
 
@@ -1076,14 +970,15 @@ void cvtcolor_iyuv2yuv4(ap_uint<INPUT_PTR_WIDTH>* img_y,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(img_y, imgInput0);
-    obj_inu.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1>(img_u, imgInput1);
-    obj_inv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1>(img_v, imgInput2);
-    xf::cv::iyuv2yuv4<XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput0, imgInput1, imgInput2, imgOutput0, imgOutput1,
-                                                    imgOutput2);
-    obj_outy.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, out_img_y);
-    obj_outu.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput1, out_img_u);
-    obj_outv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput2, out_img_v);
+    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_y, imgInput0);
+    obj_inu.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_IN_1>(img_u, imgInput1);
+    obj_inv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_IN_2>(img_v, imgInput2);
+    xf::cv::iyuv2yuv4<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2,
+                      XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_1, XF_CV_DEPTH_OUT_2>(imgInput0, imgInput1, imgInput2,
+                                                                               imgOutput0, imgOutput1, imgOutput2);
+    obj_outy.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, out_img_y);
+    obj_outu.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(imgOutput1, out_img_u);
+    obj_outv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_2>(imgOutput2, out_img_v);
 }
 
 #endif
@@ -1129,38 +1024,28 @@ void cvtcolor_nv122iyuv(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_imgy;
     imgInput0.cols = cols_imgy;
 
-    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2> imgInput1;
-// clang-format off
-    #pragma HLS stream variable=imgInput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1> imgInput1;
+
     imgInput1.rows = rows_imguv;
     imgInput1.cols = cols_imguv;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_outy;
     imgOutput0.cols = cols_outy;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1> imgOutput1;
-// clang-format off
-    #pragma HLS stream variable=imgOutput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> imgOutput1;
+
     imgOutput1.rows = rows_outuv;
     imgOutput1.cols = cols_outuv;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1> imgOutput2;
-// clang-format off
-    #pragma HLS stream variable=imgOutput2.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_OUT_2> imgOutput2;
+
     imgOutput2.rows = rows_outuv;
     imgOutput2.cols = cols_outuv;
     xf::cv::accel_utils obj_iny, obj_inuv, obj_outy, obj_outu, obj_outv;
@@ -1168,15 +1053,16 @@ void cvtcolor_nv122iyuv(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(inimg_y, imgInput0);
-    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2>(inimg_uv, imgInput1);
+    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(inimg_y, imgInput0);
+    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1>(inimg_uv, imgInput1);
 
-    xf::cv::nv122iyuv<XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(imgInput0, imgInput1, imgOutput0, imgOutput1,
-                                                                   imgOutput2);
+    xf::cv::nv122iyuv<XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                      XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_1, XF_CV_DEPTH_OUT_2>(imgInput0, imgInput1, imgOutput0,
+                                                                               imgOutput1, imgOutput2);
 
-    obj_outy.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, outimg_y);
-    obj_outu.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1>(imgOutput1, outimg_u);
-    obj_outv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1>(imgOutput2, outimg_v);
+    obj_outy.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, outimg_y);
+    obj_outu.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(imgOutput1, outimg_u);
+    obj_outv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_OUT_2>(imgOutput2, outimg_v);
 }
 #endif
 
@@ -1200,24 +1086,18 @@ void cvtcolor_nv122rgba(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_imgy;
     imgInput0.cols = cols_imgy;
 
-    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2> imgInput1;
-// clang-format off
-    #pragma HLS stream variable=imgInput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1> imgInput1;
+
     imgInput1.rows = rows_imguv;
     imgInput1.cols = cols_imguv;
 
-    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_imgy;
     imgOutput0.cols = cols_imgy;
 
@@ -1225,11 +1105,12 @@ void cvtcolor_nv122rgba(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(inimg_y, imgInput0);
-    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2>(inimg_uv, imgInput1);
-    xf::cv::nv122rgba<XF_8UC1, XF_8UC2, XF_8UC4, HEIGHT, WIDTH, NPC1, NPC2>(imgInput0, imgInput1, imgOutput0);
+    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(inimg_y, imgInput0);
+    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1>(inimg_uv, imgInput1);
+    xf::cv::nv122rgba<XF_8UC1, XF_8UC2, XF_8UC4, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                      XF_CV_DEPTH_OUT_0>(imgInput0, imgInput1, imgOutput0);
 
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC4, HEIGHT, WIDTH, NPC1>(imgOutput0, img_rgb);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_rgb);
 }
 #endif
 
@@ -1256,38 +1137,28 @@ void cvtcolor_nv122yuv4(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_imgy;
     imgInput0.cols = cols_imgy;
 
-    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2> imgInput1;
-// clang-format off
-    #pragma HLS stream variable=imgInput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1> imgInput1;
+
     imgInput1.rows = rows_imguv;
     imgInput1.cols = cols_imguv;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_imgy;
     imgOutput0.cols = cols_imgy;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput1;
-// clang-format off
-    #pragma HLS stream variable=imgOutput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> imgOutput1;
+
     imgOutput1.rows = rows_imgy;
     imgOutput1.cols = cols_imgy;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput2;
-// clang-format off
-    #pragma HLS stream variable=imgOutput2.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_2> imgOutput2;
+
     imgOutput2.rows = rows_imgy;
     imgOutput2.cols = cols_imgy;
 
@@ -1296,15 +1167,16 @@ void cvtcolor_nv122yuv4(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(inimg_y, imgInput0);
-    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2>(inimg_uv, imgInput1);
+    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(inimg_y, imgInput0);
+    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1>(inimg_uv, imgInput1);
 
-    xf::cv::nv122yuv4<XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(imgInput0, imgInput1, imgOutput0, imgOutput1,
-                                                                   imgOutput2);
+    xf::cv::nv122yuv4<XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                      XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_1, XF_CV_DEPTH_OUT_2>(imgInput0, imgInput1, imgOutput0,
+                                                                               imgOutput1, imgOutput2);
 
-    obj_outy.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, outimg_y);
-    obj_outu.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput1, outimg_u);
-    obj_outv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput2, outimg_v);
+    obj_outy.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, outimg_y);
+    obj_outu.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(imgOutput1, outimg_u);
+    obj_outv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_2>(imgOutput2, outimg_v);
 }
 #endif
 #if NV122RGB
@@ -1327,24 +1199,18 @@ void cvtcolor_nv122rgb(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_imgy;
     imgInput0.cols = cols_imgy;
 
-    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2> imgInput1;
-// clang-format off
-    #pragma HLS stream variable=imgInput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1> imgInput1;
+
     imgInput1.rows = rows_imguv;
     imgInput1.cols = cols_imguv;
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_imgy;
     imgOutput0.cols = cols_imgy;
 
@@ -1353,11 +1219,12 @@ void cvtcolor_nv122rgb(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(inimg_y, imgInput0);
-    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2>(inimg_uv, imgInput1);
-    xf::cv::nv122rgb<XF_8UC1, XF_8UC2, XF_8UC3, HEIGHT, WIDTH, NPC1, NPC2>(imgInput0, imgInput1, imgOutput0);
+    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(inimg_y, imgInput0);
+    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1>(inimg_uv, imgInput1);
+    xf::cv::nv122rgb<XF_8UC1, XF_8UC2, XF_8UC3, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                     XF_CV_DEPTH_OUT_0>(imgInput0, imgInput1, imgOutput0);
 
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgOutput0, img_rgb);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_rgb);
 }
 #endif
 
@@ -1381,24 +1248,18 @@ void cvtcolor_nv122bgr(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_imgy;
     imgInput0.cols = cols_imgy;
 
-    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2> imgInput1;
-// clang-format off
-    #pragma HLS stream variable=imgInput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1> imgInput1;
+
     imgInput1.rows = rows_imguv;
     imgInput1.cols = cols_imguv;
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_imgy;
     imgOutput0.cols = cols_imgy;
 
@@ -1407,11 +1268,12 @@ void cvtcolor_nv122bgr(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(inimg_y, imgInput0);
-    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2>(inimg_uv, imgInput1);
-    xf::cv::nv122bgr<XF_8UC1, XF_8UC2, XF_8UC3, HEIGHT, WIDTH, NPC1, NPC2>(imgInput0, imgInput1, imgOutput0);
+    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(inimg_y, imgInput0);
+    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1>(inimg_uv, imgInput1);
+    xf::cv::nv122bgr<XF_8UC1, XF_8UC2, XF_8UC3, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                     XF_CV_DEPTH_OUT_0>(imgInput0, imgInput1, imgOutput0);
 
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgOutput0, img_rgb);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_rgb);
 }
 #endif
 #if NV212BGR
@@ -1434,24 +1296,18 @@ void cvtcolor_nv212bgr(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_imgy;
     imgInput0.cols = cols_imgy;
 
-    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2> imgInput1;
-// clang-format off
-    #pragma HLS stream variable=imgInput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1> imgInput1;
+
     imgInput1.rows = rows_imguv;
     imgInput1.cols = cols_imguv;
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_imgy;
     imgOutput0.cols = cols_imgy;
 
@@ -1460,11 +1316,12 @@ void cvtcolor_nv212bgr(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(inimg_y, imgInput0);
-    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2>(inimg_uv, imgInput1);
-    xf::cv::nv212bgr<XF_8UC1, XF_8UC2, XF_8UC3, HEIGHT, WIDTH, NPC1, NPC2>(imgInput0, imgInput1, imgOutput0);
+    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(inimg_y, imgInput0);
+    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1>(inimg_uv, imgInput1);
+    xf::cv::nv212bgr<XF_8UC1, XF_8UC2, XF_8UC3, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                     XF_CV_DEPTH_OUT_0>(imgInput0, imgInput1, imgOutput0);
 
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgOutput0, img_rgb);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_rgb);
 }
 #endif
 #if NV122YUYV
@@ -1487,24 +1344,18 @@ void cvtcolor_nv122yuyv(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_imgy;
     imgInput0.cols = cols_imgy;
 
-    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2> imgInput1;
-// clang-format off
-    #pragma HLS stream variable=imgInput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1> imgInput1;
+
     imgInput1.rows = rows_imguv;
     imgInput1.cols = cols_imguv;
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_imgy;
     imgOutput0.cols = cols_imgy;
 
@@ -1512,10 +1363,11 @@ void cvtcolor_nv122yuyv(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(inimg_y, imgInput0);
-    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2>(inimg_uv, imgInput1);
-    xf::cv::nv122yuyv<XF_8UC1, XF_8UC2, XF_16UC1, HEIGHT, WIDTH, NPC1, NPC2>(imgInput0, imgInput1, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, img_yuyv);
+    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(inimg_y, imgInput0);
+    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1>(inimg_uv, imgInput1);
+    xf::cv::nv122yuyv<XF_8UC1, XF_8UC2, XF_16UC1, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                      XF_CV_DEPTH_OUT_0>(imgInput0, imgInput1, imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_yuyv);
 }
 #endif
 #if NV122NV21
@@ -1540,31 +1392,23 @@ void cvtcolor_nv122nv21(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_y;
     imgInput0.cols = cols_y;
 
-    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2> imgInput1;
-// clang-format off
-    #pragma HLS stream variable=imgInput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1> imgInput1;
+
     imgInput1.rows = rows_uv;
     imgInput1.cols = cols_uv;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_y;
     imgOutput0.cols = cols_y;
 
-    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2> imgOutput1;
-// clang-format off
-    #pragma HLS stream variable=imgOutput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_OUT_1> imgOutput1;
+
     imgOutput1.rows = rows_uv;
     imgOutput1.cols = cols_uv;
 
@@ -1572,11 +1416,13 @@ void cvtcolor_nv122nv21(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(inimg_y, imgInput0);
-    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2>(inimg_uv, imgInput1);
-    xf::cv::nv122nv21<XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(imgInput0, imgInput1, imgOutput0, imgOutput1);
-    obj_outy.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, out_y);
-    obj_outuv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2>(imgOutput1, out_uv);
+    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(inimg_y, imgInput0);
+    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1>(inimg_uv, imgInput1);
+    xf::cv::nv122nv21<XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                      XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_1>(imgInput0, imgInput1, imgOutput0, imgOutput1);
+    obj_outy.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, out_y);
+    obj_outuv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_OUT_1>(imgOutput1,
+                                                                                                     out_uv);
 }
 #endif
 #if NV212NV12
@@ -1601,31 +1447,23 @@ void cvtcolor_nv212nv12(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_y;
     imgInput0.cols = cols_y;
 
-    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2> imgInput1;
-// clang-format off
-    #pragma HLS stream variable=imgInput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1> imgInput1;
+
     imgInput1.rows = rows_uv;
     imgInput1.cols = cols_uv;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_y;
     imgOutput0.cols = cols_y;
 
-    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2> imgOutput1;
-// clang-format off
-    #pragma HLS stream variable=imgOutput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_OUT_1> imgOutput1;
+
     imgOutput1.rows = rows_uv;
     imgOutput1.cols = cols_uv;
 
@@ -1633,11 +1471,13 @@ void cvtcolor_nv212nv12(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(inimg_y, imgInput0);
-    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2>(inimg_uv, imgInput1);
-    xf::cv::nv212nv12<XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(imgInput0, imgInput1, imgOutput0, imgOutput1);
-    obj_outy.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, out_y);
-    obj_outuv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2>(imgOutput1, out_uv);
+    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(inimg_y, imgInput0);
+    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1>(inimg_uv, imgInput1);
+    xf::cv::nv212nv12<XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                      XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_1>(imgInput0, imgInput1, imgOutput0, imgOutput1);
+    obj_outy.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, out_y);
+    obj_outuv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_OUT_1>(imgOutput1,
+                                                                                                     out_uv);
 }
 #endif
 
@@ -1661,24 +1501,18 @@ void cvtcolor_nv212yuyv(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_imgy;
     imgInput0.cols = cols_imgy;
 
-    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2> imgInput1;
-// clang-format off
-    #pragma HLS stream variable=imgInput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1> imgInput1;
+
     imgInput1.rows = rows_imguv;
     imgInput1.cols = cols_imguv;
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_imgy;
     imgOutput0.cols = cols_imgy;
 
@@ -1687,10 +1521,11 @@ void cvtcolor_nv212yuyv(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(inimg_y, imgInput0);
-    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2>(inimg_uv, imgInput1);
-    xf::cv::nv212yuyv<XF_8UC1, XF_8UC2, XF_16UC1, HEIGHT, WIDTH, NPC1, NPC2>(imgInput0, imgInput1, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, img_yuyv);
+    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(inimg_y, imgInput0);
+    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1>(inimg_uv, imgInput1);
+    xf::cv::nv212yuyv<XF_8UC1, XF_8UC2, XF_16UC1, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                      XF_CV_DEPTH_OUT_0>(imgInput0, imgInput1, imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_yuyv);
 }
 #endif
 #if NV122UYVY
@@ -1713,24 +1548,18 @@ void cvtcolor_nv122uyvy(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_imgy;
     imgInput0.cols = cols_imgy;
 
-    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2> imgInput1;
-// clang-format off
-    #pragma HLS stream variable=imgInput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1> imgInput1;
+
     imgInput1.rows = rows_imguv;
     imgInput1.cols = cols_imguv;
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_imgy;
     imgOutput0.cols = cols_imgy;
 
@@ -1739,10 +1568,11 @@ void cvtcolor_nv122uyvy(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(inimg_y, imgInput0);
-    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2>(inimg_uv, imgInput1);
-    xf::cv::nv122uyvy<XF_8UC1, XF_8UC2, XF_16UC1, HEIGHT, WIDTH, NPC1, NPC2>(imgInput0, imgInput1, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, img_uyvy);
+    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(inimg_y, imgInput0);
+    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1>(inimg_uv, imgInput1);
+    xf::cv::nv122uyvy<XF_8UC1, XF_8UC2, XF_16UC1, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                      XF_CV_DEPTH_OUT_0>(imgInput0, imgInput1, imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_uyvy);
 }
 #endif
 #if NV212UYVY
@@ -1765,24 +1595,18 @@ void cvtcolor_nv212uyvy(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_imgy;
     imgInput0.cols = cols_imgy;
 
-    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2> imgInput1;
-// clang-format off
-    #pragma HLS stream variable=imgInput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1> imgInput1;
+
     imgInput1.rows = rows_imguv;
     imgInput1.cols = cols_imguv;
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_imgy;
     imgOutput0.cols = cols_imgy;
 
@@ -1790,10 +1614,11 @@ void cvtcolor_nv212uyvy(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(inimg_y, imgInput0);
-    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2>(inimg_uv, imgInput1);
-    xf::cv::nv212uyvy<XF_8UC1, XF_8UC2, XF_16UC1, HEIGHT, WIDTH, NPC1, NPC2>(imgInput0, imgInput1, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, img_uyvy);
+    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(inimg_y, imgInput0);
+    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1>(inimg_uv, imgInput1);
+    xf::cv::nv212uyvy<XF_8UC1, XF_8UC2, XF_16UC1, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                      XF_CV_DEPTH_OUT_0>(imgInput0, imgInput1, imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_uyvy);
 }
 #endif
 #if YUYV2UYVY
@@ -1807,26 +1632,23 @@ void cvtcolor_yuyv2uyvy(ap_uint<INPUT_PTR_WIDTH>* yuyv, ap_uint<INPUT_PTR_WIDTH>
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1>(yuyv, imgInput0);
-    xf::cv::yuyv2uyvy<XF_16UC1, XF_16UC1, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, uyvy);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(yuyv, imgInput0);
+    xf::cv::yuyv2uyvy<XF_16UC1, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0,
+                                                                                                    imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, uyvy);
 }
 #endif
 #if UYVY2YUYV
@@ -1840,26 +1662,23 @@ void cvtcolor_uyvy2yuyv(ap_uint<INPUT_PTR_WIDTH>* uyvy, ap_uint<OUTPUT_PTR_WIDTH
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1>(uyvy, imgInput0);
-    xf::cv::uyvy2yuyv<XF_16UC1, XF_16UC1, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, yuyv);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(uyvy, imgInput0);
+    xf::cv::uyvy2yuyv<XF_16UC1, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0,
+                                                                                                    imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, yuyv);
 }
 #endif
 #if NV212IYUV
@@ -1903,38 +1722,28 @@ void cvtcolor_nv212iyuv(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_imgy;
     imgInput0.cols = cols_imgy;
 
-    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2> imgInput1;
-// clang-format off
-    #pragma HLS stream variable=imgInput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1> imgInput1;
+
     imgInput1.rows = rows_imguv;
     imgInput1.cols = cols_imguv;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_outy;
     imgOutput0.cols = cols_outy;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1> imgOutput1;
-// clang-format off
-    #pragma HLS stream variable=imgOutput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> imgOutput1;
+
     imgOutput1.rows = rows_outuv;
     imgOutput1.cols = cols_outuv;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1> imgOutput2;
-// clang-format off
-    #pragma HLS stream variable=imgOutput2.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_OUT_2> imgOutput2;
+
     imgOutput2.rows = rows_outuv;
     imgOutput2.cols = cols_outuv;
     xf::cv::accel_utils obj_iny, obj_inuv, obj_outy, obj_outu, obj_outv;
@@ -1942,15 +1751,16 @@ void cvtcolor_nv212iyuv(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(inimg_y, imgInput0);
-    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2>(inimg_uv, imgInput1);
+    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(inimg_y, imgInput0);
+    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1>(inimg_uv, imgInput1);
 
-    xf::cv::nv212iyuv<XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(imgInput0, imgInput1, imgOutput0, imgOutput1,
-                                                                   imgOutput2);
+    xf::cv::nv212iyuv<XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                      XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_1, XF_CV_DEPTH_OUT_2>(imgInput0, imgInput1, imgOutput0,
+                                                                               imgOutput1, imgOutput2);
 
-    obj_outy.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, outimg_y);
-    obj_outu.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1>(imgOutput1, outimg_u);
-    obj_outv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1>(imgOutput2, outimg_v);
+    obj_outy.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, outimg_y);
+    obj_outu.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(imgOutput1, outimg_u);
+    obj_outv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_OUT_2>(imgOutput2, outimg_v);
 }
 #endif
 #if NV212RGBA
@@ -1973,24 +1783,18 @@ void cvtcolor_nv212rgba(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_imgy;
     imgInput0.cols = cols_imgy;
 
-    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2> imgInput1;
-// clang-format off
-    #pragma HLS stream variable=imgInput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1> imgInput1;
+
     imgInput1.rows = rows_imguv;
     imgInput1.cols = cols_imguv;
 
-    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_imgy;
     imgOutput0.cols = cols_imgy;
 
@@ -1999,11 +1803,12 @@ void cvtcolor_nv212rgba(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(inimg_y, imgInput0);
-    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2>(inimg_uv, imgInput1);
-    xf::cv::nv212rgba<XF_8UC1, XF_8UC2, XF_8UC4, HEIGHT, WIDTH, NPC1>(imgInput0, imgInput1, imgOutput0);
+    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(inimg_y, imgInput0);
+    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1>(inimg_uv, imgInput1);
+    xf::cv::nv212rgba<XF_8UC1, XF_8UC2, XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                      XF_CV_DEPTH_OUT_0>(imgInput0, imgInput1, imgOutput0);
 
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC4, HEIGHT, WIDTH, NPC1>(imgOutput0, img_rgba);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_rgba);
 }
 #endif
 #if NV212RGB
@@ -2026,24 +1831,18 @@ void cvtcolor_nv212rgb(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_imgy;
     imgInput0.cols = cols_imgy;
 
-    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2> imgInput1;
-// clang-format off
-    #pragma HLS stream variable=imgInput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1> imgInput1;
+
     imgInput1.rows = rows_imguv;
     imgInput1.cols = cols_imguv;
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_imgy;
     imgOutput0.cols = cols_imgy;
 
@@ -2052,11 +1851,12 @@ void cvtcolor_nv212rgb(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(inimg_y, imgInput0);
-    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2>(inimg_uv, imgInput1);
-    xf::cv::nv212rgb<XF_8UC1, XF_8UC2, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput0, imgInput1, imgOutput0);
+    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(inimg_y, imgInput0);
+    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1>(inimg_uv, imgInput1);
+    xf::cv::nv212rgb<XF_8UC1, XF_8UC2, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                     XF_CV_DEPTH_OUT_0>(imgInput0, imgInput1, imgOutput0);
 
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgOutput0, img_rgb);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_rgb);
 }
 #endif
 /*#if NV212IYUV
@@ -2094,31 +1894,26 @@ rows_imgy, int cols_imgy,int rows_imguv,int cols_imguv,int rows_outy,int cols_ou
 
                  xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1>   imgInput0;
 // clang-format off
-        #pragma HLS stream variable=imgInput0.data depth=2
 // clang-format on
                 imgInput0.rows=rows_imgy; imgInput0.cols=cols_imgy;
 
                          xf::cv::Mat<XF_8UC2, HEIGHT/2, WIDTH/2, NPC2>   imgInput1;
 // clang-format off
-        #pragma HLS stream variable=imgInput1.data depth=2
 // clang-format on
                 imgInput1.rows=rows_imguv; imgInput1.cols=cols_imguv;
 
                  xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1>   imgOutput0;
 // clang-format off
-        #pragma HLS stream variable=imgOutput0.data depth=2
 // clang-format on
                 imgOutput0.rows=rows_outy; imgOutput0.cols=cols_outy;
 
-                 xf::cv::Mat<XF_8UC1, HEIGHT/4, WIDTH, NPC1> imgOutput1;
+                 xf::cv::Mat<XF_8UC1, HEIGHT/4, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> imgOutput1;
 // clang-format off
-        #pragma HLS stream variable=imgOutput1.data depth=2
 // clang-format on
                 imgOutput1.rows=rows_outuv; imgOutput1.cols=cols_outuv;
 
-                 xf::cv::Mat<XF_8UC1, HEIGHT/4, WIDTH, NPC1> imgOutput2;
+                 xf::cv::Mat<XF_8UC1, HEIGHT/4, WIDTH, NPC1, XF_CV_DEPTH_OUT_2> imgOutput2;
 // clang-format off
-        #pragma HLS stream variable=imgOutput2.data depth=2
 // clang-format on
                 imgOutput2.rows=rows_outuv; imgOutput2.cols=cols_outuv;
 
@@ -2128,11 +1923,15 @@ rows_imgy, int cols_imgy,int rows_imguv,int cols_imguv,int rows_outy,int cols_ou
                 xf::cv::Array2xfMat<INPUT_PTR_WIDTH,XF_8UC1,HEIGHT, WIDTH, NPC1>  (inimg_y, imgInput0);
                 xf::cv::Array2xfMat<INPUT_PTR_WIDTH,XF_8UC2,HEIGHT/2, WIDTH/2, NPC2>  (inimg_uv, imgInput1);
 
-                xf::cv::nv212iyuv<XF_8UC1,XF_8UC2,HEIGHT,WIDTH,NPC1,NPC2>(imgInput0,imgInput1,imgOutput0,imgOutput1,imgOutput2);
+                xf::cv::nv212iyuv<XF_8UC1,XF_8UC2,HEIGHT,WIDTH,NPC1,NPC2,
+XF_CV_DEPTH_IN_0>(imgInput0,imgInput1,imgOutput0,imgOutput1,imgOutput2);
 
-                xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH,XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput0,outimg_y);
-                xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH,XF_8UC1, HEIGHT/4, WIDTH, NPC1>(imgOutput1,outimg_u);
-                xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH,XF_8UC1, HEIGHT/4, WIDTH, NPC1>(imgOutput2,outimg_v);
+                xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH,XF_8UC1, HEIGHT, WIDTH, NPC1,
+XF_CV_DEPTH_OUT_0>(imgOutput0,outimg_y);
+                xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH,XF_8UC1, HEIGHT/4, WIDTH, NPC1,
+XF_CV_DEPTH_OUT_1>(imgOutput1,outimg_u);
+                xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH,XF_8UC1, HEIGHT/4, WIDTH, NPC1,
+XF_CV_DEPTH_OUT_2>(imgOutput2,outimg_v);
 
         }
 #endif*/
@@ -2159,38 +1958,28 @@ void cvtcolor_nv212yuv4(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_imgy;
     imgInput0.cols = cols_imgy;
 
-    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2> imgInput1;
-// clang-format off
-    #pragma HLS stream variable=imgInput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1> imgInput1;
+
     imgInput1.rows = rows_imguv;
     imgInput1.cols = cols_imguv;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_imgy;
     imgOutput0.cols = cols_imgy;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput1;
-// clang-format off
-    #pragma HLS stream variable=imgOutput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> imgOutput1;
+
     imgOutput1.rows = rows_imgy;
     imgOutput1.cols = cols_imgy;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput2;
-// clang-format off
-    #pragma HLS stream variable=imgOutput2.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_2> imgOutput2;
+
     imgOutput2.rows = rows_imgy;
     imgOutput2.cols = cols_imgy;
 
@@ -2199,15 +1988,16 @@ void cvtcolor_nv212yuv4(ap_uint<INPUT_PTR_WIDTH>* inimg_y,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(inimg_y, imgInput0);
-    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2>(inimg_uv, imgInput1);
+    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(inimg_y, imgInput0);
+    obj_inuv.Array2xfMat<INPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_IN_1>(inimg_uv, imgInput1);
 
-    xf::cv::nv212yuv4<XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(imgInput0, imgInput1, imgOutput0, imgOutput1,
-                                                                   imgOutput2);
+    xf::cv::nv212yuv4<XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                      XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_1, XF_CV_DEPTH_OUT_2>(imgInput0, imgInput1, imgOutput0,
+                                                                               imgOutput1, imgOutput2);
 
-    obj_outy.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, outimg_y);
-    obj_outu.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput1, outimg_u);
-    obj_outv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput2, outimg_v);
+    obj_outy.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, outimg_y);
+    obj_outu.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(imgOutput1, outimg_u);
+    obj_outv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_2>(imgOutput2, outimg_v);
 }
 #endif
 #if UYVY2IYUV
@@ -2240,31 +2030,23 @@ void cvtcolor_uyvy2iyuv(ap_uint<INPUT_PTR_WIDTH>* img_uyvy,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_uyvy;
     imgInput0.cols = cols_uyvy;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_y;
     imgOutput0.cols = cols_y;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1> imgOutput1;
-// clang-format off
-    #pragma HLS stream variable=imgOutput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> imgOutput1;
+
     imgOutput1.rows = rows_u;
     imgOutput1.cols = cols_u;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1> imgOutput2;
-// clang-format off
-    #pragma HLS stream variable=imgOutput2.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_OUT_2> imgOutput2;
+
     imgOutput1.rows = rows_v;
     imgOutput1.cols = cols_v;
 
@@ -2273,11 +2055,12 @@ void cvtcolor_uyvy2iyuv(ap_uint<INPUT_PTR_WIDTH>* img_uyvy,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1>(img_uyvy, imgInput0);
-    xf::cv::uyvy2iyuv<XF_16UC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0, imgOutput1, imgOutput2);
-    obj_outy.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, img_y);
-    obj_outu.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1>(imgOutput1, img_u);
-    obj_outv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1>(imgOutput2, img_v);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_uyvy, imgInput0);
+    xf::cv::uyvy2iyuv<XF_16UC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_1,
+                      XF_CV_DEPTH_OUT_2>(imgInput0, imgOutput0, imgOutput1, imgOutput2);
+    obj_outy.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_y);
+    obj_outu.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(imgOutput1, img_u);
+    obj_outv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_OUT_2>(imgOutput2, img_v);
 }
 #endif
 #if UYVY2NV12
@@ -2312,24 +2095,18 @@ void cvtcolor_uyvy2nv12(ap_uint<INPUT_PTR_WIDTH>* img_uyvy,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_uyvy;
     imgInput0.cols = cols_uyvy;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_y;
     imgOutput0.cols = cols_y;
 
-    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2> imgOutput1;
-// clang-format off
-    #pragma HLS stream variable=imgOutput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_OUT_1> imgOutput1;
+
     imgOutput1.rows = rows_uv;
     imgOutput1.cols = cols_uv;
 
@@ -2338,10 +2115,12 @@ void cvtcolor_uyvy2nv12(ap_uint<INPUT_PTR_WIDTH>* img_uyvy,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1>(img_uyvy, imgInput0);
-    xf::cv::uyvy2nv12<XF_16UC1, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(imgInput0, imgOutput0, imgOutput1);
-    obj_outy.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, img_y);
-    obj_outuv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2>(imgOutput1, img_uv);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_uyvy, imgInput0);
+    xf::cv::uyvy2nv12<XF_16UC1, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0,
+                      XF_CV_DEPTH_OUT_1>(imgInput0, imgOutput0, imgOutput1);
+    obj_outy.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_y);
+    obj_outuv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_OUT_1>(imgOutput1,
+                                                                                                     img_uv);
 }
 #endif
 #if UYVY2NV21
@@ -2376,24 +2155,18 @@ void cvtcolor_uyvy2nv21(ap_uint<INPUT_PTR_WIDTH>* img_uyvy,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_uyvy;
     imgInput0.cols = cols_uyvy;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_y;
     imgOutput0.cols = cols_y;
 
-    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2> imgOutput1;
-// clang-format off
-    #pragma HLS stream variable=imgOutput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_OUT_1> imgOutput1;
+
     imgOutput1.rows = rows_uv;
     imgOutput1.cols = cols_uv;
 
@@ -2402,10 +2175,12 @@ void cvtcolor_uyvy2nv21(ap_uint<INPUT_PTR_WIDTH>* img_uyvy,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1>(img_uyvy, imgInput0);
-    xf::cv::uyvy2nv21<XF_16UC1, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(imgInput0, imgOutput0, imgOutput1);
-    obj_outy.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, img_y);
-    obj_outuv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2>(imgOutput1, img_uv);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_uyvy, imgInput0);
+    xf::cv::uyvy2nv21<XF_16UC1, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0,
+                      XF_CV_DEPTH_OUT_1>(imgInput0, imgOutput0, imgOutput1);
+    obj_outy.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_y);
+    obj_outuv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_OUT_1>(imgOutput1,
+                                                                                                     img_uv);
 }
 #endif
 #if UYVY2RGBA
@@ -2428,26 +2203,23 @@ void cvtcolor_uyvy2rgba(ap_uint<INPUT_PTR_WIDTH>* img_uyvy,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_uyvy;
     imgInput0.cols = cols_uyvy;
 
-    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_uyvy;
     imgOutput0.cols = cols_uyvy;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1>(img_uyvy, imgInput0);
-    xf::cv::uyvy2rgba<XF_16UC1, XF_8UC4, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC4, HEIGHT, WIDTH, NPC1>(imgOutput0, img_rgba);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_uyvy, imgInput0);
+    xf::cv::uyvy2rgba<XF_16UC1, XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0,
+                                                                                                   imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_rgba);
 }
 
 #endif
@@ -2471,26 +2243,23 @@ void cvtcolor_uyvy2rgb(ap_uint<INPUT_PTR_WIDTH>* img_uyvy,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_uyvy;
     imgInput0.cols = cols_uyvy;
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_uyvy;
     imgOutput0.cols = cols_uyvy;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1>(img_uyvy, imgInput0);
-    xf::cv::uyvy2rgb<XF_16UC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgOutput0, img_rgb);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_uyvy, imgInput0);
+    xf::cv::uyvy2rgb<XF_16UC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0,
+                                                                                                  imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_rgb);
 }
 
 #endif
@@ -2525,31 +2294,23 @@ void cvtcolor_yuyv2iyuv(ap_uint<INPUT_PTR_WIDTH>* img_yuyv,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_yuyv;
     imgInput0.cols = cols_yuyv;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_y;
     imgOutput0.cols = cols_y;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1> imgOutput1;
-// clang-format off
-    #pragma HLS stream variable=imgOutput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> imgOutput1;
+
     imgOutput1.rows = rows_u;
     imgOutput1.cols = cols_u;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1> imgOutput2;
-// clang-format off
-    #pragma HLS stream variable=imgOutput2.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_OUT_2> imgOutput2;
+
     imgOutput2.rows = rows_v;
     imgOutput2.cols = cols_v;
 
@@ -2558,13 +2319,14 @@ void cvtcolor_yuyv2iyuv(ap_uint<INPUT_PTR_WIDTH>* img_yuyv,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1>(img_yuyv, imgInput0);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_yuyv, imgInput0);
 
-    xf::cv::yuyv2iyuv<XF_16UC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0, imgOutput1, imgOutput2);
+    xf::cv::yuyv2iyuv<XF_16UC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_1,
+                      XF_CV_DEPTH_OUT_2>(imgInput0, imgOutput0, imgOutput1, imgOutput2);
 
-    obj_outy.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, img_y);
-    obj_outu.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1>(imgOutput1, img_u);
-    obj_outv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1>(imgOutput2, img_v);
+    obj_outy.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_y);
+    obj_outu.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(imgOutput1, img_u);
+    obj_outv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT / 4, WIDTH, NPC1, XF_CV_DEPTH_OUT_2>(imgOutput2, img_v);
 }
 #endif
 #if YUYV2NV12
@@ -2600,24 +2362,18 @@ void cvtcolor_yuyv2nv12(ap_uint<INPUT_PTR_WIDTH>* img_yuyv,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_yuyv;
     imgInput0.cols = cols_yuyv;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_y;
     imgOutput0.cols = cols_y;
 
-    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2> imgOutput1;
-// clang-format off
-    #pragma HLS stream variable=imgOutput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_OUT_1> imgOutput1;
+
     imgOutput1.rows = rows_uv;
     imgOutput1.cols = cols_uv;
 
@@ -2626,10 +2382,12 @@ void cvtcolor_yuyv2nv12(ap_uint<INPUT_PTR_WIDTH>* img_yuyv,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1>(img_yuyv, imgInput0);
-    xf::cv::yuyv2nv12<XF_16UC1, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(imgInput0, imgOutput0, imgOutput1);
-    obj_outy.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, img_y);
-    obj_outuv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2>(imgOutput1, img_uv);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_yuyv, imgInput0);
+    xf::cv::yuyv2nv12<XF_16UC1, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0,
+                      XF_CV_DEPTH_OUT_1>(imgInput0, imgOutput0, imgOutput1);
+    obj_outy.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_y);
+    obj_outuv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_OUT_1>(imgOutput1,
+                                                                                                     img_uv);
 }
 #endif
 #if YUYV2NV21
@@ -2665,24 +2423,18 @@ void cvtcolor_yuyv2nv21(ap_uint<INPUT_PTR_WIDTH>* img_yuyv,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_yuyv;
     imgInput0.cols = cols_yuyv;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_y;
     imgOutput0.cols = cols_y;
 
-    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2> imgOutput1;
-// clang-format off
-    #pragma HLS stream variable=imgOutput1.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_OUT_1> imgOutput1;
+
     imgOutput1.rows = rows_uv;
     imgOutput1.cols = cols_uv;
 
@@ -2691,10 +2443,12 @@ void cvtcolor_yuyv2nv21(ap_uint<INPUT_PTR_WIDTH>* img_yuyv,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1>(img_yuyv, imgInput0);
-    xf::cv::yuyv2nv21<XF_16UC1, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(imgInput0, imgOutput0, imgOutput1);
-    obj_outy.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, img_y);
-    obj_outuv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2>(imgOutput1, img_uv);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_yuyv, imgInput0);
+    xf::cv::yuyv2nv21<XF_16UC1, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0,
+                      XF_CV_DEPTH_OUT_1>(imgInput0, imgOutput0, imgOutput1);
+    obj_outy.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_y);
+    obj_outuv.xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC2, HEIGHT / 2, WIDTH / 2, NPC2, XF_CV_DEPTH_OUT_1>(imgOutput1,
+                                                                                                     img_uv);
 }
 #endif
 #if YUYV2RGBA
@@ -2717,26 +2471,23 @@ void cvtcolor_yuyv2rgba(ap_uint<INPUT_PTR_WIDTH>* img_yuyv,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_yuyv;
     imgInput0.cols = cols_yuyv;
 
-    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_yuyv;
     imgOutput0.cols = cols_yuyv;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1>(img_yuyv, imgInput0);
-    xf::cv::yuyv2rgba<XF_16UC1, XF_8UC4, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC4, HEIGHT, WIDTH, NPC1>(imgOutput0, img_rgba);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_yuyv, imgInput0);
+    xf::cv::yuyv2rgba<XF_16UC1, XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0,
+                                                                                                   imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_rgba);
 }
 #endif
 #if YUYV2RGB
@@ -2759,26 +2510,23 @@ void cvtcolor_yuyv2rgb(ap_uint<INPUT_PTR_WIDTH>* img_yuyv,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows_yuyv;
     imgInput0.cols = cols_yuyv;
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows_yuyv;
     imgOutput0.cols = cols_yuyv;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1>(img_yuyv, imgInput0);
-    xf::cv::yuyv2rgb<XF_16UC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgOutput0, img_rgb);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_yuyv, imgInput0);
+    xf::cv::yuyv2rgb<XF_16UC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0,
+                                                                                                  imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_rgb);
 }
 #endif
 #if RGB2GRAY
@@ -2792,25 +2540,21 @@ void cvtcolor_rgb2gray(ap_uint<INPUT_PTR_WIDTH>* img_rgb, ap_uint<OUTPUT_PTR_WID
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_rgb, imgInput0);
-    xf::cv::rgb2gray<XF_8UC3, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, img_gray);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_rgb, imgInput0);
+    xf::cv::rgb2gray<XF_8UC3, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0, imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_gray);
 }
 #endif
 #if BGR2GRAY
@@ -2823,25 +2567,21 @@ void cvtcolor_bgr2gray(ap_uint<INPUT_PTR_WIDTH>* img_bgr, ap_uint<OUTPUT_PTR_WID
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_bgr, imgInput0);
-    xf::cv::bgr2gray<XF_8UC3, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgOutput0, img_gray);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_bgr, imgInput0);
+    xf::cv::bgr2gray<XF_8UC3, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0, imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_gray);
 }
 #endif
 #if GRAY2RGB
@@ -2854,25 +2594,21 @@ void cvtcolor_gray2rgb(ap_uint<INPUT_PTR_WIDTH>* img_gray, ap_uint<OUTPUT_PTR_WI
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(img_gray, imgInput0);
-    xf::cv::gray2rgb<XF_8UC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgOutput0, img_rgb);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_gray, imgInput0);
+    xf::cv::gray2rgb<XF_8UC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0, imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_rgb);
 }
 #endif
 #if GRAY2BGR
@@ -2886,25 +2622,21 @@ void cvtcolor_gray2bgr(ap_uint<INPUT_PTR_WIDTH>* img_gray, ap_uint<OUTPUT_PTR_WI
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1>(img_gray, imgInput0);
-    xf::cv::gray2bgr<XF_8UC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgOutput0, img_bgr);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_gray, imgInput0);
+    xf::cv::gray2bgr<XF_8UC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0, imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_bgr);
 }
 #endif
 #if RGB2BGR
@@ -2918,25 +2650,21 @@ void cvtcolor_rgb2bgr(ap_uint<INPUT_PTR_WIDTH>* img_rgb, ap_uint<OUTPUT_PTR_WIDT
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_rgb, imgInput0);
-    xf::cv::rgb2bgr<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgOutput0, img_bgr);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_rgb, imgInput0);
+    xf::cv::rgb2bgr<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0, imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_bgr);
 }
 #endif
 #if BGR2RGB
@@ -2950,25 +2678,21 @@ void cvtcolor_bgr2rgb(ap_uint<INPUT_PTR_WIDTH>* img_rgb, ap_uint<OUTPUT_PTR_WIDT
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_rgb, imgInput0);
-    xf::cv::bgr2rgb<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgOutput0, img_bgr);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_rgb, imgInput0);
+    xf::cv::bgr2rgb<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0, imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_bgr);
 }
 #endif
 #if RGB2XYZ
@@ -2982,25 +2706,21 @@ void cvtcolor_rgb2xyz(ap_uint<INPUT_PTR_WIDTH>* img_rgb, ap_uint<OUTPUT_PTR_WIDT
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_rgb, imgInput0);
-    xf::cv::rgb2xyz<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgOutput0, img_xyz);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_rgb, imgInput0);
+    xf::cv::rgb2xyz<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0, imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_xyz);
 }
 #endif
 #if BGR2XYZ
@@ -3013,25 +2733,21 @@ void cvtcolor_bgr2xyz(ap_uint<INPUT_PTR_WIDTH>* img_bgr, ap_uint<OUTPUT_PTR_WIDT
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_bgr, imgInput0);
-    xf::cv::bgr2xyz<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgOutput0, img_xyz);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_bgr, imgInput0);
+    xf::cv::bgr2xyz<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0, imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_xyz);
 }
 #endif
 #if XYZ2RGB
@@ -3045,25 +2761,21 @@ void cvtcolor_xyz2rgb(ap_uint<INPUT_PTR_WIDTH>* img_xyz, ap_uint<OUTPUT_PTR_WIDT
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_xyz, imgInput0);
-    xf::cv::xyz2rgb<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgOutput0, img_rgb);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_xyz, imgInput0);
+    xf::cv::xyz2rgb<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0, imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_rgb);
 }
 #endif
 #if XYZ2BGR
@@ -3076,25 +2788,21 @@ void cvtcolor_xyz2bgr(ap_uint<INPUT_PTR_WIDTH>* img_xyz, ap_uint<OUTPUT_PTR_WIDT
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_xyz, imgInput0);
-    xf::cv::xyz2bgr<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgOutput0, img_bgr);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_xyz, imgInput0);
+    xf::cv::xyz2bgr<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0, imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_bgr);
 }
 #endif
 #if RGB2YCrCb
@@ -3108,25 +2816,22 @@ void cvtcolor_rgb2ycrcb(ap_uint<INPUT_PTR_WIDTH>* img_rgb, ap_uint<OUTPUT_PTR_WI
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_rgb, imgInput0);
-    xf::cv::rgb2ycrcb<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgOutput0, img_ycrcb);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_rgb, imgInput0);
+    xf::cv::rgb2ycrcb<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0,
+                                                                                                  imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_ycrcb);
 }
 #endif
 
@@ -3141,25 +2846,22 @@ void cvtcolor_bgr2ycrcb(ap_uint<INPUT_PTR_WIDTH>* img_bgr, ap_uint<OUTPUT_PTR_WI
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_bgr, imgInput0);
-    xf::cv::bgr2ycrcb<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgOutput0, img_ycrcb);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_bgr, imgInput0);
+    xf::cv::bgr2ycrcb<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0,
+                                                                                                  imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_ycrcb);
 }
 #endif
 
@@ -3174,25 +2876,22 @@ void cvtcolor_ycrcb2rgb(ap_uint<INPUT_PTR_WIDTH>* img_ycrcb, ap_uint<OUTPUT_PTR_
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_ycrcb, imgInput0);
-    xf::cv::ycrcb2rgb<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgOutput0, img_rgb);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_ycrcb, imgInput0);
+    xf::cv::ycrcb2rgb<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0,
+                                                                                                  imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_rgb);
 }
 #endif
 #if YCrCb2BGR
@@ -3206,25 +2905,22 @@ void cvtcolor_ycrcb2bgr(ap_uint<INPUT_PTR_WIDTH>* img_ycrcb, ap_uint<OUTPUT_PTR_
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_ycrcb, imgInput0);
-    xf::cv::ycrcb2bgr<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgOutput0, img_bgr);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_ycrcb, imgInput0);
+    xf::cv::ycrcb2bgr<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0,
+                                                                                                  imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_bgr);
 }
 #endif
 #if RGB2HLS
@@ -3237,25 +2933,21 @@ void cvtcolor_rgb2hls(ap_uint<INPUT_PTR_WIDTH>* img_rgb, ap_uint<OUTPUT_PTR_WIDT
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_rgb, imgInput0);
-    xf::cv::rgb2hls<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgOutput0, img_hls);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_rgb, imgInput0);
+    xf::cv::rgb2hls<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0, imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_hls);
 }
 #endif
 #if BGR2HLS
@@ -3268,25 +2960,21 @@ void cvtcolor_bgr2hls(ap_uint<INPUT_PTR_WIDTH>* img_bgr, ap_uint<OUTPUT_PTR_WIDT
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_bgr, imgInput0);
-    xf::cv::bgr2hls<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgOutput0, img_hls);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_bgr, imgInput0);
+    xf::cv::bgr2hls<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0, imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_hls);
 }
 #endif
 #if HLS2RGB
@@ -3300,25 +2988,21 @@ void cvtcolor_hls2rgb(ap_uint<INPUT_PTR_WIDTH>* img_hls, ap_uint<OUTPUT_PTR_WIDT
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_hls, imgInput0);
-    xf::cv::hls2rgb<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgOutput0, img_rgb);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_hls, imgInput0);
+    xf::cv::hls2rgb<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0, imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_rgb);
 }
 #endif
 #if HLS2BGR
@@ -3332,25 +3016,21 @@ void cvtcolor_hls2bgr(ap_uint<INPUT_PTR_WIDTH>* img_hls, ap_uint<OUTPUT_PTR_WIDT
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_hls, imgInput0);
-    xf::cv::hls2bgr<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgOutput0, img_bgr);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_hls, imgInput0);
+    xf::cv::hls2bgr<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0, imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_bgr);
 }
 #endif
 #if RGB2HSV
@@ -3364,25 +3044,21 @@ void cvtcolor_rgb2hsv(ap_uint<INPUT_PTR_WIDTH>* img_rgb, ap_uint<OUTPUT_PTR_WIDT
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_rgb, imgInput0);
-    xf::cv::rgb2hsv<XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgOutput0, img_bgr);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_rgb, imgInput0);
+    xf::cv::rgb2hsv<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0, imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_bgr);
 }
 
 #endif
@@ -3397,25 +3073,21 @@ void cvtcolor_bgr2hsv(ap_uint<INPUT_PTR_WIDTH>* img_bgr, ap_uint<OUTPUT_PTR_WIDT
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_bgr, imgInput0);
-    xf::cv::bgr2hsv<XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgOutput0, img_hsv);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_bgr, imgInput0);
+    xf::cv::bgr2hsv<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0, imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_hsv);
 }
 #endif
 #if HSV2RGB
@@ -3429,25 +3101,21 @@ void cvtcolor_hsv2rgb(ap_uint<INPUT_PTR_WIDTH>* img_hsv, ap_uint<OUTPUT_PTR_WIDT
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_hsv, imgInput0);
-    xf::cv::hsv2rgb<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgOutput0, img_rgb);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_hsv, imgInput0);
+    xf::cv::hsv2rgb<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0, imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_rgb);
 }
 #endif
 #if HSV2BGR
@@ -3461,25 +3129,21 @@ void cvtcolor_hsv2bgr(ap_uint<INPUT_PTR_WIDTH>* img_hsv, ap_uint<OUTPUT_PTR_WIDT
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgInput0;
-// clang-format off
-    #pragma HLS stream variable=imgInput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+
     imgInput0.rows = rows;
     imgInput0.cols = cols;
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> imgOutput0;
-// clang-format off
-    #pragma HLS stream variable=imgOutput0.data depth=2
-    // clang-format on
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(img_hsv, imgInput0);
-    xf::cv::hsv2bgr<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput0, imgOutput0);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgOutput0, img_bgr);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_hsv, imgInput0);
+    xf::cv::hsv2bgr<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(imgInput0, imgOutput0);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_bgr);
 }
 #endif
 }

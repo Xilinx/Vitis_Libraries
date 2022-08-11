@@ -41,9 +41,17 @@ bool isPowerOfTwo(int n) {
     return 1;
 }
 
-template <int IN_TYPE, int OUT_TYPE, int ROWS, int COLS, int SCALE_FACTOR, int MAX_REPRESENTED_VALUE, int NPC>
-void xf_QuatizationDithering(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC>& stream_in,
-                             xf::cv::Mat<OUT_TYPE, ROWS, COLS, NPC>& stream_out) {
+template <int IN_TYPE,
+          int OUT_TYPE,
+          int ROWS,
+          int COLS,
+          int SCALE_FACTOR,
+          int MAX_REPRESENTED_VALUE,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void xf_QuatizationDithering(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>& stream_in,
+                             xf::cv::Mat<OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT>& stream_out) {
     enum {
         PLANES = XF_CHANNELS(IN_TYPE, NPC),
 

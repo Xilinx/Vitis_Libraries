@@ -10,10 +10,16 @@ Custom Y8 image is generated from bgr image using h, s, v values.
 
 .. code:: c
 
-	template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC>
-	void custom_bgr2y8(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-					   xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_mat,
-					   struct bgr2y8_params params)
+    template <int SRC_T,
+            int DST_T,
+            int ROWS,
+            int COLS,
+            int NPC,
+            int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+            int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+    void custom_bgr2y8(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+                    xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst_mat,
+                    struct bgr2y8_params params)
 
 The following table describes the template and the function parameters.
 
@@ -36,6 +42,10 @@ The following table describes the template and the function parameters.
     +----------------------+-------------------------------------------------------------+
     | NPC                  | Number of Pixels to be processed per cycle. NPPC1 and NPPC2 |
     |                      | are supported.                                              |
+    +----------------------+-------------------------------------------------------------+
+    | XFCVDEPTH_IN_1       | Depth of the Input Image                                    |
+    +----------------------+-------------------------------------------------------------+
+    | XFCVDEPTH_OUT_1      | Depth of the Output Image                                   |
     +----------------------+-------------------------------------------------------------+
     | _src_mat             | Input Image                                                 |
     +----------------------+-------------------------------------------------------------+

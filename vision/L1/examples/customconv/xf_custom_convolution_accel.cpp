@@ -38,20 +38,20 @@ void Filter2d_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
     #pragma HLS INTERFACE s_axilite  port=return 			          bundle=control
     // clang-format on
 
-    xf::cv::Mat<INTYPE, HEIGHT, WIDTH, NPC1> imgInput(rows, cols);
-    xf::cv::Mat<OUTTYPE, HEIGHT, WIDTH, NPC1> imgOutput(rows, cols);
+    xf::cv::Mat<INTYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1> imgInput(rows, cols);
+    xf::cv::Mat<OUTTYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> imgOutput(rows, cols);
 
 #pragma HLS DATAFLOW
 
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, INTYPE, HEIGHT, WIDTH, NPC1>(img_in, imgInput);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, INTYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1>(img_in, imgInput);
 
     // Run xfOpenCV kernel:
-    xf::cv::filter2D<XF_BORDER_CONSTANT, FILTER_WIDTH, FILTER_HEIGHT, INTYPE, OUTTYPE, HEIGHT, WIDTH, NPC1>(
-        imgInput, imgOutput, filter, shift);
+    xf::cv::filter2D<XF_BORDER_CONSTANT, FILTER_WIDTH, FILTER_HEIGHT, INTYPE, OUTTYPE, HEIGHT, WIDTH, NPC1,
+                     XF_CV_DEPTH_IN_1, XF_CV_DEPTH_OUT_1>(imgInput, imgOutput, filter, shift);
 
     // Convert _dst xf::cv::Mat object to output array:
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUTTYPE, HEIGHT, WIDTH, NPC1>(imgOutput, img_out);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUTTYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(imgOutput, img_out);
 
     return;
 } // End of kernel

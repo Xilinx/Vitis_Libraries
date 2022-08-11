@@ -32,14 +32,16 @@ template <int IN_TYPE,
           int HEIGHT,
           int WIDTH,
           int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
           int WIDTH_A,
           int IBITS_A,
           int WIDTH_B,
           int IBITS_B,
           int WIDTH_OUT,
           int IBITS_OUT>
-void xFpreProcessKernel(xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC>& in_mat,
-                        xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC>& out_mat,
+void xFpreProcessKernel(xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC, XFCVDEPTH_IN>& in_mat,
+                        xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC, XFCVDEPTH_OUT>& out_mat,
                         ap_ufixed<WIDTH_A, IBITS_A, AP_RND> alpha_reg[XF_CHANNELS(IN_TYPE, NPC)],
                         ap_fixed<WIDTH_B, IBITS_B, AP_RND> beta_reg[XF_CHANNELS(IN_TYPE, NPC)],
                         int loop_count) {
@@ -92,14 +94,16 @@ template <int IN_TYPE,
           int HEIGHT,
           int WIDTH,
           int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
           int WIDTH_A,
           int IBITS_A,
           int WIDTH_B,
           int IBITS_B,
           int WIDTH_OUT,
           int IBITS_OUT>
-void preProcess(xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC>& in_mat,
-                xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC>& out_mat,
+void preProcess(xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC, XFCVDEPTH_IN>& in_mat,
+                xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC, XFCVDEPTH_OUT>& out_mat,
                 float params[2 * XF_CHANNELS(IN_TYPE, NPC)]) {
 #pragma HLS INLINE OFF
 
@@ -133,8 +137,8 @@ void preProcess(xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC>& in_mat,
 
     int loop_count = width * height;
 
-    xFpreProcessKernel<IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPC, WIDTH_A, IBITS_A, WIDTH_B, IBITS_B, WIDTH_OUT, IBITS_OUT>(
-        in_mat, out_mat, alpha_reg, beta_reg, loop_count);
+    xFpreProcessKernel<IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT, WIDTH_A, IBITS_A, WIDTH_B,
+                       IBITS_B, WIDTH_OUT, IBITS_OUT>(in_mat, out_mat, alpha_reg, beta_reg, loop_count);
 }
 }
 }

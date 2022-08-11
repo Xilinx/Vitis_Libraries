@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+#define XF_CV_DEPTH_IN_0 1
+#define XF_CV_DEPTH_IN_1 1
+#define XF_CV_DEPTH_IN_2 2
+#define XF_CV_DEPTH_IN_3 15360
+#define XF_CV_DEPTH_IN_4 4
+
+#define XF_CV_DEPTH_OUT_1 3
+
 #define FILTER_SIZE_3 1
 #define FILTER_SIZE_5 0
 #define FILTER_SIZE_7 0

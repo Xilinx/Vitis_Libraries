@@ -52,8 +52,8 @@ void blackLevelCorrection_accel(ap_uint<IMAGE_PTR_WIDTH>* in_img_ptr,
     // -----------------------------------------------
     // Internal xf::Mat objects
     // -----------------------------------------------
-    xf::cv::Mat<XF_SRC_T, XF_MAX_ROWS, XF_MAX_COLS, XF_NPPC> InImg(height, width);
-    xf::cv::Mat<XF_SRC_T, XF_MAX_ROWS, XF_MAX_COLS, XF_NPPC> OutImg(height, width);
+    xf::cv::Mat<XF_SRC_T, XF_MAX_ROWS, XF_MAX_COLS, XF_NPPC, XF_CV_DEPTH_IN> InImg(height, width);
+    xf::cv::Mat<XF_SRC_T, XF_MAX_ROWS, XF_MAX_COLS, XF_NPPC, XF_CV_DEPTH_OUT> OutImg(height, width);
 
 // -----------------------------------------------
 // Actual Body
@@ -63,14 +63,16 @@ void blackLevelCorrection_accel(ap_uint<IMAGE_PTR_WIDTH>* in_img_ptr,
     // clang-format on
 
     // Convert input image pointer to xf::Mat
-    xf::cv::Array2xfMat<IMAGE_PTR_WIDTH, XF_SRC_T, XF_MAX_ROWS, XF_MAX_COLS, XF_NPPC>(in_img_ptr, InImg);
+    xf::cv::Array2xfMat<IMAGE_PTR_WIDTH, XF_SRC_T, XF_MAX_ROWS, XF_MAX_COLS, XF_NPPC, XF_CV_DEPTH_IN>(in_img_ptr,
+                                                                                                      InImg);
 
     // Actual accelerator
-    xf::cv::blackLevelCorrection<XF_SRC_T, XF_MAX_ROWS, XF_MAX_COLS, XF_NPPC, IMAGE_MUL_WIDTH, IMAGE_MUL_FL_BITS,
-                                 XF_USE_DSP>(InImg, OutImg, bl, mul_value);
+    xf::cv::blackLevelCorrection<XF_SRC_T, XF_MAX_ROWS, XF_MAX_COLS, XF_NPPC, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT,
+                                 IMAGE_MUL_WIDTH, IMAGE_MUL_FL_BITS, XF_USE_DSP>(InImg, OutImg, bl, mul_value);
 
     // Convert output xf::Mat to image pointer
-    xf::cv::xfMat2Array<IMAGE_PTR_WIDTH, XF_SRC_T, XF_MAX_ROWS, XF_MAX_COLS, XF_NPPC>(OutImg, out_img_ptr);
+    xf::cv::xfMat2Array<IMAGE_PTR_WIDTH, XF_SRC_T, XF_MAX_ROWS, XF_MAX_COLS, XF_NPPC, XF_CV_DEPTH_OUT>(OutImg,
+                                                                                                       out_img_ptr);
 
     return;
 }

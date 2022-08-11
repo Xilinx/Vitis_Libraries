@@ -20,6 +20,7 @@
 #include "common/xf_common.hpp"
 #include "common/xf_utility.hpp"
 #include "hls_stream.h"
+// #include "xf_config_params.h"
 #include "imgproc/xf_inrange.hpp"
 
 typedef unsigned short uint16_t;
@@ -67,11 +68,13 @@ template <int SRC_T,
           int DEPTH_SRC,
           int DEPTH_DST,
           int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int MAXCOLOR>
-void xFInRange(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-               xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_mat,
+void xFInRange(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+               xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst_mat,
                unsigned char low_thresh[MAXCOLOR][3],
                unsigned char high_thresh[MAXCOLOR][3],
                uint16_t img_height,
@@ -119,9 +122,16 @@ void xFInRange(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     }
 }
 
-template <int SRC_T, int DST_T, int MAXCOLORS, int ROWS, int COLS, int NPC>
-void colorthresholding(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                       xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_mat,
+template <int SRC_T,
+          int DST_T,
+          int MAXCOLORS,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void colorthresholding(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+                       xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst_mat,
                        unsigned char low_thresh[MAXCOLORS * 3],
                        unsigned char high_thresh[MAXCOLORS * 3]) {
 // clang-format off
@@ -152,8 +162,9 @@ void colorthresholding(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     uint16_t img_height = _src_mat.rows;
     uint16_t img_width = _src_mat.cols;
 
-    xFInRange<SRC_T, DST_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), XF_DEPTH(DST_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-              XF_WORDWIDTH(DST_T, NPC), MAXCOLORS>(_src_mat, _dst_mat, low_th, high_th, img_height, img_width);
+    xFInRange<SRC_T, DST_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), XF_DEPTH(DST_T, NPC), NPC, XFCVDEPTH_IN_1,
+              XFCVDEPTH_OUT_1, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC), MAXCOLORS>(
+        _src_mat, _dst_mat, low_th, high_th, img_height, img_width);
 }
 } // namespace cv
 } // namespace xf

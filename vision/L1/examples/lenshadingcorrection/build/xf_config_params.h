@@ -19,3 +19,5 @@
 
 #define T_8U 1
 #define T_16U 0
+#define XF_CV_DEPTH_IN 3
+#define XF_CV_DEPTH_OUT 3

@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#define XF_CV_DEPTH_IN_1 2
+#define XF_CV_DEPTH_OUT_1 2
+
 #define NO 1 // Normal
 #define RO 0 // Resource Optimized
 

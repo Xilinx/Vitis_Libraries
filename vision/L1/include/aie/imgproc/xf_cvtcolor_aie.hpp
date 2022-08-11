@@ -44,10 +44,10 @@ inline void SetUV_420MetaData(metadata_elem_t* img_ptr) {
     xfSetTileHeight(img_ptr, xfGetTileHeight(img_ptr) / 2);
     xfSetTilePosH(img_ptr, xfGetTilePosH(img_ptr) / 2);
     xfSetTilePosV(img_ptr, xfGetTilePosV(img_ptr) / 2);
-    xfSetTileCrctPosH(img_ptr, xfGetTileCrctPosH(img_ptr) / 2);
-    xfSetTileCrctPosV(img_ptr, xfGetTileCrctPosV(img_ptr) / 2);
-    xfSetTileCrctTWidth(img_ptr, xfGetTileCrctTWidth(img_ptr) / 2);
-    xfSetTileCrctTHeight(img_ptr, xfGetTileCrctTHeight(img_ptr) / 2);
+    xfSetTileOutPosH(img_ptr, xfGetTileOutPosH(img_ptr) / 2);
+    xfSetTileOutPosV(img_ptr, xfGetTileOutPosV(img_ptr) / 2);
+    xfSetTileOutTWidth(img_ptr, xfGetTileOutTWidth(img_ptr) / 2);
+    xfSetTileOutTHeight(img_ptr, xfGetTileOutTHeight(img_ptr) / 2);
 }
 
 int16_t y_wei[16] = {526, 1032, 201, 2048};

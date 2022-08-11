@@ -61,10 +61,11 @@ template <int SRC_T,
           int MAX_BOXES,
           int DEPTH,
           int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int COLS_TRIP>
-void xFboundingboxkernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
+void xFboundingboxkernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
                          xf::cv::Rect_<int>* roi,
                          xf::cv::Scalar<4, unsigned char>* color,
                          int num_box,
@@ -152,8 +153,8 @@ void xFboundingboxkernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     }
 }
 
-template <int SRC_T, int ROWS, int COLS, int MAX_BOXES = 1, int NPC = 1>
-void boundingbox(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
+template <int SRC_T, int ROWS, int COLS, int MAX_BOXES = 1, int NPC = 1, int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT>
+void boundingbox(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
                  xf::cv::Rect_<int>* roi,
                  xf::cv::Scalar<4, unsigned char>* color,
                  int num_box) {
@@ -177,7 +178,7 @@ void boundingbox(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     #pragma HLS INLINE
     // clang-format on
 
-    xFboundingboxkernel<SRC_T, ROWS, COLS, MAX_BOXES, XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
+    xFboundingboxkernel<SRC_T, ROWS, COLS, MAX_BOXES, XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN, XF_WORDWIDTH(SRC_T, NPC),
                         XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(_src_mat, roi, color, num_box, height,
                                                                               width);
 }

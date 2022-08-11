@@ -25,3 +25,4 @@
 
 // maximum number of iterations for centroid convergence
 #define XF_MAX_ITERS 4
+#define XF_CV_DEPTH_IN -1

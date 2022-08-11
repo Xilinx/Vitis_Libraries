@@ -22,11 +22,16 @@
 #include "common/xf_utility.hpp"
 namespace xf {
 namespace cv {
-template <unsigned int MAXCORNERSNO, unsigned int TYPE, unsigned int ROWS, unsigned int COLS, unsigned int NPC>
+template <unsigned int MAXCORNERSNO,
+          unsigned int TYPE,
+          unsigned int ROWS,
+          unsigned int COLS,
+          unsigned int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT>
 void cornerUpdate(unsigned long* list_fix,
                   unsigned int* list,
                   uint32_t nCorners,
-                  xf::cv::Mat<TYPE, ROWS, COLS, NPC>& flow_vectors,
+                  xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>& flow_vectors,
                   ap_uint<1> harris_flag) {
     unsigned int* flowvectorsDataPtr = (unsigned int*)flow_vectors.data;
     unsigned int list_flag_tmp;

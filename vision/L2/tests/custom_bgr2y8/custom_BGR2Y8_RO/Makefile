@@ -1,4 +1,4 @@
-# Copyright 2022 Xilinx, Inc.
+# Copyright 2019-2022 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.5
+# vitis makefile-generator v2.0.6
 
 ############################## Help Section ##############################
 .PHONY: help
@@ -30,13 +30,19 @@ help::
 	$(ECHO) "      Command to build xclbin application."
 	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make host HOST_ARCH=<hw/hw_emu/sw_emu/>"
+	$(ECHO) "  make host TARGET=<hw/hw_emu/sw_emu/>"
 	$(ECHO) "      Command to build host application."
 	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  NOTE: For embedded devices, e.g. zcu102/zcu104/vck190, env variable SYSROOT and EDGE_COMMON_SW need to be set first, and HOST_ARCH is either aarch32 or aarch64. For example,"
-	$(ECHO) "       export SYSROOT=< path-to-platform-sysroot >"
-	$(ECHO) "       export EDGE_COMMON_SW=< path-to-rootfs-and-Image-files >"
+	$(ECHO) "  NOTE: For embedded devices, e.g. zcu102/zcu104/vck190, HOST_ARCH is either aarch32 or aarch64."
+	$(ECHO) "      a.IF Download the platform, and common-image from Xilinx Download Center(Suggested):"
+	$(ECHO) "        Run the sdk.sh script from the common-image directory to install sysroot using the command : ./sdk.sh -y -d ./ -p "
+	$(ECHO) "        Unzip the rootfs file : gunzip ./rootfs.ext4.gz"
+	$(ECHO) "        export SYSROOT=< path-to-platform-sysroot >"
+	$(ECHO) "      b. User could also define SYSROOT, K_IMAGE and ROOTFS by themselves: "
+	$(ECHO) "        export SYSROOT=< path-to-platform-sysroot >"
+	$(ECHO) "        export K_IMAGE=< path-to-Image-files >"
+	$(ECHO) "        export ROOTFS=< path-to-rootfs >"
 	$(ECHO) ""
 	$(ECHO) "  make clean "
 	$(ECHO) "      Command to remove the generated non-hardware files."
@@ -107,7 +113,6 @@ ifeq ($(TARGET),hw_emu)
 CXXFLAGS += -D HW_EMU_TEST
 endif
 
-
 #Inclue Required Host Source Files
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
 HOST_SRCS += $(XFLIB_DIR)/L2/examples/custom_bgr2y8/xf_custom_bgr2y8_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
@@ -141,14 +146,14 @@ else ifneq (,$(shell echo $(XPLATFORM) | awk '/zcu102/'))
 HOST_SRCS += $(XFLIB_DIR)/L2/examples/custom_bgr2y8/xf_custom_bgr2y8_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L2/tests/custom_bgr2y8/custom_BGR2Y8_RO -I $(XFLIB_DIR)/L2/examples/custom_bgr2y8 -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 CXXFLAGS += --sysroot=$(SYSROOT)
-LDFLAGS +=  -L $(SYSROOT)/usr/lib -L ${SYSROOT}/opt/xilinx/xrt/lib
+LDFLAGS +=  -L $(SYSROOT)/usr/lib -L ${SYSROOT}/lib
 LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/zcu104/'))
 HOST_SRCS += $(XFLIB_DIR)/L2/examples/custom_bgr2y8/xf_custom_bgr2y8_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L2/tests/custom_bgr2y8/custom_BGR2Y8_RO -I $(XFLIB_DIR)/L2/examples/custom_bgr2y8 -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 CXXFLAGS += --sysroot=$(SYSROOT)
-LDFLAGS +=  -L $(SYSROOT)/usr/lib -L ${SYSROOT}/opt/xilinx/xrt/lib
+LDFLAGS +=  -L $(SYSROOT)/usr/lib -L ${SYSROOT}lib
 LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 
 else 
@@ -158,7 +163,7 @@ CXXFLAGS += -O3
 LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 
 endif
-
+# workaround for opencv
 ifeq (,$(findstring opencv,$(CXXFLAGS)))
 CXXFLAGS += $(XRT_CXXFLAGS)
 endif
@@ -205,12 +210,12 @@ endif
 $(TEMP_DIR)/custom_bgr2y8_accel.xo: $(XFLIB_DIR)/L2/examples/custom_bgr2y8/xf_custom_bgr2y8_accel.cpp 
 	$(ECHO) "Compiling Kernel: custom_bgr2y8_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_custom_bgr2y8_accel) $(VPP_FLAGS) -k custom_bgr2y8_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$^'
+	$(VPP) -c $(VPP_FLAGS_custom_bgr2y8_accel) $(VPP_FLAGS) -k custom_bgr2y8_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
 BINARY_CONTAINER_krnl_custom_bgr2y8_OBJS += $(TEMP_DIR)/custom_bgr2y8_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_custom_bgr2y8_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	mkdir -p $(BUILD_DIR)
-	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/krnl_rotate $(VPP_LDFLAGS)  $(VPP_LDFLAGS_krnl_rotate) $(AIE_LDFLAGS)   -o $@ $^
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/krnl_custom_bgr2y8 $(VPP_LDFLAGS)  $(VPP_LDFLAGS_krnl_custom_bgr2y8) $(AIE_LDFLAGS)   -o $@ $^
 
 ############################## Setting Rules for Host (Building Host Executable) ##############################
 ifeq ($(HOST_ARCH), x86)
@@ -229,11 +234,6 @@ $(EMCONFIG):
 	emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
 ############################## Preparing sdcard folder ##############################
 ifneq ($(HOST_ARCH), x86)
-ifneq (,$(findstring zc706, $(PLATFORM_NAME)))
-K_IMAGE := $(SYSROOT)/../../uImage
-else
-K_IMAGE := $(SYSROOT)/../../Image
-endif
 RUN_SCRIPT := $(BUILD_DIR)/run_script.sh
 $(RUN_SCRIPT):
 	rm -rf $(RUN_SCRIPT)
@@ -267,12 +267,23 @@ SD_DIRS_WITH_PREFIX = $(foreach sd_dir,$(DATA_DIR),--package.sd_dir $(sd_dir))
 PACKAGE_FILES := $(BINARY_CONTAINERS)
 PACKAGE_FILES += $(AIE_CONTAINER)
 SD_CARD := $(CUR_DIR)/package_$(TARGET)
-$(SD_CARD): $(EXE_FILE) $(BINARY_CONTAINERS) $(RUN_SCRIPT) $(EMCONFIG)
+dfx_hw := false
+$(SD_CARD): $(EXE_FILE) $(BINARY_CONTAINERS) $(RUN_SCRIPT) $(EMCONFIG) check_kimage check_rootfs
 	@echo "Generating sd_card folder...."
 	mkdir -p $(SD_CARD)
 	chmod a+rx $(BUILD_DIR)/run_script.sh
-	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
+ifeq ($(findstring _dfx_, $(PLATFORM_NAME)),_dfx_)
+ifeq ($(TARGET),hw)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p $(PACKAGE_FILES) $(VPP_PACKAGE) -o $(BINARY_CONTAINERS_PKG)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX) --package.sd_file $(BINARY_CONTAINERS_PKG)
 	@echo "### ***** sd_card generation done! ***** ###"
+dfx_hw := true
+endif
+endif
+ifeq ($(dfx_hw), false)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
+	@echo "### ***** sd_card generation done! ***** ###"
+endif
 
 .PHONY: sd_card
 sd_card: $(SD_CARD)
@@ -316,7 +327,17 @@ endif
 endif
 #hw
 ifeq ($(TARGET), hw)
-ifeq ($(HOST_ARCH), x86)
+ifneq (,$(findstring aws-vu9p-f1, $(PLATFORM_NAME)))
+ifeq (,$(wildcard $(BUILD_DIR)/krnl_custom_bgr2y8.awsxclbin))
+	$(ECHO) "This makefile does not directly support converting .xclbin to .awsxclbin, please refer https://github.com/aws/aws-fpga/blob/master/Vitis/README.md for next operations"
+else
+	$(ECHO) "Running HW using generated .awsxclbin"
+	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
+	$(EXE_FILE) $(subst .xclbin,.awsxclbin,$(HOST_ARGS))
+	
+endif
+else ifeq ($(HOST_ARCH), x86)
+	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	$(EXE_FILE) $(HOST_ARGS)
 	
 else
@@ -353,13 +374,11 @@ cleanh:
 
 cleank:
 	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl*start_simulation. sh *.xclbin
-	-$(RMDIR) _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* xo_* _x*
-	-$(RMDIR) _x_temp.*/dltmp* _x_temp.*/kernel_info.dat _x_temp.*/*.log
-	-$(RMDIR) _x_temp.* 
+	-$(RMDIR) _x_temp.*
 
 cleanall: cleanh cleank
-	-$(RMDIR) $(BUILD_DIR)  build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
-	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
+	-$(RMDIR) $(BUILD_DIR)  emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
 	-$(RMDIR)  $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
+	-$(RMDIR) 
 
 clean: cleanh

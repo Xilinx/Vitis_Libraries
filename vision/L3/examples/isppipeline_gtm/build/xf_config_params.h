@@ -58,3 +58,15 @@
 #define OUTPUT_PTR_WIDTH 32
 
 #define XF_USE_URAM 0 // uram enable
+
+#define XF_CV_DEPTH_IN_0 2
+#define XF_CV_DEPTH_IN_1 2
+#define XF_CV_DEPTH_IN_2 2
+#define XF_CV_DEPTH_IN_3 2
+#define XF_CV_DEPTH_OUT_0 2
+#define XF_CV_DEPTH_OUT_1 2
+#define XF_CV_DEPTH_OUT_2 2
+#define XF_CV_DEPTH_OUT_3 2
+#define XF_CV_DEPTH_OUT_4 2
+#define XF_CV_DEPTH_OUT_5 2
+#define XF_CV_DEPTH_OUT_6 2

@@ -18,3 +18,6 @@
 #define RO 0 // Resource Optimized
 
 #define GRAY 1
+#define XF_CV_DEPTH_IN 3
+#define XF_CV_DEPTH_MASK_IN 3
+#define XF_CV_DEPTH_OUT 3

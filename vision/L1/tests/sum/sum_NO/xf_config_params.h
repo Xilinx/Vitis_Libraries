@@ -16,5 +16,6 @@
 
 #define NO 1 // Normal Operation
 #define RO 0 // Resource Optimized
+#define XF_CV_DEPTH_IN 2
 
 #define GRAY 1

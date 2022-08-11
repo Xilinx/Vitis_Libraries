@@ -20,3 +20,6 @@
 #define WIDTH 3840
 #define INPUT_PTR_WIDTH 256
 #define OUTPUT_PTR_WIDTH 256
+
+#define XF_CV_DEPTH_IN 3
+#define XF_CV_DEPTH_OUT 3

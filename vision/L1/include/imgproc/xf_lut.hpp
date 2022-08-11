@@ -42,11 +42,13 @@ template <int SRC_T,
           int PLANES,
           int DEPTH,
           int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int COLS_TRIP>
-void xFLUTKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
-                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst,
+void xFLUTKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src,
+                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst,
                  unsigned char* _lut,
                  uint16_t height,
                  uint16_t width) {
@@ -114,8 +116,15 @@ rowLoop:
         }
     }
 }
-template <int SRC_T, int ROWS, int COLS, int NPC = 1>
-void LUT(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst, unsigned char* _lut) {
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void LUT(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src,
+         xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst,
+         unsigned char* _lut) {
 // clang-format off
     #pragma HLS INLINE OFF
 	unsigned char height=_src.rows;
@@ -127,7 +136,7 @@ void LUT(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<SRC_T, ROWS, COL
     	assert(((height <= ROWS ) && (width <= COLS)) && "ROWS and COLS should be greater than input image");
 	#endif
 	
-    xFLUTKernel<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
+    xFLUTKernel<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT, XF_WORDWIDTH(SRC_T, NPC),
                XF_WORDWIDTH(SRC_T, NPC),(COLS >> XF_BITSHIFT(NPC))>(_src, _dst, _lut, _src.rows, _src.cols);
 }
 } // namespace cv

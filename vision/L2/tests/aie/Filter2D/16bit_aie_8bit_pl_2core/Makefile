@@ -18,29 +18,35 @@
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<hw/hw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<aarch64>"
+	$(ECHO) "  make all TARGET=<hw/hw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<aarch64> AIE_CORES=<2>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
 	$(ECHO) "      By default, HOST_ARCH=aarch64. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make sd_card TARGET=<hw/hw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<aarch64>"
+	$(ECHO) "  make sd_card TARGET=<hw/hw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<aarch64> AIE_CORES=<2>"
 	$(ECHO) "      Command to prepare sd_card files."
 	$(ECHO) "      By default, HOST_ARCH=aarch64. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<hw/hw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<aarch64>"
+	$(ECHO) "  make run TARGET=<hw/hw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<aarch64> AIE_CORES=<2>"
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) "      By default, HOST_ARCH=aarch64. HOST_ARCH required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make xclbin TARGET=<hw/hw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<aarch64>"
+	$(ECHO) "  make xclbin TARGET=<hw/hw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<aarch64> AIE_CORES=<2>"
 	$(ECHO) "      Command to build xclbin application."
 	$(ECHO) "      By default, HOST_ARCH=aarch64. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make host TARGET=<hw/hw_emu/>"
+	$(ECHO) "  make host TARGET=<hw/hw_emu/> AIE_CORES=<2>"
 	$(ECHO) "      Command to build host application."
 	$(ECHO) "      By default, HOST_ARCH=aarch64. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  NOTE: For embedded devices, e.g. zcu102/zcu104/vck190, env variable SYSROOT and EDGE_COMMON_SW need to be set first, and HOST_ARCH is either aarch32 or aarch64. For example,"
-	$(ECHO) "       export SYSROOT=< path-to-platform-sysroot >"
-	$(ECHO) "       export EDGE_COMMON_SW=< path-to-rootfs-and-Image-files >"
+	$(ECHO) "  NOTE: For embedded devices, e.g. zcu102/zcu104/vck190, HOST_ARCH is either aarch32 or aarch64."
+	$(ECHO) "      a.IF Download the platform, and common-image from Xilinx Download Center(Suggested):"
+	$(ECHO) "        Run the sdk.sh script from the common-image directory to install sysroot using the command : ./sdk.sh -y -d ./ -p "
+	$(ECHO) "        Unzip the rootfs file : gunzip ./rootfs.ext4.gz"
+	$(ECHO) "        export SYSROOT=< path-to-platform-sysroot >"
+	$(ECHO) "      b. User could also define SYSROOT, K_IMAGE and ROOTFS by themselves: "
+	$(ECHO) "        export SYSROOT=< path-to-platform-sysroot >"
+	$(ECHO) "        export K_IMAGE=< path-to-Image-files >"
+	$(ECHO) "        export ROOTFS=< path-to-rootfs >"
 	$(ECHO) ""
 	$(ECHO) "  make clean "
 	$(ECHO) "      Command to remove the generated non-hardware files."
@@ -59,6 +65,8 @@ XFLIB_DIR = $(XF_PROJ_ROOT)
 # setting devault value
 TARGET ?= hw_emu
 HOST_ARCH ?= aarch64
+AIE_CORES ?= 2
+
 
 #setting PLATFORM
 ifeq ($(PLATFORM),)
@@ -127,6 +135,7 @@ AIE_CXXFLAGS += --target=$(AIETARGET) --platform=$(XPLATFORM) --pl-freq=400 -pl-
 AIE_CXXFLAGS += -I $(XILINX_VITIS_AIETOOLS)/include
 AIE_CONTAINER = $(TEMP_DIR)/libadf.a
 AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie
+AIE_CXXFLAGS += --Xpreproc=-DAIE_CORES=$(AIE_CORES)
 $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp: $(AIE_CONTAINER)
 
 EXE_FILE_DEPS += $(AIE_CONTAINER)
@@ -144,6 +153,7 @@ HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie/Filter2D/16bit_aie_8bit_pl_2core/host.cpp
 CXXFLAGS +=  -D __PS_ENABLE_AIE__
 CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(SYSROOT)/usr/include/ -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L1/include/aie -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 CXXFLAGS += --sysroot=$(SYSROOT)
+CXXFLAGS += -DAIE_CORES=$(AIE_CORES)
 LDFLAGS +=  -L $(SYSROOT)/usr/lib/ -L $(XFLIB_DIR)/L1/lib/sw/aarch64-linux
 LDFLAGS +=  -l smartTilerStitcher -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 LDFLAGS += --sysroot=$(SYSROOT)
@@ -156,6 +166,7 @@ endif
 EXE_NAME := host.elf
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 EXE_FILE_DEPS := $(HOST_SRCS) $(EXE_FILE_DEPS)
+CONNECTIVITY_CFG := connect.cfg
 
 ifeq ($(TARGET),$(filter $(TARGET),hw_emu))
 HOST_ARGS := kernel.xclbin $(XFLIB_DIR)/data/HD.jpg
@@ -174,7 +185,7 @@ endif
 ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
 VPP_FLAGS +=   
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/
-VPP_LDFLAGS +=   --clock.freqHz 400000000:Tiler_top_1  --clock.freqHz 400000000:stitcher_top_1  --clock.defaultTolerance 0.001  --config $(CUR_DIR)/system.cfg  $(XFLIB_DIR)/L1/lib/hw/8_16/tiler.xo  $(XFLIB_DIR)/L1/lib/hw/8_16/stitcher.xo
+VPP_LDFLAGS +=   --clock.freqHz 400000000:Tiler_top_1  --clock.freqHz 400000000:stitcher_top_1  --clock.defaultTolerance 0.001  --config $(CUR_DIR)/system.cfg  --config $(BUILD_DIR)/connect.cfg  $(XFLIB_DIR)/L1/lib/hw/8_16/tiler.xo  $(XFLIB_DIR)/L1/lib/hw/8_16/stitcher.xo
 VPP_PACKAGE +=   --package.defer_aie_run
 
 else 
@@ -200,6 +211,7 @@ endif
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_kernel_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	mkdir -p $(BUILD_DIR)
+	./genSystemConnectivity.py $(AIE_CORES) $(BUILD_DIR)/$(CONNECTIVITY_CFG)
 	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/kernel $(VPP_LDFLAGS)  $(VPP_LDFLAGS_kernel) $(AIE_LDFLAGS)   -o $@ $^
 
 ############################## Setting Rules for AIE (Building Kernels) ##################
@@ -226,11 +238,6 @@ $(EMCONFIG):
 	emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
 ############################## Preparing sdcard folder ##############################
 ifneq ($(HOST_ARCH), x86)
-ifneq (,$(findstring zc706, $(PLATFORM_NAME)))
-K_IMAGE := $(SYSROOT)/../../uImage
-else
-K_IMAGE := $(SYSROOT)/../../Image
-endif
 RUN_SCRIPT := $(BUILD_DIR)/run_script.sh
 $(RUN_SCRIPT):
 	rm -rf $(RUN_SCRIPT)
@@ -264,21 +271,21 @@ SD_DIRS_WITH_PREFIX = $(foreach sd_dir,$(DATA_DIR),--package.sd_dir $(sd_dir))
 PACKAGE_FILES := $(BINARY_CONTAINERS)
 PACKAGE_FILES += $(AIE_CONTAINER)
 SD_CARD := $(CUR_DIR)/package_$(TARGET)
-vck190_dfx_hw := false
-$(SD_CARD): $(EXE_FILE) $(BINARY_CONTAINERS) $(RUN_SCRIPT) $(EMCONFIG)
+dfx_hw := false
+$(SD_CARD): $(EXE_FILE) $(BINARY_CONTAINERS) $(RUN_SCRIPT) $(EMCONFIG) check_kimage check_rootfs
 	@echo "Generating sd_card folder...."
 	mkdir -p $(SD_CARD)
 	chmod a+rx $(BUILD_DIR)/run_script.sh
-ifeq ($(findstring vck190_base_dfx, $(PLATFORM_NAME)),vck190_base_dfx)
+ifeq ($(findstring _dfx_, $(PLATFORM_NAME)),_dfx_)
 ifeq ($(TARGET),hw)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p $(PACKAGE_FILES) $(VPP_PACKAGE) -o $(BINARY_CONTAINERS_PKG)
-	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p --package.out_dir  $(SD_CARD) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.kernel_image $(K_IMAGE) --package.boot_mode sd  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX) --package.sd_file $(BINARY_CONTAINERS_PKG)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE) --package.boot_mode sd  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX) --package.sd_file $(BINARY_CONTAINERS_PKG)
 	@echo "### ***** sd_card generation done! ***** ###"
-vck190_dfx_hw := true
+dfx_hw := true
 endif
 endif
-ifeq ($(vck190_dfx_hw), false)
-	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.kernel_image $(K_IMAGE) --package.boot_mode sd  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
+ifeq ($(dfx_hw), false)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE) --package.boot_mode sd  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 	@echo "### ***** sd_card generation done! ***** ###"
 endif
 
@@ -339,12 +346,12 @@ endif
 #hw
 ifeq ($(TARGET), hw)
 ifneq (,$(findstring aws-vu9p-f1, $(PLATFORM_NAME)))
-ifneq ($(JENKINS_INTERNAL_BUILD), 1)
+ifeq (,$(wildcard $(BUILD_DIR)/kernel.awsxclbin))
 	$(ECHO) "This makefile does not directly support converting .xclbin to .awsxclbin, please refer https://github.com/aws/aws-fpga/blob/master/Vitis/README.md for next operations"
 else
-	$(ECHO) "Running inside Xilinx regression without converting to .awsxclbin"
+	$(ECHO) "Running HW using generated .awsxclbin"
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
-	$(EXE_FILE) $(HOST_ARGS)
+	$(EXE_FILE) $(subst .xclbin,.awsxclbin,$(HOST_ARGS))
 	
 endif
 else ifeq ($(HOST_ARCH), x86)

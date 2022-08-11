@@ -36,14 +36,11 @@ void sgbm_accel(ap_uint<PTR_IN_WIDTH>* img_in_l,
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInputL(rows, cols);
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1> imgInputR(rows, cols);
-    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1> imgOutput(rows, cols);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1> imgInputL(rows, cols);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_2> imgInputR(rows, cols);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> imgOutput(rows, cols);
 
 // clang-format off
-    #pragma HLS STREAM variable=imgInputL.data depth=2
-    #pragma HLS STREAM variable=imgInputR.data depth=2
-    #pragma HLS STREAM variable=imgOutput.data depth=2
 // clang-format on
 
 // clang-format off
@@ -51,15 +48,16 @@ void sgbm_accel(ap_uint<PTR_IN_WIDTH>* img_in_l,
     // clang-format on
 
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<PTR_IN_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1>(img_in_l, imgInputL);
-    xf::cv::Array2xfMat<PTR_IN_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1>(img_in_r, imgInputR);
+    xf::cv::Array2xfMat<PTR_IN_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1>(img_in_l, imgInputL);
+    xf::cv::Array2xfMat<PTR_IN_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_2>(img_in_r, imgInputR);
 
     // Run xfOpenCV kernel:
     xf::cv::SemiGlobalBM<XF_BORDER_CONSTANT, WINDOW_SIZE, TOTAL_DISPARITY, PARALLEL_UNITS, NUM_DIR, IN_TYPE, OUT_TYPE,
-                         HEIGHT, WIDTH, NPC1>(imgInputL, imgInputR, imgOutput, penalty_small, penalty_large);
+                         HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2, XF_CV_DEPTH_OUT>(
+        imgInputL, imgInputR, imgOutput, penalty_small, penalty_large);
 
     // Convert _dst xf::cv::Mat object to output array:
-    xf::cv::xfMat2Array<PTR_OUT_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPC1>(imgOutput, img_out);
+    xf::cv::xfMat2Array<PTR_OUT_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(imgOutput, img_out);
 
     return;
 } // End of kernel

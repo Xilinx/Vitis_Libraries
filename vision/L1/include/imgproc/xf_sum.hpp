@@ -28,8 +28,16 @@
 #endif
 namespace xf {
 namespace cv {
-template <int SRC_T, int ROWS, int COLS, int NPC, int PLANES, int DEPTH_SRC, int WORDWIDTH_SRC, int TC>
-int sumKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int PLANES,
+          int DEPTH_SRC,
+          int WORDWIDTH_SRC,
+          int TC>
+int sumKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src1,
               xf::cv::Scalar<XF_CHANNELS(SRC_T, NPC), double>& scl,
               uint16_t height,
               uint16_t width) {
@@ -83,8 +91,8 @@ RowLoop:
     return 0;
 }
 
-template <int SRC_T, int ROWS, int COLS, int NPC = 1>
-void sum(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1, double sum[XF_CHANNELS(SRC_T, NPC)]) {
+template <int SRC_T, int ROWS, int COLS, int NPC = 1, int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT>
+void sum(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src1, double sum[XF_CHANNELS(SRC_T, NPC)]) {
 #ifndef __SYNTHESIS__
     assert(((SRC_T == XF_8UC1)) && "Input TYPE must be XF_8UC1 for 1-channel image");
     assert(((src1.rows <= ROWS) && (src1.cols <= COLS)) && "ROWS and COLS should be greater than input image");
@@ -93,8 +101,8 @@ void sum(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1, double sum[XF_CHANNELS(SRC_T
     short width = src1.cols >> XF_BITSHIFT(NPC);
     xf::cv::Scalar<XF_CHANNELS(SRC_T, NPC), double> scl;
 
-    sumKernel<SRC_T, ROWS, COLS, NPC, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC),
-              (COLS >> XF_BITSHIFT(NPC))>(src1, scl, src1.rows, width);
+    sumKernel<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC),
+              XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(src1, scl, src1.rows, width);
     for (int i = 0; i < XF_CHANNELS(SRC_T, NPC); i++) {
         sum[i] = scl.val[i];
     }

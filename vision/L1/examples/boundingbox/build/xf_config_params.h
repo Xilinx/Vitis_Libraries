@@ -24,3 +24,4 @@
 
 /*  set the type of thresholding*/
 #define GRAY 1
+#define XF_CV_DEPTH_IN -1

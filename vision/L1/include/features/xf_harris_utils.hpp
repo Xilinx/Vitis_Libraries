@@ -24,10 +24,19 @@
 /**
  *  xFDuplicate
  */
-template <int SRC_T, int ROWS, int COLS, int DEPTH, int NPC, int WORDWIDTH, int TC>
-void xFDuplicate(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst1_mat,
-                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst2_mat,
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_2 = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH,
+          int TC>
+void xFDuplicate(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst1_mat,
+                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_2>& _dst2_mat,
                  uint16_t img_height,
                  uint16_t img_width) {
     img_width = img_width >> XF_BITSHIFT(NPC);
@@ -63,12 +72,14 @@ template <int SRC_T,
           int IN_DEPTH,
           int OUT_DEPTH,
           int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
           int IN_WW,
           int OUT_WW,
           int TC,
           typename SCALE_T>
-void xFSquare(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-              xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_mat,
+void xFSquare(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+              xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst_mat,
               SCALE_T scale,
               uint8_t filter_width,
               uint16_t img_height,
@@ -149,13 +160,16 @@ template <int SRC_T,
           int IN_DEPTH,
           int OUT_DEPTH,
           int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
           int IN_WW,
           int OUT_WW,
           int TC,
           typename SCALE_T>
-void xFMultiply(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat1,
-                xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat2,
-                xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_mat,
+void xFMultiply(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat1,
+                xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& _src_mat2,
+                xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst_mat,
                 SCALE_T scale,
                 uint8_t filter_width,
                 uint16_t img_height,
@@ -227,9 +241,17 @@ Row_Loop:
  * Thresholding function
  * Arguments: Input Stream, Output Stream, Threshold
  */
-template <int SRC_T, int ROWS, int COLS, int DEPTH, int NPC, int WORDWIDTH, int TC>
-void xFThreshold(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat,
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH,
+          int TC>
+void xFThreshold(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst_mat,
                  uint16_t threshold,
                  uint16_t img_height,
                  uint16_t img_width) {
@@ -298,11 +320,24 @@ Row_Loop:
  *  _src1_mat --> gy^2
  *  _dst_mat --> Result
  */
-template <int SRC_T, int DST_T, int ROWS, int COLS, int IN_DEPTH, int OUT_DEPTH, int NPC, int IN_WW, int OUT_WW, int TC>
-void xFComputeScore(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1_mat,
-                    xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2_mat,
-                    xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src3_mat,
-                    xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_mat,
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int IN_DEPTH,
+          int OUT_DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_3 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
+          int IN_WW,
+          int OUT_WW,
+          int TC>
+void xFComputeScore(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src1_mat,
+                    xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& _src2_mat,
+                    xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_3>& _src3_mat,
+                    xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst_mat,
                     uint16_t img_height,
                     uint16_t img_width,
                     uint16_t thresold,

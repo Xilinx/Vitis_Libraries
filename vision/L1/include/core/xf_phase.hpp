@@ -51,12 +51,15 @@ template <int SRC_T,
           int DEPTH_SRC,
           int DEPTH_DST,
           int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int COLS_TRIP>
-void xfPhaseKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
-                   xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _src2,
-                   xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_mat,
+void xfPhaseKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src1,
+                   xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& _src2,
+                   xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst_mat,
                    int _out_format,
                    uint16_t& imgheight,
                    uint16_t& imgwidth) {
@@ -140,10 +143,18 @@ void xFPhaseComputation(hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _src1,
         _src1, _src2, _dst, _out_format, imgheight, imgwidth);
 }
 
-template <int RET_TYPE, int SRC_T, int DST_T, int ROWS, int COLS, int NPC>
-void phase(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_matx,
-           xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _src_maty,
-           xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_mat) {
+template <int RET_TYPE,
+          int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_IN_X = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_Y = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void phase(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_X>& _src_matx,
+           xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_IN_Y>& _src_maty,
+           xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst_mat) {
 #ifndef __SYNTHESIS__
     assert(((_src_matx.rows <= ROWS) && (_src_matx.cols <= COLS)) &&
            "ROWS and COLS should be greater than input image");
@@ -163,9 +174,9 @@ void phase(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_matx,
     #pragma HLS INLINE OFF
     // clang-format on
 
-    xfPhaseKernel<SRC_T, DST_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), XF_DEPTH(DST_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                  XF_WORDWIDTH(DST_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(_src_matx, _src_maty, _dst_mat, RET_TYPE,
-                                                                        imgheight, imgwidth);
+    xfPhaseKernel<SRC_T, DST_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), XF_DEPTH(DST_T, NPC), NPC, XFCVDEPTH_IN_X,
+                  XFCVDEPTH_IN_Y, XFCVDEPTH_OUT, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
+                  (COLS >> XF_BITSHIFT(NPC))>(_src_matx, _src_maty, _dst_mat, RET_TYPE, imgheight, imgwidth);
 }
 } // namespace cv
 } // namespace xf

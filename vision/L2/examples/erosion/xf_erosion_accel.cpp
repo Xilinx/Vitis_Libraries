@@ -30,10 +30,8 @@ void erosion(
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(height, width);
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgOutput(height, width);
-#pragma HLS STREAM variable = imgInput.data depth = 2
-#pragma HLS STREAM variable = imgOutput.data depth = 2
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1> imgInput(height, width);
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> imgOutput(height, width);
 
     // Copy the shape data:
     unsigned char _kernel[FILTER_SIZE * FILTER_SIZE];
@@ -48,14 +46,14 @@ void erosion(
     #pragma HLS DATAFLOW
     // clang-format on
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1>(img_in, imgInput);
+    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1>(img_in, imgInput);
 
     // Run xfOpenCV kernel:
-    xf::cv::erode<XF_BORDER_CONSTANT, TYPE, HEIGHT, WIDTH, KERNEL_SHAPE, FILTER_SIZE, FILTER_SIZE, ITERATIONS, NPC1>(
-        imgInput, imgOutput, _kernel);
+    xf::cv::erode<XF_BORDER_CONSTANT, TYPE, HEIGHT, WIDTH, KERNEL_SHAPE, FILTER_SIZE, FILTER_SIZE, ITERATIONS, NPC1,
+                  XF_CV_DEPTH_IN_1, XF_CV_DEPTH_OUT_1>(imgInput, imgOutput, _kernel);
 
     // Convert imgOutput xf::cv::Mat object to output array:
-    xf::cv::xfMat2Array<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1>(imgOutput, img_out);
+    xf::cv::xfMat2Array<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(imgOutput, img_out);
 
     return;
 } // End of kernel

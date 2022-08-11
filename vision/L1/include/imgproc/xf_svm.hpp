@@ -41,9 +41,19 @@
 namespace xf {
 namespace cv {
 
-template <int SRC1_T, int SRC2_T, int DST_WIDTH, int ROWS1, int COLS1, int ROWS2, int COLS2, int NPC, int N>
-ap_int<DST_WIDTH> xfSVM(xf::cv::Mat<SRC1_T, ROWS1, COLS1, NPC>& in_1,
-                        xf::cv::Mat<SRC2_T, ROWS2, COLS2, NPC>& in_2,
+template <int SRC1_T,
+          int SRC2_T,
+          int DST_WIDTH,
+          int ROWS1,
+          int COLS1,
+          int ROWS2,
+          int COLS2,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int N>
+ap_int<DST_WIDTH> xfSVM(xf::cv::Mat<SRC1_T, ROWS1, COLS1, NPC, XFCVDEPTH_IN_1>& in_1,
+                        xf::cv::Mat<SRC2_T, ROWS2, COLS2, NPC, XFCVDEPTH_IN_1>& in_2,
                         uint16_t idx1,
                         uint16_t idx2,
                         uchar_t frac1,
@@ -76,9 +86,19 @@ svmCoreLoop:
     return result;
 }
 
-template <int SRC1_T, int SRC2_T, int DST_WIDTH, int ROWS1, int COLS1, int ROWS2, int COLS2, int NPC = 1, int N>
-void SVM(xf::cv::Mat<SRC1_T, ROWS1, COLS1, NPC>& in_1,
-         xf::cv::Mat<SRC2_T, ROWS2, COLS2, NPC>& in_2,
+template <int SRC1_T,
+          int SRC2_T,
+          int DST_WIDTH,
+          int ROWS1,
+          int COLS1,
+          int ROWS2,
+          int COLS2,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int N>
+void SVM(xf::cv::Mat<SRC1_T, ROWS1, COLS1, NPC, XFCVDEPTH_IN_1>& in_1,
+         xf::cv::Mat<SRC2_T, ROWS2, COLS2, NPC, XFCVDEPTH_IN_2>& in_2,
          uint16_t idx1,
          uint16_t idx2,
          uchar_t frac1,
@@ -90,8 +110,9 @@ void SVM(xf::cv::Mat<SRC1_T, ROWS1, COLS1, NPC>& in_1,
     assert(((SRC1_T == XF_16SC1)) && "Only 16 bit, single channel images are supported");
     assert(((SRC2_T == XF_16SC1)) && "Only 16 bit, single channel images are supported");
 #endif
-    ap_int<DST_WIDTH> svm_res = xfSVM<SRC1_T, SRC2_T, DST_WIDTH, ROWS1, COLS1, ROWS2, COLS2, NPC, N>(
-        in_1, in_2, idx1, idx2, frac1, frac2, n, out_frac);
+    ap_int<DST_WIDTH> svm_res =
+        xfSVM<SRC1_T, SRC2_T, DST_WIDTH, ROWS1, COLS1, ROWS2, COLS2, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_IN_2, N>(
+            in_1, in_2, idx1, idx2, frac1, frac2, n, out_frac);
 
     *result = svm_res;
 }

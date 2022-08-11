@@ -133,8 +133,8 @@ THRESHOLD_LOOP:
  * Otsuthreshold : Computes the otsu threshold for the input image
  *********************************************************************/
 
-template <int SRC_T, int ROWS, int COLS, int NPC = 1>
-void OtsuThreshold(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat, uint8_t& _thresh) {
+template <int SRC_T, int ROWS, int COLS, int NPC = 1, int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT>
+void OtsuThreshold(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat, uint8_t& _thresh) {
 #ifndef __SYNTHESIS__
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1, XF_NPPC8 ");
     assert(((_src_mat.rows <= ROWS) && (_src_mat.cols <= COLS)) && "ROWS and COLS should be greater than input image");
@@ -151,7 +151,7 @@ void OtsuThreshold(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat, uint8_t& _thre
     uint16_t width = _src_mat.cols >> (XF_BITSHIFT(NPC));
     uint16_t height = _src_mat.rows;
 
-    xFHistogramKernel<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
+    xFHistogramKernel<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN, XF_WORDWIDTH(SRC_T, NPC),
                       ((COLS >> (XF_BITSHIFT(NPC))) >> 1), XF_CHANNELS(SRC_T, NPC)>(_src_mat, hist, height, width);
 
     xfOtsuKernel(hist, height, _src_mat.cols, thresh);

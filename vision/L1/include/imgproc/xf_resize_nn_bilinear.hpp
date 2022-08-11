@@ -274,12 +274,14 @@ template <int SRC_TYPE,
           int INHEIGHT,
           int INWIDTH,
           int NPPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
           int OUTHEIGHT,
           int OUTWIDTH,
           int INTERPOLATION_TYPE,
           int MAX_DOWN_SCALE>
-void resizeNNBilinear(xf::cv::Mat<SRC_TYPE, INHEIGHT, INWIDTH, NPPC>& imgInput,
-                      xf::cv::Mat<SRC_TYPE, OUTHEIGHT, OUTWIDTH, NPPC>& imgOutput) {
+void resizeNNBilinear(xf::cv::Mat<SRC_TYPE, INHEIGHT, INWIDTH, NPPC, XFCVDEPTH_IN>& imgInput,
+                      xf::cv::Mat<SRC_TYPE, OUTHEIGHT, OUTWIDTH, NPPC, XFCVDEPTH_OUT>& imgOutput) {
     const int INDEX_INT = 17;
     const int WEIGHT_WIDTH = 48;
     const int WEIGHT_INT = 16;

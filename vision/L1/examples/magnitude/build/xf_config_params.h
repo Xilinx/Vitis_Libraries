@@ -18,3 +18,6 @@
 #define NO 1 // Normal Operation (1-pixel implementation)
 
 #define L1NORM 1
+#define XF_CV_DEPTH_IN1 3
+#define XF_CV_DEPTH_IN2 3
+#define XF_CV_DEPTH_OUT 3

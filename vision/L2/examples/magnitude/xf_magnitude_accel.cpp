@@ -35,30 +35,20 @@ void magnitude_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp1,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_16SC1, HEIGHT, WIDTH, NPC1> _src1(rows, cols);
-// clang-format off
-    #pragma HLS stream variable=_src1.data depth=2
-    // clang-format on
-
-    xf::cv::Mat<XF_16SC1, HEIGHT, WIDTH, NPC1> _src2(rows, cols);
-// clang-format off
-    #pragma HLS stream variable=_src2.data depth=2
-    // clang-format on
-
-    xf::cv::Mat<XF_16SC1, HEIGHT, WIDTH, NPC1> _dst(rows, cols);
-// clang-format off
-    #pragma HLS stream variable=_dst.data depth=2
-// clang-format on
+    xf::cv::Mat<XF_16SC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1> _src1(rows, cols);
+    xf::cv::Mat<XF_16SC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_2> _src2(rows, cols);
+    xf::cv::Mat<XF_16SC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _dst(rows, cols);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_16SC1, HEIGHT, WIDTH, NPC1>(img_inp1, _src1);
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_16SC1, HEIGHT, WIDTH, NPC1>(img_inp2, _src2);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_16SC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1>(img_inp1, _src1);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_16SC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_2>(img_inp2, _src2);
 
-    xf::cv::magnitude<NORM_TYPE, XF_16SC1, XF_16SC1, HEIGHT, WIDTH, NPC1>(_src1, _src2, _dst);
+    xf::cv::magnitude<NORM_TYPE, XF_16SC1, XF_16SC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2,
+                      XF_CV_DEPTH_OUT>(_src1, _src2, _dst);
 
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16SC1, HEIGHT, WIDTH, NPC1>(_dst, img_out);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16SC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_dst, img_out);
 }
 }

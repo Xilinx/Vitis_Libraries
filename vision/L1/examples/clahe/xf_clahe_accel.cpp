@@ -16,8 +16,9 @@
 
 #include "xf_clahe_config.h"
 
-#define CLAHE_T \
-    xf::cv::clahe::CLAHEImpl<IN_TYPE, HEIGHT, WIDTH, NPC, CLIPLIMIT, TILES_Y_MAX, TILES_X_MAX, TILES_Y_MIN, TILES_X_MIN>
+#define CLAHE_T                                                                                                  \
+    xf::cv::clahe::CLAHEImpl<IN_TYPE, HEIGHT, WIDTH, NPC, CLIPLIMIT, TILES_Y_MAX, TILES_X_MAX, XF_CV_DEPTH_IN_1, \
+                             XF_CV_DEPTH_OUT_1, TILES_Y_MIN, TILES_X_MIN>
 
 static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * XF_PIXELWIDTH(IN_TYPE, NPC)) / PTR_WIDTH;
 static constexpr int HIST_COUNTER_BITS = CLAHE_T::HIST_COUNTER_BITS;
@@ -46,17 +47,17 @@ void clahe_accel_i(ap_uint<PTR_WIDTH>* in_ptr,
 #pragma HLS inline off
     // clang-format on
 
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC> imgInput(height, width);
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC> imgOutput(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_IN_1> imgInput(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_OUT_1> imgOutput(height, width);
     CLAHE_T obj;
 
 // clang-format off
 #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC>(in_ptr, imgInput);
+    xf::cv::Array2xfMat<PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_IN_1>(in_ptr, imgInput);
     obj.process(imgOutput, imgInput, _lutw, _lutr, _clipCounter, height, width, clip, tilesY, tilesX);
-    xf::cv::xfMat2Array<PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC>(imgOutput, out_ptr);
+    xf::cv::xfMat2Array<PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_OUT_1>(imgOutput, out_ptr);
     return;
 }
 
