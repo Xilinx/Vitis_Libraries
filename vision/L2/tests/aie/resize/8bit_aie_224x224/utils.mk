@@ -97,18 +97,18 @@ else
 LINK_TARGET_FMT := xclbin
 endif
 # 2) dfx flow
-dfx_hw := false
+dfx_hw := off
 ifeq ($(findstring _dfx_, $(PLATFORM_NAME)),_dfx_)
 ifeq ($(TARGET),hw)
-dfx_hw := true
+dfx_hw := on
 endif
 endif
 # 3) for embeded sw_emu flow from 2022.2
-ps_on_x86 := false
+ps_on_x86 := off
 ifneq ($(HOST_ARCH), x86)
 ifeq ($(shell expr $(VITIS_VER) \>= 2022.2), 1)
 ifeq ($(TARGET), sw_emu)
-ps_on_x86 := true
+ps_on_x86 := on
 endif
 endif
 endif
@@ -164,15 +164,15 @@ endif
 
 #Checks for g++
 ifeq ($(HOST_ARCH), x86)
-X86_CXX := true
+X86_CXX := on
 else
-ifeq ($(ps_on_x86), true)
-X86_CXX := true
+ifeq ($(ps_on_x86), on)
+X86_CXX := on
 endif
 endif
 
 CXX := g++
-ifeq ($(X86_CXX), true)
+ifeq ($(X86_CXX), on)
 ifeq ($(shell expr $(VITIS_VER) \>= 2022.1), 1)
 CXX_VER := 8.3.0
 else
