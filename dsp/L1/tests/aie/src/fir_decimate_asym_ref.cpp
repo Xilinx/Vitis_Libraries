@@ -14,6 +14,7 @@
  */
 #include "fir_decimate_asym_ref.hpp"
 #include "fir_ref_utils.hpp"
+#include "fir_ref_coeff_header.hpp"
 
 /*
 Decimator Asymmetric FIR filter reference model
@@ -33,11 +34,7 @@ template <typename TT_DATA,
           unsigned int TP_DECIMATE_FACTOR,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_USE_COEFF_RELOAD,
-          unsigned int TP_NUM_OUTPUTS,
-          unsigned int TP_DUAL_IP,
-          unsigned int TP_API>
+          unsigned int TP_INPUT_WINDOW_VSIZE>
 void filter_ref(input_window<TT_DATA>* inWindow,
                 output_window<TT_DATA>* outWindow,
                 const TT_COEFF (&taps)[TP_FIR_LEN]) {
@@ -67,8 +64,8 @@ void filter_ref(input_window<TT_DATA>* inWindow,
         window_writeincr((output_window<TT_DATA>*)outWindow, accumSrs);
     }
 };
+
 //-----------------------------------------------------------------------------------------------------
-// REF FIR function - static coefficients, single output
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -91,11 +88,12 @@ void fir_decimate_asym_ref<TT_DATA,
                            TP_NUM_OUTPUTS,
                            TP_DUAL_IP,
                            TP_API>::filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow) {
-    filter_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
-               TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_API>(inWindow, outWindow, m_internalTaps);
+    firHeaderReload<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_USE_COEFF_RELOAD>(inWindow,
+                                                                                               m_internalTaps);
+    filter_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE>(
+        inWindow, outWindow, m_internalTaps);
 };
 
-// REF FIR function - reloadable coefficients, single output
 //-----------------------------------------------------------------------------------------------------
 template <typename TT_DATA,
           typename TT_COEFF,
@@ -104,6 +102,7 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
           unsigned int TP_DUAL_IP,
           unsigned int TP_API>
@@ -114,18 +113,18 @@ void fir_decimate_asym_ref<TT_DATA,
                            TP_SHIFT,
                            TP_RND,
                            TP_INPUT_WINDOW_VSIZE,
-                           USE_COEFF_RELOAD_TRUE,
+                           TP_USE_COEFF_RELOAD,
                            TP_NUM_OUTPUTS,
                            TP_DUAL_IP,
-                           TP_API>::filter(input_window<TT_DATA>* inWindow,
-                                           output_window<TT_DATA>* outWindow,
-                                           const TT_COEFF (&inTaps)[TP_FIR_LEN]) {
+                           TP_API>::filterRtp(input_window<TT_DATA>* inWindow,
+                                              output_window<TT_DATA>* outWindow,
+                                              const TT_COEFF (&inTaps)[TP_FIR_LEN]) {
     // Coefficient reload
     for (int i = 0; i < TP_FIR_LEN; i++) {
         m_internalTaps[i] = inTaps[i];
     }
-    filter_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
-               USE_COEFF_RELOAD_TRUE, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_API>(inWindow, outWindow, m_internalTaps);
+    filter_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE>(
+        inWindow, outWindow, m_internalTaps);
 };
 }
 }

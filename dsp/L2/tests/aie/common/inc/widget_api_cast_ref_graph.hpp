@@ -37,7 +37,8 @@ template <typename TT_DATA,
           unsigned int TP_NUM_INPUTS,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_NUM_OUTPUT_CLONES = 1,
-          unsigned int TP_PATTERN = 0>
+          unsigned int TP_PATTERN = 0,
+          unsigned int TP_HEADER_BYTES = 0>
 class widget_api_cast_ref_graph : public graph {
    public:
     port<input> in[TP_NUM_INPUTS];
@@ -56,9 +57,11 @@ class widget_api_cast_ref_graph : public graph {
         printf("WINDOW_VSIZE      = %d\n", TP_WINDOW_VSIZE);
         printf("NUM_OUTPUT_CLONES = %d\n", TP_NUM_OUTPUT_CLONES);
         printf("PATTERN           = %d\n", TP_PATTERN);
+        printf("HEADER BYTES      = %d\n", TP_HEADER_BYTES);
 
-        m_kernel = kernel::create_object<widget_api_cast_ref<TT_DATA, TP_IN_API, TP_OUT_API, TP_NUM_INPUTS,
-                                                             TP_WINDOW_VSIZE, TP_NUM_OUTPUT_CLONES, TP_PATTERN> >();
+        m_kernel =
+            kernel::create_object<widget_api_cast_ref<TT_DATA, TP_IN_API, TP_OUT_API, TP_NUM_INPUTS, TP_WINDOW_VSIZE,
+                                                      TP_NUM_OUTPUT_CLONES, TP_PATTERN, TP_HEADER_BYTES> >(0);
         // Specify mapping constraints
         runtime<ratio>(m_kernel) = 0.1; // Nominal figure. The real figure requires knowledge of the sample rate.
         // Source files
@@ -67,7 +70,7 @@ class widget_api_cast_ref_graph : public graph {
         // make connections
         if (TP_IN_API == kWindowAPI) {
             for (int i = 0; i < TP_NUM_INPUTS; i++) {
-                connect<window<TP_WINDOW_VSIZE * sizeof(TT_DATA)> >(in[i], m_kernel.in[i]);
+                connect<window<TP_WINDOW_VSIZE * sizeof(TT_DATA) + TP_HEADER_BYTES> >(in[i], m_kernel.in[i]);
             }
         } else if (TP_IN_API == kStreamAPI) {
             for (int i = 0; i < TP_NUM_INPUTS; i++) {
@@ -76,7 +79,7 @@ class widget_api_cast_ref_graph : public graph {
         }
         if (TP_OUT_API == kWindowAPI) {
             for (int i = 0; i < TP_NUM_OUTPUT_CLONES; i++) {
-                connect<window<TP_WINDOW_VSIZE * sizeof(TT_DATA)> >(m_kernel.out[i], out[i]);
+                connect<window<TP_WINDOW_VSIZE * sizeof(TT_DATA) + TP_HEADER_BYTES> >(m_kernel.out[i], out[i]);
             }
         } else if (TP_OUT_API == kStreamAPI) {
             for (int i = 0; i < TP_NUM_OUTPUT_CLONES; i++) {

@@ -17,6 +17,7 @@
 #define __FFT_BUFS_H__
 
 #include "fft_com_inc.h"
+#include "device_defs.h"
 
 // Inter-rank temporary storage buffers
 alignas(32) extern cint32_t fft_16_tmp1[FFT16_SIZE];
@@ -69,6 +70,20 @@ alignas(32) extern const cint16_t fft_lut_tw256[FFT_256];
 alignas(32) extern const cint16_t fft_lut_tw512[FFT_512];
 alignas(32) extern const cint16_t fft_lut_tw1024[FFT_1024];
 alignas(32) extern const cint16_t fft_lut_tw2048[FFT_2048];
+
+#ifdef __FFT_TRUE_R4__
+alignas(32) extern const cint16 fft_lut_r4_1_2[8];
+alignas(32) extern const cint16 fft_lut_r4_2_4[8];
+alignas(32) extern const cint16 fft_lut_r4_4_8[8];
+alignas(32) extern const cint16 fft_lut_r4_8_16[8];
+alignas(32) extern const cint16 fft_lut_r4_16_32[16];
+alignas(32) extern const cint16 fft_lut_r4_32_64[32];
+alignas(32) extern const cint16 fft_lut_r4_64_128[64];
+alignas(32) extern const cint16 fft_lut_r4_128_256[128];
+alignas(32) extern const cint16 fft_lut_r4_256_512[256];
+alignas(32) extern const cint16 fft_lut_r4_512_1024[512];
+alignas(32) extern const cint16 fft_lut_r4_1024_2048[1024];
+#endif
 
 // Full (2 quadrant) float tables.
 // Float cannot use the one quadrant trick because float cannot use radix4 functions.

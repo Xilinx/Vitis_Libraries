@@ -53,97 +53,25 @@ class fir_sr_asym_ref {
             internalTaps[i] = taps[i];
         }
     }
+    // Constructor
+    fir_sr_asym_ref() {
+        // Do nothing here.
+    }
 
     // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym_ref::filter); }
+    static void registerKernelClass() {
+        if
+            constexpr(TP_USE_COEFF_RELOAD == 1) { REGISTER_FUNCTION(fir_sr_asym_ref::filterRtp); }
+        else {
+            REGISTER_FUNCTION(fir_sr_asym_ref::filter);
+        }
+    }
     // FIR
     void filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow);
+    void filterRtp(input_window<TT_DATA>* inWindow,
+                   output_window<TT_DATA>* outWindow,
+                   const TT_COEFF (&inTaps)[TP_FIR_LEN]);
 };
-
-//-----------------------------------------------------------------------------------------------------
-// Single Rate class
-// Reloadable coefficients, single output
-template <typename TT_DATA,  // type of data input and output
-          typename TT_COEFF, // type of coefficients           (e.g. int16, cint32)
-          unsigned int TP_FIR_LEN,
-          unsigned int TP_SHIFT,
-          unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_NUM_OUTPUTS,
-          unsigned int TP_DUAL_IP,
-          unsigned int TP_API>
-class fir_sr_asym_ref<TT_DATA,
-                      TT_COEFF,
-                      TP_FIR_LEN,
-                      TP_SHIFT,
-                      TP_RND,
-                      TP_INPUT_WINDOW_VSIZE,
-                      1,
-                      TP_NUM_OUTPUTS,
-                      TP_DUAL_IP,
-                      TP_API> {
-   private:
-    TT_COEFF internalTaps[TP_FIR_LEN] = {};
-
-   public:
-    // Constructor
-    fir_sr_asym_ref() {}
-
-    void firReload(const TT_COEFF (&taps)[TP_FIR_LEN]) {
-        for (int i = 0; i < TP_FIR_LEN; i++) {
-            internalTaps[i] = taps[i];
-        }
-    }
-
-    // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym_ref::filter); }
-
-    // FIR
-    void filter(input_window<TT_DATA>* inWindow,
-                output_window<TT_DATA>* outWindow,
-                const TT_COEFF (&inTaps)[TP_FIR_LEN]);
-};
-/*
-// Specialization for Reloadable coefficients, dual  output
-template <
-    typename        TT_DATA,  //type of data input and output
-    typename        TT_COEFF,  //type of coefficients           (e.g. int16, cint32)
-    unsigned int    TP_FIR_LEN,
-    unsigned int    TP_SHIFT,
-    unsigned int    TP_RND,
-    unsigned int    TP_INPUT_WINDOW_VSIZE,
-    unsigned int    TP_DUAL_IP,
-    unsigned int    TP_API
-    >
-class fir_sr_asym_ref <TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, 1, 2, TP_DUAL_IP, TP_API>
-{
-    private:
-    TT_COEFF internalTaps[TP_FIR_LEN] = {};
-
-    public:
-    // Constructor
-    fir_sr_asym_ref()
-    {
-    }
-
-    void firReload(const TT_COEFF (&taps)[TP_FIR_LEN])
-    {
-        for (int i=0; i<TP_FIR_LEN; i++) {
-            internalTaps[i] = taps[i];
-        }
-    }
-
-    // Register Kernel Class
-    static void registerKernelClass()
-    {
-        REGISTER_FUNCTION(fir_sr_asym_ref::filter);
-    }
-
-    // FIR
-    void filter(input_window<TT_DATA> *inWindow, output_window<TT_DATA> *outWindow, output_window<TT_DATA> *outWindow2,
-const TT_COEFF (&inTaps)[TP_FIR_LEN]);
-};
-*/
 }
 }
 }

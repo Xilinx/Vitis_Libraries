@@ -1,7 +1,7 @@
 {
     "name": "Xilinx DSPLIB widget real2complex",
     "description": "",
-    "gui": "false",
+    "gui": false,
     "flow": "versal",
     "platform_allowlist": [
         "vck190"
@@ -25,7 +25,7 @@
             "build_cmd": "tclsh LIB_DIR/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE) $(WINDOW_VSIZE) $(NITER_UUT) $(DATA_SEED) $(DATA_STIM_TYPE) 0 0 $(DATA_TYPE) 0 1"
         },
         {
-            "build_cmd": "perl LIB_DIR/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(LOC_INPUT_FILE) --type $(DATA_TYPE) --ssr 1 --split --dual 0"
+            "build_cmd": "perl LIB_DIR/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(LOC_INPUT_FILE) --type $(DATA_TYPE) --ssr 1 --split --dual 0 -k 0 -w $(WINDOW_VSIZE)"
         },
         {
             "build_cmd": "make x86sim TARGET=x86sim TAG=REF"
@@ -39,8 +39,8 @@
             "target": "aiesim",
             "launch_cmd": [
                 "mkdir -p logs",
-                "perl LIB_DIR/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./aiesimulator_output/data/uut_output.txt --type $(DATA_TYPE) --ssr 1 --zip --dual 0",
-                "perl LIB_DIR/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./x86simulator_output/data/ref_output.txt --type $(DATA_TYPE) --ssr 1 --zip --dual 0",
+                "perl LIB_DIR/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./aiesimulator_output/data/uut_output.txt --type $(DATA_TYPE) --ssr 1 --zip --dual 0 -k 0 -w $(WINDOW_VSIZE)",
+                "perl LIB_DIR/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./x86simulator_output/data/ref_output.txt --type $(DATA_TYPE) --ssr 1 --zip --dual 0 -k 0 -w $(WINDOW_VSIZE)",
                 "grep -ve '[XT]' ./aiesimulator_output/data/uut_output.txt > ./logs/uut_output.txt",
                 "grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./logs/ref_output.txt",
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE)",
@@ -55,11 +55,12 @@
             "target": "x86sim",
             "launch_cmd": [
                 "mkdir -p logs",
-                "perl LIB_DIR/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./x86simulator_output/data/uut_output.txt --type $(DATA_TYPE) --ssr 1 --zip --dual 0",
-                "perl LIB_DIR/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./x86simulator_output/data/ref_output.txt --type $(DATA_TYPE) --ssr 1 --zip --dual 0",
+                "perl LIB_DIR/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./x86simulator_output/data/uut_output.txt --type $(DATA_TYPE) --ssr 1 --zip --dual 0 -k 0 -w $(WINDOW_VSIZE)",
+                "perl LIB_DIR/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./x86simulator_output/data/ref_output.txt --type $(DATA_TYPE) --ssr 1 --zip --dual 0 -k 0 -w $(WINDOW_VSIZE)",
                 "grep -ve '[XT]' ./x86simulator_output/data/uut_output.txt > ./logs/uut_output.txt",
                 "grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./logs/ref_output.txt",
-                "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE)"
+                "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE)",
+                "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./"
                 ]
         }
     ],
@@ -71,7 +72,7 @@
         {
             "name": "x86sim-launch",
             "target": "x86sim",
-            "sim_options": "--stop-on-deadlock"
+            "sim_options": ""
         }
     ],
     "aiecompiler": {

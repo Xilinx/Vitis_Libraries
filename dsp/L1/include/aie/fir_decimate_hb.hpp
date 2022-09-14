@@ -32,6 +32,7 @@
 #include <adf.h>
 #include "fir_utils.hpp"
 #include "fir_decimate_hb_traits.hpp"
+#include "fir_sr_asym.hpp"
 
 #define K_BITS_IN_BYTE 8
 #define K_MAX_PASSES 2
@@ -225,8 +226,16 @@ class kernelFilterClass {
                            T_outputIF<TP_CASC_OUT, TT_DATA> outInterface);
 
     // Additional defensive checks
-    static_assert(TP_INPUT_WINDOW_VSIZE % m_kLanes == 0,
-                  "ERROR: TP_INPUT_WINDOW_VSIZE must be an integer multiple of the number of lanes for this data type");
+    // window size must be a multiple of lanes* decimation factor (to ensure that output window is a multiple of lanes)
+    // * 2 (because most archs have a minimum repeat factor of 2.
+    static_assert(TP_INPUT_WINDOW_VSIZE % (2 * kDecimateFactor * m_kLanes) == 0,
+                  "ERROR: TP_INPUT_WINDOW_VSIZE must be an integer multiple of 512 bits. Since TP_INPUT_WINDOW_VSIZE "
+                  "is in terms of samples, 512 is divided by the size of the data type here. e.g for cint16 (32 bits), "
+                  "TP_INPUT_WINDOW_VSIZE must be a multiple of 16.");
+
+    // window max size check. Output will be half the size of input, so only check input size.
+    static_assert(TP_INPUT_WINDOW_VSIZE + TP_FIR_LEN * sizeof(TT_DATA) <= 32768,
+                  "Error: TP_INPUT_WINDOW_VSIZE uses more memory than is available in a memory group");
 
    public:
     // Access function for AIE Synthesizer
@@ -826,8 +835,7 @@ class fir_decimate_hb<TT_DATA,
 };
 
 //-----------------------------------------------------------------------------------------------------
-// Partially specialized classes for cascaded interface (final kernel in cascade), single input, no reload, single
-// output
+// Partially specialized classes for cascaded interface (final kernel in cascade), x input, no reload, single output
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -896,7 +904,7 @@ class fir_decimate_hb<TT_DATA,
                 output_window<TT_DATA>* __restrict outWindow);
 };
 
-// Partially specialized classes for cascaded interface (final kernel in cascade), single input, no reload, dual output
+// Partially specialized classes for cascaded interface (final kernel in cascade), x input, no reload, dual output
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -965,7 +973,7 @@ class fir_decimate_hb<TT_DATA,
                 output_window<TT_DATA>* __restrict outWindow,
                 output_window<TT_DATA>* __restrict outWindow2);
 };
-
+/*
 // Partially specialized classes for cascaded interface (final kernel in cascade), dual input, no reload, single output
 template <typename TT_DATA,
           typename TT_COEFF,
@@ -976,62 +984,34 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN>
-class fir_decimate_hb<TT_DATA,
-                      TT_COEFF,
-                      TP_FIR_LEN,
-                      TP_SHIFT,
-                      TP_RND,
-                      TP_INPUT_WINDOW_VSIZE,
-                      CASC_IN_TRUE,
-                      CASC_OUT_FALSE,
-                      TP_FIR_RANGE_LEN,
-                      TP_KERNEL_POSITION,
-                      TP_CASC_LEN,
-                      DUAL_IP_DUAL,
-                      USE_COEFF_RELOAD_FALSE,
-                      1,
-                      USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
-                                                                 TT_COEFF,
-                                                                 TP_FIR_LEN,
-                                                                 TP_SHIFT,
-                                                                 TP_RND,
-                                                                 TP_INPUT_WINDOW_VSIZE,
-                                                                 CASC_IN_TRUE,
-                                                                 CASC_OUT_FALSE,
-                                                                 TP_FIR_RANGE_LEN,
-                                                                 TP_KERNEL_POSITION,
-                                                                 TP_CASC_LEN,
-                                                                 DUAL_IP_DUAL,
-                                                                 USE_COEFF_RELOAD_FALSE,
-                                                                 1,
-                                                                 USE_WINDOW_API> {
-   private:
-   public:
+class fir_decimate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                      CASC_IN_TRUE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN, DUAL_IP_DUAL,
+USE_COEFF_RELOAD_FALSE, 1, USE_WINDOW_API> :
+    public kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                             CASC_IN_TRUE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN,
+DUAL_IP_DUAL, USE_COEFF_RELOAD_FALSE, 1, USE_WINDOW_API>
+{
+private:
+public:
     // Constructor
-    fir_decimate_hb(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / 4 + 1])
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_TRUE,
-                            CASC_OUT_FALSE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            DUAL_IP_DUAL,
-                            USE_COEFF_RELOAD_FALSE,
-                            1,
-                            USE_WINDOW_API>(taps) {}
+    fir_decimate_hb(const TT_COEFF (&taps)[(TP_FIR_LEN+1)/4+1]) :
+    kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                      CASC_IN_TRUE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN, DUAL_IP_DUAL,
+USE_COEFF_RELOAD_FALSE, 1, USE_WINDOW_API>
+                      (taps)
+    {
+    }
 
     // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_hb::filter); }
+    static void registerKernelClass()
+    {
+        REGISTER_FUNCTION(fir_decimate_hb::filter);
+    }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
-                input_window<TT_DATA>* inWindowReverse,
-                input_stream_cacc48* inCascade,
+    void filter(input_window<TT_DATA>  *inWindow,
+                input_window<TT_DATA>  *inWindowReverse,
+                input_stream_cacc48    *inCascade,
                 output_window<TT_DATA>* __restrict outWindow);
 };
 
@@ -1045,68 +1025,39 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN>
-class fir_decimate_hb<TT_DATA,
-                      TT_COEFF,
-                      TP_FIR_LEN,
-                      TP_SHIFT,
-                      TP_RND,
-                      TP_INPUT_WINDOW_VSIZE,
-                      CASC_IN_TRUE,
-                      CASC_OUT_FALSE,
-                      TP_FIR_RANGE_LEN,
-                      TP_KERNEL_POSITION,
-                      TP_CASC_LEN,
-                      DUAL_IP_DUAL,
-                      USE_COEFF_RELOAD_FALSE,
-                      2,
-                      USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
-                                                                 TT_COEFF,
-                                                                 TP_FIR_LEN,
-                                                                 TP_SHIFT,
-                                                                 TP_RND,
-                                                                 TP_INPUT_WINDOW_VSIZE,
-                                                                 CASC_IN_TRUE,
-                                                                 CASC_OUT_FALSE,
-                                                                 TP_FIR_RANGE_LEN,
-                                                                 TP_KERNEL_POSITION,
-                                                                 TP_CASC_LEN,
-                                                                 DUAL_IP_DUAL,
-                                                                 USE_COEFF_RELOAD_FALSE,
-                                                                 2,
-                                                                 USE_WINDOW_API> {
-   private:
-   public:
+class fir_decimate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                      CASC_IN_TRUE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN, DUAL_IP_DUAL,
+USE_COEFF_RELOAD_FALSE, 2, USE_WINDOW_API> :
+    public kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                             CASC_IN_TRUE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN,
+DUAL_IP_DUAL, USE_COEFF_RELOAD_FALSE, 2, USE_WINDOW_API>
+{
+private:
+public:
     // Constructor
-    fir_decimate_hb(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / 4 + 1])
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_TRUE,
-                            CASC_OUT_FALSE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            DUAL_IP_DUAL,
-                            USE_COEFF_RELOAD_FALSE,
-                            2,
-                            USE_WINDOW_API>(taps) {}
+    fir_decimate_hb(const TT_COEFF (&taps)[(TP_FIR_LEN+1)/4+1]) :
+    kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                      CASC_IN_TRUE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN, DUAL_IP_DUAL,
+USE_COEFF_RELOAD_FALSE, 2, USE_WINDOW_API>
+                      (taps)
+    {
+    }
 
     // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_hb::filter); }
+    static void registerKernelClass()
+    {
+        REGISTER_FUNCTION(fir_decimate_hb::filter);
+    }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
-                input_window<TT_DATA>* inWindowReverse,
-                input_stream_cacc48* inCascade,
+    void filter(input_window<TT_DATA>  *inWindow,
+                input_window<TT_DATA>  *inWindowReverse,
+                input_stream_cacc48    *inCascade,
                 output_window<TT_DATA>* __restrict outWindow,
                 output_window<TT_DATA>* __restrict outWindow2);
 };
-
-// Partially specialized classes for cascaded interface (final kernel in cascade), single input, with reload, single
-// output
+*/
+// Partially specialized classes for cascaded interface (final kernel in cascade), x input, with reload, single output
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -1175,8 +1126,7 @@ class fir_decimate_hb<TT_DATA,
                 output_window<TT_DATA>* __restrict outWindow);
 };
 
-// Partially specialized classes for cascaded interface (final kernel in cascade), single input, with reload, dual
-// output
+// Partially specialized classes for cascaded interface (final kernel in cascade), x input, with reload, dual output
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -1245,9 +1195,9 @@ class fir_decimate_hb<TT_DATA,
                 output_window<TT_DATA>* __restrict outWindow,
                 output_window<TT_DATA>* __restrict outWindow2);
 };
-
+/*
 // Partially specialized classes for cascaded interface (final kernel in cascade), dual input, with reload, single
-// output
+output
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -1257,62 +1207,33 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN>
-class fir_decimate_hb<TT_DATA,
-                      TT_COEFF,
-                      TP_FIR_LEN,
-                      TP_SHIFT,
-                      TP_RND,
-                      TP_INPUT_WINDOW_VSIZE,
-                      CASC_IN_TRUE,
-                      CASC_OUT_FALSE,
-                      TP_FIR_RANGE_LEN,
-                      TP_KERNEL_POSITION,
-                      TP_CASC_LEN,
-                      DUAL_IP_DUAL,
-                      USE_COEFF_RELOAD_TRUE,
-                      1,
-                      USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
-                                                                 TT_COEFF,
-                                                                 TP_FIR_LEN,
-                                                                 TP_SHIFT,
-                                                                 TP_RND,
-                                                                 TP_INPUT_WINDOW_VSIZE,
-                                                                 CASC_IN_TRUE,
-                                                                 CASC_OUT_FALSE,
-                                                                 TP_FIR_RANGE_LEN,
-                                                                 TP_KERNEL_POSITION,
-                                                                 TP_CASC_LEN,
-                                                                 DUAL_IP_DUAL,
-                                                                 USE_COEFF_RELOAD_TRUE,
-                                                                 1,
-                                                                 USE_WINDOW_API> {
-   private:
-   public:
+class fir_decimate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                      CASC_IN_TRUE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN, DUAL_IP_DUAL,
+USE_COEFF_RELOAD_TRUE, 1, USE_WINDOW_API> :
+    public kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                      CASC_IN_TRUE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN, DUAL_IP_DUAL,
+USE_COEFF_RELOAD_TRUE, 1, USE_WINDOW_API>
+{
+private:
+public:
     // Constructor
-    fir_decimate_hb()
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_TRUE,
-                            CASC_OUT_FALSE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            DUAL_IP_DUAL,
-                            USE_COEFF_RELOAD_TRUE,
-                            1,
-                            USE_WINDOW_API>() {}
+    fir_decimate_hb() :
+    kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                      CASC_IN_TRUE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN, DUAL_IP_DUAL,
+USE_COEFF_RELOAD_TRUE, 1, USE_WINDOW_API>()
+    {
+    }
 
     // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_hb::filter); }
+    static void registerKernelClass()
+    {
+        REGISTER_FUNCTION(fir_decimate_hb::filter);
+    }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
-                input_window<TT_DATA>* inWindowReverse,
-                input_stream_cacc48* inCascade,
+    void filter(input_window<TT_DATA>  *inWindow,
+                input_window<TT_DATA>  *inWindowReverse,
+                input_stream_cacc48    *inCascade,
                 output_window<TT_DATA>* __restrict outWindow);
 };
 
@@ -1326,66 +1247,37 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN>
-class fir_decimate_hb<TT_DATA,
-                      TT_COEFF,
-                      TP_FIR_LEN,
-                      TP_SHIFT,
-                      TP_RND,
-                      TP_INPUT_WINDOW_VSIZE,
-                      CASC_IN_TRUE,
-                      CASC_OUT_FALSE,
-                      TP_FIR_RANGE_LEN,
-                      TP_KERNEL_POSITION,
-                      TP_CASC_LEN,
-                      DUAL_IP_DUAL,
-                      USE_COEFF_RELOAD_TRUE,
-                      2,
-                      USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
-                                                                 TT_COEFF,
-                                                                 TP_FIR_LEN,
-                                                                 TP_SHIFT,
-                                                                 TP_RND,
-                                                                 TP_INPUT_WINDOW_VSIZE,
-                                                                 CASC_IN_TRUE,
-                                                                 CASC_OUT_FALSE,
-                                                                 TP_FIR_RANGE_LEN,
-                                                                 TP_KERNEL_POSITION,
-                                                                 TP_CASC_LEN,
-                                                                 DUAL_IP_DUAL,
-                                                                 USE_COEFF_RELOAD_TRUE,
-                                                                 2,
-                                                                 USE_WINDOW_API> {
-   private:
-   public:
+class fir_decimate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                      CASC_IN_TRUE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN, DUAL_IP_DUAL,
+USE_COEFF_RELOAD_TRUE, 2, USE_WINDOW_API> :
+    public kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                      CASC_IN_TRUE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN, DUAL_IP_DUAL,
+USE_COEFF_RELOAD_TRUE, 2, USE_WINDOW_API>
+{
+private:
+public:
     // Constructor
-    fir_decimate_hb()
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_TRUE,
-                            CASC_OUT_FALSE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            DUAL_IP_DUAL,
-                            USE_COEFF_RELOAD_TRUE,
-                            2,
-                            USE_WINDOW_API>() {}
+    fir_decimate_hb() :
+    kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                      CASC_IN_TRUE, CASC_OUT_FALSE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN, DUAL_IP_DUAL,
+USE_COEFF_RELOAD_TRUE, 2, USE_WINDOW_API>()
+    {
+    }
 
     // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_hb::filter); }
+    static void registerKernelClass()
+    {
+        REGISTER_FUNCTION(fir_decimate_hb::filter);
+    }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
-                input_window<TT_DATA>* inWindowReverse,
-                input_stream_cacc48* inCascade,
+    void filter(input_window<TT_DATA>  *inWindow,
+                input_window<TT_DATA>  *inWindowReverse,
+                input_stream_cacc48    *inCascade,
                 output_window<TT_DATA>* __restrict outWindow,
                 output_window<TT_DATA>* __restrict outWindow2);
 };
-
+*/
 //-----------------------------------------------------------------------------------------------------
 // Partially specialized classes for cascaded interface (First kernel in cascade), single input, no reload
 template <typename TT_DATA,
@@ -1666,7 +1558,7 @@ class fir_decimate_hb<TT_DATA,
 };
 
 //-----------------------------------------------------------------------------------------------------
-// Partially specialized classes for cascaded interface (middle kernels in cascade), single input, no reload
+// Partially specialized classes for cascaded interface (middle kernels in cascade), x input, no reload
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -1735,7 +1627,7 @@ class fir_decimate_hb<TT_DATA,
                 output_stream_cacc48* outCascade,
                 output_window<TT_DATA>* broadcastWindow);
 };
-
+/*
 // Partially specialized classes for cascaded interface (middle kernels in cascade), dual input, no reload
 template <typename TT_DATA,
           typename TT_COEFF,
@@ -1746,67 +1638,39 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN>
-class fir_decimate_hb<TT_DATA,
-                      TT_COEFF,
-                      TP_FIR_LEN,
-                      TP_SHIFT,
-                      TP_RND,
-                      TP_INPUT_WINDOW_VSIZE,
-                      CASC_IN_TRUE,
-                      CASC_OUT_TRUE,
-                      TP_FIR_RANGE_LEN,
-                      TP_KERNEL_POSITION,
-                      TP_CASC_LEN,
-                      DUAL_IP_DUAL,
-                      USE_COEFF_RELOAD_FALSE,
-                      1,
-                      USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
-                                                                 TT_COEFF,
-                                                                 TP_FIR_LEN,
-                                                                 TP_SHIFT,
-                                                                 TP_RND,
-                                                                 TP_INPUT_WINDOW_VSIZE,
-                                                                 CASC_IN_TRUE,
-                                                                 CASC_OUT_TRUE,
-                                                                 TP_FIR_RANGE_LEN,
-                                                                 TP_KERNEL_POSITION,
-                                                                 TP_CASC_LEN,
-                                                                 DUAL_IP_DUAL,
-                                                                 USE_COEFF_RELOAD_FALSE,
-                                                                 1,
-                                                                 USE_WINDOW_API> {
-   private:
-   public:
+class fir_decimate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                      CASC_IN_TRUE, CASC_OUT_TRUE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN, DUAL_IP_DUAL,
+USE_COEFF_RELOAD_FALSE, 1, USE_WINDOW_API> :
+    public kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                      CASC_IN_TRUE, CASC_OUT_TRUE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN, DUAL_IP_DUAL,
+USE_COEFF_RELOAD_FALSE, 1, USE_WINDOW_API>
+{
+private:
+public:
     // Constructor
-    fir_decimate_hb(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / 4 + 1])
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_TRUE,
-                            CASC_OUT_TRUE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            DUAL_IP_DUAL,
-                            USE_COEFF_RELOAD_FALSE,
-                            1,
-                            USE_WINDOW_API>(taps) {}
+    fir_decimate_hb(const TT_COEFF (&taps)[(TP_FIR_LEN+1)/4+1]):
+    kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                      CASC_IN_TRUE, CASC_OUT_TRUE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN, DUAL_IP_DUAL,
+USE_COEFF_RELOAD_FALSE, 1, USE_WINDOW_API>
+                      (taps)
+    {
+    }
 
     // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_hb::filter); }
+    static void registerKernelClass()
+    {
+        REGISTER_FUNCTION(fir_decimate_hb::filter);
+    }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
-                input_window<TT_DATA>* inWindowReverse,
-                input_stream_cacc48* inCascade,
-                output_stream_cacc48* outCascade,
-                output_window<TT_DATA>* broadcastWindow);
+    void filter(input_window<TT_DATA> *inWindow,
+                input_window<TT_DATA> *inWindowReverse,
+                input_stream_cacc48   *inCascade,
+                output_stream_cacc48  *outCascade,
+                output_window<TT_DATA> *broadcastWindow);
 };
-
-// Partially specialized classes for cascaded interface (middle kernels in cascade), single input, with reload
+*/
+// Partially specialized classes for cascaded interface (middle kernels in cascade), x input, with reload
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -1875,7 +1739,7 @@ class fir_decimate_hb<TT_DATA,
                 output_stream_cacc48* outCascade,
                 output_window<TT_DATA>* broadcastWindow);
 };
-
+/*
 // Partially specialized classes for cascaded interface (middle kernels in cascade), dual input, with reload
 template <typename TT_DATA,
           typename TT_COEFF,
@@ -1886,66 +1750,37 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN>
-class fir_decimate_hb<TT_DATA,
-                      TT_COEFF,
-                      TP_FIR_LEN,
-                      TP_SHIFT,
-                      TP_RND,
-                      TP_INPUT_WINDOW_VSIZE,
-                      CASC_IN_TRUE,
-                      CASC_OUT_TRUE,
-                      TP_FIR_RANGE_LEN,
-                      TP_KERNEL_POSITION,
-                      TP_CASC_LEN,
-                      DUAL_IP_DUAL,
-                      USE_COEFF_RELOAD_TRUE,
-                      1,
-                      USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
-                                                                 TT_COEFF,
-                                                                 TP_FIR_LEN,
-                                                                 TP_SHIFT,
-                                                                 TP_RND,
-                                                                 TP_INPUT_WINDOW_VSIZE,
-                                                                 CASC_IN_TRUE,
-                                                                 CASC_OUT_TRUE,
-                                                                 TP_FIR_RANGE_LEN,
-                                                                 TP_KERNEL_POSITION,
-                                                                 TP_CASC_LEN,
-                                                                 DUAL_IP_DUAL,
-                                                                 USE_COEFF_RELOAD_TRUE,
-                                                                 1,
-                                                                 USE_WINDOW_API> {
-   private:
-   public:
+class fir_decimate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                      CASC_IN_TRUE, CASC_OUT_TRUE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN, DUAL_IP_DUAL,
+USE_COEFF_RELOAD_TRUE, 1, USE_WINDOW_API> :
+    public kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                      CASC_IN_TRUE, CASC_OUT_TRUE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN, DUAL_IP_DUAL,
+USE_COEFF_RELOAD_TRUE, 1, USE_WINDOW_API>
+{
+private:
+public:
     // Constructor
-    fir_decimate_hb()
-        : kernelFilterClass<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            CASC_IN_TRUE,
-                            CASC_OUT_TRUE,
-                            TP_FIR_RANGE_LEN,
-                            TP_KERNEL_POSITION,
-                            TP_CASC_LEN,
-                            DUAL_IP_DUAL,
-                            USE_COEFF_RELOAD_TRUE,
-                            1,
-                            USE_WINDOW_API>() {}
+    fir_decimate_hb():
+    kernelFilterClass<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
+                      CASC_IN_TRUE, CASC_OUT_TRUE, TP_FIR_RANGE_LEN, TP_KERNEL_POSITION, TP_CASC_LEN, DUAL_IP_DUAL,
+USE_COEFF_RELOAD_TRUE, 1, USE_WINDOW_API>()
+    {
+    }
 
     // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_hb::filter); }
+    static void registerKernelClass()
+    {
+        REGISTER_FUNCTION(fir_decimate_hb::filter);
+    }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
-                input_window<TT_DATA>* inWindowReverse,
-                input_stream_cacc48* inCascade,
-                output_stream_cacc48* outCascade,
-                output_window<TT_DATA>* broadcastWindow);
+    void filter(input_window<TT_DATA> *inWindow,
+                input_window<TT_DATA> *inWindowReverse,
+                input_stream_cacc48   *inCascade,
+                output_stream_cacc48  *outCascade,
+                output_window<TT_DATA> *broadcastWindow);
 };
-
+*/
 // ----------------------------------------------------------------------------
 // ---------------------------------- STREAM ----------------------------------
 // ----------------------------------------------------------------------------
@@ -3126,6 +2961,73 @@ class fir_decimate_hb<TT_DATA,
                 input_stream_cacc48* inCascade,
                 output_stream_cacc48* outCascade,
                 output_window<TT_DATA>* broadcastWindow);
+};
+
+template <typename fp = fir_params_defaults>
+class fir_decimate_hb_tl : public fir_decimate_hb<typename fp::BTT_DATA,
+                                                  typename fp::BTT_COEFF,
+                                                  fp::BTP_FIR_LEN,
+                                                  fp::BTP_SHIFT,
+                                                  fp::BTP_RND,
+                                                  fp::BTP_INPUT_WINDOW_VSIZE,
+                                                  fp::BTP_CASC_IN,
+                                                  fp::BTP_CASC_OUT,
+                                                  fp::BTP_FIR_RANGE_LEN,
+                                                  fp::BTP_KERNEL_POSITION,
+                                                  fp::BTP_CASC_LEN,
+                                                  fp::BTP_DUAL_IP,
+                                                  fp::BTP_USE_COEFF_RELOAD,
+                                                  fp::BTP_NUM_OUTPUTS,
+                                                  fp::BTP_API> {
+   public:
+    // Get kernel's FIR range Length
+    template <int pos>
+    static constexpr unsigned int getKernelFirRangeLen() {
+        constexpr unsigned int nextFirRangeLen =
+            pos + 1 == fp::BTP_CASC_LEN
+                ? (fp::BTP_POLY_SSR == 1
+                       ? fnFirRangeRemSym<fp::BTP_FIR_LEN, fp::BTP_CASC_LEN, pos>()
+                       : sr_asym::fnFirRangeRemAsym<fp::BTP_FIR_LEN, fp::BTP_CASC_LEN, pos, typename fp::BTT_DATA,
+                                                    typename fp::BTT_COEFF, fp::BTP_API>())
+                : (fp::BTP_POLY_SSR == 1
+                       ? fnFirRangeSym<fp::BTP_FIR_LEN, fp::BTP_CASC_LEN, pos>()
+                       : sr_asym::fnFirRangeAsym<fp::BTP_FIR_LEN, fp::BTP_CASC_LEN, pos, typename fp::BTT_DATA,
+                                                 typename fp::BTT_COEFF, fp::BTP_API>());
+        return nextFirRangeLen;
+    };
+
+    // Get kernel's FIR range Length
+    static constexpr unsigned int getFirRangeLen() { return fp::BTP_FIR_RANGE_LEN; };
+
+    // Get kernel's FIR Total Tap Length
+    static constexpr unsigned int getTapLen() { return (fp::BTP_FIR_LEN + 1) / 4 + 1; };
+
+    // Get kernel's FIR Total Tap Length
+    static constexpr unsigned int getSSRMargin() {
+        constexpr unsigned int margin = fnFirMargin<fp::BTP_FIR_LEN / fp::BTP_SSR, typename fp::BTT_DATA>();
+        return margin;
+    };
+
+    static constexpr unsigned int getDF() { return 1; };
+    static constexpr unsigned int getIF() { return 1; };
+
+    // Get FIR variant
+    static constexpr eFIRVariant getFirType() { return eFIRVariant::kDecHB; };
+    using parent_class = fir_decimate_hb<typename fp::BTT_DATA,
+                                         typename fp::BTT_COEFF,
+                                         fp::BTP_FIR_LEN,
+                                         fp::BTP_SHIFT,
+                                         fp::BTP_RND,
+                                         fp::BTP_INPUT_WINDOW_VSIZE,
+                                         fp::BTP_CASC_IN,
+                                         fp::BTP_CASC_OUT,
+                                         fp::BTP_FIR_RANGE_LEN,
+                                         fp::BTP_KERNEL_POSITION,
+                                         fp::BTP_CASC_LEN,
+                                         fp::BTP_DUAL_IP,
+                                         fp::BTP_USE_COEFF_RELOAD,
+                                         fp::BTP_NUM_OUTPUTS,
+                                         fp::BTP_API>;
 };
 }
 }

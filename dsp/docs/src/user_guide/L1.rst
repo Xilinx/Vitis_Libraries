@@ -18,7 +18,7 @@
    :caption: Table of Contents
    :maxdepth: 3
 
-   L1.rst
+   1-Dimensional(Line) SSR FFT L1 FPGA Module <L1.rst>
 
 .. _L1_1DFFT_OVERVIEW:
 

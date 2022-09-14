@@ -1,0 +1,64 @@
+{
+  "schema": "aieip_spec_schema-0.1",
+  "ip_name": "vmc_mixer",
+  "block_info": {
+    "label": "Mixer",
+    "description": ""
+  },
+  "parameters": [
+    {
+      "name": "data_type",
+      "label": "Input/Output data type",
+      "description": "The type of individual data samples input to and output of the mixer function",
+      "enum": [ "cint16", "cint32", "cfloat" ],
+      "default": "cint16",
+      "type": "typename"
+    },
+    {
+      "name": "input_window_size",
+      "label": "Input window size (Number of Samples)",
+      "description": "The number of samples in input window",
+      "default": 32,
+      "maximum": 4096,
+      "minimum": 4,	  
+      "type": "int",
+      "validator": {
+        "file": "vmc_mixer.py",
+        "function": "vmc_validate_output_window_size",
+        "args": ["data_type"]
+      }
+    },
+    {
+	  "name": "mixer_mode",
+      "label": "Mixer mode",
+      "description": "The mixer operation modes.",
+      "enum": [ 1, 2 ],
+      "enum_str": [ "Single Input Mode", "Dual Input Mode" ],
+      "default": 1,
+      "type" : "int"
+    },
+    {
+	  "name": "phase_increment", 
+      "label": "Phase increment",
+      "description": "The phase increment between samples.",
+      "default": 0,
+      "minimum": 0,
+      "maximum": 2147483648,
+      "type": "uint"
+    },
+    {
+	  "name": "input_sampling_rate", 
+      "label": "Target input throughput (MSPS)",
+      "description": "The target input throughput of the function in MSPS",
+      "default": 200,
+      "maximum": 1000,
+      "minimum": 1,
+      "type": "int"
+    }
+
+  ],
+  "generator": {
+    "file": "vmc_mixer.py",
+    "function": "vmc_generate_graph"
+  }
+}

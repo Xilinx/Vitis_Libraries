@@ -1,0 +1,98 @@
+{
+  "schema": "aieip_spec_schema-0.1",
+  "ip_name": "vmc_stream_fft_window",
+  "block_info": {
+    "label": "Windowing Utility Stream",
+    "description": ""
+  },
+  "parameters": [
+    {
+      "name": "data_type",
+      "label": "Input/Output data type",
+      "description": "The type of individual data samples input to and output of the FFT function",
+      "enum": [ "cint16", "cint32", "cfloat" ],
+      "default": "cint16",
+      "type": "typename"
+    },
+    {
+      "name": "coeff_type",
+      "label": "Function coefficient type",
+      "description": "The type of individual coefficients of the FFT window function",
+      "enum": [ "int16", "int32", "float" ],
+      "default": "int16",
+      "type": "typename",
+      "validator": {
+        "file": "vmc_stream_fft_window.py",
+        "function": "vmc_validate_coeff_type",
+        "args": [ "data_type" ]
+      }
+    },
+    {
+      "name": "point_size",
+      "label": "Point Size",
+      "description": "The number of coefficients in the FFT window function",
+      "default": 32,
+      "maximum": 65536,
+      "minimum": 16,
+      "type": "int",
+      "validator": {
+        "file": "vmc_stream_fft_window.py",
+        "function": "vmc_validate_point_size"
+      }
+    },
+    {
+      "name": "input_window_size",
+      "label": "Input window size (Number of Samples)",
+      "description": "The number of samples in the input window",
+      "default": 64,
+      "maximum": 65536,
+      "minimum": 16,
+      "type": "int",
+      "validator": {
+        "file": "vmc_stream_fft_window.py",
+        "function": "vmc_validate_input_window_size",
+        "args": [ "point_size" ]
+      }
+    },
+    {
+      "name": "shift_val",
+      "label": "Scale output down by 2^",
+      "description": "The power of 2 shift down applied to the product of sample and coefficient",
+      "default": 0,
+      "maximum": 60,
+      "minimum": 0,
+      "type": "int",
+      "validator": {
+        "file": "vmc_stream_fft_window.py",
+        "function": "vmc_validate_shift_val",
+        "args": [ "data_type" ]
+      }
+    },
+    {
+      "name": "ssr",
+      "label": "Number of parallel input/output (SSR)",
+      "description": "Specify number of data input/output in parallel",
+      "default": 1,
+      "minimum": 1,
+      "maximum": 32,
+      "type": "int",
+      "validator": {
+        "file": "vmc_stream_fft_window.py",
+        "function": "vmc_validate_ssr",
+        "args": [ "data_type", "point_size"]
+      }
+    },
+    {
+      "name": "coeff",
+      "label": "Coefficients",
+      "description": "The window function coefficients",
+      "element_type": "coeff_type",
+      "default": [ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+      "type": "vector"
+    }
+  ],
+  "generator": {
+    "file": "vmc_stream_fft_window.py",
+    "function": "vmc_generate_graph"
+  }
+}

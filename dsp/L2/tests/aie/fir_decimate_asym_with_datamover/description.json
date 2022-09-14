@@ -1,0 +1,155 @@
+{
+    "name": "Xilinx DSPLIB fir_decimate_asym with datamover",
+    "description": "",
+    "gui": true,
+    "flow": "versal",
+    "platform_allowlist": [
+        "vck190"
+    ],
+    "data": ["PROJECT/data/"],
+    "platform_properties": {
+        "vck190": {
+            "v++": {
+                "compiler": {
+                    "clflags": []
+                },
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/system.cfg"
+                    ]
+                },
+                "package": {
+                    "clflags": [
+                        "--package.defer_aie_run"
+                    ]
+                }
+            }
+        }
+    },
+    "launch": [
+        {
+            "name": "hwemu-launch",
+            "target": "hw_emu"
+        },
+        {
+            "name": "aiesim-launch",
+            "target": "aiesim"
+        },
+        {
+            "name": "x86sim-launch",
+            "target": "x86sim"
+        }
+    ],
+    "host": {
+        "host_exe": "host.elf",
+        "compiler": {
+            "sources": [
+                "PROJECT/host.cpp",
+                "PROJECT/gui_hack/aie_control_xrt.cpp"
+            ],
+            "includepaths": [
+                "$(SYSROOT)/usr/include/xrt/",
+                "LIB_DIR/L2/include/aie",
+                "LIB_DIR/L2/tests/aie/common/inc",
+                "LIB_DIR/L1/include/aie",
+                "LIB_DIR/L1/src/aie",
+                "LIB_DIR/L1/tests/aie/inc",
+                "LIB_DIR/L1/tests/aie/src",
+                "PROJECT"
+            ],
+            "options": "--sysroot=$(SYSROOT)",
+            "symbols": ["__PS_ENABLE_AIE__", "USING_UUT=1"]
+        },
+        "linker": {
+            "librarypaths": [
+                "$(SYSROOT)/usr/lib/"
+            ],
+            "options": "--sysroot=$(SYSROOT)"
+        }
+    },
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/../utils/L1/include/hw",
+                "LIB_DIR/../utils/L2/src/sw/datamvoer",
+                "PROJECT/kernel",
+                "PROJECT"
+            ]
+        }
+    },
+    "aiecompiler": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L1/include/aie",
+                "LIB_DIR/L1/src/aie",
+                "LIB_DIR/L1/tests/aie/inc",
+                "LIB_DIR/L1/tests/aie/src",
+                "LIB_DIR/L2/include/aie",
+                "LIB_DIR/L2/tests/aie/common/inc",
+                "./"
+            ],
+            "clflags":["--dataflow  -Xpreproc=\"-DUUT_GRAPH=fir_decimate_asym_graph -DOUTPUT_FILE=data/uut_output.txt -DINPUT_FILE=data/input.txt  -DUSING_UUT=1 \""]
+        }
+    },
+    "aiecontainers": [
+        {
+            "accelerators": [
+                {
+                    "location": "PROJECT/test.cpp",
+                    "files": ["LIB_DIR/L1/src/aie/fir_decimate_asym.cpp"],
+                    "pl-freq": 1000,
+                    "workdir": "./Work",
+                    "options": "",
+                    "name": "libadf.a",
+                     "pl_kernels_in_aie_graph": [
+                         "LIB_DIR/L1/src/aie/fir_decimate_asym.cpp"
+                     ]
+                }
+            ]
+        }
+    ],
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/../utils/L2/src/sw/datamover/mm2s.cpp",
+                    "clflags": " ",
+                    "name": "mm2s"
+                },
+                {
+                    "location": "LIB_DIR/../utils/L2/src/sw/datamover/s2mm.cpp",
+                    "clflags": " ",
+                    "name": "s2mm"
+                }
+            ],
+            "name": "kernel"
+        }
+    ],
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": 32768,
+                "max_time_min": {
+                    "vitis_aie_sim": 200,
+                    "vitis_aie_x86sim": 60,
+                    "vitis_hw_build": 470,
+                    "vitis_hw_emu": 470,
+                    "vitis_hw_run": 60
+                }
+            }
+        ],
+        "targets": [
+            "vitis_aie_sim",
+            "vitis_aie_x86sim",
+            "vitis_hw_emu",
+            "vitis_hw_build",
+            "vitis_hw_run"
+        ],
+        "category": "canary"
+    }
+}

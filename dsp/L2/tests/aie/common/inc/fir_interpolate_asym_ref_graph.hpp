@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef FIR_INTERPOLATE_ASYM_REF_HPP
-#define FIR_INTERPOLATE_ASYM_REF_HPP
+#ifndef FIR_INTERPOLATE_ASYM_REF_GRAPH_HPP
+#define FIR_INTERPOLATE_ASYM_REF_GRAPH_HPP
 
 // This file holds the definition header of the Asymmetric Interpolation FIR reference model graph class
 
@@ -33,6 +33,7 @@ using namespace adf;
 using namespace xf::dsp::aie::widget::api_cast;
 
 class empty {};
+struct no_port {};
 
 template <typename TT_DATA,
           typename TT_COEFF,
@@ -45,20 +46,27 @@ template <typename TT_DATA,
           unsigned int TP_USE_COEFF_RELOAD = 0,
           unsigned int TP_DUAL_IP = 0,
           unsigned int TP_NUM_OUTPUTS = 1,
-          unsigned int TP_API = 0>
+          unsigned int TP_API = 0,
+          unsigned int TP_SSR = 1,             // dummy param not used in ref model
+          unsigned int TP_PARA_INTERP_POLY = 1 // dummy param not used in ref model
+          >
 class fir_interpolate_asym_ref_graph : public graph {
    public:
-    using in2_port = typename std::conditional<(TP_DUAL_IP == 1), port<input>, empty>::type;
-    using coeff_port = typename std::conditional<(TP_USE_COEFF_RELOAD == 1), port<input>, empty>::type;
-    using out2_port = typename std::conditional<(TP_NUM_OUTPUTS == 2), port<output>, empty>::type;
+    template <class dir>
+    using ssr_port_array = std::array<port<dir>, TP_SSR>;
+    using dual_ip_port = typename std::conditional_t<(TP_DUAL_IP == 1), ssr_port_array<input>, no_port>;
+    using rtp_port = typename std::conditional_t<(TP_USE_COEFF_RELOAD == 1), port<input>, no_port>;
+    using dual_op_port = typename std::conditional_t<(TP_NUM_OUTPUTS == 2), ssr_port_array<output>, no_port>;
     using widget_kernel_in = typename std::conditional<(TP_DUAL_IP == 1 && TP_API == 1), kernel, empty>::type;
     using widget_kernel_out = typename std::conditional<(TP_NUM_OUTPUTS == 2), kernel, empty>::type;
 
-    port<input> in;
-    in2_port in2;
-    coeff_port coeff;
-    port<output> out;
-    out2_port out2;
+    ssr_port_array<input> in;
+    ssr_port_array<output> out;
+
+    std::array<rtp_port, 1> coeff;
+
+    dual_ip_port in2;
+    dual_op_port out2;
 
     // FIR Kernel
     kernel m_firKernel;
@@ -81,9 +89,15 @@ class fir_interpolate_asym_ref_graph : public graph {
     }
 
     void create_connections() {
-        printf("===========================\n");
-        printf("== FIR INTERPOLATE ASYM REF\n");
-        printf("===========================\n");
+        constexpr unsigned int headerConfigSize = 256 / 8; // 256-bits of configuration info organized in int32 fields
+        constexpr unsigned int headerByteSize =
+            TP_USE_COEFF_RELOAD == 2 ? CEIL(TP_FIR_LEN * sizeof(TT_COEFF), headerConfigSize) + headerConfigSize
+                                     : 0; // align to 32 Byte boundary
+        // Byte size of window buffer.
+        constexpr unsigned int inputWindowByteSize = TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) + headerByteSize;
+        constexpr unsigned int inputWindowVectorSize = inputWindowByteSize / sizeof(TT_DATA); //
+        constexpr unsigned int outputWindowByteSize = TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) * TP_INTERPOLATE_FACTOR;
+        constexpr unsigned int outputWindowVectorSize = outputWindowByteSize / sizeof(TT_DATA); //
 
         // Make connections
         // Size of window in Bytes.
@@ -91,23 +105,21 @@ class fir_interpolate_asym_ref_graph : public graph {
             constexpr(TP_DUAL_IP == 1 && TP_API == 1) {
                 const int kInterleavePattern = 0;
                 m_widgetKernelIn = kernel::create_object<
-                    widget_api_cast_ref<TT_DATA, 1, 0, 2, TP_INPUT_WINDOW_VSIZE, 1, kInterleavePattern> >();
-                connect<stream>(in, m_widgetKernelIn.in[0]);
-                connect<stream>(in2, m_widgetKernelIn.in[1]);
-                connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA),
-                               fnFirMargin<TP_FIR_LEN / TP_INTERPOLATE_FACTOR, TT_DATA>() * sizeof(TT_DATA)> >(
-                    m_widgetKernelIn.out[0], m_firKernel.in[0]);
+                    widget_api_cast_ref<TT_DATA, 1, 0, 2, inputWindowVectorSize, 1, kInterleavePattern> >();
+                connect<stream>(in[0], m_widgetKernelIn.in[0]);
+                connect<stream>(in2[0], m_widgetKernelIn.in[1]);
+                connect<window<inputWindowByteSize, fnFirMargin<TP_FIR_LEN / TP_INTERPOLATE_FACTOR, TT_DATA>() *
+                                                        sizeof(TT_DATA)> >(m_widgetKernelIn.out[0], m_firKernel.in[0]);
                 runtime<ratio>(m_widgetKernelIn) = 0.4;
                 // Source files
                 source(m_widgetKernelIn) = "widget_api_cast_ref.cpp";
             }
         else {
-            connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA),
-                           fnFirMargin<TP_FIR_LEN / TP_INTERPOLATE_FACTOR, TT_DATA>() * sizeof(TT_DATA)> >(
-                in, m_firKernel.in[0]);
+            connect<window<inputWindowByteSize, fnFirMargin<TP_FIR_LEN / TP_INTERPOLATE_FACTOR, TT_DATA>() *
+                                                    sizeof(TT_DATA)> >(in[0], m_firKernel.in[0]);
         }
         if
-            constexpr(TP_USE_COEFF_RELOAD == 1) { connect<parameter>(coeff, async(m_firKernel.in[1])); }
+            constexpr(TP_USE_COEFF_RELOAD == 1) { connect<parameter>(coeff[0], async(m_firKernel.in[1])); }
 
         if
             constexpr(TP_NUM_OUTPUTS == 2) {
@@ -116,27 +128,23 @@ class fir_interpolate_asym_ref_graph : public graph {
                 m_widgetKernelOut = kernel::create_object<
                     widget_api_cast_ref<TT_DATA, USE_WINDOW_API, TP_API, kNumInputs,
                                         TP_INPUT_WINDOW_VSIZE * TP_INTERPOLATE_FACTOR, kNumOutputs, 0> >();
-                connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) * TP_INTERPOLATE_FACTOR> >(
-                    m_firKernel.out[0], m_widgetKernelOut.in[0]);
+                connect<window<outputWindowByteSize> >(m_firKernel.out[0], m_widgetKernelOut.in[0]);
 
                 if
                     constexpr(TP_API == USE_WINDOW_API) {
-                        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) * TP_INTERPOLATE_FACTOR> >(
-                            m_widgetKernelOut.out[0], out);
-                        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) * TP_INTERPOLATE_FACTOR> >(
-                            m_widgetKernelOut.out[1], out2);
+                        connect<window<outputWindowByteSize> >(m_widgetKernelOut.out[0], out[0]);
+                        connect<window<outputWindowByteSize> >(m_widgetKernelOut.out[1], out2[0]);
                     }
                 else {
-                    connect<stream>(m_widgetKernelOut.out[0], out);
-                    connect<stream>(m_widgetKernelOut.out[1], out2);
+                    connect<stream>(m_widgetKernelOut.out[0], out[0]);
+                    connect<stream>(m_widgetKernelOut.out[1], out2[0]);
                 }
 
                 source(m_widgetKernelOut) = "widget_api_cast_ref.cpp";
                 runtime<ratio>(m_widgetKernelOut) = 0.9;
             }
         else {
-            connect<window<(TP_INTERPOLATE_FACTOR * TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA))> >(m_firKernel.out[0],
-                                                                                                out);
+            connect<window<outputWindowByteSize> >(m_firKernel.out[0], out[0]);
         }
 
         // Specify mapping constraints
@@ -151,4 +159,4 @@ class fir_interpolate_asym_ref_graph : public graph {
 }
 }
 }
-#endif // FIR_INTERPOLATE_ASYM_REF_HPP
+#endif // FIR_INTERPOLATE_ASYM_REF_GRAPH_HPP

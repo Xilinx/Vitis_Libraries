@@ -74,6 +74,71 @@
             "PORT_API":"1",
             "USE_CUSTOM_CONSTRAINT":"1",
             "INPUT_WINDOW_VSIZE":"2560"
+        },
+        "test_7_int16_stream": {
+            "DATA_TYPE":"int16",
+            "COEFF_TYPE":"int16",
+            "FIR_LEN":"32",
+            "SHIFT":"16",
+            "CASC_LEN":"1",
+            "UUT_SSR": "1",
+            "DUAL_IP":"0",
+            "NUM_OUTPUTS":"1",
+            "PORT_API":"1",
+            "USE_COEFF_RELOAD":"1",
+            "INPUT_WINDOW_VSIZE":"25600"
+        },
+        "test_8_int16_stream_rtp_reload": {
+            "DATA_TYPE":"int16",
+            "COEFF_TYPE":"int16",
+            "FIR_LEN":"32",
+            "SHIFT":"16",
+            "CASC_LEN":"1",
+            "UUT_SSR": "1",
+            "DUAL_IP":"0",
+            "NUM_OUTPUTS":"1",
+            "PORT_API":"1",
+            "USE_COEFF_RELOAD":"1",
+            "INPUT_WINDOW_VSIZE":"25600"
+        },
+        "test_9_int16_ssr_rtp_reload": {
+            "DATA_TYPE":"int16",
+            "COEFF_TYPE":"int16",
+            "FIR_LEN":"32",
+            "SHIFT":"16",
+            "CASC_LEN":"2",
+            "UUT_SSR": "2",
+            "DUAL_IP":"0",
+            "NUM_OUTPUTS":"1",
+            "PORT_API":"1",
+            "USE_COEFF_RELOAD":"1",
+            "INPUT_WINDOW_VSIZE":"25600"
+        },
+        "test_10_cint32_header_reload": {
+            "DATA_TYPE":"cint32",
+            "COEFF_TYPE":"cint32",
+            "FIR_LEN":"16",
+            "SHIFT":"16",
+            "CASC_LEN":"1",
+            "UUT_SSR": "2",
+            "DUAL_IP":"0",
+            "NUM_OUTPUTS":"1",
+            "PORT_API":"1",
+            "USE_COEFF_RELOAD":"2",
+            "INPUT_WINDOW_VSIZE":"25600"
+        },
+        "test_11_int32_header_reload_dual": {
+            "DATA_TYPE":"int32",
+            "COEFF_TYPE":"int32",
+            "FIR_LEN":"32",
+            "SHIFT":"16",
+            "CASC_LEN":"1",
+            "UUT_SSR": "4",
+            "DUAL_IP":"1",
+            "NUM_OUTPUTS":"2",
+            "PORT_API":"1",
+            "USE_COEFF_RELOAD":"2",
+            "INPUT_WINDOW_VSIZE":"25600"
         }
     }
 }

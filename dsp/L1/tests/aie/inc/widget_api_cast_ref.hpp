@@ -24,7 +24,10 @@ Widget API Cast reference model
 #include "fir_ref_utils.hpp"
 #include "widget_api_cast_traits.hpp"
 
+#ifndef _DSPLIB_WIDGET_API_CAST_REF_DEBUG_
 //#define _DSPLIB_WIDGET_API_CAST_REF_DEBUG_
+//#include "debug_utils.h"
+#endif //_DSPLIB_WIDGET_API_CAST_REF_DEBUG_
 
 namespace xf {
 namespace dsp {
@@ -37,34 +40,34 @@ template <typename TT_DATA, // type of data input and output
           unsigned int TP_IN_API,
           unsigned int TP_OUT_API,
           unsigned int TP_NUM_INPUTS,
-          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_WINDOW_VSIZE, // does not include header, so refers to payload samples
           unsigned int TP_NUM_OUTPUT_CLONES = 1,
-          unsigned int TP_PATTERN = 0>
+          unsigned int TP_PATTERN = 0,
+          unsigned int TP_HEADER_BYTES = 0>
 class widget_api_cast_ref {
    private:
    public:
-    // Constructor
-    widget_api_cast_ref() {}
+    int kIndex;
+    widget_api_cast_ref(int idx) { kIndex = idx; }
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast_ref::transferData); }
-    // FIR
     void transferData(input_window<TT_DATA>* inWindow0, output_window<TT_DATA>* outWindow0);
 };
 
 // window to window, 1 to 2
 template <typename TT_DATA, // type of data input and output
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_PATTERN>
-class widget_api_cast_ref<TT_DATA, kWindowAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN> {
+          unsigned int TP_PATTERN,
+          unsigned int TP_HEADER_BYTES>
+class widget_api_cast_ref<TT_DATA, kWindowAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN, TP_HEADER_BYTES> {
    private:
    public:
-    // Constructor
-    widget_api_cast_ref() {}
+    int kIndex;
+    widget_api_cast_ref(int idx) { kIndex = idx; }
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast_ref::transferData); }
-    // FIR
     void transferData(input_window<TT_DATA>* inWindow0,
                       output_window<TT_DATA>* outWindow0,
                       output_window<TT_DATA>* outWindow1);
@@ -73,16 +76,16 @@ class widget_api_cast_ref<TT_DATA, kWindowAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 2
 // window to window, 1 to 3
 template <typename TT_DATA, // type of data input and output
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_PATTERN>
-class widget_api_cast_ref<TT_DATA, kWindowAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 3, TP_PATTERN> {
+          unsigned int TP_PATTERN,
+          unsigned int TP_HEADER_BYTES>
+class widget_api_cast_ref<TT_DATA, kWindowAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 3, TP_PATTERN, TP_HEADER_BYTES> {
    private:
    public:
-    // Constructor
-    widget_api_cast_ref() {}
+    int kIndex;
+    widget_api_cast_ref(int idx) { kIndex = idx; }
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast_ref::transferData); }
-    // FIR
     void transferData(input_window<TT_DATA>* inWindow0,
                       output_window<TT_DATA>* outWindow0,
                       output_window<TT_DATA>* outWindow1,
@@ -92,32 +95,32 @@ class widget_api_cast_ref<TT_DATA, kWindowAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 3
 // stream to window, 1 to 1
 template <typename TT_DATA, // type of data input and output
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_PATTERN>
-class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 1, TP_PATTERN> {
+          unsigned int TP_PATTERN,
+          unsigned int TP_HEADER_BYTES>
+class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES> {
    private:
    public:
-    // Constructor
-    widget_api_cast_ref() {}
+    int kIndex;
+    widget_api_cast_ref(int idx) { kIndex = idx; }
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast_ref::transferData); }
-    // FIR
     void transferData(input_stream<TT_DATA>* inStream0, output_window<TT_DATA>* outWindow0);
 };
 
 // stream to window, 1 to 2
 template <typename TT_DATA, // type of data input and output
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_PATTERN>
-class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN> {
+          unsigned int TP_PATTERN,
+          unsigned int TP_HEADER_BYTES>
+class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN, TP_HEADER_BYTES> {
    private:
    public:
-    // Constructor
-    widget_api_cast_ref() {}
+    int kIndex;
+    widget_api_cast_ref(int idx) { kIndex = idx; }
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast_ref::transferData); }
-    // FIR
     void transferData(input_stream<TT_DATA>* inStream0,
                       output_window<TT_DATA>* outWindow0,
                       output_window<TT_DATA>* outWindow1);
@@ -126,16 +129,16 @@ class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 2
 // stream to window, 1 to 3
 template <typename TT_DATA, // type of data input and output
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_PATTERN>
-class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 3, TP_PATTERN> {
+          unsigned int TP_PATTERN,
+          unsigned int TP_HEADER_BYTES>
+class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 3, TP_PATTERN, TP_HEADER_BYTES> {
    private:
    public:
-    // Constructor
-    widget_api_cast_ref() {}
+    int kIndex;
+    widget_api_cast_ref(int idx) { kIndex = idx; }
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast_ref::transferData); }
-    // FIR
     void transferData(input_stream<TT_DATA>* inStream0,
                       output_window<TT_DATA>* outWindow0,
                       output_window<TT_DATA>* outWindow1,
@@ -145,16 +148,17 @@ class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 3
 // stream to window, 1 to 4
 template <typename TT_DATA, // type of data input and output
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_PATTERN>
-class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 4, TP_PATTERN> {
+          unsigned int TP_PATTERN,
+          unsigned int TP_HEADER_BYTES>
+class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 4, TP_PATTERN, TP_HEADER_BYTES> {
    private:
    public:
-    // Constructor
-    widget_api_cast_ref() {}
+    int kIndex;
+    widget_api_cast_ref(int idx) { kIndex = idx; }
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast_ref::transferData); }
-    // FIR
+
     void transferData(input_stream<TT_DATA>* inStream0,
                       output_window<TT_DATA>* outWindow0,
                       output_window<TT_DATA>* outWindow1,
@@ -166,34 +170,34 @@ class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 4
 // stream to window, 2 to 1
 template <typename TT_DATA, // type of data input and output
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_PATTERN>
-class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1, TP_PATTERN> {
+          unsigned int TP_PATTERN,
+          unsigned int TP_HEADER_BYTES>
+class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES> {
    private:
    public:
-    // Constructor
-    widget_api_cast_ref() {}
+    int kIndex;
+    widget_api_cast_ref(int idx) { kIndex = idx; }
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast_ref::transferData); }
-    // FIR
     void transferData(input_stream<TT_DATA>* inStream0,
                       input_stream<TT_DATA>* inStream1,
                       output_window<TT_DATA>* outWindow0);
 };
 
-// stream to window, 1 to 2
+// stream to window, 2 to 2
 template <typename TT_DATA, // type of data input and output
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_PATTERN>
-class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 2, TP_PATTERN> {
+          unsigned int TP_PATTERN,
+          unsigned int TP_HEADER_BYTES>
+class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 2, TP_PATTERN, TP_HEADER_BYTES> {
    private:
    public:
-    // Constructor
-    widget_api_cast_ref() {}
+    int kIndex;
+    widget_api_cast_ref(int idx) { kIndex = idx; }
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast_ref::transferData); }
-    // FIR
     void transferData(input_stream<TT_DATA>* inStream0,
                       input_stream<TT_DATA>* inStream1,
                       output_window<TT_DATA>* outWindow0,
@@ -203,16 +207,16 @@ class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 2
 // stream to window, 2 to 3
 template <typename TT_DATA, // type of data input and output
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_PATTERN>
-class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 3, TP_PATTERN> {
+          unsigned int TP_PATTERN,
+          unsigned int TP_HEADER_BYTES>
+class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 3, TP_PATTERN, TP_HEADER_BYTES> {
    private:
    public:
-    // Constructor
-    widget_api_cast_ref() {}
+    int kIndex;
+    widget_api_cast_ref(int idx) { kIndex = idx; }
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast_ref::transferData); }
-    // FIR
     void transferData(input_stream<TT_DATA>* inStream0,
                       input_stream<TT_DATA>* inStream1,
                       output_window<TT_DATA>* outWindow0,
@@ -223,16 +227,16 @@ class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 3
 // stream to window, 2 to 4
 template <typename TT_DATA, // type of data input and output
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_PATTERN>
-class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 4, TP_PATTERN> {
+          unsigned int TP_PATTERN,
+          unsigned int TP_HEADER_BYTES>
+class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 4, TP_PATTERN, TP_HEADER_BYTES> {
    private:
    public:
-    // Constructor
-    widget_api_cast_ref() {}
+    int kIndex;
+    widget_api_cast_ref(int idx) { kIndex = idx; }
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast_ref::transferData); }
-    // FIR
     void transferData(input_stream<TT_DATA>* inStream0,
                       input_stream<TT_DATA>* inStream1,
                       output_window<TT_DATA>* outWindow0,
@@ -245,32 +249,32 @@ class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 4
 // window to stream, 1 to 1
 template <typename TT_DATA, // type of data input and output
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_PATTERN>
-class widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 1, TP_PATTERN> {
+          unsigned int TP_PATTERN,
+          unsigned int TP_HEADER_BYTES>
+class widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES> {
    private:
    public:
-    // Constructor
-    widget_api_cast_ref() {}
+    int kIndex;
+    widget_api_cast_ref(int idx) { kIndex = idx; }
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast_ref::transferData); }
-    // FIR
     void transferData(input_window<TT_DATA>* inWindow0, output_stream<TT_DATA>* outStream0);
 };
 
 // window to stream, 1 to 2
 template <typename TT_DATA, // type of data input and output
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_PATTERN>
-class widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN> {
+          unsigned int TP_PATTERN,
+          unsigned int TP_HEADER_BYTES>
+class widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN, TP_HEADER_BYTES> {
    private:
    public:
-    // Constructor
-    widget_api_cast_ref() {}
+    int kIndex;
+    widget_api_cast_ref(int idx) { kIndex = idx; }
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast_ref::transferData); }
-    // FIR
     void transferData(input_window<TT_DATA>* inWindow0,
                       output_stream<TT_DATA>* outStream0,
                       output_stream<TT_DATA>* outStream1);

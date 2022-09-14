@@ -33,12 +33,12 @@ The DSPLib consists the following DSP elements:
 
 
 
-   func-fir-filters.rst
-   func-fft.rst
-   func-matmul.rst
-   func-widget-apicast.rst
-   func-widget-real2comp.rst
-   func-dds.rst
+   Filters <func-fir-filters.rst>
+   FFT/iFFT <func-fft.rst>
+   Matrix Multiply <func-matmul.rst>
+   Widget API Cast <func-widget-apicast.rst>
+   Widget Real to Complex <func-widget-real2comp.rst>
+   DDS / Mixer <func-dds.rst>
 
 .. |image1| image:: ./media/image1.png
 .. |image2| image:: ./media/image2.png

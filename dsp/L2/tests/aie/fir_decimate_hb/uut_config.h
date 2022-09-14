@@ -82,6 +82,13 @@
 #define P_SSR 1
 #endif
 
+// Force reference model to ignore PARALLEL FACTOR for polyphase decomposition
+#ifdef USING_UUT
+#define P_PARA_DECI_POLY UUT_PARA_DECI_POLY
+#else
+#define P_PARA_DECI_POLY 1
+#endif
+
 #ifndef USING_UUT
 #undef PORT_API
 #undef NUM_OUTPUTS

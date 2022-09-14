@@ -1,0 +1,75 @@
+{
+  "schema": "vitis_library_api_spec_schema-1.0",
+  "api_name": "xf::dsp::aie::mixer::dds_mixer::dds_mixer_graph",
+  "display_name": "dds_mixer_graph",
+  "header_file_name": "dds_mixer_graph.hpp",
+  "search_paths": [
+    "L1/include/aie",
+    "L1/src/aie",
+	"L1/tests/aie/inc",
+    "L1/tests/aie/src",
+	"L2/include/aie",
+	"L2/tests/aie/common/inc"
+  ],
+  "parameters": [
+    {
+      "name": "TT_DATA",
+      "type": "typename",
+      "description": "describes the type of individual data samples input to and output from the dds/mixer",
+      "enum": [
+        "cint16",
+        "cint32",
+        "cfloat"
+      ]
+    },
+    {
+      "name": "TP_INPUT_WINDOW_VSIZE",
+      "type": "uint",
+      "description": "describes the number of samples in the input/output window API or number of samples to process per iteration.",
+      "minimum": 4,
+      "validator": {
+        "file" : "dds_mixer.py",
+        "function" : "validate_TP_WINDOW_VSIZE",
+        "args": ["TT_DATA"]
+      }
+    },
+    {
+      "name": "TP_MIXER_MODE",
+      "type": "uint",
+      "description": "describes the mode of operation of the dds/mixer",
+      "maximum": 2, 
+      "minimum": 0
+    },
+    {
+      "name": "TP_API",
+      "type": "uint",
+      "description": "specifies if the input/output interface should be window-based or stream-based.",
+      "minimum": 0,
+      "maximum": 1
+    },
+    {
+      "name": "TP_SSR",
+      "type": "uint",
+      "description": "specifies the super sample rate, ie how much data input/output in parallel for a single channel.",
+      "minimum": 1
+    }, 
+    {
+      "name" : "phaseInc" ,
+      "type" : "uint",
+      "description" :  "specifies the phase increment between samples."
+    }, 
+    {
+      "name" : "initialPhaseOffset" ,
+      "type" : "uint",
+      "description" :  "specifies the initial value of the phase accumulator, creating a phase offset."
+    }
+  ],
+  "ports": {
+    "file": "dds_mixer.py",
+    "function": "info_ports"
+  },
+  "generator": {
+    "file": "dds_mixer.py",
+    "function": "generate_graph"
+  }
+}

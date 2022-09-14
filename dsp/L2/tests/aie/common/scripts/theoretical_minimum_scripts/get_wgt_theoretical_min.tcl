@@ -91,6 +91,15 @@ if {$uutKernel=="widget_api_cast"} {
     }
     set vSize [expr {16 / $baseTypeSize}]
     set minTheoryCycleCount     [expr {$windowSize / $vSize}]
+
+# FFT Window
+} elseif {$uutKernel=="fft_window"} {
+    set baseTypeSize 2
+    if {($dataType=="cfloat") || ($dataType=="cint32")} {
+        set baseTypeSize 4
+    }
+    set vSize [expr {16 / $baseTypeSize}]
+    set minTheoryCycleCount     [expr {$windowSize / $vSize}]
 }
 
 # compute throughput

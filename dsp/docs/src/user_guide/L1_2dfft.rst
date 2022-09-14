@@ -18,7 +18,7 @@
    :caption: Table of Contents
    :maxdepth: 3
 
-   L1_2dfft.rst
+   2-Dimensional(Matrix) SSR FFT L1 FPGA Module <L1_2dfft.rst>
 
 .. _L1_2DFFT_OVERVIEW:
 

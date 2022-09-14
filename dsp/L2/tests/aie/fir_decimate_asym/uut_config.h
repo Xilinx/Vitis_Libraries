@@ -95,5 +95,11 @@
 #define DUAL_IP 0
 #endif
 
+#ifdef USING_UUT
+#define P_SSR UUT_SSR
+#else
+#define P_SSR 1
+#endif
+
 // END OF UUT CONFIGURATION
 //------------------------------------------------------------------------------

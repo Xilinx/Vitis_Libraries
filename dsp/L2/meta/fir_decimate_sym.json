@@ -1,0 +1,171 @@
+{
+  "schema": "vitis_library_api_spec_schema-1.0",
+  "api_name": "xf::dsp::aie::fir::decimate_sym::fir_decimate_sym_graph",
+  "display_name": "fir_decimate_sym_graph",
+  "header_file_name": "fir_decimate_sym_graph.hpp",
+  "search_paths": [
+	"L1/include/aie",
+	"L1/src/aie",
+	"L1/tests/aie/inc",
+	"L1/tests/aie/src",
+	"L2/include/aie",
+	"L2/tests/aie/common/inc"
+  ],
+  "parameters": [
+    {
+      "name": "TT_DATA",
+      "description": "The type of individual data samples input to and output of the filter function",
+      "type": "typename",
+      "enum": [
+        "int16",
+        "cint16",
+        "int32",
+        "cint32",
+        "float",
+        "cfloat"
+      ]
+    },
+    {
+      "name": "TT_COEF",
+      "description": "The type of individual coefficients of the filter taps",
+      "type": "typename",
+      "enum": [
+        "int16",
+        "cint16",
+        "int32",
+        "cint32",
+        "float",
+        "cfloat"
+      ],
+      "validator": {
+        "file": "fir_decimate_sym.py",
+        "function": "validate_TT_COEF",
+        "args": ["TT_DATA"]
+      },
+      "updater": {
+        "file": "fir_decimate_sym.py",
+        "function": "update_TT_COEF",
+        "args": ["TT_DATA"]
+      }
+    },
+    {
+      "name": "TP_FIR_LEN",
+      "description": "The number of taps in the filter",
+      "type": "uint",
+      "minimum": 4,
+      "maximum": 8192,
+      "validator": {
+        "file": "fir_decimate_sym.py",
+        "function": "validate_TP_FIR_LEN",
+        "args": ["TT_DATA", "TT_COEF", "TP_DECIMATE_FACTOR","TP_CASC_LEN", "TP_API", "TP_USE_COEF_RELOAD", "TP_SSR"]
+      }
+    },
+    {
+      "name": "TP_DECIMATE_FACTOR",
+      "description": "The integer downsample rate of the filter",
+      "type": "uint",
+      "minimum": 2,
+      "maximum": 3,
+      "validator": {
+        "file": "fir_decimate_sym.py",
+        "function": "validate_TP_DECIMATE_FACTOR",
+        "args": ["TT_DATA", "TT_COEF", "TP_API"]
+      }
+    },
+    {
+      "name": "TP_SHIFT",
+      "description": "The power of 2 shift down applied to the accumulation of FIR before output",
+      "type": "uint",
+      "maximum": 80,
+      "minimum": 0,
+      "validator": {
+        "file": "fir_decimate_sym.py",
+        "function": "validate_TP_SHIFT",
+        "args": ["TT_DATA"]
+      }
+    },
+    {
+      "name": "TP_RND",
+      "description": "The rounding to be applied during the shift down stage of processing.",
+      "type": "uint",
+      "maximum": 7,
+      "minimum": 0
+    },
+    {
+      "name": "TP_INPUT_WINDOW_VSIZE",
+      "description": "The number of samples in the window PAI used for input to the filter function. The number of values in the output window will be TP_INPUT_WINDOW_VSIZE also by virtue the single rate nature of this function.",
+      "type": "uint",
+      "minimum": 4,
+      "validator": {
+        "file": "fir_decimate_sym.py",
+        "function": "validate_TP_INPUT_WINDOW_VSIZE",
+        "args": ["TT_DATA", "TT_COEF", "TP_FIR_LEN", "TP_DECIMATE_FACTOR", "TP_API", "TP_SSR"]
+      }
+    },
+    {
+      "name": "TP_CASC_LEN",
+      "description": "The length of the cascade chain.",
+      "type": "uint",
+      "minimum": 1,
+      "maximum": 40
+    },
+    {
+      "name": "TP_USE_COEF_RELOAD",
+      "description": "Selects Coefficient Reload Mode: 0 - no reload, 1 - RTP port based, 2 - Stream Header based.",
+      "type": "uint",
+      "maximum": 2,
+      "minimum": 0,
+      "validator": {
+        "file": "aie_common_fir.py",
+        "function": "validate_TP_USE_COEF_RELOAD_NON_SSR",
+        "args": ["TP_API"]
+        }                    
+    },
+    {
+      "name": "TP_NUM_OUTPUTS",
+      "description": "The number of output ports. Windows API output an exact copy of the data. Stream API interleaves the output data with a 128-bit pattern.",
+      "type": "uint",
+      "minimum": 1,
+      "maximum": 2
+    },
+    {
+      "name": "TP_DUAL_IP",
+      "description": "TP_DUAL_IP allows 2 stream inputs to be connected to FIR, increasing available throughput. When set to 0, single stream input will be connected to FIR kernel, when set to 1, both input stream ports will be used.",
+      "type": "uint",
+      "maximum": 1,
+      "minimum": 0
+    },
+    {
+      "name": "TP_API",
+      "description": "The form of IO: 0 for windows, 1 for streams",
+      "type": "uint",
+      "minimum": 0,
+      "maximum": 1
+    },
+    {
+      "name": "TP_SSR",
+      "description": "TP_SSR specifies the number of parallel input/output paths where samples are interleaved between paths, giving an overall higher throughput.",
+      "minimum": 1,
+      "type": "uint",
+      "validator": {
+        "file": "fir_decimate_sym.py",
+        "function": "validate_TP_SSR",
+        "args": ["TP_API", "TP_DECIMATE_FACTOR"]
+      }
+    },
+    {                       
+      "name": "coeff",
+      "description": "The filter coefficients.",
+      "element_type": "TT_COEF",
+      "type": "vector"
+    }
+  ],
+  "ports": {
+    "file": "fir_decimate_sym.py",
+    "function": "info_ports"
+  },
+  "generator": {
+    "file": "fir_decimate_sym.py",
+    "function": "generate_graph"
+  }
+}

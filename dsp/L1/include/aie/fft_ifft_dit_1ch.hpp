@@ -59,7 +59,8 @@ template <typename TT_DATA = cint16,
           unsigned int TP_START_RANK = 0,
           unsigned int TP_END_RANK = 8,
           unsigned int TP_DYN_PT_SIZE = 0,
-          unsigned int TP_WINDOW_VSIZE = TP_POINT_SIZE>
+          unsigned int TP_WINDOW_VSIZE = TP_POINT_SIZE,
+          unsigned int TP_ORIG_PAR_POWER = 0>
 class stockhamStages {
    private:
    public:
@@ -105,7 +106,8 @@ template <typename TT_DATA = cint16,
           unsigned int TP_START_RANK = 0,
           unsigned int TP_END_RANK = 8,
           unsigned int TP_DYN_PT_SIZE = 0,
-          unsigned int TP_WINDOW_VSIZE = TP_POINT_SIZE>
+          unsigned int TP_WINDOW_VSIZE = TP_POINT_SIZE,
+          unsigned int TP_ORIG_PAR_POWER = 0>
 class kernelFFTClass {
    private:
    public:
@@ -126,7 +128,8 @@ template <typename TT_DATA,
           unsigned int TP_START_RANK,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE>
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
 class kernelFFTClass<TT_DATA,
                      TT_OUT_DATA,
                      TT_TWIDDLE,
@@ -136,7 +139,8 @@ class kernelFFTClass<TT_DATA,
                      TP_START_RANK,
                      TP_END_RANK,
                      TP_DYN_PT_SIZE,
-                     TP_WINDOW_VSIZE> {
+                     TP_WINDOW_VSIZE,
+                     TP_ORIG_PAR_POWER> {
    public:
     typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
     stockhamStages<TT_DATA,
@@ -149,7 +153,8 @@ class kernelFFTClass<TT_DATA,
                    TP_START_RANK,
                    TP_END_RANK,
                    TP_DYN_PT_SIZE,
-                   TP_WINDOW_VSIZE>
+                   TP_WINDOW_VSIZE,
+                   TP_ORIG_PAR_POWER>
         stages;
     void kernelFFT(input_window<TT_DATA>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
 };
@@ -161,7 +166,8 @@ template <typename TT_DATA,
           unsigned int TP_START_RANK,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE>
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
 class kernelFFTClass<TT_DATA,
                      TT_OUT_DATA,
                      TT_TWIDDLE,
@@ -171,7 +177,8 @@ class kernelFFTClass<TT_DATA,
                      TP_START_RANK,
                      TP_END_RANK,
                      TP_DYN_PT_SIZE,
-                     TP_WINDOW_VSIZE> {
+                     TP_WINDOW_VSIZE,
+                     TP_ORIG_PAR_POWER> {
    public:
     typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
     stockhamStages<TT_DATA,
@@ -184,7 +191,8 @@ class kernelFFTClass<TT_DATA,
                    TP_START_RANK,
                    TP_END_RANK,
                    TP_DYN_PT_SIZE,
-                   TP_WINDOW_VSIZE>
+                   TP_WINDOW_VSIZE,
+                   TP_ORIG_PAR_POWER>
         stages;
     void kernelFFT(input_window<TT_DATA>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
 };
@@ -196,7 +204,8 @@ template <typename TT_DATA,
           unsigned int TP_START_RANK,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE>
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
 class kernelFFTClass<TT_DATA,
                      TT_OUT_DATA,
                      TT_TWIDDLE,
@@ -206,7 +215,8 @@ class kernelFFTClass<TT_DATA,
                      TP_START_RANK,
                      TP_END_RANK,
                      TP_DYN_PT_SIZE,
-                     TP_WINDOW_VSIZE> {
+                     TP_WINDOW_VSIZE,
+                     TP_ORIG_PAR_POWER> {
    public:
     typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
     stockhamStages<TT_DATA,
@@ -219,7 +229,8 @@ class kernelFFTClass<TT_DATA,
                    TP_START_RANK,
                    TP_END_RANK,
                    TP_DYN_PT_SIZE,
-                   TP_WINDOW_VSIZE>
+                   TP_WINDOW_VSIZE,
+                   TP_ORIG_PAR_POWER>
         stages;
     void kernelFFT(input_window<TT_DATA>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
 };
@@ -231,7 +242,8 @@ template <typename TT_DATA,
           unsigned int TP_START_RANK,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE>
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
 class kernelFFTClass<TT_DATA,
                      TT_OUT_DATA,
                      TT_TWIDDLE,
@@ -241,7 +253,8 @@ class kernelFFTClass<TT_DATA,
                      TP_START_RANK,
                      TP_END_RANK,
                      TP_DYN_PT_SIZE,
-                     TP_WINDOW_VSIZE> {
+                     TP_WINDOW_VSIZE,
+                     TP_ORIG_PAR_POWER> {
    public:
     typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
     stockhamStages<TT_DATA,
@@ -254,7 +267,8 @@ class kernelFFTClass<TT_DATA,
                    TP_START_RANK,
                    TP_END_RANK,
                    TP_DYN_PT_SIZE,
-                   TP_WINDOW_VSIZE>
+                   TP_WINDOW_VSIZE,
+                   TP_ORIG_PAR_POWER>
         stages;
     void kernelFFT(input_window<TT_DATA>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
 };
@@ -266,7 +280,8 @@ template <typename TT_DATA,
           unsigned int TP_START_RANK,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE>
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
 class kernelFFTClass<TT_DATA,
                      TT_OUT_DATA,
                      TT_TWIDDLE,
@@ -276,7 +291,8 @@ class kernelFFTClass<TT_DATA,
                      TP_START_RANK,
                      TP_END_RANK,
                      TP_DYN_PT_SIZE,
-                     TP_WINDOW_VSIZE> {
+                     TP_WINDOW_VSIZE,
+                     TP_ORIG_PAR_POWER> {
    public:
     typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
     stockhamStages<TT_DATA,
@@ -289,7 +305,8 @@ class kernelFFTClass<TT_DATA,
                    TP_START_RANK,
                    TP_END_RANK,
                    TP_DYN_PT_SIZE,
-                   TP_WINDOW_VSIZE>
+                   TP_WINDOW_VSIZE,
+                   TP_ORIG_PAR_POWER>
         stages;
     void kernelFFT(input_window<TT_DATA>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
 };
@@ -301,7 +318,8 @@ template <typename TT_DATA,
           unsigned int TP_START_RANK,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE>
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
 class kernelFFTClass<TT_DATA,
                      TT_OUT_DATA,
                      TT_TWIDDLE,
@@ -311,7 +329,8 @@ class kernelFFTClass<TT_DATA,
                      TP_START_RANK,
                      TP_END_RANK,
                      TP_DYN_PT_SIZE,
-                     TP_WINDOW_VSIZE> {
+                     TP_WINDOW_VSIZE,
+                     TP_ORIG_PAR_POWER> {
    public:
     typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
     stockhamStages<TT_DATA,
@@ -324,7 +343,8 @@ class kernelFFTClass<TT_DATA,
                    TP_START_RANK,
                    TP_END_RANK,
                    TP_DYN_PT_SIZE,
-                   TP_WINDOW_VSIZE>
+                   TP_WINDOW_VSIZE,
+                   TP_ORIG_PAR_POWER>
         stages;
     void kernelFFT(input_window<TT_DATA>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
 };
@@ -336,7 +356,8 @@ template <typename TT_DATA,
           unsigned int TP_START_RANK,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE>
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
 class kernelFFTClass<TT_DATA,
                      TT_OUT_DATA,
                      TT_TWIDDLE,
@@ -346,7 +367,8 @@ class kernelFFTClass<TT_DATA,
                      TP_START_RANK,
                      TP_END_RANK,
                      TP_DYN_PT_SIZE,
-                     TP_WINDOW_VSIZE> {
+                     TP_WINDOW_VSIZE,
+                     TP_ORIG_PAR_POWER> {
    public:
     typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
     stockhamStages<TT_DATA,
@@ -359,7 +381,8 @@ class kernelFFTClass<TT_DATA,
                    TP_START_RANK,
                    TP_END_RANK,
                    TP_DYN_PT_SIZE,
-                   TP_WINDOW_VSIZE>
+                   TP_WINDOW_VSIZE,
+                   TP_ORIG_PAR_POWER>
         stages;
 
     void kernelFFT(input_window<TT_DATA>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
@@ -372,7 +395,8 @@ template <typename TT_DATA,
           unsigned int TP_START_RANK,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE>
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
 class kernelFFTClass<TT_DATA,
                      TT_OUT_DATA,
                      TT_TWIDDLE,
@@ -382,7 +406,8 @@ class kernelFFTClass<TT_DATA,
                      TP_START_RANK,
                      TP_END_RANK,
                      TP_DYN_PT_SIZE,
-                     TP_WINDOW_VSIZE> {
+                     TP_WINDOW_VSIZE,
+                     TP_ORIG_PAR_POWER> {
    public:
     typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
     stockhamStages<TT_DATA,
@@ -395,7 +420,8 @@ class kernelFFTClass<TT_DATA,
                    TP_START_RANK,
                    TP_END_RANK,
                    TP_DYN_PT_SIZE,
-                   TP_WINDOW_VSIZE>
+                   TP_WINDOW_VSIZE,
+                   TP_ORIG_PAR_POWER>
         stages;
     void kernelFFT(input_window<TT_DATA>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
 };
@@ -408,7 +434,8 @@ template <typename TT_DATA,
           unsigned int TP_START_RANK,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE>
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
 class kernelFFTClass<TT_DATA,
                      TT_OUT_DATA,
                      TT_TWIDDLE,
@@ -418,7 +445,8 @@ class kernelFFTClass<TT_DATA,
                      TP_START_RANK,
                      TP_END_RANK,
                      TP_DYN_PT_SIZE,
-                     TP_WINDOW_VSIZE> {
+                     TP_WINDOW_VSIZE,
+                     TP_ORIG_PAR_POWER> {
    public:
     typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
     stockhamStages<TT_DATA,
@@ -431,7 +459,8 @@ class kernelFFTClass<TT_DATA,
                    TP_START_RANK,
                    TP_END_RANK,
                    TP_DYN_PT_SIZE,
-                   TP_WINDOW_VSIZE>
+                   TP_WINDOW_VSIZE,
+                   TP_ORIG_PAR_POWER>
         stages;
     void kernelFFT(input_window<TT_DATA>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
 };
@@ -444,7 +473,8 @@ template <typename TT_OUT_DATA,
           unsigned int TP_START_RANK,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE>
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
 class kernelFFTClass<cint16,
                      TT_OUT_DATA,
                      cint16,
@@ -454,7 +484,8 @@ class kernelFFTClass<cint16,
                      TP_START_RANK,
                      TP_END_RANK,
                      TP_DYN_PT_SIZE,
-                     TP_WINDOW_VSIZE> {
+                     TP_WINDOW_VSIZE,
+                     TP_ORIG_PAR_POWER> {
    public:
     typedef cint32_t T_internalDataType;
     stockhamStages<cint16,
@@ -467,7 +498,8 @@ class kernelFFTClass<cint16,
                    TP_START_RANK,
                    TP_END_RANK,
                    TP_DYN_PT_SIZE,
-                   TP_WINDOW_VSIZE>
+                   TP_WINDOW_VSIZE,
+                   TP_ORIG_PAR_POWER>
         stages;
 
     void kernelFFT(input_window<cint16>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
@@ -478,7 +510,8 @@ template <typename TT_OUT_DATA,
           unsigned int TP_START_RANK,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE>
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
 class kernelFFTClass<cint16,
                      TT_OUT_DATA,
                      cint16,
@@ -488,7 +521,8 @@ class kernelFFTClass<cint16,
                      TP_START_RANK,
                      TP_END_RANK,
                      TP_DYN_PT_SIZE,
-                     TP_WINDOW_VSIZE> {
+                     TP_WINDOW_VSIZE,
+                     TP_ORIG_PAR_POWER> {
    public:
     typedef cint32_t T_internalDataType;
     stockhamStages<cint16,
@@ -501,7 +535,8 @@ class kernelFFTClass<cint16,
                    TP_START_RANK,
                    TP_END_RANK,
                    TP_DYN_PT_SIZE,
-                   TP_WINDOW_VSIZE>
+                   TP_WINDOW_VSIZE,
+                   TP_ORIG_PAR_POWER>
         stages;
 
     void kernelFFT(input_window<cint16>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
@@ -512,7 +547,8 @@ template <typename TT_OUT_DATA,
           unsigned int TP_START_RANK,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE>
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
 class kernelFFTClass<cint16,
                      TT_OUT_DATA,
                      cint16,
@@ -522,7 +558,8 @@ class kernelFFTClass<cint16,
                      TP_START_RANK,
                      TP_END_RANK,
                      TP_DYN_PT_SIZE,
-                     TP_WINDOW_VSIZE> {
+                     TP_WINDOW_VSIZE,
+                     TP_ORIG_PAR_POWER> {
    public:
     typedef cint32_t T_internalDataType;
     stockhamStages<cint16,
@@ -535,7 +572,8 @@ class kernelFFTClass<cint16,
                    TP_START_RANK,
                    TP_END_RANK,
                    TP_DYN_PT_SIZE,
-                   TP_WINDOW_VSIZE>
+                   TP_WINDOW_VSIZE,
+                   TP_ORIG_PAR_POWER>
         stages;
 
     void kernelFFT(input_window<cint16>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
@@ -546,7 +584,8 @@ template <typename TT_OUT_DATA,
           unsigned int TP_START_RANK,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE>
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
 class kernelFFTClass<cint16,
                      TT_OUT_DATA,
                      cint16,
@@ -556,7 +595,8 @@ class kernelFFTClass<cint16,
                      TP_START_RANK,
                      TP_END_RANK,
                      TP_DYN_PT_SIZE,
-                     TP_WINDOW_VSIZE> {
+                     TP_WINDOW_VSIZE,
+                     TP_ORIG_PAR_POWER> {
    public:
     typedef cint32_t T_internalDataType;
     stockhamStages<cint16,
@@ -569,7 +609,8 @@ class kernelFFTClass<cint16,
                    TP_START_RANK,
                    TP_END_RANK,
                    TP_DYN_PT_SIZE,
-                   TP_WINDOW_VSIZE>
+                   TP_WINDOW_VSIZE,
+                   TP_ORIG_PAR_POWER>
         stages;
 
     void kernelFFT(input_window<cint16>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
@@ -580,7 +621,8 @@ template <typename TT_OUT_DATA,
           unsigned int TP_START_RANK,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE>
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
 class kernelFFTClass<cint16,
                      TT_OUT_DATA,
                      cint16,
@@ -590,7 +632,8 @@ class kernelFFTClass<cint16,
                      TP_START_RANK,
                      TP_END_RANK,
                      TP_DYN_PT_SIZE,
-                     TP_WINDOW_VSIZE> {
+                     TP_WINDOW_VSIZE,
+                     TP_ORIG_PAR_POWER> {
    public:
     typedef cint32_t T_internalDataType;
     stockhamStages<cint16,
@@ -603,7 +646,8 @@ class kernelFFTClass<cint16,
                    TP_START_RANK,
                    TP_END_RANK,
                    TP_DYN_PT_SIZE,
-                   TP_WINDOW_VSIZE>
+                   TP_WINDOW_VSIZE,
+                   TP_ORIG_PAR_POWER>
         stages;
 
     void kernelFFT(input_window<cint16>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
@@ -614,7 +658,8 @@ template <typename TT_OUT_DATA,
           unsigned int TP_START_RANK,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE>
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
 class kernelFFTClass<cint16,
                      TT_OUT_DATA,
                      cint16,
@@ -624,7 +669,8 @@ class kernelFFTClass<cint16,
                      TP_START_RANK,
                      TP_END_RANK,
                      TP_DYN_PT_SIZE,
-                     TP_WINDOW_VSIZE> {
+                     TP_WINDOW_VSIZE,
+                     TP_ORIG_PAR_POWER> {
    public:
     typedef cint32_t T_internalDataType;
     stockhamStages<cint16,
@@ -637,7 +683,8 @@ class kernelFFTClass<cint16,
                    TP_START_RANK,
                    TP_END_RANK,
                    TP_DYN_PT_SIZE,
-                   TP_WINDOW_VSIZE>
+                   TP_WINDOW_VSIZE,
+                   TP_ORIG_PAR_POWER>
         stages;
 
     void kernelFFT(input_window<cint16>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
@@ -648,7 +695,8 @@ template <typename TT_OUT_DATA,
           unsigned int TP_START_RANK,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE>
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
 class kernelFFTClass<cint16,
                      TT_OUT_DATA,
                      cint16,
@@ -658,7 +706,8 @@ class kernelFFTClass<cint16,
                      TP_START_RANK,
                      TP_END_RANK,
                      TP_DYN_PT_SIZE,
-                     TP_WINDOW_VSIZE> {
+                     TP_WINDOW_VSIZE,
+                     TP_ORIG_PAR_POWER> {
    public:
     typedef cint32_t T_internalDataType;
     stockhamStages<cint16,
@@ -671,7 +720,8 @@ class kernelFFTClass<cint16,
                    TP_START_RANK,
                    TP_END_RANK,
                    TP_DYN_PT_SIZE,
-                   TP_WINDOW_VSIZE>
+                   TP_WINDOW_VSIZE,
+                   TP_ORIG_PAR_POWER>
         stages;
 
     void kernelFFT(input_window<cint16>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
@@ -682,7 +732,8 @@ template <typename TT_OUT_DATA,
           unsigned int TP_START_RANK,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE>
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
 class kernelFFTClass<cint16,
                      TT_OUT_DATA,
                      cint16,
@@ -692,7 +743,8 @@ class kernelFFTClass<cint16,
                      TP_START_RANK,
                      TP_END_RANK,
                      TP_DYN_PT_SIZE,
-                     TP_WINDOW_VSIZE> {
+                     TP_WINDOW_VSIZE,
+                     TP_ORIG_PAR_POWER> {
    public:
     typedef cint32_t T_internalDataType;
     stockhamStages<cint16,
@@ -705,7 +757,8 @@ class kernelFFTClass<cint16,
                    TP_START_RANK,
                    TP_END_RANK,
                    TP_DYN_PT_SIZE,
-                   TP_WINDOW_VSIZE>
+                   TP_WINDOW_VSIZE,
+                   TP_ORIG_PAR_POWER>
         stages;
 
     void kernelFFT(input_window<cint16>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
@@ -717,7 +770,8 @@ template <typename TT_OUT_DATA,
           unsigned int TP_START_RANK,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE>
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
 class kernelFFTClass<cint16,
                      TT_OUT_DATA,
                      cint16,
@@ -727,7 +781,8 @@ class kernelFFTClass<cint16,
                      TP_START_RANK,
                      TP_END_RANK,
                      TP_DYN_PT_SIZE,
-                     TP_WINDOW_VSIZE> {
+                     TP_WINDOW_VSIZE,
+                     TP_ORIG_PAR_POWER> {
    public:
     typedef cint32_t T_internalDataType;
     stockhamStages<cint16,
@@ -740,7 +795,8 @@ class kernelFFTClass<cint16,
                    TP_START_RANK,
                    TP_END_RANK,
                    TP_DYN_PT_SIZE,
-                   TP_WINDOW_VSIZE>
+                   TP_WINDOW_VSIZE,
+                   TP_ORIG_PAR_POWER>
         stages;
 
     void kernelFFT(input_window<cint16>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
@@ -757,7 +813,8 @@ template <typename TT_DATA, // input
           unsigned int TP_START_RANK,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE = TP_POINT_SIZE>
+          unsigned int TP_WINDOW_VSIZE = TP_POINT_SIZE,
+          unsigned int TP_ORIG_PAR_POWER = 0>
 class fft_ifft_dit_1ch {
    private:
     // Parameter value defensive and legality checks
@@ -786,7 +843,8 @@ class fft_ifft_dit_1ch {
                    TP_START_RANK,
                    TP_END_RANK,
                    TP_DYN_PT_SIZE,
-                   TP_WINDOW_VSIZE>
+                   TP_WINDOW_VSIZE,
+                   TP_ORIG_PAR_POWER>
         m_fftKernel; // Kernel for FFT
 
    public:

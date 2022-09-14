@@ -21,9 +21,9 @@ the FIR_RESAMPLER library element.
 
 #include <adf.h>
 #include <vector>
-#include "graph_utils.hpp"
+#include "fir_graph_utils.hpp"
 #include <tuple>
-
+#include "fir_common_traits.hpp"
 #include "fir_resampler.hpp"
 namespace xf {
 namespace dsp {
@@ -599,9 +599,10 @@ class fir_resampler_graph : public graph {
             source(m_firKernels[i]) = "fir_resampler.cpp";
         }
     }
-    kernel m_firKernels[TP_CASC_LEN];
 
    public:
+    kernel m_firKernels[TP_CASC_LEN];
+
     /**
      * The input data to the function. This input is either a window API of
      * samples of TT_DATA type or stream API (depending on TP_API).
@@ -725,6 +726,36 @@ class fir_resampler_graph : public graph {
                            TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS,
                            TP_DUAL_IP, TP_API>::create(m_firKernels);
         create_connections();
+    };
+
+    template <unsigned int T_API, typename T_D>
+    static constexpr unsigned int fnGetMaxTapsPerKernel() {
+        if
+            constexpr(T_API == 0) { return 256; }
+        else {
+            constexpr unsigned int m_kSamplesInBuff = fnSamplesIn1024<T_D>();
+            constexpr unsigned int m_kDataLoadVsize = (32 / sizeof(T_D));
+            return m_kSamplesInBuff - m_kDataLoadVsize;
+        }
+    }
+
+    template <typename T_D, typename T_C, int T_PORTS>
+    static constexpr unsigned int fnGetOptTapsPerKernel() {
+        unsigned int optTaps = fnGetOptTapsPerKernelSrAsym<T_D, T_C, T_PORTS>();
+        return optTaps;
+    };
+
+    template <int T_FIR_LEN, int T_API, typename T_D, unsigned int T_IF, unsigned int T_DF>
+    static constexpr unsigned int fnGetMinCascLen() {
+        constexpr int kMaxTaps = fnGetMaxTapsPerKernel<T_API, T_D>();
+        return getMinCascLen<(T_FIR_LEN * T_DF / T_IF), kMaxTaps>();
+    };
+
+    template <int T_FIR_LEN, typename T_D, typename T_C, int T_API, int T_PORTS, unsigned int T_IF, unsigned int T_DF>
+    static constexpr unsigned int fnGetOptCascLen() {
+        constexpr int kMaxTaps = fnGetMaxTapsPerKernel<T_API, T_D>();
+        constexpr int kRawOptTaps = fnGetOptTapsPerKernel<T_D, T_C, T_PORTS>();
+        return getOptCascLen<kMaxTaps, kRawOptTaps, (T_FIR_LEN * T_DF / T_IF)>();
     };
 };
 }

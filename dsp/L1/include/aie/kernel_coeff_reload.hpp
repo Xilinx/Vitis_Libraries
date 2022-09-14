@@ -14,8 +14,8 @@
  */
 #pragma once
 
-#ifndef _DSPLIB_KERNEL_RTP_RELOAD_HPP_
-#define _DSPLIB_KERNEL_RTP_RELOAD_HPP_
+#ifndef _DSPLIB_KERNEL_COEFF_RELOAD_HPP_
+#define _DSPLIB_KERNEL_COEFF_RELOAD_HPP_
 
 #ifndef INLINE_DECL
 #define INLINE_DECL inline __attribute__((always_inline))
@@ -24,17 +24,10 @@
 #define NOINLINE_DECL inline __attribute__((noinline))
 #endif
 
-// This file holds sets of templated types and overloaded (or template specialized) functions
-// for use by multiple kernels.
-// Functions in this file as a rule use intrinsics from a single set. For instance, a set
-// may contain a MAC with pre-add which uses a single 1024 bit buffer for both forward
-// and reverse data. In cases where a library element has to use an intrinsic which differs
-// by more than the types used for some combinations of library element parameter types
-// then the set of templatized functions will be particular to that library element and should
-// therefore be in <library_element>_utils.hpp
-
 #include <stdio.h>
 #include <adf.h>
+
+// #define _DSPLIB_KERNEL_COEFF_RELOAD_HPP_DEBUG_
 
 namespace xf {
 namespace dsp {
@@ -181,6 +174,12 @@ INLINE_DECL void bufferReload(T_inputIF<CASC_OUT_TRUE, TT_DATA, TP_DUAL_IP> inIn
     bufferReload<TT_COEFF, TP_FIR_LEN>(inInterface.inCascade, outTaps);
 }
 
+// Wrapper. Overloaded with IO interface.
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_FIR_LEN, unsigned int TP_DUAL_IP = 0>
+INLINE_DECL void bufferReload(T_inputIF<CASC_OUT_TRUE, TT_DATA, TP_DUAL_IP> inInterface, TT_COEFF* outTaps) {
+    bufferReload<TT_COEFF, TP_FIR_LEN>(inInterface.in, outTaps);
+}
+
 // sendRtpTrigger
 template <typename TT_DATA>
 INLINE_DECL void sendRtpTrigger(bool updateRtp, T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface) {
@@ -269,8 +268,54 @@ INLINE_DECL bool rtpCompare(const TT_COEFF (&inTaps)[TP_FIR_LEN], TT_COEFF* oldT
         }
     return coeffnEq == 0 ? 0 : 1;
 }
+
+// Read 256-bits of header data from the stream(s).
+//
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_FIR_LEN_SSR, unsigned int TP_DUAL_IP, bool TP_CASC_IN>
+NOINLINE_DECL void bufferReloadSSR(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface, TT_COEFF* taps) {
+    T_buff_256b<TT_DATA> buff;
+    T_buff_256b<TT_COEFF> coeffBuff;
+    T_buff_256b<TT_COEFF>* __restrict outTapsPtr = (T_buff_256b<TT_COEFF>*)taps;
+    const int dataSamplesPer256Buff = 256 / 8 / sizeof(TT_DATA);
+    const int coeffSamplesPer256Buff = 256 / 8 / sizeof(TT_COEFF);
+
+    for (int i = 0; i < CEIL(TP_FIR_LEN_SSR, coeffSamplesPer256Buff); i += coeffSamplesPer256Buff) {
+        // copy 256-bit vector from input stream to memory location and output cascade
+        // implement a vector based version of firReload.
+        readStream256(buff, 0, inInterface);
+        // coeffBuff.val = buff.val.template cast_to<TT_COEFF>();
+        // *outTapsPtr++ = coeffBuff;
+        outTapsPtr->val = buff.val.template cast_to<TT_COEFF>();
+        outTapsPtr++;
+    }
+}
+// Read out stream Header Config WORD and check if Coefficient set is appended to it
+//
+template <unsigned int TP_API,
+          unsigned int TP_USE_COEFF_RELOAD,
+          bool TP_CASC_IN,
+          typename TT_DATA,
+          unsigned int TP_DUAL_IP = 0>
+INLINE_DECL bool checkHeaderForUpdate(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface) {
+    bool updateNotRequired = false;
+    bool ret;
+    T_buff_256b<TT_DATA> buff = null_buff_256b<TT_DATA>();
+    T_buff_256b<TT_DATA> nullBuff = null_buff_256b<TT_DATA>();
+    T_buff_256b<int32> headerConfig;
+    if
+        constexpr(TP_API == USE_STREAM_API && TP_USE_COEFF_RELOAD == 2) {
+            readStream256(buff, 0, inInterface);
+            // at this point, just check if non-zero.
+            // ret = ne16(buff.val, nullBuff.val);
+            ret = ::aie::not_equal(buff.val, nullBuff.val);
+        }
+    else {
+        ret = updateNotRequired;
+    }
+    return ret;
+}
 }
 }
 }
 } // namespaces
-#endif // _DSPLIB_KERNEL_RTP_RELOAD_HPP_
+#endif // _DSPLIB_KERNEL_COEFF_RELOAD_HPP_

@@ -25,10 +25,27 @@ xf::dsp::aie::testcase::test_graph filter;
 int main(void) {
     filter.init();
 #if (USE_COEFF_RELOAD == 1)
-    filter.update(filter.coeff, filter.m_taps[0], (FIR_LEN + 1) / 2);
+    // SSR configs call asym kernels, that require asym taps
+    COEFF_TYPE tapsAsym[FIR_LEN];
+#if (P_SSR > 1)
+    xf::dsp::aie::convert_sym_taps_to_asym(tapsAsym, FIR_LEN, filter.m_taps[0]);
+    for (int i = 0; i < P_SSR; i++) {
+        filter.update(filter.coeff[i], tapsAsym, FIR_LEN);
+    }
+#else
+    filter.update(filter.coeff[0], filter.m_taps[0], (FIR_LEN + 1) / 2);
+#endif
     filter.run(NITER / 2);
     filter.wait();
-    filter.update(filter.coeff, filter.m_taps[1], (FIR_LEN + 1) / 2);
+#if (P_SSR > 1)
+    xf::dsp::aie::convert_sym_taps_to_asym(tapsAsym, FIR_LEN, filter.m_taps[1]);
+    for (int i = 0; i < P_SSR; i++) {
+        filter.update(filter.coeff[i], tapsAsym, FIR_LEN);
+    }
+#else
+    filter.update(filter.coeff[0], filter.m_taps[1], (FIR_LEN + 1) / 2);
+#endif
+
     filter.run(NITER / 2);
 #else
     filter.run(NITER);

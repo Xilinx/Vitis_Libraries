@@ -26,10 +26,14 @@ int main(void) {
     filter.init();
 
 #if (USE_COEFF_RELOAD == 1)
-    filter.update(filter.coeff, filter.m_taps[0], FIR_LEN);
+    for (int i = 0; i < P_SSR; i++) {
+        filter.update(filter.coeff[i], filter.m_taps[0], FIR_LEN);
+    }
     filter.run(NITER / 2);
     filter.wait();
-    filter.update(filter.coeff, filter.m_taps[1], FIR_LEN);
+    for (int i = 0; i < P_SSR; i++) {
+        filter.update(filter.coeff[i], filter.m_taps[1], FIR_LEN);
+    }
     filter.run(NITER / 2);
 #else
     filter.run(NITER);

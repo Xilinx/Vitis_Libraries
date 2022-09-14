@@ -135,6 +135,43 @@ INLINE_DECL constexpr unsigned int fnVOutSizeDecAsym() {
     return fnNumLanesDecAsym<TT_DATA, TT_COEFF>();
 };
 
+template <unsigned int TP_DECIMATE_FACTOR,
+          unsigned int m_kLanes,
+          unsigned int streamInitNullAccs,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int dataOffsetNthKernel,
+          unsigned int m_kStreamLoadVsize,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int m_kFirRangeOffset,
+          unsigned int m_kFirRangeOffsetLastKernel>
+INLINE_DECL constexpr unsigned int getInitDataNeeded() {
+    constexpr int dataNeededLastKernel =
+        1 + TP_DECIMATE_FACTOR * (m_kLanes - 1) + (streamInitNullAccs * TP_DECIMATE_FACTOR * m_kLanes);
+    constexpr unsigned int kMinDataNeeded = (TP_MODIFY_MARGIN_OFFSET + dataNeededLastKernel - dataOffsetNthKernel);
+    constexpr unsigned int kMinDataLoaded = CEIL(kMinDataNeeded, m_kStreamLoadVsize);
+    constexpr unsigned int kMinDataLoadCycles = kMinDataLoaded / m_kStreamLoadVsize;
+    constexpr unsigned int m_kInitDataNeededNoCasc = TP_FIR_RANGE_LEN - 1 + kMinDataLoadCycles * m_kStreamLoadVsize;
+    // when kernels are cascaded, the starting data is offset by a certain amount for all kernels except the last.
+    // The data register needs to accommodate this offset data as well.
+    constexpr unsigned int m_kInitDataNeeded =
+        m_kInitDataNeededNoCasc +
+        (m_kFirRangeOffsetLastKernel - m_kFirRangeOffset - streamInitNullAccs * TP_DECIMATE_FACTOR * m_kLanes);
+    return m_kInitDataNeeded;
+}
+
+template <unsigned int TP_FIR_LEN, unsigned int TP_FIR_RANGE_LEN, unsigned int m_kFirRangeOffset>
+INLINE_DECL constexpr unsigned int getDataOffset() {
+    constexpr int dataOffsetNthKernel = (TP_FIR_LEN - TP_FIR_RANGE_LEN - m_kFirRangeOffset);
+    return dataOffsetNthKernel;
+}
+
+template <unsigned int dataOffsetNthKernel, unsigned int TP_DECIMATE_FACTOR, unsigned int m_kVOutSize>
+INLINE_DECL constexpr unsigned int getInitNullAccs() {
+    constexpr int emptyInitLanes = CEIL(dataOffsetNthKernel, TP_DECIMATE_FACTOR) / TP_DECIMATE_FACTOR;
+    constexpr int streamInitNullAccs =
+        emptyInitLanes / m_kVOutSize; // Number of Null Mac Vectors sent as partial prouducts over cascade.
+    return streamInitNullAccs;
+}
 // Function to return Lsize - the number of interations required to cover the input window.
 template <unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_DECIMATE_FACTOR, unsigned int m_kVOutSize>
 INLINE_DECL constexpr unsigned int fnLsize() {
@@ -163,6 +200,20 @@ template <>
 INLINE_DECL constexpr unsigned int fnMaxXoffsetRange<cfloat>() {
     return 8;
 };
+
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_DECIMATE_FACTOR>
+static constexpr unsigned int getStreamReadWidth() {
+    // constexpr unsigned int  StreamReadWidth    = fnStreamReadWidth<TT_DATA, TT_COEFF>();
+    constexpr unsigned int StreamReadWidth =
+        (TP_DECIMATE_FACTOR % 2 == 0) ? 256 : fnStreamReadWidth<TT_DATA, TT_COEFF>();
+    return StreamReadWidth;
+}
+
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_DECIMATE_FACTOR>
+static constexpr unsigned int getKernelStreamLoadVsize() {
+    constexpr unsigned int StreamReadWidth = getStreamReadWidth<TT_DATA, TT_COEFF, TP_DECIMATE_FACTOR>();
+    return (StreamReadWidth / 8 / sizeof(TT_DATA));
+}
 }
 }
 }

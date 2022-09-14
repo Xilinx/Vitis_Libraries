@@ -25,10 +25,11 @@ the Single Rate Asymmetrical FIR library element.
 
 #include <adf.h>
 #include <vector>
-#include "graph_utils.hpp"
+#include "fir_graph_utils.hpp"
 #include <tuple>
 #include <typeinfo>
 #include "fir_sr_asym.hpp"
+#include "fir_common_traits.hpp"
 #include "fir_utils.hpp"
 
 namespace xf {
@@ -40,327 +41,6 @@ using namespace adf;
 
 // empty struct for conditional ports using type alias
 struct empty {};
-
-//---------------------------------------------------------------------------------------------------
-// create_casc_kernel_recur
-// Where the FIR function is split over multiple processors to increase throughput, recursion
-// is used to generate the multiple kernels, rather than a for loop due to constraints of
-// c++ template handling.
-// For each such kernel, only a splice of the full array of coefficients is processed.
-//---------------------------------------------------------------------------------------------------
-/**
-  * @cond NOCOMMENTS
-  */
-// Recursive kernel creation, static/reloadable coefficients
-template <int dim,
-          typename TT_DATA,
-          typename TT_COEFF,
-          unsigned int TP_FIR_LEN,
-          unsigned int TP_SHIFT,
-          unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_CASC_LEN,
-          unsigned int TP_USE_COEFF_RELOAD = 0,
-          unsigned int TP_NUM_OUTPUTS = 1,
-          unsigned int TP_DUAL_IP = 0,
-          unsigned int TP_API = 0,
-          bool TP_CASC_IN = CASC_IN_FALSE,
-          bool TP_CASC_OUT = CASC_OUT_FALSE,
-          int TP_MODIFY_MARGIN_OFFSET = 0>
-class casc_kernels {
-   private:
-    static_assert(dim >= 0, "ERROR: dim must be a positive integer");
-    static constexpr bool casc_in = (TP_CASC_IN || (dim == 0 ? false : true));
-    static constexpr bool casc_out = (TP_CASC_OUT || (dim == (TP_CASC_LEN - 1) ? false : true));
-    static constexpr unsigned int firRangeAsym =
-        (dim == (TP_CASC_LEN - 1)) ? fnFirRangeRemAsym<TP_FIR_LEN, TP_CASC_LEN, dim, TT_DATA, TT_COEFF, TP_API>()
-                                   : // last Kernel gets remainder taps
-            fnFirRangeAsym<TP_FIR_LEN, TP_CASC_LEN, dim, TT_DATA, TT_COEFF, TP_API>();
-
-    // Kernels with cascade out only have one output.
-    static constexpr unsigned int numOutputs = (casc_out) ? 1 : TP_NUM_OUTPUTS;
-
-   public:
-    using kernelClass = fir_sr_asym<TT_DATA,                // TT_DATA
-                                    TT_COEFF,               // TT_COEFF
-                                    TP_FIR_LEN,             // TP_FIR_LEN
-                                    TP_SHIFT,               // TP_SHIFT
-                                    TP_RND,                 // TP_RND
-                                    TP_INPUT_WINDOW_VSIZE,  // TP_INPUT_WINDOW_VSIZE
-                                    casc_in,                // TP_CASC_IN
-                                    casc_out,               // TP_CASC_OUT
-                                    firRangeAsym,           // TP_FIR_RANGE_LEN
-                                    dim,                    // TP_KERNEL_POSITION
-                                    TP_CASC_LEN,            // TP_CASC_LEN
-                                    TP_USE_COEFF_RELOAD,    // TP_USE_COEFF_RELOAD
-                                    numOutputs,             // TP_NUM_OUTPUTS
-                                    TP_DUAL_IP,             // TP_DUAL_IP
-                                    TP_API,                 // TP_API
-                                    TP_MODIFY_MARGIN_OFFSET // TP_MODIFY_MARGIN_OFFSET
-                                    >;
-    // convenient alias to access any class; casc_kernels_class_lookup<3>::kernelClass gives us the underlying kernel
-    // class of the 4th kernel (where the 1st is at index 0).
-    template <int dim_idx>
-    using casc_kernels_class_lookup = casc_kernels<dim_idx,
-                                                   TT_DATA,
-                                                   TT_COEFF,
-                                                   TP_FIR_LEN,
-                                                   TP_SHIFT,
-                                                   TP_RND,
-                                                   TP_INPUT_WINDOW_VSIZE,
-                                                   TP_CASC_LEN,
-                                                   TP_USE_COEFF_RELOAD,
-                                                   TP_NUM_OUTPUTS,
-                                                   TP_DUAL_IP,
-                                                   TP_API,
-                                                   TP_CASC_IN,
-                                                   TP_CASC_OUT,
-                                                   TP_MODIFY_MARGIN_OFFSET>;
-
-    using type = casc_kernels_class_lookup<dim>;                                                            // thisClass
-    using recurseClass = typename std::conditional_t<(dim > 0), casc_kernels_class_lookup<dim - 1>, empty>; // nextClass
-
-    static void create_and_recurse(kernel firKernels[TP_CASC_LEN], const std::vector<TT_COEFF>& taps) {
-        printf(
-            "Creating: fir_sr_asym<\n\tDATA, \tCOEFF, \tTP_FIR_LEN %d, \tTP_SHIFT %d, \tTP_RND %d, "
-            "\tTP_INPUT_WINDOW_VSIZE %d, \tcasc_in %d, \tcasc_out %d, \tfirRangeAsym %d, \tdim %d, \tTP_CASC_LEN %d, "
-            "\tTP_USE_COEFF_RELOAD %d, \tnumOutputs %d, \tTP_DUAL_IP %d, \tTP_API %d, \tTP_MODIFY_MARGIN_OFFSET %d "
-            "\n>\n",
-            TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, casc_in, casc_out, firRangeAsym, dim, TP_CASC_LEN,
-            TP_USE_COEFF_RELOAD, numOutputs, TP_DUAL_IP, TP_API, TP_MODIFY_MARGIN_OFFSET);
-
-        firKernels[dim] = kernel::create_object<kernelClass>(taps);
-        if
-            constexpr(dim != 0) { recurseClass::create_and_recurse(firKernels, taps); }
-    }
-    static void create_and_recurse(kernel firKernels[TP_CASC_LEN]) {
-        firKernels[dim] = kernel::create_object<kernelClass>();
-        if
-            constexpr(dim != 0) { recurseClass::create_and_recurse(firKernels); }
-    }
-};
-
-#ifndef COEFF_DATA_ALIGNMENT
-#define COEFF_DATA_ALIGNMENT 1 // data
-#endif
-
-template <int dim,
-          typename TT_DATA,
-          typename TT_COEFF,
-          unsigned int TP_FIR_LEN,
-          unsigned int TP_SHIFT,
-          unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_CASC_LEN,
-          unsigned int TP_USE_COEFF_RELOAD = 0,
-          unsigned int TP_NUM_OUTPUTS = 1,
-          unsigned int TP_DUAL_IP = 0,
-          unsigned int TP_API = 0,
-          unsigned int TP_SSR = 1,
-          bool TP_CASC_IN = CASC_IN_FALSE,
-          bool TP_CASC_OUT = CASC_OUT_FALSE>
-class ssr_kernels {
-   private:
-    static_assert(dim >= 0, "ERROR: dim must be a positive integer");
-
-   public:
-    static constexpr unsigned int totalKernels = TP_CASC_LEN * TP_SSR * TP_SSR;
-    static constexpr unsigned int ssrOutputPath = (dim / TP_SSR);
-    static constexpr unsigned int ssrInnerPhase = (dim % TP_SSR);
-
-    static constexpr unsigned int getSSRDataPhase(unsigned int ssrOutputPath,
-                                                  unsigned int ssrInnerPhase,
-                                                  unsigned int SSR) {
-        if (COEFF_DATA_ALIGNMENT == 0) {
-            // aligned by coefficients
-            return (ssrOutputPath + (SSR - ssrInnerPhase)) % SSR;
-        } else {
-            // aligned by data (preferred for data deadlock/backpressure)
-            return (ssrInnerPhase) % SSR;
-        }
-    }
-    static constexpr unsigned int getSSRCoeffPhase(unsigned int ssrOutputPath,
-                                                   unsigned int ssrInnerPhase,
-                                                   unsigned int SSR) {
-        if (COEFF_DATA_ALIGNMENT == 0) {
-            // aligned by coefficients
-            return (ssrInnerPhase) % SSR;
-        } else {
-            // aligned by data (preferred for data deadlock/backpressure)
-            return (ssrOutputPath + (SSR - ssrInnerPhase)) % SSR;
-        }
-    }
-    // aligned by coefficients
-    static constexpr unsigned int ssrDataPhase = getSSRDataPhase(ssrOutputPath, ssrInnerPhase, TP_SSR);
-    static constexpr unsigned int ssrCoeffPhase = getSSRCoeffPhase(ssrOutputPath, ssrInnerPhase, TP_SSR);
-
-    static constexpr unsigned int FIR_LEN_SSR_RANGE = (TP_FIR_LEN / TP_SSR); // to be ceiled or something
-    static constexpr unsigned int getKernelStartingIndex(unsigned int ssrDataPhase,
-                                                         unsigned int ssrOutputPath,
-                                                         unsigned int SSR,
-                                                         unsigned int CASCADE_LENGTH) {
-        return ssrDataPhase * CASCADE_LENGTH + ssrOutputPath * SSR * CASCADE_LENGTH;
-    }
-    static constexpr unsigned int kernelStartingIndex =
-        getKernelStartingIndex(ssrDataPhase, ssrOutputPath, TP_SSR, TP_CASC_LEN);
-
-    /** SSR 4 Example why we need margin offset.
-     * numbers are data indexes contributing at each ssr kernel.
-     * Small example of 8 taps fir_len.
-     *
-     * Y0
-     *  0 -4
-     * -1 -5  := starting sample is margin sample, so needs MARGIN_OFFSET_MODIFY
-     * -2 -6  := starting sample is margin sample, so needs MARGIN_OFFSET_MODIFY
-     * -3 -7  := starting sample is margin sample, so needs MARGIN_OFFSET_MODIFY
-     *
-     * Y1
-     *  1 -3
-     *  0 -4
-     * -1 -5  := starting sample is margin sample, so needs MARGIN_OFFSET_MODIFY
-     * -2 -6  := starting sample is margin sample, so needs MARGIN_OFFSET_MODIFY
-     *
-     * Y2
-     *  2 -2
-     *  1 -3
-     *  0 -4
-     * -1 -5  := starting sample is margin sample, so needs MARGIN_OFFSET_MODIFY
-     *
-     * Y3
-     *  3 -1
-     *  2 -2
-     *  1 -3
-     *  0 -4
-     *
-     *
-     * We always only need a -1 margin offset, and we always have at least one spare margin sample
-     * because we request FIR_LEN margin samples rather than FIR_LEN-1 margin samples.
-     */
-    static constexpr int MODIFY_MARGIN_OFFSET = (ssrOutputPath < ssrDataPhase) ? -1 : 0;
-
-    /**
-     * @brief Seperate taps into a specific SSR phase.
-     *    Phase 0 contains taps index 0, TP_SSR, 2*TP_SSR, ...
-     *    Phase 1 contains taps index 1, TP_SSR+1, 2*TP_SSR+1, ...
-     *    ...
-     *    Phase TP_SSR-1 contains taps index TP_SSR-1, TP_SSR+TP_SSR-1, 2*TP_SSR+TP_SSR-1, ...
-     *
-     * @param taps
-     * @return std::array<std::vector<TT_COEFF>, TP_SSR>
-     */
-    static std::vector<TT_COEFF> segment_taps_array_for_phase(const std::vector<TT_COEFF>& taps,
-                                                              const unsigned int coeffPhase) {
-        // https://stackoverflow.com/a/421615
-        typename std::vector<TT_COEFF>::const_iterator firstTap = taps.begin() + FIR_LEN_SSR_RANGE * coeffPhase;
-        typename std::vector<TT_COEFF>::const_iterator lastTap = firstTap + FIR_LEN_SSR_RANGE;
-        std::vector<TT_COEFF> ssrTapsRange; //
-        for (unsigned int i = 0; i < FIR_LEN_SSR_RANGE; i++) {
-            unsigned int coefIndex = i * TP_SSR + coeffPhase;
-            if (coefIndex < TP_FIR_LEN) {
-                ssrTapsRange.push_back(taps.at(coefIndex));
-
-            } else {
-                // padding
-                ssrTapsRange.push_back(nullElem<TT_COEFF>());
-            }
-        }
-
-        //(firstTap, lastTap);
-
-        return ssrTapsRange;
-    }
-
-    template <int ssr_kernel_idx>
-    using ssr_kernels_lookup = ssr_kernels<ssr_kernel_idx,
-                                           TT_DATA,
-                                           TT_COEFF,
-                                           TP_FIR_LEN,
-                                           TP_SHIFT,
-                                           TP_RND,
-                                           TP_INPUT_WINDOW_VSIZE,
-                                           TP_CASC_LEN,
-                                           TP_USE_COEFF_RELOAD,
-                                           TP_NUM_OUTPUTS,
-                                           TP_DUAL_IP,
-                                           TP_API,
-                                           TP_SSR,
-                                           TP_CASC_IN,
-                                           TP_CASC_OUT>;
-    using this_ssr_kernel = ssr_kernels_lookup<dim>;
-
-    // middle kernels connect to eachother.
-    static constexpr bool casc_in = (ssrInnerPhase == 0) ? (false || TP_CASC_IN) : true; // first kernel of output phase
-    static constexpr bool casc_out =
-        (ssrInnerPhase == TP_SSR - 1) ? (false || TP_CASC_OUT) : true; // last kernel of output phase
-
-    using this_casc_kernels =
-        casc_kernels<TP_CASC_LEN - 1, // dim
-                     TT_DATA,
-                     TT_COEFF,
-                     TP_FIR_LEN / TP_SSR, // each cascade kernel chain processes a specific phase of coefficients
-                     TP_SHIFT,
-                     TP_RND,
-                     TP_INPUT_WINDOW_VSIZE,
-                     TP_CASC_LEN,
-                     TP_USE_COEFF_RELOAD,
-                     TP_NUM_OUTPUTS,
-                     TP_DUAL_IP,
-                     TP_API,
-                     casc_in,  // TP_CASC_IN,
-                     casc_out, // TP_CASC_OUT,
-                     MODIFY_MARGIN_OFFSET>;
-
-    // avoid any reference to a ssr_kernels_lookup<-1>;
-    using next_ssr_kernel = typename std::conditional_t<(dim > 0), ssr_kernels_lookup<dim - 1>, empty>;
-
-    static void create_and_recurse(kernel (&firKernels)[totalKernels], const std::vector<TT_COEFF>& taps) {
-        // only pass a subset of the taps to the casc_kernels, and have it treat that as it normally would.
-        std::vector<TT_COEFF> ssrPhaseTaps(segment_taps_array_for_phase(taps, ssrCoeffPhase));
-        if
-            constexpr(dim == (TP_SSR * TP_SSR) - 1) {
-                printf(
-                    "m_firKernels[range] corresponds to ssrOutputPath,ssrInnerPhase D(ssrDataPhase) C(ssrCoeffPhase) "
-                    ":\n");
-            }
-        printf("m_firKernels[%d:%d] = %d,%d D(%d) C(%d) \n", kernelStartingIndex, kernelStartingIndex + TP_CASC_LEN - 1,
-               ssrOutputPath, ssrInnerPhase, ssrDataPhase, ssrCoeffPhase);
-        // pass the kernels from a specific index so cascades can be placed as normal.
-        this_casc_kernels::create_and_recurse(firKernels + kernelStartingIndex, ssrPhaseTaps);
-
-        if
-            constexpr(dim > 0) next_ssr_kernel::create_and_recurse(firKernels, taps);
-    }
-
-    static void create_and_recurse(kernel (&firKernels)[totalKernels]) {
-        // pass the kernels from a specific index so cascades can be placed as "normal" from that position.
-        this_casc_kernels::create_and_recurse(firKernels + kernelStartingIndex);
-
-        if
-            constexpr(dim > 0) next_ssr_kernel::create_and_recurse(firKernels);
-    }
-
-    /**
-     * @brief Seperate taps into an SSR number of phases. Used for debug / holistic view
-     *    Phase 0 contains taps index 0, TP_SSR, 2*TP_SSR, ...
-     *    Phase 1 contains taps index 1, TP_SSR+1, 2*TP_SSR+1, ...
-     *    ...
-     *    Phase TP_SSR-1 contains taps index TP_SSR-1, TP_SSR+TP_SSR-1, 2*TP_SSR+TP_SSR-1, ...
-     *
-     * @param taps
-     * @return std::array<std::vector<TT_COEFF>, TP_SSR>
-     */
-    static std::array<std::vector<TT_COEFF>, TP_SSR> segment_taps_array(const std::vector<TT_COEFF>& taps) {
-        std::array<std::vector<TT_COEFF>, TP_SSR> ssrTapsArray;
-        for (unsigned int ssrCoeffPhase = 0; ssrCoeffPhase < TP_SSR; ssrCoeffPhase++) {
-            std::vector<TT_COEFF> ssrTapsRange(segment_taps_array_for_phase(taps, ssrCoeffPhase));
-
-            ssrTapsArray[ssrCoeffPhase].insert(ssrTapsArray[ssrCoeffPhase].end(), ssrTapsRange.begin(),
-                                               ssrTapsRange.end()); // = ssrTapsRange;
-        }
-        // todo, add debug
-        return ssrTapsArray;
-    }
-};
 
 /**
   * @endcond
@@ -443,6 +123,7 @@ class ssr_kernels {
  given by SSR^2*CASC_LEN.
 
  **/
+
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -461,32 +142,12 @@ class fir_sr_asym_graph : public graph {
    private:
     static constexpr bool TP_CASC_IN = CASC_IN_FALSE;   // should be unsigned int if exposed on graph interface
     static constexpr bool TP_CASC_OUT = CASC_OUT_FALSE; // should be unsigned int if exposed on graph interface
-    /**
-     * Port positions for kernel's optional ports.
-     */
-    static constexpr unsigned int DUAL_OUT_PORT_POS = 1;
-    static constexpr unsigned int DUAL_IP_PORT_POS = 1;
-    static constexpr unsigned int CASC_IN_PORT_POS = (TP_DUAL_IP == DUAL_IP_DUAL) ? 2 : 1;
-    static constexpr unsigned int RTP_PORT_POS =
-        ((TP_DUAL_IP == DUAL_IP_DUAL) ? ((TP_CASC_IN == CASC_IN_TRUE) ? 3 : 2) : 1);
-
-    kernel m_firKernels[TP_SSR * TP_SSR * TP_CASC_LEN];
-
-    /**
-     * @brief Helper Aliases
-     */
-    template <class dir>
-    using ssr_port_array = std::array<port<dir>, TP_SSR>;
-
     // 3d array for storing net information.
     // address[inPhase][outPath][cascPos]
     std::array<std::array<std::array<connect<stream, stream>*, TP_CASC_LEN>, TP_SSR>, TP_SSR> net;
     std::array<std::array<std::array<connect<stream, stream>*, TP_CASC_LEN>, TP_SSR>, TP_SSR> net2;
 
     static constexpr unsigned int INPUT_WINDOW_BYTESIZE = TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA);
-    static constexpr unsigned int OUTPUT_WINDOW_BYTESIZE = INPUT_WINDOW_BYTESIZE;
-    static constexpr unsigned int MARGIN_BYTESIZE = fnFirMargin<TP_FIR_LEN / TP_SSR, TT_DATA>() * sizeof(TT_DATA);
-    static constexpr int TP_MODIFY_MARGIN_OFFSET = 0;
 
     // This figure is mostly guesswork and will likely need changed for specfic systems.
     // If this is lower, then SSR designs (ssr2 casc2) typically suffer from stream stalls, which ruins QoR.
@@ -526,183 +187,45 @@ class fir_sr_asym_graph : public graph {
         return fifoDepthCap;
     }
 
+    template <int dim, int firlen = TP_FIR_LEN>
+    struct ssr_params : public fir_params_defaults {
+        static constexpr int Bdim = dim;
+        using BTT_DATA = TT_DATA;
+        using BTT_COEFF = TT_COEFF;
+        static constexpr int BTP_FIR_LEN = firlen;
+        static constexpr int BTP_SHIFT = TP_SHIFT;
+        static constexpr int BTP_RND = TP_RND;
+        static constexpr int BTP_INPUT_WINDOW_VSIZE = TP_INPUT_WINDOW_VSIZE;
+        static constexpr int BTP_CASC_LEN = TP_CASC_LEN;
+        static constexpr int BTP_USE_COEFF_RELOAD = TP_USE_COEFF_RELOAD;
+        static constexpr int BTP_NUM_OUTPUTS = TP_NUM_OUTPUTS;
+        static constexpr int BTP_DUAL_IP = TP_DUAL_IP;
+        static constexpr int BTP_API = TP_API;
+        static constexpr int BTP_SSR = TP_SSR;
+        static constexpr int BTP_COEFF_PHASES = TP_SSR;
+        static constexpr int BTP_COEFF_PHASES_LEN = firlen;
+        static constexpr int BTP_CASC_IN = TP_CASC_IN;
+        static constexpr int BTP_CASC_OUT = TP_CASC_OUT;
+        static constexpr int BTP_FIR_RANGE_LEN = 1;
+    };
     template <int ssr_dim>
-    using ssrKernelLookup = ssr_kernels<ssr_dim,
-                                        TT_DATA,
-                                        TT_COEFF,
-                                        TP_FIR_LEN,
-                                        TP_SHIFT,
-                                        TP_RND,
-                                        TP_INPUT_WINDOW_VSIZE,
-                                        TP_CASC_LEN,
-                                        TP_USE_COEFF_RELOAD,
-                                        TP_NUM_OUTPUTS,
-                                        TP_DUAL_IP,
-                                        TP_API,
-                                        TP_SSR,
-                                        TP_CASC_IN,
-                                        TP_CASC_OUT>;
-    using lastSSRKernel = ssrKernelLookup<(TP_SSR * TP_SSR) - 1>;
-    template <int casc_dim, int ssr_dim = 0>
-    using cascKernelLookup =
-        typename ssrKernelLookup<ssr_dim>::this_casc_kernels::template casc_kernels_class_lookup<casc_dim>;
-    template <int ssr_dim = 0>
-    using lastCascKernel = cascKernelLookup<ssr_dim, TP_CASC_LEN - 1>;
+    using ssrKernelLookup = ssr_kernels<ssr_params<ssr_dim>, fir_sr_asym_tl>;
+    using lastSSRKernel = ssrKernelLookup<(TP_SSR * TP_SSR) - 1>; // TP_SSR^2
 
-    using uut_kernel = typename cascKernelLookup<0, 0>::kernelClass; // very first kernel
-
-    // make connections for a
-    void input_connections(port<input>(&in), kernel firKernels[TP_CASC_LEN], int ssrOutPathIndex, int ssrInPhaseIndex) {
-        // make in connections
-        if (TP_API == USE_WINDOW_API) {
-            connect<window<INPUT_WINDOW_BYTESIZE, MARGIN_BYTESIZE> >(in, firKernels[0].in[0]);
-            for (int i = 1; i < TP_CASC_LEN; i++) {
-                single_buffer(firKernels[i].in[0]);
-                connect<window<INPUT_WINDOW_BYTESIZE + MARGIN_BYTESIZE> >(async(firKernels[i - 1].out[1]),
-                                                                          async(firKernels[i].in[0]));
-            }
-        } else if (TP_API == USE_STREAM_API) {
-            for (int i = 0; i < TP_CASC_LEN; i++) {
-                net[ssrInPhaseIndex][ssrOutPathIndex][i] = new connect<stream, stream>(in, firKernels[i].in[0]);
-                fifo_depth(*net[ssrInPhaseIndex][ssrOutPathIndex][i]) = calculate_fifo_depth(i);
-            }
-        } else {
-            for (int i = 0; i < TP_CASC_LEN; i++) {
-                connect<window<INPUT_WINDOW_BYTESIZE, MARGIN_BYTESIZE> >(in, firKernels[i].in[0]);
-            }
-        }
-    }
-
-    // make cascade connections
-    void cascade_connections(kernel firKernels[TP_CASC_LEN]) {
-        for (int i = 1; i < TP_CASC_LEN; i++) {
-            connect<cascade>(firKernels[i - 1].out[0], firKernels[i].in[CASC_IN_PORT_POS]);
-        }
-    }
-
-    // make output connections
-    void output_connections(port<output>(&out), kernel firKernels[TP_CASC_LEN]) {
-        if (TP_CASC_OUT == CASC_OUT_TRUE) {
-            connect<cascade>(firKernels[TP_CASC_LEN - 1].out[0], out);
-        } else {
-            if (TP_API == USE_WINDOW_API) {
-                connect<window<INPUT_WINDOW_BYTESIZE> >(firKernels[TP_CASC_LEN - 1].out[0], out);
-            } else {
-                connect<stream>(firKernels[TP_CASC_LEN - 1].out[0], out);
-            }
-        }
-    }
-
-    // make dual input connections
-    void conditional_dual_ip_connections(port<input>(&in2),
-                                         kernel firKernels[TP_CASC_LEN],
-                                         int ssrOutPathIndex,
-                                         int ssrInPhaseIndex) {
-        if
-            constexpr(TP_DUAL_IP == DUAL_IP_DUAL) {
-                if (TP_API == USE_STREAM_API) {
-                    for (int i = 0; i < TP_CASC_LEN; i++) {
-                        net2[ssrOutPathIndex][ssrInPhaseIndex][i] =
-                            new connect<stream, stream>(in2, firKernels[i].in[DUAL_IP_PORT_POS]);
-                        fifo_depth(*net2[ssrOutPathIndex][ssrInPhaseIndex][i]) = calculate_fifo_depth(i);
-                    }
-                }
-            }
-    }
-
-    // make cascade input connection
-    void conditional_casc_in_connections(port<input>(&casc_in), kernel firKernels[TP_CASC_LEN]) {
-        if
-            constexpr(TP_CASC_IN == CASC_IN_TRUE) { connect<cascade>(casc_in, firKernels[0].in[CASC_IN_PORT_POS]); }
-    }
-
-    // make output connections
-    void conditional_out_connections(port<output>(&out2), kernel firKernels[TP_CASC_LEN]) {
-        if
-            constexpr(TP_NUM_OUTPUTS == 2) {
-                if (TP_API == USE_WINDOW_API) {
-                    connect<window<OUTPUT_WINDOW_BYTESIZE> >(firKernels[TP_CASC_LEN - 1].out[DUAL_OUT_PORT_POS], out2);
-                } else {
-                    connect<stream>(firKernels[TP_CASC_LEN - 1].out[DUAL_OUT_PORT_POS], out2);
-                }
-            }
-    }
-
-    // make RTP connection
-    void conditional_rtp_connections(port<input>(&coeff), kernel firKernels[TP_CASC_LEN]) {
-        if
-            constexpr(TP_USE_COEFF_RELOAD == USE_COEFF_RELOAD_TRUE) {
-                connect<parameter>(coeff, async(firKernels[0].in[RTP_PORT_POS]));
-            }
-    }
-
-    // make connections
-    void create_connections() {
-        printf("ssrOutputPath, ssrInnerPhase : D(ssrDataPhase) C(ssrCoeffPhase) Starts at kernelStartingIndex:\n");
-        for (unsigned int ssrOutputPath = 0; ssrOutputPath < TP_SSR; ssrOutputPath++) {
-            for (unsigned int ssrInnerPhase = 0; ssrInnerPhase < TP_SSR; ssrInnerPhase++) {
-                // Taking definition from inside ssr_kernels to avoid duplication
-                unsigned int ssrDataPhase = lastSSRKernel::getSSRDataPhase(ssrOutputPath, ssrInnerPhase, TP_SSR);
-                unsigned int ssrCoeffPhase = lastSSRKernel::getSSRCoeffPhase(ssrOutputPath, ssrInnerPhase, TP_SSR);
-                unsigned int kernelStartingIndex =
-                    lastSSRKernel::getKernelStartingIndex(ssrDataPhase, ssrOutputPath, TP_SSR, TP_CASC_LEN);
-                kernel* firstKernelOfCascadeChain = m_firKernels + kernelStartingIndex;
-                kernel* lastKernelOfCascadeChain = m_firKernels + kernelStartingIndex + TP_CASC_LEN - 1;
-                unsigned int nextChainKernelStartingIndex = lastSSRKernel::getKernelStartingIndex(
-                    lastSSRKernel::getSSRDataPhase(ssrOutputPath, ssrInnerPhase + 1, TP_SSR), ssrOutputPath, TP_SSR,
-                    TP_CASC_LEN);
-                kernel* firstKernelOfNextCascadeChain = m_firKernels + nextChainKernelStartingIndex;
-
-                printf("%d, %d : D(%d) C(%d) Starts at %d\n", ssrOutputPath, ssrInnerPhase, ssrDataPhase, ssrCoeffPhase,
-                       kernelStartingIndex);
-                input_connections(in[ssrDataPhase], firstKernelOfCascadeChain, ssrOutputPath, ssrInnerPhase);
-
-                cascade_connections(firstKernelOfCascadeChain); // connect all cascades together
-
-                // Connect SSR Inner phases cascade ports together.
-                if (ssrInnerPhase != TP_SSR - 1) {
-                    printf(
-                        "cascade between ssrInnerPhase (%d) kernels. d(%d) c(%d)\nStartingIndex=%d, "
-                        "nextChainKernelStartingIndex=%d, nextChainDataPhase=%d\n",
-                        ssrInnerPhase, ssrDataPhase, ssrCoeffPhase, kernelStartingIndex, nextChainKernelStartingIndex,
-                        lastSSRKernel::getSSRDataPhase(ssrOutputPath, ssrInnerPhase + 1, TP_SSR));
-                    connect<cascade>(lastKernelOfCascadeChain->out[0],
-                                     firstKernelOfNextCascadeChain->in[CASC_IN_PORT_POS]);
-                }
-
-                if
-                    constexpr(TP_DUAL_IP == DUAL_IP_DUAL) conditional_dual_ip_connections(
-                        in2[ssrDataPhase], firstKernelOfCascadeChain, ssrOutputPath, ssrInnerPhase);
-                if
-                    constexpr(TP_USE_COEFF_RELOAD == USE_COEFF_RELOAD_TRUE)
-                        conditional_rtp_connections(coeff[ssrCoeffPhase], firstKernelOfCascadeChain);
-
-                if (ssrInnerPhase == 0)
-                    if
-                        constexpr(TP_CASC_IN == CASC_IN_TRUE)
-                            conditional_casc_in_connections(casc_in[ssrOutputPath], firstKernelOfCascadeChain);
-
-                // Final inner phase produces output.
-                if (ssrInnerPhase == TP_SSR - 1) {
-                    output_connections(out[ssrOutputPath], firstKernelOfCascadeChain);
-                    if
-                        constexpr(TP_NUM_OUTPUTS == 2)
-                            conditional_out_connections(out2[ssrOutputPath], firstKernelOfCascadeChain);
-                }
-
-                for (int i = 0; i < TP_CASC_LEN; i++) {
-                    // Specify mapping constraints
-                    runtime<ratio>(m_firKernels[kernelStartingIndex + i]) = 0.8;
-                    // Source files
-                    source(m_firKernels[kernelStartingIndex + i]) = "fir_sr_asym.cpp";
-                }
-            }
-        }
+    struct first_casc_params : public ssr_params<0> {
+        static constexpr int Bdim = 0;
+        static constexpr int BTP_FIR_LEN = CEIL(TP_FIR_LEN, TP_SSR) / TP_SSR;
+        static constexpr int BTP_FIR_RANGE_LEN =
+            fir_sr_asym_tl<ssr_params<0, BTP_FIR_LEN> >::template getKernelFirRangeLen<0>();
     };
 
+    using first_casc_kernel_in_first_ssr = fir_sr_asym_tl<first_casc_params>;
+
     static_assert(TP_SSR >= 1, "ERROR: TP_SSR must be 1 or higher");
-    static_assert(TP_FIR_LEN % TP_SSR == 0,
-                  "FIR LEN must be divisble by TP_SSR"); // Consider removing later with padding.
+
+    static_assert(TP_FIR_LEN % TP_SSR == 0, "TP_FIR LEN must be divisble by TP_SSR"); //
+    // static_assert(TP_USE_COEFF_RELOAD != 2 || (TP_FIR_LEN % TP_SSR == 0), "TP_FIR LEN must be divisble by TP_SSR, at
+    // least for the header based coefficient reaload."); //
     static_assert(TP_CASC_LEN <= 40, "ERROR: Unsupported Cascade length");
     // Dual input streams offer no throughput gain if only single output stream would be used.
     // Therefore, dual input streams are only supported with 2 output streams.
@@ -729,8 +252,11 @@ class fir_sr_asym_graph : public graph {
     static_assert(TP_USE_COEFF_RELOAD == 0 || (TP_FIR_LEN / TP_SSR) <= kMaxTapsPerKernel,
                   "ERROR: Exceeded maximum supported FIR length with reloadable coefficients. Please limit the FIR "
                   "length or disable coefficient reload.");
-    static_assert(TP_USE_COEFF_RELOAD == 0 || (TP_USE_COEFF_RELOAD == 1 && TP_SSR <= 1),
-                  "ERROR: Coefficient reload is not supported for SSR configurations.");
+    // static_assert(TP_USE_COEFF_RELOAD != 1 || (TP_USE_COEFF_RELOAD == 1 && TP_SSR == 1),"ERROR: Coefficient reload is
+    // not supported for SSR configurations.");
+    static_assert(TP_USE_COEFF_RELOAD != 2 || TP_API == USE_STREAM_API,
+                  "ERROR: Unsupported TP_USE_COEFF_RELOAD and TP_API combination. Header based coeff reload "
+                  "(TP_USE_COEFF_RELOAD == 2) only supported with Streaming API (TP_API == 1)."); //
 
     static constexpr unsigned int kMemoryModuleSize = 32768;
     static constexpr unsigned int bufferSize = (((TP_FIR_LEN / TP_SSR) + TP_INPUT_WINDOW_VSIZE) * sizeof(TT_DATA));
@@ -739,7 +265,32 @@ class fir_sr_asym_graph : public graph {
                   "ERROR: Input Window size (based on requrested window size and FIR length margin) exceeds Memory "
                   "Module size of 32kB");
 
+    template <unsigned int CL>
+    struct tmp_ssr_params : public ssr_params<0> {
+        static constexpr unsigned int BTP_FIR_LEN = CEIL(TP_FIR_LEN, TP_SSR) / TP_SSR;
+        static constexpr unsigned int BTP_CASC_LEN = CL;
+    };
+
+    template <int pos, int CLEN, int T_FIR_LEN, typename T_D, typename T_C, unsigned int SSR>
+    static constexpr unsigned int clRecurser() {
+        if
+            constexpr(
+                fir_sr_asym_tl<tmp_ssr_params<CLEN> >::template fnCheckIfFits<pos, CLEN, T_FIR_LEN, T_D, T_C, SSR>() ==
+                1) {
+                if
+                    constexpr(pos == 0) { return CLEN; }
+                else {
+                    return clRecurser<pos - 1, CLEN, T_FIR_LEN, T_D, T_C, SSR>();
+                }
+            }
+        else {
+            return clRecurser<CLEN, CLEN + 1, T_FIR_LEN, T_D, T_C, SSR>();
+        }
+    }
+
    public:
+    kernel m_firKernels[TP_SSR * TP_SSR * TP_CASC_LEN];
+
     /**
      * The input data array to the function. This input array is either a window API of
      * samples of TT_DATA type or stream API (depending on TP_API).
@@ -850,7 +401,7 @@ class fir_sr_asym_graph : public graph {
         // return the architecture for first kernel in the design (only one for single kernel designs).
         // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
         // best.
-        return uut_kernel::get_m_kArch();
+        return first_casc_kernel_in_first_ssr::parent_class::get_m_kArch();
     };
 
     /**
@@ -858,9 +409,11 @@ class fir_sr_asym_graph : public graph {
      * Constructor has no args. To be used with TP_USE_COEFF_RELOAD=1, taps needs to be passed through RTP
      **/
     fir_sr_asym_graph() {
+        printParams<ssr_params<0> >();
+
         printf("== class fir_sr_asym_base_graph (reloadable): \n");
         lastSSRKernel::create_and_recurse(m_firKernels);
-        create_connections();
+        lastSSRKernel::create_connections(m_firKernels, &in[0], in2, &out[0], out2, coeff, net, net2, casc_in);
     };
 
     /**
@@ -870,7 +423,44 @@ class fir_sr_asym_graph : public graph {
     fir_sr_asym_graph(const std::vector<TT_COEFF>& taps) {
         printf("== class fir_sr_asym_base_graph (static): \n");
         lastSSRKernel::create_and_recurse(m_firKernels, taps);
-        create_connections();
+        lastSSRKernel::create_connections(m_firKernels, &in[0], in2, &out[0], out2, coeff, net, net2, casc_in);
+    };
+
+    template <unsigned int T_API, typename T_D, typename T_C>
+    static constexpr unsigned int fnGetMaxTapsPerKernel() {
+        if
+            constexpr(T_API == 0) { return 256; }
+        else {
+            constexpr unsigned int m_kSamplesInBuff = fnSamplesIn1024<T_D>();
+            constexpr unsigned int m_kDataLoadVsize = fnDataLoadVsizeSrAsym<T_D, T_C, T_API>();
+            return m_kSamplesInBuff - m_kDataLoadVsize;
+        }
+    }
+
+    template <typename T_D, typename T_C, int T_PORTS>
+    static constexpr unsigned int fnGetOptTapsPerKernel() {
+        unsigned int optTaps = fnGetOptTapsPerKernelSrAsym<T_D, T_C, T_PORTS>();
+        return optTaps;
+    };
+
+    template <int T_FIR_LEN, int T_API, typename T_D, typename T_C, unsigned int SSR>
+    static constexpr unsigned int fnGetMinCascLen() {
+        constexpr int kMaxTaps = fnGetMaxTapsPerKernel<T_API, T_D, T_C>();
+        constexpr int firLenPerSSR = CEIL(T_FIR_LEN, SSR) / SSR;
+        constexpr int cLenMin = getMinCascLen<firLenPerSSR, kMaxTaps>();
+        if
+            constexpr(T_API == 0) { return cLenMin; }
+        else {
+            return clRecurser<cLenMin - 1, cLenMin, firLenPerSSR, T_D, T_C, SSR>();
+        }
+        return cLenMin;
+    };
+
+    template <int T_FIR_LEN, typename T_D, typename T_C, int T_API, int T_PORTS>
+    static constexpr unsigned int fnGetOptCascLen() {
+        constexpr int kMaxTaps = fnGetMaxTapsPerKernel<T_API, T_D, T_C>();
+        constexpr int kRawOptTaps = fnGetOptTapsPerKernel<T_D, T_C, T_PORTS>();
+        return getOptCascLen<kMaxTaps, kRawOptTaps, T_FIR_LEN>();
     };
 };
 }

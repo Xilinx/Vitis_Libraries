@@ -49,8 +49,8 @@ class test_kernel : public graph {
         // Size of window in Bytes.
         // Margin gets automatically added within the FIR graph class.
         // Margin equals to FIR length rounded up to nearest multiple of 32 Bytes.
-        connect<>(in, firGraph.in);
-        connect<>(firGraph.out, out);
+        connect<>(in, firGraph.in[0]);
+        connect<>(firGraph.out[0], out);
     };
 };
 };

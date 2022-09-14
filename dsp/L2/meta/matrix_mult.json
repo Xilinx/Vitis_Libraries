@@ -1,0 +1,181 @@
+{
+    "schema": "vitis_library_api_spec_schema-1.0",
+    "api_name": "xf::dsp::aie::blas::matrix_mult::matrix_mult_graph",
+    "display_name": "matrix_mult_graph",
+    "header_file_name": "matrix_mult_graph.hpp",
+    "search_paths": [
+      "L1/include/aie",
+      "L2/include/aie",
+      "L1/src/aie"
+    ],
+    "parameters": [
+        {
+            "name": "TT_DATA_A",
+            "type": "typename",
+            "description": "describes the type of individual data samples input of Matrix A to the gemm function. This is a typename and must be one of the following:",
+            "enum": [
+              "int16",
+              "cint16",
+              "int32",
+              "cint32",
+              "float",
+              "cfloat"
+            ]
+        },
+        {
+            "name": "TT_DATA_B",
+            "type": "typename",
+            "description": "describes the type of individual data samples input of Matrix B to the gemm function. This is a typename and must be one of the following:",
+            "enum": [
+              "int16",
+              "cint16",
+              "int32",
+              "cint32",
+              "float",
+              "cfloat"
+            ], 
+            "validator": {
+              "file": "matrix_mult.py",
+              "function": "validate_TT_DATA_B",
+              "args": ["TT_DATA_A"]
+            }
+        },
+        {
+            "name": "TP_DIM_A",
+            "type": "uint",
+            "description": "is an unsigned integer which describes the number of elements along the unique dimension (rows) of Matrix A.",
+            "validator": {
+              "file": "matrix_mult.py",
+              "function": "validate_TP_DIM_A",
+              "args": ["TT_DATA_A","TT_DATA_B"]
+            }
+        },
+        {
+            "name": "TP_DIM_AB",
+            "type": "uint",
+            "description": "is an unsigned integer which describes the number of elements along the common dimension of Matrix A (columns) and Matrix B (rows).",
+            "validator": {
+              "file": "matrix_mult.py",
+              "function": "validate_TP_DIM_AB",
+              "args": ["TT_DATA_A","TT_DATA_B", "TP_CASC_LEN"]
+            }
+        },
+        {
+            "name": "TP_DIM_B",
+            "type": "uint",
+            "description": "is an unsigned integer which describes the number of elements along the unique dimension (columns) of Matrix B.",
+            "validator": {
+              "file": "matrix_mult.py",
+              "function": "validate_TP_DIM_B",
+              "args": ["TT_DATA_A","TT_DATA_B"]
+            }
+        },
+        {
+            "name": "TP_SHIFT",
+            "type": "uint",
+            "description": "describes power of 2 shift down applied to the accumulation of product terms before each output. TP_SHIFT must be in the range 0 to 61.",
+            "maximum": 80,
+            "minimum": 0,
+            "validator": {
+              "file": "matrix_mult.py",
+              "function": "validate_TP_SHIFT",
+              "args": ["TT_DATA_A"]
+            }
+          },
+        {
+            "name": "TP_RND",
+            "type": "uint",
+            "description": "describes the selection of rounding to be applied during the shift down stage of processing. TP_RND must be in the range 0 to 7 where",
+            "maximum": 7,
+            "minimum": 0
+        },
+        {
+            "name": "TP_DIM_A_LEADING",
+            "type": "uint",
+            "description": "describes the scheme in which the data should be stored in memory. ROW_MAJOR = 0, COL_MAJOR = 1. Note, a COL_MAJOR matrix can be transposed to become a ROW_MAJOR matrix."
+        },
+        {
+            "name": "TP_DIM_B_LEADING",
+            "type": "uint",
+            "description": "describes the scheme in which the data should be stored in memory. ROW_MAJOR = 0, COL_MAJOR = 1."
+        },
+        {
+            "name": "TP_DIM_OUT_LEADING",
+            "type": "uint",
+            "description": "describes the scheme in which the data should be stored in memory. ROW_MAJOR = 0, COL_MAJOR = 1."
+        },
+        {
+            "name": "TP_ADD_TILING_A",
+            "type": "uint",
+            "description": "describes wether or not to add an additional kernel to rearrange the matrix samples into their required position.",
+            "validator": {
+              "file": "matrix_mult.py",
+              "function": "validate_TP_ADD_TILING_A",
+              "args": ["TT_DATA_A","TT_DATA_B","TP_DIM_A", "TP_DIM_AB", "TP_CASC_LEN", "TP_DIM_A_LEADING"]
+            }
+        },
+        {
+            "name": "TP_ADD_TILING_B",
+            "type": "uint",
+            "description": "describes wether or not to add an additional kernel to rearrange the matrix samples into their required position.",
+            "validator": {
+              "file": "matrix_mult.py",
+              "function": "validate_TP_ADD_TILING_B",
+              "args": ["TT_DATA_A","TT_DATA_B", "TP_DIM_AB","TP_DIM_B","TP_CASC_LEN", "TP_DIM_B_LEADING"]
+            }
+        },
+        {
+            "name": "TP_ADD_DETILING_OUT",
+            "type": "uint",
+            "description": "describes wether or not to add an additional kernel to rearrange the matrix samples into their required position.",
+            "validator": {
+              "file": "matrix_mult.py",
+              "function": "validate_TP_ADD_DETILING_OUT",
+              "args": [
+                "TT_DATA_A",
+                "TT_DATA_B",
+                "TP_DIM_A",
+                "TP_DIM_B",
+                "TP_DIM_OUT_LEADING"
+              ]
+            }
+        },
+        {
+            "name": "TP_INPUT_WINDOW_VSIZE_A",
+            "type": "uint",
+            "description": "describes the number of samples in the window API used for input to Matrix A.",
+            "minimum": 4,
+            "validator": {
+              "file": "matrix_mult.py",
+              "function": "validate_TP_INPUT_WINDOW_VSIZE_A",
+              "args": ["TT_DATA_A", "TP_DIM_A", "TP_DIM_AB"]
+            }
+        },
+        {
+            "name": "TP_INPUT_WINDOW_VSIZE_B",
+            "type": "uint",
+            "description": "describes the number of samples in the window API used for input to Matrix B.",
+            "minimum": 4,
+            "validator": {
+              "file": "matrix_mult.py",
+              "function": "validate_TP_INPUT_WINDOW_VSIZE_B",
+              "args": ["TT_DATA_A", "TT_DATA_B", "TP_INPUT_WINDOW_VSIZE_A", "TP_DIM_A", "TP_DIM_AB", "TP_DIM_B"]
+            }
+        },
+        {
+            "name": "TP_CASC_LEN",
+            "type": "uint",
+            "description": "describes the number of AIE Tiles to split the GEMM operation into.",
+            "minimum": 1
+        }
+    ],
+    "ports": {
+      "file": "matrix_mult.py",
+      "function": "info_ports"
+    },
+    "generator": {
+      "file": "matrix_mult.py",
+      "function": "generate_graph"
+    }
+  }
+  

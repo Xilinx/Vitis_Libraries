@@ -1,0 +1,128 @@
+{
+  "schema": "aieip_spec_schema-0.1",
+  "ip_name": "vmc_stream_fir_sr_asym",
+  "block_info": {
+    "label": "FIR Asymmetric Stream",
+    "description": ""
+  },
+  "parameters": [
+    {
+      "name": "data_type",
+      "label": "Input/Output data type",
+      "description": "The type of individual data samples input to and output of the filter function",
+      "enum": [ "int16", "cint16", "int32", "cint32", "float", "cfloat" ],
+      "default": "cint16",
+      "type": "typename"
+    },
+    {
+      "name": "coef_type",
+      "label": "Filter coefficients type",
+      "description": "The type of individual coefficients of the filter taps",
+      "enum": [ "int16", "cint16", "int32", "cint32", "float", "cfloat" ],
+      "default": "int16",
+      "type": "typename",
+      "validator": {
+        "file": "vmc_stream_fir_sr_asym.py",
+        "function": "vmc_validate_coef_type",
+        "args": ["data_type"]
+      }
+    },
+    {
+      "name": "use_coeff_reload",
+      "label": "Use runtime coefficient reloading",
+      "description": "Allows the user to select of runtime coefficient reloading",
+      "default": false,
+      "type": "bool",
+      "validator": {
+        "file": "vmc_stream_fir_sr_asym.py",
+        "function": "vmc_validate_use_coeff_reload",
+        "args": ["ssr"]
+      }
+    },
+    {
+      "name": "fir_length",
+      "label": "fir filter length",
+      "description": "Specify fir length for coefficient reloading",
+      "default": 32,
+      "minimum": 4,
+      "maximum": 8192,
+      "type": "int"
+    },
+    {
+      "name": "coeff",
+      "label": "Filter coefficients",
+      "description": "The FIR filter tap coefficients.",
+      "element_type": "coef_type",
+      "default": [ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+      "type": "vector",
+      "validator": {
+        "file": "vmc_stream_fir_sr_asym.py",
+        "function": "vmc_validate_coeff",
+        "args": ["use_coeff_reload", "coef_type" ,"fir_length", "data_type", "casc_length", "ssr"]
+      }
+    },
+    {
+      "name": "input_window_size",
+      "label": "Input window size (Number of samples)",
+      "description": "The number of samples in the window API used for input to the filter function. The number of samples in the output window will depend on the FIR filter parameters",
+      "default": 256,
+      "minimum": 4,
+      "maximum": 8192,
+      "type": "int",
+      "validator": {
+        "file": "vmc_stream_fir_sr_asym.py",
+        "function": "vmc_validate_input_window_size",
+        "args": ["data_type", "coef_type", "use_coeff_reload", "coeff", "fir_length","ssr"]
+      }
+    },
+    {
+      "name": "casc_length",
+      "label": "Number of cascade stages",
+      "description": "The length of cascaded kernels",
+      "default": 1,
+      "type": "int",
+      "maximum": 9,
+      "minimum": 1,
+      "validator": {
+        "file": "vmc_stream_fir_sr_asym.py",
+        "function": "vmc_validate_casc_length",
+        "args": ["use_coeff_reload", "fir_length"]
+      }
+    },
+    {
+      "name": "shift_val",
+      "label": "Scale output down by 2^",
+      "description": "The power of 2 shift down applied to the accumulation of FIR before output",
+      "default": 0,
+      "maximum": 61,
+      "minimum": 0,
+      "type": "int",
+	  "validator": {
+        "file": "vmc_stream_fir_sr_asym.py",
+        "function": "vmc_validate_shift_val",
+        "args": ["data_type"]
+      }
+    },
+    {
+      "name": "rnd_mode",
+      "label": "Rounding mode",
+      "description": "The rounding to be applied during the shift down stage of processing.",
+      "enum": [0, 1, 2, 3, 4, 5, 6, 7],
+      "enum_str": ["Floor", "Ceiling", "Round to positive infinity", "Round to negative infinity", "Round symmetrical to infinity", "Round symmetrical to zero", "Round convergent to even", "Round convergent to odd"],
+      "default": 2,
+      "type": "int"
+    },
+    {
+      "name": "ssr",
+      "label": "Number of parallel input/output (SSR)",
+      "description": "Specify number of data input/output in parallel for a single channel.",
+      "default": 1,
+      "minimum": 1,
+      "type": "int"
+    }
+  ],
+  "generator": {
+    "file": "vmc_stream_fir_sr_asym.py",
+    "function": "vmc_generate_graph"
+  }
+}

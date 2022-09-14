@@ -57,13 +57,15 @@ AI Engine DSP library
 
 AIE DSP library consists of designs of various DSP algorithms, optimized to take full advantage of the processing power of the Xilinx |reg| Versal |reg| Adaptive Computing Acceleration Platform (ACAP) devices, which contain an array of Xilinx |reg| AI Engines - high-performance vector processors.
 
-The library is organized into three types of AIE designs, namely:
+The library is organized into three part, namely:
 
 - L1 AIE kernels,
 
 - L2 AIE graphs, and
 
-- L3 software APIs.
+- L3 software APIs,
+
+though at present there are no L3 software APIs and the recommended entry point for all library elements is an L2 AIE graph.
 
 Please refer to :ref:`INTRODUCTION` for more information.
 
@@ -71,19 +73,19 @@ Vitis |trade| AIE DSP Library provides a SSR FFT implementation targeting AIE, a
 
 
 .. toctree::
-   :caption: Library Overview
+   :caption: Introduction
    :maxdepth: 4
 
-   overview.rst
-   release.rst
+   Overview <overview.rst>
+   Release Note <release.rst>
 
 .. toctree::
    :caption: L1 PL DSP Library User Guide
    :maxdepth: 4
    :numbered:
 
-   user_guide/L1.rst
-   user_guide/L1_2dfft.rst
+   1-Dimensional(Line) SSR FFT L1 FPGA Module <user_guide/L1.rst>
+   2-Dimensional(Matrix) SSR FFT L1 FPGA Module <user_guide/L1_2dfft.rst>
 
 .. toctree::
    :caption: L2 DSP Library User Guide
@@ -91,10 +93,10 @@ Vitis |trade| AIE DSP Library provides a SSR FFT implementation targeting AIE, a
    :numbered:
 
 
-   user_guide/L2/introduction.rst
-   user_guide/L2/dsp-lib-func.rst
-   user_guide/L2/compiling-and-simulating.rst
-   user_guide/L2/benchmark.rst
+   Introduction <user_guide/L2/introduction.rst>
+   DSP Library Functions <user_guide/L2/dsp-lib-func.rst>
+   Compiling and Simulating Using the Makefile <user_guide/L2/compiling-and-simulating.rst>
+   Benchmark/QoR <user_guide/L2/benchmark.rst>
 
 
 .. toctree::

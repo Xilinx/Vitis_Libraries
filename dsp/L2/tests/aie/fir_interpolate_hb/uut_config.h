@@ -55,6 +55,10 @@
 #define UUT_SSR 1
 #endif
 
+#ifndef CASC_LEN
+#define CASC_LEN 1
+#endif
+
 #ifndef INTERPOLATE_FACTOR
 #define INTERPOLATE_FACTOR 2
 #endif
@@ -83,6 +87,13 @@
 #define P_SSR UUT_SSR
 #else
 #define P_SSR 1
+#endif
+
+// Force reference model to ignore SSR and only use array length 1
+#ifdef USING_UUT
+#define P_PARA_INTERP_POLY UUT_PARA_INTERP_POLY
+#else
+#define P_PARA_INTERP_POLY 1
 #endif
 
 #ifndef USING_UUT

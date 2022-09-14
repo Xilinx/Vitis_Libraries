@@ -17,3 +17,7 @@ L2/tests/aie/*/test_*
 L2/tests/aie/*/Work*
 L2/examples/*/Work*
 *TestResults*
+*__pycache__
+*_generated_graph
+
+L2/tests/aie/*/results/*

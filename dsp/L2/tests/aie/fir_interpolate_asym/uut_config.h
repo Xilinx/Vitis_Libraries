@@ -60,8 +60,16 @@
 #define PORT_API 0
 #endif
 
+#ifndef USE_COEFF_RELOAD
+#define USE_COEFF_RELOAD 0
+#endif
+
 #ifndef UUT_SSR
 #define UUT_SSR 1
+#endif
+
+#ifndef UUT_PARA_INTERP_POLY
+#define UUT_PARA_INTERP_POLY 1
 #endif
 
 #ifndef CASC_LEN
@@ -79,8 +87,10 @@
 // Force reference model to ignore SSR and only use array length 1
 #ifdef USING_UUT
 #define P_SSR UUT_SSR
+#define P_PARA_INTERP_POLY UUT_PARA_INTERP_POLY
 #else
 #define P_SSR 1
+#define P_PARA_INTERP_POLY 1
 #endif
 
 #ifndef USING_UUT

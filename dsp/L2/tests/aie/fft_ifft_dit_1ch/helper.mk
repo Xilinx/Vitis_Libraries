@@ -21,6 +21,12 @@
 HELPER_CUR_DIR ?= .
 HELPER_ROOT_DIR ?= ./../../../../
 
+ifeq ($(DATA_TYPE), cint16)
+WINDOW_VSIZE = $$(($(INPUT_WINDOW_VSIZE)-8*$(DYN_PT_SIZE)))
+else
+WINDOW_VSIZE = $$(($(INPUT_WINDOW_VSIZE)-4*$(DYN_PT_SIZE)))
+endif
+
 ifeq ($(POINT_SIZE), 16)
 	PT_SIZE_PWR       := 4
 else ifeq ($(POINT_SIZE), 32)
@@ -61,18 +67,35 @@ else
 	endif
 endif
 
+ifeq ($(DYN_PT_SIZE), 1)
+ifeq ($(DATA_TYPE), cint16)
+	DYN_PT_HEADER_SIZE := 8
+else
+	DYN_PT_HEADER_SIZE := 4
+endif
+else
+	DYN_PT_HEADER_SIZE := 0
+endif
+
 NUM_OUTPUTS = $(NUM_INPUTS)
+
+PARAM_MAP = DATA_TYPE $(DATA_TYPE) TWIDDLE_TYPE $(TWIDDLE_TYPE) POINT_SIZE $(POINT_SIZE) FFT_NIFFT $(FFT_NIFFT) SHIFT $(SHIFT) CASC_LEN $(CASC_LEN) DYN_PT_SIZE $(DYN_PT_SIZE) WINDOW_VSIZE $(WINDOW_VSIZE) PARALLEL_POWER $(PARALLEL_POWER) API_IO $(API_IO)
 
 HELPER:= $(HELPER_CUR_DIR)/.HELPER
 
-$(HELPER): create_input sim_ref prep_x86_out
+$(HELPER): validate_config create_input sim_ref prep_x86_out
 	make cleanall
+
+validate_config:
+	echo validating configuration;\
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL) $(PARAM_MAP);\
+    vitis -exec ipmetadata_config_checker $(HELPER_ROOT_DIR)/L2/meta/fft_ifft_dit_1ch.json ./config.json -newflow
 
 create_input:
 	@echo starting create_input
 	@echo NUM_INPUTS $(NUM_INPUTS)
-	@tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE) $(INPUT_WINDOW_VSIZE) $(NITER) $(SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(PT_SIZE_PWR) $(DATA_TYPE) $(API_IO) 1 ;\
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(INPUT_FILE) --type $(DATA_TYPE) --ssr $(NUM_INPUTS) --split --dual 0 ;\
+	@tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE) $(INPUT_WINDOW_VSIZE) $(NITER) $(SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(PT_SIZE_PWR) $(DATA_TYPE) $(API_IO) 1  ${PARALLEL_POWER};\
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(INPUT_FILE) --type $(DATA_TYPE) --ssr $(NUM_INPUTS) --split --dual 0 -k $(DYN_PT_HEADER_SIZE) -w ${WINDOW_VSIZE};\
 	echo Input ready
 
 sim_ref:
@@ -94,9 +117,9 @@ prep_aie_out:
 
 
 check_op_ref: prep_x86_out prep_aie_out
-	@perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(UUT_SIM_FILE) --type $(DATA_TYPE) --ssr $(NUM_OUTPUTS) --zip --dual 0 ;\
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(REF_SIM_FILE) --type $(DATA_TYPE) --ssr $(NUM_OUTPUTS) --zip --dual 0 ;\
+	@perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(UUT_SIM_FILE) --type $(DATA_TYPE) --ssr $(NUM_OUTPUTS) --zip --dual 0 -k $(DYN_PT_HEADER_SIZE) -w ${WINDOW_VSIZE} ;\
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(REF_SIM_FILE) --type $(DATA_TYPE) --ssr $(NUM_OUTPUTS) --zip --dual 0 -k $(DYN_PT_HEADER_SIZE) -w ${WINDOW_VSIZE} ;\
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE)
 
 get_status: check_op_ref
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) DATA_TYPE $(DATA_TYPE) TWIDDLE_TYPE $(TWIDDLE_TYPE) POINT_SIZE $(POINT_SIZE) FFT_NIFFT $(FFT_NIFFT) SHIFT $(SHIFT) CASC_LEN $(CASC_LEN) DYN_PT_SIZE $(DYN_PT_SIZE) WINDOW_VSIZE $(WINDOW_VSIZE) $(PARALLEL_POWER) $(API_IO)
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP)

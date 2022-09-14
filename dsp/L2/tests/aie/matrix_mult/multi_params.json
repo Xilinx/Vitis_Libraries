@@ -1,62 +1,62 @@
 {
     "daily": {
         "test_0_matmul_nxl_lxn_32x64_64x32": {
-            "t_data_a":"cint16",
-            "t_data_b":"cint16",
-            "p_dim_a":"32",
-            "p_dim_ab":"64",
-            "p_dim_b":"32",
-            "shift":"16"
+            "T_DATA_A":"cint16",
+            "T_DATA_B":"cint16",
+            "P_DIM_A":"32",
+            "P_DIM_AB":"64",
+            "P_DIM_B":"32",
+            "P_SHIFT":"16"
         },
         "test_1_matmul_nxl_lxn_32x32_32x64": {
-            "t_data_a":"cint16",
-            "t_data_b":"cint16",
-            "p_dim_a":"32",
-            "p_dim_ab":"32",
-            "p_dim_b":"64",
-            "shift":"16"
+            "T_DATA_A":"cint16",
+            "T_DATA_B":"cint16",
+            "P_DIM_A":"32",
+            "P_DIM_AB":"32",
+            "P_DIM_B":"64",
+            "P_SHIFT":"16"
         },
         "test_2_matmul_nxl_lxn_16x16_16x16": {
-            "t_data_a":"cint16",
-            "t_data_b":"cint16",
-            "p_dim_a":"16",
-            "p_dim_ab":"16",
-            "p_dim_b":"16",
-            "shift":"16"
+            "T_DATA_A":"cint16",
+            "T_DATA_B":"cint16",
+            "P_DIM_A":"16",
+            "P_DIM_AB":"16",
+            "P_DIM_B":"16",
+            "P_SHIFT":"16"
         },
         "test_3_matmul_nxl_lxn_32x32_32x32": {
-            "t_data_a":"cint16",
-            "t_data_b":"cint16",
-            "p_dim_a":"32",
-            "p_dim_ab":"32",
-            "p_dim_b":"32",
-            "shift":"16"
+            "T_DATA_A":"cint16",
+            "T_DATA_B":"cint16",
+            "P_DIM_A":"32",
+            "P_DIM_AB":"32",
+            "P_DIM_B":"32",
+            "P_SHIFT":"16"
         },
         "test_4_matmul_nxl_lxn_32x128_128x16": {
-            "t_data_a":"int16",
-            "t_data_b":"cint32",
-            "p_dim_a":"32",
-            "p_dim_ab":"128",
-            "p_dim_b":"16",
-            "shift":"32",
-            "p_casc_len": "4",
-            "p_add_tiling_a": "0",
-            "p_add_detiling_out": "1",
-            "p_dim_out_leading": "1",
-            "p_dim_a_leading": "1"
+            "T_DATA_A":"int16",
+            "T_DATA_B":"cint32",
+            "P_DIM_A":"32",
+            "P_DIM_AB":"128",
+            "P_DIM_B":"16",
+            "P_SHIFT":"32",
+            "P_CASC_LEN": "4",
+            "P_ADD_TILING_A": "0",
+            "P_ADD_DETILING_OUT": "1",
+            "P_DIM_OUT_LEADING": "1",
+            "P_DIM_A_LEADING": "1"
         },
         "test_5_matmul_nxl_lxn_8x64_64x4": {
-            "t_data_a":"cint32",
-            "t_data_b":"int32",
-            "p_dim_a":"8",
-            "p_dim_ab":"64",
-            "p_dim_b":"4",
-            "shift":"32",
-            "p_casc_len": "4",
-            "p_add_tiling_a": "1",
-            "p_add_detiling_out": "1",
-            "p_dim_out_leading": "1",
-            "p_dim_a_leading": "1"
+            "T_DATA_A":"cint32",
+            "T_DATA_B":"int32",
+            "P_DIM_A":"8",
+            "P_DIM_AB":"64",
+            "P_DIM_B":"4",
+            "P_SHIFT":"32",
+            "P_CASC_LEN": "4",
+            "P_ADD_TILING_A": "1",
+            "P_ADD_DETILING_OUT": "1",
+            "P_DIM_OUT_LEADING": "1",
+            "P_DIM_A_LEADING": "1"
         }
     }
 }

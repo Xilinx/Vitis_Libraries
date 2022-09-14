@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef _DSPLIB_GRAPH_UTILSHPP_
-#define _DSPLIB_GRAPH_UTILSHPP_
+#ifndef _DSPLIB_GRAPH_UTILS_HPP_
+#define _DSPLIB_GRAPH_UTILS_HPP_
 /*
 The file captures the definition of the graph utilities commonly used across various library elements
 */
@@ -24,20 +24,21 @@ The file captures the definition of the graph utilities commonly used across var
 namespace xf {
 namespace dsp {
 namespace aie {
-
 using namespace adf;
 
 class empty {};
+struct no_port {};
 
 template <typename DIRECTION, bool Condition>
-using port_conditional = typename std::conditional<Condition, port<DIRECTION>, empty>::type;
+using port_conditional = typename std::conditional<Condition, port<DIRECTION>, no_port>::type;
 
 template <typename DIRECTION, unsigned int SIZE>
 using port_array = typename std::array<port<DIRECTION>, SIZE>;
 
 template <typename DIRECTION, bool Condition, unsigned int SIZE>
-using port_conditional_array = typename std::conditional<Condition, port_array<DIRECTION, SIZE>, empty>::type;
+using port_conditional_array =
+    typename std::conditional<Condition, port_array<DIRECTION, SIZE>, std::array<no_port, SIZE> >::type;
 }
 }
 } // namespace braces
-#endif //_DSPLIB_GRAPH_UTILSHPP_
+#endif //_DSPLIB_GRAPH_UTILS_HPP_

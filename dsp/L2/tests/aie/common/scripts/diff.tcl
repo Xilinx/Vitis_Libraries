@@ -126,48 +126,51 @@ if {$fexist2} {
     set inFile2 [open $fileName2 r]
 }
 
-# Compare line by line, until EoF.
-
-#
-while {$fexist1 && $fexist2  && [gets $inFile1 line1] != -1} {
-        incr lineNo
-        if {[gets $inFile2 line2] != -1} {
-            set valList1 [split $line1 " "]
-            set valList2 [split $line2 " "]
-            set indexList2 0
-            set printLines 0
-            foreach val1  $valList1 {
-                # Assume that each files have same number of arguments
-                # skip empty spaces at the end of the line
-                if {($val1!="")} {
-                    if {[isSame $val1  [lindex $valList2 $indexList2] $tolerance $toleranceMode] } {
-                        # Good, move on
-                        incr fileMatchesFound
-                    } else {
-                        # Bad, set out flag to print out diff lines to diff file.
-                        set printLines 1
-                        # and set the comparison result
-                        set fileMismatch 1
-                        incr fileDiffsFound
+if {$fexist1 && $fexist2} {
+    # Compare line by line, until EoF.
+    while {[gets $inFile1 line1] != -1} {
+            incr lineNo
+            if {[gets $inFile2 line2] != -1} {
+                set valList1 [split $line1 " "]
+                set valList2 [split $line2 " "]
+                set indexList2 0
+                set printLines 0
+                foreach val1  $valList1 {
+                    # Assume that each files have same number of arguments
+                    # skip empty spaces at the end of the line
+                    if {($val1!="")} {
+                        if {[isSame $val1  [lindex $valList2 $indexList2] $tolerance $toleranceMode] } {
+                            # Good, move on
+                            incr fileMatchesFound
+                        } else {
+                            # Bad, set out flag to print out diff lines to diff file.
+                            set printLines 1
+                            # and set the comparison result
+                            set fileMismatch 1
+                            incr fileDiffsFound
+                        }
                     }
+                    incr indexList2
                 }
-                incr indexList2
+                        if {$printLines == 1} {
+                    set outFile [open $fileNameOut a]
+                    # Write to file
+                    puts $outFile "Line no: $lineNo:     $line1"
+                    puts $outFile "Line no: $lineNo:     $line2"
+                    close $outFile
+                }
+            } else {
+                # inFile2 too short
+                set fileLengthMismatch 1
             }
-                    if {$printLines == 1} {
-                set outFile [open $fileNameOut a]
-                # Write to file
-                puts $outFile "Line no: $lineNo:     $line1"
-                puts $outFile "Line no: $lineNo:     $line2"
-                close $outFile
-            }
-        } else {
-            set fileLengthMismatch 1
-        }
-} 
-if  {[gets $inFile2 line2] != -1} {
-    set fileLengthMismatch 1
+    }
+    # Error if other file still has data left.
+    if  {[gets $inFile2 line2] != -1} {
+        # inFile2 too long
+        set fileLengthMismatch 1
+    }
 }
- 
+
 # Deal with catastrophic cancellations for floats
 set fileAllSamples  [expr ($fileDiffsFound + $fileMatchesFound)]
 if {$fileAllSamples == 0.0} {

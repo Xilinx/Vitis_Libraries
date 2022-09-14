@@ -37,13 +37,6 @@ INLINE_DECL constexpr unsigned int fnFirInterpFractTypeSupport() {
     return fnUnsupportedTypeCombo<TT_DATA, TT_COEFF>();
 }; // Int16 data int16 coeff type combo unsupported, due to xquare.
 
-static constexpr unsigned int kUpdWSize = 256 / 8;    // Upd_w size in Bytes (256bit) - const for all data/coeff types
-static constexpr unsigned int kZBuffSize = 256 / 8;   // Zbuff size in Bytes (256bit) - const for all data/coeff types
-static constexpr unsigned int kXYBuffSize = 1024 / 8; // XYbuff size in Bytes (1024bit) - const for all data/coeff types
-static constexpr unsigned int kBuffSize128Byte = 128; // 1024-bit buffer size in Bytes
-static constexpr unsigned int kBuffSize64Byte = 64;   // 512-bit buffer size in Bytes
-static constexpr unsigned int kBuffSize32Byte = 32;   // 256-bit buffer size in Bytes
-
 struct firParamsTrait {
     // typename dataType = TT_DATA;
     unsigned int dataSizeBytes;
@@ -77,12 +70,6 @@ INLINE_DECL constexpr unsigned int fnDataLoadsInRegResampler() {
     // would be needed it a different command was used (e.g. upd_v, upd_x).
     // Or when using 128-bit streams.
     return kXYBuffSize / kUpdWSize;
-}
-
-// Number of data type samples in a 1024-bit buffer
-template <typename TT_DATA>
-INLINE_DECL constexpr unsigned int fnSamplesIn1024() {
-    return kXYBuffSize / sizeof(TT_DATA);
 }
 
 // Parameter to constant resolution functions

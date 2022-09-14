@@ -2370,8 +2370,8 @@ INLINE_DECL T_accSym<cfloat, cfloat> macSrSymCT<K_CT_OP_WITH_1_SAMPLE>(T_accSym<
 // ---------------------------------------------------- 2 BUFF ---------------------------------------------------- //
 
 // Initial MAC/MUL operation. Take inputIF as an argument to ease overloading.
-template <typename TT_DATA, typename TT_COEFF>
-INLINE_DECL T_accSym<TT_DATA, TT_COEFF> initMacSrSym(T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface,
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_DUAL_IP>
+INLINE_DECL T_accSym<TT_DATA, TT_COEFF> initMacSrSym(T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> inInterface,
                                                      T_accSym<TT_DATA, TT_COEFF> acc,
                                                      T_buff_512b<TT_DATA> xbuff,
                                                      unsigned int xstart,
@@ -2382,8 +2382,8 @@ INLINE_DECL T_accSym<TT_DATA, TT_COEFF> initMacSrSym(T_inputIF<CASC_IN_FALSE, TT
     return mulSrSym(xbuff.val, xstart, ybuff.val, ystart, zbuff.val, zstart);
 };
 
-template <typename TT_DATA, typename TT_COEFF>
-INLINE_DECL T_accSym<TT_DATA, TT_COEFF> initMacSrSym(T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface,
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_DUAL_IP>
+INLINE_DECL T_accSym<TT_DATA, TT_COEFF> initMacSrSym(T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface,
                                                      T_accSym<TT_DATA, TT_COEFF> acc,
                                                      T_buff_512b<TT_DATA> xbuff,
                                                      unsigned int xstart,
@@ -2397,8 +2397,8 @@ INLINE_DECL T_accSym<TT_DATA, TT_COEFF> initMacSrSym(T_inputIF<CASC_IN_TRUE, TT_
 // ---------------------------------------------------- 1 BUFF ---------------------------------------------------- //
 
 // Initial MAC/MUL operation. Take inputIF as an argument to ease overloading.
-template <typename TT_DATA, typename TT_COEFF>
-INLINE_DECL T_accSym<TT_DATA, TT_COEFF> initMacSrSym(T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface,
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_DUAL_IP>
+INLINE_DECL T_accSym<TT_DATA, TT_COEFF> initMacSrSym(T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> inInterface,
                                                      T_accSym<TT_DATA, TT_COEFF> acc,
                                                      T_buff_1024b<TT_DATA> xbuff,
                                                      unsigned int xstart,
@@ -2408,8 +2408,8 @@ INLINE_DECL T_accSym<TT_DATA, TT_COEFF> initMacSrSym(T_inputIF<CASC_IN_FALSE, TT
     return mulSrSym(xbuff.val, xstart, ystart, zbuff.val, zstart);
 };
 
-template <typename TT_DATA, typename TT_COEFF>
-INLINE_DECL T_accSym<TT_DATA, TT_COEFF> initMacSrSym(T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface,
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_DUAL_IP>
+INLINE_DECL T_accSym<TT_DATA, TT_COEFF> initMacSrSym(T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface,
                                                      T_accSym<TT_DATA, TT_COEFF> acc,
                                                      T_buff_1024b<TT_DATA> xbuff,
                                                      unsigned int xstart,

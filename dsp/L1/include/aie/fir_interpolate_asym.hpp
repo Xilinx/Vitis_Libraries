@@ -38,15 +38,109 @@ coefficients is therefore reversed during construction to yield conventional FIR
 
 // CEIL rounds x up to the next multiple of y, which may be x itself.
 #define CEIL(x, y) (((x + y - 1) / y) * y)
-#define intDataNeeded(x) (1 + (int)(((x)-1) / TP_INTERPOLATE_FACTOR))
+//#define intDataNeeded(x) (1 + (int)(((x)-1)/TP_INTERPOLATE_FACTOR))
 
 namespace xf {
 namespace dsp {
 namespace aie {
 namespace fir {
 namespace interpolate_asym {
-//#define _DSPLIB_FIR_INTERPOLATE_ASYM_HPP_DEBUG_
 
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_INTERPOLATE_FACTOR,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          bool TP_CASC_IN = CASC_IN_FALSE,
+          bool TP_CASC_OUT = CASC_OUT_FALSE,
+          unsigned int TP_FIR_RANGE_LEN = TP_FIR_LEN,
+          unsigned int TP_KERNEL_POSITION = 0,
+          unsigned int TP_CASC_LEN = 1,
+          unsigned int TP_USE_COEFF_RELOAD = 0, // 1 = use coeff reload, 0 = don't use coeff reload
+          unsigned int TP_DUAL_IP = 0,
+          unsigned int TP_NUM_OUTPUTS = 1,
+          unsigned int TP_API = 0,
+          int TP_MODIFY_MARGIN_OFFSET = 0,
+          unsigned int TP_COEFF_PHASE = 0,
+          unsigned int TP_COEFF_PHASE_OFFSET = 0,
+          unsigned int TP_COEFF_PHASES = 1,
+          unsigned int TP_COEFF_PHASES_LEN = TP_FIR_LEN* TP_COEFF_PHASES>
+class fir_interpolate_asym;
+
+template <typename fp = fir_params_defaults>
+class fir_interpolate_asym_tl {
+   public:
+    // Get kernel's FIR range Length
+    template <int pos>
+    static constexpr unsigned int getKernelFirRangeLen() {
+        constexpr unsigned int firRangeLen =
+            pos + 1 == fp::BTP_CASC_LEN
+                ? (fnFirRangeRem<fp::BTP_FIR_LEN, fp::BTP_CASC_LEN, pos, fp::BTP_INTERPOLATE_FACTOR>())
+                : (fnFirRange<fp::BTP_FIR_LEN, fp::BTP_CASC_LEN, pos, fp::BTP_INTERPOLATE_FACTOR>());
+        return firRangeLen;
+    };
+
+    template <int pos, int CLEN, int T_FIR_LEN, typename T_D, typename T_C, unsigned int TP_DUAL_IP, unsigned int IF>
+    static constexpr unsigned int fnCheckIfFits() {
+        constexpr unsigned int fir_range_len = getKernelFirRangeLen<pos>();
+        constexpr unsigned int m_kColumns = sizeof(T_C) == 2 ? 2 : 1; // number of mult-adds per lane for main intrinsic
+        constexpr unsigned int m_kNumOps = CEIL(fir_range_len / IF, m_kColumns) / m_kColumns;
+        constexpr unsigned int m_kDataLoadVsize = (32 / sizeof(T_D)); // number of samples in a single 256-bit load
+        constexpr int sizeOf1Read = (TP_DUAL_IP == 0) ? m_kDataLoadVsize / 2 : m_kDataLoadVsize;
+        constexpr unsigned int m_kDataRegVsize = fnSamplesIn1024<T_D>();
+        constexpr unsigned int m_kSpaces = m_kDataRegVsize - sizeOf1Read;
+        if
+            constexpr(m_kNumOps * m_kColumns > m_kSpaces) { return 0; }
+        else {
+            return 1;
+        }
+    }
+
+    // Get kernel's FIR range Length
+    static constexpr unsigned int getFirRangeLen() { return fp::BTP_FIR_RANGE_LEN; };
+
+    // Get kernel's FIR Total Tap Length
+    static constexpr unsigned int getTapLen() {
+        int rnd = fp::BTP_SSR * fp::BTP_INTERPOLATE_FACTOR;
+        return CEIL(fp::BTP_FIR_LEN, rnd) / fp::BTP_SSR;
+    };
+    static constexpr unsigned int getDF() { return 1; };
+    static constexpr unsigned int getIF() { return fp::BTP_INTERPOLATE_FACTOR; };
+
+    // Get kernel's FIR Total Tap Length
+    static constexpr unsigned int getSSRMargin() {
+        constexpr unsigned int margin =
+            fnFirMargin<fp::BTP_FIR_LEN / fp::BTP_SSR / fp::BTP_INTERPOLATE_FACTOR, typename fp::BTT_DATA>();
+        return margin;
+    };
+
+    // Get FIR variant
+    static constexpr eFIRVariant getFirType() { return eFIRVariant::kIntAsym; };
+
+    using parent_class = fir_interpolate_asym<typename fp::BTT_DATA,
+                                              typename fp::BTT_COEFF,
+                                              fp::BTP_FIR_LEN,
+                                              fp::BTP_INTERPOLATE_FACTOR,
+                                              fp::BTP_SHIFT,
+                                              fp::BTP_RND,
+                                              fp::BTP_INPUT_WINDOW_VSIZE,
+                                              fp::BTP_CASC_IN,
+                                              fp::BTP_CASC_OUT,
+                                              fp::BTP_FIR_RANGE_LEN,
+                                              fp::BTP_KERNEL_POSITION,
+                                              fp::BTP_CASC_LEN,
+                                              fp::BTP_USE_COEFF_RELOAD,
+                                              fp::BTP_DUAL_IP,
+                                              fp::BTP_NUM_OUTPUTS,
+                                              fp::BTP_API,
+                                              fp::BTP_MODIFY_MARGIN_OFFSET,
+                                              fp::BTP_COEFF_PHASE,
+                                              fp::BTP_COEFF_PHASE_OFFSET,
+                                              fp::BTP_COEFF_PHASES,
+                                              fp::BTP_COEFF_PHASES_LEN>;
+};
 //-----------------------------------------------------------------------------------------------------
 template <typename TT_DATA,
           typename TT_COEFF,
@@ -63,7 +157,12 @@ template <typename TT_DATA,
           unsigned int TP_USE_COEFF_RELOAD = 0,
           unsigned int TP_DUAL_IP = 0,
           unsigned int TP_NUM_OUTPUTS = 1,
-          unsigned int TP_API = 0>
+          unsigned int TP_API = 0,
+          int TP_MODIFY_MARGIN_OFFSET = 0,
+          unsigned int TP_COEFF_PHASE = 0,
+          unsigned int TP_COEFF_PHASE_OFFSET = 0,
+          unsigned int TP_COEFF_PHASES = 1,
+          unsigned int TP_COEFF_PHASES_LEN = TP_FIR_LEN* TP_COEFF_PHASES>
 class kernelFilterClass {
    private:
     // tap length __restrictions
@@ -75,8 +174,8 @@ class kernelFilterClass {
     static constexpr unsigned int kArchPhaseParallel = 3;
 
     // Parameter value defensive and legality checks
-    static_assert(TP_FIR_LEN <= fnMaxTapssIntAsym<TT_DATA, TT_COEFF>(),
-                  "ERROR: Max supported FIR length exceeded for TT_DATA/TT_COEFF combination. ");
+    // static_assert(TP_FIR_LEN <= fnMaxTapssIntAsym<TT_DATA,TT_COEFF>(),"ERROR: Max supported FIR length exceeded for
+    // TT_DATA/TT_COEFF combination. ");
     static_assert(TP_FIR_RANGE_LEN >= FIR_LEN_MIN,
                   "ERROR: Illegal combination of design FIR length and cascade length, resulting in kernel FIR length "
                   "below minimum required value. ");
@@ -118,7 +217,6 @@ class kernelFilterClass {
     static constexpr unsigned int m_kDataLoadVsize =
         (32 / sizeof(TT_DATA)); // number of samples in a single 256-bit load
     static constexpr unsigned int m_kSamplesInBuff = m_kDataLoadsInReg * m_kDataLoadVsize;
-    // static constexpr unsigned int m_kSamplesInBuff          = 0;
 
     static constexpr unsigned int m_kFirRangeOffset =
         fnFirRangeOffset<TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TP_INTERPOLATE_FACTOR>() /
@@ -148,9 +246,7 @@ class kernelFilterClass {
     static constexpr unsigned int m_kLCMPhases = m_kTotalLanes / m_kLanes;
     static constexpr unsigned int m_kPhases = TP_INTERPOLATE_FACTOR;
     static constexpr unsigned int m_kNumOps = CEIL(TP_FIR_RANGE_LEN / TP_INTERPOLATE_FACTOR, m_kColumns) / m_kColumns;
-    static constexpr unsigned int m_kXbuffSize = 128;                               // data buffer size in Bytes
-    static constexpr unsigned int m_kDataRegVsize = m_kXbuffSize / sizeof(TT_DATA); // samples in data buffer
-    static constexpr unsigned int m_kLsize = TP_INPUT_WINDOW_VSIZE / m_kLanes;      // loops required to consume input
+    static constexpr unsigned int m_kLsize = TP_INPUT_WINDOW_VSIZE / m_kLanes; // loops required to consume input
     static constexpr unsigned int m_kInitialLoads =
         (m_kDataBuffXOffset + (m_kPhases * m_kLanes + m_kVOutSize) / TP_INTERPOLATE_FACTOR + m_kColumns - 1 +
          (m_kLanes - 1)) /
@@ -169,35 +265,63 @@ class kernelFilterClass {
         TP_FIR_LEN - TP_FIR_RANGE_LEN - m_kFirRangeOffset * TP_INTERPOLATE_FACTOR;
     static constexpr int streamInitNullAccs = coefRangeStartIndex / m_kVOutSize;
     static constexpr int phaseOffset = streamInitNullAccs % m_kLCMPhases;
-    static constexpr int d = m_kRepeatFactor * m_kPhases;
+    static constexpr int m_kRepFactPhases = m_kRepeatFactor * m_kPhases;
     static constexpr int streamInitAccs =
-        (CEIL(streamInitNullAccs, d) - CEIL(streamInitNullAccs, m_kPhases)) / m_kPhases;
+        (CEIL(streamInitNullAccs, m_kRepFactPhases) - CEIL(streamInitNullAccs, m_kPhases)) / m_kPhases;
+
+    template <unsigned int x>
+    static constexpr int fintDataNeeded() {
+        if
+            constexpr(x == 0) { return 0; }
+        else {
+            int dataNeeded = 1 + (int)((x - 1) / TP_INTERPOLATE_FACTOR);
+            return dataNeeded;
+        }
+    };
+
     static constexpr int initPhaseDataAccesses =
-        intDataNeeded(TP_FIR_LEN - TP_FIR_RANGE_LEN - m_kFirRangeOffset * TP_INTERPOLATE_FACTOR);
-    int initPhaseDataAccesses2 =
-        intDataNeeded(TP_FIR_LEN - TP_FIR_RANGE_LEN - m_kFirRangeOffset * TP_INTERPOLATE_FACTOR);
-    static constexpr int phase1Reads = intDataNeeded(CEIL(streamInitNullAccs, d) * m_kLanes) - initPhaseDataAccesses;
+        fintDataNeeded<TP_FIR_LEN - TP_FIR_RANGE_LEN - m_kFirRangeOffset * TP_INTERPOLATE_FACTOR>();
+    static constexpr int phase1Reads =
+        fintDataNeeded<(CEIL(streamInitNullAccs, m_kRepFactPhases) * m_kLanes)>() - initPhaseDataAccesses;
     static constexpr int sizeOf1Read = (TP_DUAL_IP == 0) ? m_kDataLoadVsize / 2 : m_kDataLoadVsize;
     static constexpr int indexToWrite = (CEIL(phase1Reads, sizeOf1Read)) / sizeOf1Read;
-    static constexpr int totalNeededDataPerStrobe = intDataNeeded(m_kLanes * m_kPhases);
+    static constexpr int totalNeededDataPerStrobe = fintDataNeeded<(m_kLanes * m_kPhases)>();
     static constexpr int startIndex = 2; // arbitrarily chosen - defines the default initial index of the sbuff to write
-    static constexpr int startIndexB =
+    static constexpr int startIndexCasc =
         (startIndex + indexToWrite) %
-        (m_kDataRegVsize / sizeOf1Read); // modified startIndex, used in cascaded kernels if streamInitNullAccs!=0
+        (m_kSamplesInBuff / sizeOf1Read); // modified startIndex, used in cascaded kernels if streamInitNullAccs!=0
 
+    static constexpr int actualMarginOffset =
+        CEIL(TP_MODIFY_MARGIN_OFFSET * -1, TP_INTERPOLATE_FACTOR) / TP_INTERPOLATE_FACTOR;
     static constexpr int m_kXStart = startIndex * sizeOf1Read - (m_kColumns * (m_kNumOps - 1) + m_kColumns - 1) + add1 -
                                      coefRangeStartIndex / TP_INTERPOLATE_FACTOR;
     static constexpr int streamInitNullStrobes = CEIL(streamInitNullAccs, m_kPhases) / m_kPhases;
-    static constexpr unsigned int m_kSpaces = m_kDataRegVsize - sizeOf1Read;
-
+    alignas(32) int delay[(1024 / 8) / sizeof(int)] = {0};
+    int doInit = (TP_CASC_LEN == 1 || streamInitNullAccs == 0) ? 0 : 1;
     // Additional defensive checks
+    struct ssr_params : public fir_params_defaults {
+        using BTT_DATA = TT_DATA;
+        using BTT_COEFF = TT_COEFF;
+        static constexpr unsigned int BTP_FIR_LEN = TP_FIR_LEN;
+        static constexpr unsigned int BTP_INTERPOLATE_FACTOR = TP_INTERPOLATE_FACTOR;
+        static constexpr unsigned int BTP_CASC_LEN = TP_CASC_LEN;
+    };
     static_assert(TP_INPUT_WINDOW_VSIZE % m_kLanes == 0,
                   "ERROR: TP_INPUT_WINDOW_VSIZE must be an integer multiple of the number of lanes for this data type");
-    static_assert(TP_API == USE_WINDOW_API || m_kNumOps * m_kColumns <= m_kSpaces,
+    static_assert(TP_API == USE_WINDOW_API ||
+                      (fir_interpolate_asym_tl<ssr_params>::template fnCheckIfFits<TP_KERNEL_POSITION,
+                                                                                   TP_CASC_LEN,
+                                                                                   TP_FIR_LEN,
+                                                                                   TT_DATA,
+                                                                                   TT_COEFF,
+                                                                                   TP_DUAL_IP,
+                                                                                   TP_INTERPOLATE_FACTOR>() == 1),
                   "ERROR: FIR_LENGTH is too large for the number of kernels with Stream API, increase TP_CASC_LEN");
     static_assert(TP_DUAL_IP == 0 || TP_API == USE_STREAM_API,
                   "Error: Dual input feature is only supported for stream API");
-    INLINE_DECL unsigned int fintDataNeeded(unsigned int x) { return (1 + (int)(((x)-1) / TP_INTERPOLATE_FACTOR)); }
+    /*INLINE_DECL unsigned int fintDataNeeded(unsigned int x){
+        return (1 + (int)(((x) - 1)/TP_INTERPOLATE_FACTOR));
+    }*/
 
     // The m_internalTaps is defined in terms of samples, but loaded into a vector, so has to be memory-aligned to the
     // vector size.
@@ -223,15 +347,15 @@ class kernelFilterClass {
     // Constants for coeff reload
     static constexpr unsigned int m_kCoeffLoadSize = 256 / 8 / sizeof(TT_COEFF);
     alignas(32) TT_COEFF
-        m_oldInTaps[CEIL(TP_FIR_LEN, m_kCoeffLoadSize)]; // Previous user input coefficients with zero padding
-    bool m_coeffnEq;                                     // Are coefficients sets equal?
+        m_rawInTaps[CEIL(TP_COEFF_PHASES_LEN, m_kCoeffLoadSize)]; // Previous user input coefficients with zero padding
+    bool isUpdateRequired;                                        // Are coefficients sets equal?
 
    public:
     // Access function for AIE Synthesizer
     static unsigned int get_m_kArch() { return m_kArch; };
 
     // Constructors
-    kernelFilterClass() : m_oldInTaps{} {}
+    kernelFilterClass() : m_rawInTaps{} {}
 
     kernelFilterClass(const TT_COEFF (&taps)[TP_FIR_LEN]) {
         // Loads taps/coefficients
@@ -244,7 +368,6 @@ class kernelFilterClass {
     }
 
     void firReload(TT_COEFF* taps) {
-        const unsigned int bitsInNibble = 4;
         // Since the intrinsics can have columns, any values in memory beyond the end of the taps array could
         // contaminate the calculation.
         // To avoid this hazard, the class has its own taps array which is zero-padded to the column width for the type
@@ -256,9 +379,11 @@ class kernelFilterClass {
                 for (int column = 0; column < m_kColumns; ++column) {
                     for (int lane = 0; lane < m_kLanes; ++lane) {
                         tapIndex = TP_INTERPOLATE_FACTOR - 1 -
-                                   ((lane + phase * m_kLanes) % TP_INTERPOLATE_FACTOR) + // datum index of lane
-                                   (column * TP_INTERPOLATE_FACTOR) +                    // column offset is additive
+                                   ((lane + phase * m_kLanes + TP_MODIFY_MARGIN_OFFSET + TP_INTERPOLATE_FACTOR) %
+                                    TP_INTERPOLATE_FACTOR) +          // datum index of lane
+                                   (column * TP_INTERPOLATE_FACTOR) + // column offset is additive
                                    ((op * m_kColumns * TP_INTERPOLATE_FACTOR));
+
                         if (tapIndex < TP_FIR_RANGE_LEN && tapIndex >= 0) {
                             tapIndex = TP_FIR_LEN - 1 - tapIndex -
                                        fnFirRangeOffset<TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION,
@@ -276,6 +401,57 @@ class kernelFilterClass {
         }
     };
 
+    template <unsigned int coeffPhase,
+              unsigned int coeffPhaseOffset,
+              unsigned int coeffPhases,
+              unsigned int coeffPhasesLen>
+    void firReload(const TT_COEFF* taps) {
+        TT_COEFF* tapsPtr = (TT_COEFF*)taps;
+        firReload<coeffPhase, coeffPhaseOffset, coeffPhases, coeffPhasesLen>(tapsPtr);
+    }
+    // Reload - create internalTaps array from a full taps array.
+    // In SSR context, only Nth coeff is required, i.e., coeffs for this coeff phase must be extracted.
+    template <unsigned int coeffPhase,
+              unsigned int coeffPhaseOffset,
+              unsigned int coeffPhases,
+              unsigned int coeffPhasesLen>
+    void firReload(TT_COEFF* taps) {
+        // Since the intrinsics can have columns, any values in memory beyond the end of the taps array could
+        // contaminate the calculation.
+        // To avoid this hazard, the class has its own taps array which is zero-padded to the column width for the type
+        // of coefficient.
+        int tapIndex;
+        // Coefficients are pre-arranged such that during filter execution they may simply be read from a lookup table.
+        for (int phase = 0; phase < m_kLCMPhases; ++phase) {
+            for (int op = 0; op < m_kNumOps; ++op) {
+                for (int column = 0; column < m_kColumns; ++column) {
+                    for (int lane = 0; lane < m_kLanes; ++lane) {
+                        tapIndex = TP_INTERPOLATE_FACTOR - 1 -
+                                   ((lane + phase * m_kLanes + TP_MODIFY_MARGIN_OFFSET + TP_INTERPOLATE_FACTOR) %
+                                    TP_INTERPOLATE_FACTOR) +          // datum index of lane
+                                   (column * TP_INTERPOLATE_FACTOR) + // column offset is additive
+                                   ((op * m_kColumns * TP_INTERPOLATE_FACTOR));
+
+                        if (tapIndex < TP_FIR_RANGE_LEN && tapIndex >= 0) {
+                            unsigned int tapsOffset =
+                                tapIndex * coeffPhases + (coeffPhases - 1 - coeffPhase) + coeffPhaseOffset;
+                            unsigned int tapsAddress =
+                                coeffPhasesLen - 1 - tapsOffset -
+                                coeffPhases * fnFirRangeOffset<TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION,
+                                                               TP_INTERPOLATE_FACTOR>(); // Reverse coefficients and
+                                                                                         // apply cascade range offset.
+                                                                                         // See note at head of file.
+                            m_internalTaps[phase][op][column][lane] = taps[tapsAddress];
+
+                        } else {
+                            m_internalTaps[phase][op][column][lane] = nullElem<TT_COEFF>(); // 0 for the type.
+                        }
+                    }
+                }
+            }
+        }
+    };
+
     // Filter kernel for static coefficient designs
     void filterKernel(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                       T_outputIF<TP_CASC_OUT, TT_DATA> outInterface);
@@ -283,7 +459,7 @@ class kernelFilterClass {
     // Filter kernel for reloadable coefficient designs
     void filterKernel(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                       T_outputIF<TP_CASC_OUT, TT_DATA> outInterface,
-                      const TT_COEFF (&inTaps)[TP_FIR_LEN]);
+                      const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
     void filterKernelRtp(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                          T_outputIF<TP_CASC_OUT, TT_DATA> outInterface);
 };
@@ -301,15 +477,20 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
-          bool TP_CASC_IN = CASC_IN_FALSE,
-          bool TP_CASC_OUT = CASC_OUT_FALSE,
-          unsigned int TP_FIR_RANGE_LEN = TP_FIR_LEN,
-          unsigned int TP_KERNEL_POSITION = 0,
-          unsigned int TP_CASC_LEN = 1,
-          unsigned int TP_USE_COEFF_RELOAD = 0, // 1 = use coeff reload, 0 = don't use coeff reload
-          unsigned int TP_DUAL_IP = 0,
-          unsigned int TP_NUM_OUTPUTS = 1,
-          unsigned int TP_API = 0>
+          bool TP_CASC_IN,
+          bool TP_CASC_OUT,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_USE_COEFF_RELOAD, // 1 = use coeff reload, 0 = don't use coeff reload
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_NUM_OUTPUTS,
+          unsigned int TP_API,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym : public kernelFilterClass<TT_DATA,
                                                       TT_COEFF,
                                                       TP_FIR_LEN,
@@ -319,13 +500,18 @@ class fir_interpolate_asym : public kernelFilterClass<TT_DATA,
                                                       TP_INPUT_WINDOW_VSIZE,
                                                       TP_CASC_IN,
                                                       TP_CASC_OUT,
-                                                      TP_FIR_LEN,
+                                                      TP_FIR_RANGE_LEN,
                                                       0,
                                                       1,
                                                       TP_USE_COEFF_RELOAD,
                                                       TP_DUAL_IP,
                                                       TP_NUM_OUTPUTS,
-                                                      TP_API> {
+                                                      TP_API,
+                                                      TP_MODIFY_MARGIN_OFFSET,
+                                                      TP_COEFF_PHASE,
+                                                      TP_COEFF_PHASE_OFFSET,
+                                                      TP_COEFF_PHASES,
+                                                      TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -339,13 +525,18 @@ class fir_interpolate_asym : public kernelFilterClass<TT_DATA,
                             TP_INPUT_WINDOW_VSIZE,
                             TP_CASC_IN,
                             TP_CASC_OUT,
-                            TP_FIR_LEN,
+                            TP_FIR_RANGE_LEN,
                             0,
                             1,
                             TP_USE_COEFF_RELOAD,
                             TP_DUAL_IP,
                             TP_NUM_OUTPUTS,
-                            TP_API>(taps) {}
+                            TP_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -364,7 +555,12 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -380,22 +576,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_FALSE,
                            DUAL_IP_SINGLE,
                            2,
-                           USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_FALSE,
-                                                                      CASC_OUT_FALSE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      TP_KERNEL_POSITION,
-                                                                      TP_CASC_LEN,
-                                                                      USE_COEFF_RELOAD_FALSE,
-                                                                      DUAL_IP_SINGLE,
-                                                                      2,
-                                                                      USE_WINDOW_API> {
+                           USE_WINDOW_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_FALSE,
+                                                                           CASC_OUT_FALSE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           TP_KERNEL_POSITION,
+                                                                           TP_CASC_LEN,
+                                                                           USE_COEFF_RELOAD_FALSE,
+                                                                           DUAL_IP_SINGLE,
+                                                                           2,
+                                                                           USE_WINDOW_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -415,7 +621,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             DUAL_IP_SINGLE,
                             2,
-                            USE_WINDOW_API>(taps) {}
+                            USE_WINDOW_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -437,7 +648,12 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -453,22 +669,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_TRUE,
                            DUAL_IP_SINGLE,
                            1,
-                           USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_FALSE,
-                                                                      CASC_OUT_FALSE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      TP_KERNEL_POSITION,
-                                                                      TP_CASC_LEN,
-                                                                      USE_COEFF_RELOAD_TRUE,
-                                                                      DUAL_IP_SINGLE,
-                                                                      1,
-                                                                      USE_WINDOW_API> {
+                           USE_WINDOW_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_FALSE,
+                                                                           CASC_OUT_FALSE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           TP_KERNEL_POSITION,
+                                                                           TP_CASC_LEN,
+                                                                           USE_COEFF_RELOAD_TRUE,
+                                                                           DUAL_IP_SINGLE,
+                                                                           1,
+                                                                           USE_WINDOW_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -488,7 +714,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             DUAL_IP_SINGLE,
                             1,
-                            USE_WINDOW_API>() {}
+                            USE_WINDOW_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -496,7 +727,7 @@ class fir_interpolate_asym<TT_DATA,
     // FIR
     void filter(input_window<TT_DATA>* inWindow,
                 output_window<TT_DATA>* outWindow,
-                const TT_COEFF (&inTaps)[TP_FIR_LEN]);
+                const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
 };
 
 // Single kernel specialization. No cascade ports, with reload coefficients, dual output
@@ -509,7 +740,12 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -525,22 +761,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_TRUE,
                            DUAL_IP_SINGLE,
                            2,
-                           USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_FALSE,
-                                                                      CASC_OUT_FALSE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      TP_KERNEL_POSITION,
-                                                                      TP_CASC_LEN,
-                                                                      USE_COEFF_RELOAD_TRUE,
-                                                                      DUAL_IP_SINGLE,
-                                                                      2,
-                                                                      USE_WINDOW_API> {
+                           USE_WINDOW_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_FALSE,
+                                                                           CASC_OUT_FALSE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           TP_KERNEL_POSITION,
+                                                                           TP_CASC_LEN,
+                                                                           USE_COEFF_RELOAD_TRUE,
+                                                                           DUAL_IP_SINGLE,
+                                                                           2,
+                                                                           USE_WINDOW_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -560,7 +806,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             DUAL_IP_SINGLE,
                             2,
-                            USE_WINDOW_API>() {}
+                            USE_WINDOW_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -569,7 +820,7 @@ class fir_interpolate_asym<TT_DATA,
     void filter(input_window<TT_DATA>* inWindow,
                 output_window<TT_DATA>* outWindow,
                 output_window<TT_DATA>* outWindow2,
-                const TT_COEFF (&inTaps)[TP_FIR_LEN]);
+                const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
 };
 
 //-----------------------------------------------------------------------------------------------------
@@ -583,7 +834,12 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -599,22 +855,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_FALSE,
                            DUAL_IP_SINGLE,
                            1,
-                           USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_TRUE,
-                                                                      CASC_OUT_FALSE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      TP_KERNEL_POSITION,
-                                                                      TP_CASC_LEN,
-                                                                      USE_COEFF_RELOAD_FALSE,
-                                                                      DUAL_IP_SINGLE,
-                                                                      1,
-                                                                      USE_WINDOW_API> {
+                           USE_WINDOW_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_TRUE,
+                                                                           CASC_OUT_FALSE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           TP_KERNEL_POSITION,
+                                                                           TP_CASC_LEN,
+                                                                           USE_COEFF_RELOAD_FALSE,
+                                                                           DUAL_IP_SINGLE,
+                                                                           1,
+                                                                           USE_WINDOW_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -634,7 +900,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             DUAL_IP_SINGLE,
                             1,
-                            USE_WINDOW_API>(taps) {}
+                            USE_WINDOW_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -655,7 +926,12 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -671,22 +947,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_FALSE,
                            DUAL_IP_SINGLE,
                            2,
-                           USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_TRUE,
-                                                                      CASC_OUT_FALSE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      TP_KERNEL_POSITION,
-                                                                      TP_CASC_LEN,
-                                                                      USE_COEFF_RELOAD_FALSE,
-                                                                      DUAL_IP_SINGLE,
-                                                                      2,
-                                                                      USE_WINDOW_API> {
+                           USE_WINDOW_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_TRUE,
+                                                                           CASC_OUT_FALSE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           TP_KERNEL_POSITION,
+                                                                           TP_CASC_LEN,
+                                                                           USE_COEFF_RELOAD_FALSE,
+                                                                           DUAL_IP_SINGLE,
+                                                                           2,
+                                                                           USE_WINDOW_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -706,7 +992,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             DUAL_IP_SINGLE,
                             2,
-                            USE_WINDOW_API>(taps) {}
+                            USE_WINDOW_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -728,7 +1019,12 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -744,22 +1040,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_TRUE,
                            DUAL_IP_SINGLE,
                            1,
-                           USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_TRUE,
-                                                                      CASC_OUT_FALSE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      TP_KERNEL_POSITION,
-                                                                      TP_CASC_LEN,
-                                                                      USE_COEFF_RELOAD_TRUE,
-                                                                      DUAL_IP_SINGLE,
-                                                                      1,
-                                                                      USE_WINDOW_API> {
+                           USE_WINDOW_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_TRUE,
+                                                                           CASC_OUT_FALSE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           TP_KERNEL_POSITION,
+                                                                           TP_CASC_LEN,
+                                                                           USE_COEFF_RELOAD_TRUE,
+                                                                           DUAL_IP_SINGLE,
+                                                                           1,
+                                                                           USE_WINDOW_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -779,7 +1085,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             DUAL_IP_SINGLE,
                             1,
-                            USE_WINDOW_API>() {}
+                            USE_WINDOW_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -798,7 +1109,12 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -814,22 +1130,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_TRUE,
                            DUAL_IP_SINGLE,
                            2,
-                           USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_TRUE,
-                                                                      CASC_OUT_FALSE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      TP_KERNEL_POSITION,
-                                                                      TP_CASC_LEN,
-                                                                      USE_COEFF_RELOAD_TRUE,
-                                                                      DUAL_IP_SINGLE,
-                                                                      2,
-                                                                      USE_WINDOW_API> {
+                           USE_WINDOW_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_TRUE,
+                                                                           CASC_OUT_FALSE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           TP_KERNEL_POSITION,
+                                                                           TP_CASC_LEN,
+                                                                           USE_COEFF_RELOAD_TRUE,
+                                                                           DUAL_IP_SINGLE,
+                                                                           2,
+                                                                           USE_WINDOW_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -849,7 +1175,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             DUAL_IP_SINGLE,
                             2,
-                            USE_WINDOW_API>() {}
+                            USE_WINDOW_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -873,7 +1204,12 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_NUM_OUTPUTS>
+          unsigned int TP_NUM_OUTPUTS,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -889,22 +1225,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_FALSE,
                            DUAL_IP_SINGLE,
                            TP_NUM_OUTPUTS,
-                           USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_FALSE,
-                                                                      CASC_OUT_TRUE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      TP_KERNEL_POSITION,
-                                                                      TP_CASC_LEN,
-                                                                      USE_COEFF_RELOAD_FALSE,
-                                                                      DUAL_IP_SINGLE,
-                                                                      TP_NUM_OUTPUTS,
-                                                                      USE_WINDOW_API> {
+                           USE_WINDOW_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_FALSE,
+                                                                           CASC_OUT_TRUE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           TP_KERNEL_POSITION,
+                                                                           TP_CASC_LEN,
+                                                                           USE_COEFF_RELOAD_FALSE,
+                                                                           DUAL_IP_SINGLE,
+                                                                           TP_NUM_OUTPUTS,
+                                                                           USE_WINDOW_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -924,7 +1270,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             DUAL_IP_SINGLE,
                             TP_NUM_OUTPUTS,
-                            USE_WINDOW_API>(taps) {}
+                            USE_WINDOW_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -946,7 +1297,12 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_NUM_OUTPUTS>
+          unsigned int TP_NUM_OUTPUTS,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -962,22 +1318,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_TRUE,
                            DUAL_IP_SINGLE,
                            TP_NUM_OUTPUTS,
-                           USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_FALSE,
-                                                                      CASC_OUT_TRUE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      TP_KERNEL_POSITION,
-                                                                      TP_CASC_LEN,
-                                                                      USE_COEFF_RELOAD_TRUE,
-                                                                      DUAL_IP_SINGLE,
-                                                                      TP_NUM_OUTPUTS,
-                                                                      USE_WINDOW_API> {
+                           USE_WINDOW_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_FALSE,
+                                                                           CASC_OUT_TRUE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           TP_KERNEL_POSITION,
+                                                                           TP_CASC_LEN,
+                                                                           USE_COEFF_RELOAD_TRUE,
+                                                                           DUAL_IP_SINGLE,
+                                                                           TP_NUM_OUTPUTS,
+                                                                           USE_WINDOW_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -997,7 +1363,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             DUAL_IP_SINGLE,
                             TP_NUM_OUTPUTS,
-                            USE_WINDOW_API>() {}
+                            USE_WINDOW_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -1006,7 +1377,7 @@ class fir_interpolate_asym<TT_DATA,
     void filter(input_window<TT_DATA>* inWindow,
                 output_stream_cacc48* outCascade,
                 output_window<TT_DATA>* broadcastWindow,
-                const TT_COEFF (&inTaps)[TP_FIR_LEN]);
+                const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
 };
 
 //-----------------------------------------------------------------------------------------------------
@@ -1021,7 +1392,12 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_NUM_OUTPUTS>
+          unsigned int TP_NUM_OUTPUTS,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -1037,22 +1413,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_FALSE,
                            DUAL_IP_SINGLE,
                            TP_NUM_OUTPUTS,
-                           USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_TRUE,
-                                                                      CASC_OUT_TRUE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      TP_KERNEL_POSITION,
-                                                                      TP_CASC_LEN,
-                                                                      USE_COEFF_RELOAD_FALSE,
-                                                                      DUAL_IP_SINGLE,
-                                                                      TP_NUM_OUTPUTS,
-                                                                      USE_WINDOW_API> {
+                           USE_WINDOW_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_TRUE,
+                                                                           CASC_OUT_TRUE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           TP_KERNEL_POSITION,
+                                                                           TP_CASC_LEN,
+                                                                           USE_COEFF_RELOAD_FALSE,
+                                                                           DUAL_IP_SINGLE,
+                                                                           TP_NUM_OUTPUTS,
+                                                                           USE_WINDOW_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -1072,7 +1458,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             DUAL_IP_SINGLE,
                             TP_NUM_OUTPUTS,
-                            USE_WINDOW_API>(taps) {}
+                            USE_WINDOW_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -1095,7 +1486,12 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_NUM_OUTPUTS>
+          unsigned int TP_NUM_OUTPUTS,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -1111,22 +1507,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_TRUE,
                            DUAL_IP_SINGLE,
                            TP_NUM_OUTPUTS,
-                           USE_WINDOW_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_TRUE,
-                                                                      CASC_OUT_TRUE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      TP_KERNEL_POSITION,
-                                                                      TP_CASC_LEN,
-                                                                      USE_COEFF_RELOAD_TRUE,
-                                                                      DUAL_IP_SINGLE,
-                                                                      TP_NUM_OUTPUTS,
-                                                                      USE_WINDOW_API> {
+                           USE_WINDOW_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_TRUE,
+                                                                           CASC_OUT_TRUE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           TP_KERNEL_POSITION,
+                                                                           TP_CASC_LEN,
+                                                                           USE_COEFF_RELOAD_TRUE,
+                                                                           DUAL_IP_SINGLE,
+                                                                           TP_NUM_OUTPUTS,
+                                                                           USE_WINDOW_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -1146,7 +1552,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             DUAL_IP_SINGLE,
                             TP_NUM_OUTPUTS,
-                            USE_WINDOW_API>() {}
+                            USE_WINDOW_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -1171,7 +1582,12 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_FIR_RANGE_LEN>
+          unsigned int TP_FIR_RANGE_LEN,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -1187,22 +1603,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_FALSE,
                            DUAL_IP_SINGLE,
                            1,
-                           USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_FALSE,
-                                                                      CASC_OUT_FALSE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      0,
-                                                                      1,
-                                                                      USE_COEFF_RELOAD_FALSE,
-                                                                      DUAL_IP_SINGLE,
-                                                                      1,
-                                                                      USE_STREAM_API> {
+                           USE_STREAM_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_FALSE,
+                                                                           CASC_OUT_FALSE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           0,
+                                                                           1,
+                                                                           USE_COEFF_RELOAD_FALSE,
+                                                                           DUAL_IP_SINGLE,
+                                                                           1,
+                                                                           USE_STREAM_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -1222,7 +1648,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             DUAL_IP_SINGLE,
                             1,
-                            USE_STREAM_API>(taps) {}
+                            USE_STREAM_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -1240,7 +1671,12 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_FIR_RANGE_LEN>
+          unsigned int TP_FIR_RANGE_LEN,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -1256,22 +1692,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_FALSE,
                            DUAL_IP_SINGLE,
                            2,
-                           USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_FALSE,
-                                                                      CASC_IN_FALSE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      0,
-                                                                      1,
-                                                                      USE_COEFF_RELOAD_FALSE,
-                                                                      DUAL_IP_SINGLE,
-                                                                      2,
-                                                                      USE_STREAM_API> {
+                           USE_STREAM_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_FALSE,
+                                                                           CASC_IN_FALSE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           0,
+                                                                           1,
+                                                                           USE_COEFF_RELOAD_FALSE,
+                                                                           DUAL_IP_SINGLE,
+                                                                           2,
+                                                                           USE_STREAM_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -1291,7 +1737,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             DUAL_IP_SINGLE,
                             2,
-                            USE_STREAM_API>(taps) {}
+                            USE_STREAM_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -1308,7 +1759,12 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_FIR_RANGE_LEN>
+          unsigned int TP_FIR_RANGE_LEN,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -1324,22 +1780,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_TRUE,
                            DUAL_IP_SINGLE,
                            1,
-                           USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_FALSE,
-                                                                      CASC_IN_FALSE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      0,
-                                                                      1,
-                                                                      USE_COEFF_RELOAD_TRUE,
-                                                                      DUAL_IP_SINGLE,
-                                                                      1,
-                                                                      USE_STREAM_API> {
+                           USE_STREAM_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_FALSE,
+                                                                           CASC_IN_FALSE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           0,
+                                                                           1,
+                                                                           USE_COEFF_RELOAD_TRUE,
+                                                                           DUAL_IP_SINGLE,
+                                                                           1,
+                                                                           USE_STREAM_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -1359,7 +1825,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             DUAL_IP_SINGLE,
                             1,
-                            USE_STREAM_API>() {}
+                            USE_STREAM_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -1367,7 +1838,7 @@ class fir_interpolate_asym<TT_DATA,
     // FIR
     void filter(input_stream<TT_DATA>* inStream,
                 output_stream<TT_DATA>* outStream,
-                const TT_COEFF (&inTaps)[TP_FIR_LEN]);
+                const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
 };
 
 // Single kernel specialization. No cascade ports. Reloadable coefficients, dual output
@@ -1379,7 +1850,12 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_FIR_RANGE_LEN>
+          unsigned int TP_FIR_RANGE_LEN,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -1395,22 +1871,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_TRUE,
                            DUAL_IP_SINGLE,
                            2,
-                           USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_FALSE,
-                                                                      CASC_OUT_FALSE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      0,
-                                                                      1,
-                                                                      USE_COEFF_RELOAD_TRUE,
-                                                                      DUAL_IP_SINGLE,
-                                                                      2,
-                                                                      USE_STREAM_API> {
+                           USE_STREAM_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_FALSE,
+                                                                           CASC_OUT_FALSE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           0,
+                                                                           1,
+                                                                           USE_COEFF_RELOAD_TRUE,
+                                                                           DUAL_IP_SINGLE,
+                                                                           2,
+                                                                           USE_STREAM_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -1430,7 +1916,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             DUAL_IP_SINGLE,
                             2,
-                            USE_STREAM_API>() {}
+                            USE_STREAM_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -1439,7 +1930,7 @@ class fir_interpolate_asym<TT_DATA,
     void filter(input_stream<TT_DATA>* inStream,
                 output_stream<TT_DATA>* outStream,
                 output_stream<TT_DATA>* outStream2,
-                const TT_COEFF (&inTaps)[TP_FIR_LEN]);
+                const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
 };
 
 // cascaded kernels - final kernel specialisation. single output. static coefficients
@@ -1452,7 +1943,12 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -1468,22 +1964,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_FALSE,
                            DUAL_IP_SINGLE,
                            1,
-                           USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_TRUE,
-                                                                      CASC_OUT_FALSE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      TP_KERNEL_POSITION,
-                                                                      TP_CASC_LEN,
-                                                                      USE_COEFF_RELOAD_FALSE,
-                                                                      DUAL_IP_SINGLE,
-                                                                      1,
-                                                                      USE_STREAM_API> {
+                           USE_STREAM_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_TRUE,
+                                                                           CASC_OUT_FALSE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           TP_KERNEL_POSITION,
+                                                                           TP_CASC_LEN,
+                                                                           USE_COEFF_RELOAD_FALSE,
+                                                                           DUAL_IP_SINGLE,
+                                                                           1,
+                                                                           USE_STREAM_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -1503,7 +2009,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             DUAL_IP_SINGLE,
                             1,
-                            USE_STREAM_API>(taps) {}
+                            USE_STREAM_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -1523,7 +2034,12 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -1539,22 +2055,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_FALSE,
                            DUAL_IP_SINGLE,
                            2,
-                           USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_TRUE,
-                                                                      CASC_OUT_FALSE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      TP_KERNEL_POSITION,
-                                                                      TP_CASC_LEN,
-                                                                      USE_COEFF_RELOAD_FALSE,
-                                                                      DUAL_IP_SINGLE,
-                                                                      2,
-                                                                      USE_STREAM_API> {
+                           USE_STREAM_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_TRUE,
+                                                                           CASC_OUT_FALSE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           TP_KERNEL_POSITION,
+                                                                           TP_CASC_LEN,
+                                                                           USE_COEFF_RELOAD_FALSE,
+                                                                           DUAL_IP_SINGLE,
+                                                                           2,
+                                                                           USE_STREAM_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -1574,7 +2100,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             DUAL_IP_SINGLE,
                             2,
-                            USE_STREAM_API>(taps) {}
+                            USE_STREAM_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -1598,7 +2129,12 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_NUM_OUTPUTS>
+          unsigned int TP_NUM_OUTPUTS,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -1614,22 +2150,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_FALSE,
                            DUAL_IP_SINGLE,
                            TP_NUM_OUTPUTS,
-                           USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_FALSE,
-                                                                      CASC_OUT_TRUE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      TP_KERNEL_POSITION,
-                                                                      TP_CASC_LEN,
-                                                                      USE_COEFF_RELOAD_FALSE,
-                                                                      DUAL_IP_SINGLE,
-                                                                      TP_NUM_OUTPUTS,
-                                                                      USE_STREAM_API> {
+                           USE_STREAM_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_FALSE,
+                                                                           CASC_OUT_TRUE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           TP_KERNEL_POSITION,
+                                                                           TP_CASC_LEN,
+                                                                           USE_COEFF_RELOAD_FALSE,
+                                                                           DUAL_IP_SINGLE,
+                                                                           TP_NUM_OUTPUTS,
+                                                                           USE_STREAM_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -1649,7 +2195,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             DUAL_IP_SINGLE,
                             TP_NUM_OUTPUTS,
-                            USE_STREAM_API>(taps) {}
+                            USE_STREAM_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -1670,7 +2221,12 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_NUM_OUTPUTS>
+          unsigned int TP_NUM_OUTPUTS,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -1686,22 +2242,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_FALSE,
                            DUAL_IP_SINGLE,
                            TP_NUM_OUTPUTS,
-                           USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_TRUE,
-                                                                      CASC_OUT_TRUE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      TP_KERNEL_POSITION,
-                                                                      TP_CASC_LEN,
-                                                                      USE_COEFF_RELOAD_FALSE,
-                                                                      DUAL_IP_SINGLE,
-                                                                      TP_NUM_OUTPUTS,
-                                                                      USE_STREAM_API> {
+                           USE_STREAM_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_TRUE,
+                                                                           CASC_OUT_TRUE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           TP_KERNEL_POSITION,
+                                                                           TP_CASC_LEN,
+                                                                           USE_COEFF_RELOAD_FALSE,
+                                                                           DUAL_IP_SINGLE,
+                                                                           TP_NUM_OUTPUTS,
+                                                                           USE_STREAM_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -1721,7 +2287,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             DUAL_IP_SINGLE,
                             TP_NUM_OUTPUTS,
-                            USE_STREAM_API>(taps) {}
+                            USE_STREAM_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -1741,7 +2312,12 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -1757,22 +2333,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_TRUE,
                            DUAL_IP_SINGLE,
                            1,
-                           USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_TRUE,
-                                                                      CASC_OUT_FALSE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      TP_KERNEL_POSITION,
-                                                                      TP_CASC_LEN,
-                                                                      USE_COEFF_RELOAD_TRUE,
-                                                                      DUAL_IP_SINGLE,
-                                                                      1,
-                                                                      USE_STREAM_API> {
+                           USE_STREAM_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_TRUE,
+                                                                           CASC_OUT_FALSE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           TP_KERNEL_POSITION,
+                                                                           TP_CASC_LEN,
+                                                                           USE_COEFF_RELOAD_TRUE,
+                                                                           DUAL_IP_SINGLE,
+                                                                           1,
+                                                                           USE_STREAM_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -1792,7 +2378,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             DUAL_IP_SINGLE,
                             1,
-                            USE_STREAM_API>() {}
+                            USE_STREAM_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -1812,7 +2403,12 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -1828,22 +2424,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_TRUE,
                            DUAL_IP_SINGLE,
                            2,
-                           USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_TRUE,
-                                                                      CASC_OUT_FALSE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      TP_KERNEL_POSITION,
-                                                                      TP_CASC_LEN,
-                                                                      USE_COEFF_RELOAD_TRUE,
-                                                                      DUAL_IP_SINGLE,
-                                                                      2,
-                                                                      USE_STREAM_API> {
+                           USE_STREAM_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_TRUE,
+                                                                           CASC_OUT_FALSE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           TP_KERNEL_POSITION,
+                                                                           TP_CASC_LEN,
+                                                                           USE_COEFF_RELOAD_TRUE,
+                                                                           DUAL_IP_SINGLE,
+                                                                           2,
+                                                                           USE_STREAM_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -1863,7 +2469,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             DUAL_IP_SINGLE,
                             2,
-                            USE_STREAM_API>() {}
+                            USE_STREAM_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -1887,7 +2498,12 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_NUM_OUTPUTS>
+          unsigned int TP_NUM_OUTPUTS,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -1903,22 +2519,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_TRUE,
                            DUAL_IP_SINGLE,
                            TP_NUM_OUTPUTS,
-                           USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_FALSE,
-                                                                      CASC_OUT_TRUE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      TP_KERNEL_POSITION,
-                                                                      TP_CASC_LEN,
-                                                                      USE_COEFF_RELOAD_TRUE,
-                                                                      DUAL_IP_SINGLE,
-                                                                      TP_NUM_OUTPUTS,
-                                                                      USE_STREAM_API> {
+                           USE_STREAM_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_FALSE,
+                                                                           CASC_OUT_TRUE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           TP_KERNEL_POSITION,
+                                                                           TP_CASC_LEN,
+                                                                           USE_COEFF_RELOAD_TRUE,
+                                                                           DUAL_IP_SINGLE,
+                                                                           TP_NUM_OUTPUTS,
+                                                                           USE_STREAM_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -1938,13 +2564,20 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             DUAL_IP_SINGLE,
                             TP_NUM_OUTPUTS,
-                            USE_STREAM_API>() {}
+                            USE_STREAM_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
 
     // FIR
-    void filter(input_stream<TT_DATA>* inStream, output_stream_cacc48* inCascade, const TT_COEFF (&inTaps)[TP_FIR_LEN]);
+    void filter(input_stream<TT_DATA>* inStream,
+                output_stream_cacc48* inCascade,
+                const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
 };
 
 //-----------------------------------------------------------------------------------------------------
@@ -1959,7 +2592,12 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_NUM_OUTPUTS>
+          unsigned int TP_NUM_OUTPUTS,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -1975,22 +2613,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_TRUE,
                            DUAL_IP_SINGLE,
                            TP_NUM_OUTPUTS,
-                           USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_TRUE,
-                                                                      CASC_OUT_TRUE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      TP_KERNEL_POSITION,
-                                                                      TP_CASC_LEN,
-                                                                      USE_COEFF_RELOAD_TRUE,
-                                                                      DUAL_IP_SINGLE,
-                                                                      TP_NUM_OUTPUTS,
-                                                                      USE_STREAM_API> {
+                           USE_STREAM_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_TRUE,
+                                                                           CASC_OUT_TRUE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           TP_KERNEL_POSITION,
+                                                                           TP_CASC_LEN,
+                                                                           USE_COEFF_RELOAD_TRUE,
+                                                                           DUAL_IP_SINGLE,
+                                                                           TP_NUM_OUTPUTS,
+                                                                           USE_STREAM_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -2010,7 +2658,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             DUAL_IP_SINGLE,
                             TP_NUM_OUTPUTS,
-                            USE_STREAM_API>() {}
+                            USE_STREAM_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -2031,7 +2684,12 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_FIR_RANGE_LEN>
+          unsigned int TP_FIR_RANGE_LEN,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -2047,22 +2705,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_FALSE,
                            DUAL_IP_DUAL,
                            1,
-                           USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_FALSE,
-                                                                      CASC_OUT_FALSE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      0,
-                                                                      1,
-                                                                      USE_COEFF_RELOAD_FALSE,
-                                                                      DUAL_IP_DUAL,
-                                                                      1,
-                                                                      USE_STREAM_API> {
+                           USE_STREAM_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_FALSE,
+                                                                           CASC_OUT_FALSE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           0,
+                                                                           1,
+                                                                           USE_COEFF_RELOAD_FALSE,
+                                                                           DUAL_IP_DUAL,
+                                                                           1,
+                                                                           USE_STREAM_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -2082,7 +2750,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             DUAL_IP_DUAL,
                             1,
-                            USE_STREAM_API>(taps) {}
+                            USE_STREAM_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -2100,7 +2773,12 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_FIR_RANGE_LEN>
+          unsigned int TP_FIR_RANGE_LEN,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -2116,22 +2794,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_FALSE,
                            DUAL_IP_DUAL,
                            2,
-                           USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_FALSE,
-                                                                      CASC_IN_FALSE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      0,
-                                                                      1,
-                                                                      USE_COEFF_RELOAD_FALSE,
-                                                                      DUAL_IP_DUAL,
-                                                                      2,
-                                                                      USE_STREAM_API> {
+                           USE_STREAM_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_FALSE,
+                                                                           CASC_IN_FALSE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           0,
+                                                                           1,
+                                                                           USE_COEFF_RELOAD_FALSE,
+                                                                           DUAL_IP_DUAL,
+                                                                           2,
+                                                                           USE_STREAM_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -2151,7 +2839,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             DUAL_IP_DUAL,
                             2,
-                            USE_STREAM_API>(taps) {}
+                            USE_STREAM_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -2171,7 +2864,12 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_FIR_RANGE_LEN>
+          unsigned int TP_FIR_RANGE_LEN,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -2187,22 +2885,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_TRUE,
                            DUAL_IP_DUAL,
                            1,
-                           USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_FALSE,
-                                                                      CASC_IN_FALSE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      0,
-                                                                      1,
-                                                                      USE_COEFF_RELOAD_TRUE,
-                                                                      DUAL_IP_DUAL,
-                                                                      1,
-                                                                      USE_STREAM_API> {
+                           USE_STREAM_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_FALSE,
+                                                                           CASC_IN_FALSE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           0,
+                                                                           1,
+                                                                           USE_COEFF_RELOAD_TRUE,
+                                                                           DUAL_IP_DUAL,
+                                                                           1,
+                                                                           USE_STREAM_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -2222,7 +2930,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             DUAL_IP_DUAL,
                             1,
-                            USE_STREAM_API>() {}
+                            USE_STREAM_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -2231,7 +2944,7 @@ class fir_interpolate_asym<TT_DATA,
     void filter(input_stream<TT_DATA>* inStream,
                 input_stream<TT_DATA>* inStream2,
                 output_stream<TT_DATA>* outStream,
-                const TT_COEFF (&inTaps)[TP_FIR_LEN]);
+                const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
 };
 
 // Single kernel specialization. No cascade ports. Reloadable coefficients, dual output
@@ -2243,7 +2956,12 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_FIR_RANGE_LEN>
+          unsigned int TP_FIR_RANGE_LEN,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -2259,22 +2977,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_TRUE,
                            DUAL_IP_DUAL,
                            2,
-                           USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_FALSE,
-                                                                      CASC_OUT_FALSE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      0,
-                                                                      1,
-                                                                      USE_COEFF_RELOAD_TRUE,
-                                                                      DUAL_IP_DUAL,
-                                                                      2,
-                                                                      USE_STREAM_API> {
+                           USE_STREAM_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_FALSE,
+                                                                           CASC_OUT_FALSE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           0,
+                                                                           1,
+                                                                           USE_COEFF_RELOAD_TRUE,
+                                                                           DUAL_IP_DUAL,
+                                                                           2,
+                                                                           USE_STREAM_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -2294,7 +3022,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             DUAL_IP_DUAL,
                             2,
-                            USE_STREAM_API>() {}
+                            USE_STREAM_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -2304,7 +3037,7 @@ class fir_interpolate_asym<TT_DATA,
                 input_stream<TT_DATA>* inStream2,
                 output_stream<TT_DATA>* outStream,
                 output_stream<TT_DATA>* outStream2,
-                const TT_COEFF (&inTaps)[TP_FIR_LEN]);
+                const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
 };
 
 // cascaded kernels - final kernel specialisation. single output. static coefficients
@@ -2317,7 +3050,12 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -2333,22 +3071,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_FALSE,
                            DUAL_IP_DUAL,
                            1,
-                           USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_TRUE,
-                                                                      CASC_OUT_FALSE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      TP_KERNEL_POSITION,
-                                                                      TP_CASC_LEN,
-                                                                      USE_COEFF_RELOAD_FALSE,
-                                                                      DUAL_IP_DUAL,
-                                                                      1,
-                                                                      USE_STREAM_API> {
+                           USE_STREAM_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_TRUE,
+                                                                           CASC_OUT_FALSE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           TP_KERNEL_POSITION,
+                                                                           TP_CASC_LEN,
+                                                                           USE_COEFF_RELOAD_FALSE,
+                                                                           DUAL_IP_DUAL,
+                                                                           1,
+                                                                           USE_STREAM_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -2368,7 +3116,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             DUAL_IP_DUAL,
                             1,
-                            USE_STREAM_API>(taps) {}
+                            USE_STREAM_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -2391,7 +3144,12 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -2407,22 +3165,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_FALSE,
                            DUAL_IP_DUAL,
                            2,
-                           USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_TRUE,
-                                                                      CASC_OUT_FALSE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      TP_KERNEL_POSITION,
-                                                                      TP_CASC_LEN,
-                                                                      USE_COEFF_RELOAD_FALSE,
-                                                                      DUAL_IP_DUAL,
-                                                                      2,
-                                                                      USE_STREAM_API> {
+                           USE_STREAM_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_TRUE,
+                                                                           CASC_OUT_FALSE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           TP_KERNEL_POSITION,
+                                                                           TP_CASC_LEN,
+                                                                           USE_COEFF_RELOAD_FALSE,
+                                                                           DUAL_IP_DUAL,
+                                                                           2,
+                                                                           USE_STREAM_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -2442,7 +3210,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             DUAL_IP_DUAL,
                             2,
-                            USE_STREAM_API>(taps) {}
+                            USE_STREAM_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -2467,7 +3240,12 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_NUM_OUTPUTS>
+          unsigned int TP_NUM_OUTPUTS,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -2483,22 +3261,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_FALSE,
                            DUAL_IP_DUAL,
                            TP_NUM_OUTPUTS,
-                           USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_FALSE,
-                                                                      CASC_OUT_TRUE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      TP_KERNEL_POSITION,
-                                                                      TP_CASC_LEN,
-                                                                      USE_COEFF_RELOAD_FALSE,
-                                                                      DUAL_IP_DUAL,
-                                                                      TP_NUM_OUTPUTS,
-                                                                      USE_STREAM_API> {
+                           USE_STREAM_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_FALSE,
+                                                                           CASC_OUT_TRUE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           TP_KERNEL_POSITION,
+                                                                           TP_CASC_LEN,
+                                                                           USE_COEFF_RELOAD_FALSE,
+                                                                           DUAL_IP_DUAL,
+                                                                           TP_NUM_OUTPUTS,
+                                                                           USE_STREAM_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -2518,7 +3306,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             DUAL_IP_DUAL,
                             TP_NUM_OUTPUTS,
-                            USE_STREAM_API>(taps) {}
+                            USE_STREAM_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -2539,7 +3332,12 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_NUM_OUTPUTS>
+          unsigned int TP_NUM_OUTPUTS,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -2555,22 +3353,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_FALSE,
                            DUAL_IP_DUAL,
                            TP_NUM_OUTPUTS,
-                           USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_TRUE,
-                                                                      CASC_OUT_TRUE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      TP_KERNEL_POSITION,
-                                                                      TP_CASC_LEN,
-                                                                      USE_COEFF_RELOAD_FALSE,
-                                                                      DUAL_IP_DUAL,
-                                                                      TP_NUM_OUTPUTS,
-                                                                      USE_STREAM_API> {
+                           USE_STREAM_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_TRUE,
+                                                                           CASC_OUT_TRUE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           TP_KERNEL_POSITION,
+                                                                           TP_CASC_LEN,
+                                                                           USE_COEFF_RELOAD_FALSE,
+                                                                           DUAL_IP_DUAL,
+                                                                           TP_NUM_OUTPUTS,
+                                                                           USE_STREAM_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -2590,7 +3398,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             DUAL_IP_DUAL,
                             TP_NUM_OUTPUTS,
-                            USE_STREAM_API>(taps) {}
+                            USE_STREAM_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -2613,7 +3426,12 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -2629,22 +3447,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_TRUE,
                            DUAL_IP_DUAL,
                            1,
-                           USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_TRUE,
-                                                                      CASC_OUT_FALSE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      TP_KERNEL_POSITION,
-                                                                      TP_CASC_LEN,
-                                                                      USE_COEFF_RELOAD_TRUE,
-                                                                      DUAL_IP_DUAL,
-                                                                      1,
-                                                                      USE_STREAM_API> {
+                           USE_STREAM_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_TRUE,
+                                                                           CASC_OUT_FALSE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           TP_KERNEL_POSITION,
+                                                                           TP_CASC_LEN,
+                                                                           USE_COEFF_RELOAD_TRUE,
+                                                                           DUAL_IP_DUAL,
+                                                                           1,
+                                                                           USE_STREAM_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -2664,7 +3492,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             DUAL_IP_DUAL,
                             1,
-                            USE_STREAM_API>() {}
+                            USE_STREAM_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -2687,7 +3520,12 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -2703,22 +3541,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_TRUE,
                            DUAL_IP_DUAL,
                            2,
-                           USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_TRUE,
-                                                                      CASC_OUT_FALSE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      TP_KERNEL_POSITION,
-                                                                      TP_CASC_LEN,
-                                                                      USE_COEFF_RELOAD_TRUE,
-                                                                      DUAL_IP_DUAL,
-                                                                      2,
-                                                                      USE_STREAM_API> {
+                           USE_STREAM_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_TRUE,
+                                                                           CASC_OUT_FALSE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           TP_KERNEL_POSITION,
+                                                                           TP_CASC_LEN,
+                                                                           USE_COEFF_RELOAD_TRUE,
+                                                                           DUAL_IP_DUAL,
+                                                                           2,
+                                                                           USE_STREAM_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -2738,7 +3586,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             DUAL_IP_DUAL,
                             2,
-                            USE_STREAM_API>() {}
+                            USE_STREAM_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -2763,7 +3616,12 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_NUM_OUTPUTS>
+          unsigned int TP_NUM_OUTPUTS,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -2779,22 +3637,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_TRUE,
                            DUAL_IP_DUAL,
                            TP_NUM_OUTPUTS,
-                           USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_FALSE,
-                                                                      CASC_OUT_TRUE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      TP_KERNEL_POSITION,
-                                                                      TP_CASC_LEN,
-                                                                      USE_COEFF_RELOAD_TRUE,
-                                                                      DUAL_IP_DUAL,
-                                                                      TP_NUM_OUTPUTS,
-                                                                      USE_STREAM_API> {
+                           USE_STREAM_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_FALSE,
+                                                                           CASC_OUT_TRUE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           TP_KERNEL_POSITION,
+                                                                           TP_CASC_LEN,
+                                                                           USE_COEFF_RELOAD_TRUE,
+                                                                           DUAL_IP_DUAL,
+                                                                           TP_NUM_OUTPUTS,
+                                                                           USE_STREAM_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -2814,7 +3682,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             DUAL_IP_DUAL,
                             TP_NUM_OUTPUTS,
-                            USE_STREAM_API>() {}
+                            USE_STREAM_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
@@ -2823,7 +3696,7 @@ class fir_interpolate_asym<TT_DATA,
     void filter(input_stream<TT_DATA>* inStream,
                 input_stream<TT_DATA>* inStream2,
                 output_stream_cacc48* inCascade,
-                const TT_COEFF (&inTaps)[TP_FIR_LEN]);
+                const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
 };
 
 //-----------------------------------------------------------------------------------------------------
@@ -2838,7 +3711,12 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_NUM_OUTPUTS>
+          unsigned int TP_NUM_OUTPUTS,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
 class fir_interpolate_asym<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -2854,22 +3732,32 @@ class fir_interpolate_asym<TT_DATA,
                            USE_COEFF_RELOAD_TRUE,
                            DUAL_IP_DUAL,
                            TP_NUM_OUTPUTS,
-                           USE_STREAM_API> : public kernelFilterClass<TT_DATA,
-                                                                      TT_COEFF,
-                                                                      TP_FIR_LEN,
-                                                                      TP_INTERPOLATE_FACTOR,
-                                                                      TP_SHIFT,
-                                                                      TP_RND,
-                                                                      TP_INPUT_WINDOW_VSIZE,
-                                                                      CASC_IN_TRUE,
-                                                                      CASC_OUT_TRUE,
-                                                                      TP_FIR_RANGE_LEN,
-                                                                      TP_KERNEL_POSITION,
-                                                                      TP_CASC_LEN,
-                                                                      USE_COEFF_RELOAD_TRUE,
-                                                                      DUAL_IP_DUAL,
-                                                                      TP_NUM_OUTPUTS,
-                                                                      USE_STREAM_API> {
+                           USE_STREAM_API,
+                           TP_MODIFY_MARGIN_OFFSET,
+                           TP_COEFF_PHASE,
+                           TP_COEFF_PHASE_OFFSET,
+                           TP_COEFF_PHASES,
+                           TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
+                                                                           TT_COEFF,
+                                                                           TP_FIR_LEN,
+                                                                           TP_INTERPOLATE_FACTOR,
+                                                                           TP_SHIFT,
+                                                                           TP_RND,
+                                                                           TP_INPUT_WINDOW_VSIZE,
+                                                                           CASC_IN_TRUE,
+                                                                           CASC_OUT_TRUE,
+                                                                           TP_FIR_RANGE_LEN,
+                                                                           TP_KERNEL_POSITION,
+                                                                           TP_CASC_LEN,
+                                                                           USE_COEFF_RELOAD_TRUE,
+                                                                           DUAL_IP_DUAL,
+                                                                           TP_NUM_OUTPUTS,
+                                                                           USE_STREAM_API,
+                                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                                           TP_COEFF_PHASE,
+                                                                           TP_COEFF_PHASE_OFFSET,
+                                                                           TP_COEFF_PHASES,
+                                                                           TP_COEFF_PHASES_LEN> {
    private:
    public:
     // Constructor
@@ -2889,7 +3777,12 @@ class fir_interpolate_asym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             DUAL_IP_DUAL,
                             TP_NUM_OUTPUTS,
-                            USE_STREAM_API>() {}
+                            USE_STREAM_API,
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_COEFF_PHASE,
+                            TP_COEFF_PHASE_OFFSET,
+                            TP_COEFF_PHASES,
+                            TP_COEFF_PHASES_LEN>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }

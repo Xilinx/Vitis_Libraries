@@ -31,6 +31,7 @@
 
 #include <stdio.h>
 #include <adf.h>
+#include "fir_params_defaults.hpp"
 
 // The following maximums are the maximums tested. The function may work for larger values.
 #ifndef FIR_LEN_MAX
@@ -54,6 +55,9 @@
 // e.g. CEIL(10,8) = 16, TRUNC(10, 8) = 8
 #define CEIL(x, y) (((x + y - 1) / y) * y)
 #define TRUNC(x, y) (((x) / y) * y)
+#define FLOOR(X, Y) X >= 0 ? (int)((int)(X) / (int)(Y)) : (int)((int)((X) - (Y) + 1) / (int)(Y));
+// performs floor((float)(inVal/rnd))
+
 // Pragma unroll complains if you try to unroll(0);
 // It's safe to just unroll(1) in this circumstance.
 #define GUARD_ZERO(x) ((x) > 0 ? (x) : 1)
@@ -88,11 +92,24 @@ namespace xf {
 namespace dsp {
 namespace aie {
 
+static constexpr unsigned int kUpdWSize = 256 / 8;    // Upd_w size in Bytes (256bit) - const for all data/coeff types
+static constexpr unsigned int kZBuffSize = 256 / 8;   // Zbuff size in Bytes (256bit) - const for all data/coeff types
+static constexpr unsigned int kXYBuffSize = 1024 / 8; // XYbuff size in Bytes (1024bit) - const for all data/coeff types
+static constexpr unsigned int kBuffSize128Byte = 128; // 1024-bit buffer size in Bytes
+static constexpr unsigned int kBuffSize64Byte = 64;   // 512-bit buffer size in Bytes
+static constexpr unsigned int kBuffSize32Byte = 32;   // 256-bit buffer size in Bytes
+
+// Number of data type samples in a 1024-bit buffer
+template <typename TT_DATA>
+INLINE_DECL constexpr unsigned int fnSamplesIn1024() {
+    return kXYBuffSize / sizeof(TT_DATA);
+}
 // function to return the size of the acc,
 template <typename TT_DATA, typename TT_COEFF>
 INLINE_DECL constexpr unsigned int fnAccSize() {
     return 0;
 };
+
 template <>
 INLINE_DECL constexpr unsigned int fnAccSize<int16, int16>() {
     return 48;
@@ -347,6 +364,47 @@ INLINE_DECL constexpr unsigned int fnStreamReadWidth<cfloat, cfloat>() {
 
 namespace fir {
 
+enum eFIRVariant {
+    kSrAsym = 0,
+    kSrSym = 1,
+    kIntHB = 2,
+    kDecHB = 3,
+    kIntAsym = 4,
+    kDecAsym = 5,
+    kDecSym = 6,
+    kResamp = 7
+};
+
+inline const char* firToString(eFIRVariant fir_type) {
+    switch (fir_type) {
+        case kSrAsym:
+            return "kSrAsym ";
+            break;
+        case kSrSym:
+            return "kSrSym  ";
+            break;
+        case kIntHB:
+            return "kIntHB  ";
+            break;
+        case kDecHB:
+            return "kDecHB  ";
+            break;
+        case kIntAsym:
+            return "kIntAsym";
+            break;
+        case kDecAsym:
+            return "kDecAsym";
+            break;
+        case kDecSym:
+            return "kDecSym ";
+            break;
+        case kResamp:
+            return "kResamp ";
+            break;
+        default:
+            return "[Unknown FIR type]";
+    }
+}
 // Functions to support defensive checks
 enum { enumUnknownType = 0, enumInt16, enumCint16, enumInt32, enumCint32, enumFloat, enumCfloat };
 // function to return an enumeration of the data or coefficient type
@@ -552,6 +610,8 @@ template <typename T_D>
 struct T_outputIF<CASC_OUT_TRUE, T_D> {
     output_stream_cacc48* outCascade;
     output_window<T_D>* broadcastWindow; // broadcastWindow can just be ignored when it's the last kernel
+    output_stream<T_D>* __restrict outStream;
+    output_stream<T_D>* __restrict outStream2;
 };
 
 // Handy enum for if conditions
@@ -586,6 +646,21 @@ constexpr kernelPositionState getKernelPositionState(unsigned int kernelPosition
     // anything else is an error
     return kernelPositionState::error_kernel;
 };
+
+//----------------------------------------------------------------------
+// isComplex
+template <typename T>
+INLINE_DECL constexpr bool isComplex() {
+    return (std::is_same<T, cint16>::value || std::is_same<T, cint32>::value || std::is_same<T, cfloat>::value) ? true
+                                                                                                                : false;
+};
+
+// isFloat
+template <typename T>
+INLINE_DECL constexpr bool isFloat() {
+    return (std::is_same<T, float>::value || std::is_same<T, cfloat>::value) ? true : false;
+};
+
 //----------------------------------------------------------------------
 // nullElem
 template <typename T_RDATA>

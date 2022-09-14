@@ -52,25 +52,25 @@ List of all Makefile targets:
 
 .. code-block::
 
-    make all TARGET=<x86sim/aiesim/> PLATFORM=<FPGA platform> HOST_ARCH=<aarch64>
+    make all TARGET=<x86sim/aiesim/> PLATFORM=<FPGA platform> 
         Command to generate the design for specified Target and Shell.
-        By default, HOST_ARCH=aarch64. HOST_ARCH is required for SoC shells
+        
 
-    make sd_card TARGET=<x86sim/aiesim/> PLATFORM=<FPGA platform> HOST_ARCH=<aarch64>
+    make sd_card TARGET=<x86sim/aiesim/> PLATFORM=<FPGA platform> 
         Command to prepare sd_card files.
-        By default, HOST_ARCH=aarch64. HOST_ARCH is required for SoC shells
+        
 
-    make run TARGET=<x86sim/aiesim/> PLATFORM=<FPGA platform> HOST_ARCH=<aarch64>
+    make run TARGET=<x86sim/aiesim/> PLATFORM=<FPGA platform> 
         Command to run application in emulation.
-        By default, HOST_ARCH=aarch64. HOST_ARCH required for SoC shells
+        
 
-    make xclbin TARGET=<x86sim/aiesim/> PLATFORM=<FPGA platform> HOST_ARCH=<aarch64>
+    make xclbin TARGET=<x86sim/aiesim/> PLATFORM=<FPGA platform> 
         Command to build xclbin application.
-        By default, HOST_ARCH=aarch64. HOST_ARCH is required for SoC shells
+        
 
-    make host HOST_ARCH=<x86sim/aiesim/>
+    make host 
         Command to build host application.
-        By default, HOST_ARCH=aarch64. HOST_ARCH is required for SoC shells
+        
 
     make clean
         Command to remove the generated non-hardware files.
@@ -78,7 +78,7 @@ List of all Makefile targets:
     make cleanall
         Command to remove all the generated files.
 
-.. note:: For embedded devices like vck190, env variable SYSROOT, EDGE_COMMON_SW and PERL need to be set first, and HOST_ARCH must be set to either aarch32 or aarch64. For example,
+.. note:: For embedded devices like vck190, env variable SYSROOT, EDGE_COMMON_SW and PERL need to be set first. For example,
 
             .. code-block::
 

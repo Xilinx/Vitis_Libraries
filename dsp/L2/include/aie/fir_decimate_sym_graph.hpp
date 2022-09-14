@@ -23,9 +23,11 @@
 
 #include <adf.h>
 #include <vector>
-#include "graph_utils.hpp"
+#include "fir_graph_utils.hpp"
 #include "fir_decimate_sym.hpp"
+#include "fir_decimate_asym.hpp"
 #include "widget_api_cast.hpp"
+#include "fir_common_traits.hpp"
 
 namespace xf {
 namespace dsp {
@@ -428,10 +430,14 @@ template <typename TT_DATA,
           unsigned int TP_DUAL_IP = 0,
           unsigned int TP_USE_COEFF_RELOAD = 0, // 1 = use coeff reload, 0 = don't use coeff reload
           unsigned int TP_NUM_OUTPUTS = 1,
-          unsigned int TP_API = 0>
+          unsigned int TP_API = 0,
+          unsigned int TP_SSR = 1>
 class fir_decimate_sym_graph : public graph {
    private:
     static constexpr unsigned int kMaxTapsPerKernel = 512;
+    // parameters that may be exposed externally in the future
+    static constexpr unsigned int TP_CASC_IN = CASC_IN_FALSE;
+    static constexpr unsigned int TP_CASC_OUT = CASC_OUT_FALSE;
 
     static_assert(TP_CASC_LEN <= 40, "ERROR: Unsupported Cascade length");
 
@@ -453,15 +459,20 @@ class fir_decimate_sym_graph : public graph {
     static_assert(TP_API != 0 || inBufferSize < kMemoryModuleSize,
                   "ERROR: Input Window size (based on requrested window size and FIR length margin) exceeds Memory "
                   "Module size of 32kB");
+    static_assert(TP_API == 1 || TP_SSR == 1, "ERROR: SSR > 1 is only supported for streaming API");
+    // static_assert(TP_USE_COEFF_RELOAD==0 || TP_SSR == 1, "ERROR: SSR > 1 is only supported for static coefficients");
 
-    std::array<connect<stream, stream>*, (TP_CASC_LEN * (TP_DUAL_IP + 1))> net;
+    // 3d array for storing net information.
+    // address[inPhase][outPath][cascPos]
+    std::array<std::array<std::array<connect<stream, stream>*, TP_CASC_LEN>, TP_SSR>, TP_SSR> net;
+    std::array<std::array<std::array<connect<stream, stream>*, TP_CASC_LEN>, TP_SSR>, TP_SSR> net2;
 
     void create_connections() {
         // make input connections
         if
             constexpr(TP_API == USE_WINDOW_API || TP_DUAL_IP == DUAL_IP_SINGLE) {
                 connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA),
-                               fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(in, m_firKernels[0].in[0]);
+                               fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(in[0], m_firKernels[0].in[0]);
             }
 
         if
@@ -469,15 +480,15 @@ class fir_decimate_sym_graph : public graph {
                 if
                     constexpr(TP_API == USE_WINDOW_API) {
                         connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA),
-                                       fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(in2,
+                                       fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(in2[0],
                                                                                                m_firKernels[0].in[1]);
                     }
                 else {
                     kernel m_inWidgetKernel;
                     m_inWidgetKernel = kernel::create_object<
                         widget_api_cast<TT_DATA, USE_STREAM_API, USE_WINDOW_API, 2, TP_INPUT_WINDOW_VSIZE, 1, 0> >();
-                    connect<stream>(in, m_inWidgetKernel.in[0]);
-                    connect<stream>(in2, m_inWidgetKernel.in[1]);
+                    connect<stream>(in[0], m_inWidgetKernel.in[0]);
+                    connect<stream>(in2[0], m_inWidgetKernel.in[1]);
                     connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA),
                                    fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(m_inWidgetKernel.out[0],
                                                                                            m_firKernels[0].in[0]);
@@ -500,7 +511,7 @@ class fir_decimate_sym_graph : public graph {
                 constexpr(TP_DUAL_IP == DUAL_IP_SINGLE) {
                     for (int i = 1; i < TP_CASC_LEN; i++) {
                         connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA),
-                                       fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(in,
+                                       fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(in[0],
                                                                                                m_firKernels[i].in[0]);
                     }
                 }
@@ -521,24 +532,24 @@ class fir_decimate_sym_graph : public graph {
         if
             constexpr(TP_USE_COEFF_RELOAD == true) {
                 // make RTP connection
-                connect<parameter>(coeff, async(m_firKernels[0].in[tp_port_pos]));
+                connect<parameter>(coeff[0], async(m_firKernels[0].in[tp_port_pos]));
             }
 
         // make output connections
         if
             constexpr(TP_API == 0) {
                 connect<window<TP_INPUT_WINDOW_VSIZE / TP_DECIMATE_FACTOR * sizeof(TT_DATA)> >(
-                    m_firKernels[TP_CASC_LEN - 1].out[0], out);
+                    m_firKernels[TP_CASC_LEN - 1].out[0], out[0]);
                 if
                     constexpr(TP_NUM_OUTPUTS == 2) {
                         connect<window<TP_INPUT_WINDOW_VSIZE / TP_DECIMATE_FACTOR * sizeof(TT_DATA)> >(
-                            m_firKernels[TP_CASC_LEN - 1].out[1], out2);
+                            m_firKernels[TP_CASC_LEN - 1].out[1], out2[0]);
                     }
             }
         else {
-            connect<stream>(m_firKernels[TP_CASC_LEN - 1].out[0], out);
+            connect<stream>(m_firKernels[TP_CASC_LEN - 1].out[0], out[0]);
             if
-                constexpr(TP_NUM_OUTPUTS == 2) { connect<stream>(m_firKernels[TP_CASC_LEN - 1].out[1], out2); }
+                constexpr(TP_NUM_OUTPUTS == 2) { connect<stream>(m_firKernels[TP_CASC_LEN - 1].out[1], out2[0]); }
         }
         for (int i = 0; i < TP_CASC_LEN; i++) {
             // Specify mapping constraints
@@ -547,10 +558,35 @@ class fir_decimate_sym_graph : public graph {
             source(m_firKernels[i]) = "fir_decimate_sym.cpp";
         }
     }
+    static constexpr unsigned int rnd = TP_DECIMATE_FACTOR * TP_SSR;
 
-    kernel m_firKernels[TP_CASC_LEN];
+    struct ssr_params : public fir_params_defaults {
+        static constexpr int Bdim = TP_SSR * TP_SSR - 1;
+        using BTT_DATA = TT_DATA;
+        using BTT_COEFF = TT_COEFF;
+        static constexpr int BTP_FIR_LEN = CEIL(TP_FIR_LEN, TP_SSR);
+        static constexpr unsigned int BTP_FIR_RANGE_LEN =
+            TRUNC((CEIL(TP_FIR_LEN, rnd) / (TP_CASC_LEN * TP_SSR)), TP_DECIMATE_FACTOR);
+        static constexpr unsigned int BTP_DECIMATE_FACTOR = TP_DECIMATE_FACTOR;
+        static constexpr int BTP_SHIFT = TP_SHIFT;
+        static constexpr int BTP_RND = TP_RND;
+        static constexpr int BTP_INPUT_WINDOW_VSIZE = TP_INPUT_WINDOW_VSIZE;
+        static constexpr int BTP_CASC_LEN = TP_CASC_LEN;
+        static constexpr int BTP_USE_COEFF_RELOAD = TP_USE_COEFF_RELOAD;
+        static constexpr int BTP_NUM_OUTPUTS = TP_NUM_OUTPUTS;
+        static constexpr int BTP_DUAL_IP = TP_DUAL_IP;
+        static constexpr int BTP_API = TP_API;
+        static constexpr int BTP_SSR = TP_SSR;
+        static constexpr int BTP_CASC_IN = 0;
+        static constexpr int BTP_COEFF_PHASES = TP_SSR;
+        static constexpr int BTP_COEFF_PHASES_LEN = TP_FIR_LEN;
+    };
+
+    using lastSSRKernelAsym = ssr_kernels<ssr_params, decimate_asym::fir_decimate_asym_tl>;
 
    public:
+    kernel m_firKernels[TP_CASC_LEN * TP_SSR * TP_SSR];
+
     /**
      * The input data to the function. This input is either a window API of
      * samples of TT_DATA type or stream API (depending on TP_API).
@@ -560,29 +596,28 @@ class fir_decimate_sym_graph : public graph {
      * Margin size (in Bytes) equals to TP_FIR_LEN rounded up to a nearest
      * multiple of 32 bytes.
      **/
-    port<input> in;
+    port_array<input, TP_SSR> in;
 
     /**
      * The output data from the function. This output is either a window API of
      * samples of TT_DATA type or stream API (depending on TP_API).
      * Number of output samples is determined by interpolation & decimation factors (if present).
      **/
-    port<output> out;
+    port_array<output, TP_SSR> out;
 
     /**
-     * The conditional input data to the function.
+     * The conditional input array data to the function.
      * This input is (generated when TP_DUAL_IP == 1) either a window API of
      * samples of TT_DATA type or stream API (depending on TP_API).
      *
      **/
-    port_conditional<input, (TP_DUAL_IP == 1)> in2;
-
+    port_conditional_array<input, (TP_DUAL_IP == 1), TP_SSR> in2;
     /**
      * The conditional coefficient data to the function.
      * This port is (generated when TP_USE_COEFF_RELOAD == 1) an array of coefficients of TT_COEFF type.
      *
      **/
-    port_conditional<input, (TP_USE_COEFF_RELOAD == 1)> coeff;
+    port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), TP_SSR> coeff;
 
     /**
      * The output data from the function.
@@ -590,7 +625,12 @@ class fir_decimate_sym_graph : public graph {
      * samples of TT_DATA type or stream API (depending on TP_API).
      * Number of output samples is determined by interpolation & decimation factors (if present).
      **/
-    port_conditional<output, (TP_NUM_OUTPUTS == 2)> out2;
+    port_conditional_array<output, (TP_NUM_OUTPUTS == 2), TP_SSR> out2;
+    /**
+     * The conditional input array data to the function.
+     * This input is (generated when TP_CASC_IN == CASC_IN_TRUE) either a cascade input.
+     **/
+    port_conditional_array<output, (TP_CASC_IN == CASC_IN_TRUE), TP_SSR> casc_in;
 
     /**
      * Access function to get pointer to kernel (or first kernel in a chained configuration).
@@ -601,7 +641,10 @@ class fir_decimate_sym_graph : public graph {
     * @brief Access function to get kernel's architecture (or first kernel's architecture in a chained configuration).
     **/
     unsigned int getKernelArchs() {
-        constexpr unsigned int firRange = (TP_CASC_LEN == 1) ? TP_FIR_LEN : fnFirRangeSym<TP_FIR_LEN, TP_CASC_LEN, 0>();
+        constexpr unsigned int rnd = TP_SSR * TP_DECIMATE_FACTOR;
+        constexpr unsigned int firLenPerSSR = CEIL(TP_FIR_LEN, rnd) / TP_SSR;
+        constexpr unsigned int firRange =
+            (TP_CASC_LEN == 1) ? firLenPerSSR : fnFirRangeSym<firLenPerSSR, TP_CASC_LEN, 0>();
         // return the architecture for first kernel in the design (only one for single kernel designs).
         // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
         // best.
@@ -623,22 +666,59 @@ class fir_decimate_sym_graph : public graph {
      * @param[in] taps   a reference to the std::vector array of taps values of type TT_COEFF.
      **/
     fir_decimate_sym_graph() {
-        // create kernels
-        create_casc_kernel<TP_CASC_LEN, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
-                           TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS,
-                           TP_API>::create(m_firKernels);
-        create_connections();
+        if
+            constexpr(TP_SSR == 1) {
+                create_casc_kernel<TP_CASC_LEN, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
+                                   TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS,
+                                   TP_API>::create(m_firKernels);
+                create_connections();
+            }
+        else {
+            lastSSRKernelAsym::create_and_recurse(m_firKernels);
+            lastSSRKernelAsym::create_connections(m_firKernels, &in[0], in2, &out[0], out2, coeff, net, net2, casc_in,
+                                                  "fir_decimate_asym.cpp");
+        }
     }
 
     /**
      * @brief This is the constructor function for the FIR graph with reloadable coefficients.
      **/
     fir_decimate_sym_graph(const std::vector<TT_COEFF>& taps) {
-        create_casc_kernel<TP_CASC_LEN, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
-                           TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS,
-                           TP_API>::create(m_firKernels, taps);
-        create_connections();
+        if
+            constexpr(TP_SSR == 1) {
+                create_casc_kernel<TP_CASC_LEN, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
+                                   TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS,
+                                   TP_API>::create(m_firKernels, taps);
+                create_connections();
+            }
+        else {
+            std::vector<TT_COEFF> asymTaps = lastSSRKernelAsym::convert_sym_taps_to_asym(TP_FIR_LEN, taps);
+            lastSSRKernelAsym::create_and_recurse(m_firKernels, asymTaps);
+            lastSSRKernelAsym::create_connections(m_firKernels, &in[0], in2, &out[0], out2, coeff, net, net2, casc_in,
+                                                  "fir_decimate_asym.cpp");
+        }
     }
+
+    static constexpr unsigned int fnGetMaxTapsPerKernel() { return 512; }
+
+    template <int T_FIR_LEN, typename T_D, int T_DF>
+    static constexpr unsigned int fnGetMinCascLen() {
+        constexpr int kMaxTaps = fnGetMaxTapsPerKernel();
+        return getMinCascLen<(T_FIR_LEN * T_DF / 2), kMaxTaps>();
+    };
+
+    template <typename T_D, typename T_C, int T_PORTS>
+    static constexpr unsigned int fnGetOptTapsPerKernel() {
+        unsigned int optTaps = fnGetOptTapsPerKernelSrAsym<T_D, T_C, T_PORTS>();
+        return optTaps;
+    };
+
+    template <int T_FIR_LEN, typename T_D, typename T_C, int T_API, int T_PORTS, int T_DF>
+    static constexpr unsigned int fnGetOptCascLen() {
+        constexpr int kMaxTaps = fnGetMaxTapsPerKernel();
+        constexpr int kRawOptTaps = fnGetOptTapsPerKernel<T_D, T_C, T_PORTS>();
+        return getOptCascLen<kMaxTaps, kRawOptTaps, (T_FIR_LEN * T_DF / 2)>();
+    };
 };
 /**
   * @endcond

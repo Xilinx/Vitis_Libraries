@@ -25,10 +25,32 @@ xf::dsp::aie::testcase::test_graph filter;
 int main(void) {
     filter.init();
 #if (USE_COEFF_RELOAD == 1)
-    filter.update(filter.coeff, filter.m_taps[0], (FIR_LEN + 1) / 4 + 1);
+    // SSR configs call asym kernels, that require asym taps
+    constexpr unsigned int hbRTPLength = (FIR_LEN + 1) / 4 + 1;
+    constexpr unsigned int asymRTPLength = CEIL((FIR_LEN + 1) / 2, P_SSR) + 1;
+    COEFF_TYPE tapsAsym[asymRTPLength];
+
+#if (P_PARA_DECI_POLY > 1)
+    // Convert compressed array into Asymmetric and odd numbered - with Center tap
+    xf::dsp::aie::convert_hb_taps_to_asym(tapsAsym, hbRTPLength, filter.m_taps[0], P_SSR);
+    for (int i = 0; i < P_SSR; i++) {
+        filter.update(filter.coeff[i], tapsAsym, asymRTPLength);
+    }
+#else
+    filter.update(filter.coeff[0], filter.m_taps[0], hbRTPLength);
+#endif
     filter.run(NITER / 2);
     filter.wait();
-    filter.update(filter.coeff, filter.m_taps[1], (FIR_LEN + 1) / 4 + 1);
+
+#if (P_PARA_DECI_POLY > 1)
+    xf::dsp::aie::convert_hb_taps_to_asym(tapsAsym, hbRTPLength, filter.m_taps[1], P_SSR);
+    for (int i = 0; i < P_SSR; i++) {
+        filter.update(filter.coeff[i], tapsAsym, asymRTPLength);
+    }
+#else
+    filter.update(filter.coeff[0], filter.m_taps[1], hbRTPLength);
+#endif
+
     filter.run(NITER / 2);
 #else
     filter.run(NITER);

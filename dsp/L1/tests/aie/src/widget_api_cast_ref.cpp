@@ -32,30 +32,34 @@ template <typename TT_DATA,
           unsigned int TP_NUM_INPUTS,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_NUM_OUTPUT_CLONES,
-          unsigned int TP_PATTERN>
+          unsigned int TP_PATTERN,
+          unsigned int TP_HEADER_BYTES>
 void widget_api_cast_ref<TT_DATA,
                          TP_IN_API,
                          TP_OUT_API,
                          TP_NUM_INPUTS,
                          TP_WINDOW_VSIZE,
                          TP_NUM_OUTPUT_CLONES,
-                         TP_PATTERN>::transferData(input_window<TT_DATA>* inWindow0,
-                                                   output_window<TT_DATA>* outWindow0) {
+                         TP_PATTERN,
+                         TP_HEADER_BYTES>::transferData(input_window<TT_DATA>* inWindow0,
+                                                        output_window<TT_DATA>* outWindow0) {
     TT_DATA d_in;
 
-    for (unsigned int i = 0; i < TP_WINDOW_VSIZE; i++) {
+    for (unsigned int i = 0; i < TP_WINDOW_VSIZE + TP_HEADER_BYTES / sizeof(TT_DATA); i++) {
         d_in = window_readincr(inWindow0); // read input data
         window_writeincr((output_window<TT_DATA>*)outWindow0, d_in);
     }
 };
 
 // Widget API Cast - dual cloned output 'specialization'
-template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN>
-void widget_api_cast_ref<TT_DATA, kWindowAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN>::transferData(
-    input_window<TT_DATA>* inWindow0, output_window<TT_DATA>* outWindow0, output_window<TT_DATA>* outWindow1) {
+template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+void widget_api_cast_ref<TT_DATA, kWindowAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN, TP_HEADER_BYTES>::
+    transferData(input_window<TT_DATA>* inWindow0,
+                 output_window<TT_DATA>* outWindow0,
+                 output_window<TT_DATA>* outWindow1) {
     TT_DATA d_in;
 
-    for (unsigned int i = 0; i < TP_WINDOW_VSIZE; i++) {
+    for (unsigned int i = 0; i < TP_WINDOW_VSIZE + TP_HEADER_BYTES / sizeof(TT_DATA); i++) {
         d_in = window_readincr(inWindow0); // read input data
         window_writeincr((output_window<TT_DATA>*)outWindow0, d_in);
         window_writeincr((output_window<TT_DATA>*)outWindow1, d_in);
@@ -63,15 +67,15 @@ void widget_api_cast_ref<TT_DATA, kWindowAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 2,
 };
 
 // Widget API Cast - triple output 'specialization'
-template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN>
-void widget_api_cast_ref<TT_DATA, kWindowAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 3, TP_PATTERN>::transferData(
-    input_window<TT_DATA>* inWindow0,
-    output_window<TT_DATA>* outWindow0,
-    output_window<TT_DATA>* outWindow1,
-    output_window<TT_DATA>* outWindow2) {
+template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+void widget_api_cast_ref<TT_DATA, kWindowAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 3, TP_PATTERN, TP_HEADER_BYTES>::
+    transferData(input_window<TT_DATA>* inWindow0,
+                 output_window<TT_DATA>* outWindow0,
+                 output_window<TT_DATA>* outWindow1,
+                 output_window<TT_DATA>* outWindow2) {
     TT_DATA d_in;
 
-    for (unsigned int i = 0; i < TP_WINDOW_VSIZE; i++) {
+    for (unsigned int i = 0; i < TP_WINDOW_VSIZE + TP_HEADER_BYTES / sizeof(TT_DATA); i++) {
         d_in = window_readincr(inWindow0); // read input data
         window_writeincr((output_window<TT_DATA>*)outWindow0, d_in);
         window_writeincr((output_window<TT_DATA>*)outWindow1, d_in);
@@ -80,24 +84,26 @@ void widget_api_cast_ref<TT_DATA, kWindowAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 3,
 };
 
 // Widget API Cast - 1 stream input 1 window output
-template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN>
-void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 1, TP_PATTERN>::transferData(
-    input_stream<TT_DATA>* inStream0, output_window<TT_DATA>* outWindow0) {
+template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>::
+    transferData(input_stream<TT_DATA>* inStream0, output_window<TT_DATA>* outWindow0) {
     TT_DATA d_in;
 
-    for (unsigned int i = 0; i < TP_WINDOW_VSIZE; i++) {
+    for (unsigned int i = 0; i < TP_WINDOW_VSIZE + TP_HEADER_BYTES / sizeof(TT_DATA); i++) {
         d_in = readincr(inStream0); // read input data
         window_writeincr((output_window<TT_DATA>*)outWindow0, d_in);
     }
 };
 
 // Widget API Cast - 1 stream input 2 window output
-template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN>
-void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN>::transferData(
-    input_stream<TT_DATA>* inStream0, output_window<TT_DATA>* outWindow0, output_window<TT_DATA>* outWindow1) {
+template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN, TP_HEADER_BYTES>::
+    transferData(input_stream<TT_DATA>* inStream0,
+                 output_window<TT_DATA>* outWindow0,
+                 output_window<TT_DATA>* outWindow1) {
     TT_DATA d_in;
 
-    for (unsigned int i = 0; i < TP_WINDOW_VSIZE; i++) {
+    for (unsigned int i = 0; i < TP_WINDOW_VSIZE + TP_HEADER_BYTES / sizeof(TT_DATA); i++) {
         d_in = readincr(inStream0); // read input data
         window_writeincr((output_window<TT_DATA>*)outWindow0, d_in);
         window_writeincr((output_window<TT_DATA>*)outWindow1, d_in);
@@ -105,15 +111,15 @@ void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 2,
 };
 
 // Widget API Cast - 1 stream input 3 window output
-template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN>
-void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 3, TP_PATTERN>::transferData(
-    input_stream<TT_DATA>* inStream0,
-    output_window<TT_DATA>* outWindow0,
-    output_window<TT_DATA>* outWindow1,
-    output_window<TT_DATA>* outWindow2) {
+template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 3, TP_PATTERN, TP_HEADER_BYTES>::
+    transferData(input_stream<TT_DATA>* inStream0,
+                 output_window<TT_DATA>* outWindow0,
+                 output_window<TT_DATA>* outWindow1,
+                 output_window<TT_DATA>* outWindow2) {
     TT_DATA d_in;
 
-    for (unsigned int i = 0; i < TP_WINDOW_VSIZE; i++) {
+    for (unsigned int i = 0; i < TP_WINDOW_VSIZE + TP_HEADER_BYTES / sizeof(TT_DATA); i++) {
         d_in = readincr(inStream0); // read input data
         window_writeincr((output_window<TT_DATA>*)outWindow0, d_in);
         window_writeincr((output_window<TT_DATA>*)outWindow1, d_in);
@@ -122,16 +128,16 @@ void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 3,
 };
 
 // Widget API Cast - 1 stream input 4 window output
-template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN>
-void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 4, TP_PATTERN>::transferData(
-    input_stream<TT_DATA>* inStream0,
-    output_window<TT_DATA>* outWindow0,
-    output_window<TT_DATA>* outWindow1,
-    output_window<TT_DATA>* outWindow2,
-    output_window<TT_DATA>* outWindow3) {
+template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 4, TP_PATTERN, TP_HEADER_BYTES>::
+    transferData(input_stream<TT_DATA>* inStream0,
+                 output_window<TT_DATA>* outWindow0,
+                 output_window<TT_DATA>* outWindow1,
+                 output_window<TT_DATA>* outWindow2,
+                 output_window<TT_DATA>* outWindow3) {
     TT_DATA d_in;
 
-    for (unsigned int i = 0; i < TP_WINDOW_VSIZE; i++) {
+    for (unsigned int i = 0; i < TP_WINDOW_VSIZE + TP_HEADER_BYTES / sizeof(TT_DATA); i++) {
         d_in = readincr(inStream0); // read input data
         window_writeincr((output_window<TT_DATA>*)outWindow0, d_in);
         window_writeincr((output_window<TT_DATA>*)outWindow1, d_in);
@@ -142,15 +148,27 @@ void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 4,
 
 // Dual stream in
 // Widget API Cast - 2 stream input 1 window output
-template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN>
-void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1, TP_PATTERN>::transferData(
-    input_stream<TT_DATA>* inStream0, input_stream<TT_DATA>* inStream1, output_window<TT_DATA>* outWindow0) {
+template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>::
+    transferData(input_stream<TT_DATA>* inStream0,
+                 input_stream<TT_DATA>* inStream1,
+                 output_window<TT_DATA>* outWindow0) {
     TT_DATA d_in, d_in2;
     constexpr unsigned int kWriteSize = 256 / 8; // in bytes
     constexpr unsigned int kStreamReadSize = 128 / 8;
     constexpr unsigned int kNumStreams = 2;
     constexpr unsigned int kSampleSize = sizeof(TT_DATA);
     constexpr unsigned int Lsize = TP_WINDOW_VSIZE * kSampleSize / (kWriteSize);
+
+    // header handling
+    if
+        constexpr(TP_HEADER_BYTES > 0) {
+            for (int i = 0; i < TP_HEADER_BYTES / sizeof(TT_DATA); i++) {
+                d_in = readincr(inStream1); // read just to empty it
+                d_in = readincr(inStream0); // read header from one stream only
+                window_writeincr((output_window<TT_DATA>*)outWindow0, d_in);
+            }
+        }
 
     if
         constexpr(TP_PATTERN == 0) {
@@ -197,18 +215,29 @@ void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1,
 };
 
 // Widget API Cast - 2 stream input 2 window output
-template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN>
-void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 2, TP_PATTERN>::transferData(
-    input_stream<TT_DATA>* inStream0,
-    input_stream<TT_DATA>* inStream1,
-    output_window<TT_DATA>* outWindow0,
-    output_window<TT_DATA>* outWindow1) {
+template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 2, TP_PATTERN, TP_HEADER_BYTES>::
+    transferData(input_stream<TT_DATA>* inStream0,
+                 input_stream<TT_DATA>* inStream1,
+                 output_window<TT_DATA>* outWindow0,
+                 output_window<TT_DATA>* outWindow1) {
     TT_DATA d_in;
     constexpr unsigned int kWriteSize = 256 / 8; // in bytes
     constexpr unsigned int kStreamReadSize = 128 / 8;
     constexpr unsigned int kNumStreams = 2;
     constexpr unsigned int kSampleSize = sizeof(TT_DATA);
     constexpr unsigned int Lsize = TP_WINDOW_VSIZE * kSampleSize / (kWriteSize);
+
+    // header handling
+    if
+        constexpr(TP_HEADER_BYTES > 0) {
+            for (int i = 0; i < TP_HEADER_BYTES / sizeof(TT_DATA); i++) {
+                d_in = readincr(inStream1); // read just to empty it
+                d_in = readincr(inStream0); // read header from one stream only
+                window_writeincr((output_window<TT_DATA>*)outWindow0, d_in);
+                window_writeincr((output_window<TT_DATA>*)outWindow1, d_in);
+            }
+        }
 
     if
         constexpr(TP_PATTERN == 0) {
@@ -259,19 +288,30 @@ void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 2,
 };
 
 // Widget API Cast - 2 stream input 3 window output
-template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN>
-void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 3, TP_PATTERN>::transferData(
-    input_stream<TT_DATA>* inStream0,
-    input_stream<TT_DATA>* inStream1,
-    output_window<TT_DATA>* outWindow0,
-    output_window<TT_DATA>* outWindow1,
-    output_window<TT_DATA>* outWindow2) {
+template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 3, TP_PATTERN, TP_HEADER_BYTES>::
+    transferData(input_stream<TT_DATA>* inStream0,
+                 input_stream<TT_DATA>* inStream1,
+                 output_window<TT_DATA>* outWindow0,
+                 output_window<TT_DATA>* outWindow1,
+                 output_window<TT_DATA>* outWindow2) {
     TT_DATA d_in;
     constexpr unsigned int kWriteSize = 256 / 8; // in bytes
     constexpr unsigned int kStreamReadSize = 128 / 8;
     constexpr unsigned int kNumStreams = 2;
     constexpr unsigned int kSampleSize = sizeof(TT_DATA);
     constexpr unsigned int Lsize = TP_WINDOW_VSIZE * kSampleSize / (kWriteSize);
+
+    if
+        constexpr(TP_HEADER_BYTES > 0) {
+            for (int i = 0; i < TP_HEADER_BYTES / sizeof(TT_DATA); i++) {
+                d_in = readincr(inStream1); // read just to empty it
+                d_in = readincr(inStream0); // read header from one stream only
+                window_writeincr((output_window<TT_DATA>*)outWindow0, d_in);
+                window_writeincr((output_window<TT_DATA>*)outWindow1, d_in);
+                window_writeincr((output_window<TT_DATA>*)outWindow2, d_in);
+            }
+        }
 
     if
         constexpr(TP_PATTERN == 0) {
@@ -329,20 +369,32 @@ void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 3,
 };
 
 // Widget API Cast - 2 stream input 4 window output
-template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN>
-void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 4, TP_PATTERN>::transferData(
-    input_stream<TT_DATA>* inStream0,
-    input_stream<TT_DATA>* inStream1,
-    output_window<TT_DATA>* outWindow0,
-    output_window<TT_DATA>* outWindow1,
-    output_window<TT_DATA>* outWindow2,
-    output_window<TT_DATA>* outWindow3) {
+template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 4, TP_PATTERN, TP_HEADER_BYTES>::
+    transferData(input_stream<TT_DATA>* inStream0,
+                 input_stream<TT_DATA>* inStream1,
+                 output_window<TT_DATA>* outWindow0,
+                 output_window<TT_DATA>* outWindow1,
+                 output_window<TT_DATA>* outWindow2,
+                 output_window<TT_DATA>* outWindow3) {
     TT_DATA d_in;
     constexpr unsigned int kWriteSize = 256 / 8; // in bytes
     constexpr unsigned int kStreamReadSize = 128 / 8;
     constexpr unsigned int kNumStreams = 2;
     constexpr unsigned int kSampleSize = sizeof(TT_DATA);
     constexpr unsigned int Lsize = TP_WINDOW_VSIZE * kSampleSize / (kWriteSize);
+
+    if
+        constexpr(TP_HEADER_BYTES > 0) {
+            for (int i = 0; i < TP_HEADER_BYTES / sizeof(TT_DATA); i++) {
+                d_in = readincr(inStream1); // read just to empty it
+                d_in = readincr(inStream0); // read header from one stream only
+                window_writeincr((output_window<TT_DATA>*)outWindow0, d_in);
+                window_writeincr((output_window<TT_DATA>*)outWindow1, d_in);
+                window_writeincr((output_window<TT_DATA>*)outWindow2, d_in);
+                window_writeincr((output_window<TT_DATA>*)outWindow3, d_in);
+            }
+        }
 
     if
         constexpr(TP_PATTERN == 0) {
@@ -407,24 +459,36 @@ void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 4,
 };
 
 // Widget API Cast - window to stream, 1 to 1
-template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN>
-void widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 1, TP_PATTERN>::transferData(
-    input_window<TT_DATA>* inWindow0, output_stream<TT_DATA>* outStream0) {
+template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+void widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>::
+    transferData(input_window<TT_DATA>* inWindow0, output_stream<TT_DATA>* outStream0) {
     TT_DATA d_in;
 
-    for (unsigned int i = 0; i < TP_WINDOW_VSIZE; i++) {
+    for (unsigned int i = 0; i < TP_WINDOW_VSIZE + TP_HEADER_BYTES / sizeof(TT_DATA); i++) {
         d_in = window_readincr(inWindow0); // read input data
         writeincr(outStream0, d_in);
     }
 };
 
 // Widget API Cast - window to stream, 1 to 2
-template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN>
-void widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN>::transferData(
-    input_window<TT_DATA>* inWindow0, output_stream<TT_DATA>* outStream0, output_stream<TT_DATA>* outStream1) {
+template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+void widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN, TP_HEADER_BYTES>::
+    transferData(input_window<TT_DATA>* inWindow0,
+                 output_stream<TT_DATA>* outStream0,
+                 output_stream<TT_DATA>* outStream1) {
     TT_DATA d_in;
     constexpr unsigned int kSamplesIn128b = 16 / sizeof(TT_DATA);
-    constexpr unsigned int Lsize = TP_WINDOW_VSIZE / (2 * kSamplesIn128b);
+    constexpr unsigned int Lsize = (TP_WINDOW_VSIZE) / (2 * kSamplesIn128b);
+
+    // header handling - clone to both outputs
+    if
+        constexpr(TP_HEADER_BYTES > 0) {
+            for (int i = 0; i < TP_HEADER_BYTES / sizeof(TT_DATA); i++) {
+                d_in = window_readincr(inWindow0); // read input data samplewise
+                writeincr(outStream0, d_in);
+                writeincr(outStream1, d_in);
+            }
+        }
 
     if
         constexpr(TP_PATTERN == 0) {

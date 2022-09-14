@@ -364,7 +364,7 @@ if ( $cascLen eq "" ) {
         open(IN, '<' . $inFile . '.beforeInt16LinePerSample') or die $!;
         open(OUT, '>' . $inFile) or die $!;
         while (<IN>) {
-            s/\s(-?[0-9]+)//g ;
+            s/\s+(-?[0-9]+)\s?/\n$1/g ;
             print OUT $_;
         }
         close(OUT)

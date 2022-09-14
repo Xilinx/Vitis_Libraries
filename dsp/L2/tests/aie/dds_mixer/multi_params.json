@@ -27,8 +27,8 @@
             "WINDOW_VSIZE":"320",
             "P_API":"1",
             "UUT_SSR":"16",
-            "DDS_PHASE_INC": "0xD6555555",
-            "INITIAL_DDS_OFFSET" : "0xD6555555"
+            "DDS_PHASE_INC": "1797958314",
+            "INITIAL_DDS_OFFSET" : "1797958314"
         },
         "test_5_dds_mixer": {
             "DATA_TYPE":"cint32",

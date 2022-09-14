@@ -18,11 +18,42 @@
 #include <stdlib.h>
 #include "fft_r2comb_ref.hpp"
 
+#ifndef _DSPLIB_FFT_R2_COMB_REF_DEBUG_
+//#define _DSPLIB_FFT_R2_COMB_REF_DEBUG_
+//#include "debug_utils.h"
+#endif //_DSPLIB_FFT_R2_COMB_REF_DEBUG_
+
+// unitVector cannot be in fft_ref_utils because that is used by 2 different kernels, so leads to multiple definition.
+template <typename T_D>
+constexpr T_D kunitVector(){};
+template <>
+cint16 constexpr kunitVector<cint16>() {
+    cint16 temp;
+    temp.real = 1;
+    temp.imag = 0;
+    return temp;
+};
+template <>
+cint32 constexpr kunitVector<cint32>() {
+    cint32 temp;
+    temp.real = 1;
+    temp.imag = 0;
+    return temp;
+};
+template <>
+cfloat constexpr kunitVector<cfloat>() {
+    cfloat temp;
+    temp.real = 1.0;
+    temp.imag = 0.0;
+    return temp;
+};
+
 namespace xf {
 namespace dsp {
 namespace aie {
 namespace fft {
 namespace r2comb {
+
 /*
   FFT/iFFT DIT r2 combiner  reference model
 */
@@ -61,7 +92,8 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_PARALLEL_POWER>
+          unsigned int TP_PARALLEL_POWER,
+          unsigned int TP_ORIG_PAR_POWER>
 void fft_r2comb_ref<TT_DATA,
                     TT_TWIDDLE,
                     TP_POINT_SIZE,
@@ -69,13 +101,15 @@ void fft_r2comb_ref<TT_DATA,
                     TP_SHIFT,
                     TP_DYN_PT_SIZE,
                     TP_WINDOW_VSIZE,
-                    TP_PARALLEL_POWER>::r2StageInt(TT_DATA* samplesA,
+                    TP_PARALLEL_POWER,
+                    TP_ORIG_PAR_POWER>::r2StageInt(TT_DATA* samplesA,
                                                    TT_DATA* samplesB,
                                                    TT_TWIDDLE* twiddles,
                                                    int pptSize,
                                                    bool inv) {
     int ptSize = TP_DYN_PT_SIZE == 0 ? TP_POINT_SIZE : pptSize;
     int loopSize = (ptSize >> TP_PARALLEL_POWER) >> 1; // each loop calc 2 samples
+
     constexpr unsigned int kRadix = 2;
     typedef typename T_base_type_struct<TT_DATA>::T_base_type TT_BASE_DATA;
     cint64 sam1, sam2, sam2rot;
@@ -116,7 +150,8 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_PARALLEL_POWER>
+          unsigned int TP_PARALLEL_POWER,
+          unsigned int TP_ORIG_PAR_POWER>
 void fft_r2comb_ref<TT_DATA,
                     TT_TWIDDLE,
                     TP_POINT_SIZE,
@@ -124,7 +159,8 @@ void fft_r2comb_ref<TT_DATA,
                     TP_SHIFT,
                     TP_DYN_PT_SIZE,
                     TP_WINDOW_VSIZE,
-                    TP_PARALLEL_POWER>::r2StageFloat(TT_DATA* samplesA,
+                    TP_PARALLEL_POWER,
+                    TP_ORIG_PAR_POWER>::r2StageFloat(TT_DATA* samplesA,
                                                      TT_DATA* samplesB,
                                                      TT_TWIDDLE* twiddles,
                                                      int pptSize,
@@ -166,7 +202,8 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_PARALLEL_POWER>
+          unsigned int TP_PARALLEL_POWER,
+          unsigned int TP_ORIG_PAR_POWER>
 void fft_r2comb_ref<TT_DATA,
                     TT_TWIDDLE,
                     TP_POINT_SIZE,
@@ -174,18 +211,101 @@ void fft_r2comb_ref<TT_DATA,
                     TP_SHIFT,
                     TP_DYN_PT_SIZE,
                     TP_WINDOW_VSIZE,
-                    TP_PARALLEL_POWER>::fft_r2comb_ref_main(input_window<TT_DATA>* inWindow,
+                    TP_PARALLEL_POWER,
+                    TP_ORIG_PAR_POWER>::fft_r2comb_ref_main(input_window<TT_DATA>* inWindow,
                                                             output_window<TT_DATA>* outWindow) {
-    constexpr int n = (TP_POINT_SIZE >> TP_PARALLEL_POWER);
-    TT_DATA* xbuff = (TT_DATA*)inWindow->ptr;
-    TT_DATA* obuff = (TT_DATA*)outWindow->ptr;
-    bool inv = TP_FFT_NIFFT == 1 ? false : true; // may be overwritten if dyn_pt_size is set
-    for (int frameStart = 0; frameStart < TP_WINDOW_VSIZE; frameStart += n) {
-        if
-            constexpr(is_cfloat<TT_DATA>()) { r2StageFloat(xbuff + frameStart, obuff + frameStart, twiddles, n, inv); }
-        else {
-            r2StageInt(xbuff + frameStart, obuff + frameStart, twiddles, n,
-                       inv); // only called for the first stage so stage is implied
+    if
+        constexpr(TP_DYN_PT_SIZE == 1) {
+            constexpr int kMinPtSizePwr = 4;
+            constexpr int kMaxPtSizePwr = 12;
+            constexpr unsigned int kHeaderSize = 32 / (sizeof(TT_DATA)); // dynamic point size header size in samples
+            constexpr unsigned int kPtSizePwr = fnGetPointSizePower<TP_POINT_SIZE>();
+            constexpr unsigned int kR2Stages =
+                std::is_same<TT_DATA, cfloat>::value
+                    ? kPtSizePwr
+                    : (kPtSizePwr % 2 == 1 ? 1 : 0); // There is one radix 2 stage if we have an odd power of 2 point
+                                                     // size, but for cfloat all stages are R2.
+            constexpr unsigned int kR4Stages = std::is_same<TT_DATA, cfloat>::value ? 0 : kPtSizePwr / 2;
+            constexpr unsigned int shift = 15; // unsigned weight (binary point position) of TT_TWIDDLE
+            unsigned int stageShift = 0;
+
+            TT_DATA* headerPtr;
+            TT_DATA header;
+            int16 ptSizePwr =
+                kPtSizePwr; // default to static point size value. May be overwritten if dynamic point size selected.
+            TT_DATA dummyttdata; // used to consume blank data in header.
+            unsigned int ptSize =
+                TP_POINT_SIZE; // default to static point size value. May be overwritten if dynamic point size selected.
+            bool inv = TP_FFT_NIFFT == 1 ? false : true; // may be overwritten if dyn_pt_size is set
+            TT_DATA headerOut;
+
+            headerPtr = (TT_DATA*)inWindow->ptr;
+            header = window_readincr(inWindow);
+            ; //*headerPtr++;//saved for later when output to outWindow
+            window_writeincr(outWindow, header);
+            inv = header.real == 0 ? true : false;
+            header = window_readincr(inWindow); //*headerPtr++;//saved for later when output to outWindow
+            ptSizePwr = (int32)header.real - (TP_ORIG_PAR_POWER - TP_PARALLEL_POWER);
+            window_writeincr(outWindow, header);
+            for (int i = 2; i < kHeaderSize - 1; i++) {
+                header = window_readincr(inWindow);
+                window_writeincr(outWindow, header);
+            }
+            header = window_readincr(inWindow);
+
+            if (ptSizePwr >= kMinPtSizePwr && ptSizePwr <= kMaxPtSizePwr && (int32)header.real == 0) {
+                window_writeincr(outWindow, header); // Status word. 0 indicated all ok.
+                // window_incr(inWindow,kHeaderSize);
+                // override values set for constant point size with values derived from the header in a dynamic point
+                // size frame
+                ptSize = ((unsigned int)1) << ptSizePwr;
+
+                int tw_base = twiddle_tables[kPtSizePwr - ptSizePwr];
+                int n = ptSize;
+
+                TT_DATA* xbuff = (TT_DATA*)inWindow->ptr;
+                TT_DATA* obuff = (TT_DATA*)outWindow->ptr;
+
+                // first, blank the whole output window (bar the header which has already been output)
+                for (int i = 0; i < TP_WINDOW_VSIZE; i++) {
+                    obuff[i] = nullElem<TT_DATA>();
+                }
+
+                for (int frameStart = 0; frameStart < TP_WINDOW_VSIZE;
+                     frameStart += (TP_POINT_SIZE >> TP_PARALLEL_POWER)) {
+                    if
+                        constexpr(is_cfloat<TT_DATA>()) {
+                            r2StageFloat(xbuff + frameStart, obuff + frameStart, &twiddles[tw_base], n, inv);
+                        }
+                    else {
+                        r2StageInt(xbuff + frameStart, obuff + frameStart, &twiddles[tw_base], n,
+                                   inv); // only called for the first stage so stage is implied
+                    }
+                }
+            } else { // illegal dynamic point size
+                header = kunitVector<TT_DATA>();
+                window_writeincr(outWindow, header);
+                TT_DATA* obuff = (TT_DATA*)outWindow->ptr;
+                // blank the whole output window (bar the header which has already been output)
+                for (int i = 0; i < TP_WINDOW_VSIZE; i++) {
+                    obuff[i] = nullElem<TT_DATA>();
+                }
+            }
+        }
+    else {                                 // static frame size
+        constexpr int n = (TP_POINT_SIZE); // actually a dummy. The stage functions below use TP_POINT_SIZE directly.
+        TT_DATA* xbuff = (TT_DATA*)inWindow->ptr;
+        TT_DATA* obuff = (TT_DATA*)outWindow->ptr;
+        constexpr bool inv = TP_FFT_NIFFT == 1 ? false : true; // may be overwritten if dyn_pt_size is set
+        for (int frameStart = 0; frameStart < TP_WINDOW_VSIZE; frameStart += n) {
+            if
+                constexpr(is_cfloat<TT_DATA>()) {
+                    r2StageFloat(xbuff + frameStart, obuff + frameStart, twiddles, n, inv);
+                }
+            else {
+                r2StageInt(xbuff + frameStart, obuff + frameStart, twiddles, n,
+                           inv); // only called for the first stage so stage is implied
+            }
         }
     }
 };

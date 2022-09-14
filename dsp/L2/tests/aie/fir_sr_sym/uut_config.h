@@ -99,5 +99,11 @@
 #define DUAL_IP 0
 #endif
 
+#if (DUAL_IP == 1 && PORT_API == 1)
+#define DUAL_INPUT_SAMPLES 1
+#else
+#define DUAL_INPUT_SAMPLES 0
+#endif
+
 // END OF UUT CONFIGURATION
 //------------------------------------------------------------------------------

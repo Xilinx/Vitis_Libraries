@@ -4,6 +4,7 @@
             "DATA_TYPE":"cint16",
             "COEFF_TYPE":"int16",
             "FIR_LEN":"199",
+            "DUAL_IP":"1",
             "SHIFT":"20",
             "INPUT_WINDOW_VSIZE":"256"
         },
@@ -11,6 +12,7 @@
             "DATA_TYPE":"cint16",
             "COEFF_TYPE":"int16",
             "FIR_LEN":"129",
+            "DUAL_IP":"1",
             "SHIFT":"15",
             "INPUT_WINDOW_VSIZE":"256"
         },
@@ -18,6 +20,7 @@
             "DATA_TYPE":"cint16",
             "COEFF_TYPE":"int16",
             "FIR_LEN":"89",
+            "DUAL_IP":"1",
             "SHIFT":"15",
             "INPUT_WINDOW_VSIZE":"256"
         },
@@ -25,6 +28,7 @@
             "DATA_TYPE":"cint16",
             "COEFF_TYPE":"int16",
             "FIR_LEN":"63",
+            "DUAL_IP":"1",
             "SHIFT":"15",
             "INPUT_WINDOW_VSIZE":"256"
         },
@@ -33,6 +37,7 @@
             "COEFF_TYPE":"cint16",
             "COEFF_SIZE":"4",
             "FIR_LEN":"30",
+            "DUAL_IP":"1",
             "SHIFT":"15",
             "INPUT_WINDOW_VSIZE":"512",
             "CASC_LEN":"3"
@@ -42,6 +47,7 @@
             "COEFF_TYPE":"cint16",
             "COEFF_SIZE":"4",
             "FIR_LEN":"24",
+            "DUAL_IP":"0",
             "SHIFT":"15",
             "INPUT_WINDOW_VSIZE":"256"
         },
@@ -50,6 +56,7 @@
             "COEFF_TYPE":"cint16",
             "COEFF_SIZE":"4",
             "FIR_LEN":"24",
+            "DUAL_IP":"0",
             "SHIFT":"15",
             "INPUT_WINDOW_VSIZE":"256",
             "CASC_LEN":"2"
@@ -86,6 +93,64 @@
             "PORT_API":"1",
             "SHIFT":"16",
             "INPUT_WINDOW_VSIZE":"256"
+        },
+        "test_11_fir_32t_cint32_cint32_stream": {
+            "DATA_TYPE":"cint32",
+            "COEFF_TYPE":"cint32",
+            "COEFF_SIZE":"8",
+            "FIR_LEN":"8",
+            "CASC_LEN":"1",
+            "PORT_API":"1",
+            "NUM_OUTPUTS":"2",
+            "SHIFT":"16",
+            "INPUT_WINDOW_VSIZE":"256"
+        },
+        "test_12_int32_dual_ip_streams": {
+            "DATA_TYPE":"int32",
+            "COEFF_TYPE":"int32",
+            "FIR_LEN":"32",
+            "SHIFT":"16",
+            "CASC_LEN":"1",
+            "DUAL_IP":"1",
+            "NUM_OUTPUTS":"2",
+            "PORT_API":"1",
+            "INPUT_WINDOW_VSIZE":"256"
+        },
+        "test_13_cint32_dual_ip_window": {
+            "DATA_TYPE":"int32",
+            "COEFF_TYPE":"int32",
+            "FIR_LEN":"32",
+            "SHIFT":"16",
+            "CASC_LEN":"1",
+            "DUAL_IP":"1",
+            "NUM_OUTPUTS":"2",
+            "PORT_API":"0",
+            "INPUT_WINDOW_VSIZE":"256"
+        },
+        "test_14_cint16_ssr": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"cint16",
+            "FIR_LEN":"48",
+            "SHIFT":"16",
+            "CASC_LEN":"2",
+            "DUAL_IP":"1",
+            "NUM_OUTPUTS":"2",
+            "PORT_API":"1",
+            "INPUT_WINDOW_VSIZE":"25600",
+            "UUT_SSR":"3"
+        },
+        "test_15_cint16_ssr_reload": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"cint16",
+            "FIR_LEN":"48",
+            "SHIFT":"16",
+            "CASC_LEN":"2",
+            "DUAL_IP":"1",
+            "NUM_OUTPUTS":"2",
+            "PORT_API":"1",
+            "INPUT_WINDOW_VSIZE":"25600",
+            "USE_COEFF_RELOAD":"1",
+            "UUT_SSR":"3"
         }
     }
 }

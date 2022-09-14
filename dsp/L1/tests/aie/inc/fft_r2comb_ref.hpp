@@ -21,6 +21,7 @@ FFT/iFFT DIT single channel reference model
 
 #ifndef _DSPLIB_FFT_R2COMB_REF_DEBUG_
 //#define _DSPLIB_FFT_R2_COMB_REF_DEBUG_
+//#include "debug_utils.h"
 #endif //_DSPLIB_FFT_R2COMB_REF_DEBUG_
 
 #include <adf.h>
@@ -43,11 +44,16 @@ template <typename TT_DATA,    // type of data input and output
           unsigned int TP_SHIFT,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE = TP_POINT_SIZE,
-          unsigned int TP_PARALLEL_POWER = 1>
+          unsigned int TP_PARALLEL_POWER = 1,
+          unsigned int TP_ORIG_PAR_POWER = TP_PARALLEL_POWER>
 class fft_r2comb_ref {
    private:
-    TT_TWIDDLE twiddles[(TP_POINT_SIZE / 2) >> TP_PARALLEL_POWER];
-
+    static constexpr unsigned int kSupportedPtSizes = 12; // 16 to 64k.
+    int twiddle_tables[kSupportedPtSizes];
+    TT_TWIDDLE twiddles[(TP_POINT_SIZE / (2 - TP_DYN_PT_SIZE)) >> TP_PARALLEL_POWER]; // inelegant way of saying table
+                                                                                      // for dynamic point size is 2x
+                                                                                      // the static one because it is
+                                                                                      // 1+1/2+1/4+...
    public:
     unsigned int kIndex;
     // Constructor
@@ -56,13 +62,37 @@ class fft_r2comb_ref {
     fft_r2comb_ref(unsigned int inIdx) {
         kIndex = inIdx;
         const TT_TWIDDLE* twiddle_master = fnGetR2TwiddleMasterBase<TT_TWIDDLE>();
-        //    int idx = ((kR2MasterTableSize>>TP_PARALLEL_POWER) * kIndex);
-        //    int stride =  (2*kR2MasterTableSize/TP_POINT_SIZE);
-        int idx = 2 * kR2MasterTableSize / TP_POINT_SIZE * kIndex;
-        int stride = (2 * kR2MasterTableSize / TP_POINT_SIZE) << TP_PARALLEL_POWER;
-        for (int i = 0; i<(TP_POINT_SIZE / 2)>> TP_PARALLEL_POWER; i++) {
-            twiddles[i] = twiddle_master[idx];
-            idx += stride;
+
+        int idx;
+        int stride;
+        int table_index = 0;
+        int table_base_index = 0;
+
+        int ptSize = TP_POINT_SIZE;
+        if
+            constexpr(TP_DYN_PT_SIZE == 1) {
+                for (int table_size = (TP_POINT_SIZE / 2) >> TP_PARALLEL_POWER; table_size >= 8;
+                     table_size = (table_size >> 1)) {
+                    idx = 2 * kR2MasterTableSize / ptSize * kIndex;
+                    stride = ((2 * kR2MasterTableSize / ptSize) << TP_PARALLEL_POWER);
+                    twiddle_tables[table_base_index++] = table_index;
+                    for (int i = 0; i<(ptSize / 2)>> TP_PARALLEL_POWER; i++) {
+                        twiddles[table_index] = twiddle_master[idx];
+                        idx += stride;
+                        table_index++;
+                    }
+                    ptSize = (ptSize >> 1);
+                }
+            }
+        else {
+            idx = 2 * kR2MasterTableSize / ptSize * kIndex;
+            stride = ((2 * kR2MasterTableSize / ptSize) << TP_PARALLEL_POWER);
+            twiddle_tables[table_base_index++] = table_index;
+            for (int i = 0; i<(ptSize / 2)>> TP_PARALLEL_POWER; i++) {
+                twiddles[table_index] = twiddle_master[idx];
+                idx += stride;
+                table_index++;
+            }
         }
     }
     // Register Kernel Class

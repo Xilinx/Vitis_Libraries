@@ -54,54 +54,28 @@ class fir_interpolate_asym_ref {
         // This reference model uses taps directly. It does not need to pad the taps array
         // to the column width because the concept of columns does not apply to the ref model.
         for (int i = 0; i < FIR_LEN; ++i) {
-            m_internalTapsRef[i] = taps[FIR_LEN - 1 - i];
+            m_internalTaps[i] = taps[FIR_LEN - 1 - i];
         }
     }
+    // Constructor
+    fir_interpolate_asym_ref() {}
+
     // Register Kernel Class
     static void registerKernelClass() {
-        REGISTER_FUNCTION(fir_interpolate_asym_ref::filter);
-        // REGISTER_PARAMETER(m_internalTapsRef);
+        if
+            constexpr(TP_USE_COEFF_RELOAD == 1) { REGISTER_FUNCTION(fir_interpolate_asym_ref::filterRtp); }
+        else {
+            REGISTER_FUNCTION(fir_interpolate_asym_ref::filter);
+        }
     }
     // FIR
     void filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow);
+    void filterRtp(input_window<TT_DATA>* inWindow,
+                   output_window<TT_DATA>* outWindow,
+                   const TT_COEFF (&inTaps)[TP_FIR_LEN]);
 
    private:
-    TT_COEFF chess_storage(% chess_alignof(v8cint16)) m_internalTapsRef[TP_FIR_LEN];
-};
-
-//-----------------------------------------------------------------------------------------------------
-// Interpolate Asym Reference Model Class - reloadable coefficients, single output
-template <typename TT_DATA,  // type of data input and output
-          typename TT_COEFF, // type of coefficients           (e.g. int16, cint32)
-          unsigned int TP_FIR_LEN,
-          unsigned int TP_INTERPOLATE_FACTOR,
-          unsigned int TP_SHIFT,
-          unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_NUM_OUTPUTS,
-          unsigned int TP_API>
-class fir_interpolate_asym_ref<TT_DATA,
-                               TT_COEFF,
-                               TP_FIR_LEN,
-                               TP_INTERPOLATE_FACTOR,
-                               TP_SHIFT,
-                               TP_RND,
-                               TP_INPUT_WINDOW_VSIZE,
-                               USE_COEFF_RELOAD_TRUE,
-                               TP_NUM_OUTPUTS,
-                               TP_API> {
-   public:
-    // Constructor
-    fir_interpolate_asym_ref() {}
-    // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym_ref::filter); }
-    // FIR
-    void filter(input_window<TT_DATA>* inWindow,
-                output_window<TT_DATA>* outWindow,
-                const TT_COEFF (&inTaps)[TP_FIR_LEN]);
-
-   private:
-    TT_COEFF chess_storage(% chess_alignof(v8cint16)) m_internalTapsRef[TP_FIR_LEN];
+    alignas(32) TT_COEFF m_internalTaps[TP_FIR_LEN];
 };
 }
 }

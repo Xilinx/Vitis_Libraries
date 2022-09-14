@@ -89,25 +89,37 @@ class fir_resampler_ref_graph : public graph {
     };
     void make_connections() {
         // Make input connections
+
+        constexpr unsigned int headerConfigSize = 256 / 8; // 256-bits of configuration info organized in int32 fields
+        constexpr unsigned int headerByteSize =
+            TP_USE_COEFF_RELOAD == 2 ? CEIL(TP_FIR_LEN * sizeof(TT_COEFF), headerConfigSize) + headerConfigSize
+                                     : 0; // align to 32 Byte boundary
+        // Byte size of window buffer.
+        constexpr unsigned int inputWindowByteSize = TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) + headerByteSize;
+        constexpr unsigned int inputWindowVectorSize = inputWindowByteSize / sizeof(TT_DATA);
+        constexpr unsigned int outputWindowByteSize =
+            TP_INTERPOLATE_FACTOR * TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) / TP_DECIMATE_FACTOR;
+        constexpr unsigned int outputWindowVectorSize = outputWindowByteSize / sizeof(TT_DATA);
+
         if
             constexpr(TP_DUAL_IP == 1 && TP_API == 1) {
                 constexpr int kNumInputs = 2;                    // 2 stream inputs
                 constexpr int kNumOutputs = kNumFirKernelInputs; //
                 m_widgetKernelIn = kernel::create_object<
-                    widget_api_cast_ref<TT_DATA, TP_API, USE_WINDOW_API, kNumInputs, TP_INPUT_WINDOW_VSIZE, kNumOutputs,
+                    widget_api_cast_ref<TT_DATA, TP_API, USE_WINDOW_API, kNumInputs, inputWindowVectorSize, kNumOutputs,
                                         kInterleavePattern> >();
 
                 connect<stream>(in[0], m_widgetKernelIn.in[0]);
                 connect<stream>(in2[0], m_widgetKernelIn.in[1]);
                 connect<
-                    window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA),
+                    window<inputWindowByteSize,
                            fnFirMargin<(TP_FIR_LEN + TP_INTERPOLATE_FACTOR - 1) / TP_INTERPOLATE_FACTOR, TT_DATA>() *
                                sizeof(TT_DATA)> >(m_widgetKernelIn.out[0], m_firKernel.in[0]);
                 runtime<ratio>(m_widgetKernelIn) = 0.9;
                 source(m_widgetKernelIn) = "widget_api_cast_ref.cpp";
             }
         else {
-            connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA),
+            connect<window<inputWindowByteSize,
                            fnFirMargin<(TP_FIR_LEN + TP_INTERPOLATE_FACTOR - 1) / TP_INTERPOLATE_FACTOR, TT_DATA>() *
                                sizeof(TT_DATA)> >(in[0], m_firKernel.in[0]);
         }
@@ -118,19 +130,15 @@ class fir_resampler_ref_graph : public graph {
                 constexpr int kNumOutputs = TP_NUM_OUTPUTS;      //
 
                 m_widgetKernelOut = kernel::create_object<
-                    widget_api_cast_ref<TT_DATA, USE_WINDOW_API, TP_API, kNumInputs,
-                                        TP_INTERPOLATE_FACTOR * TP_INPUT_WINDOW_VSIZE / TP_DECIMATE_FACTOR, kNumOutputs,
-                                        kInterleavePattern> >();
+                    widget_api_cast_ref<TT_DATA, USE_WINDOW_API, TP_API, kNumInputs, outputWindowVectorSize,
+                                        kNumOutputs, kInterleavePattern> >();
 
-                connect<window<TP_INTERPOLATE_FACTOR * TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) / TP_DECIMATE_FACTOR> >(
-                    m_firKernel.out[0], m_widgetKernelOut.in[0]);
+                connect<window<outputWindowByteSize> >(m_firKernel.out[0], m_widgetKernelOut.in[0]);
 
                 if
                     constexpr(TP_API == USE_WINDOW_API) {
-                        connect<window<TP_INTERPOLATE_FACTOR * TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) /
-                                       TP_DECIMATE_FACTOR> >(m_widgetKernelOut.out[0], out[0]);
-                        connect<window<TP_INTERPOLATE_FACTOR * TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) /
-                                       TP_DECIMATE_FACTOR> >(m_widgetKernelOut.out[1], out2[0]);
+                        connect<window<outputWindowByteSize> >(m_widgetKernelOut.out[0], out[0]);
+                        connect<window<outputWindowByteSize> >(m_widgetKernelOut.out[1], out2[0]);
                     }
                 else {
                     connect<stream>(m_widgetKernelOut.out[0], out[0]);
@@ -141,8 +149,7 @@ class fir_resampler_ref_graph : public graph {
                 runtime<ratio>(m_widgetKernelOut) = 0.9;
             }
         else {
-            connect<window<TP_INTERPOLATE_FACTOR * TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) / TP_DECIMATE_FACTOR> >(
-                m_firKernel.out[0], out[0]);
+            connect<window<outputWindowByteSize> >(m_firKernel.out[0], out[0]);
         }
 
         if

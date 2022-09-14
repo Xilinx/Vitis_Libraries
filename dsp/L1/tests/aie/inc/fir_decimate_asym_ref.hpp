@@ -50,52 +50,25 @@ class fir_decimate_asym_ref {
             m_internalTaps[i] = taps[i];
         }
     }
-
-    // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym_ref::filter); }
-
-    // FIR
-    void filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow);
-
-   private:
-    TT_COEFF chess_storage(% chess_alignof(v8cint16)) m_internalTaps[TP_FIR_LEN];
-};
-
-//-----------------------------------------------------------------------------------------------------
-// Decimate Asym Reference Model Class - reloadable coefficients, single output
-template <typename TT_DATA,
-          typename TT_COEFF,
-          unsigned int TP_FIR_LEN,
-          unsigned int TP_DECIMATE_FACTOR,
-          unsigned int TP_SHIFT,
-          unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_NUM_OUTPUTS,
-          unsigned int TP_DUAL_IP,
-          unsigned int TP_API>
-class fir_decimate_asym_ref<TT_DATA,
-                            TT_COEFF,
-                            TP_FIR_LEN,
-                            TP_DECIMATE_FACTOR,
-                            TP_SHIFT,
-                            TP_RND,
-                            TP_INPUT_WINDOW_VSIZE,
-                            USE_COEFF_RELOAD_TRUE,
-                            TP_NUM_OUTPUTS,
-                            TP_DUAL_IP,
-                            TP_API> {
-   public:
     // Constructor
     fir_decimate_asym_ref() {}
+
     // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym_ref::filter); }
+    static void registerKernelClass() {
+        if
+            constexpr(TP_USE_COEFF_RELOAD == 1) { REGISTER_FUNCTION(fir_decimate_asym_ref::filterRtp); }
+        else {
+            REGISTER_FUNCTION(fir_decimate_asym_ref::filter);
+        }
+    }
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
-                output_window<TT_DATA>* outWindow,
-                const TT_COEFF (&inTaps)[TP_FIR_LEN]);
+    void filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow);
+    void filterRtp(input_window<TT_DATA>* inWindow,
+                   output_window<TT_DATA>* outWindow,
+                   const TT_COEFF (&inTaps)[TP_FIR_LEN]);
 
    private:
-    TT_COEFF chess_storage(% chess_alignof(v8cint16)) m_internalTaps[TP_FIR_LEN];
+    alignas(32) TT_COEFF m_internalTaps[TP_FIR_LEN];
 };
 }
 }

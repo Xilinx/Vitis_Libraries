@@ -1,0 +1,62 @@
+{
+  "schema": "vmc_vitis_library_api_spec_schema-1.0",
+  "ip_name": "vmc_dds",
+  "block_info": {
+    "label": "DDS",
+    "description": ""
+  },
+  "parameters": [
+    {
+      "name": "data_type",
+      "label": "Output data type",
+      "description": "The type of individual data samples output of the DDS function",
+      "enum": [ "cint16", "cfloat" ],
+      "default": "cint16",
+      "type": "typename"
+    },
+    {
+      "name": "output_window_size",
+      "label": "Output window size (Number of Samples)",
+      "description": "The number of samples in output window",
+      "default": 32,
+      "maximum": 4096,
+      "minimum": 8,	  
+      "type": "int",
+      "validator": {
+        "file": "vmc_dds.py",
+        "function": "vmc_validate_output_window_size",
+        "args": ["data_type"]
+      }
+    },
+    {
+	  "name": "phase_increment",
+      "label": "Phase increment",
+      "description": "The phase increment between samples.",
+      "default": 0,
+      "minimum": 0,
+      "maximum": 2147483648,
+      "type": "uint"
+    },
+    {
+	  "name": "output_sampling_rate", 
+      "label": "Target output throughput (MSPS)",
+      "description": "The target output throughput of the function in MSPS",
+      "default": 200,
+      "maximum": 1000,
+      "minimum": 1,
+      "type": "int"
+    },
+    {
+	  "name": "vmc_sample_time",
+      "label": "Sample time",
+      "description": "Sample time for the block output port(s)",
+      "default": -1,
+      "type": "double"
+    }
+
+  ],
+  "generator": {
+    "file": "vmc_dds.py",
+    "function": "vmc_generate_graph"
+  }
+}

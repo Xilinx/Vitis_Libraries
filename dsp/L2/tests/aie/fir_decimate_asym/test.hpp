@@ -25,11 +25,7 @@ fir_decimate_asym graph class.
 #include "utils.hpp"
 
 #include "uut_config.h"
-#include "test_stim.hpp"
-#include "fir_common_traits.hpp"
-
-#define Q(x) #x
-#define QUOTE(x) Q(x)
+#include "test_utils.hpp"
 
 #ifndef UUT_GRAPH
 #define UUT_GRAPH fir_decimate_asym_graph
@@ -46,82 +42,45 @@ namespace testcase {
 
 namespace dsplib = xf::dsp::aie;
 
-template <unsigned int ssr, unsigned int dual, typename plioType>
-void createPLIOFileConnections(std::array<plioType, ssr*(dual + 1)>& plioPorts, std::string filename) {
-    for (unsigned int ssrIdx = 0; ssrIdx < ssr; ++ssrIdx) {
-        for (unsigned int dualIdx = 0; dualIdx < (dual + 1); ++dualIdx) {
-            std::string filenameInternal = filename;
-
-#if (NUM_OUTPUTS == 2 && PORT_API == 0)
-            if (dual == 1 && dualIdx == 1) {
-                filenameInternal.insert(filenameInternal.length() - 4, ("_clone"));
-            } else {
-#ifdef USING_UUT
-                // Insert SSR index and dual stream index into filename before extension (.txt)
-                filenameInternal.insert(filenameInternal.length() - 4,
-                                        ("_" + std::to_string(ssrIdx) + "_" + std::to_string(dualIdx)));
-#endif
-            }
-#elif defined(USING_UUT)
-            // Insert SSR index and dual stream index into filename before extension (.txt)
-            filenameInternal.insert(filenameInternal.length() - 4,
-                                    ("_" + std::to_string(ssrIdx) + "_" + std::to_string(dualIdx)));
-#endif
-            plioPorts[ssrIdx * (dual + 1) + dualIdx] =
-                plioType::create("PLIO_" + filenameInternal, adf::plio_32_bits, filenameInternal);
-        }
-    }
-}
-
 class test_graph : public graph {
    private:
     COEFF_TYPE taps[FIR_LEN];
 
    public:
-#ifndef P_SSR
-    static constexpr int P_SSR = 1; // until SSR is supported
-#endif
 #ifdef USING_UUT
     static constexpr int DUAL_INPUT_SAMPLES = (PORT_API == 1) && (DUAL_IP == 1) ? 1 : 0;
 #else
     static constexpr int DUAL_INPUT_SAMPLES = 0;
 #endif
-    std::array<input_plio, P_SSR*(DUAL_INPUT_SAMPLES + 1)> in; // 0? dual_ip - not supported by sr_sym
-    std::array<output_plio, P_SSR * NUM_OUTPUTS> out;          // NUM_OUTPUTS forces to 1 for ref
+    std::array<input_plio, P_SSR*(DUAL_INPUT_SAMPLES + 1)> in;
+    std::array<output_plio, P_SSR * NUM_OUTPUTS> out;
 
 #if (USE_COEFF_RELOAD == 1) // Reloadable coefficients
-    port<input> coeff;
+    port_conditional_array<input, USE_COEFF_RELOAD == 1, P_SSR> coeff;
 #endif
 
     COEFF_TYPE m_taps[2][FIR_LEN];
     std::vector<COEFF_TYPE> m_taps_v;
 
+    template <unsigned int windowVSize = INPUT_SAMPLES>
+    using uut_g = dsplib::fir::decimate_asym::UUT_GRAPH<DATA_TYPE,
+                                                        COEFF_TYPE,
+                                                        FIR_LEN,
+                                                        DECIMATE_FACTOR,
+                                                        SHIFT,
+                                                        ROUND_MODE,
+                                                        windowVSize,
+                                                        CASC_LEN,
+                                                        USE_COEFF_RELOAD,
+                                                        NUM_OUTPUTS,
+                                                        DUAL_IP,
+                                                        PORT_API,
+                                                        P_SSR>;
+
     // Constructor
     test_graph() {
-        printf("========================\n");
-        printf("== UUT Graph Class: ");
-        printf(QUOTE(UUT_GRAPH));
-        printf("\n");
-        printf("========================\n");
-        printf("Input samples     = %d \n", INPUT_SAMPLES);
-        printf("Input window [B]  = %lu \n", INPUT_SAMPLES * sizeof(DATA_TYPE));
-        printf("Input margin      = %lu \n", INPUT_MARGIN(FIR_LEN, DATA_TYPE));
-        printf("Output samples    = %d \n", OUTPUT_SAMPLES);
-        printf("FIR Length        = %d \n", FIR_LEN);
-        printf("Decimation factor = %d \n", DECIMATE_FACTOR);
-        printf("Shift             = %d \n", SHIFT);
-        printf("ROUND_MODE        = %d \n", ROUND_MODE);
-        printf("CASC_LEN          = %d \n", CASC_LEN);
-        printf("USE_COEFF_RELOAD  = %d \n", USE_COEFF_RELOAD);
-        printf("NUM_OUTPUTS       = %d \n", NUM_OUTPUTS);
-        printf("DUAL_IP           = %d \n", DUAL_IP);
-        printf("PORT_API          = %d \n", PORT_API);
-        printf("Data type         = ");
-        printf(QUOTE(DATA_TYPE));
-        printf("\n");
-        printf("Coeff type        = ");
-        printf(QUOTE(COEFF_TYPE));
-        printf("\n");
+        printConfig();
+
         namespace dsplib = xf::dsp::aie;
         // Generate random taps
         // STIM_GEN_INCONES, STIM_GEN_ALLONES, STIM_GEN_IMPULSE, STIM_GEN_RANDOM
@@ -149,59 +108,78 @@ class test_graph : public graph {
             m_taps_v.push_back(m_taps[0][i]);
         }
 
+#ifdef USING_UUT
         static constexpr int kMaxTaps =
-            fir::fnGetMaxTapsPerKernelDecAsym<PORT_API, DATA_TYPE, COEFF_TYPE, DECIMATE_FACTOR>();
+            uut_g<INPUT_SAMPLES>::fnGetMaxTapsPerKernel<PORT_API, DATA_TYPE, COEFF_TYPE, DECIMATE_FACTOR, P_SSR>();
         printf("For this config the Maximum Taps Per Kernel is %d\n", kMaxTaps);
         static constexpr int kMinLen =
-            fir::fnGetMinCascLenDecAsym<FIR_LEN, PORT_API, DATA_TYPE, COEFF_TYPE, DECIMATE_FACTOR>();
+            uut_g<INPUT_SAMPLES>::fnGetMinCascLen<FIR_LEN, PORT_API, DATA_TYPE, COEFF_TYPE, DECIMATE_FACTOR, P_SSR>();
         printf("For this config the Minimum CASC_LEN is %d\n", kMinLen);
 #if (PORT_API == 1)
-        static constexpr int kRawOptTaps = fir::fnGetOptTapsPerKernel<DATA_TYPE, COEFF_TYPE, DUAL_IP + 1>();
+        static constexpr int kRawOptTaps =
+            uut_g<INPUT_SAMPLES>::fnGetOptTapsPerKernel<DATA_TYPE, COEFF_TYPE, DUAL_IP + 1>();
         static constexpr int kOptTaps = kRawOptTaps < kMaxTaps ? kRawOptTaps : kMaxTaps;
         printf("For this config the Optimal Taps (streaming) Per Kernel is %d\n", kOptTaps);
-        static constexpr int kOptLen =
-            fir::fnGetOptCascLenDecAsym<FIR_LEN, DATA_TYPE, COEFF_TYPE, PORT_API, NUM_OUTPUTS, DECIMATE_FACTOR>();
+        static constexpr int kOptLen = uut_g<INPUT_SAMPLES>::fnGetOptCascLen<FIR_LEN, DATA_TYPE, COEFF_TYPE, PORT_API,
+                                                                             NUM_OUTPUTS, DECIMATE_FACTOR, P_SSR>();
         printf("For this config the Optimal CASC_LEN is %d\n", kOptLen);
 #endif
+#endif
 
-// FIR sub-graph
-#if (USE_COEFF_RELOAD == 1) // Reloadable coefficients
+#if (USE_COEFF_RELOAD != 0) // Reloadable coefficients
         static_assert(NITER % 2 == 0,
                       "ERROR: Please set NITER to be a multiple of 2 when reloadable coefficients are used");
-        dsplib::fir::decimate_asym::UUT_GRAPH<DATA_TYPE, COEFF_TYPE, FIR_LEN, DECIMATE_FACTOR, SHIFT, ROUND_MODE,
-                                              INPUT_SAMPLES, CASC_LEN, USE_COEFF_RELOAD_TRUE, NUM_OUTPUTS, DUAL_IP,
-                                              PORT_API>
-            firGraph;
+#endif
+
+#if (USE_COEFF_RELOAD == 0)
+        // Static coefficients
+        uut_g<INPUT_SAMPLES> firGraph(m_taps_v);
+#elif (USE_COEFF_RELOAD == 1)
+        // RTP coefficients
+        uut_g<INPUT_SAMPLES> firGraph;
+#else
+        //  default. Pass coeffs through graph constructor.
+        uut_g<INPUT_SAMPLES> firGraph(m_taps_v);
+#endif
+// Connect two identical FIRs to ensure we don't get any errors regarding interoperability.
+// don't mix up num_outputs to different number of inputs
+#if (USE_CHAIN == 1 && ((NUM_OUTPUTS == 1 && DUAL_IP == 0) || (NUM_OUTPUTS == 2 && DUAL_INPUT_SAMPLES == 1)))
+// FIR sub-graph
+#if (USE_COEFF_RELOAD == 1) // Reloadable coefficients
+        uut_g<INPUT_SAMPLES / DECIMATE_FACTOR> firGraph2;
 #else // Multi-kernel, static coefficients
-        dsplib::fir::decimate_asym::UUT_GRAPH<DATA_TYPE, COEFF_TYPE, FIR_LEN, DECIMATE_FACTOR, SHIFT, ROUND_MODE,
-                                              INPUT_SAMPLES, CASC_LEN, USE_COEFF_RELOAD_FALSE, NUM_OUTPUTS, DUAL_IP,
-                                              PORT_API>
-            firGraph(m_taps_v);
+        uut_g<INPUT_SAMPLES / DECIMATE_FACTOR> firGraph2(m_taps_v);
+#endif
 #endif
 
         // Make connections
-        createPLIOFileConnections<P_SSR, DUAL_INPUT_SAMPLES>(in, QUOTE(INPUT_FILE));
-        createPLIOFileConnections<P_SSR, (NUM_OUTPUTS - 1)>(out, QUOTE(OUTPUT_FILE));
+        createPLIOFileConnections<P_SSR, DUAL_INPUT_SAMPLES>(in, QUOTE(INPUT_FILE), "in");
+        createPLIOFileConnections<P_SSR, (NUM_OUTPUTS - 1)>(out, QUOTE(OUTPUT_FILE), "out");
 
-        connect<>(in[0].out[0], firGraph.in);
+        for (unsigned int i = 0; i < P_SSR; ++i) {
+            unsigned int plioBaseIdxIn = i * (DUAL_INPUT_SAMPLES + 1);
+            unsigned int plioBaseIdxOut = i * (NUM_OUTPUTS);
+
+            connect<>(in[plioBaseIdxIn].out[0], firGraph.in[i]);
 #if (DUAL_IP == 1)
-        connect<>(in[1].out[0], firGraph.in2);
+            connect<>(in[plioBaseIdxIn + 1].out[0], firGraph.in2[i]);
 #endif
 #if (USE_CHAIN == 1 && NUM_OUTPUTS == 1)
-        // Chained connections mutually explusive with multiple outputs.
-        dsplib::fir::decimate_asym::UUT_GRAPH<DATA_TYPE, COEFF_TYPE, FIR_LEN, DECIMATE_FACTOR, SHIFT, ROUND_MODE,
-                                              INPUT_SAMPLES / DECIMATE_FACTOR, CASC_LEN>
-            firGraph2(m_taps_v);
-        connect<>(firGraph.out, firGraph2.in);
-        connect<>(firGraph2.out, out[0].in[0]);
+            // Chained connections mutually explusive with multiple outputs.
+            connect<>(firGraph.out[plioBaseIdxOut], firGraph2.in[plioBaseIdxIn]);
+            connect<>(firGraph2.out[plioBaseIdxOut], out[plioBaseIdxOut].in[0]);
 #else
-        connect<>(firGraph.out, out[0].in[0]);
+            connect<>(firGraph.out[i], out[plioBaseIdxOut].in[0]);
 #if (NUM_OUTPUTS == 2)
-        connect<>(firGraph.out2, out[1].in[0]);
+            connect<>(firGraph.out2[i], out[plioBaseIdxOut + 1].in[0]);
 #endif
 #endif
+        }
+
 #if (USE_COEFF_RELOAD == 1)
-        connect<>(coeff, firGraph.coeff);
+        for (int i = 0; i < P_SSR; i++) {
+            connect<>(coeff[i], firGraph.coeff[i]);
+        }
 #endif
 
 #ifdef USING_UUT
@@ -214,13 +192,17 @@ class test_graph : public graph {
         }
 
         // overwrite the internally calculated fifo depth with some other value.
-        for (int i = 1; i < CASC_LEN; i++) {
-            connect<stream, stream>* net = firGraph.getInNet(i);
-            fifo_depth(*net) = 384 + 16 * i;
+        for (int outPath = 0; outPath < P_SSR; outPath++) {
+            for (int inPhase = 0; inPhase < P_SSR; inPhase++) {
+                for (int i = 1; i < CASC_LEN; i++) {
+                    connect<stream, stream>* net = firGraph.getInNet(outPath, inPhase, i);
+                    fifo_depth(*net) = 384 + 16 * i;
 #if (DUAL_IP == 1)
-            connect<stream, stream>* net2 = firGraph.getIn2Net(i);
-            fifo_depth(*net2) = 384 + 16 * i;
+                    connect<stream, stream>* net2 = firGraph.getIn2Net(outPath, inPhase, i);
+                    fifo_depth(*net2) = 384 + 16 * i;
 #endif
+                }
+            }
         }
 #endif
 

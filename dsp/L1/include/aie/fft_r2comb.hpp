@@ -57,9 +57,11 @@ template <typename TT_DATA,
           unsigned int TP_POINT_SIZE,
           unsigned int TP_FFT_NIFFT,
           unsigned int TP_SHIFT,
+          unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_PARALLEL_POWER,
-          unsigned int TP_INDEX>
+          unsigned int TP_INDEX,
+          unsigned int TP_ORIG_PAR_POWER>
 class fft_r2comb {
    public:
     // Constructor

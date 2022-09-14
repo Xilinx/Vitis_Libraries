@@ -23,17 +23,36 @@ xf::dsp::aie::testcase::test_graph filter;
 
 int main(void) {
     filter.init();
-
 #if (USE_COEFF_RELOAD == 1)
-    filter.update(filter.coeff, filter.m_taps[0], ((FIR_LEN + 1) / 4 + 1));
+    // SSR configs call asym kernels, that require asym taps
+    COEFF_TYPE tapsAsym[FIR_LEN];
+    COEFF_TYPE tapsCenterTap;
+#if (P_PARA_INTERP_POLY > 1)
+    xf::dsp::aie::convert_sym_taps_to_asym(tapsAsym, (FIR_LEN + 1) / 2, filter.m_taps[0]);
+    tapsCenterTap = filter.m_taps[0][(FIR_LEN + 1) / 4];
+    for (int i = 0; i < P_SSR; i++) {
+        filter.update(filter.coeff[i], tapsAsym, (FIR_LEN + 1) / 2);
+        filter.update(filter.coeffCT[i], tapsCenterTap);
+    }
+#else
+    filter.update(filter.coeff[0], filter.m_taps[0], ((FIR_LEN + 1) / 4 + 1));
+#endif
     filter.run(NITER / 2);
     filter.wait();
-    filter.update(filter.coeff, filter.m_taps[1], ((FIR_LEN + 1) / 4 + 1));
+#if (P_PARA_INTERP_POLY > 1)
+    xf::dsp::aie::convert_sym_taps_to_asym(tapsAsym, (FIR_LEN + 1) / 2, filter.m_taps[1]);
+    tapsCenterTap = filter.m_taps[1][(FIR_LEN + 1) / 4];
+    for (int i = 0; i < P_SSR; i++) {
+        filter.update(filter.coeff[i], tapsAsym, (FIR_LEN + 1) / 2);
+        filter.update(filter.coeffCT[i], tapsCenterTap);
+    }
+#else
+    filter.update(filter.coeff[0], filter.m_taps[1], ((FIR_LEN + 1) / 4 + 1));
+#endif
     filter.run(NITER / 2);
 #else
     filter.run(NITER);
 #endif
-
     filter.end();
 
     return 0;

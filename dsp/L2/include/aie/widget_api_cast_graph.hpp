@@ -69,6 +69,11 @@ using namespace adf;
  *                       or one 256b window read is split into upper and lower 128b cunks for output.
  *         1           : kSampleIntlv. One TT_DATA sample is taken from each stream and written to window or vice versa.
  *         2           : kSplit. The window is split into 2 halves with each half going to a stream.
+ * @tparam TP_HEADER_BYTES sets the number of bytes at the beginning of a window which are not subject to interlace.
+ *         These bytes are not included in TP_WINDOW_VSIZE as that refers to payload data whereas a header is intended
+ *         for control information. Where this widget is configured for 2 streams in, the header is read from the first
+ *         stream and copied to output. The header on the second stream is read and discarded. The header is written
+ *         to all output windows or streams.
  **/
 template <typename TT_DATA,
           unsigned int TP_IN_API, // 0 = Window, 1 = Stream
@@ -76,7 +81,8 @@ template <typename TT_DATA,
           unsigned int TP_NUM_INPUTS,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_NUM_OUTPUT_CLONES = 1,
-          unsigned int TP_PATTERN = 0>
+          unsigned int TP_PATTERN = 0,
+          unsigned int TP_HEADER_BYTES = 0>
 /**
  **/
 class widget_api_cast_graph : public graph {
@@ -134,7 +140,7 @@ class widget_api_cast_graph : public graph {
      **/
     widget_api_cast_graph() {
         m_kernel = kernel::create_object<widget_api_cast<TT_DATA, TP_IN_API, TP_OUT_API, TP_NUM_INPUTS, TP_WINDOW_VSIZE,
-                                                         TP_NUM_OUTPUT_CLONES, TP_PATTERN> >();
+                                                         TP_NUM_OUTPUT_CLONES, TP_PATTERN, TP_HEADER_BYTES> >();
 
         // Specify mapping constraints
         runtime<ratio>(m_kernel) = 0.1; // Nominal figure. The real figure requires knowledge of the sample rate.
@@ -145,7 +151,7 @@ class widget_api_cast_graph : public graph {
         // make connections
         if (TP_IN_API == kWindowAPI) {
             for (int i = 0; i < TP_NUM_INPUTS; i++) {
-                connect<window<TP_WINDOW_VSIZE * sizeof(TT_DATA)> >(in[i], m_kernel.in[i]);
+                connect<window<TP_WINDOW_VSIZE * sizeof(TT_DATA) + TP_HEADER_BYTES> >(in[i], m_kernel.in[i]);
             }
         } else if (TP_IN_API == kStreamAPI) {
             for (int i = 0; i < TP_NUM_INPUTS; i++) {
@@ -154,7 +160,7 @@ class widget_api_cast_graph : public graph {
         }
         if (TP_OUT_API == kWindowAPI) {
             for (int i = 0; i < TP_NUM_OUTPUT_CLONES; i++) {
-                connect<window<TP_WINDOW_VSIZE * sizeof(TT_DATA)> >(m_kernel.out[i], out[i]);
+                connect<window<TP_WINDOW_VSIZE * sizeof(TT_DATA) + TP_HEADER_BYTES> >(m_kernel.out[i], out[i]);
             }
         } else if (TP_OUT_API == kStreamAPI) {
             for (int i = 0; i < TP_NUM_OUTPUT_CLONES; i++) {

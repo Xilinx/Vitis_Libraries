@@ -24,10 +24,6 @@ Coding conventions
 #pragma once
 #include <adf.h>
 
-#define __NEW_WINDOW_H__ 1
-
-#define __AIEARCH__ 1
-#define __AIENGINE__ 1
 #define __AIE_API_USE_NATIVE_1024B_VECTOR__
 
 #include "aie_api/aie_adf.hpp"

@@ -38,7 +38,8 @@ template <typename TT_DATA,
           unsigned int TP_CASC_LEN = 1, // necessary to match UUT, but unused by ref model
           unsigned int TP_DYN_PT_SIZE = 0,
           unsigned int TP_WINDOW_VSIZE = TP_POINT_SIZE,
-          unsigned int TP_API = kWindowAPI>
+          unsigned int TP_API = kWindowAPI,
+          unsigned int TP_ORIG_PAR_POWER = 0>
 class fft_ifft_dit_1ch_mono_ref_graph : public graph {
    public:
     port<input> in[1];
@@ -50,12 +51,14 @@ class fft_ifft_dit_1ch_mono_ref_graph : public graph {
     // Constructor
     fft_ifft_dit_1ch_mono_ref_graph() {
         printf("===================================\n");
-        printf("== FFT/IFFT DIT 1 Channel REF Graph\n");
+        printf("== FFT/IFFT DIT 1 Channel mono REF \n");
+        printf("== Graph window specialization\n");
         printf("===================================\n");
 
         // Create FIR class
-        m_fftKernel = kernel::create_object<fft_ifft_dit_1ch_ref<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT,
-                                                                 TP_SHIFT, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE> >();
+        m_fftKernel =
+            kernel::create_object<fft_ifft_dit_1ch_ref<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT,
+                                                       TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, TP_ORIG_PAR_POWER> >();
 
         // Make connections
         // Size of window in Bytes. Dynamic point size adds a 256 bit (32 byte) header. This is larger than required,
@@ -71,6 +74,7 @@ class fft_ifft_dit_1ch_mono_ref_graph : public graph {
         // Source files
         source(m_fftKernel) = "fft_ifft_dit_1ch_ref.cpp";
         headers(m_fftKernel) = {"fft_ifft_dit_1ch_ref.hpp"};
+        printf("== Graph window specialization exit\n");
     };
 };
 
@@ -82,7 +86,8 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_CASC_LEN, // necessary to match UUT, but unused by ref model
           unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE>
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
 class fft_ifft_dit_1ch_mono_ref_graph<TT_DATA,
                                       TT_TWIDDLE,
                                       TP_POINT_SIZE,
@@ -91,7 +96,8 @@ class fft_ifft_dit_1ch_mono_ref_graph<TT_DATA,
                                       TP_CASC_LEN,
                                       TP_DYN_PT_SIZE,
                                       TP_WINDOW_VSIZE,
-                                      kStreamAPI> : public graph {
+                                      kStreamAPI,
+                                      TP_ORIG_PAR_POWER> : public graph {
    public:
     port<input> in[2];
     port<output> out[2];
@@ -101,21 +107,26 @@ class fft_ifft_dit_1ch_mono_ref_graph<TT_DATA,
     kernel m_inWidget;
     kernel m_outWidget;
 
+    static constexpr int kHeaderBytes =
+        TP_DYN_PT_SIZE == 1 ? kFftDynHeadBytes : 0; // header for dynamic point size is 32 bytes
+
     // Constructor
     fft_ifft_dit_1ch_mono_ref_graph() {
         printf("===================================\n");
-        printf("== FFT/IFFT DIT 1 Channel REF Graph\n");
+        printf("== FFT/IFFT DIT 1 Channel mono REF \n");
+        printf("== Graph stream specialization\n");
         printf("===================================\n");
 
         // Create FIR class
-        m_fftKernel = kernel::create_object<fft_ifft_dit_1ch_ref<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT,
-                                                                 TP_SHIFT, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE> >();
+        m_fftKernel =
+            kernel::create_object<fft_ifft_dit_1ch_ref<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT,
+                                                       TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, TP_ORIG_PAR_POWER> >();
         m_inWidget = kernel::create_object<
-            widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2,
-                                TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA), 1, kSampleIntlv> >();
+            widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1, kSampleIntlv, kHeaderBytes> >(
+            -1);
         m_outWidget = kernel::create_object<
-            widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamAPI, 1,
-                                TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA), 2, kSampleIntlv> >();
+            widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 2, kSampleIntlv, kHeaderBytes> >(
+            -1);
 
         // Make connections
         connect<stream>(in[0], m_inWidget.in[0]);
@@ -123,10 +134,8 @@ class fft_ifft_dit_1ch_mono_ref_graph<TT_DATA,
 
         // Size of window in Bytes. Dynamic point size adds a 256 bit (32 byte) header. This is larger than required,
         // but keeps 256 bit alignment
-        connect<window<TP_WINDOW_VSIZE * sizeof(TT_DATA) + TP_DYN_PT_SIZE * kFftDynHeadBytes> >(m_inWidget.out[0],
-                                                                                                m_fftKernel.in[0]);
-        connect<window<TP_WINDOW_VSIZE * sizeof(TT_DATA) + TP_DYN_PT_SIZE * kFftDynHeadBytes> >(m_fftKernel.out[0],
-                                                                                                m_outWidget.in[0]);
+        connect<window<TP_WINDOW_VSIZE * sizeof(TT_DATA) + kHeaderBytes> >(m_inWidget.out[0], m_fftKernel.in[0]);
+        connect<window<TP_WINDOW_VSIZE * sizeof(TT_DATA) + kHeaderBytes> >(m_fftKernel.out[0], m_outWidget.in[0]);
 
         connect<stream>(m_outWidget.out[0], out[0]);
         connect<stream>(m_outWidget.out[1], out[1]);
@@ -143,6 +152,7 @@ class fft_ifft_dit_1ch_mono_ref_graph<TT_DATA,
         headers(m_inWidget) = {"widget_api_cast_ref.hpp"};
         source(m_outWidget) = "widget_api_cast_ref.cpp";
         headers(m_outWidget) = {"widget_api_cast_ref.hpp"};
+        printf("== Graph stream specialization exit\n");
     };
 };
 
@@ -158,7 +168,8 @@ template <typename TT_DATA,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_API,
-          unsigned int TP_PARALLEL_POWER = 1>
+          unsigned int TP_PARALLEL_POWER = 1,
+          unsigned int TP_ORIG_PAR_POWER = TP_PARALLEL_POWER>
 class fft_ifft_dit_1ch_ref_graph : public graph {
    public:
     static_assert(!(std::is_same<TT_DATA, cfloat>::value) || (TP_SHIFT == 0),
@@ -176,6 +187,9 @@ class fft_ifft_dit_1ch_ref_graph : public graph {
     static constexpr int kR2Shift = TP_SHIFT > 0 ? 1 : 0;
     static constexpr int kFFTsubShift = TP_SHIFT > 0 ? TP_SHIFT - 1 : 0;
 
+    static constexpr int kHeaderBytes =
+        TP_DYN_PT_SIZE == 1 ? kFftDynHeadBytes : 0; // header for dynamic point size is 32 bytes
+
     kernel m_combInKernel[kParallel_factor];
     kernel m_r2Comb[kParallel_factor];
     kernel m_combOutKernel[kParallel_factor];
@@ -189,19 +203,25 @@ class fft_ifft_dit_1ch_ref_graph : public graph {
                                TP_DYN_PT_SIZE,
                                (TP_WINDOW_VSIZE >> 1),
                                kStreamAPI,
-                               (TP_PARALLEL_POWER - 1)>
+                               (TP_PARALLEL_POWER - 1),
+                               TP_ORIG_PAR_POWER>
         FFTsubframe[2]; // fractal or recursive decomposition
 
     // constructor
     fft_ifft_dit_1ch_ref_graph() {
+        printf("========================================\n");
+        printf("Entering top level ref graph constructor\n");
+        printf("========================================\n");
         for (int i = 0; i < kParallel_factor; i++) {
             m_combInKernel[i] = kernel::create_object<
-                widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, kWindowSize, 1, kSampleIntlv> >();
-            m_r2Comb[i] =
-                kernel::create_object<fft_r2comb_ref<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, kR2Shift,
-                                                     TP_DYN_PT_SIZE, kWindowSize, TP_PARALLEL_POWER> >(i);
+                widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, kWindowSize, 1, kSampleIntlv, kHeaderBytes> >(
+                i);
+            m_r2Comb[i] = kernel::create_object<
+                fft_r2comb_ref<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, kR2Shift, TP_DYN_PT_SIZE, kWindowSize,
+                               TP_PARALLEL_POWER, TP_ORIG_PAR_POWER> >(i);
             m_combOutKernel[i] = kernel::create_object<
-                widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamAPI, 1, kWindowSize, 2, kSampleIntlv> >();
+                widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamAPI, 1, kWindowSize, 2, kSampleIntlv, kHeaderBytes> >(
+                i);
         }
         // make connections
         for (int i = 0; i < kParallel_factor; i++) {
@@ -209,8 +229,9 @@ class fft_ifft_dit_1ch_ref_graph : public graph {
             connect<stream>(in[2 * i + 1], FFTsubframe[1].in[i]); // stream connection
             connect<stream>(FFTsubframe[0].out[i], m_combInKernel[i].in[0]);
             connect<stream>(FFTsubframe[1].out[i], m_combInKernel[i].in[1]);
-            connect<window<kWindowSize * sizeof(TT_DATA)> >(m_combInKernel[i].out[0], m_r2Comb[i].in[0]);
-            connect<window<kWindowSize * sizeof(TT_DATA)> >(m_r2Comb[i].out[0], m_combOutKernel[i].in[0]);
+            connect<window<kWindowSize * sizeof(TT_DATA) + kHeaderBytes> >(m_combInKernel[i].out[0], m_r2Comb[i].in[0]);
+            connect<window<kWindowSize * sizeof(TT_DATA) + kHeaderBytes> >(m_r2Comb[i].out[0],
+                                                                           m_combOutKernel[i].in[0]);
             connect<stream>(m_combOutKernel[i].out[0], out[i]);
             connect<stream>(m_combOutKernel[i].out[1], out[i + kParallel_factor]);
         }
@@ -227,6 +248,7 @@ class fft_ifft_dit_1ch_ref_graph : public graph {
             runtime<ratio>(m_r2Comb[i]) = 0.94;
             runtime<ratio>(m_combOutKernel[i]) = 0.94;
         }
+        printf("Exiting top level ref graph constructor\n");
     }; // end of constructor
 };     // end of class
 
@@ -238,7 +260,8 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE>
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
 class fft_ifft_dit_1ch_ref_graph<TT_DATA,
                                  TT_TWIDDLE,
                                  TP_POINT_SIZE,
@@ -248,12 +271,17 @@ class fft_ifft_dit_1ch_ref_graph<TT_DATA,
                                  TP_DYN_PT_SIZE,
                                  TP_WINDOW_VSIZE,
                                  kWindowAPI,
-                                 0> : public graph {
+                                 0,
+                                 TP_ORIG_PAR_POWER> : public graph {
    public:
     static_assert(!(std::is_same<TT_DATA, cfloat>::value) || (TP_SHIFT == 0),
                   "ERROR: TP_SHIFT cannot be performed for TT_DATA=cfloat, so must be set to 0");
+    static constexpr int kHeaderBytes =
+        TP_DYN_PT_SIZE == 1 ? kFftDynHeadBytes : 0; // header for dynamic point size is 32 bytes
+
     port<input> in[1];
     port<output> out[1];
+
     fft_ifft_dit_1ch_mono_ref_graph<TT_DATA,
                                     TT_TWIDDLE,
                                     TP_POINT_SIZE,
@@ -262,13 +290,13 @@ class fft_ifft_dit_1ch_ref_graph<TT_DATA,
                                     TP_CASC_LEN,
                                     TP_DYN_PT_SIZE,
                                     TP_WINDOW_VSIZE,
-                                    kWindowAPI>
+                                    kWindowAPI,
+                                    TP_ORIG_PAR_POWER>
         FFTwinproc;
+
     fft_ifft_dit_1ch_ref_graph() {
-        connect<window<TP_WINDOW_VSIZE * sizeof(TT_DATA) + TP_DYN_PT_SIZE * kFftDynHeadBytes> >(in[0],
-                                                                                                FFTwinproc.in[0]);
-        connect<window<TP_WINDOW_VSIZE * sizeof(TT_DATA) + TP_DYN_PT_SIZE * kFftDynHeadBytes> >(FFTwinproc.out[0],
-                                                                                                out[0]);
+        connect<window<TP_WINDOW_VSIZE * sizeof(TT_DATA) + kHeaderBytes> >(in[0], FFTwinproc.in[0]);
+        connect<window<TP_WINDOW_VSIZE * sizeof(TT_DATA) + kHeaderBytes> >(FFTwinproc.out[0], out[0]);
     };
 };
 // specialization for end of recursion, i.e. single FFT, stream API
@@ -279,7 +307,8 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE>
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
 class fft_ifft_dit_1ch_ref_graph<TT_DATA,
                                  TT_TWIDDLE,
                                  TP_POINT_SIZE,
@@ -289,12 +318,15 @@ class fft_ifft_dit_1ch_ref_graph<TT_DATA,
                                  TP_DYN_PT_SIZE,
                                  TP_WINDOW_VSIZE,
                                  kStreamAPI,
-                                 0> : public graph {
+                                 0,
+                                 TP_ORIG_PAR_POWER> : public graph {
    public:
     static_assert(!(std::is_same<TT_DATA, cfloat>::value) || (TP_SHIFT == 0),
                   "ERROR: TP_SHIFT cannot be performed for TT_DATA=cfloat, so must be set to 0");
+
     port<input> in[2]; // dual streams
     port<output> out[2];
+
     fft_ifft_dit_1ch_mono_ref_graph<TT_DATA,
                                     TT_TWIDDLE,
                                     TP_POINT_SIZE,
@@ -303,9 +335,12 @@ class fft_ifft_dit_1ch_ref_graph<TT_DATA,
                                     TP_CASC_LEN,
                                     TP_DYN_PT_SIZE,
                                     TP_WINDOW_VSIZE,
-                                    kStreamAPI>
+                                    kStreamAPI,
+                                    TP_ORIG_PAR_POWER>
         FFTstrproc;
+
     fft_ifft_dit_1ch_ref_graph() {
+        printf("end of recursion, stream graph\n");
         connect<stream>(in[0], FFTstrproc.in[0]);
         connect<stream>(in[1], FFTstrproc.in[1]);
         connect<stream>(FFTstrproc.out[0], out[0]);

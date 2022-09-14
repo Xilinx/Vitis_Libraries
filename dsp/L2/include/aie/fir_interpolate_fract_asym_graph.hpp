@@ -23,7 +23,7 @@
 
 #include <adf.h>
 #include <vector>
-#include "graph_utils.hpp"
+#include "fir_graph_utils.hpp"
 
 #include "fir_resampler.hpp"
 namespace xf {

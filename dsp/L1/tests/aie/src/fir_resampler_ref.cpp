@@ -14,6 +14,7 @@
  */
 #include "fir_resampler_ref.hpp"
 #include "fir_ref_utils.hpp"
+#include "fir_ref_coeff_header.hpp"
 
 /*
 Fractional interpolator asymetric FIR filter reference model
@@ -33,9 +34,7 @@ template <typename TT_DATA,  // type of data input and output
           unsigned int TP_DECIMATE_FACTOR,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_USE_COEFF_RELOAD,
-          unsigned int TP_NUM_OUTPUTS>
+          unsigned int TP_INPUT_WINDOW_VSIZE>
 void filter_ref(input_window<TT_DATA>* inWindow,
                 output_window<TT_DATA>* outWindow,
                 const TT_COEFF (&taps)[TP_FIR_LEN]) {
@@ -103,8 +102,10 @@ void fir_resampler_ref<TT_DATA,
                        TP_INPUT_WINDOW_VSIZE,
                        TP_USE_COEFF_RELOAD,
                        TP_NUM_OUTPUTS>::filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow) {
+    firHeaderReload<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_USE_COEFF_RELOAD>(inWindow,
+                                                                                               m_internalTaps);
     filter_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
-               TP_INPUT_WINDOW_VSIZE, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS>(inWindow, outWindow, m_internalTapsRef);
+               TP_INPUT_WINDOW_VSIZE>(inWindow, outWindow, m_internalTaps);
 };
 
 // specialization for reload coeffs, single output
@@ -116,6 +117,7 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS>
 void fir_resampler_ref<TT_DATA,
                        TT_COEFF,
@@ -125,16 +127,16 @@ void fir_resampler_ref<TT_DATA,
                        TP_SHIFT,
                        TP_RND,
                        TP_INPUT_WINDOW_VSIZE,
-                       USE_COEFF_RELOAD_TRUE,
-                       TP_NUM_OUTPUTS>::filter(input_window<TT_DATA>* inWindow,
-                                               output_window<TT_DATA>* outWindow,
-                                               const TT_COEFF (&inTaps)[TP_FIR_LEN]) {
+                       TP_USE_COEFF_RELOAD,
+                       TP_NUM_OUTPUTS>::filterRtp(input_window<TT_DATA>* inWindow,
+                                                  output_window<TT_DATA>* outWindow,
+                                                  const TT_COEFF (&inTaps)[TP_FIR_LEN]) {
     // Coefficient reload
     for (int i = 0; i < TP_FIR_LEN; i++) {
-        m_internalTapsRef[i] = inTaps[i];
+        m_internalTaps[i] = inTaps[i];
     }
     filter_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
-               TP_INPUT_WINDOW_VSIZE, USE_COEFF_RELOAD_TRUE, TP_NUM_OUTPUTS>(inWindow, outWindow, m_internalTapsRef);
+               TP_INPUT_WINDOW_VSIZE>(inWindow, outWindow, m_internalTaps);
 };
 }
 }

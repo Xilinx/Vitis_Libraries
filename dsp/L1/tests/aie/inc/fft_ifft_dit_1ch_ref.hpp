@@ -44,7 +44,8 @@ template <typename TT_DATA,    // type of data input and output
           unsigned int TP_FFT_NIFFT,
           unsigned int TP_SHIFT,
           unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE = TP_POINT_SIZE>
+          unsigned int TP_WINDOW_VSIZE = TP_POINT_SIZE,
+          unsigned int TP_ORIG_PAR_POWER = 0>
 class fft_ifft_dit_1ch_ref {
    private:
     TT_TWIDDLE twiddles[TP_POINT_SIZE];

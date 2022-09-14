@@ -68,6 +68,20 @@ functions for use by the reference model classes.
 // Round up to y
 #define CEIL(x, y) (((x + y - 1) / y) * y)
 
+//----------------------------------------------------------------------
+// isComplex
+template <typename T>
+constexpr bool isComplex() {
+    return (std::is_same<T, cint16>::value || std::is_same<T, cint32>::value || std::is_same<T, cfloat>::value) ? true
+                                                                                                                : false;
+};
+
+// isFloat
+template <typename T>
+constexpr bool isFloat() {
+    return (std::is_same<T, float>::value || std::is_same<T, cfloat>::value) ? true : false;
+};
+
 static const int C_PMAX16 = std::numeric_limits<short int>::max();
 static const int C_NMAX16 = std::numeric_limits<short int>::min();
 static const int C_PMAX32 = std::numeric_limits<int32_t>::max();

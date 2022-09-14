@@ -106,7 +106,44 @@ class test_graph : public graph {
 
 // apply location constraints for TP_POINT_SIZE=64k
 #ifdef USING_UUT
-#if (POINT_SIZE == 65536)
+#if (PARALLEL_POWER == 1)
+            for (int lane = 0; lane < 2; lane++) {
+                location<kernel>(fftGraph.m_r2Comb[lane]) = tile(LOC_XBASE + lane * 2, LOC_YBASE + CASC_LEN + 1);
+            }
+#endif //(PARALLEL_POWER == 1)
+#if (PARALLEL_POWER == 2)
+            for (int lane = 0; lane < 4; lane++) {
+                location<kernel>(fftGraph.m_r2Comb[lane]) = tile(LOC_XBASE + lane * 2, LOC_YBASE + CASC_LEN + 2);
+            }
+            for (int lane = 0; lane < 2; lane++) {
+                location<kernel>(fftGraph.FFTsubframe0.m_r2Comb[lane]) =
+                    tile(LOC_XBASE + lane * 2, LOC_YBASE + CASC_LEN + 1);
+                location<kernel>(fftGraph.FFTsubframe1.m_r2Comb[lane]) =
+                    tile(LOC_XBASE + lane * 2 + 4, LOC_YBASE + CASC_LEN + 1);
+            }
+#endif //(PARALLEL_POWER == 2)
+#if (PARALLEL_POWER == 3)
+            for (int lane = 0; lane < 8; lane++) {
+                location<kernel>(fftGraph.m_r2Comb[lane]) = tile(LOC_XBASE + lane * 2, LOC_YBASE + CASC_LEN + 3);
+            }
+            for (int lane = 0; lane < 4; lane++) {
+                location<kernel>(fftGraph.FFTsubframe0.m_r2Comb[lane]) =
+                    tile(LOC_XBASE + lane * 2, LOC_YBASE + CASC_LEN + 2);
+                location<kernel>(fftGraph.FFTsubframe1.m_r2Comb[lane]) =
+                    tile(LOC_XBASE + lane * 2 + 8, LOC_YBASE + CASC_LEN + 2);
+            }
+            for (int lane = 0; lane < 2; lane++) {
+                location<kernel>(fftGraph.FFTsubframe0.FFTsubframe0.m_r2Comb[lane]) =
+                    tile(LOC_XBASE + lane * 2, LOC_YBASE + CASC_LEN + 1);
+                location<kernel>(fftGraph.FFTsubframe0.FFTsubframe1.m_r2Comb[lane]) =
+                    tile(LOC_XBASE + lane * 2 + 4, LOC_YBASE + CASC_LEN + 1);
+                location<kernel>(fftGraph.FFTsubframe1.FFTsubframe0.m_r2Comb[lane]) =
+                    tile(LOC_XBASE + lane * 2 + 8, LOC_YBASE + CASC_LEN + 1);
+                location<kernel>(fftGraph.FFTsubframe1.FFTsubframe1.m_r2Comb[lane]) =
+                    tile(LOC_XBASE + lane * 2 + 12, LOC_YBASE + CASC_LEN + 1);
+            }
+#endif //(PARALLEL_POWER == 3)
+#if (PARALLEL_POWER == 4)
             for (int lane = 0; lane < 16; lane++) {
                 location<kernel>(fftGraph.m_r2Comb[lane]) = tile(LOC_XBASE + lane * 2, LOC_YBASE + CASC_LEN + 4);
             }
@@ -144,7 +181,7 @@ class test_graph : public graph {
                 location<kernel>(fftGraph.FFTsubframe1.FFTsubframe1.FFTsubframe1.m_r2Comb[lane]) =
                     tile(LOC_XBASE + lane * 2 + 28, LOC_YBASE + CASC_LEN + 1);
             }
-#endif //(POINT_SIZE == 65536)
+#endif //(PARALLEL_POWER == 4)
 #endif // USING_UUT
         }
     };

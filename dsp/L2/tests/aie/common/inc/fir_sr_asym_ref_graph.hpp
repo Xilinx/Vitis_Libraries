@@ -72,13 +72,7 @@ class fir_sr_asym_ref_graph : public graph {
     using widget_kernel_in = typename std::conditional<(TP_DUAL_IP == 1 && TP_API == 1), kernel, empty>::type;
     using widget_kernel_out = typename std::conditional<(TP_NUM_OUTPUTS == 2), kernel, empty>::type;
 
-    static constexpr unsigned int DUAL_OP_PORT_POS = 1;
-    static constexpr unsigned int DUAL_IP_PORT_POS = 1;
     static constexpr unsigned int RTP_PORT_POS = (TP_DUAL_IP == DUAL_IP_DUAL) ? 2 : 1;
-
-    static constexpr unsigned int INPUT_WINDOW_BYTESIZE = TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA);
-    static constexpr unsigned int OUTPUT_WINDOW_BYTESIZE = INPUT_WINDOW_BYTESIZE;
-    static constexpr unsigned int MARGIN_BYTESIZE = fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA);
 
    public:
     using ref_kernel_class = fir_sr_asym_ref<TT_DATA,
@@ -105,37 +99,40 @@ class fir_sr_asym_ref_graph : public graph {
     widget_kernel_out m_widgetKernelOut;
 
     fir_sr_asym_ref_graph() {
-        printf("== class fir_sr_asym_ref_graph (reloadable coeff): \n");
         m_firKernel = kernel::create_object<ref_kernel_class>();
         create_connections();
     };
     fir_sr_asym_ref_graph(const std::vector<TT_COEFF>& taps) {
-        printf("== class fir_sr_asym_ref_graph (static coeff): \n");
         m_firKernel = kernel::create_object<ref_kernel_class>(taps);
         create_connections();
     };
 
     void create_connections() {
-        // stream/window api and cascade length is ignored in ref model.
+        constexpr unsigned int headerConfigSize = 256 / 8; // 256-bits of configuration info organized in int32 fields
+        constexpr unsigned int headerByteSize =
+            TP_USE_COEFF_RELOAD == 2 ? CEIL(TP_FIR_LEN * sizeof(TT_COEFF), headerConfigSize) + headerConfigSize
+                                     : 0; // align to 32 Byte boundary
+        // Byte size of window buffer.
+        constexpr unsigned int inputWindowByteSize = TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) + headerByteSize;
+        constexpr unsigned int inputWindowVectorSize = inputWindowByteSize / sizeof(TT_DATA);
+        constexpr unsigned int outputWindowByteSize = TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA);
 
         // Make input connections
         if
             constexpr(TP_DUAL_IP == 1 && TP_API == 1) {
                 const int kInterleavePattern = 0;
                 m_widgetKernelIn = kernel::create_object<
-                    widget_api_cast_ref<TT_DATA, 1, 0, 2, TP_INPUT_WINDOW_VSIZE, 1, kInterleavePattern> >();
+                    widget_api_cast_ref<TT_DATA, 1, 0, 2, inputWindowVectorSize, 1, kInterleavePattern> >();
                 connect<stream>(in[0], m_widgetKernelIn.in[0]);
                 connect<stream>(in2[0], m_widgetKernelIn.in[1]);
-                connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA),
-                               fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(m_widgetKernelIn.out[0],
-                                                                                       m_firKernel.in[0]);
+                connect<window<inputWindowByteSize, fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(
+                    m_widgetKernelIn.out[0], m_firKernel.in[0]);
                 runtime<ratio>(m_widgetKernelIn) = 0.4;
                 // Source files
                 source(m_widgetKernelIn) = "widget_api_cast_ref.cpp";
             }
         else {
-            connect<
-                window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA), fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(
+            connect<window<inputWindowByteSize, fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(
                 in[0], m_firKernel.in[0]);
         }
 
@@ -148,11 +145,11 @@ class fir_sr_asym_ref_graph : public graph {
                 m_widgetKernelOut =
                     kernel::create_object<widget_api_cast_ref<TT_DATA, USE_WINDOW_API, TP_API, kNumInputs,
                                                               TP_INPUT_WINDOW_VSIZE, kNumOutputs, 0> >();
-                connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA)> >(m_firKernel.out[0], m_widgetKernelOut.in[0]);
+                connect<window<outputWindowByteSize> >(m_firKernel.out[0], m_widgetKernelOut.in[0]);
                 if
                     constexpr(TP_API == USE_WINDOW_API) {
-                        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA)> >(m_widgetKernelOut.out[0], out[0]);
-                        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA)> >(m_widgetKernelOut.out[1], out2[0]);
+                        connect<window<outputWindowByteSize> >(m_widgetKernelOut.out[0], out[0]);
+                        connect<window<outputWindowByteSize> >(m_widgetKernelOut.out[1], out2[0]);
                     }
                 else {
                     connect<stream>(m_widgetKernelOut.out[0], out[0]);
@@ -162,7 +159,7 @@ class fir_sr_asym_ref_graph : public graph {
                 runtime<ratio>(m_widgetKernelOut) = 0.9;
             }
         else {
-            connect<window<(TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA))> >(m_firKernel.out[0], out[0]);
+            connect<window<outputWindowByteSize> >(m_firKernel.out[0], out[0]);
         }
         // make RTP connection
         if

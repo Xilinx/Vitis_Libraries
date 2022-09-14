@@ -87,6 +87,39 @@
             "USE_COEFF_RELOAD":"1",
             "SHIFT":"15",
             "INPUT_WINDOW_VSIZE":"256"
+        },
+        "test_10_cint32_cint32_stream_2outputs": {
+            "DATA_TYPE":"cint32",
+            "COEFF_TYPE":"cint32",
+            "FIR_LEN":"63",
+            "SHIFT":"16",
+            "INPUT_WINDOW_VSIZE":"256",
+            "NUM_OUTPUTS":"2",
+            "PORT_API":"1"
+        },
+        "test_12_cint32_int32_ssr3_cl3": {
+            "DATA_TYPE":"cint32",
+            "COEFF_TYPE":"int32",
+            "FIR_LEN":"143",
+            "SHIFT":"16",
+            "INPUT_WINDOW_VSIZE":"1280",
+            "PORT_API":"1",
+            "UUT_SSR":"3",
+            "CASC_LEN":"3",
+            "UUT_PARA_INTERP_POLY":"2"
+        },
+        "test_13_cint32_int32_ssr3_cl3_reload": {
+            "DATA_TYPE":"cint32",
+            "COEFF_TYPE":"int32",
+            "COEFF_SIZE":"4",
+            "FIR_LEN":"143",
+            "SHIFT":"16",
+            "INPUT_WINDOW_VSIZE":"1280",
+            "PORT_API":"1",
+            "UUT_SSR":"3",
+            "CASC_LEN":"3",
+            "USE_COEFF_RELOAD":"1",
+            "UUT_PARA_INTERP_POLY":"2"
         }
     }
 }

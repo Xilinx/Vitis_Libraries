@@ -34,6 +34,7 @@ namespace decimate_hb {
 using namespace adf;
 using namespace xf::dsp::aie::widget::api_cast;
 class empty {};
+struct no_port {};
 
 // The template list here has to match that of the UUT because the L2 flow instances each graph (UUT/REF) in turn using
 // the same instantiation.
@@ -48,21 +49,25 @@ template <typename TT_DATA,
           unsigned int TP_DUAL_IP = 0,
           unsigned int TP_USE_COEFF_RELOAD = 0,
           unsigned int TP_NUM_OUTPUTS = 1,
-          unsigned int TP_API = 0>
+          unsigned int TP_API = 0,
+          unsigned int TP_SSR = 1,
+          unsigned int TP_PARA_DECI_POLY = 1>
 class fir_decimate_hb_ref_graph : public graph {
    public:
-    using in2_port = typename std::conditional<(TP_DUAL_IP == 1), port<input>, empty>::type;
-    using coeff_port = typename std::conditional<(TP_USE_COEFF_RELOAD == 1), port<input>, empty>::type;
-    using out2_port = typename std::conditional<(TP_NUM_OUTPUTS == 2), port<output>, empty>::type;
+    template <class dir>
+    using ssr_port_array = std::array<port<dir>, TP_SSR>;
+
+    using dual_ip_port = typename std::conditional_t<(TP_DUAL_IP == DUAL_IP_DUAL), ssr_port_array<input>, no_port>;
+    using dual_op_port = typename std::conditional_t<(TP_NUM_OUTPUTS == 2), ssr_port_array<output>, no_port>;
+    using rtp_port = typename std::conditional_t<(TP_USE_COEFF_RELOAD == 1), port<input>, no_port>;
     using widget_kernel_in = typename std::conditional<(TP_DUAL_IP == 1 && TP_API == 1), kernel, empty>::type;
     using widget_kernel_out = typename std::conditional<(TP_NUM_OUTPUTS == 2), kernel, empty>::type;
 
-    port<input> in;
-    in2_port in2;
-    coeff_port coeff;
-    port<output> out;
-    // port<output> out2;
-    out2_port out2;
+    ssr_port_array<input> in;
+    ssr_port_array<output> out;
+    dual_ip_port in2;
+    dual_op_port out2;
+    std::array<rtp_port, 1> coeff;
 
     // FIR Kernel
     kernel m_firKernel;
@@ -105,8 +110,8 @@ class fir_decimate_hb_ref_graph : public graph {
             constexpr(TP_DUAL_IP == 1 && TP_API == 1) {
                 m_widgetKernelIn = kernel::create_object<
                     widget_api_cast_ref<TT_DATA, 1, 0, 2, TP_INPUT_WINDOW_VSIZE, 1, kInterleavePattern> >();
-                connect<stream>(in, m_widgetKernelIn.in[0]);
-                connect<stream>(in2, m_widgetKernelIn.in[1]);
+                connect<stream>(in[0], m_widgetKernelIn.in[0]);
+                connect<stream>(in2[0], m_widgetKernelIn.in[1]);
                 connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA),
                                fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(m_widgetKernelIn.out[0],
                                                                                        m_firKernel.in[0]);
@@ -117,7 +122,7 @@ class fir_decimate_hb_ref_graph : public graph {
         else {
             connect<
                 window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA), fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(
-                in, m_firKernel.in[0]);
+                in[0], m_firKernel.in[0]);
         }
         // Size of output window in Bytes, multiplied by const interpolate factor of 2
         if
@@ -133,13 +138,13 @@ class fir_decimate_hb_ref_graph : public graph {
                 if
                     constexpr(TP_API == USE_WINDOW_API) {
                         connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) / kDecimateFactor> >(
-                            m_widgetKernelOut.out[0], out);
+                            m_widgetKernelOut.out[0], out[0]);
                         connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) / kDecimateFactor> >(
-                            m_widgetKernelOut.out[1], out2);
+                            m_widgetKernelOut.out[1], out2[0]);
                     }
                 else {
-                    connect<stream>(m_widgetKernelOut.out[0], out);
-                    connect<stream>(m_widgetKernelOut.out[1], out2);
+                    connect<stream>(m_widgetKernelOut.out[0], out[0]);
+                    connect<stream>(m_widgetKernelOut.out[1], out2[0]);
                 }
 
                 source(m_widgetKernelOut) = "widget_api_cast_ref.cpp";
@@ -147,10 +152,10 @@ class fir_decimate_hb_ref_graph : public graph {
             }
         else {
             connect<window<TP_INPUT_WINDOW_VSIZE / kDecimateFactor * sizeof(TT_DATA) / kOutputWindowReductionFactor> >(
-                m_firKernel.out[0], out);
+                m_firKernel.out[0], out[0]);
         }
         if
-            constexpr(TP_USE_COEFF_RELOAD == 1) { connect<parameter>(coeff, async(m_firKernel.in[1])); }
+            constexpr(TP_USE_COEFF_RELOAD == 1) { connect<parameter>(coeff[0], async(m_firKernel.in[1])); }
     }
 };
 }

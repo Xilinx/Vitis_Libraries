@@ -78,6 +78,68 @@
             "NUM_OUTPUTS":"2",
             "PORT_API":"1",
             "USE_CUSTOM_CONSTRAINT":"1"
+        },
+        "test_8_cint32_cint32_stream_2outputs": {
+            "DATA_TYPE":"cint32",
+            "COEFF_TYPE":"cint32",
+            "FIR_LEN":"8",
+            "INTERPOLATE_FACTOR":"2",
+            "SHIFT":"16",
+            "INPUT_WINDOW_VSIZE":"2560",
+            "NUM_OUTPUTS":"2",
+            "PORT_API":"1",
+            "USE_CUSTOM_CONSTRAINT":"1"
+        },
+        "test_9_cint16_int16_stream_ssr": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int16",
+            "FIR_LEN":"288",
+            "INTERPOLATE_FACTOR":"3",
+            "SHIFT":"16",
+            "INPUT_WINDOW_VSIZE":"4608",
+            "PORT_API":"1",
+            "CASC_LEN":"3",
+            "UUT_SSR":"4"
+        },
+        "test_10_fir_27t_if3_poly3_2out_stream_casc": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int16",
+            "FIR_LEN":"27",
+            "INTERPOLATE_FACTOR":"3",
+            "SHIFT":"16",
+            "INPUT_WINDOW_VSIZE":"7680",
+            "PORT_API":"1",
+            "CASC_LEN":"3",
+            "UUT_PARA_INTERP_POLY": "3",
+            "NUM_OUTPUTS" : "2",
+            "DUAL_IP" : "1"
+        },
+        "test_11_fir_108t_if6_poly2_2out_stream_ssr2": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int16",
+            "FIR_LEN":"108",
+            "INTERPOLATE_FACTOR":"6",
+            "SHIFT":"16",
+            "INPUT_WINDOW_VSIZE":"7680",
+            "PORT_API":"1",
+            "UUT_PARA_INTERP_POLY": "2",
+            "NUM_OUTPUTS" : "2",
+            "DUAL_IP" : "1",
+            "UUT_SSR" : "2"
+        },
+        "test_12_fir_108t_if6_poly1_2out_stream_ssr2_reload": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int16",
+            "FIR_LEN":"108",
+            "INTERPOLATE_FACTOR":"6",
+            "SHIFT":"16",
+            "INPUT_WINDOW_VSIZE":"7680",
+            "USE_COEFF_RELOAD":"1",
+            "PORT_API":"1",
+            "UUT_PARA_INTERP_POLY": "1",
+            "NUM_OUTPUTS" : "2",
+            "DUAL_IP" : "1",
+            "UUT_SSR" : "2"
         }
     }
 }

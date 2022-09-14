@@ -49,51 +49,28 @@ class fir_resampler_ref {
         // to the column width because the concept of columns does not apply to the ref model.
         for (int i = 0; i < FIR_LEN; ++i) {
             // We don't need any reversal in this constructor -
-            m_internalTapsRef[i] = coefficients[i];
+            m_internalTaps[i] = coefficients[i];
         }
     }
-    // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(fir_resampler_ref::filter); }
-    // FIR
-    void filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow);
-
-   private:
-    TT_COEFF chess_storage(% chess_alignof(v8cint16)) m_internalTapsRef[TP_FIR_LEN];
-};
-
-//-----------------------------------------------------------------------------------------------------
-// specialization for reloadable coefficients, single output
-template <typename TT_DATA,  // type of data input and output
-          typename TT_COEFF, // type of coefficients           (e.g. int16, cint32)
-          unsigned int TP_FIR_LEN,
-          unsigned int TP_INTERPOLATE_FACTOR,
-          unsigned int TP_DECIMATE_FACTOR,
-          unsigned int TP_SHIFT,
-          unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_NUM_OUTPUTS>
-class fir_resampler_ref<TT_DATA,
-                        TT_COEFF,
-                        TP_FIR_LEN,
-                        TP_INTERPOLATE_FACTOR,
-                        TP_DECIMATE_FACTOR,
-                        TP_SHIFT,
-                        TP_RND,
-                        TP_INPUT_WINDOW_VSIZE,
-                        USE_COEFF_RELOAD_TRUE,
-                        TP_NUM_OUTPUTS> {
-   public:
     // Constructor
     fir_resampler_ref() {}
+
     // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(fir_resampler_ref::filter); }
+    static void registerKernelClass() {
+        if
+            constexpr(TP_USE_COEFF_RELOAD == 1) { REGISTER_FUNCTION(fir_resampler_ref::filterRtp); }
+        else {
+            REGISTER_FUNCTION(fir_resampler_ref::filter);
+        }
+    }
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
-                output_window<TT_DATA>* outWindow,
-                const TT_COEFF (&inTaps)[TP_FIR_LEN]);
+    void filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow);
+    void filterRtp(input_window<TT_DATA>* inWindow,
+                   output_window<TT_DATA>* outWindow,
+                   const TT_COEFF (&inTaps)[TP_FIR_LEN]);
 
    private:
-    TT_COEFF chess_storage(% chess_alignof(v8cint16)) m_internalTapsRef[TP_FIR_LEN];
+    alignas(32) TT_COEFF m_internalTaps[TP_FIR_LEN];
 };
 }
 }

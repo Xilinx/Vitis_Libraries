@@ -18,7 +18,6 @@
 #include <adf.h>
 
 #ifndef __NEW_WINDOW_H__
-#define __NEW_WINDOW_H__ 1
 #endif
 // if we use 1kb registers -> aie api uses 2x512b registers for 1024b so we need this for QoR
 #ifndef __AIE_API_USE_NATIVE_1024B_VECTOR__

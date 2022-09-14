@@ -1,7 +1,7 @@
 {
     "name": "Xilinx DSPLIB matrix mult with datamover",
     "description": "",
-    "gui": "true",
+    "gui": true,
     "flow": "versal",
     "platform_allowlist": [
         "vck190"
@@ -19,7 +19,7 @@
                     ]
                 },
                 "package": {
-                    "cflags": [
+                    "clflags": [
                         "--package.defer_aie_run"
                     ]
                 }
@@ -51,6 +51,7 @@
                 "$(SYSROOT)/usr/include/xrt/",
                 "LIB_DIR/L2/include/aie",
                 "LIB_DIR/L2/tests/aie/common/inc",
+                "LIB_DIR/L1/src/aie",
                 "LIB_DIR/L1/include/aie",
                 "LIB_DIR/L1/tests/aie/inc",
                 "LIB_DIR/L1/tests/aie/src",
@@ -100,7 +101,7 @@
                     "workdir": "./Work",
                     "options": "",
                     "name": "libadf.a",
-                     "aie_kernel_files": [
+                     "pl_kernels_in_aie_graph": [
                          "LIB_DIR/L1/src/aie/matrix_mult.cpp",
                          "LIB_DIR/L1/src/aie/matrix_mult_tiler.cpp",
                          "LIB_DIR/L1/src/aie/matrix_mult_untiler.cpp"

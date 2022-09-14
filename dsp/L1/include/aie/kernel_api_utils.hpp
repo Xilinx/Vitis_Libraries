@@ -371,6 +371,31 @@ INLINE_DECL void writeStream(T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface,
                              T_outVal<TT_DATA, TT_COEFF> outVal,
                              int phase = 0) {
     // Do nothing if cascade output is present, but stream output is not
+    static constexpr unsigned streamBitWidth = 128;
+    static constexpr unsigned streamByteWidth = streamBitWidth / 8;
+    int outPhase = 0;
+    if
+        constexpr(TP_NUM_OUTPUTS == 1) { writeincr(outInterface.outStream, outVal.val); }
+    else if
+        constexpr(TP_NUM_OUTPUTS == 2) {
+            // Check if vector is a 256-bits and alternate between streams if 128-bits.
+            static_assert(outVal.val.bits() % streamBitWidth == 0);
+            if
+                constexpr(outVal.val.bits() >= TP_NUM_OUTPUTS * streamBitWidth) {
+                    // if outval length = 2 * streamBitWidth, write to both streams
+                    // TODO: As per UG1076, Chapter 4, Using Streams in Parallel , use macro: WRITEINCR(MS_rsrc1, idx1,
+                    // val) and WRITEINCR(MS_rsrc2, idx2, val)
+                    put_wms(0, outVal.val.template extract<outVal.getLanes() / 2>(0));
+                    put_wms(1, outVal.val.template extract<outVal.getLanes() / 2>(1));
+                }
+            else {
+                if (phase == 0) {
+                    put_wms(0, outVal.val);
+                } else {
+                    put_wms(1, outVal.val);
+                }
+            }
+        }
 }
 
 // Overloaded function to write to stream output.
@@ -451,11 +476,20 @@ INLINE_DECL void writeStream(T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface,
 }
 
 // Overloaded function to write to output.
-template <typename TT_DATA, typename TT_COEFF, unsigned int TP_NUM_OUTPUTS = 1, unsigned int TP_API = USE_WINDOW_API>
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_NUM_OUTPUTS = 1,
+          unsigned int TP_API = USE_WINDOW_API,
+          unsigned int ENABLE_WRITE = 0>
 INLINE_DECL void writeOutput(T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface,
                              T_outVal<TT_DATA, TT_COEFF> outVal,
                              int phase = 0) {
-    // Do nothing if cascade output is present, but window output is not
+    // By default: Do nothing if cascade output is present, but window output is not.
+    // However, SSR operation introduces a structure where both streams & cascades are used as outputs to increase
+    // throughput.
+    // In such case, a manual driver is added here.
+    if
+        constexpr(ENABLE_WRITE == 1) { writeStream<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS>(outInterface, outVal, phase); }
 }
 
 // Overloaded function to write to output.
@@ -466,7 +500,7 @@ INLINE_DECL void writeOutput(T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface,
     if
         constexpr(TP_API == USE_WINDOW_API) { writeWindow<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS>(outInterface, outVal); }
     else {
-        writeStream<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS>(outInterface, outVal);
+        writeStream<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS>(outInterface, outVal, phase);
     }
 }
 
@@ -475,7 +509,9 @@ template <typename TT_DATA, typename TT_COEFF, unsigned int TP_NUM_OUTPUTS = 1, 
 INLINE_DECL void writeOutput(T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface,
                              T_outVal384<TT_DATA, TT_COEFF> outVal,
                              int phase = 0) {
-    // Do nothing if cascade output is present, but output is not
+    // By default: Do nothing if cascade output is present, but window output is not.
+    // However, SSR operation may introduce a structure where both streams & cascades are used as outputs to increase
+    // throughput.
 }
 
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_NUM_OUTPUTS = 1, unsigned int TP_API = USE_WINDOW_API>
@@ -577,6 +613,46 @@ INLINE_DECL void readStream256(T_buff_1024b<TT_DATA>& xbuff,
     xbuff.val.insert(index % 4, concat_vector(data0.template cast_to<TT_DATA>(), data1.template cast_to<TT_DATA>()));
 };
 
+// Read 256-bits from a stream.
+template <bool TP_CASC_IN, typename TT_DATA, unsigned int TP_DUAL_IP = 0>
+INLINE_DECL void readStream256(T_buff_512b<TT_DATA>& xbuff,
+                               int index,
+                               T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface) {
+    xbuff.val.insert(index % 2, readincr_v<256 / 8 / sizeof(TT_DATA)>(inInterface.inStream));
+};
+
+// Read 256-bits from 2 streams. Read 128-bits from each.
+template <bool TP_CASC_IN, typename TT_DATA>
+INLINE_DECL void readStream256(T_buff_512b<TT_DATA>& xbuff,
+                               int index,
+                               T_inputIF<TP_CASC_IN, TT_DATA, DUAL_IP_DUAL> inInterface) {
+    using wss_type = typename T_buff_128b<cint16>::v_type;
+    wss_type data0, data1;
+    data0 = getc_wss(0);
+    data1 = getc_wss(1);
+    xbuff.val.insert(index % 2, concat_vector(data0.template cast_to<TT_DATA>(), data1.template cast_to<TT_DATA>()));
+};
+
+// Read 256-bits from a stream.
+template <bool TP_CASC_IN, typename TT_DATA, unsigned int TP_DUAL_IP = 0>
+INLINE_DECL void readStream256(T_buff_256b<TT_DATA>& xbuff,
+                               int index,
+                               T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface) {
+    xbuff.val.insert(0, readincr_v<256 / 8 / sizeof(TT_DATA)>(inInterface.inStream));
+};
+
+// Read 256-bits from 2 streams. Read 128-bits from each.
+template <bool TP_CASC_IN, typename TT_DATA>
+INLINE_DECL void readStream256(T_buff_256b<TT_DATA>& xbuff,
+                               int index,
+                               T_inputIF<TP_CASC_IN, TT_DATA, DUAL_IP_DUAL> inInterface) {
+    using wss_type = typename T_buff_128b<cint16>::v_type;
+    wss_type data0, data1;
+    data0 = getc_wss(0);
+    data1 = getc_wss(1);
+    xbuff.val.insert(0, concat_vector(data0.template cast_to<TT_DATA>(), data1.template cast_to<TT_DATA>()));
+};
+
 // Read 128-bits from a stream.
 template <bool TP_CASC_IN, typename TT_DATA, unsigned int TP_DUAL_IP = 0>
 INLINE_DECL void readStream128(T_buff_1024b<TT_DATA>& xbuff,
@@ -606,7 +682,7 @@ INLINE_DECL void readStream128(T_buff_1024b<TT_DATA>& xbuff,
 }
 } // namespaces
 
-#include "kernel_rtp_reload.hpp"
+#include "kernel_coeff_reload.hpp"
 #include "kernel_broadcast.hpp"
 
 #endif // _DSPLIB_RELOAD_UTILS_HPP_

@@ -18,6 +18,9 @@ Single rate asymetric FIR filter reference model
 
 #include "fir_sr_asym_ref.hpp"
 #include "fir_ref_utils.hpp"
+#include "fir_ref_coeff_header.hpp"
+
+// #define _DSPLIB_FIR_SR_ASYM_REF_HPP_DEBUG_
 
 namespace xf {
 namespace dsp {
@@ -25,8 +28,43 @@ namespace aie {
 namespace fir {
 namespace sr_asym {
 
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE>
+void filter_ref(input_window<TT_DATA>* inWindow,
+                output_window<TT_DATA>* outWindow,
+                const TT_COEFF (&taps)[TP_FIR_LEN]) {
+    T_accRef<TT_DATA> accum;
+    TT_DATA d_in[TP_FIR_LEN];
+    TT_DATA accumSrs;
+
+    const unsigned int kFirMarginOffset = fnFirMargin<TP_FIR_LEN, TT_DATA>() - TP_FIR_LEN + 1; // FIR Margin Offset.
+    window_incr(inWindow, kFirMarginOffset);                                                   // read input data
+
+    for (unsigned int i = 0; i < TP_INPUT_WINDOW_VSIZE; i++) {
+        accum = null_accRef<TT_DATA>(); // reset accumulator at the start of the mult-add for each output sample
+        // Accumulation
+        for (unsigned int j = 0; j < TP_FIR_LEN; j++) {
+            d_in[j] = window_readincr(inWindow); // read input data
+            // Note the coefficient index reversal. See note in constructor.
+            multiplyAcc<TT_DATA, TT_COEFF>(accum, d_in[j], taps[TP_FIR_LEN - 1 - j]);
+        }
+        // printf("Window sample[%d]: %d %d \n", i + kFirMarginOffset, d_in[0].real, d_in[0].imag); // complex only.
+        // Revert data pointer for next sample
+        window_decr(inWindow, TP_FIR_LEN - 1);
+
+        roundAcc(TP_RND, TP_SHIFT, accum);
+        saturateAcc(accum);
+        accumSrs = castAcc(accum);
+        window_writeincr((output_window<TT_DATA>*)outWindow, accumSrs);
+    }
+};
+
 // REF FIR function - default/base 'specialization'
-// Static coefficients
 //-----------------------------------------------------------------------------------------------------
 template <typename TT_DATA,
           typename TT_COEFF,
@@ -48,34 +86,13 @@ void fir_sr_asym_ref<TT_DATA,
                      TP_NUM_OUTPUTS,
                      TP_DUAL_IP,
                      TP_API>::filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow) {
-    const unsigned int shift = TP_SHIFT;
-    T_accRef<TT_DATA> accum;
-    TT_DATA d_in[TP_FIR_LEN];
-    TT_DATA accumSrs;
-
-    const unsigned int kFirMarginOffset = fnFirMargin<TP_FIR_LEN, TT_DATA>() - TP_FIR_LEN + 1; // FIR Margin Offset.
-    window_incr(inWindow, kFirMarginOffset);                                                   // read input data
-
-    for (unsigned int i = 0; i < TP_INPUT_WINDOW_VSIZE; i++) {
-        accum = null_accRef<TT_DATA>(); // reset accumulator at the start of the mult-add for each output sample
-        // Accumulation
-        for (unsigned int j = 0; j < TP_FIR_LEN; j++) {
-            d_in[j] = window_readincr(inWindow); // read input data
-            // Note the coefficient index reversal. See note in constructor.
-            multiplyAcc<TT_DATA, TT_COEFF>(accum, d_in[j], internalTaps[TP_FIR_LEN - 1 - j]);
-        }
-        // Revert data pointer for next sample
-        window_decr(inWindow, TP_FIR_LEN - 1);
-
-        roundAcc(TP_RND, shift, accum);
-        saturateAcc(accum);
-        accumSrs = castAcc(accum);
-        window_writeincr((output_window<TT_DATA>*)outWindow, accumSrs);
-    }
+    firHeaderReload<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_USE_COEFF_RELOAD>(inWindow, internalTaps);
+    filter_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE>(inWindow, outWindow,
+                                                                                       internalTaps);
 };
 
 // REF FIR function
-// Reloadable coefficients
+// RTP coefficients
 //-----------------------------------------------------------------------------------------------------
 template <typename TT_DATA,
           typename TT_COEFF,
@@ -83,6 +100,7 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
           unsigned int TP_DUAL_IP,
           unsigned int TP_API>
@@ -92,37 +110,18 @@ void fir_sr_asym_ref<TT_DATA,
                      TP_SHIFT,
                      TP_RND,
                      TP_INPUT_WINDOW_VSIZE,
-                     1,
+                     TP_USE_COEFF_RELOAD,
                      TP_NUM_OUTPUTS,
                      TP_DUAL_IP,
-                     TP_API>::filter(input_window<TT_DATA>* inWindow,
-                                     output_window<TT_DATA>* outWindow,
-                                     const TT_COEFF (&inTaps)[TP_FIR_LEN]) {
-    firReload(inTaps);
-    const unsigned int shift = TP_SHIFT;
-    T_accRef<TT_DATA> accum;
-    TT_DATA d_in[TP_FIR_LEN];
-    TT_DATA accumSrs;
-
-    const unsigned int kFirMarginOffset = fnFirMargin<TP_FIR_LEN, TT_DATA>() - TP_FIR_LEN + 1; // FIR Margin Offset.
-    window_incr(inWindow, kFirMarginOffset);                                                   // read input data
-
-    for (unsigned int i = 0; i < TP_INPUT_WINDOW_VSIZE; i++) {
-        accum = null_accRef<TT_DATA>(); // reset accumulator at the start of the mult-add for each output sample
-        // Accumulation
-        for (unsigned int j = 0; j < TP_FIR_LEN; j++) {
-            d_in[j] = window_readincr(inWindow); // read input data
-            // Note the coefficient index reversal. See note in constructor.
-            multiplyAcc<TT_DATA, TT_COEFF>(accum, d_in[j], internalTaps[TP_FIR_LEN - 1 - j]);
-        }
-        // Revert data pointer for next sample
-        window_decr(inWindow, TP_FIR_LEN - 1);
-
-        roundAcc(TP_RND, shift, accum);
-        saturateAcc(accum);
-        accumSrs = castAcc(accum);
-        window_writeincr((output_window<TT_DATA>*)outWindow, accumSrs);
+                     TP_API>::filterRtp(input_window<TT_DATA>* inWindow,
+                                        output_window<TT_DATA>* outWindow,
+                                        const TT_COEFF (&inTaps)[TP_FIR_LEN]) {
+    // Coefficient Reload
+    for (int i = 0; i < TP_FIR_LEN; i++) {
+        internalTaps[i] = inTaps[i];
     }
+    filter_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE>(inWindow, outWindow,
+                                                                                       internalTaps);
 };
 }
 }

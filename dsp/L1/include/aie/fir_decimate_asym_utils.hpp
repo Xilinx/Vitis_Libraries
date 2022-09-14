@@ -88,16 +88,12 @@ INLINE_DECL void fnLoadXIpData(T_buff_1024b<TT_DATA>& buff,
 
 //-----------------------------------------------------------------------------------------------------
 template <typename TT_DATA>
-INLINE_DECL T_buff_512b<TT_DATA> select(T_buff_1024b<TT_DATA> xbuff,
+INLINE_DECL T_buff_512b<TT_DATA> select(const unsigned int sel,
+                                        T_buff_1024b<TT_DATA> xbuff,
                                         unsigned int xstart,
                                         const unsigned int xOffsets,
                                         const unsigned int xstartUpper) {
-    using buf_type = typename T_buff_512b<TT_DATA>::v_type;
-    buf_type chess_storage(X_BUFFER) tmp;
-    const unsigned int two_columns = (xOffsets & 0xF0000) == 0 ? 1 : 0; // extract columns
-
     T_buff_512b<TT_DATA> retVal;
-    const unsigned int sel = two_columns == 1 ? 0xFFF0 : 0xFF00;
     const unsigned int xoffsets = xOffsets;
     const unsigned int xoffsets_hi = 0;
     const unsigned int yoffsets = xOffsets;
@@ -108,15 +104,12 @@ INLINE_DECL T_buff_512b<TT_DATA> select(T_buff_1024b<TT_DATA> xbuff,
 
 //-----------------------------------------------------------------------------------------------------
 template <>
-INLINE_DECL T_buff_512b<int32> select(T_buff_1024b<int32> xbuff,
+INLINE_DECL T_buff_512b<int32> select(const unsigned int sel,
+                                      T_buff_1024b<int32> xbuff,
                                       unsigned int xstart,
                                       const unsigned int xOffsets,
                                       const unsigned int xstartUpper) {
-    // xstartUpper = xstart + m_kLanes/2 * TP_DECIMATE_FACTOR; //upper half of lanes
-    const unsigned int lanes = 2 * (xstartUpper - xstart) / ((0xF00 & xOffsets) >> 8); // extract lanes
     T_buff_512b<int32> retVal;
-    const unsigned int sel =
-        lanes == 8 ? 0xFF00 : 0xFFF0; // int32 data and int32 coefs requres selection switch after 4 lanes
     const unsigned int xoffsets = xOffsets;
     const unsigned int xoffsets_hi = 0;
     const unsigned int yoffsets = xOffsets;
@@ -126,7 +119,8 @@ INLINE_DECL T_buff_512b<int32> select(T_buff_1024b<int32> xbuff,
 }
 
 template <>
-INLINE_DECL T_buff_512b<int16> select(T_buff_1024b<int16> xbuff,
+INLINE_DECL T_buff_512b<int16> select(const unsigned int sel,
+                                      T_buff_1024b<int16> xbuff,
                                       unsigned int xstart,
                                       const unsigned int xOffsets,
                                       const unsigned int xstartUpper) {
@@ -135,24 +129,24 @@ INLINE_DECL T_buff_512b<int16> select(T_buff_1024b<int16> xbuff,
     return retVal;
 }
 template <>
-INLINE_DECL T_buff_512b<cint32> select(T_buff_1024b<cint32> xbuff,
+INLINE_DECL T_buff_512b<cint32> select(const unsigned int sel,
+                                       T_buff_1024b<cint32> xbuff,
                                        unsigned int xstart,
                                        const unsigned int xOffsets,
                                        const unsigned int xstartUpper) {
     T_buff_512b<cint32> retVal;
-    const unsigned int sel = 0xF0;
     const unsigned int xoffsets = xOffsets;
     const unsigned int yoffsets = xOffsets;
     retVal.val = select8(sel, xbuff.val, xstart, xOffsets, xstartUpper, xOffsets);
     return retVal;
 }
 template <>
-INLINE_DECL T_buff_512b<float> select(T_buff_1024b<float> xbuff,
+INLINE_DECL T_buff_512b<float> select(const unsigned int sel,
+                                      T_buff_1024b<float> xbuff,
                                       unsigned int xstart,
                                       const unsigned int xOffsets,
                                       const unsigned int xstartUpper) {
     T_buff_512b<float> retVal;
-    const unsigned int sel = 0xFF00;
     const unsigned int xoffsets = xOffsets;
     const unsigned int xoffsets_hi = 0;
     const unsigned int yoffsets = 0;
@@ -161,15 +155,34 @@ INLINE_DECL T_buff_512b<float> select(T_buff_1024b<float> xbuff,
     return retVal;
 }
 template <>
-INLINE_DECL T_buff_512b<cfloat> select(T_buff_1024b<cfloat> xbuff,
+INLINE_DECL T_buff_512b<cfloat> select(const unsigned int sel,
+                                       T_buff_1024b<cfloat> xbuff,
                                        unsigned int xstart,
                                        const unsigned int xOffsets,
                                        const unsigned int xstartUpper) {
     T_buff_512b<cfloat> retVal;
-    const unsigned int sel = 0xC;
+    const unsigned int selInt = 0xC;
     const unsigned int xoffsets = xOffsets;
     const unsigned int yoffsets = xOffsets;
-    retVal.val = fpselect8(sel, xbuff.val, xstart, xOffsets, xstartUpper, xOffsets);
+    retVal.val = fpselect8(selInt, xbuff.val, xstart, xOffsets, xstartUpper, xOffsets);
+    return retVal;
+}
+
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA, unsigned int Lanes, unsigned int Cols>
+INLINE_DECL T_buff_512b<TT_DATA> select(T_buff_1024b<TT_DATA> xbuff,
+                                        unsigned int xstart,
+                                        const unsigned int xOffsets,
+                                        const unsigned int xstartUpper) {
+    T_buff_512b<TT_DATA> retVal;
+    // Preselect data buffer in such way that xoffset limits are avoided.
+    // Data buffer can hold 1024-bit, which maybe up to 32 samples, but xoffsets are only 4-bit (3-bit for floats).
+    // Samples from 1-24-bit buffer that are offset by decimate_factor are placed in adjacent position in the temp
+    // 512-bit buffer and can be indexed nicely.
+    const unsigned int selAddr = Cols * Lanes / 2;                                // lanes 2 to 8.
+    const unsigned int sel = selAddr == 2 ? 0xC : selAddr == 4 ? 0xFFF0 : 0xFF00; // lanes 2 to 8.
+
+    retVal = select(sel, xbuff, xstart, xOffsets, xstartUpper);
     return retVal;
 }
 
@@ -182,12 +195,12 @@ INLINE_DECL T_accDecAsym<TT_DATA, TT_COEFF> mulDecAsym(T_buff_1024b<TT_DATA> xbu
                                                        unsigned int zstart,
                                                        const unsigned int decimateOffsets,
                                                        const unsigned int xstartUpper) {
+    constexpr unsigned int Lanes = fnNumLanesDecAsym<TT_DATA, TT_COEFF>();
+    constexpr unsigned int Cols = fnNumColumnsDecAsym<TT_DATA, TT_COEFF>();
+    constexpr unsigned int CoeffStep = 1;
+    constexpr unsigned int DataStepX = 1;
     if
         constexpr(TP_DFX == kLowDF) {
-            constexpr unsigned int Lanes = fnNumLanesDecAsym<TT_DATA, TT_COEFF>();
-            constexpr unsigned int Cols = fnNumColumnsDecAsym<TT_DATA, TT_COEFF>();
-            constexpr unsigned int CoeffStep = 1;
-            constexpr unsigned int DataStepX = 1;
             constexpr unsigned int DataStepY = TP_DECIMATE_FACTOR;
             T_accDecAsym<TT_DATA, TT_COEFF> retVal;
             retVal.val = ::aie::sliding_mul_ops<
@@ -203,16 +216,12 @@ INLINE_DECL T_accDecAsym<TT_DATA, TT_COEFF> mulDecAsym(T_buff_1024b<TT_DATA> xbu
             T_accDecAsym<TT_DATA, TT_COEFF> retVal;
             const unsigned int xoffsets = decimateOffsets;
             const unsigned int xmulstart = 0;
-            constexpr unsigned int CoeffStep = 1;
-            constexpr unsigned int DataStepX = 1;
             constexpr unsigned int DataStepY = fnNumColumnsDecAsym<TT_DATA, TT_COEFF>();
             T_buff_512b<TT_DATA> buff;
-
-            buff = select(xbuff, xstart, xoffsets, xstartUpper);
+            buff = select<TT_DATA, Lanes, Cols>(xbuff, xstart, xoffsets, xstartUpper);
             tmp = buff.val;
             retVal.val = ::aie::sliding_mul_ops<
-                fnNumLanesDecAsym<TT_DATA, TT_COEFF>(), fnNumColumnsDecAsym<TT_DATA, TT_COEFF>(), CoeffStep, DataStepX,
-                DataStepY, TT_COEFF, TT_DATA,
+                Lanes, Cols, CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
                 accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >::mul(zbuff.val, zstart, tmp,
                                                                                             xmulstart);
             return retVal;
@@ -227,16 +236,17 @@ INLINE_DECL T_accDecAsym<TT_DATA, TT_COEFF> macDecAsym(T_accDecAsym<TT_DATA, TT_
                                                        unsigned int zstart,
                                                        const unsigned int decimateOffsets,
                                                        const unsigned int xstartUpper) {
+    constexpr unsigned int Lanes = fnNumLanesDecAsym<TT_DATA, TT_COEFF>();
+    constexpr unsigned int Cols = fnNumColumnsDecAsym<TT_DATA, TT_COEFF>();
+    constexpr unsigned int CoeffStep = 1;
+    constexpr unsigned int DataStepX = 1;
     if
         constexpr(TP_DFX == kLowDF) {
-            const unsigned int CoeffStep = 1;
-            const unsigned int DataStepX = 1;
             constexpr unsigned int DataStepY = TP_DECIMATE_FACTOR;
 
             T_accDecAsym<TT_DATA, TT_COEFF> retVal;
             retVal.val = ::aie::sliding_mul_ops<
-                fnNumLanesDecAsym<TT_DATA, TT_COEFF>(), fnNumColumnsDecAsym<TT_DATA, TT_COEFF>(), CoeffStep, DataStepX,
-                DataStepY, TT_COEFF, TT_DATA,
+                Lanes, Cols, CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
                 accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >::mac(acc.val, zbuff.val, zstart,
                                                                                             xbuff.val, xstart);
             return retVal;
@@ -248,15 +258,11 @@ INLINE_DECL T_accDecAsym<TT_DATA, TT_COEFF> macDecAsym(T_accDecAsym<TT_DATA, TT_
             T_accDecAsym<TT_DATA, TT_COEFF> retVal;
             const unsigned int xoffsets = decimateOffsets;
             const unsigned int xmulstart = 0;
-            constexpr unsigned int CoeffStep = 1;
-            constexpr unsigned int DataStepX = 1;
             constexpr unsigned int DataStepY = fnNumColumnsDecAsym<TT_DATA, TT_COEFF>(); // 4 for 4 column intrinsics
-            // TODO: apply chess_copy() to force the tmp buffer to be loop variant and hence prevent dumping all tmp's
-            // on stack pre-loop.
-            tmp = select(xbuff, xstart, xoffsets, xstartUpper).val;
-            /*vPrintf("tmp ", tmp);
-            vPrintf("xbuff", xbuff.val);
-            printf("xstart : %d \t xstartUpper %d \n", xstart, xstartUpper);*/
+            T_buff_512b<TT_DATA> buff;
+
+            buff = select<TT_DATA, Lanes, Cols>(xbuff, xstart, xoffsets, xstartUpper);
+            tmp = buff.val;
             retVal.val = ::aie::sliding_mul_ops<
                 fnNumLanesDecAsym<TT_DATA, TT_COEFF>(), fnNumColumnsDecAsym<TT_DATA, TT_COEFF>(), CoeffStep, DataStepX,
                 DataStepY, TT_COEFF, TT_DATA,

@@ -41,6 +41,9 @@
 #ifndef PATTERN
 #define PATTERN 0
 #endif
+#ifndef HEADER_BYTES
+#define HEADER_BYTES 0
+#endif
 
 #ifndef USE_CHAIN
 #define USE_CHAIN 0

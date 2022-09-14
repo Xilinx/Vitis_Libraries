@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-//#ifndef _DSPLIB_FFT_REF_UTILS_HPP_
-//#define _DSPLIB_FFT_REF_UTILS_HPP_
+#ifndef _DSPLIB_FFT_REF_UTILS_HPP_
+#define _DSPLIB_FFT_REF_UTILS_HPP_
 
 #include "fft_ifft_dit_twiddle_lut.h"
 
@@ -757,4 +757,4 @@ inline void btfly<cint16, cint16>(T_int_data<cint16>& q0,
 
 //}}}} //namespace
 
-//#endif // ifdef _DSPLIB_FFT_REF_UTILS_HPP_
+#endif // ifdef _DSPLIB_FFT_REF_UTILS_HPP_
