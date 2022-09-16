@@ -37,6 +37,7 @@
 #include "xf_security/ecb.hpp"
 #include "xf_security/ecc.hpp"
 #include "xf_security/ecdsa.hpp"
+#include "xf_security/ecdsa_nistp384p.hpp"
 #include "xf_security/eddsa.hpp"
 #include "xf_security/gcm.hpp"
 #include "xf_security/gmac.hpp"
@@ -55,5 +56,6 @@
 #include "xf_security/sm234.hpp"
 #include "xf_security/vdf.hpp"
 #include "xf_security/xts.hpp"
+#include "xf_security/poseidon.hpp"
 
 #endif

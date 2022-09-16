@@ -4,14 +4,14 @@
     "description": "A SystemCompiler example for CRC32C acceleration.", 
     "flow": "vitis", 
     "platform_allowlist": [
-        "samsung_U2",
+        "u2_",
         "u200"
     ], 
     "platform_blocklist": [
         "zc"
     ], 
     "platform_properties": {
-        "samsung_U2": {
+        "u2_": {
             "host": {
                 "compiler": {
                     "symbols": [

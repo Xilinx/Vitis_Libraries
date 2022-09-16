@@ -35,7 +35,7 @@ Benchmarks of 4 different acceleration applications are also provided with the l
 .. toctree::
    :caption: Tutorial
    :maxdepth: 1
-   tutorial.rst
+   Vitis Security Library Tutorial <tutorial.rst>
 
 
 Library Contents
@@ -308,23 +308,23 @@ To run the Vitis projects for benchmark evaluation and test, you may need the ex
 
 
 .. toctree::
-   :caption: Library Overview
+   :caption: Introduction
    :maxdepth: 1
 
-   overview.rst
-   release.rst
+   Overview <overview.rst>
+   Release Note <release.rst>
 
 .. toctree::
    :caption: User Guide
    :maxdepth: 2
 
-   guide_L1/hw_guide.rst
+   L1 Module User Guide <guide_L1/hw_guide.rst>
 
 .. toctree::
    :caption: Benchmark
    :maxdepth: 1
 
-   benchmark.rst
+   Benchmark <benchmark.rst>
 
 Index
 -----

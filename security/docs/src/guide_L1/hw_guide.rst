@@ -28,5 +28,5 @@ L1 Module User Guide
 .. toctree::
    :maxdepth: 2
 
-   internals.rst
-   hw_api.rst
+   Design Internals <internals.rst>
+   API Functions of ``xf::security`` <hw_api.rst>

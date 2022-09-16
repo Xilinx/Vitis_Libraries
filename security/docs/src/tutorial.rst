@@ -29,12 +29,12 @@ Vitis Security Library Tutorial
 Crypto Algorithm Hardware Acceleration
 =======================================
 
-Crypto algorithms plays an important roll in transfer, verification, storage and processing of data.
+Crypto algorithms play an important role in transfer, verification, storage and processing of data.
 Crypto application includes encryption/decryption, checksum, hash, signature/verification, etc.
-Modern crypto algorithms are complicated and keep evovling, especially in new area like block-chain application.
-FPGA is suitable for a wide variety of crypto algortihm and able to provide competitive or even better performance than CPU.
-It is also convenient to construct a processing pipeline while crypto processing is one of the pipeline stage, which will save bandwidth cost and improve performance.
-Last but not the least, FPGA could have multiple compute unit working in parallel, which will also improve total performance.
+Modern crypto algorithms are complicated and keep evolving, especially in new areas like block-chain application.
+FPGA is suitable for a wide variety of crypto algorithms and able to provide competitive or even better performance than CPU.
+It is also convenient to construct a processing pipeline while crypto processing is one of the pipeline stages, which will save bandwidth cost and improve performance.
+Last but not the least, FPGA could have multiple compute units working in parallel, which will also improve total performance.
 
 .. image:: /images/pipeline_processing.png
    :alt: Execution Plan 
@@ -54,7 +54,7 @@ L1 API
 Target Audience and Major Features
 ------------------------------------
 
-Target audience of L1 API are users who is familiar with HLS programming and want to tests / profile / modify operators or add new APIs.
+Target audience of L1 API are users who is familiar with HLS programming and want to test / profile / modify operators or add new APIs.
 With the HLS test project provided in L1 layer, user could get:
 
 (1) Function correctness tests, both in c-simulation and co-simulation
@@ -65,9 +65,9 @@ With the HLS test project provided in L1 layer, user could get:
 Input / output interface
 --------------------------
 
-For easy connection with other HLS component, most of security library L1 API takes hls::stream interface.
+For easy connection with other HLS components, most of security library L1 API takes hls::stream interface.
 For APIs which could take variable length of input, API will include either scalar parameter for input length or "end flag" stream working with data stream in a 1:1 fashion to tell if this is the last block of input data.
-For details of interface definition and how padding will happen in stream interface, please take reference of documentation and corresponding test cases.
+For details of interface definition and how padding will happen in stream interface, please take reference to documentation and corresponding test cases.
 
 Command to Run L1 cases
 -------------------------
