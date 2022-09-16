@@ -22,6 +22,6 @@ L2 Kernels Tests Guide
 .. toctree::
    :maxdepth: 1
 
-   L2_test_rtm.rst
-   L2_test_cg.rst
-   L2_test_fcn.rst
+   RTM Kernel Test <L2_test_rtm.rst>
+   CG Kernel Test <L2_test_cg.rst>
+   FCN Kernel Test <L2_test_fcn.rst>

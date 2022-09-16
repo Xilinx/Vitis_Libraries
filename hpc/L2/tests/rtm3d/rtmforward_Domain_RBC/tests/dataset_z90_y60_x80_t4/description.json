@@ -27,7 +27,6 @@
             "cmd_args": "BUILD/rtmforward.xclbin PROJECT/data/ 90 60 80 4 1"
         }
     ], 
-    "pre_launch": [], 
     "host": {
         "host_exe": "host.exe", 
         "compiler": {

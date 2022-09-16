@@ -27,7 +27,7 @@ the software executable can be found in the ``L2/src/hw`` and ``L2/src/sw``.
 .. toctree::
    :maxdepth: 2
 
-   L2_overview.rst
-   L2_apis.rst
-   L2_test.rst
+   Introduction of L2 Kernels <L2_overview.rst>
+   L2 Kernel APIs <L2_apis.rst>
+   L2 Kernels Tests Guide <L2_test.rst>
 

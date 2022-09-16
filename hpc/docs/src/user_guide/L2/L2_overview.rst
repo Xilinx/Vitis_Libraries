@@ -22,7 +22,7 @@ Introduction of L2 Kernels
 .. toctree::
    :maxdepth: 2
 
-   L2_rtm.rst
-   L2_mlp.rst
-   L2_cg.rst
+   RTM Kernels <L2_rtm.rst>
+   MLP Kernels <L2_mlp.rst>
+   CG Kernels <L2_cg.rst>
 

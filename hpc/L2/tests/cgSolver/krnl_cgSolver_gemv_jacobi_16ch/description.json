@@ -45,11 +45,6 @@
             ]
         }
     }, 
-    "pre_launch": [
-        {
-            "launch_cmd": "make data_gen"
-        }
-    ], 
     "launch": [
         {
             "name": "generic launch for all flows", 

@@ -3,7 +3,6 @@
     "name": "Xilinx RTM Test", 
     "description": "Xilinx RTM Test", 
     "flow": "vitis", 
-    "runtime": "XRT", 
     "platform_type": "pcie", 
     "platform_allowlist": [
         "u280"
@@ -25,11 +24,6 @@
         {
             "name": "generic launch for all flows", 
             "cmd_args": "BUILD/rtm.xclbin BUILD/data/"
-        }
-    ], 
-    "pre_launch": [
-        {
-            "launch_cmd": "make data_gen"
         }
     ], 
     "host": {
@@ -67,17 +61,17 @@
         {
             "name": "rtm", 
             "ldclflags": "--config opts.cfg", 
-            "frequency": 150, 
+            "frequency": 120, 
             "accelerators": [
                 {
                     "name": "rtmforward", 
                     "location": "LIB_DIR/L2/src/hw/rtm2d/rtmforward.cpp", 
-                    "frequency": 250
+                    "frequency": 120
                 }, 
                 {
                     "name": "rtmbackward", 
                     "location": "LIB_DIR/L2/src/hw/rtm2d/rtmbackward.cpp", 
-                    "frequency": 250
+                    "frequency": 120
                 }
             ]
         }

@@ -43,11 +43,6 @@
             ]
         }
     }, 
-    "pre_launch": [
-        {
-            "launch_cmd": "make data_gen"
-        }
-    ], 
     "launch": [
         {
             "name": "generic launch for all flows", 
@@ -147,7 +142,7 @@
         }
     ], 
     "testinfo": {
-        "disable": false, 
+        "disable": true, 
         "jobs": [
             {
                 "index": 0, 

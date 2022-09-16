@@ -29,25 +29,25 @@ endif
 
 .PHONY: all install clean cleanhtml cleanall
 
-all: install
+all: .stamp/sphinx
 
 install: .stamp/sphinx
 	rsync -av --delete --exclude .git --exclude .nojekyll --exclude .buildinfo \
-		 _build/html/ $(HTML_DEST_DIR) 1>/dev/null
+		 build/html/ $(HTML_DEST_DIR) 1>/dev/null
 
 DOXYREST_FRAME = $(dir $(shell which doxyrest))/../doxyrest_frame
-rsts := $(patsubst Doxyfile_%, rst_%, $(wildcard Doxyfile_*))
+rsts := $(patsubst Doxyfile_%, src/rst_%, $(wildcard Doxyfile_*))
 
-rst_%: Doxyfile_%
+src/rst_%: Doxyfile_%
 	doxygen $^
-	rm -rf rst_$*
-	mkdir -p rst_$*
-	doxyrest xml_$*/index.xml -o rst_$*/index.rst \
+	rm -rf src/rst_$*
+	mkdir -p src/rst_$*
+	doxyrest xml_$*/index.xml -o src/rst_$*/index.rst \
 		-F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
 
 .stamp/sphinx: $(rsts) Makefile.sphinx
 	mkdir -p $(HTML_DEST_DIR)
-	mkdir -p _build
+	mkdir -p build
 	mkdir -p src/_static
 	mkdir -p .stamp
 	make -f Makefile.sphinx html
@@ -57,8 +57,8 @@ clean:
 	rm -rf .stamp
 
 cleanhtml:
-	rm -rf .stamp/sphinx _build/html _build/doctrees
+	rm -rf .stamp/sphinx build/html build/doctrees
 
 cleanall:
-	rm -rf .stamp src/_static _build $(HTML_DEST_DIR)
-	rm -rf xml_* rst_*
+	rm -rf .stamp src/_static build $(HTML_DEST_DIR)
+	rm -rf xml_* src/rst_*

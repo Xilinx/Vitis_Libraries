@@ -26,11 +26,6 @@
             "cmd_args": "BUILD/rtm.xclbin BUILD/data/"
         }
     ], 
-    "pre_launch": [
-        {
-            "launch_cmd": "make data_gen"
-        }
-    ], 
     "host": {
         "host_exe": "host.exe", 
         "compiler": {

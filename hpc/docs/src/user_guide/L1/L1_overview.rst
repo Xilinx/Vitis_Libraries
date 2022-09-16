@@ -22,6 +22,6 @@ Introduction of L1 Primitives
 .. toctree::
    :maxdepth: 3 
 
-   rtm_intr.rst
-   cg_intr.rst
-   mlp_intr.rst
+   RTM Introduction <rtm_intr.rst>
+   Conjugate Gradient Solver Introduction <cg_intr.rst>
+   MLP Introduction <mlp_intr.rst>

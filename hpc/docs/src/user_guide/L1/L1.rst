@@ -26,6 +26,6 @@ directory of the Vitis hpc library.
 .. toctree::
    :maxdepth: 2 
 
-   L1_overview.rst
-   L1_apis.rst
-   L1_test.rst
+   Introduction of L1 Primitives <L1_overview.rst>
+   L1 APIs <L1_apis.rst>
+   L1 Test <L1_test.rst>

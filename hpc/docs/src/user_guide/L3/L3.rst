@@ -22,6 +22,6 @@ L3 RTM API User Guide
 .. toctree::
    :maxdepth: 2
 
-   L3_overview.rst
-   L3_api.rst
-   L3_test.rst
+   Introduction of L3 APIs <L3_overview.rst>
+   L3 APIs <L3_api.rst>
+   L3 test <L3_test.rst>

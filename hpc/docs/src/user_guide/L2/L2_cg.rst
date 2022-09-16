@@ -31,6 +31,6 @@ Usage and Benchmark
 .. toctree::
    :maxdepth: 2
 
-   benchmark/cg_gemv_jacobi.rst
-   benchmark/cg_spmv_jacobi.rst
+   GEMV-based Conjugate Gradient Solver with Jacobi Preconditioner <benchmark/cg_gemv_jacobi.rst>
+   SPMV-based Conjugate Gradient Solver with Jacobi Preconditioner <benchmark/cg_spmv_jacobi.rst>
 

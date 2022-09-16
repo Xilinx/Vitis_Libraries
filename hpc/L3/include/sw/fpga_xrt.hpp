@@ -23,6 +23,8 @@
 #include "experimental/xrt_kernel.h"
 #include "experimental/xrt_device.h"
 #include "experimental/xrt_bo.h"
+#include <vector>
+#include <future>
 
 using namespace std;
 
