@@ -34,7 +34,7 @@
     }, 
     "pre_build": [
         {
-            "build_cmd": "PROJECT/arrow_compile/setup.sh $(XILINX_VIVADO)/tps/lnx64/gcc-6.2.0/bin"
+            "build_cmd": "PROJECT/arrow_compile/setup.sh $(CXX) $(XRT_CXXFLAGS)"
         }
     ],
     "launch": [
@@ -63,7 +63,7 @@
                 "PROJECT/arrow_compile/arrow/cpp/src",
                 "PROJECT/arrow_compile/arrow/cpp/release/src/"
             ], 
-            "options": "-O3 -std=c++14 -D_GLIBCXX_USE_CXX11_ABI=1 -DXDEVICE=$(PLATFORM_NAME)"
+            "options": "-O3 -std=c++14 -DXDEVICE=$(PLATFORM_NAME)"
         },
         "linker" : {
             "librarypaths" : [

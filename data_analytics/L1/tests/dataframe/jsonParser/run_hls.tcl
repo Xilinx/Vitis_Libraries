@@ -26,7 +26,7 @@ if {![info exists CLKP]} {
 open_project -reset $PROJ
 
 add_files "test.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw -I./"
-add_files -tb "test.cpp schema.txt" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
+add_files -tb "test.cpp schema-0.txt schema-1.txt schema-2.txt schema-3.txt" -cflags "-I${XF_PROJ_ROOT}/L1/include/hw"
 set_top json_dut
 
 open_solution -reset $SOLN
@@ -44,6 +44,7 @@ if {$CSYNTH == 1} {
 
 if {$COSIM == 1} {
   cosim_design
+#  cosim_design -trace_level all -wave_debug
 }
 
 if {$VIVADO_SYN == 1} {

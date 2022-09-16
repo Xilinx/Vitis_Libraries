@@ -53,10 +53,7 @@ void readDDR(ap_uint<88>* ddr_obj, hls::stream<Object>& obj_strm) {
     Object obj_dat;
     for (int i = 1; i < obj_num + 1; i++) {
         ap_uint<88> all_data = ddr_obj[i];
-        obj_dat.set_data(all_data.range(63, 0));
-        obj_dat.set_id(all_data.range(79, 64));
-        obj_dat.set_valid(all_data.range(83, 80));
-        obj_dat.set_type(all_data.range(87, 84));
+        obj_dat.set_all(all_data);
         obj_strm.write(obj_dat);
     }
 #ifdef _DF_DEBUG_V2

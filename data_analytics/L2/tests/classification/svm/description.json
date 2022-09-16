@@ -25,38 +25,6 @@
                     ]
                 }
             }
-        },
-        "u50": {
-            "host": {
-                "compiler": {
-                    "symbols": [
-                        "USE_HBM"
-                    ]
-                }
-            },
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u50.cfg"
-                    ]
-                }
-            }
-        },
-        "vck190": {
-            "host": {
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib",
-                        "${SYSROOT}/opt/xilinx/xrt/lib"
-                    ]
-                },
-                "compiler": {
-                    "includepaths": [
-                        "$(SYSROOT)/usr/include"
-                    ],
-                    "options": "--sysroot=$(SYSROOT)"
-                }
-            }
         }
     },
     "launch": [

@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.4
+# sc makefile-generator v1.0.0
 #
 #+-------------------------------------------------------------------------------
 # The following parameters are assigned with default values. These parameters can
@@ -70,14 +70,15 @@ check_device:
 	fi;
 
 #get HOST_ARCH by PLATFORM
+ifneq (,$(PLATFORM))
 HOST_ARCH_temp = $(shell platforminfo -p $(PLATFORM) | grep 'CPU Type' | sed 's/.*://' | sed '/ai_engine/d' | sed 's/^[[:space:]]*//')
-$(warning HOST_ARCH_temp:$(HOST_ARCH_temp))
 ifeq ($(HOST_ARCH_temp), x86)
 HOST_ARCH := x86
 else ifeq ($(HOST_ARCH_temp), cortex-a9)
 HOST_ARCH := aarch32
-else ifeq ($(HOST_ARCH_temp), cortex-a*)
+else ifneq (,$(findstring cortex-a, $(HOST_ARCH_temp)))
 HOST_ARCH := aarch64
+endif
 endif
 
 #Checks for Device Family

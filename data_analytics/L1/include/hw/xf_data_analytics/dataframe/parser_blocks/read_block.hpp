@@ -199,7 +199,7 @@ void blockDivide(ap_uint<29>* base_addr_buff, ap_uint<29>* nm_buff, ap_uint<128>
         ap_uint<29> addr = base_addr_buff[i];
         cnt = 0;
         while (!find_head) {
-#pragma HLS pipeline II = 1
+#pragma HLS pipeline II = 2
             ap_uint<128> i_128 = ddr_buff[addr++];
             cnt++;
             // serach \n from head to end

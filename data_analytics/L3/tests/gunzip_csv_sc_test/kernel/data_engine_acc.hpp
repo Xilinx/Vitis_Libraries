@@ -29,6 +29,11 @@ class data_engine_acc : public VPP_ACC<data_engine_acc, /*NCU=*/1> {
     SYS_PORT(cfgBuf, bank0);
     SYS_PORT(firValue, bank0);
 
+    SYS_PORT_PFM(u50, csvBuf, HBM[0]);
+    SYS_PORT_PFM(u50, szBuf, HBM[1]);
+    SYS_PORT_PFM(u50, cfgBuf, HBM[2]);
+    SYS_PORT_PFM(u50, firValue, HBM[3]);
+
    public:
     /**
      * @brief top of kernel

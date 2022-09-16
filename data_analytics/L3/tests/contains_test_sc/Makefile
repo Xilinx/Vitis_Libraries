@@ -209,7 +209,7 @@ $(NUMPY_SRC): pre_build
 $(SO_FILE): $(NUMPY_SRC) $(SO_FILE_DEPS)
 	$(MAKEDEPEND)
 	mkdir -p $(BUILD_DIR)
-	$(CUR_DIR)/ext/swig/install/bin/swig -c++ -python $(PYFLAGS) -o $(BUILD_DIR)/contains_wrap.cpp $(CUR_DIR)/host/contains.i
+	SWIG_LIB=$(CUR_DIR)/ext/swig/install/share/swig/4.0.2 $(CUR_DIR)/ext/swig/install/bin/swig -c++ -python $(PYFLAGS) -o $(BUILD_DIR)/contains_wrap.cpp $(CUR_DIR)/host/contains.i
 	$(CXX) -fPIC -c $(SO_SRCS) $(CXXFLAGS) $(LDFLAGS)
 	$(CXX) -o $(SO_FILE) -shared contains_wrap.o strtree_contains.o $(SO_FILE_DEPS) $(CXXFLAGS) $(LDFLAGS)
 

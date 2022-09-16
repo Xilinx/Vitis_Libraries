@@ -32,7 +32,11 @@ SmartSSDCache::SmartSSDCache(const char* xclbin_path, int card_num, sssd_info_t*
         printf("add card %d\n", i);
         data_engine_acc::add_card(cuCluster[i], i);
     }
-    csvInBufPool = data_engine_acc::create_bufpool(vpp::input, vpp::p2p);
+#ifdef USE_P2P
+    csvInBufPool = data_engine_acc::create_bufpool(vpp::input, vpp::p2p); // for U.2. device only
+#else
+    csvInBufPool = data_engine_acc::create_bufpool(vpp::input);
+#endif
     cfgInBufPool = data_engine_acc::create_bufpool(vpp::input);
     outBufPool = data_engine_acc::create_bufpool(vpp::output);
     metaBufPool = data_engine_acc::create_bufpool(vpp::bidirectional);

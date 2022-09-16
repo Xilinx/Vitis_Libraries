@@ -29,6 +29,9 @@
 #define N 12
 
 namespace sssd_engine {
+/**
+ * @brief generating configuration bits for CSV scanner kernel
+ */
 class DataEngineConfig {
    private:
     ap_uint<64> convert(sssd_filter_t* filter);
@@ -45,6 +48,7 @@ class DataEngineConfig {
      * @param gzip file under gzip or not
      * @param sd schema for describing the table
      * @param cfg kernel configurations
+     * @return error code
      *
      */
     ErrorCode genConfigBits(bool gzip, sssd_scandesc_t* sd, uint64_t* cfg);

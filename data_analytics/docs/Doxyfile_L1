@@ -27,7 +27,7 @@ INPUT                  = ../L1/include/hw/xf_data_analytics/classification \
                          ../L1/include/hw/xf_data_analytics/clustering \
                          ../L1/include/hw/xf_data_analytics/common \
                          ../L1/include/hw/xf_data_analytics/dataframe \
-                         ../L1/include/hw/xf_data_analytics/text \
+                         ../L1/include/hw/xf_data_analytics/regression \
                          ../L1/include/sw/xf_data_analytics/text
 
 # The XML_OUTPUT tag is used to specify where the XML pages will be put. If a

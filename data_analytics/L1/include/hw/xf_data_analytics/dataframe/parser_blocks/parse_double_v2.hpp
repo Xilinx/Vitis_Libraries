@@ -471,9 +471,12 @@ static void parseStr2Dec(hls::stream<ap_uint<8> >& i_strm,
             is_ld_0 = true;
         }
         ap_uint<8> in;
-        nb_1 = i_e_strm.read_nb(e);
-        nb_2 = vld_strm.read_nb(vld);
-        nb_3 = i_strm.read_nb(in);
+        {
+#pragma HLS latency min = 0 max = 0
+            nb_1 = i_e_strm.read_nb(e);
+            nb_2 = vld_strm.read_nb(vld);
+            nb_3 = i_strm.read_nb(in);
+        }
         // std::cout << std::hex << in << " " << vld << " " << e << " " << std::dec;
         if (vld && nb_1 && nb_2 && nb_3) {
             if (is_first && in == '-')

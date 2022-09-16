@@ -1,19 +1,19 @@
 {
     "gui": false,
-    "name": "Xilinx Geo IP Test", 
-    "description": "Geo information look up with IP", 
-    "flow": "vitis", 
-    "platform_type": "", 
+    "name": "Xilinx Geo IP Test",
+    "description": "Geo information look up with IP",
+    "flow": "vitis",
+    "platform_type": "",
     "platform_allowlist": [
-        "u50", 
-        "u200", 
-        "u250", 
-        "aws-vu9p-f1", 
+        "u50",
+        "u200",
+        "u250",
+        "aws-vu9p-f1",
         "vck190"
-    ], 
+    ],
     "platform_blocklist": [
         "zc"
-    ], 
+    ],
     "platform_properties": {
         "u50": {
             "v++": {
@@ -23,7 +23,7 @@
                     ]
                 }
             }
-        }, 
+        },
         "u200": {
             "v++": {
                 "compiler": {
@@ -32,7 +32,7 @@
                     ]
                 }
             }
-        }, 
+        },
         "u250": {
             "v++": {
                 "compiler": {
@@ -41,27 +41,12 @@
                     ]
                 }
             }
-        }, 
-        "vck190": {
-            "host": {
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib", 
-                        "${SYSROOT}/opt/xilinx/xrt/lib"
-                    ]
-                }, 
-                "compiler": {
-                    "includepaths": [
-                        "$(SYSROOT)/usr/include"
-                    ], 
-                    "options": "--sysroot=$(SYSROOT)"
-                }
-            }
-        }
-    }, 
+        },
+        "vck190": {}
+    },
     "launch": [
         {
-            "cmd_args": " -xclbin BUILD/GeoIP_kernel.xclbin -csv PROJECT/test_geoip.csv", 
+            "cmd_args": " -xclbin BUILD/GeoIP_kernel.xclbin -csv PROJECT/test_geoip.csv",
             "name": "generic launch for all flows"
         }
     ],
@@ -69,99 +54,104 @@
         "PROJECT/test_geoip.csv"
     ],
     "host": {
-        "host_exe": "host.exe", 
+        "host_exe": "host.exe",
         "compiler": {
             "sources": [
-                "host/main.cpp", 
+                "host/main.cpp",
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
-            ], 
+            ],
             "includepaths": [
-                "host", 
-                "kernel", 
-                "LIB_DIR/L2/include/hw", 
+                "host",
+                "kernel",
+                "LIB_DIR/L2/include/hw",
                 "LIB_DIR/ext/xcl2",
                 "LIB_DIR/../utils/L1/include"
-            ], 
+            ],
             "options": "-O3 "
         }
-    }, 
+    },
     "v++": {
         "compiler": {
             "includepaths": [
-                "LIB_DIR/L2/include/hw", 
+                "LIB_DIR/L2/include/hw",
                 "kernel"
             ]
         }
-    }, 
+    },
     "containers": [
         {
             "accelerators": [
                 {
-                    "location": "kernel/geoip_kernel.cpp", 
-                    "frequency": 300.0, 
-                    "clflags": " -D KERNEL_NAME=GeoIP_kernel", 
-                    "name": "GeoIP_kernel", 
-                    "num_compute_units": 1, 
+                    "location": "kernel/geoip_kernel.cpp",
+                    "frequency": 300.0,
+                    "clflags": " -D KERNEL_NAME=GeoIP_kernel",
+                    "name": "GeoIP_kernel",
+                    "num_compute_units": 1,
                     "compute_units": [
                         {
-                            "name": "GeoIP_kernel", 
-                            "slr": "SLR0", 
+                            "name": "GeoIP_kernel",
+                            "slr": "SLR0",
                             "arguments": [
                                 {
-                                    "name": "ip", 
+                                    "name": "ip",
                                     "memory": "DDR[0]"
-                                }, 
+                                },
                                 {
-                                    "name": "netHigh16", 
+                                    "name": "netHigh16",
                                     "memory": "DDR[0]"
-                                }, 
+                                },
                                 {
-                                    "name": "netHigh16ID", 
+                                    "name": "netHigh16ID",
                                     "memory": "DDR[0]"
-                                }, 
+                                },
                                 {
-                                    "name": "netLow21", 
+                                    "name": "netLow21",
                                     "memory": "DDR[0]"
-                                }, 
+                                },
                                 {
-                                    "name": "net2Low21", 
+                                    "name": "net2Low21",
                                     "memory": "DDR[0]"
-                                }, 
+                                },
                                 {
-                                    "name": "netID", 
+                                    "name": "netID",
                                     "memory": "DDR[0]"
                                 }
                             ]
                         }
                     ]
                 }
-            ], 
-            "frequency": 300.0, 
+            ],
+            "frequency": 300.0,
             "name": "GeoIP_kernel"
         }
-    ], 
+    ],
     "testinfo": {
-        "disable": false, 
+        "disable": false,
         "jobs": [
             {
-                "index": 0, 
-                "dependency": [], 
-                "env": "", 
-                "cmd": "", 
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
                 "max_memory_MB": {
-                    "vitis_hw_build": 40960, 
-                    "vitis_hw_emu": 28672, 
-                    "vitis_sw_emu": 10240, 
+                    "vitis_hw_build": 40960,
+                    "vitis_hw_emu": 28672,
+                    "vitis_sw_emu": 10240,
                     "vitis_hw_run": 10240
-                }, 
-                "max_time_min": 300
+                },
+                "max_time_min": {
+		    "vitis_hw_build": 300,
+		    "vitis_hw_emu": 600,
+		    "vitis_sw_emu": 300,
+		    "vitis_hw_run": 300
+		}
             }
-        ], 
+        ],
         "targets": [
-            "vitis_sw_emu", 
-            "vitis_hw_emu", 
+            "vitis_sw_emu",
+            "vitis_hw_emu",
             "vitis_hw"
-        ], 
+        ],
         "category": "canary"
     }
 }

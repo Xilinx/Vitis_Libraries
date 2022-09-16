@@ -20,35 +20,40 @@
 #include "ap_int.h"
 #include <stdint.h>
 
+//#define __DEBUG_JSON_PARSE_KEY_IN__
+//#define __DEBUG_JSON_PARSE_KEY_OUT__
+
 namespace xf {
 namespace data_analytics {
 namespace dataframe {
 namespace internal {
 /**
  *
- * @brief parse the key to find the index for it and filter out the key is not included in the schema.
+ * @brief parse the key to find the index for it and filter out the key which is not existed in the schema.
  *
  * @param i_strm input stream for char of key.
+ * @param i_idx_strm input key index.
  * @param i_vld_strm valid flag for each char.
  * @param i_e_strm end flag of i_strm.
  * @param i_ln_e_strm line end flag.
- * @param mask_cfg It configures which key is valid.
+ * @param mask_cfg configuration for valid keys from schema.
  * @param o_hash_strm_0 ouput index which corresponds to input key.
- * @param o_ln_e_strm_0 ouput line end flag
- * @param o_e_strm_0 output end flag of o_hash_strm_0
+ * @param o_ln_e_strm_0 ouput line end flag.
+ * @param o_e_strm_0 output end flag of o_hash_strm_0.
  * @param o_mk_strm output mask flag to indicates the missing key for each line.
  * @param o_e_strm output end flag of o_mk_strm;
- * @param key_buff Input key in schema.
+ * @param key_buff input keys that are described in schema.
  */
 
 template <int COL_NUM>
 void parseKey(hls::stream<ap_uint<8> >& i_strm,
+              hls::stream<ap_uint<8> >& i_idx_strm,
               hls::stream<bool>& i_vld_strm,
               hls::stream<bool>& i_e_strm,
               hls::stream<bool>& ln_e_strm,
               ap_uint<COL_NUM> mask_cfg,
 
-              hls::stream<ap_uint<9> >& o_hash_strm_0,
+              hls::stream<ap_uint<COL_NUM + 1> >& o_hash_strm_0,
               hls::stream<bool>& o_ln_e_strm_0,
               hls::stream<bool>& o_e_strm_0,
 
@@ -57,7 +62,18 @@ void parseKey(hls::stream<ap_uint<8> >& i_strm,
               hls::stream<bool>& o_e_strm,
 
               ap_uint<8> key_buff[COL_NUM][256]) {
-    ap_uint<9> hash_val = 0;
+#ifndef __SYNSTHESIS__
+#ifdef __DEBUG_JSON_PARSER__
+    for (int i = 0; i < COL_NUM; i++) {
+        std::cout << "key-" << i << ": ";
+        for (int j = 0; j < 10; j++) {
+            std::cout << (char)key_buff[i][j];
+        }
+        std::cout << std::endl;
+    }
+#endif
+#endif
+    ap_uint<COL_NUM + 1> hash_val = 0;
     bool flag[COL_NUM];
     // Initialize the flag
     for (int i = 0; i < COL_NUM; ++i) {
@@ -65,22 +81,60 @@ void parseKey(hls::stream<ap_uint<8> >& i_strm,
         flag[i] = true;
     }
     bool e = i_e_strm.read();
-    bool first = true;
-    ap_uint<8> idx = 0;
+    ap_uint<8> idx;
+    ap_uint<8> in_byte;
     ap_uint<COL_NUM> record = 0;
     bool i_vld = true;
     bool nb_1 = false;
     bool nb_2 = false;
     bool nb_3 = false;
     bool nb_4 = false;
+    bool nb_5 = false;
     bool ln_e = false;
     // write out one more dummy data
     o_e_strm.write(false);
     while (!e) {
 #pragma HLS pipeline II = 1
-        if (!i_vld && nb_1 && nb_2 && nb_3 && nb_4) {
-            idx = 0;
-            hash_val = (1 << 8);
+        {
+#pragma HLS latency min = 0 max = 0
+            // non-blocking read the input stream.
+            nb_1 = i_strm.read_nb(in_byte);
+            nb_2 = i_vld_strm.read_nb(i_vld);
+            nb_3 = i_e_strm.read_nb(e);
+            nb_4 = ln_e_strm.read_nb(ln_e);
+            nb_5 = i_idx_strm.read_nb(idx);
+        }
+#ifndef __SYNSTHESIS__
+#ifdef __DEBUG_JSON_PARSE_KEY_IN__
+        if (nb_1 && nb_2 && nb_3 && nb_4 && nb_5) {
+            std::cout << "key_byte = " << (char)in_byte << std::endl;
+            std::cout << "key_vld = " << i_vld << std::endl;
+            std::cout << "key_e = " << e << std::endl;
+            std::cout << "ln_e = " << ln_e << std::endl;
+            std::cout << "key_idx = " << idx << std::endl << std::endl;
+        }
+#endif
+#endif
+        if (i_vld && nb_1 && nb_2 && nb_3 && nb_4 && nb_5) {
+            if (idx == 0 && in_byte == 0) {
+                o_hash_strm_0.write(hash_val);
+                o_ln_e_strm_0.write(ln_e);
+                o_e_strm_0.write(false);
+#ifndef __SYNSTHESIS__
+#ifdef __DEBUG_JSON_PARSE_KEY_OUT__
+                std::cout << "hash_val = " << hash_val << std::endl;
+                std::cout << "ln_e = " << ln_e << std::endl;
+#endif
+#endif
+            } else {
+                // compare each char
+                for (int i = 0; i < COL_NUM; ++i) {
+#pragma HLS unroll
+                    flag[i] = flag[i] && (in_byte == key_buff[i][idx]);
+                }
+            }
+        } else if (!i_vld && nb_1 && nb_2 && nb_3 && nb_4 && nb_5) {
+            hash_val = (1 << COL_NUM);
             // find the matched index of input key
             for (int i = 0; i < COL_NUM; ++i) {
                 if (flag[i]) hash_val = i;
@@ -97,31 +151,16 @@ void parseKey(hls::stream<ap_uint<8> >& i_strm,
                 // record the input key
                 record[hash_val] = 1;
             }
-            first = true;
-
             // output the index
             o_hash_strm_0.write(hash_val);
             o_ln_e_strm_0.write(ln_e);
             o_e_strm_0.write(false);
-        }
-        ap_uint<8> in_byte;
-        // non-blocking read the input stream.
-        nb_1 = i_strm.read_nb(in_byte);
-        nb_2 = i_vld_strm.read_nb(i_vld);
-        nb_3 = i_e_strm.read_nb(e);
-        nb_4 = ln_e_strm.read_nb(ln_e);
-        if (i_vld && nb_1 && nb_2 && nb_3 && nb_4) {
-            if (first)
-                // ignore the '\"'
-                first = false;
-            else {
-                // compare each char
-                for (int i = 0; i < COL_NUM; ++i) {
-#pragma HLS unroll
-                    flag[i] = flag[i] && (in_byte == key_buff[i][idx]);
-                }
-                idx++;
-            }
+#ifndef __SYNSTHESIS__
+#ifdef __DEBUG_JSON_PARSE_KEY_OUT__
+            std::cout << "hash_val = " << hash_val << std::endl;
+            std::cout << "ln_e = " << ln_e << std::endl;
+#endif
+#endif
         }
     }
     // write-out one more dummay data
@@ -146,7 +185,7 @@ template <int COL_NUM>
 void addNull(hls::stream<ap_uint<COL_NUM> >& i_mk_strm,
              hls::stream<bool>& i_e_strm,
 
-             hls::stream<ap_uint<9> >& o_hash_strm,
+             hls::stream<ap_uint<COL_NUM + 1> >& o_hash_strm,
              hls::stream<bool>& o_ln_e_strm) {
     bool e = i_e_strm.read();
     bool ln_e = true;
@@ -162,7 +201,7 @@ void addNull(hls::stream<ap_uint<COL_NUM> >& i_mk_strm,
             } else {
                 // add the index for missing field
                 ln_e = false;
-                ap_uint<9> rd = 0;
+                ap_uint<COL_NUM> rd = 0;
                 for (int i = 0; i < COL_NUM; ++i) {
 #pragma HLS unroll
                     if (ch[i]) {

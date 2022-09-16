@@ -45,7 +45,7 @@ Apache 2.0 license, advanced users are empowered to easily tailor, optimize and 
 Supported operating systems are RHEL/CentOS 7.4, 7.5 and Ubuntu 16.04.4 LTS, 18.04.1 LTS.
 
 _GCC 5.0 or above_ is required for C++11/C++14 support.
-With CentOS/RHEL 7.4 and 7.5, it could enabled via
+With CentOS/RHEL 7.4 and 7.5, it can be enabled via
 [devtoolset-6](https://www.softwarecollections.org/en/scls/rhscl/devtoolset-6/).
 
 ### Development Tools
@@ -55,13 +55,13 @@ and a matching version of XRT should be installed.
 
 ## Running Test Cases
 
-This library ships two types of case: HLS cases and Vitis cases.
-HLS cases can only be found in `L1/tests` folder, and are created to test module-level functionality.
-Both types of cases are driven by makefiles.
+This library ships two types of test cases: HLS test cases and Vitis test cases.
+HLS test cases can only be found in `L1/tests` folder, and are created to test module-level functionality.
+Both types of test cases are driven by makefiles.
 
 ### Shell Environment
 
-For command-line developers the following settings are required before running any case in this library:
+For command-line developers the following settings are required before running any test case in this library:
 
 ```console
 source /opt/xilinx/Vitis/2022.1/settings64.sh
@@ -112,7 +112,7 @@ Here, `TARGET` decides the FPGA binary type
 
 ## Benchmark Result
 
-In `L2/benchmarks` and `L2/demo`, these Kernels are built into xclbins targeting Alveo U200/U250/U50. We achieved a good performance. For more details about the benchmarks, please kindly find them in [benchmark results](https://xilinx.github.io/Vitis_Libraries/data_analytics/2022.1/benchmark/benchmark.html).
+The kernels in `L2/benchmarks` and `L2/demo` are built into xclbins targeting Alveo U200/U250/U50. We achieved a good performance. For more details about the benchmarks, please kindly find them in [benchmark results](https://xilinx.github.io/Vitis_Libraries/data_analytics/2022.1/benchmark/benchmark.html).
 
 
 ## License

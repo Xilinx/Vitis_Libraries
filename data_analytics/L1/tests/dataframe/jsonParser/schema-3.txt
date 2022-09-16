@@ -1,0 +1,6 @@
+"nest/obj/bool column":0
+"nest/int column":1
+"float column":2
+"double column":3
+"date column":4
+"string column":5

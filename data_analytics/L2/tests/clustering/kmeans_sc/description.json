@@ -9,8 +9,6 @@
         "u200"
     ],
     "platform_blocklist": [
-        "xilinx_u250_xdma_201830_2",
-        "xilinx_u200_xdma_201830_2",
         "zc",
         "aws-vu9p-f1"
     ],
