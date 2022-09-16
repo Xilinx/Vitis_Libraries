@@ -85,19 +85,23 @@
                 "parameters": [
                     {
                         "name": "T",
-                        "type": "typename"
+                        "type": "typename",
+                        "description": "data type"
                     },
                     {
                         "name": "diagSize",
-                        "type": "int"
+                        "type": "int",
+                        "description": "size of matrix diagonal matrix"
                     },
                     {
                         "name": "UN",
-                        "type": "int"
+                        "type": "int",
+                        "description": "Unroll number"
                     },
                     {
                         "name": "NMAXUN",
-                        "type": "int"
+                        "type": "int",
+                        "description": "size for each unrolled CU"
                     }
                 ],
                 "ports": []
@@ -573,15 +577,18 @@
                 "parameters": [
                     {
                         "name": "T",
-                        "type": "typename"
+                        "type": "typename",
+                        "description": "data type (support float and double)"
                     },
                     {
                         "name": "NMAX",
-                        "type": "unsigned int"
+                        "type": "unsigned int",
+                        "description": "matrix size"
                     },
                     {
                         "name": "NCU",
-                        "type": "unsigned int"
+                        "type": "unsigned int",
+                        "description": "number of compute units"
                     }
                 ],
                 "ports": [

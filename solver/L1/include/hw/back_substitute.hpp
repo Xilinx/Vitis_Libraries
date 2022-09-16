@@ -134,7 +134,7 @@ struct backSubstituteTraits<RowsColsA,
 // This permits sharing of operators with the factorization function preceding the back-substitution
 template <typename T>
 void back_substitute_recip(T x, T& one_over_x) {
-    // #pragma HLS resource variable=one_over_x core=FDiv
+    // #pragma HLS BIND_OP variable=one_over_x  op=fdiv impl=fabric
     const T ONE = 1.0;
     one_over_x = ONE / x;
 }
@@ -147,7 +147,7 @@ void back_substitute_recip(T x, T& one_over_x) {
 // This permits sharing of operators with the factorization function preceding the back-substitution.
 template <typename T>
 void back_substitute_recip(hls::x_complex<T> x, hls::x_complex<T>& one_over_x) {
-    // #pragma HLS resource variable=recip core=FDiv
+    // #pragma HLS BIND_OP variable=recip  op=fdiv impl=fabric
     T recip; // intermediate variable to allow directive to be applied
     const hls::x_complex<T> ONE = 1.0;
     recip = ONE.real() / x.real();
@@ -157,7 +157,7 @@ void back_substitute_recip(hls::x_complex<T> x, hls::x_complex<T>& one_over_x) {
 
 template <typename T>
 void back_substitute_recip(std::complex<T> x, std::complex<T>& one_over_x) {
-    // #pragma HLS resource variable=recip core=FDiv
+    // #pragma HLS BIND_OP variable=recip  op=fdiv impl=fabric
     T recip; // intermediate variable to allow directive to be applied
     const std::complex<T> ONE(1.0);
     recip = ONE.real() / x.real();

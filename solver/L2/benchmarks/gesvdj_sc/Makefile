@@ -18,17 +18,14 @@
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<x86>"
+	$(ECHO) "  make all TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<x86>"
+	$(ECHO) "  make run TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to run application in emulation."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH required for SoC shells"
 	$(ECHO) ""
 	$(ECHO) "  make host HOST_ARCH=<hw/hw_emu/sw_emu/>"
 	$(ECHO) "      Command to build host application."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
 	$(ECHO) "  make clean "
 	$(ECHO) "      Command to remove the generated non-hardware files."
@@ -53,7 +50,7 @@ ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := xilinx_u250_gen3x16_xdma_3_1_202020_1
+PLATFORM := xilinx_u250_gen3x16_xdma_4_1_202210_1
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
@@ -91,7 +88,7 @@ ifeq ($(HOST_ARCH), x86)
 CXXFLAGS += -I $(XILINX_VITIS)/system_compiler/include -I $(XILINX_HLS)/include 
 LDFLAGS += -L$(XILINX_XRT)/lib -L$(XILINX_VITIS)/system_compiler/lib/x86 -lvpp_acc -l$(LIB_XRT) -lxrt_coreutil  -Wl,-rpath=$(XILINX_VITIS)/system_compiler/lib/x86:$(XILINX_XRT)/lib:$(GCC_HOME)/lib64  -Wl,--enable-new-dtags -lpthread 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --temp_dir $(TEMP_DIR) --save-temps -g -I $(XILINX_VITIS)/system_compiler/include 
-VPP_LDFLAGS += 
+VPP_LDFLAGS += --optimize 2 -R 2 
 else ifeq ($(HOST_ARCH), aarch64)
 CXXFLAGS += 
 LDFLAGS += 
@@ -124,10 +121,11 @@ endif
 #Inclue Required Host Source Files
 HOST_SRCS += $(CUR_DIR)/host/main.cpp 
 CXXFLAGS +=  -I $(XFLIB_DIR)/ext/MatrixGen -I $(XFLIB_DIR)/../utils/L1/include -I $(CUR_DIR)/kernel -I $(CUR_DIR)/host -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2
-LDFLAGS += -L $(XILINX_HLS)/lnx64/lib/csim -lhlsmc++-GCC46 -L $(XILINX_HLS)/lnx64/tools/fpo_v7_0 -lIp_floating_point_v7_0_bitacc_cmodel -lgmp -Wl,-rpath=$(XILINX_HLS)/lnx64/lib/csim:$(XILINX_HLS)/lnx64/tools/fpo_v7_0
+LDFLAGS += -L $(XILINX_HLS)/lnx64/lib/csim -lhlsmc++-GCC46 -L $(XILINX_HLS)/lnx64/tools/fpo_v7_1 -lIp_floating_point_v7_1_bitacc_cmodel -lgmp -Wl,-rpath=$(XILINX_HLS)/lnx64/lib/csim:$(XILINX_HLS)/lnx64/tools/fpo_v7_1
 
 EXE_NAME := host.exe
-EXE_OBJS := $(addprefix $(TEMP_DIR)/, $(addsuffix .o,$(basename $(HOST_SRCS))))
+REL_HOST_SRCS := $(shell realpath --relative-to $(CUR_DIR) $(HOST_SRCS))
+EXE_OBJS := $(addprefix $(TEMP_DIR)/, $(addsuffix .o,$(basename $(shell realpath --relative-to $(CUR_DIR) $(HOST_SRCS) | sed "s|\.\.\/||g"))))
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 EXE_FILE_DEPS := $(EXE_OBJS) 
 MAKEDEPEND = $(CXX) $< -MM -MP -MF $(basename $@).d -MT $@  $(CXXFLAGS)
@@ -156,25 +154,26 @@ endif
 .SECONDEXPANSION:
 # ################ Setting Rules for Binary Containers (Building Kernels) ################
 ACC_SRCS_kernel_gesvdj_0 += $(CUR_DIR)/kernel/gesvdj.cpp
-ACC_OBJS_kernel_gesvdj_0  := $(addprefix $(TEMP_DIR)/, $(addsuffix .o,$(basename $(ACC_SRCS_kernel_gesvdj_0))))
+ACC_OBJS_kernel_gesvdj_0  := $(addprefix $(TEMP_DIR)/, $(addsuffix .o,$(basename $(shell realpath --relative-to $(CUR_DIR)  $(ACC_SRCS_kernel_gesvdj_0) | sed "s|\.\.\/||g"))))
 $(ACC_OBJS_kernel_gesvdj_0): $(TEMP_DIR)/%.o : %.cpp $$(@D)/.f
 	@echo "--> Making $@ from: $?"
 	$(MAKEDEPEND)
-	$(VPP) $(VPP_FLAGS) $(VPP_FLAGS_kernel_gesvdj_0) -o $@  -c $<
+	$(VPP) $(VPP_FLAGS) $(VPP_FLAGS_kernel_gesvdj_0) -o $@  -c $(shell find $(ACC_SRCS_kernel_gesvdj_0) -name  $(subst .o,.cpp,$(notdir $@)) )
 BINARY_CONTAINERS_DEPS  += $(ACC_OBJS_kernel_gesvdj_0) 
 $(BINARY_CONTAINERS_TMP) : $(BINARY_CONTAINERS_DEPS)
 	@echo "--> Making $@ from: $?"
-	$(VPP) $(VPP_FLAGS) $(VPP_LDFLAGS) -o $(BINARY_CONTAINERS) -l $^
+	$(VPP) $(VPP_FLAGS) $(VPP_LDFLAGS) $(VPP_LDFLAGS_kernel_gesvdj) -o $(BINARY_CONTAINERS) -l $^
 EXE_FILE_DEPS += $(BINARY_CONTAINERS_TMP)
 EXE_FILE_DEPS += $(BINARY_CONTAINERS_DEPS)
 
 ############################## Setting Rules for Host (Building Host Executable) ##############################
 ifeq ($(HOST_ARCH), x86)
-$(TEMP_DIR)/%.o : %.cpp $$(@D)/.f
+$(TEMP_DIR)/%.o : $(REL_HOST_SRCS) $$(@D)/.f
 	@echo "--> Making $@ from: $?"
 	mkdir -p $(BUILD_DIR)
 	$(MAKEDEPEND)
-	$(CXX) -o $@ $(CXXFLAGS)  -I . -c $<
+	$(CXX) -o $@ $(CXXFLAGS)  -I . -c $(shell find $(HOST_SRCS) -name $(subst .o,.cpp,$(notdir $@)) )
+ 
 $(EXE_FILE): $(EXE_FILE_DEPS)  
 	mkdir -p $(BUILD_DIR)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
@@ -252,12 +251,11 @@ cleanh:
 
 cleank:
 	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl*start_simulation. sh *.xclbin
-	-$(RMDIR) _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* xo_* _x*
-	-$(RMDIR) _x_temp.*/dltmp* _x_temp.*/kernel_info.dat _x_temp.*/*.log
-	-$(RMDIR) _x_temp.* 
+	-$(RMDIR) _x_temp.*
 
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR)  build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
 	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
+	-$(RMDIR) 
 
 clean: cleanh

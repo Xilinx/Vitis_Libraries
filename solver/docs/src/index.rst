@@ -47,24 +47,24 @@ Currently this includes the following operations for dense matrix
 
 
 .. toctree::
-   :caption: Overview
+   :caption: Introduction
    :maxdepth: 2
 
-   overview.rst
-   tutorial.rst
-   release.rst
+   Overview <overview.rst>
+   Vitis Solver Library Tutorial <tutorial.rst>
+   Release Note <release.rst>
 
 .. toctree::
    :caption: User Guide
    :maxdepth: 2
 
-   guide_L1/L1.rst
-   guide_L2/L2.rst
+   L1 Module User Guide <guide_L1/L1.rst>
+   L2 Module User Guide <guide_L2/L2.rst>
 
 .. toctree::
    :caption: Benchmark 
    :maxdepth: 2
    
-   benchmark.rst
+   Benchmark <benchmark.rst>
 
 

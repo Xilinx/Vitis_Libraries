@@ -63,8 +63,8 @@ LoopSweeps:
         T cols[NCU][NCMAX];
 #pragma HLS array_partition variable = rows
 #pragma HLS array_partition variable = cols
-#pragma HLS resource variable = rows core = RAM_2P_BRAM
-#pragma HLS resource variable = cols core = RAM_2P_BRAM
+#pragma HLS BIND_STORAGE variable = rows  type=ram_2p impl=bram
+#pragma HLS BIND_STORAGE variable = cols  type=ram_2p impl=bram
 
         int idscu = s % NCU;
         int idsrow = s / NCU;
@@ -157,7 +157,7 @@ void getrf(int n, T* A, int lda, int* ipiv, int& info) {
 
     T matA[NCU][NRCU][NMAX];
 #pragma HLS array_partition variable = matA complete
-#pragma HLS resource variable = matA core = XPM_MEMORY uram
+#pragma HLS BIND_STORAGE variable = matA  type=xpm_memory impl=uram
 
 LoopRead:
     for (int r = 0; r < n; r++) {

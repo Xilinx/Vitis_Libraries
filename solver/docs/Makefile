@@ -29,13 +29,13 @@ endif
 
 .PHONY: all install xml rst html clean cleanhtml cleanall
 
-all: install
+all: .stamp/sphinx
 
 install: .stamp/sphinx
 	rm -rf $(HTML_DEST_DIR)/*
 #	make cleanall
 	rsync -av --delete --exclude .git --exclude .nojekyll --exclude .buildinfo \
-		 _build/html/ $(HTML_DEST_DIR) 1>/dev/null
+		 build/html/ $(HTML_DEST_DIR) 1>/dev/null
 
 .stamp/doxygen:
 	rm -rf xml_*
@@ -50,24 +50,24 @@ install: .stamp/sphinx
 DOXYREST_FRAME = $(dir $(shell which doxyrest))/../doxyrest_frame
 
 .stamp/doxyrest: .stamp/doxygen
-	rm -rf rst_L1
-	mkdir rst_L1
-	doxyrest xml_L1/index.xml -o rst_L1/index.rst -F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
-	rm -f rst_L1/index.rst rst_L1/global.rst
-	rm -rf rst_L2_*
-	mkdir rst_L2_mat rst_L2_linearsolver rst_L2_eigensolver
-	doxyrest xml_L2_mat/index.xml -o rst_L2_mat/index.rst -F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
-	doxyrest xml_L2_linearsolver/index.xml -o rst_L2_linearsolver/index.rst -F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
-	doxyrest xml_L2_eigensolver/index.xml -o rst_L2_eigensolver/index.rst -F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
+	rm -rf src/rst_L1
+	mkdir src/rst_L1
+	doxyrest xml_L1/index.xml -o src/rst_L1/index.rst -F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
+	rm -f src/rst_L1/index.rst src/rst_L1/global.rst
+	rm -rf src/rst_L2_*
+	mkdir src/rst_L2_mat src/rst_L2_linearsolver src/rst_L2_eigensolver
+	doxyrest xml_L2_mat/index.xml -o src/rst_L2_mat/index.rst -F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
+	doxyrest xml_L2_linearsolver/index.xml -o src/rst_L2_linearsolver/index.rst -F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
+	doxyrest xml_L2_eigensolver/index.xml -o src/rst_L2_eigensolver/index.rst -F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
 
-	rm -f rst_L2_mat/index.rst rst_L2_mat/global.rst
-	rm -f rst_L2_linearsolver/index.rst rst_L2_linearsolver/global.rst
-	rm -f rst_L2_eigensolver/index.rst rst_L2_eigensolver/global.rst
+	rm -f src/rst_L2_mat/index.rst src/rst_L2_mat/global.rst
+	rm -f src/rst_L2_linearsolver/index.rst src/rst_L2_linearsolver/global.rst
+	rm -f src/rst_L2_eigensolver/index.rst src/rst_L2_eigensolver/global.rst
 
-	rm -rf rst_2
-	mkdir rst_2
-	doxyrest xml_L2/index.xml -o rst_2/index.rst -F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
-	rm -f rst_2/index.rst rst_2/global.rst
+	rm -rf src/rst_2
+	mkdir src/rst_2
+	doxyrest xml_L2/index.xml -o src/rst_2/index.rst -F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
+	rm -f src/rst_2/index.rst src/rst_2/global.rst
 	touch .stamp/doxyrest
 
 .stamp/sphinx: .stamp/doxyrest Makefile.sphinx
@@ -83,14 +83,14 @@ rst:
 	make .stamp/doxyrest
 
 html:
-	rm -rf .stamp/sphinx _build/doctrees
+	rm -rf .stamp/sphinx build/doctrees
 	make .stamp/sphinx
 
 clean:
 	rm -rf .stamp
 
 cleanhtml:
-	rm -rf .stamp/sphinx _build/html _build/doctrees
+	rm -rf .stamp/sphinx build/html build/doctrees
 
 cleanall:
-	rm -rf .stamp xml_L* rst_L* _build/html _build/doctrees doc_html
+	rm -rf .stamp xml_L* src/rst_L* build doc_html

@@ -14,29 +14,19 @@
    limitations under the License.
 
 .. meta::
-   :keywords: Vitis, Solver, Library
-   :description: Vitis Solver library L1 module user guide.
+   :keywords: Matrix, Decomposition, Linear, Solver
+   :description: Vitis Solver library L1 application programming interface reference.
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
 
-**************************************
-L1 Module User Guide
-**************************************
-
-.. toctree::
-   :maxdepth: 2
-
-APIs 
--------------
-.. toctree::
-   :maxdepth: 2
-
-   api.rst
-
 Core Utility
----------------------------
-.. toctree::
-   :maxdepth: 2
-  
-   utility.rst
+===============
 
+.. toctree::
+   :maxdepth: 1
+
+   QRF (QR Factorization) <kernel/qrf.rst>
+   QR_Inverse <kernel/qr_inverse.rst>
+   SVD (Singular Value Decomposition) <kernel/svd.rst>
+   Cholesky_Inverse <kernel/cholesky_inverse.rst>
+   Cholesky <kernel/cholesky.rst>

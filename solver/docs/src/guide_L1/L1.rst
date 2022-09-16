@@ -1,5 +1,5 @@
-.. 
-   Copyright 2019 Xilinx, Inc.
+..
+   Copyright 2021 Xilinx, Inc.
   
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,28 +15,28 @@
 
 .. meta::
    :keywords: Vitis, Solver, Library
-   :description: Vitis Solver library L2 module user guide.
+   :description: Vitis Solver library L1 module user guide.
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
 
 **************************************
-L2 Module User Guide
+L1 Module User Guide
 **************************************
-
-.. toctree::
-   :maxdepth: 1
-
-Supported Numerical Methods
----------------------------
-.. toctree::
-   :maxdepth: 1
-  
-   L2_methods.rst
-
-Level II APIs 
--------------
 
 .. toctree::
    :maxdepth: 2
 
-   L2_api.rst
+APIs 
+-------------
+.. toctree::
+   :maxdepth: 2
+
+   APIs <api.rst>
+
+Core Utility
+---------------------------
+.. toctree::
+   :maxdepth: 2
+  
+   Core Utility <utility.rst>
+

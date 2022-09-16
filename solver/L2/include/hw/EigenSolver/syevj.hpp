@@ -76,8 +76,8 @@ void syevj(int m, T A[NMAX * NMAX], int lda, T S[NMAX], T U[NMAX * NMAX], int ld
 #else
     T dataA_2D[NCU][NCU][NMAXUN][NMAXUN];
     T dataU_2D[NCU][NCU][NMAXUN][NMAXUN];
-#pragma HLS RESOURCE variable = dataA_2D core = RAM_T2P_URAM
-#pragma HLS RESOURCE variable = dataU_2D core = RAM_T2P_URAM
+#pragma HLS BIND_STORAGE variable = dataA_2D  type=ram_t2p impl=uram
+#pragma HLS BIND_STORAGE variable = dataU_2D  type=ram_t2p impl=uram
 #pragma HLS ARRAY_PARTITION variable = dataA_2D
 #pragma HLS ARRAY_PARTITION variable = dataU_2D
 #pragma HLS ARRAY_PARTITION variable = dataA_2D

@@ -1,5 +1,5 @@
-..
-   Copyright 2021 Xilinx, Inc.
+.. 
+   Copyright 2019 Xilinx, Inc.
   
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,19 +14,29 @@
    limitations under the License.
 
 .. meta::
-   :keywords: Matrix, Decomposition, Linear, Solver
-   :description: Vitis Solver library L1 application programming interface reference.
+   :keywords: Vitis, Solver, Library
+   :description: Vitis Solver library L2 module user guide.
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
 
-Core Utility
-===============
+**************************************
+L2 Module User Guide
+**************************************
 
 .. toctree::
    :maxdepth: 1
 
-   kernel/qrf.rst
-   kernel/qr_inverse.rst
-   kernel/svd.rst
-   kernel/cholesky_inverse.rst
-   kernel/cholesky.rst
+Supported Numerical Methods
+---------------------------
+.. toctree::
+   :maxdepth: 1
+  
+   Matrix Decomposition <L2_methods.rst>
+
+Level II APIs 
+-------------
+
+.. toctree::
+   :maxdepth: 2
+
+   Matrix Decomposition <L2_api.rst>

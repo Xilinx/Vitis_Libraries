@@ -20,8 +20,8 @@ Currently this includes the following operations for dense matrix
 
 ## Software and Hardware requirements
   - CentOS/RHEL 7.4, 7.5 or Ubuntu 16.04.4 LTS, 18.04.1 LTS
-  - Vitis 2021.1
-  - Alveo U200, U250
+  - Vitis 2022.2
+  - Alveo U200, U250, U280
 
 ## Benchmark Result
 In `L2/benchmarks`, Kernels are built into xclbins targeting Alveo U200/U250. We achieved a good performance. For more details about the benchmarks, please kindly find them in [benchmark results](https://xilinx.github.io/Vitis_Libraries/solver/2021.2/benchmark.html).
