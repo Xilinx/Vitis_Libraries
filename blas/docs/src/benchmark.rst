@@ -52,7 +52,7 @@ For more details on this benchmark, see:
 .. toctree::
    :maxdepth: 1
    
-   user_guide/L2/L2_benchmark_gemv.rst
+   L2 GEMV benchmark <user_guide/L2/L2_benchmark_gemv.rst>
 
 
 1.2 gemm
@@ -84,7 +84,7 @@ For more details on this benchmark, see:
 .. toctree::
    :maxdepth: 1
    
-   user_guide/L2/L2_benchmark_gemm.rst
+   L2 GEMM benchmark <user_guide/L2/L2_benchmark_gemm.rst>
 
 *gemm with XRT in u250*
 
@@ -125,7 +125,7 @@ For more details on the benchmarks, see:
 .. toctree::
    :maxdepth: 1
    
-   user_guide/L3/L3_benchmark_gemm.rst
+   L3 API GEMM benchmark <user_guide/L3/L3_benchmark_gemm.rst>
 
 
 2. Benchmark Test Overview

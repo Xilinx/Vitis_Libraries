@@ -13,6 +13,7 @@
                     "amax.hpp"
                 ],
                 "search_paths": [
+                    "L1/include/hw",
                     "L1/include/hw/xf_blas"
                 ],
                 "instance": "function",
@@ -64,6 +65,7 @@
                     "amin.hpp"
                 ],
                 "search_paths": [
+                    "L1/include/hw",
                     "L1/include/hw/xf_blas"
                 ],
                 "instance": "function",
@@ -115,6 +117,7 @@
                     "asum.hpp"
                 ],
                 "search_paths": [
+                    "L1/include/hw",
                     "L1/include/hw/xf_blas"
                 ],
                 "instance": "function",
@@ -166,6 +169,7 @@
                     "axpy.hpp"
                 ],
                 "search_paths": [
+                    "L1/include/hw",
                     "L1/include/hw/xf_blas"
                 ],
                 "instance": "function",
@@ -222,6 +226,7 @@
                     "copy.hpp"
                 ],
                 "search_paths": [
+                    "L1/include/hw",
                     "L1/include/hw/xf_blas"
                 ],
                 "instance": "function",
@@ -273,6 +278,7 @@
                     "dot.hpp"
                 ],
                 "search_paths": [
+                    "L1/include/hw",
                     "L1/include/hw/xf_blas"
                 ],
                 "instance": "function",
@@ -324,6 +330,7 @@
                     "gbmv.hpp"
                 ],
                 "search_paths": [
+                    "L1/include/hw",
                     "L1/include/hw/xf_blas"
                 ],
                 "instance": "function",
@@ -369,6 +376,7 @@
                     "gemm.hpp"
                 ],
                 "search_paths": [
+                    "L1/include/hw",
                     "L1/include/hw/xf_blas"
                 ],
                 "instance": "function",
@@ -404,6 +412,7 @@
                     "gemv.hpp"
                 ],
                 "search_paths": [
+                    "L1/include/hw",
                     "L1/include/hw/xf_blas"
                 ],
                 "instance": "function",
@@ -439,6 +448,7 @@
                     "nrm2.hpp"
                 ],
                 "search_paths": [
+                    "L1/include/hw",
                     "L1/include/hw/xf_blas"
                 ],
                 "instance": "function",
@@ -490,6 +500,7 @@
                     "scal.hpp"
                 ],
                 "search_paths": [
+                    "L1/include/hw",
                     "L1/include/hw/xf_blas"
                 ],
                 "instance": "function",
@@ -541,6 +552,7 @@
                     "swap.hpp"
                 ],
                 "search_paths": [
+                    "L1/include/hw",
                     "L1/include/hw/xf_blas"
                 ],
                 "instance": "function",
@@ -602,6 +614,7 @@
                     "symv.hpp"
                 ],
                 "search_paths": [
+                    "L1/include/hw",
                     "L1/include/hw/xf_blas"
                 ],
                 "instance": "function",
@@ -637,6 +650,7 @@
                     "trmv.hpp"
                 ],
                 "search_paths": [
+                    "L1/include/hw",
                     "L1/include/hw/xf_blas"
                 ],
                 "instance": "function",

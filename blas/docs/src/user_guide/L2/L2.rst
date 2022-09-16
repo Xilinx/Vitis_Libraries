@@ -29,7 +29,7 @@ L2 Kernels User Guide
 .. toctree::
    :maxdepth: 2
 
-   L2_overview.rst
-   L2_gemm.rst
-   L2_benchmark.rst
+   L2 API Overview <L2_overview.rst>
+   Blas Function Kernel <L2_gemm.rst>
+   L2 API benchmark <L2_benchmark.rst>
 

@@ -28,8 +28,8 @@ L2 API benchmark
 .. toctree::
    :maxdepth: 3
    
-   L2_benchmark_gemm.rst
-   L2_benchmark_gemv.rst
+   L2 GEMM benchmark <L2_benchmark_gemm.rst>
+   L2 GEMV benchmark <L2_benchmark_gemv.rst>
 
 
 Benchmark Test Overview

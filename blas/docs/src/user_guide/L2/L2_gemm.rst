@@ -49,4 +49,4 @@ GEMM operation C = A * B + X is implemented as a kernel in this library.
 .. toctree::
    :maxdepth: 1
 
-   L2_gemm_content.rst
+   GEMM Kernel <L2_gemm_content.rst>

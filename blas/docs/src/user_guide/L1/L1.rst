@@ -29,10 +29,10 @@ L1 Primitives User Guide
 .. toctree::
    :maxdepth: 2
 
-   L1_overview.rst
-   L1_compute_api.rst
-   L1_data_mover.rst
-   L1_test.rst
-   pyenvguide.rst
+   L1 API Overview <L1_overview.rst>
+   L1 Compute APIs <L1_compute_api.rst>
+   L1 Data mover <L1_data_mover.rst>
+   L1 Test <L1_test.rst>
+   Python Environment Setup Guide <pyenvguide.rst>
    
 
