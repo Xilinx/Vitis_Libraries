@@ -1,30 +1,30 @@
 {
-    "name": "Xilinx Axi To Multi Stream HLS Test", 
-    "description": "Xilinx Axi To Multi Stream HLS Test", 
-    "flow": "hls", 
+    "name": "Vitis PL Datamover (4D) Read Test", 
+    "description": "Test 4D datamover's correctness under certain descriptor", 
+    "flow": "hls",
     "platform_allowlist": [
-        "u200", 
-        "aws-vu9p-f1", 
+        "u200",
         "vck190"
-    ], 
-    "platform_blocklist": [], 
-    "part_allowlist": [], 
+    ],
+    "platform_blocklist": [],
+    "part_allowlist": [],
     "part_blocklist": [], 
-    "project": "test", 
-    "solution": "solution1", 
-    "clock": "2.5", 
-    "topfunction": "top_func", 
+    "project": "prj", 
+    "solution": "solution", 
+    "clock": "3.33", 
+    "topfunction": "dut", 
     "top": {
         "source": [
-            "axi_to_multi_stream_tb.cpp"
+            "tb.cpp"
         ], 
-        "cflags": "-std=c++0x -g -I${XF_PROJ_ROOT}/L1/include"
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include"
     }, 
     "testbench": {
         "source": [
-            "axi_to_multi_stream_tb.cpp"
+            "tb.cpp",
+            "test.dat"
         ], 
-        "cflags": "-std=c++0x -g -I${XF_PROJ_ROOT}/L1/include", 
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include", 
         "ldflags": "", 
         "argv": {}, 
         "stdmath": false
@@ -38,17 +38,17 @@
                 "env": "", 
                 "cmd": "", 
                 "max_memory_MB": {
-                    "vivado_syn": 32768, 
+                    "hls_vivado_syn": 16384, 
                     "hls_csim": 10240, 
                     "hls_cosim": 16384, 
-                    "vivado_impl": 16384, 
+                    "hls_vivado_impl": 16384, 
                     "hls_csynth": 10240
                 }, 
                 "max_time_min": {
-                    "vivado_syn": 420, 
+                    "hls_vivado_syn": 420, 
                     "hls_csim": 60, 
                     "hls_cosim": 420, 
-                    "vivado_impl": 420, 
+                    "hls_vivado_impl": 420, 
                     "hls_csynth": 60
                 }
             }
@@ -61,5 +61,6 @@
             "vivado_impl"
         ], 
         "category": "canary"
-    }
+    }, 
+    "clock_uncertainty": 1.05
 }

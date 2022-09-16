@@ -13,26 +13,28 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-.. include:: overview.rst
+Vitis Utility Library
+=====================
+
 
 .. toctree::
-   :caption: Library Overview
+   :caption: Introduction
    :maxdepth: 1
 
-   overview.rst
-   tutorial.rst
-   release.rst
-   requirements.rst
-   design_flows.rst
+   Overview <overview.rst>
+   Tutorial <tutorial.rst>
+   Release Note <release.rst>
+   Requirements <requirements.rst>
+   Design Flows <design_flows.rst>
 
 .. toctree::
    :caption: Utility User Guide
    :maxdepth: 3
 
-   guide/toc.rst
+   Utility API User Guide <guide/toc.rst>
 
 .. toctree::
    :caption: Data-Mover User Guide
 
-   datamover/kernel_gen_guide.rst
+   Generating PL Data-Mover Kernels <datamover/kernel_gen_guide.rst>
 

@@ -40,13 +40,13 @@ sys.path.insert(1, os.path.join(tools_dir, 'share/doxyrest_b/sphinx'))
 # -- Project information -----------------------------------------------------
 
 project = 'Vitis Utility Library'
-copyright = '2021, Xilinx'
+copyright = '2022, Xilinx'
 author = 'Xilinx'
 
 # The short X.Y version
-version = '2021.2'
+version = '2022.1'
 # The full version, including alpha/beta/rc tags
-release = 'v2021.2'
+release = 'v2022.1'
 
 
 # -- General configuration ---------------------------------------------------

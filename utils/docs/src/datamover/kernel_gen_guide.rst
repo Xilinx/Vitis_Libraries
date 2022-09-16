@@ -188,7 +188,7 @@ Specifying the corresponding Vitis, XRT, and path to the platform repository by 
 
 .. code-block:: bash
 
-    make run TARGET=hw DEVICE=${PLATFORM_REPO_PATHS}/xilinx_vck190_base_202210_1/xilinx_vck190_base_202210_1.xpfm HOST_ARCH=aarch64
+    make run TARGET=hw DEVICE=${PLATFORM_REPO_PATHS}/xilinx_vck190_base_202210_1/xilinx_vck190_base_202210_1.xpfm 
 
 .. ATTENTION::
     * Only HW_EMU and HW run available

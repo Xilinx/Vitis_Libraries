@@ -18,11 +18,7 @@
 .. toctree::
    :hidden:
 
-=====================
-Vitis Utility Library
-=====================
-
-Introduction
+Overview
 ------------
 
 Vitis Utility Library is an open-sourced Vitis library of common patterns of streaming and storage access.

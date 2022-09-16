@@ -10,7 +10,6 @@
     ], 
     "default_target": "hw_emu",
     "default_device": "xilinx_vck190_base_202110_1",
-    "default_HOST_ARCH": "aarch64",
     "platform_blocklist": [], 
     "platform_properties": {}, 
     "launch": [
@@ -30,11 +29,6 @@
                 "host", 
                 "LIB_DIR/ext/xcl2"
             ], 
-            "customized_params": {
-                "default": {
-                    "SIZE": 1024
-                }
-            },
             "options": "-std=c++14"
         }
     }, 

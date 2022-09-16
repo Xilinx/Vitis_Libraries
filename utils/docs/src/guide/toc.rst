@@ -22,11 +22,11 @@ Utility API User Guide
 .. toctree::
    :maxdepth: 2
 
-   stream_based.rst
-   api.rst
-   api_class.rst
-   helper.rst
-   tag.rst
-   internals.rst
-   examples.rst
+   Stream-Based API Design <stream_based.rst>
+   API Functions of ``xf::common::utils_hw`` <api.rst>
+   API Class of ``xf::common::utils_hw`` <api_class.rst>
+   Template Helpers in ``xf::common::utils_hw`` <helper.rst>
+   Tag Types in ``xf::common::utils_hw`` <tag.rst>
+   Module Design Internals <internals.rst>
+   Examples <examples.rst>
 
