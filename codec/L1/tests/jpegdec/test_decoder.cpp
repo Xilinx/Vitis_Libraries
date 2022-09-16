@@ -182,7 +182,7 @@ int main(int argc, const char* argv[]) {
                 printf("Warning: [code 3] huffman data is not in expectation!\n");
             }
         }
-        printf("Info: Ready to decode next input file!\n");
+        return 1;
     }
 
     xf::codec::details::hls_next_mcupos2(block_strm, hls_block, hls_sfv, hls_sfh, hls_mbs, hls_bch[0], hls_bc[0],
@@ -214,6 +214,7 @@ int main(int argc, const char* argv[]) {
     free(hls_block);
 
     std::cout << "Ready for next image!\n ";
+    return 0;
 }
 #endif
 

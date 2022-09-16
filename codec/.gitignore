@@ -1,6 +1,5 @@
 *.log
 *.yuv
-*.jpg
 _x_*
 build_dir*
 emconfig.json

@@ -1,0 +1,81 @@
+{
+    "gui": false, 
+    "name": "Xilinx Resize (SC) Test", 
+    "description": "A SystemCompiler example for fast resize in codec cases.", 
+    "flow": "vitis", 
+    "platform_allowlist": [
+        "u50" 
+    ], 
+    "platform_blocklist": [
+        "zc"
+    ], 
+    "launch": [
+        {
+            "cmd_args": "-i PROJECT/images/t0.raw -srcw 512 -srch 512 -dstw 64 -dsth 64", 
+            "name": "generic launch for all flows"
+        }
+    ], 
+    "host": {
+        "host_exe": "host.exe", 
+        "compiler": {
+            "sources": [
+                "host/test_resize.cpp",
+		        "kernel/kernel_resize.cpp"
+            ], 
+            "includepaths": [
+                "LIB_DIR/L2/include/hw/resize", 
+                "LIB_DIR/L2/demos/resize_sc/host", 
+                "LIB_DIR/L2/demos/resize", 
+                "LIB_DIR/../utils/L1/include",
+                "LIB_DIR/L2/demos/resize_sc/kernel" 
+            ],
+            "options": "-O3"
+        }
+    }, 
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L2/include/hw/resize", 
+                "LIB_DIR/L2/demos/resize_sc/kernel"
+            ]
+        }
+    }, 
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "kernel/kernel_resize.cpp", 
+                    "frequency": 300.0, 
+                    "name": "kernel_resize"
+                }
+            ], 
+            "frequency": 200.0, 
+            "name": "kernel_resize"
+        }
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32768, 
+                "max_time_min": {
+                    "vitis_hw_build": 470, 
+                    "vitis_hw_emu": 300, 
+                    "vitis_sw_emu": 60, 
+                    "vitis_hw_run": 10
+                }
+            }
+        ], 
+        "targets": [
+            "vitis_sw_emu", 
+            "vitis_hw_emu", 
+            "vitis_hw_build", 
+            "vitis_hw_run"
+        ], 
+        "category": "canary"
+    }
+}

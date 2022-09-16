@@ -172,18 +172,17 @@ void Huffman_decoder(
     const int16_t dc_huff_start_addr[2][16],
     //
     const ap_uint<12> cyc_cmp,
-// regs
-#ifndef __SYNTHESIS__
+    // regs
+    //#ifndef __SYNTHESIS__
     const uint8_t hls_cs_cmpc,
     const uint16_t hls_mcuh,
-#endif
+    //#endif
     const uint8_t hls_mbs[MAX_NUM_COLOR],
     const uint32_t hls_mcuc,
 
     // output
     bool& rtn2,
     hls::stream<ap_uint<24> >& block_strm) {
-
 #pragma HLS INLINE off
 
     ap_uint<12> hls_cmp = cyc_cmp;
@@ -1133,8 +1132,8 @@ void top_mcu_decoder(
 
     xf::codec::details::Huffman_decoder(huff_sos_strm, sign_no_huff, dht_tbl1, ac_val, ac_huff_start_code,
                                         ac_huff_start_addr, dc_val, dc_huff_start_code, dc_huff_start_addr, hls_cmp,
-#ifndef __SYNTHESIS__
+                                        //#ifndef __SYNTHESIS__
                                         hls_cs_cmpc, hls_mcuh,
-#endif
+                                        //#endif
                                         hls_mbs, hls_mcuc, rtn2, block_strm);
 }

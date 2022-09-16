@@ -2,15 +2,15 @@
     "name": "Xilinx jpeg decoder HLS Test",
     "description": "Xilinx jpeg decoder HLS Test",
     "flow": "hls",
-    "platform_whitelist": [
+    "platform_allowlist": [
         "u200"
     ],
-    "platform_blacklist": [],
-    "part_whitelist": [],
-    "part_blacklist": [],
+    "platform_blocklist": [],
+    "part_allowlist": [],
+    "part_blocklist": [],
     "project": "test",
     "solution": "solution1",
-    "clock": "2.5",
+    "clock": "3.33",
     "topfunction": "kernel_parser_decoder",
     "top": {
         "source": [
@@ -41,17 +41,17 @@
                 "env": "",
                 "cmd": "",
                 "max_memory_MB": {
-                    "hls_vivado_syn": 16384,
+                    "vivado_syn": 16384,
                     "hls_csim": 16384,
                     "hls_cosim": 16384,
-                    "hls_vivado_impl": 16384,
+                    "vivado_impl": 16384,
                     "hls_csynth": 16384
                 },
                 "max_time_min": {
-                    "hls_vivado_syn": 480,
+                    "vivado_syn": 480,
                     "hls_csim": 120,
                     "hls_cosim": 480,
-                    "hls_vivado_impl": 480,
+                    "vivado_impl": 480,
                     "hls_csynth": 240
                 }
             }
@@ -60,8 +60,8 @@
             "hls_csim",
             "hls_csynth",
             "hls_cosim",
-            "hls_vivado_syn",
-            "hls_vivado_impl"
+            "vivado_syn",
+            "vivado_impl"
         ],
         "category": "canary"
     }

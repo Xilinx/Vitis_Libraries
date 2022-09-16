@@ -29,11 +29,11 @@ endif
 
 .PHONY: all install xml rst html clean cleanhtml ultraclean
 
-all: install
+all: html
 
 install: .stamp/sphinx
 	rm -rf $(HTML_DEST_DIR)/*
-	rsync -av _build/html/ $(HTML_DEST_DIR)
+	rsync -av build/html/ $(HTML_DEST_DIR)
 
 .stamp/doxygen:
 	rm -rf xml_L1 xml_L2 xml_L3
@@ -45,18 +45,18 @@ install: .stamp/sphinx
 DOXYREST_FRAME = $(dir $(shell which doxyrest))/../doxyrest_frame
 
 .stamp/doxyrest: .stamp/doxygen
-	rm -rf rst_L1
-	mkdir rst_L1
+	rm -rf src/rst_L1
+	mkdir src/rst_L1
 	echo "marc0"
-	doxyrest xml_L1/index.xml -o rst_L1/index.rst \
+	doxyrest xml_L1/index.xml -o src/rst_L1/index.rst \
 		-F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
 	echo "marc"
-#	rm -f rst_L1/index.rst rst_L1/global.rst
-	rm -rf rst_L2
-	mkdir rst_L2
-	doxyrest xml_L2/index.xml -o rst_L2/index.rst \
+#	rm -f src/rst_L1/index.rst src/rst_L1/global.rst
+	rm -rf src/rst_L2
+	mkdir src/rst_L2
+	doxyrest xml_L2/index.xml -o src/rst_L2/index.rst \
 		-F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
-#	rm -f rst_L2/index.rst rst_L2/global.rst
+#	rm -f src/rst_L2/index.rst src/rst_L2/global.rst
 	touch .stamp/doxyrest
 
 .stamp/sphinx: .stamp/doxyrest Makefile.sphinx
@@ -72,14 +72,14 @@ rst:
 	make .stamp/doxyrest
 
 html:
-	rm -rf .stamp/sphinx _build/doctrees
+	rm -rf .stamp/sphinx build/doctrees
 	make .stamp/sphinx
 
 clean:
 	rm -rf .stamp
 
 cleanhtml:
-	rm -rf .stamp/sphinx _build/html _build/doctrees
+	rm -rf .stamp/sphinx build/html build/doctrees
 
-ultraclean:
-	rm -rf .stamp xml_L1 xml_L2 xml_L3 rst_L1 rst_L2 rst_L3 _build/html _build/doctrees
+cleanall:
+	rm -rf .stamp xml_L1 xml_L2 xml_L3 src/rst_L1 src/rst_L2 src/rst_L3 build/html build/doctrees

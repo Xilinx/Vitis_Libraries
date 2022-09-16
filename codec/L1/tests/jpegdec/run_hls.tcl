@@ -20,14 +20,15 @@ set PROJ "test.prj"
 set SOLN "solution1"
 
 if {![info exists CLKP]} {
-  set CLKP 2.5
+  set CLKP 3.33
 }
 
 open_project -reset $PROJ
 
-add_files "test_decoder.cpp ${XF_PROJ_ROOT}/L1/src/XAcc_jfifparser.cpp ${XF_PROJ_ROOT}/L1/src/XAcc_jpegdecoder.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include -std=c++0x"
+add_files "test_decoder.cpp ${XF_PROJ_ROOT}/L1/src/XAcc_jfifparser.cpp ${XF_PROJ_ROOT}/L1/src/XAcc_jpegdecoder.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include -std=c++0x -g -O0"
 add_files -tb "test_decoder.cpp" -cflags "-I${XF_PROJ_ROOT}/L1/include -std=c++0x"
 set_top kernel_parser_decoder
+#set_top Huffman_decoder
 
 open_solution -reset $SOLN
 

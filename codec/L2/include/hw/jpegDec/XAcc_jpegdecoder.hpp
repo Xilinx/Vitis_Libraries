@@ -826,7 +826,7 @@ void mcu_decoder(
 #pragma HLS DATAFLOW
 
     // clang-format off
-	    hls::stream<xf::codec::sos_data> huff_sos_strm;
+	    hls::stream<xf::codec::details::sos_data> huff_sos_strm;
 	#pragma HLS DATA_PACK variable = huff_sos_strm
 	#pragma HLS RESOURCE  variable = huff_sos_strm core = FIFO_LUTRAM
 	#pragma HLS STREAM    variable = huff_sos_strm depth = 32
