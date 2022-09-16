@@ -1,24 +1,24 @@
 {
-    "gui": true, 
-    "name": "Xilinx ZC Discounting Bond Engine Test", 
-    "description": "A zero-coupon bond is a bond which is purchased at a price below the face value of the bond. It does not pay coupon during the contract period, and repays the face value at the time of maturity.", 
-    "flow": "vitis", 
-    "platform_type": "pcie", 
+    "gui": false,
+    "name": "Xilinx ZC Discounting Bond Engine Test",
+    "description": "A zero-coupon bond is a bond which is purchased at a price below the face value of the bond. It does not pay coupon during the contract period, and repays the face value at the time of maturity.",
+    "flow": "vitis",
+    "platform_type": "pcie",
     "platform_allowlist": [
-        "u250", 
-        "u200", 
+        "u250",
+        "u200",
         "u50"
-    ], 
+    ],
     "platform_blocklist": [
         "zc"
-    ], 
+    ],
     "platform_properties": {
         "u200": {
             "host": {
                 "compiler": {
                     "symbols": []
                 }
-            }, 
+            },
             "v++": {
                 "compiler": {
                     "clflags": [
@@ -26,13 +26,13 @@
                     ]
                 }
             }
-        }, 
+        },
         "u250": {
             "host": {
                 "compiler": {
                     "symbols": []
                 }
-            }, 
+            },
             "v++": {
                 "compiler": {
                     "clflags": [
@@ -40,13 +40,13 @@
                     ]
                 }
             }
-        }, 
+        },
         "u50": {
             "host": {
                 "compiler": {
                     "symbols": []
                 }
-            }, 
+            },
             "v++": {
                 "compiler": {
                     "clflags": [
@@ -55,104 +55,110 @@
                 }
             }
         }
-    }, 
+    },
     "launch": [
         {
-            "cmd_args": " -xclbin BUILD/BOND_k.xclbin", 
-            "name": "generic launch for all flows"
+            "cmd_args": " -xclbin BUILD/BOND_k.xclbin",
+            "name": "generic launch for all flows",
+            "ld_library_path": [
+                "$(XILINX_HLS)/lnx64/tools/fpo_v7_1"
+            ]
         }
-    ], 
+    ],
     "host": {
-        "host_exe": "host.exe", 
+        "host_exe": "host.exe",
         "compiler": {
             "sources": [
-                "host/main.cpp", 
+                "host/main.cpp",
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
-            ], 
+            ],
             "includepaths": [
-                "LIB_DIR/L1/include", 
-                "LIB_DIR/L2/include", 
-                "LIB_DIR/L2/tests/ZCDiscountingBondEngine/host", 
-                "LIB_DIR/L2/tests/ZCDiscountingBondEngine/kernel", 
+                "LIB_DIR/L1/include",
+                "LIB_DIR/L2/include",
+                "LIB_DIR/L2/tests/ZCDiscountingBondEngine/host",
+                "LIB_DIR/L2/tests/ZCDiscountingBondEngine/kernel",
                 "LIB_DIR/ext/xcl2"
-            ], 
-            "options": "-O3 ", 
+            ],
+            "options": "-O3  -I$(XILINX_HLS)/include",
             "symbols": []
+        },
+        "linker": {
+            "options": " -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel"
         }
-    }, 
+    },
     "v++": {
         "compiler": {
             "includepaths": [
-                "LIB_DIR/L1/include", 
-                "LIB_DIR/L2/include", 
+                "LIB_DIR/L1/include",
+                "LIB_DIR/L2/include",
                 "LIB_DIR/L2/tests/ZCDiscountingBondEngine/kernel"
-            ], 
+            ],
             "symbols": []
         }
-    }, 
+    },
     "containers": [
         {
             "accelerators": [
                 {
-                    "location": "kernel/BOND_k0.cpp", 
-                    "frequency": 300.0, 
-                    "clflags": " -D DPRAGMA", 
-                    "name": "BOND_k0", 
-                    "num_compute_units": 1, 
+                    "location": "kernel/BOND_k0.cpp",
+                    "frequency": 300.0,
+                    "clflags": " -D DPRAGMA",
+                    "name": "BOND_k0",
+                    "num_compute_units": 1,
                     "compute_units": [
                         {
-                            "name": "BOND_k0_1", 
-                            "slr": "SLR0", 
+                            "name": "BOND_k0_1",
+                            "slr": "SLR0",
                             "arguments": [
                                 {
-                                    "name": "time", 
+                                    "name": "time",
                                     "memory": "DDR[0]"
-                                }, 
+                                },
                                 {
-                                    "name": "disc", 
+                                    "name": "disc",
                                     "memory": "DDR[0]"
-                                }, 
+                                },
                                 {
-                                    "name": "NPV", 
+                                    "name": "NPV",
                                     "memory": "DDR[0]"
                                 }
                             ]
                         }
                     ]
                 }
-            ], 
-            "frequency": 300.0, 
+            ],
+            "frequency": 300.0,
             "name": "BOND_k"
         }
-    ], 
+    ],
     "testinfo": {
-        "disable": false, 
+        "disable": false,
         "jobs": [
             {
-                "index": 0, 
-                "dependency": [], 
-                "env": "", 
-                "cmd": "", 
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
                 "max_memory_MB": {
-                    "vitis_hw_build": 40960, 
-                    "vitis_hw_emu": 28672, 
-                    "vitis_sw_emu": 10240, 
+                    "vitis_hw_build": 40960,
+                    "vitis_hw_emu": 28672,
+                    "vitis_sw_emu": 10240,
                     "vitis_hw_run": 10240
-                }, 
+                },
                 "max_time_min": {
-                    "vitis_hw_build": 470, 
-                    "vitis_hw_emu": 300, 
-                    "vitis_sw_emu": 60, 
+                    "vitis_hw_build": 470,
+                    "vitis_hw_emu": 300,
+                    "vitis_sw_emu": 60,
                     "vitis_hw_run": 10
                 }
             }
-        ], 
+        ],
         "targets": [
-            "vitis_sw_emu", 
-            "vitis_hw_emu", 
-            "vitis_hw_build", 
+            "vitis_sw_emu",
+            "vitis_hw_emu",
+            "vitis_hw_build",
             "vitis_hw_run"
-        ], 
+        ],
         "category": "canary"
     }
 }

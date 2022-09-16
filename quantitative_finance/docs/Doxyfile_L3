@@ -24,7 +24,6 @@
 
 INPUT                  = ../L3/include \
 						 ../L3/include/models \
-						 ../L3/src/models/heston_fd/include \
 						 ../L3/src/models/mc_american/include \
 						 ../L3/src/models/mc_european/include \
 						 ../L3/src/models/mc_european_dje/include \

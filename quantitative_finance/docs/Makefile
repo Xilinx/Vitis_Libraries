@@ -29,13 +29,13 @@ endif
 
 .PHONY: all install xml rst html clean cleanhtml cleanall
 
-all: install
+all: .stamp/sphinx
 
 install: .stamp/sphinx
 	rm -rf $(HTML_DEST_DIR)/*
 #	make cleanall
 	rsync -av --delete --exclude .git --exclude .nojekyll --exclude .buildinfo \
-		 _build/html/ $(HTML_DEST_DIR) 1>/dev/null
+		 build/html/ $(HTML_DEST_DIR) 1>/dev/null
 
 .stamp/doxygen:
 	rm -rf xml_L1 xml_L2 xml_L3
@@ -55,21 +55,21 @@ DOXYREST_FRAME = $(dir $(shell which doxyrest))/../share/doxyrest/frame
 endif
 
 .stamp/doxyrest: .stamp/doxygen
-	rm -rf rst_L1
-	mkdir rst_L1
-	doxyrest xml_L1/index.xml -o rst_L1/index.rst \
+	rm -rf src/rst_L1
+	mkdir src/rst_L1
+	doxyrest xml_L1/index.xml -o src/rst_L1/index.rst \
 		-F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
-	rm -f rst_L1/index.rst rst_L1/global.rst
-	rm -rf rst_L2
-	mkdir rst_L2
-	doxyrest xml_L2/index.xml -o rst_L2/index.rst \
+	rm -f src/rst_L1/index.rst src/rst_L1/global.rst
+	rm -rf src/rst_L2
+	mkdir src/rst_L2
+	doxyrest xml_L2/index.xml -o src/rst_L2/index.rst \
 		-F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
-	rm -f rst_L2/index.rst rst_L2/global.rst
-	rm -rf rst_L3
-	mkdir rst_L3
-	doxyrest xml_L3/index.xml -o rst_L3/index.rst \
+	rm -f src/rst_L2/index.rst src/rst_L2/global.rst
+	rm -rf src/rst_L3
+	mkdir src/rst_L3
+	doxyrest xml_L3/index.xml -o src/rst_L3/index.rst \
 		-F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
-	rm -f rst_L3/index.rst rst_L3/global.rst
+	rm -f src/rst_L3/index.rst src/rst_L3/global.rst
 	touch .stamp/doxyrest
 
 .stamp/sphinx: .stamp/doxyrest Makefile.sphinx
@@ -85,14 +85,14 @@ rst:
 	make .stamp/doxyrest
 
 html:
-	rm -rf .stamp/sphinx _build/doctrees
+	rm -rf .stamp/sphinx build/doctrees
 	make .stamp/sphinx
 
 clean:
 	rm -rf .stamp
 
 cleanhtml:
-	rm -rf .stamp/sphinx _build/html _build/doctrees
+	rm -rf .stamp/sphinx build/html build/doctrees
 
 cleanall:
-	rm -rf .stamp xml_L1 xml_L2 xml_L3 rst_L1 rst_L2 rst_L3 _build/html _build/doctrees
+	rm -rf .stamp xml_L1 xml_L2 xml_L3 src/rst_L1 src/rst_L2 src/rst_L3 build/html build/doctrees

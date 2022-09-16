@@ -44,7 +44,6 @@ CXXFLAGS += -Imodels/cf_black_scholes_merton/include
 CXXFLAGS += -Imodels/cf_garman_kohlhagen/include
 CXXFLAGS += -Imodels/hcf/include
 CXXFLAGS += -Imodels/m76/include
-CXXFLAGS += -Imodels/heston_fd/include
 CXXFLAGS += -Imodels/mc_american/include
 CXXFLAGS += -Imodels/mc_european/include
 CXXFLAGS += -Imodels/binomial_tree/include
