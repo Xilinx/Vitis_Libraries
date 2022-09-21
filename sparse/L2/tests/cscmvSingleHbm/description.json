@@ -13,13 +13,12 @@
     ], 
     "platform_properties": {
         "u280": {
-            "host": {
-                "compiler": {
-                    "symbols": []
-                }
-            }, 
             "v++": {
-                "compiler": {}
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/compile_opts_seq.cfg"
+                    ]
+                }
             }
         }
     }, 
@@ -27,11 +26,6 @@
         {
             "name": "generic launch for all flows", 
             "cmd_args": " BUILD/cscmv.xclbin PROJECT/data/app.bin"
-        }
-    ], 
-    "pre_launch": [
-        {
-            "launch_cmd": ""
         }
     ], 
     "host": {
@@ -116,7 +110,6 @@
                     "name": "cscmvSeqKernel", 
                     "location": "LIB_DIR/L2/src/hw/fp32/cscmvSingleHbm.cpp", 
                     "frequency": 300, 
-                    "clflags": "--config PROJECT/compile_opts_seq.cfg", 
                     "num_compute_units": 0
                 }
             ]

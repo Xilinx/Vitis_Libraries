@@ -143,7 +143,7 @@ void dispColVec(const unsigned int t_chId,
     static const unsigned int t_ParamsPerPar = t_ParBits / 32;
     // local buffer for colVec
     ap_uint<t_DataBits * t_ParEntries> l_vecStore[t_MaxColParBlocks];
-#pragma HLS RESOURCE variable = l_vecStore core = RAM_1P_URAM uram
+#pragma HLS BIND_STORAGE variable = l_vecStore  type=ram_1p impl=uram
     unsigned int l_offset, l_vecBlocks;
     unsigned int l_minIdx[t_HbmChannels];
 #pragma HLS ARRAY_PARTITION variable = l_minIdx complete dim = 1
@@ -213,7 +213,7 @@ void dispColVecSink(hls::stream<ap_uint<t_DataBits * t_ParEntries> >& p_datStr,
     static const unsigned int t_ParamsPerPar = t_ParBits / 32;
     // local buffer for colVec
     ap_uint<t_DataBits * t_ParEntries> l_vecStore[t_MaxColParBlocks];
-#pragma HLS RESOURCE variable = l_vecStore core = RAM_1P_URAM uram
+#pragma HLS BIND_STORAGE variable = l_vecStore  type=ram_1p impl=uram
 
     unsigned int l_offset, l_vecBlocks;
     unsigned int l_minIdx[t_HbmChannels];
@@ -323,7 +323,7 @@ void dispNnzColStep(const unsigned int t_ChId,
     static const unsigned int t_ParamsPerPar = t_ParBits / 32;
 
     ap_uint<t_DataBits * t_ParEntries> l_nnzColStore[t_MaxColParBlocks];
-#pragma HLS RESOURCE variable = l_nnzColStore core = RAM_1P_URAM uram
+#pragma HLS BIND_STORAGE variable = l_nnzColStore  type=ram_1p impl=uram
     unsigned int l_offset, l_vecBlocks;
     unsigned int l_parBlocks[t_HbmChannels];
 #pragma HLS ARRAY_PARTITION variable = l_parBlocks complete dim = 1
@@ -374,7 +374,7 @@ void dispNnzColStepDup(const unsigned int t_ChId,
     static const unsigned int t_ParamsPerPar = t_ParBits / 32;
 
     ap_uint<t_DataBits * t_ParEntries> l_nnzColStore[t_MaxColParBlocks];
-#pragma HLS RESOURCE variable = l_nnzColStore core = RAM_1P_URAM uram
+#pragma HLS BIND_STORAGE variable = l_nnzColStore  type=ram_1p impl=uram
     unsigned int l_offset, l_vecBlocks;
     unsigned int l_parBlocks[t_HbmChannels];
 #pragma HLS ARRAY_PARTITION variable = l_parBlocks complete dim = 1
@@ -424,7 +424,7 @@ void dispNnzColSink(hls::stream<ap_uint<t_DataBits * t_ParEntries> >& p_datStr,
     static const unsigned int t_ParamsPerPar = t_ParBits / 32;
 
     ap_uint<t_DataBits * t_ParEntries> l_nnzColStore[t_MaxColParBlocks];
-#pragma HLS RESOURCE variable = l_nnzColStore core = RAM_1P_URAM uram
+#pragma HLS BIND_STORAGE variable = l_nnzColStore  type=ram_1p impl=uram
     unsigned int l_offset, l_vecBlocks;
     unsigned int l_parBlocks[t_HbmChannels];
 #pragma HLS ARRAY_PARTITION variable = l_parBlocks complete dim = 1

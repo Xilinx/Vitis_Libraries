@@ -34,24 +34,24 @@ Demos and usage examples of different level implementations are also provided
 for reference. 
 
 .. toctree::
-   :caption: Library Overview
+   :caption: Introduction
    :maxdepth: 1
 
-   overview.rst
-   release.rst
+   Overview <overview.rst>
+   Release Note <release.rst>
  
 .. toctree::
    :caption: User Guide
    :maxdepth: 2
 
-   user_guide/L1_user_guide.rst
-   user_guide/L2_user_guide.rst
+   L1 Primitives User Guide <user_guide/L1_user_guide.rst>
+   L2 Kernel User Guide <user_guide/L2_user_guide.rst>
 
 .. toctree::
    :caption: Benchmark Result
    :maxdepth: 1
 
-   benchmark.rst
+   Benchmark <benchmark.rst>
 
 Index
 -----

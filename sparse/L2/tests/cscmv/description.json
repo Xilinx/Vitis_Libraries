@@ -14,30 +14,18 @@
     "platform_properties": {
         "u280": {
             "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/compile_opts.cfg"
+                "linker": {
+                    "ldclflags": [
+                         "--config PROJECT/conn_u280.cfg --config PROJECT/compile_opts.cfg"
                     ]
                 }
-            },
-            "containers": [
-                {
-                    "name": "cscmv",
-                    "frequency": 300,
-                    "ldclflags": "--config PROJECT/conn_u280.cfg"
-                }
-            ]
+            }
         }
     }, 
     "launch": [
         {
             "name": "generic launch for all flows", 
             "cmd_args": " BUILD/cscmv.xclbin PROJECT/data/app.bin"
-        }
-    ], 
-    "pre_launch": [
-        {
-            "launch_cmd": "make -f makeGenBin.mk gen_data"
         }
     ], 
     "host": {
@@ -157,8 +145,8 @@
                 "env": "", 
                 "cmd": "", 
                 "max_memory_MB": {
-                    "vitis_hw_build": 40960, 
-                    "vitis_hw_emu": 28672, 
+                    "vitis_hw_build": 51200, 
+                    "vitis_hw_emu": 51200, 
                     "vitis_hw_run": 10240
                 }, 
                 "max_time_min": {

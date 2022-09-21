@@ -682,7 +682,7 @@ void rowMemAcc(const unsigned int p_rowBlocks,
     static const unsigned int t_Latency = 6;
 
     t_DataType l_rowStore[t_MaxRowBlocks][t_Latency];
-#pragma HLS RESOURCE variable = l_rowStore core = RAM_T2P
+#pragma HLS BIND_STORAGE variable = l_rowStore  type=ram_t2p impl=auto
 #pragma HLS ARRAY_PARTITION variable = l_rowStore complete dim = 2
 
 init_mem:

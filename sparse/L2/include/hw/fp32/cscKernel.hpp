@@ -301,7 +301,7 @@ void writeHbm(hls::stream<uint32_t>& p_paramStr,
 
     ap_uint<t_MemBits> l_rowStore[t_MaxRowBlocks][t_DataWords];
 #pragma HLS ARRAY_PARTITION variable = l_rowStore complete dim = 2
-#pragma HLS RESOURCE variable = l_rowStore core = RAM_1P_URAM uram
+#pragma HLS BIND_STORAGE variable = l_rowStore  type=ram_1p impl=uram
 
     hls::stream<ap_uint<t_MemBits> > l_memStr;
     ap_uint<t_MemBits>* l_wrPtr;

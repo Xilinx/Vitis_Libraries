@@ -27,6 +27,6 @@ L1 Primitives User Guide
 .. toctree::
    :maxdepth: 2
 
-   L1_intro.rst
-   L1_details.rst
-   L1_api.rst
+   Primitive Overview <L1_intro.rst>
+   Primitive Implementation Details <L1_details.rst>
+   API Functions of ``xf::sparse`` <L1_api.rst>

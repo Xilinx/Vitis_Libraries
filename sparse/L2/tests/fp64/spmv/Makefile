@@ -114,7 +114,7 @@ CXXFLAGS += -I$(CUR_DIR)/src/
 CXXFLAGS += $(EXTRA_CXXFLAGS)
 
 ifeq ($(HOST_ARCH), x86)
-LDFLAGS += -L$(XILINX_HLS)/lnx64/tools/fpo_v7_0 -Wl,--as-needed -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel
+LDFLAGS += -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -Wl,--as-needed -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel
 endif
 
 # ################### Setting package and image directory #######################

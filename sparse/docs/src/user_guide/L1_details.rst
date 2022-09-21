@@ -26,6 +26,6 @@ Primitive Implementation Details
 .. toctree::
    :maxdepth: 1
 
-   L1_xBarCol.rst
-   L1_cscRow.rst
-   L1_dispCol.rst
+   Scatter-Gather Logic Implementation <L1_xBarCol.rst>
+   Row-wise Accumulator Implementation <L1_cscRow.rst>
+   Column Vector Buffering and Distribution Implementation <L1_dispCol.rst>

@@ -51,7 +51,7 @@ These are details for benchmark results and usage steps.
 .. toctree::
    :maxdepth: 1
 
-   benchmark/spmv_double.rst
+   SPMV (Double precision) <benchmark/spmv_double.rst>
 
 
 
