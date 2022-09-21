@@ -30,13 +30,15 @@ Requirements
 FPGA Accelerator Card
 ~~~~~~~~~~~~~~~~~~~~~
 
-All the modules and APIs works with Alveo U280 out of the box, many support U50, U200 and U250 as well.
-Most of the APIs can be scaled and tailored for any 16nm Alveo card.
+The Database Library relies heavily on HBM,
+so that high-level APIs (L2 and L3) are mostly targeting Alveo cards with HBM. For example,
 
-* `Alveo U280 <https://www.xilinx.com/products/boards-and-kits/alveo/u280.html>`_
+* `Alveo U55C <https://www.xilinx.com/products/boards-and-kits/alveo/u55c.html>`_
 * `Alveo U50 <https://www.xilinx.com/products/boards-and-kits/alveo/u50.html>`_
-* `Alveo U200 <https://www.xilinx.com/products/boards-and-kits/alveo/u200.html>`_
-* `Alveo U250 <https://www.xilinx.com/products/boards-and-kits/alveo/u250.html>`_
+* `Alveo U280 <https://www.xilinx.com/products/boards-and-kits/alveo/u280.html>`_
+
+The low-level L1 modules are actually device-agonostic, so that they can be instantiated into a Vitis project
+targeting any platform, as long as the resources budget can be met.
 
 Software Platform
 ~~~~~~~~~~~~~~~~~
@@ -50,8 +52,8 @@ With CentOS/RHEL 7.4 and 7.5, C++11/C++14 should be enabled via
 Development Tools
 ~~~~~~~~~~~~~~~~~
 
-This library is designed to work with Vitis 2020.2,
-and a matching version of XRT should be installed.
+This library is designed to work with Vitis 2022.2,
+and a matching version of XRT should be installed for both compilation and run.
 
 
 Dependency

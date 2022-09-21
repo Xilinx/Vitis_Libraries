@@ -1171,6 +1171,7 @@ namespace database {
  *
  * To check for existance of a value with generated vector, use the ``bfCheck`` primitive.
  *
+ * @tparam IS_BRAM choose which types of memory to use. True for BRAM. False for URAM
  * @tparam STR_IN_W W width of the streamed input message, e.g., W=512.
  * @tparam BV_W width of the hash value. ptr0, ptr1 and ptr2 should point at MEM_SPACE=2^BV_W (bit).
  *
@@ -1204,6 +1205,7 @@ void bfGen(hls::stream<ap_uint<STR_IN_W> >& msg_strm,
  * The bloom-filter bit vectors are built into internally allocated buffers, and streamed out after the filter has been
  * fully built.
  *
+ * @tparam IS_BRAM choose which types of memory to use. True for BRAM. False for URAM
  * @tparam STR_IN_W W width of the streamed input message, e.g., W=512.
  * @tparam BV_W width of the hash value. bit_vet_strm should send out MEM_SPACE=2^BV_W (bit) data in total.
  *

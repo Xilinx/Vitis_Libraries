@@ -5,24 +5,33 @@
     "gui": false,
     "platform_type": "pcie",
     "platform_allowlist": [
-        "u50"
+        "u50",
+        "u55c"
     ],
     "platform_blocklist": [
         "other"
     ],
     "platform_properties": {
         "u50": {
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "-g --config PROJECT/hls_pre.cfg -D PART_FLOW=1"
-                    ]
-                }
-            },
             "containers": [
                 {
                     "name": "gqe_part_v3",
-                    "ldclflags": "--config PROJECT/conn_u50.cfg --config PROJECT/opts.cfg"
+                    "ldclflags": "--config PROJECT/conn_u50.cfg --config PROJECT/opts_u50.cfg"
+                }
+            ]
+        },
+        "u55c": {
+            "containers": [
+                {
+                    "name": "gqe_part_v3",
+                    "ldclflags": "--config PROJECT/conn_u55c.cfg --config PROJECT/opts_u55c.cfg",
+                    "accelerators": [
+                       {
+                          "name": "gqeKernel",
+                          "frequency": 200
+                       }
+                    ],
+                    "frequency": 150
                 }
             ]
         }
@@ -70,7 +79,7 @@
                 "LIB_DIR/../utils/L1/include"
             ],
             "clflags": [
-                "-g"
+                "-g --config PROJECT/hls_pre.cfg -D PART_FLOW=1"
             ],
             "hls_jobs": 16
         },

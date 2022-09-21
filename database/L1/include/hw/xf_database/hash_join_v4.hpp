@@ -4371,7 +4371,7 @@ namespace database {
  * @tparam ARW width of address, log2(small table max num of rows).
  * @tparam CH_NM number of input channels, 1,2,4.
  * @tparam BF_HASH_NM number of bloom filter, 1,2,3.
- * @tparam BF_W bloom-filter hash width.
+ * @tparam BFW bloom-filter hash width.
  * @tparam EN_BF bloom-filter switch, 0 for off, 1 for on.
  *
  * @param k0_strm_arry input of key columns of both tables.

@@ -385,7 +385,7 @@ namespace database {
 /**
  * @brief Merge sort function.
  *
- * @tparam Data_Type the input and output key type
+ * @tparam Key_Type the input and output key type
  *
  * @param left_kin_strm input key stream
  * @param left_strm_in_end end flag stream for left input

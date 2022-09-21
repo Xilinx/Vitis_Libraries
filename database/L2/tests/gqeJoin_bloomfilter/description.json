@@ -2,27 +2,36 @@
     "name": "Xilinx gqeBloomfilter Kernel Test",
     "description": "Xilinx gqeBloomfilter Kernel Test",
     "flow": "vitis",
-    "gui": true,
+    "gui": false,
     "platform_type": "pcie",
     "platform_allowlist": [
-        "u50"
+        "u50",
+        "u55c"
     ],
     "platform_blocklist": [
         "other"
     ],
     "platform_properties": {
         "u50": {
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "-g --config PROJECT/hls_pre.cfg -D PART_FLOW=0"
-                    ]
-                }
-            },
             "containers": [
                 {
                     "name": "gqe_filter",
-                    "ldclflags": "--config PROJECT/conn_u50.cfg --config PROJECT/opts.cfg"
+                    "ldclflags": "--config PROJECT/conn_u50.cfg --config PROJECT/opts_u50.cfg"
+                }
+            ]
+        },
+        "u55c": {
+            "containers": [
+                {
+                    "name": "gqe_filter",
+                    "ldclflags": "--config PROJECT/conn_u55c.cfg --config PROJECT/opts_u55c.cfg",
+                    "accelerators": [
+                       {
+                          "name": "gqeKernel",
+                          "frequency": 200
+                       }
+                    ],
+                    "frequency": 150
                 }
             ]
         }
@@ -69,14 +78,19 @@
                 "LIB_DIR/../utils/L1/include"
             ],
             "clflags": [
-                "-g --advanced.param compiler.fsanitize=address,memory"
+				"--config PROJECT/hls_pre.cfg -D PART_FLOW=0"
             ],
             "hls_jobs": 16
         },
         "linker": {
             "synth_jobs": 16,
             "impl_jobs": 16
-        }
+        },
+        "build_datafiles": [
+            "PROJECT/runPre.tcl",
+            "PROJECT/post_place_opt.tcl",
+            "PROJECT/post_route_opt.tcl"
+        ]
     },
     "containers": [
         {

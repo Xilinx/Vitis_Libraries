@@ -49,6 +49,7 @@ namespace details {
 // XXX: caution, this implementation is really tricky for the HLS, currently only verified with 2020.2 released
 // Vitis-HLS.
 // Better don't touch this module if not necessary, as logic may be mis-synthesized (Csim/Cosim mismatch).
+// template <int PU, int EW, int VEC_LEN, int COL_NM, int GRP_SZ>
 template <int PU, int EW, int COL_NM, int GRP_SZ>
 void collect(hls::stream<ap_uint<8> >& i_general_cfg_strm,
              hls::stream<ap_uint<EW * VEC_LEN> > i_strm[PU][COL_NM],
@@ -67,8 +68,9 @@ void collect(hls::stream<ap_uint<8> >& i_general_cfg_strm,
 
     const int MAX = (1 << PU) - 1;
     ap_uint<GRP_SZ> hash_table = 0;
+    ap_uint<EW * VEC_LEN * COL_NM> row_out_tmp;
     ap_uint<EW * VEC_LEN> row_out[COL_NM];
-#pragma HLS array_partition variable = row_out dim = 1
+#pragma HLS array_partition variable = row_out dim = 0
     ap_uint<PU> priority = 1;
 
     ap_uint<PU> empty_e = 0;
@@ -113,13 +115,15 @@ void collect(hls::stream<ap_uint<8> >& i_general_cfg_strm,
                     } else {
                         o_hp_bkpu_strm.write((idx, bk));
                         o_nm_strm.write(nm[idx]);
+                    FORWARD_CORE_LOOP:
                         while (nm_r > 0) {
 #pragma HLS pipeline II = 1
                             if (!i_strm[idx][0].empty() && !i_strm[idx][1].empty() && !i_strm[idx][2].empty()) {
                                 for (int c = 0; c < COL_NM; c++) {
 #pragma HLS unroll
-                                    i_strm[idx][c].read_nb(row_out[c]);
-                                    o_row_strm[c].write(row_out[c]);
+                                    ap_uint<EW * VEC_LEN> tmp_r;
+                                    i_strm[idx][c].read_nb(tmp_r);
+                                    o_row_strm[c].write(tmp_r);
                                 }
                                 nm_r--;
                             }
@@ -145,13 +149,16 @@ void collect(hls::stream<ap_uint<8> >& i_general_cfg_strm,
                                 i_nm_strm[idx].read_nb(nm[idx]);
                                 for (int c = 0; c < COL_NM; c++) {
 #pragma HLS unroll
-                                    i_strm[idx][c].read_nb(row_out[c]);
+                                    ap_uint<EW * VEC_LEN> tmp_r;
+                                    i_strm[idx][c].read_nb(tmp_r);
+                                    row_out_tmp((c + 1) * EW * VEC_LEN - 1, EW * VEC_LEN * c) = tmp_r;
                                 }
                             }
                             if (nm[idx] > 0) {
                                 for (int c = 0; c < COL_NM; c++) {
 #pragma HLS unroll
-                                    o_row_strm[c].write(row_out[c]);
+                                    o_row_strm[c].write(
+                                        row_out_tmp.range((c + 1) * EW * VEC_LEN - 1, EW * VEC_LEN * c));
                                 }
                                 o_nm_strm.write(1);
                                 cnt++;
@@ -167,17 +174,19 @@ void collect(hls::stream<ap_uint<8> >& i_general_cfg_strm,
                                 i_nm_strm[idx].read_nb(nm[idx]);
                                 for (int c = 0; c < COL_NM; c++) {
 #pragma HLS unroll
-                                    i_strm[idx][c].read_nb(row_out[c]);
+                                    ap_uint<EW * VEC_LEN> tmp_r;
+                                    i_strm[idx][c].read_nb(tmp_r);
+                                    row_out_tmp((c + 1) * EW * VEC_LEN - 1, EW * VEC_LEN * c) = tmp_r;
                                 }
                             }
                             if (nm[idx] > 0) {
                                 sec_end[idx] = 1;
-                                hash_table |= (ap_uint<GRP_SZ>)row_out[0].range(GRP_SZ - 1, 0);
+                                hash_table |= (ap_uint<GRP_SZ>)row_out_tmp.range(GRP_SZ - 1, 0);
                                 if (sec_end == MAX) {
                                     for (int c = 0; c < COL_NM; c++) {
 #pragma HLS unroll
-                                        row_out[c].range(GRP_SZ - 1, 0) = hash_table;
-                                        o_row_strm[c].write(row_out[c]);
+                                        row_out_tmp.range(EW * VEC_LEN * c + GRP_SZ - 1, EW * VEC_LEN * c) = hash_table;
+                                        o_row_strm[c].write(row_out_tmp((c + 1) * EW * VEC_LEN - 1, EW * VEC_LEN * c));
                                     }
                                     o_nm_strm.write(1);
                                     sec_end = 0;

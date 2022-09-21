@@ -141,7 +141,7 @@ void Worker::migrate_func() {
 
             // fill in res_row and arg_size based on meta
             if (tsk.func == WorkerFunctions::JOIN) {
-                if (tsk.k_id == 0) {
+                if (tsk.k_id == 1) {
                     ap_uint<512>* meta = (ap_uint<512>*)(sub_buf_host_parent[tsk.k_id][tsk.p_id][6] +
                                                          sub_buf_head[tsk.k_id][tsk.p_id][6]);
                     // part dim loop
@@ -155,7 +155,7 @@ void Worker::migrate_func() {
                             (*tsk.arg_size)[i][j] = tmp_row * 8;
                         }
                     }
-                } else if (tsk.k_id == 1) {
+                } else if (tsk.k_id == 0) {
                     ap_uint<512>* meta = (ap_uint<512>*)(sub_buf_host_parent[tsk.k_id][tsk.p_id][6] +
                                                          sub_buf_head[tsk.k_id][tsk.p_id][6]);
                     // part = 1
@@ -203,7 +203,7 @@ void Worker::migrate_func() {
 
         // fill in res_row and arg_size based on meta
         if (tsk.func == WorkerFunctions::JOIN) {
-            if (tsk.k_id == 0) {
+            if (tsk.k_id == 1) {
                 ap_uint<512>* meta =
                     (ap_uint<512>*)(sub_buf_host_parent[tsk.k_id][tsk.p_id][6] + sub_buf_head[tsk.k_id][tsk.p_id][6]);
                 // part dim loop
@@ -217,7 +217,7 @@ void Worker::migrate_func() {
                         (*tsk.arg_size)[i][j] = tmp_row * 8;
                     }
                 }
-            } else if (tsk.k_id == 1) {
+            } else if (tsk.k_id == 0) {
                 ap_uint<512>* meta =
                     (ap_uint<512>*)(sub_buf_host_parent[tsk.k_id][tsk.p_id][6] + sub_buf_head[tsk.k_id][tsk.p_id][6]);
                 // part = 1
@@ -394,9 +394,9 @@ Worker::Worker(cl_context context, cl_device_id device_id, string xclbin_path, W
             clFinish(cq);
 
             // set cl sub buffer dimensions
-            setSubBufDim(2, 2, {10, 27});
-            // set cl buffer for kernel 0
+            setSubBufDim(2, 2, {27, 27});
             resetAccBufSize();
+            // set cl buffer for kernel 1
             for (size_t p_id = 0; p_id < 2; p_id++) {
                 createNoneOverLap(0, p_id, 0, 0, (1 << 26));
                 createNoneOverLap(0, p_id, 1, 1, (1 << 26));
@@ -409,29 +409,21 @@ Worker::Worker(cl_context context, cl_device_id device_id, string xclbin_path, W
                 createNoneOverLap(0, p_id, 8, 5, (1 << 26));
                 createNoneOverLap(0, p_id, 9, 6, (1 << 26));
                 createNoneOverLap(0, p_id, 10, 7, (1 << 26));
-            }
-            // set cl buffer for kernel 1
-            // resetAccBufSize();
-            for (size_t p_id = 0; p_id < 2; p_id++) {
-                createNoneOverLap(1, p_id, 0, 0, (1 << 26));
-                createNoneOverLap(1, p_id, 1, 1, (1 << 26));
-                createNoneOverLap(1, p_id, 2, 2, (1 << 26));
-                createNoneOverLap(1, p_id, 3, 3, (1 << 26));
-                createNoneOverLap(1, p_id, 4, 3, (512 / 8 * 14));
-                createNoneOverLap(1, p_id, 5, 3, (512 / 8 * 24));
-                createNoneOverLap(1, p_id, 6, 7, (512 / 8 * 24));
-                createNoneOverLap(1, p_id, 7, 4, (1 << 26));
-                createNoneOverLap(1, p_id, 8, 5, (1 << 26));
-                createNoneOverLap(1, p_id, 9, 6, (1 << 26));
-                createNoneOverLap(1, p_id, 10, 7, (1 << 26));
                 if (p_id == 0) {
                     for (size_t i = 0; i < 16; i++) {
-                        createNoneOverLap(1, p_id, i + 11, i + 8, (1 << 28));
+                        createNoneOverLap(0, p_id, i + 11, i + 8, (1 << 28));
                     }
                 } else { // 16 HBM channel's buffer are the same between ping and pong
                     for (size_t i = 0; i < 16; i++) {
-                        dupSubBuf(1, 0, i + 11, 1, p_id, i + 11);
+                        dupSubBuf(0, 0, i + 11, 0, p_id, i + 11);
                     }
+                }
+            }
+
+            // set cl buffer for kernel 0
+            for (size_t p_id = 0; p_id < 2; p_id++) {
+                for (size_t arg_id = 0; arg_id < 27; arg_id++) {
+                    dupSubBuf(0, p_id, arg_id, 1, p_id, arg_id);
                 }
             }
 
@@ -546,7 +538,7 @@ void Worker::runKernel(WorkerFunctions func,
                        size_t evt_wait_num,
                        cl_event* evt) {
     if (func == WorkerFunctions::JOIN) {
-        if (k_id == 0) { // part
+        if (k_id == 1) { // part
             // set arg
             for (size_t i = 0; i < 13; i++) {
                 if (i < 3) {
@@ -558,7 +550,7 @@ void Worker::runKernel(WorkerFunctions func,
             }
             // enqueue task
             clEnqueueTask(cq, krn[k_id][p_id], evt_wait_num, evt_wait_list, evt);
-        } else if (k_id == 1) { // join
+        } else if (k_id == 0) { // join
             // set arg
             for (size_t i = 0; i < 28; i++) {
                 if (i < 1) {

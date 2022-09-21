@@ -28,6 +28,12 @@ Release Note
    :hidden:
    :maxdepth: 1
 
+2022.2
+------
+
+In the 2022.2 release, the GQE implementation supports Alveo U55C cards.
+
+
 2022.1
 ------
 
@@ -39,6 +45,11 @@ In 2022.1 release, database library introduce (1) GQE combines partition / bloom
   pipelined execution of kernels and reduce DMA workload. This design targets for U50. U50 costs less and still retains HBM.
 
 * Key-Value store offloading introduce a new kernel for accelerate K-V compaction operation in log-structure merge tree database.
+
+.. note:: Known Issue
+
+   * GQE filter case sw_emu and hw_emu will fail due to design change. This will be fixed later.
+
 
 2021.2
 ------
@@ -127,3 +138,4 @@ plan generated from TPC-H 22 queries.
 
 These modules work in streaming fashion and can work in parallel
 when possible.
+

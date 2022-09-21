@@ -2589,6 +2589,7 @@ namespace database {
  * @tparam _WHashHigh number of hash bits used for dispatch pu.
  * @tparam _WHashLow number of hash bits used for hash-table.
  * @tparam _CHNM number of input channels.
+ * @tparam _Wcnt width of 'number of keys' per hash value, in bits.
  * @tparam _WBuffer width of HBM/DDR buffer(ping_buf and pong_buf).
  * @tparam _BurstLenW burst len of writting unhandled data.
  * @tparam _BurstLenR burst len of reloading unhandled data.

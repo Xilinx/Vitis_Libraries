@@ -70,14 +70,14 @@ These are details for benchmark result and usage steps.
 .. toctree::
    :maxdepth: 1
 
-   benchmark/compound_sort.rst
-   benchmark/hash_anti_join.rst
-   benchmark/hash_group_aggregate.rst
-   benchmark/hash_join_v2.rst
-   benchmark/hash_join_v3.rst
-   benchmark/hash_join_v4.rst
-   benchmark/hash_multi_join.rst
-   benchmark/hash_semi_join.rst
+   Compound Sort <benchmark/compound_sort.rst>
+   Hash Anti-join <benchmark/hash_anti_join.rst>
+   Hash Group Aggregate <benchmark/hash_group_aggregate.rst>
+   Hash Join V2 <benchmark/hash_join_v2.rst>
+   Hash Join V3 <benchmark/hash_join_v3.rst>
+   Hash Join V4 <benchmark/hash_join_v4.rst>
+   Hash Multi-Join <benchmark/hash_multi_join.rst>
+   Hash Semi-Join <benchmark/hash_semi_join.rst>
 
 
 

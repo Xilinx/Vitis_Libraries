@@ -110,9 +110,21 @@ void Workshop::Join(TableSection* tab_a,
 
                     int join_type,
                     JoinStrategyBase* strategyimp) {
-    join_task tsk{tab_a,           filter_a,   tab_a_sec_ready, tab_part_a, tab_b, filter_b,
-                  tab_b_sec_ready, tab_part_b, join_str,        output_str, tab_c, tab_c_sec_ready_promise,
-                  join_type,       strategyimp};
+    task_complex tsk{JOIN_TASK,
+                     tab_a,
+                     filter_a,
+                     tab_a_sec_ready,
+                     tab_part_a,
+                     tab_b,
+                     filter_b,
+                     tab_b_sec_ready,
+                     tab_part_b,
+                     join_str,
+                     output_str,
+                     tab_c,
+                     tab_c_sec_ready_promise,
+                     join_type,
+                     strategyimp};
     {
         lock_guard<mutex> lk(m);
         q.push(tsk);
@@ -120,10 +132,30 @@ void Workshop::Join(TableSection* tab_a,
     }
 }
 
-void Workshop::processJoin(join_task tsk) {
+void Workshop::Bloomfilter(TableSection* tab_a,
+                           string filter_a,
+                           vector<future<size_t> >* tab_a_sec_ready,
+                           TableSection* tab_b,
+                           string filter_b,
+                           vector<future<size_t> >* tab_b_sec_ready,
+                           string bf_str,
+                           string output_str,
+                           TableSection* tab_c,
+                           vector<promise<size_t> >* tab_c_sec_ready_promise) {
+    task_complex tsk{
+        BF_TASK, tab_a,      filter_a, tab_a_sec_ready,         nullptr, tab_b,  filter_b, tab_b_sec_ready, nullptr,
+        bf_str,  output_str, tab_c,    tab_c_sec_ready_promise, 0,       nullptr};
+    {
+        lock_guard<mutex> lk(m);
+        q.push(tsk);
+        cv.notify_all();
+    }
+}
+
+void Workshop::processJoin(task_complex tsk) {
     // params
     StrategySet params = tsk.strategyimp->getSolutionParams((*(tsk.tab_a)), (*(tsk.tab_b)));
-    cout << "start to process one join_task" << endl;
+    cout << "start to process one task_complex" << endl;
 
     size_t wkn = worker.size();
     if (params.sol == 1) {
@@ -236,13 +268,13 @@ void Workshop::processJoin(join_task tsk) {
         // 1.3.2 p2d
         for (size_t i = 0; i < wkn; i++) {
             build_p2d_evt_dep[i].push_back(build_h2p_evt[i]);
-            worker[i].MigrateToDevice(WorkerFunctions::JOIN, 1, 0, &build_p2d_arg_buf_idx[i], &build_p2d_arg_size[i],
+            worker[i].MigrateToDevice(WorkerFunctions::JOIN, 0, 0, &build_p2d_arg_buf_idx[i], &build_p2d_arg_size[i],
                                       build_p2d_evt_dep[i].data(), build_p2d_evt_dep[i].size(), &build_p2d_evt[i]);
         }
         // 1.3.3 krn
         for (size_t i = 0; i < wkn; i++) {
             build_krn_evt_dep[i].push_back(build_p2d_evt[i]);
-            worker[i].runKernel(WorkerFunctions::JOIN, 1, 0, build_krn_scalar_arg[i], build_krn_evt_dep[i].data(),
+            worker[i].runKernel(WorkerFunctions::JOIN, 0, 0, build_krn_scalar_arg[i], build_krn_evt_dep[i].data(),
                                 build_krn_evt_dep[i].size(), &build_krn_evt[i]);
         }
         // 1.4 wait
@@ -409,7 +441,7 @@ void Workshop::processJoin(join_task tsk) {
             if (i >= (wkn * 2)) {
                 probe_p2d_evt_dep[i].push_back(probe_krn_evt[i - (2 * wkn)]);
             }
-            worker[w_id].MigrateToDevice(WorkerFunctions::JOIN, 1, p_id, &probe_p2d_arg_buf_idx[i],
+            worker[w_id].MigrateToDevice(WorkerFunctions::JOIN, 0, p_id, &probe_p2d_arg_buf_idx[i],
                                          &probe_p2d_arg_size[i], probe_p2d_evt_dep[i].data(),
                                          probe_p2d_evt_dep[i].size(), &probe_p2d_evt[i]);
             // 2.4.3 krn
@@ -420,21 +452,21 @@ void Workshop::processJoin(join_task tsk) {
             if (i >= (wkn * 2)) {
                 probe_krn_evt_dep[i].push_back(probe_d2p_evt[i - (2 * wkn)]);
             }
-            worker[w_id].runKernel(WorkerFunctions::JOIN, 1, p_id, probe_krn_scalar_arg[i], probe_krn_evt_dep[i].data(),
+            worker[w_id].runKernel(WorkerFunctions::JOIN, 0, p_id, probe_krn_scalar_arg[i], probe_krn_evt_dep[i].data(),
                                    probe_krn_evt_dep[i].size(), &probe_krn_evt[i]);
             // 2.4.4 meta
             probe_meta_evt_dep[i].push_back(probe_krn_evt[i]);
             if (i >= (wkn * 2)) {
                 probe_meta_evt_dep[i].push_back(probe_d2p_evt[i - (2 * wkn)]);
             }
-            worker[w_id].MigrateMetaToHost(WorkerFunctions::JOIN, 1, p_id, probe_meta_evt_dep[i].data(),
+            worker[w_id].MigrateMetaToHost(WorkerFunctions::JOIN, 0, p_id, probe_meta_evt_dep[i].data(),
                                            probe_meta_evt_dep[i].size(), &probe_meta_evt[i]);
             // 2.4.5 d2p
             probe_d2p_evt_dep[i].push_back(probe_meta_evt[i]);
             if (i >= (wkn * 2)) {
                 probe_d2p_evt_dep[i].push_back(probe_p2h_evt[i - (wkn * 2)]);
             }
-            worker[w_id].MigrateResToHost(WorkerFunctions::JOIN, 1, p_id, &probe_d2p_arg_buf_idx[i],
+            worker[w_id].MigrateResToHost(WorkerFunctions::JOIN, 0, p_id, &probe_d2p_arg_buf_idx[i],
                                           &probe_d2p_arg_head[i], &probe_p2h_length[i], &probe_d2p_res_row[i],
                                           probe_d2p_evt_dep[i].data(), probe_d2p_evt_dep[i].size(), &probe_d2p_evt[i]);
             // 2.4.6 p2h
@@ -663,7 +695,7 @@ void Workshop::processJoin(join_task tsk) {
             if (i >= (wkn * 2)) {
                 part_a_krn_evt_dep[i].push_back(part_a_d2p_evt[i - (2 * wkn)]);
             }
-            worker[w_id].runKernel(WorkerFunctions::JOIN, 0, p_id, part_a_krn_scalar_arg[i],
+            worker[w_id].runKernel(WorkerFunctions::JOIN, 1, p_id, part_a_krn_scalar_arg[i],
                                    part_a_krn_evt_dep[i].data(), part_a_krn_evt_dep[i].size(), &part_a_krn_evt[i]);
             // 1.4.4 meta
             part_a_meta_evt_dep[i].push_back(part_a_krn_evt[i]);
@@ -877,7 +909,7 @@ void Workshop::processJoin(join_task tsk) {
             if (i >= (wkn * 2)) {
                 part_b_krn_evt_dep[i].push_back(part_b_d2p_evt[i - (2 * wkn)]);
             }
-            worker[w_id].runKernel(WorkerFunctions::JOIN, 0, p_id, part_b_krn_scalar_arg[i],
+            worker[w_id].runKernel(WorkerFunctions::JOIN, 1, p_id, part_b_krn_scalar_arg[i],
                                    part_b_krn_evt_dep[i].data(), part_b_krn_evt_dep[i].size(), &part_b_krn_evt[i]);
             // 2.4.4 meta
             part_b_meta_evt_dep[i].push_back(part_b_krn_evt[i]);
@@ -1126,7 +1158,7 @@ void Workshop::processJoin(join_task tsk) {
             if (i >= wkn) {
                 build_krn_evt_dep[i].push_back(probe_krn_evt[i - wkn]);
             }
-            worker[w_id].runKernel(WorkerFunctions::JOIN, 1, p_id, build_krn_scalar_arg[i], build_krn_evt_dep[i].data(),
+            worker[w_id].runKernel(WorkerFunctions::JOIN, 0, p_id, build_krn_scalar_arg[i], build_krn_evt_dep[i].data(),
                                    build_krn_evt_dep[i].size(), &build_krn_evt[i]);
             // probe h2p
             probe_h2p_evt_dep[i].push_back(build_p2d_evt[i]);
@@ -1144,7 +1176,7 @@ void Workshop::processJoin(join_task tsk) {
             if (i >= (2 * wkn)) {
                 probe_krn_evt_dep[i].push_back(probe_d2p_evt[i - (2 * wkn)]);
             }
-            worker[w_id].runKernel(WorkerFunctions::JOIN, 1, p_id, probe_krn_scalar_arg[i], probe_krn_evt_dep[i].data(),
+            worker[w_id].runKernel(WorkerFunctions::JOIN, 0, p_id, probe_krn_scalar_arg[i], probe_krn_evt_dep[i].data(),
                                    probe_krn_evt_dep[i].size(), &probe_krn_evt[i]);
             // probe meta
             probe_meta_evt_dep[i].push_back(probe_krn_evt[i]);
@@ -1207,6 +1239,351 @@ void Workshop::processJoin(join_task tsk) {
     }
 }
 
+void Workshop::processBF(task_complex tsk) {
+    size_t wkn = worker.size();
+
+    size_t tab_a_sec_num = tsk.tab_a->getSecNum();
+    size_t tab_b_sec_num = tsk.tab_b->getSecNum();
+    std::cout << "sec a = " << tab_a_sec_num << " sec b = " << tab_b_sec_num << std::endl;
+    if (tab_a_sec_num != 1) {
+        std::cout << "Sections number for tab A should be 1" << std::endl;
+        exit(0);
+    }
+
+    BloomFilterConfig bf_build_cfg(*tsk.tab_a, tsk.filter_a, *tsk.tab_b, tsk.filter_b, tsk.join_str, *tsk.tab_c,
+                                   tsk.output_str, false);
+    BloomFilterConfig bf_probe_cfg(*tsk.tab_a, tsk.filter_a, *tsk.tab_b, tsk.filter_b, tsk.join_str, *tsk.tab_c,
+                                   tsk.output_str, true);
+
+    ap_uint<512>* build_cfg = bf_build_cfg.getBloomFilterConfigBits();
+    ap_uint<512>* probe_cfg = bf_probe_cfg.getBloomFilterConfigBits();
+
+    vector<vector<int8_t> > bf_scan = bf_build_cfg.getShuffleScan();
+    vector<int8_t> bf_wr = bf_build_cfg.getShuffleWrite();
+
+    // 1. build
+    // 1.0 tab_a's sec[0] ready;
+    vector<size_t> tab_a_sec_row(1);
+    tab_a_sec_row[0] = (*tsk.tab_a_sec_ready)[0].get();
+    // 1.1 events
+    vector<cl_event> build_h2p_evt(wkn);
+    vector<cl_event> build_p2d_evt(wkn);
+    vector<cl_event> build_krn_evt(wkn);
+    vector<vector<cl_event> > build_h2p_evt_dep(wkn);
+    vector<vector<cl_event> > build_p2d_evt_dep(wkn);
+    vector<vector<cl_event> > build_krn_evt_dep(wkn);
+    for (size_t i = 0; i < wkn; i++) {
+        build_h2p_evt[i] = clCreateUserEvent(ctx, &err);
+    }
+
+    // 1.2 h2p, p2d, krn args
+    vector<vector<vector<char*> > > build_h2p_src(wkn);
+    vector<vector<vector<char*> > > build_h2p_dst(wkn);
+    vector<vector<vector<size_t> > > build_h2p_bias(wkn);
+    vector<vector<vector<size_t> > > build_h2p_length(wkn);
+    vector<vector<vector<size_t> > > build_h2p_acc(wkn);
+    vector<MetaTable> meta_build_in(wkn);
+    vector<vector<size_t> > build_p2d_arg_buf_idx(wkn);
+    vector<vector<size_t> > build_p2d_arg_size(wkn);
+    vector<vector<size_t> > build_krn_scalar_arg(wkn);
+    for (size_t i = 0; i < wkn; i++) {
+        build_h2p_src[i].resize(1);
+        build_h2p_dst[i].resize(1);
+        build_h2p_bias[i].resize(1);
+        build_h2p_length[i].resize(1);
+        build_h2p_acc[i].resize(1);
+        // 1.2.1 din_col0,1,2
+        for (size_t j = 0; j < 1; j++) {
+            for (size_t k = 0; k < 3; k++) {
+                if (bf_scan[0][k] != -1) {
+                    build_h2p_src[i][j].push_back(tsk.tab_a->getColPointer(j, bf_scan[0][k]));
+                    build_h2p_dst[i][j].push_back(worker[i].sub_buf_host_parent[1][0][k] +
+                                                  worker[i].sub_buf_head[1][0][k]);
+                    build_h2p_bias[i][j].push_back(0);
+                    build_h2p_length[i][j].push_back(tsk.tab_a->getColTypeSize(bf_scan[0][k]) * tab_a_sec_row[j]);
+                    build_h2p_acc[i][j].push_back(0);
+                    build_p2d_arg_buf_idx[i].push_back(k);
+                    build_p2d_arg_size[i].push_back(tsk.tab_a->getColTypeSize(bf_scan[0][k]) * tab_a_sec_row[j]);
+                }
+            }
+        }
+
+        // 1.2.2 din_val
+        if (tsk.tab_a->getValidEnableFlag()) {
+            for (size_t j = 0; j < 1; j++) {
+                build_h2p_src[i][j].push_back(tsk.tab_a->getValColPointer(j));
+                build_h2p_dst[i][j].push_back(worker[i].sub_buf_host_parent[1][0][3] + worker[i].sub_buf_head[1][0][3]);
+                build_h2p_bias[i][j].push_back(0);
+                build_h2p_length[i][j].push_back((tab_a_sec_row[j] + 7) / 8);
+                build_h2p_acc[i][j].push_back(0);
+                build_p2d_arg_buf_idx[i].push_back(3);
+                build_p2d_arg_size[i].push_back((tab_a_sec_row[j] + 7) / 8);
+            }
+        }
+        // 1.2.3 din_krn_cfg
+        for (size_t j = 0; j < 1; j++) {
+            build_h2p_src[i][j].push_back((char*)build_cfg);
+            build_h2p_dst[i][j].push_back(worker[i].sub_buf_host_parent[1][0][4] + worker[i].sub_buf_head[1][0][4]);
+            build_h2p_bias[i][j].push_back(0);
+            build_h2p_length[i][j].push_back(sizeof(ap_uint<512>) * 14);
+            build_h2p_acc[i][j].push_back(0);
+            build_p2d_arg_buf_idx[i].push_back(4);
+            build_p2d_arg_size[i].push_back(sizeof(ap_uint<512>) * 14);
+        }
+        // 1.2.4 din_meta_in
+        meta_build_in[i].setSecID(0);
+        meta_build_in[i].setColNum(3);
+        for (size_t j = 0; j < 3; j++) {
+            meta_build_in[i].setCol(j, j, tab_a_sec_row[0]);
+        }
+        for (size_t j = 0; j < 1; j++) {
+            build_h2p_src[i][j].push_back((char*)meta_build_in[i].meta());
+            build_h2p_dst[i][j].push_back(worker[i].sub_buf_host_parent[1][0][5] + worker[i].sub_buf_head[1][0][5]);
+            build_h2p_bias[i][j].push_back(0);
+            build_h2p_length[i][j].push_back(sizeof(ap_uint<512>) * 24);
+            build_h2p_acc[i][j].push_back(0);
+            build_p2d_arg_buf_idx[i].push_back(5);
+            build_p2d_arg_size[i].push_back(sizeof(ap_uint<512>) * 24);
+        }
+        // 1.2.5 scalar_arg
+        build_krn_scalar_arg[i].resize(1);
+        build_krn_scalar_arg[i][0] = 0;
+    }
+    // 1.3 addTask
+    // 1.3.1 h2p
+    for (size_t i = 0; i < wkn; i++) {
+        h2p.addTask(build_h2p_evt_dep[i].data(), build_h2p_evt_dep[i].size(), &build_h2p_evt[i], &build_h2p_src[i],
+                    &build_h2p_dst[i], &build_h2p_bias[i], &build_h2p_length[i], &build_h2p_acc[i]);
+    }
+    // 1.3.2 p2d
+    for (size_t i = 0; i < wkn; i++) {
+        build_p2d_evt_dep[i].push_back(build_h2p_evt[i]);
+        worker[i].MigrateToDevice(WorkerFunctions::JOIN, 0, 0, &build_p2d_arg_buf_idx[i], &build_p2d_arg_size[i],
+                                  build_p2d_evt_dep[i].data(), build_p2d_evt_dep[i].size(), &build_p2d_evt[i]);
+    }
+    // 1.3.3 krn
+    for (size_t i = 0; i < wkn; i++) {
+        build_krn_evt_dep[i].push_back(build_p2d_evt[i]);
+        worker[i].runKernel(WorkerFunctions::JOIN, 0, 0, build_krn_scalar_arg[i], build_krn_evt_dep[i].data(),
+                            build_krn_evt_dep[i].size(), &build_krn_evt[i]);
+    }
+    // 1.4 wait
+    clWaitForEvents(build_krn_evt.size(), build_krn_evt.data());
+
+    // 2. probe
+    vector<size_t> tab_b_sec_row(tab_b_sec_num);
+
+    // 2.1 event and dependence
+    vector<cl_event> probe_h2p_evt(tab_b_sec_num);
+    vector<cl_event> probe_p2d_evt(tab_b_sec_num);
+    vector<cl_event> probe_krn_evt(tab_b_sec_num);
+    vector<cl_event> probe_meta_evt(tab_b_sec_num);
+    vector<cl_event> probe_d2p_evt(tab_b_sec_num);
+    vector<cl_event> probe_p2h_evt(tab_b_sec_num);
+    for (size_t i = 0; i < tab_b_sec_num; i++) {
+        probe_h2p_evt[i] = clCreateUserEvent(ctx, &err);
+        probe_d2p_evt[i] = clCreateUserEvent(ctx, &err);
+        probe_p2h_evt[i] = clCreateUserEvent(ctx, &err);
+    }
+    vector<vector<cl_event> > probe_h2p_evt_dep(tab_b_sec_num);
+    vector<vector<cl_event> > probe_p2d_evt_dep(tab_b_sec_num);
+    vector<vector<cl_event> > probe_krn_evt_dep(tab_b_sec_num);
+    vector<vector<cl_event> > probe_meta_evt_dep(tab_b_sec_num);
+    vector<vector<cl_event> > probe_d2p_evt_dep(tab_b_sec_num);
+    vector<vector<cl_event> > probe_p2h_evt_dep(tab_b_sec_num);
+
+    // 2.2 h2p, p2d, krn, meta, d2p, p2h args
+    // 2.2.1 h2p
+    vector<vector<vector<char*> > > probe_h2p_src(tab_b_sec_num);
+    vector<vector<vector<char*> > > probe_h2p_dst(tab_b_sec_num);
+    vector<vector<vector<size_t> > > probe_h2p_bias(tab_b_sec_num);
+    vector<vector<vector<size_t> > > probe_h2p_length(tab_b_sec_num);
+    vector<vector<vector<size_t> > > probe_h2p_acc(tab_b_sec_num);
+    vector<MetaTable> meta_probe_in(tab_b_sec_num);
+    vector<MetaTable> meta_probe_out(tab_b_sec_num);
+    // 2.2.2 p2d
+    vector<vector<size_t> > probe_p2d_arg_buf_idx(tab_b_sec_num);
+    vector<vector<size_t> > probe_p2d_arg_size(tab_b_sec_num);
+    // 2.2.3 krn
+    vector<vector<size_t> > probe_krn_scalar_arg(tab_b_sec_num);
+    // 2.2.4 meta, no extra args
+    // 2.2.5 d2p
+    vector<vector<size_t> > probe_d2p_arg_buf_idx(tab_b_sec_num);
+    vector<vector<vector<size_t> > > probe_d2p_arg_head(tab_b_sec_num);
+    // vector<vector<vector<size_t> > > probe_d2p_arg_size(tab_b_sec_num);
+    // d2p's will write to probe_p2h_length
+    vector<vector<size_t> > probe_d2p_res_row(tab_b_sec_num);
+    // 2.2.6 p2h
+    vector<vector<vector<char*> > > probe_p2h_src(tab_b_sec_num);
+    vector<vector<vector<char*> > > probe_p2h_dst(tab_b_sec_num);
+    vector<vector<vector<size_t> > > probe_p2h_bias(tab_b_sec_num);
+    vector<vector<vector<size_t> > > probe_p2h_length(tab_b_sec_num);
+    vector<vector<vector<size_t> > > probe_p2h_acc(tab_b_sec_num);
+
+    // 2.3 check tab_b's sec ready one by one
+    for (size_t i = 0; i < tab_b_sec_num; i++) {
+        // 2.3.0. get tab_b's sec ready
+        tab_b_sec_row[i] = (*tsk.tab_b_sec_ready)[i].get();
+        size_t w_id = i % wkn;
+        size_t p_id = (i / wkn) % 2;
+        // 2.3.1 h2p, p2d, krn
+        // 2.3.1.1 din_col0,1,2
+        probe_h2p_src[i].resize(1);
+        probe_h2p_dst[i].resize(1);
+        probe_h2p_bias[i].resize(1);
+        probe_h2p_length[i].resize(1);
+        probe_h2p_acc[i].resize(1);
+        for (size_t k = 0; k < 3; k++) {
+            if (bf_scan[1][k] != -1) {
+                probe_h2p_src[i][0].push_back(tsk.tab_b->getColPointer(i, bf_scan[1][k]));
+                probe_h2p_dst[i][0].push_back(worker[w_id].sub_buf_host_parent[1][p_id][k] +
+                                              worker[w_id].sub_buf_head[1][p_id][k]);
+                probe_h2p_bias[i][0].push_back(0);
+                probe_h2p_length[i][0].push_back(tsk.tab_b->getColTypeSize(bf_scan[1][k]) * tab_b_sec_row[i]);
+                probe_h2p_acc[i][0].push_back(0);
+                probe_p2d_arg_buf_idx[i].push_back(k);
+                probe_p2d_arg_size[i].push_back(tsk.tab_b->getColTypeSize(bf_scan[1][k]) * tab_b_sec_row[i]);
+            }
+        }
+        // 2.3.1.2 din_val
+        if (tsk.tab_b->getValidEnableFlag()) {
+            probe_h2p_src[i][0].push_back(tsk.tab_b->getValColPointer(i));
+            probe_h2p_dst[i][0].push_back(worker[w_id].sub_buf_host_parent[1][p_id][3] +
+                                          worker[w_id].sub_buf_head[1][p_id][3]);
+            probe_h2p_bias[i][0].push_back(0);
+            probe_h2p_length[i][0].push_back((tab_b_sec_row[i] + 7) / 8);
+            probe_h2p_acc[i][0].push_back(0);
+            probe_p2d_arg_buf_idx[i].push_back(3);
+            probe_p2d_arg_size[i].push_back((tab_b_sec_row[i] + 7) / 8);
+        }
+        // 2.3.1.3 din_krn_cfg
+        probe_h2p_src[i][0].push_back((char*)probe_cfg);
+        probe_h2p_dst[i][0].push_back(worker[w_id].sub_buf_host_parent[1][p_id][4] +
+                                      worker[w_id].sub_buf_head[1][p_id][4]);
+        probe_h2p_bias[i][0].push_back(0);
+        probe_h2p_length[i][0].push_back(sizeof(ap_uint<512>) * 14);
+        probe_h2p_acc[i][0].push_back(0);
+        probe_p2d_arg_buf_idx[i].push_back(4);
+        probe_p2d_arg_size[i].push_back(sizeof(ap_uint<512>) * 14);
+        // 2.3.1.4 din_meta_in
+        meta_probe_in[i].setSecID(i);
+        meta_probe_in[i].setColNum(3);
+        for (size_t k = 0; k < 3; k++) {
+            meta_probe_in[i].setCol(k, k, tab_b_sec_row[i]);
+        }
+        probe_h2p_src[i][0].push_back((char*)meta_probe_in[i].meta());
+        probe_h2p_dst[i][0].push_back(worker[w_id].sub_buf_host_parent[1][p_id][5] +
+                                      worker[w_id].sub_buf_head[1][p_id][5]);
+        probe_h2p_bias[i][0].push_back(0);
+        probe_h2p_length[i][0].push_back(sizeof(ap_uint<512>) * 24);
+        probe_h2p_acc[i][0].push_back(0);
+        probe_p2d_arg_buf_idx[i].push_back(5);
+        probe_p2d_arg_size[i].push_back(sizeof(ap_uint<512>) * 24);
+        // 2.3.1.5 din_meta_out
+        meta_probe_out[i].setSecID(0);
+        meta_probe_out[i].setColNum(4);
+        for (size_t k = 0; k < 4; k++) {
+            meta_probe_out[i].setCol(k, k, tsk.tab_c->getSecRowNum(i));
+        }
+        probe_h2p_src[i][0].push_back((char*)meta_probe_out[i].meta());
+        probe_h2p_dst[i][0].push_back(worker[w_id].sub_buf_host_parent[1][p_id][6] +
+                                      worker[w_id].sub_buf_head[1][p_id][6]);
+        probe_h2p_bias[i][0].push_back(0);
+        probe_h2p_length[i][0].push_back(sizeof(ap_uint<512>) * 24);
+        probe_h2p_acc[i][0].push_back(0);
+        probe_p2d_arg_buf_idx[i].push_back(6);
+        probe_p2d_arg_size[i].push_back(sizeof(ap_uint<512>) * 24);
+        // 2.3.2 krn
+        probe_krn_scalar_arg[i].push_back(1);
+        // 2.3.3 meta
+        // 2.3.4 d2p, p2h
+        probe_d2p_res_row[i].resize(1, 0);
+        probe_d2p_arg_head[i].resize(1);
+
+        probe_p2h_src[i].resize(1);
+        probe_p2h_dst[i].resize(1);
+        probe_p2h_bias[i].resize(1);
+        probe_p2h_length[i].resize(1);
+        probe_p2h_acc[i].resize(1);
+        for (size_t k = 0; k < 4; k++) {
+            if (bf_wr[k] != -1) {
+                probe_d2p_arg_buf_idx[i].push_back(k + 7);
+                probe_d2p_arg_head[i][0].push_back(0);
+
+                probe_p2h_src[i][0].push_back(worker[w_id].sub_buf_host_parent[1][p_id][k + 7] +
+                                              worker[w_id].sub_buf_head[1][p_id][k + 7]);
+                probe_p2h_dst[i][0].push_back(tsk.tab_c->getColPointer(i, bf_wr[k]));
+                probe_p2h_bias[i][0].push_back(0);
+                probe_p2h_length[i][0].push_back(0); // will be write by d2p and read by p2h
+                probe_p2h_acc[i][0].push_back(0);
+            }
+        }
+        // 2.4 add Task
+        // 2.4.1 h2p => p2d(-2)
+        if (i >= (wkn * 2)) {
+            probe_h2p_evt_dep[i].push_back(probe_p2d_evt[i - (2 * wkn)]);
+        }
+        h2p.addTask(probe_h2p_evt_dep[i].data(), probe_h2p_evt_dep[i].size(), &probe_h2p_evt[i], &probe_h2p_src[i],
+                    &probe_h2p_dst[i], &probe_h2p_bias[i], &probe_h2p_length[i], &probe_h2p_acc[i]);
+        // 2.4.2 p2d
+        probe_p2d_evt_dep[i].push_back(probe_h2p_evt[i]);
+        if (i >= (wkn * 2)) {
+            probe_p2d_evt_dep[i].push_back(probe_krn_evt[i - (2 * wkn)]);
+        }
+        worker[w_id].MigrateToDevice(WorkerFunctions::JOIN, 0, p_id, &probe_p2d_arg_buf_idx[i], &probe_p2d_arg_size[i],
+                                     probe_p2d_evt_dep[i].data(), probe_p2d_evt_dep[i].size(), &probe_p2d_evt[i]);
+        // 2.4.3 krn
+        probe_krn_evt_dep[i].push_back(probe_p2d_evt[i]);
+        if (i >= wkn) {
+            probe_krn_evt_dep[i].push_back(probe_krn_evt[i - wkn]);
+        }
+        if (i >= (wkn * 2)) {
+            probe_krn_evt_dep[i].push_back(probe_d2p_evt[i - (2 * wkn)]);
+        }
+        worker[w_id].runKernel(WorkerFunctions::JOIN, 0, p_id, probe_krn_scalar_arg[i], probe_krn_evt_dep[i].data(),
+                               probe_krn_evt_dep[i].size(), &probe_krn_evt[i]);
+        // 2.4.4 meta
+        probe_meta_evt_dep[i].push_back(probe_krn_evt[i]);
+        if (i >= (wkn * 2)) {
+            probe_meta_evt_dep[i].push_back(probe_d2p_evt[i - (2 * wkn)]);
+        }
+        worker[w_id].MigrateMetaToHost(WorkerFunctions::JOIN, 0, p_id, probe_meta_evt_dep[i].data(),
+                                       probe_meta_evt_dep[i].size(), &probe_meta_evt[i]);
+        // 2.4.5 d2p
+        probe_d2p_evt_dep[i].push_back(probe_meta_evt[i]);
+        if (i >= (wkn * 2)) {
+            probe_d2p_evt_dep[i].push_back(probe_p2h_evt[i - (wkn * 2)]);
+        }
+        worker[w_id].MigrateResToHost(WorkerFunctions::JOIN, 0, p_id, &probe_d2p_arg_buf_idx[i], &probe_d2p_arg_head[i],
+                                      &probe_p2h_length[i], &probe_d2p_res_row[i], probe_d2p_evt_dep[i].data(),
+                                      probe_d2p_evt_dep[i].size(), &probe_d2p_evt[i]);
+        // 2.4.6 p2h
+        probe_p2h_evt_dep[i].push_back(probe_d2p_evt[i]);
+        p2h.addTask(probe_p2h_evt_dep[i].data(), probe_p2h_evt_dep[i].size(), &probe_p2h_evt[i], &probe_p2h_src[i],
+                    &probe_p2h_dst[i], &probe_p2h_bias[i], &probe_p2h_length[i], &probe_p2h_acc[i]);
+    }
+    // 2.5 wait for event
+    for (size_t i = 0; i < probe_p2h_evt.size(); i++) {
+        clWaitForEvents(1, &probe_p2h_evt[i]);
+        (*tsk.tab_c_sec_ready_promise)[i].set_value(probe_d2p_res_row[i][0]);
+    }
+
+    // 3 release cl_event
+    for (size_t i = 0; i < wkn; i++) {
+        clReleaseEvent(build_h2p_evt[i]);
+        clReleaseEvent(build_p2d_evt[i]);
+        clReleaseEvent(build_krn_evt[i]);
+    }
+    for (size_t i = 0; i < tab_b_sec_num; i++) {
+        clReleaseEvent(probe_h2p_evt[i]);
+        clReleaseEvent(probe_p2d_evt[i]);
+        clReleaseEvent(probe_krn_evt[i]);
+        clReleaseEvent(probe_meta_evt[i]);
+        clReleaseEvent(probe_d2p_evt[i]);
+        clReleaseEvent(probe_p2h_evt[i]);
+    }
+}
+
 void Workshop::checkJoinQueue() {
     while (join_service_run) {
         {
@@ -1215,8 +1592,13 @@ void Workshop::checkJoinQueue() {
         }
 
         while (!q.empty()) {
-            join_task tsk = q.front();
-            processJoin(tsk);
+            task_complex tsk = q.front();
+            if (tsk.tsk_type == JOIN_TASK) {
+                processJoin(tsk);
+            } else {
+                processBF(tsk);
+            }
+
             {
                 unique_lock<mutex> lk(m);
                 q.pop();
@@ -1225,8 +1607,13 @@ void Workshop::checkJoinQueue() {
     }
     // clean up q's left task
     while (!q.empty()) {
-        join_task tsk = q.front();
-        processJoin(tsk);
+        task_complex tsk = q.front();
+        if (tsk.tsk_type == JOIN_TASK) {
+            processJoin(tsk);
+        } else {
+            processBF(tsk);
+        }
+
         {
             unique_lock<mutex> lk(m);
             q.pop();

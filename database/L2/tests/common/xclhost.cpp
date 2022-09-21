@@ -63,20 +63,8 @@ cl_int init_hardware(cl_context* context,
         cl_device_id devices[16] = {0};
         device_count = device_count > 16 ? 16 : device_count;
         err = clGetDeviceIDs(platforms[pid], device_type, device_count, devices, NULL);
-        char device_name[256];
-        cl_uint did;
-        for (did = 0; did < device_count; ++did) {
-            err = clGetDeviceInfo(devices[did], CL_DEVICE_NAME, 256, device_name, 0);
-            printf("DEBUG: found device %d: %s\n", did, device_name);
-            if (!strcmp(device_name, dsa_name)) {
-                printf("INFO: selected device %s\n", device_name);
-                break;
-            }
-        }
-        if (did == device_count) {
-            fprintf(stderr, "ERROR: target device %s not found\n.", dsa_name);
-            return CL_INVALID_DEVICE;
-        }
+        // Deprecate the device match by fixing to card-0
+        cl_uint did = 0;
         *device_id = devices[did];
         // device found.
         cl_context_properties ctx_prop[3] = {CL_CONTEXT_PLATFORM, (cl_context_properties)platforms[pid], 0};

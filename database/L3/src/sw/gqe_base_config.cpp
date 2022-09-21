@@ -353,6 +353,14 @@ void BaseConfig::updateRowIDCol(std::string& filter_str_,
     col_names_[2] = rowID_str_;
     // 2)replace the filter_str with col name
     for (int i = 0; i < 3; i++) {
+        std::cout << "i = " << i << std::endl;
+        std::cout << "filter_str_ = " << filter_str_ << std::endl;
+        std::cout << "col_names_ = " << col_names_[i] << std::endl;
+        std::cout << "rowID_str_" << rowID_str_ << std::endl;
+        std::cout << "strs_ = " << strs_[i] << std::endl;
+    }
+
+    for (int i = 0; i < 3; i++) {
         alignColName(filter_str_, col_names_[i], strs_[i]);
     }
 }

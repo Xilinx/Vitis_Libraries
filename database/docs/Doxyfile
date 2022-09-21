@@ -16,5 +16,5 @@
 
 @INCLUDE               = Doxyfile.common
 
-INPUT                  = ../../L1/include/hw/xf_database 
+INPUT                  = ../L1/include/hw/xf_database 
 XML_OUTPUT             = xml

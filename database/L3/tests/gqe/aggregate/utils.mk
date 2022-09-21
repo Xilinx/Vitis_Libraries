@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.6
+# vitis makefile-generator v2.0.7
 #
 #+-------------------------------------------------------------------------------
 # The following parameters are assigned with default values. These parameters can
@@ -40,16 +40,13 @@ ifeq ($(DEBUG), yes)
 VPP_LDFLAGS += --dk protocol:all:all:all
 endif
 
-#Check environment setup
+#Check vitis setup
 ifndef XILINX_VITIS
   XILINX_VITIS = /opt/xilinx/Vitis/$(TOOL_VERSION)
   export XILINX_VITIS
 endif
-ifndef XILINX_XRT
-  XILINX_XRT = /opt/xilinx/xrt
-  export XILINX_XRT
-endif
 
+.PHONY: check_device
 check_device:
 	@set -eu; \
 	inallowlist=False; \
@@ -82,8 +79,10 @@ endif
 endif
 
 
-#get suffix of kernel by PLATFORM
+
+# Special processing for tool version/platform type
 VITIS_VER = $(shell v++ --version | grep 'v++' | sed 's/^[[:space:]]*//' | sed -e 's/^[*]* v++ v//g' | cut -d " " -f1)
+# 1) for versal flow from 2022.1
 DEVICE_TYPE = $(shell platforminfo -p $(PLATFORM) | grep 'FPGA Family' | sed 's/.*://' | sed '/ai_engine/d' | sed 's/^[[:space:]]*//')
 ifeq ($(DEVICE_TYPE), versal)
 ifeq ($(shell expr $(VITIS_VER) \>= 2022.1), 1)
@@ -93,6 +92,42 @@ LINK_TARGET_FMT := xclbin
 endif
 else
 LINK_TARGET_FMT := xclbin
+endif
+# 2) dfx flow
+dfx_hw := off
+ifeq ($(findstring _dfx_, $(PLATFORM_NAME)),_dfx_)
+ifeq ($(TARGET),hw)
+dfx_hw := on
+endif
+endif
+# 3) for embeded sw_emu flow from 2022.2
+ps_on_x86 := off
+ifneq ($(HOST_ARCH), x86)
+ifeq ($(shell expr $(VITIS_VER) \>= 2022.2), 1)
+ifeq ($(TARGET), sw_emu)
+ps_on_x86 := on
+HOST_ARCH := x86
+endif
+endif
+endif
+
+#when x86 arch, check XRT setup
+ifeq ($(HOST_ARCH), x86)
+ifndef XILINX_XRT
+  XILINX_XRT = /opt/xilinx/xrt
+  export XILINX_XRT
+endif
+endif
+
+#check if need sd_card
+ifeq ($(HOST_ARCH), aarch32)
+SD_CARD_NEEDED := on
+endif
+ifeq ($(HOST_ARCH), aarch64)
+SD_CARD_NEEDED := on
+endif
+ifeq ($(ps_on_x86), on)
+SD_CARD_NEEDED := on
 endif
 
 #Checks for Device Family
@@ -107,6 +142,7 @@ ifneq ($(HOST_ARCH), $(filter $(HOST_ARCH),aarch64 aarch32 x86))
 $(error HOST_ARCH variable not set, please set correctly and rerun)
 endif
 
+.PHONY: check_version check_sysroot check_kimage check_rootfs
 check_version:
 ifneq (, $(shell which git))
 ifneq (,$(wildcard $(XFLIB_DIR)/.git))
@@ -114,15 +150,35 @@ ifneq (,$(wildcard $(XFLIB_DIR)/.git))
 endif
 endif
 
-#Checks for SYSROOT
+#Set/Check SYSROOT/K_IMAGE/ROOTFS
+ifneq ($(HOST_ARCH), x86)
+ifneq (,$(findstring zc706, $(PLATFORM_NAME)))
+K_IMAGE ?= $(SYSROOT)/../../uImage
+else
+K_IMAGE ?= $(SYSROOT)/../../Image
+endif
+ROOTFS ?= $(SYSROOT)/../../rootfs.ext4
+endif
+
 check_sysroot:
 ifneq ($(HOST_ARCH), x86)
-ifndef SYSROOT
+ifeq (,$(wildcard $(SYSROOT)))
 	$(error SYSROOT ENV variable is not set, please set ENV variable correctly and rerun)
 endif
 endif
+check_kimage:
+ifneq ($(HOST_ARCH), x86)
+ifeq (,$(wildcard $(K_IMAGE)))
+	$(error K_IMAGE ENV variable is not set, please set ENV variable correctly and rerun)
+endif
+endif
+check_rootfs:
+ifneq ($(HOST_ARCH), x86)
+ifeq (,$(wildcard $(ROOTFS)))
+	$(error ROOTFS ENV variable is not set, please set ENV variable correctly and rerun)
+endif
+endif
 
-#Checks for g++
 CXX := g++
 ifeq ($(HOST_ARCH), x86)
 ifeq ($(shell expr $(VITIS_VER) \>= 2022.1), 1)
@@ -144,10 +200,12 @@ endif
 $(warning [WARNING]: g++ version too old. Using g++ provided by the tool: $(CXX))
 endif
 endif
-else ifeq ($(HOST_ARCH), aarch64)
+else 
+ifeq ($(HOST_ARCH), aarch64)
 CXX := $(XILINX_VITIS)/gnu/aarch64/lin/aarch64-linux/bin/aarch64-linux-gnu-g++
 else ifeq ($(HOST_ARCH), aarch32)
 CXX := $(XILINX_VITIS)/gnu/aarch32/lin/gcc-arm-linux-gnueabi/bin/arm-linux-gnueabihf-g++
+endif
 endif
 
 #Check OS and setting env for xrt c++ api
@@ -268,10 +326,3 @@ RMDIR = rm -rf
 MV = mv -f
 CP = cp -rf
 ECHO:= @echo
-
-ifneq (,$(shell echo $(XPLATFORM) | awk '/xilinx_u280_xdma_201920_3/'))
-VPP_FLAGS += --advanced.param compiler.ignorePlatformCompatibilityCheck=true
-ifeq ($(TARGET), hw)
-VPP_LDFLAGS += --advanced.param compiler.userPreSysLinkOverlayTcl=preSysLink.tcl
-endif
-endif

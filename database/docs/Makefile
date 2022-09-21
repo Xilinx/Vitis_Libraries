@@ -16,7 +16,7 @@
 
 .PHONY: all install xml rst html clean cleanhtml cleanall check_tools
 
-all: install
+all: .stamp/sphinx
 
 check_tools:
 ifeq (, $(shell which doxygen 2>/dev/null))
@@ -34,7 +34,7 @@ ifeq (, $(HTML_DEST_DIR))
 	@echo "ERROR: HTML_DEST_DIR is not set." && false
 endif
 	rsync -av --delete --exclude .git --exclude .nojekyll --exclude .buildinfo \
-		 _build/html/ $(HTML_DEST_DIR) 1>/dev/null
+		 build/html/ $(HTML_DEST_DIR) 1>/dev/null
 
 .stamp/doxygen: | check_tools
 	rm -rf xml xml_2 xml_3
@@ -47,13 +47,13 @@ endif
 DOXYREST_FRAME = $(dir $(shell which doxyrest))/../doxyrest_frame
 
 .stamp/doxyrest: .stamp/doxygen | check_tools
-	rm -rf rst
-	mkdir rst
-	doxyrest xml/index.xml -o rst/index.rst \
+	rm -rf src/rst src/rst_2 src/rst_3
+	mkdir src/rst src/rst_2 src/rst_3
+	doxyrest xml/index.xml -o src/rst/index.rst \
 		-F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
-	doxyrest xml_2/index.xml -o rst_2/index.rst \
+	doxyrest xml_2/index.xml -o src/rst_2/index.rst \
 		-F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
-	doxyrest xml_3/index.xml -o rst_3/index.rst \
+	doxyrest xml_3/index.xml -o src/rst_3/index.rst \
 		-F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
 	touch .stamp/doxyrest
 
@@ -70,14 +70,14 @@ rst:
 	make .stamp/doxyrest
 
 html:
-	rm -rf .stamp/sphinx _build/doctrees _build/html
+	rm -rf .stamp/sphinx build/doctrees build/html
 	make .stamp/sphinx
 
 clean:
 	rm -rf .stamp
 
 cleanhtml:
-	rm -rf .stamp/sphinx _build/html _build/doctrees
+	rm -rf .stamp/sphinx build/html build/doctrees
 
 cleanall:
-	rm -rf .stamp xml xml_2 xml_3 rst rst_2 rst_3 _build/html _build/doctrees
+	rm -rf .stamp xml xml_2 xml_3 build src/rst src/rst_2 src/rst_3

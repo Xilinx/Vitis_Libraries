@@ -67,11 +67,6 @@
             "cmd_args": " -xclbin BUILD/q5simplified.xclbin -work PROJECT/db_data -sf 1"
         },
         {
-            "name": "generic launch for hw_emu flows",
-            "target": "hw_emu",
-            "cmd_args": " -xclbin BUILD/q5simplified.xclbin -work PROJECT/db_data -sf 1"
-        },
-        {
             "name": "generic launch for hw flows",
             "target": "hw",
             "cmd_args": " -xclbin BUILD/q5simplified.xclbin -work PROJECT/db_data -sf 100"

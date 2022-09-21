@@ -21,12 +21,8 @@
 
 .. _brief:
 
-======================
-Vitis Database Library
-======================
-
-Introduction
-------------
+Overview
+--------
 
 Vitis Database Library is an open-sourced Vitis library written in C++ and released under
 `Apache 2.0 license <https://www.apache.org/licenses/LICENSE-2.0>`_
@@ -67,7 +63,7 @@ GQE consists of post-bitstream programmable kernel(s) and corresponding software
 License
 -------
 
-    Copyright 2019-2020 Xilinx, Inc.
+    Copyright 2019-2022 Xilinx, Inc.
     
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -89,4 +85,3 @@ Trademark Notice
     United States and other countries.
     
     All other trademarks are the property of their respective owners.
-

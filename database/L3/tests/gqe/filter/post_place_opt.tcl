@@ -1,0 +1,2 @@
+phys_opt_design -directive AggressiveExplore
+phys_opt_design -directive AggressiveExplore

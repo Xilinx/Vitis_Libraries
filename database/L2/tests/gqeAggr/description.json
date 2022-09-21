@@ -5,7 +5,8 @@
     "gui": false,
     "platform_type": "pcie",
     "platform_allowlist": [
-        "u280"
+        "u280",
+        "u50"
     ],
     "platform_blocklist": [
         "other"

@@ -126,7 +126,8 @@
                 "parameters": [
                     {
                         "name": "IS_BRAM",
-                        "type": "bool"
+                        "type": "bool",
+                        "description": "choose which types of memory to use. True for BRAM. False for URAM"
                     },
                     {
                         "name": "STR_IN_W",
@@ -186,7 +187,8 @@
                 "parameters": [
                     {
                         "name": "IS_BRAM",
-                        "type": "bool"
+                        "type": "bool",
+                        "description": "choose which types of memory to use. True for BRAM. False for URAM"
                     },
                     {
                         "name": "STR_IN_W",
@@ -1152,7 +1154,8 @@
                     },
                     {
                         "name": "_Wcnt",
-                        "type": "int"
+                        "type": "int",
+                        "description": "width of 'number of keys' per hash value, in bits."
                     },
                     {
                         "name": "_WBuffer",
@@ -1845,7 +1848,8 @@
                     },
                     {
                         "name": "BFW",
-                        "type": "int"
+                        "type": "int",
+                        "description": "width of buffer."
                     },
                     {
                         "name": "EN_BF",
@@ -2604,7 +2608,8 @@
                     },
                     {
                         "name": "H",
-                        "type": "int"
+                        "type": "int",
+                        "description": "the bit width of ap_uint type for output hash stream"
                     }
                 ],
                 "ports": [
@@ -3169,7 +3174,8 @@
                 "parameters": [
                     {
                         "name": "Key_Type",
-                        "type": "typename"
+                        "type": "typename",
+                        "description": "the input and output key type"
                     }
                 ],
                 "ports": [
@@ -3229,7 +3235,8 @@
                 "parameters": [
                     {
                         "name": "CMP_NUM",
-                        "type": "int"
+                        "type": "int",
+                        "description": "number of key compraring unit in parallel"
                     },
                     {
                         "name": "KEY_T",

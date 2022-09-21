@@ -234,11 +234,10 @@ void part_flow(const ap_uint<10> part_depth,
     bool last = i_part_e_strm.read();
 BU_WLOOP:
     while (!last) {
-#pragma HLS pipeline
+#pragma HLS pipeline II = 1
 #pragma HLS dependence variable = uram_inst0.blocks inter false
 #pragma HLS dependence variable = uram_inst1.blocks inter false
 #pragma HLS dependence variable = uram_inst2.blocks inter false
-#pragma HLS dependence variable = bucket_flag inter false
         // write to uram
         if (isNonBlocking) {
             last = i_part_e_strm.read();
@@ -320,62 +319,69 @@ BU_WLOOP:
                 rcnt++;
             }
         }
+
     } // end while loop
 
 #ifdef USER_DEBUG
     std::cout << "wlist_strm.size() = " << wlist_strm.size() << ", rcnt = " << rcnt << std::endl;
 #endif
-    if (rcnt != 0) {
-    BUILD_REMAIN_ONE_BUCKET_LOOP:
-        for (int i = rcnt; i < part_depth; i++) {
+
+    ap_uint<2> state = (rcnt != 0) ? (ap_uint<2>)0 : (!wlist_strm.empty() ? (ap_uint<2>)1 : (ap_uint<2>)2);
+    int bk_ptr = 0;
+    do {
+        ap_uint<10> dl, ul;
+        ap_uint<ARW - HASHWH> offset;
+        ap_uint<2> nxt_state;
+        switch (state) {
+            case 0:
+                dl = rcnt;
+                ul = part_depth;
+                offset = rcnt;
+                nxt_state = !wlist_strm.empty() ? (ap_uint<2>)1 : (ap_uint<2>)2;
+                break;
+            case 1:
+                dl = 0;
+                ul = part_depth;
+                offset = 0;
+                bk_num = wlist_strm.read();
+                nxt_state = !wlist_strm.empty() ? (ap_uint<2>)1 : (ap_uint<2>)2;
+                break;
+            case 2:
+                dl = 0;
+                ul = 0;
+                nxt_state = 2;
+                break;
+        }
+
+    REMAIN_BUCKET_LOOP:
+        for (ap_uint<10> i = 0; i < (ul - dl); i++) {
 #pragma HLS PIPELINE II = 1
 #pragma HLS dependence variable = uram_inst0.blocks inter false
 #pragma HLS dependence variable = uram_inst1.blocks inter false
 #pragma HLS dependence variable = uram_inst2.blocks inter false
-            ap_uint<ARW - HASHWH> raddr = bk_num(bit_num, 0) * part_depth + i;
+            ap_uint<ARW - HASHWH> raddr;
+            if (state == 0 || state == 1) raddr = bk_num(bit_num, 0) * part_depth + offset + i;
+            ap_uint<KEYW + PW> rdata = 0;
             ap_uint<64> tmp0 = uram_inst0.read(raddr);
             ap_uint<64> tmp1 = uram_inst1.read(raddr);
             ap_uint<64> tmp2 = uram_inst2.read(raddr);
-            ap_uint<KEYW + PW> rdata = 0;
             rdata.range(63, 0) = tmp0;
             rdata.range(127, 64) = tmp1;
             rdata.range(191, 128) = tmp2;
             o_hp_kpld_strm.write(rdata);
         }
-        o_hp_nm_strm.write(part_depth);
 
-        if (bit_num > 0) {
-            o_hp_bk_strm.write(bk_num(bit_num, 1));
-        } else {
-            o_hp_bk_strm.write(0);
+        if (state == 0 || state == 1) {
+            o_hp_nm_strm.write(part_depth);
+            if (bit_num > 0) {
+                o_hp_bk_strm.write(bk_num(bit_num, 1));
+            } else {
+                o_hp_bk_strm.write(0);
+            }
         }
-    }
 
-    while (!wlist_strm.empty()) {
-        bk_num = wlist_strm.read();
-    BUILD_REMAIN_COMPLETE_BUCKET_OUT_LOOP:
-        for (int i = 0; i < part_depth; i++) {
-#pragma HLS PIPELINE II = 1
-#pragma HLS dependence variable = uram_inst0.blocks inter false
-#pragma HLS dependence variable = uram_inst1.blocks inter false
-#pragma HLS dependence variable = uram_inst2.blocks inter false
-            ap_uint<ARW - HASHWH> raddr = bk_num(bit_num, 0) * part_depth + i;
-            ap_uint<64> tmp0 = uram_inst0.read(raddr);
-            ap_uint<64> tmp1 = uram_inst1.read(raddr);
-            ap_uint<64> tmp2 = uram_inst2.read(raddr);
-            ap_uint<KEYW + PW> rdata = 0;
-            rdata.range(63, 0) = tmp0;
-            rdata.range(127, 64) = tmp1;
-            rdata.range(191, 128) = tmp2;
-            o_hp_kpld_strm.write(rdata);
-        }
-        o_hp_nm_strm.write(part_depth);
-        if (bit_num > 0) {
-            o_hp_bk_strm.write(bk_num(bit_num, 1));
-        } else {
-            o_hp_bk_strm.write(0);
-        }
-    }
+        state = nxt_state;
+    } while (state != 2);
 
     ap_uint<10> len;
     ap_uint<ARW - HASHWH> offset;

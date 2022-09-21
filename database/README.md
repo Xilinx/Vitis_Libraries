@@ -19,19 +19,21 @@ At each level, this library strives to make modules configurable through documen
 so that advanced users can easily tailor, optimize or combine with property logic for specific needs.
 Test cases are provided for all the public APIs, and can be used as examples of usage.
 
-Check the [comprehensive HTML document](https://xilinx.github.io/Vitis_Libraries/database/2021.2/) for more details.
+Check the [comprehensive HTML document](https://docs.xilinx.com/r/en-US/Vitis_Libraries/Vitis-Libraries) for more details.
 
 ## Requirements
 
 ### FPGA Accelerator Card
 
-All the modules and APIs works with Alveo U280 out of the box, many support U250 and U200 as well.
-Most of the APIs can be scaled and tailored for any 16nm Alveo card.
+The Database Library relies heavily on HBM,
+so that high-level APIs (L2 and L3) are mostly targeting Alveo cards with HBM. For example,
 
-* [Alveo U280](https://www.xilinx.com/products/boards-and-kits/alveo/u280.html)
+* [Alveo U55C](https://www.xilinx.com/products/boards-and-kits/alveo/u50c.html)
 * [Alveo U50](https://www.xilinx.com/products/boards-and-kits/alveo/u50.html)
-* [Alveo U250](https://www.xilinx.com/products/boards-and-kits/alveo/u250.html)
-* [Alveo U200](https://www.xilinx.com/products/boards-and-kits/alveo/u200.html)
+* [Alveo U280](https://www.xilinx.com/products/boards-and-kits/alveo/u280.html)
+
+The low-level L1 modules are actually device-agonostic, so that they can be instantiated into a Vitis project
+targeting any platform, as long as the resources budget can be met.
 
 ### Software Platform
 
@@ -43,7 +45,7 @@ With CentOS/RHEL 7.4 and 7.5, C++11/C++14 should be enabled via
 
 ### Development Tools
 
-This library is designed to work with Vitis 2021.1,
+This library is designed to work with Vitis 2022.2,
 and a matching version of XRT should be installed.
 
 ### Dependency
@@ -68,7 +70,7 @@ Build environment needs setup with the Vitis and XRT scripts before running any 
 For command-line developers the following settings are required before running any case in this library:
 
 ```console
-source /opt/xilinx/Vitis/2021.1/settings64.sh
+source /opt/xilinx/Vitis/2022.2/settings64.sh
 source /opt/xilinx/xrt/setup.sh
 export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 ```
@@ -121,21 +123,18 @@ Here, `TARGET` decides the FPGA binary type
 Besides ``run``, the Vitis case makefile also allows ``host`` and ``xclbin`` as build target.
 
 
-
 ## Benchmark Result
 
 In `L1/benchmarks`, a list of key primitives are combined with data-loading/storing modules and built into xclbins targeting Alveo U280.
-For more details about the benchmarks, please kindly find them in [benchmark results](https://xilinx.github.io/Vitis_Libraries/database/2021.2/benchmark.html).
-
-## Documentations
-For more details of the database library, please refer to [Database Library Documentation](https://xilinx.github.io/Vitis_Libraries/database/2021.2/index.html).
+For more details about the benchmarks, please kindly find them in Database Library's Benchmarking section of
+[documentation](https://docs.xilinx.com/r/en-US/Vitis_Libraries/Vitis-Libraries).
 
 
 ## License
 
 Licensed using the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0).
 
-    Copyright 2019-2021 Xilinx, Inc.
+    Copyright 2019-2022 Xilinx, Inc.
     
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.

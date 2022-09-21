@@ -119,7 +119,7 @@ namespace xf {
 namespace database {
 /// @brief murmur3 algorithm.
 /// @tparam W the bit width of ap_uint type for input message stream.
-/// @tparam h the bit width of ap_uint type for output hash stream.
+/// @tparam H the bit width of ap_uint type for output hash stream.
 /// @param key_strm the message being hashed.
 /// @param hash_strm the result.
 template <int W, int H>

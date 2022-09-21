@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-add_cells_to_pblock pblock_dynamic_SLR1 [get_cells pfm_top_i/dynamic_region/gqeAggr_1/inst/writeTableAggr_*] -clear_locs
-add_cells_to_pblock pblock_dynamic_SLR1 [get_cells pfm_top_i/dynamic_region/gqeAggr_1/inst/multi_dynamic_eval_wrapper_*] -clear_locs
-add_cells_to_pblock pblock_dynamic_SLR1 [get_cells pfm_top_i/dynamic_region/gqeAggr_1/inst/scan_cols_wrapper_*] -clear_locs
-add_cells_to_pblock pblock_dynamic_SLR1 [get_cells pfm_top_i/dynamic_region/gqeAggr_1/inst/filter_ongoing_*] -clear_locs
-add_cells_to_pblock pblock_dynamic_SLR0 [get_cells pfm_top_i/dynamic_region/gqeAggr_1/inst/group_aggregate_wrapper_*] -clear_locs
+add_cells_to_pblock pblock_dynamic_SLR1 [get_cells -hierarchical writeTableAggr_*] -clear_locs
+add_cells_to_pblock pblock_dynamic_SLR1 [get_cells -hierarchical multi_dynamic_eval_wrapper_*] -clear_locs
+add_cells_to_pblock pblock_dynamic_SLR1 [get_cells -hierarchical scan_cols_wrapper_*] -clear_locs
+add_cells_to_pblock pblock_dynamic_SLR1 [get_cells -hierarchical filter_ongoing_*] -clear_locs
+add_cells_to_pblock pblock_dynamic_SLR0 [get_cells -hierarchical group_aggregate_wrapper_*] -clear_locs

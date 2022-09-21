@@ -31,7 +31,7 @@
 #ifndef __SYNTHESIS__
 #include <iostream>
 #define USER_DEBUG true
-//#define XDEBUG true
+#define XDEBUG true
 #endif
 
 namespace xf {
@@ -88,7 +88,8 @@ void count_for_burst(hls::stream<ap_uint<8> >& i_general_cfg_strm,
     ap_uint<elem_size * vec_len> vecs[col_num + 1];
 #pragma HLS array_partition variable = vecs complete dim = 1
     int nrow_step_cnt[256];
-#pragma HLS array_partition variable = nrow_step_cnt complete dim = 1
+//#pragma HLS array_partition variable = nrow_step_cnt complete dim = 1
+#pragma HLS bind_storage variable = nrow_step_cnt type = ram_s2p impl = bram
     int nrow_cnt[256];
 #pragma HLS bind_storage variable = nrow_cnt type = ram_s2p impl = bram
 
@@ -129,8 +130,10 @@ void count_for_burst(hls::stream<ap_uint<8> >& i_general_cfg_strm,
             // the partition idx among all PUs
             location = pu_idx * part_num_per_PU + bk_idx;
             p_base_addr = PARTITION_SIZE * location;
+            int nrow_step_cnt_reg = nrow_step_cnt[location];
 
-            // convert dat number from nm * 32bit to nm/16 * 512bit
+        // convert dat number from nm * 32bit to nm/16 * 512bit
+        CACHE_BURST_LEN_LOOP:
             for (int i = 0; i < (nm + vec_len - 1) / vec_len; i++) {
 #pragma HLS pipeline II = 1
                 burst_step_cnt_reg += vec_len;
@@ -154,20 +157,21 @@ void count_for_burst(hls::stream<ap_uint<8> >& i_general_cfg_strm,
                                 // get write ddr base addr
                                 o_p_base_addr_strm[c].write(p_base_addr);
                                 // get the offset after nm times of write
-                                o_burst_step_cnt_strm[c].write((nrow_step_cnt[location] + vec_len - 1) / vec_len);
+                                o_burst_step_cnt_strm[c].write((nrow_step_cnt_reg + vec_len - 1) / vec_len);
                             }
                         }
                     }
                     b = 0;
 
                     // update offset
-                    nrow_step_cnt[location] += burst_step_cnt_reg;
+                    nrow_step_cnt_reg += burst_step_cnt_reg;
                     burst_step_cnt_reg = 0;
                 } else {
                     ++b;
                 }
             }
 
+            nrow_step_cnt[location] = nrow_step_cnt_reg;
             if (b != 0) {
                 {
 #pragma HLS latency min = 1 max = 1
@@ -177,13 +181,13 @@ void count_for_burst(hls::stream<ap_uint<8> >& i_general_cfg_strm,
                             o_nm_strm[c].write(b);
                             o_p_base_addr_strm[c].write(p_base_addr);
                             // get the offset after nm times of write
-                            o_burst_step_cnt_strm[c].write((nrow_step_cnt[location] + vec_len - 1) / vec_len);
+                            o_burst_step_cnt_strm[c].write((nrow_step_cnt_reg + vec_len - 1) / vec_len);
                         }
                     }
                 }
 
                 // update offset
-                nrow_step_cnt[location] += burst_step_cnt_reg;
+                nrow_step_cnt[location] = nrow_step_cnt_reg + burst_step_cnt_reg;
                 burst_step_cnt_reg = 0;
             }
 

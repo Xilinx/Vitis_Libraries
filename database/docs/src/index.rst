@@ -19,28 +19,31 @@
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
 
+Vitis Database Library
+======================
+
 .. toctree::
-   :caption: Library Overview
+   :caption: Introduction
    :maxdepth: 1
 
-   overview.rst
-   release.rst
-   requirements.rst
-   design_flows.rst
-   tutorial.rst
+   Overview <overview.rst>
+   Release Note <release.rst>
+   Requirements <requirements.rst>
+   Design Flows <design_flows.rst>
+   Vitis Database Library Tutorial <tutorial.rst>
 
 .. toctree::
    :caption: User Guide
    :maxdepth: 2
 
-   guide/L1.rst
-   gqe_guide/L2.rst
-   gqe_guide/L3.rst
+   L1 Module User Guide <guide/L1.rst>
+   L2 GQE Kernel User Guide <gqe_guide/L2.rst>
+   L3 GQE Overlay User Guide <gqe_guide/L3.rst>
 
 .. toctree::
    :caption: Benchmark Result
    :maxdepth: 1
 
-   benchmark.rst
-   benchmark/tpc_h.rst
+   Benchmark <benchmark.rst>
+   TPC-H Queries with GQE <benchmark/tpc_h.rst>
 

@@ -38,6 +38,7 @@ namespace database {
 /**
  * @brief Nested loop join function
  *
+ * @tparam CMP_NUM number of key compraring unit in parallel
  * @tparam KEY_T the type of the key of left table
  * @tparam LEFT_FIELD_T the type of the field of left table
  * @tparam RIGHT_FIELD_T the type of the field of right table

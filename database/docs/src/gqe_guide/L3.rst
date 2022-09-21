@@ -28,6 +28,6 @@ L3 GQE Overlay User Guide
 .. toctree::
    :maxdepth: 2
    
-   gqe_l3_design.rst
-   gqe_l3_api.rst
+   GQE L3 Design <gqe_l3_design.rst>
+   GQE L3 APIs <gqe_l3_api.rst>
 
