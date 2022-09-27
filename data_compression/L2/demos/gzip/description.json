@@ -21,7 +21,8 @@
     "default_device": "u200",
     "platform_blocklist": [
         "zc",
-        "u50"
+        "u50",
+        "vck190_base_dfx"
     ],
     "platform_allowlist": [
         "u200",
@@ -135,20 +136,6 @@
     },
     "platform_properties": {
         "vck190": {
-            "host": {
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib",
-                        "${SYSROOT}/opt/xilinx/xrt/lib"
-                    ]
-                },
-                "compiler": {
-                    "includepaths": [
-                        "$(SYSROOT)/usr/include"
-                    ],
-                    "options": "--sysroot=$(SYSROOT)"
-                }
-            },
             "containers": [
                 {
                     "name": "compress_decompress",

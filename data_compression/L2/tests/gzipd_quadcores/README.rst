@@ -11,7 +11,7 @@ The binary host file generated is named as "**xil_zlib**" and it is present in `
 Executable Usage
 ----------------
 
-To execute single file for compression 	    : ``./build/xil_zlib ./build/xclbin_<xsa_name>_<TARGET mode>/compress.xclbin  <file_name>``
+To execute single file for compression 	    : ``./build_dir.<TARGET mode>.<xsa_name>/xil_zlib ./build_dir.<TARGET mode>.<xsa_name>/compress.xclbin  <file_name>``
 
 Results
 -------

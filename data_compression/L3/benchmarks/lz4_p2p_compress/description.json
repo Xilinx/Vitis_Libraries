@@ -68,12 +68,12 @@
                 {
                     "name": "xilLz4Compress",
                     "location": "LIB_DIR/L2/src/lz4_compress_mm.cpp",
-                    "num_compute_units": "2"
+                    "num_compute_units": 2
                 },
                 {
                     "name": "xilLz4Packer",
                     "location": "LIB_DIR/L2/src/lz4_packer_mm.cpp",
-                    "num_compute_units": "2"
+                    "num_compute_units": 2
                 }
             ]
         }

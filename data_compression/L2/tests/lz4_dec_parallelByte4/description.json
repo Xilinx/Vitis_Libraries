@@ -97,7 +97,7 @@
                     "vitis_hw_run": 10240
                 },
                 "max_time_min": {
-                    "vitis_hw_build": 470,
+                    "vitis_hw_build": 600,
                     "vitis_hw_emu": 300,
                     "vitis_sw_emu": 25,
                     "vitis_hw_run": 10
@@ -114,20 +114,6 @@
     },
     "platform_properties": {
         "vck190": {
-            "host": {
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib",
-                        "${SYSROOT}/opt/xilinx/xrt/lib"
-                    ]
-                },
-                "compiler": {
-                    "includepaths": [
-                        "$(SYSROOT)/usr/include"
-                    ],
-                    "options": "--sysroot=$(SYSROOT)"
-                }
-            },
             "containers": [
                 {
                     "name": "decompress",

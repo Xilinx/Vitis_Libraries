@@ -4,7 +4,7 @@
         "LZ4_P2P application for decompression resides in `L3/benchmarks/lz4_p2p_decompress` directory."
     ],
     "flow": "vitis",
-    "default_device": "samsumg_u2",
+    "default_device": "samsung_u2",
     "platform_blocklist": [
         "u50",
         "u280",
@@ -17,7 +17,6 @@
         "u200",
         "u250"
     ],
-    "default_device": "samsung_u2",
     "launch": [
         {
             "cmd_args": "-dx BUILD/decompress.xclbin -d PROJECT/sample.txt.lz4",
@@ -77,8 +76,8 @@
                 "PARALLEL_BLOCK=1",
                 "MULTIPLE_BYTES=8"
             ],
-         "includepaths": [
-               "LIB_DIR/L2/tests/src",
+            "includepaths": [
+                "LIB_DIR/L2/tests/src",
                 "LIB_DIR/../security/L1/include"
             ]
         }
@@ -111,15 +110,15 @@
                 "env": "",
                 "cmd": "",
                 "max_memory_MB": {
-                    "vitis_hw_build": 40960, 
-                    "vitis_hw_emu": 204800, 
-                    "vitis_sw_emu": 10240, 
+                    "vitis_hw_build": 40960,
+                    "vitis_hw_emu": 204800,
+                    "vitis_sw_emu": 10240,
                     "vitis_hw_run": 10240
                 },
                 "max_time_min": {
-                    "vitis_hw_build": 470, 
-                    "vitis_hw_emu": 1140, 
-                    "vitis_sw_emu": 25, 
+                    "vitis_hw_build": 470,
+                    "vitis_hw_emu": 1140,
+                    "vitis_sw_emu": 25,
                     "vitis_hw_run": 10
                 }
             }

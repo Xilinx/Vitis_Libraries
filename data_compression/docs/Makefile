@@ -28,9 +28,9 @@ $(error "HTML_DEST_DIR is not set.")
 endif
 
 
-.PHONY: all install xml rst html clean cleanhtml ultraclean
+.PHONY: all install xml rst html clean cleanhtml cleanall
 
-all: ultraclean install
+all: cleanall install
 
 
 install: .stamp/sphinx
@@ -41,7 +41,7 @@ install: .stamp/sphinx
 	rm -rf $(HTML_DEST_DIR)/_sources
 	rm -rf $(HTML_DEST_DIR)/_static
 	rm -rf $(HTML_DEST_DIR)/doxygen
-	rsync -av _build/html/ $(HTML_DEST_DIR)/
+	rsync -av build/html/ $(HTML_DEST_DIR)/
 	
 
 # different for L1 and L2
@@ -60,16 +60,16 @@ install: .stamp/sphinx
 
 .ONESHELL:
 .stamp/doxyrest: .stamp/doxygen
-	rm -rf doxygen/L1/rst doxygen/L2/rst doxygen/L3/rst
-	mkdir doxygen/L1/rst doxygen/L2/rst doxygen/L3/rst
+	rm -rf src/rst_1 src/rst_2 src/rst_3
+	mkdir src/rst_1 src/rst_2 src/rst_3
 	cd ./doxygen/L1
-	doxyrest xml/index.xml -o rst/api_index.rst \
+	doxyrest xml/index.xml -o ../../src/rst_1/api_index.rst \
 		-F ../doxyrest_frame -f c_index.rst.in -Dg_verbatimToCodeBlock
 	cd ../L2
-	doxyrest xml/index.xml -o rst/api_index.rst \
+	doxyrest xml/index.xml -o ../../src/rst_2/api_index.rst \
 		-F ../doxyrest_frame -f c_index.rst.in -Dg_verbatimToCodeBlock
 	cd ../L3
-	doxyrest xml/index.xml -o rst/api_index.rst \
+	doxyrest xml/index.xml -o ../../src/rst_3/api_index.rst \
 		-F ../doxyrest_frame -f c_index.rst.in -Dg_verbatimToCodeBlock
 	cd ../../
 	touch .stamp/doxyrest
@@ -91,20 +91,21 @@ rst:
 
 
 html:
-	rm -rf .stamp/sphinx _build/doctrees
+	rm -rf .stamp/sphinx build/doctrees
 	make .stamp/sphinx
 
 clean:
 	rm -rf .stamp
 
 cleanhtml:
-	rm -rf .stamp/sphinx _build/html _build/doctrees
+	rm -rf .stamp/sphinx build/html build/doctrees
 	
 .ONESHELL:
-ultraclean:
-	rm -rf .stamp _build/html _build/doctrees
+cleanall:
+	rm -rf .stamp build/html build/doctrees
+	rm -rf src/rst_1 src/rst_2 src/rst_3
 	cd doxygen/
-	rm -rf L1/xml L2/xml L3/xml L1/rst L2/rst L3/rst L1/html L2/html L3/html
+	rm -rf L1/xml L2/xml L3/xml L1/html L2/html L3/html
 	rm -rf L1/latex L2/latex L3/latex
 	cd ../
 

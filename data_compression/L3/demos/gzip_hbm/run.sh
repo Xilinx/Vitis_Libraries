@@ -1,9 +1,9 @@
 #!/bin/bash
 EXE_FILE=$1
 LIB_PROJ_ROOT=$2
-BIN_PATH=$3
+XCLBIN_FILE=$3
 echo "XCL_MODE=${XCL_EMULATION_MODE}"
-export XILINX_LIBZ_XCLBIN=$BIN_PATH
+export XILINX_LIBZ_XCLBIN=$XCLBIN_FILE
 if [ "${XCL_EMULATION_MODE}" == "sw_emu" ]; 
 then
     echo -e "\n\n-----------Supported Options-----------\n"
@@ -17,11 +17,8 @@ then
     cp $LIB_PROJ_ROOT/common/data/test.list test.list
     echo "sample_run.txt.gz" > gzip_test_decomp.list
     echo "sample_run.txt.xz" > zlib_test_decomp.list
-    for ((i = 0 ; i < 10 ; i++))
-    do
-        find ./reports/ -type f | xargs cat >> sample_run.txt
-    done
-   
+    find ./reports/ -type f | xargs cat >> sample_run.txt
+    
     for ((i = 0 ; i < 10 ; i++)) 
     do
 	cat sample_run.txt >> sample_run.txt${i}
@@ -31,32 +28,32 @@ then
     done
 
 echo -e "\n\n-----------ZLIB Flow-----------\n"
-    cmd1="$EXE_FILE -t sample.txt -zlib 1"
+    cmd1="$EXE_FILE -xbin $XCLBIN_FILE -t sample.txt -zlib 1"
     echo $cmd1
     $cmd1
 
 echo -e "\n\n-----------GZIP Flow (-xbin option)-----------\n"
-    cmd2="$EXE_FILE -xbin $BIN_PATH -t sample.txt"
+    cmd2="$EXE_FILE -xbin $XCLBIN_FILE -t sample.txt"
     echo $cmd2
     $cmd2
 
 echo -e "\n\n-----------GZIP Compress list of files -----------\n"
-    cmd2="$EXE_FILE -xbin $BIN_PATH -cfl ./test.list"
+    cmd2="$EXE_FILE -xbin $XCLBIN_FILE -cfl ./test.list"
     echo $cmd2
     $cmd2
 
 echo -e "\n\n-----------ZLIB Compress list of files -----------\n"
-    cmd2="$EXE_FILE -xbin $BIN_PATH -cfl ./test.list -zlib 1"
+    cmd2="$EXE_FILE -xbin $XCLBIN_FILE -cfl ./test.list -zlib 1"
     echo $cmd2
     $cmd2
 
 echo -e "\n\n-----------GZIP Decompress list of files -----------\n"
-    cmd2="$EXE_FILE -xbin $BIN_PATH -dfl ./gzip_test_decomp.list"
+    cmd2="$EXE_FILE -xbin $XCLBIN_FILE -dfl ./gzip_test_decomp.list"
     echo $cmd2
     $cmd2
 
 echo -e "\n\n-----------ZLIB Decompress list of files -----------\n"
-    cmd2="$EXE_FILE -xbin $BIN_PATH -dfl ./zlib_test_decomp.list"
+    cmd2="$EXE_FILE -xbin $XCLBIN_FILE -dfl ./zlib_test_decomp.list"
     echo $cmd2
     $cmd2
 fi

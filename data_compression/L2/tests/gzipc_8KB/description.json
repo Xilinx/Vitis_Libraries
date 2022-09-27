@@ -36,7 +36,7 @@
         "zc"
     ],
     "platform_allowlist": [
-        "xilinx_u250_gen3x16_xdma_3_1_202020_1",
+        "u250",
         "u200",
         "u50",
         "vck190",
@@ -143,20 +143,6 @@
     },
     "platform_properties": {
         "vck190": {
-            "host": {
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib",
-                        "${SYSROOT}/opt/xilinx/xrt/lib"
-                    ]
-                },
-                "compiler": {
-                    "includepaths": [
-                        "$(SYSROOT)/usr/include"
-                    ],
-                    "options": "--sysroot=$(SYSROOT)"
-                }
-            },
             "containers": [
                 {
                     "name": "compress",

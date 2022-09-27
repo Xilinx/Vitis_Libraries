@@ -22,8 +22,21 @@
     ],
     "post_launch": [
         {
+            "target": "sw_emu",
             "launch_cmd": [
                 "XCL_EMULATION_MODE=$(TARGET) ./run.sh HOST_EXE LIB_DIR $(BINARY_CONTAINERS)"
+            ]
+        },
+        {
+            "target": "hw_emu",
+            "launch_cmd": [
+                "XCL_EMULATION_MODE=$(TARGET) ./run.sh HOST_EXE LIB_DIR $(BINARY_CONTAINERS)"
+            ]
+        },
+        {
+            "target": "hw",
+            "launch_cmd": [
+                "./run.sh HOST_EXE LIB_DIR $(BINARY_CONTAINERS)"
             ]
         }
     ],
@@ -59,10 +72,6 @@
         }
     },
     "v++": {
-        "build_datafiles": [
-            "PROJECT/advanced.cfg",
-            "PROJECT/hls_directives.tcl"
-        ],
         "compiler": {
             "includepaths": [
                 "LIB_DIR/../security/L1/include"

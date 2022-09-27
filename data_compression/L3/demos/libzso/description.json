@@ -62,32 +62,32 @@
                 {
                     "name": "xilLz77Compress", 
                     "location": "LIB_DIR/L2/src/zlib_lz77_compress_mm.cpp", 
-                    "num_compute_units": "1"
+                    "num_compute_units": 1
                 }, 
                 {
                     "name": "xilHuffmanKernel", 
                     "location": "LIB_DIR/L2/src/zlib_huffman_enc_mm.cpp", 
-                    "num_compute_units": "1"
+                    "num_compute_units": 1
                 }, 
                 {
                     "name": "xilTreegenKernel", 
                     "location": "LIB_DIR/L2/src/zlib_treegen_mm.cpp", 
-                    "num_compute_units": "1"
+                    "num_compute_units": 1
                 }, 
                 {
                     "name": "xilGzipS2MM", 
                     "location": "LIB_DIR/L2/tests/src/gzip_dm_s2mm.cpp", 
-                    "num_compute_units": "1"
+                    "num_compute_units": 1
                 }, 
                 {
                     "name": "xilGzipMM2S", 
                     "location": "LIB_DIR/L2/tests/src/gzip_dm_mm2s.cpp", 
-                    "num_compute_units": "1"
+                    "num_compute_units": 1
                 }, 
                 {
                     "name": "xilDecompressStream", 
                     "location": "LIB_DIR/L2/src/zlib_decompress_stream.cpp", 
-                    "num_compute_units": "1"
+                    "num_compute_units": 1
                 }
             ]
         }
@@ -110,7 +110,7 @@
                     "vitis_hw_run": 10240
                 }, 
                 "max_time_min": {
-                    "vitis_hw_build": 470, 
+                    "vitis_hw_build": 600, 
                     "vitis_hw_emu": 300, 
                     "vitis_sw_emu": 60, 
                     "vitis_hw_run": 10

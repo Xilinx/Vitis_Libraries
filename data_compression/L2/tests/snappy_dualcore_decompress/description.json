@@ -84,7 +84,7 @@
             ]
         }
     ],
-    "output_files": "data/sample.txt.snappy.*",
+    "output_files": ["data/sample.txt.snappy.*"],
     "testinfo": {
         "disable": false,
         "jobs": [
@@ -117,20 +117,6 @@
     },
     "platform_properties": {
         "vck190": {
-            "host": {
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib",
-                        "${SYSROOT}/opt/xilinx/xrt/lib"
-                    ]
-                },
-                "compiler": {
-                    "includepaths": [
-                        "$(SYSROOT)/usr/include"
-                    ],
-                    "options": "--sysroot=$(SYSROOT)"
-                }
-            },
             "containers": [
                 {
                     "name": "dualcore_decompress_streaming",
