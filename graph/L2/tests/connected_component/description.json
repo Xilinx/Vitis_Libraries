@@ -51,20 +51,6 @@
             }
         }, 
         "vck190": {
-            "host": {
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib", 
-                        "${SYSROOT}/opt/xilinx/xrt/lib"
-                    ]
-                }, 
-                "compiler": {
-                    "includepaths": [
-                        "$(SYSROOT)/usr/include"
-                    ], 
-                    "options": "--sysroot=$(SYSROOT)"
-                }
-            }, 
             "v++": {
                 "compiler": {
                     "clflags": [
@@ -94,6 +80,12 @@
             "cmd_args": " -xclbin wcc_kernel.xclbin -o test_offset.csr -c test_column.csr -g test_golden.mtx", 
             "platform": "vck190",
             "name": "vck 190 launch"
+        },
+        {
+            "cmd_args": " -xclbin BUILD/wcc_kernel.xclbin -o PROJECT/data/test_offset.csr -c PROJECT/data/test_column.csr -g PROJECT/data/test_golden.mtx", 
+            "target" : "sw_emu",
+            "platform" : "vck190",
+            "name": "sw_emu launch for vck190"
         }
     ], 
     "host": {

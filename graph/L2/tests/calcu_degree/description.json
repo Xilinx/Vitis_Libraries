@@ -51,20 +51,6 @@
             }
         }, 
         "vck190": {
-            "host": {
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib", 
-                        "${SYSROOT}/opt/xilinx/xrt/lib"
-                    ]
-                }, 
-                "compiler": {
-                    "includepaths": [
-                        "$(SYSROOT)/usr/include"
-                    ], 
-                    "options": "--sysroot=$(SYSROOT)"
-                }
-            }, 
             "v++": {
                 "compiler": {
                     "clflags": [
@@ -86,6 +72,12 @@
             "cmd_args": " -xclbin kernel_calcuDegree_0.xclbin", 
             "platform": "vck190",
             "name": "vck 190 launch"
+        },
+        {
+            "cmd_args": " -xclbin BUILD/kernel_calcuDegree_0.xclbin -dataSetDir PROJECT/data/ -refDir PROJECT/data/", 
+            "target" : "sw_emu",
+            "platform" : "vck190",
+            "name": "sw_emu for vck190 launch"
         }
     ], 
     "host": {

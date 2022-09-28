@@ -1566,7 +1566,10 @@ void preWrite32WithSource(int nrows,
                     tTmp.f = randomProbability;
                     pongT[k] = tTmp.i;
                     orderT[k] = tmpCSC;
-                    if (cntSource < sourceLength) sourceID = sourceStrm.read();
+                    if (cntSource < sourceLength) {
+                        sourceID = sourceStrm.read();
+                        cntSource++;
+                    }
                 } else {
                     pongT[k] = 0;
                     orderT[k][31] = notSourceflag;
@@ -1674,7 +1677,10 @@ void preWrite64WithSource(int nrows,
                     tTmp.f = randomProbability;
                     pongT[k] = tTmp.i;
                     orderT[k] = tmpCSC;
-                    if (cntSource < sourceLength) sourceID = sourceStrm.read();
+                    if (cntSource < sourceLength) {
+                        sourceID = sourceStrm.read();
+                        cntSource++;
+                    }
                 } else {
                     pongT[k] = 0;
                     orderT[k][31] = notSourceflag;

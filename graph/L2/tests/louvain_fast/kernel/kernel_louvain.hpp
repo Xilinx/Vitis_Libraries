@@ -34,7 +34,7 @@
 #define MAXNE (1 << 27)
 #define VERTEXS (MAXNV / NUM)
 #define EDGES (MAXNE / NUM)
-#define DEGREES (1 << 17)
+#define DEGREES (1 << 16) // for huge degree
 #define COLORS (4096)
 
 const int depthVertex = VERTEXS;

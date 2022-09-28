@@ -17,11 +17,6 @@
         {
             "cmd_args": " -o PROJECT/data/test_offset.csr -c PROJECT/data/test_column.csr -g PROJECT/data/test_golden.mtx -i 0", 
             "name": "generic launch for all flows"
-        },
-        {
-            "cmd_args": " -o test_offset.csr -c test_column.csr -g test_golden.mtx -i 0",
-            "platform": "vck190",
-            "name": "vck 190 launch"
         }
     ], 
     "host": {

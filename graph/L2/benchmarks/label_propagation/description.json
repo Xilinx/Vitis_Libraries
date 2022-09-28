@@ -6,7 +6,7 @@
     "platform_allowlist": [
         "u50", 
         "u200", 
-        "u250", 
+        "u250",
         "aws-vu9p-f1", 
         "vck190"
     ], 
@@ -49,22 +49,8 @@
                     ]
                 }
             }
-        }, 
+        },
         "vck190": {
-            "host": {
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib", 
-                        "${SYSROOT}/opt/xilinx/xrt/lib"
-                    ]
-                }, 
-                "compiler": {
-                    "includepaths": [
-                        "$(SYSROOT)/usr/include"
-                    ], 
-                    "options": "--sysroot=$(SYSROOT)"
-                }
-            }, 
             "v++": {
                 "compiler": {
                     "clflags": [
@@ -94,6 +80,12 @@
             "cmd_args": " -xclbin LPKernel.xclbin -o csr_offsets.txt -i csr_columns.txt -label label.txt", 
             "platform": "vck190",
             "name": "vck 190 launch"
+        },
+        {
+            "cmd_args": " -xclbin BUILD/LPKernel.xclbin -o PROJECT/data/csr_offsets.txt -i PROJECT/data/csr_columns.txt -label PROJECT/data/label.txt", 
+            "target": "sw_emu",
+            "platform": "vck190",
+            "name": "sw_emu vck190 launch"
         }
     ], 
     "host": {

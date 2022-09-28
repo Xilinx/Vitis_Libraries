@@ -266,7 +266,7 @@ GET_E:
     }
 }
 
-template <int DWIDTH>
+template <int DWIDTH, int MAXDEGREE>
 void SameColor_GetC(ap_uint<DWIDTH>* cidPrev,
                     hls::stream<ap_uint<96> >& str_GetEout,
                     hls::stream<ap_uint<128> >& str_GetCout) {
@@ -288,7 +288,7 @@ GET_C:
         if ((d + 0) == e_dgr) {
             str_GetEout.read(din96);
             u_e.vd.get(din96, v, e_dgr);
-            if (e_dgr >= 0) {
+            if (e_dgr >= 0 && e_dgr < MAXDEGREE) {
                 vCid = axi_cidPrev.rdi(v);
                 u_c.vcde.set(dout128, v, vCid, e_dgr, false);
                 str_GetCout.write(dout128);
@@ -302,14 +302,16 @@ GET_C:
         } else {
             str_GetEout.read(din96);
             u_e.ew.get(din96, edge, deg_w);
-            eCid = axi_cidPrev.rdi(edge);
-            u_c.ecw.set(dout128, edge, eCid, deg_w);
-            str_GetCout.write(dout128);
+            if (e_dgr < MAXDEGREE) {
+                eCid = axi_cidPrev.rdi(edge);
+                u_c.ecw.set(dout128, edge, eCid, deg_w);
+                str_GetCout.write(dout128);
 #ifndef __SYNTHESIS__
 #ifdef _DEBUG_GetC
-            printf("GetC: d=%d\t v=%d,\t e_dgr=%d\t edge=%d\t eCid=%d\n", d, v, e_dgr, edge, eCid);
+                printf("GetC: d=%d\t v=%d,\t e_dgr=%d\t edge=%d\t eCid=%d\n", d, v, e_dgr, edge, eCid);
 #endif
 #endif
+            }
             d++;
         }
     }
@@ -1120,7 +1122,7 @@ GetFlag_writeout:
     }
 }
 
-template <int DWIDTH, int CSRWIDTH, int COLORWIDTH>
+template <int DWIDTH, int CSRWIDTH, int COLORWIDTH, int MAXDEGREE>
 void SameColor_dataflow(int numVertex,
                         int coloradj1,
                         int coloradj2,
@@ -1160,7 +1162,7 @@ void SameColor_dataflow(int numVertex,
     hls::stream<ap_uint<128> > str_GetCout("str_GetCout");
 #pragma HLS RESOURCE variable = str_GetCout core = FIFO_LUTRAM
 #pragma HLS STREAM variable = str_GetCout depth = 256
-    SameColor_GetC<DWIDTH>(cidPrev, str_GetEout, str_GetCout);
+    SameColor_GetC<DWIDTH, MAXDEGREE>(cidPrev, str_GetEout, str_GetCout);
 
     hls::stream<ap_uint<128> > str_Aggout("str_Aggout");
 #pragma HLS RESOURCE variable = str_Aggout core = FIFO_LUTRAM

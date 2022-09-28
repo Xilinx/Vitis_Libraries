@@ -47,7 +47,7 @@ using namespace std;
 #endif
 #define VERTEXS (MAXNV / NUM)
 #define EDGES (MAXNE / NUM)
-#define DEGREES (1 << 17)
+#define DEGREES (1 << 16)
 #define COLORS (4096)
 typedef double DWEIGHT;
 

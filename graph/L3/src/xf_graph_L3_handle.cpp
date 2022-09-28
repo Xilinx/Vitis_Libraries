@@ -747,7 +747,8 @@ int Handle::setUp(std::string deviceNames) {
 
 int Handle::setUp() {
     // std::string deviceNames = "xilinx_u50_gen3x16_xdma_201920_3";
-    std::string deviceNames = "xilinx_u50_gen3x16_xdma_201920_3 xilinx_u50_gen3x16_xdma_5_202210_1";
+    std::string deviceNames =
+        "xilinx_u50_gen3x16_xdma_201920_3 xilinx_u50_gen3x16_xdma_5_202210_1 xilinx_u55c_gen3x16_xdma_3_202210_1";
     return setUp(deviceNames);
 }
 

@@ -1,11 +1,10 @@
 {
-    "gui": true, 
+    "gui": false, 
     "name": "Xilinx Louvain Modularity Test", 
     "description": "The Louvain method for community detection is a method to extract communities from large networks created by Blondel from the University of Louvain (the source of this method's name). The method is a greedy optimization method that appears to run in time O(n cdot log n), if n is the number of nodes in the network", 
     "flow": "vitis", 
     "platform_allowlist": [
         "u50",
-        "u280",
         "u55c"
     ], 
     "platform_blocklist": [
@@ -16,16 +15,7 @@
             "v++": {
                 "compiler": {
                     "clflags": [
-                        "--config PROJECT/conn_u50_u280.cfg --advanced.param compiler.userPostSysLinkOverlayTcl=PROJECT/postSysLink.tcl"
-                    ]
-                }
-            }
-        },
-        "u280": {
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u50_u280.cfg --advanced.param compiler.userPostSysLinkOverlayTcl=PROJECT/postSysLink.tcl"
+                        "--config PROJECT/conn_u50.cfg --advanced.param compiler.userPostSysLinkOverlayTcl=PROJECT/postSysLink.tcl"
                     ]
                 }
             }

@@ -51,20 +51,6 @@
             }
         }, 
         "vck190": {
-            "host": {
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib", 
-                        "${SYSROOT}/opt/xilinx/xrt/lib"
-                    ]
-                }, 
-                "compiler": {
-                    "includepaths": [
-                        "$(SYSROOT)/usr/include"
-                    ], 
-                    "options": "--sysroot=$(SYSROOT)"
-                }
-            }, 
             "v++": {
                 "compiler": {
                     "clflags": [
@@ -92,7 +78,13 @@
         {
             "cmd_args": " -xclbin TC_kernel.xclbin -o csr_offsets.txt -i csr_columns.txt", 
             "platform": "vck190",
-            "name": "vck 190 launch"
+            "name": "vck190 launch"
+        },
+        {
+            "cmd_args": " -xclbin BUILD/TC_kernel.xclbin -o PROJECT/data/csr_offsets.txt -i PROJECT/data/csr_columns.txt", 
+            "target": "sw_emu",
+            "platform": "vck190",
+            "name": "sw_emu vck190 launch"
         }
     ], 
     "host": {

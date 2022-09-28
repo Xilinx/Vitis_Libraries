@@ -4,7 +4,8 @@
     "description": "An example for weighted pagerank with 2 channels", 
     "flow": "vitis", 
     "platform_allowlist": [
-        "u50"
+        "u50",
+        "u280"
     ], 
     "platform_blocklist": [
         "zc"

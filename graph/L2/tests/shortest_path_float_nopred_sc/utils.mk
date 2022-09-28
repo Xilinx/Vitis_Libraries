@@ -138,6 +138,27 @@ ifneq ($(shell expr $(BINUTILS) \>= $(BINUTILS_REQ)), 1)
 export PATH := $(XILINX_VIVADO)/tps/lnx64/binutils-$(BINUTILS_INTOOL)/bin:$(PATH)
 endif
 
+#Check OS and setting env for xrt c++ api
+OSDIST = $(shell lsb_release -i |awk -F: '{print tolower($$2)}' | tr -d ' \t' )
+OSREL = $(shell lsb_release -r |awk -F: '{print tolower($$2)}' |tr -d ' \t')
+
+# for centos and redhat
+ifneq ($(findstring centos,$(OSDIST)),)
+ifeq (7,$(shell echo $(OSREL) | awk -F. '{print tolower($$1)}' ))
+ifeq ($(HOST_ARCH), x86)
+XRT_CXXFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0
+SYS_COMP_LIB := $(XILINX_VITIS)/system_compiler/lib/centos7
+endif
+endif
+else ifneq ($(findstring redhat,$(OSDIST)),)
+ifeq (7,$(shell echo $(OSREL) | awk -F. '{print tolower($$1)}' ))
+ifeq ($(HOST_ARCH), x86)
+XRT_CXXFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0
+SYS_COMP_LIB := $(XILINX_VITIS)/system_compiler/lib/centos7
+endif
+endif
+endif
+
 #Setting VPP
 VPP := v++
 

@@ -25,39 +25,7 @@
                     ]
                 }
             }
-        }, 
-        "u200": {
-            "host": {
-                "compiler": {
-                    "symbols": [
-                        "USE_DDR"
-                    ]
-                }
-            }, 
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u200_u250.cfg"
-                    ]
-                }
-            }
-        }, 
-        "u250": {
-            "host": {
-                "compiler": {
-                    "symbols": [
-                        "USE_DDR"
-                    ]
-                }
-            }, 
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u200_u250.cfg"
-                    ]
-                }
-            }
-        }
+        } 
     }, 
     "data": [
         "./data"

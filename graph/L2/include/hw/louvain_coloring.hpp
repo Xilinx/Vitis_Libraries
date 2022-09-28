@@ -834,7 +834,7 @@ INIT_SAME_COLOR:
     }
 }
 
-template <typename DWEIGHT, int DWIDTH, int CSRWIDTH, int COLORWIDTH, int MAXVERTEX>
+template <typename DWEIGHT, int DWIDTH, int CSRWIDTH, int COLORWIDTH, int MAXVERTEX, int MAXDEGREE>
 void sameColorWrapper(int numVertex,
                       int numColor,
                       int& moves,
@@ -873,38 +873,40 @@ COLOR:
 
         if (loop_cnt[0] == 0) {
             // cidSize and tot are ping_pong buffers
-            SameColor_dataflow<DWIDTH, CSRWIDTH, COLORWIDTH>(numVertex, coloradj1, coloradj2, moves, scalor, total_w_i,
-                                                             use_push_flag, write_push_flag, constant_recip,
-                                                             offset,        //[MAXVERTEX],
-                                                             index,         //[MAXEDGE],
-                                                             weight,        //[MAXEDGE],
-                                                             colorInx,      //[MAXVERTEX],
-                                                             cidPrev,       //[MAXVERTEX],
-                                                             cidSizePrev,   //[MAXVERTEX],
-                                                             totPrev,       //[MAXVERTEX],
-                                                             cidCurr,       //[MAXVERTEX],
-                                                             cidSizeUpdate, //[MAXVERTEX],
-                                                             totUpdate,     //[MAXVERTEX],
-                                                             commWeight, offsetDup, indexDup, flag,
-                                                             flagUpdate); //[MAXVERTEX]);
+            SameColor_dataflow<DWIDTH, CSRWIDTH, COLORWIDTH, MAXDEGREE>(numVertex, coloradj1, coloradj2, moves, scalor,
+                                                                        total_w_i, use_push_flag, write_push_flag,
+                                                                        constant_recip,
+                                                                        offset,        //[MAXVERTEX],
+                                                                        index,         //[MAXEDGE],
+                                                                        weight,        //[MAXEDGE],
+                                                                        colorInx,      //[MAXVERTEX],
+                                                                        cidPrev,       //[MAXVERTEX],
+                                                                        cidSizePrev,   //[MAXVERTEX],
+                                                                        totPrev,       //[MAXVERTEX],
+                                                                        cidCurr,       //[MAXVERTEX],
+                                                                        cidSizeUpdate, //[MAXVERTEX],
+                                                                        totUpdate,     //[MAXVERTEX],
+                                                                        commWeight, offsetDup, indexDup, flag,
+                                                                        flagUpdate); //[MAXVERTEX]);
 
             updateSameColor<DWIDTH, MAXVERTEX>(numVertex, cidPrev, cidCurr, cidSizePrev, cidSizeUpdate, cidSizeCurr,
                                                totPrev, totUpdate, totCurr);
         } else {
-            SameColor_dataflow<DWIDTH, CSRWIDTH, COLORWIDTH>(numVertex, coloradj1, coloradj2, moves, scalor, total_w_i,
-                                                             use_push_flag, write_push_flag, constant_recip,
-                                                             offset,        //[MAXVERTEX],
-                                                             index,         //[MAXEDGE],
-                                                             weight,        //[MAXEDGE],
-                                                             colorInx,      //[MAXVERTEX],
-                                                             cidPrev,       //[MAXVERTEX],
-                                                             cidSizeCurr,   //[MAXVERTEX],
-                                                             totCurr,       //[MAXVERTEX],
-                                                             cidCurr,       //[MAXVERTEX],
-                                                             cidSizeUpdate, //[MAXVERTEX],
-                                                             totUpdate,     //[MAXVERTEX],
-                                                             commWeight, offsetDup, indexDup, flag,
-                                                             flagUpdate); //[MAXVERTEX]);
+            SameColor_dataflow<DWIDTH, CSRWIDTH, COLORWIDTH, MAXDEGREE>(numVertex, coloradj1, coloradj2, moves, scalor,
+                                                                        total_w_i, use_push_flag, write_push_flag,
+                                                                        constant_recip,
+                                                                        offset,        //[MAXVERTEX],
+                                                                        index,         //[MAXEDGE],
+                                                                        weight,        //[MAXEDGE],
+                                                                        colorInx,      //[MAXVERTEX],
+                                                                        cidPrev,       //[MAXVERTEX],
+                                                                        cidSizeCurr,   //[MAXVERTEX],
+                                                                        totCurr,       //[MAXVERTEX],
+                                                                        cidCurr,       //[MAXVERTEX],
+                                                                        cidSizeUpdate, //[MAXVERTEX],
+                                                                        totUpdate,     //[MAXVERTEX],
+                                                                        commWeight, offsetDup, indexDup, flag,
+                                                                        flagUpdate); //[MAXVERTEX]);
 
             updateSameColor<DWIDTH, MAXVERTEX>(numVertex, cidPrev, cidCurr, cidSizeCurr, cidSizeUpdate, cidSizePrev,
                                                totCurr, totUpdate, totPrev);
@@ -1008,12 +1010,12 @@ MOVE:
 
         pushcnt = 0;
         if (tmpItrop[0] == 0) {
-            sameColorWrapper<DWEIGHT, DWIDTH, CSRWIDTH, COLORWIDTH, MAXVERTEX>(
+            sameColorWrapper<DWEIGHT, DWIDTH, CSRWIDTH, COLORWIDTH, MAXVERTEX, MAXDEGREE>(
                 numVertex, numColor, moves, total_w_i, scalor, constant_recip, colorPtr, loop_cnt, config_push_flag,
                 wirte_push_flag, offset, index, weight, colorInx, cidPrev, cidSizePrev, totPrev, cidCurr, cidSizeCurr,
                 totCurr, cidSizeUpdate, totUpdate, commWeight, offsetDup, indexDup, flag, flagUpdate);
         } else {
-            sameColorWrapper<DWEIGHT, DWIDTH, CSRWIDTH, COLORWIDTH, MAXVERTEX>(
+            sameColorWrapper<DWEIGHT, DWIDTH, CSRWIDTH, COLORWIDTH, MAXVERTEX, MAXDEGREE>(
                 numVertex, numColor, moves, total_w_i, scalor, constant_recip, colorPtr, loop_cnt, config_push_flag,
                 wirte_push_flag, offset, index, weight, colorInx, cidPrev, cidSizePrev, totPrev, cidCurr, cidSizeCurr,
                 totCurr, cidSizeUpdate, totUpdate, commWeight, offsetDup, indexDup, flagUpdate, flag);

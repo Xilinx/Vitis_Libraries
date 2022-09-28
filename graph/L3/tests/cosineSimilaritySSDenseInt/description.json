@@ -5,11 +5,11 @@
     "flow": "vitis",
     "xrm": true,
     "platform_allowlist": [
-        "u50"
+        "u55c"
     ], 
     "platform_blocklist": [], 
     "platform_properties": {
-        "u50": {
+        "u55c": {
             "v++": {
                 "compiler": {
                     "clflags": [
@@ -220,7 +220,7 @@
                     ]
                 }
             ], 
-            "frequency": 300.0, 
+            "frequency": 200.0, 
             "name": "denseSimilarityKernel"
         }
     ], 
