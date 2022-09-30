@@ -35,6 +35,8 @@
 #define COL_MAJOR 1
 #endif
 
+//#define MATMUL_DEBUG
+
 namespace xf {
 namespace dsp {
 namespace aie {
@@ -94,13 +96,28 @@ constexpr loHi getUnTileShuffleOffsetsInt16(unsigned M, unsigned N, unsigned vec
     loHi ret = {.lo = offLo, .hi = offHi};
     return ret;
 }
+
+template <typename T_D, unsigned inRow, unsigned inCol>
+static constexpr int getVecSize() {
+    constexpr unsigned minVBuffSizeforType = (512 / 8) / sizeof(T_D); // not sure why this is 512 bits?
+    if
+        constexpr(minVBuffSizeforType > (inRow * inCol)) { return inRow * inCol; }
+    else if
+        constexpr(inCol % minVBuffSizeforType == 0 || minVBuffSizeforType > inCol) { return minVBuffSizeforType; }
+    else {
+        int vSize = minVBuffSizeforType;
+        while (inCol % vSize != 0) {
+            vSize /= 2;
+        }
+        return vSize;
+    }
+}
+
 template <unsigned M, unsigned N, unsigned inRow, unsigned inCol, unsigned leadingDim, typename T_D>
 static void doUnTile(T_D* __restrict inPtr, T_D* outPtr) {
     constexpr unsigned minGranularity = (128 / 8) / sizeof(T_D);
     constexpr unsigned loadSize = (N >= minGranularity) ? N : minGranularity;
-    constexpr unsigned minVBuffSizeforType = (512 / 8) / sizeof(T_D);
-    constexpr unsigned vectorSize = (minVBuffSizeforType > (inRow * inCol)) ? (inRow * inCol) : minVBuffSizeforType;
-
+    constexpr unsigned vectorSize = getVecSize<T_D, inRow, inCol>();
     // static_assert(N >= minGranularity, "Granularity is awkward");
     static_assert(vectorSize <= (1024 / 8) / sizeof(T_D), "calculated vector size too large for vector register.");
     static_assert(!(leadingDim == COL_MAJOR && std::is_same_v<T_D, int16>),
@@ -109,9 +126,6 @@ static void doUnTile(T_D* __restrict inPtr, T_D* outPtr) {
     // printf("LargeTileSize=%d\n",largeTile);
     loHi offsets = std::is_same_v<T_D, int16> ? getUnTileShuffleOffsetsInt16(M, N, vectorSize, leadingDim)
                                               : getUnTileShuffleOffsets(M, N, vectorSize, leadingDim);
-
-    // printf("M: %d, N: %d, vectorSize: %d, loadSize: %d, leadingDim: %d\n", M, N, vectorSize, loadSize, leadingDim);
-    // printf("Offsets: lo : %0X, hi: %0X\n", offsets.lo, offsets.hi);
 
     const unsigned loadsPerVector = vectorSize / loadSize;
     const unsigned tilesPerVector = vectorSize / (M * N);
@@ -129,8 +143,7 @@ static void doUnTile(T_D* __restrict inPtr, T_D* outPtr) {
 
     const unsigned vectorsPerCol = inRow / rowsPerVector;
     const unsigned vectorsPerRow = inCol / colsPerVector;
-    // printf("colsPerLoad: %d, rowsPerLoad: %d, colsPerVector: %d, rowsPerVector: %d, vectorsPerCol: %d, vectorsPerRow:
-    // %d\n",colsPerLoad, rowsPerLoad, colsPerVector, rowsPerVector, vectorsPerCol, vectorsPerRow );
+
     // Loop through a row first if row major
     const unsigned outerLoopCount = (leadingDim == ROW_MAJOR) ? vectorsPerCol : vectorsPerRow;
     const unsigned innerLoopCount = (leadingDim == ROW_MAJOR) ? vectorsPerRow : vectorsPerCol;
@@ -145,9 +158,6 @@ static void doUnTile(T_D* __restrict inPtr, T_D* outPtr) {
     const unsigned outerDimStoreIncr = (leadingDim == ROW_MAJOR) ? inCol : inRow;
     const unsigned innerDimStoreIncr = storeSize;
 
-    // printf("outerLoopCount: %d, innerLoopCount: %d,  outerDimPerVector: %d, innerDimPerVector: %d, storeSize: %d \n",
-    // outerLoopCount, innerLoopCount, outerDimPerVector, innerDimPerVector, storeSize);
-
     const bool shuffleIsNeeded = (leadingDim == COL_MAJOR) || ((leadingDim == ROW_MAJOR) && (loadSize > N));
 
     for (unsigned outerDimIdx = 0; outerDimIdx < outerLoopCount; ++outerDimIdx)
@@ -161,8 +171,6 @@ static void doUnTile(T_D* __restrict inPtr, T_D* outPtr) {
             for (unsigned innerDimIdx = 0; innerDimIdx < innerLoopCount; ++innerDimIdx)
                 chess_loop_count((innerLoopCount)) chess_prepare_for_pipelining {
                     const unsigned ptrInnerBase = innerDimIdx * innerLoopIncr;
-                    // printf("outerDimIdx: %d, ptrOuterBase: %d,  innerDimIdx: %d, ptrInnerBase: %d\n",outerDimIdx,
-                    // ptrOuterBase, innerDimIdx, ptrInnerBase);
 
                     aie::vector<T_D, vectorSize> vec;
 
@@ -188,29 +196,17 @@ static void doUnTile(T_D* __restrict inPtr, T_D* outPtr) {
                                     loadSize * loadIdx; // unlikely
 
                         const unsigned loadPtr = innerLoadPtr + ptrInnerBase + ptrOuterBase;
-
-                        // printf("loadPtr=%d, innerLoadPtr=%d\n", loadPtr, innerLoadPtr);
-                        // load
-
                         vec.insert(loadIdx, aie::load_v<loadSize>(inPtr + loadPtr));
                     }
 
-                    // myprint(vec, true, "beforeShuffle: ");
                     if
-                        constexpr(shuffleIsNeeded) {
-                            // printf("We need to do a shuffle\n");
-                            vec = doShuffle(vec, 0, offsets);
-                            // myprint(vec, true, "afterShuffle: ");
-                        }
+                        constexpr(shuffleIsNeeded) { vec = doShuffle(vec, 0, offsets); }
 #pragma unroll((outerDimPerVector))
                     for (unsigned outerStoreIdx = 0; outerStoreIdx < outerDimPerVector; ++outerStoreIdx) {
                         const unsigned storeOuterPtr = outerStoreIdx * outerDimStoreIncr;
 #pragma unroll((std::max(innerDimPerVector / storeSize, (unsigned) 1)))
                         for (unsigned innerStoreIdx = 0;
                              innerStoreIdx < std::max(innerDimPerVector / storeSize, (unsigned)1); ++innerStoreIdx) {
-                            // printf("outerStoreIdx=%d, storeOuterPtr=%d, innerStoreIdx=%d, storeInnerPtr=%d\n",
-                            // outerStoreIdx,storeOuterPtr, innerStoreIdx, innerStoreIdx*storeSize);
-
                             // If we don't shuffle and still load multiple outerDims, then we need to skip over that.
                             const unsigned sliceIdx =
                                 (!shuffleIsNeeded && outerDimPerVector > 1)
@@ -220,23 +216,12 @@ static void doUnTile(T_D* __restrict inPtr, T_D* outPtr) {
                                                       innerDimIdx * innerDimPerVector +
                                                       outerDimIdx * outerDimPerVector * outerDimStoreIncr;
 
-                            // printf("storePtr=%d, sliceIdx=%d\n", storePtr, sliceIdx);
-
                             // store direct to window
                             aie::store_v(outPtr + storePtr, vec.template extract<storeSize>(sliceIdx));
                         }
                     }
                 }
         }
-
-    const unsigned tileSize = (M * N);
-    // for (unsigned AChunk=0; AChunk<(inRow*inCol); AChunk+=tileSize){
-    //  aie::vector<T_D, tileSize> APost = aie::load_v<tileSize>(outPtr); outPtr += tileSize;
-    ////  //aie::vector<T_D, sizeTileA> A1 = aie::load_v<sizeTileA>(pA1); pA1 += sizeTileA;
-    //  myprint(APost,true,"A0postProc: ");
-    ////  myprint(A1,true,"A1preProc: ");
-    ////
-    //}
 }
 
 namespace aie = ::aie;
