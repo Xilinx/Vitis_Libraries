@@ -178,13 +178,13 @@ int gzipOCLHost::init(const std::string& binaryFileName, uint8_t m_kidx) {
     // Create Command Queue
     // Compress Command Queue & Kernel Setup
     //    OCL_CHECK(err, m_def_q = new cl::CommandQueue(*m_context, m_device, m_isProfile, &err));
-    if ((m_cdflow == BOTH) || (m_cdflow == COMPRESS)) {
+    if ((m_cdflow == BOTH) || (m_cdflow == COMP_ONLY)) {
         OCL_CHECK(err,
                   m_def_q = new cl::CommandQueue(*m_context, m_device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE, &err));
     }
 
     // DeCompress Command Queue & Kernel Setup
-    if ((m_cdflow == BOTH) || (m_cdflow == DECOMPRESS)) {
+    if ((m_cdflow == BOTH) || (m_cdflow == DECOMP_ONLY)) {
         for (uint8_t i = 0; i < D_COMPUTE_UNIT; i++) {
             OCL_CHECK(err, m_q_dec[i] = new cl::CommandQueue(*m_context, m_device, CL_QUEUE_PROFILING_ENABLE, &err));
             OCL_CHECK(err, m_q_rd[i] = new cl::CommandQueue(*m_context, m_device, CL_QUEUE_PROFILING_ENABLE, &err));
@@ -209,13 +209,18 @@ gzipOCLHost::gzipOCLHost(const std::string& binaryFileName,
                          enum design_flow dflow,
                          const int bank_id) {
     m_cdflow = cd_flow;
+    m_zlibFlow = (enum design_flow)dflow;
     m_device = device;
     m_pending = 0;
     m_context = context;
     m_program = program;
     m_islibz = true;
     m_isSlaveBridge = sb_opt;
-    if (m_zlibFlow) m_checksum = 1;
+    if (m_zlibFlow) {
+        m_checksum = 1;
+        m_isZlib = true;
+    }
+
     if (m_cdflow == COMP_ONLY)
         m_kidx = 1;
     else
@@ -306,16 +311,16 @@ gzipOCLHost::gzipOCLHost(enum State flow,
         return;
     }
 
-    if ((m_cdflow == BOTH) || (m_cdflow == COMPRESS)) {
+    if ((m_cdflow == BOTH) || (m_cdflow == COMP_ONLY)) {
         m_memMgrCmp = new memoryManager(8, m_context, sb_opt, m_def_q);
     }
 
-    if ((m_cdflow == BOTH) || (m_cdflow == DECOMPRESS)) {
+    if ((m_cdflow == BOTH) || (m_cdflow == DECOMP_ONLY)) {
         m_memMgrDecMM2S = new memoryManager(8, m_context, sb_opt, m_rd_q);
         m_memMgrDecS2MM = new memoryManager(8, m_context, sb_opt, m_wr_q);
     }
 
-    if ((m_cdflow == BOTH) || (m_cdflow == COMPRESS)) {
+    if ((m_cdflow == BOTH) || (m_cdflow == COMP_ONLY)) {
         if (isSlaveBridge()) {
             h_buf_checksum = (uint32_t*)m_memMgrCmp->create_host_buffer(CL_MEM_READ_WRITE, sizeof(uint32_t),
                                                                         &(buffer_checksum_data));
@@ -335,7 +340,7 @@ gzipOCLHost::gzipOCLHost(enum State flow,
         }
     }
 
-    if ((m_cdflow == BOTH) || (m_cdflow == DECOMPRESS)) {
+    if ((m_cdflow == BOTH) || (m_cdflow == DECOMP_ONLY)) {
         // Decompression host buffer allocation
         for (int j = 0; j < DIN_BUFFERCOUNT; ++j)
             MEM_ALLOC_CHECK(h_dbufstream_in[j].resize(INPUT_BUFFER_SIZE), INPUT_BUFFER_SIZE, "Input Buffer");
@@ -1350,9 +1355,7 @@ size_t gzipOCLHost::deflate_buffer(
     cl_int err;
     std::string compress_kname;
     if (m_compressFullKernel == NULL) {
-        // Random: Use kernel name directly and let XRT
-        // decide the CU connection based on HBM bank
-        compress_kname = compress_kernel_names[1];
+        compress_kname = compress_kernel_names[2];
         OCL_CHECK(err, m_compressFullKernel = new cl::Kernel(*m_program, compress_kname.c_str(), &err));
         initialize_checksum = true;
     }
@@ -1443,7 +1446,7 @@ size_t gzipOCLHost::deflate_buffer(
                                                                    &(buffer->rd_event)));
             cl_int err;
             OCL_CHECK(err, err = buffer->rd_event.setCallback(CL_COMPLETE, event_compress_cb, (void*)buffer));
-            input_size = 0;
+            // input_size = 0;
             actionDone = true;
         }
     }

@@ -444,5 +444,5 @@ run: xclbin lib host $(EMU_CONFIG)
 ifeq ($(TARGET), $(filter $(TARGET), sw_emu hw_emu))
 	XCL_EMULATION_MODE=$(TARGET) ./run.sh $(EXE_FILE) $(XFLIB_DIR) $(XCLBIN_FILE)
 else 
-	./run.sh $(EXE_FILE) $(XFLIB_DIR) $(XCLBIN_DIR)
+	./run.sh $(EXE_FILE) $(XFLIB_DIR) $(XCLBIN_FILE)
 endif
