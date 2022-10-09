@@ -4,9 +4,9 @@ from aie_common import *
 from aie_common_fir import *
 import json
 import fir_sr_asym as sr_asym
-import math 
+import math
 
-# script generated file to avoid so much complicated duplication. 
+# script generated file to avoid so much complicated duplication.
 from getPhaseAlias import getPhaseAlias
 #These can be ignred, as they were mostly development asserts
 # fir_resampler.cpp:        static_assert(windowDecPhase[0] % (params.alignWindowReadBytes/params.dataSizeBytes) == 0,"ERROR: Solution doesn't meet alignment requirements. Window decrements must be aligned to 128b boundary. Increase m_kPolyphaseLaneAlias usually solves this. ");
@@ -28,7 +28,7 @@ from getPhaseAlias import getPhaseAlias
 # fir_resampler.hpp:        static_assert(fnTypeCheckDataCoeffSize<TT_DATA, TT_COEFF>() != 0, "ERROR: TT_DATA type less precise than TT_COEFF is not supported.");
 # fir_resampler.hpp:        static_assert(fnTypeCheckDataCoeffCmplx<TT_DATA, TT_COEFF>() != 0, "ERROR: real TT_DATA with complex TT_COEFF is not supported.");
 # fir_resampler.hpp:        static_assert(fnTypeCheckDataCoeffFltInt<TT_DATA, TT_COEFF>() != 0, "ERROR: a mix of float and integer types of TT_DATA and TT_COEFF is not supported.");
-# fir_resampler.hpp:        // This is a constexpr that we use to trigger the static_assert and is only used in the UUT, but also gives us an error message that we need to automatically translate to python. 
+# fir_resampler.hpp:        // This is a constexpr that we use to trigger the static_assert and is only used in the UUT, but also gives us an error message that we need to automatically translate to python.
 # fir_resampler.hpp:        static_assert(inputWindowVSizeIntegerOutputSize(windowSize, interpolateFactor, decimateFactor), "ERROR: Output Window Size must be an integer given the input window size and decimate factor");
 # fir_resampler.hpp:        static_assert(( is_everything_valid<this_fir_params>()), "Configuration Error");
 # fir_resampler.hpp:        static_assert((((TP_INPUT_WINDOW_VSIZE*sizeof(TT_DATA)) % (128/8)) == 0), "Number of input samples must align to 128 bits.");
@@ -75,28 +75,28 @@ from getPhaseAlias import getPhaseAlias
 
 def fn_check_samples_can_fit_streaming(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_CASC_LEN, TP_API):
 
-  m_kWinAccessByteSize = 128//8 # fixed 
+  m_kWinAccessByteSize = 128//8 # fixed
 
 
-  m_kDataBuffXOffset   = (m_kWinAccessByteSize/fn_size_by_byte(TT_DATA)) -1 # Let's just maximally size this to avoid needing so much duplicated code. 
-  
+  m_kDataBuffXOffset   = (m_kWinAccessByteSize/fn_size_by_byte(TT_DATA)) -1 # Let's just maximally size this to avoid needing so much duplicated code.
+
   m_kLanes = fnNumLanes(TT_DATA, TT_COEF, TP_API)
-  m_kNumSamplesRequiredForNLanes = (m_kLanes * TP_DECIMATE_FACTOR + (TP_INTERPOLATE_FACTOR - 1)) / TP_INTERPOLATE_FACTOR 
+  m_kNumSamplesRequiredForNLanes = (m_kLanes * TP_DECIMATE_FACTOR + (TP_INTERPOLATE_FACTOR - 1)) / TP_INTERPOLATE_FACTOR
 
   m_kSamplesInBuff     = (1024//8)//fn_size_by_byte(TT_DATA)
 
   if TP_API != 0: #stream
     for kernelPos in range(TP_CASC_LEN):
       TP_FIR_RANGE_LEN =  (
-        fnFirRangeRem(TP_FIR_LEN,TP_CASC_LEN,kernelPos,TP_INTERPOLATE_FACTOR) 
-          if (kernelPos == (TP_CASC_LEN-1)) 
-          else 
+        fnFirRangeRem(TP_FIR_LEN,TP_CASC_LEN,kernelPos,TP_INTERPOLATE_FACTOR)
+          if (kernelPos == (TP_CASC_LEN-1))
+          else
             fnFirRange(TP_FIR_LEN,TP_CASC_LEN,kernelPos,TP_INTERPOLATE_FACTOR)
       )
       m_kPolyLen =  (TP_FIR_RANGE_LEN+TP_INTERPOLATE_FACTOR-1)//TP_INTERPOLATE_FACTOR
       m_kInitDataNeeded    = m_kDataBuffXOffset + m_kPolyLen + m_kNumSamplesRequiredForNLanes - 1
       if m_kInitDataNeeded > m_kSamplesInBuff:
-        return isError(f"TP_FIR_RANGE_LEN ({TP_FIR_RANGE_LEN}) for kernel {kernelPos} exceeds max supported range for this data/coeff type combination ({TT_DATA}/{TT_COEF}). Increase TP_CASC_LEN to split the workload over more kernels. ")
+        return isError(f"Filter length per kernel ({TP_FIR_RANGE_LEN}) for kernel {kernelPos} exceeds max supported range for this data/coeff type combination ({TT_DATA}/{TT_COEF}). Increase cascade length to split the workload over more kernels. ")
 
   return isValid
 
@@ -119,12 +119,12 @@ def fn_max_fir_len_overall(TT_DATA, TT_COEF, TP_FIR_LEN):
     ("cfloat", "cfloat") : 1024
   }
   return (
-    isError(f"Max supported FIR length (TP_FIR_LEN = {TP_FIR_LEN} > Max = {maxTaps[(TT_DATA, TT_COEF)]}) exceeded for TT_DATA/TT_COEFF combination {TT_DATA},{TT_COEF}.") 
-      if TP_FIR_LEN > maxTaps[(TT_DATA, TT_COEF)] 
+    isError(f"Max supported Filter length (Filter length = {TP_FIR_LEN} > Max = {maxTaps[(TT_DATA, TT_COEF)]}) exceeded for data type and coefficient type combination {TT_DATA},{TT_COEF}.")
+      if TP_FIR_LEN > maxTaps[(TT_DATA, TT_COEF)]
       else isValid
   )
 
-def fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR,TP_DECIMATE_FACTOR, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD): 
+def fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR,TP_DECIMATE_FACTOR, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD):
   minLenCheck =  fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_Rnd=TP_INTERPOLATE_FACTOR)
 
   maxLenCheck = fn_max_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR, 1)
@@ -136,7 +136,7 @@ def fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR,TP_D
   for check in (minLenCheck,maxLenCheck,maxLenOverallCheck, streamingVectorRegisterCheck):
     if check["is_valid"] == False :
       return check
-  
+
   return isValid
 
 
@@ -172,11 +172,11 @@ def fn_check_repeatFactor(TT_DATA, TT_COEF, TP_INTERPOLATE_FACTOR, TP_DECIMATE_F
   m_kRepeatFactor = 16 # no comments or anything about this hardcoded number...
 
   if (TP_API == 1 and m_kLsize % m_kRepeatFactor != 0):
-    isError("For optimal design, inner loop size must schedule multiple iterations of vector operations. Please use a TP_INPUT_WINDOW_VSIZE that results in a m_kLsize being a multiple of m_kRepeatFactor.")
+    isError("For optimal design, inner loop size must schedule multiple iterations of vector operations. Please use a Input window size that results in a m_kLsize being a multiple of m_kRepeatFactor.")
   return isValid
 
 
-# will need to divide window size by SSR once this is incorporated. 
+# will need to divide window size by SSR once this is incorporated.
 def fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN,TP_INTERPOLATE_FACTOR,TP_DECIMATE_FACTOR, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1):
   # resampler doesn't actually have this constraint
   #checkMultipleLanes =  fn_windowsize_multiple_lanes(TT_DATA, TT_COEF, TP_INPUT_WINDOW_VSIZE, TP_API)
@@ -188,9 +188,11 @@ def fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN,TP_INTERPOLATE_FA
 
 
   checkMaxBuffer = fn_max_windowsize_for_buffer(TT_DATA, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR)
+  # Input samples are round-robin split to each SSR input paths, so total frame size must be divisable by SSR factor.
+  checkIfDivisableBySSR = fn_windowsize_divisible_by_ssr(TP_INPUT_WINDOW_VSIZE, TP_SSR)
 
   checkIntegerOutputWindow = (
-    isError("Output Window Size must be an integer given the input window size, interpolate factor and decimate factor") 
+    isError("Output Window Size must be an integer given the input window size, interpolate factor and decimate factor")
     if (TP_INPUT_WINDOW_VSIZE * TP_INTERPOLATE_FACTOR) % TP_DECIMATE_FACTOR != 0 else isValid
   )
 
@@ -199,7 +201,7 @@ def fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN,TP_INTERPOLATE_FA
     if ((TP_INPUT_WINDOW_VSIZE * fn_size_by_byte(TT_DATA)) % (128//8)) else isValid
   )
   checkRepeatFactor = fn_check_repeatFactor(TT_DATA, TT_COEF, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_INPUT_WINDOW_VSIZE, TP_API)
-  for check in (checkOutputMultipleLanes, checkOutputMultipleLanesAndLaneAlias, checkMaxBuffer, checkIntegerOutputWindow, checkAlignment128b, checkRepeatFactor):
+  for check in (checkOutputMultipleLanes, checkOutputMultipleLanesAndLaneAlias, checkMaxBuffer, checkIfDivisableBySSR, checkIntegerOutputWindow, checkAlignment128b, checkRepeatFactor):
     if check["is_valid"] == False :
       return check
 
@@ -215,7 +217,7 @@ def validate_TT_COEF(args):
     if check["is_valid"] == False :
       return check
   return isValid
-    
+
 def validate_TP_SHIFT(args):
   TT_DATA = args["TT_DATA"]
   TP_SHIFT = args["TP_SHIFT"]
@@ -230,9 +232,9 @@ def validate_TP_INPUT_WINDOW_VSIZE(args):
   TP_INTERPOLATE_FACTOR = args["TP_INTERPOLATE_FACTOR"]
   TP_DECIMATE_FACTOR = args["TP_DECIMATE_FACTOR"]
   TP_SSR = 1
-  
+
   #interpolate_hb traits looks like the UPSHIFT_CT types have different number of lanes, but it's actually stil the exact same as 384..
-  # decimate_hb also just uses 384, so no additional rules here. 
+  # decimate_hb also just uses 384, so no additional rules here.
   return fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR)
 
 
@@ -251,10 +253,10 @@ def validate_TP_FIR_LEN(args):
 
 def fn_validate_dual_ip(TP_API, TP_DUAL_IP):
   if TP_DUAL_IP == 1 and TP_API == 0:
-    return isError("Dual input ports only supported when port API is a stream.")
+    return isError("Dual input ports only supported when port is a stream.")
   return isValid
 
-    
+
 def validate_TP_DUAL_IP(args):
   TP_API = args["TP_API"]
   TP_DUAL_IP = args["TP_DUAL_IP"]
@@ -268,12 +270,12 @@ def fn_validate_decimate_factor(TT_DATA, TT_COEF,TP_INTERPOLATE_FACTOR,TP_DECIMA
   buffIndexLimit = 16 if TT_DATA != "cfloat" else 8 # 4b range, unless cfloat
 
   checkBuffSize = (
-    isError(f"The overall decimation rate ({TP_DECIMATE_FACTOR/TP_INTERPOLATE_FACTOR}) requires more samples ({m_kNumSamplesForNLanes}) than can be fit within the vector register ({kXYBuffSize}).") 
+    isError(f"The overall decimation rate ({TP_DECIMATE_FACTOR/TP_INTERPOLATE_FACTOR}) requires more samples ({m_kNumSamplesForNLanes}) than can be fit within the vector register ({kXYBuffSize}).")
     if ((m_kNumSamplesForNLanes + (m_kColumns-1)) > kXYBuffSize) else isValid
   )
 
   checkBuffIndexing = (
-    isError(f"The overall decimation rate ({TP_DECIMATE_FACTOR/TP_INTERPOLATE_FACTOR}) requires more samples ({m_kNumSamplesForNLanes}) than can be indexed within the vector register ({buffIndexLimit}).") 
+    isError(f"The overall decimation rate ({TP_DECIMATE_FACTOR/TP_INTERPOLATE_FACTOR}) requires more samples ({m_kNumSamplesForNLanes}) than can be indexed within the vector register ({buffIndexLimit}).")
     if (m_kNumSamplesForNLanes > buffIndexLimit) else isValid
   )
 
@@ -337,18 +339,18 @@ def info_ports(args):
     TT_COEF = args["TT_COEF"]
     TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
-    TP_SSR=1    
+    TP_SSR = 1
     TP_INTERPOLATE_FACTOR = args["TP_INTERPOLATE_FACTOR"]
     TP_DECIMATE_FACTOR = args["TP_DECIMATE_FACTOR"]
     margin_size = sr_asym.fn_margin_size((TP_FIR_LEN+TP_INTERPOLATE_FACTOR-1)//TP_INTERPOLATE_FACTOR, TT_DATA)
 
-    in_ports = get_port_info("in", "in", TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_SSR, marginSize=margin_size, TP_API=args["TP_API"]) 
-    in2_ports = (get_port_info("in2", "in", TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_SSR, marginSize=margin_size, TP_API=args["TP_API"]) if (args["TP_DUAL_IP"] == 1) else [])
+    in_ports = get_port_info("in", "in", TT_DATA, TP_INPUT_WINDOW_VSIZE//TP_SSR, TP_SSR, marginSize=margin_size, TP_API=args["TP_API"])
+    in2_ports = (get_port_info("in2", "in", TT_DATA, TP_INPUT_WINDOW_VSIZE//TP_SSR, TP_SSR, marginSize=margin_size, TP_API=args["TP_API"]) if (args["TP_DUAL_IP"] == 1) else [])
     coeff_ports = (get_parameter_port_info("coeff", "in", TT_COEF, TP_SSR, TP_FIR_LEN, "async") if (args["TP_USE_COEF_RELOAD"] == 1) else [])
 
     # interp by 2 for halfband
-    out_ports = get_port_info("out", "out", TT_DATA, (TP_INPUT_WINDOW_VSIZE*TP_INTERPOLATE_FACTOR)//TP_DECIMATE_FACTOR, TP_SSR, TP_API=args["TP_API"])
-    out2_ports = (get_port_info("out2", "out", TT_DATA, (TP_INPUT_WINDOW_VSIZE*TP_INTERPOLATE_FACTOR)//TP_DECIMATE_FACTOR, TP_SSR, TP_API=args["TP_API"]) if (args["TP_NUM_OUTPUTS"] == 2) else [])
+    out_ports = get_port_info("out", "out", TT_DATA, (TP_INPUT_WINDOW_VSIZE*TP_INTERPOLATE_FACTOR)//TP_SSR//TP_DECIMATE_FACTOR, TP_SSR, TP_API=args["TP_API"])
+    out2_ports = (get_port_info("out2", "out", TT_DATA, (TP_INPUT_WINDOW_VSIZE*TP_INTERPOLATE_FACTOR)//TP_SSR//TP_DECIMATE_FACTOR, TP_SSR, TP_API=args["TP_API"]) if (args["TP_NUM_OUTPUTS"] == 2) else [])
     return in_ports + in2_ports + coeff_ports + out_ports + out2_ports
 
 
@@ -384,9 +386,9 @@ def generate_graph(graphname, args):
   dual_ip_connect_str = f"adf::connect<> net_in2(in2[i], filter.in2[i]);" if TP_DUAL_IP == 1 else "// No dual input"
   coeff_ip_declare_str = f"ssr_port_array<input> coeff;" if TP_USE_COEF_RELOAD == 1 else "//No coeff port"
   coeff_ip_connect_str = f"adf::connect<> net_coeff(coeff[i], filter.coeff[i]);" if TP_USE_COEF_RELOAD == 1 else "//No coeff port"
-  dual_op_declare_str = f"ssr_port_array<input> out2;" if TP_NUM_OUTPUTS == 2 else "// No dual output"
+  dual_op_declare_str = f"ssr_port_array<output> out2;" if TP_NUM_OUTPUTS == 2 else "// No dual output"
   dual_op_connect_str = f"adf::connect<> net_out2(filter.out2[i], out2[i]);" if TP_NUM_OUTPUTS == 2 else "// No dual output"
- 
+
   # Use formatted multi-line string to avoid a lot of \n and \t
   code  = (
 f"""
@@ -404,21 +406,21 @@ public:
 
   std::vector<{TT_COEF}> taps = {taps};
   xf::dsp::aie::fir::resampler::fir_resampler_graph<
-    {TT_DATA}, //TT_DATA 
-    {TT_COEF}, //TT_COEF 
-    {TP_FIR_LEN}, //TP_FIR_LEN 
-    {TP_INTERPOLATE_FACTOR}, //TP_INTERPOLATE_FACTOR 
-    {TP_DECIMATE_FACTOR}, //TP_DECIMATE_FACTOR 
-    {TP_SHIFT}, //TP_SHIFT 
+    {TT_DATA}, //TT_DATA
+    {TT_COEF}, //TT_COEF
+    {TP_FIR_LEN}, //TP_FIR_LEN
+    {TP_INTERPOLATE_FACTOR}, //TP_INTERPOLATE_FACTOR
+    {TP_DECIMATE_FACTOR}, //TP_DECIMATE_FACTOR
+    {TP_SHIFT}, //TP_SHIFT
     {TP_RND}, //TP_RND
-    {TP_INPUT_WINDOW_VSIZE}, //TP_INPUT_WINDOW_VSIZE 
-    {TP_CASC_LEN}, //TP_CASC_LEN 
-    {TP_USE_COEF_RELOAD}, //TP_USE_COEF_RELOAD 
-    {TP_NUM_OUTPUTS}, //TP_NUM_OUTPUTS 
-    {TP_DUAL_IP}, //TP_DUAL_IP 
-    {TP_API} //TP_API 
+    {TP_INPUT_WINDOW_VSIZE}, //TP_INPUT_WINDOW_VSIZE
+    {TP_CASC_LEN}, //TP_CASC_LEN
+    {TP_USE_COEF_RELOAD}, //TP_USE_COEF_RELOAD
+    {TP_NUM_OUTPUTS}, //TP_NUM_OUTPUTS
+    {TP_DUAL_IP}, //TP_DUAL_IP
+    {TP_API} //TP_API
   > filter;
-  
+
   {graphname}() : filter({constr_args_str}) {{
     adf::kernel *filter_kernels = filter.getKernels();
     for (int i=0; i < 1; i++) {{

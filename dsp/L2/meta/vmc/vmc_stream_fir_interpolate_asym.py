@@ -1,4 +1,5 @@
 from fir_interpolate_asym import *
+import fir_polyphase_decomposer as poly
 
 #### VMC validators ####
 def vmc_validate_coef_type(args):
@@ -70,7 +71,18 @@ def vmc_validate_ssr(args):
     interpolate_factor = args["interpolate_factor"]
     ssr = args["ssr"]
     api = 1
-    return fn_validate_ssr(ssr, interpolate_factor, api)    
+    return fn_validate_ssr(ssr, interpolate_factor, api)
+
+def vmc_validate_interp_poly(args):
+  interp_poly = args["interp_poly"]
+  ipol_factor = args["interpolate_factor"]
+  ret = poly.fn_validate_interp_poly(interp_poly, ipol_factor)
+  if ret["is_valid"] == False:
+    err_msg = ret["err_message"]
+    err_msg = err_msg.replace("TP_PARA_INTERP_POLY", "'Interpolate polyphase'")
+    return {"is_valid": False, "err_message": err_msg}
+  else:
+    return {"is_valid": True}
 
 #### VMC graph generator ####
 def vmc_generate_graph(name, args):

@@ -1,38 +1,3 @@
-from fft_ifft_dit_1ch import *
-import json
-import math
-
-#### VMC validators ####
-def vmc_validate_point_size(args):
-    point_size = args["point_size"]
-    dyn_point_size = 0;
-    return fn_validate_point_size(point_size, dyn_point_size)
-
-def vmc_validate_shift_val(args):
-    data_type = args["data_type"]
-    shift_val = args["shift_val"]
-    return fn_validate_shift(data_type, shift_val)
-
-def vmc_validate_input_window_size(args):
-    point_size = args["point_size"]
-    input_window_size = args["input_window_size"]
-    return fn_validate_window_size(point_size, input_window_size)
-
-def vmc_validate_casc_length(args):
-    use_casc_length = args["use_casc_length"]
-    data_type = args["data_type"]
-    point_size = args["point_size"]
-    casc_length = args["casc_length"]
-    if not use_casc_length:
-      return {"is_valid": True}
-
-    return fn_validate_casc_len(data_type, point_size, casc_length)
-	
-# Get twiddle types	
-k_twiddle_type = {"cfloat":"cfloat", "cint32":"cint16", "cint16":"cint16"}
-
-def fn_get_twiddle_type(data_type):
-	return k_twiddle_type[data_type]
 
 #### VMC graph generator ####
 def vmc_generate_graph(name, args):

@@ -350,8 +350,7 @@ class create_casc_kernel<1,
  *         range 3 to 16.
  * @tparam TP_DECIMATE_FACTOR is an unsigned integer which describes the
  *         decimation factor of the filter. TP_DECIMATE_FACTOR must be in the
- *         range 2 to 16. The decimation factor should be less that the interpolation
- *         factor and should not be divisible factor of the interpolation factor.
+ *         range 2 to 16.
  * @tparam TP_SHIFT describes power of 2 shift down applied to the accumulation of
  *         FIR terms before output. \n TP_SHIFT must be in the range 0 to 61.
  * @tparam TP_RND describes the selection of rounding to be applied during the
@@ -367,12 +366,19 @@ class create_casc_kernel<1,
  *         - 7 = round convergent to odd. \n
  *         Modes 2 to 7 round to the nearest integer. They differ only in how
  *         they round for values of 0.5.
- * @tparam TP_INPUT_WINDOW_VSIZE describes the number of samples in the window API
- *         used for input to the filter function. \n
+ * @tparam TP_INPUT_WINDOW_VSIZE describes the number of samples processed by the graph
+ *         in a single iteration run.  \n
+ *         When TP_API is set to 0, samples are buffered and stored in a ping-pong window buffer mapped onto Memory
+ *Group banks. \n
+ *         As a results, maximum number of samples processed by the graph is limited by the size of Memory Group. \n
+ *         When TP_API is set to 1, samples are processed directly from the stream inputs and no buffering takes place.
+ *\n
+ *         In such case, maximum number of samples processed by the graph is limited to 32-bit value (4.294B samples per
+ *iteration).  \n
+ *         TP_INPUT_WINDOW_VSIZE must be an integer multiple of TP_DECIMATE_FACTOR.
  *         The number of values in the output window will be TP_INPUT_WINDOW_VSIZE
  *         multipled by TP_INTERPOLATE_FACTOR and divided by TP_DECIMATE_FACTOR. \n
- *         In the instance this would lead to a fraction number of output samples,
- *         this would be rounded down. \n
+ *         The resulting output window size must be a multiple of 256bits. \n
  *         Note: Margin size should not be included in TP_INPUT_WINDOW_VSIZE.
  * @tparam TP_CASC_LEN describes the number of AIE processors to split the operation
  *         over. \n This allows resource to be traded for higher performance.
@@ -382,7 +388,11 @@ class create_casc_kernel<1,
  *         - 0 = static coefficients, defined in filter constructor,
  *         - 1 = reloadable coefficients, passed as argument to runtime function. \n
  *
- *         Note: when used, optional port: ``` port<input> coeff; ``` will be added to the FIR. \n
+ *         Note: when used, optional port: ``` port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), TP_SSR> coeff;
+ *``` will be added to the FIR. \n
+ *         Note: the size of the port array is equal to the total number of output paths  (TP_SSR).  \n
+ *         Each port should contain the same taps array content, i.e. each additional port must be a duplicate of the
+ *coefficient array. \n
  * @tparam TP_NUM_OUTPUTS sets the number of ports over which the output is sent. \n
  *         This can be 1 or 2. It is set to 1 by default. \n
  *         Depending on TP_API, additional output ports functionality differs.
@@ -422,6 +432,7 @@ template <typename TT_DATA,
 class fir_resampler_graph : public graph {
    private:
     static_assert(TP_CASC_LEN <= 40, "ERROR: Unsupported Cascade length");
+
     // Dual input ports offer no throughput gain if port api is windows.
     // Therefore, dual input ports are only supported with streams and not windows.
     static_assert(TP_API == USE_STREAM_API || TP_DUAL_IP == DUAL_IP_SINGLE,
@@ -454,6 +465,14 @@ class fir_resampler_graph : public graph {
                   "ERROR: Input Window size (based on requrested window size and FIR length margin) exceeds Memory "
                   "Module size of 32kB");
 
+    static constexpr unsigned int TP_SSR = 1;
+    static constexpr unsigned int TP_CASC_IN = 0;
+    static constexpr unsigned int TP_CASC_OUT = 0;
+
+    // 3d array for storing net information.
+    // address[inPhase][outPath][cascPos]
+    // std::array<std::array<std::array<connect<stream,stream> *, TP_CASC_LEN>, TP_SSR>, TP_SSR> net;
+    // std::array<std::array<std::array<connect<stream,stream> *, TP_CASC_LEN>, TP_SSR>, TP_SSR> net2;
     std::array<connect<stream, stream>*, TP_CASC_LEN> net;
     std::array<connect<stream, stream>*, TP_CASC_LEN> net2;
 
@@ -600,6 +619,56 @@ class fir_resampler_graph : public graph {
         }
     }
 
+    static constexpr unsigned int rnd = TP_DECIMATE_FACTOR * TP_SSR;
+
+    template <int dim>
+    struct ssr_params : public fir_params_defaults {
+        static constexpr int Bdim = dim;
+        using BTT_DATA = TT_DATA;
+        using BTT_COEFF = TT_COEFF;
+        static constexpr unsigned int BTP_FIR_LEN = TP_FIR_LEN;
+        static constexpr unsigned int BTP_FIR_RANGE_LEN =
+            TRUNC((CEIL(TP_FIR_LEN, rnd) / (TP_CASC_LEN * TP_SSR)), TP_DECIMATE_FACTOR);
+        static constexpr unsigned int BTP_DECIMATE_FACTOR = TP_DECIMATE_FACTOR;
+        static constexpr unsigned int BTP_INTERPOLATE_FACTOR = TP_INTERPOLATE_FACTOR;
+        static constexpr unsigned int BTP_SHIFT = TP_SHIFT;
+        static constexpr unsigned int BTP_RND = TP_RND;
+        static constexpr unsigned int BTP_INPUT_WINDOW_VSIZE = TP_INPUT_WINDOW_VSIZE;
+        static constexpr bool BTP_CASC_IN = TP_CASC_IN;
+        static constexpr bool BTP_CASC_OUT = TP_CASC_OUT;
+        static constexpr unsigned int BTP_CASC_LEN = TP_CASC_LEN;
+        static constexpr unsigned int BTP_USE_COEFF_RELOAD = TP_USE_COEFF_RELOAD;
+        static constexpr unsigned int BTP_NUM_OUTPUTS = TP_NUM_OUTPUTS;
+        static constexpr unsigned int BTP_DUAL_IP = TP_DUAL_IP;
+        static constexpr unsigned int BTP_API = TP_API;
+        static constexpr unsigned int BTP_SSR = TP_SSR;
+        static constexpr int BTP_MODIFY_MARGIN_OFFSET = 0;
+    };
+
+    using lastSSRKernel = ssr_kernels<ssr_params<TP_SSR - 1>, fir_resampler_tl>;
+
+    template <unsigned int CL>
+    struct tmp_ssr_params : public ssr_params<0> {
+        static constexpr unsigned int BTP_FIR_LEN = CEIL(TP_FIR_LEN, rnd) / TP_SSR;
+        static constexpr unsigned int BTP_CASC_LEN = CL;
+    };
+
+    template <int pos, int CLEN, int T_FIR_LEN, typename T_D, typename T_C, unsigned int T_IF, unsigned int T_DF>
+    static constexpr unsigned int clRecurser() {
+        if
+            constexpr(fir_resampler_tl<tmp_ssr_params<CLEN> >::template fnCheckIfFits<pos, CLEN, T_FIR_LEN, T_D, T_C,
+                                                                                      T_DF, T_IF>() == 1) {
+                if
+                    constexpr(pos == 0) { return CLEN; }
+                else {
+                    return clRecurser<pos - 1, CLEN, T_FIR_LEN, T_D, T_C, T_DF, T_IF>();
+                }
+            }
+        else {
+            return clRecurser<CLEN, CLEN + 1, T_FIR_LEN, T_D, T_C, T_DF, T_IF>();
+        }
+    }
+
    public:
     kernel m_firKernels[TP_CASC_LEN];
 
@@ -630,9 +699,10 @@ class fir_resampler_graph : public graph {
     port_conditional_array<input, (TP_DUAL_IP == 1), 1> in2;
 
     /**
-     * The conditional coefficient data to the function.
-     * This port is (generated when TP_USE_COEFF_RELOAD == 1) an array of coefficients of TT_COEFF type.
-     *
+     * The conditional array of input ports  used to pass run-time programmable (RTP) coeficients.
+     * This port_conditional_array is (generated when TP_USE_COEFF_RELOAD == 1) an array of input ports, which size is
+     *defined by TP_SSR.
+     * Each port in the array holds a duplicate of the coefficient array, required to connect to each SSR input path.
      **/
     port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), 1> coeff;
 
@@ -671,21 +741,6 @@ class fir_resampler_graph : public graph {
      * @param[in] cascadePosition   an index to the kernel's position in the cascade.
      **/
     connect<stream, stream>* getIn2Net(int cascadePosition) { return net2[cascadePosition]; };
-
-    /**
-     * @cond NOCOMMENTS
-     */
-    /**
-    * @brief Access function to get Graphs minimum cascade length for a given configuration.
-    **/
-    static unsigned int getMinCascadeLength() {
-        unsigned int minCascLen = CEIL(TP_FIR_LEN, kMaxTapsPerKernel) / kMaxTapsPerKernel;
-
-        return minCascLen;
-    };
-    /**
-     * @endcond
-     */
 
     /**
     * @brief Access function to get kernel's architecture (or first kernel's architecture in a chained configuration).
@@ -729,7 +784,7 @@ class fir_resampler_graph : public graph {
     };
 
     template <unsigned int T_API, typename T_D>
-    static constexpr unsigned int fnGetMaxTapsPerKernel() {
+    static constexpr unsigned int getMaxTapsPerKernel() {
         if
             constexpr(T_API == 0) { return 256; }
         else {
@@ -740,22 +795,55 @@ class fir_resampler_graph : public graph {
     }
 
     template <typename T_D, typename T_C, int T_PORTS>
-    static constexpr unsigned int fnGetOptTapsPerKernel() {
-        unsigned int optTaps = fnGetOptTapsPerKernelSrAsym<T_D, T_C, T_PORTS>();
+    static constexpr unsigned int getOptTapsPerKernel() {
+        unsigned int optTaps = getOptTapsPerKernelSrAsym<T_D, T_C, T_PORTS>();
         return optTaps;
     };
 
-    template <int T_FIR_LEN, int T_API, typename T_D, unsigned int T_IF, unsigned int T_DF>
-    static constexpr unsigned int fnGetMinCascLen() {
-        constexpr int kMaxTaps = fnGetMaxTapsPerKernel<T_API, T_D>();
-        return getMinCascLen<(T_FIR_LEN * T_DF / T_IF), kMaxTaps>();
+    /**
+    * @brief Access function to get Graphs minimum cascade length for a given configuration.
+    * @tparam T_FIR_LEN tap length of the fir filter
+    * @tparam T_API interface type : 0 - window, 1 - stream
+    * @tparam T_D data type
+    * @tparam T_C coeff type
+    * @tparam T_IF interpolation factor
+    * @tparam T_DF decimation factor
+    * @tparam SSR Super Sample Rate operation - defaults to: 1.
+    **/
+    template <int T_FIR_LEN,
+              int T_API,
+              typename T_D,
+              typename T_C,
+              unsigned int T_IF,
+              unsigned int T_DF,
+              unsigned int SSR = 1>
+    static constexpr unsigned int getMinCascLen() {
+        constexpr int kMaxTaps = getMaxTapsPerKernel<T_API, T_D>();
+        constexpr int firLenPerSSR = CEIL(T_FIR_LEN, SSR) / SSR;
+        constexpr int cLenMin = xf::dsp::aie::getMinCascLen<firLenPerSSR * T_DF / T_IF, kMaxTaps>();
+        if
+            constexpr(T_API == 0) { return cLenMin; }
+        else {
+            return clRecurser<cLenMin - 1, cLenMin, firLenPerSSR, T_D, T_C, T_DF, T_IF>();
+        }
+        return cLenMin;
     };
 
+    /**
+    * @brief Access function to get graph's cascade length to obtain maximum performance for streaming configurations.
+    * @tparam T_FIR_LEN tap length of the fir filter
+    * @tparam T_D data type
+    * @tparam T_C coeff type
+    * @tparam T_API interface type : 0 - window, 1 - stream
+    * @tparam T_PORTS single/dual input and output ports. 1 : single, 2 : dual
+    * @tparam T_IF interpolation factor
+    * @tparam T_DF decimation factor
+    **/
     template <int T_FIR_LEN, typename T_D, typename T_C, int T_API, int T_PORTS, unsigned int T_IF, unsigned int T_DF>
-    static constexpr unsigned int fnGetOptCascLen() {
-        constexpr int kMaxTaps = fnGetMaxTapsPerKernel<T_API, T_D>();
-        constexpr int kRawOptTaps = fnGetOptTapsPerKernel<T_D, T_C, T_PORTS>();
-        return getOptCascLen<kMaxTaps, kRawOptTaps, (T_FIR_LEN * T_DF / T_IF)>();
+    static constexpr unsigned int getOptCascLen() {
+        constexpr int kMaxTaps = getMaxTapsPerKernel<T_API, T_D>();
+        constexpr int kRawOptTaps = getOptTapsPerKernel<T_D, T_C, T_PORTS>();
+        return xf::dsp::aie::getOptCascLen<kMaxTaps, kRawOptTaps, (T_FIR_LEN * T_DF / T_IF)>();
     };
 };
 }

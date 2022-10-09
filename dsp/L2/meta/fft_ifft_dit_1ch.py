@@ -1,8 +1,8 @@
 
 
 from aie_common import *
-import json 
-import sys 
+import json
+import sys
 
 # fft_ifft_dit_1ch.hpp:821:    static_assert(fnCheckDataType<TT_DATA>(), "ERROR: TT_IN_DATA is not a supported type");
 # fft_ifft_dit_1ch.hpp:822:    static_assert(fnCheckDataType<TT_OUT_DATA>(), "ERROR: TT_OUT_DATA is not a supported type");
@@ -15,8 +15,8 @@ import sys
 # fft_ifft_dit_1ch.hpp:828:    static_assert(TP_FFT_NIFFT == 0 || TP_FFT_NIFFT == 1, "ERROR: TP_FFT_NIFFT must be 0 (reverse) or 1 (forward)");
 # fft_ifft_dit_1ch.hpp:829:    static_assert(fnCheckShift<TP_SHIFT>(), "ERROR: TP_SHIFT is out of range (0 to 60)");
 # fft_ifft_dit_1ch.hpp:830:    static_assert(fnCheckShiftFloat<TT_DATA, TP_SHIFT>(),
-# fft_ifft_dit_1ch.hpp:832:    static_assert(TP_WINDOW_VSIZE % TP_POINT_SIZE == 0, "ERROR: TP_WINDOW_SIZE must be a multiple of TP_POINT_SIZE");
-# fft_ifft_dit_1ch.hpp:833:    static_assert(TP_WINDOW_VSIZE / TP_POINT_SIZE >= 1, "ERROR: TP_WINDOW_SIZE must be a multiple of TP_POINT_SIZE")
+# fft_ifft_dit_1ch.hpp:832:    static_assert(TP_WINDOW_VSIZE % TP_POINT_SIZE == 0, "ERROR: TP_WINDOW_VSIZE must be a multiple of TP_POINT_SIZE");
+# fft_ifft_dit_1ch.hpp:833:    static_assert(TP_WINDOW_VSIZE / TP_POINT_SIZE >= 1, "ERROR: TP_WINDOW_VSIZE must be a multiple of TP_POINT_SIZE")
 # fft_ifft_dit_1ch.hpp:834:    static_assert((TP_DYN_PT_SIZE == 0) || (TP_POINT_SIZE != 16),
 # fft_ifft_dit_1ch_graph.hpp:152:        static_assert(fnCheckCascLen<TT_DATA, TP_END_RANK, TP_CASC_LEN>(), "Error: TP_CASC_LEN is invalid");
 # fft_ifft_dit_1ch_graph.hpp:153:        static_assert(fnCheckCascLen2<TT_DATA, TP_POINT_SIZE, TP_CASC_LEN>(), "Error: 16 point float FFT does not support cascade")
@@ -30,7 +30,7 @@ def fn_validate_twiddle_type(TT_DATA, TT_TWIDDLE):
       ("cfloat", "cfloat")
     ]
   return (
-    isValid if ((TT_DATA,TT_TWIDDLE) in validTypeCombos) 
+    isValid if ((TT_DATA,TT_TWIDDLE) in validTypeCombos)
     else (
     isError(f"Invalid Data/Twiddle type combination ({TT_DATA},{TT_TWIDDLE}). ")
     )
@@ -41,9 +41,9 @@ def validate_TT_TWIDDLE(args):
   TT_TWIDDLE = args["TT_TWIDDLE"]
   return fn_validate_twiddle_type(TT_DATA, TT_TWIDDLE)
 
-#https://stackoverflow.com/a/57025941 
-#  every power of 2 has exactly 1 bit set to 1 (the bit in that number's log base-2 index). 
-# So when subtracting 1 from it, that bit flips to 0 and all preceding bits flip to 1. 
+#https://stackoverflow.com/a/57025941
+#  every power of 2 has exactly 1 bit set to 1 (the bit in that number's log base-2 index).
+# So when subtracting 1 from it, that bit flips to 0 and all preceding bits flip to 1.
 # That makes these 2 numbers the inverse of each other so when AND-ing them, we will
 #  get 0 as the result.
 def fn_is_power_of_two(n):
@@ -51,56 +51,73 @@ def fn_is_power_of_two(n):
     (n & (n-1) == 0) and n!=0 )
 
 # good candidate for aie_common, especially if we want to give better error messages
-# finds the first instance of a given paramter name in the list of parameters. 
+# finds the first instance of a given paramter name in the list of parameters.
 # Retuns None if can't find it
 def fn_get_parameter_json(metadata_json, param_name):
   return next((param for param in metadata_json["parameters"] if param["name"] == param_name), None)
 
-# Resolve the dirname of this file, so this is never a relative path from cwd. 
+# Resolve the dirname of this file, so this is never a relative path from cwd.
 import os
 path_dirname_to_this_file = os.path.dirname(os.path.abspath(__file__))
 #read the metadata json file to get the min supported point size, to avoid duplication and maintence hazard
 def fn_get_min_supported_point_size():
 
   try:
-    with open(f"{path_dirname_to_this_file}/fft_ifft_dit_1ch.json") as filePointer: 
+    with open(f"{path_dirname_to_this_file}/fft_ifft_dit_1ch.json") as filePointer:
       fft_metadata_json = json.load(filePointer)
   except Exception as e:
     sys.exit(f"Failed to open metadata json file. {e}")
-  
+
   # grab the point size object from the json
   pointSizeJson = fn_get_parameter_json(fft_metadata_json, "TP_POINT_SIZE")
   # get the min and  if we don't find minimum, then assume no min
-  minPointSize = (pointSizeJson["minimum"]) if pointSizeJson else 0 
+  minPointSize = (pointSizeJson["minimum"]) if pointSizeJson else 0
   return minPointSize
 
 
 
-def fn_validate_point_size(TP_POINT_SIZE, TP_DYN_PT_SIZE):
+def fn_validate_point_size(TP_POINT_SIZE, TP_DYN_PT_SIZE, TT_DATA, TP_PARALLEL_POWER, TP_API):
   checkPointSizeIsPowerOf2 = isValid if fn_is_power_of_two(TP_POINT_SIZE) else (
-    isError(f"TP_POINT_SIZE ({TP_POINT_SIZE}) must be a power of 2")
+    isError(f"Point size ({TP_POINT_SIZE}) must be a power of 2")
   )
 
   minPointSize = fn_get_min_supported_point_size()
-  # You can't switch between multiple point sizes if the max point size specified is also the minimum supported.. 
+  # You can't switch between multiple point sizes if the max point size specified is also the minimum supported..
   checkDynPointSizeIsMoreThanMinPointSize = (
-    isError(f"TP_POINT_SIZE ({TP_POINT_SIZE}) must be higher than the minimum suppored point size ({minPointSize}) when using dynamic point sizes.")
+    isError(f"Point size ({TP_POINT_SIZE}) must be higher than the minimum suppored size ({minPointSize}) when using dynamic point FFT.")
     if (TP_DYN_PT_SIZE == 1 and TP_POINT_SIZE <= minPointSize)
     else isValid
   )
 
-  
   for check in (checkPointSizeIsPowerOf2,checkDynPointSizeIsMoreThanMinPointSize):
     if check["is_valid"] == False :
       return check
+
+  if (TT_DATA=="cint16"):
+    if (TP_API == 0):
+      if ((TP_POINT_SIZE>>TP_PARALLEL_POWER) > 2048):
+        isError(f"Point size per kernel cannot exceed 2048 for cint16 with Windowed interfaces ")
+      else:
+        if ((TP_POINT_SIZE>>TP_PARALLEL_POWER) > 4096):
+          isError(f"Point size per kernel cannot exceed 4096 for cint16 with Streaming interfaces ")
+    else:
+      if (TP_API == 0):
+        if ((TP_POINT_SIZE>>TP_PARALLEL_POWER) > 1024):
+          isError(f"Point size per kernel cannot exceed 1024 for cint32 or cfloat with Windowed interfaces ")
+        else:
+          if ((TP_POINT_SIZE>>TP_PARALLEL_POWER) > 2048):
+            isError(f"Point size per kernel cannot exceed 2048 for cint32 or cfloat with Streaming interfaces ")
   return isValid
 
 def validate_TP_POINT_SIZE(args):
   TP_POINT_SIZE = args["TP_POINT_SIZE"]
   TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"]
-  return fn_validate_point_size(TP_POINT_SIZE, TP_DYN_PT_SIZE)
+  TT_DATA = args["TT_DATA"]
+  TP_PARALLEL_POWER = args["TP_PARALLEL_POWER"]
+  TP_API = args["TP_API"]
+  return fn_validate_point_size(TP_POINT_SIZE, TP_DYN_PT_SIZE, TT_DATA, TP_PARALLEL_POWER, TP_API)
 
-  
+
 def validate_TP_SHIFT(args):
   TP_SHIFT = args["TP_SHIFT"]
   TT_DATA = args["TT_DATA"]
@@ -111,10 +128,10 @@ def fn_log2(n):
   original_n = n
   if not fn_is_power_of_two(n):
     sys.exit("invalid assumption that n is a power of two")
-  if n != 0: 
+  if n != 0:
     power_cnt = 0
     while n % 2 == 0:
-      # keep right shifting until the power of two bit is at the LSB. 
+      # keep right shifting until the power of two bit is at the LSB.
       n = n >> 1
       power_cnt+=1
       #print(f"n={n} and iter={power_cnt}")
@@ -126,14 +143,14 @@ def fn_log2(n):
     #return Inf
 
 def fn_validate_casc_len(TT_DATA, TP_POINT_SIZE, TP_CASC_LEN):
-  # Defines how many radix-2 ranks there are. 
+  # Defines how many radix-2 ranks there are.
   log2PointSize = fn_log2(TP_POINT_SIZE)
   # equation for integer ffts is complicated by the fact that odd power of 2 point sizes start with a radix 2 stage
   TP_END_RANK = CEIL(log2PointSize, 2) if TT_DATA != "cfloat" else log2PointSize
-  
-  checkCascLenIsNotGreaterThanRanks = ( 
-    isValid if (TP_CASC_LEN <= TP_END_RANK) else 
-    isError("TP_CASC_LEN is greater than ")
+
+  checkCascLenIsNotGreaterThanRanks = (
+    isValid if (TP_CASC_LEN <= TP_END_RANK) else
+    isError(f"Cascade length is greater than ({TP_END_RANK})")
   )
 
   return checkCascLenIsNotGreaterThanRanks
@@ -146,22 +163,21 @@ def validate_TP_CASC_LEN(args):
 
 
 
-def fn_validate_window_size(TP_POINT_SIZE, TP_WINDOW_VSIZE):
-   # Not nessecary to check:
-   #  (TP_WINDOW_VSIZE // TP_POINT_SIZE >= 1) 
-   # This is caught by min window size. 
+def fn_validate_window_size(TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_DYN_PT_SIZE):
+  # Disable the window_vsize check for dynamic point size, due to incorrectly created caller function's arguments.
+  if (TP_DYN_PT_SIZE == 1) :
+   return isValid
 
+  if (TP_WINDOW_VSIZE % TP_POINT_SIZE != 0):
+    return isError(f"Input window size ({TP_WINDOW_VSIZE}) must be a multiple of point size ({TP_POINT_SIZE}) ")
+  return isValid
 
-  checkWindowIsMulipleOfPointSize = ( 
-    isValid if (TP_WINDOW_VSIZE % TP_POINT_SIZE == 0) else
-    isError("TP_WINDOW_SIZE ({TP_WINDOW_SIZE}) must be a multiple of TP_POINT_SIZE ({TP_POINT_SIZE}) ")
-  ) 
-  return checkWindowIsMulipleOfPointSize
 
 def validate_TP_WINDOW_VSIZE(args):
   TP_POINT_SIZE = args["TP_POINT_SIZE"]
   TP_WINDOW_VSIZE = args["TP_WINDOW_VSIZE"]
-  return fn_validate_window_size(TP_POINT_SIZE, TP_WINDOW_VSIZE)
+  TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"]
+  return fn_validate_window_size(TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_DYN_PT_SIZE)
 
 
 
@@ -183,19 +199,19 @@ def validate_TP_PARALLEL_POWER(args):
 
   ######### Graph Generator ############
 
-# Used by higher layer software to figure out how to connect blocks together. 
+# Used by higher layer software to figure out how to connect blocks together.
 
 def get_dyn_pt_port_info(portname, dir, TT_DATA, windowVSize, vectorLength=None, marginSize=0, TP_API=0):
-  return [{ 
+  return [{
     "name" : f"{portname}[{idx}]" if vectorLength else f"{portname}", # portname no index
     "type" : "window" if TP_API==0 else "stream",
     "direction" : f"{dir}",
-    "data_type" : TT_DATA, 
+    "data_type" : TT_DATA,
     "fn_is_complex" : fn_is_complex(TT_DATA),
     "window_size" : fn_input_window_size(windowVSize, TT_DATA) + 32,
     "margin_size": marginSize
   } for idx in range((vectorLength if vectorLength else 1))] # do just one port if vectorLength=None
-  
+
 def info_ports(args):
   """Standard function creating a static dictionary of information
   for upper software to correctly connect the IP.
@@ -213,7 +229,10 @@ def info_ports(args):
     out_ports = get_port_info("out", "out", TT_DATA, TP_WINDOW_VSIZE, 1, 0, TP_API)
   elif TP_API == 0 and TP_DYN_PT_SIZE == 1:
     in_ports = get_dyn_pt_port_info("in", "in", TT_DATA, (TP_WINDOW_VSIZE/2**(TP_PARALLEL_POWER)), 2**TP_PARALLEL_POWER, 0, TP_API)
-    out_ports = get_dyn_pt_port_info("out", "out", TT_DATA, (TP_WINDOW_VSIZE/2**(TP_PARALLEL_POWER)), 2**TP_PARALLEL_POWER, 0, TP_API)  
+    out_ports = get_dyn_pt_port_info("out", "out", TT_DATA, (TP_WINDOW_VSIZE/2**(TP_PARALLEL_POWER)), 2**TP_PARALLEL_POWER, 0, TP_API)
+  elif TP_API == 1 and TP_DYN_PT_SIZE == 1:
+    in_ports = get_dyn_pt_port_info("in", "in", TT_DATA, (TP_WINDOW_VSIZE/2**(TP_PARALLEL_POWER + 1)), 2**(TP_PARALLEL_POWER + 1), 0, TP_API)
+    out_ports = get_dyn_pt_port_info("out", "out", TT_DATA, (TP_WINDOW_VSIZE/2**(TP_PARALLEL_POWER + 1)), 2**(TP_PARALLEL_POWER + 1), 0, TP_API)
   else:
     in_ports = get_port_info("in", "in", TT_DATA, (TP_WINDOW_VSIZE/2**(TP_PARALLEL_POWER+1)), 2**(TP_PARALLEL_POWER+1), 0, 1)
     out_ports = get_port_info("out", "out", TT_DATA, (TP_WINDOW_VSIZE/2**(TP_PARALLEL_POWER+1)), 2**(TP_PARALLEL_POWER+1), 0, 1)
@@ -233,7 +252,7 @@ def generate_graph(graphname, args):
   TP_WINDOW_VSIZE = args["TP_WINDOW_VSIZE"]
   TP_API = args["TP_API"]
   TP_PARALLEL_POWER = args["TP_PARALLEL_POWER"]
-  
+
   if TP_API == 0 and TP_DYN_PT_SIZE == 0:
     ssr = 1
   elif TP_API == 0 and TP_DYN_PT_SIZE == 1:
@@ -273,7 +292,7 @@ public:
     }}
   }}
 }};
-"""    
+"""
   )
   out = {}
   out["graph"] = code
@@ -289,5 +308,3 @@ public:
   ]
   return out
 
-
-print("Finished processing FFT metadata script.")

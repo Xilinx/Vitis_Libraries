@@ -6,7 +6,9 @@
     "platform_allowlist": [
         "vck190"
     ],
-    "data": ["PROJECT/data/"],
+    "data": [
+        "PROJECT/data/"
+    ],
     "platform_properties": {
         "vck190": {
             "v++": {
@@ -26,13 +28,13 @@
     },
     "pre_build": [
         {
-            "build_cmd": "tclsh LIB_DIR/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL) $(PARAM_MAP)"
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL) $(PARAM_MAP))"
         },
         {
-            "build_cmd": "vitis -exec ipmetadata_config_checker LIB_DIR/L2/meta/$(UUT_KERNEL).json ./config.json -newflow"
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), vitis -exec ipmetadata_config_checker LIB_DIR/L2/meta/$(UUT_KERNEL).json ./config.json -newflow)"
         },
         {
-            "build_cmd": "make -f PROJECT/golden.mk GOLDEN_CUR_DIR=PROJECT GOLDEN_ROOT_DIR=LIB_DIR LOC_INPUT_FILE_A=$(LOC_INPUT_FILE_A) LOC_INPUT_FILE_B=$(LOC_INPUT_FILE_B) P_INPUT_WINDOW_VSIZE_A=$(P_INPUT_WINDOW_VSIZE_A) STIM_TYPE_A=$(STIM_TYPE_A) INPUT_FILE_B=$(INPUT_FILE_B) P_INPUT_WINDOW_VSIZE_B=$(P_INPUT_WINDOW_VSIZE_B) STIM_TYPE_B=$(STIM_TYPE_B) NITER_UUT=$(NITER_UUT) P_DIM_A=$(P_DIM_A) P_DIM_AB=$(P_DIM_AB) T_DATA_A=$(T_DATA_A) T_DATA_B=$(T_DATA_B) P_CASC_LEN=$(P_CASC_LEN) P_DIM_A_LEADING=$(P_DIM_A_LEADING) P_ADD_TILING_A=$(P_ADD_TILING_A) P_DIM_B=$(P_DIM_B) P_DIM_B_LEADING=$(P_DIM_B_LEADING) P_ADD_TILING_B=$(P_ADD_TILING_B) "
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), make -f PROJECT/golden.mk GOLDEN_CUR_DIR=PROJECT GOLDEN_ROOT_DIR=LIB_DIR LOC_INPUT_FILE_A=$(LOC_INPUT_FILE_A) LOC_INPUT_FILE_B=$(LOC_INPUT_FILE_B) P_INPUT_WINDOW_VSIZE_A=$(P_INPUT_WINDOW_VSIZE_A) STIM_TYPE_A=$(STIM_TYPE_A) INPUT_FILE_B=$(INPUT_FILE_B) P_INPUT_WINDOW_VSIZE_B=$(P_INPUT_WINDOW_VSIZE_B) STIM_TYPE_B=$(STIM_TYPE_B) NITER_UUT=$(NITER_UUT) P_DIM_A=$(P_DIM_A) P_DIM_AB=$(P_DIM_AB) T_DATA_A=$(T_DATA_A) T_DATA_B=$(T_DATA_B) P_CASC_LEN=$(P_CASC_LEN) P_DIM_A_LEADING=$(P_DIM_A_LEADING) P_ADD_TILING_A=$(P_ADD_TILING_A) P_DIM_B=$(P_DIM_B) P_DIM_B_LEADING=$(P_DIM_B_LEADING) P_ADD_TILING_B=$(P_ADD_TILING_B) )"
         }
     ],
     "post_launch": [
@@ -46,7 +48,7 @@
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE)",
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP) STIM_TYPE_A $(STIM_TYPE_A) STIM_TYPE_B $(STIM_TYPE_B) NITER $(NITER)",
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/get_stats.tcl $(NUM_MACS_PER_KERNEL) $(P_CASC_LEN) $(STATUS_FILE) ./aiesimulator_output matMult_impl1",
-		        "tclsh LIB_DIR/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_mtx_theoretical_min.tcl $(T_DATA_A) $(T_DATA_B) $(NUM_MACS_PER_KERNEL) $(P_CASC_LEN) $(STATUS_FILE) $(UUT_KERNEL)",
+                "tclsh LIB_DIR/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_mtx_theoretical_min.tcl $(T_DATA_A) $(T_DATA_B) $(NUM_MACS_PER_KERNEL) $(P_CASC_LEN) $(STATUS_FILE) $(UUT_KERNEL)",
                 "LIB_DIR/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) LIB_DIR/L2/tests/aie/common/scripts",
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./"
             ]
@@ -54,13 +56,13 @@
         {
             "target": "x86sim",
             "launch_cmd": [
-                "mkdir -p logs",
-                "grep -ve '[XT]' ./x86simulator_output/data/uut_output.txt > ./logs/uut_output.txt",
-                "grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./logs/ref_output.txt",
-                "perl LIB_DIR/L2/tests/aie/common/scripts/matrix_mult_partition_shuffle.pl --untile --inFile ./logs/uut_output.txt --tileInPlace --inRow $(P_DIM_A) --inCol $(P_DIM_B) --T_DATA_A $(T_DATA_A) --T_DATA_B $(T_DATA_B) --colMajor $(P_DIM_OUT_LEADING) --isTiled $(P_ADD_DETILING_OUT) ",
-                "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE)",
-                "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./"
-                ]
+                "$(if $(filter-out REF,$(TAG)), mkdir -p logs)",
+                "$(if $(filter-out REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/uut_output.txt > ./logs/uut_output.txt)",
+                "$(if $(filter-out REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./logs/ref_output.txt)",
+                "$(if $(filter-out REF,$(TAG)), perl LIB_DIR/L2/tests/aie/common/scripts/matrix_mult_partition_shuffle.pl --untile --inFile ./logs/uut_output.txt --tileInPlace --inRow $(P_DIM_A) --inCol $(P_DIM_B) --T_DATA_A $(T_DATA_A) --T_DATA_B $(T_DATA_B) --colMajor $(P_DIM_OUT_LEADING) --isTiled $(P_ADD_DETILING_OUT) )",
+                "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE))",
+                "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./)"
+            ]
         }
     ],
     "launch": [
@@ -85,31 +87,31 @@
                 "./"
             ],
             "customized_params": {
-                "params" : "--dataflow -v $($(TAG)_TARGET_COMPILE_ARGS) -workdir=$($(TAG)_WORK_DIR) -Xpreproc=\"$($(TAG)_PREPROC_ARGS)\"",
+                "params": "--dataflow -v $($(TAG)_TARGET_COMPILE_ARGS) -workdir=$($(TAG)_WORK_DIR) -Xpreproc=\"$($(TAG)_PREPROC_ARGS)\"",
                 "default": {
                     "TAG": "UUT",
                     "UUT_KERNEL": "matrix_mult",
                     "REF_KERNEL": "matrix_mult_ref",
                     "UUT_GRAPH": "matrix_mult_graph",
                     "REF_GRAPH": "matrix_mult_ref_graph",
-                    "NITER":"16",
-                    "NITER_UUT":"$(NITER)",
-                    "NITER_REF":"$(NITER)",
-                    "INPUT_WINDOW_VSIZE":"256",
-                    "UUT_INPUT_WINDOW_VSIZE":"$(INPUT_WINDOW_VSIZE)",
+                    "NITER": "16",
+                    "NITER_UUT": "$(NITER)",
+                    "NITER_REF": "$(NITER)",
+                    "INPUT_WINDOW_VSIZE": "256",
+                    "UUT_INPUT_WINDOW_VSIZE": "$(INPUT_WINDOW_VSIZE)",
                     "REF_INPUT_WINDOW_VSIZE": "$$(( $(UUT_INPUT_WINDOW_VSIZE) * $(NITER_UUT) / $(NITER_REF)))",
-                    "DATA_TYPE":"cint16",
-                    "SHIFT":"20",
-                    "ROUND_MODE":"0",
-                    "CASC_LEN":"1",
-                    "P_CASC_LEN":"1",
+                    "DATA_TYPE": "cint16",
+                    "SHIFT": "20",
+                    "ROUND_MODE": "0",
+                    "CASC_LEN": "1",
+                    "P_CASC_LEN": "1",
                     "DIFF_TOLERANCE": "0",
                     "CC_TOLERANCE": "0",
                     "DATA_SEED": "1",
                     "DATA_STIM_TYPE": "0",
-                    "STIM_TYPE_A":"0",
-                    "STIM_TYPE_B":"0",
-                    "STACKSIZE_VAL":"2048",
+                    "STIM_TYPE_A": "0",
+                    "STIM_TYPE_B": "0",
+                    "STACKSIZE_VAL": "2048",
                     "T_DATA_A": "cint16",
                     "T_DATA_B": "$(T_DATA_A)",
                     "P_SHIFT": "$(SHIFT)",
@@ -117,31 +119,31 @@
                     "P_DIM_A": "16",
                     "P_DIM_AB": "$(P_DIM_A)",
                     "P_DIM_B": "$(P_DIM_A)",
-                    "ROW_MAJOR":"0",
-                    "COL_MAJOR":"1",
-                    "P_INPUT_WINDOW_VSIZE_A":"$$(( $(P_DIM_A) * $(P_DIM_AB)))",
-                    "P_INPUT_WINDOW_VSIZE_B":"$$(( $(P_DIM_B) * $(P_DIM_AB)))",
-                    "P_ADD_TILING_A" : "1",
-                    "P_ADD_TILING_B" : "1",
-                    "P_ADD_DETILING_OUT" : "1",
+                    "ROW_MAJOR": "0",
+                    "COL_MAJOR": "1",
+                    "P_INPUT_WINDOW_VSIZE_A": "$$(( $(P_DIM_A) * $(P_DIM_AB)))",
+                    "P_INPUT_WINDOW_VSIZE_B": "$$(( $(P_DIM_B) * $(P_DIM_AB)))",
+                    "P_ADD_TILING_A": "1",
+                    "P_ADD_TILING_B": "1",
+                    "P_ADD_DETILING_OUT": "1",
                     "NUM_MACS_PER_KERNEL": "$(shell echo $$(( ( $(P_DIM_A) * $(P_DIM_AB) * $(P_DIM_B) ) / $(P_CASC_LEN) )))",
-                    "P_DIM_A_LEADING":"$(ROW_MAJOR)",
-                    "P_DIM_B_LEADING":"$(COL_MAJOR)",
-                    "P_DIM_OUT_LEADING":"$(ROW_MAJOR)",
-                    "UUT_SIM_FILE":"./data/uut_output.txt",
+                    "P_DIM_A_LEADING": "$(ROW_MAJOR)",
+                    "P_DIM_B_LEADING": "$(COL_MAJOR)",
+                    "P_DIM_OUT_LEADING": "$(ROW_MAJOR)",
+                    "UUT_SIM_FILE": "./data/uut_output.txt",
                     "REF_SIM_FILE": "./data/ref_output.txt",
-                    "UUT_SIM_FILE2":"./data/uut_output_2.txt",
+                    "UUT_SIM_FILE2": "./data/uut_output_2.txt",
                     "REF_SIM_FILE2": "./data/ref_output_2.txt",
-                    "LOC_INPUT_FILE_A":"./data/inputA.txt",
-                    "LOC_INPUT_FILE_B":"./data/inputB.txt",
+                    "LOC_INPUT_FILE_A": "./data/inputA.txt",
+                    "LOC_INPUT_FILE_B": "./data/inputB.txt",
                     "UUT_FILE_SUFFIX": "$(UUT_KERNEL)_$(T_DATA_A)_$(T_DATA_B)_$(STIM_TYPE_A)_$(STIM_TYPE_B)_$(P_SHIFT)_$(P_ROUND_MODE)_$(P_DIM_A)_$(P_DIM_AB)_$(P_DIM_B)_$(P_INPUT_WINDOW_VSIZE_A)_$(P_INPUT_WINDOW_VSIZE_B)_$(P_ADD_TILING_A)_$(P_ADD_TILING_B)_$(P_ADD_DETILING_OUT)_$(P_DIM_A_LEADING)_$(P_DIM_B_LEADING)_$(P_DIM_OUT_LEADING)",
                     "LOG_FILE": "./logs/log_$(UUT_FILE_SUFFIX).txt",
                     "STATUS_LOG_FILE": "./logs/status_$(UUT_FILE_SUFFIX).txt",
                     "STATUS_FILE": "$(STATUS_LOG_FILE)",
                     "UUT_TARGET_COMPILE_ARGS": "-Xchess=llvm.xargs=\"-std=c++2a\" -Xchess=main:backend.mist2.xargs=\"+NOdra\"  -Xchess=main:backend.mist2.pnll=\"off\" ",
-                    "REF_TARGET_COMPILE_ARGS":"",
-                    "UUT_WORK_DIR":"./Work",
-                    "REF_WORK_DIR":"./Work",
+                    "REF_TARGET_COMPILE_ARGS": "",
+                    "UUT_WORK_DIR": "./Work",
+                    "REF_WORK_DIR": "./Work",
                     "PREPROC_ARGS": " -DINPUT_FILE_A=$(LOC_INPUT_FILE_A) -DINPUT_FILE_B=$(LOC_INPUT_FILE_B) -DT_DATA_A=$(T_DATA_A) -DT_DATA_B=$(T_DATA_B) -DP_DIM_A=$(P_DIM_A) -DP_DIM_AB=$(P_DIM_AB) -DP_DIM_B=$(P_DIM_B) -DP_SHIFT=$(P_SHIFT) -DP_ROUND_MODE=$(P_ROUND_MODE) -DP_DIM_A_LEADING=$(P_DIM_A_LEADING) -DP_DIM_B_LEADING=$(P_DIM_B_LEADING) -DP_DIM_OUT_LEADING=$(P_DIM_OUT_LEADING) -DP_ADD_TILING_A=$(P_ADD_TILING_A) -DP_ADD_TILING_B=$(P_ADD_TILING_B) -DP_ADD_DETILING_OUT=$(P_ADD_DETILING_OUT) -DP_INPUT_WINDOW_VSIZE_A=$(P_INPUT_WINDOW_VSIZE_A) -DP_INPUT_WINDOW_VSIZE_B=$(P_INPUT_WINDOW_VSIZE_B) -DP_CASC_LEN=$(P_CASC_LEN) -DSTIM_TYPE_A=$(STIM_TYPE_A) -DSTIM_TYPE_B=$(STIM_TYPE_B) -DNITER=$(NITER)",
                     "REF_PREPROC_ARGS": "-DUUT_GRAPH=$(REF_GRAPH) -DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS)",
                     "UUT_PREPROC_ARGS": "-DUUT_GRAPH=$(UUT_GRAPH) -DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) -DUSING_UUT=1",
@@ -155,7 +157,11 @@
             "accelerators": [
                 {
                     "location": "PROJECT/test.cpp",
-                    "files": ["LIB_DIR/L1/src/aie/matrix_mult.cpp", "LIB_DIR/L1/src/aie/matrix_mult_tiler.cpp","LIB_DIR/L1/src/aie/matrix_mult_untiler.cpp"],
+                    "files": [
+                        "LIB_DIR/L1/src/aie/matrix_mult.cpp",
+                        "LIB_DIR/L1/src/aie/matrix_mult_tiler.cpp",
+                        "LIB_DIR/L1/src/aie/matrix_mult_untiler.cpp"
+                    ],
                     "pl-freq": 1000,
                     "workdir": "./Work",
                     "options": "",

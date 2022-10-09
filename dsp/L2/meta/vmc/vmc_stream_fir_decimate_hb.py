@@ -20,8 +20,9 @@ def vmc_validate_input_window_size(args):
 	coeff = args["coeff"]
 	api = 1
 	ssr = args["ssr"]
+	deci_poly = args["deci_poly"]
 	fir_length = fn_get_fir_length_hb(args)
-	return fn_validate_input_window_size(data_type, coef_type, fir_length, input_window_size, api, ssr)
+	return fn_validate_input_window_size(data_type, coef_type, fir_length, input_window_size, api, ssr, deci_poly)
 
 def vmc_validate_casc_length(args):
     use_coeff_reload = args["use_coeff_reload"]
@@ -41,14 +42,27 @@ def vmc_validate_coeff(args):
 	data_type = args["data_type"]
 	casc_length = args["casc_length"]
 	ssr = args["ssr"]
-	api = 1
+	deci_poly = args["deci_poly"]
+	api = 1        
 	fir_length = fn_get_fir_length_hb(args)
-	return fn_validate_fir_len(data_type, coef_type, fir_length, casc_length, ssr, api, use_coeff_reload )
+	return fn_validate_fir_len(data_type, coef_type, fir_length, casc_length, ssr, api, use_coeff_reload, deci_poly)
 
 def vmc_validate_shift_val(args):
 	data_type = args["data_type"]
 	shift_val = args["shift_val"]
 	return fn_validate_shift(data_type, shift_val)
+
+def vmc_validate_deci_poly(args):
+        deci_poly = args["deci_poly"]
+        ssr = args["ssr"]
+        api = 1
+        ret = fn_validate_para_deci_poly(api, deci_poly, ssr)
+        if ret["is_valid"] == False:
+          err_msg = ret["err_message"]
+          err_msg = err_msg.replace("TP_PARA_DECI_POLY", "'Decimate polyphase'")
+          return {"is_valid": False, "err_message": err_msg}
+        else:
+          return {"is_valid": True}
 
 #### VMC graph generator ####
 def vmc_generate_graph(name, args):

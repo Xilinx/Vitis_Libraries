@@ -58,7 +58,7 @@
             "PORT_API":"1",
             "DUAL_IP" : "1",
             "NUM_OUTPUTS" : "2",
-            "INPUT_WINDOW_VSIZE":"512",
+            "INPUT_WINDOW_VSIZE":"1024",
             "DIFF_TOLERANCE":"0.0025",
             "CC_TOLERANCE":"0.0025"
         },
@@ -73,7 +73,7 @@
             "NUM_OUTPUTS":"2",
             "PORT_API":"1",
             "USE_CUSTOM_CONSTRAINT":"1",
-            "INPUT_WINDOW_VSIZE":"2560"
+            "INPUT_WINDOW_VSIZE":"7680"
         },
         "test_7_int16_stream": {
             "DATA_TYPE":"int16",
@@ -139,6 +139,33 @@
             "PORT_API":"1",
             "USE_COEFF_RELOAD":"2",
             "INPUT_WINDOW_VSIZE":"25600"
+        },
+        "test_12_cint16_ssr_6": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int16",
+            "FIR_LEN":"48",
+            "SHIFT":"16",
+            "CASC_LEN":"1",
+            "UUT_SSR": "6",
+            "DUAL_IP":"1",
+            "NUM_OUTPUTS":"2",
+            "PORT_API":"1",
+            "USE_COEFF_RELOAD":"0",
+            "INPUT_WINDOW_VSIZE":"49152"
+        },
+        "test_13_cint16_ssr_7": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int16",
+            "FIR_LEN":"56",
+            "SHIFT":"16",
+            "CASC_LEN":"1",
+            "UUT_SSR": "7",
+            "DUAL_IP":"1",
+            "NITER":"4",
+            "NUM_OUTPUTS":"2",
+            "PORT_API":"1",
+            "USE_COEFF_RELOAD":"0",
+            "INPUT_WINDOW_VSIZE":"57344"
         }
     }
 }

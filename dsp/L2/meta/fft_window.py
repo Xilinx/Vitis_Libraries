@@ -30,61 +30,71 @@ def fn_validate_coeff_type(TT_DATA, TT_COEFF):
   if ((TT_DATA=="cint16" and TT_COEFF=="int16") or (TT_DATA=="cint32" and TT_COEFF=="int32") or (TT_DATA=="cfloat" and TT_COEFF=="float")):
     return isValid
   else:
-    return isError("TT_COEFF must be the atomic type of TT_DATA")
+    return isError("Coefficient type must be the atomic type of data")
 
-def fn_validate_point_size(TP_POINT_SIZE):
-  if (TP_POINT_SIZE in [16,32,64,128,256,512,1024,2048,4096,8192,16384,32768,65536]) :
+def fn_validate_point_size(TP_POINT_SIZE, TT_DATA):
+  if (TP_POINT_SIZE % (16/fn_size_by_byte(TT_DATA) ) == 0) :
     return isValid
   else:
-    return isError("TP_POINT_SIZE must be a power of 2 and must be between 16 and 65536")
+    return isError("Point size must describe a frame size which is a multiple of 128 bits.")
 
 def fn_validate_window_vsize(TP_POINT_SIZE,TP_WINDOW_VSIZE):
-  if ((TP_WINDOW_VSIZE in [16,32,64,128,256,512,1024,2048,4096,8192,16384,32768,65536]) and (TP_WINDOW_VSIZE>=TP_POINT_SIZE) and (TP_WINDOW_VSIZE%TP_POINT_SIZE==0)) :
+  if ((TP_WINDOW_VSIZE>=TP_POINT_SIZE) and (TP_WINDOW_VSIZE%TP_POINT_SIZE==0)) :
     return isValid
   else:
-    return isError("TP_WINDOW_VSIZE must be an integer multiple of TP_POINT_SIZE")
+    return isError("Window size must be an integer multiple of point size")
 
 def fn_validate_shift(TT_DATA, TP_SHIFT):
   if (TT_DATA=="cfloat"):
     if (TP_SHIFT==0) :
       return isValid
     else:
-      return isError("TP_SHIFT must be 0 for TT_DATA=cfloat")
+      return isError("Shift must be 0 for cfloat data type")
   if (TT_DATA=="cint32"):
     if (TP_SHIFT>=0 and TP_SHIFT<61) :
       return isValid
     else:
-      return isError("TP_SHIFT must be in range 0 to 61 for TT_DATA=cint32")
+      return isError("Shift must be in range 0 to 61 for cint32 data type")
   if (TT_DATA=="cint16"):
     if (TP_SHIFT>=0 and TP_SHIFT<32) :
       return isValid
     else:
-      return isError("TP_SHIFT must be in range 0 to 31 for TT_DATA=cint16")
+      return isError("Shift must be in range 0 to 31 for cint16 data type")
 
 def fn_validate_ssr(TT_DATA, TP_POINT_SIZE, TP_API, TP_SSR):
   if (TP_POINT_SIZE/TP_SSR >=16 and TP_POINT_SIZE/TP_SSR<=4096) :
     if (TP_POINT_SIZE/TP_SSR<=1024 or TP_API==1) :
       return isValid
     else:
-      return isError("TP_POINT_SIZE/TP_SSR must be less than 1024 for windowed configurations")
+      return isError("(Point size/SSR) must be less than 1024 for windowed configurations")
   else:
-    return isError("TP_POINT_SIZE/TP_SSR must be between 16 and 4096")
+    return isError("(Point size/SSR) must be between 16 and 4096")
 
 def fn_validate_dyn_pt_size(TP_POINT_SIZE, TP_SSR, TP_DYN_PT_SIZE):
-  if (TP_DYN_PT_SIZE==0 or TP_POINT_SIZE/TP_SSR >=32) :
+  if (TP_DYN_PT_SIZE==0 or TP_POINT_SIZE/TP_SSR >32) :
     return isValid
   else:
-    return isError("When TP_DYN_PT_SIZE is selected, TP_POINT_SIZE/TP_SSR must be at least 32")
+    return isError("When dynamic point FFT is selected, (Point size/SSR) must be greater than 32")
+
+def fn_validate_weights(TP_POINT_SIZE, TP_DYN_PT_SIZE, weights_list):
+  if TP_DYN_PT_SIZE == 0:
+    if len(weights_list) != TP_POINT_SIZE :
+      return isError(f"Specified coefficient list is not equal to Point size({TP_POINT_SIZE})")
+  else:
+    if (len(weights_list) < TP_POINT_SIZE or len(weights_list) > TP_POINT_SIZE*2):
+      return isError(f"The coefficient list array {len(weights_list)} must specify the weights for the maximum point size and all smaller point sizes, so must be in the range TP_POINT_SIZE + TP_POINT_SIZE/2 to 2*TP_POINT_SIZE, where TP_POINT_SIZE = {TP_POINT_SIZE}")
+  return isValid
 
 #### validation APIs ####
-def validate_TT_COEFF(args): 
+def validate_TT_COEFF(args):
     TT_DATA = args["TT_DATA"]
     TT_COEFF = args["TT_COEFF"]
     return fn_validate_coeff_type(TT_DATA, TT_COEFF)
 
 def validate_TP_POINT_SIZE(args):
     TP_POINT_SIZE = args["TP_POINT_SIZE"]
-    return fn_validate_point_size(TP_POINT_SIZE)
+    TT_DATA = args["TT_DATA"]
+    return fn_validate_point_size(TP_POINT_SIZE, TT_DATA)
 
 def validate_TP_WINDOW_VSIZE(args):
     TP_POINT_SIZE = args["TP_POINT_SIZE"]
@@ -108,6 +118,12 @@ def validate_TP_DYN_PT_SIZE(args):
     TP_SSR = args["TP_SSR"]
     TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"]
     return fn_validate_dyn_pt_size(TP_POINT_SIZE, TP_SSR, TP_DYN_PT_SIZE)
+
+def validate_weights(args):
+    weights = args["weights"]
+    TP_POINT_SIZE = args["TP_POINT_SIZE"]
+    TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"]
+    return fn_validate_weights(TP_POINT_SIZE, TP_DYN_PT_SIZE, weights)
 
 
 # Example of updater.
@@ -186,7 +202,7 @@ def update_TP_DYN_PT_SIZE(args) :
   TP_POINT_SIZE = args["TP_POINT_SIZE"]
   TP_SSR = args["TP_SSR"]
   return update_dyn_pt_size(TP_POINT_SIZE, TP_SSR)
-  
+
 #### port ####
 
 def get_port_info(portname, dir, dataType, windowVsize, apiType, vectorLength):
@@ -201,6 +217,17 @@ def get_port_info(portname, dir, dataType, windowVsize, apiType, vectorLength):
     "margin_size" : 0
 } for idx in range(vectorLength)]
 
+def get_dyn_pt_port_info(portname, dir, TT_DATA, windowVSize, vectorLength=None, marginSize=0, TP_API=0):
+  return [{
+    "name" : f"{portname}[{idx}]" if vectorLength else f"{portname}", # portname no index
+    "type" : "window" if TP_API==0 else "stream",
+    "direction" : f"{dir}",
+    "data_type" : TT_DATA,
+    "fn_is_complex" : fn_is_complex(TT_DATA),
+    "window_size" : fn_input_window_size(windowVSize, TT_DATA) + 32,
+    "margin_size": marginSize
+  } for idx in range((vectorLength if vectorLength else 1))] # do just one port if vectorLength=None
+
 def info_ports(args):
   """Standard function creating a static dictionary of information
   for upper software to correctly connect the IP.
@@ -209,9 +236,10 @@ def info_ports(args):
   TT_DATA = args["TT_DATA"]
   TP_API = args["TP_API"]
   TP_SSR = args["TP_SSR"]
+  TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"]
   complex = fn_is_complex(TT_DATA)
   TP_WINDOW_VSIZE = args["TP_WINDOW_VSIZE"]
-  if (TP_API==0):
+  if (TP_API==0 and TP_DYN_PT_SIZE == 0):
     portsIn = get_port_info(
       portname = "in",
       dir = "in",
@@ -228,6 +256,15 @@ def info_ports(args):
       apiType = "window",
       vectorLength = TP_SSR
     )
+
+  elif (TP_API == 0 and TP_DYN_PT_SIZE == 1):
+    portsIn = get_dyn_pt_port_info("in", "in", TT_DATA, TP_WINDOW_VSIZE, TP_SSR, 0, TP_API)
+    portsOut = get_dyn_pt_port_info("out", "out", TT_DATA, TP_WINDOW_VSIZE, TP_SSR, 0, TP_API)
+
+  elif (TP_API == 1 and TP_DYN_PT_SIZE == 1):
+    portsIn = get_dyn_pt_port_info("in", "in", TT_DATA, TP_WINDOW_VSIZE, TP_SSR, 0, TP_API)
+    portsOut = get_dyn_pt_port_info("out", "out", TT_DATA, TP_WINDOW_VSIZE, TP_SSR, 0, TP_API)
+
   else:
     portsIn = get_port_info(
       portname = "in",
@@ -235,7 +272,7 @@ def info_ports(args):
       dataType = TT_DATA,
       windowVsize = TP_WINDOW_VSIZE,
       apiType = "stream",
-      vectorLength = 2* TP_SSR
+      vectorLength = TP_SSR
     )
     portsOut = get_port_info(
       portname = "out",
@@ -243,7 +280,7 @@ def info_ports(args):
       dataType = TT_DATA,
       windowVsize = TP_WINDOW_VSIZE,
       apiType = "stream",
-      vectorLength = 2* TP_SSR
+      vectorLength = TP_SSR
     )
   return portsIn+portsOut
 
@@ -272,6 +309,10 @@ def generate_graph(graphname, args):
   TP_SSR = args["TP_SSR"]
   TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"]
   coeff_list = args["weights"]
+  if TP_API == 1:
+    ssr = TP_SSR//2
+  else:
+    ssr = TP_SSR
 
   weights = fn_get_weights_vector(TT_COEFF, coeff_list)
 
@@ -287,18 +328,18 @@ public:
   ssr_port_array<input> in;
   ssr_port_array<output> out;
 
-  std::vector<{TT_COEFF}> weights = {weights};
-  xf::dsp::aie::fft::fft_window::fft_window_graph<
-    {TT_DATA}, //TT_DATA 
+  std::array<{TT_COEFF},{TP_POINT_SIZE*(1 + TP_DYN_PT_SIZE)}> weights = {weights};
+  xf::dsp::aie::fft::windowfn::fft_window_graph<
+    {TT_DATA}, //TT_DATA
     {TT_COEFF}, //TT_COEFF
-    {TP_POINT_SIZE}, //TP_POINT_SIZE 
+    {TP_POINT_SIZE}, //TP_POINT_SIZE
     {TP_WINDOW_VSIZE}, //TP_WINDOW_VSIZE
     {TP_SHIFT}, //TP_SHIFT
     {TP_API}, //TP_API
-    {TP_SSR}, //TP_SSR 
-    {TP_DYN_PT_SIZE} //TP_DYN_PT_SIZE 
+    {ssr}, //TP_SSR
+    {TP_DYN_PT_SIZE} //TP_DYN_PT_SIZE
   > fft_window;
-  
+
   {graphname}() : fft_window(weights) {{
     adf::kernel *fft_window_kernels = fft_window.getKernels();
     for (int i=0; i < 1; i++) {{

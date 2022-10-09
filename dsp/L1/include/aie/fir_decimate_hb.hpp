@@ -233,10 +233,6 @@ class kernelFilterClass {
                   "is in terms of samples, 512 is divided by the size of the data type here. e.g for cint16 (32 bits), "
                   "TP_INPUT_WINDOW_VSIZE must be a multiple of 16.");
 
-    // window max size check. Output will be half the size of input, so only check input size.
-    static_assert(TP_INPUT_WINDOW_VSIZE + TP_FIR_LEN * sizeof(TT_DATA) <= 32768,
-                  "Error: TP_INPUT_WINDOW_VSIZE uses more memory than is available in a memory group");
-
    public:
     // Access function for AIE Synthesizer
     static unsigned int get_m_kArch() { return m_kArchZigZag == kArchZigZag ? kArchZigZag : m_kArch; };

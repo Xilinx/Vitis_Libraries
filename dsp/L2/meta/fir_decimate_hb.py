@@ -44,31 +44,35 @@ import fir_sr_asym as sr_asym
 #
 
 
-def fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1):
-    # decimate halfband always uses 384b version of lanes. 
+def fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1, TP_PARA_DECI_POLY=1):
+    # decimate halfband always uses 384b version of lanes.
     checkMultipleLanes =  fn_windowsize_multiple_lanes(TT_DATA, TT_COEF, TP_INPUT_WINDOW_VSIZE, TP_API, numLanes=fnNumLanes384b(TT_DATA, TT_COEF)*4)
     #  also checks output size (this isn't done on static asserts for some reason right now)
     checkMaxBuffer = fn_max_windowsize_for_buffer(TT_DATA, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR, TP_INTERPOLATE_FACTOR=1, TP_DECIMATE_FACTOR=2)
+    # Input samples are round-robin split to each SSR input paths, so total frame size must be divisable by SSR factor.
+    checkIfDivisableBySSR = fn_windowsize_divisible_by_ssr(TP_INPUT_WINDOW_VSIZE, TP_SSR * TP_PARA_DECI_POLY)
 
-    for check in (checkMultipleLanes,checkMaxBuffer):
+    for check in (checkMultipleLanes,checkMaxBuffer,checkIfDivisableBySSR):
       if check["is_valid"] == False :
         return check
 
     return isValid
 
 def fn_halfband_len(TP_FIR_LEN):
-  return isValid if ((TP_FIR_LEN + 1) % 4 == 0) else isError("TP_FIR_LEN must be 4N-1 where N is a positive integer.")
+  return isValid if ((TP_FIR_LEN + 1) % 4 == 0) else isError("Filter length must be 4N-1 where N is a positive integer.")
 
-def fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD): 
+def fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD, TP_PARA_DECI_POLY):
     minLenCheck =  fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR)
 
     maxLenCheck = fn_max_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR, 4)
     halfbandLenCheck = fn_halfband_len(TP_FIR_LEN)
-
-    for check in (minLenCheck,maxLenCheck,halfbandLenCheck):
+    dataNeededCheck = isValid
+    if TP_PARA_DECI_POLY > 1:
+      dataNeededCheck = sr_asym.fn_data_needed_within_buffer_size(TT_DATA, TT_COEF, (TP_FIR_LEN + 1)/2, TP_CASC_LEN, TP_API, TP_SSR )
+    for check in (minLenCheck, maxLenCheck, halfbandLenCheck, dataNeededCheck):
       if check["is_valid"] == False :
         return check
-    
+
     return isValid
 
 def fn_type_support(TT_DATA, TT_COEF):
@@ -122,7 +126,7 @@ def validate_TT_COEF(args):
       if check["is_valid"] == False :
         return check
     return isValid
-    
+
 def validate_TP_SHIFT(args):
   TT_DATA = args["TT_DATA"]
   TP_SHIFT = args["TP_SHIFT"]
@@ -135,7 +139,8 @@ def validate_TP_INPUT_WINDOW_VSIZE(args):
     TP_FIR_LEN = args["TP_FIR_LEN"]
     TP_API = args["TP_API"]
     TP_SSR = args["TP_SSR"]
-    return fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR)
+    TP_PARA_DECI_POLY   = args["TP_PARA_DECI_POLY"]
+    return fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR, TP_PARA_DECI_POLY)
 
 
 
@@ -147,8 +152,9 @@ def validate_TP_FIR_LEN(args):
     TP_SSR = args["TP_SSR"]
     TP_API = args["TP_API"]
     TP_USE_COEF_RELOAD = args["TP_USE_COEF_RELOAD"]
+    TP_PARA_DECI_POLY = args["TP_PARA_DECI_POLY"]
 
-    return fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD)
+    return fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD, TP_PARA_DECI_POLY)
 
 def validate_TP_NUM_OUTPUTS(args):
     TP_NUM_OUTPUTS    = args["TP_NUM_OUTPUTS"]
@@ -165,7 +171,7 @@ def validate_TP_PARA_DECI_POLY(args):
 def validate_TP_SSR(args):
     TP_SSR              = args["TP_SSR"]
     TP_API              = args["TP_API"]
-    return fn_validate_ssr(TP_API, TP_SSR)                                              
+    return fn_validate_ssr(TP_API, TP_SSR)
 
 # Example of updater.
 #
@@ -211,15 +217,20 @@ def info_ports(args):
     TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
     TP_SSR = args["TP_SSR"]
+    TP_PARA_DECI_POLY = args["TP_PARA_DECI_POLY"]
     margin_size = sr_asym.fn_margin_size(TP_FIR_LEN, TT_DATA)
+    num_in_ports = TP_SSR*TP_PARA_DECI_POLY
+    in_win_size = TP_INPUT_WINDOW_VSIZE//num_in_ports
+    num_out_ports = TP_SSR
+    out_win_size = (TP_INPUT_WINDOW_VSIZE//2)//num_out_ports
 
-    in_ports = get_port_info("in", "in", TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_SSR, marginSize=margin_size, TP_API=args["TP_API"]) 
-    in2_ports = (get_port_info("in2", "in", TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_SSR, marginSize=margin_size, TP_API=args["TP_API"]) if (args["TP_DUAL_IP"] == 1) else [])
+    in_ports = get_port_info("in", "in", TT_DATA, in_win_size, num_in_ports, marginSize=margin_size, TP_API=args["TP_API"])
+    in2_ports = (get_port_info("in2", "in", TT_DATA, in_win_size, num_in_ports, marginSize=margin_size, TP_API=args["TP_API"]) if (args["TP_DUAL_IP"] == 1) else [])
     coeff_ports = (get_parameter_port_info("coeff", "in", TT_COEF, TP_SSR, ((TP_FIR_LEN+1)/4+1), "async") if (args["TP_USE_COEF_RELOAD"] == 1) else [])
 
     # decimate by 2 for halfband
-    out_ports = get_port_info("out", "out", TT_DATA, TP_INPUT_WINDOW_VSIZE//2, TP_SSR, TP_API=args["TP_API"])
-    out2_ports = (get_port_info("out2", "out", TT_DATA, TP_INPUT_WINDOW_VSIZE//2, TP_SSR, TP_API=args["TP_API"]) if (args["TP_NUM_OUTPUTS"] == 2) else [])
+    out_ports = get_port_info("out", "out", TT_DATA, out_win_size, num_out_ports, TP_API=args["TP_API"])
+    out2_ports = (get_port_info("out2", "out", TT_DATA, out_win_size, num_out_ports, TP_API=args["TP_API"]) if (args["TP_NUM_OUTPUTS"] == 2) else [])
     return in_ports + in2_ports + coeff_ports + out_ports + out2_ports
 
 #### graph generator ####
@@ -242,15 +253,16 @@ def generate_graph(graphname, args):
   TP_DUAL_IP = args["TP_DUAL_IP"]
   TP_API = args["TP_API"]
   TP_SSR = args["TP_SSR"]
+  TP_PARA_DECI_POLY = args["TP_PARA_DECI_POLY"]
   coeff_list = args["coeff"]
 
   taps = sr_asym.fn_get_taps_vector(TT_COEF, coeff_list)
   constr_args_str = f"taps" if TP_USE_COEF_RELOAD == 0 else ""
-  dual_ip_declare_str = f"ssr_port_array<input> in2;" if TP_DUAL_IP == 1 else "// No dual input"
+  dual_ip_declare_str = f"ssr_in_port_array<input> in2;" if TP_DUAL_IP == 1 else "// No dual input"
   dual_ip_connect_str = f"adf::connect<> net_in2(in2[i], filter.in2[i]);" if TP_DUAL_IP == 1 else "// No dual input"
-  coeff_ip_declare_str = f"ssr_port_array<input> coeff;" if TP_USE_COEF_RELOAD == 1 else "//No coeff port"
-  coeff_ip_connect_str = f"adf::connect<> net_coeff(coeff[i], filter.coeff[i]);" if TP_USE_COEF_RELOAD == 1 else "//No coeff port"
-  dual_op_declare_str = f"ssr_port_array<input> out2;" if TP_NUM_OUTPUTS == 2 else "// No dual output"
+  coeff_ip_declare_str = f"ssr_coeff_port_array<input> coeff;" if TP_USE_COEF_RELOAD == 1 else "// No coeff port"
+  coeff_ip_connect_str = f"adf::connect<> net_coeff(coeff[i], filter.coeff[i]);" if TP_USE_COEF_RELOAD == 1 else "// No coeff port"
+  dual_op_declare_str = f"ssr_out_port_array<output> out2;" if TP_NUM_OUTPUTS == 2 else "// No dual output"
   dual_op_connect_str = f"adf::connect<> net_out2(filter.out2[i], out2[i]);" if TP_NUM_OUTPUTS == 2 else "// No dual output"
   # Use formatted multi-line string to avoid a lot of \n and \t
   code  = (
@@ -258,39 +270,44 @@ f"""
 class {graphname} : public adf::graph {{
 public:
   static constexpr unsigned int TP_SSR = {TP_SSR};
+  static constexpr unsigned int TP_PARA_DECI_POLY = {TP_PARA_DECI_POLY};
   template <typename dir>
-  using ssr_port_array = std::array<adf::port<dir>, TP_SSR>;
+  using ssr_in_port_array = std::array<adf::port<dir>, TP_SSR*TP_PARA_DECI_POLY>;
+  template <typename dir>
+  using ssr_coeff_port_array = std::array<adf::port<dir>, TP_SSR>;
+  template <typename dir>
+  using ssr_out_port_array = std::array<adf::port<dir>, TP_SSR>;
 
-  ssr_port_array<input> in;
+  ssr_in_port_array<input> in;
   {dual_ip_declare_str}
   {coeff_ip_declare_str}
-  ssr_port_array<output> out;
+  ssr_out_port_array<output> out;
   {dual_op_declare_str}
 
   std::vector<{TT_COEF}> taps = {taps};
   xf::dsp::aie::fir::decimate_hb::fir_decimate_hb_graph<
-    {TT_DATA}, //TT_DATA 
-    {TT_COEF}, //TT_COEF 
-    {TP_FIR_LEN}, //TP_FIR_LEN 
-    {TP_SHIFT}, //TP_SHIFT 
+    {TT_DATA}, //TT_DATA
+    {TT_COEF}, //TT_COEF
+    {TP_FIR_LEN}, //TP_FIR_LEN
+    {TP_SHIFT}, //TP_SHIFT
     {TP_RND}, //TP_RND
-    {TP_INPUT_WINDOW_VSIZE}, //TP_INPUT_WINDOW_VSIZE 
-    {TP_CASC_LEN}, //TP_CASC_LEN 
+    {TP_INPUT_WINDOW_VSIZE}, //TP_INPUT_WINDOW_VSIZE
+    {TP_CASC_LEN}, //TP_CASC_LEN
     {TP_DUAL_IP}, //TP_DUAL_IP
-    {TP_USE_COEF_RELOAD}, //TP_USE_COEF_RELOAD 
-    {TP_NUM_OUTPUTS}, //TP_NUM_OUTPUTS 
-    {TP_API}, //TP_API 
-    {TP_SSR} // TP_SSR
+    {TP_USE_COEF_RELOAD}, //TP_USE_COEF_RELOAD
+    {TP_NUM_OUTPUTS}, //TP_NUM_OUTPUTS
+    {TP_API}, //TP_API
+    {TP_SSR}, // TP_SSR
+    {TP_PARA_DECI_POLY} //TP_PARA_DECI_POLY
   > filter;
-  
+
   {graphname}() : filter({constr_args_str}) {{
     adf::kernel *filter_kernels = filter.getKernels();
-    for (int i=0; i < 1; i++) {{
-      adf::runtime<ratio>(filter_kernels[i]) = 0.9;
-    }}
-    for (int i=0; i < TP_SSR; i++) {{
+    for (int i=0; i < TP_SSR*TP_PARA_DECI_POLY; i++) {{
       adf::connect<> net_in(in[i], filter.in[i]);
       {dual_ip_connect_str}
+    }}
+    for (int i=0; i < TP_SSR; i++) {{
       {coeff_ip_connect_str}
       adf::connect<> net_out(filter.out[i], out[i]);
       {dual_op_connect_str}

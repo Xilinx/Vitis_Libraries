@@ -1,4 +1,5 @@
 from fft_ifft_dit_1ch import *
+from vmc_fft_common import *
 import json
 
 #### VMC validators ####
@@ -45,8 +46,9 @@ def vmc_generate_graph(name, args):
     #TODO: call to partitioner to determine cascade length
     tmpargs["TP_CASC_LEN"] = 1
     tmpargs["TP_DYN_PT_SIZE"] = 1
-    tmpargs["TP_API"] = 0
-    tmpargs["TP_PARALLEL_POWER"] = 0
+    tmpargs["TP_API"] = 1
+    ssr = args["ssr"]
+    tmpargs["TP_PARALLEL_POWER"] = fn_get_parallel_power(ssr)
     tmpargs["TP_FFT_NIFFT"] = 1
 
     return generate_graph(name, tmpargs)

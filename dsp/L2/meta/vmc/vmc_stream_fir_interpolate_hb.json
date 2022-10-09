@@ -65,7 +65,7 @@
       "validator": {
         "file": "vmc_stream_fir_interpolate_hb.py",
         "function": "vmc_validate_coeff",
-        "args": ["use_coeff_reload", "coef_type" ,"fir_length", "data_type", "casc_length", "ssr"]
+        "args": ["use_coeff_reload", "coef_type" ,"fir_length", "data_type", "casc_length", "ssr", "interp_poly"]
       }
     },
     {
@@ -119,13 +119,25 @@
       "default": 2,
       "type": "int"
     },
-	{
-	  "name": "ssr",
+    {
+      "name": "ssr",
       "label": "Number of parallel input/output (SSR)",
       "description": "Specify number of data input/output in parallel for a single channel.",
       "default": 1,
       "minimum": 1,
       "type": "int"
+    },
+    {
+      "name": "interp_poly",
+      "label": "Interpolate polyphase",
+      "description": "The number of parallel polyphases to combine.",
+      "type": "int",
+      "minimum": 1,
+      "validator": {
+        "file": "vmc_stream_fir_interpolate_hb.py",
+        "function": "vmc_validate_interp_poly",
+        "args": ["ssr"]
+      }
     }
   ],
   "generator": {

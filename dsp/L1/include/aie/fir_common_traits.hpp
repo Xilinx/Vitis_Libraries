@@ -28,103 +28,103 @@ namespace dsp {
 namespace aie {
 namespace fir {
 template <typename T_D, typename T_C, int T_PORTS>
-constexpr unsigned int fnGetOptTapsPerKernelSrAsym() {
+constexpr unsigned int getOptTapsPerKernelSrAsym() {
     return -1;
 };
 template <>
-constexpr unsigned int fnGetOptTapsPerKernelSrAsym<int16, int16, 1>() {
+constexpr unsigned int getOptTapsPerKernelSrAsym<int16, int16, 1>() {
     return 16;
 };
 template <>
-constexpr unsigned int fnGetOptTapsPerKernelSrAsym<int16, int16, 2>() {
+constexpr unsigned int getOptTapsPerKernelSrAsym<int16, int16, 2>() {
     return 8;
 };
 template <>
-constexpr unsigned int fnGetOptTapsPerKernelSrAsym<cint16, int16, 1>() {
+constexpr unsigned int getOptTapsPerKernelSrAsym<cint16, int16, 1>() {
     return 16;
 };
 template <>
-constexpr unsigned int fnGetOptTapsPerKernelSrAsym<cint16, int16, 2>() {
+constexpr unsigned int getOptTapsPerKernelSrAsym<cint16, int16, 2>() {
     return 8;
 };
 template <>
-constexpr unsigned int fnGetOptTapsPerKernelSrAsym<cint16, cint16, 1>() {
+constexpr unsigned int getOptTapsPerKernelSrAsym<cint16, cint16, 1>() {
     return 8;
 };
 template <>
-constexpr unsigned int fnGetOptTapsPerKernelSrAsym<cint16, cint16, 2>() {
+constexpr unsigned int getOptTapsPerKernelSrAsym<cint16, cint16, 2>() {
     return 4;
 };
 template <>
-constexpr unsigned int fnGetOptTapsPerKernelSrAsym<int32, int16, 1>() {
+constexpr unsigned int getOptTapsPerKernelSrAsym<int32, int16, 1>() {
     return 16;
 };
 template <>
-constexpr unsigned int fnGetOptTapsPerKernelSrAsym<int32, int16, 2>() {
+constexpr unsigned int getOptTapsPerKernelSrAsym<int32, int16, 2>() {
     return 8;
 };
 template <>
-constexpr unsigned int fnGetOptTapsPerKernelSrAsym<int32, int32, 1>() {
+constexpr unsigned int getOptTapsPerKernelSrAsym<int32, int32, 1>() {
     return 8;
 };
 template <>
-constexpr unsigned int fnGetOptTapsPerKernelSrAsym<int32, int32, 2>() {
+constexpr unsigned int getOptTapsPerKernelSrAsym<int32, int32, 2>() {
     return 4;
 };
 template <>
-constexpr unsigned int fnGetOptTapsPerKernelSrAsym<cint32, int16, 1>() {
+constexpr unsigned int getOptTapsPerKernelSrAsym<cint32, int16, 1>() {
     return 16;
 }; // user must also look at max in case max < opt
 template <>
-constexpr unsigned int fnGetOptTapsPerKernelSrAsym<cint32, int16, 2>() {
+constexpr unsigned int getOptTapsPerKernelSrAsym<cint32, int16, 2>() {
     return 8;
 };
 template <>
-constexpr unsigned int fnGetOptTapsPerKernelSrAsym<cint32, cint16, 1>() {
+constexpr unsigned int getOptTapsPerKernelSrAsym<cint32, cint16, 1>() {
     return 8;
 };
 template <>
-constexpr unsigned int fnGetOptTapsPerKernelSrAsym<cint32, cint16, 2>() {
+constexpr unsigned int getOptTapsPerKernelSrAsym<cint32, cint16, 2>() {
     return 4;
 };
 template <>
-constexpr unsigned int fnGetOptTapsPerKernelSrAsym<cint32, int32, 1>() {
+constexpr unsigned int getOptTapsPerKernelSrAsym<cint32, int32, 1>() {
     return 8;
 };
 template <>
-constexpr unsigned int fnGetOptTapsPerKernelSrAsym<cint32, int32, 2>() {
+constexpr unsigned int getOptTapsPerKernelSrAsym<cint32, int32, 2>() {
     return 4;
 };
 template <>
-constexpr unsigned int fnGetOptTapsPerKernelSrAsym<cint32, cint32, 1>() {
+constexpr unsigned int getOptTapsPerKernelSrAsym<cint32, cint32, 1>() {
     return 4;
 };
 template <>
-constexpr unsigned int fnGetOptTapsPerKernelSrAsym<cint32, cint32, 2>() {
+constexpr unsigned int getOptTapsPerKernelSrAsym<cint32, cint32, 2>() {
     return 2;
 };
 template <>
-constexpr unsigned int fnGetOptTapsPerKernelSrAsym<float, float, 1>() {
+constexpr unsigned int getOptTapsPerKernelSrAsym<float, float, 1>() {
     return 8;
 };
 template <>
-constexpr unsigned int fnGetOptTapsPerKernelSrAsym<float, float, 2>() {
+constexpr unsigned int getOptTapsPerKernelSrAsym<float, float, 2>() {
     return 4;
 };
 template <>
-constexpr unsigned int fnGetOptTapsPerKernelSrAsym<cfloat, float, 1>() {
+constexpr unsigned int getOptTapsPerKernelSrAsym<cfloat, float, 1>() {
     return 8;
 };
 template <>
-constexpr unsigned int fnGetOptTapsPerKernelSrAsym<cfloat, float, 2>() {
+constexpr unsigned int getOptTapsPerKernelSrAsym<cfloat, float, 2>() {
     return 4;
 };
 template <>
-constexpr unsigned int fnGetOptTapsPerKernelSrAsym<cfloat, cfloat, 1>() {
+constexpr unsigned int getOptTapsPerKernelSrAsym<cfloat, cfloat, 1>() {
     return 4;
 };
 template <>
-constexpr unsigned int fnGetOptTapsPerKernelSrAsym<cfloat, cfloat, 2>() {
+constexpr unsigned int getOptTapsPerKernelSrAsym<cfloat, cfloat, 2>() {
     return 2;
 };
 }

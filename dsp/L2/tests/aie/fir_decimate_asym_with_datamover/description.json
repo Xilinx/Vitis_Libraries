@@ -6,7 +6,9 @@
     "platform_allowlist": [
         "vck190"
     ],
-    "data": ["PROJECT/data/"],
+    "data": [
+        "PROJECT/data/"
+    ],
     "platform_properties": {
         "vck190": {
             "v++": {
@@ -58,7 +60,10 @@
                 "PROJECT"
             ],
             "options": "--sysroot=$(SYSROOT)",
-            "symbols": ["__PS_ENABLE_AIE__", "USING_UUT=1"]
+            "symbols": [
+                "__PS_ENABLE_AIE__",
+                "USING_UUT=1"
+            ]
         },
         "linker": {
             "librarypaths": [
@@ -88,7 +93,9 @@
                 "LIB_DIR/L2/tests/aie/common/inc",
                 "./"
             ],
-            "clflags":["--dataflow  -Xpreproc=\"-DUUT_GRAPH=fir_decimate_asym_graph -DOUTPUT_FILE=data/uut_output.txt -DINPUT_FILE=data/input.txt  -DUSING_UUT=1 \""]
+            "clflags": [
+                "--dataflow  -Xpreproc=\"-DUUT_GRAPH=fir_decimate_asym_graph -DOUTPUT_FILE=data/uut_output.txt -DINPUT_FILE=data/input.txt  -DUSING_UUT=1 \""
+            ]
         }
     },
     "aiecontainers": [
@@ -96,14 +103,16 @@
             "accelerators": [
                 {
                     "location": "PROJECT/test.cpp",
-                    "files": ["LIB_DIR/L1/src/aie/fir_decimate_asym.cpp"],
+                    "files": [
+                        "LIB_DIR/L1/src/aie/fir_decimate_asym.cpp"
+                    ],
                     "pl-freq": 1000,
                     "workdir": "./Work",
                     "options": "",
                     "name": "libadf.a",
-                     "pl_kernels_in_aie_graph": [
-                         "LIB_DIR/L1/src/aie/fir_decimate_asym.cpp"
-                     ]
+                    "pl_kernels_in_aie_graph": [
+                        "LIB_DIR/L1/src/aie/fir_decimate_asym.cpp"
+                    ]
                 }
             ]
         }

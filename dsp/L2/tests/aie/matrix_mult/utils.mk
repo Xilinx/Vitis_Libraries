@@ -179,7 +179,6 @@ ifeq (,$(wildcard $(ROOTFS)))
 endif
 endif
 
-
 CXX := g++
 ifeq ($(HOST_ARCH), x86)
 ifeq ($(shell expr $(VITIS_VER) \>= 2022.1), 1)

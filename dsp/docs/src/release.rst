@@ -22,6 +22,36 @@ Release Note
    :hidden:
    :maxdepth: 1
 
+2022.2
+------
+
+The below features have been added to the library in this release.
+
+*  **FFT Window** - new library element
+
++---------------------------------------+-----------------------------------------------------------------------------+
+| **Function**                          | **Namespace and class name**                                                |
++=======================================+=============================================================================+
+| FFT Window                            |  xf::dsp::aie::fft::windowfn::fft_window_graph                              |
++---------------------------------------+-----------------------------------------------------------------------------+
+
+FFT Window is a utility to apply a windowing (scaling) function such as Hamming to a frame of data samples. 
+
+*  **FFT/iFFT**
+
+FFT Dynamic Point Size, i.e. run-time point size determination is now supported with parallelized configurations.
+
+*  **FIR Filters**
+
+All FIR library elements (with the exception of FIR Resampler) now support Super Sample Rate operation for higher throughput. 
+To miximize throughput and minimize latency, Super Sample Rate operation is implemented using streaming interfaces and a mixture of asymmetric FIR kernels, i.e. symmetry benefit is sidelined in order to take full advantage of streaming interfaces. 
+
+In addition, usage of Input Window Size (TP_INPUT_WINDOW_VSIZE) parameter has been consolidated across library.
+TP_INPUT_WINDOW_VSIZE describes the number of samples processed by the graph in a single iteration run. 
+
+Reloadable coefficients within the Super Sample Rate configurations are now supported on all FIR variants that support SSR operation. 
+
+
 2022.1
 ------
 

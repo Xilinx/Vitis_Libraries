@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.7
+# vitis makefile-generator v2.0.8
 
 ############################## Help Section ##############################
 .PHONY: help
@@ -93,13 +93,8 @@ LDFLAGS += -pthread -L$(XILINX_XRT)/lib -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -Wl
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
 VPP_LDFLAGS += --optimize 2 -R 2 
 else ifeq ($(HOST_ARCH), aarch64)
-ifeq ($(ps_on_x86), on) 
-CXXFLAGS += -fmessage-length=0 -I$(CUR_DIR)/src/ -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
-LDFLAGS += -pthread -L$(XILINX_XRT)/lib -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -Wl,--as-needed -lOpenCL -lxrt_coreutil -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel 
-else
 CXXFLAGS += -I$(CUR_DIR)/src/ -fmessage-length=0 --sysroot=$(SYSROOT)  -I$(SYSROOT)/usr/include/xrt -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
 LDFLAGS += -pthread -L$(SYSROOT)/usr/lib -Wl,--as-needed -lxilinxopencl -lxrt_coreutil 
-endif
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
 VPP_LDFLAGS += --optimize 2 -R 2 
 endif
@@ -111,7 +106,7 @@ XILINX_VITIS_AIETOOLS ?=
 XILINX_VITIS_AIELIBS ?=
 ifneq ($(wildcard $(XILINX_VITIS)/aietools/.*),)
 XILINX_VITIS_AIETOOLS := $(XILINX_VITIS)/aietools
-ifeq ($(ps_on_x86), on)
+ifeq ($(HOST_ARCH), x86)
 XILINX_VITIS_AIELIBS := -L$(XILINX_VITIS_AIETOOLS)/lib/lnx64.o -ladf_api_xrt
 else
 XILINX_VITIS_AIELIBS := -L$(XILINX_VITIS_AIETOOLS)/lib/aarch64.o -ladf_api_xrt
@@ -133,7 +128,7 @@ NITER_UUT ?= $(NITER)
 NITER_REF ?= $$(($(NITER_UUT) / 2))
 INPUT_WINDOW_VSIZE ?= 384
 UUT_INPUT_WINDOW_VSIZE ?= $(INPUT_WINDOW_VSIZE)
-SSR_INPUT_WINDOW_VSIZE ?= $$(( $(INPUT_WINDOW_VSIZE) * $(UUT_SSR) ))
+SSR_INPUT_WINDOW_VSIZE ?= $$(( $(INPUT_WINDOW_VSIZE)  ))
 REF_INPUT_WINDOW_VSIZE ?= $$(( $(SSR_INPUT_WINDOW_VSIZE) * $(NITER_UUT) / $(NITER_REF)))
 DATA_TYPE ?= cint16
 COEFF_TYPE ?= int16
@@ -158,7 +153,7 @@ UUT_SSR_IN ?= $$(( $(UUT_SSR) * $(UUT_PARA_DECI_POLY) ))
 UUT_SSR_OUT ?= $$(( $(UUT_SSR) * $(UUT_PARA_INTERP_POLY) ))
 DUAL_INPUT_SAMPLES ?= $$(( $(PORT_API) * $(DUAL_IP) ))
 DUAL_OUTPUT_SAMPLES ?= $$(( $(PORT_API) * ($(NUM_OUTPUTS)-1) ))
-SSR_OUTPUT_WINDOW_VSIZE ?= $$(( $(INPUT_WINDOW_VSIZE) * $(INTERPOLATE_FACTOR) * $(UUT_SSR) / $(DECIMATE_FACTOR)  ))
+SSR_OUTPUT_WINDOW_VSIZE ?= $$(( $(INPUT_WINDOW_VSIZE) * $(INTERPOLATE_FACTOR)  / $(DECIMATE_FACTOR)  ))
 REF_OUTPUT_WINDOW_VSIZE ?= $$(( $(SSR_OUTPUT_WINDOW_VSIZE) * $(NITER_UUT) / $(NITER_REF)))
 DIFF_TOLERANCE ?= 0
 CC_TOLERANCE ?= 0
@@ -246,29 +241,22 @@ endif
 ######################### binary container global settings ##########################
 
 ############################## Setting Rules for AIE (Building Kernels) ##################
-$(AIE_CONTAINER): $(XFLIB_DIR)/L2/tests/aie/fir_decimate_asym/test.cpp $(XFLIB_DIR)/L1/src/aie/fir_decimate_asym.cpp 
+$(AIE_CONTAINER): $(XFLIB_DIR)/L2/tests/aie/fir_decimate_asym/test.cpp $(XFLIB_DIR)/L1/src/aie/fir_decimate_asym.cpp  | pre_build
 	$(ECHO) "Compiling: libadf.a"
 	mkdir -p $(dir $@)
 	$(AIECXX) $(AIE_CXXFLAGS) $^
 	mv ./libadf.a $(AIE_CONTAINER)
 
 ############################## Setting Rules for Host (Building Host Executable) ##############################
-ifeq ($(HOST_ARCH), x86)
-$(EXE_FILE): $(EXE_FILE_DEPS) |  check_xrt
+$(EXE_FILE): $(EXE_FILE_DEPS)
 	mkdir -p $(BUILD_DIR)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
-
-else
-$(EXE_FILE): $(EXE_FILE_DEPS) |  check_sysroot
-	mkdir -p $(BUILD_DIR)
-	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
-
-endif
 
 $(EMCONFIG):
 	emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
+
 ############################## Preparing sdcard folder ##############################
-ifneq ($(HOST_ARCH), x86)
+ifeq ($(SD_CARD_NEEDED), on)
 RUN_SCRIPT := $(BUILD_DIR)/run_script.sh
 $(RUN_SCRIPT):
 	rm -rf $(RUN_SCRIPT)
@@ -302,7 +290,7 @@ SD_DIRS_WITH_PREFIX = $(foreach sd_dir,$(DATA_DIR),--package.sd_dir $(sd_dir))
 PACKAGE_FILES := $(BINARY_CONTAINERS)
 PACKAGE_FILES += $(AIE_CONTAINER)
 SD_CARD := $(CUR_DIR)/package_$(TARGET)
-$(SD_CARD): $(EXE_FILE) $(BINARY_CONTAINERS) $(RUN_SCRIPT) $(EMCONFIG) check_kimage check_rootfs
+$(SD_CARD): host xclbin $(RUN_SCRIPT) $(EMCONFIG) check_kimage check_rootfs
 	@echo "Generating sd_card folder...."
 	mkdir -p $(SD_CARD)
 	chmod a+rx $(BUILD_DIR)/run_script.sh
@@ -332,7 +320,7 @@ endif
 ifneq (,$(filter x86sim aiesim, $(TARGET)))
 RUN_DEPS += $(AIE_CONTAINER)
 else
-RUN_DEPS += $(EXE_FILE) $(BINARY_CONTAINERS) $(EMCONFIG)
+RUN_DEPS += host xclbin $(EMCONFIG)
 RUN_DEPS += $(SD_CARD)
 endif
 
@@ -341,18 +329,20 @@ mkflag:
 	mkdir -p $(BUILD_DIR)
 	rm -rf $(BUILD_DIR)/makefile_args.txt
 	@for var in $(MAKEFLAGS); do echo $$var >> $(BUILD_DIR)/makefile_args.txt; done
-all: check_device pre_build check_vpp check_platform mkflag $(RUN_DEPS)
+
+all: check_device check_vpp check_platform mkflag $(RUN_DEPS)
+
 run: all
 #x86sim
 ifeq ($(TARGET), x86sim)
 	$(X86SIMULATOR) --pkg-dir=./Work 
-	mkdir -p logs
-	perl $(XFLIB_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./x86simulator_output/data/uut_output.txt --type $(DATA_TYPE) --ssr $(UUT_SSR_OUT) --zip --dual $(DUAL_OUTPUT_SAMPLES) -k 0 -w $(SSR_OUTPUT_WINDOW_VSIZE)
-	perl $(XFLIB_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./x86simulator_output/data/ref_output.txt --type $(DATA_TYPE) --ssr 1 --zip --dual 0 -k 0 -w $(REF_OUTPUT_WINDOW_VSIZE)
-	grep -ve '[XT]' ./x86simulator_output/data/uut_output.txt > ./logs/uut_output.txt
-	grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./logs/ref_output.txt
-	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE)
-	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/diff_exit.tcl ./
+	$(if $(filter-out REF,$(TAG)), mkdir -p logs)
+	$(if $(filter-out REF,$(TAG)), perl $(XFLIB_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./x86simulator_output/data/uut_output.txt --type $(DATA_TYPE) --ssr $(UUT_SSR_OUT) --zip --dual $(DUAL_OUTPUT_SAMPLES) -k 0 -w $(SSR_OUTPUT_WINDOW_VSIZE))
+	$(if $(filter-out REF,$(TAG)), perl $(XFLIB_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./x86simulator_output/data/ref_output.txt --type $(DATA_TYPE) --ssr 1 --zip --dual 0 -k 0 -w $(REF_OUTPUT_WINDOW_VSIZE))
+	$(if $(filter-out REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/uut_output.txt > ./logs/uut_output.txt)
+	$(if $(filter-out REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./logs/ref_output.txt)
+	$(if $(filter-out REF,$(TAG)), tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE))
+	$(if $(filter-out REF,$(TAG)), tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/diff_exit.tcl ./)
 endif
 #aiesim
 ifeq ($(TARGET), aiesim)
@@ -377,8 +367,8 @@ ifeq ($(HOST_ARCH), x86)
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_output.log
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_stdout.log
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_stdout.log || exit 1
 	
 endif
 endif
@@ -389,16 +379,10 @@ ifeq ($(HOST_ARCH), x86)
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) 
 	
 else
-ifeq ($(ps_on_x86), on)
-	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
-	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) 
-	
-else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_output.log
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_stdout.log
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_stdout.log || exit 1
 	
-endif
 endif
 endif
 #hw
@@ -415,35 +399,31 @@ endif
 ############################## Setting Targets ##############################
 .PHONY: pre_build
 pre_build:
-	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL) $(PARAM_MAP)
-	vitis -exec ipmetadata_config_checker $(XFLIB_DIR)/L2/meta/fir_decimate_asym.json ./config.json -newflow
-	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE) $(SSR_INPUT_WINDOW_VSIZE) $(NITER_UUT) $(DATA_SEED) $(DATA_STIM_TYPE) 0 0 $(DATA_TYPE) $(PORT_API) 1
-	perl $(XFLIB_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(LOC_INPUT_FILE) --type $(DATA_TYPE) --ssr $(UUT_SSR_IN) --split --dual $(DUAL_INPUT_SAMPLES) -k 0 -w $(SSR_INPUT_WINDOW_VSIZE) -c $(COEFF_TYPE) -fl $(FIR_LEN)
-	cp $(LOC_INPUT_FILE)  $(REF_INPUT_FILE)
-	perl $(XFLIB_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(REF_INPUT_FILE) --type $(DATA_TYPE) --ssr 1 --split --dual 0 -k 0 -w ${REF_INPUT_WINDOW_VSIZE} -c $(COEFF_TYPE) -fl $(FIR_LEN)
-	make x86sim TARGET=x86sim TAG=REF
-	make cleanall
+	$(if $(filter-out REF,$(TAG)), tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL) $(PARAM_MAP))
+	$(if $(filter-out REF,$(TAG)), vitis -exec ipmetadata_config_checker $(XFLIB_DIR)/L2/meta/fir_decimate_asym.json ./config.json -newflow)
+	$(if $(filter-out REF,$(TAG)), tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE) $(SSR_INPUT_WINDOW_VSIZE) $(NITER_UUT) $(DATA_SEED) $(DATA_STIM_TYPE) 0 0 $(DATA_TYPE) $(PORT_API) 1)
+	$(if $(filter-out REF,$(TAG)), perl $(XFLIB_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(LOC_INPUT_FILE) --type $(DATA_TYPE) --ssr $(UUT_SSR_IN) --split --dual $(DUAL_INPUT_SAMPLES) -k 0 -w $(SSR_INPUT_WINDOW_VSIZE) -c $(COEFF_TYPE) -fl $(FIR_LEN))
+	$(if $(filter-out REF,$(TAG)), cp $(LOC_INPUT_FILE)  $(REF_INPUT_FILE))
+	$(if $(filter-out REF,$(TAG)), perl $(XFLIB_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(REF_INPUT_FILE) --type $(DATA_TYPE) --ssr 1 --split --dual 0 -k 0 -w ${REF_INPUT_WINDOW_VSIZE} -c $(COEFF_TYPE) -fl $(FIR_LEN))
+	$(if $(filter-out REF,$(TAG)), make run TARGET=x86sim TAG=REF)
+	$(if $(filter-out REF,$(TAG)), make cleanall)
 
 .PHONY: clean cleanall emconfig
 emconfig: $(EMCONFIG)
 
 .PHONY: host
 ifeq ($(HOST_ARCH), x86)
-host:  pre_build check_xrt $(EXE_FILE)
+host: check_xrt  pre_build $(EXE_FILE)
 else
-host:  pre_build check_sysroot $(EXE_FILE)
+host: check_sysroot  pre_build $(EXE_FILE)
 endif
 
 .PHONY: xclbin
 ifeq ($(HOST_ARCH), x86)
-xclbin: pre_build check_vpp check_xrt $(BINARY_CONTAINERS) $(AIE_CONTAINER)
+xclbin: check_vpp check_xrt  pre_build $(BINARY_CONTAINERS)
 else
-xclbin: pre_build check_vpp check_sysroot $(BINARY_CONTAINERS) $(AIE_CONTAINER)
+xclbin: check_vpp check_sysroot  pre_build $(BINARY_CONTAINERS)
 endif
-
-.PHONY: x86sim
-x86sim: $(AIE_CONTAINER)
-	$(X86SIMULATOR) --pkg-dir=./Work
 
 ############################## Cleaning Rules ##############################
 cleanh:

@@ -221,6 +221,7 @@ fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, TP_API, 
                     window_writeincr(outWindow, outVect);
                 }
                 for (int vect = vecInFrame; vect < kVecInFrame; vect++) {
+                    dataVect = window_readincr_v<kSamplesInVect>(inWindow);
                     window_writeincr(outWindow, blankVect);
                 }
             }
@@ -385,7 +386,7 @@ fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SS
         stream_writeincr_128b(outStream1, header, 1);
 
         // write out blank window
-        for (int i = 0; i < TP_WINDOW_VSIZE / (16 / sizeof(TT_DATA)); i++) {
+        for (int i = 0; i < TP_WINDOW_VSIZE / (32 / sizeof(TT_DATA)); i++) {
             stream_writeincr_128b(outStream0, blankData, 0);
             stream_writeincr_128b(outStream1, blankData, 1);
         }

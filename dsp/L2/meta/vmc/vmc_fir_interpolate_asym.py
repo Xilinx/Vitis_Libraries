@@ -70,6 +70,7 @@ def vmc_validate_shift_val(args):
 	shift_val = args["shift_val"]
 	return fn_validate_shift(data_type, shift_val)
 
+
 #### VMC graph generator ####
 def vmc_generate_graph(name, args):
     tmpargs = {}

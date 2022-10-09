@@ -53,7 +53,7 @@
       "validator": {
         "file": "vmc_stream_fir_decimate_hb.py",
         "function": "vmc_validate_coeff",
-        "args": ["use_coeff_reload", "coef_type" ,"fir_length", "data_type", "casc_length", "ssr"]
+        "args": ["use_coeff_reload", "coef_type" ,"fir_length", "data_type", "casc_length", "ssr", "deci_poly"]
       }
     },
     {
@@ -67,7 +67,7 @@
       "validator": {
         "file": "vmc_stream_fir_decimate_hb.py",
         "function": "vmc_validate_input_window_size",
-        "args": ["data_type", "coef_type", "use_coeff_reload", "coeff", "fir_length", "ssr"]
+        "args": ["data_type", "coef_type", "use_coeff_reload", "coeff", "fir_length", "ssr", "deci_poly"]
       }
     },
     {
@@ -107,15 +107,26 @@
       "default": 2,
       "type": "int"
     },
-	{
-	  "name": "ssr",
+    {
+      "name": "ssr",
       "label": "Number of parallel input/output (SSR)",
       "description": "Specify number of data input/output in parallel for a single channel.",
       "default": 1,
       "minimum": 1,
       "type": "int"
+    },
+    {
+      "name": "deci_poly",
+      "label": "Decimate polyphase",
+      "description": "The number of parallel polyphases to combine.",
+      "type": "int",
+      "minimum": 1,
+      "validator": {
+        "file": "vmc_stream_fir_decimate_hb.py",
+        "function": "vmc_validate_deci_poly",
+        "args": ["ssr"]
+      }
     }
-	
   ],
   "generator": {
     "file": "vmc_stream_fir_decimate_hb.py",

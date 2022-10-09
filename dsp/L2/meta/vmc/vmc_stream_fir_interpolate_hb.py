@@ -37,9 +37,10 @@ def vmc_validate_coeff(args):
 	data_type = args["data_type"]
 	casc_length = args["casc_length"]
 	ssr = args["ssr"]
+	interp_poly = args["interp_poly"]
 	api = 1
 	fir_length = fn_get_fir_length_hb(args)
-	return fn_validate_fir_len(data_type, coef_type, fir_length, casc_length, ssr, api, use_coeff_reload )
+	return fn_validate_fir_len(data_type, coef_type, fir_length, casc_length, ssr, api, use_coeff_reload, interp_poly)
 
 
 def vmc_validate_shift_val(args):
@@ -51,6 +52,18 @@ def vmc_validate_upshift_ct(args):
 	data_type = args["data_type"]
 	upshift_ct = args["upshift_ct"]
 	return fn_validate_upshift_ct(data_type, upshift_ct)
+
+def vmc_validate_interp_poly(args):
+        interp_poly = args["interp_poly"]
+        ssr = args["ssr"]
+        api = 1
+        ret = fn_validate_para_interp_poly(api, interp_poly, ssr)
+        if ret["is_valid"] == False:
+          err_msg = ret["err_message"]
+          err_msg = err_msg.replace("TP_PARA_INTERP_POLY", "'Interpolate polyphase'")
+          return {"is_valid": False, "err_message": err_msg}
+        else:
+          return {"is_valid": True}
 
 #### VMC graph generator ####
 def vmc_generate_graph(name, args):

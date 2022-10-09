@@ -42,6 +42,7 @@ using namespace adf;
 // fft_window_graph template
 //--------------------------------------------------------------------------------------------------
 /**
+ * @ingroup fft_window
  * @brief fft_window is utility to apply a windowing (scaling) function such as Hamming to a
  *        frame of data samples.
  *
@@ -122,7 +123,7 @@ class fft_window_graph : public graph {
     static constexpr int kKernelWindowVsize = TP_WINDOW_VSIZE / TP_SSR;
     static_assert(kKernelPtSize <= 4096, "ERROR: TP_POINT_SIZE/TP_SSR must be at no more than 4096");
     static_assert(kKernelPtSize >= 16, "ERROR: TP_POINT_SIZE/TP_SSR must be at least 16");
-    static_assert(TP_DYN_PT_SIZE == 0 || kKernelPtSize > 32, "ERROR: TP_DYN_PT_SIZE is not valid for this point size");
+    static_assert(TP_DYN_PT_SIZE == 0 || kKernelPtSize >= 32, "ERROR: TP_DYN_PT_SIZE is not valid for this point size");
 
     /**
      * The input data to the function.

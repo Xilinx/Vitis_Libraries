@@ -59,45 +59,47 @@ fn_decimate_asym_lanes = fnNumLanes384b
 
 
 def fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1):
-  # CAUTION: this constant overlaps many factors. The main need is a "strobe" concept that means we unroll until xbuff is back to starting conditions. 
+  # CAUTION: this constant overlaps many factors. The main need is a "strobe" concept that means we unroll until xbuff is back to starting conditions.
   # So number of lanes * decimation factor is the incremental sample need; Which might require a load (which is fixed to 256b currently)
   # This load might load enough samples of X operations, but we can map out that we will need 3 additional 256b loads to wrap round our 1024b buffer
-  # Given that we know there will be 3 additional loads, we need to work out how many output vector chunks that covers. 
-  # 8 seems to work for all current decimation values and lanes across data types.. 
-  streamRptFactor = 8; 
+  # Given that we know there will be 3 additional loads, we need to work out how many output vector chunks that covers.
+  # 8 seems to work for all current decimation values and lanes across data types..
+  streamRptFactor = 8;
 
-  # decimator uses 384b accs, but also checks for multiple of decimate factor. When using streams, also takes into account the stream repeat factor. 
-  windowSizeMultiplier = (fn_decimate_asym_lanes(TT_DATA, TT_COEF)*TP_DECIMATE_FACTOR) if TP_API == 0 else (fn_decimate_asym_lanes(TT_DATA, TT_COEF)*TP_DECIMATE_FACTOR*streamRptFactor) 
+  # decimator uses 384b accs, but also checks for multiple of decimate factor. When using streams, also takes into account the stream repeat factor.
+  windowSizeMultiplier = (fn_decimate_asym_lanes(TT_DATA, TT_COEF)*TP_DECIMATE_FACTOR) if TP_API == 0 else (fn_decimate_asym_lanes(TT_DATA, TT_COEF)*TP_DECIMATE_FACTOR*streamRptFactor)
 
-  # Slightly cheating here by putting in numLanes as the multiplied value. 
+  # Slightly cheating here by putting in numLanes as the multiplied value.
   checkMultipleLanes =  fn_windowsize_multiple_lanes(TT_DATA, TT_COEF, TP_INPUT_WINDOW_VSIZE, TP_API, numLanes=windowSizeMultiplier)
   #  also checks output size (this isn't done on static asserts for some reason right now)
-  checkMaxBuffer = fn_max_windowsize_for_buffer(TT_DATA, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR, TP_INTERPOLATE_FACTOR=1) 
+  checkMaxBuffer = fn_max_windowsize_for_buffer(TT_DATA, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR, TP_INTERPOLATE_FACTOR=1)
+  # Input samples are round-robin split to each SSR input paths, so total frame size must be divisable by SSR factor.
+  checkIfDivisableBySSR = fn_windowsize_divisible_by_ssr(TP_INPUT_WINDOW_VSIZE, TP_SSR)
 
-  for check in (checkMultipleLanes,checkMaxBuffer):
+  for check in (checkMultipleLanes,checkMaxBuffer,checkIfDivisableBySSR):
     if check["is_valid"] == False :
       return check
 
   return isValid
 
 def fn_multiple_decimation(TP_FIR_LEN,TP_DECIMATE_FACTOR, TP_CASC_LEN):
-  # why? We already have range check and also can't we just zero-pad anyway?? 
+  # why? We already have range check and also can't we just zero-pad anyway??
   if ((TP_FIR_LEN % TP_DECIMATE_FACTOR) != 0) :
-    return isError(f"TP_FIR_LEN ({TP_FIR_LEN}) must be a multiple of TP_DECIMATE_FACTOR ({TP_DECIMATE_FACTOR}).")
+    return isError(f"Filter length ({TP_FIR_LEN}) must be a multiple of decimate factor ({TP_DECIMATE_FACTOR}).")
 
   for TP_KERNEL_POSITION in range(TP_CASC_LEN):
     #Check every kernel's init data needed (different kernels need different DataBuffXOffset)
     TP_FIR_RANGE_LEN =  (
-      fnFirRangeRem(TP_FIR_LEN,TP_CASC_LEN,TP_KERNEL_POSITION,TP_DECIMATE_FACTOR) 
-        if (TP_KERNEL_POSITION == (TP_CASC_LEN-1)) 
-        else 
+      fnFirRangeRem(TP_FIR_LEN,TP_CASC_LEN,TP_KERNEL_POSITION,TP_DECIMATE_FACTOR)
+        if (TP_KERNEL_POSITION == (TP_CASC_LEN-1))
+        else
           fnFirRange(TP_FIR_LEN,TP_CASC_LEN,TP_KERNEL_POSITION,TP_DECIMATE_FACTOR)
     )
     if ((TP_FIR_RANGE_LEN % TP_DECIMATE_FACTOR) != 0) :
-      return isError(f"Illegal combination of design FIR length ({TP_FIR_LEN}) and cascade length ({TP_CASC_LEN}). TP_FIR_RANGE_LEN ({TP_FIR_RANGE_LEN}) must be a multiple of TP_DECIMATE_FACTOR ({TP_DECIMATE_FACTOR})")
-  return isValid 
+      return isError(f"Illegal combination of design filter length ({TP_FIR_LEN}) and cascade length ({TP_CASC_LEN}).")
+  return isValid
 
-def fn_data_needed_within_buffer_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR, TP_DECIMATE_FACTOR, TP_API):
+def fn_data_needed_within_buffer_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN, TP_API, TP_SSR, TP_DECIMATE_FACTOR):
     if(TP_API == 1):
         streamReadWidthDef = sr_asym.fnStreamReadWidth(TT_DATA, TT_COEF)
         streamReadWidth    = 256 if (TP_DECIMATE_FACTOR%2==0) else streamReadWidthDef
@@ -108,7 +110,7 @@ def fn_data_needed_within_buffer_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN,
         m_kSamplesInBuff     = (1024//8)//fn_size_by_byte(TT_DATA)
         fir_len_per_ssr      = CEIL(TP_FIR_LEN, (TP_SSR * TP_DECIMATE_FACTOR))//TP_SSR
         for TP_KP in range(TP_CASC_LEN):
-            TP_FIR_RANGE_LEN = fnFirRangeRem(fir_len_per_ssr, TP_CASC_LEN, TP_KP, TP_DECIMATE_FACTOR) if (TP_KP == TP_CASC_LEN - 1) else fnFirRange(fir_len_per_ssr,TP_CASC_LEN, TP_KP, TP_DECIMATE_FACTOR)  
+            TP_FIR_RANGE_LEN = fnFirRangeRem(fir_len_per_ssr, TP_CASC_LEN, TP_KP, TP_DECIMATE_FACTOR) if (TP_KP == TP_CASC_LEN - 1) else fnFirRange(fir_len_per_ssr,TP_CASC_LEN, TP_KP, TP_DECIMATE_FACTOR)
             m_kFirRangeOffset = sr_asym.fnFirRangeOffset(fir_len_per_ssr, TP_CASC_LEN, TP_KP, TP_DECIMATE_FACTOR)
             emptyInitLanes    = CEIL((fir_len_per_ssr - TP_FIR_RANGE_LEN - m_kFirRangeOffset), TP_DECIMATE_FACTOR) / TP_DECIMATE_FACTOR
             streamInitNullAccs           = emptyInitLanes/ m_kVOutSize
@@ -119,72 +121,72 @@ def fn_data_needed_within_buffer_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN,
             kMinDataLoadCycles = kMinDataLoaded/m_kStreamLoadVsize
             m_kFirRangeOffsetLastKernel    = sr_asym.fnFirRangeOffset(fir_len_per_ssr,TP_CASC_LEN,TP_CASC_LEN-1,TP_DECIMATE_FACTOR)
             m_kInitDataNeededNoCasc    = TP_FIR_RANGE_LEN - 1 + kMinDataLoadCycles * m_kStreamLoadVsize
-            m_kInitDataNeeded          = m_kInitDataNeededNoCasc + (m_kFirRangeOffsetLastKernel - m_kFirRangeOffset - streamInitNullAccs * TP_DECIMATE_FACTOR * m_kVOutSize)
+            m_kInitDataNeeded          = m_kInitDataNeededNoCasc + (dataOffsetNthKernel - streamInitNullAccs * TP_DECIMATE_FACTOR * m_kLanes)
             if (m_kInitDataNeeded > m_kSamplesInBuff) :
               return isError(
                 f"Kernel[{TP_KP}] requires too much data ({m_kInitDataNeeded} samples) "\
-                  f"to fit in a single buffer ({m_kSamplesInBuff} samples), due to the fir length per kernel- "\
-                  f"influenced by fir length ({TP_FIR_LEN}), SSR ({TP_SSR}), cascade length ({TP_CASC_LEN}).\n"
+                  f"to fit in a single buffer ({m_kSamplesInBuff} samples), due to the filter length per kernel- "\
+                  f"influenced by filter length ({TP_FIR_LEN}), SSR ({TP_SSR}), cascade length ({TP_CASC_LEN}).\n"
               )
     return isValid
 
-def fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD): 
+def fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD):
     minLenCheck =  fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR)
-    # apprently this is what the graph does, but i think we should be taking into account the rate change factors here. 
+    # apprently this is what the graph does, but i think we should be taking into account the rate change factors here.
     maxLenCheck = fn_max_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR, 1)
-    
-    dataNeededCheck = fn_data_needed_within_buffer_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN,TP_API, TP_SSR, TP_DECIMATE_FACTOR, TP_API )
+
+    dataNeededCheck = fn_data_needed_within_buffer_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN,TP_API, TP_SSR, TP_DECIMATE_FACTOR )
     firMultipleCheck = fn_multiple_decimation(TP_FIR_LEN,TP_DECIMATE_FACTOR, TP_CASC_LEN)
     for check in (minLenCheck,maxLenCheck,dataNeededCheck, firMultipleCheck):
       if check["is_valid"] == False :
         return check
-    
+
     return isValid
 
-# only get a 4b offset value per lane (single hex digit), whereas some buffers are larger than this, 
-# so we need to catch the situation where decimate factor causes us to require more data in one op than we can index. 
+# only get a 4b offset value per lane (single hex digit), whereas some buffers are larger than this,
+# so we need to catch the situation where decimate factor causes us to require more data in one op than we can index.
 def fn_xoffset_range_valid(TT_DATA, TT_COEF, TP_DECIMATE_FACTOR, TP_API):
   m_kLanes = fn_decimate_asym_lanes(TT_DATA, TT_COEF)
 
   # When checking against xoffset, shouldn't we check m_kLanes*TP_DECIMATE_FACTOR??
   dataNeededBetweenOutputChunks =  (m_kLanes-1)*TP_DECIMATE_FACTOR
-  
+
   m_kXoffsetRange = 8 if TT_DATA == "cfloat" else 16;
   #m_kFirInitOffset     = m_kFirRangeOffset + m_kFirMarginOffset;
   #m_kDataBuffXOffset   = m_kFirInitOffset % (m_kWinAccessByteSize/sizeof(TT_DATA));  // Remainder of m_kFirInitOffset divided by 128bit
   # CAUTION Fixed AIE1 constant for window read granularity
-  m_kWinAccessByteSize = 128//8  
-  # Complicated to pull in lots of other code here, so we'll just go for worst case. 
+  m_kWinAccessByteSize = 128//8
+  # Complicated to pull in lots of other code here, so we'll just go for worst case.
   m_kDataBuffXOffset = (m_kWinAccessByteSize//fn_size_by_byte(TT_DATA))-1
 
-  
+
   buffSize = (1024//8) // fn_size_by_byte(TT_DATA)
   loadSizeBits = 128 if fn_base_type(TT_DATA) == "int32" else 256
   loadVSize = (loadSizeBits // 8) // fn_size_by_byte(TT_DATA)
 
   dataNeededWithAlignment = dataNeededBetweenOutputChunks + m_kDataBuffXOffset
-  # CAUTION, I've tweaked this vs traits because the previous phrasing didn't make sense to me. 
+  # CAUTION, I've tweaked this vs traits because the previous phrasing didn't make sense to me.
   # m_kDataRegVsize-m_kDataLoadVsize >= m_kDFDataRange
   if (dataNeededWithAlignment > (buffSize - loadVSize)):
-    return isError(f"TP_DECIMATION_FACTOR exceeded for this data/coeff type combination. Required input data ({dataNeededWithAlignment}) exceeds input vector's register ({(buffSize - loadVSize)}).")
-  
+    return isError(f"Decimate factor exceeded for this data type and coefficient type combination. Required input data ({dataNeededWithAlignment}) exceeds input vector's register ({(buffSize - loadVSize)}).")
+
   if (TP_API == 1 and dataNeededBetweenOutputChunks > m_kXoffsetRange):
-    return isError(f"TP_DECIMATION_FACTOR exceeded for this data/coeff type combination. Required input data ({dataNeededBetweenOutputChunks}) exceeds input vector's register offset address range ({m_kXoffsetRange}).")
+    return isError(f"Decimate factor exceeded for this data type andcoefficient type combination. Required input data ({dataNeededBetweenOutputChunks}) exceeds input vector's register offset address range ({m_kXoffsetRange}).")
 
   return isValid
 
-# This logic is copied from the kernel class. 
+# This logic is copied from the kernel class.
 
 
-def fn_validate_decimate_factor(TT_DATA, TT_COEF, TP_DECIMATE_FACTOR, TP_API): 
-  
+def fn_validate_decimate_factor(TT_DATA, TT_COEF, TP_DECIMATE_FACTOR, TP_API):
+
     offsetRangeCheck = fn_xoffset_range_valid(TT_DATA, TT_COEF, TP_DECIMATE_FACTOR, TP_API )
-    
+
     return offsetRangeCheck
 
 def fn_validate_dual_ip(TP_API, TP_DUAL_IP):
     if TP_DUAL_IP == 1 and TP_API == 0:
-      return isError("Dual input ports only supported when port API is a stream.")
+      return isError("Dual input ports only supported when port is a stream.")
 
     return isValid
 
@@ -193,7 +195,7 @@ def fn_type_support(TT_DATA, TT_COEF):
 
 def fn_validate_ssr(TP_SSR, TP_API):
     ssrStreamCheck = fn_stream_ssr(TP_API, TP_SSR)
-    return ssrStreamCheck                                    
+    return ssrStreamCheck
 
 #### validation APIs ####
 def validate_TT_COEF(args):
@@ -205,7 +207,7 @@ def validate_TT_COEF(args):
       if check["is_valid"] == False :
         return check
     return isValid
-    
+
 def validate_TP_SHIFT(args):
   TT_DATA = args["TT_DATA"]
   TP_SHIFT = args["TP_SHIFT"]
@@ -243,7 +245,7 @@ def validate_TP_DECIMATE_FACTOR(args):
   return fn_validate_decimate_factor(TT_DATA, TT_COEF, TP_DECIMATE_FACTOR, TP_API)
 
 
-    
+
 def validate_TP_DUAL_IP(args):
     TP_API = args["TP_API"]
     TP_DUAL_IP = args["TP_DUAL_IP"]
@@ -252,7 +254,7 @@ def validate_TP_DUAL_IP(args):
 def validate_TP_SSR(args):
     TP_API = args["TP_API"]
     TP_SSR = args["TP_SSR"]
-    return fn_validate_ssr(TP_SSR, TP_API)                          
+    return fn_validate_ssr(TP_SSR, TP_API)
 
 # Example of updater.
 #
@@ -301,13 +303,13 @@ def info_ports(args):
     TP_DECIMATE_FACTOR = args["TP_DECIMATE_FACTOR"]
     margin_size = sr_asym.fn_margin_size(TP_FIR_LEN, TT_DATA)
 
-    in_ports = get_port_info("in", "in", TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_SSR, marginSize=margin_size, TP_API=args["TP_API"]) 
-    in2_ports = (get_port_info("in2", "in", TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_SSR, marginSize=margin_size, TP_API=args["TP_API"]) if (args["TP_DUAL_IP"] == 1) else [])
+    in_ports = get_port_info("in", "in", TT_DATA, TP_INPUT_WINDOW_VSIZE//TP_SSR, TP_SSR, marginSize=margin_size, TP_API=args["TP_API"])
+    in2_ports = (get_port_info("in2", "in", TT_DATA, TP_INPUT_WINDOW_VSIZE//TP_SSR, TP_SSR, marginSize=margin_size, TP_API=args["TP_API"]) if (args["TP_DUAL_IP"] == 1) else [])
     coeff_ports = (get_parameter_port_info("coeff", "in", TT_COEF, TP_SSR, TP_FIR_LEN, "async") if (args["TP_USE_COEF_RELOAD"] == 1) else [])
 
     # decimate by 2 for halfband
-    out_ports = get_port_info("out", "out", TT_DATA, TP_INPUT_WINDOW_VSIZE//TP_DECIMATE_FACTOR, TP_SSR, TP_API=args["TP_API"])
-    out2_ports = (get_port_info("out2", "out", TT_DATA, TP_INPUT_WINDOW_VSIZE//TP_DECIMATE_FACTOR, TP_SSR, TP_API=args["TP_API"]) if (args["TP_NUM_OUTPUTS"] == 2) else [])
+    out_ports = get_port_info("out", "out", TT_DATA, TP_INPUT_WINDOW_VSIZE//TP_SSR//TP_DECIMATE_FACTOR, TP_SSR, TP_API=args["TP_API"])
+    out2_ports = (get_port_info("out2", "out", TT_DATA, TP_INPUT_WINDOW_VSIZE//TP_SSR//TP_DECIMATE_FACTOR, TP_SSR, TP_API=args["TP_API"]) if (args["TP_NUM_OUTPUTS"] == 2) else [])
     return in_ports + in2_ports + coeff_ports + out_ports + out2_ports
 
 
@@ -340,7 +342,7 @@ def generate_graph(graphname, args):
   dual_ip_connect_str = f"adf::connect<> net_in2(in2[i], filter.in2[i]);" if TP_DUAL_IP == 1 else "// No dual input"
   coeff_ip_declare_str = f"ssr_port_array<input> coeff;" if TP_USE_COEF_RELOAD == 1 else "//No coeff port"
   coeff_ip_connect_str = f"adf::connect<> net_coeff(coeff[i], filter.coeff[i]);" if TP_USE_COEF_RELOAD == 1 else "//No coeff port"
-  dual_op_declare_str = f"ssr_port_array<input> out2;" if TP_NUM_OUTPUTS == 2 else "// No dual output"
+  dual_op_declare_str = f"ssr_port_array<output> out2;" if TP_NUM_OUTPUTS == 2 else "// No dual output"
   dual_op_connect_str = f"adf::connect<> net_out2(filter.out2[i], out2[i]);" if TP_NUM_OUTPUTS == 2 else "// No dual output"
   # Use formatted multi-line string to avoid a lot of \n and \t
   code  = (
@@ -359,21 +361,21 @@ public:
 
   std::vector<{TT_COEF}> taps = {taps};
   xf::dsp::aie::fir::decimate_asym::fir_decimate_asym_graph<
-    {TT_DATA}, //TT_DATA 
-    {TT_COEF}, //TT_COEF 
-    {TP_FIR_LEN}, //TP_FIR_LEN 
-    {TP_DECIMATE_FACTOR}, //TP_DECIMATE_FACTOR 
-    {TP_SHIFT}, //TP_SHIFT 
+    {TT_DATA}, //TT_DATA
+    {TT_COEF}, //TT_COEF
+    {TP_FIR_LEN}, //TP_FIR_LEN
+    {TP_DECIMATE_FACTOR}, //TP_DECIMATE_FACTOR
+    {TP_SHIFT}, //TP_SHIFT
     {TP_RND}, //TP_RND
-    {TP_INPUT_WINDOW_VSIZE}, //TP_INPUT_WINDOW_VSIZE 
-    {TP_CASC_LEN}, //TP_CASC_LEN 
-    {TP_USE_COEF_RELOAD}, //TP_USE_COEF_RELOAD 
-    {TP_NUM_OUTPUTS}, //TP_NUM_OUTPUTS 
-    {TP_DUAL_IP}, //TP_DUAL_IP 
-    {TP_API}, //TP_API 
+    {TP_INPUT_WINDOW_VSIZE}, //TP_INPUT_WINDOW_VSIZE
+    {TP_CASC_LEN}, //TP_CASC_LEN
+    {TP_USE_COEF_RELOAD}, //TP_USE_COEF_RELOAD
+    {TP_NUM_OUTPUTS}, //TP_NUM_OUTPUTS
+    {TP_DUAL_IP}, //TP_DUAL_IP
+    {TP_API}, //TP_API
     {TP_SSR} //TP_SSR
   > filter;
-  
+
   {graphname}() : filter({constr_args_str}) {{
     adf::kernel *filter_kernels = filter.getKernels();
     for (int i=0; i < 1; i++) {{

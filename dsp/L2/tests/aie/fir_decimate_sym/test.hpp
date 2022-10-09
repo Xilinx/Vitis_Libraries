@@ -103,19 +103,13 @@ class test_graph : public graph {
         for (int i = 0; i < kNumTaps; i++) {
             m_taps_v.push_back(m_taps[0][i]);
         }
-
 #ifdef USING_UUT
-        static constexpr int kMaxTaps = uut_g<INPUT_SAMPLES>::fnGetMaxTapsPerKernel();
-        printf("For this config the Maximum Taps Per Kernel is %d\n", kMaxTaps);
-        static constexpr int kMinLen = uut_g<INPUT_SAMPLES>::fnGetMinCascLen<FIR_LEN, DATA_TYPE, DECIMATE_FACTOR>();
+        static constexpr int kMinLen =
+            uut_g<INPUT_SAMPLES>::getMinCascLen<FIR_LEN, DATA_TYPE, COEFF_TYPE, DECIMATE_FACTOR, PORT_API, P_SSR>();
         printf("For this config the Minimum CASC_LEN is %d\n", kMinLen);
 #if (PORT_API == 1)
-        static constexpr int kRawOptTaps =
-            uut_g<INPUT_SAMPLES>::fnGetOptTapsPerKernel<DATA_TYPE, COEFF_TYPE, DUAL_IP + 1>();
-        static constexpr int kOptTaps = kRawOptTaps < kMaxTaps ? kRawOptTaps : kMaxTaps;
-        printf("For this config the Optimal Taps (streaming) Per Kernel is %d\n", kOptTaps);
-        static constexpr int kOptLen = uut_g<INPUT_SAMPLES>::fnGetOptCascLen<FIR_LEN, DATA_TYPE, COEFF_TYPE, PORT_API,
-                                                                             NUM_OUTPUTS, DECIMATE_FACTOR>();
+        static constexpr int kOptLen =
+            uut_g<INPUT_SAMPLES>::getOptCascLen<FIR_LEN, DATA_TYPE, COEFF_TYPE, PORT_API, DECIMATE_FACTOR, P_SSR>();
         printf("For this config the Optimal CASC_LEN is %d\n", kOptLen);
 #endif
 #endif
@@ -175,17 +169,17 @@ class test_graph : public graph {
 #ifdef USING_UUT
         const int MAX_PING_PONG_SIZE = 16384;
         const int MEMORY_MODULE_SIZE = 32768;
-        if (PORT_API == 0) {
-            const int bufferSize = ((FIR_LEN + INPUT_SAMPLES) * sizeof(DATA_TYPE));
-            if (bufferSize > MAX_PING_PONG_SIZE) {
-                single_buffer(firGraph.getKernels()->in[0]);
-            } else {
-                // use default ping-pong buffer, unless requested buffer exceeds memory module size
-                static_assert(bufferSize < MEMORY_MODULE_SIZE,
-                              "ERROR: Input Window size (based on requrested window size and FIR length margin) "
-                              "exceeds Memory Module size of 32kB");
-            }
+#if (P_SSR == 1)
+        const int bufferSize = ((FIR_LEN + INPUT_SAMPLES) * sizeof(DATA_TYPE));
+        if (bufferSize > MAX_PING_PONG_SIZE) {
+            single_buffer(firGraph.getKernels()->in[0]);
+        } else {
+            // use default ping-pong buffer, unless requested buffer exceeds memory module size
+            static_assert(bufferSize < MEMORY_MODULE_SIZE,
+                          "ERROR: Input Window size (based on requrested window size and FIR length margin) exceeds "
+                          "Memory Module size of 32kB");
         }
+#endif
 #endif
 
 #ifdef USING_UUT

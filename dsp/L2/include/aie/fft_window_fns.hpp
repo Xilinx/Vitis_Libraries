@@ -21,6 +21,31 @@ namespace aie {
 namespace fft {
 namespace windowfn {
 
+/**
+ * @addtogroup  fft_window FFT Window
+ *
+ * @{
+ *
+ */
+
+/**
+ * @defgroup fft_window_utils FFT Window utils
+ *
+ * @ingroup fft_window
+ *
+ * The FFT Window utilities contain helper funcitons to create windowing data structures.
+ *
+ */
+
+/**
+ * @ingroup fft_window_utils
+ * @brief getHammingWindow is utility to create Hamming window.
+ * @tparam TT_COEFF describes the type of weights in the FFT window.
+ * @param[out] weights a pointer to the area where Window will be created
+ * @param[in] pointSize size of the window to create
+ *
+ */
+
 template <typename T_C>
 void getHammingWindow(T_C* weights, const unsigned int pointSize) {
     float temp;
@@ -31,6 +56,9 @@ void getHammingWindow(T_C* weights, const unsigned int pointSize) {
         weights[i] = (T_C)((float)(1 << 14) * temp + 0.5);
     }
 }
+/**
+  * @cond NOCOMMENTS
+  */
 
 template <>
 void getHammingWindow<int32>(int32* weights, const unsigned int pointSize) {
@@ -53,6 +81,18 @@ void getHammingWindow<float>(float* weights, const unsigned int pointSize) {
     }
 }
 
+/**
+ * @endcond
+ */
+
+/**
+ * @ingroup fft_window_utils
+ * @brief getHannWindow is utility to create Hann window.
+ * @tparam TT_COEFF describes the type of weights in the FFT window.
+ * @param[out] weights a pointer to the area where Window will be created
+ * @param[in] pointSize size of the window to create
+ *
+ */
 template <typename T_C>
 void getHannWindow(T_C* weights, const unsigned int pointSize) {
     float temp;
@@ -63,6 +103,9 @@ void getHannWindow(T_C* weights, const unsigned int pointSize) {
         weights[i] = (T_C)((float)(1 << 14) * temp + 0.5);
     }
 }
+/**
+  * @cond NOCOMMENTS
+  */
 
 template <>
 void getHannWindow<int32>(int32* weights, const unsigned int pointSize) {
@@ -85,6 +128,18 @@ void getHannWindow<float>(float* weights, const unsigned int pointSize) {
     }
 }
 
+/**
+ * @endcond
+ */
+
+/**
+ * @ingroup fft_window_utils
+ * @brief getBlackmanWindow is utility to create Hamming window.
+ * @tparam TT_COEFF describes the type of weights in the FFT window.
+ * @param[out] weights a pointer to the area where Window will be created
+ * @param[in] pointSize size of the window to create
+ *
+ */
 template <typename T_C>
 void getBlackmanWindow(T_C* weights, const unsigned int pointSize) {
     float temp;
@@ -95,6 +150,9 @@ void getBlackmanWindow(T_C* weights, const unsigned int pointSize) {
         weights[i] = (T_C)((float)(1 << 14) * temp + 0.5);
     }
 }
+/**
+  * @cond NOCOMMENTS
+  */
 
 template <>
 void getBlackmanWindow<int32>(int32* weights, const unsigned int pointSize) {
@@ -132,6 +190,18 @@ float fn_io(float x) {
     return overall_sum;
 }
 
+/**
+ * @endcond
+ */
+
+/**
+ * @ingroup fft_window_utils
+ * @brief geKeiserWindow is utility to create Hamming window.
+ * @tparam TT_COEFF describes the type of weights in the FFT window.
+ * @param[out] weights a pointer to the area where Window will be created
+ * @param[in] pointSize size of the window to create
+ *
+ */
 template <typename T_C>
 void getKaiserWindow(T_C* weights, const unsigned int pointSize, const float alpha = 1.27) {
     float temp;
@@ -147,6 +217,9 @@ void getKaiserWindow(T_C* weights, const unsigned int pointSize, const float alp
         weights[i] = (T_C)((float)(1 << 14) * temp + 0.5);
     }
 }
+/**
+  * @cond NOCOMMENTS
+  */
 
 template <>
 void getKaiserWindow<int32>(int32* weights, const unsigned int pointSize, const float alpha) {
@@ -178,6 +251,14 @@ void getKaiserWindow<float>(float* weights, const unsigned int pointSize, const 
         weights[i] = fn_io(arg) / divFactor;
     }
 }
+
+/**
+ * @endcond
+ */
+
+/**
+ * @}
+ */
 }
 }
 }

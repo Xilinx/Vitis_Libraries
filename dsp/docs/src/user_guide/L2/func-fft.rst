@@ -47,6 +47,9 @@ Template Parameters
 
 To see details on the template parameters for the FFT, see :ref:`API_REFERENCE`.
 
+For guidance on configuration with some example scenarios, see :ref:`Configuration Notes` 
+
+See also :ref:`Parameter Legality Notes` regarding legality checking of parameters.
 
 ~~~~~~~~~~~~~~~~
 Access functions
@@ -173,6 +176,15 @@ For the same example, to ensure that the second radix2 combiner kernel in the fi
 
 For large point sizes, e.g. 65536, the design is large, requiring 80 tiles. With such a large design, the Vitis AIE mapper may time out due to there being too many possibilities of placement, so placement constraints are recommended to reduce the solution space and so reduce the time spent by the Vitis AIE mapper tool to find a solution. Example constraints have been provided in the test.hpp file for the fft_ifft_dit_1ch, i.e in: `L2/tests/aie/fft_ifft_dit_1ch/test.hpp`.
 
+Use of single_buffer
+--------------------
+When configured for TP_API=0, i.e. window API, the FFT will default to use ping-pong buffers for performance. However, for the FFT, the resulting buffers can be very large and can limit the point size achievable by a single kernel. It is possible to apply the single_buffer constraint to the input and/or output buffers to reduce the memory cost of the FFT. By this means an FFT with TT_DATA=cint32 of TP_POINT_SIZE=4096 can be made to fit in a single kernel. The following code shows how such a constraint may be applied.
+
+.. code-block::
+
+xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph<DATA_TYPE, TWIDDLE_TYPE, POINT_SIZE, FFT_NIFFT, SHIFT, CASC_LEN, DYN_PT_SIZE, WINDOW_VSIZE, API_IO, PARALLEL_POWER> fftGraph; 
+single_buffer(fftGraph.FFTwinproc.m_fftKernels[0].in[0]);
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Code Example including constraints
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -260,11 +272,43 @@ The following code block shows example code of how to include an instance of the
                 location<kernel>(fftGraph.FFTsubframe1.FFTsubframe1.FFTsubframe1.m_r2Comb[lane]) =
                     tile(LOC_XBASE + lane * 2 + 28, LOC_YBASE + CASC_LEN + 1);
         }
-
         #endif //(POINT_SIZE == 65536)
       }
     };//end of class
 
+~~~~~~~~~~~~~~~~~~~
+Configuration Notes
+~~~~~~~~~~~~~~~~~~~
+This section is intended to provide guidance for the user on how best to configure the FFT in some typical scenarios, or when designing with one particular metric in mind, such as resource use or performance.
+
+Configuration for performance vs resource
+-----------------------------------------
+Simple configurations of the FFT use a single kernel. Multiple kernels will be used when either TP_PARALLEL_POWER > 0 or TP_CASC_LEN > 1. Both of these parameters exist to allow higher throughput, though TP_PARALLEL_POWER also allows larger point sizes that can be implemented in a single kernel. 
+If higher throughput is required than can be achieved with a single kernel then TP_CASC_LEN should be increased in preference to TP_PARALLEL_POWER. This is because resource (number of kernels) will match TP_CASC_LEN, whereas for TP_PARALLEL_POWER, resource increases quadratically.
+It is recommended that TP_PARALLEL_POWER is only increased after TP_CASC_LEN has been increased, but where throughput still needs to be increased.
+Of course, TP_PARALLEL_POWER may be required if the point size required is greater than a single kernel can be achieved. In this case, to keep resource minimised, increase TP_PARALLEL_POWER as required to support the point size in question, then increase TP_CASC_LEN to achieve the required throughput, before again increasing TP_PARALLEL_POWER if higher throughput is still required.
+The maximum point size supported by a single kernel may be increased by use of the single_kernel constraint. This only applies when TP_API=0 (windows) as the streaming implementation always uses single buffering.
+
+Scenarios
+---------
+
+Scenario 1: 512 point forward FFT with cint16 data requres >500 Msamples/sec with a window interface and minimal latency. With TP_CASC_LEN=1 and TP_PARALLEL_POWER=0 this is seen to achieve approx 419Msa/sec. With TP_CASC_LEN=2 this increases to 590Msa/s. The configuration will be as follows:
+xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph<cint16, cint16, 512, 1, 9, 2, 0, 512, 0, 0> myFFT;
+Notes: TP_SHIFT is set to 9 for nominal 1/N scaling. TP_WINDOW_VSIZE has been set to TP_POINT_SIZE to minimize latency.
+
+Scenario 2: 4096 point inverse FFT with cint32 data is required with 100Msa/sec. This cannot be accommodated in a single kernel due to memory limits. These memory limits apply to cascaded implementations too, so the recommended configuration is as follows:
+xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph<cint32, cint16, 4096, 0, 12, 1, 0, 4096, 1, 1> myFFT;
+Notes: TP_SHIFT is set to 12 for nominal 1/N scaling. TP_WINDOW_VSIZE has been set to TP_POINT_SIZE as to attempt any multiple of TP_POINT_SIZE would exceed memory limits.
+
+~~~~~~~~~~~~~~~~~~~~~~~~
+Parameter Legality Notes
+~~~~~~~~~~~~~~~~~~~~~~~~
+Where possible, illegal values for template parameters, or illegal combinations of values of template parameters are detected at compilation time. 
+Where an illegal configuration is detected, compilation will fail with an error message indicating the constraint in question.
+However, no attempt has been made to detect and error upon configurations which are simply too large for the resource available, as the library element cannot know how much of the device is used by the user code and also because the resource limits vary by device. In these cases, compilation will likely fail, but due to the over-use of a resource detected by the aie tools. 
+For example, an FFT of TT_DATA = cint16 can be supported up to TP_POINT_SIZE=65536 using TP_PARALLEL_POWER=4. 
+A similarly configured FFT with TT_DATA=cint32 will not compile because the per-tile memory use, which is constant and predictable, is exceeded. This condition is detected and an error would be issued.
+An FFT with TT_DATA=cint32 and TP_PARALLEL_POWER=5 should, in theory, be possible to implement, but this will use 192 tiles directly and will use the memory of many other tiles, so is likely to exceed the capacity of the AIE array. However, the available capacity cannot easily be determined, so no error check is applied here.
 
 
 

@@ -150,12 +150,30 @@ INLINE_DECL constexpr unsigned int getInitDataNeeded() {
     constexpr unsigned int kMinDataNeeded = (TP_MODIFY_MARGIN_OFFSET + dataNeededLastKernel - dataOffsetNthKernel);
     constexpr unsigned int kMinDataLoaded = CEIL(kMinDataNeeded, m_kStreamLoadVsize);
     constexpr unsigned int kMinDataLoadCycles = kMinDataLoaded / m_kStreamLoadVsize;
+
+    /* In a non-cascaded design or in the last kernel in a chain of cascaded kernels this gives the maximum data that
+       needs to fit in the buffer.
+       For ex, a cint32 data type which needs a single data read of 4 data samples for the first lane of outputs would
+       look like this after the first
+       read and before any computation is performed :
+       sbuff =  1 2 3 4  0 0 0 0  0 0 0 0  0 0 0 0
+
+       Since the data pointer for the mac operations increment by one after every MAC, and we want to point to the first
+       new element after (TP_FIR_RANGE_LEN - 1) MACs
+       (the previous MACs would use margin samples), initDataNeeded would need (enough samples for the margin samples) +
+       (enough data to perform first computation).
+
+    */
     constexpr unsigned int m_kInitDataNeededNoCasc = TP_FIR_RANGE_LEN - 1 + kMinDataLoadCycles * m_kStreamLoadVsize;
-    // when kernels are cascaded, the starting data is offset by a certain amount for all kernels except the last.
-    // The data register needs to accommodate this offset data as well.
+    /* when kernels are cascaded, the number of margin samples can be more than (TP_FIR_RANGE_LEN - 1).
+       The first output sample produced by this kernel needs  (streamInitNullAccs * TP_DECIMATE_FACTOR * m_kVOutSize)
+       input data,
+       but the first input data sample that this kernel processes is the data corresponding to the
+       (dataOffsetNthKernel)th coefficient.
+       The data register needs to accommodate this difference in the margin samples.
+    */
     constexpr unsigned int m_kInitDataNeeded =
-        m_kInitDataNeededNoCasc +
-        (m_kFirRangeOffsetLastKernel - m_kFirRangeOffset - streamInitNullAccs * TP_DECIMATE_FACTOR * m_kLanes);
+        m_kInitDataNeededNoCasc + (dataOffsetNthKernel - streamInitNullAccs * TP_DECIMATE_FACTOR * m_kLanes);
     return m_kInitDataNeeded;
 }
 

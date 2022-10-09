@@ -1,6 +1,6 @@
 {
   "schema": "vitis_library_api_spec_schema-1.0",
-  "api_name": "xf::dsp::aie::fft::fft_window::fft_window_graph",
+  "api_name": "xf::dsp::aie::fft::windowfn::fft_window_graph",
   "display_name": "fft_window_graph",
   "header_file_name": "fft_window_graph.hpp",
   "search_paths": [
@@ -50,7 +50,8 @@
       "maximum": 65536,
       "validator": {
         "file": "fft_window.py",
-        "function": "validate_TP_POINT_SIZE"
+        "function": "validate_TP_POINT_SIZE",
+        "args": ["TT_DATA"]
       }
     },
     {
@@ -132,7 +133,12 @@
       "name": "weights",
       "description": "The window coefficients.",
       "element_type": "TT_COEFF",
-      "type": "vector"
+      "type": "vector",
+      "validator": {
+        "file": "fft_window.py",
+        "function": "validate_weights",
+        "args": ["TP_POINT_SIZE","TP_DYN_PT_SIZE"]
+      }
     }
   ],
   "ports": {

@@ -28,6 +28,9 @@ namespace xf {
 namespace dsp {
 namespace aie {
 using namespace adf;
+/**
+  * @cond NOCOMMENTS
+  */
 
 // Recursive cascaded kernel creation, any FIR variant with any params
 template <typename casc_params = fir_params_defaults, template <typename> typename fir_type = fir_type_default>
@@ -560,12 +563,39 @@ static constexpr unsigned int getMinCascLen() {
     return T_FIR_LEN % kMaxTaps == 0 ? T_FIR_LEN / kMaxTaps : T_FIR_LEN / kMaxTaps + 1;
 };
 
-template <int kMaxTaps, int kRawOptTaps, int T_FIR_LEN>
+template <int kMaxTaps, int kRawOptTaps, int T_FIR_LEN, int SSR = 1>
 constexpr unsigned int getOptCascLen() {
     constexpr int kOptTaps = kRawOptTaps < kMaxTaps ? kRawOptTaps : kMaxTaps;
-    return (T_FIR_LEN) % kOptTaps == 0 ? (T_FIR_LEN) / kOptTaps : (T_FIR_LEN) / kOptTaps + 1;
+    constexpr int firLenPerSSR = T_FIR_LEN / SSR;
+    return (firLenPerSSR) % kOptTaps == 0 ? (firLenPerSSR) / kOptTaps : (firLenPerSSR) / kOptTaps + 1;
 };
 
+/**
+ * @endcond
+ */
+
+/**
+ * @defgroup graph_utils Graph utils
+ *
+ * The Graphs utilities contain helper funcitons and classes that ease usage of library elements.
+ *
+ */
+
+//--------------------------------------------------------------------------------------------------
+// convert_sym_taps_to_asym
+//--------------------------------------------------------------------------------------------------
+/**
+ * @ingroup graph_utils
+ *
+ * @brief convert_sym_taps_to_asym is an helper function to convert users input coefficient array. \n
+ * Function creates an asymmetric array in the area provided from a symmetric one. \n
+ * Function can be used when run-time programmable coefficients are being passed to the FIR graph, \n
+ * using the graph's class ``update()`` method.
+ * @tparam TT_COEFF describes the type of individual coefficients of the filter taps.
+ * @param[out] tapsOut  a pointer to the output taps array of uncompressed (flen) size.
+ * @param[in] fLen  input argument defining the size of the uncompressed array.
+ * @param[in] tapsIn pointer to the input taps array of compressed (fLen+1)/2 size.
+ */
 template <typename TT_COEFF>
 void convert_sym_taps_to_asym(TT_COEFF* tapsOut, unsigned int fLen, TT_COEFF* tapsIn) {
     for (unsigned int i = 0; i < fLen; i++) {
@@ -577,22 +607,38 @@ void convert_sym_taps_to_asym(TT_COEFF* tapsOut, unsigned int fLen, TT_COEFF* ta
     }
 };
 
+//--------------------------------------------------------------------------------------------------
+// convert_hb_taps_to_asym
+//--------------------------------------------------------------------------------------------------
+/**
+ * @ingroup graph_utils
+ *
+ * @brief convert_hb_taps_to_asym is an helper function to convert users input coefficient array. \n
+ * Function can be used when run-time programmable coefficients are being passed to the FIR graph, \n
+ * using the graph's class ``update()`` method. \n
+ * \n
+ * HB taps arrays are compressed arrays of taps with the center tap at the end,  \n
+ * with a length of: ``hbFirLen = (FIR Length + 1) / 4 + 1``.
+ * When converting to Asym, we want to convert the symmetric taps to asymmetric,
+ * but it's useful to have the center tap at the end,
+ * (since it is processed by separate polyphase lane and is offloaded to a separate, dedicated kernel). \n
+ * However for SSR cases, the array needs to be padded with zeros to a multiple of SSR factor. \n
+ * For example, for a FIR Length of 7, where coeffs are: ``1, 0, 2, 5, 2, 0, 1`` \n
+ * ``tapsIn: 1, 2, 5`` \n
+ * ``hbFirLen: 3`` \n
+ * For SSR: 1, \n
+ * ``tapsOut: 1, 2, 2, 1, 5`` \n
+ * For SSR: 3 \n
+ * ``tapsOut: 1, 2, 2, 1, 0, 0, 5`` \n
+ *
+ * @tparam TT_COEFF describes the type of individual coefficients of the filter taps.
+ * @param[out] tapsOut  a pointer to the output taps array of uncompressed (flen) size.
+ * @param[in] hbFirLen  input argument defining the size of the uncompressed array.
+ * @param[in] tapsIn pointer to the input taps array of compressed (fLen+1)/2 size.
+ * @param[in] ssr ssr parameter
+ */
 template <typename TT_COEFF>
 void convert_hb_taps_to_asym(TT_COEFF* tapsOut, unsigned int hbFirLen, TT_COEFF* tapsIn, unsigned int ssr) {
-    // HB taps arrays are compressed arrays of taps with the center tap at the end, with a length of: hbFirLen = (FIR
-    // Length + 1) / 4 + 1.
-    // When converting to Asym, we want to convert the symmetric taps to asymmetric, but it's useful to have the center
-    // tap at the end,
-    // (since it is processed by separate polyphase lane and is offloaded to a separate, dedicated kernel).
-    // However for SSR cases, the array needs to be padded with zeros to a multiple of SSR factor.
-    // For example, for a FIR Length of 7, where coeffs are: 1, 0, 2, 5, 2, 0, 1,
-    // tapsIn: 1, 2, 5
-    // hbFirLen: 3
-    // For SSR: 1,
-    // tapsOut: 1, 2, 2, 1, 5
-    // For SSR: 3
-    // tapsOut: 1, 2, 2, 1, 0, 0, 5
-    //
     int symFLen = (hbFirLen - 1) * 2; // (FIR_LEN+1)/2
 
     for (unsigned int i = 0; i < CEIL(symFLen, ssr); i++) {

@@ -8,7 +8,7 @@ import fir_polyphase_decomposer as poly
 
 import importlib
 from pathlib import Path
-current_uut_kernel = Path(__file__).stem                                       
+current_uut_kernel = Path(__file__).stem
 # fir_interpolate_asym.hpp:         static_assert(TP_FIR_LEN <= fnMaxTapssIntAsym<TT_DATA,TT_COEFF>(),"ERROR: Max supported FIR length exceeded for TT_DATA/TT_COEFF combination. ");
 # fir_interpolate_asym.hpp:         static_assert(TP_FIR_RANGE_LEN >= FIR_LEN_MIN,"ERROR: Illegal combination of design FIR length and cascade length, resulting in kernel FIR length below minimum required value. ");
 # fir_interpolate_asym.hpp:         static_assert(TP_SHIFT >= SHIFT_MIN && TP_SHIFT <= SHIFT_MAX, "ERROR: SHIFT is out of the supported range.");
@@ -56,7 +56,7 @@ current_uut_kernel = Path(__file__).stem
 #
 
 def fn_fir_len_multiple_interp(TP_FIR_LEN, TP_INTERPOLATE_FACTOR):
-  return isError(f"TP_FIR_LEN ({TP_FIR_LEN}) must be an integer multiple of TP_INTERPOLATE_FACTOR ({TP_INTERPOLATE_FACTOR}).") if TP_FIR_LEN % TP_INTERPOLATE_FACTOR != 0 else isValid
+  return isError(f"Filter length ({TP_FIR_LEN}) must be an integer multiple of interpolate factor ({TP_INTERPOLATE_FACTOR}).") if TP_FIR_LEN % TP_INTERPOLATE_FACTOR != 0 else isValid
 
 def fn_check_samples_can_fit_streaming(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_CASC_LEN, TP_DUAL_IP, TP_API, TP_SSR):
   m_kNumColumns = 2 if fn_size_by_byte(TT_COEF) == 2 else 1
@@ -65,20 +65,20 @@ def fn_check_samples_can_fit_streaming(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INTERPOL
   sizeOfA256Read = (256//8)//fn_size_by_byte(TT_DATA)
 
   sizeOfARead = sizeOfA256Read//2 if TP_DUAL_IP == 0 else sizeOfA256Read;
-  m_kSpaces = m_kSamplesInBuff - sizeOfARead; # duplicating conservative spaces. 
+  m_kSpaces = m_kSamplesInBuff - sizeOfARead; # duplicating conservative spaces.
   firLenPerSsr = CEIL(TP_FIR_LEN, (TP_INTERPOLATE_FACTOR*TP_SSR))/TP_SSR
   if TP_API != 0:
     for kernelPos in range(TP_CASC_LEN):
       TP_FIR_RANGE_LEN =  (
-        fnFirRangeRem(firLenPerSsr,TP_CASC_LEN,kernelPos,TP_INTERPOLATE_FACTOR) 
-          if (kernelPos == (TP_CASC_LEN-1)) 
-          else 
+        fnFirRangeRem(firLenPerSsr,TP_CASC_LEN,kernelPos,TP_INTERPOLATE_FACTOR)
+          if (kernelPos == (TP_CASC_LEN-1))
+          else
             fnFirRange(firLenPerSsr,TP_CASC_LEN,kernelPos,TP_INTERPOLATE_FACTOR)
       )
       numSamples = CEIL(TP_FIR_RANGE_LEN//TP_INTERPOLATE_FACTOR, m_kNumColumns)
       if numSamples > m_kSpaces :
-        return isError(f"kernel[{kernelPos}] requires too much data ({numSamples} samples) to fit in a single buffer ({m_kSpaces} samples), due to the fir length per kernel- influenced by fir length ({TP_FIR_LEN}), interpolate factor ({TP_INTERPOLATE_FACTOR}) and cascade length ({TP_CASC_LEN})")
-  
+        return isError(f"kernel[{kernelPos}] requires too much data ({numSamples} samples) to fit in a single buffer ({m_kSpaces} samples), due to the filter length per kernel- influenced by filter length ({TP_FIR_LEN}), interpolate factor ({TP_INTERPOLATE_FACTOR}) and cascade length ({TP_CASC_LEN})")
+
   return isValid
 
 # Values are derived from experimentation and are a factor of program memory limits, memory module sizes etc.
@@ -97,12 +97,12 @@ def fn_max_fir_len_overall(TT_DATA, TT_COEF, TP_FIR_LEN):
     ("cfloat", "cfloat") : 1024
   }
   return (
-    isError(f"Max supported FIR length (TP_FIR_LEN = {TP_FIR_LEN} > Max = {maxTaps[(TT_DATA, TT_COEF)]}) exceeded for TT_DATA/TT_COEFF combination {TT_DATA},{TT_COEF}.") 
-      if TP_FIR_LEN > maxTaps[(TT_DATA, TT_COEF)] 
+    isError(f"Max supported filter length (filter length = {TP_FIR_LEN} > Max = {maxTaps[(TT_DATA, TT_COEF)]}) exceeded for data type and coefficient type combination {TT_DATA},{TT_COEF}.")
+      if TP_FIR_LEN > maxTaps[(TT_DATA, TT_COEF)]
       else isValid
   )
 
-def fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD, TP_DUAL_IP): 
+def fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD, TP_DUAL_IP):
     minLenCheck =  fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_Rnd=TP_INTERPOLATE_FACTOR)
 
     maxLenCheck = fn_max_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR, 1)
@@ -116,7 +116,7 @@ def fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_
     for check in (minLenCheck,maxLenCheck,maxLenOverallCheck, multipleInterpolationRateCheck, streamingVectorRegisterCheck):
       if check["is_valid"] == False :
         return check
-    
+
     return isValid
 
 
@@ -125,11 +125,13 @@ def fn_type_support(TT_DATA, TT_COEF):
 
 
 def fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN,TP_INTERPOLATE_FACTOR, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1):
-    # interpolate asym uses common lanes, but doesn't use shorter acc for streaming arch.. why? 
+    # interpolate asym uses common lanes, but doesn't use shorter acc for streaming arch.. why?
     checkMultipleLanes =  fn_windowsize_multiple_lanes(TT_DATA, TT_COEF, TP_INPUT_WINDOW_VSIZE, 0)
     checkMaxBuffer = fn_max_windowsize_for_buffer(TT_DATA, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR, TP_INTERPOLATE_FACTOR)
+    # Input samples are round-robin split to each SSR input paths, so total frame size must be divisable by SSR factor.
+    checkIfDivisableBySSR = fn_windowsize_divisible_by_ssr(TP_INPUT_WINDOW_VSIZE, TP_SSR)
 
-    for check in (checkMultipleLanes,checkMaxBuffer):
+    for check in (checkMultipleLanes,checkMaxBuffer,checkIfDivisableBySSR):
       if check["is_valid"] == False :
         return check
 
@@ -145,7 +147,7 @@ def validate_TT_COEF(args):
       if check["is_valid"] == False :
         return check
     return isValid
-    
+
 def validate_TP_SHIFT(args):
   TT_DATA = args["TT_DATA"]
   TP_SHIFT = args["TP_SHIFT"]
@@ -162,7 +164,7 @@ def validate_TP_INPUT_WINDOW_VSIZE(args):
     #overwrite args with the decomposed version
     args, uut_kernel = poly.get_modified_args_from_polyphase_decomposer(args, current_uut_kernel)
     # if we've decomposed to another type of kernel, then import that kernel and use that validate function
-    if uut_kernel != current_uut_kernel: 
+    if uut_kernel != current_uut_kernel:
       other_kernel = importlib.import_module(uut_kernel)
       return other_kernel.validate_TP_INPUT_WINDOW_VSIZE(args)
 
@@ -175,9 +177,9 @@ def validate_TP_INPUT_WINDOW_VSIZE(args):
     TP_API = args["TP_API"]
     TP_INTERPOLATE_FACTOR = args["TP_INTERPOLATE_FACTOR"]
     TP_SSR = args["TP_SSR"]
-    
+
     #interpolate_hb traits looks like the UPSHIFT_CT types have different number of lanes, but it's actually stil the exact same as 384..
-    # decimate_hb also just uses 384, so no additional rules here. 
+    # decimate_hb also just uses 384, so no additional rules here.
     return fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR)
 
 
@@ -192,7 +194,7 @@ def validate_TP_FIR_LEN(args):
     #overwrite args with the decomposed version
     args, uut_kernel = poly.get_modified_args_from_polyphase_decomposer(args, current_uut_kernel)
     # if we've decomposed to another type of kernel, then import that kernel and use that validate function
-    if uut_kernel != current_uut_kernel: 
+    if uut_kernel != current_uut_kernel:
       other_kernel = importlib.import_module(uut_kernel)
       return other_kernel.validate_TP_FIR_LEN(args)
 
@@ -214,7 +216,7 @@ def validate_TP_DUAL_IP(args):
 
 def fn_interp_ssr(TP_INTERPOLATE_FACTOR, TP_SSR):
   if TP_INTERPOLATE_FACTOR == TP_SSR:
-    return isError(f"Currently, TP_SSR = TP_INTERPOLATE_FACTOR is not supported. Please set SSR to next higher value to get required throughput")
+    return isError(f"Currently, SSR equal to interpolate factor is not supported. Please set SSR to next higher value to get required throughput")
   return isValid
 
 def fn_validate_ssr(TP_SSR, TP_INTERPOLATE_FACTOR, TP_API):
@@ -233,9 +235,9 @@ def validate_TP_SSR(args):
     TP_SSR = args["TP_SSR"]
     kernelInterpolate = TP_INTERPOLATE_FACTOR//TP_PARA_INTERP_POLY
     return (
-      fn_validate_ssr(TP_SSR, TP_INTERPOLATE_FACTOR//TP_PARA_INTERP_POLY, TP_API) if kernelInterpolate > 1 
+      fn_validate_ssr(TP_SSR, TP_INTERPOLATE_FACTOR//TP_PARA_INTERP_POLY, TP_API) if kernelInterpolate > 1
       else isValid # assume single rate SSR is valid, since it doesn't have a validation function
-    )                                                 
+    )
 
 # Example of updater.
 #
@@ -280,17 +282,18 @@ def info_ports(args):
     TT_COEF = args["TT_COEF"]
     TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
-    TP_SSR = args["TP_SSR"] 
+    TP_SSR = args["TP_SSR"]
     TP_INTERPOLATE_FACTOR = args["TP_INTERPOLATE_FACTOR"]
-    TP_PARA_INTERP_POLY = (args["TP_PARA_INTERP_POLY"] if ("TP_PARA_INTERP_POLY" in args)  else 1)                                                
+    TP_PARA_INTERP_POLY = (args["TP_PARA_INTERP_POLY"] if ("TP_PARA_INTERP_POLY" in args)  else 1)
     margin_size = sr_asym.fn_margin_size(TP_FIR_LEN//TP_INTERPOLATE_FACTOR, TT_DATA)
     num_in_ports = TP_SSR # *TP_PARA_DECI_POLY (not in the internpolator)
-    in_win_size = TP_INPUT_WINDOW_VSIZE//num_in_ports    
+    in_win_size = TP_INPUT_WINDOW_VSIZE//num_in_ports
     num_out_ports = TP_SSR*TP_PARA_INTERP_POLY
-    out_win_size = (TP_INPUT_WINDOW_VSIZE*TP_INTERPOLATE_FACTOR)//num_out_ports                                                                         
+    out_win_size = (TP_INPUT_WINDOW_VSIZE*TP_INTERPOLATE_FACTOR)//num_out_ports
 
-    in_ports = get_port_info("in", "in", TT_DATA, in_win_size, num_in_ports, marginSize=margin_size, TP_API=args["TP_API"]) 
-    in2_ports = (get_port_info("in2", "in", TT_DATA, in_win_size, num_in_ports, marginSize=margin_size, TP_API=args["TP_API"]) if (args["TP_DUAL_IP"] == 1) else [])
+    in_ports = get_port_info("in", "in", TT_DATA, in_win_size, num_in_ports, marginSize=margin_size, TP_API=args["TP_API"])
+    in2_ports = (get_port_info("in2", "in", TT_DATA, in_win_size
+    , num_in_ports, marginSize=margin_size, TP_API=args["TP_API"]) if (args["TP_DUAL_IP"] == 1) else [])
     coeff_ports = (get_parameter_port_info("coeff", "in", TT_COEF, TP_SSR, TP_FIR_LEN, "async") if (args["TP_USE_COEF_RELOAD"] == 1) else [])
 
     # decimate by 2 for halfband
@@ -348,40 +351,39 @@ public:
 
   std::vector<{TT_COEF}> taps = {taps};
   xf::dsp::aie::fir::interpolate_asym::fir_interpolate_asym_graph<
-    {TT_DATA}, //TT_DATA 
-    {TT_COEF}, //TT_COEF 
-    {TP_FIR_LEN}, //TP_FIR_LEN 
-    {TP_INTERPOLATE_FACTOR}, //TP_INTERPOLATE_FACTOR 
-    {TP_SHIFT}, //TP_SHIFT 
+    {TT_DATA}, //TT_DATA
+    {TT_COEF}, //TT_COEF
+    {TP_FIR_LEN}, //TP_FIR_LEN
+    {TP_INTERPOLATE_FACTOR}, //TP_INTERPOLATE_FACTOR
+    {TP_SHIFT}, //TP_SHIFT
     {TP_RND}, //TP_RND
-    {TP_INPUT_WINDOW_VSIZE}, //TP_INPUT_WINDOW_VSIZE 
-    {TP_CASC_LEN}, //TP_CASC_LEN 
-    {TP_USE_COEF_RELOAD}, //TP_USE_COEF_RELOAD 
-    {TP_DUAL_IP}, //TP_DUAL_IP 
-    {TP_NUM_OUTPUTS}, //TP_NUM_OUTPUTS 
-    {TP_API}, //TP_API 
+    {TP_INPUT_WINDOW_VSIZE}, //TP_INPUT_WINDOW_VSIZE
+    {TP_CASC_LEN}, //TP_CASC_LEN
+    {TP_USE_COEF_RELOAD}, //TP_USE_COEF_RELOAD
+    {TP_DUAL_IP}, //TP_DUAL_IP
+    {TP_NUM_OUTPUTS}, //TP_NUM_OUTPUTS
+    {TP_API}, //TP_API
     {TP_SSR}, //TP_SSR
-    {TP_PARA_INTERP_POLY} //TP_PARA_INTERP_POLY     
+    {TP_PARA_INTERP_POLY} //TP_PARA_INTERP_POLY
   > filter;
-  
+
   {graphname}() : filter({constr_args_str}) {{
     adf::kernel *filter_kernels = filter.getKernels();
     for (int i=0; i < 1; i++) {{
       adf::runtime<ratio>(filter_kernels[i]) = 0.9;
     }}
-    // no PARA_DECI_POLY
     for (int ssrIdx=0; ssrIdx < TP_SSR; ssrIdx++) {{
       adf::connect<> net_in(in[ssrIdx], filter.in[ssrIdx]);
       {dual_ip_connect_str}
       {coeff_ip_connect_str}
     }}
-    
+
     for (int paraPolyIdx=0; paraPolyIdx < TP_PARA_INTERP_POLY; paraPolyIdx++) {{
       for (int ssrIdx=0; ssrIdx < TP_SSR; ssrIdx++) {{
-        unsigned outPortIdx = paraPolyIdx+ssrIdx*TP_PARA_INTERP_POLY;                                                                                
+        unsigned outPortIdx = paraPolyIdx+ssrIdx*TP_PARA_INTERP_POLY;
         adf::connect<> net_out(filter.out[outPortIdx], out[outPortIdx]);
       {dual_op_connect_str}
-      }}      
+      }}
     }}
   }}
 

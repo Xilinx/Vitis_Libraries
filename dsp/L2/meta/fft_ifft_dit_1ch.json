@@ -45,7 +45,7 @@
       "validator": {
         "file": "fft_ifft_dit_1ch.py",
         "function": "validate_TP_POINT_SIZE",
-        "args": ["TP_DYN_PT_SIZE"]
+        "args": ["TP_DYN_PT_SIZE", "TT_DATA", "TP_PARALLEL_POWER", "TP_API"]
       }
     },
     {
@@ -72,7 +72,7 @@
       "description": "The length of the cascade chain.",
       "type": "uint",
       "minimum": 1,
-      "maximum": 9, 
+      "maximum": 9,
       "validator": {
         "file" : "fft_ifft_dit_1ch.py",
         "function" : "validate_TP_CASC_LEN",
@@ -94,7 +94,7 @@
       "validator": {
         "file" : "fft_ifft_dit_1ch.py",
         "function" : "validate_TP_WINDOW_VSIZE",
-        "args": ["TP_POINT_SIZE"]
+        "args": ["TP_POINT_SIZE", "TP_DYN_PT_SIZE"]
       }
     },
     {

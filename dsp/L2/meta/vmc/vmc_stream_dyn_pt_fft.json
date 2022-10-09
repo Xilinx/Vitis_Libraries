@@ -1,15 +1,15 @@
 {
   "schema": "aieip_spec_schema-0.1",
-  "ip_name": "vmc_stream_fft",
+  "ip_name": "vmc_stream_dyn_pt_fft_stream",
   "block_info": {
-    "label": "FFT Stream",
+    "label": "FFT Dynamic Point Stream",
     "description": ""
   },
   "parameters": [
     {
       "name": "data_type",
       "label": "Input/Output data type",
-      "description": "The type of individual data samples input to and output of the FFT function",
+      "description": "The type of individual data samples input to and output of the fft function",
       "enum": [ "cint16", "cint32", "cfloat" ],
       "default": "cint16",
       "type": "typename"
@@ -23,7 +23,7 @@
       "minimum": 16,
       "type": "int",
       "validator": {
-        "file": "vmc_fft_common.py",
+        "file": "vmc_stream_dyn_pt_fft.py",
         "function": "vmc_validate_point_size",
         "args": []
       }
@@ -37,7 +37,7 @@
       "minimum": 0,
       "type": "int",
       "validator": {
-        "file": "vmc_fft_common.py",
+        "file": "vmc_stream_dyn_pt_fft.py",
         "function": "vmc_validate_shift_val",
         "args": ["data_type", "point_size"]
       }
@@ -51,12 +51,12 @@
       "minimum": 16,
       "type": "int",
       "validator": {
-        "file": "vmc_fft_common.py",
+        "file": "vmc_stream_dyn_pt_fft.py",
         "function": "vmc_validate_input_window_size",
         "args": ["point_size"]
       }
     },
-    {
+	{
       "name": "ssr",
       "label": "SSR",
       "description": "The number of input channels for SSR. The specified value should be of the form 2^N",
@@ -70,8 +70,8 @@
         "args": ["point_size"]
       }
     },
-    {
-      "name":"input_sampling_rate",
+	{
+	  "name":"input_sampling_rate",
       "label": "Target input throughput (MSPS)",
       "description": "The target input throughput of the function in MSPS",
       "default": 200,
@@ -95,14 +95,14 @@
       "maximum": 9,
       "minimum": 1,
       "validator": {
-        "file": "vmc_fft_common.py",
+        "file": "vmc_stream_dyn_pt_fft.py",
         "function": "vmc_validate_casc_length",
         "args": ["data_type", "point_size", "use_casc_length"]
       }
     }
   ],
   "generator": {
-    "file": "vmc_stream_fft.py",
+    "file": "vmc_stream_dyn_pt_fft.py",
     "function": "vmc_generate_graph"
   }
 }

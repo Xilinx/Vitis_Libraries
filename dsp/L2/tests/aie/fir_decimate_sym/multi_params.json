@@ -84,7 +84,8 @@
             "SHIFT":"15",
             "USE_COEFF_RELOAD":"0",
             "PORT_API":"1",
-            "UUT_SSR":"2"
+            "UUT_SSR":"2",
+            "INPUT_WINDOW_VSIZE":"3840"
         },
         "test_9_fir_24t_ssr2_reload": {
             "DATA_TYPE":"cint16",
@@ -94,7 +95,8 @@
             "SHIFT":"15",
             "USE_COEFF_RELOAD":"1",
             "PORT_API":"1",
-            "UUT_SSR":"2"
+            "UUT_SSR":"2",
+            "INPUT_WINDOW_VSIZE":"3840"
         }
     }
 }

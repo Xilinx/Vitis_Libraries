@@ -112,8 +112,20 @@ class ct_kernels {
  *         - 7 = round convergent to odd. \n
  *         Modes 2 to 7 round to the nearest integer. They differ only in how
  *         they round for values of 0.5.
- * @tparam TP_INPUT_WINDOW_VSIZE describes the number of samples in the window API
- *         used for input to the filter function. \n
+ * @tparam TP_INPUT_WINDOW_VSIZE describes the number of samples processed by the graph
+ *         in a single iteration run.  \n
+ *         When TP_API is set to 0, samples are buffered and stored in a ping-pong window buffer mapped onto Memory
+ *Group banks. \n
+ *         As a results, maximum number of samples processed by the graph is limited by the size of Memory Group. \n
+ *         When TP_API is set to 1 and TP_SSR is set to 1, incoming samples are buffered in a similar manner.  \n
+ *         When TP_API is set to 1 and TP_SSR > 1, samples are processed directly from the stream inputs and no
+ *buffering takes place. \n
+ *         In such case, maximum number of samples processed by the graph is limited to 32-bit value (4.294B samples per
+ *iteration).  \n
+ *         Note: For SSR configurations (TP_SSR>1), the input data must be split over multiple ports,
+ *         where each successive sample is sent to a different input port in a round-robin fashion. \n
+ *         As a results, each SSR input path will process a fraction of the frame defined by the TP_INPUT_WINDOW_VSIZE.
+ *\n
  *         The number of values in the output window will be TP_INPUT_WINDOW_VSIZE
  *         divided by 2 by virtue the halfband decimation factor. \n
  *         Note: Margin size should not be included in TP_INPUT_WINDOW_VSIZE.
@@ -134,11 +146,15 @@ class ct_kernels {
  *         - samples 0-3 to be sent over stream0 for cint16 data type, \n
  *         - samples 4-7 to be sent over stream1 for cint16 data type. \n
  * @tparam TP_USE_COEFF_RELOAD allows the user to select if runtime coefficient
- *         reloading should be used.   \n When defining the parameter:
- *         - 0 = static coefficients, defined in filter constructor
+ *         reloading should be used. \n When defining the parameter:
+ *         - 0 = static coefficients, defined in filter constructor,
  *         - 1 = reloadable coefficients, passed as argument to runtime function. \n
  *
- *         Note: when used, optional port: ``` port<input> coeff; ``` will be added to the FIR. \n
+ *         Note: when used, optional port: ``` port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), TP_SSR> coeff;
+ *``` will be added to the FIR. \n
+ *         Note: the size of the port array is equal to the total number of output paths  (TP_SSR).  \n
+ *         Each port should contain the same taps array content, i.e. each additional port must be a duplicate of the
+ *coefficient array. \n
  * @tparam TP_NUM_OUTPUTS sets the number of ports over which the output is sent. \n
  *         This can be 1 or 2. It is set to 1 by default. \n
  *         Depending on TP_API, additional output ports functionality differs.
@@ -154,6 +170,37 @@ class ct_kernels {
  *         Note: when used, optional port: ``` port<output> out2; ``` will be added to the FIR. \n
  * @tparam TP_API specifies if the input/output interface should be window-based or stream-based.  \n
  *         The values supported are 0 (window API) or 1 (stream API).
+ * @tparam TP_SSR specifies the number of parallel input/output paths where samples are interleaved between paths,
+ *         giving an overall higher throughput.   \n
+ *         A TP_SSR of 1 means just one output leg and 1 input phase, and is the backwards compatible option. \n
+ *         The number of AIEs used is given by ``TP_SSR^2 * TP_CASC_LEN``. \n
+ * @tparam TP_PARA_DECI_POLY specifies the number of distinct input data phases into which the input stream will be
+ *split.
+ *         In each stream computations are performed parallelly and the outputs are combined into a single output
+ *stream. \n
+ *         Currently, only TP_PARA_DECI_POLY=2 is supported for the halfband interpolators with SSR>1. SSR = 1 supports
+ *TP_PARA_DECI_POLY=1 or 2.
+ *
+ *         TP_PARA_DECI_POLY = 2 result in two input polyphases. Each polyphase processes half of the input data stream.
+ *Processed output data from both the polyphases
+ *         are combined together to produce the overall output data stream.
+ *         Hence, effectively the input to the filter is de-interleaved into TP_SSR * TP_PARA_DECI_POLY distinct input
+ *data phases
+ *         and produces TP_SSR distinct output data phases. \n
+ *
+ *         Overall, the first polyphase is implemented using a single rate asymmetric filter that is configured to
+ *produce and consume data parallelly in
+ *         TP_SSR phases, each phase can operate at maximum throughput depending on the configuration.
+ *         The first polyphase uses TP_SSR^2 * TP_CASC_LEN kernels. \n
+ *         The second polyphase simplifies into a single kernel that does a single tap because halfband decimators only
+ *have one non-zero
+ *         coefficient in the second coefficient phase. The second polyphase uses SSR kernels operating at maximum
+ *throughput.
+ *         Currently, only TP_PARA_INTERP_POLY=2 is supported for the halfband interpolators with SSR>1. SSR = 1
+ *supports TP_PARA_INTERP_POLY=1 or 2.
+ *         The overall theoretical output data rate is TP_SSR * TP_NUM_OUTPUTS * 1 GSa/s.
+ *         The overall theoretical input data rate is TP_SSR * TP_PARA_DECI_POLY * (TP_DUAL_IP + 1) * 1GSa/s
+ *
  **/
 template <typename TT_DATA,
           typename TT_COEFF,
@@ -173,6 +220,9 @@ class fir_decimate_hb_graph : public graph {
     static constexpr unsigned int kMaxTapsPerKernel = 1024;
 
     static_assert(TP_CASC_LEN <= 40, "ERROR: Unsupported Cascade length");
+
+    static_assert(TP_INPUT_WINDOW_VSIZE % TP_SSR == 0,
+                  "ERROR: Unsupported frame size. TP_INPUT_WINDOW_VSIZE must be divisible by TP_SSR");
 
     // Limit FIR length per kernel. Longer FIRs may exceed Program Memory and/or system memory combined with window
     // buffers may exceed Memory Module size
@@ -208,6 +258,8 @@ class fir_decimate_hb_graph : public graph {
 
     void create_connections() {
         // make input connections
+
+        // TP_INPUT_WINDOW_VSIZE / TP_SSR. However, only SSR=1 is supported with windowed architectures
 
         if
             constexpr(TP_API == USE_WINDOW_API) {
@@ -360,7 +412,7 @@ class fir_decimate_hb_graph : public graph {
         static constexpr int BTP_FIR_LEN = CEIL((TP_POLY_SSR != 1 ? (TP_FIR_LEN + 1) / 2 : TP_FIR_LEN), TP_SSR);
         static constexpr int BTP_SHIFT = TP_SHIFT;
         static constexpr int BTP_RND = TP_RND;
-        static constexpr int BTP_INPUT_WINDOW_VSIZE = TP_INPUT_WINDOW_VSIZE / TP_POLY_SSR;
+        static constexpr int BTP_INPUT_WINDOW_VSIZE = TP_INPUT_WINDOW_VSIZE / (TP_SSR * TP_POLY_SSR);
         static constexpr int BTP_CASC_LEN = TP_CASC_LEN;
         static constexpr int BTP_USE_COEFF_RELOAD = TP_USE_COEFF_RELOAD;
         static constexpr int BTP_NUM_OUTPUTS = TP_NUM_OUTPUTS;
@@ -380,7 +432,7 @@ class fir_decimate_hb_graph : public graph {
         static constexpr int BTP_FIR_LEN = CEIL((TP_POLY_SSR != 1 ? (TP_FIR_LEN + 1) / 2 : TP_FIR_LEN), TP_SSR);
         static constexpr int BTP_SHIFT = TP_SHIFT;
         static constexpr int BTP_RND = TP_RND;
-        static constexpr int BTP_INPUT_WINDOW_VSIZE = TP_INPUT_WINDOW_VSIZE / TP_POLY_SSR;
+        static constexpr int BTP_INPUT_WINDOW_VSIZE = TP_INPUT_WINDOW_VSIZE / (TP_SSR * TP_POLY_SSR);
         static constexpr int BTP_CASC_LEN = TP_CASC_LEN;
         static constexpr int BTP_USE_COEFF_RELOAD = TP_USE_COEFF_RELOAD;
         static constexpr int BTP_NUM_OUTPUTS = TP_NUM_OUTPUTS;
@@ -403,7 +455,7 @@ class fir_decimate_hb_graph : public graph {
         static constexpr int BTP_FIR_LEN = 1;
         static constexpr int BTP_SHIFT = TP_SHIFT;
         static constexpr int BTP_RND = TP_RND;
-        static constexpr int BTP_INPUT_WINDOW_VSIZE = TP_INPUT_WINDOW_VSIZE / TP_PARA_DECI_POLY;
+        static constexpr int BTP_INPUT_WINDOW_VSIZE = TP_INPUT_WINDOW_VSIZE / (TP_SSR * TP_PARA_DECI_POLY);
         static constexpr int BTP_CASC_IN = 0;
         static constexpr int BTP_CASC_OUT = 1;
         static constexpr int BTP_FIR_RANGE_LEN = 1;
@@ -440,6 +492,23 @@ class fir_decimate_hb_graph : public graph {
     port_array<input, TP_SSR> in_dummy;
     port_conditional_array<input, (TP_DUAL_IP == 1), TP_SSR> in2_dummy;
 
+    template <typename T_D>
+    static constexpr unsigned int getMaxTapsPerKernel() {
+        if
+            constexpr(std::is_same<TT_DATA, int32>::value) { return 902; }
+        else if
+            constexpr(std::is_same<TT_DATA, float>::value) { return 500; }
+        else {
+            return 1024;
+        }
+    }
+
+    template <typename T_D, typename T_C, int T_PORTS>
+    static constexpr unsigned int getOptTapsPerKernel() {
+        unsigned int optTaps = getOptTapsPerKernelSrAsym<T_D, T_C, T_PORTS>();
+        return optTaps;
+    };
+
    public:
     kernel m_firKernels[TP_SSR * TP_SSR * TP_CASC_LEN];
     kernel m_ct_firKernels[TP_SSR];
@@ -471,9 +540,24 @@ class fir_decimate_hb_graph : public graph {
     port_conditional_array<input, (TP_DUAL_IP == 1), TP_SSR * TP_PARA_DECI_POLY> in2;
 
     /**
-     * The conditional coefficient array data to the function.
-     * This port is (generated when TP_USE_COEFF_RELOAD == 1) an array of coefficients of TT_COEFF type.
-     *
+     * The conditional array of input ports  used to pass run-time programmable (RTP) coeficients.
+     * This port_conditional_array is (generated when TP_USE_COEFF_RELOAD == 1) an array of input ports, which size is
+     *defined by TP_SSR.
+     * Each port in the array holds a duplicate of the coefficient array, required to connect to each SSR input path.
+     * Size of the coefficient array is dependent on the TP_SSR.
+     * - When TP_SSR = 1, the taps array must be supplied in a compressed form for
+     *                   this halfband application, i.e.  \n
+     *                   taps[] = {c0, c2, c4, ..., cN, cCT} where  \n
+     *                   N = (TP_FIR_LEN+1)/4 and
+     *                   cCT is the center tap. \n
+     *                   For example, a 7-tap halfband decimator might use coeffs
+     *                   (1, 0, 2, 5, 2, 0, 1).  \n This would be input as
+     *                   coeff[]= {1,2,5} since the context of halfband decimation
+     *                   allows the remaining coefficients to be inferred.
+     * - When TP_SSR > 1, the taps array must be paritially uncompressed and symmetry must be removed.
+     *                   For example, a 7-tap halfband decimator might use coeffs
+     *                   (1, 0, 2, 5, 2, 0, 1).  \n This would be input as
+     *                   coeff[]= {1,2,5,2,1}.
      **/
     port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), TP_SSR> coeff;
 
@@ -504,8 +588,8 @@ class fir_decimate_hb_graph : public graph {
         // return the architecture for first kernel in the design (only one for single kernel designs).
         // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
         // best.
-        return fir_decimate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, false, true,
-                               firRange, 0, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS,
+        return fir_decimate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, (TP_INPUT_WINDOW_VSIZE / TP_SSR), false,
+                               true, firRange, 0, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS,
                                TP_API>::get_m_kArch();
     };
 
@@ -560,44 +644,43 @@ class fir_decimate_hb_graph : public graph {
         connect_with_ssr();
     }
 
-    template <typename T_D>
-    static constexpr unsigned int fnGetMaxTapsPerKernel() {
-        if
-            constexpr(std::is_same<TT_DATA, int32>::value) { return 902; }
-        else if
-            constexpr(std::is_same<TT_DATA, float>::value) { return 500; }
-        else {
-            return 1024;
-        }
-    }
-
+    /**
+    * @brief Access function to get Graphs minimum cascade length for a given configuration.
+    * @tparam T_FIR_LEN tap length of the fir filter
+    * @tparam T_D data type
+    * @tparam T_C coeff type
+    * @tparam SSR parallelism factor set for super sample rate operation
+    * @tparam T_API interface type : 0 - window, 1 - stream
+    **/
     template <int T_FIR_LEN, typename T_D, typename T_C, int SSR, int T_API>
-    static constexpr unsigned int fnGetMinCascLen() {
+    static constexpr unsigned int getMinCascLen() {
         if
             constexpr(SSR == 1) {
-                constexpr int kMaxTaps = fnGetMaxTapsPerKernel<T_D>();
-                return getMinCascLen<((T_FIR_LEN + 1) / 4), kMaxTaps>();
+                constexpr int kMaxTaps = getMaxTapsPerKernel<T_D>();
+                return xf::dsp::aie::getMinCascLen<T_FIR_LEN, kMaxTaps>();
             }
         else {
             using asym_graph =
                 sr_asym::fir_sr_asym_graph<cint16, int16, 8, 0, 0, 128>; // making an arbitrary template list to call
                                                                          // sr_asym, can be avoided if we have default
                                                                          // template parameters for all arguments
-            return asym_graph::fnGetMinCascLen<T_FIR_LEN, T_API, T_D, T_C, SSR>();
+            return asym_graph::getMinCascLen<T_FIR_LEN, T_API, T_D, T_C, SSR>();
         }
     };
 
-    template <typename T_D, typename T_C, int T_PORTS>
-    static constexpr unsigned int fnGetOptTapsPerKernel() {
-        unsigned int optTaps = fnGetOptTapsPerKernelSrAsym<T_D, T_C, T_PORTS>();
-        return optTaps;
-    };
-
-    template <int T_FIR_LEN, typename T_D, typename T_C, int T_API, int T_PORTS>
-    static constexpr unsigned int fnGetOptCascLen() {
-        constexpr int kMaxTaps = fnGetMaxTapsPerKernel<T_D>();
-        constexpr int kRawOptTaps = fnGetOptTapsPerKernel<T_D, T_C, T_PORTS>();
-        return getOptCascLen<kMaxTaps, kRawOptTaps, ((T_FIR_LEN + 1) / 4)>();
+    /**
+    * @brief Access function to get graph's cascade length to obtain maximum performance for streaming configurations.
+    * @tparam T_FIR_LEN tap length of the fir filter
+    * @tparam T_D data type
+    * @tparam T_C coeff type
+    * @tparam T_PORTS single/dual input and output ports. 1 : single, 2 : dual
+    *
+    **/
+    template <int T_FIR_LEN, typename T_D, typename T_C, int T_PORTS>
+    static constexpr unsigned int getOptCascLen() {
+        constexpr int kMaxTaps = getMaxTapsPerKernel<T_D>();
+        constexpr int kRawOptTaps = getOptTapsPerKernel<T_D, T_C, T_PORTS>();
+        return xf::dsp::aie::getOptCascLen<kMaxTaps, kRawOptTaps, ((T_FIR_LEN + 1) / 2)>();
     };
 };
 }

@@ -132,6 +132,7 @@
       "default": 2,
       "type": "int"
     }
+    
   ],
   "generator": {
     "file": "vmc_fir_interpolate_asym.py",

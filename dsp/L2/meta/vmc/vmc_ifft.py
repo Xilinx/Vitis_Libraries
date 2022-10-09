@@ -15,7 +15,8 @@ def vmc_validate_shift_val(args):
 def vmc_validate_input_window_size(args):
     point_size = args["point_size"]
     input_window_size = args["input_window_size"]
-    return fn_validate_window_size(point_size, input_window_size)
+    dyn_point_size = 0;
+    return fn_validate_window_size(point_size, input_window_size, dyn_point_size)
 
 def vmc_validate_casc_length(args):
     use_casc_length = args["use_casc_length"]

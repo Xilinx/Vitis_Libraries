@@ -72,8 +72,19 @@ using namespace adf;
  *         - 7 = round convergent to odd. \n
  *         Modes 2 to 7 round to the nearest integer. They differ only in how
  *         they round for values of 0.5.
- * @tparam TP_INPUT_WINDOW_VSIZE describes the number of samples in the window API
- *         used for input to the filter function. \n
+ * @tparam TP_INPUT_WINDOW_VSIZE describes the number of samples processed by the graph
+ *         in a single iteration run.  \n
+ *         When TP_API is set to 0, samples are buffered and stored in a ping-pong window buffer mapped onto Memory
+ Group banks. \n
+ *         As a results, maximum number of samples processed by the graph is limited by the size of Memory Group. \n
+ *         When TP_API is set to 1, samples are processed directly from the stream inputs and no buffering takes place.
+ \n
+ *         In such case, maximum number of samples processed by the graph is limited to 32-bit value (4.294B samples per
+ iteration).  \n
+ *         Note: For SSR configurations (TP_SSR>1), the input data must be split over multiple ports,
+ *         where each successive sample is sent to a different input port in a round-robin fashion. \n
+ *         As a results, each SSR input path will process a fraction of the frame defined by the TP_INPUT_WINDOW_VSIZE.
+ \n
  *         The number of values in the output window will be TP_INPUT_WINDOW_VSIZE
  *         multipled by TP_INTERPOLATE_FACTOR. \n
  *         Note: Margin size should not be included in TP_INPUT_WINDOW_VSIZE.
@@ -81,11 +92,16 @@ using namespace adf;
  *         over. \n This allows resource to be traded for higher performance.
  *         TP_CASC_LEN must be in the range 1 (default) to 9.
  * @tparam TP_USE_COEFF_RELOAD allows the user to select if runtime coefficient
- *         reloading should be used.   \n When defining the parameter:
- *         - 0 = static coefficients, defined in filter constructor
+ *         reloading should be used. \n When defining the parameter:
+ *         - 0 = static coefficients, defined in filter constructor,
  *         - 1 = reloadable coefficients, passed as argument to runtime function. \n
  *
- *         Note: when used, optional port: ``` port<input> coeff; ``` will be added to the FIR. \n
+ *         Note: when used, optional port: ``` port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), TP_SSR *
+ TP_PARA_INTERP_POLY> coeff; ``` will be added to the FIR. \n
+ *         Note: the size of the port array is equal to the total number of output paths  (TP_SSR *
+ TP_PARA_INTERP_POLY).  \n
+ *         Each port should contain the same taps array content, i.e. each additional port must be a duplicate of the
+ coefficient array. \n
  * @tparam TP_NUM_OUTPUTS sets the number of ports over which the output is sent. \n
  *         This can be 1 or 2. It is set to 1 by default. \n
  *         Depending on TP_API, additional output ports functionality differs.
@@ -107,18 +123,21 @@ using namespace adf;
  *         - samples 4-7 to be sent over stream1 for cint16 data type. \n
  * @tparam TP_API specifies if the input/output interface should be window-based or stream-based.  \n
  *         The values supported are 0 (window API) or 1 (stream API).
- * @tparam TP_SSR specifies the number of parallel input/output paths where samples are interleaved between paths,
+ * @tparam TP_SSR specifies the number of parallel input paths where samples are interleaved between paths,
  giving an overall higher throughput.   \n
- *         An SSR of 1 means just one output leg, and is the backwards compatible option.
- * @tparam TP_PARA_INTERP_POLY specifies the number of interpolator polyphases that will be split up
- * and executed in parallel, resulting in additional output paths. \n
- *         A TP_PARA_INTERP_POLY of 1 means just one output leg, and is the backwards compatible option. \n
+ *         An SSR of 1 means just one input path, and is the backwards compatible option.
+ * @tparam TP_PARA_INTERP_POLY sets the number of interpolator polyphases over which the coefficients will be split to
+ enable parallel computation of the outputs. \n
+ *         The polyphases are executed parallelly, output data is produced by each polyphase directly. \n
+ *         TP_PARA_INTERP_POLY does not affect the number of input data paths. \n
+ *         There will be TP_SSR input phases irrespective of the value of TP_PARA_INTERP_POLY. \n
  *         TP_PARA_INTERP_POLY = TP_INTERPOLATE_FACTOR will result in an interpolate factor of polyphases,
- * operating as independant single rate filters.
- *          TP_PARA_INTERP_POLY < TP_INTERPOLATE_FACTOR will result in the polyphase branches operating as
- * independant interpolators.
- *
- *         The number of AIEs used is given by PARA_INTERP_POLY*SSR^2*CASC_LEN. \n
+ * where each kernel is a single rate filters. \n
+ *          TP_PARA_INTERP_POLY < TP_INTERPOLATE_FACTOR will result in the kernels in the polyphase branches operating
+ as
+ * independent interpolators. \n
+ *         TP_PARA_INTERP_POLY can be used in combination with TP_SSR.
+ *         The number of AIEs used is given by TP_PARA_INTERP_POLY*TP_SSR^2 * TP_CASC_LEN. \n
  *
  **/
 
@@ -141,6 +160,9 @@ class fir_interpolate_asym_graph : public graph {
     static constexpr unsigned int TP_CASC_IN = CASC_IN_FALSE;
 
     static_assert(TP_CASC_LEN <= 40, "ERROR: Unsupported Cascade length");
+
+    static_assert(TP_INPUT_WINDOW_VSIZE % TP_SSR == 0,
+                  "ERROR: Unsupported frame size. TP_INPUT_WINDOW_VSIZE must be divisible by TP_SSR");
     // Dual input ports offer no throughput gain if port api is windows.
     // Therefore, dual input ports are only supported with streams and not windows.
     static_assert(TP_API == USE_STREAM_API || TP_DUAL_IP == DUAL_IP_SINGLE,
@@ -155,7 +177,7 @@ class fir_interpolate_asym_graph : public graph {
 
     // Limit FIR length for reloadable coeffs. Reloadable coeffs need a storage space that contibutes to system memory
     // exceeding Memory Module size.
-    static_assert(TP_USE_COEFF_RELOAD == 0 || TP_FIR_LEN <= kMaxTapsPerKernel,
+    static_assert(TP_USE_COEFF_RELOAD == 0 || TP_FIR_LEN / TP_SSR <= kMaxTapsPerKernel,
                   "ERROR: Exceeded maximum supported FIR length with reloadable coefficients. Please limit the FIR "
                   "length or disable coefficient reload.");
 
@@ -174,16 +196,14 @@ class fir_interpolate_asym_graph : public graph {
     // SSR is only supported for streaming API
     static_assert(TP_API == 1 || TP_SSR == 1,
                   "ERROR: SSR > 1 is only supported for streaming API. Set TP_API = 1 to enable streaming API");
-    // SSR is only supported for streaming API
-    // static_assert(TP_USE_COEFF_RELOAD == 0 || TP_SSR == 1, "ERROR: SSR > 1 is currently only supported for static
-    // coefficients");
 
     static_assert(((TP_INTERPOLATE_FACTOR / TP_PARA_INTERP_POLY) != TP_SSR) || TP_SSR == 1,
                   "ERROR: Currently, we do not support SSR=(INTERPOLATE_FACTOR/TP_PARA_INTERP_POLY). Please set SSR to "
                   "the next higher value "
                   "to get as high a performance");
 
-    static constexpr unsigned int OUT_SSR = TP_SSR * TP_PARA_INTERP_POLY;
+    static_assert(TP_PARA_INTERP_POLY == 1 || TP_USE_COEFF_RELOAD == 0,
+                  "ERROR: Reloadable coefficients not supported with multiple parallel interpolation polyphases.");
 
     using casc_net_array = std::array<connect<stream, stream>*, TP_CASC_LEN>;
     using ssr_net_array = std::array<std::array<casc_net_array, TP_SSR>, TP_SSR>;
@@ -241,7 +261,7 @@ class fir_interpolate_asym_graph : public graph {
         static constexpr unsigned int BTP_INTERPOLATE_FACTOR = TP_INTERPOLATE_FACTOR;
         static constexpr unsigned int BTP_SHIFT = TP_SHIFT;
         static constexpr unsigned int BTP_RND = TP_RND;
-        static constexpr unsigned int BTP_INPUT_WINDOW_VSIZE = TP_INPUT_WINDOW_VSIZE;
+        static constexpr unsigned int BTP_INPUT_WINDOW_VSIZE = TP_INPUT_WINDOW_VSIZE / TP_SSR;
         static constexpr unsigned int BTP_CASC_LEN = TP_CASC_LEN;
         static constexpr unsigned int BTP_USE_COEFF_RELOAD = TP_USE_COEFF_RELOAD;
         static constexpr unsigned int BTP_NUM_OUTPUTS = TP_NUM_OUTPUTS;
@@ -253,6 +273,7 @@ class fir_interpolate_asym_graph : public graph {
         static constexpr unsigned int BTP_PARA_INTERP_POLY = TP_PARA_INTERP_POLY;
         static constexpr int BTP_MODIFY_MARGIN_OFFSET = 0;
     };
+
     // src file might not be interpolate_asym - use decomposer utility to get sourcefile.
     static constexpr const char* srcFileName = decomposer::getSourceFile<ssr_params>();
 
@@ -279,8 +300,31 @@ class fir_interpolate_asym_graph : public graph {
         }
     }
 
+    template <unsigned int T_API, typename T_D>
+    static constexpr unsigned int getMaxTapsPerKernel() {
+        if
+            constexpr(T_API == 0) { return 256; }
+        else {
+            constexpr unsigned int m_kSamplesInBuff = fnSamplesIn1024<T_D>();
+            constexpr unsigned int m_kDataLoadVsize = (32 / sizeof(T_D));
+            return m_kSamplesInBuff - m_kDataLoadVsize;
+        }
+    }
+
+    template <typename T_D, typename T_C, int T_PORTS>
+    static constexpr unsigned int getOptTapsPerKernel() {
+        unsigned int optTaps = getOptTapsPerKernelSrAsym<T_D, T_C, T_PORTS>();
+        return optTaps;
+    };
+
    public:
     kernel m_firKernels[TP_CASC_LEN * TP_SSR * TP_SSR * TP_PARA_INTERP_POLY];
+
+    /**
+     * OUT_SSR defines the number of output paths, equal to ``TP_SSR * TP_PARA_INTERP_POLY``.
+     **/
+
+    static constexpr unsigned int OUT_SSR = TP_SSR * TP_PARA_INTERP_POLY;
 
     /**
      * The input data to the function. This input is either a window API of
@@ -309,9 +353,10 @@ class fir_interpolate_asym_graph : public graph {
     port_conditional_array<input, (TP_DUAL_IP == 1), TP_SSR> in2;
 
     /**
-     * The conditional coefficient data to the function.
-     * This port is (generated when TP_USE_COEFF_RELOAD == 1) an array of coefficients of TT_COEFF type.
-     *
+     * The conditional array of input ports  used to pass run-time programmable (RTP) coeficients.
+     * This port_conditional_array is (generated when TP_USE_COEFF_RELOAD == 1) an array of input ports, which size is
+     *defined by TP_SSR.
+     * Each port in the array holds a duplicate of the coefficient array, required to connect to each SSR input path.
      **/
     port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), TP_SSR * TP_PARA_INTERP_POLY> coeff;
 
@@ -344,6 +389,9 @@ class fir_interpolate_asym_graph : public graph {
      * Nets only get assigned when streaming interface is being broadcast, i.e.
      * nets only get used when TP_API == 1 and TP_CASC_LEN > 1
      * @param[in] cascadePosition   an index to the kernel's position in the cascade.
+     * @param[in] ssrOutPathIndex      an index to the output data Path.
+     * @param[in] ssrInPhaseIndex     an index to the input data Phase
+     * @param[in] paraPolyphaseOutIdx an index to the parallel output polyphase
      **/
     connect<stream, stream>* getInNet(int cascadePosition,
                                       int ssrOutPathIndex = 0,
@@ -358,6 +406,9 @@ class fir_interpolate_asym_graph : public graph {
      * Nets only get assigned when streaming interface is being broadcast, i.e.
      * nets only get used when TP_API == 1 and TP_CASC_LEN > 1
      * @param[in] cascadePosition   an index to the kernel's position in the cascade.
+     * @param[in] ssrOutPathIndex      an index to the output data Path.
+     * @param[in] ssrInPhaseIndex     an index to the input data Phase
+     * @param[in] paraPolyphaseOutIdx an index to the parallel output polyphase
      **/
     connect<stream, stream>* getIn2Net(int cascadePosition,
                                        int ssrOutPathIndex = 0,
@@ -365,21 +416,6 @@ class fir_interpolate_asym_graph : public graph {
                                        int paraPolyphaseOutIdx = 0) {
         return net2[paraPolyphaseOutIdx][0][ssrOutPathIndex][ssrInPhaseIndex][cascadePosition];
     };
-
-    /**
-     * @cond NOCOMMENTS
-     */
-    /**
-    * @brief Access function to get Graphs minimum cascade length for a given configuration.
-    **/
-    static unsigned int getMinCascadeLength() {
-        unsigned int minCascLen = CEIL(TP_FIR_LEN, kMaxTapsPerKernel) / kMaxTapsPerKernel;
-
-        return minCascLen;
-    };
-    /**
-     * @endcond
-     */
 
     /**
     * @brief Access function to get kernel's architecture (or first kernel's architecture in a chained configuration).
@@ -393,8 +429,8 @@ class fir_interpolate_asym_graph : public graph {
         // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
         // best.
         return fir_interpolate_asym<TT_DATA, TT_COEFF, firLenPerSSR, TP_INTERPOLATE_FACTOR, TP_SHIFT, TP_RND,
-                                    TP_INPUT_WINDOW_VSIZE, false, true, firRange, 0, TP_CASC_LEN, TP_USE_COEFF_RELOAD,
-                                    TP_DUAL_IP, TP_NUM_OUTPUTS, TP_API>::get_m_kArch();
+                                    (TP_INPUT_WINDOW_VSIZE / TP_SSR), false, true, firRange, 0, TP_CASC_LEN,
+                                    TP_USE_COEFF_RELOAD, TP_DUAL_IP, TP_NUM_OUTPUTS, TP_API>::get_m_kArch();
     };
 
     /**
@@ -411,29 +447,21 @@ class fir_interpolate_asym_graph : public graph {
      * @brief This is the constructor function for the FIR graph with reloadable coefficients.
      **/
     fir_interpolate_asym_graph() {
-        printParams<ssr_params>();
         decomposer::polyphase_decomposer<ssr_params>::create(m_firKernels);
         decomposer::polyphase_decomposer<ssr_params>::create_connections(m_firKernels, &in[0], in2, &out[0], out2,
                                                                          coeff, net, net2, casc_in, srcFileName);
     }
 
-    template <unsigned int T_API, typename T_D>
-    static constexpr unsigned int fnGetMaxTapsPerKernel() {
-        if
-            constexpr(T_API == 0) { return 256; }
-        else {
-            constexpr unsigned int m_kSamplesInBuff = fnSamplesIn1024<T_D>();
-            constexpr unsigned int m_kDataLoadVsize = (32 / sizeof(T_D));
-            return m_kSamplesInBuff - m_kDataLoadVsize;
-        }
-    }
-
-    template <typename T_D, typename T_C, int T_PORTS>
-    static constexpr unsigned int fnGetOptTapsPerKernel() {
-        unsigned int optTaps = fnGetOptTapsPerKernelSrAsym<T_D, T_C, T_PORTS>();
-        return optTaps;
-    };
-
+    /**
+    * @brief Access function to get Graphs minimum cascade length for a given configuration.
+    * @tparam T_FIR_LEN tap length of the fir filter
+    * @tparam T_API interface type : 0 - window, 1 - stream
+    * @tparam T_D data type
+    * @tparam T_C coeff type
+    * @tparam T_IF interpolation factor
+    * @tparam SSR parallelism factor set for super sample rate operation
+    * @tparam IP_PORTS single/dual input ports : 0 - single, 1 - dual
+    **/
     template <int T_FIR_LEN,
               int T_API,
               typename T_D,
@@ -441,10 +469,10 @@ class fir_interpolate_asym_graph : public graph {
               unsigned int T_IF,
               unsigned int SSR,
               unsigned int IP_PORTS>
-    static constexpr unsigned int fnGetMinCascLen() {
-        constexpr int kMaxTaps = fnGetMaxTapsPerKernel<T_API, T_D>();
+    static constexpr unsigned int getMinCascLen() {
+        constexpr int kMaxTaps = getMaxTapsPerKernel<T_API, T_D>();
         constexpr int firLenPerSSR = CEIL(T_FIR_LEN, SSR) / SSR;
-        constexpr int cLenMin = getMinCascLen<firLenPerSSR / T_IF, kMaxTaps>();
+        constexpr int cLenMin = xf::dsp::aie::getMinCascLen<firLenPerSSR / T_IF, kMaxTaps>();
         if
             constexpr(T_API == 0) { return cLenMin; }
         else {
@@ -453,11 +481,29 @@ class fir_interpolate_asym_graph : public graph {
         return cLenMin;
     };
 
-    template <int T_FIR_LEN, typename T_D, typename T_C, int T_API, int T_PORTS, unsigned int T_IF>
-    static constexpr unsigned int fnGetOptCascLen() {
-        constexpr int kMaxTaps = fnGetMaxTapsPerKernel<T_API, T_D>();
-        constexpr int kRawOptTaps = fnGetOptTapsPerKernel<T_D, T_C, T_PORTS>();
-        return getOptCascLen<kMaxTaps, kRawOptTaps, (T_FIR_LEN / T_IF)>();
+    /**
+    * @brief Access function to get graph's cascade length to obtain maximum performance for streaming configurations.
+    * @tparam T_FIR_LEN tap length of the fir filter
+    * @tparam T_D data type
+    * @tparam T_C coeff type
+    * @tparam T_API interface type : 0 - window, 1 - stream
+    * @tparam T_IF interpolation factor
+    * @tparam SSR parallelism factor set for super sample rate operation
+    * @tparam INT_POLY number of polyphases set for super sample rate operation
+    **/
+    template <int T_FIR_LEN,
+              typename T_D,
+              typename T_C,
+              int T_API,
+              unsigned int T_IF,
+              unsigned int SSR,
+              unsigned int INT_POLY>
+    static constexpr unsigned int getOptCascLen() {
+        constexpr int kMaxTaps = getMaxTapsPerKernel<T_API, T_D>();
+        constexpr int kRawOptTaps = getOptTapsPerKernel<T_D, T_C, 1>();
+        constexpr int firLenPerSSR = CEIL(T_FIR_LEN, SSR) / SSR;
+        constexpr int tapsPerSSR = firLenPerSSR / (T_IF / INT_POLY);
+        return xf::dsp::aie::getOptCascLen<kMaxTaps, kRawOptTaps, tapsPerSSR>();
     };
 };
 

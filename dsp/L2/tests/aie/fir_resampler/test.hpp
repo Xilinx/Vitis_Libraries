@@ -111,19 +111,19 @@ class test_graph : public graph {
         }
 
 #ifdef USING_UUT
-        static constexpr int kMaxTaps = uut_g<INPUT_SAMPLES>::fnGetMaxTapsPerKernel<PORT_API, DATA_TYPE>();
+        static constexpr int kMaxTaps = uut_g<INPUT_SAMPLES>::getMaxTapsPerKernel<PORT_API, DATA_TYPE>();
         printf("For this config the Maximum Taps Per Kernel is %d\n", kMaxTaps);
-        static constexpr int kMinLen =
-            uut_g<INPUT_SAMPLES>::fnGetMinCascLen<FIR_LEN, PORT_API, DATA_TYPE, INTERPOLATE_FACTOR, DECIMATE_FACTOR>();
+        static constexpr int kMinLen = uut_g<INPUT_SAMPLES>::getMinCascLen<FIR_LEN, PORT_API, DATA_TYPE, COEFF_TYPE,
+                                                                           INTERPOLATE_FACTOR, DECIMATE_FACTOR>();
         printf("For this config the Minimum CASC_LEN is %d\n", kMinLen);
 #if (PORT_API == 1)
         static constexpr int kRawOptTaps =
-            uut_g<INPUT_SAMPLES>::fnGetOptTapsPerKernel<DATA_TYPE, COEFF_TYPE, DUAL_IP + 1>();
+            uut_g<INPUT_SAMPLES>::getOptTapsPerKernel<DATA_TYPE, COEFF_TYPE, DUAL_IP + 1>();
         static constexpr int kOptTaps = kRawOptTaps < kMaxTaps ? kRawOptTaps : kMaxTaps;
         printf("For this config the Optimal Taps (streaming) Per Kernel is %d\n", kOptTaps);
         static constexpr int kOptLen =
-            uut_g<INPUT_SAMPLES>::fnGetOptCascLen<FIR_LEN, DATA_TYPE, COEFF_TYPE, PORT_API, NUM_OUTPUTS,
-                                                  INTERPOLATE_FACTOR, DECIMATE_FACTOR>();
+            uut_g<INPUT_SAMPLES>::getOptCascLen<FIR_LEN, DATA_TYPE, COEFF_TYPE, PORT_API, NUM_OUTPUTS,
+                                                INTERPOLATE_FACTOR, DECIMATE_FACTOR>();
         printf("For this config the Optimal CASC_LEN is %d\n", kOptLen);
 #endif
 #endif

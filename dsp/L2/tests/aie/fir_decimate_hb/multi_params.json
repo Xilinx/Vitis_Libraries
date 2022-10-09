@@ -69,7 +69,7 @@
             "FIR_LEN":"63",
             "SHIFT":"16",
             "USE_COEFF_RELOAD":"0",
-            "INPUT_WINDOW_VSIZE":"256",
+            "INPUT_WINDOW_VSIZE":"512",
             "UUT_SSR":"2",
             "PORT_API":"1",
             "UUT_PARA_DECI_POLY":"2"
@@ -80,35 +80,11 @@
             "FIR_LEN":"143",
             "SHIFT":"16",
             "USE_COEFF_RELOAD":"0",
-            "INPUT_WINDOW_VSIZE":"12800",
+            "INPUT_WINDOW_VSIZE":"38400",
             "UUT_SSR":"3",
             "PORT_API":"1",
             "UUT_PARA_DECI_POLY":"2",
             "CASC_LEN":"3"
-        },
-        "test_9_fir_59t_ssr4_casc2": {
-            "DATA_TYPE":"cint32",
-            "COEFF_TYPE":"cint16",
-            "FIR_LEN":"59",
-            "SHIFT":"16",
-            "USE_COEFF_RELOAD":"0",
-            "INPUT_WINDOW_VSIZE":"12800",
-            "UUT_SSR":"4",
-            "PORT_API":"1",
-            "UUT_PARA_DECI_POLY":"2",
-            "CASC_LEN":"2"
-        },
-        "test_10_fir_59t_ssr4_casc2_reload": {
-            "DATA_TYPE":"cint32",
-            "COEFF_TYPE":"cint16",
-            "FIR_LEN":"59",
-            "SHIFT":"16",
-            "USE_COEFF_RELOAD":"1",
-            "INPUT_WINDOW_VSIZE":"12800",
-            "UUT_SSR":"4",
-            "PORT_API":"1",
-            "UUT_PARA_DECI_POLY":"2",
-            "CASC_LEN":"2"
         }
     }
 }

@@ -87,7 +87,7 @@ def fn_complex_coef(TT_DATA, TT_COEF):
 def fn_coef_32b(TT_DATA, TT_COEF):
     type32b = ["int32", "cint32"]
     if TT_COEF in type32b and not TT_DATA in type32b:
-        return isError("32-bit type Coefficients are only supported when Input/Output type is also a 32-bit type.")
+        return isError("32-bit type coefficients are only supported when Input/Output type is also a 32-bit type.")
     return isValid
 
 def fn_int_coef(TT_DATA, TT_COEF):
@@ -111,7 +111,7 @@ def fn_validate_coef_type(TT_DATA, TT_COEF):
 ### Validate Shift ###
 def fn_float_no_shift(TT_DATA, TP_SHIFT):
     if fn_is_floating_point(TT_DATA) and (TP_SHIFT > 0):
-      return isError("TP_SHIFT cannot be performed for TT_DATA=cfloat, so must be set to 0")
+      return isError("Shift cannot be performed for 'cfloat' data type, so must be set to 0")
     return isValid
 
 # most library element only need to check this to validate shift

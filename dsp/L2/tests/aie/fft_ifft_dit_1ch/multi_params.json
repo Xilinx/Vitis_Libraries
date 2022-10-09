@@ -126,23 +126,13 @@
             "SHIFT":"14",
             "NITER":"4"
         },
-        "test_15_fft_32k": {
+        "test_17_fft_dyn_pt_size": {
             "DATA_TYPE":"cint16",
             "TWIDDLE_TYPE":"cint16",
-            "POINT_SIZE":"32768",
-            "API_IO":"1",
-            "PARALLEL_POWER":"3",
-            "SHIFT":"15",
-            "NITER":"4"
-        },
-        "test_16_fft_64k": {
-            "DATA_TYPE":"cint16",
-            "TWIDDLE_TYPE":"cint16",
-            "POINT_SIZE":"65536",
-            "API_IO":"1",
-            "PARALLEL_POWER":"4",
-            "SHIFT":"16",
-            "NITER":"2"
+            "POINT_SIZE":"128",
+            "FFT_NIFFT":"1",
+            "SHIFT":"8",
+            "DYN_PT_SIZE":"1"
         }
     }
 }

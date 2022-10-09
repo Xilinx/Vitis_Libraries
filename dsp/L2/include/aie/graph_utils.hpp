@@ -26,15 +26,60 @@ namespace dsp {
 namespace aie {
 using namespace adf;
 
+/**
+ * @ingroup graph_utils
+ *
+ * @brief empty class is a helper utility to conditionally remove instances of other classes.
+ */
 class empty {};
+
+/**
+ * @ingroup graph_utils
+ *
+ * @brief no_port struct is a helper utility to conditionally remove instances of other classes.
+ */
 struct no_port {};
 
+//--------------------------------------------------------------------------------------------------
+// port_conditional
+//--------------------------------------------------------------------------------------------------
+/**
+ * @ingroup graph_utils
+ *
+ * @brief port_conditional is an helper alias to conditionally instance port.
+ * @tparam DIRECTION describes port direction: input, output or inout.
+ * @tparam Condition when met port of a DIRECTION is created, otherwise a no_port struct is instanced.
+ */
 template <typename DIRECTION, bool Condition>
 using port_conditional = typename std::conditional<Condition, port<DIRECTION>, no_port>::type;
 
+//--------------------------------------------------------------------------------------------------
+// port_array
+//--------------------------------------------------------------------------------------------------
+/**
+ * @ingroup graph_utils
+ *
+ * @brief port_array is an helper alias to instance port array
+ * Uses: ``std::array`` to instance an array of ``port<DIRECTION>`` classes.
+ * @tparam DIRECTION describes port direction: input, output or inout.
+ *
+ * @tparam SIZE array size.
+ */
 template <typename DIRECTION, unsigned int SIZE>
 using port_array = typename std::array<port<DIRECTION>, SIZE>;
 
+//--------------------------------------------------------------------------------------------------
+// port_array
+//--------------------------------------------------------------------------------------------------
+/**
+ * @ingroup graph_utils
+ *
+ * @brief port_conditional_array is an helper alias to conditionally instance port array
+ * Uses: ``std::conditional`` to instance a ``port_array<DIRECTION, SIZE>`` class or an empty ``no_port`` struct array.
+ * @tparam DIRECTION describes port direction: input, output or inout.
+ * @tparam Condition when met port of a DIRECTION is created, otherwise a no_port struct is instanced.
+ * @tparam SIZE array size.
+ */
 template <typename DIRECTION, bool Condition, unsigned int SIZE>
 using port_conditional_array =
     typename std::conditional<Condition, port_array<DIRECTION, SIZE>, std::array<no_port, SIZE> >::type;

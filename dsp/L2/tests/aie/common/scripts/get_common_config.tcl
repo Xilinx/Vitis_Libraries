@@ -20,7 +20,7 @@ set fileDir             [lindex $argv 1]
 # --- Grep Status Results ---
 # ---------------------------
 set aieCompileLogFile "${fileDir}AIECompiler.log"
-set aieSimLogFile "${fileDir}aiesimulator.log"
+set aieSimLogFile "${fileDir}AIESimulator.log"
 set diffFile "${fileDir}logs/diff.txt"
 set compPhrase "compilation complete"
 set simPhrase "simulation finished"

@@ -57,7 +57,7 @@
       "validator": {
         "file": "fir_interpolate_hb.py",
         "function": "validate_TP_FIR_LEN",
-        "args": ["TT_DATA", "TT_COEF", "TP_CASC_LEN", "TP_API", "TP_USE_COEF_RELOAD", "TP_SSR"]
+        "args": ["TT_DATA", "TT_COEF", "TP_CASC_LEN", "TP_API", "TP_USE_COEF_RELOAD", "TP_SSR", "TP_PARA_INTERP_POLY"]
       }
     },
     {

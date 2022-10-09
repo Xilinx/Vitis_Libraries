@@ -169,6 +169,7 @@ Multiplying a 16x16 matrix (with 4x4 tiling) with a 16x16 matrix (with 4x2 tilin
 
 The following table specifies the tiling scheme used for a given data type combination and the corresponding output data type:
 
+.. _table-tile-pattern:
 .. table:: Table 9 : Matrix Multiply tiling pattern combination
    :align: center
 
@@ -220,9 +221,15 @@ The following table specifies the tiling scheme used for a given data type combi
 
 The parameters TP_ADD_TILING_A, TP_ADD_TILING_B, and TP_ADD_DETILING_OUT control the inclusion of an additional pre-processing / post-processing kernel to perform the required data data storage re-ordering. When used with TP_DIM_A_LEADING, TP_DIM_B_LEADING, or TP_DIM_OUT_LEADING, the matrix is also transposed in the tiling kernel.
 
-If the additional kernels are not selected, then the matrix multiply kernels assume incoming data is in the correct format, as specified above. When using the TP_CASC_LEN parameter, the matrix multiply operation is split across TP_DIM_AB and processed in a TP_CASC_LEN number of kernels. The accumulated partial results of each kernel are passed down the cascade port to the next kernel in the cascade chain until the final kernel provides the expected output. Cascade connections are made internally to the matrix multiply graph.
+If the additional kernels are not selected, then the matrix multiply kernels assume incoming data is in the correct format, as specified above. 
 
-Each AI Engine kernel in the array is given a sub-matrix, so the interface to the graph is an array of ports for both A and B.
+The tiling imposes a restriction that the matrix dimensions need to be multiples of the tile dimensions. If you require dimensions that do not satisfy these requirements, please pad the matrices up to the closet multiple of the tile dimensions in table :ref:`table-tile-pattern` with zeros.
+
+Cascaded kernels
+----------------
+When using the TP_CASC_LEN parameter, the matrix multiply operation is split across TP_DIM_AB and processed in a TP_CASC_LEN number of kernels. The accumulated partial results of each kernel are passed down the cascade port to the next kernel in the cascade chain until the final kernel provides the expected output. Cascade connections are made internally to the matrix multiply graph and external interfaces to the graph remain unchanged. 
+
+Each AI Engine kernel in the array is given a sub-matrix, so the interface to the graph is an array of ports for both A and B. The sub matrices are obtained by dividing the input matrices in their common dimension TP_DIM_AB. 
 
 **Input Matrix A (16x16 - 4x4 Tile - Cascade Length 2)**:
 
@@ -333,6 +340,10 @@ A Matrix Multiply solution can consist of a cascade of kernels for the multiply 
 'tilerA' - This is an array of TP_CASC_LEN kernels which connect 1:1 with the A input port of the matrix multiply kernels.
 
 'tilerB' - This is an array of TP_CASC_LEN kernels which connect 1:1 with the B input port of the matrix multiply kernels.
+
+NOTE : For some combinations of template parameters, the log will give out an error message "ERROR: shouldn't be here". This combination of factors is not supported by the AIE Compiler. A possible workaround is to pad up the matrices with zeros so that their dimentions become the closest multiple of 8 for cint32 data types, 16 for cint16/int16 data types, and 32 for int16 data types.
+
+
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Code Example including constraints

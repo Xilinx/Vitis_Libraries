@@ -22,16 +22,16 @@
     },
     "pre_build": [
         {
-            "build_cmd": "tclsh LIB_DIR/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE) $(WINDOW_VSIZE) $(NITER_UUT) $(DATA_SEED) $(DATA_STIM_TYPE) 0 0 $(DATA_TYPE) 0 1"
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE) $(WINDOW_VSIZE) $(NITER_UUT) $(DATA_SEED) $(DATA_STIM_TYPE) 0 0 $(DATA_TYPE) 0 1)"
         },
         {
-            "build_cmd": "perl LIB_DIR/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(LOC_INPUT_FILE) --type $(DATA_TYPE) --ssr 1 --split --dual 0 -k 0 -w $(WINDOW_VSIZE)"
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), perl LIB_DIR/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(LOC_INPUT_FILE) --type $(DATA_TYPE) --ssr 1 --split --dual 0 -k 0 -w $(WINDOW_VSIZE))"
         },
         {
-            "build_cmd": "make x86sim TARGET=x86sim TAG=REF"
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), make run TARGET=x86sim TAG=REF)"
         },
         {
-            "build_cmd": "make cleanall"
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), make cleanall)"
         }
     ],
     "post_launch": [
@@ -46,22 +46,22 @@
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE)",
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) DATA_TYPE $(DATA_TYPE) DATA_OUT_TYPE $(DATA_OUT_TYPE) WINDOW_VSIZE $(WINDOW_VSIZE)",
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/get_stats.tcl $(WINDOW_VSIZE) 1 $(STATUS_FILE) ./aiesimulator_output transferData $(NITER_UUT)",
-		        "tclsh LIB_DIR/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_wgt_theoretical_min.tcl $(DATA_TYPE) $(WINDOW_VSIZE) $(STATUS_FILE) $(UUT_KERNEL) 0 0 0 0",
+                "tclsh LIB_DIR/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_wgt_theoretical_min.tcl $(DATA_TYPE) $(WINDOW_VSIZE) $(STATUS_FILE) $(UUT_KERNEL) 0 0 0 0",
                 "LIB_DIR/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) LIB_DIR/L2/tests/aie/common/scripts",
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./"
-                ]
+            ]
         },
         {
             "target": "x86sim",
             "launch_cmd": [
-                "mkdir -p logs",
-                "perl LIB_DIR/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./x86simulator_output/data/uut_output.txt --type $(DATA_TYPE) --ssr 1 --zip --dual 0 -k 0 -w $(WINDOW_VSIZE)",
-                "perl LIB_DIR/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./x86simulator_output/data/ref_output.txt --type $(DATA_TYPE) --ssr 1 --zip --dual 0 -k 0 -w $(WINDOW_VSIZE)",
-                "grep -ve '[XT]' ./x86simulator_output/data/uut_output.txt > ./logs/uut_output.txt",
-                "grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./logs/ref_output.txt",
-                "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE)",
-                "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./"
-                ]
+                "$(if $(filter-out REF,$(TAG)), mkdir -p logs)",
+                "$(if $(filter-out REF,$(TAG)), perl LIB_DIR/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./x86simulator_output/data/uut_output.txt --type $(DATA_TYPE) --ssr 1 --zip --dual 0 -k 0 -w $(WINDOW_VSIZE))",
+                "$(if $(filter-out REF,$(TAG)), perl LIB_DIR/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./x86simulator_output/data/ref_output.txt --type $(DATA_TYPE) --ssr 1 --zip --dual 0 -k 0 -w $(WINDOW_VSIZE))",
+                "$(if $(filter-out REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/uut_output.txt > ./logs/uut_output.txt)",
+                "$(if $(filter-out REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./logs/ref_output.txt)",
+                "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE))",
+                "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./)"
+            ]
         }
     ],
     "launch": [
@@ -87,36 +87,36 @@
                 "./"
             ],
             "customized_params": {
-                "params" : "--dataflow -v $($(TAG)_TARGET_COMPILE_ARGS) -workdir=$($(TAG)_WORK_DIR) -Xpreproc=\"$(TAG_PREPROC_ARGS)\"",
+                "params": "--dataflow -v $($(TAG)_TARGET_COMPILE_ARGS) -workdir=$($(TAG)_WORK_DIR) -Xpreproc=\"$(TAG_PREPROC_ARGS)\"",
                 "default": {
                     "TAG": "UUT",
                     "UUT_KERNEL": "widget_real2complex",
                     "REF_KERNEL": "widget_real2complex_ref",
                     "UUT_GRAPH": "widget_real2complex_graph",
                     "REF_GRAPH": "widget_real2complex_ref_graph",
-                    "NITER":"16",
-                    "NITER_UUT":"$(NITER)",
-                    "NITER_REF":"$$(($(NITER_UUT) / 2))",
-                    "WINDOW_VSIZE":"256",
-                    "UUT_WINDOW_VSIZE":"$(WINDOW_VSIZE)",
+                    "NITER": "16",
+                    "NITER_UUT": "$(NITER)",
+                    "NITER_REF": "$$(($(NITER_UUT) / 2))",
+                    "WINDOW_VSIZE": "256",
+                    "UUT_WINDOW_VSIZE": "$(WINDOW_VSIZE)",
                     "REF_WINDOW_VSIZE": "$$(( $(UUT_WINDOW_VSIZE) * $(NITER_UUT) / $(NITER_REF)))",
-                    "DATA_TYPE":"int16",
-                    "DATA_OUT_TYPE":"cint16",
+                    "DATA_TYPE": "int16",
+                    "DATA_OUT_TYPE": "cint16",
                     "DIFF_TOLERANCE": "0",
                     "CC_TOLERANCE": "0",
                     "DATA_SEED": "1",
                     "DATA_STIM_TYPE": "0",
-                    "UUT_SIM_FILE":"./data/uut_output.txt",
+                    "UUT_SIM_FILE": "./data/uut_output.txt",
                     "REF_SIM_FILE": "./data/ref_output.txt",
-                    "UUT_SIM_FILE2":"./data/uut_output_2.txt",
+                    "UUT_SIM_FILE2": "./data/uut_output_2.txt",
                     "REF_SIM_FILE2": "./data/ref_output_2.txt",
-                    "LOC_INPUT_FILE":"./data/input.txt",
+                    "LOC_INPUT_FILE": "./data/input.txt",
                     "UUT_FILE_SUFFIX": "$(UUT_KERNEL)_$(DATA_TYPE)_$(DATA_OUT_TYPE)_$(WINDOW_VSIZE)",
                     "STATUS_FILE": "./logs/status_$(UUT_FILE_SUFFIX).txt",
                     "UUT_TARGET_COMPILE_ARGS": "-Xchess=llvm.xargs=\"-std=c++2a\" -Xchess=main:backend.mist2.xargs=\"+NOdra\"  -Xchess=main:backend.mist2.pnll=\"off\" ",
-                    "REF_TARGET_COMPILE_ARGS":"",
-                    "UUT_WORK_DIR":"./Work",
-                    "REF_WORK_DIR":"./Work",
+                    "REF_TARGET_COMPILE_ARGS": "",
+                    "UUT_WORK_DIR": "./Work",
+                    "REF_WORK_DIR": "./Work",
                     "PREPROC_ARGS": "-DINPUT_FILE=$(LOC_INPUT_FILE) -DDATA_TYPE=$(DATA_TYPE) -DDATA_OUT_TYPE=$(DATA_OUT_TYPE) ",
                     "USING_REF": "",
                     "USING_UUT": "-DUSING_UUT=1",
@@ -130,7 +130,9 @@
             "accelerators": [
                 {
                     "location": "LIB_DIR/L2/tests/aie/widget_real2complex/test.cpp",
-                    "files": ["LIB_DIR/L1/src/aie/widget_real2complex.cpp"],
+                    "files": [
+                        "LIB_DIR/L1/src/aie/widget_real2complex.cpp"
+                    ],
                     "pl-freq": 1000,
                     "workdir": "./Work",
                     "options": "",

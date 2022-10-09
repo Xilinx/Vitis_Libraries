@@ -2,7 +2,7 @@
   "schema": "aieip_spec_schema-0.1",
   "ip_name": "vmc_fft_window",
   "block_info": {
-    "label": "Windowing Utility",
+    "label": "Window Function",
     "description": ""
   },
   "parameters": [
@@ -37,7 +37,8 @@
       "type": "int",
       "validator": {
         "file": "vmc_fft_window.py",
-        "function": "vmc_validate_point_size"
+        "function": "vmc_validate_point_size",
+        "args": ["data_type"]
       }
     },
     {
@@ -69,20 +70,6 @@
       }
     },
     {
-      "name": "ssr",
-      "label": "Number of parallel input/output (SSR)",
-      "description": "Specify number of data input/output in parallel",
-      "default": 1,
-      "minimum": 1,
-      "maximum": 32,
-      "type": "int",
-      "validator": {
-        "file": "vmc_fft_window.py",
-        "function": "vmc_validate_ssr",
-        "args": [ "data_type", "point_size"]
-      }
-    },
-    {
       "name": "is_dyn_pt_size",
       "label": "Dynamic Point Size",
       "description": "The selection of static point size or dynamic point size operation",
@@ -91,7 +78,7 @@
       "validator": {
         "file": "vmc_fft_window.py",
         "function": "vmc_validate_is_dyn_pt_size",
-        "args": [ "point_size", "ssr" ]
+        "args": [ "point_size"]
       }
     },
     {
@@ -100,7 +87,12 @@
       "description": "The window function coefficients",
       "element_type": "coeff_type",
       "default": [ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
-      "type": "vector"
+      "type": "vector",
+      "validator": {
+        "file": "vmc_fft_window.py",
+        "function": "vmc_validate_coeff",
+        "args": ["point_size","is_dyn_pt_size"]
+      }
     }
   ],
   "generator": {

@@ -131,6 +131,30 @@
             "UUT_SSR":"8",
             "STIM_TYPE":"0",
             "WINDOW_CHOICE":"3"
+        },
+        "test_12_fft_window": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int16",
+            "POINT_SIZE":"256",
+            "WINDOW_VSIZE":"512",
+            "SHIFT":"14",
+            "API_IO":"1",
+            "UUT_SSR":"1",
+            "DYN_PT_SIZE":"1",
+            "STIM_TYPE":"0",
+            "WINDOW_CHOICE":"3"
+        },
+        "test_13_fft_window": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int16",
+            "POINT_SIZE":"256",
+            "WINDOW_VSIZE":"512",
+            "SHIFT":"14",
+            "API_IO":"1",
+            "UUT_SSR":"4",
+            "DYN_PT_SIZE":"1",
+            "STIM_TYPE":"0",
+            "WINDOW_CHOICE":"3"
         }
     }
 }

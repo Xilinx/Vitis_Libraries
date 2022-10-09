@@ -78,14 +78,12 @@ else
 	NUM_PORTS := $$(( $(UUT_SSR) * 2 ))
 endif
 
+
+DYN_PT_HEADER_MODE = 0
 ifeq ($(DYN_PT_SIZE), 1)
-ifeq ($(DATA_TYPE), cint16)
-	DYN_PT_HEADER_SIZE := 8
+	DYN_PT_HEADER_MODE = 1
 else
-	DYN_PT_HEADER_SIZE := 4
-endif
-else
-	DYN_PT_HEADER_SIZE := 0
+	DYN_PT_HEADER_MODE = 0
 endif
 
 HELPER:= $(HELPER_CUR_DIR)/.HELPER
@@ -98,11 +96,11 @@ create_input:
 	@echo NUM_PORTS $(NUM_PORTS)
 	@echo INPUT_FILE $(INPUT_FILE)
 	@tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE) $(WINDOW_VSIZE) $(NITER) $(SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(LOG_POINT_SIZE) $(DATA_TYPE) $(API_IO) 1 0 ;\
-    perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(INPUT_FILE) --type $(DATA_TYPE) --ssr $(NUM_PORTS) --split --dual 0 -k $(DYN_PT_HEADER_SIZE) -w $(WINDOW_VSIZE) ;\
+    perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(INPUT_FILE) --type $(DATA_TYPE) --ssr $(NUM_PORTS) --split --dual 0 -k $(DYN_PT_HEADER_MODE) -w $(WINDOW_VSIZE) ;\
 	echo Input ready
 
 sim_ref:
-	make UUT_KERNEL=fft_window_ref UUT_SIM_FILE=./data/ref_output.txt x86sim TARGET=x86sim TAG=REF
+	make UUT_KERNEL=fft_window_ref UUT_SIM_FILE=./data/ref_output.txt run TARGET=x86sim TAG=REF
 
 prep_x86_out:
 	@x86_out_files=`ls $(HELPER_CUR_DIR)/x86simulator_output/data`;\
@@ -119,12 +117,12 @@ prep_aie_out:
 	done
 
 check_op_ref: prep_x86_out prep_aie_out
-	@perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(UUT_SIM_FILE) --type $(DATA_TYPE) --ssr $(NUM_PORTS) --zip --dual 0 -k $(DYN_PT_HEADER_SIZE) -w $(WINDOW_VSIZE) ;\
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(REF_SIM_FILE) --type $(DATA_TYPE) --ssr $(NUM_PORTS) --zip --dual 0 -k $(DYN_PT_HEADER_SIZE) -w $(WINDOW_VSIZE) ;\
+	@perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(UUT_SIM_FILE) --type $(DATA_TYPE) --ssr $(NUM_PORTS) --zip --dual 0 -k $(DYN_PT_HEADER_MODE) -w $(WINDOW_VSIZE) ;\
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(REF_SIM_FILE) --type $(DATA_TYPE) --ssr $(NUM_PORTS) --zip --dual 0 -k $(DYN_PT_HEADER_MODE) -w $(WINDOW_VSIZE) ;\
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE)
 
 get_status: check_op_ref
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) DATA_TYPE $(DATA_TYPE) COEFF_TYPE $(COEFF_TYPE) POINT_SIZE $(POINT_SIZE) WINDOW_VSIZE $(WINDOW_VSIZE) SHIFT $(SHIFT) API_IO $(API_IO) UUT_SSR $(UUT_SSR) DYN_PT_SIZE $(DYN_PT_SIZE)
 
-get_qor: 
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_wgt_theoretical_min.tcl $(DATA_TYPE) $(WINDOW_VSIZE) $(STATUS_FILE) $(UUT_KERNEL) $(API_IO) $(API_IO) $(NUM_PORTS) $(NUM_PORTS) 
+get_qor:
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_wgt_theoretical_min.tcl $(DATA_TYPE) $(WINDOW_VSIZE) $(STATUS_FILE) $(UUT_KERNEL) $(API_IO) $(API_IO) $(NUM_PORTS) $(NUM_PORTS)

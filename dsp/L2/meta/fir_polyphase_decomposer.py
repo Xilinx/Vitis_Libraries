@@ -72,11 +72,11 @@ def fn_validate_decomposer_TP_FIR_LEN(args):
   TP_PARA_DECI_POLY = dargs["TP_PARA_DECI_POLY"]
   if TP_FIR_LEN % TP_PARA_INTERP_POLY != 0: 
     return isError(
-      f"TP_FIR_LEN ({ TP_FIR_LEN }) must be a mutliple of TP_PARA_INTERP_POLY ({ TP_PARA_INTERP_POLY })"
+      f"Filter length ({ TP_FIR_LEN }) must be a mutliple of TP_PARA_INTERP_POLY ({ TP_PARA_INTERP_POLY })"
     )
   if TP_FIR_LEN % TP_PARA_DECI_POLY != 0: 
     return isError(
-      f"TP_FIR_LEN ({ TP_FIR_LEN }) must be a mutliple of TP_PARA_DECI_POLY ({ TP_PARA_DECI_POLY })"
+      f"Filter length ({ TP_FIR_LEN }) must be a mutliple of TP_PARA_DECI_POLY ({ TP_PARA_DECI_POLY })"
     )
   
   return isValid
@@ -88,18 +88,21 @@ def fn_validate_decomposer_TP_INPUT_WINDOW_VSIZE(args):
   TP_INPUT_WINDOW_VSIZE = dargs["TP_INPUT_WINDOW_VSIZE"]
   TP_PARA_DECI_POLY = dargs["TP_PARA_DECI_POLY"]
   if TP_INPUT_WINDOW_VSIZE % TP_PARA_DECI_POLY != 0: 
-    return isError(f"TP_INPUT_WINDOW_VSIZE ({TP_INPUT_WINDOW_VSIZE}) must be a mutliple of TP_PARA_DECI_POLY ({TP_PARA_DECI_POLY})")
+    return isError(f"Input window size ({TP_INPUT_WINDOW_VSIZE}) must be a mutliple of TP_PARA_DECI_POLY ({TP_PARA_DECI_POLY})")
   
   return isValid
 
-def validate_TP_PARA_INTERP_POLY(args): 
-  TP_PARA_INTERP_POLY = args["TP_PARA_INTERP_POLY"]
-  TP_INTERPOLATE_FACTOR = args["TP_INTERPOLATE_FACTOR"]
+def fn_validate_interp_poly(TP_PARA_INTERP_POLY, TP_INTERPOLATE_FACTOR):
   return (
     isError(f"TP_PARA_INTERP_POLY ({TP_PARA_INTERP_POLY}) must be an integer factor (greater than 0) of TP_INTERPOLATE_FACTOR ({TP_INTERPOLATE_FACTOR}) ")
       if ((TP_INTERPOLATE_FACTOR % TP_PARA_INTERP_POLY != 0) and (TP_INTERPOLATE_FACTOR//TP_PARA_INTERP_POLY >= 1)) 
     else isValid
   )
+
+def validate_TP_PARA_INTERP_POLY(args): 
+  TP_PARA_INTERP_POLY = args["TP_PARA_INTERP_POLY"]
+  TP_INTERPOLATE_FACTOR = args["TP_INTERPOLATE_FACTOR"]
+  return fn_validate_interp_poly(TP_PARA_INTERP_POLY, TP_INTERPOLATE_FACTOR)
 
 def validate_TP_PARA_DECI_POLY(args): 
   TP_PARA_DECI_POLY = args["TP_PARA_DECI_POLY"]

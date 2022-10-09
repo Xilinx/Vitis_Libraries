@@ -136,7 +136,7 @@
             "DUAL_IP":"1",
             "NUM_OUTPUTS":"2",
             "PORT_API":"1",
-            "INPUT_WINDOW_VSIZE":"25600",
+            "INPUT_WINDOW_VSIZE":"38400",
             "UUT_SSR":"3"
         },
         "test_15_cint16_ssr_reload": {
@@ -148,7 +148,7 @@
             "DUAL_IP":"1",
             "NUM_OUTPUTS":"2",
             "PORT_API":"1",
-            "INPUT_WINDOW_VSIZE":"25600",
+            "INPUT_WINDOW_VSIZE":"38400",
             "USE_COEFF_RELOAD":"1",
             "UUT_SSR":"3"
         }

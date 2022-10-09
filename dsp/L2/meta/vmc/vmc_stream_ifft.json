@@ -19,11 +19,11 @@
       "label": "Point Size",
       "description": "The number of samples in the transform",
       "default": 64,
-      "maximum": 4096,
+      "maximum": 65536,
       "minimum": 16,
       "type": "int",
       "validator": {
-        "file": "vmc_stream_fft.py",
+        "file": "vmc_fft_common.py",
         "function": "vmc_validate_point_size",
         "args": []
       }
@@ -37,7 +37,7 @@
       "minimum": 0,
       "type": "int",
       "validator": {
-        "file": "vmc_stream_fft.py",
+        "file": "vmc_fft_common.py",
         "function": "vmc_validate_shift_val",
         "args": ["data_type", "point_size"]
       }
@@ -47,27 +47,31 @@
       "label": "Input window size (Number of Samples)",
       "description": "The number of samples in the input window",
       "default": 64,
-      "maximum": 4096,
+      "maximum": 65536,
       "minimum": 16,
       "type": "int",
       "validator": {
-        "file": "vmc_stream_fft.py",
+        "file": "vmc_fft_common.py",
         "function": "vmc_validate_input_window_size",
         "args": ["point_size"]
       }
     },
-	{
-	  "name": "ssr",
+    {
+      "name": "ssr",
       "label": "SSR",
       "description": "The number of input channels for SSR. The specified value should be of the form 2^N",
       "default": 2,
       "maximum": 512,
       "minimum": 2,
-      "type": "int"
+      "type": "int",
+      "validator": {
+        "file": "vmc_fft_common.py",
+        "function": "vmc_validate_ssr",
+        "args": ["point_size"]
+      }
     },
-
-	{
-	  "name":"input_sampling_rate",
+    {
+      "name":"input_sampling_rate",
       "label": "Target input throughput (MSPS)",
       "description": "The target input throughput of the function in MSPS",
       "default": 200,
@@ -91,14 +95,14 @@
       "maximum": 9,
       "minimum": 1,
       "validator": {
-        "file": "vmc_stream_fft.py",
+        "file": "vmc_fft_common.py",
         "function": "vmc_validate_casc_length",
         "args": ["data_type", "point_size", "use_casc_length"]
       }
     }
   ],
   "generator": {
-    "file": "vmc_stream_fft.py",
+    "file": "vmc_stream_ifft.py",
     "function": "vmc_generate_graph"
   }
 }

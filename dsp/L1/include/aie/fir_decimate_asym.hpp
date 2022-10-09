@@ -251,24 +251,26 @@ class kernelFilterClass {
 
     static constexpr unsigned int m_kVOutSize = fnVOutSizeDecAsym<TT_DATA, TT_COEFF>();
 
-    static constexpr unsigned int dataOffsetNthKernel =
-        getDataOffset<TP_FIR_LEN, TP_FIR_RANGE_LEN, m_kFirRangeOffset>();
-    static constexpr int streamInitNullAccs = getInitNullAccs<dataOffsetNthKernel, TP_DECIMATE_FACTOR, m_kVOutSize>();
+    static constexpr int dataOffsetNthKernel = getDataOffset<TP_FIR_LEN, TP_FIR_RANGE_LEN, m_kFirRangeOffset>();
+    static constexpr int streamInitNullAccs =
+        getInitNullAccs<dataOffsetNthKernel, TP_DECIMATE_FACTOR, m_kVOutSize>(); // Number of Null Mac Vectors sent as
+                                                                                 // partial prouducts over cascade.
     static constexpr int dataNeededLastKernel =
         1 + TP_DECIMATE_FACTOR * (m_kLanes - 1) + (streamInitNullAccs * TP_DECIMATE_FACTOR * m_kLanes);
     static constexpr unsigned int kMinDataNeeded =
         (TP_MODIFY_MARGIN_OFFSET + dataNeededLastKernel - dataOffsetNthKernel);
     static constexpr unsigned int kMinDataLoaded = CEIL(kMinDataNeeded, m_kStreamLoadVsize);
     static constexpr unsigned int kMinDataLoadCycles = kMinDataLoaded / m_kStreamLoadVsize;
-    static constexpr int m_kInitDataNeeded = getInitDataNeeded<TP_DECIMATE_FACTOR,
-                                                               m_kLanes,
-                                                               streamInitNullAccs,
-                                                               TP_MODIFY_MARGIN_OFFSET,
-                                                               dataOffsetNthKernel,
-                                                               m_kStreamLoadVsize,
-                                                               TP_FIR_RANGE_LEN,
-                                                               m_kFirRangeOffset,
-                                                               m_kFirRangeOffsetLastKernel>();
+
+    static constexpr unsigned int m_kInitDataNeeded = getInitDataNeeded<TP_DECIMATE_FACTOR,
+                                                                        m_kLanes,
+                                                                        streamInitNullAccs,
+                                                                        TP_MODIFY_MARGIN_OFFSET,
+                                                                        dataOffsetNthKernel,
+                                                                        m_kStreamLoadVsize,
+                                                                        TP_FIR_RANGE_LEN,
+                                                                        m_kFirRangeOffset,
+                                                                        m_kFirRangeOffsetLastKernel>();
 
     static constexpr unsigned int m_kXoffsetRange = fnMaxXoffsetRange<TT_DATA>();
     static constexpr eArchType m_kArchIncrStrobeEn =

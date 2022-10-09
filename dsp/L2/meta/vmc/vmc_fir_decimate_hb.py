@@ -44,16 +44,18 @@ def vmc_validate_coeff(args):
 	use_casc_length = args["use_casc_length"]
 	ssr = 1
 	api = 0
+	deci_poly = 1
 	fir_length = fn_get_fir_length_hb(args)
 	#TODO: Talk to DSP Lib team about separating casc length from fir_length API
 	if use_casc_length:
-		return fn_validate_fir_len(data_type, coef_type, fir_length, casc_length, ssr, api, use_coeff_reload )
+		return fn_validate_fir_len(data_type, coef_type, fir_length, casc_length, ssr, api, use_coeff_reload, deci_poly )
 	return {"is_valid": True}
 
 def vmc_validate_shift_val(args):
 	data_type = args["data_type"]
 	shift_val = args["shift_val"]
 	return fn_validate_shift(data_type, shift_val)
+
 
 #### VMC graph generator ####
 def vmc_generate_graph(name, args):

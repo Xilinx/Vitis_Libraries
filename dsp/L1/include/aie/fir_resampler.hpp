@@ -57,6 +57,110 @@ namespace aie {
 namespace fir {
 namespace resampler {
 
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_INTERPOLATE_FACTOR,
+          unsigned int TP_DECIMATE_FACTOR,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          bool TP_CASC_IN = CASC_IN_FALSE,
+          bool TP_CASC_OUT = CASC_OUT_FALSE,
+          unsigned int TP_FIR_RANGE_LEN = TP_FIR_LEN,
+          unsigned int TP_KERNEL_POSITION = 0,
+          unsigned int TP_CASC_LEN = 1,
+          unsigned int TP_USE_COEFF_RELOAD = 0,
+          unsigned int TP_NUM_OUTPUTS = 1,
+          unsigned int TP_DUAL_IP = 0,
+          unsigned int TP_API = 0>
+class fir_resampler;
+
+template <typename fp = fir_params_defaults>
+class fir_resampler_tl {
+   public:
+    // Get kernel's FIR range Length
+    template <int pos>
+    static constexpr unsigned int getKernelFirRangeLen() {
+        constexpr unsigned int firRangeLen = pos + 1 == fp::BTP_CASC_LEN
+                                                 ? fnFirRangeRem<CEIL(fp::BTP_FIR_LEN, fp::BTP_INTERPOLATE_FACTOR),
+                                                                 fp::BTP_CASC_LEN, pos, fp::BTP_INTERPOLATE_FACTOR>()
+                                                 : fnFirRange<CEIL(fp::BTP_FIR_LEN, fp::BTP_INTERPOLATE_FACTOR),
+                                                              fp::BTP_CASC_LEN, pos, fp::BTP_INTERPOLATE_FACTOR>();
+        return firRangeLen;
+    };
+
+    template <int pos, int CLEN, int T_FIR_LEN, typename T_D, typename T_C, unsigned int T_DF, unsigned int T_IF>
+    static constexpr unsigned int fnCheckIfFits() {
+        constexpr int samplesInBuff = fnSamplesIn1024<T_D>();
+        constexpr unsigned int fir_range_len = getKernelFirRangeLen<pos>();
+        constexpr unsigned int m_kPolyLen = (fir_range_len + T_IF - 1) / T_IF;
+        constexpr unsigned int m_kFirLenCeil = CEIL(T_FIR_LEN, T_IF);
+        constexpr unsigned int m_kFirCoeffOffset =
+            fnFirRangeOffset<m_kFirLenCeil, CLEN, pos, T_IF>(); // FIR Cascade Coeff Offset for this kernel position
+        constexpr unsigned int m_kFirRangeOffset =
+            m_kFirCoeffOffset / T_IF; // FIR Cascade Data Offset for this kernel position
+        constexpr unsigned int m_kFirMarginLen = m_kFirLenCeil / T_IF;
+        constexpr unsigned int m_kFirMarginOffset =
+            fnFirMargin<m_kFirMarginLen, T_D>() - m_kFirMarginLen + 1; // FIR Margin Offset.
+        constexpr unsigned int m_kWinAccessByteSize =
+            fnWinAccessByteSize<T_D, T_C>(); // The memory data path is min 128-bits wide for vector operations
+        constexpr unsigned int m_kFirInitOffset = m_kFirRangeOffset + m_kFirMarginOffset;
+        constexpr unsigned int m_kDataBuffXOffset =
+            m_kFirInitOffset % (m_kWinAccessByteSize / sizeof(T_D)); // Remainder of m_kFirInitOffset divided by 128bit
+        constexpr unsigned int m_kLanes = fnNumLanesResampler<T_D, T_C, 1>(); // number of operations in parallel of
+                                                                              // this type combinations that the vector
+                                                                              // processor can do.
+        constexpr unsigned int m_kNumSamplesRequiredForNLanes = (m_kLanes * T_DF + (T_IF - 1)) / T_IF;
+        constexpr unsigned int m_kInitDataNeeded = m_kDataBuffXOffset + m_kPolyLen + m_kNumSamplesRequiredForNLanes - 1;
+
+        if
+            constexpr(m_kInitDataNeeded > samplesInBuff) { return 0; }
+        else {
+            return 1;
+        }
+    }
+
+    // Get kernel's FIR range Length
+    static constexpr unsigned int getFirRangeLen() { return fp::BTP_FIR_RANGE_LEN; };
+
+    // Get kernel's FIR Total Tap Length
+    static constexpr unsigned int getTapLen() { return CEIL(fp::BTP_FIR_LEN, fp::BTP_SSR) / fp::BTP_SSR; };
+
+    // Get kernel's FIR Total Tap Length
+    static constexpr unsigned int getSSRMargin() {
+        constexpr unsigned int margin =
+            fnFirMargin<((fp::BTP_FIR_LEN + fp::BTP_INTERPOLATE_FACTOR - 1) / fp::BTP_INTERPOLATE_FACTOR),
+                        typename fp::BTT_DATA>();
+        return margin;
+    };
+
+    static constexpr unsigned int getDF() { return fp::BTP_DECIMATE_FACTOR; };
+    static constexpr unsigned int getIF() { return fp::BTP_INTERPOLATE_FACTOR; };
+
+    // Get FIR variant
+    static constexpr eFIRVariant getFirType() { return eFIRVariant::kSrAsym; };
+    // Get FIR source file
+    static const char* getFirSource() { return "fir_resampler.cpp"; };
+
+    using parent_class = fir_resampler<typename fp::BTT_DATA,
+                                       typename fp::BTT_COEFF,
+                                       fp::BTP_FIR_LEN,
+                                       fp::BTP_INTERPOLATE_FACTOR,
+                                       fp::BTP_DECIMATE_FACTOR,
+                                       fp::BTP_SHIFT,
+                                       fp::BTP_RND,
+                                       fp::BTP_INPUT_WINDOW_VSIZE,
+                                       fp::BTP_CASC_IN,
+                                       fp::BTP_CASC_OUT,
+                                       fp::BTP_FIR_RANGE_LEN,
+                                       fp::BTP_KERNEL_POSITION,
+                                       fp::BTP_CASC_LEN,
+                                       fp::BTP_USE_COEFF_RELOAD,
+                                       fp::BTP_NUM_OUTPUTS,
+                                       fp::BTP_DUAL_IP,
+                                       fp::BTP_API>;
+};
 //-----------------------------------------------------------------------------------------------------
 template <typename TT_DATA,
           typename TT_COEFF,
@@ -376,15 +480,15 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
-          bool TP_CASC_IN = CASC_IN_FALSE,
-          bool TP_CASC_OUT = CASC_OUT_FALSE,
-          unsigned int TP_FIR_RANGE_LEN = TP_FIR_LEN,
-          unsigned int TP_KERNEL_POSITION = 0,
-          unsigned int TP_CASC_LEN = 1,
-          unsigned int TP_USE_COEFF_RELOAD = 0, // 1 = use coeff reload, 0 = don't use coeff reload
-          unsigned int TP_NUM_OUTPUTS = 1,
-          unsigned int TP_DUAL_IP = 0,
-          unsigned int TP_API = 0>
+          bool TP_CASC_IN,
+          bool TP_CASC_OUT,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_USE_COEFF_RELOAD, // 1 = use coeff reload, 0 = don't use coeff reload
+          unsigned int TP_NUM_OUTPUTS,
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_API>
 class fir_resampler : public kernelFilterClass<TT_DATA,
                                                TT_COEFF,
                                                TP_FIR_LEN,

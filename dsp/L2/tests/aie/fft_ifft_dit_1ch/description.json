@@ -22,7 +22,7 @@
     },
     "pre_build": [
         {
-            "build_cmd": "make -f PROJECT/helper.mk HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(INPUT_FILE) UUT_KERNEL=$(UUT_KERNEL) $(PARAM_MAP)"
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), make -f PROJECT/helper.mk HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(INPUT_FILE) UUT_KERNEL=$(UUT_KERNEL) $(PARAM_MAP))"
         }
     ],
     "post_launch": [
@@ -32,18 +32,18 @@
                 "mkdir -p logs",
                 "make -f PROJECT/helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(INPUT_FILE) $(PARAM_MAP) STATUS_FILE=$(STATUS_FILE) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)",
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/get_stats.tcl $(WINDOW_VSIZE) $(CASC_LEN) $(STATUS_FILE) ./aiesimulator_output fftMain $(NITER)",
-		        "tclsh LIB_DIR/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_fft_theoretical_min.tcl $(DATA_TYPE) $(TWIDDLE_TYPE) $(WINDOW_VSIZE) $(POINT_SIZE) $(CASC_LEN) $(STATUS_FILE) $(UUT_KERNEL) $(PARALLEL_POWER) $(API_IO)",
+                "tclsh LIB_DIR/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_fft_theoretical_min.tcl $(DATA_TYPE) $(TWIDDLE_TYPE) $(WINDOW_VSIZE) $(POINT_SIZE) $(CASC_LEN) $(STATUS_FILE) $(UUT_KERNEL) $(PARALLEL_POWER) $(API_IO)",
                 "LIB_DIR/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) LIB_DIR/L2/tests/aie/common/scripts",
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./"
-                ]
+            ]
         },
         {
             "target": "x86sim",
             "launch_cmd": [
-                "mkdir -p logs",
-                "make -f PROJECT/helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(INPUT_FILE) $(PARAM_MAP) STATUS_FILE=$(STATUS_FILE) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)",
-                "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./"
-                ]
+                "$(if $(filter-out REF,$(TAG)), mkdir -p logs)",
+                "$(if $(filter-out REF,$(TAG)), make -f PROJECT/helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(INPUT_FILE) $(PARAM_MAP) STATUS_FILE=$(STATUS_FILE) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE))",
+                "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./)"
+            ]
         }
     ],
     "launch": [
@@ -69,41 +69,41 @@
                 "./"
             ],
             "customized_params": {
-                "params" : "--dataflow -v  $($(TAG)_TARGET_COMPILE_ARGS)  -Xpreproc=\"$($(TAG)_PREPROC_ARGS)\"",
+                "params": "--dataflow -v  $($(TAG)_TARGET_COMPILE_ARGS)  -Xpreproc=\"$($(TAG)_PREPROC_ARGS)\"",
                 "default": {
                     "TAG": "UUT",
                     "UUT_KERNEL": "fft_ifft_dit_1ch",
                     "REF_KERNEL": "fft_ifft_dit_1ch_ref",
                     "UUT_GRAPH": "fft_ifft_dit_1ch_graph",
                     "REF_GRAPH": "fft_ifft_dit_1ch_ref_graph",
-                    "NITER":"4",
-                    "DATA_TYPE":"cint16",
-                    "TWIDDLE_TYPE":"cint16",
-                    "POINT_SIZE":"1024",
-                    "DYN_PT_SIZE":"0",
-                    "FFT_NIFFT":"1",
-                    "SHIFT":"17",
-                    "CASC_LEN":"1",
-                    "WINDOW_VSIZE":"$(POINT_SIZE)",
+                    "NITER": "4",
+                    "DATA_TYPE": "cint16",
+                    "TWIDDLE_TYPE": "cint16",
+                    "POINT_SIZE": "1024",
+                    "DYN_PT_SIZE": "0",
+                    "FFT_NIFFT": "1",
+                    "SHIFT": "17",
+                    "CASC_LEN": "1",
+                    "WINDOW_VSIZE": "$(POINT_SIZE)",
                     "API_IO": "0",
                     "PARALLEL_POWER": "0",
-                    "INPUT_WINDOW_VSIZE":"$(WINDOW_VSIZE)",
+                    "INPUT_WINDOW_VSIZE": "$(WINDOW_VSIZE)",
                     "DIFF_TOLERANCE": "0",
                     "CC_TOLERANCE": "0",
                     "DATA_SEED": "1",
-                    "STIM_TYPE":"0",
-                    "STACKSIZE_VAL":"600",
-                    "UUT_SIM_FILE":"./data/uut_output.txt",
+                    "STIM_TYPE": "0",
+                    "STACKSIZE_VAL": "600",
+                    "UUT_SIM_FILE": "./data/uut_output.txt",
                     "REF_SIM_FILE": "./data/ref_output.txt",
-                    "INPUT_FILE":"./data/input.txt",
+                    "INPUT_FILE": "./data/input.txt",
                     "UUT_FILE_SUFFIX": "$(UUT_KERNEL)_$(DATA_TYPE)_$(TWIDDLE_TYPE)_$(POINT_SIZE)_$(FFT_NIFFT)_$(SHIFT)_$(CASC_LEN)_$(DYN_PT_SIZE)_$(WINDOW_VSIZE)_$(API_IO)_$(PARALLEL_POWER)",
                     "LOG_FILE": "./logs/log_$(UUT_FILE_SUFFIX).txt",
                     "STATUS_LOG_FILE": "./logs/status_$(UUT_FILE_SUFFIX).txt",
                     "STATUS_FILE": "$(STATUS_LOG_FILE)",
                     "UUT_TARGET_COMPILE_ARGS": "-Xchess=llvm.xargs=\"-std=c++2a\" -Xchess=main:backend.mist2.xargs=\"+NOdra\" -Xchess=main:backend.mist2.pnll=\"off\" -stacksize=$(STACKSIZE_VAL)",
-                    "REF_TARGET_COMPILE_ARGS":"",
-                    "UUT_WORK_DIR":"./Work",
-                    "REF_WORK_DIR":"./Work",
+                    "REF_TARGET_COMPILE_ARGS": "",
+                    "UUT_WORK_DIR": "./Work",
+                    "REF_WORK_DIR": "./Work",
                     "PREPROC_ARGS": "-DINPUT_FILE=$(INPUT_FILE) -DDATA_TYPE=$(DATA_TYPE) -DTWIDDLE_TYPE=$(TWIDDLE_TYPE) -DPOINT_SIZE=$(POINT_SIZE) -DFFT_NIFFT=$(FFT_NIFFT) -DSHIFT=$(SHIFT) -DCASC_LEN=$(CASC_LEN) -DDYN_PT_SIZE=$(DYN_PT_SIZE) -DWINDOW_VSIZE=$(WINDOW_VSIZE) -DAPI_IO=$(API_IO) -DPARALLEL_POWER=$(PARALLEL_POWER) -DSTIM_TYPE=$(STIM_TYPE)  -DINPUT_WINDOW_VSIZE=$(INPUT_WINDOW_VSIZE) -DNITER=$(NITER)",
                     "REF_PREPROC_ARGS": "-DUUT_GRAPH=$(REF_GRAPH) -DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS) ",
                     "UUT_PREPROC_ARGS": "-DUUT_GRAPH=$(UUT_GRAPH) -DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) -DUSING_UUT=1",
@@ -117,7 +117,10 @@
             "accelerators": [
                 {
                     "location": "LIB_DIR/L2/tests/aie/fft_ifft_dit_1ch/test.cpp",
-                    "files": ["LIB_DIR/L1/src/aie/fft_ifft_dit_1ch.cpp", "LIB_DIR/L1/src/aie/fft_r2comb.cpp"],
+                    "files": [
+                        "LIB_DIR/L1/src/aie/fft_ifft_dit_1ch.cpp",
+                        "LIB_DIR/L1/src/aie/fft_r2comb.cpp"
+                    ],
                     "pl-freq": 1000,
                     "workdir": "./Work",
                     "options": "",
@@ -137,7 +140,7 @@
                 "max_memory_MB": {
                     "vitis_aie_x86sim": 32768,
                     "vitis_aie_sim": 40960
-                 },
+                },
                 "max_time_min": {
                     "vitis_aie_x86sim": 60,
                     "vitis_aie_sim": 200

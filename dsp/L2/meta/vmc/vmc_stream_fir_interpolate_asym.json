@@ -116,8 +116,8 @@
       "default": 2,
       "type": "int"
     },
-	{
-	  "name": "ssr",
+    {
+      "name": "ssr",
       "label": "Number of parallel input/output (SSR)",
       "description": "Specify number of data input/output in parallel for a single channel.",
       "default": 1,
@@ -126,6 +126,18 @@
       "validator": {
         "file": "vmc_stream_fir_interpolate_asym.py",
         "function": "vmc_validate_ssr",
+        "args": ["interpolate_factor"]
+      }
+    },
+    {
+      "name": "interp_poly",
+      "label": "Interpolate polyphase",
+      "description": "The number of parallel polyphases to decompose over",
+      "type": "int",
+      "minimum": 1,
+      "validator": {
+        "file": "vmc_stream_fir_interpolate_asym.py",
+        "function": "vmc_validate_interp_poly",
         "args": ["interpolate_factor"]
       }
     }

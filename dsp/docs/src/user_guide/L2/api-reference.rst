@@ -24,6 +24,10 @@ The graph declarations may be found in L2/include/aie/.
 This section describes the interface to each library element, i.e., configuration parameters, constructor arguments, and ports.
 
 
+- `dds_mixer_graph <../../rst/class_xf_dsp_aie_mixer_dds_mixer_dds_mixer_graph.html>`_
+- `Graph utils <../../rst/group_graph_utils.html>`_
+- `FFT IFFT <../../rst/group_fft_graphs.html>`_
+- `FFT Window <../../rst/group_fft_window.html>`_
 - `fir_sr_asym_graph <../../rst/class_xf_dsp_aie_fir_sr_asym_fir_sr_asym_graph.html>`_
 - `fir_sr_sym_graph <../../rst/class_xf_dsp_aie_fir_sr_sym_fir_sr_sym_graph.html>`_
 - `fir_interpolate_asym_graph <../../rst/class_xf_dsp_aie_fir_interpolate_asym_fir_interpolate_asym_graph.html>`_
@@ -34,10 +38,8 @@ This section describes the interface to each library element, i.e., configuratio
 - `fir_decimate_sym_graph <../../rst/class_xf_dsp_aie_fir_decimate_sym_fir_decimate_sym_graph.html>`_
 - `fir_resampler_graph <../../rst/class_xf_dsp_aie_fir_resampler_fir_resampler_graph.html>`_
 - `matrix_mult_graph <../../rst/class_xf_dsp_aie_blas_matrix_mult_matrix_mult_graph.html>`_
-- `FFT Graphs <../../rst/group_fft_graphs.html>`_
 - `widget_api_cast_graph <../../rst/class_xf_dsp_aie_widget_api_cast_widget_api_cast_graph.html>`_
 - `widget_real2complex_graph <../../rst/class_xf_dsp_aie_widget_real2complex_widget_real2complex_graph.html>`_
-- `dds_mixer_graph <../../rst/class_xf_dsp_aie_mixer_dds_mixer_dds_mixer_graph.html>`_
 
 
 .. |image1| image:: ./media/image1.png

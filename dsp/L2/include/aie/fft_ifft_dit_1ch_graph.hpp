@@ -738,9 +738,9 @@ class fft_ifft_dit_1ch_mono_graph<cint16,
   */
 
 /**
- * @defgroup fft_graphs FFT Graph
+ * @defgroup fft_graphs FFT IFFT
  *
- * The FFT graph is offered as a template class that is available with 2 template specializations,
+ * The FFT/IFFT graph is offered as a template class that is available with 2 template specializations,
  * that offer varied features and interfaces:
  * - window interface (TP_API == 0) or
  * - stream interface (TP_API == 1).
