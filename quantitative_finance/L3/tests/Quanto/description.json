@@ -76,11 +76,11 @@
             "accelerators": [
                 {
                     "location": "LIB_DIR/L2/tests/Quanto/src/kernel/quanto_kernel.cpp",
-                    "frequency": 300.0,
+                    "frequency": 200.0,
                     "name": "quanto_kernel"
                 }
             ],
-            "frequency": 300.0,
+            "frequency": 200.0,
             "name": "quanto_kernel"
         }
     ],

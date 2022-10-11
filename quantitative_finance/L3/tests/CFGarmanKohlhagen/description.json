@@ -76,11 +76,11 @@
             "accelerators": [
                 {
                     "location": "LIB_DIR/L2/tests/GarmanKohlhagenEngine/src/kernel/gk_kernel.cpp",
-                    "frequency": 300.0,
+                    "frequency": 200.0,
                     "name": "gk_kernel"
                 }
             ],
-            "frequency": 300.0,
+            "frequency": 200.0,
             "name": "gk_kernel"
         }
     ],

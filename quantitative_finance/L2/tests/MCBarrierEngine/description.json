@@ -101,7 +101,7 @@
             "accelerators": [
                 {
                     "location": "kernel/MCBarrierNoBiasEngine_k0.cpp",
-                    "frequency": 300,
+                    "frequency": 200,
                     "clflags": "-D DPRAGMA",
                     "name": "MCBarrierNoBiasEngine_k0",
                     "num_compute_units": 1,
@@ -123,7 +123,7 @@
                     ]
                 }
             ],
-            "frequency": 300,
+            "frequency": 200,
             "name": "MCBarrierNoBiasEngine_k"
         }
     ],

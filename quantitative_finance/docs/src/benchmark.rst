@@ -92,13 +92,13 @@ Vitis Quantitative_Finance Library
 
 * **Download code**
 
-These quantitative_finance benchmarks can be downloaded from `vitis libraries <https://github.com/Xilinx/Vitis_Libraries.git>`_ ``master`` branch.
+These quantitative_finance benchmarks can be downloaded from `vitis libraries <https://github.com/Xilinx/Vitis_Libraries.git>`_ ``main`` branch.
 
 .. code-block:: bash
 
    git clone https://github.com/Xilinx/Vitis_Libraries.git 
    cd Vitis_Libraries
-   git checkout master
+   git checkout main
    cd quantitative_finance 
 
 * **Setup environment**

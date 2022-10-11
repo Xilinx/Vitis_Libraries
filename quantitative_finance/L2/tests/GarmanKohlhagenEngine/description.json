@@ -90,10 +90,12 @@
     "containers": [
         {
             "name": "gk_kernel",
+            "frequency": 200.0,
             "accelerators": [
                 {
                     "name": "gk_kernel",
-                    "location": "src/kernel/gk_kernel.cpp"
+                    "location": "src/kernel/gk_kernel.cpp",
+                    "frequency": 200.0
                 }
             ]
         }

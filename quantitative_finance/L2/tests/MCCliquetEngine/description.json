@@ -101,7 +101,7 @@
             "accelerators": [
                 {
                     "location": "kernel/MCCliquetEngine_k.cpp",
-                    "frequency": 300,
+                    "frequency": 200,
                     "clflags": "-D DPRAGMA",
                     "name": "MCCliquetEngine_k",
                     "num_compute_units": 1,
@@ -127,7 +127,7 @@
                     ]
                 }
             ],
-            "frequency": 300,
+            "frequency": 200,
             "name": "MCCliquetEngine_k"
         }
     ],

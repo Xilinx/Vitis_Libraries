@@ -90,10 +90,12 @@
     "containers": [
         {
             "name": "quanto_kernel",
+            "frequency": 200.0,
             "accelerators": [
                 {
                     "name": "quanto_kernel",
-                    "location": "src/kernel/quanto_kernel.cpp"
+                    "location": "src/kernel/quanto_kernel.cpp",
+                    "frequency": 200.0
                 }
             ]
         }

@@ -101,7 +101,7 @@
             "accelerators": [
                 {
                     "location": "kernel/BOND_k0.cpp",
-                    "frequency": 300.0,
+                    "frequency": 200.0,
                     "clflags": " -D DPRAGMA",
                     "name": "BOND_k0",
                     "num_compute_units": 1,
@@ -127,7 +127,7 @@
                     ]
                 }
             ],
-            "frequency": 300.0,
+            "frequency": 200.0,
             "name": "BOND_k"
         }
     ],
