@@ -162,10 +162,11 @@ int main(int argc, char** argv) {
         if ((good_matches[i].queryIdx != good_matches_cv[i].queryIdx) ||
             (good_matches[i].trainIdx != good_matches_cv[i].trainIdx)) {
             printf("wrong matches found in the validation!");
+            std::cerr << "ERROR: Test Failed." << std::endl;
             return -1;
-        }
+        } else
+            std::cout << "Test passed successfully!" << std::endl;
     }
-    std::cout << "Test passed successfully!" << std::endl;
 
     std::cout.precision(3);
     std::cout << std::fixed;

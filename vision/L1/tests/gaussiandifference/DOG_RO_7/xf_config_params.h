@@ -11,12 +11,29 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
+
  * limitations under the License.
  */
 
-#define FILTER_SIZE_3 0
-#define FILTER_SIZE_5 0
-#define FILTER_SIZE_7 1
+#define XF_CV_DEPTH_IN_0 1
+#define XF_CV_DEPTH_IN_1 1
+#define XF_CV_DEPTH_IN_2 2
+#define XF_CV_DEPTH_IN_3 15360
+#define XF_CV_DEPTH_IN_4 4
 
-#define RO 1
-#define NO 0
+#define XF_CV_DEPTH_OUT_1 3
+
+#define FILTER_SIZE_1_3 0
+#define FILTER_SIZE_1_5 0
+#define FILTER_SIZE_1_7 1
+
+#define FILTER_SIZE_2_3 0
+#define FILTER_SIZE_2_5 0
+#define FILTER_SIZE_2_7 1
+
+#define FILTER_SIZE_2_3 0
+#define FILTER_SIZE_2_5 0
+#define FILTER_SIZE_2_7 1
+
+#define MPC 1
+#define SPC 0

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#define NO 1
-#define RO 0
+#define SPC 1
+#define MPC 0
 
 /*  set the input types  */
 
@@ -23,3 +23,4 @@
 #define T_16U 0 // Input type of 16U
 #define T_16S 1 // Input type of 16S
 #define T_32S 0 // Input type of 32S
+#define XF_CV_DEPTH_IN 3

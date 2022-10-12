@@ -90,8 +90,14 @@ void exponential(ap_fixed<WIDTH, 4> in, ap_ufixed<WIDTH, 8>& out) {
 
     out = int_out * frac_out;
 }
-template <int SIN_CHANNEL_IN_TYPE, int SIN_CHANNEL_OUT_TYPE, int ROWS, int COLS, int NPC, int TC>
-void xFcompute_mean(xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC>& yimage,
+template <int SIN_CHANNEL_IN_TYPE,
+          int SIN_CHANNEL_OUT_TYPE,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_YIMAGE = _XFCVDEPTH_DEFAULT,
+          int TC>
+void xFcompute_mean(xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_YIMAGE>& yimage,
                     ap_ufixed<16, 4>& mean_fixed,
                     ap_ufixed<16, 4>& L_max,
                     ap_ufixed<16, 4>& L_min,
@@ -163,23 +169,29 @@ rowLoop1:
         // clang-format on
         sum = sum + tmp_sum[j];
     }
-    ap_ufixed<32, 8> inv_divsion = (ap_ufixed<32, 8>)1 / (ap_ufixed<32, 32>)(rows * cols * NPC);
+    ap_ufixed<32, 1> inv_divsion = (ap_ufixed<32, 1>)1 / (ap_ufixed<32, 32>)(rows * cols * NPC);
     mean_fixed = (sum * inv_divsion);
     return;
 }
 
-template <int SIN_CHANNEL_IN_TYPE, int SIN_CHANNEL_OUT_TYPE, int ROWS, int COLS, int NPC, int TC>
-void xFcompute_xyzmapped(xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC>& ximage,
-                         xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC>& yimage,
-                         xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC>& zimage,
+template <int SIN_CHANNEL_IN_TYPE,
+          int SIN_CHANNEL_OUT_TYPE,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int TC>
+void xFcompute_xyzmapped(xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>& ximage,
+                         xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>& yimage,
+                         xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>& zimage,
                          ap_ufixed<16, 4>& mean,
                          ap_ufixed<16, 4>& L_max,
                          ap_ufixed<16, 4>& L_min,
                          float c1,
                          float c2,
-                         xf::cv::Mat<SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC>& xmapped,
-                         xf::cv::Mat<SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC>& ymapped,
-                         xf::cv::Mat<SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC>& zmapped,
+                         xf::cv::Mat<SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>& xmapped,
+                         xf::cv::Mat<SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>& ymapped,
+                         xf::cv::Mat<SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>& zmapped,
                          int rows,
                          int cols) {
 // clang-format off
@@ -194,8 +206,8 @@ void xFcompute_xyzmapped(xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC>& xima
 		ap_int<13> i,j,k;
 		
 		ap_ufixed<16, 4> ld_nume = 2.4;
-		ap_ufixed<16, 4> ld_dinom = L_max;
-		ap_ufixed<16, 4> inv_L_range =  (ap_ufixed<16, 8>)1/ld_dinom;	
+		ap_ufixed<16, 4> ld_dinom = L_max-L_min;
+		ap_ufixed<16, 1> inv_L_range =  (ap_ufixed<16, 1>)1/ld_dinom;	
 		
 		ap_ufixed<16, 4> K1 = (ld_nume * inv_L_range);
 		ap_fixed<16, 4> _k1 = 1- K1; 
@@ -203,7 +215,7 @@ void xFcompute_xyzmapped(xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC>& xima
 		ap_ufixed<16, 4> c1_fixed = (ap_ufixed<16, 8>) c1;
 		
 		ap_ufixed<16, 4> ld_dinom_sq = (ld_dinom * ld_dinom);
-		ap_ufixed<16, 4> inv_comp = (ap_ufixed<16, 8>)1/(ap_ufixed<16, 8>)(2 * ld_dinom_sq);
+		ap_ufixed<16, 1> inv_comp = (ap_ufixed<16, 1>)1/(ap_ufixed<16, 8>)(2 * ld_dinom_sq);
 		
 		ap_ufixed<16, 4> c1_sq = (c1_fixed * c1_fixed);
 		ap_ufixed<16, 4> sigma_sq = (c1_sq * inv_comp);
@@ -218,6 +230,7 @@ void xFcompute_xyzmapped(xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC>& xima
 		
 		rd_ptr=0, wr_ptr=0;
 		ap_ufixed<16, 4> c2_fixed = (ap_ufixed<16, 8>) c2;
+	
 	rowLoop2:
 		for (i = 0; i < rows; i++) {
 	// clang-format off
@@ -264,14 +277,14 @@ void xFcompute_xyzmapped(xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC>& xima
                 exponential(exp_in2, exp_out2);
 
                 float pxl_ratio = exp_out2.to_float() / pxl_valy;
-                ap_ufixed<16, 1> ratio = (ap_ufixed<16, 1>)pxl_ratio;
+                ap_ufixed<24, 1> ratio = (ap_ufixed<24, 1>)pxl_ratio;
 
                 ap_ufixed<16, 8> pxl_x = ratio * (ap_ufixed<16, 16>)pxl_valx;
                 ap_ufixed<16, 8> pxl_z = ratio * (ap_ufixed<16, 16>)pxl_valz;
 
-                val_xout.range((k + 1) * PXL_WIDTH_OUT - 1, k * PXL_WIDTH_OUT) = pxl_x.to_char();
-                val_zout.range((k + 1) * PXL_WIDTH_OUT - 1, k * PXL_WIDTH_OUT) = pxl_z.to_char();
-                val_yout.range((k + 1) * PXL_WIDTH_OUT - 1, k * PXL_WIDTH_OUT) = exp_out2.to_char();
+                val_xout.range((k + 1) * PXL_WIDTH_OUT - 1, k * PXL_WIDTH_OUT) = hls::round(pxl_x);
+                val_zout.range((k + 1) * PXL_WIDTH_OUT - 1, k * PXL_WIDTH_OUT) = hls::round(pxl_z);
+                val_yout.range((k + 1) * PXL_WIDTH_OUT - 1, k * PXL_WIDTH_OUT) = hls::round(exp_out2);
             }
 
             ymapped.write(wr_ptr, val_yout);
@@ -285,9 +298,17 @@ void xFcompute_xyzmapped(xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC>& xima
     return;
 }
 
-template <int SRC_T, int DST_T, int SIN_CHANNEL_IN_TYPE, int SIN_CHANNEL_OUT_TYPE, int ROWS, int COLS, int NPC>
-void gtm(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
-         xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
+template <int SRC_T,
+          int DST_T,
+          int SIN_CHANNEL_IN_TYPE,
+          int SIN_CHANNEL_OUT_TYPE,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void gtm(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
+         xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& dst,
          ap_ufixed<16, 4>& mean1,
          ap_ufixed<16, 4>& mean2,
          ap_ufixed<16, 4>& L_max1,
@@ -307,49 +328,53 @@ void gtm(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 
     uint16_t cols_shifted = cols >> (XF_BITSHIFT(NPC));
 
-    xf::cv::Mat<SRC_T, ROWS, COLS, NPC> bgr2xyz(rows, cols);
+    xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN> bgr2xyz(rows, cols);
 
-    xf::cv::Mat<SRC_T, ROWS, COLS, NPC> xyzimg1(rows, cols);
-    xf::cv::Mat<SRC_T, ROWS, COLS, NPC> xyzimg2(rows, cols);
-    xf::cv::Mat<SRC_T, ROWS, COLS, NPC> xyzimg3(rows, cols);
-    xf::cv::Mat<DST_T, ROWS, COLS, NPC> xyzoutput(rows, cols);
+    xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN> xyzimg1(rows, cols);
+    xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN> xyzimg2(rows, cols);
+    xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN> xyzimg3(rows, cols);
+    xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_IN> xyzoutput(rows, cols);
 
-    xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC> ximage(rows, cols);
-    xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC> yimage(rows, cols);
-    xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC> yimage1(rows, cols);
-    xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC> yimage2(rows, cols);
-    xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC> zimage(rows, cols);
+    xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> ximage(rows, cols);
+    xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> yimage(rows, cols);
+    xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> yimage1(rows, cols);
+    xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> yimage2(rows, cols);
+    xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> zimage(rows, cols);
 
-    xf::cv::Mat<SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC> xmapped(rows, cols);
-    xf::cv::Mat<SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC> ymapped(rows, cols);
-    xf::cv::Mat<SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC> zmapped(rows, cols);
+    xf::cv::Mat<SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> xmapped(rows, cols);
+    xf::cv::Mat<SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> ymapped(rows, cols);
+    xf::cv::Mat<SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> zmapped(rows, cols);
 
 // clang-format off
 		#pragma HLS DATAFLOW
     // clang-format on
 
     // Convert BGR to XYZ:
-    xf::cv::bgr2xyz<SRC_T, SRC_T, ROWS, COLS, NPC>(src, bgr2xyz);
+    xf::cv::bgr2xyz<SRC_T, SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN>(src, bgr2xyz);
 
-    xf::cv::duplicateimages<SRC_T, ROWS, COLS, NPC>(bgr2xyz, xyzimg1, xyzimg2, xyzimg3);
+    xf::cv::duplicateimages<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN, XFCVDEPTH_IN, XFCVDEPTH_IN>(
+        bgr2xyz, xyzimg1, xyzimg2, xyzimg3);
 
-    xf::cv::extractChannel<SRC_T, SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC>(xyzimg1, ximage, 0);
+    xf::cv::extractChannel<SRC_T, SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN>(xyzimg1, ximage, 0);
 
-    xf::cv::extractChannel<SRC_T, SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC>(xyzimg2, yimage, 1);
+    xf::cv::extractChannel<SRC_T, SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN>(xyzimg2, yimage, 1);
 
-    xf::cv::extractChannel<SRC_T, SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC>(xyzimg3, zimage, 2);
+    xf::cv::extractChannel<SRC_T, SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN>(xyzimg3, zimage, 2);
 
-    xf::cv::duplicateMat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC>(yimage, yimage1, yimage2);
+    xf::cv::duplicateMat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN, XFCVDEPTH_IN>(
+        yimage, yimage1, yimage2);
 
-    xFcompute_mean<SIN_CHANNEL_IN_TYPE, SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC, (COLS >> (XF_BITSHIFT(NPC)))>(
-        yimage1, mean1, L_max1, L_min1, rows, cols_shifted);
+    xFcompute_mean<SIN_CHANNEL_IN_TYPE, SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN,
+                   (COLS >> (XF_BITSHIFT(NPC)))>(yimage1, mean1, L_max1, L_min1, rows, cols_shifted);
 
-    xFcompute_xyzmapped<SIN_CHANNEL_IN_TYPE, SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC, (COLS >> (XF_BITSHIFT(NPC)))>(
-        ximage, yimage2, zimage, mean2, L_max2, L_min2, c1, c2, xmapped, ymapped, zmapped, rows, cols_shifted);
+    xFcompute_xyzmapped<SIN_CHANNEL_IN_TYPE, SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN,
+                        (COLS >> (XF_BITSHIFT(NPC)))>(ximage, yimage2, zimage, mean2, L_max2, L_min2, c1, c2, xmapped,
+                                                      ymapped, zmapped, rows, cols_shifted);
 
-    xf::cv::merge<SIN_CHANNEL_OUT_TYPE, DST_T, ROWS, COLS, NPC>(zmapped, ymapped, xmapped, xyzoutput);
+    xf::cv::merge<SIN_CHANNEL_OUT_TYPE, DST_T, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN, XFCVDEPTH_IN>(
+        zmapped, ymapped, xmapped, xyzoutput);
 
-    xf::cv::xyz2bgr<DST_T, DST_T, ROWS, COLS, NPC>(xyzoutput, dst);
+    xf::cv::xyz2bgr<DST_T, DST_T, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT>(xyzoutput, dst);
 
     return;
 }

@@ -142,11 +142,12 @@ int main(int argc, char** argv) {
                 std::cerr << "Test failed" << std::endl;
                 exit(-1);
             }
+            //}
         }
+        gaussian_graph.end();
         std::cout << "Test passed" << std::endl;
         std::cout << "Average time to process frame : " << (((float)tt.count() * 0.001) / (float)iterations) << " ms"
                   << std::endl;
-        //}
         std::cout << "Test passed" << std::endl;
         return 0;
     } catch (std::exception& e) {

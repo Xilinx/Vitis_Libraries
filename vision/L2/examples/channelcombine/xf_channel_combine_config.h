@@ -28,7 +28,7 @@
 #define WIDTH 3840
 
 // Resolve optimization type:
-#if NO
+#if SPC
 #define NPC1 XF_NPPC1
 #define PTR_IN_WIDTH 8
 #define PTR_OUT_WIDTH 32

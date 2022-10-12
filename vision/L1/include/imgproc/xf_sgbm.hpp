@@ -145,7 +145,7 @@ void xFCensus5x5(hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _src_mat,
     // Temporary buffer to hold image data from five rows
     XF_SNAME(WORDWIDTH_SRC) buf[5][COLS];
 // clang-format off
-    #pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
+    #pragma HLS bind_storage variable=buf type=RAM_S2P impl=BRAM
     #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
     // clang-format on
 
@@ -347,7 +347,14 @@ class xFMinSAD<2> {
  * xFCensusTransformKernel : This function calls the transform operations depending upon the
  * window size. This acts as a wrapper function.
  */
-template <int ROWS, int COLS, int DEPTH_SRC, int DEPTH_DST, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST>
+template <int ROWS,
+          int COLS,
+          int DEPTH_SRC,
+          int DEPTH_DST,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH_SRC,
+          int WORDWIDTH_DST>
 void xFCensusTransformKernel(hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _src,
                              hls::stream<XF_SNAME(WORDWIDTH_DST)>& _dst,
                              uint8_t _window_size,
@@ -491,7 +498,7 @@ void xFSGBMoptimization(hls::stream<ap_uint<8> > _cost[PU],
     //     PU consecutive array indexes to be accessed in parallel
     uint8_t Lr[R - 1][NDISP][COLS];
 // clang-format off
-    #pragma HLS RESOURCE variable=Lr core=RAM_T2P_BRAM
+    #pragma HLS bind_storage variable=Lr type=RAM_T2P impl=BRAM
     #pragma HLS ARRAY_PARTITION variable=Lr complete dim=1
     #pragma HLS ARRAY_PARTITION variable=Lr complete dim=2
     // clang-format on
@@ -741,13 +748,13 @@ loop_row:
                         // process block
                         uint8_t lr_tmp;
 // clang-format off
-                        #pragma HLS RESOURCE variable=lr_tmp core=AddSub_DSP
+                        #pragma HLS BIND_OP variable=lr_tmp op=sub impl=DSP
                         // clang-format on
                         lr_tmp = cpd - (uint8_t)lr_mink;
 
                         uint8_t lr;
 // clang-format off
-                        #pragma HLS RESOURCE variable=lr_tmp core=AddSub_DSP
+                        #pragma HLS BIND_OP variable=lr op=add impl=DSP
                         // clang-format on
                         lr = lr_tmp + tminv;
 
@@ -880,10 +887,22 @@ void xfSGBMcomputedisparity(hls::stream<ap_uint<16> > _agg_cost[PU],
     }
 }
 
-template <int BORDER_TYPE, int WINDOW_SIZE, int NDISP, int PU, int R, int SRC_T, int DST_T, int ROWS, int COLS, int NPC>
-void SemiGlobalBM(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat_l,
-                  xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat_r,
-                  xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_mat,
+template <int BORDER_TYPE,
+          int WINDOW_SIZE,
+          int NDISP,
+          int PU,
+          int R,
+          int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_IN_L = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_R = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void SemiGlobalBM(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_L>& _src_mat_l,
+                  xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_R>& _src_mat_r,
+                  xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst_mat,
                   uint8_t p1,
                   uint8_t p2) {
 #ifndef _SYNTHESIS_
@@ -940,12 +959,12 @@ void SemiGlobalBM(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat_l,
         }
     }
 
-    xFCensusTransformKernel<ROWS, COLS, XF_DEPTH(SRC_T, NPC), XF_DEPTH(XF_32UC1, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                            XF_WORDWIDTH(XF_32UC1, NPC)>(_src_l, _src_census_l, WINDOW_SIZE, BORDER_TYPE, height,
-                                                         width);
-    xFCensusTransformKernel<ROWS, COLS, XF_DEPTH(SRC_T, NPC), XF_DEPTH(XF_32UC1, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                            XF_WORDWIDTH(XF_32UC1, NPC)>(_src_r, _src_census_r, WINDOW_SIZE, BORDER_TYPE, height,
-                                                         width);
+    xFCensusTransformKernel<ROWS, COLS, XF_DEPTH(SRC_T, NPC), XF_DEPTH(XF_32UC1, NPC), NPC, XFCVDEPTH_IN_L,
+                            XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(XF_32UC1, NPC)>(_src_l, _src_census_l, WINDOW_SIZE,
+                                                                                   BORDER_TYPE, height, width);
+    xFCensusTransformKernel<ROWS, COLS, XF_DEPTH(SRC_T, NPC), XF_DEPTH(XF_32UC1, NPC), NPC, XFCVDEPTH_IN_R,
+                            XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(XF_32UC1, NPC)>(_src_r, _src_census_r, WINDOW_SIZE,
+                                                                                   BORDER_TYPE, height, width);
 
     for (int i = 0; i < height; i++) {
 // clang-format off

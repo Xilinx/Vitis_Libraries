@@ -14,6 +14,35 @@
  * limitations under the License.
  */
 
+/*  xf_tvl1_accel.cpp hierarchy
+*
+*  tvl1_accel
+*      TVLonescale_n_resizeScaleU
+*          TVLonescale
+*              warpGradientFunct
+*                  dupMat  subfunct
+*                  centeredgradient subfunct
+*                  ConvertType subfunct
+*                  Remap_Bicubic subfunct
+*                  calcgrad  subfunct
+*              medianBlurFunct
+*                  medianBlurFunct_1inst
+*                      medianBlur end
+*                  medianBlur end
+*              TVL_INNER_Core
+*                  estimateV subfunct
+*                  divergence  subfunct
+*                  updateU  subfunct
+*                  forwardgradient  subfunct
+*                  estimatedualvariables  subfunct
+*              Write_TvlError end
+*          resizeScale_flow
+*              resizeNNBilinear end (xf_resize.hpp, xf_resize_nn_bilinear.hpp)
+*              multiplyU  subfunct
+*      merge_out
+*          mergeU end
+*/
+
 #include "xf_tvl1_config.h"
 #include <iostream>
 
@@ -41,18 +70,19 @@ _MBFUNCT_TPLT_DEC void medianBlurFunct_1inst(ap_uint<PTR_WIDTH>* _U1, unsigned s
 #pragma HLS inline off
     // clang-format on
 
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> U1_in(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> U1_out(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1_in> U1_in(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1_out> U1_out(height, width);
 
 // clang-format off
 #pragma HLS dataflow
     // clang-format on
 
-    xf::cv::Array2xfMat<PTR_WIDTH, FLOW_T, ROWS, COLS, NPC>(_U1, U1_in);
+    xf::cv::Array2xfMat<PTR_WIDTH, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1_in>(_U1, U1_in);
 
-    xf::cv::medianBlur<MEDIANFILTERING, XF_BORDER_REPLICATE, FLOW_T, ROWS, COLS, NPC>(U1_in, U1_out);
+    xf::cv::medianBlur<MEDIANFILTERING, XF_BORDER_REPLICATE, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1_in,
+                       XF_CV_DEPTH_U1_out>(U1_in, U1_out);
 
-    xf::cv::xfMat2Array<PTR_WIDTH, FLOW_T, ROWS, COLS, NPC>(U1_out, _U1);
+    xf::cv::xfMat2Array<PTR_WIDTH, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1_out>(U1_out, _U1);
 
     return;
 }
@@ -73,23 +103,25 @@ _MBFUNCT_TPLT_DEC void medianBlurFunct(ap_uint<PTR_WIDTH>* _U1,
                 medianBlurFunct_1inst<PTR_WIDTH, FLOW_T, ROWS, COLS, NPC, MEDIANFILTERING>(_U2, height, width);
         }
     } else {
-        xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> U1_in(height, width);
-        xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> U2_in(height, width);
-        xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> U1_out(height, width);
-        xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> U2_out(height, width);
+        xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1_in> U1_in(height, width);
+        xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U2_in> U2_in(height, width);
+        xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1_out> U1_out(height, width);
+        xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U2_out> U2_out(height, width);
 
 // clang-format off
 #pragma HLS dataflow
         // clang-format on
 
-        xf::cv::Array2xfMat<PTR_WIDTH, FLOW_T, ROWS, COLS, NPC>(_U1, U1_in);
-        xf::cv::Array2xfMat<PTR_WIDTH, FLOW_T, ROWS, COLS, NPC>(_U2, U2_in);
+        xf::cv::Array2xfMat<PTR_WIDTH, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1_in>(_U1, U1_in);
+        xf::cv::Array2xfMat<PTR_WIDTH, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U2_in>(_U2, U2_in);
 
-        xf::cv::medianBlur<MEDIANFILTERING, XF_BORDER_REPLICATE, FLOW_T, ROWS, COLS, NPC>(U1_in, U1_out);
-        xf::cv::medianBlur<MEDIANFILTERING, XF_BORDER_REPLICATE, FLOW_T, ROWS, COLS, NPC>(U2_in, U2_out);
+        xf::cv::medianBlur<MEDIANFILTERING, XF_BORDER_REPLICATE, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1_in,
+                           XF_CV_DEPTH_U1_out>(U1_in, U1_out);
+        xf::cv::medianBlur<MEDIANFILTERING, XF_BORDER_REPLICATE, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U2_in,
+                           XF_CV_DEPTH_U2_out>(U2_in, U2_out);
 
-        xf::cv::xfMat2Array<PTR_WIDTH, FLOW_T, ROWS, COLS, NPC>(U1_out, _U1);
-        xf::cv::xfMat2Array<PTR_WIDTH, FLOW_T, ROWS, COLS, NPC>(U2_out, _U2);
+        xf::cv::xfMat2Array<PTR_WIDTH, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1_out>(U1_out, _U1);
+        xf::cv::xfMat2Array<PTR_WIDTH, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U2_out>(U2_out, _U2);
     }
     return;
 }
@@ -118,48 +150,48 @@ _PPFUNCT_TPLT_DEC void TVL_INNER_Core(ap_uint<PTR_WIDTH>* _I1wx,
 
     int width_ncpr = (width + (NPC - 1)) >> XF_BITSHIFT(NPC);
     // input Mat obj
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> I1wx(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> I1wy(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> U1_in(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> U2_in(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> grad(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> rhoc(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> p11_in(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> p12_in(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> p21_in(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> p22_in(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_I1wx> I1wx(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_I1wy> I1wy(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1_in> U1_in(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U2_in> U2_in(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_grad> grad(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_rhoc> rhoc(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_p11_in> p11_in(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_p12_in> p12_in(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_p21_in> p21_in(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_p22_in> p22_in(height, width);
     // output Mat obj
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> p11_out(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> p12_out(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> p21_out(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> p22_out(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_p11_out> p11_out(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_p12_out> p12_out(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_p21_out> p21_out(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_p22_out> p22_out(height, width);
     // intermediate result Mat obj
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> V1(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> V2(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> divP1(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> divP2(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> U1x(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> U1y(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> U2x(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> U2y(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> U1_passEV(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> U2_passEV(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> U1_out(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> U1_out_ddr(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> U2_out(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> U2_out_ddr(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> p11_passDIV(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> p12_passDIV(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> p21_passDIV(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> p22_passDIV(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> p11_passUU(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> p12_passUU(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> p21_passUU(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> p22_passUU(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> p11_passFG(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> p12_passFG(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> p21_passFG(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> p22_passFG(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_V1> V1(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_V2> V2(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_divP1> divP1(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_divP2> divP2(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1x> U1x(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1y> U1y(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U2x> U2x(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U2y> U2y(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1_passEV> U1_passEV(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U2_passEV> U2_passEV(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1_out> U1_out(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1_out_ddr> U1_out_ddr(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U2_out> U2_out(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U2_out_ddr> U2_out_ddr(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_p11_passDIV> p11_passDIV(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_p12_passDIV> p12_passDIV(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_p21_passDIV> p21_passDIV(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_p22_passDIV> p22_passDIV(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_p11_passUU> p11_passUU(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_p12_passUU> p12_passUU(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_p21_passUU> p21_passUU(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_p22_passUU> p22_passUU(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_p11_passFG> p11_passFG(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_p12_passFG> p12_passFG(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_p21_passFG> p21_passFG(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_p22_passFG> p22_passFG(height, width);
 // clang-format off
 #pragma HLS dataflow
     // clang-format on
@@ -175,26 +207,41 @@ _PPFUNCT_TPLT_DEC void TVL_INNER_Core(ap_uint<PTR_WIDTH>* _I1wx,
     xf::cv::Ptr2xfMat<PTR_WIDTH, FLOW_T, ROWS, COLS, NPC>(_p21, p21_in);
     xf::cv::Ptr2xfMat<PTR_WIDTH, FLOW_T, ROWS, COLS, NPC>(_p22, p22_in);
 
-    estimateV<IMG_FBITS, FLOW_FBITS, IMG_T, FLOW_T, ROWS, COLS, NPC, ERR_BW, FLOW_BW>(
+    estimateV<IMG_FBITS, FLOW_FBITS, IMG_T, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_I1wx, XF_CV_DEPTH_I1wy,
+              XF_CV_DEPTH_U1_in, XF_CV_DEPTH_U2_in, XF_CV_DEPTH_U1_passEV, XF_CV_DEPTH_U2_passEV, XF_CV_DEPTH_grad,
+              XF_CV_DEPTH_rhoc, XF_CV_DEPTH_V1, XF_CV_DEPTH_V2, ERR_BW, FLOW_BW>(
         I1wx, I1wy, U1_in, U2_in, U1_passEV, U2_passEV, grad, rhoc, V1, V2, lt, height, width_ncpr);
 
-    divergence<IMG_FBITS, FLOW_FBITS, IMG_T, FLOW_T, ROWS, COLS, NPC, ERR_BW>(
+    divergence<IMG_FBITS, FLOW_FBITS, IMG_T, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_p11_in, XF_CV_DEPTH_p12_in,
+               XF_CV_DEPTH_divP1, XF_CV_DEPTH_p11_passDIV, XF_CV_DEPTH_p12_passDIV, ERR_BW>(
         p11_in, p12_in, divP1, p11_passDIV, p12_passDIV, height, width_ncpr, intilize_P_with_zeros);
 
-    divergence<IMG_FBITS, FLOW_FBITS, IMG_T, FLOW_T, ROWS, COLS, NPC, ERR_BW>(
+    divergence<IMG_FBITS, FLOW_FBITS, IMG_T, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_p21_in, XF_CV_DEPTH_p22_in,
+               XF_CV_DEPTH_divP2, XF_CV_DEPTH_p21_passDIV, XF_CV_DEPTH_p22_passDIV, ERR_BW>(
         p21_in, p22_in, divP2, p21_passDIV, p22_passDIV, height, width_ncpr, intilize_P_with_zeros);
 
-    updateU<IMG_FBITS, FLOW_FBITS, IMG_T, FLOW_T, ROWS, COLS, NPC, ERR_BW, FLOW_BW>(
+    updateU<IMG_FBITS, FLOW_FBITS, IMG_T, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_V1, XF_CV_DEPTH_V2, XF_CV_DEPTH_divP1,
+            XF_CV_DEPTH_divP2, XF_CV_DEPTH_U1_passEV, XF_CV_DEPTH_U2_passEV, XF_CV_DEPTH_U1_out, XF_CV_DEPTH_U2_out,
+            XF_CV_DEPTH_U1_out_ddr, XF_CV_DEPTH_U2_out_ddr, XF_CV_DEPTH_p11_passDIV, XF_CV_DEPTH_p12_passDIV,
+            XF_CV_DEPTH_p21_passDIV, XF_CV_DEPTH_p22_passDIV, XF_CV_DEPTH_p11_passUU, XF_CV_DEPTH_p12_passUU,
+            XF_CV_DEPTH_p21_passUU, XF_CV_DEPTH_p22_passUU, ERR_BW, FLOW_BW>(
         V1, V2, divP1, divP2, U1_passEV, U2_passEV, U1_out, U2_out, U1_out_ddr, U2_out_ddr, p11_passDIV, p12_passDIV,
         p21_passDIV, p22_passDIV, p11_passUU, p12_passUU, p21_passUU, p22_passUU, error, theta, height, width_ncpr);
 
-    forwardgradient<IMG_FBITS, FLOW_FBITS, IMG_T, FLOW_T, ROWS, COLS, NPC, ERR_BW>(
-        U1_out, U1x, U1y, p11_passUU, p12_passUU, p11_passFG, p12_passFG, height, width_ncpr);
+    forwardgradient<IMG_FBITS, FLOW_FBITS, IMG_T, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1_out, XF_CV_DEPTH_U1x,
+                    XF_CV_DEPTH_U1y, XF_CV_DEPTH_p11_passUU, XF_CV_DEPTH_p12_passUU, XF_CV_DEPTH_p11_passFG,
+                    XF_CV_DEPTH_p12_passFG, ERR_BW>(U1_out, U1x, U1y, p11_passUU, p12_passUU, p11_passFG, p12_passFG,
+                                                    height, width_ncpr);
 
-    forwardgradient<IMG_FBITS, FLOW_FBITS, IMG_T, FLOW_T, ROWS, COLS, NPC, ERR_BW>(
-        U2_out, U2x, U2y, p21_passUU, p22_passUU, p21_passFG, p22_passFG, height, width_ncpr);
+    forwardgradient<IMG_FBITS, FLOW_FBITS, IMG_T, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U2_out, XF_CV_DEPTH_U2x,
+                    XF_CV_DEPTH_U2y, XF_CV_DEPTH_p21_passUU, XF_CV_DEPTH_p22_passUU, XF_CV_DEPTH_p21_passFG,
+                    XF_CV_DEPTH_p22_passFG, ERR_BW>(U2_out, U2x, U2y, p21_passUU, p22_passUU, p21_passFG, p22_passFG,
+                                                    height, width_ncpr);
 
-    estimatedualvariables<IMG_FBITS, FLOW_FBITS, IMG_T, FLOW_T, ROWS, COLS, NPC, ERR_BW>(
+    estimatedualvariables<IMG_FBITS, FLOW_FBITS, IMG_T, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1x, XF_CV_DEPTH_U1y,
+                          XF_CV_DEPTH_U2x, XF_CV_DEPTH_U2y, XF_CV_DEPTH_p11_passFG, XF_CV_DEPTH_p12_passFG,
+                          XF_CV_DEPTH_p21_passFG, XF_CV_DEPTH_p22_passFG, XF_CV_DEPTH_p11_out, XF_CV_DEPTH_p12_out,
+                          XF_CV_DEPTH_p21_out, XF_CV_DEPTH_p22_out, ERR_BW>(
         U1x, U1y, U2x, U2y, p11_passFG, p12_passFG, p21_passFG, p22_passFG, p11_out, p12_out, p21_out, p22_out, taut,
         intilize_P_with_zeros, height, width_ncpr);
 
@@ -230,24 +277,24 @@ _WGFUNCT_TPLT_DEC void warpGradientFunct(ap_uint<FLOW_PTRWIDTH>* _U1,
     const int TC_DELAY = 1 + 100;
 
     // input Mat obj
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> U1(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> U2(height, width);
-    xf::cv::Mat<IMG_T, ROWS, COLS, NPC> I0(height, width);
-    xf::cv::Mat<IMG_T, ROWS, COLS, NPC> I1(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1> U1(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U2> U2(height, width);
+    xf::cv::Mat<IMG_T, ROWS, COLS, NPC, XF_CV_DEPTH_I0> I0(height, width);
+    xf::cv::Mat<IMG_T, ROWS, COLS, NPC, XF_CV_DEPTH_I1> I1(height, width);
 
     // output Mat obj
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> I1wx(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> I1wy(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> grad(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> rhoc(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_I1wx> I1wx(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_I1wy> I1wy(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_grad> grad(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_rhoc> rhoc(height, width);
 
     // intermediate result Mat obj
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> I1x(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> I1y(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_I1x> I1x(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_I1y> I1y(height, width);
     xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, CNG_DELAY> I1w(height, width);
-    xf::cv::Mat<IMG_T, ROWS, COLS, NPC> I1_copy1(height, width);
-    xf::cv::Mat<IMG_T, ROWS, COLS, NPC> I1_copy2(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> I1_flowtype(height, width);
+    xf::cv::Mat<IMG_T, ROWS, COLS, NPC, XF_CV_DEPTH_I1_copy1> I1_copy1(height, width);
+    xf::cv::Mat<IMG_T, ROWS, COLS, NPC, XF_CV_DEPTH_I1_copy2> I1_copy2(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_I1_flowtype> I1_flowtype(height, width);
     xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, TC_DELAY> U1_copy1(height, width);
     xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, CNG_DELAY> U1_copy2(height, width);
     xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, CNG_DELAY> U1_copy3(height, width);
@@ -256,49 +303,58 @@ _WGFUNCT_TPLT_DEC void warpGradientFunct(ap_uint<FLOW_PTRWIDTH>* _U1,
     xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, CNG_DELAY> U2_copy2(height, width);
     xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, CNG_DELAY> U2_copy3(height, width);
     xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, CNG_REMAP_DELAY> U2_copy4(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> I1wx_copy1(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> I1wy_copy1(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> I1wx_copy2(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> I1wy_copy2(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_I1wx_copy1> I1wx_copy1(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_I1wy_copy1> I1wy_copy1(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_I1wx_copy2> I1wx_copy2(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_I1wy_copy2> I1wy_copy2(height, width);
 
 // clang-format off
 #pragma HLS dataflow
     // clang-format on
 
-    xf::cv::Array2xfMat<FLOW_PTRWIDTH, FLOW_T, ROWS, COLS, NPC>(_U1, U1);
-    xf::cv::Array2xfMat<FLOW_PTRWIDTH, FLOW_T, ROWS, COLS, NPC>(_U2, U2);
-    xf::cv::Array2xfMat<IMG_PTRWIDTH, IMG_T, ROWS, COLS, NPC>(_I0, I0);
-    xf::cv::Array2xfMat<IMG_PTRWIDTH, IMG_T, ROWS, COLS, NPC>(_I1, I1);
+    xf::cv::Array2xfMat<FLOW_PTRWIDTH, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1>(_U1, U1);
+    xf::cv::Array2xfMat<FLOW_PTRWIDTH, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U2>(_U2, U2);
+    xf::cv::Array2xfMat<IMG_PTRWIDTH, IMG_T, ROWS, COLS, NPC, XF_CV_DEPTH_I0>(_I0, I0);
+    xf::cv::Array2xfMat<IMG_PTRWIDTH, IMG_T, ROWS, COLS, NPC, XF_CV_DEPTH_I1>(_I1, I1);
 
-    dupMat<FLOW_T, ROWS, COLS, NPC, TC_DELAY, CNG_DELAY, CNG_DELAY, CNG_REMAP_DELAY>(U1, U1_copy1, U1_copy2, U1_copy3,
-                                                                                     U1_copy4, height, width);
+    dupMat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1, TC_DELAY, CNG_DELAY, CNG_DELAY, CNG_REMAP_DELAY>(
+        U1, U1_copy1, U1_copy2, U1_copy3, U1_copy4, height, width);
 
-    dupMat<FLOW_T, ROWS, COLS, NPC, TC_DELAY, CNG_DELAY, CNG_DELAY, CNG_REMAP_DELAY>(U2, U2_copy1, U2_copy2, U2_copy3,
-                                                                                     U2_copy4, height, width);
+    dupMat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U2, TC_DELAY, CNG_DELAY, CNG_DELAY, CNG_REMAP_DELAY>(
+        U2, U2_copy1, U2_copy2, U2_copy3, U2_copy4, height, width);
 
-    dupMat<IMG_T, ROWS, COLS, NPC>(I1, I1_copy1, I1_copy2, height, width);
+    dupMat<IMG_T, ROWS, COLS, NPC, XF_CV_DEPTH_I1, XF_CV_DEPTH_I1_copy1, XF_CV_DEPTH_I1_copy2>(I1, I1_copy1, I1_copy2,
+                                                                                               height, width);
 
-    centeredgradient<IMG_FBITS, FLOW_FBITS, IMG_T, FLOW_T, ROWS, COLS, NPC, ERR_BW>(I1_copy1, I1x, I1y, height, width);
+    centeredgradient<IMG_FBITS, FLOW_FBITS, IMG_T, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_I1_copy1, XF_CV_DEPTH_I1x,
+                     XF_CV_DEPTH_I1y, ERR_BW>(I1_copy1, I1x, I1y, height, width);
 
-    ConvertType<IMG_T, FLOW_T, ROWS, COLS, NPC, IMG_FBITS, FLOW_FBITS>(I1_copy2, I1_flowtype, height, width);
-    Remap_Bicubic<FLOW_T, FLOW_T, FLOW_T, ROWS, COLS, REMAP_FILTER_WIDTH, NPC, XF_BORDER_REFLECT_101, 0, MFV,
-                  FLOW_FBITS, FLOW_FBITS, TC_DELAY, CNG_DELAY>(I1_flowtype, U1_copy1, U2_copy1, I1w);
-    Remap_Bicubic<FLOW_T, FLOW_T, FLOW_T, ROWS, COLS, REMAP_FILTER_WIDTH, NPC, XF_BORDER_REFLECT_101, 0, MFV,
-                  FLOW_FBITS, FLOW_FBITS, CNG_DELAY>(I1x, U1_copy2, U2_copy2, I1wx);
-    Remap_Bicubic<FLOW_T, FLOW_T, FLOW_T, ROWS, COLS, REMAP_FILTER_WIDTH, NPC, XF_BORDER_REFLECT_101, 0, MFV,
-                  FLOW_FBITS, FLOW_FBITS, CNG_DELAY>(I1y, U1_copy3, U2_copy3, I1wy);
+    ConvertType<IMG_T, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_I1_copy2, XF_CV_DEPTH_I1_flowtype, IMG_FBITS, FLOW_FBITS>(
+        I1_copy2, I1_flowtype, height, width);
+    Remap_Bicubic<FLOW_T, FLOW_T, FLOW_T, ROWS, COLS, REMAP_FILTER_WIDTH, NPC, XF_CV_DEPTH_I1_flowtype, TC_DELAY,
+                  TC_DELAY, CNG_DELAY, XF_BORDER_REFLECT_101, 0, MFV, FLOW_FBITS, FLOW_FBITS>(I1_flowtype, U1_copy1,
+                                                                                              U2_copy1, I1w);
+    Remap_Bicubic<FLOW_T, FLOW_T, FLOW_T, ROWS, COLS, REMAP_FILTER_WIDTH, NPC, XF_CV_DEPTH_I1x, CNG_DELAY, CNG_DELAY,
+                  XF_CV_DEPTH_I1wx, XF_BORDER_REFLECT_101, 0, MFV, FLOW_FBITS, FLOW_FBITS>(I1x, U1_copy2, U2_copy2,
+                                                                                           I1wx);
+    Remap_Bicubic<FLOW_T, FLOW_T, FLOW_T, ROWS, COLS, REMAP_FILTER_WIDTH, NPC, XF_CV_DEPTH_I1y, CNG_DELAY, CNG_DELAY,
+                  XF_CV_DEPTH_I1wy, XF_BORDER_REFLECT_101, 0, MFV, FLOW_FBITS, FLOW_FBITS>(I1y, U1_copy3, U2_copy3,
+                                                                                           I1wy);
 
-    dupMat<FLOW_T, ROWS, COLS, NPC>(I1wx, I1wx_copy1, I1wx_copy2, height, width);
+    dupMat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_I1wx, XF_CV_DEPTH_I1wx_copy1, XF_CV_DEPTH_I1wx_copy2>(
+        I1wx, I1wx_copy1, I1wx_copy2, height, width);
 
-    dupMat<FLOW_T, ROWS, COLS, NPC>(I1wy, I1wy_copy1, I1wy_copy2, height, width);
+    dupMat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_I1wy, XF_CV_DEPTH_I1wy_copy1, XF_CV_DEPTH_I1wy_copy2>(
+        I1wy, I1wy_copy1, I1wy_copy2, height, width);
 
-    calcgrad<IMG_FBITS, FLOW_FBITS, IMG_T, FLOW_T, ROWS, COLS, NPC, ERR_BW, CNG_DELAY, CNG_REMAP_DELAY>(
+    calcgrad<IMG_FBITS, FLOW_FBITS, IMG_T, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_I0, CNG_DELAY, XF_CV_DEPTH_I1wx_copy1,
+             XF_CV_DEPTH_I1wy_copy1, CNG_REMAP_DELAY, CNG_REMAP_DELAY, XF_CV_DEPTH_grad, XF_CV_DEPTH_rhoc, ERR_BW>(
         I0, I1w, I1wx_copy1, I1wy_copy1, U1_copy4, U2_copy4, grad, rhoc, height, width);
 
-    xf::cv::xfMat2Array<FLOW_PTRWIDTH, FLOW_T, ROWS, COLS, NPC>(I1wx_copy2, _I1wx);
-    xf::cv::xfMat2Array<FLOW_PTRWIDTH, FLOW_T, ROWS, COLS, NPC>(I1wy_copy2, _I1wy);
-    xf::cv::xfMat2Array<FLOW_PTRWIDTH, FLOW_T, ROWS, COLS, NPC>(grad, _grad);
-    xf::cv::xfMat2Array<FLOW_PTRWIDTH, FLOW_T, ROWS, COLS, NPC>(rhoc, _rhoc);
+    xf::cv::xfMat2Array<FLOW_PTRWIDTH, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_I1wx_copy2>(I1wx_copy2, _I1wx);
+    xf::cv::xfMat2Array<FLOW_PTRWIDTH, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_I1wy_copy2>(I1wy_copy2, _I1wy);
+    xf::cv::xfMat2Array<FLOW_PTRWIDTH, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_grad>(grad, _grad);
+    xf::cv::xfMat2Array<FLOW_PTRWIDTH, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_rhoc>(rhoc, _rhoc);
 
     return;
 }
@@ -412,49 +468,52 @@ _RSFUNCT_TPLT_DEC void resizeScale_flow(ap_uint<FLOW_PTRWIDTH>* _U1_in,
 #pragma HLS inline off
     // clang-format on
 
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> U1_in(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> U2_in(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> U1_out(newheight, newwidth);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> U2_out(newheight, newwidth);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1_in> U1_in(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U2_in> U2_in(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1_out> U1_out(newheight, newwidth);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U2_out> U2_out(newheight, newwidth);
 
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> U1_resize(newheight, newwidth);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> U2_resize(newheight, newwidth);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1_resize> U1_resize(newheight, newwidth);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U2_resize> U2_resize(newheight, newwidth);
 
 // clang-format off
 #pragma HLS dataflow
     // clang-format on
 
-    xf::cv::Array2xfMat<FLOW_PTRWIDTH, FLOW_T, ROWS, COLS, NPC>(_U1_in, U1_in);
-    xf::cv::Array2xfMat<FLOW_PTRWIDTH, FLOW_T, ROWS, COLS, NPC>(_U2_in, U2_in);
+    xf::cv::Array2xfMat<FLOW_PTRWIDTH, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1_in>(_U1_in, U1_in);
+    xf::cv::Array2xfMat<FLOW_PTRWIDTH, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U2_in>(_U2_in, U2_in);
 
     // resize<XF_INTERPOLATION_BILINEAR, FLOW_T, ROWS, COLS, ROWS, COLS,NPC,  2>(U1_in, U1_resize);
     // resize<XF_INTERPOLATION_BILINEAR, FLOW_T, ROWS, COLS, ROWS, COLS,NPC,  2>(U2_in, U2_resize);
-    resizeNNBilinear<FLOW_T, ROWS, COLS, NPC, ROWS, COLS, XF_INTERPOLATION_BILINEAR, 2>(U1_in, U1_resize);
-    resizeNNBilinear<FLOW_T, ROWS, COLS, NPC, ROWS, COLS, XF_INTERPOLATION_BILINEAR, 2>(U2_in, U2_resize);
+    resizeNNBilinear<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1_in, XF_CV_DEPTH_U1_resize, ROWS, COLS,
+                     XF_INTERPOLATION_BILINEAR, 2>(U1_in, U1_resize);
+    resizeNNBilinear<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U2_in, XF_CV_DEPTH_U2_resize, ROWS, COLS,
+                     XF_INTERPOLATION_BILINEAR, 2>(U2_in, U2_resize);
 
-    multiplyU<FLOW_T, FLOW_FB, ROWS, COLS, NPC, SCALE_BW>(U1_resize, U2_resize, U1_out, U2_out, invscale, newheight,
-                                                          newwidth);
+    multiplyU<FLOW_T, FLOW_FB, ROWS, COLS, NPC, XF_CV_DEPTH_U1_resize, XF_CV_DEPTH_U2_resize, XF_CV_DEPTH_U1_out,
+              XF_CV_DEPTH_U2_out, SCALE_BW>(U1_resize, U2_resize, U1_out, U2_out, invscale, newheight, newwidth);
 
-    xf::cv::xfMat2Array<FLOW_PTRWIDTH, FLOW_T, ROWS, COLS, NPC>(U1_out, _U1_out);
-    xf::cv::xfMat2Array<FLOW_PTRWIDTH, FLOW_T, ROWS, COLS, NPC>(U2_out, _U2_out);
+    xf::cv::xfMat2Array<FLOW_PTRWIDTH, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1_out>(U1_out, _U1_out);
+    xf::cv::xfMat2Array<FLOW_PTRWIDTH, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U2_out>(U2_out, _U2_out);
 }
 
 _MRGFUNCT_TPLT_DEC void merge_out(
     ap_uint<FLOW_PTRWIDTH>* _U1, ap_uint<FLOW_PTRWIDTH>* _U2, ap_uint<OUT_PTRWIDTH>* _flow, int height, int width) {
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> U1(height, width);
-    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC> U2(height, width);
-    xf::cv::Mat<XF_64UC1, ROWS, COLS, NPC> U12(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1> U1(height, width);
+    xf::cv::Mat<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U2> U2(height, width);
+    xf::cv::Mat<XF_64UC1, ROWS, COLS, NPC, XF_CV_DEPTH_U12> U12(height, width);
 
 // clang-format off
 #pragma HLS dataflow
     // clang-format on
 
-    xf::cv::Array2xfMat<FLOW_PTRWIDTH, FLOW_T, ROWS, COLS, NPC>(_U1, U1);
-    xf::cv::Array2xfMat<FLOW_PTRWIDTH, FLOW_T, ROWS, COLS, NPC>(_U2, U2);
+    xf::cv::Array2xfMat<FLOW_PTRWIDTH, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1>(_U1, U1);
+    xf::cv::Array2xfMat<FLOW_PTRWIDTH, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U2>(_U2, U2);
 
-    mergeU<FLOW_T, XF_64UC1, ROWS, COLS, NPC, FLOW_FBITS>(U1, U2, U12, height, width);
+    mergeU<FLOW_T, XF_64UC1, ROWS, COLS, NPC, XF_CV_DEPTH_U1, XF_CV_DEPTH_U2, XF_CV_DEPTH_U12, FLOW_FBITS>(
+        U1, U2, U12, height, width);
 
-    xf::cv::xfMat2Array<OUT_PTRWIDTH, XF_64UC1, ROWS, COLS, NPC>(U12, _flow);
+    xf::cv::xfMat2Array<OUT_PTRWIDTH, XF_64UC1, ROWS, COLS, NPC, XF_CV_DEPTH_U12>(U12, _flow);
 }
 
 _TVL1FUNCT_TPLT_DEC void TVLonescale_n_resizeScaleU(ap_uint<IMG_PTRWIDTH>* _I0,

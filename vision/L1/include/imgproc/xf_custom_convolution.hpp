@@ -198,6 +198,8 @@ template <int SRC_T,
           int DEPTH_SRC,
           int DEPTH_DST,
           int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int TC,
@@ -206,8 +208,8 @@ template <int SRC_T,
           int filter_width,
           int F_COUNT,
           int PLANES>
-void Convolution_Process(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
-                         xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst,
+void Convolution_Process(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src,
+                         xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst,
                          XF_SNAME(WORDWIDTH_SRC) buf[filter_height][COLS >> XF_BITSHIFT(NPC)],
                          XF_PTNAME(DEPTH_SRC) lbuf[filter_height][XF_NPIXPERCYCLE(NPC) + filter_width - 1],
                          XF_SNAME(WORDWIDTH_SRC) tmp_buf[filter_height],
@@ -358,6 +360,8 @@ template <int SRC_T,
           int DEPTH_SRC,
           int DEPTH_DST,
           int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int COLS_COUNT,
@@ -367,9 +371,9 @@ template <int SRC_T,
           int FW,
           int COL_FACTOR_COUNT,
           int PLANES>
-void xFCustomConvolutionKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
+void xFCustomConvolutionKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src,
                                short int _filter[][filter_width],
-                               xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst,
+                               xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst,
                                unsigned char shift,
                                unsigned short img_width,
                                unsigned short img_height) {
@@ -492,8 +496,8 @@ mainRowLoop:
         // initializing the temporary result value to zero
         P0 = 0;
 
-        Convolution_Process<SRC_T, DST_T, ROWS, COLS, DEPTH_SRC, DEPTH_DST, NPC, WORDWIDTH_SRC, WORDWIDTH_DST,
-                            COLS_COUNT, FW, filter_height, filter_width, F_COUNT, PLANES>(
+        Convolution_Process<SRC_T, DST_T, ROWS, COLS, DEPTH_SRC, DEPTH_DST, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1,
+                            WORDWIDTH_SRC, WORDWIDTH_DST, COLS_COUNT, FW, filter_height, filter_width, F_COUNT, PLANES>(
             _src, _dst, buf, lbuf, tmp_buf, mask_value, _filter, img_width, row_ind, shift, P0, index, col_factor,
             filter_width_factor, img_height, row, rd_ind, wr_ind);
 
@@ -644,14 +648,16 @@ template <int SRC_T,
           int DEPTH_SRC,
           int DEPTH_DST,
           int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int TC,
           int K_HEIGHT,
           int K_WIDTH,
           int PLANES>
-static void xFFilter2Dkernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                             xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_mat,
+static void xFFilter2Dkernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+                             xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst_mat,
                              short int _filter_kernel[K_HEIGHT][K_WIDTH],
                              unsigned char shift,
                              uint16_t rows,
@@ -797,9 +803,18 @@ ROW_LOOP:
     }
 }
 
-template <int BORDER_TYPE, int FILTER_WIDTH, int FILTER_HEIGHT, int SRC_T, int DST_T, int ROWS, int COLS, int NPC>
-void filter2D(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-              xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_mat,
+template <int BORDER_TYPE,
+          int FILTER_WIDTH,
+          int FILTER_HEIGHT,
+          int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void filter2D(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+              xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst_mat,
               short int filter[FILTER_HEIGHT * FILTER_WIDTH],
               unsigned char _shift) {
 // clang-format off
@@ -823,8 +838,8 @@ void filter2D(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
     if (NPC == XF_NPPC8) {
         xFCustomConvolutionKernel<SRC_T, DST_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), XF_DEPTH(DST_T, NPC), NPC,
-                                  XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC), (COLS >> XF_BITSHIFT(NPC)),
-                                  FILTER_HEIGHT, FILTER_WIDTH,
+                                  XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC),
+                                  (COLS >> XF_BITSHIFT(NPC)), FILTER_HEIGHT, FILTER_WIDTH,
                                   (XF_NPIXPERCYCLE(NPC) - ((FILTER_WIDTH >> 1) % XF_NPIXPERCYCLE(NPC))),
                                   ((FILTER_WIDTH >> 1) % XF_NPIXPERCYCLE(NPC)),
                                   (((FILTER_WIDTH >> 1) - 1) >> XF_BITSHIFT(NPC)), XF_CHANNELS(SRC_T, NPC)>(
@@ -833,9 +848,10 @@ void filter2D(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     }
 
     else if (NPC == XF_NPPC1) {
-        xFFilter2Dkernel<SRC_T, DST_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), XF_DEPTH(DST_T, NPC), NPC,
-                         XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC), COLS, FILTER_HEIGHT, FILTER_WIDTH,
-                         XF_CHANNELS(SRC_T, NPC)>(_src_mat, _dst_mat, lfilter, _shift, img_height, img_width);
+        xFFilter2Dkernel<SRC_T, DST_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), XF_DEPTH(DST_T, NPC), NPC, XFCVDEPTH_IN_1,
+                         XFCVDEPTH_OUT_1, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC), COLS, FILTER_HEIGHT,
+                         FILTER_WIDTH, XF_CHANNELS(SRC_T, NPC)>(_src_mat, _dst_mat, lfilter, _shift, img_height,
+                                                                img_width);
     }
 }
 } // namespace cv

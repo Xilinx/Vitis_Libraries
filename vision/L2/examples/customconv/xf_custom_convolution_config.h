@@ -31,10 +31,10 @@
 #define SHIFT 15
 
 // Resolve optimization type:
-#if RO
+#if MPC
 #define NPC1 XF_NPPC8
 #endif
-#if NO
+#if SPC
 #define NPC1 XF_NPPC1
 #endif
 
@@ -43,7 +43,7 @@
 #if OUT_8U
 #define INTYPE XF_8UC1
 #define OUTTYPE XF_8UC1
-#if NO
+#if SPC
 #define PTR_IN_WIDTH 8
 #define PTR_OUT_WIDTH 8
 #else
@@ -55,7 +55,7 @@
 #if OUT_16S
 #define INTYPE XF_8UC1
 #define OUTTYPE XF_16SC1
-#if NO
+#if SPC
 #define PTR_IN_WIDTH 8
 #define PTR_OUT_WIDTH 16
 #else
@@ -69,7 +69,7 @@
 #if OUT_8U
 #define INTYPE XF_8UC3
 #define OUTTYPE XF_8UC3
-#if NO
+#if SPC
 #define PTR_IN_WIDTH 32
 #define PTR_OUT_WIDTH 32
 #else
@@ -81,7 +81,7 @@
 #if OUT_16S
 #define INTYPE XF_8UC3
 #define OUTTYPE XF_16SC3
-#if NO
+#if SPC
 #define PTR_IN_WIDTH 64
 #define PTR_OUT_WIDTH 64
 #else

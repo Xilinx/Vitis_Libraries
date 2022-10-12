@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#define XF_CV_DEPTH_IN 3
+#define XF_CV_DEPTH_OUT 3
 
 #define FILTER_HEIGHT 7
 #define FILTER_WIDTH 7
 
 /*  set the optimization type  */
 
-#define NO 1 // Normal Operation
-#define RO 0 // Resource Optimized
+#define SPC 1 // Single Pixel per Clock operation
+#define MPC 0 // Multiple Pixels per Clock operation
 
 /* set the output type */
 

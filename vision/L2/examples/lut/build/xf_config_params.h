@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-#define RO 0
-#define NO 1
+#define MPC 0
+#define SPC 1
 
 #define GRAY 1
 #define RGBA 0
+#define XF_CV_DEPTH_IN 3
+#define XF_CV_DEPTH_OUT 3

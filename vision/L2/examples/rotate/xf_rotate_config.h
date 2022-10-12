@@ -32,7 +32,7 @@
 #define TILE_SIZE 32
 
 // Resolve the optimization type:
-#if NO
+#if SPC
 #define NPC1 XF_NPPC1
 #if GRAY
 #define INPUT_PTR_WIDTH 8
@@ -42,7 +42,7 @@
 #define OUTPUT_PTR_WIDTH 32
 #endif
 #endif
-#if RO
+#if MPC
 #define NPC1 XF_NPPC2
 #if GRAY
 #define INPUT_PTR_WIDTH 16

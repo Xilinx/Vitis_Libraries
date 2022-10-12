@@ -78,7 +78,7 @@ xFApplyMask3x3(XF_PTNAME(DEPTH) _i00,
 /**
  * xFComputeMaskValue3x3 function:
  * If PO is enabled then 16 mask_value will be computed, by unrolling the filter_loop.
- * If RO is enabled then 8 mask_value  will be computed, by unrolling the filter_loop.
+ * If MPC is enabled then 8 mask_value  will be computed, by unrolling the filter_loop.
  */
 template <int NPC, int DEPTH>
 void xFComputeMaskValues3x3(XF_PTNAME(DEPTH) * _mask_value,
@@ -101,9 +101,18 @@ computeMaskValueLoop:
     } // end of computeMaskValueLoop
 }
 
-template <int SRC_T, int ROWS, int COLS, int DEPTH, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int COLS_COUNT>
-void ProcessBox3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat,
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH_SRC,
+          int WORDWIDTH_DST,
+          int COLS_COUNT>
+void ProcessBox3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst_mat,
                    XF_SNAME(WORDWIDTH_SRC) buf[3][COLS >> XF_BITSHIFT(NPC)],
                    XF_PTNAME(DEPTH) l00_buf[XF_NPIXPERCYCLE(NPC) + 2],
                    XF_PTNAME(DEPTH) l10_buf[XF_NPIXPERCYCLE(NPC) + 2],
@@ -192,12 +201,14 @@ template <int SRC_T,
           int COLS,
           int DEPTH,
           int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int COLS_COUNT,
           bool USE_URAM>
-void xFBoxFilter3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                    xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat,
+void xFBoxFilter3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+                    xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst_mat,
                     uint16_t img_height,
                     uint16_t img_width) {
     ap_uint<13> row_ind = 1;
@@ -227,12 +238,12 @@ void xFBoxFilter3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     XF_SNAME(WORDWIDTH_SRC) buf[3][COLS >> XF_BITSHIFT(NPC)]; // Line Buffer to hold image row data
     if (USE_URAM) {
 // clang-format off
-        #pragma HLS RESOURCE variable=buf core=RAM_S2P_URAM
+        #pragma HLS bind_storage variable=buf type=RAM_S2P impl=URAM
         #pragma HLS array_reshape variable=buf dim=1 factor=3 cyclic
         // clang-format on
     } else {
 // clang-format off
-        #pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
+        #pragma HLS bind_storage variable=buf type=RAM_S2P impl=BRAM
         #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
         // clang-format on
     }
@@ -280,9 +291,9 @@ ROWLOOP:
         l20_buf[0] = l20_buf[1] = 0;
         P0 = 0;
 
-        ProcessBox3x3<SRC_T, ROWS, COLS, DEPTH, NPC, WORDWIDTH_SRC, WORDWIDTH_DST, COLS_COUNT>(
-            _src_mat, _dst_mat, buf, l00_buf, l10_buf, l20_buf, mask_value, P0, img_width, img_height, shift, row_ind,
-            top, mid, bottom, row, rd_ind, wr_ind);
+        ProcessBox3x3<SRC_T, ROWS, COLS, DEPTH, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1, WORDWIDTH_SRC, WORDWIDTH_DST,
+                      COLS_COUNT>(_src_mat, _dst_mat, buf, l00_buf, l10_buf, l20_buf, mask_value, P0, img_width,
+                                  img_height, shift, row_ind, top, mid, bottom, row, rd_ind, wr_ind);
 
         if (NPC == XF_NPPC1) {
             mask_value[0] = xFApplyMask3x3<DEPTH>(l00_buf[buf_size - 3], // Applying Mask
@@ -401,12 +412,14 @@ template <int SRC_T,
           int COLS,
           int DEPTH,
           int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int WORDWIDTH_AP,
           int TC>
-void ProcessBox5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat,
+void ProcessBox5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst_mat,
                    XF_SNAME(WORDWIDTH_SRC) buf[5][(COLS >> XF_BITSHIFT(NPC))],
                    XF_PTNAME(DEPTH) src_buf1[XF_NPIXPERCYCLE(NPC) + 4],
                    XF_PTNAME(DEPTH) src_buf2[XF_NPIXPERCYCLE(NPC) + 4],
@@ -512,13 +525,15 @@ template <int SRC_T,
           int COLS,
           int DEPTH,
           int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int WORDWIDTH_AP,
           int TC,
           bool USE_URAM>
-void xFBoxFilter5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                    xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat,
+void xFBoxFilter5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+                    xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst_mat,
                     uint16_t img_height,
                     uint16_t img_width) {
     ap_uint<13> row_ind, row, col;
@@ -553,12 +568,12 @@ void xFBoxFilter5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     XF_SNAME(WORDWIDTH_SRC) buf[5][(COLS >> XF_BITSHIFT(NPC))];
     if (USE_URAM) {
 // clang-format off
-        #pragma HLS RESOURCE variable=buf core=RAM_S2P_URAM
+        #pragma HLS bind_storage variable=buf type=RAM_S2P impl=URAM
         #pragma HLS array_reshape variable=buf dim=1 factor=5 cyclic
         // clang-format on
     } else {
 // clang-format off
-        #pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
+        #pragma HLS bind_storage variable=buf type=RAM_S2P impl=BRAM
         #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
         // clang-format on
     }
@@ -632,9 +647,10 @@ Row_Loop:
         src_buf5[0] = src_buf5[1] = src_buf5[2] = src_buf5[3] = 0;
 
         inter_val = 0;
-        ProcessBox5x5<SRC_T, ROWS, COLS, DEPTH, NPC, WORDWIDTH_SRC, WORDWIDTH_DST, WORDWIDTH_AP, TC>(
-            _src_mat, _dst_mat, buf, src_buf1, src_buf2, src_buf3, src_buf4, src_buf5, GradientValues, inter_val,
-            img_width, img_height, row_ind, shift, tp1, tp2, mid, bottom1, bottom2, row, rd_ind, wr_ind);
+        ProcessBox5x5<SRC_T, ROWS, COLS, DEPTH, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1, WORDWIDTH_SRC, WORDWIDTH_DST,
+                      WORDWIDTH_AP, TC>(_src_mat, _dst_mat, buf, src_buf1, src_buf2, src_buf3, src_buf4, src_buf5,
+                                        GradientValues, inter_val, img_width, img_height, row_ind, shift, tp1, tp2, mid,
+                                        bottom1, bottom2, row, rd_ind, wr_ind);
 
         if ((NPC == XF_NPPC8) || (NPC == XF_NPPC16)) {
             for (i = 0; i < 6; i++) {
@@ -851,12 +867,14 @@ template <int SRC_T,
           int COLS,
           int DEPTH,
           int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int WORDWIDTH_AP,
           int TC>
-void ProcessBox7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat,
+void ProcessBox7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst_mat,
                    XF_SNAME(WORDWIDTH_SRC) buf[5][(COLS >> XF_BITSHIFT(NPC))],
                    XF_PTNAME(DEPTH) src_buf1[XF_NPIXPERCYCLE(NPC) + 6],
                    XF_PTNAME(DEPTH) src_buf2[XF_NPIXPERCYCLE(NPC) + 6],
@@ -956,11 +974,12 @@ template <int SRC_T,
           int COLS,
           int DEPTH,
           int NPC,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int WORDWIDTH_AP,
           int TC>
-void RightBorderBox7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat,
+void RightBorderBox7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst_mat,
                        XF_PTNAME(DEPTH) src_buf1[XF_NPIXPERCYCLE(NPC) + 6],
                        XF_PTNAME(DEPTH) src_buf2[XF_NPIXPERCYCLE(NPC) + 6],
                        XF_PTNAME(DEPTH) src_buf3[XF_NPIXPERCYCLE(NPC) + 6],
@@ -1049,13 +1068,15 @@ template <int SRC_T,
           int COLS,
           int DEPTH,
           int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int WORDWIDTH_AP,
           int TC,
           bool USE_URAM>
-void xFBoxFilter7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                    xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat,
+void xFBoxFilter7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+                    xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst_mat,
                     uint16_t img_height,
                     uint16_t img_width) {
     ap_uint<13> row_ind, row, col;
@@ -1089,12 +1110,12 @@ void xFBoxFilter7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     XF_SNAME(WORDWIDTH_SRC) buf[7][(COLS >> XF_BITSHIFT(NPC))];
     if (USE_URAM) {
 // clang-format off
-        #pragma HLS RESOURCE variable=buf core=RAM_S2P_URAM
+        #pragma HLS bind_storage variable=buf type=RAM_S2P impl=URAM
         #pragma HLS array_reshape variable=buf dim=1 factor=7 cyclic
         // clang-format on
     } else {
 // clang-format off
-        #pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
+        #pragma HLS bind_storage variable=buf type=RAM_S2P impl=BRAM
         #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
         // clang-format on
     }
@@ -1213,14 +1234,14 @@ Row_Loop:
         }
         inter_val = 0;
 
-        ProcessBox7x7<SRC_T, ROWS, COLS, DEPTH, NPC, WORDWIDTH_SRC, WORDWIDTH_DST, WORDWIDTH_AP, TC>(
-            _src_mat, _dst_mat, buf, src_buf1, src_buf2, src_buf3, src_buf4, src_buf5, src_buf6, src_buf7,
-            GradientValues, inter_val, img_width, img_height, row_ind, shiftx, tp1, tp2, tp3, mid, bottom1, bottom2,
-            bottom3, row, rd_ind, wr_ind);
+        ProcessBox7x7<SRC_T, ROWS, COLS, DEPTH, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1, WORDWIDTH_SRC, WORDWIDTH_DST,
+                      WORDWIDTH_AP, TC>(_src_mat, _dst_mat, buf, src_buf1, src_buf2, src_buf3, src_buf4, src_buf5,
+                                        src_buf6, src_buf7, GradientValues, inter_val, img_width, img_height, row_ind,
+                                        shiftx, tp1, tp2, tp3, mid, bottom1, bottom2, bottom3, row, rd_ind, wr_ind);
 
-        RightBorderBox7x7<SRC_T, ROWS, COLS, DEPTH, NPC, WORDWIDTH_SRC, WORDWIDTH_DST, WORDWIDTH_AP, TC>(
-            _dst_mat, src_buf1, src_buf2, src_buf3, src_buf4, src_buf5, src_buf6, src_buf7, GradientValues, inter_val,
-            img_width, img_height, row_ind, shiftx, row, wr_ind);
+        RightBorderBox7x7<SRC_T, ROWS, COLS, DEPTH, NPC, XFCVDEPTH_OUT_1, WORDWIDTH_SRC, WORDWIDTH_DST, WORDWIDTH_AP,
+                          TC>(_dst_mat, src_buf1, src_buf2, src_buf3, src_buf4, src_buf5, src_buf6, src_buf7,
+                              GradientValues, inter_val, img_width, img_height, row_ind, shiftx, row, wr_ind);
         row_ind++;
         if (row_ind == 7) {
             row_ind = 0;
@@ -1228,8 +1249,17 @@ Row_Loop:
     } // Row_Loop ends here
 } // end of function xFBoxFilter7x7
 
-template <int BORDER_TYPE, int FILTER_TYPE, int SRC_T, int ROWS, int COLS, int NPC, bool USE_URAM = false>
-void boxFilter(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat, xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat) {
+template <int BORDER_TYPE,
+          int FILTER_TYPE,
+          int SRC_T,
+          int ROWS,
+          int COLS,
+          int NPC,
+          bool USE_URAM = false,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void boxFilter(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+               xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst_mat) {
 // clang-format off
     #pragma HLS INLINE OFF
 // clang-format on
@@ -1244,29 +1274,30 @@ void boxFilter(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat, xf::cv::Mat<SRC_T,
     uint16_t img_height = _src_mat.rows;
 
     if (FILTER_TYPE == XF_FILTER_3X3) {
-        xFBoxFilter3x3<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC),
-                       (COLS >> XF_BITSHIFT(NPC)), USE_URAM>(_src_mat, _dst_mat, img_height, img_width);
+        xFBoxFilter3x3<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1,
+                       XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)), USE_URAM>(
+            _src_mat, _dst_mat, img_height, img_width);
     } else if (FILTER_TYPE == XF_FILTER_5X5) {
         if (NPC == XF_NPPC8) {
-            xFBoxFilter5x5<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                           XF_WORDWIDTH(SRC_T, NPC), XF_19SP, (COLS >> XF_BITSHIFT(NPC)), USE_URAM>(
-                _src_mat, _dst_mat, img_height, img_width);
+            xFBoxFilter5x5<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1,
+                           XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), XF_19SP, (COLS >> XF_BITSHIFT(NPC)),
+                           USE_URAM>(_src_mat, _dst_mat, img_height, img_width);
         } else {
-            xFBoxFilter5x5<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                           XF_WORDWIDTH(SRC_T, NPC), XF_19SP, (COLS >> XF_BITSHIFT(NPC)), USE_URAM>(
-                _src_mat, _dst_mat, img_height, img_width);
+            xFBoxFilter5x5<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1,
+                           XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), XF_19SP, (COLS >> XF_BITSHIFT(NPC)),
+                           USE_URAM>(_src_mat, _dst_mat, img_height, img_width);
         }
     }
 
     else if (FILTER_TYPE == XF_FILTER_7X7) {
         if (NPC == XF_NPPC8) {
-            xFBoxFilter7x7<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                           XF_WORDWIDTH(SRC_T, NPC), XF_19SP, (COLS >> XF_BITSHIFT(NPC)), USE_URAM>(
-                _src_mat, _dst_mat, img_height, img_width);
+            xFBoxFilter7x7<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1,
+                           XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), XF_19SP, (COLS >> XF_BITSHIFT(NPC)),
+                           USE_URAM>(_src_mat, _dst_mat, img_height, img_width);
         } else {
-            xFBoxFilter7x7<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                           XF_WORDWIDTH(SRC_T, NPC), XF_19SP, (COLS >> XF_BITSHIFT(NPC)), USE_URAM>(
-                _src_mat, _dst_mat, img_height, img_width);
+            xFBoxFilter7x7<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1,
+                           XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), XF_19SP, (COLS >> XF_BITSHIFT(NPC)),
+                           USE_URAM>(_src_mat, _dst_mat, img_height, img_width);
         }
     }
 }

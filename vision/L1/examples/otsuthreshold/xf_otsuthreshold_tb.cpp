@@ -117,7 +117,8 @@ int main(int argc, char** argv) {
     if (maxdiff > 1) {
         fprintf(stderr, "ERROR: Test Failed.\n ");
         return EXIT_FAILURE;
-    }
+    } else
+        std::cout << "Test Passed " << std::endl;
 
     return 0;
 }

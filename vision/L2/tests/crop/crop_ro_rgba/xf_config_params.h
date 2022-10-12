@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
-#define NO 0 // Normal Operation
-#define RO 1 // Normal Operation
+#define SPC 0 // Single Pixel per Clock operation
+#define MPC 1 // Single Pixel per Clock operation
 
 #define MEMORYMAPPED_ARCH 1
 
 /*  set the type of input image*/
 #define GRAY 0
+
+#define XF_CV_DEPTH_IN -1
+#define XF_CV_DEPTH_OUT -1
+
+#define XF_CV_DEPTH_OUT_1 -1
+#define XF_CV_DEPTH_OUT_2 -1
 
 #define NUM_ROI 3
 

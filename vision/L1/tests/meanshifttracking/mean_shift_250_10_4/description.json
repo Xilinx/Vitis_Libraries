@@ -29,7 +29,7 @@
             "${XF_PROJ_ROOT}/L1/examples/meanshifttracking/xf_mean_shift_tb.cpp"
         ], 
         "cflags": "-I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x -D__SDA_MEM_MAP__", 
-        "ldflags": "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d", 
+        "ldflags": "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_video -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d", 
         "argv": {
             "hls_csim": " ${XF_PROJ_ROOT}/data/mst_imgs 3 ", 
             "hls_cosim": " ${XF_PROJ_ROOT}/data/mst_imgs 3 "

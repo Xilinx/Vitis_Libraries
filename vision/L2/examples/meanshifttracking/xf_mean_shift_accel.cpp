@@ -47,10 +47,10 @@ void mean_shift_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC4, XF_HEIGHT, XF_WIDTH, XF_NPPC1> inMat(rows, cols, img_inp);
+    xf::cv::Mat<XF_8UC4, XF_HEIGHT, XF_WIDTH, XF_NPPC1, XF_CV_DEPTH_IN> inMat(rows, cols, img_inp);
 
     xf::cv::MeanShift<XF_MAX_OBJECTS, XF_MAX_ITERS, XF_MAX_OBJ_HEIGHT, XF_MAX_OBJ_WIDTH, XF_8UC4, XF_HEIGHT, XF_WIDTH,
-                      XF_NPPC1>(inMat, tlx, tly, obj_height, obj_width, dx, dy, track, frame_status, no_objects,
-                                no_of_iterations);
+                      XF_NPPC1, XF_CV_DEPTH_IN>(inMat, tlx, tly, obj_height, obj_width, dx, dy, track, frame_status,
+                                                no_objects, no_of_iterations);
 }
 }

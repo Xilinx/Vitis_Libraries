@@ -702,48 +702,48 @@ _LB_TPLT_DEC class LineBuffer {
         #pragma HLS dependence variable=val intra false
         // clang-format on
 
-        // #pragma HLS RESOURCE variable=val core=RAM_S2P_URAM
-        //#pragma HLS array reshape variable=val factor=RESHAPE_FACTOR  dim=1
+        // #pragma HLS bind_storage variable=val type=RAM_S2P impl=URAM
+        //#pragma HLS array_reshape variable=val factor=RESHAPE_FACTOR  dim=1
 
         switch (MEM_TYPE) {
             case RAM_1P_BRAM:
 // clang-format off
-                #pragma HLS RESOURCE variable=val core=RAM_1P_BRAM
+                #pragma HLS bind_storage variable=val type=RAM_1P impl=BRAM
                 // clang-format on
                 break;
             case RAM_1P_URAM:
 // clang-format off
-                #pragma HLS RESOURCE variable=val core=RAM_1P_URAM
+                #pragma HLS bind_storage variable=val type=RAM_1P impl=URAM
                 // clang-format on
                 break;
             case RAM_2P_BRAM:
 // clang-format off
-                #pragma HLS RESOURCE variable=val core=RAM_2P_BRAM
+                #pragma HLS bind_storage variable=val type=RAM_2P impl=BRAM
                 // clang-format on
                 break;
             case RAM_2P_URAM:
 // clang-format off
-                #pragma HLS RESOURCE variable=val core=RAM_2P_URAM
+                #pragma HLS bind_storage variable=val type=RAM_2P impl=URAM
                 // clang-format on
                 break;
             case RAM_S2P_BRAM:
 // clang-format off
-                #pragma HLS RESOURCE variable=val core=RAM_S2P_BRAM
+                #pragma HLS bind_storage variable=val type=RAM_S2P impl=BRAM
                 // clang-format on
                 break;
             case RAM_S2P_URAM:
 // clang-format off
-                #pragma HLS RESOURCE variable=val core=RAM_S2P_URAM
+                #pragma HLS bind_storage variable=val type=RAM_S2P impl=URAM
                 // clang-format on
                 break;
             case RAM_T2P_BRAM:
 // clang-format off
-                #pragma HLS RESOURCE variable=val core=RAM_T2P_BRAM
+                #pragma HLS bind_storage variable=val type=RAM_T2P impl=BRAM
                 // clang-format on
                 break;
             case RAM_T2P_URAM:
 // clang-format off
-                #pragma HLS RESOURCE variable=val core=RAM_T2P_URAM
+                #pragma HLS bind_storage variable=val type=RAM_T2P impl=URAM
                 // clang-format on
                 break;
             default:

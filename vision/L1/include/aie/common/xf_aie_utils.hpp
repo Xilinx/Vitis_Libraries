@@ -68,24 +68,36 @@ inline metadata_elem_t xfGetTileFinalHeight(void* img_ptr) {
     return ((metadata_elem_t*)img_ptr)[POS_MDS_FINAL_HEIGHT];
 }
 
-inline metadata_elem_t xfGetTileCrctPosH(void* img_ptr) {
-    return ((metadata_elem_t*)img_ptr)[POS_MDS_CRCTPOSH];
+inline metadata_elem_t xfGetTileOutOffset_L(void* img_ptr) {
+    return ((metadata_elem_t*)img_ptr)[POS_MDS_OUT_OFFSET_LOWER];
 }
 
-inline metadata_elem_t xfGetTileCrctPosV(void* img_ptr) {
-    return ((metadata_elem_t*)img_ptr)[POS_MDS_CRCTPOSV];
+inline metadata_elem_t xfGetTileOutOffset_U(void* img_ptr) {
+    return ((metadata_elem_t*)img_ptr)[POS_MDS_OUT_OFFSET_UPPER];
 }
 
-inline metadata_elem_t xfGetTileCrctTWidth(void* img_ptr) {
-    return ((metadata_elem_t*)img_ptr)[POS_MDS_CRCT_TWIDTH];
+inline metadata_elem_t xfGetTileOutPosH(void* img_ptr) {
+    return ((metadata_elem_t*)img_ptr)[POS_MDS_OUT_POSH];
 }
 
-inline metadata_elem_t xfGetTileCrctTHeight(void* img_ptr) {
-    return ((metadata_elem_t*)img_ptr)[POS_MDS_CRCT_THEIGHT];
+inline metadata_elem_t xfGetTileOutPosV(void* img_ptr) {
+    return ((metadata_elem_t*)img_ptr)[POS_MDS_OUT_POSV];
+}
+
+inline metadata_elem_t xfGetTileOutTWidth(void* img_ptr) {
+    return ((metadata_elem_t*)img_ptr)[POS_MDS_OUT_TWIDTH];
+}
+
+inline metadata_elem_t xfGetTileOutTHeight(void* img_ptr) {
+    return ((metadata_elem_t*)img_ptr)[POS_MDS_OUT_THEIGHT];
 }
 
 inline metadata_elem_t xfGetTileSat(void* img_ptr) {
     return ((metadata_elem_t*)img_ptr)[POS_MDS_SAT_EN];
+}
+
+inline metadata_elem_t xfGetImgStride(void* img_ptr) {
+    return ((metadata_elem_t*)img_ptr)[POS_MDS_IMAGE_STRIDE];
 }
 
 inline void* xfGetImgDataPtr(void* img_ptr) {
@@ -138,20 +150,28 @@ inline void xfSetTileFinalHeight(void* img_ptr, metadata_elem_t final_height) {
     ((metadata_elem_t*)img_ptr)[POS_MDS_FINAL_HEIGHT] = final_height;
 }
 
-inline void xfSetTileCrctPosH(void* img_ptr, metadata_elem_t crct_posh) {
-    ((metadata_elem_t*)img_ptr)[POS_MDS_CRCTPOSH] = crct_posh;
+inline void xfSetTileOutPosH(void* img_ptr, metadata_elem_t out_posh) {
+    ((metadata_elem_t*)img_ptr)[POS_MDS_OUT_POSH] = out_posh;
 }
 
-inline void xfSetTileCrctPosV(void* img_ptr, metadata_elem_t crct_posv) {
-    ((metadata_elem_t*)img_ptr)[POS_MDS_CRCTPOSV] = crct_posv;
+inline void xfSetTileOutPosV(void* img_ptr, metadata_elem_t out_posv) {
+    ((metadata_elem_t*)img_ptr)[POS_MDS_OUT_POSV] = out_posv;
 }
 
-inline void xfSetTileCrctTWidth(void* img_ptr, metadata_elem_t crct_twidth) {
-    ((metadata_elem_t*)img_ptr)[POS_MDS_CRCT_TWIDTH] = crct_twidth;
+inline void xfSetTileOutTWidth(void* img_ptr, metadata_elem_t out_twidth) {
+    ((metadata_elem_t*)img_ptr)[POS_MDS_OUT_TWIDTH] = out_twidth;
 }
 
-inline void xfSetTileCrctTHeight(void* img_ptr, metadata_elem_t crct_theight) {
-    ((metadata_elem_t*)img_ptr)[POS_MDS_CRCT_THEIGHT] = crct_theight;
+inline void xfSetTileOutTHeight(void* img_ptr, metadata_elem_t out_theight) {
+    ((metadata_elem_t*)img_ptr)[POS_MDS_OUT_THEIGHT] = out_theight;
+}
+
+inline void xfSetTileOutOffset_L(void* img_ptr, metadata_elem_t out_offsetL) {
+    ((metadata_elem_t*)img_ptr)[POS_MDS_OUT_OFFSET_LOWER] = out_offsetL;
+}
+
+inline void xfSetTileOutOffset_U(void* img_ptr, metadata_elem_t out_offsetU) {
+    ((metadata_elem_t*)img_ptr)[POS_MDS_OUT_OFFSET_UPPER] = out_offsetU;
 }
 
 inline void xfUnsignedSaturation(void* img_ptr) {

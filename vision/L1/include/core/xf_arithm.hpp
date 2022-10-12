@@ -226,12 +226,15 @@ template <int SRC_T,
           int PLANES,
           int DEPTH,
           int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int COLS_TRIP>
-void xFAbsDiffKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
-                     xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,
-                     xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst,
+void xFAbsDiffKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src1,
+                     xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& _src2,
+                     xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst,
                      uint16_t image_height,
                      uint16_t image_width) {
     //	image_width=image_width>>XF_BITSHIFT(NPC);
@@ -286,12 +289,15 @@ template <int SRC_T,
           int PLANES,
           int DEPTH,
           int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int COLS_TRIP>
-void xFBitwiseANDKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
-                        xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,
-                        xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst,
+void xFBitwiseANDKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src1,
+                        xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& _src2,
+                        xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst,
                         uint16_t image_height,
                         uint16_t image_width) {
     ap_uint<13> i, j, k;
@@ -344,12 +350,15 @@ template <int SRC_T,
           int PLANES,
           int DEPTH,
           int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int COLS_TRIP>
-void xFBitwiseORKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
-                       xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,
-                       xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst,
+void xFBitwiseORKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src1,
+                       xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& _src2,
+                       xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst,
                        uint16_t image_height,
                        uint16_t image_width) {
     ap_uint<13> i, j, k;
@@ -401,11 +410,13 @@ template <int SRC_T,
           int PLANES,
           int DEPTH,
           int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int COLS_TRIP>
-void xFBitwiseNOTKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
-                        xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst,
+void xFBitwiseNOTKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src,
+                        xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst,
                         uint16_t image_height,
                         uint16_t image_width) {
     ap_uint<13> i, j, k;
@@ -453,12 +464,15 @@ template <int SRC_T,
           int PLANES,
           int DEPTH,
           int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int COLS_TRIP>
-void xFBitwiseXORKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
-                        xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,
-                        xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst,
+void xFBitwiseXORKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src1,
+                        xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& _src2,
+                        xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst,
                         uint16_t image_height,
                         uint16_t image_width) {
     ap_uint<13> i, j, k;
@@ -510,12 +524,15 @@ template <int SRC_T,
           int PLANES,
           int DEPTH,
           int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int COLS_TRIP>
-void xFMulKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
-                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src2,
-                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& dst,
+void xFMulKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
+                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& src2,
+                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst,
                  int _policytype,
                  float _scale_val,
                  uint16_t image_height,
@@ -591,10 +608,16 @@ rowLoop:
     }
 }
 
-template <int SRC_T, int ROWS, int COLS, int NPC = 1>
-void absdiff(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
-             xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,
-             xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void absdiff(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src1,
+             xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& _src2,
+             xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst) {
 // clang-format off
     #pragma HLS inline off
     // clang-format on
@@ -606,14 +629,21 @@ void absdiff(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     assert(((_src1.rows <= ROWS) && (_src1.cols <= COLS) && (_src2.rows <= ROWS) && (_src2.cols <= COLS)) &&
            "ROWS and COLS should be greater than input image");
 #endif
-    xFAbsDiffKernel<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                    XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(_src1, _src2, _dst, _src1.rows, image_width);
+    xFAbsDiffKernel<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1,
+                    XFCVDEPTH_IN_2, XFCVDEPTH_OUT_1, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC),
+                    (COLS >> XF_BITSHIFT(NPC))>(_src1, _src2, _dst, _src1.rows, image_width);
 }
 
-template <int SRC_T, int ROWS, int COLS, int NPC = 1>
-void bitwise_and(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
-                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,
-                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void bitwise_and(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src1,
+                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& _src2,
+                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst) {
 // clang-format off
     #pragma HLS inline off
 // clang-format on
@@ -625,15 +655,21 @@ void bitwise_and(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
 #endif
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
 
-    xFBitwiseANDKernel<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                       XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(_src1, _src2, _dst, _src1.rows,
-                                                                             image_width);
+    xFBitwiseANDKernel<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1,
+                       XFCVDEPTH_IN_2, XFCVDEPTH_OUT_1, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC),
+                       (COLS >> XF_BITSHIFT(NPC))>(_src1, _src2, _dst, _src1.rows, image_width);
 }
 
-template <int SRC_T, int ROWS, int COLS, int NPC = 1>
-void bitwise_or(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
-                xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,
-                xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void bitwise_or(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src1,
+                xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& _src2,
+                xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst) {
 // clang-format off
     #pragma HLS INLINE OFF
 // clang-format on
@@ -645,13 +681,19 @@ void bitwise_or(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
 #endif
     uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
 
-    xFBitwiseORKernel<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                      XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(_src1, _src2, _dst, _src1.rows,
-                                                                            image_width);
+    xFBitwiseORKernel<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1,
+                      XFCVDEPTH_IN_2, XFCVDEPTH_OUT_1, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC),
+                      (COLS >> XF_BITSHIFT(NPC))>(_src1, _src2, _dst, _src1.rows, image_width);
 }
 
-template <int SRC_T, int ROWS, int COLS, int NPC = 1>
-void bitwise_not(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src, xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& dst) {
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void bitwise_not(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src,
+                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst) {
     //	assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) &&
     //			"NPC must be XF_NPPC1 or XF_NPPC8 ");
     //	assert(((SRC_T == XF_8UC1) ) &&
@@ -663,14 +705,21 @@ void bitwise_not(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src, xf::cv::Mat<SRC_T, RO
     #pragma HLS inline off
     // clang-format on
 
-    xFBitwiseNOTKernel<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                       XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(src, dst, src.rows, image_width);
+    xFBitwiseNOTKernel<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1,
+                       XFCVDEPTH_OUT_1, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(
+        src, dst, src.rows, image_width);
 }
 
-template <int SRC_T, int ROWS, int COLS, int NPC = 1>
-void bitwise_xor(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
-                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src2,
-                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& dst) {
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void bitwise_xor(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
+                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& src2,
+                 xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst) {
 #ifndef __SYNTHESIS__
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
     assert(((SRC_T == XF_8UC1) || (SRC_T == XF_8UC3)) && "Image type must be XF_8UC1,XF_8UC3 ");
@@ -683,14 +732,22 @@ void bitwise_xor(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
 
     uint16_t image_width = src1.cols >> XF_BITSHIFT(NPC);
 
-    xFBitwiseXORKernel<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                       XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(src1, src2, dst, src1.rows, image_width);
+    xFBitwiseXORKernel<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1,
+                       XFCVDEPTH_IN_2, XFCVDEPTH_OUT_1, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC),
+                       (COLS >> XF_BITSHIFT(NPC))>(src1, src2, dst, src1.rows, image_width);
 }
 
-template <int POLICY_TYPE, int SRC_T, int ROWS, int COLS, int NPC = 1>
-void multiply(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
-              xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src2,
-              xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& dst,
+template <int POLICY_TYPE,
+          int SRC_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void multiply(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
+              xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& src2,
+              xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst,
               float scale) {
 // clang-format off
     #pragma HLS inline off
@@ -707,9 +764,9 @@ void multiply(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src1,
 #endif
     uint16_t image_width = src1.cols >> XF_BITSHIFT(NPC);
 
-    xFMulKernel<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(src1, src2, dst, POLICY_TYPE, scale, src1.rows,
-                                                                      image_width);
+    xFMulKernel<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1, XFCVDEPTH_IN_2,
+                XFCVDEPTH_OUT_1, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(
+        src1, src2, dst, POLICY_TYPE, scale, src1.rows, image_width);
 }
 
 /**
@@ -725,81 +782,18 @@ template <int SRC_T,
           int PLANES,
           int DEPTH,
           int NPC,
-          int WORDWIDTH_SRC,
-          int WORDWIDTH_DST,
-          int COLS_TRIP,
-          typename KERNEL,
-          int USE_SRC2 = 0,
-          int XFPDEPTH>
-void xFarithm_proc(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFPDEPTH>& _src1,
-                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,
-                   xf::cv::Scalar<XF_CHANNELS(SRC_T, NPC), unsigned char> scl,
-                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst,
-                   int _policytype,
-                   uint16_t image_height,
-                   uint16_t image_width) {
-    KERNEL opr;
-    int STEP;
-    STEP = XF_PIXELDEPTH(DEPTH) / PLANES;
-    ap_uint<13> i, j, k;
-    XF_SNAME(WORDWIDTH_SRC) val_src1 = 0, val_src2 = 0;
-    XF_SNAME(WORDWIDTH_DST) val_dst = 0;
-    XF_PTNAME(DEPTH) result, p = 0, q = 0;
-
-rowLoop:
-    for (i = 0; i < image_height; i++) {
-// clang-format off
-        #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
-        #pragma HLS LOOP_FLATTEN off
-    // clang-format on
-
-    colLoop:
-        for (j = 0; j < image_width; j++) {
-// clang-format off
-            #pragma HLS LOOP_TRIPCOUNT min=COLS_TRIP max=COLS_TRIP
-            #pragma HLS pipeline
-            // clang-format on
-            val_src1 =
-                (XF_SNAME(WORDWIDTH_SRC))(_src1.read(i * image_width + j)); // reading the data from the first stream
-            if (USE_SRC2) {
-                val_src2 = (XF_SNAME(WORDWIDTH_SRC))(_src2.read(i * image_width + j));
-            }
-        procLoop:
-            for (k = 0; k < (XF_WORDDEPTH(WORDWIDTH_SRC)); k += STEP) {
-// clang-format off
-                #pragma HLS unroll
-                // clang-format on
-                p = val_src1.range(k + (STEP - 1), k); // Get bits from certain range of positions.
-                if (USE_SRC2) {
-                    q = val_src2.range(k + (STEP - 1), k);
-                } else {
-                    q = scl.val[0];
-                }
-
-                opr.template apply<DEPTH>(p, q, result, _policytype);
-
-                val_dst.range(k + (STEP - 1), k) = result; // Set bits in a range of positions.
-            }
-            _dst.write(i * image_width + j, val_dst); // writing data to the output stream
-        }
-    }
-}
-
-template <int SRC_T,
-          int ROWS,
-          int COLS,
-          int PLANES,
-          int DEPTH,
-          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int COLS_TRIP,
           typename KERNEL,
           int USE_SRC2 = 0>
-void xFarithm_proc(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
-                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,
+void xFarithm_proc(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src1,
+                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& _src2,
                    xf::cv::Scalar<XF_CHANNELS(SRC_T, NPC), unsigned char> scl,
-                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst,
+                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst,
                    int _policytype,
                    uint16_t image_height,
                    uint16_t image_width) {
@@ -850,10 +844,17 @@ rowLoop:
     }
 }
 
-template <int POLICY_TYPE, int SRC_T, int ROWS, int COLS, int NPC = 1>
-void add(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
-         xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,
-         xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
+template <int POLICY_TYPE,
+          int SRC_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void add(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src1,
+         xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& _src2,
+         xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst) {
 // clang-format off
     #pragma HLS inline off
     // clang-format on
@@ -866,16 +867,22 @@ void add(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
            "_policytype must be 'XF_CONVERT_POLICY_SATURATE' or 'XF_CONVERT_POLICY_TRUNCATE'");
     assert((_src1.rows <= ROWS) && "ROWS and COLS should be greater than input image");
 #endif
-    xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                  XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)), kernel_add, 1>(
-        _src1, _src2, 0, _dst, POLICY_TYPE, _src1.rows, image_width);
+    xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1, XFCVDEPTH_IN_2,
+                  XFCVDEPTH_OUT_1, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)),
+                  kernel_add, 1>(_src1, _src2, 0, _dst, POLICY_TYPE, _src1.rows, image_width);
 }
 
 /*  addS API call*/
-template <int POLICY_TYPE, int SRC_T, int ROWS, int COLS, int NPC = 1>
-void addS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
+template <int POLICY_TYPE,
+          int SRC_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void addS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src1,
           unsigned char _scl[XF_CHANNELS(SRC_T, NPC)],
-          xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
+          xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst) {
 // clang-format off
     #pragma HLS inline off
     // clang-format on
@@ -893,15 +900,21 @@ void addS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
         scl.val[i] = _scl[i];
     }
 
-    xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                  XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)), kernel_add, 0>(
-        _src1, _src1, scl, _dst, POLICY_TYPE, _src1.rows, image_width);
+    xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1, XFCVDEPTH_IN_1,
+                  XFCVDEPTH_OUT_1, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)),
+                  kernel_add, 0>(_src1, _src1, scl, _dst, POLICY_TYPE, _src1.rows, image_width);
 }
 
-template <int POLICY_TYPE, int SRC_T, int ROWS, int COLS, int NPC = 1>
-void SubS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
+template <int POLICY_TYPE,
+          int SRC_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void SubS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src1,
           unsigned char _scl[XF_CHANNELS(SRC_T, NPC)],
-          xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
+          xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst) {
 // clang-format off
     #pragma HLS inline off
     // clang-format on
@@ -919,15 +932,21 @@ void SubS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
         scl.val[i] = _scl[i];
     }
 
-    xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                  XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)), kernel_sub, 0>(
-        _src1, _src1, scl, _dst, POLICY_TYPE, _src1.rows, image_width);
+    xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1, XFCVDEPTH_IN_1,
+                  XFCVDEPTH_OUT_1, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)),
+                  kernel_sub, 0>(_src1, _src1, scl, _dst, POLICY_TYPE, _src1.rows, image_width);
 }
 /*  subRS API call*/
-template <int POLICY_TYPE, int SRC_T, int ROWS, int COLS, int NPC = 1>
-void SubRS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
+template <int POLICY_TYPE,
+          int SRC_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void SubRS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src1,
            unsigned char _scl[XF_CHANNELS(SRC_T, NPC)],
-           xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
+           xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst) {
 // clang-format off
     #pragma HLS inline off
     // clang-format on
@@ -944,38 +963,23 @@ void SubRS(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
         scl.val[i] = _scl[i];
     }
 
-    xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                  XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)), kernel_subRS, 0>(
-        _src1, _src1, scl, _dst, POLICY_TYPE, _src1.rows, image_width);
-}
-/*  subtract API call*/
-template <int POLICY_TYPE, int SRC_T, int ROWS, int COLS, int NPC = 1, int XFPDEPTH>
-void subtract(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFPDEPTH>& _src1,
-              xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,
-              xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
-// clang-format off
-    #pragma HLS inline off
-    // clang-format on
-    uint16_t image_width = _src1.cols >> XF_BITSHIFT(NPC);
-#ifndef __SYNTHESIS__
-    assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1 or XF_NPPC8 ");
-    assert(((SRC_T == XF_8UC1) || (SRC_T == XF_16SC1) || (SRC_T == XF_8UC3) || (SRC_T == XF_16SC3)) &&
-           "TYPE must be XF_8UC1,XF_8UC3, 16SC1,16SC3 ");
-    assert((POLICY_TYPE == XF_CONVERT_POLICY_SATURATE || POLICY_TYPE == XF_CONVERT_POLICY_TRUNCATE) &&
-           "_policytype must be 'XF_CONVERT_POLICY_SATURATE' or 'XF_CONVERT_POLICY_TRUNCATE'");
-    assert((_src1.rows <= ROWS) && "ROWS and COLS should be greater than input image");
-    assert((_src1.cols <= COLS) && "ROWS and COLS should be greater than input image");
-#endif
-    xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                  XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)), kernel_sub, 1, XFPDEPTH>(
-        _src1, _src2, 0, _dst, POLICY_TYPE, _src1.rows, image_width);
+    xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1, XFCVDEPTH_IN_1,
+                  XFCVDEPTH_OUT_1, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)),
+                  kernel_subRS, 0>(_src1, _src1, scl, _dst, POLICY_TYPE, _src1.rows, image_width);
 }
 
 /*  subtract API call*/
-template <int POLICY_TYPE, int SRC_T, int ROWS, int COLS, int NPC = 1>
-void subtract(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
-              xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,
-              xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
+template <int POLICY_TYPE,
+          int SRC_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void subtract(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src1,
+              xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& _src2,
+              xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst) {
 // clang-format off
     #pragma HLS inline off
     // clang-format on
@@ -989,15 +993,20 @@ void subtract(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     assert((_src1.rows <= ROWS) && "ROWS and COLS should be greater than input image");
     assert((_src1.cols <= COLS) && "ROWS and COLS should be greater than input image");
 #endif
-    xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                  XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)), kernel_sub, 1>(
-        _src1, _src2, 0, _dst, POLICY_TYPE, _src1.rows, image_width);
+    xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1, XFCVDEPTH_IN_2,
+                  XFCVDEPTH_OUT_1, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)),
+                  kernel_sub, 1>(_src1, _src2, 0, _dst, POLICY_TYPE, _src1.rows, image_width);
 }
 /*  MaxS API call*/
-template <int SRC_T, int ROWS, int COLS, int NPC = 1>
-void max(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void max(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src1,
          unsigned char _scl[XF_CHANNELS(SRC_T, NPC)],
-         xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
+         xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst) {
 // clang-format off
     #pragma HLS inline off
     // clang-format on
@@ -1013,16 +1022,22 @@ void max(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
         scl.val[i] = _scl[i];
     }
 
-    xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                  XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)), kernel_max, 0>(_src1, _src1, scl, _dst, 0,
-                                                                                       _src1.rows, image_width);
+    xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1, XFCVDEPTH_IN_1,
+                  XFCVDEPTH_OUT_1, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)),
+                  kernel_max, 0>(_src1, _src1, scl, _dst, 0, _src1.rows, image_width);
 }
 
 /*  Max API call*/
-template <int SRC_T, int ROWS, int COLS, int NPC = 1>
-void max(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
-         xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,
-         xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void max(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src1,
+         xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& _src2,
+         xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst) {
 // clang-format off
     #pragma HLS inline off
     // clang-format on
@@ -1034,16 +1049,21 @@ void max(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
 
     assert((_src1.rows <= ROWS) && "ROWS and COLS should be greater than input image");
 #endif
-    xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                  XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)), kernel_max, 1>(_src1, _src2, 0, _dst, 0,
-                                                                                       _src1.rows, image_width);
+    xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1, XFCVDEPTH_IN_2,
+                  XFCVDEPTH_OUT_1, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)),
+                  kernel_max, 1>(_src1, _src2, 0, _dst, 0, _src1.rows, image_width);
 }
 
 /*  MinS API call*/
-template <int SRC_T, int ROWS, int COLS, int NPC = 1>
-void min(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void min(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src1,
          unsigned char _scl[XF_CHANNELS(SRC_T, NPC)],
-         xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
+         xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst) {
 // clang-format off
     #pragma HLS inline off
     // clang-format on
@@ -1059,16 +1079,22 @@ void min(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
         scl.val[i] = _scl[i];
     }
 
-    xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                  XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)), kernel_min, 0>(_src1, _src1, scl, _dst, 0,
-                                                                                       _src1.rows, image_width);
+    xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1, XFCVDEPTH_IN_1,
+                  XFCVDEPTH_OUT_1, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)),
+                  kernel_min, 0>(_src1, _src1, scl, _dst, 0, _src1.rows, image_width);
 }
 
 /*  Min API call*/
-template <int SRC_T, int ROWS, int COLS, int NPC = 1>
-void min(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
-         xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,
-         xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void min(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src1,
+         xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& _src2,
+         xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst) {
 // clang-format off
     #pragma HLS inline off
     // clang-format on
@@ -1079,15 +1105,21 @@ void min(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     assert((_src1.cols <= COLS) && "ROWS and COLS should be greater than input image");
     assert((_src1.rows <= ROWS) && "ROWS and COLS should be greater than input image");
 #endif
-    xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                  XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)), kernel_min, 1>(_src1, _src2, 0, _dst, 0,
-                                                                                       _src1.rows, image_width);
+    xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1, XFCVDEPTH_IN_2,
+                  XFCVDEPTH_OUT_1, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)),
+                  kernel_min, 1>(_src1, _src2, 0, _dst, 0, _src1.rows, image_width);
 }
 /*  CompareS API call*/
-template <int CMP_OP, int SRC_T, int ROWS, int COLS, int NPC = 1>
-void compare(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
+template <int CMP_OP,
+          int SRC_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void compare(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src1,
              unsigned char _scl[XF_CHANNELS(SRC_T, NPC)],
-             xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
+             xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst) {
 // clang-format off
     #pragma HLS inline off
     // clang-format on
@@ -1105,16 +1137,23 @@ void compare(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
         scl.val[i] = _scl[i];
     }
 
-    xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                  XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)), kernel_compare, 0>(
-        _src1, _src1, scl, _dst, CMP_OP, _src1.rows, image_width);
+    xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1, XFCVDEPTH_IN_1,
+                  XFCVDEPTH_OUT_1, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)),
+                  kernel_compare, 0>(_src1, _src1, scl, _dst, CMP_OP, _src1.rows, image_width);
 }
 
 /*  Compare API call*/
-template <int CMP_OP, int SRC_T, int ROWS, int COLS, int NPC = 1>
-void compare(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
-             xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,
-             xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
+template <int CMP_OP,
+          int SRC_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void compare(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src1,
+             xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& _src2,
+             xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst) {
 // clang-format off
     #pragma HLS inline off
     // clang-format on
@@ -1126,16 +1165,21 @@ void compare(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
 
     assert((_src1.rows <= ROWS) && "ROWS and COLS should be greater than input image");
 #endif
-    xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                  XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)), kernel_compare, 1>(
-        _src1, _src2, 0, _dst, CMP_OP, _src1.rows, image_width);
+    xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1, XFCVDEPTH_IN_2,
+                  XFCVDEPTH_OUT_1, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)),
+                  kernel_compare, 1>(_src1, _src2, 0, _dst, CMP_OP, _src1.rows, image_width);
 }
 
 /* set API call*/
-template <int SRC_T, int ROWS, int COLS, int NPC = 1>
-void set(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void set(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src1,
          unsigned char _scl[XF_CHANNELS(SRC_T, NPC)],
-         xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
+         xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst) {
 // clang-format off
     #pragma HLS inline off
     // clang-format on
@@ -1151,13 +1195,19 @@ void set(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
         scl.val[i] = _scl[i];
     }
 
-    xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                  XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)), kernel_set, 0>(_src1, _src1, scl, _dst, 0,
-                                                                                       _src1.rows, image_width);
+    xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1, XFCVDEPTH_IN_1,
+                  XFCVDEPTH_OUT_1, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)),
+                  kernel_set, 0>(_src1, _src1, scl, _dst, 0, _src1.rows, image_width);
 }
 /* Zero API call*/
-template <int SRC_T, int ROWS, int COLS, int NPC = 1>
-void zero(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1, xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void zero(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src1,
+          xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst) {
 // clang-format off
     #pragma HLS inline off
     // clang-format on
@@ -1167,9 +1217,9 @@ void zero(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1, xf::cv::Mat<SRC_T, ROWS, C
     assert(((SRC_T == XF_8UC1)) && "TYPE must be XF_8UC1");
     assert((_src1.rows <= ROWS) && "ROWS and COLS should be greater than input image");
 #endif
-    xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                  XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)), kernel_zero, 0>(_src1, _src1, 0, _dst, 0,
-                                                                                        _src1.rows, image_width);
+    xFarithm_proc<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1, XFCVDEPTH_IN_1,
+                  XFCVDEPTH_OUT_1, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)),
+                  kernel_zero, 0>(_src1, _src1, 0, _dst, 0, _src1.rows, image_width);
 }
 } // namespace cv
 } // namespace xf

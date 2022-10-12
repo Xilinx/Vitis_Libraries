@@ -257,7 +257,6 @@ int main(int argc, char** argv) {
         q.enqueueReadBuffer(imageFromDevice, CL_TRUE, 0, image_out_size_bytes, out_img.data);
         q.enqueueReadBuffer(irImageFromDevice, CL_TRUE, 0, ir_image_out_size_bytes, ir_output.data);
     }
-
     q.finish();
 
     /////////////////////////////////////// end of CL ////////////////////////
@@ -265,6 +264,7 @@ int main(int argc, char** argv) {
     // Write output image
     imwrite("hls_out.png", out_img);
     imwrite("ir_out.png", ir_output);
+    std::cout << "Test Finished" << std::endl;
 
     return 0;
 }

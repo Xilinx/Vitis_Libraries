@@ -38,13 +38,13 @@
 #endif
 
 // Set the optimization type:
-#if NO
+#if SPC
 #define NPC1 XF_NPPC1
 #endif
 
 // Set the input pixel depth
 #define IN_TYPE XF_8UC1
-#if NO
+#if SPC
 #define INPUT_PTR_WIDTH 8
 #else
 #define INPUT_PTR_WIDTH 64

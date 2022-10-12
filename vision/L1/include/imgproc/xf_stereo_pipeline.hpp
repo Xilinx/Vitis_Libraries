@@ -137,12 +137,21 @@ void xFComputeUndistortCoordinates(
     v = fy * (FRAMET(y * kr) + FRAMET(p1 * (r2 + 2 * y2)) + FRAMET(p2 * _2xy)) + v0;
 }
 
-template <int ROWS, int COLS, int CM_SIZE, typename CM_T, int N, int MAP_T, int NPC, typename MAP_type>
+template <int ROWS,
+          int COLS,
+          int CM_SIZE,
+          typename CM_T,
+          int N,
+          int MAP_T,
+          int NPC,
+          int XFCVDEPTH_mapx = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_mapy = _XFCVDEPTH_DEFAULT,
+          typename MAP_type>
 void xFInitUndistortRectifyMapInverseKernel(CM_T* cameraMatrix,
                                             CM_T* distCoeffs,
                                             CM_T* ir,
-                                            xf::cv::Mat<MAP_T, ROWS, COLS, NPC>& map1,
-                                            xf::cv::Mat<MAP_T, ROWS, COLS, NPC>& map2,
+                                            xf::cv::Mat<MAP_T, ROWS, COLS, NPC, XFCVDEPTH_mapx>& map1,
+                                            xf::cv::Mat<MAP_T, ROWS, COLS, NPC, XFCVDEPTH_mapy>& map2,
                                             uint16_t rows,
                                             uint16_t cols,
                                             int noRotation = false) {
@@ -216,21 +225,28 @@ loop_height:
     }
 }
 
-template <int CM_SIZE, int DC_SIZE, int MAP_T, int ROWS, int COLS, int NPC>
+template <int CM_SIZE,
+          int DC_SIZE,
+          int MAP_T,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_mapx = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_mapy = _XFCVDEPTH_DEFAULT>
 void InitUndistortRectifyMapInverse(ap_fixed<32, 12>* cameraMatrix,
                                     ap_fixed<32, 12>* distCoeffs,
                                     ap_fixed<32, 12>* ir,
-                                    xf::cv::Mat<MAP_T, ROWS, COLS, NPC>& _mapx_mat,
-                                    xf::cv::Mat<MAP_T, ROWS, COLS, NPC>& _mapy_mat,
+                                    xf::cv::Mat<MAP_T, ROWS, COLS, NPC, XFCVDEPTH_mapx>& _mapx_mat,
+                                    xf::cv::Mat<MAP_T, ROWS, COLS, NPC, XFCVDEPTH_mapy>& _mapy_mat,
                                     int _cm_size,
                                     int _dc_size) {
 // clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
 
-    xFInitUndistortRectifyMapInverseKernel<ROWS, COLS, CM_SIZE, ap_fixed<32, 12>, DC_SIZE, MAP_T, NPC,
-                                           XF_TNAME(MAP_T, NPC)>(cameraMatrix, distCoeffs, ir, _mapx_mat, _mapy_mat,
-                                                                 _mapx_mat.rows, _mapx_mat.cols);
+    xFInitUndistortRectifyMapInverseKernel<ROWS, COLS, CM_SIZE, ap_fixed<32, 12>, DC_SIZE, MAP_T, NPC, XFCVDEPTH_mapx,
+                                           XFCVDEPTH_mapy, XF_TNAME(MAP_T, NPC)>(
+        cameraMatrix, distCoeffs, ir, _mapx_mat, _mapy_mat, _mapx_mat.rows, _mapx_mat.cols);
 }
 } // namespace cv
 } // namespace xf

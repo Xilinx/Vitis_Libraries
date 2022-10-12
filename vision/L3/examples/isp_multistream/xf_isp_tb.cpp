@@ -16,9 +16,25 @@
 
 #include "common/xf_headers.hpp"
 #include "xf_isp_types.h"
-
 #include "xcl2.hpp"
 
+int g_value_com(unsigned short& value_in, float& alpha, float& ob) {
+    float radiance_out = (value_in - ob) / alpha;
+
+    return radiance_out;
+}
+double compute_datareliabilityweight(float& C, float& mu_h, float& mu_l, float& r) {
+    double wr;
+
+    if (r < mu_l)
+        wr = exp(-C * (std::pow((r - mu_l), 2)));
+    else if (r < mu_h)
+        wr = 1;
+    else
+        wr = exp(-C * (std::pow((r - mu_h), 2)));
+
+    return wr;
+}
 void compute_gamma(float r_g, float g_g, float b_g, uchar gamma_lut[256 * 3]) {
     float gamma_inv[256] = {
         0.000000, 0.003922, 0.007843, 0.011765, 0.015686, 0.019608, 0.023529, 0.027451, 0.031373, 0.035294, 0.039216,
@@ -83,29 +99,90 @@ void compute_gamma(float r_g, float g_g, float b_g, uchar gamma_lut[256 * 3]) {
         gamma_lut[i + 512] = gam_b;
     }
 }
+void wr_ocv_gen(float& alpha,
+                float& optical_black_value,
+                float& intersec,
+                float& rho,
+                float& imax,
+                float* t,
+                short wr_ocv[NO_EXPS][W_B_SIZE]) {
+    int m = NO_EXPS;
+
+    float gamma_out[NO_EXPS] = {0.0, 0.0};
+    for (int i = 0; i < m - 1; i++) {
+        gamma_out[i] = (rho * (imax - optical_black_value) - optical_black_value * (imax - rho)) /
+                       (t[i] * rho + t[i + 1] * (imax - rho));
+    }
+
+    float mu_h[NO_EXPS] = {0.0, 0.0};
+    float mu_l[NO_EXPS] = {0.0, 0.0};
+
+    for (int i = 0; i < m - 1; i++) {
+        if (i == 0) {
+            float value = (rho - optical_black_value) / alpha;
+            mu_h[i] = value / t[0];
+        } else {
+            mu_h[i] = gamma_out[i] - (gamma_out[i - 1] - mu_h[i - 1]);
+        }
+
+        mu_l[i + 1] = 2 * gamma_out[i] - mu_h[i];
+    }
+
+    float value_max = (imax - optical_black_value) / alpha;
+    mu_h[m - 1] = value_max / t[m - 1];
+
+    float c_inters = -(log(intersec) / (std::pow((gamma_out[0] - mu_h[0]), 2)));
+
+    double wr[NO_EXPS][W_B_SIZE];
+
+    FILE* fp = fopen("weights.txt", "w");
+    for (int i = 0; i < NO_EXPS; i++) {
+        for (int j = 0; j < (W_B_SIZE); j++) {
+            float rv = (float)(j / t[i]);
+            wr[i][j] = compute_datareliabilityweight(c_inters, mu_h[i], mu_l[i], rv);
+            wr_ocv[i][j] = wr[i][j] * 16384;
+            fprintf(fp, "%lf,", wr[i][j]);
+        }
+        fprintf(fp, "\n");
+    }
+    fclose(fp);
+}
 int main(int argc, char** argv) {
-    if (argc != 5) {
+    if (argc != 9) {
         fprintf(stderr, "Invalid Number of Arguments!\nUsage:\n");
         fprintf(stderr, "<Executable Name> <input image path> \n");
         return -1;
     }
 
-    cv::Mat in_img1, in_img2, in_img3, in_img4, ocv_ref, in_gray, diff;
+    cv::Mat in_img1, in_img2, in_img3, in_img4, in_img5, in_img6, in_img7, in_img8, interleaved_img1, interleaved_img2,
+        interleaved_img3, interleaved_img4, ocv_ref, in_gray, diff;
 
     unsigned short in_width, in_height;
+    int height, width;
 
 /*  reading in the color image  */
 #if T_8U
+    std::cout << "T_8U selected" << std::endl;
     in_img1 = cv::imread(argv[1], 0);
     in_img2 = cv::imread(argv[2], 0);
     in_img3 = cv::imread(argv[3], 0);
     in_img4 = cv::imread(argv[4], 0);
+    in_img5 = cv::imread(argv[5], 0);
+    in_img6 = cv::imread(argv[6], 0);
+    in_img7 = cv::imread(argv[7], 0);
+    in_img8 = cv::imread(argv[8], 0);
 #else
     in_img1 = cv::imread(argv[1], -1);
     in_img2 = cv::imread(argv[2], -1);
     in_img3 = cv::imread(argv[3], -1);
     in_img4 = cv::imread(argv[4], -1);
+    in_img5 = cv::imread(argv[5], -1);
+    in_img6 = cv::imread(argv[6], -1);
+    in_img7 = cv::imread(argv[7], -1);
+    in_img8 = cv::imread(argv[8], -1);
 #endif
+    height = in_img1.rows;
+    width = in_img1.cols;
 
     if (in_img1.data == NULL) {
         fprintf(stderr, "Cannot open image 1 at %s\n", argv[1]);
@@ -124,12 +201,192 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Cannot open image 4 at %s\n", argv[4]);
         return 0;
     }
+    if (in_img5.data == NULL) {
+        fprintf(stderr, "Cannot open image 1 at %s\n", argv[5]);
+        return 0;
+    }
+    if (in_img6.data == NULL) {
+        fprintf(stderr, "Cannot open image 2 at %s\n", argv[6]);
+        return 0;
+    }
 
-    // Write input image
-    imwrite("input1.jpg", in_img1);
-    imwrite("input2.jpg", in_img2);
-    imwrite("input3.jpg", in_img3);
-    imwrite("input4.jpg", in_img4);
+    if (in_img7.data == NULL) {
+        fprintf(stderr, "Cannot open image 3 at %s\n", argv[7]);
+        return 0;
+    }
+    if (in_img8.data == NULL) {
+        fprintf(stderr, "Cannot open image 4 at %s\n", argv[8]);
+        return 0;
+    }
+    // write input image
+    imwrite("input1.png", in_img1);
+    imwrite("input2.png", in_img2);
+    imwrite("input3.png", in_img3);
+    imwrite("input4.png", in_img4);
+    imwrite("input5.png", in_img5);
+    imwrite("input6.png", in_img6);
+    imwrite("input7.png", in_img7);
+    imwrite("input8.png", in_img8);
+
+    interleaved_img1.create(cv::Size(in_img1.cols + NUM_H_BLANK, in_img1.rows * 2), CV_16UC1);
+    interleaved_img2.create(cv::Size(in_img1.cols + NUM_H_BLANK, in_img1.rows * 2), CV_16UC1);
+    interleaved_img3.create(cv::Size(in_img1.cols + NUM_H_BLANK, in_img1.rows * 2), CV_16UC1);
+    interleaved_img4.create(cv::Size(in_img1.cols + NUM_H_BLANK, in_img1.rows * 2), CV_16UC1);
+
+#if T_8U
+    int sc = 1;
+    int cnt = 0, cnt1 = 0;
+    for (int r = 0; r < height * 2; r++) {
+        for (int c = 0; c < width + NUM_H_BLANK; c++) {
+            if (r < NUM_V_BLANK_LINES) {
+                if (c >= NUM_H_BLANK) {
+                    interleaved_img1.at<unsigned char>(r, c) = in_img1.at<unsigned char>(r, c - NUM_H_BLANK);
+                    interleaved_img2.at<unsigned char>(r, c) = in_img3.at<unsigned char>(r, c - NUM_H_BLANK);
+                    interleaved_img3.at<unsigned char>(r, c) = in_img5.at<unsigned char>(r, c - NUM_H_BLANK);
+                    interleaved_img4.at<unsigned char>(r, c) = in_img7.at<unsigned char>(r, c - NUM_H_BLANK);
+                } else {
+                    interleaved_img1.at<unsigned char>(r, c) = 0;
+                    interleaved_img2.at<unsigned char>(r, c) = 0;
+                    interleaved_img3.at<unsigned char>(r, c) = 0;
+                    interleaved_img4.at<unsigned char>(r, c) = 0;
+                }
+            }
+
+            if (r >= NUM_V_BLANK_LINES && r <= ((2 * height) - NUM_V_BLANK_LINES)) {
+                if (r % 2 == 0) {
+                    if (c >= NUM_H_BLANK) {
+                        interleaved_img1.at<unsigned char>(r, c) = in_img2.at<unsigned char>(cnt, c - NUM_H_BLANK);
+                        interleaved_img2.at<unsigned char>(r, c) = in_img4.at<unsigned char>(cnt, c - NUM_H_BLANK);
+                        interleaved_img3.at<unsigned char>(r, c) = in_img6.at<unsigned char>(cnt, c - NUM_H_BLANK);
+                        interleaved_img4.at<unsigned char>(r, c) = in_img8.at<unsigned char>(cnt, c - NUM_H_BLANK);
+                    } else {
+                        interleaved_img1.at<unsigned char>(r, c) = 0;
+                        interleaved_img2.at<unsigned char>(r, c) = 0;
+                        interleaved_img3.at<unsigned char>(r, c) = 0;
+                        interleaved_img4.at<unsigned char>(r, c) = 0;
+                    }
+                } else {
+                    if (c >= NUM_H_BLANK) {
+                        interleaved_img1.at<unsigned char>(r, c) =
+                            in_img1.at<unsigned char>(cnt1 + NUM_V_BLANK_LINES - 1, c - NUM_H_BLANK);
+                        interleaved_img2.at<unsigned char>(r, c) =
+                            in_img3.at<unsigned char>(cnt1 + NUM_V_BLANK_LINES - 1, c - NUM_H_BLANK);
+                        interleaved_img3.at<unsigned char>(r, c) =
+                            in_img5.at<unsigned char>(cnt1 + NUM_V_BLANK_LINES - 1, c - NUM_H_BLANK);
+                        interleaved_img4.at<unsigned char>(r, c) =
+                            in_img7.at<unsigned char>(cnt1 + NUM_V_BLANK_LINES - 1, c - NUM_H_BLANK);
+                    }
+
+                    else {
+                        interleaved_img1.at<unsigned char>(r, c) = 0;
+                        interleaved_img2.at<unsigned char>(r, c) = 0;
+                        interleaved_img3.at<unsigned char>(r, c) = 0;
+                        interleaved_img4.at<unsigned char>(r, c) = 0;
+                    }
+                }
+            }
+            if (r >= ((2 * height) - NUM_V_BLANK_LINES)) {
+                if (c >= NUM_H_BLANK) {
+                    interleaved_img1.at<unsigned char>(r, c) = in_img2.at<unsigned char>(cnt, c - NUM_H_BLANK);
+                    interleaved_img2.at<unsigned char>(r, c) = in_img4.at<unsigned char>(cnt, c - NUM_H_BLANK);
+                    interleaved_img3.at<unsigned char>(r, c) = in_img6.at<unsigned char>(cnt, c - NUM_H_BLANK);
+                    interleaved_img4.at<unsigned char>(r, c) = in_img8.at<unsigned char>(cnt, c - NUM_H_BLANK);
+                } else {
+                    interleaved_img1.at<unsigned char>(r, c) = 0;
+                    interleaved_img2.at<unsigned char>(r, c) = 0;
+                    interleaved_img3.at<unsigned char>(r, c) = 0;
+                    interleaved_img4.at<unsigned char>(r, c) = 0;
+                }
+            }
+        }
+        if (r % 2 == 0 && r >= NUM_V_BLANK_LINES) {
+            cnt++;
+        }
+        if (r % 2 != 0 && r >= NUM_V_BLANK_LINES) {
+            cnt1++;
+        }
+    }
+#else
+    int sc = 1;
+    int cnt = 0, cnt1 = 0;
+
+    for (int r = 0; r < height * 2; r++) {
+        for (int c = 0; c < width + NUM_H_BLANK; c++) {
+            if (r < NUM_V_BLANK_LINES) {
+                if (c >= NUM_H_BLANK) {
+                    interleaved_img1.at<unsigned short>(r, c) = in_img1.at<unsigned short>(r, c - NUM_H_BLANK);
+                    interleaved_img2.at<unsigned short>(r, c) = in_img3.at<unsigned short>(r, c - NUM_H_BLANK);
+                    interleaved_img3.at<unsigned short>(r, c) = in_img5.at<unsigned short>(r, c - NUM_H_BLANK);
+                    interleaved_img4.at<unsigned short>(r, c) = in_img7.at<unsigned short>(r, c - NUM_H_BLANK);
+                } else {
+                    interleaved_img1.at<unsigned short>(r, c) = 0;
+                    interleaved_img2.at<unsigned short>(r, c) = 0;
+                    interleaved_img3.at<unsigned short>(r, c) = 0;
+                    interleaved_img4.at<unsigned short>(r, c) = 0;
+                }
+            }
+
+            if (r >= NUM_V_BLANK_LINES && r <= ((2 * height) - NUM_V_BLANK_LINES)) {
+                if (r % 2 == 0) {
+                    if (c >= NUM_H_BLANK) {
+                        interleaved_img1.at<unsigned short>(r, c) = in_img2.at<unsigned short>(cnt, c - NUM_H_BLANK);
+                        interleaved_img2.at<unsigned short>(r, c) = in_img4.at<unsigned short>(cnt, c - NUM_H_BLANK);
+                        interleaved_img3.at<unsigned short>(r, c) = in_img6.at<unsigned short>(cnt, c - NUM_H_BLANK);
+                        interleaved_img4.at<unsigned short>(r, c) = in_img8.at<unsigned short>(cnt, c - NUM_H_BLANK);
+                    } else {
+                        interleaved_img1.at<unsigned short>(r, c) = 0;
+                        interleaved_img2.at<unsigned short>(r, c) = 0;
+                        interleaved_img3.at<unsigned short>(r, c) = 0;
+                        interleaved_img4.at<unsigned short>(r, c) = 0;
+                    }
+                } else {
+                    if (c >= NUM_H_BLANK) {
+                        interleaved_img1.at<unsigned short>(r, c) =
+                            in_img1.at<unsigned short>(cnt1 + NUM_V_BLANK_LINES - 1, c - NUM_H_BLANK);
+                        interleaved_img2.at<unsigned short>(r, c) =
+                            in_img3.at<unsigned short>(cnt1 + NUM_V_BLANK_LINES - 1, c - NUM_H_BLANK);
+                        interleaved_img3.at<unsigned short>(r, c) =
+                            in_img5.at<unsigned short>(cnt1 + NUM_V_BLANK_LINES - 1, c - NUM_H_BLANK);
+                        interleaved_img4.at<unsigned short>(r, c) =
+                            in_img7.at<unsigned short>(cnt1 + NUM_V_BLANK_LINES - 1, c - NUM_H_BLANK);
+                    }
+
+                    else {
+                        interleaved_img1.at<unsigned short>(r, c) = 0;
+                        interleaved_img2.at<unsigned short>(r, c) = 0;
+                        interleaved_img3.at<unsigned short>(r, c) = 0;
+                        interleaved_img4.at<unsigned short>(r, c) = 0;
+                    }
+                }
+            }
+            if (r >= ((2 * height) - NUM_V_BLANK_LINES)) {
+                if (c >= NUM_H_BLANK) {
+                    interleaved_img1.at<unsigned short>(r, c) = in_img2.at<unsigned short>(cnt, c - NUM_H_BLANK);
+                    interleaved_img2.at<unsigned short>(r, c) = in_img4.at<unsigned short>(cnt, c - NUM_H_BLANK);
+                    interleaved_img3.at<unsigned short>(r, c) = in_img6.at<unsigned short>(cnt, c - NUM_H_BLANK);
+                    interleaved_img4.at<unsigned short>(r, c) = in_img8.at<unsigned short>(cnt, c - NUM_H_BLANK);
+                } else {
+                    interleaved_img1.at<unsigned short>(r, c) = 0;
+                    interleaved_img2.at<unsigned short>(r, c) = 0;
+                    interleaved_img3.at<unsigned short>(r, c) = 0;
+                    interleaved_img4.at<unsigned short>(r, c) = 0;
+                }
+            }
+        }
+        if (r % 2 == 0 && r >= NUM_V_BLANK_LINES) {
+            cnt++;
+        }
+        if (r % 2 != 0 && r >= NUM_V_BLANK_LINES) {
+            cnt1++;
+        }
+    }
+
+#endif
+
+    imwrite("interleaved_img1.png", interleaved_img1);
+    imwrite("interleaved_img2.png", interleaved_img2);
+    imwrite("interleaved_img3.png", interleaved_img3);
+    imwrite("interleaved_img4.png", interleaved_img4);
 
     cv::Mat out_img1(in_img1.rows, in_img1.cols, CV_16UC1);
     cv::Mat out_img2(in_img2.rows, in_img2.cols, CV_16UC1);
@@ -138,22 +395,40 @@ int main(int argc, char** argv) {
 
 #if T_8U
     size_t vec_in_size_bytes = NUM_STREAMS * 256 * 3 * sizeof(unsigned char);
+    size_t vec_weight_size_bytes = NO_EXPS * XF_NPPC * W_B_SIZE * sizeof(short);
     size_t image_in_size_bytes = in_img1.rows * in_img1.cols * sizeof(unsigned char);
     size_t image_out_size_bytes = in_img1.rows * in_img1.cols * 1 * sizeof(unsigned short);
 #else
     size_t vec_in_size_bytes = NUM_STREAMS * 256 * 3 * sizeof(unsigned char);
-    size_t image_in_size_bytes = in_img1.rows * in_img1.cols * sizeof(unsigned short);
+    size_t vec_weight_size_bytes = NO_EXPS * XF_NPPC * W_B_SIZE * sizeof(short);
+    size_t image_in_size_bytes = interleaved_img1.rows * interleaved_img1.cols * sizeof(unsigned short);
     size_t image_out_size_bytes = in_img1.rows * in_img1.cols * 1 * sizeof(unsigned short);
 #endif
 
     /////////////////////////////////////// CL ////////////////////////
+    float alpha = 1.0f;
+    float optical_black_value = 0.0f;
+    float intersec = 0.25f;
+    float rho = 512;
+    float imax = (W_B_SIZE - 1);
+    float t[NO_EXPS] = {1.0f, 0.25f}; //{1.0f,0.25f,0.0625f};
+    short wr_ocv[NO_EXPS][W_B_SIZE];
 
-    int height = in_img1.rows;
-    int width = in_img1.cols;
+    // wr_ocv_gen function call
+    wr_ocv_gen(alpha, optical_black_value, intersec, rho, imax, t, wr_ocv);
+
+    short wr_hls[NO_EXPS * XF_NPPC * W_B_SIZE];
+    for (int k = 0; k < XF_NPPC; k++) {
+        for (int i = 0; i < NO_EXPS; i++) {
+            for (int j = 0; j < (W_B_SIZE); j++) {
+                wr_hls[(i + k * NO_EXPS) * W_B_SIZE + j] = wr_ocv[i][j];
+            }
+        }
+    }
 
     struct ispparams_config params[NUM_STREAMS];
 
-    unsigned short array_params[NUM_STREAMS][6];
+    unsigned short array_params[NUM_STREAMS][10];
 
     for (int i = 0; i < NUM_STREAMS; i++) {
         array_params[i][0] = params[i].rgain;
@@ -162,6 +437,10 @@ int main(int argc, char** argv) {
         array_params[i][3] = params[i].pawb;
         array_params[i][4] = params[i].bayer_p;
         array_params[i][5] = params[i].black_level;
+        array_params[i][6] = params[i].height;
+        array_params[i][7] = params[i].width;
+        array_params[i][8] = params[i].blk_height;
+        array_params[i][9] = params[i].blk_width;
     }
 
     unsigned char gamma_lut[NUM_STREAMS][256 * 3];
@@ -175,8 +454,10 @@ int main(int argc, char** argv) {
     compute_gamma(gamma_val_r, gamma_val_g, gamma_val_b, gamma_lut[2]);
     compute_gamma(gamma_val_r, gamma_val_g, gamma_val_b, gamma_lut[3]);
 
+    //    int blk_height = 32;
+    //    int blk_width = 32;
     // int channels=out_img.channels();
-    size_t array_size_bytes = NUM_STREAMS * 6 * sizeof(unsigned short);
+    size_t array_size_bytes = NUM_STREAMS * 10 * sizeof(unsigned short);
 
     cl_int err;
     std::cout << "INFO: Running OpenCL section." << std::endl;
@@ -206,6 +487,7 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, cl::Buffer buffer_outImage3(context, CL_MEM_WRITE_ONLY, image_out_size_bytes, NULL, &err));
     OCL_CHECK(err, cl::Buffer buffer_outImage4(context, CL_MEM_WRITE_ONLY, image_out_size_bytes, NULL, &err));
     OCL_CHECK(err, cl::Buffer buffer_inVec(context, CL_MEM_READ_ONLY, vec_in_size_bytes, NULL, &err));
+    OCL_CHECK(err, cl::Buffer buffer_inVec_Weights(context, CL_MEM_READ_ONLY, vec_weight_size_bytes, NULL, &err));
     OCL_CHECK(err, cl::Buffer buffer_array(context, CL_MEM_READ_ONLY, array_size_bytes, NULL, &err));
 
     // Set the kernel arguments
@@ -217,10 +499,9 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, err = kernel.setArg(5, buffer_outImage2));
     OCL_CHECK(err, err = kernel.setArg(6, buffer_outImage3));
     OCL_CHECK(err, err = kernel.setArg(7, buffer_outImage4));
-    OCL_CHECK(err, err = kernel.setArg(8, height));
-    OCL_CHECK(err, err = kernel.setArg(9, width));
-    OCL_CHECK(err, err = kernel.setArg(10, buffer_array));
-    OCL_CHECK(err, err = kernel.setArg(11, buffer_inVec));
+    OCL_CHECK(err, err = kernel.setArg(8, buffer_array));
+    OCL_CHECK(err, err = kernel.setArg(9, buffer_inVec));
+    OCL_CHECK(err, err = kernel.setArg(10, buffer_inVec_Weights));
 
     for (int i = 0; i < 2; i++) {
         OCL_CHECK(err, q.enqueueWriteBuffer(buffer_array,     // buffer on the FPGA
@@ -235,10 +516,16 @@ int main(int argc, char** argv) {
                                             vec_in_size_bytes, // Size in bytes
                                             gamma_lut));
 
-        OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inImage1, CL_TRUE, 0, image_in_size_bytes, in_img1.data));
-        OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inImage2, CL_TRUE, 0, image_in_size_bytes, in_img2.data));
-        OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inImage3, CL_TRUE, 0, image_in_size_bytes, in_img3.data));
-        OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inImage4, CL_TRUE, 0, image_in_size_bytes, in_img4.data));
+        OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inVec_Weights,  // buffer on the FPGA
+                                            CL_TRUE,               // blocking call
+                                            0,                     // buffer offset in bytes
+                                            vec_weight_size_bytes, // Size in bytes
+                                            wr_hls));
+
+        OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inImage1, CL_TRUE, 0, image_in_size_bytes, interleaved_img1.data));
+        OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inImage2, CL_TRUE, 0, image_in_size_bytes, interleaved_img2.data));
+        OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inImage3, CL_TRUE, 0, image_in_size_bytes, interleaved_img3.data));
+        OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inImage4, CL_TRUE, 0, image_in_size_bytes, interleaved_img4.data));
 
         // Profiling Objects
         cl_ulong start = 0;
@@ -270,6 +557,7 @@ int main(int argc, char** argv) {
     imwrite("hls_out2.png", out_img2);
     imwrite("hls_out3.png", out_img3);
     imwrite("hls_out4.png", out_img4);
+    std::cout << "Test Finished" << std::endl;
 
     return 0;
 }

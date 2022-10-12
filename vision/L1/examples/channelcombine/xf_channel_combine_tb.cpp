@@ -61,35 +61,24 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Cannot open input images \n");
         return 1;
     }
-    // creating memory for diff image
-    diff.create(in_gray1.rows, in_gray1.cols, CV_TYPE);
 #endif
 
 #if FOUR_INPUT
-
     in_gray4 = cv::imread(argv[4], 0);
-
     if ((in_gray4.data == NULL)) {
         fprintf(stderr, "Cannot open image 4\n");
         return 1;
     }
-
 #endif
 
     // image height and width
     int height = in_gray1.rows;
     int width = in_gray1.cols;
 
-// Allocate memory for the output images:
-#if TWO_INPUT
-    out_img.create(in_gray1.rows, in_gray1.cols, CV_8UC2);
-#endif
-#if THREE_INPUT
-    out_img.create(in_gray1.rows, in_gray1.cols, CV_8UC3);
-#endif
-#if FOUR_INPUT
-    out_img.create(in_gray1.rows, in_gray1.cols, CV_8UC4);
-#endif
+    // Allocate memory for the output images:
+    out_img.create(height, width, CV_TYPE);
+    // creating memory for diff image
+    diff.create(height, width, CV_TYPE);
 
 // Call the top function
 #if TWO_INPUT
@@ -107,9 +96,10 @@ int main(int argc, char** argv) {
                           (ap_uint<OUTPUT_PTR_WIDTH>*)out_img.data, height, width);
 #endif
 
+// Write the kernel output image:
 #if !TWO_INPUT
-    // Write the kernel output image:
     cv::imwrite("hls_out.jpg", out_img);
+#endif
 
     // OpenCV reference:
     std::vector<cv::Mat> bgr_planes;
@@ -118,7 +108,9 @@ int main(int argc, char** argv) {
     bgr_planes.push_back(in_gray1);
     bgr_planes.push_back(in_gray2);
 
+#if !TWO_INPUT
     bgr_planes.push_back(in_gray3);
+#endif
 
 #if FOUR_INPUT
     bgr_planes.push_back(in_gray4);
@@ -127,9 +119,11 @@ int main(int argc, char** argv) {
     cv::merge(bgr_planes, merged);
 
     // Results verification:
-    cv::imwrite("out_ocv.jpg", merged);
     cv::absdiff(merged, out_img, diff);
+#if !TWO_INPUT
+    cv::imwrite("out_ocv.jpg", merged);
     cv::imwrite("diff.jpg", diff);
+#endif
 
     // Find minimum and maximum differences:
     double minval = 256, maxval = 0;
@@ -142,21 +136,30 @@ int main(int argc, char** argv) {
 #if THREE_INPUT
             cv::Vec3b v = diff.at<cv::Vec3b>(i, j);
 #endif
+#if TWO_INPUT
+            cv::Vec2b v = diff.at<cv::Vec2b>(i, j);
+#endif
             if (v[0] > 0) cnt++;
             if (v[1] > 0) cnt++;
+#if THREE_INPUT
             if (v[2] > 0) cnt++;
+#endif
 #if FOUR_INPUT
             if (v[3] > 0) cnt++;
 #endif
             if (minval > v[0]) minval = v[0];
             if (minval > v[1]) minval = v[1];
+#if THREE_INPUT
             if (minval > v[2]) minval = v[2];
+#endif
 #if FOUR_INPUT
             if (minval > v[3]) minval = v[3];
 #endif
             if (maxval < v[0]) maxval = v[0];
             if (maxval < v[1]) maxval = v[1];
+#if THREE_INPUT
             if (maxval < v[2]) maxval = v[2];
+#endif
 #if FOUR_INPUT
             if (maxval < v[3]) maxval = v[3];
 #endif
@@ -172,8 +175,8 @@ int main(int argc, char** argv) {
 
     if (err_per > 0.0f) {
         fprintf(stderr, "ERROR: Test Failed.\n ");
-        return EXIT_FAILURE;
-    }
-#endif
+        return 1;
+    } else
+        std::cout << "Test Passed " << std::endl;
     return 0;
 }

@@ -139,6 +139,7 @@ int main(int argc, char** argv) {
             exit(-1);
         }
         //}
+        absdiff_graph.end();
         std::cout << "Test passed" << std::endl;
         return 0;
     } catch (std::exception& e) {

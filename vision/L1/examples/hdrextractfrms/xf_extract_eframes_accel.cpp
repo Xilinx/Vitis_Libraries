@@ -29,8 +29,9 @@ static constexpr int __XF_DEPTH_2 = __XF_DEPTH * 2;
  * Return:      None
  * Description: Read data from multiple pixel/clk AXI stream into user defined stream
  ************************************************************************************/
-template <int TYPE, int ROWS, int COLS, int NPPC>
-void AXIVideo2BayerMat(InVideoStrm_t_e_s& bayer_strm, xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& bayer_mat) {
+template <int TYPE, int ROWS, int COLS, int NPPC, int XF_CV_DEPTH_BAYER>
+void AXIVideo2BayerMat(InVideoStrm_t_e_s& bayer_strm,
+                       xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XF_CV_DEPTH_BAYER>& bayer_mat) {
 // clang-format off
 #pragma HLS INLINE OFF
     // clang-format on
@@ -96,8 +97,8 @@ loop_row_axi2mat:
     return;
 }
 
-template <int TYPE, int ROWS, int COLS, int NPPC>
-void GRAYMat2AXIvideo(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& gray_mat, OutVideoStrm_t_e_s& gray_strm) {
+template <int TYPE, int ROWS, int COLS, int NPPC, int XF_CV_DEPTH_GRAY>
+void GRAYMat2AXIvideo(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XF_CV_DEPTH_GRAY>& gray_mat, OutVideoStrm_t_e_s& gray_strm) {
 // clang-format off
 #pragma HLS INLINE OFF
     // clang-format on
@@ -186,9 +187,10 @@ void extractEFrames_accel(InVideoStrm_t_e_s& in_ptr,
     // -----------------------------------------------
     // Internal xf::Mat objects
     // -----------------------------------------------
-    xf::cv::Mat<XF_SRC_T, XF_MAX_ROWS * 2, XF_MAX_COLS + NUM_H_BLANK, XF_NPPC> InImg(height * 2, width + NUM_H_BLANK);
-    xf::cv::Mat<XF_SRC_T, XF_MAX_ROWS, XF_MAX_COLS, XF_NPPC> LEF_Img(height, width);
-    xf::cv::Mat<XF_SRC_T, XF_MAX_ROWS, XF_MAX_COLS, XF_NPPC> SEF_Img(height, width);
+    xf::cv::Mat<XF_SRC_T, XF_MAX_ROWS * 2, XF_MAX_COLS + NUM_H_BLANK, XF_NPPC, XF_CV_DEPTH_IN> InImg(
+        height * 2, width + NUM_H_BLANK);
+    xf::cv::Mat<XF_SRC_T, XF_MAX_ROWS, XF_MAX_COLS, XF_NPPC, XF_CV_DEPTH_LEF> LEF_Img(height, width);
+    xf::cv::Mat<XF_SRC_T, XF_MAX_ROWS, XF_MAX_COLS, XF_NPPC, XF_CV_DEPTH_SEF> SEF_Img(height, width);
 
 // -----------------------------------------------
 // Actual Body
@@ -197,13 +199,14 @@ void extractEFrames_accel(InVideoStrm_t_e_s& in_ptr,
     #pragma HLS DATAFLOW
     // clang-format on
 
-    AXIVideo2BayerMat<XF_SRC_T, XF_MAX_ROWS * 2, XF_MAX_COLS + NUM_H_BLANK, XF_NPPC>(in_ptr, InImg);
+    AXIVideo2BayerMat<XF_SRC_T, XF_MAX_ROWS * 2, XF_MAX_COLS + NUM_H_BLANK, XF_NPPC, XF_CV_DEPTH_IN>(in_ptr, InImg);
     // Actual accelerator
     xf::cv::extractExposureFrames<XF_SRC_T, NUM_V_BLANK_LINES, NUM_H_BLANK, XF_MAX_ROWS, XF_MAX_COLS, XF_NPPC,
-                                  XF_USE_URAM>(InImg, LEF_Img, SEF_Img);
+                                  XF_USE_URAM, XF_CV_DEPTH_IN, XF_CV_DEPTH_LEF, XF_CV_DEPTH_SEF>(InImg, LEF_Img,
+                                                                                                 SEF_Img);
 
-    GRAYMat2AXIvideo<XF_SRC_T, XF_MAX_ROWS, XF_MAX_COLS, XF_NPPC>(LEF_Img, lef_ptr);
-    GRAYMat2AXIvideo<XF_SRC_T, XF_MAX_ROWS, XF_MAX_COLS, XF_NPPC>(SEF_Img, sef_ptr);
+    GRAYMat2AXIvideo<XF_SRC_T, XF_MAX_ROWS, XF_MAX_COLS, XF_NPPC, XF_CV_DEPTH_LEF>(LEF_Img, lef_ptr);
+    GRAYMat2AXIvideo<XF_SRC_T, XF_MAX_ROWS, XF_MAX_COLS, XF_NPPC, XF_CV_DEPTH_SEF>(SEF_Img, sef_ptr);
 }
 
 #endif // __XF_EXTRACT_EFRAMES_ACCEL_CPP__

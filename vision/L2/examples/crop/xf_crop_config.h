@@ -33,10 +33,10 @@ typedef ap_uint<64> ap_uint64_t;
 #define HEIGHT 2160
 #define WIDTH 3840
 
-#if NO
+#if SPC
 #define NPC XF_NPPC1
 #endif
-#if RO
+#if MPC
 #define NPC XF_NPPC8
 #endif
 

@@ -40,12 +40,15 @@ namespace cv {
 // ......................................................................................
 
 // Some macros related to template (for easiness of coding)
-#define _GENERIC_BPC_TPLT_DEC                                                                  \
-    template <typename F, int SRC_T, int ROWS, int COLS, int K_ROWS, int K_COLS, int NPPC = 1, \
+#define _GENERIC_BPC_TPLT_DEC                                                                    \
+    template <typename F, int SRC_T, int ROWS, int COLS, int K_ROWS, int K_COLS, int NPPC = 1,   \
+              int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT, int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT, \
               int BORDER_T = XF_BORDER_CONSTANT, int USE_URAM = 0>
-#define _GENERIC_BPC_TPLT \
-    template <typename F, int SRC_T, int ROWS, int COLS, int K_ROWS, int K_COLS, int NPPC, int BORDER_T, int USE_URAM>
-#define _GENERIC_BPC GenericBPC<F, SRC_T, ROWS, COLS, K_ROWS, K_COLS, NPPC, BORDER_T, USE_URAM>
+#define _GENERIC_BPC_TPLT                                                                                      \
+    template <typename F, int SRC_T, int ROWS, int COLS, int K_ROWS, int K_COLS, int NPPC, int XFCVDEPTH_IN_1, \
+              int XFCVDEPTH_OUT_1, int BORDER_T, int USE_URAM>
+#define _GENERIC_BPC \
+    GenericBPC<F, SRC_T, ROWS, COLS, K_ROWS, K_COLS, NPPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1, BORDER_T, USE_URAM>
 
 // Some global constants
 #define CH_IDX_T uint8_t
@@ -95,19 +98,20 @@ _GENERIC_BPC_TPLT_DEC class GenericBPC {
     }
 
     // Internal functions
-    void initialize(xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _src);
+    void initialize(xf::cv::Mat<SRC_T, ROWS, COLS, NPPC, XFCVDEPTH_IN_1>& _src);
 
     void update_row_idx();
     void process_row(ROW_IDX_T r,
-                     xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _src,
-                     xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _dst);
-    void process_image(xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _src, xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _dst);
+                     xf::cv::Mat<SRC_T, ROWS, COLS, NPPC, XFCVDEPTH_IN_1>& _src,
+                     xf::cv::Mat<SRC_T, ROWS, COLS, NPPC, XFCVDEPTH_OUT_1>& _dst);
+    void process_image(xf::cv::Mat<SRC_T, ROWS, COLS, NPPC, XFCVDEPTH_IN_1>& _src,
+                       xf::cv::Mat<SRC_T, ROWS, COLS, NPPC, XFCVDEPTH_OUT_1>& _dst);
 };
 
 // -----------------------------------------------------------------------------------
 // Function to initialize internal regsiters and buffers
 // -----------------------------------------------------------------------------------
-_GENERIC_BPC_TPLT void _GENERIC_BPC::initialize(xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _src) {
+_GENERIC_BPC_TPLT void _GENERIC_BPC::initialize(xf::cv::Mat<SRC_T, ROWS, COLS, NPPC, XFCVDEPTH_IN_1>& _src) {
 #pragma HLS INLINE
 
     // Computing no.of clocks required for processing a row of given image
@@ -131,8 +135,8 @@ _GENERIC_BPC_TPLT void _GENERIC_BPC::initialize(xf::cv::Mat<SRC_T, ROWS, COLS, N
 // Function to process a row
 // -----------------------------------------------------------------------------------
 _GENERIC_BPC_TPLT void _GENERIC_BPC::process_row(ROW_IDX_T r,
-                                                 xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _src,
-                                                 xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _dst) {
+                                                 xf::cv::Mat<SRC_T, ROWS, COLS, NPPC, XFCVDEPTH_IN_1>& _src,
+                                                 xf::cv::Mat<SRC_T, ROWS, COLS, NPPC, XFCVDEPTH_OUT_1>& _dst) {
 #pragma HLS INLINE OFF
 
     // --------------------------------------
@@ -287,8 +291,8 @@ _GENERIC_BPC_TPLT void _GENERIC_BPC::update_row_idx() {
 // -----------------------------------------------------------------------------------
 // Main function that runs the filter over the image
 // -----------------------------------------------------------------------------------
-_GENERIC_BPC_TPLT void _GENERIC_BPC::process_image(xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _src,
-                                                   xf::cv::Mat<SRC_T, ROWS, COLS, NPPC>& _dst) {
+_GENERIC_BPC_TPLT void _GENERIC_BPC::process_image(xf::cv::Mat<SRC_T, ROWS, COLS, NPPC, XFCVDEPTH_IN_1>& _src,
+                                                   xf::cv::Mat<SRC_T, ROWS, COLS, NPPC, XFCVDEPTH_OUT_1>& _dst) {
 #pragma HLS INLINE OFF
     // Constant declaration
     const uint32_t _TC =
@@ -439,12 +443,22 @@ class BPC {
 // --------------------------------------------------------------------------------------
 // Below function will generate list of corners
 // --------------------------------------------------------------------------------------
-template <int TYPE, int ROWS, int COLS, int NPPC = 1, int BORDER_T = XF_BORDER_CONSTANT, int USE_URAM = 0>
-void badpixelcorrection(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& _src, xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& _dst) {
+template <int TYPE,
+          int ROWS,
+          int COLS,
+          int NPPC = 1,
+          int BORDER_T = XF_BORDER_CONSTANT,
+          int USE_URAM = 0,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void badpixelcorrection(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN_1>& _src,
+                        xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT_1>& _dst) {
 // clang-format off
 #pragma HLS INLINE OFF
     // clang-format on
-    GenericBPC<_BPC_, TYPE, ROWS, COLS, _BPC_P_SIZE, _BPC_P_SIZE, NPPC, BORDER_T, USE_URAM> bpc;
+    GenericBPC<_BPC_, TYPE, ROWS, COLS, _BPC_P_SIZE, _BPC_P_SIZE, NPPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1, BORDER_T,
+               USE_URAM>
+        bpc;
 
     bpc.process_image(_src, _dst);
 

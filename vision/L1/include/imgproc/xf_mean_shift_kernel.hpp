@@ -64,9 +64,16 @@ const unsigned char xFTrackmulSqrtLut[100] = {
  * y1     		--> Top left corner y-coordinate
  * buf_size		--> number of elements to be read in one row
  */
-template <int ROWS, int IN_TC, int COLS, int SRC_T, int ROWS_IMG, int COLS_IMG, int NPC>
+template <int ROWS,
+          int IN_TC,
+          int COLS,
+          int SRC_T,
+          int ROWS_IMG,
+          int COLS_IMG,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT>
 void xFTrackmulBlkReadIn(XF_TNAME(SRC_T, NPC) ptr[1],
-                         xf::cv::Mat<SRC_T, ROWS_IMG, COLS_IMG, NPC>& _in_mat,
+                         xf::cv::Mat<SRC_T, ROWS_IMG, COLS_IMG, NPC, XFCVDEPTH_IN>& _in_mat,
                          int i,
                          hls::stream<XF_TNAME(SRC_T, NPC)>& input1,
                          int x1,
@@ -102,9 +109,16 @@ loop_blockread_inner:
  * obj_wdt  --> width of the object
  * obj_num	--> object number in the video
  */
-template <int ROWS, int IN_TC, int COLS, int SRC_T, int ROWS_IMG, int COLS_IMG, int NPC>
+template <int ROWS,
+          int IN_TC,
+          int COLS,
+          int SRC_T,
+          int ROWS_IMG,
+          int COLS_IMG,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT>
 void xFTrackmulBlkRead(hls::stream<XF_TNAME(SRC_T, NPC)>& input1,
-                       xf::cv::Mat<SRC_T, ROWS_IMG, COLS_IMG, NPC>& _in_mat,
+                       xf::cv::Mat<SRC_T, ROWS_IMG, COLS_IMG, NPC, XFCVDEPTH_IN>& _in_mat,
                        uint16_t x1,
                        uint16_t y1,
                        uint16_t obj_hgt,
@@ -121,8 +135,8 @@ loop_blockread_outer:
         #pragma HLS PIPELINE
         #pragma HLS LOOP_TRIPCOUNT min=20 max=ROWS avg=ROWS
         // clang-format on
-        xFTrackmulBlkReadIn<ROWS, IN_TC, COLS, SRC_T, ROWS_IMG, COLS_IMG, NPC>(dst, _in_mat, i, input1, x1, y1,
-                                                                               buf_size);
+        xFTrackmulBlkReadIn<ROWS, IN_TC, COLS, SRC_T, ROWS_IMG, COLS_IMG, NPC, XFCVDEPTH_IN>(dst, _in_mat, i, input1,
+                                                                                             x1, y1, buf_size);
     }
 }
 
@@ -295,7 +309,7 @@ static int xFTrackmulSqrt(int temp) {
  * y1     	--> Top left corner y-coordinate
  * obj_hgt  --> height of the object
  * obj_wdt  --> width of the object
- * C_x   	--> temporary histogram used in RO, PO cases for parallel processing
+ * C_x   	--> temporary histogram used in MPC, PO cases for parallel processing
  * C_x  	--> object number in the video
  * track    --> track status of the current object
  * rows     --> height of the image
@@ -427,7 +441,7 @@ loop_weight_height:
  * Qu		--> Array to store the histograms of the objects in the first frame
  * Pu		--> array to store the histogram of current object
  * BIN 		--> An array to store the bin values
- * tmp_hist	--> temporary histogram used in RO, PO cases to compute histogram in parallel
+ * tmp_hist	--> temporary histogram used in MPC, PO cases to compute histogram in parallel
  * obj_num 	--> object number in the video
  * frameno	--> frame number in video
  */
@@ -438,9 +452,10 @@ template <int ROWS,
           int ROWS_IMG,
           int COLS_IMG,
           int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
           typename QuPuTYPE,
           typename BINTYPE>
-void xFTrackmulFindhist(xf::cv::Mat<SRC_T, ROWS_IMG, COLS_IMG, NPC>& _in_mat,
+void xFTrackmulFindhist(xf::cv::Mat<SRC_T, ROWS_IMG, COLS_IMG, NPC, XFCVDEPTH_IN>& _in_mat,
                         uint16_t x1,
                         uint16_t y1,
                         uint16_t obj_hgt,
@@ -460,7 +475,8 @@ void xFTrackmulFindhist(xf::cv::Mat<SRC_T, ROWS_IMG, COLS_IMG, NPC>& _in_mat,
     // clang-format on
 
     // Read the block from DDR and push into stream
-    xFTrackmulBlkRead<ROWS, IN_TC, COLS, SRC_T, ROWS_IMG, COLS_IMG, NPC>(input2, _in_mat, x1, y1, obj_hgt, obj_wdt);
+    xFTrackmulBlkRead<ROWS, IN_TC, COLS, SRC_T, ROWS_IMG, COLS_IMG, NPC, XFCVDEPTH_IN>(input2, _in_mat, x1, y1, obj_hgt,
+                                                                                       obj_wdt);
 
     // Read the values from stream and find the histogram
     xFTrackmulHist<ROWS, (IN_TC >> 1), COLS, NPC, XF_WORDWIDTH(SRC_T, NPC)>(input2, x1, obj_hgt, y1, obj_wdt, Qu, Pu,
@@ -483,8 +499,17 @@ void xFTrackmulFindhist(xf::cv::Mat<SRC_T, ROWS_IMG, COLS_IMG, NPC>& _in_mat,
  * obj_num --> current object index
  * iters    --> Total number of iterations for the convergence
  */
-template <int ROWS, int IN_TC, int COLS, int SRC_T, int ROWS_IMG, int COLS_IMG, int MAXOBJS, int MAXITERS, int NPC>
-void xFTrackmulKernelFunc(xf::cv::Mat<SRC_T, ROWS_IMG, COLS_IMG, NPC>& _in_mat,
+template <int ROWS,
+          int IN_TC,
+          int COLS,
+          int SRC_T,
+          int ROWS_IMG,
+          int COLS_IMG,
+          int MAXOBJS,
+          int MAXITERS,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT>
+void xFTrackmulKernelFunc(xf::cv::Mat<SRC_T, ROWS_IMG, COLS_IMG, NPC, XFCVDEPTH_IN>& _in_mat,
                           uint16_t x1,
                           uint16_t y1,
                           uint16_t obj_hgt,
@@ -527,8 +552,8 @@ loop_iterations:
 
         if (flag == 0) {
             // Find histogram of the current frame and store in array Pu[512]
-            xFTrackmulFindhist<ROWS, IN_TC, COLS, SRC_T, ROWS_IMG, COLS_IMG, NPC>(_in_mat, x1, y1, obj_hgt, obj_wdt,
-                                                                                  Qu[obj_num], Pu, BIN, frame_status);
+            xFTrackmulFindhist<ROWS, IN_TC, COLS, SRC_T, ROWS_IMG, COLS_IMG, NPC, XFCVDEPTH_IN>(
+                _in_mat, x1, y1, obj_hgt, obj_wdt, Qu[obj_num], Pu, BIN, frame_status);
             flag = 1;
         }
 
@@ -568,8 +593,16 @@ loop_qu_copy:
  * iters    --> Total number of iterations for the centroid convergence, optimally '4'
  */
 
-template <int ROWS, int COLS, int SRC_T, int ROWS_IMG, int COLS_IMG, int MAXOBJ, int MAXITERS, int NPC>
-void xFMeanShiftKernel(xf::cv::Mat<SRC_T, ROWS_IMG, COLS_IMG, NPC>& _in_mat,
+template <int ROWS,
+          int COLS,
+          int SRC_T,
+          int ROWS_IMG,
+          int COLS_IMG,
+          int MAXOBJ,
+          int MAXITERS,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT>
+void xFMeanShiftKernel(xf::cv::Mat<SRC_T, ROWS_IMG, COLS_IMG, NPC, XFCVDEPTH_IN>& _in_mat,
                        uint16_t tlx[MAXOBJ],
                        uint16_t tly[MAXOBJ],
                        uint16_t obj_hgt[MAXOBJ],
@@ -620,7 +653,8 @@ loop_objects:
 
         if (track) {
             xFTrackmulKernelFunc<ROWS, (COLS >> XF_BITSHIFT(NPC)), COLS, SRC_T, ROWS_IMG, COLS_IMG, MAXOBJ,
-                                 (MAXITERS << 1), NPC>(_in_mat, x1, y1, x2, y2, dx, dy, track, frame_status, a, iters);
+                                 (MAXITERS << 1), NPC, XFCVDEPTH_IN>(_in_mat, x1, y1, x2, y2, dx, dy, track,
+                                                                     frame_status, a, iters);
         } else // If non-trackable displacement is Zero
         {
             dx = 0;

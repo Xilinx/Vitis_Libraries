@@ -31,11 +31,11 @@ typedef unsigned short int uint16_t;
 #define WIDTH 3840
 
 /*  define the input and output types  */
-#if NO
+#if SPC
 #define NPC1 XF_NPPC1
 #endif
 
-#if RO
+#if MPC
 #define NPC1 XF_NPPC8
 #endif
 

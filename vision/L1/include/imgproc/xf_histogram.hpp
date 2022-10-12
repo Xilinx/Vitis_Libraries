@@ -26,8 +26,16 @@
 namespace xf {
 namespace cv {
 
-template <int SRC_T, int ROWS, int COLS, int DEPTH, int NPC, int WORDWIDTH, int SRC_TC, int PLANES>
-void xFHistogramKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH,
+          int SRC_TC,
+          int PLANES>
+void xFHistogramKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
                        uint32_t hist_array[PLANES][256],
                        uint16_t& imgheight,
                        uint16_t& imgwidth) {
@@ -48,7 +56,7 @@ HIST_INITIALIZE_LOOP:
 // clang-format off
 #pragma HLS PIPELINE
         // clang-format on
-        for (ap_uint<5> j = 0; j < (1 << XF_BITSHIFT(NPC) * PLANES); j++) {
+        for (ap_uint<5> j = 0; j < ((1 << XF_BITSHIFT(NPC)) * PLANES); j++) {
 // clang-format off
 #pragma HLS LOOP_TRIPCOUNT min=256 max=256
             // clang-format on
@@ -124,8 +132,8 @@ MERGE_HIST_LOOP:
     }
 }
 
-template <int SRC_T, int ROWS, int COLS, int NPC = 1>
-void calcHist(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, uint32_t* histogram) {
+template <int SRC_T, int ROWS, int COLS, int NPC = 1, int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT>
+void calcHist(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src, uint32_t* histogram) {
 #ifndef __SYNTHESIS__
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1, XF_NPPC8 ");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && "ROWS and COLS should be greater than input image");
@@ -138,7 +146,7 @@ void calcHist(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, uint32_t* histogram) {
     uint16_t width = _src.cols >> (XF_BITSHIFT(NPC));
     uint16_t height = _src.rows;
 
-    xFHistogramKernel<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
+    xFHistogramKernel<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN, XF_WORDWIDTH(SRC_T, NPC),
                       ((COLS >> (XF_BITSHIFT(NPC))) >> 1), XF_CHANNELS(SRC_T, NPC)>(_src, hist_array, height, width);
 
     for (int i = 0; i < (XF_CHANNELS(SRC_T, NPC)); i++) {

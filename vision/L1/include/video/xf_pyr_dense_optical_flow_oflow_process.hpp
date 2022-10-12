@@ -82,15 +82,15 @@ void find_G_and_b_matrix(hls::stream<ap_int<9> >& strmIx,
 // clang-format on
 
 // clang-format off
-        #pragma HLS RESOURCE variable=bufLines_ix core=RAM_S2P_URAM
+        #pragma HLS bind_storage variable=bufLines_ix type=RAM_S2P impl=URAM
         // clang-format on
     } else {
 // clang-format off
-        #pragma HLS RESOURCE variable=colsum_IxIx core=RAM_T2P_BRAM
-        #pragma HLS RESOURCE variable=colsum_IxIy core=RAM_T2P_BRAM
-        #pragma HLS RESOURCE variable=colsum_IyIy core=RAM_T2P_BRAM
-        #pragma HLS RESOURCE variable=colsum_IxIt core=RAM_T2P_BRAM
-        #pragma HLS RESOURCE variable=colsum_IyIt core=RAM_T2P_BRAM
+        #pragma HLS bind_storage variable=colsum_IxIx type=RAM_T2P impl=BRAM
+        #pragma HLS bind_storage variable=colsum_IxIy type=RAM_T2P impl=BRAM
+        #pragma HLS bind_storage variable=colsum_IyIy type=RAM_T2P impl=BRAM
+        #pragma HLS bind_storage variable=colsum_IxIt type=RAM_T2P impl=BRAM
+        #pragma HLS bind_storage variable=colsum_IyIt type=RAM_T2P impl=BRAM
         // clang-format on
     }
 

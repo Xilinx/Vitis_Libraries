@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-#define NO 1 // Normal Operation
-#define RO 0 // Resource Optimized
+#define SPC 1 // Single Pixel per Clock operation
+#define MPC 0 // Multiple Pixels per Clock operation
+#define XF_CV_DEPTH_IN 2
+#define XF_CV_DEPTH_OUT 2
 
 /*  set the type of thresholding*/
 #define THRESH_TYPE XF_THRESHOLD_TYPE_BINARY

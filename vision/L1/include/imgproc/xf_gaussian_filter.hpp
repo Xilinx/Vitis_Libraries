@@ -329,9 +329,18 @@ Compute_Grad_Loop:
     }
 }
 
-template <int SRC_T, int ROWS, int COLS, int PLANES, int DEPTH, int NPC, int WORDWIDTH, int TC>
-void ProcessGaussian3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                        xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _out_mat,
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int PLANES,
+          int DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH,
+          int TC>
+void ProcessGaussian3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+                        xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _out_mat,
                         XF_SNAME(WORDWIDTH) buf[3][(COLS >> XF_BITSHIFT(NPC))],
                         XF_PTNAME(DEPTH) src_buf1[XF_NPIXPERCYCLE(NPC) + 2],
                         XF_PTNAME(DEPTH) src_buf2[XF_NPIXPERCYCLE(NPC) + 2],
@@ -423,9 +432,18 @@ Col_Loop:
     } // Col_Loop
 }
 
-template <int SRC_T, int ROWS, int COLS, int PLANES, int DEPTH, int NPC, int WORDWIDTH, int TC>
-void xfGaussianFilter3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                         xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _out_mat,
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int PLANES,
+          int DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH,
+          int TC>
+void xfGaussianFilter3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+                         xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _out_mat,
                          uint16_t img_height,
                          uint16_t img_width,
                          unsigned char* weights) {
@@ -455,7 +473,7 @@ void xfGaussianFilter3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
     XF_SNAME(WORDWIDTH) buf[3][(COLS >> XF_BITSHIFT(NPC))];
 // clang-format off
-    #pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
+    #pragma HLS bind_storage variable=buf type=RAM_S2P impl=BRAM
     #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
     // clang-format on
     row_ind = 1;
@@ -497,7 +515,7 @@ Row_Loop:
 
         P0 = 0;
 
-        ProcessGaussian3x3<SRC_T, ROWS, COLS, PLANES, DEPTH, NPC, WORDWIDTH, TC>(
+        ProcessGaussian3x3<SRC_T, ROWS, COLS, PLANES, DEPTH, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1, WORDWIDTH, TC>(
             _src_mat, _out_mat, buf, src_buf1, src_buf2, src_buf3, OutputValues, P0, img_width, img_height, shift_x, tp,
             mid, bottom, row, weights, read_index, write_index);
 
@@ -559,9 +577,19 @@ Compute_Grad_Loop:
     }
 }
 
-template <int SRC_T, int ROWS, int COLS, int PLANES, int DEPTH, int NPC, int WORDWIDTH, int TC, bool FOR_IMAGE_PYRAMID>
-void ProcessGaussian5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                        xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _out_mat,
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int PLANES,
+          int DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH,
+          int TC,
+          bool FOR_IMAGE_PYRAMID>
+void ProcessGaussian5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+                        xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _out_mat,
                         XF_SNAME(WORDWIDTH) buf[5][(COLS >> XF_BITSHIFT(NPC))],
                         XF_PTNAME(DEPTH) src_buf1[XF_NPIXPERCYCLE(NPC) + 4],
                         XF_PTNAME(DEPTH) src_buf2[XF_NPIXPERCYCLE(NPC) + 4],
@@ -670,9 +698,19 @@ Col_Loop:
     } // Col_Loop
 }
 
-template <int SRC_T, int ROWS, int COLS, int PLANES, int DEPTH, int NPC, int WORDWIDTH, int TC, bool FOR_IMAGE_PYRAMID>
-void xFGaussianFilter5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                         xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _out_mat,
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int PLANES,
+          int DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH,
+          int TC,
+          bool FOR_IMAGE_PYRAMID>
+void xFGaussianFilter5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+                         xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _out_mat,
                          uint16_t img_height,
                          uint16_t img_width,
                          unsigned char weights[5]) {
@@ -712,7 +750,7 @@ void xFGaussianFilter5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
     XF_SNAME(WORDWIDTH) buf[5][(COLS >> XF_BITSHIFT(NPC))];
 // clang-format off
-    #pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
+    #pragma HLS bind_storage variable=buf type=RAM_S2P impl=BRAM
     #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
     // clang-format on
 
@@ -789,10 +827,10 @@ Row_Loop:
 
         inter_valx = 0;
 
-        ProcessGaussian5x5<SRC_T, ROWS, COLS, PLANES, DEPTH, NPC, WORDWIDTH, TC, FOR_IMAGE_PYRAMID>(
-            _src_mat, _out_mat, buf, src_buf1, src_buf2, src_buf3, src_buf4, src_buf5, OutputValues, inter_valx,
-            img_width, img_height, row_ind, shift_x, tp1, tp2, mid, bottom1, bottom2, row, weights, read_index,
-            write_index);
+        ProcessGaussian5x5<SRC_T, ROWS, COLS, PLANES, DEPTH, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1, WORDWIDTH, TC,
+                           FOR_IMAGE_PYRAMID>(_src_mat, _out_mat, buf, src_buf1, src_buf2, src_buf3, src_buf4, src_buf5,
+                                              OutputValues, inter_valx, img_width, img_height, row_ind, shift_x, tp1,
+                                              tp2, mid, bottom1, bottom2, row, weights, read_index, write_index);
 
         if ((NPC == XF_NPPC8) || (NPC == XF_NPPC16)) {
             for (ap_uint<6> i = 4; i < (XF_NPIXPERCYCLE(NPC) + 4); i++) {
@@ -879,9 +917,18 @@ void xFGaussian7x7(XF_PTNAME(DEPTH) * OutputValues,
     }
 }
 
-template <int SRC_T, int ROWS, int COLS, int PLANES, int DEPTH, int NPC, int WORDWIDTH, int TC>
-void ProcessGaussian7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                        xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _out_mat,
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int PLANES,
+          int DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH,
+          int TC>
+void ProcessGaussian7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+                        xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _out_mat,
                         XF_SNAME(WORDWIDTH) buf[7][(COLS >> XF_BITSHIFT(NPC))],
                         XF_PTNAME(DEPTH) src_buf1[XF_NPIXPERCYCLE(NPC) + 6],
                         XF_PTNAME(DEPTH) src_buf2[XF_NPIXPERCYCLE(NPC) + 6],
@@ -987,9 +1034,18 @@ Col_Loop:
     } // Col_Loop
 }
 
-template <int SRC_T, int ROWS, int COLS, int PLANES, int DEPTH, int NPC, int WORDWIDTH, int TC>
-void xFGaussianFilter7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                         xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _out_mat,
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int PLANES,
+          int DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH,
+          int TC>
+void xFGaussianFilter7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+                         xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _out_mat,
                          uint16_t img_height,
                          uint16_t img_width,
                          unsigned char weights[7]) {
@@ -1026,7 +1082,7 @@ void xFGaussianFilter7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
     XF_SNAME(WORDWIDTH) buf[7][(COLS >> XF_BITSHIFT(NPC))];
 // clang-format off
-    #pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
+    #pragma HLS bind_storage variable=buf type=RAM_S2P impl=BRAM
     #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
     // clang-format on
 
@@ -1143,7 +1199,7 @@ Row_Loop:
             src_buf7[i] = 0;
         }
         inter_valx = 0;
-        ProcessGaussian7x7<SRC_T, ROWS, COLS, PLANES, DEPTH, NPC, WORDWIDTH, TC>(
+        ProcessGaussian7x7<SRC_T, ROWS, COLS, PLANES, DEPTH, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1, WORDWIDTH, TC>(
             _src_mat, _out_mat, buf, src_buf1, src_buf2, src_buf3, src_buf4, src_buf5, src_buf6, src_buf7, OutputValues,
             inter_valx, img_width, img_height, shiftx, tp1, tp2, tp3, mid, bottom1, bottom2, bottom3, row, weights,
             read_index, write_index);
@@ -1228,8 +1284,17 @@ Row_Loop:
 
  }*/
 
-template <int FILTER_SIZE, int BORDER_TYPE, int SRC_T, int ROWS, int COLS, int NPC = 1>
-void GaussianBlur(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst, float sigma) {
+template <int FILTER_SIZE,
+          int BORDER_TYPE,
+          int SRC_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void GaussianBlur(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src,
+                  xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst,
+                  float sigma) {
 // clang-format off
     #pragma HLS inline off
     // clang-format on
@@ -1242,27 +1307,27 @@ void GaussianBlur(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<SRC_T, 
         #pragma HLS ARRAY_PARTITION variable=weights complete dim=1
         // clang-format on
         weightsghcalculation3x3(sigma, weights);
-        xfGaussianFilter3x3<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC,
-                            XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(_src, _dst, _src.rows, imgwidth,
-                                                                                  weights);
+        xfGaussianFilter3x3<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1,
+                            XFCVDEPTH_OUT_1, XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(
+            _src, _dst, _src.rows, imgwidth, weights);
     } else if (FILTER_SIZE == XF_FILTER_5X5) {
         unsigned char weights[5];
 // clang-format off
         #pragma HLS ARRAY_PARTITION variable=weights complete dim=1
         // clang-format on
         weightsghcalculation5x5(sigma, weights);
-        xFGaussianFilter5x5<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC,
-                            XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)), false>(_src, _dst, _src.rows,
-                                                                                         imgwidth, weights);
+        xFGaussianFilter5x5<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1,
+                            XFCVDEPTH_OUT_1, XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC)), false>(
+            _src, _dst, _src.rows, imgwidth, weights);
     } else if (FILTER_SIZE == XF_FILTER_7X7) {
         unsigned char weights[7];
 // clang-format off
         #pragma HLS ARRAY_PARTITION variable=weights complete dim=1
         // clang-format on
         weightsghcalculation7x7(sigma, weights);
-        xFGaussianFilter7x7<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC,
-                            XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(_src, _dst, _src.rows, imgwidth,
-                                                                                  weights);
+        xFGaussianFilter7x7<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1,
+                            XFCVDEPTH_OUT_1, XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(
+            _src, _dst, _src.rows, imgwidth, weights);
     }
 }
 } // namespace cv

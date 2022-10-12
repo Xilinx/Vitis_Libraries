@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#define RO 0 // Resource Optimized (8-pixel implementation)
-#define NO 1 // Normal Operation (1-pixel implementation)
+#define MPC 0 // Multiple Pixels per Clock operation
+#define SPC 1 // Single Pixel per Clock operation
 
 /* Conversion Type*/
 
@@ -29,3 +29,6 @@
 #define XF_CONVERT8UTO32S 0  // set to convert bit depth from unsigned 8-bit  to 32-bit unsigned
 #define XF_CONVERT16UTO32S 0 // set to convert bit depth from unsigned 16-bit to 32-bit signed
 #define XF_CONVERT16STO32S 1 // set to convert bit depth from signed   16-bit to 32-bit signed
+
+#define XF_CV_DEPTH_IN_1 1
+#define XF_CV_DEPTH_OUT_1 3

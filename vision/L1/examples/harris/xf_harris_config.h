@@ -31,10 +31,10 @@
  * Pack pixels in and write into streams
  */
 
-#if RO
+#if MPC
 #define NPIX XF_NPPC8
 #endif
-#if NO
+#if SPC
 #define NPIX XF_NPPC1
 #endif
 
@@ -43,10 +43,10 @@
 
 #define IMGSIZE WIDTH* HEIGHT
 
-#if RO
+#if MPC
 #define IN_TYPE ap_uint<64>
 #endif
-#if NO
+#if SPC
 #define IN_TYPE ap_uint<8>
 #endif
 

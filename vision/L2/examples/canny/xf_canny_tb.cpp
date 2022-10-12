@@ -342,8 +342,11 @@ int main(int argc, char** argv) {
     std::cout << "\tkernel done" << std::endl;
     if (err_per < 2.5f)
         std::cout << "Test Passed .... !!!" << std::endl;
-    else
+    else {
+        std::cerr << "ERROR: Test Failed." << std::endl;
         return 1;
+    }
+
     /*			Destructors			*/
     in_img.~Mat();
     img_gray.~Mat();

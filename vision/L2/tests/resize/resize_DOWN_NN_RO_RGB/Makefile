@@ -11,32 +11,34 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.6
+# vitis makefile-generator v2.0.8
 
 ############################## Help Section ##############################
 .PHONY: help
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<x86/aarch64>"
+	$(ECHO) "  make all TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<x86/aarch64>"
+	$(ECHO) "  make run TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to run application in emulation."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make xclbin TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<x86/aarch64>"
+	$(ECHO) "  make xclbin TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to build xclbin application."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
 	$(ECHO) "  make host TARGET=<hw/hw_emu/sw_emu/>"
 	$(ECHO) "      Command to build host application."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  NOTE: For embedded devices, e.g. zcu102/zcu104/vck190, env variable SYSROOT and EDGE_COMMON_SW need to be set first, and HOST_ARCH is either aarch32 or aarch64. For example,"
-	$(ECHO) "       export SYSROOT=< path-to-platform-sysroot >"
-	$(ECHO) "       export EDGE_COMMON_SW=< path-to-rootfs-and-Image-files >"
+	$(ECHO) "  NOTE: For embedded devices, e.g. zcu102/zcu104/vck190, HOST_ARCH is either aarch32 or aarch64."
+	$(ECHO) "      a.IF Download the platform, and common-image from Xilinx Download Center(Suggested):"
+	$(ECHO) "        Run the sdk.sh script from the common-image directory to install sysroot using the command : ./sdk.sh -y -d ./ -p "
+	$(ECHO) "        Unzip the rootfs file : gunzip ./rootfs.ext4.gz"
+	$(ECHO) "        export SYSROOT=< path-to-platform-sysroot >"
+	$(ECHO) "      b. User could also define SYSROOT, K_IMAGE and ROOTFS by themselves: "
+	$(ECHO) "        export SYSROOT=< path-to-platform-sysroot >"
+	$(ECHO) "        export K_IMAGE=< path-to-Image-files >"
+	$(ECHO) "        export ROOTFS=< path-to-rootfs >"
 	$(ECHO) ""
 	$(ECHO) "  make clean "
 	$(ECHO) "      Command to remove the generated non-hardware files."
@@ -87,12 +89,12 @@ RUN_DEPS :=
 # get global setting
 ifeq ($(HOST_ARCH), x86)
 CXXFLAGS += -fmessage-length=0 -I$(CUR_DIR)/src/ -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
-LDFLAGS += -pthread -L$(XILINX_XRT)/lib -L$(XILINX_HLS)/lnx64/tools/fpo_v7_0  -Wl,--as-needed -lOpenCL -lxrt_coreutil -lgmp -lmpfr -lIp_floating_point_v7_0_bitacc_cmodel 
+LDFLAGS += -pthread -L$(XILINX_XRT)/lib -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -Wl,--as-needed -lOpenCL -lxrt_coreutil -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
 VPP_LDFLAGS += --optimize 2 -R 2 
 else ifeq ($(HOST_ARCH), aarch64)
 CXXFLAGS += -I$(CUR_DIR)/src/ -fmessage-length=0 --sysroot=$(SYSROOT)  -I$(SYSROOT)/usr/include/xrt -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
-LDFLAGS += -pthread -L$(SYSROOT)/usr/lib -L$(XILINX_VITIS_AIETOOLS)/lib/aarch64.o -Wl,--as-needed -lxilinxopencl -lxrt_coreutil 
+LDFLAGS += -pthread -L$(SYSROOT)/usr/lib -Wl,--as-needed -lxilinxopencl -lxrt_coreutil 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
 VPP_LDFLAGS += --optimize 2 -R 2 
 endif
@@ -107,58 +109,81 @@ ifeq ($(TARGET),hw_emu)
 CXXFLAGS += -D HW_EMU_TEST
 endif
 
-
 #Inclue Required Host Source Files
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
 HOST_SRCS += $(XFLIB_DIR)/L2/examples/resize/xf_resize_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L2/tests/resize/resize_DOWN_NN_RO_RGB -I $(XFLIB_DIR)/L2/examples/resize -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS += -O3
+CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L2/tests/resize/resize_DOWN_NN_RO_RGB -I $(XFLIB_DIR)/L2/examples/resize -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
 LDFLAGS +=  -L $(OPENCV_LIB)
 LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/aws-vu9p-f1/'))
 HOST_SRCS += $(XFLIB_DIR)/L2/examples/resize/xf_resize_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L2/tests/resize/resize_DOWN_NN_RO_RGB -I $(XFLIB_DIR)/L2/examples/resize -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS += -O3
+CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L2/tests/resize/resize_DOWN_NN_RO_RGB -I $(XFLIB_DIR)/L2/examples/resize -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
 LDFLAGS +=  -L $(OPENCV_LIB)
 LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
 HOST_SRCS += $(XFLIB_DIR)/L2/examples/resize/xf_resize_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L2/tests/resize/resize_DOWN_NN_RO_RGB -I $(XFLIB_DIR)/L2/examples/resize -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS += -O3
+CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L2/tests/resize/resize_DOWN_NN_RO_RGB -I $(XFLIB_DIR)/L2/examples/resize -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
 LDFLAGS +=  -L $(OPENCV_LIB)
 LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/zcu102/'))
+ifeq ($(ps_on_x86), on)
 HOST_SRCS += $(XFLIB_DIR)/L2/examples/resize/xf_resize_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L2/tests/resize/resize_DOWN_NN_RO_RGB -I $(XFLIB_DIR)/L2/examples/resize -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS += --sysroot=$(SYSROOT)
+CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L2/tests/resize/resize_DOWN_NN_RO_RGB -I $(XFLIB_DIR)/L2/examples/resize -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
+LDFLAGS +=  -L $(OPENCV_LIB)
+LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
+else
+HOST_SRCS += $(XFLIB_DIR)/L2/examples/resize/xf_resize_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
+CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L2/tests/resize/resize_DOWN_NN_RO_RGB -I $(XFLIB_DIR)/L2/examples/resize -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
 LDFLAGS +=  -L $(SYSROOT)/usr/lib -L ${SYSROOT}/lib
 LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/zcu104/'))
-HOST_SRCS += $(XFLIB_DIR)/L2/examples/resize/xf_resize_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L2/tests/resize/resize_DOWN_NN_RO_RGB -I $(XFLIB_DIR)/L2/examples/resize -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS += --sysroot=$(SYSROOT)
-LDFLAGS +=  -L $(SYSROOT)/usr/lib -L ${SYSROOT}/lib
-LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
-HOST_SRCS += $(XFLIB_DIR)/L2/examples/resize/xf_resize_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L2/tests/resize/resize_DOWN_NN_RO_RGB -I $(XFLIB_DIR)/L2/examples/resize -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS += --sysroot=$(SYSROOT)
-LDFLAGS +=  -L $(SYSROOT)/usr/lib -L ${SYSROOT}/lib
-LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-
-else 
-HOST_SRCS += $(XFLIB_DIR)/L2/examples/resize/xf_resize_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(XFLIB_DIR)/L2/tests/resize/resize_DOWN_NN_RO_RGB -I $(XFLIB_DIR)/L2/examples/resize -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS += -O3
-LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-
 endif
-
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/zcu104/'))
+ifeq ($(ps_on_x86), on)
+HOST_SRCS += $(XFLIB_DIR)/L2/examples/resize/xf_resize_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
+CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L2/tests/resize/resize_DOWN_NN_RO_RGB -I $(XFLIB_DIR)/L2/examples/resize -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
+LDFLAGS +=  -L $(OPENCV_LIB)
+LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
+else
+HOST_SRCS += $(XFLIB_DIR)/L2/examples/resize/xf_resize_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
+CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L2/tests/resize/resize_DOWN_NN_RO_RGB -I $(XFLIB_DIR)/L2/examples/resize -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
+LDFLAGS +=  -L $(SYSROOT)/usr/lib -L ${SYSROOT}/lib
+LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
+endif
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
+ifeq ($(ps_on_x86), on)
+HOST_SRCS += $(XFLIB_DIR)/L2/examples/resize/xf_resize_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
+CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L2/tests/resize/resize_DOWN_NN_RO_RGB -I $(XFLIB_DIR)/L2/examples/resize -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
+LDFLAGS +=  -L $(OPENCV_LIB)
+LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
+else
+HOST_SRCS += $(XFLIB_DIR)/L2/examples/resize/xf_resize_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
+CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L2/tests/resize/resize_DOWN_NN_RO_RGB -I $(XFLIB_DIR)/L2/examples/resize -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
+LDFLAGS +=  -L $(SYSROOT)/usr/lib -L ${SYSROOT}/lib
+LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
+endif
+else 
+ifeq ($(ps_on_x86), on)
+HOST_SRCS += $(XFLIB_DIR)/L2/examples/resize/xf_resize_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
+CXXFLAGS +=  -I $(XFLIB_DIR)/L2/tests/resize/resize_DOWN_NN_RO_RGB -I $(XFLIB_DIR)/L2/examples/resize -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
+LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
+else
+HOST_SRCS += $(XFLIB_DIR)/L2/examples/resize/xf_resize_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
+CXXFLAGS +=  -I $(XFLIB_DIR)/L2/tests/resize/resize_DOWN_NN_RO_RGB -I $(XFLIB_DIR)/L2/examples/resize -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
+LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
+endif
+endif
+# workaround for opencv
 ifeq (,$(findstring opencv,$(CXXFLAGS)))
 CXXFLAGS += $(XRT_CXXFLAGS)
 endif
@@ -193,8 +218,14 @@ endif
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/tests/resize/resize_DOWN_NN_RO_RGB -I $(XFLIB_DIR)/L2/examples/resize -I $(XFLIB_DIR)/L1/include/
 
 ######################### binary container global settings ##########################
+VPP_FLAGS_resize_accel += --hls.clock 150000000:resize_accel
+ifneq ($(HOST_ARCH_temp), x86)
+VPP_LDFLAGS_krnl_resize += --clock.defaultFreqHz 150000000
+else
+VPP_LDFLAGS_krnl_resize += --kernel_frequency 150
+endif
 
-ifeq ($(HOST_ARCH), x86)
+ifneq ($(SD_CARD_NEEDED), on)
 BINARY_CONTAINERS += $(BUILD_DIR)/krnl_resize.xclbin
 else
 BINARY_CONTAINERS += $(BUILD_DIR)/krnl_resize_pkg.$(LINK_TARGET_FMT)
@@ -205,7 +236,7 @@ endif
 $(TEMP_DIR)/resize_accel.xo: $(XFLIB_DIR)/L2/examples/resize/xf_resize_accel.cpp 
 	$(ECHO) "Compiling Kernel: resize_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_resize_accel) $(VPP_FLAGS) -k resize_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o'$@' '$^'
+	$(VPP) -c $(VPP_FLAGS_resize_accel) $(VPP_FLAGS) -k resize_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
 BINARY_CONTAINER_krnl_resize_OBJS += $(TEMP_DIR)/resize_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_resize_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
@@ -213,27 +244,15 @@ $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/krnl_resize $(VPP_LDFLAGS)  $(VPP_LDFLAGS_krnl_resize) $(AIE_LDFLAGS)   -o $@ $^
 
 ############################## Setting Rules for Host (Building Host Executable) ##############################
-ifeq ($(HOST_ARCH), x86)
-$(EXE_FILE): $(EXE_FILE_DEPS) | check_env check_xrt
+$(EXE_FILE): $(EXE_FILE_DEPS)
 	mkdir -p $(BUILD_DIR)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
-
-else
-$(EXE_FILE): $(EXE_FILE_DEPS) | check_env  check_sysroot
-	mkdir -p $(BUILD_DIR)
-	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
-
-endif
 
 $(EMCONFIG):
 	emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
+
 ############################## Preparing sdcard folder ##############################
-ifneq ($(HOST_ARCH), x86)
-ifneq (,$(findstring zc706, $(PLATFORM_NAME)))
-K_IMAGE := $(SYSROOT)/../../uImage
-else
-K_IMAGE := $(SYSROOT)/../../Image
-endif
+ifeq ($(SD_CARD_NEEDED), on)
 RUN_SCRIPT := $(BUILD_DIR)/run_script.sh
 $(RUN_SCRIPT):
 	rm -rf $(RUN_SCRIPT)
@@ -249,7 +268,7 @@ endif
 	@echo './$(EXE_NAME) $(PKG_HOST_ARGS)' >> $(RUN_SCRIPT)
 	@echo 'return_code=$$?' >> $(RUN_SCRIPT)
 	@echo 'if [ $$return_code -ne 0 ]; then' >> $(RUN_SCRIPT)
-	@echo '        echo "ERROR: Embedded host run failed, RC=$$return_code"' >> $(RUN_SCRIPT)
+	@echo '        echo "ERROR: TEST FAILED, RC=$$return_code"' >> $(RUN_SCRIPT)
 	@echo 'else' >> $(RUN_SCRIPT)
 	@echo '        echo "INFO: TEST PASSED, RC=0"' >> $(RUN_SCRIPT)
 	@echo 'fi' >> $(RUN_SCRIPT)
@@ -267,29 +286,34 @@ SD_DIRS_WITH_PREFIX = $(foreach sd_dir,$(DATA_DIR),--package.sd_dir $(sd_dir))
 PACKAGE_FILES := $(BINARY_CONTAINERS)
 PACKAGE_FILES += $(AIE_CONTAINER)
 SD_CARD := $(CUR_DIR)/package_$(TARGET)
-vck190_dfx_hw := false
-$(SD_CARD): $(EXE_FILE) $(BINARY_CONTAINERS) $(RUN_SCRIPT) $(EMCONFIG)
+$(SD_CARD): host xclbin $(RUN_SCRIPT) $(EMCONFIG) check_kimage check_rootfs
 	@echo "Generating sd_card folder...."
 	mkdir -p $(SD_CARD)
 	chmod a+rx $(BUILD_DIR)/run_script.sh
-ifneq (,$(findstring vck190_base_dfx, $(PLATFORM_NAME)))
-ifeq ($(TARGET),hw)
-	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p $(PACKAGE_FILES) -o $(BINARY_CONTAINERS_PKG)
-	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p --package.out_dir  $(SD_CARD) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX) --package.sd_file $(BINARY_CONTAINERS_PKG)
+# 1. DFX HW Flow
+ifeq ($(dfx_hw), on)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p $(PACKAGE_FILES) $(VPP_PACKAGE) -o $(BINARY_CONTAINERS_PKG)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX) --package.sd_file $(BINARY_CONTAINERS_PKG)
 	@echo "### ***** sd_card generation done! ***** ###"
-vck190_dfx_hw := true
 endif
+# 2. PS_ON_X86 - From 2022.2, Target:sw_emu
+ifeq ($(ps_on_x86), on)
+	@echo "### ***** running PS X86 SE_EMU ***** ###"
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir $(SD_CARD) --package.emu_ps x86
 endif
-ifeq ($(vck190_dfx_hw), false)
-	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(SYSROOT)/../../rootfs.ext4 --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
+#3. General Embeded flow
+ifeq ($(dfx_hw), off)
+ifeq ($(ps_on_x86), off)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 	@echo "### ***** sd_card generation done! ***** ###"
+endif
 endif
 
 .PHONY: sd_card
 sd_card: $(SD_CARD)
 endif
 ############################## Setting Essential Checks and Building Rules ##############################
-RUN_DEPS += $(EXE_FILE) $(BINARY_CONTAINERS) $(EMCONFIG)
+RUN_DEPS += host xclbin $(EMCONFIG)
 RUN_DEPS += $(SD_CARD)
 
 .PHONY: mkflag all run
@@ -297,7 +321,7 @@ mkflag:
 	mkdir -p $(BUILD_DIR)
 	rm -rf $(BUILD_DIR)/makefile_args.txt
 	@for var in $(MAKEFLAGS); do echo $$var >> $(BUILD_DIR)/makefile_args.txt; done
-all: check_device  check_vpp check_platform mkflag $(RUN_DEPS)
+all: check_device check_vpp check_platform mkflag $(RUN_DEPS)
 run: all
 #hw_emu
 ifneq (,$(filter hw_emu, $(TARGET)))
@@ -307,8 +331,8 @@ ifeq ($(HOST_ARCH), x86)
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_stdout.log
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_stdout.log || exit 1
 	
 endif
 endif
@@ -320,22 +344,24 @@ ifeq ($(HOST_ARCH), x86)
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_stdout.log
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_stdout.log || exit 1
 	
 endif
 endif
 #hw
 ifeq ($(TARGET), hw)
 ifneq (,$(findstring aws-vu9p-f1, $(PLATFORM_NAME)))
-ifneq ($(JENKINS_INTERNAL_BUILD), 1)
+ifeq (,$(wildcard $(BUILD_DIR)/krnl_resize.awsxclbin))
 	$(ECHO) "This makefile does not directly support converting .xclbin to .awsxclbin, please refer https://github.com/aws/aws-fpga/blob/master/Vitis/README.md for next operations"
 else
-	$(ECHO) "Running inside Xilinx regression without converting to .awsxclbin"
-	$(EXE_FILE) $(HOST_ARGS)
+	$(ECHO) "Running HW using generated .awsxclbin"
+	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
+	$(EXE_FILE) $(subst .xclbin,.awsxclbin,$(HOST_ARGS))
 	
 endif
 else ifeq ($(HOST_ARCH), x86)
+	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	$(EXE_FILE) $(HOST_ARGS)
 	
 else
@@ -350,63 +376,48 @@ emconfig: $(EMCONFIG)
 
 .PHONY: host
 ifeq ($(HOST_ARCH), x86)
-host:  check_env check_xrt $(EXE_FILE)
+host: check_xrt check_env  $(EXE_FILE)
 else
-host:  check_env check_sysroot $(EXE_FILE)
+host: check_sysroot check_env   $(EXE_FILE)
 endif
 
 .PHONY: xclbin
 ifeq ($(HOST_ARCH), x86)
-xclbin:  check_env check_vpp check_xrt $(BINARY_CONTAINERS) 
+xclbin: check_vpp check_xrt check_env $(BINARY_CONTAINERS)
 else
-xclbin:  check_env check_vpp check_sysroot $(BINARY_CONTAINERS) 
+xclbin: check_vpp check_sysroot check_env $(BINARY_CONTAINERS)
 endif
 
 .PHONY: check_env
 check_env:
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
 ifeq (,$(OPENCV_INCLUDE))
-	@echo "Cannot find OpenCV include path. Please set OPENCV_INCLUDE variable"
+	$(error "Cannot find OpenCV include path. Please set OPENCV_INCLUDE variable")
 endif
 endif
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
 ifeq (,$(OPENCV_INCLUDE))
-	@echo "Cannot find OpenCV include path. Please set OPENCV_INCLUDE variable"
+	$(error "Cannot find OpenCV include path. Please set OPENCV_INCLUDE variable")
 endif
 endif
 ifneq (,$(shell echo $(XPLATFORM) | awk '/aws-vu9p-f1/'))
 ifeq (,$(OPENCV_INCLUDE))
-	@echo "Cannot find OpenCV include path. Please set OPENCV_INCLUDE variable"
+	$(error "Cannot find OpenCV include path. Please set OPENCV_INCLUDE variable")
 endif
 endif
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
 ifeq (,$(OPENCV_LIB))
-	@echo "Cannot find Opencv lib path. Please set OPENCV_LIB variable"
+	$(error "Cannot find Opencv lib path. Please set OPENCV_LIB variable")
 endif
 endif
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
 ifeq (,$(OPENCV_LIB))
-	@echo "Cannot find Opencv lib path. Please set OPENCV_LIB variable"
+	$(error "Cannot find Opencv lib path. Please set OPENCV_LIB variable")
 endif
 endif
 ifneq (,$(shell echo $(XPLATFORM) | awk '/aws-vu9p-f1/'))
 ifeq (,$(OPENCV_LIB))
-	@echo "Cannot find Opencv lib path. Please set OPENCV_LIB variable"
-endif
-endif
-ifneq (,$(shell echo $(XPLATFORM) | awk '/zcu102/'))
-ifeq (,$(EDGE_COMMON_SW))
-	@echo "Please set EDGE_COMMON_SW variable"
-endif
-endif
-ifneq (,$(shell echo $(XPLATFORM) | awk '/zcu104/'))
-ifeq (,$(EDGE_COMMON_SW))
-	@echo "Please set EDGE_COMMON_SW variable"
-endif
-endif
-ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
-ifeq (,$(EDGE_COMMON_SW))
-	@echo "Please set EDGE_COMMON_SW variable"
+	$(error "Cannot find Opencv lib path. Please set OPENCV_LIB variable")
 endif
 endif
 
@@ -417,12 +428,11 @@ cleanh:
 
 cleank:
 	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl*start_simulation. sh *.xclbin
-	-$(RMDIR) _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* xo_* _x*
-	-$(RMDIR) _x_temp.*/dltmp* _x_temp.*/kernel_info.dat _x_temp.*/*.log
-	-$(RMDIR) _x_temp.* 
+	-$(RMDIR) _x_temp.*
 
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR)  emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
 	-$(RMDIR)  $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
+	-$(RMDIR) 
 
 clean: cleanh

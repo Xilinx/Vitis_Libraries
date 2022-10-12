@@ -285,12 +285,12 @@ static void xfEdgeTracing(xf::cv::Mat<DST_T, HEIGHT, WIDTH, NPC_DST, depthm>& _d
 
     if (USE_URAM) {
 // clang-format off
-        #pragma HLS RESOURCE variable=iBuff core=RAM_T2P_URAM
+        #pragma HLS bind_storage variable=iBuff type=RAM_T2P impl=URAM
         #pragma HLS array_partition variable=iBuff dim=1
         // clang-format on
     } else {
 // clang-format off
-        #pragma HLS RESOURCE variable=iBuff core=RAM_T2P_BRAM
+        #pragma HLS bind_storage variable=iBuff type=RAM_T2P impl=BRAM
         #pragma HLS array_partition variable=iBuff dim=1
         // clang-format on
     }

@@ -172,8 +172,8 @@ void flip(ap_uint<PTR_WIDTH>* SrcPtr,
     ap_uint<XF_WORDDEPTH(XF_WORDWIDTH(TYPE, NPC))> DstRow[NPC_COLS];
 
 // clang-format off
-#pragma HLS BIND_STORAGE variable = SrcRow type = ram_s2p impl = bram
-#pragma HLS BIND_STORAGE variable = DstRow type = ram_s2p impl = bram
+#pragma HLS BIND_STORAGE variable = SrcRow type=ram_s2p impl=bram
+#pragma HLS BIND_STORAGE variable = DstRow type=ram_s2p impl=bram
     // clang-format on
 
     for (int r = 0; r < Rows; r++) {

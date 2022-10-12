@@ -30,12 +30,12 @@
 #define WIDTH 256
 
 // Resolve the optimization type:
-#if NO
+#if SPC
 #define NPC1 XF_NPPC1
 #define INPUT_PTR_WIDTH 64
 #define OUTPUT_PTR_WIDTH 32
 #endif
-#if RO
+#if MPC
 #define NPC1 XF_NPPC2
 #define INPUT_PTR_WIDTH 128
 #define OUTPUT_PTR_WIDTH 64

@@ -21,10 +21,10 @@
 
 //#define XF_BAYER_PATTERN XF_BAYER_RG // bayer pattern
 
-#define T_8U 1
+#define T_8U 0
 #define T_10U 0
 #define T_12U 0
-#define T_16U 0
+#define T_16U 1
 
 #define XF_CCM_TYPE XF_CCM_bt2020_bt709
 
@@ -62,7 +62,23 @@
 
 #define XF_AXI_GBR 1
 
-#define INPUT_PTR_WIDTH 16
+#define INPUT_PTR_WIDTH 32
 #define OUTPUT_PTR_WIDTH 32
+#define NUM_V_BLANK_LINES 8
+#define NUM_H_BLANK 8
 
 #define XF_USE_URAM 0 // uram enable
+
+#define XF_CV_DEPTH_LEF 2
+#define XF_CV_DEPTH_SEF 2
+#define XF_CV_DEPTH_IN_0 2
+#define XF_CV_DEPTH_IN_1 2
+#define XF_CV_DEPTH_IN_2 2
+#define XF_CV_DEPTH_IN_3 2
+#define XF_CV_DEPTH_OUT_0 2
+#define XF_CV_DEPTH_OUT_1 2
+#define XF_CV_DEPTH_OUT_2 2
+#define XF_CV_DEPTH_OUT_3 2
+#define XF_CV_DEPTH_OUT_4 2
+#define XF_CV_DEPTH_OUT_5 2
+#define XF_CV_DEPTH_OUT_6 2

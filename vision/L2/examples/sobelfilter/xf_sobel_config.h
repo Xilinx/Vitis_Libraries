@@ -44,12 +44,12 @@ typedef unsigned int uint32_t;
 
 #if GRAY
 #if (FILTER_WIDTH == 3 | FILTER_WIDTH == 5)
-#if RO
+#if MPC
 #define IN_TYPE XF_8UC1
 #define OUT_TYPE XF_8UC1
 #define NPC1 XF_NPPC8
 #endif
-#if NO
+#if SPC
 #define IN_TYPE XF_8UC1
 #define OUT_TYPE XF_8UC1
 #define NPC1 XF_NPPC1
@@ -57,7 +57,7 @@ typedef unsigned int uint32_t;
 #endif
 
 #if (FILTER_WIDTH == 7)
-#if NO
+#if SPC
 #define IN_TYPE XF_8UC1
 #define OUT_TYPE XF_8UC1
 #define NPC1 XF_NPPC1
@@ -69,12 +69,12 @@ typedef unsigned int uint32_t;
 #else
 
 #if (FILTER_WIDTH == 3 | FILTER_WIDTH == 5)
-#if RO
+#if MPC
 #define IN_TYPE XF_8UC3
 #define OUT_TYPE XF_8UC3
 #define NPC1 XF_NPPC8
 #endif
-#if NO
+#if SPC
 #define IN_TYPE XF_8UC3
 #define OUT_TYPE XF_8UC3
 #define NPC1 XF_NPPC1
@@ -82,7 +82,7 @@ typedef unsigned int uint32_t;
 #endif
 
 #if (FILTER_WIDTH == 7)
-#if NO
+#if SPC
 #define IN_TYPE XF_8UC3
 #define OUT_TYPE XF_8UC3
 #define NPC1 XF_NPPC1

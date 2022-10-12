@@ -28,10 +28,10 @@
 #define HEIGHT 2160
 #define WIDTH 3840
 
-#if RO
+#if MPC
 #define NPIX XF_NPPC8
 #endif
-#if NO
+#if SPC
 #define NPIX XF_NPPC1
 #endif
 

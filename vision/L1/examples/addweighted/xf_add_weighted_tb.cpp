@@ -98,8 +98,9 @@ int main(int argc, char** argv) {
 
     if (err_per > 0.0f) {
         fprintf(stderr, "ERROR: Test Failed.\n ");
-        return EXIT_FAILURE;
-    }
+        return 1;
+    } else
+        std::cout << "Test Passed " << std::endl;
 
     return 0;
 }

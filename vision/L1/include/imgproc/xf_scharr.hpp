@@ -232,12 +232,15 @@ template <int SRC_T,
           int DEPTH_SRC,
           int DEPTH_DST,
           int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_GRAD_X = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_GRAD_Y = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int TC>
-void ProcessScharr3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                      xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _gradx_mat,
-                      xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _grady_mat,
+void ProcessScharr3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+                      xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_GRAD_X>& _gradx_mat,
+                      xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_GRAD_Y>& _grady_mat,
                       XF_SNAME(WORDWIDTH_SRC) buf[3][(COLS >> XF_BITSHIFT(NPC))],
                       XF_PTNAME(DEPTH_SRC) src_buf1[XF_NPIXPERCYCLE(NPC) + 2],
                       XF_PTNAME(DEPTH_SRC) src_buf2[XF_NPIXPERCYCLE(NPC) + 2],
@@ -333,12 +336,15 @@ template <int SRC_T,
           int DEPTH_SRC,
           int DEPTH_DST,
           int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_GRAD_X = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_GRAD_Y = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int TC>
-void xFScharrFilterKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                          xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _gradx_mat,
-                          xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _grady_mat,
+void xFScharrFilterKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+                          xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_GRAD_X>& _gradx_mat,
+                          xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_GRAD_Y>& _grady_mat,
                           uint16_t img_height,
                           uint16_t img_width) {
     ap_uint<13> row_ind;
@@ -371,7 +377,7 @@ void xFScharrFilterKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     // Line buffer to hold image data
     XF_SNAME(WORDWIDTH_SRC) buf[3][(COLS >> XF_BITSHIFT(NPC))]; // Line buffer
                                                                 // clang-format off
-                                                                #pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
+                                                                #pragma HLS bind_storage variable=buf type=RAM_S2P impl=BRAM
     #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
                                                                 // clang-format on
     row_ind = 1;
@@ -417,7 +423,8 @@ Row_Loop: // Process complete image
         /***********		Process complete row
          * **********/
         P0 = P1 = 0;
-        ProcessScharr3x3<SRC_T, DST_T, ROWS, COLS, PLANES, DEPTH_SRC, DEPTH_DST, NPC, WORDWIDTH_SRC, WORDWIDTH_DST, TC>(
+        ProcessScharr3x3<SRC_T, DST_T, ROWS, COLS, PLANES, DEPTH_SRC, DEPTH_DST, NPC, XFCVDEPTH_IN, XFCVDEPTH_GRAD_X,
+                         XFCVDEPTH_GRAD_Y, WORDWIDTH_SRC, WORDWIDTH_DST, TC>(
             _src_mat, _gradx_mat, _grady_mat, buf, src_buf1, src_buf2, src_buf3, GradientValuesX, GradientValuesY, P0,
             P1, img_width, img_height, row_ind, shift_x, shift_y, tp, mid, bottom, row, read_index, write_index);
 
@@ -445,7 +452,7 @@ Row_Loop: // Process complete image
                     src_buf3[buf_size - 2].range(k + STEP - 1, k), src_buf3[buf_size - 1].range(k + STEP - 1, k), 0);
                 p += STEP_OUT;
             }
-        } else /*			Last column border care	for NO Case
+        } else /*			Last column border care	for SPC Case
                   */
         {
             int STEP, STEP_OUT, q = 0;
@@ -490,10 +497,18 @@ Row_Loop: // Process complete image
     } // Row_Loop
 }
 
-template <int BORDER_TYPE, int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
-void Scharr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-            xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_matx,
-            xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_maty) {
+template <int BORDER_TYPE,
+          int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_X = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_Y = _XFCVDEPTH_DEFAULT>
+void Scharr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+            xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_X>& _dst_matx,
+            xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_Y>& _dst_maty) {
 // clang-format off
     #pragma HLS INLINE OFF
     // clang-format on
@@ -509,8 +524,9 @@ void Scharr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 #endif
 
     xFScharrFilterKernel<SRC_T, DST_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), XF_DEPTH(DST_T, NPC),
-                         NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(
-        _src_mat, _dst_matx, _dst_maty, img_height, img_width);
+                         NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT_X, XFCVDEPTH_OUT_Y, XF_WORDWIDTH(SRC_T, NPC),
+                         XF_WORDWIDTH(DST_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(_src_mat, _dst_matx, _dst_maty,
+                                                                               img_height, img_width);
 }
 } // namespace cv
 } // namespace xf

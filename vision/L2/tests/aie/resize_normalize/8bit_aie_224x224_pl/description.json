@@ -1,0 +1,141 @@
+{
+    "name": "Xilinx resize normalize AIE Test", 
+    "description": "resize normalize AIE function example", 
+    "flow": "versal", 
+    "platform_allowlist": [
+        "vck190"
+    ], 
+    "platform_blocklist": [], 
+    "platform_properties": {
+        "vck190": {
+            "v++": {
+                "compiler": {
+                    "clflags": [
+                        ""
+                    ]
+                }, 
+                "linker": {
+                    "ldclflags": [
+                        "--clock.freqHz 400000000:Tiler_top_1", 
+                        "--clock.freqHz 400000000:stitcher_top_1", 
+                        "--clock.defaultTolerance 0.001", 
+                        "--config PROJECT/system.cfg", 
+                        "LIB_DIR/L1/lib/hw/8_8/tiler.xo", 
+                        "LIB_DIR/L1/lib/hw/8_8/stitcher.xo"
+                    ]
+                }, 
+                "package": {
+                    "clflags": [
+                        "--package.defer_aie_run"
+                    ]
+                }
+            }
+        }
+    }, 
+    "data": [
+        "LIB_DIR/data/HD.jpg" 
+    ], 
+    "gui": false, 
+    "launch": [
+        {
+            "name": "hwemu-launch", 
+            "target": "hw_emu", 
+            "cmd_args": "kernel.xclbin LIB_DIR/data/HD.jpg"
+        }, 
+        {
+            "name": "hw", 
+            "target": "hw", 
+            "cmd_args": "kernel.xclbin LIB_DIR/data/HD.jpg"
+        }
+    ], 
+    "host": {
+        "host_exe": "host.elf", 
+        "compiler": {
+            "sources": [
+                "LIB_DIR/L2/tests/aie/resize_normalize/8bit_aie_224x224_pl/host.cpp", 
+                "./Work/ps/c_rts/aie_control_xrt.cpp"
+            ], 
+            "includepaths": [
+                "$(SYSROOT)/usr/include/xrt/", 
+                "$(SYSROOT)/usr/include/", 
+                "$(SYSROOT)/usr/include/opencv4", 
+                "LIB_DIR/L1/include/aie", 
+                "./"
+            ], 
+            "options": "--sysroot=$(SYSROOT)", 
+            "symbols": [
+                "__PS_ENABLE_AIE__"
+            ]
+        }, 
+        "linker": {
+            "librarypaths": [
+                "$(SYSROOT)/usr/lib/", 
+                "LIB_DIR/L1/lib/sw/aarch64-linux"
+            ], 
+            "libraries": [
+                "smartTilerStitcher"
+            ], 
+            "options": "--sysroot=$(SYSROOT)"
+        }
+    }, 
+    "aiecompiler": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L1/include/aie"
+            ]
+        }
+    }, 
+    "aiecontainers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/L2/tests/aie/resize_normalize/8bit_aie_224x224_pl/graph.cpp", 
+                    "pl-freq": 400, 
+                    "workdir": "./Work", 
+                    "options": "-pl-axi-lite=true", 
+                    "name": "libadf.a", 
+                    "aie_kernel_files": [
+                        "xf_resize.cc"
+                    ]
+                }
+            ]
+        }
+    ], 
+    "containers": [
+        {
+            "frequency": "400", 
+            "name": "kernel"
+        }
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32768, 
+                "max_time_min": {
+                    "vitis_aie_sim": 50, 
+                    "vitis_aie_x86sim": 50, 
+                    "vitis_hw_build": 470, 
+                    "vitis_hw_emu": 200, 
+                    "vitis_hw_run": 30
+                }
+            }
+        ], 
+        "targets": [
+            "vitis_hw_emu", 
+            "vitis_hw_build", 
+            "vitis_hw_run",
+            "vitis_aie_x86sim",
+            "vitis_aie_sim"
+        ], 
+        "category": "canary"
+    },
+    "output_files": [
+        "pl_sample_counts",
+        "ISS_RPC_SERVER_PORT"
+    ]    
+}

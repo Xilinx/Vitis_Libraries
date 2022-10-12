@@ -2,31 +2,35 @@
     "name": "Xilinx BPC L2 Test", 
     "description": [
         "BPC L2 function example"
-    ],
-    "flow": "vitis",
+    ], 
+    "flow": "vitis", 
     "platform_allowlist": [
-        "u200",
+        "u200", 
         "aws-vu9p-f1", 
-        "vck190", "zcu102", "zcu104"
+        "vck190", 
+        "zcu102", 
+        "zcu104"
     ], 
     "platform_blocklist": [
-        "u280", "u250", "u50"
+        "u280", 
+        "u250", 
+        "u50"
     ], 
     "platform_properties": {
         "u200": {
             "host": {
                 "compiler": {
-			"includepaths" : [
-				"$(OPENCV_INCLUDE)"
-			]
-		},
-		"linker" : {
-			"librarypaths" : [
-				"$(OPENCV_LIB)"
-			]
-		}
-	    }
-        },
+                    "includepaths": [
+                        "$(OPENCV_INCLUDE)"
+                    ]
+                }, 
+                "linker": {
+                    "librarypaths": [
+                        "$(OPENCV_LIB)"
+                    ]
+                }
+            }
+        }, 
         "aws-vu9p-f1": {
             "host": {
                 "compiler": {
@@ -40,130 +44,181 @@
                     ]
                 }
             }
-        },
+        }, 
         "vck190": {
             "host": {
                 "compiler": {
                     "includepaths": [
-			"$(SYSROOT)/usr/include",
+                        "$(SYSROOT)/usr/include", 
                         "$(SYSROOT)/usr/include/opencv4"
-                    ], 
-                    "options": "--sysroot=$(SYSROOT)"
+                    ]
                 }, 
                 "linker": {
                     "librarypaths": [
                         "$(SYSROOT)/usr/lib", 
                         "${SYSROOT}/lib"
                     ]
+                }, 
+                "compiler_x86": {
+                    "includepaths": [
+                        "$(OPENCV_INCLUDE)"
+                    ]
+                }, 
+                "linker_x86": {
+                    "librarypaths": [
+                        "$(OPENCV_LIB)"
+                    ]
                 }
             }
-        },
-	"zcu102": {
+        }, 
+        "zcu102": {
             "host": {
                 "compiler": {
-			"includepaths" : [
-				"$(SYSROOT)/usr/include",
-				"$(SYSROOT)/usr/include/opencv4"
-			],
-			"options" : "--sysroot=$(SYSROOT)"
-		},
-		"linker" : {
-			"librarypaths" : [
-				"$(SYSROOT)/usr/lib",
-				"${SYSROOT}/lib"
-			]
-		}
-	    }
-	},
-	"zcu104": {
+                    "includepaths": [
+                        "$(SYSROOT)/usr/include", 
+                        "$(SYSROOT)/usr/include/opencv4"
+                    ]
+                }, 
+                "linker": {
+                    "librarypaths": [
+                        "$(SYSROOT)/usr/lib", 
+                        "${SYSROOT}/lib"
+                    ]
+                }, 
+                "compiler_x86": {
+                    "includepaths": [
+                        "$(OPENCV_INCLUDE)"
+                    ]
+                }, 
+                "linker_x86": {
+                    "librarypaths": [
+                        "$(OPENCV_LIB)"
+                    ]
+                }
+            }
+        }, 
+        "zcu104": {
             "host": {
                 "compiler": {
-			"includepaths" : [
-				"$(SYSROOT)/usr/include",
-				"$(SYSROOT)/usr/include/opencv4"
-			],
-			"options" : "--sysroot=$(SYSROOT)"					
-		},
-		"linker" : {
-			"librarypaths" : [
-				"$(SYSROOT)/usr/lib",
-				"${SYSROOT}/lib"
-			]
-		}
-	    }
+                    "includepaths": [
+                        "$(SYSROOT)/usr/include", 
+                        "$(SYSROOT)/usr/include/opencv4"
+                    ]
+                }, 
+                "linker": {
+                    "librarypaths": [
+                        "$(SYSROOT)/usr/lib", 
+                        "${SYSROOT}/lib"
+                    ]
+                }, 
+                "compiler_x86": {
+                    "includepaths": [
+                        "$(OPENCV_INCLUDE)"
+                    ]
+                }, 
+                "linker_x86": {
+                    "librarypaths": [
+                        "$(OPENCV_LIB)"
+                    ]
+                }
+            }
         }
-    },
-    "gui": true,
+    }, 
+    "gui": true, 
     "launch": [
         {
-            "target" : "sw_emu",
-            "cmd_args": "LIB_DIR/data/hd.png ",
-            "name": "sw_emu",
-	    "ld_library_path" : [
-		"$(OPENCV_LIB)",
-		"$(LD_LIBRARY_PATH)",
-		"$(XILINX_XRT)/lib"
-	    ]
-        },
+            "target": "sw_emu", 
+            "cmd_args": "LIB_DIR/data/hd.png ", 
+            "name": "sw_emu", 
+            "ld_library_path": [
+                "$(OPENCV_LIB)", 
+                "$(LD_LIBRARY_PATH)", 
+                "$(XILINX_XRT)/lib"
+            ]
+        }, 
         {
-            "target" : "hw_emu",
-            "cmd_args": "LIB_DIR/data/hd.png  ",
-            "name": "hw_emu",
-	    "ld_library_path" : [
-		"$(OPENCV_LIB)",
-		"$(LD_LIBRARY_PATH)",
-		"$(XILINX_XRT)/lib"
-	    ]
-        },
+            "target": "hw_emu", 
+            "cmd_args": "LIB_DIR/data/hd.png  ", 
+            "name": "hw_emu", 
+            "ld_library_path": [
+                "$(OPENCV_LIB)", 
+                "$(LD_LIBRARY_PATH)", 
+                "$(XILINX_XRT)/lib"
+            ]
+        }, 
         {
-            "target" : "hw",
-            "cmd_args": "LIB_DIR/data/hd.png ",
-            "name": "hardware_build",
-	    "ld_library_path" : [
-		"$(OPENCV_LIB)",
-		"$(LD_LIBRARY_PATH)",
-		"$(XILINX_XRT)/lib"
-	    ]
+            "target": "hw", 
+            "cmd_args": "LIB_DIR/data/hd.png ", 
+            "name": "hardware_build", 
+            "ld_library_path": [
+                "$(OPENCV_LIB)", 
+                "$(LD_LIBRARY_PATH)", 
+                "$(XILINX_XRT)/lib"
+            ]
         }
-    ],
-    "data": ["LIB_DIR/data/hd.png", "LIB_DIR/data/hd.png"], 
+    ], 
+    "data": [
+        "LIB_DIR/data/hd.png", 
+        "LIB_DIR/data/hd.png"
+    ], 
     "host": {
         "host_exe": "badpixelcorrection", 
         "compiler": {
             "sources": [
-                "LIB_DIR/L2/examples/badpixelcorrection/xf_badpixelcorrection_tb.cpp",
+                "LIB_DIR/L2/examples/badpixelcorrection/xf_badpixelcorrection_tb.cpp", 
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
-            ],
-	    "includepaths": [
-		"LIB_DIR/L2/examples/badpixelcorrection/build"
-	    ], 
-            "options": "-O3",
-            "symbols": ["__SDSVHLS__" ] 
-        }
-    },
-    "v++":{
-        "compiler": {
+            ], 
+            "includepaths": [
+                "LIB_DIR/L2/examples/badpixelcorrection/build"
+            ], 
+            "options": "-O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include", 
             "symbols": [
-                
-            ],
- 	    "includepaths": [
-		"LIB_DIR/L2/examples/badpixelcorrection/build"
-	    ],
-           "clflags": [
+                "__SDSVHLS__"
             ]
+        }
+    }, 
+    "v++": {
+        "compiler": {
+            "symbols": [], 
+            "includepaths": [
+                "LIB_DIR/L2/examples/badpixelcorrection/build"
+            ], 
+            "clflags": []
         }
     }, 
     "containers": [
         {
-            "name": "krnl_badpixelcorrection",
+            "name": "krnl_badpixelcorrection", 
             "accelerators": [
                 {
                     "name": "badpixelcorrection_accel", 
-                    "location": "LIB_DIR/L2/examples/badpixelcorrection/xf_badpixelcorrection_accel.cpp"
+                    "location": "LIB_DIR/L2/examples/badpixelcorrection/xf_badpixelcorrection_accel.cpp",
+                    "frequency": 300.0
                 }
-           ] 
+            ],
+            "frequency": 300.0
         }
-    ],
+    ], 
+    "check_env": [
+        {
+            "env": "OPENCV_INCLUDE", 
+            "platform": [
+                "u200", 
+                "u50", 
+                "aws-vu9p-f1"
+            ], 
+            "echo": "Cannot find OpenCV include path. Please set OPENCV_INCLUDE variable"
+        }, 
+        {
+            "env": "OPENCV_LIB", 
+            "platform": [
+                "u200", 
+                "u50", 
+                "aws-vu9p-f1"
+            ], 
+            "echo": "Cannot find Opencv lib path. Please set OPENCV_LIB variable"
+        }
+    ], 
     "testinfo": {
         "disable": false, 
         "jobs": [
@@ -182,5 +237,5 @@
             "vitis_hw"
         ], 
         "category": "full"
-    } 
+    }
 }

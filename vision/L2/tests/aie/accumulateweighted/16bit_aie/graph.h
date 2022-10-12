@@ -55,7 +55,7 @@ class accumulateWeightedGraph : public adf::graph {
         connect<window<TILE_WINDOW_SIZE> >(k1.out[0], out);
 
         // specify kernel sources
-        source(k1) = "xf_accumulateweighted.cc";
+        source(k1) = "xf_accumulate_weighted.cc";
 
         // specify kernel run times
         runtime<ratio>(k1) = 0.5;

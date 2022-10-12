@@ -30,8 +30,8 @@
 namespace xf {
 namespace cv {
 
-template <int TYPE, int ROWS, int COLS, int PLANES, int NPC>
-void xFStddevkernel(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src_mat1,
+template <int TYPE, int ROWS, int COLS, int PLANES, int NPC, int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT>
+void xFStddevkernel(xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat1,
                     unsigned short _mean[XF_CHANNELS(TYPE, NPC)],
                     unsigned short _dst_stddev[XF_CHANNELS(TYPE, NPC)],
                     uint16_t height,
@@ -139,8 +139,8 @@ Row_Loop1:
     }
 }
 
-template <int SRC_T, int ROWS, int COLS, int NPC = 1>
-void meanStdDev(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
+template <int SRC_T, int ROWS, int COLS, int NPC = 1, int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT>
+void meanStdDev(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src,
                 unsigned short _mean[XF_CHANNELS(SRC_T, NPC)],
                 unsigned short _stddev[XF_CHANNELS(SRC_T, NPC)]) {
 // clang-format off
@@ -156,7 +156,8 @@ void meanStdDev(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,
 
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && "ROWS and COLS should be greater than input image");
 #endif
-    xFStddevkernel<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), NPC>(_src, _mean, _stddev, _src.rows, _src.cols);
+    xFStddevkernel<SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), NPC, XFCVDEPTH_IN>(_src, _mean, _stddev, _src.rows,
+                                                                                  _src.cols);
 }
 } // namespace cv
 } // namespace xf

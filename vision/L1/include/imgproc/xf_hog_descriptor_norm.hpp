@@ -247,12 +247,12 @@ void xFDHOGNormalize(hist_type HA_1[][NOB],
     uint32_t nf_1[1], nf_2[1];
     char n_1[1], n_2[1];
 // clang-format off
-    #pragma HLS RESOURCE variable=nf_1 core=RAM_1P_LUTRAM
-    #pragma HLS RESOURCE variable=nf_2 core=RAM_1P_LUTRAM
-    #pragma HLS RESOURCE variable=tmp_nf_sq24_1 core=RAM_1P_LUTRAM
-    #pragma HLS RESOURCE variable=tmp_nf_sq24_2 core=RAM_1P_LUTRAM
-    #pragma HLS RESOURCE variable=n_1 core=RAM_1P_LUTRAM
-    #pragma HLS RESOURCE variable=n_2 core=RAM_1P_LUTRAM
+    #pragma HLS bind_storage variable=nf_1 type=RAM_1P impl=LUTRAM
+    #pragma HLS bind_storage variable=nf_2 type=RAM_1P impl=LUTRAM
+    #pragma HLS bind_storage variable=tmp_nf_sq24_1 type=RAM_1P impl=LUTRAM
+    #pragma HLS bind_storage variable=tmp_nf_sq24_2 type=RAM_1P impl=LUTRAM
+    #pragma HLS bind_storage variable=n_1 type=RAM_1P impl=LUTRAM
+    #pragma HLS bind_storage variable=n_2 type=RAM_1P impl=LUTRAM
     // clang-format on
 
     // taking each bin as 16-bit unsigned type

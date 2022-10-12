@@ -27,11 +27,10 @@ void sum_accel(ap_uint<PTR_WIDTH>* img_in, double* sum_out, int height, int widt
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(height, width);
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> imgInput(height, width);
     double sum_local[XF_CHANNELS(TYPE, NPC1)];
 
 // clang-format off
-    #pragma HLS STREAM variable=imgInput.data depth=2
 // clang-format on
 
 // clang-format off
@@ -39,10 +38,10 @@ void sum_accel(ap_uint<PTR_WIDTH>* img_in, double* sum_out, int height, int widt
     // clang-format on
 
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1>(img_in, imgInput);
+    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(img_in, imgInput);
 
     // Run xfOpenCV kernel:
-    xf::cv::sum<TYPE, HEIGHT, WIDTH, NPC1>(imgInput, sum_local);
+    xf::cv::sum<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, sum_local);
 
     // Copy the result to output port:
     for (unsigned int i = 0; i < XF_CHANNELS(TYPE, NPC1); ++i) {

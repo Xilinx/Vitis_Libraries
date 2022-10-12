@@ -18,5 +18,5 @@
 #include "imgproc/xf_absdiff_aie.hpp"
 
 void absdiff(input_window_int16* input1, input_window_int16* input2, output_window_int16* output) {
-    xf::cv::aie::absdiff_api(input1, input1, output);
+    xf::cv::aie::absdiff_api(input1, input2, output);
 };

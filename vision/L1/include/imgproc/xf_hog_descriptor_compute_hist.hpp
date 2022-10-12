@@ -518,7 +518,7 @@ void xFDHOGcomputeHist(hls::stream<XF_SNAME(WORDWIDTH)>& _phase_strm,
                        ssv_type* ssv,
                        uint16_t* bin_center,
                        uint16_t nohc) {
-    // NO mode
+    // SPC mode
     if (NPC == XF_NPPC1) {
         xFDHOGcomputeHistNO<ROWS, COLS, DEPTH, NPC, WORDWIDTH, CELL_HEIGHT, CELL_WIDTH, NOHC,
                             (COLS >> XF_BITSHIFT(NPC)), WIN_STRIDE, BIN_STRIDE>(_phase_strm, _mag_strm, HA, ssv,

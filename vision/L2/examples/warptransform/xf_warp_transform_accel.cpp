@@ -29,12 +29,10 @@ void warptransform_accel(
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(rows, cols);
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgOutput(rows, cols);
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> imgInput(rows, cols);
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> imgOutput(rows, cols);
 
 // clang-format off
-    #pragma HLS STREAM variable=imgInput.data depth=2
-    #pragma HLS STREAM variable=imgOutput.data depth=2
 // clang-format on
 
 // clang-format off
@@ -52,14 +50,14 @@ void warptransform_accel(
     }
 
     // Retrieve xf::Mat objects from img_in data:
-    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1>(img_in, imgInput);
+    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(img_in, imgInput);
 
     // Run xfOpenCV kernel:
     xf::cv::warpTransform<NUM_STORE_ROWS, START_PROC, TRANSFORM_TYPE, INTERPOLATION, TYPE, HEIGHT, WIDTH, NPC1,
-                          XF_USE_URAM>(imgInput, imgOutput, transform_matrix);
+                          XF_USE_URAM, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(imgInput, imgOutput, transform_matrix);
 
     // Convert _dst xf::Mat object to output array:
-    xf::cv::xfMat2Array<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1>(imgOutput, img_out);
+    xf::cv::xfMat2Array<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(imgOutput, img_out);
 
     return;
 } // End of kernel

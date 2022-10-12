@@ -28,12 +28,12 @@
 #define WIDTH 128
 
 // Resolve pixel precision:
-#if NO
+#if SPC
 #define NPC1 XF_NPPC1
 #define INPUT_PTR_WIDTH 8
 #define OUTPUT_PTR_WIDTH 8
 #endif
-#if RO
+#if MPC
 #define NPC1 XF_NPPC8
 #define INPUT_PTR_WIDTH 64
 #define OUTPUT_PTR_WIDTH 64

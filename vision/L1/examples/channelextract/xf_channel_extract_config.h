@@ -28,18 +28,66 @@
 #define HEIGHT 128
 #define WIDTH 128
 
-#if NO
-#define OUT_TYPE ap_uint<8> // ap_uinnt8_t
-#define IN_TYPE ap_uint<32> // ap_uint32_t
-//#define INPUT_CH_TYPE XF_RGBA
-//#define INPUT_CH_TYPE XF_GRAY
-#elif RO
-#define OUT_TYPE ap_uint<64> // ap_uint64_t
-#define IN_TYPE ap_uint<64>  // ap_uint256_t
-#endif
+#if SPC
+#define NPC1 XF_NPPC1
+#elif MPC
+#if NPC4
+#define NPC1 XF_NPPC4
+#elif NPC8
+#define NPC1 XF_NPPC8
+#endif // NPC4
+#endif // SPC
 
+#if T_16U
+
+#if SPC
+#define INPUT_PTR_WIDTH 64
+#define OUTPUT_PTR_WIDTH 16
+#elif MPC
+#if NPC4
+#define INPUT_PTR_WIDTH 256
+#define OUTPUT_PTR_WIDTH 64
+#elif NPC8
+#define INPUT_PTR_WIDTH 512
+#define OUTPUT_PTR_WIDTH 128
+#endif // NPC4
+#endif // SPC
+
+#define CV_OUTTYPE CV_16UC1
+#define OUTPUT_CH_TYPE XF_16UC1
+#if BGR
+#define INPUT_CH_TYPE XF_16UC3
+#define CV_INTYPE CV_16UC3
+#elif BGRA
+#define INPUT_CH_TYPE XF_16UC4
+#define CV_INTYPE CV_16UC4
+#endif // BGR
+
+#elif T_8U
+
+#if SPC
 #define INPUT_PTR_WIDTH 32
 #define OUTPUT_PTR_WIDTH 8
+#elif MPC
+#if NPC4
+#define INPUT_PTR_WIDTH 128
+#define OUTPUT_PTR_WIDTH 32
+#elif NPC8
+#define INPUT_PTR_WIDTH 256
+#define OUTPUT_PTR_WIDTH 64
+#endif // NPC4
+#endif // SPC
+
+#define CV_OUTTYPE CV_8UC1
+#define OUTPUT_CH_TYPE XF_8UC1
+#if BGR
+#define INPUT_CH_TYPE XF_8UC3
+#define CV_INTYPE CV_8UC3
+#elif BGRA
+#define INPUT_CH_TYPE XF_8UC4
+#define CV_INTYPE CV_8UC4
+#endif // BGR
+#endif // T_16U
 
 #endif //_XF_CHANNEL_EXTRACT_CONFIG_H_
 

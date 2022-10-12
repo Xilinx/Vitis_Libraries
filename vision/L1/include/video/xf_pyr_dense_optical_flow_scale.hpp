@@ -286,9 +286,9 @@ void scale_up(hls::stream<ap_fixed<FLOW_WIDTH, FLOW_INT> >& inStrm,
 // clang-format off
         #pragma HLS array_reshape variable=buf0 dim=1 complete
         #pragma HLS array_reshape variable=buf1 dim=1 complete
-        #pragma HLS RESOURCE variable=buffer core=RAM_S2P_URAM
-        #pragma HLS RESOURCE variable=buf0   core=RAM_S2P_URAM
-        #pragma HLS RESOURCE variable=buf1   core=RAM_S2P_URAM
+        #pragma HLS bind_storage variable=buffer type=RAM_S2P impl=URAM
+        #pragma HLS bind_storage variable=buf0   type=RAM_S2P impl=URAM
+        #pragma HLS bind_storage variable=buf1   type=RAM_S2P impl=URAM
         // clang-format on
     }
 

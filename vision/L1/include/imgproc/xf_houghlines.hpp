@@ -26,6 +26,7 @@ typedef unsigned short uint16_t;
 #include "hls_stream.h"
 #include "common/xf_common.hpp"
 #include "common/xf_utility.hpp"
+// #include "xf_config_params.h"
 
 #define pai 3.1415926
 #define pai_by_360 0.008726
@@ -143,13 +144,14 @@ template <int SRC_T,
           int COLS,
           int DEPTH,
           int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH,
           unsigned int theta,
           unsigned int rho,
           int AngleN,
           int rhoN,
           int MINTHETA>
-void xfVoting(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
+void xfVoting(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
               ap_uint<12> accum[AngleN + 1][rhoN + 1],
               ap_uint<12> height,
               ap_uint<12> width) {
@@ -623,6 +625,7 @@ template <int SRC_T,
           int COLS,
           int DEPTH,
           int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH,
           unsigned int theta,
           unsigned int rho,
@@ -630,7 +633,7 @@ template <int SRC_T,
           int DIAG,
           int MINTHETA,
           int MAXTHETA>
-void xfHoughLines(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
+void xfHoughLines(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
                   float outputrho[linesMax],
                   float outputtheta[linesMax],
                   short _threshold,
@@ -662,11 +665,12 @@ void xfHoughLines(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
 // clang-format off
     #pragma HLS ARRAY_PARTITION variable=accum complete dim=1
-    #pragma HLS RESOURCE variable=accum core=RAM_T2P_BRAM
+    #pragma HLS bind_storage variable=accum type=RAM_T2P impl=BRAM
     // clang-format on
 
-    xfVoting<SRC_T, ROWS, COLS, DEPTH, NPC, WORDWIDTH, theta, rho, ((2 * (MAXTHETA - MINTHETA)) / theta), ((DIAG)),
-             MINTHETA>(_src_mat, accum, height, width); // votes updation
+    xfVoting<SRC_T, ROWS, COLS, DEPTH, NPC, XFCVDEPTH_IN_1, WORDWIDTH, theta, rho,
+             ((2 * (MAXTHETA - MINTHETA)) / theta), ((DIAG)), MINTHETA>(_src_mat, accum, height,
+                                                                        width); // votes updation
     xfThinning<ROWS, COLS, DEPTH, NPC, WORDWIDTH, ((2 * (MAXTHETA - MINTHETA)) / theta), ((DIAG))>(
         accum, _threshold); // thinning -->NMS
     xfSorting<ROWS, COLS, DEPTH, NPC, WORDWIDTH, theta, rho, ((2 * (MAXTHETA - MINTHETA)) / theta), ((DIAG)), linesMax,
@@ -705,8 +709,9 @@ template <unsigned int RHO,
           int SRC_T,
           int ROWS,
           int COLS,
-          int NPC>
-void HoughLines(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT>
+void HoughLines(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
                 float outputrho[MAXLINES],
                 float outputtheta[MAXLINES],
                 short threshold,
@@ -723,9 +728,9 @@ void HoughLines(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     assert(((MAXTHETA > 0) && (MAXTHETA <= 180)) && "MAXTHETA must be between 0 to 180");
 #endif
     // Main function calling
-    xfHoughLines<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC), THETA, RHO, MAXLINES, DIAG,
-                 MINTHETA, MAXTHETA>(_src_mat, outputrho, outputtheta, threshold, _src_mat.rows, _src_mat.cols,
-                                     linesmax);
+    xfHoughLines<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1, XF_WORDWIDTH(SRC_T, NPC), THETA, RHO,
+                 MAXLINES, DIAG, MINTHETA, MAXTHETA>(_src_mat, outputrho, outputtheta, threshold, _src_mat.rows,
+                                                     _src_mat.cols, linesmax);
 }
 } // namespace cv
 } // namespace xf

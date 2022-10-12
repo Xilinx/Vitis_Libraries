@@ -16,8 +16,8 @@
 
 #define INPUT_PTR_WIDTH 64
 #define OUTPUT_PTR_WIDTH 64
-#define RO 1
-#define NO 0
+#define MPC 1
+#define SPC 0
 
 #define FILTER_WIDTH 7
 #define BLOCK_WIDTH 7
@@ -26,3 +26,6 @@
 #define MAXCORNERS 1024
 
 #define XF_USE_URAM true
+
+#define XF_CV_DEPTH_IN 3
+#define XF_CV_DEPTH_OUT 3

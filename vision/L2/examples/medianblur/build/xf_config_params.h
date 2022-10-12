@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#define NO 1 // Normal Operation
-#define RO 0 // Resource Optimized
+#define SPC 1 // Single Pixel per Clock operation
+#define MPC 0 // Multiple Pixels per Clock operation
 
 #define RGB 1
 #define GRAY 0
@@ -24,3 +24,5 @@
 /*  set the height and weight  */
 #define HEIGHT 2160
 #define WIDTH 3840
+#define XF_CV_DEPTH_IN 3
+#define XF_CV_DEPTH_OUT 3

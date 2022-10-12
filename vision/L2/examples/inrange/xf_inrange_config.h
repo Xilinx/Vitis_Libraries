@@ -28,10 +28,10 @@
 #define WIDTH 3840
 
 // Resolve optimization type:
-#if RO
+#if MPC
 #define NPC1 XF_NPPC8
 #endif
-#if NO
+#if SPC
 #define NPC1 XF_NPPC1
 #endif
 
@@ -39,7 +39,7 @@
 #if RGB
 #define IN_TYPE XF_8UC3
 #define OUT_TYPE XF_8UC1
-#if NO
+#if SPC
 #define PTR_IN_WIDTH 32
 #define PTR_OUT_WIDTH 8
 #else
@@ -49,7 +49,7 @@
 #else
 #define IN_TYPE XF_8UC1
 #define OUT_TYPE XF_8UC1
-#if NO
+#if SPC
 #define PTR_IN_WIDTH 8
 #define PTR_OUT_WIDTH 8
 #else

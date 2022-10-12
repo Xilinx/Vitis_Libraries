@@ -53,11 +53,11 @@ class demosaicGraph : public adf::graph {
 
         std::stringstream ssi;
         ssi << "DataIn" << (start_core_idx + CORE_IDX);
-        in1[CORE_IDX] = input_plio::create(ssi.str().c_str(), adf::plio_64_bits, "data/input.txt");
+        in1[CORE_IDX] = input_plio::create(ssi.str().c_str(), adf::plio_128_bits, "data/input.txt");
 
         std::stringstream sso;
         sso << "DataOut" << (start_core_idx + CORE_IDX);
-        out1[CORE_IDX] = output_plio::create(sso.str().c_str(), adf::plio_64_bits, "data/output.txt");
+        out1[CORE_IDX] = output_plio::create(sso.str().c_str(), adf::plio_128_bits, "data/output.txt");
 
         // create nets to connect kernels and IO ports
         connect<window<TILE_WINDOW_SIZE> >(in1[CORE_IDX].out[0], k[CORE_IDX].in[0]);

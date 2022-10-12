@@ -31,8 +31,8 @@
 namespace xf {
 namespace cv {
 /* reading data from scalar and write into img*/
-template <int SRC_T, int ROWS, int COLS, int NPC>
-void write(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& img,
+template <int SRC_T, int ROWS, int COLS, int NPC, int XFCVDEPTH = _XFCVDEPTH_DEFAULT>
+void write(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH>& img,
            xf::cv::Scalar<XF_CHANNELS(SRC_T, NPC), XF_TNAME(SRC_T, NPC)> s,
            int ind) {
 // clang-format off
@@ -42,8 +42,8 @@ void write(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& img,
     img.write(ind, s.val[0]);
 }
 /* reading data from scalar and write into img*/
-template <int SRC_T, int ROWS, int COLS, int NPC>
-void fetchingmatdata(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& img,
+template <int SRC_T, int ROWS, int COLS, int NPC, int XFCVDEPTH = _XFCVDEPTH_DEFAULT>
+void fetchingmatdata(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH>& img,
                      xf::cv::Scalar<XF_CHANNELS(SRC_T, NPC), XF_TNAME(SRC_T, NPC)> s,
                      int val) {
 // clang-format off
@@ -52,8 +52,8 @@ void fetchingmatdata(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& img,
     write(img, s, val);
 }
 /* reading data from img and writing onto scalar variable*/
-template <int SRC_T, int ROWS, int COLS, int NPC>
-xf::cv::Scalar<XF_CHANNELS(SRC_T, NPC), XF_TNAME(SRC_T, NPC)> read(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& img,
+template <int SRC_T, int ROWS, int COLS, int NPC, int XFCVDEPTH = _XFCVDEPTH_DEFAULT>
+xf::cv::Scalar<XF_CHANNELS(SRC_T, NPC), XF_TNAME(SRC_T, NPC)> read(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH>& img,
                                                                    int index) {
 // clang-format off
     #pragma HLS inline
@@ -65,8 +65,8 @@ xf::cv::Scalar<XF_CHANNELS(SRC_T, NPC), XF_TNAME(SRC_T, NPC)> read(xf::cv::Mat<S
     return scl;
 }
 /* reading data from img and writing onto scalar variable*/
-template <int SRC_T, int ROWS, int COLS, int NPC>
-void fillingdata(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& img,
+template <int SRC_T, int ROWS, int COLS, int NPC, int XFCVDEPTH = _XFCVDEPTH_DEFAULT>
+void fillingdata(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH>& img,
                  xf::cv::Scalar<XF_CHANNELS(SRC_T, NPC), XF_TNAME(SRC_T, NPC)>& s,
                  int index) {
 // clang-format off
@@ -96,8 +96,9 @@ Unpack a AXI video stream into a xf::cv::Mat<> object
  *output: img
  */
 
-template <int W, int TYPE, int ROWS, int COLS, int NPPC>
-int AXIvideo2xfMat(hls::stream<ap_axiu<W, 1, 1, 1> >& AXI_video_strm, xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& img) {
+template <int W, int TYPE, int ROWS, int COLS, int NPPC, int XFCVDEPTH = _XFCVDEPTH_DEFAULT>
+int AXIvideo2xfMat(hls::stream<ap_axiu<W, 1, 1, 1> >& AXI_video_strm,
+                   xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH>& img) {
     ap_axiu<W, 1, 1, 1> axi;
     int res = 0;
 
@@ -175,8 +176,8 @@ loop_row_axi2mat:
  *  input: img
  *  output: AXI_video_strm
  */
-template <int W, int TYPE, int ROWS, int COLS, int NPPC, int XFCV_DEPTH = 2>
-int xfMat2AXIvideo(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCV_DEPTH>& img,
+template <int W, int TYPE, int ROWS, int COLS, int NPPC, int XFCVDEPTH = _XFCVDEPTH_DEFAULT>
+int xfMat2AXIvideo(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH>& img,
                    hls::stream<ap_axiu<W, 1, 1, 1> >& AXI_video_strm) {
     ap_axiu<W, 1, 1, 1> axi;
     int res = 0;

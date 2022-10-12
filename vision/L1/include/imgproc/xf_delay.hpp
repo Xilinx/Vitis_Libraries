@@ -25,8 +25,15 @@
 namespace xf {
 namespace cv {
 
-template <int MAXDELAY, int SRC_T, int ROWS, int COLS, int NPC>
-void delayMat(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src, xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst) {
+template <int MAXDELAY,
+          int SRC_T,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void delayMat(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src,
+              xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst) {
 // clang-format off
     #pragma HLS inline off
     // clang-format on

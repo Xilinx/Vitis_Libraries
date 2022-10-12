@@ -26,10 +26,14 @@
 #include "xf_pyr_dense_optical_flow_find_gradients.hpp"
 #include "xf_pyr_dense_optical_flow_oflow_process.hpp"
 #include "math.h"
-template <unsigned short MAXHEIGHT, unsigned short MAXWIDTH, int FLOW_WIDTH, int FLOW_INT>
+template <unsigned short MAXHEIGHT,
+          unsigned short MAXWIDTH,
+          int XFCVDEPTH_STREAM_OUT = _XFCVDEPTH_DEFAULT,
+          int FLOW_WIDTH,
+          int FLOW_INT>
 void stitch_stream_fixed_int(hls::stream<ap_fixed<FLOW_WIDTH, FLOW_INT> >& in_stream1,
                              hls::stream<ap_fixed<FLOW_WIDTH, FLOW_INT> >& in_stream2,
-                             xf::cv::Mat<XF_32UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1>& sitched_stream,
+                             xf::cv::Mat<XF_32UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1, XFCVDEPTH_STREAM_OUT>& sitched_stream,
                              unsigned int rows,
                              unsigned int cols,
                              unsigned int level) {
@@ -82,8 +86,12 @@ void stitch_stream_fixed_int(hls::stream<ap_fixed<FLOW_WIDTH, FLOW_INT> >& in_st
     fclose(fpV);
 #endif
 } // end split_stream()
-template <unsigned short MAXHEIGHT, unsigned short MAXWIDTH, int FLOW_WIDTH, int FLOW_INT>
-void split_stream_int_fixed(xf::cv::Mat<XF_32UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1>& instream,
+template <unsigned short MAXHEIGHT,
+          unsigned short MAXWIDTH,
+          int XFCVDEPTH_STREAM_IN = _XFCVDEPTH_DEFAULT,
+          int FLOW_WIDTH,
+          int FLOW_INT>
+void split_stream_int_fixed(xf::cv::Mat<XF_32UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1, XFCVDEPTH_STREAM_IN>& instream,
                             hls::stream<ap_fixed<FLOW_WIDTH, FLOW_INT> >& out_stream1,
                             hls::stream<ap_fixed<FLOW_WIDTH, FLOW_INT> >& out_stream2,
                             unsigned int rows,
@@ -276,15 +284,19 @@ void find_flow(hls::stream<ap_fixed<SIXIY_WIDTH, SIXIY_INT> >& strmSigmaIx2,
 template <unsigned short MAXHEIGHT,
           unsigned short MAXWIDTH,
           int NUM_PYR_LEVELS,
+          int XFCVDEPTH_CURR_IMG = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_NEXT_IMG = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_STREAM_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_STREAM_OUT = _XFCVDEPTH_DEFAULT,
           int NUM_LINES,
           int WINSIZE,
           int FLOW_WIDTH,
           int FLOW_INT,
           bool USE_URAM>
-void xFLKOpticalFlowDenseKernel(xf::cv::Mat<XF_8UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1>& currImg,
-                                xf::cv::Mat<XF_8UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1>& nextImg,
-                                xf::cv::Mat<XF_32UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1>& strmFlowin,
-                                xf::cv::Mat<XF_32UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1>& strmFlow,
+void xFLKOpticalFlowDenseKernel(xf::cv::Mat<XF_8UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1, XFCVDEPTH_CURR_IMG>& currImg,
+                                xf::cv::Mat<XF_8UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1, XFCVDEPTH_NEXT_IMG>& nextImg,
+                                xf::cv::Mat<XF_32UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1, XFCVDEPTH_STREAM_IN>& strmFlowin,
+                                xf::cv::Mat<XF_32UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1, XFCVDEPTH_STREAM_OUT>& strmFlow,
                                 const unsigned int rows,
                                 const unsigned int cols,
                                 const unsigned int prev_rows,
@@ -352,8 +364,8 @@ void xFLKOpticalFlowDenseKernel(xf::cv::Mat<XF_8UC1, MAXHEIGHT, MAXWIDTH, XF_NPP
     assert(cols <= MAXWIDTH);
 #endif
     // splitting the input flow streams to U and V to scale them up whenever scale up is enabled
-    split_stream_int_fixed<MAXHEIGHT, MAXWIDTH, FLOW_WIDTH, FLOW_INT>(strmFlowin, strmFlowU_split, strmFlowV_split,
-                                                                      prev_rows, prev_cols, level);
+    split_stream_int_fixed<MAXHEIGHT, MAXWIDTH, XFCVDEPTH_STREAM_IN, FLOW_WIDTH, FLOW_INT>(
+        strmFlowin, strmFlowU_split, strmFlowV_split, prev_rows, prev_cols, level);
 
     // scaling up U and V streams whenever scaleup is enabled
     scale_up<MAXHEIGHT, MAXWIDTH, FLOW_WIDTH, FLOW_INT, SCCMP_WIDTH, SCCMP_INT, RMAPPX_WIDTH, RMAPPX_INT, SCALE_WIDTH,
@@ -364,8 +376,8 @@ void xFLKOpticalFlowDenseKernel(xf::cv::Mat<XF_8UC1, MAXHEIGHT, MAXWIDTH, XF_NPP
                                   scale_in);
 
     // Finding the Temporal and space gradients for the input set of images
-    findGradients<MAXHEIGHT, MAXWIDTH, NUM_PYR_LEVELS, NUM_LINES, WINSIZE, IT_WIDTH, IT_INT, ITCMP_WIDTH, ITCMP_INT,
-                  FLOW_WIDTH, FLOW_INT, RMAPPX_WIDTH, RMAPPX_INT, USE_URAM>(
+    findGradients<MAXHEIGHT, MAXWIDTH, NUM_PYR_LEVELS, XFCVDEPTH_CURR_IMG, XFCVDEPTH_NEXT_IMG, NUM_LINES, WINSIZE,
+                  IT_WIDTH, IT_INT, ITCMP_WIDTH, ITCMP_INT, FLOW_WIDTH, FLOW_INT, RMAPPX_WIDTH, RMAPPX_INT, USE_URAM>(
         currImg, nextImg, strmIt_float, strmIx, strmIy, rows, cols, strmFlowU_scaled, strmFlowV_scaled, strmFlowU_in1,
         strmFlowV_in1, level);
 
@@ -388,7 +400,7 @@ void xFLKOpticalFlowDenseKernel(xf::cv::Mat<XF_8UC1, MAXHEIGHT, MAXWIDTH, XF_NPP
                  USE_URAM>(strmFlowV_fil, strmFlowV_fil_out, flagV, WINDOW_SIZE, 1, rows, cols);
 
     // stitching the U and V flow streams to a single flow stream
-    stitch_stream_fixed_int<MAXHEIGHT, MAXWIDTH, FLOW_WIDTH, FLOW_INT>(strmFlowU_fil_out, strmFlowV_fil_out, strmFlow,
-                                                                       rows, cols, level);
+    stitch_stream_fixed_int<MAXHEIGHT, MAXWIDTH, XFCVDEPTH_STREAM_OUT, FLOW_WIDTH, FLOW_INT>(
+        strmFlowU_fil_out, strmFlowV_fil_out, strmFlow, rows, cols, level);
 }
 #endif

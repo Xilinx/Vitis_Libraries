@@ -310,10 +310,9 @@ int main(int argc, char** argv) {
     xf::cv::analyzeDiff(diff, ERROR_THRESHOLD, err_per);
 
     if (err_per > 0.0f) {
-        std::cout << "Testcase failed" << std::endl;
+        std::cerr << "Testcase failed" << std::endl;
         return 1;
-    }
-
-    std::cout << "Testcase passed" << std::endl;
+    } else
+        std::cout << "Testcase passed" << std::endl;
     return 0;
 }

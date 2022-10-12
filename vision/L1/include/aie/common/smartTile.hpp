@@ -29,67 +29,103 @@ namespace xF {
 
 class smartTileMetaData {
    public:
-    uint32_t groupNumber;
-    std::vector<uint32_t> position;     //<row,column> in image
-    std::vector<uint16_t> size;         //<height,width> of tile  //can be copied from cv::Size that is part of cv::Mat
-                                        ////potential compile time constant
-    std::vector<uint16_t> overlapSizeH; //<left,right>
-    std::vector<uint16_t> overlapSizeV; //<top,bottom>
+    uint32_t m_groupNumber;
 
-    std::vector<uint32_t> finalImageSize; // cv::Size finalImageSize;
+    //<height,width> of tile
+    uint16_t m_tileHeight;
+    uint16_t m_tileWidth;
 
-    // parameters required to support resize
-    std::vector<uint16_t> coordinate; //<row,column> in tile configuration
-    std::vector<uint16_t>
-        tileConfiguration; //<#tileRows,#tileCols>						//potential compile time
-                           // constant
+    //<row,column> in image
+    uint32_t m_positionH;
+    uint32_t m_positionV;
 
-    // parameters to enable run-time monitoring if tile overlap size is large enough or enable on the fly retiling in an
-    // dynamic environment.
-    bool enableInvalidRegions; // flag to enable invalidRegion tracking					//only for
-                               // dynamic execution
-    std::vector<uint16_t>
-        invalidHorizontalRegion; // <left,right>						//only for dynamic
-                                 // execution
-    std::vector<uint16_t>
-        invalidVerticalRegion; // <top,bottom>							//only for dynamic
-                               // execution
+    //<row,column> in tile configuration
+    uint16_t m_coordinate_row;
+    uint16_t m_coordinate_col;
+
+    //<left,right> overlap
+    uint16_t m_overlapSizeH_left;
+    uint16_t m_overlapSizeH_right;
+
+    //<top,bottom> overlap
+    uint16_t m_overlapSizeV_top;
+    uint16_t m_overlapSizeV_bottom;
+
+    // cv::Size finalImageSize
+    uint16_t m_finalImageSizeHeight;
+    uint16_t m_finalImageSizeWidth;
+
+    // tile configuration
+    uint16_t m_tileRows;
+    uint16_t m_tileCols;
+
+    bool m_enableInvalidRegions;
+
+    uint16_t m_invalidHorizontalRegion_left;
+    uint16_t m_invalidHorizontalRegion_right;
+    uint16_t m_invalidVerticalRegion_top;
+    uint16_t m_invalidVerticalRegion_bottom;
 
     smartTileMetaData(){};
 
     smartTileMetaData(unsigned int _groupNumber,
-                      std::vector<uint16_t> _tileSize,
-                      std::vector<uint32_t> _position,
-                      std::vector<uint16_t> _coordinate,
-                      std::vector<uint16_t> _overlapSizeH,
-                      std::vector<uint16_t> _overlapSizeV,
-                      std::vector<uint32_t> _finalImageSize,
-                      std::vector<uint16_t> _tileConfiguration,
+                      uint16_t _tileHeight,
+                      uint16_t _tileWidth,
+                      uint32_t _positionV,
+                      uint32_t _positionH,
+                      uint16_t _coordinate_row,
+                      uint16_t _coordinate_col,
+                      uint16_t _overlapSizeH_left,
+                      uint16_t _overlapSizeH_right,
+                      uint16_t _overlapSizeV_top,
+                      uint16_t _overlapSizeV_bottom,
+                      uint32_t _finalImageSizeHeight,
+                      uint32_t _finalImageSizeWidth,
+                      uint16_t _tileRows,
+                      uint16_t _tileCols,
                       bool _enableInvalidRegions = true) {
-        groupNumber = _groupNumber;
-        size = _tileSize;
-        position = _position;
-        coordinate = _coordinate;
-        overlapSizeH = _overlapSizeH;
-        overlapSizeV = _overlapSizeV;
-        finalImageSize = _finalImageSize;
-        tileConfiguration = _tileConfiguration;
-        enableInvalidRegions = _enableInvalidRegions;
-        invalidHorizontalRegion = {0, 0};
-        invalidVerticalRegion = {0, 0};
+        m_groupNumber = _groupNumber;
+
+        m_tileHeight = _tileHeight;
+        m_tileWidth = _tileWidth;
+
+        m_positionH = _positionH;
+        m_positionV = _positionV;
+
+        m_coordinate_row = _coordinate_row;
+        m_coordinate_col = _coordinate_col;
+
+        m_overlapSizeH_left = _overlapSizeH_left;
+        m_overlapSizeH_right = _overlapSizeH_right;
+
+        m_overlapSizeV_top = _overlapSizeV_top;
+        m_overlapSizeV_bottom = _overlapSizeV_bottom;
+
+        m_finalImageSizeHeight = _finalImageSizeHeight;
+        m_finalImageSizeWidth = _finalImageSizeWidth;
+
+        m_tileRows = _tileRows;
+        m_tileCols = _tileCols;
+
+        m_enableInvalidRegions = _enableInvalidRegions;
+
+        m_invalidHorizontalRegion_left = 0;
+        m_invalidHorizontalRegion_right = 0;
+        m_invalidVerticalRegion_top = 0;
+        m_invalidVerticalRegion_bottom = 0;
     }
 
-    uint16_t tileWidth() const { return size[1]; }
-    uint16_t tileHeight() const { return size[0]; }
-    uint16_t positionV() const { return position[0]; }
-    uint16_t positionH() const { return position[1]; }
-    uint32_t finalWidth() const { return finalImageSize[1]; }
-    uint32_t finalHeight() const { return finalImageSize[0]; }
+    uint16_t tileWidth() const { return m_tileWidth; }
+    uint16_t tileHeight() const { return m_tileHeight; }
+    uint16_t positionV() const { return m_positionV; }
+    uint16_t positionH() const { return m_positionH; }
+    uint32_t finalWidth() const { return m_finalImageSizeWidth; }
+    uint32_t finalHeight() const { return m_finalImageSizeHeight; }
 
-    uint16_t overlapSizeH_left() const { return overlapSizeH[0]; }
-    uint16_t overlapSizeH_right() const { return overlapSizeH[1]; }
-    uint16_t overlapSizeV_top() const { return overlapSizeV[0]; }
-    uint16_t overlapSizeV_bottom() const { return overlapSizeV[1]; }
+    uint16_t overlapSizeH_left() const { return m_overlapSizeH_left; }
+    uint16_t overlapSizeH_right() const { return m_overlapSizeH_right; }
+    uint16_t overlapSizeV_top() const { return m_overlapSizeV_top; }
+    uint16_t overlapSizeV_bottom() const { return m_overlapSizeV_bottom; }
 };
 
 } // namespace xF

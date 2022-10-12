@@ -24,7 +24,7 @@
 #include "xf_config_params.h"
 
 /* Interface types*/
-#if RO
+#if MPC
 #define NPC_T XF_NPPC2
 #else
 #define NPC_T XF_NPPC1

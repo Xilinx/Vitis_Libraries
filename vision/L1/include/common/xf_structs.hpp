@@ -826,11 +826,7 @@ inline void Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::convertTo(Mat<DST_T, ROWS, COLS
             DATATYPE out_val;
 
             for (int k = 0; k < (1 << (XF_BITSHIFT(NPPC))); k++) {
-#ifdef __SDSVHLS__
                 in_pix = in_val.range(in_shift + IN_STEP - 1, in_shift);
-#else
-                in_pix = in_val.chnl[k][0];
-#endif
 
                 if (otype == XF_CONVERT_16U_TO_8U || otype == XF_CONVERT_16S_TO_8U || otype == XF_CONVERT_32S_TO_8U ||
                     otype == XF_CONVERT_32S_TO_16U || otype == XF_CONVERT_32S_TO_16S) {
@@ -854,16 +850,13 @@ inline void Mat<T, ROWS, COLS, NPPC, XFCVDEPTH>::convertTo(Mat<DST_T, ROWS, COLS
                 }
 
                 out_pix = tmp_out_pix.range(out_shift + OUT_STEP - 1, out_shift);
-#ifdef __SDSVHLS__
+
                 out_val.range(out_shift + OUT_STEP - 1, out_shift) = out_pix;
-#else
-                out_val.chnl[k][0] = out_pix;
-#endif
 
                 in_shift = in_shift + IN_STEP;
                 out_shift = out_shift + OUT_STEP;
             }
-            write(((i * cols >> (XF_BITSHIFT(NPPC))) + j), out_val);
+            dst.write(((i * cols >> (XF_BITSHIFT(NPPC))) + j), out_val);
         }
     }
 }

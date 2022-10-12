@@ -29,8 +29,8 @@ namespace cv {
 // ======================================================================================
 // Function to read from DDR and copy to xf::cv::Mat
 // ======================================================================================
-template <int BUS_WIDTH, int TYPE, int ROWS, int COLS, int NPPC>
-void Ptr2xfMat(ap_uint<BUS_WIDTH>* in_ptr, xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& out_mat) {
+template <int BUS_WIDTH, int TYPE, int ROWS, int COLS, int NPPC, int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void Ptr2xfMat(ap_uint<BUS_WIDTH>* in_ptr, xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT>& out_mat) {
 #pragma HLS INLINE OFF
 
     const int c_TRIP_COUNT = ROWS * COLS;
@@ -47,8 +47,8 @@ void Ptr2xfMat(ap_uint<BUS_WIDTH>* in_ptr, xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& 
 // ======================================================================================
 // Function to read from DDR and copy to xf::cv::Mat
 // ======================================================================================
-template <int BUS_WIDTH, int TYPE, int ROWS, int COLS, int NPPC>
-void xfMat2Ptr(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& in_mat, ap_uint<BUS_WIDTH>* out_ptr) {
+template <int BUS_WIDTH, int TYPE, int ROWS, int COLS, int NPPC, int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT>
+void xfMat2Ptr(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN>& in_mat, ap_uint<BUS_WIDTH>* out_ptr) {
 #pragma HLS INLINE OFF
 
     const int c_TRIP_COUNT = ROWS * COLS;
@@ -557,10 +557,12 @@ class accel_utils {
         int stop = 0;
     }
 
-    template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
-    void Array2xfMat(ap_uint<PTR_WIDTH>* srcPtr, xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& dstMat, int stride = -1) {
+    template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC, int XFCVDEPTH = _XFCVDEPTH_DEFAULT>
+    void Array2xfMat(ap_uint<PTR_WIDTH>* srcPtr,
+                     xf::cv::Mat<MAT_T, ROWS, COLS, NPC, XFCVDEPTH>& dstMat,
+                     int stride = -1) {
 #if !defined(__XF_USE_OLD_IMPL__)
-        MMIterIn<PTR_WIDTH, MAT_T, ROWS, COLS, NPC>::Array2xfMat(srcPtr, dstMat, stride);
+        MMIterIn<PTR_WIDTH, MAT_T, ROWS, COLS, NPC, XFCVDEPTH>::Array2xfMat(srcPtr, dstMat, stride);
 #else
 // clang-format off
         #pragma HLS DATAFLOW
@@ -704,10 +706,18 @@ class accel_utils {
         }
     }
 
-    template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC, int FILLZERO = 1>
-    void xfMat2Array(xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& srcMat, ap_uint<PTR_WIDTH>* dstPtr, int stride = -1) {
+    template <int PTR_WIDTH,
+              int MAT_T,
+              int ROWS,
+              int COLS,
+              int NPC,
+              int XFCVDEPTH = _XFCVDEPTH_DEFAULT,
+              int FILLZERO = 1>
+    void xfMat2Array(xf::cv::Mat<MAT_T, ROWS, COLS, NPC, XFCVDEPTH>& srcMat,
+                     ap_uint<PTR_WIDTH>* dstPtr,
+                     int stride = -1) {
 #if !defined(__XF_USE_OLD_IMPL__)
-        MMIterOut<PTR_WIDTH, MAT_T, ROWS, COLS, NPC, FILLZERO>::xfMat2Array(srcMat, dstPtr, stride);
+        MMIterOut<PTR_WIDTH, MAT_T, ROWS, COLS, NPC, FILLZERO, XFCVDEPTH>::xfMat2Array(srcMat, dstPtr, stride);
 #else
 // clang-format off
         #pragma HLS DATAFLOW
@@ -772,20 +782,20 @@ class accel_utils {
     }
 };
 
-template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC, int FILLZERO = 1>
-void xfMat2Array(xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& srcMat, ap_uint<PTR_WIDTH>* dstPtr, int stride = -1) {
+template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC, int XFCVDEPTH = _XFCVDEPTH_DEFAULT, int FILLZERO = 1>
+void xfMat2Array(xf::cv::Mat<MAT_T, ROWS, COLS, NPC, XFCVDEPTH>& srcMat, ap_uint<PTR_WIDTH>* dstPtr, int stride = -1) {
 #if !defined(__XF_USE_OLD_IMPL__)
-    MMIterOut<PTR_WIDTH, MAT_T, ROWS, COLS, NPC, FILLZERO>::xfMat2Array(srcMat, dstPtr, stride);
+    MMIterOut<PTR_WIDTH, MAT_T, ROWS, COLS, NPC, FILLZERO, XFCVDEPTH>::xfMat2Array(srcMat, dstPtr, stride);
 #else
     accel_utils au;
     au.xfMat2Array<PTR_WIDTH, MAT_T, ROWS, COLS, NPC>(srcMat, dstPtr);
 #endif
 }
 
-template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
-void Array2xfMat(ap_uint<PTR_WIDTH>* srcPtr, xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& dstMat, int stride = -1) {
+template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC, int XFCVDEPTH = _XFCVDEPTH_DEFAULT>
+void Array2xfMat(ap_uint<PTR_WIDTH>* srcPtr, xf::cv::Mat<MAT_T, ROWS, COLS, NPC, XFCVDEPTH>& dstMat, int stride = -1) {
 #if !defined(__XF_USE_OLD_IMPL__)
-    MMIterIn<PTR_WIDTH, MAT_T, ROWS, COLS, NPC>::Array2xfMat(srcPtr, dstMat, stride);
+    MMIterIn<PTR_WIDTH, MAT_T, ROWS, COLS, NPC, XFCVDEPTH>::Array2xfMat(srcPtr, dstMat, stride);
 #else
     accel_utils au;
     au.Array2xfMat<PTR_WIDTH, MAT_T, ROWS, COLS, NPC>(srcPtr, dstMat);

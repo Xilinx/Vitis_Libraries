@@ -1,0 +1,133 @@
+{
+    "name": "Xilinx blacklevel correction AIE Test", 
+    "description": "blacklevel correction AIE function example", 
+    "flow": "versal", 
+    "platform_allowlist": [
+        "vck190"
+    ], 
+    "platform_blocklist": [], 
+    "platform_properties": {
+        "vck190": {
+            "v++": {
+                "compiler": {
+                    "clflags": [
+                        ""
+                    ]
+                }, 
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/system.cfg"
+                    ]
+                }, 
+                "package": {
+                    "clflags": [
+                        "--package.defer_aie_run"
+                    ]
+                }
+            }
+        }
+    }, 
+    "data": [
+        "LIB_DIR/data/4k.jpg", 
+        "LIB_DIR/data/HD.jpg"
+    ], 
+    "gui": false, 
+    "launch": [
+        {
+            "name": "hwemu-launch", 
+            "target": "hw_emu", 
+            "cmd_args": "kernel.xclbin LIB_DIR/data/HD.jpg"
+        }, 
+        {
+            "name": "hw", 
+            "target": "hw", 
+            "cmd_args": "kernel.xclbin LIB_DIR/data/4k.jpg"
+        }
+    ], 
+    "host": {
+        "host_exe": "host.elf", 
+        "compiler": {
+            "sources": [
+                "LIB_DIR/L2/tests/aie/blacklevel/16bit_aie_gmio/host.cpp", 
+                "./Work/ps/c_rts/aie_control_xrt.cpp"
+            ], 
+            "includepaths": [
+                "$(SYSROOT)/usr/include/xrt/", 
+                "$(SYSROOT)/usr/include/", 
+                "$(SYSROOT)/usr/include/opencv4", 
+                "LIB_DIR/L1/include/aie", 
+                "./"
+            ], 
+            "options": "--sysroot=$(SYSROOT) -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include", 
+            "symbols": [
+                "__PS_ENABLE_AIE__"
+            ]
+        }, 
+        "linker": {
+            "librarypaths": [
+                "$(SYSROOT)/usr/lib/", 
+                "LIB_DIR/L1/lib/sw/aarch64-linux"
+            ], 
+            "libraries": [
+                "smartTilerStitcher"
+            ], 
+            "options": "--sysroot=$(SYSROOT)"
+        }
+    }, 
+    "aiecompiler": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L1/include/aie"
+            ]
+        }
+    }, 
+    "aiecontainers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/L2/tests/aie/blacklevel/16bit_aie_gmio/graph.cpp", 
+                    "pl-freq": 300, 
+                    "workdir": "./Work", 
+                    "name": "libadf.a", 
+                    "aie_kernel_files": [
+                        "xf_blacklevel.cc"
+                    ]
+                }
+            ]
+        }
+    ], 
+    "containers": [
+        {
+            "name": "kernel"
+        }
+    ], 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 32768, 
+                "max_time_min": {
+                    "vitis_aie_sim": 50, 
+                    "vitis_aie_x86sim": 50, 
+                    "vitis_hw_build": 470, 
+                    "vitis_hw_emu": 200, 
+                    "vitis_hw_run": 30
+                }
+            }
+        ], 
+        "targets": [
+            "vitis_hw_emu", 
+            "vitis_hw_build", 
+            "vitis_hw_run"
+        ], 
+        "category": "canary"
+    },
+    "output_files": [
+        "pl_sample_counts",
+        "ISS_RPC_SERVER_PORT"
+    ]    
+}

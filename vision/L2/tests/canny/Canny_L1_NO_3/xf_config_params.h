@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#define RO 0
-#define NO 1
+#define MPC 0
+#define SPC 1
 
 #define FILTER_WIDTH 3
 
@@ -26,3 +26,6 @@
 
 #define INPUT_PTR_WIDTH 64
 #define OUTPUT_PTR_WIDTH 64
+
+#define XF_CV_DEPTH_IN_1 2
+#define XF_CV_DEPTH_OUT_1 2

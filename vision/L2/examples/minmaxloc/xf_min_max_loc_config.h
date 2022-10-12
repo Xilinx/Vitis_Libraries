@@ -30,7 +30,7 @@
 // Resolve pixel depth:
 #if T_8U
 #define TYPE XF_8UC1
-#if NO
+#if SPC
 #define PTR_WIDTH 8
 #else
 #define PTR_WIDTH 64
@@ -39,7 +39,7 @@
 #endif
 #if T_16U
 #define TYPE XF_16UC1
-#if NO
+#if SPC
 #define PTR_WIDTH 16
 #else
 #define PTR_WIDTH 128
@@ -48,7 +48,7 @@
 #endif
 #if T_16S
 #define TYPE XF_16SC1
-#if NO
+#if SPC
 #define PTR_WIDTH 16
 #else
 #define PTR_WIDTH 128
@@ -57,7 +57,7 @@
 #endif
 #if T_32S
 #define TYPE XF_32SC1
-#if NO
+#if SPC
 #define PTR_WIDTH 32
 #else
 #define PTR_WIDTH 256
@@ -66,11 +66,11 @@
 #endif
 
 // Resolve optimization type:
-#if NO
+#if SPC
 #define NPC1 XF_NPPC1
 #endif
 
-#if RO
+#if MPC
 #define NPC1 XF_NPPC8
 #endif
 

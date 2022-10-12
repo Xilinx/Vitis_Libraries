@@ -27,10 +27,10 @@
 #define HEIGHT 128
 #define WIDTH 128
 
-#if NO
+#if SPC
 #define NPC1 XF_NPPC1
 #endif
-#if RO
+#if MPC
 #define NPC1 XF_NPPC8
 #endif
 

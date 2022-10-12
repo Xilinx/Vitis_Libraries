@@ -21,21 +21,21 @@
         "source": [
             "${XF_PROJ_ROOT}/L1/examples/custom_bgr2y8/xf_custom_bgr2y8_accel.cpp"
         ], 
-        "cflags": "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x", 
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/custom_bgr2y8/build -I ./ -D__SDSVHLS__ -std=c++0x", 
         "csimflags": "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
     }, 
     "testbench": {
         "source": [
             "${XF_PROJ_ROOT}/L1/examples/custom_bgr2y8/xf_custom_bgr2y8_tb.cpp"
         ], 
-        "cflags": "-I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x", 
+        "cflags": "-I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/custom_bgr2y8/build -I ./ -D__SDSVHLS__ -std=c++0x", 
         "ldflags": "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core", 
         "argv": {
             "hls_csim": " ${XF_PROJ_ROOT}/data/HD2.JPG", 
             "hls_cosim": " ${XF_PROJ_ROOT}/data/HD2.JPG "
         }, 
         "stdmath": false, 
-        "csimflags": "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+        "csimflags": "-I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/custom_bgr2y8/build -I ./ -D__SDSVHLS__ -std=c++0x"
     }, 
     "testinfo": {
         "disable": false, 

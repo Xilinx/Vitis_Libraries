@@ -28,10 +28,10 @@
 #define WIDTH 1920
 #define HEIGHT 1080
 
-#if NO
+#if SPC
 #define INTYPE XF_NPPC1
 #define OUTTYPE XF_NPPC32
-#elif RO
+#elif MPC
 #define INTYPE XF_NPPC8
 #define OUTTYPE XF_NPPC32
 #endif

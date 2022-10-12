@@ -129,6 +129,7 @@ int main(int argc, char** argv) {
         std::cout << "Data transfer complete (Stitcher)\n";
         //@}
 
+        // Analyze output {
         std::cout << "Analyzing diff\n";
         cv::Mat diff;
         dst = cv::max(dst, 0);
@@ -145,6 +146,8 @@ int main(int argc, char** argv) {
             std::cerr << "Test failed" << std::endl;
             exit(-1);
         }
+        //}
+        accum_graph.end();
 
         std::cout << "Test passed" << std::endl;
         return 0;

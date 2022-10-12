@@ -28,7 +28,7 @@
 #define HEIGHT 2160
 #define WIDTH 3840
 
-#if NO
+#if SPC
 #define NPIX XF_NPPC1
 #if T_8U
 #define IN_TYPE XF_8UC3
@@ -45,7 +45,7 @@
 #endif
 #endif
 
-#if RO
+#if MPC
 #define NPIX XF_NPPC8
 #if T_8U
 #define IN_TYPE XF_8UC3

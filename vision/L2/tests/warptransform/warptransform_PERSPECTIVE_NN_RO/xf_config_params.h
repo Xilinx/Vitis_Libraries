@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#define RO 1 // 8 Pixel Processing
-#define NO 0 // 1 Pixel Processing
+#define MPC 1 // 8 Pixel Processing
+#define SPC 0 // 1 Pixel Processing
 
 // Number of rows in the input image
 #define HEIGHT 2160
@@ -37,3 +37,5 @@
 // transform type 0-AFFINE 1-PERSPECTIVE
 #define TRANSFORM_TYPE 1
 #define XF_USE_URAM false
+#define XF_CV_DEPTH_IN 3
+#define XF_CV_DEPTH_OUT 3

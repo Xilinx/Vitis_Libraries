@@ -24,7 +24,7 @@
 #include "imgproc/xf_resize.hpp"
 
 /* Interface types*/
-#if RO
+#if MPC
 
 #if RGB
 #define NPC_T XF_NPPC4

@@ -39,14 +39,24 @@ int main(int argc, char** argv) {
     // Create memory for output image
     out_img.create(in_gray.rows, in_gray.cols, in_gray.depth());
 
-#if FILTER_WIDTH == 3
-    float sigma = 0.5f;
+#if FILTER_WIDTH_1 == 3
+    float sigma1 = 0.5f;
 #endif
-#if FILTER_WIDTH == 7
-    float sigma = 1.16666f;
+#if FILTER_WIDTH_1 == 7
+    float sigma1 = 1.16666f;
 #endif
-#if FILTER_WIDTH == 5
-    float sigma = 0.8333f;
+#if FILTER_WIDTH_1 == 5
+    float sigma1 = 0.8333f;
+#endif
+
+#if FILTER_WIDTH_2 == 3
+    float sigma2 = 0.5f;
+#endif
+#if FILTER_WIDTH_2 == 7
+    float sigma2 = 1.16f;
+#endif
+#if FILTER_WIDTH_2 == 5
+    float sigma2 = 0.8333f;
 #endif
 
     cv::Mat dst(in_gray.size(), in_gray.type());
@@ -61,10 +71,10 @@ int main(int argc, char** argv) {
     clock_gettime(CLOCK_REALTIME, &begin_hw);
 
     // OpenCV reference function
-    cv::GaussianBlur(in_gray, dst, cv::Size(FILTER_WIDTH, FILTER_WIDTH), sigma, sigma, cv::BORDER_CONSTANT);
+    cv::GaussianBlur(in_gray, dst, cv::Size(FILTER_WIDTH_1, FILTER_WIDTH_1), sigma1, sigma1, cv::BORDER_CONSTANT);
     dst2 = dst.clone();
     dst3 = dst.clone();
-    cv::GaussianBlur(dst2, dst4, cv::Size(FILTER_WIDTH, FILTER_WIDTH), sigma, sigma, cv::BORDER_CONSTANT);
+    cv::GaussianBlur(dst2, dst4, cv::Size(FILTER_WIDTH_2, FILTER_WIDTH_2), sigma2, sigma2, cv::BORDER_CONSTANT);
     subtract(dst3, dst4, dst_fin);
 
     // End time for latency calculation of CPU function
@@ -120,10 +130,11 @@ int main(int argc, char** argv) {
 
     // Set kernel arguments:
     OCL_CHECK(err, err = kernel.setArg(0, buffer_inImage));
-    OCL_CHECK(err, err = kernel.setArg(1, sigma));
-    OCL_CHECK(err, err = kernel.setArg(2, buffer_outImage));
-    OCL_CHECK(err, err = kernel.setArg(3, rows));
-    OCL_CHECK(err, err = kernel.setArg(4, cols));
+    OCL_CHECK(err, err = kernel.setArg(1, sigma1));
+    OCL_CHECK(err, err = kernel.setArg(2, sigma2));
+    OCL_CHECK(err, err = kernel.setArg(3, buffer_outImage));
+    OCL_CHECK(err, err = kernel.setArg(4, rows));
+    OCL_CHECK(err, err = kernel.setArg(5, cols));
 
     // Initialize the buffers:
     cl::Event event;

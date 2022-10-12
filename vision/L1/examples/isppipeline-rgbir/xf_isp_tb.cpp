@@ -316,8 +316,8 @@ int main(int argc, char** argv) {
     cv::imwrite("input.png", raw_input);
 
     InVideoStrm_t src_axi;
-    // OutVideoStrm_t dst_axi;
-    InVideoStrm_t dst_axi;
+    OutVideoStrm_t dst_axi;
+    // InVideoStrm_t dst_axi;
     OutVideoStrmIR_t ir_axi;
 
     unsigned char InColorFormat = 0;
@@ -362,8 +362,13 @@ int main(int argc, char** argv) {
 
         // Convert processed image back to CV image
         // MultiPixelAXIvideo2Mat(dst_axi, final_output, 0);
-        AXIvideo2cvMatxf<XF_NPPC, XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC)>(dst_axi, final_output);
+        AXIvideo2cvMatxf<XF_NPPC, XF_DTPIXELDEPTH(XF_YUV_T, XF_NPPC)>(dst_axi, final_output);
+#if T_8U
         AXIvideo2cvMatxf<XF_NPPC, XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC)>(ir_axi, ir_output);
+#else
+        MultiPixelAXIvideo2Mat(ir_axi, ir_output, 0);
+#endif
+        // AXIvideo2cvMatxf<XF_NPPC, XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC)>(ir_axi, ir_output);
     }
 
     imwrite("output.png", final_output);

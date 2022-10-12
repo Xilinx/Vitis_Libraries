@@ -26,9 +26,18 @@ typedef unsigned short uint16_t;
 namespace xf {
 namespace cv {
 
-template <int SRC_TYPE, int DST_TYPE, int ROWS, int COLS, int NPC, int WORDWIDTH_SRC, int WORDWIDTH_DST, int TC>
-void XFIntegralImageKernel(xf::cv::Mat<SRC_TYPE, ROWS, COLS, NPC>& _src_mat,
-                           xf::cv::Mat<DST_TYPE, ROWS, COLS, NPC>& _dst_mat,
+template <int SRC_TYPE,
+          int DST_TYPE,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH_SRC,
+          int WORDWIDTH_DST,
+          int TC>
+void XFIntegralImageKernel(xf::cv::Mat<SRC_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+                           xf::cv::Mat<DST_TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst_mat,
                            uint16_t height,
                            uint16_t width) {
 // clang-format off
@@ -76,8 +85,15 @@ RowLoop:
 
 // XFIntegralImage
 
-template <int SRC_TYPE, int DST_TYPE, int ROWS, int COLS, int NPC>
-void integral(xf::cv::Mat<SRC_TYPE, ROWS, COLS, NPC>& _src_mat, xf::cv::Mat<DST_TYPE, ROWS, COLS, NPC>& _dst_mat) {
+template <int SRC_TYPE,
+          int DST_TYPE,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void integral(xf::cv::Mat<SRC_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+              xf::cv::Mat<DST_TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst_mat) {
 // clang-format off
     #pragma HLS INLINE OFF
 // clang-format on
@@ -86,8 +102,9 @@ void integral(xf::cv::Mat<SRC_TYPE, ROWS, COLS, NPC>& _src_mat, xf::cv::Mat<DST_
     assert(((_src_mat.rows <= ROWS) && (_dst_mat.cols <= COLS)) &&
            "ROWS and COLS should be greater than or equal to input image size");
 #endif
-    XFIntegralImageKernel<SRC_TYPE, DST_TYPE, ROWS, COLS, NPC, XF_WORDWIDTH(SRC_TYPE, NPC), XF_WORDWIDTH(DST_TYPE, NPC),
-                          (COLS >> XF_BITSHIFT(NPC))>(_src_mat, _dst_mat, _src_mat.rows, _src_mat.cols);
+    XFIntegralImageKernel<SRC_TYPE, DST_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT, XF_WORDWIDTH(SRC_TYPE, NPC),
+                          XF_WORDWIDTH(DST_TYPE, NPC), (COLS >> XF_BITSHIFT(NPC))>(_src_mat, _dst_mat, _src_mat.rows,
+                                                                                   _src_mat.cols);
 }
 } // namespace cv
 } // namespace xf

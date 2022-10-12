@@ -31,23 +31,34 @@
 
 #define MAXDELAY 15360
 
-#if FILTER_SIZE_3
-#define FILTER_WIDTH 3
-#define FILTER 3
-#elif FILTER_SIZE_5
-#define FILTER_WIDTH 5
-#define FILTER 5
-#elif FILTER_SIZE_7
-#define FILTER_WIDTH 7
-#define FILTER 7
+#if FILTER_SIZE_1_3
+#define FILTER_WIDTH_1 3
+#define FILTER_1 3
+#elif FILTER_SIZE_1_5
+#define FILTER_WIDTH_1 5
+#define FILTER_1 5
+#elif FILTER_SIZE_1_7
+#define FILTER_WIDTH_1 7
+#define FILTER_1 7
+#endif
+
+#if FILTER_SIZE_2_3
+#define FILTER_WIDTH_2 3
+#define FILTER_2 3
+#elif FILTER_SIZE_2_5
+#define FILTER_WIDTH_2 5
+#define FILTER_2 5
+#elif FILTER_SIZE_2_7
+#define FILTER_WIDTH_2 7
+#define FILTER_2 7
 #endif
 
 // Resolve optimization type
-#if RO
+#if MPC
 #define NPC1 XF_NPPC8
 #define PTR_WIDTH 64
 #endif
-#if NO
+#if SPC
 #define NPC1 XF_NPPC1
 #define PTR_WIDTH 8
 #endif

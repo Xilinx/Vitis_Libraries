@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#define XF_CV_DEPTH_IN 3
+#define XF_CV_DEPTH_OUT 3
 
 #define HEIGHT 128
 #define WIDTH 128

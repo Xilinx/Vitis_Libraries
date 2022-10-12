@@ -44,7 +44,7 @@ __attribute__((noinline)) void multiplication(const T* restrict img_in1,
     ::aie::accum<acc32, N> acc0;
     //    ::aie::vector<T, N> weight(1638,1638,1638,1638,1638,1638,1638,1638,1638,1638,1638,1638,1638,1638,1638,1638);
 
-    T fix_scale = ::aie::to_fixed<float>(scale, SRS_SHIFT); //(float)scale*(1<<15);
+    T fix_scale = ::aie::to_fixed<T>(scale, SRS_SHIFT); //(float)scale*(1<<15);
     ::aie::vector<T, N> weight = ::aie::broadcast<T, N>(fix_scale);
 
     for (int j = 0; j < (img_height * img_width); j += 16) // 16x samples per loop

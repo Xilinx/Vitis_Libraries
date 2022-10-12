@@ -37,21 +37,30 @@ int main(int argc, char** argv) {
     ocv_ref.create(in_gray.rows, in_gray.cols, in_gray.depth());
     out_img.create(in_gray.rows, in_gray.cols, in_gray.depth());
 
-#if FILTER_WIDTH == 3
-    float sigma = 0.5f;
+#if FILTER_WIDTH_1 == 3
+    float sigma1 = 0.5f;
 #endif
-#if FILTER_WIDTH == 7
-    float sigma = 1.16666f;
+#if FILTER_WIDTH_1 == 7
+    float sigma1 = 1.16666f;
 #endif
-#if FILTER_WIDTH == 5
-    float sigma = 0.8333f;
+#if FILTER_WIDTH_1 == 5
+    float sigma1 = 0.8333f;
+#endif
+
+#if FILTER_WIDTH_2 == 3
+    float sigma2 = 0.5f;
+#endif
+#if FILTER_WIDTH_2 == 7
+    float sigma2 = 1.16f;
+#endif
+#if FILTER_WIDTH_2 == 5
+    float sigma2 = 0.8333f;
 #endif
 
     // OpenCV Reference
-    cv::GaussianBlur(in_gray, in_gray1, cv::Size(FILTER_WIDTH, FILTER_WIDTH), FILTER_WIDTH / 6.0, FILTER_WIDTH / 6.0,
-                     cv::BORDER_CONSTANT);
-    cv::GaussianBlur(in_gray1, in_gray2, cv::Size(FILTER_WIDTH, FILTER_WIDTH), FILTER_WIDTH / 6.0, FILTER_WIDTH / 6.0,
-                     cv::BORDER_CONSTANT);
+
+    cv::GaussianBlur(in_gray, in_gray1, cv::Size(FILTER_WIDTH_1, FILTER_WIDTH_1), sigma1, sigma1, cv::BORDER_CONSTANT);
+    cv::GaussianBlur(in_gray1, in_gray2, cv::Size(FILTER_WIDTH_2, FILTER_WIDTH_2), sigma2, sigma2, cv::BORDER_CONSTANT);
     cv::subtract(in_gray1, in_gray2, ocv_ref);
 
     // OpenCL section:
@@ -62,7 +71,9 @@ int main(int argc, char** argv) {
     int cols = in_gray.cols;
 
     //////////Top function call //////////////////////////////
-    gaussian_diff_accel((ap_uint<PTR_WIDTH>*)in_gray.data, sigma, (ap_uint<PTR_WIDTH>*)out_img.data, rows, cols);
+
+    gaussian_diff_accel((ap_uint<PTR_WIDTH>*)in_gray.data, sigma1, sigma2, (ap_uint<PTR_WIDTH>*)out_img.data, rows,
+                        cols);
 
     // Write the output of kernel:
     cv::imwrite("output_hls.png", out_img);

@@ -77,10 +77,20 @@ _FIXED_PIXEL_TYPE interp3(cube vertix, _FIXED_PIXEL_TYPE dist_r, _FIXED_PIXEL_TY
  * lutdim	: size of one of the dimensions of the 3d lut.
  */
 
-template <int LUTDIM, int SQLUTDIM, int INTYPE, int OUTTYPE, int ROWS, int COLS, int NPPC = 1, int URAM = 0>
-void lut3d(xf::cv::Mat<INTYPE, ROWS, COLS, NPPC>& in_img,
-           xf::cv::Mat<XF_32FC3, SQLUTDIM, LUTDIM, NPPC>& lut,
-           xf::cv::Mat<OUTTYPE, ROWS, COLS, NPPC>& out_img,
+template <int LUTDIM,
+          int SQLUTDIM,
+          int INTYPE,
+          int OUTTYPE,
+          int ROWS,
+          int COLS,
+          int NPPC = 1,
+          int URAM = 0,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void lut3d(xf::cv::Mat<INTYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN_1>& in_img,
+           xf::cv::Mat<XF_32FC3, SQLUTDIM, LUTDIM, NPPC, XFCVDEPTH_IN_2>& lut,
+           xf::cv::Mat<OUTTYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT_1>& out_img,
            unsigned char lutdim) {
 #ifndef __SYNTHESIS__
     assert(((COLS >= in_img.cols) && (ROWS >= in_img.rows)) &&

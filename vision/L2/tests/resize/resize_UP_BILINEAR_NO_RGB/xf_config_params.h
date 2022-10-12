@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#define XF_CV_DEPTH_IN 2
+#define XF_CV_DEPTH_OUT 2
 
-#define RO 0 // Resource Optimized (8-pixel implementation)
-#define NO 1 // Normal Operation (1-pixel implementation)
+#define MPC 0 // Multiple Pixels per Clock operation
+#define SPC 1 // Single Pixel per Clock operation
 
 // port widths
 #define INPUT_PTR_WIDTH 128
@@ -42,7 +44,7 @@
 #define NEWHEIGHT 2160 // Maximum output image height
 
 /* Interface types*/
-#if RO
+#if MPC
 
 #if RGB
 #define NPC_T XF_NPPC4

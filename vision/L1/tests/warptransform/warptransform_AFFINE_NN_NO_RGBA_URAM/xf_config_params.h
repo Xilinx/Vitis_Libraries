@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#define XF_CV_DEPTH_OUT 2
+#define XF_CV_DEPTH_IN 2
 
-#define RO 0 // 8 Pixel Processing
-#define NO 1 // 1 Pixel Processing
+#define MPC 0 // 8 Pixel Processing
+#define SPC 1 // 1 Pixel Processing
 
 // Number of rows in the input image
 #define HEIGHT 128

@@ -49,3 +49,9 @@ static constexpr int NEWHEIGHT = 300;
 static constexpr int MAXDOWNSCALE = 9;
 
 static constexpr int INTERPOLATION = 1;
+
+#define XF_CV_DEPTH_IN 2
+#define XF_CV_DEPTH_CH_SWAP 2
+#define XF_CV_DEPTH_RESIZE_OUT 2
+#define XF_CV_DEPTH_CROP 2
+#define XF_CV_DEPTH_OUT 2

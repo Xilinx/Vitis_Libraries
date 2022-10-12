@@ -126,7 +126,7 @@ void absDiff(::cv::Mat& cv_img, xf::cv::Mat<_PTYPE, _ROWS, _COLS, _NPC>& xf_img,
     }
 }
 
-void analyzeDiff(::cv::Mat& diff_img, int err_thresh, float& err_per) {
+static void analyzeDiff(::cv::Mat& diff_img, int err_thresh, float& err_per) {
     int cv_bitdepth;
     if (diff_img.depth() == CV_8U || diff_img.depth() == CV_8S) {
         cv_bitdepth = 8;

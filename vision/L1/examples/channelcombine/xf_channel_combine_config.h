@@ -28,13 +28,13 @@
 #define WIDTH 128
 
 // Resolve optimization type:
-#if NO
+#if SPC
 #define NPC1 XF_NPPC1
 #define INPUT_PTR_WIDTH 8
 #define OUTPUT_PTR_WIDTH 32
 #endif
 
-#if RO
+#if MPC
 #define NPC1 XF_NPPC8
 #define INPUT_PTR_WIDTH 64
 #define OUTPUT_PTR_WIDTH 256
@@ -70,11 +70,12 @@ void channel_combine_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
 #if TWO_INPUT
 #define IN_TYPE XF_8UC1
 #define OUT_TYPE XF_8UC2
-#endif
+#define CV_TYPE CV_8UC2
 void channel_combine_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
                            ap_uint<INPUT_PTR_WIDTH>* img_in2,
                            ap_uint<OUTPUT_PTR_WIDTH>* img_out,
                            int height,
                            int width);
 
+#endif
 #endif //_XF_CHANNEL_COMBINE_CONFIG_H_

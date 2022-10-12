@@ -217,9 +217,16 @@ void Core_Process(XF_DTUNAME(SRC_T, NPC) imgblock[5][buf_size], int& b, int& g, 
         }*/
 }
 
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, bool USE_URAM>
-void demosaicing(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_mat,
-                 xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst_mat,
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC,
+          bool USE_URAM,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void demosaicing(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src_mat,
+                 xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst_mat,
                  unsigned short& bformat) {
 #ifndef __SYNTHESIS__
     //    assert(((BFORMAT == XF_BAYER_BG) || (BFORMAT == XF_BAYER_GB) || (BFORMAT == XF_BAYER_GR) ||
@@ -244,12 +251,12 @@ void demosaicing(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src_mat,
     XF_TNAME(SRC_T, NPC) linebuffer[__BHEIGHTMINUSONE][COLS >> XF_BITSHIFT(NPC)];
     if (USE_URAM) {
 // clang-format off
-        #pragma HLS RESOURCE variable=linebuffer core=RAM_T2P_URAM
+        #pragma HLS bind_storage variable=linebuffer type=RAM_T2P impl=URAM
         #pragma HLS array_reshape variable=linebuffer dim=1 factor=4 cyclic
         // clang-format on
     } else {
 // clang-format off
-        #pragma HLS RESOURCE variable=linebuffer core=RAM_T2P_BRAM
+        #pragma HLS bind_storage variable=linebuffer type=RAM_T2P impl=BRAM
         #pragma HLS array_partition variable=linebuffer complete dim=1
         // clang-format on
     }

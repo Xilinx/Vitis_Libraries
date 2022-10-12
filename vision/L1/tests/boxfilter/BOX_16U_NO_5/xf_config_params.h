@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
+#define XF_CV_DEPTH_IN_1 1
+#define XF_CV_DEPTH_OUT_1 3
+
 #define FILTER_SIZE_3 0
 #define FILTER_SIZE_5 1
 #define FILTER_SIZE_7 0
 
-#define RO 0
-#define NO 1
+#define MPC 0
+#define SPC 1
 
 #define T_8U 0  // Input type of 8U
 #define T_16U 1 // Input type of 16U

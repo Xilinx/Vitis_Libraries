@@ -18,8 +18,8 @@
 #define FILTER_SIZE_5 0
 #define FILTER_SIZE_7 1
 
-#define RO 0
-#define NO 1
+#define MPC 0
+#define SPC 1
 
 #define T_8U 0  // Input type of 8U
 #define T_16U 0 // Input type of 16U
@@ -37,3 +37,6 @@
 
 #define INPUT_PTR_WIDTH 256
 #define OUTPUT_PTR_WIDTH 256
+
+#define XF_CV_DEPTH_IN_1 2
+#define XF_CV_DEPTH_OUT_1 2

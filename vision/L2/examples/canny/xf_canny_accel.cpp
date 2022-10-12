@@ -45,14 +45,14 @@ void canny_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     }
     printf("actual number of cols is %d \n", npcCols);
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, INTYPE> in_mat(rows, cols);
-    xf::cv::Mat<XF_2UC1, HEIGHT, WIDTH, XF_NPPC32> dst_mat(rows, npcCols);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, INTYPE, XF_CV_DEPTH_IN_1> in_mat(rows, cols);
+    xf::cv::Mat<XF_2UC1, HEIGHT, WIDTH, XF_NPPC32, XF_CV_DEPTH_OUT_1> dst_mat(rows, npcCols);
 
 #pragma HLS DATAFLOW
 
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, INTYPE>(img_inp, in_mat);
-    xf::cv::Canny<FILTER_WIDTH, NORM_TYPE, XF_8UC1, XF_2UC1, HEIGHT, WIDTH, INTYPE, XF_NPPC32, XF_USE_URAM>(
-        in_mat, dst_mat, low_threshold, high_threshold);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_2UC1, HEIGHT, WIDTH, XF_NPPC32>(dst_mat, img_out);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, INTYPE, XF_CV_DEPTH_IN_1>(img_inp, in_mat);
+    xf::cv::Canny<FILTER_WIDTH, NORM_TYPE, XF_8UC1, XF_2UC1, HEIGHT, WIDTH, INTYPE, XF_NPPC32, XF_USE_URAM,
+                  XF_CV_DEPTH_IN_1, XF_CV_DEPTH_OUT_1>(in_mat, dst_mat, low_threshold, high_threshold);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_2UC1, HEIGHT, WIDTH, XF_NPPC32, XF_CV_DEPTH_OUT_1>(dst_mat, img_out);
 }
 }

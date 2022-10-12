@@ -24,14 +24,14 @@
 #include "imgproc/xf_hist_equalize.hpp"
 
 /*  define the input and output types  */
-#if NO
+#if SPC
 #define NPC_T XF_NPPC1
 // port widths
 #define INPUT_PTR_WIDTH 8
 #define OUTPUT_PTR_WIDTH 8
 #endif
 
-#if RO
+#if MPC
 // port widths
 #define INPUT_PTR_WIDTH 64
 #define OUTPUT_PTR_WIDTH 64

@@ -28,9 +28,9 @@ $(error "HTML_DEST_DIR is not set.")
 endif
 
 
-.PHONY: all install xml rst html clean cleanhtml ultraclean
+.PHONY: all install xml rst html clean cleanhtml cleanall
 
-all: ultraclean install
+all: cleanall install
 
 
 install: .stamp/sphinx
@@ -41,7 +41,7 @@ install: .stamp/sphinx
 	rm -rf $(HTML_DEST_DIR)/_sources
 	rm -rf $(HTML_DEST_DIR)/_static
 	rm -rf $(HTML_DEST_DIR)/doxygen
-	rsync -av _build/html/ $(HTML_DEST_DIR)/
+	rsync -av build/html/ $(HTML_DEST_DIR)/
 	
 
 # different for L1 and L2
@@ -81,18 +81,18 @@ rst:
 
 
 html:
-	rm -rf .stamp/sphinx _build/doctrees
+	rm -rf .stamp/sphinx build/doctrees
 	make .stamp/sphinx
 
 clean:
 	rm -rf .stamp
 
 cleanhtml:
-	rm -rf .stamp/sphinx _build/html _build/doctrees
+	rm -rf .stamp/sphinx build/html build/doctrees
 	
 .ONESHELL:
-ultraclean:
-	rm -rf .stamp _build/html _build/doctrees
+cleanall:
+	rm -rf .stamp build/html build/doctrees
 	cd doxygen/
 	rm -rf L1/xml L1/rst L1/html 
 	rm -rf L1/latex L2/latex L3/latex

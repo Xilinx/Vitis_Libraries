@@ -6,41 +6,46 @@ This directory contains whole applications formed by stitching a pipeline of Vit
 
 'examples/build' folder has the configuration file that would help modify the default configuration of the function.
 
-'tests' folder has sub-folders named according to the function and the configuration it would run. Each individual folder has Makefiles and config files that would perform software emulation, hardware emulation and hardware build of the corresponding function in examples folder, based on the 'Board' the user selects.
+'tests' folder has sub-folders named according to the function and the configuration it would run. Each individual folder has Makefiles and config files that would perform software emulation, hardware emulation and hardware build of the corresponding function in examples folder, based on the platform the user selects.
 
 'benchmarks' directory has applications ready to build that give out their performance comparison against other architectures.
 
 ### Commands to run:
 
+**For PCIe Devices:**
+
     source < path-to-Vitis-installation-directory >/settings64.sh
-
-    export DEVICE=< path-to-platform-directory >/< platform >.xpfm
-
-**For PCIe devices:**
-
-    source < part-to-XRT-installation-directory >/setup.sh
-
+    source < path-to-XRT-installation-directory >/setup.sh
+    export PLATFORM=< path-to-platform-directory >/< platform >.xpfm
 	export OPENCV_INCLUDE=< path-to-opencv-include-folder >
-
 	export OPENCV_LIB=< path-to-opencv-lib-folder >
-
 	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:< path-to-opencv-lib-folder >
-
     make host xclbin TARGET=< sw_emu|hw_emu|hw >
-
     make run TARGET=< sw_emu|hw_emu|hw >
 
-**For embedded devices:**
+**For Embedded Devices:**
+
+Software Emulation:
+
+    source < path-to-Vitis-installation-directory >/settings64.sh
+    source < path-to-XRT-installation-directory >/setup.sh
+    export PLATFORM=< path-to-platform-directory >/< platform >.xpfm
+	export OPENCV_INCLUDE=< path-to-opencv-include-folder >
+	export OPENCV_LIB=< path-to-opencv-lib-folder >
+	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:< path-to-opencv-lib-folder >
+    make run TARGET=sw_emu
+
+Hardware Emulation and Hardware Build:
 
 	Download the platform, and common-image from Xilinx Download Center. Run the sdk.sh script from the common-image directory to install sysroot using the command : "./sdk.sh -y -d ./ -p"
 
 	Unzip the rootfs file : "gunzip ./rootfs.ext4.gz"
 
+    source < path-to-Vitis-installation-directory >/settings64.sh
+    export PLATFORM=< path-to-platform-directory >/< platform >.xpfm
     export SYSROOT=< path-to-platform-sysroot >
-
-    make host xclbin TARGET=< sw_emu|hw_emu|hw > HOST_ARCH=< aarch32 | aarch64 >
-
-    make run TARGET=< sw_emu|hw_emu|hw > HOST_ARCH=< aarch32 | aarch64 > #This command will generate only the sd_card folder in case of hardware build.
+    make host xclbin TARGET=< hw_emu|hw > 
+    make run TARGET=< hw_emu|hw > #This command will generate only the sd_card folder in case of hardware build.
 
 **Note**. For hw run on embedded devices, copy the generated sd_card folder content under package_hw to an SD Card. More information on preparing the SD Card is available [here](https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/18842385/How+to+format+SD+card+for+SD+boot#HowtoformatSDcardforSDboot-CopingtheImagestotheNewPartitions). After successful booting of the board, run the following commands:
 

@@ -14,8 +14,22 @@
  * limitations under the License.
  */
 
-#define RO 0
-#define NO 1
+#define MPC 0
+#define SPC 1
 
 #define INPUT_PTR_WIDTH 256
 #define OUTPUT_PTR_WIDTH 256
+
+#define BGR 1
+#define BGRA 0
+
+#if MPC
+#define NPC4 0
+#define NPC8 1
+#endif
+
+#define T_8U 0
+#define T_16U 1
+
+#define XF_CV_DEPTH_IN_0 2
+#define XF_CV_DEPTH_OUT_0 2

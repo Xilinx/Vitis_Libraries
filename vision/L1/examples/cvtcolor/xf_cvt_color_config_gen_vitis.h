@@ -37,17 +37,17 @@ static constexpr int HEIGHT = 1080;
      YUYV2NV21 || RGBA2NV12 || RGBA2NV21 || RGB2NV12 || RGB2NV21 || NV122RGBA || NV212RGB || NV212RGBA || NV122RGB ||  \
      NV122BGR || NV212BGR || NV122YUYV || NV212YUYV || NV122UYVY || NV212UYVY || NV122NV21 || NV212NV12 || BGR2NV12 || \
      BGR2NV21)
-#if NO
+#if SPC
 static constexpr int NPC1 = XF_NPPC1;
 static constexpr int NPC2 = XF_NPPC1;
 #endif
-#if RO
+#if MPC
 static constexpr int NPC1 = XF_NPPC8;
 static constexpr int NPC2 = XF_NPPC4;
 #endif
 
 #else
-#if NO
+#if SPC
 static constexpr int NPC1 = XF_NPPC1;
 static constexpr int NPC2 = XF_NPPC1;
 #else

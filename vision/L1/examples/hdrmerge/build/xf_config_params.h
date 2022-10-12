@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#define NO 1 // Normal Operation
-#define RO 0 // Resource Optimized
+#define SPC 1 // Single Pixel per Clock operation
+#define MPC 0 // Multiple Pixels per Clock operation
 
 #define T_8U 0
 #define T_16U 1
@@ -56,3 +56,6 @@
 #define NO_EXPS 2
 
 #define NPIX XF_NPPC2
+#define XF_CV_DEPTH_IN_1 3
+#define XF_CV_DEPTH_IN_2 3
+#define XF_CV_DEPTH_OUT 3

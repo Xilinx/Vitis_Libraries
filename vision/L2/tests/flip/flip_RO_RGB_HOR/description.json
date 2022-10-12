@@ -6,8 +6,8 @@
     "flow": "vitis", 
     "platform_allowlist": [
         "u200", 
-		"aws-vu9p-f1",
-		"vck190",
+        "aws-vu9p-f1", 
+        "vck190", 
         "zcu102", 
         "zcu104", 
         "u50"
@@ -44,7 +44,7 @@
                     ]
                 }
             }
-        },
+        }, 
         "aws-vu9p-f1": {
             "host": {
                 "compiler": {
@@ -58,37 +58,55 @@
                     ]
                 }
             }
-        },
+        }, 
         "vck190": {
             "host": {
                 "compiler": {
                     "includepaths": [
-						"$(SYSROOT)/usr/include",
+                        "$(SYSROOT)/usr/include", 
                         "$(SYSROOT)/usr/include/opencv4"
-                    ], 
-                    "options": "--sysroot=$(SYSROOT)"
+                    ]
                 }, 
                 "linker": {
                     "librarypaths": [
                         "$(SYSROOT)/usr/lib", 
                         "${SYSROOT}/lib"
                     ]
+                }, 
+                "compiler_x86": {
+                    "includepaths": [
+                        "$(OPENCV_INCLUDE)"
+                    ]
+                }, 
+                "linker_x86": {
+                    "librarypaths": [
+                        "$(OPENCV_LIB)"
+                    ]
                 }
             }
-        },
+        }, 
         "zcu102": {
             "host": {
                 "compiler": {
                     "includepaths": [
-                        "$(SYSROOT)/usr/include",
+                        "$(SYSROOT)/usr/include", 
                         "$(SYSROOT)/usr/include/opencv4"
-                    ], 
-                    "options": "--sysroot=$(SYSROOT)"
+                    ]
                 }, 
                 "linker": {
                     "librarypaths": [
                         "$(SYSROOT)/usr/lib", 
                         "${SYSROOT}/opt/xilinx/xrt/lib"
+                    ]
+                }, 
+                "compiler_x86": {
+                    "includepaths": [
+                        "$(OPENCV_INCLUDE)"
+                    ]
+                }, 
+                "linker_x86": {
+                    "librarypaths": [
+                        "$(OPENCV_LIB)"
                     ]
                 }
             }
@@ -97,20 +115,29 @@
             "host": {
                 "compiler": {
                     "includepaths": [
-                        "$(SYSROOT)/usr/include",
+                        "$(SYSROOT)/usr/include", 
                         "$(SYSROOT)/usr/include/opencv4"
-                    ], 
-                    "options": "--sysroot=$(SYSROOT)"
+                    ]
                 }, 
                 "linker": {
                     "librarypaths": [
                         "$(SYSROOT)/usr/lib", 
                         "${SYSROOT}/opt/xilinx/xrt/lib"
                     ]
+                }, 
+                "compiler_x86": {
+                    "includepaths": [
+                        "$(OPENCV_INCLUDE)"
+                    ]
+                }, 
+                "linker_x86": {
+                    "librarypaths": [
+                        "$(OPENCV_LIB)"
+                    ]
                 }
             }
         }
-    },
+    }, 
     "gui": true, 
     "launch": [
         {
@@ -145,8 +172,8 @@
         }
     ], 
     "data": [
-        "LIB_DIR/data/512x512.png",
-		"LIB_DIR/data/4k_5.png"
+        "LIB_DIR/data/512x512.png", 
+        "LIB_DIR/data/4k_5.png"
     ], 
     "host": {
         "host_exe": "flip", 
@@ -159,7 +186,7 @@
                 "LIB_DIR/L2/tests/flip/flip_RO_RGB_HOR", 
                 "LIB_DIR/L2/examples/flip"
             ], 
-            "options": "-O3", 
+            "options": "-O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include", 
             "symbols": []
         }
     }, 
@@ -175,13 +202,15 @@
     }, 
     "containers": [
         {
-            "name": "krnl_flip",
+            "name": "krnl_flip", 
             "accelerators": [
                 {
-                    "name": "flip_accel",
-                    "location": "LIB_DIR/L2/examples/flip/xf_flip_accel.cpp"
+                    "name": "flip_accel", 
+                    "location": "LIB_DIR/L2/examples/flip/xf_flip_accel.cpp",
+                    "frequency": 150.0
                 }
-            ]
+            ],
+            "frequency": 150.0
         }
     ], 
     "check_env": [
@@ -193,7 +222,7 @@
             "env": "OPENCV_LIB", 
             "echo": "Cannot find Opencv lib path. Please set OPENCV_LIB variable"
         }
-    ],  
+    ], 
     "testinfo": {
         "disable": false, 
         "jobs": [
@@ -212,5 +241,5 @@
             "vitis_hw"
         ], 
         "category": "full"
-    } 
+    }
 }

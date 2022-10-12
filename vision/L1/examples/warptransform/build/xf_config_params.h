@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-#define RO 0 // 8 Pixel Processing
-#define NO 1 // 1 Pixel Processing
+#define MPC 0 // 8 Pixel Processing
+#define SPC 1 // 1 Pixel Processing
 
 // Number of rows in the input image
 #define HEIGHT 128
 // Number of columns in  in the input image
 #define WIDTH 128
+#define XF_CV_DEPTH_OUT 2
+#define XF_CV_DEPTH_IN 2
 
 // Number of rows of input image to be stored
 #define NUM_STORE_ROWS 100

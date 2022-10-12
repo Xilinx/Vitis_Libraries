@@ -26,7 +26,7 @@
 #include "imgproc/xf_colorthresholding.hpp"
 #include "imgproc/xf_dilation.hpp"
 #include "imgproc/xf_erosion.hpp"
-//#include "xf_config_params.h"
+#include "xf_config_params.h"
 
 //#define MAXCOLORS 3
 

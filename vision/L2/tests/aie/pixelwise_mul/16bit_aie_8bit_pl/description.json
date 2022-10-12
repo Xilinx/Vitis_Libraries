@@ -15,7 +15,7 @@
                     ]
                 }, 
                 "linker": {
-                    "clflags": [
+                    "ldclflags": [
                         "--clock.freqHz 400000000:Tiler_top_1", 
                         "--clock.freqHz 400000000:Tiler_top_2", 
                         "--clock.freqHz 400000000:stitcher_top_1", 
@@ -64,7 +64,7 @@
                 "LIB_DIR/L1/include/aie", 
                 "./"
             ], 
-            "options": "--sysroot=$(SYSROOT)", 
+            "options": "--sysroot=$(SYSROOT) -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include", 
             "symbols": [
                 "__PS_ENABLE_AIE__"
             ]
@@ -96,7 +96,7 @@
                     "workdir": "./Work", 
                     "options": "-pl-axi-lite=true", 
                     "name": "libadf.a", 
-                    "aie_kernel_files": [
+                    "files": [
                         "xf_multiplication.cc"
                     ]
                 }
@@ -130,8 +130,14 @@
         "targets": [
             "vitis_hw_emu", 
             "vitis_hw_build", 
-            "vitis_hw_run"
+            "vitis_hw_run",
+            "vitis_aie_x86sim",
+            "vitis_aie_sim"
         ], 
         "category": "canary"
-    }
+    },
+    "output_files": [
+        "pl_sample_counts",
+        "ISS_RPC_SERVER_PORT"
+    ]    
 }

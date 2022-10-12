@@ -30,8 +30,17 @@
 namespace xf {
 namespace cv {
 
-template <int TYPE, int SRC_ROWS, int SRC_COLS, int DST_ROWS, int DST_COLS, int NPC, int INSERT_VAL>
-void insertBorder(xf::cv::Mat<TYPE, SRC_ROWS, SRC_COLS, NPC>& _src, xf::cv::Mat<TYPE, DST_ROWS, DST_COLS, NPC>& _dst) {
+template <int TYPE,
+          int SRC_ROWS,
+          int SRC_COLS,
+          int DST_ROWS,
+          int DST_COLS,
+          int NPC,
+          int INSERT_VAL,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void insertBorder(xf::cv::Mat<TYPE, SRC_ROWS, SRC_COLS, NPC, XFCVDEPTH_IN>& _src,
+                  xf::cv::Mat<TYPE, DST_ROWS, DST_COLS, NPC, XFCVDEPTH_OUT>& _dst) {
 // clang-format off
 #pragma HLS INLINE OFF
     // clang-format on
@@ -256,22 +265,24 @@ template <int INTERPOLATION_TYPE,
           int DST_COLS,
           int NPC,
           int MAX_DOWN_SCALE,
-          int INSERT_VAL>
-void letterbox(xf::cv::Mat<TYPE, SRC_ROWS, SRC_COLS, NPC>& _src,
-               xf::cv::Mat<TYPE, DST_ROWS, DST_COLS, NPC>& _dst,
+          int INSERT_VAL,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void letterbox(xf::cv::Mat<TYPE, SRC_ROWS, SRC_COLS, NPC, XFCVDEPTH_IN>& _src,
+               xf::cv::Mat<TYPE, DST_ROWS, DST_COLS, NPC, XFCVDEPTH_OUT>& _dst,
                int rows_out_resize,
                int cols_out_resize) {
 // clang-format off
 #pragma inline off
     // clang-format on
-    xf::cv::Mat<TYPE, NEWHEIGHT, NEWWIDTH, NPC> out_mat_resize(rows_out_resize, cols_out_resize);
+    xf::cv::Mat<TYPE, NEWHEIGHT, NEWWIDTH, NPC, XFCVDEPTH_OUT> out_mat_resize(rows_out_resize, cols_out_resize);
 // clang-format off
-#pragma HLS stream variable=out_mat_resize.data depth=2
 #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::resize<INTERPOLATION_TYPE, TYPE, SRC_ROWS, SRC_COLS, DST_ROWS, DST_COLS, NPC, MAX_DOWN_SCALE>(
-        _src, out_mat_resize);
-    xf::cv::insertBorder<TYPE, DST_ROWS, DST_COLS, DST_ROWS, DST_COLS, NPC, 128>(out_mat_resize, _dst);
+    xf::cv::resize<INTERPOLATION_TYPE, TYPE, SRC_ROWS, SRC_COLS, DST_ROWS, DST_COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT,
+                   MAX_DOWN_SCALE>(_src, out_mat_resize);
+    xf::cv::insertBorder<TYPE, DST_ROWS, DST_COLS, DST_ROWS, DST_COLS, NPC, 128, XFCVDEPTH_IN, XFCVDEPTH_OUT>(
+        out_mat_resize, _dst);
 }
 } // namespace cv
 } // namespace xf

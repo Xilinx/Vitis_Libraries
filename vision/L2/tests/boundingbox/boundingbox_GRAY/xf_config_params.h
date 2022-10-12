@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define NO 1 // Normal Operation
+#define SPC 1 // Single Pixel per Clock operation
 
 /*  set the height and weight  */
 #define HEIGHT 2160
@@ -27,3 +27,5 @@
 
 #define INPUT_PTR_WIDTH 8
 #define OUTPUT_PTR_WIDTH 8
+
+#define XF_CV_DEPTH_IN -1

@@ -47,15 +47,24 @@
             "host": {
                 "compiler": {
                     "includepaths": [
-                        "$(SYSROOT)/usr/include",
-			"$(SYSROOT)/usr/include/opencv4"
-                    ], 
-                    "options": "--sysroot=$(SYSROOT)"
+                        "$(SYSROOT)/usr/include", 
+                        "$(SYSROOT)/usr/include/opencv4"
+                    ]
                 }, 
                 "linker": {
                     "librarypaths": [
                         "$(SYSROOT)/usr/lib", 
                         "${SYSROOT}/opt/xilinx/xrt/lib"
+                    ]
+                }, 
+                "compiler_x86": {
+                    "includepaths": [
+                        "$(OPENCV_INCLUDE)"
+                    ]
+                }, 
+                "linker_x86": {
+                    "librarypaths": [
+                        "$(OPENCV_LIB)"
                     ]
                 }
             }
@@ -64,15 +73,24 @@
             "host": {
                 "compiler": {
                     "includepaths": [
-                        "$(SYSROOT)/usr/include",
-			"$(SYSROOT)/usr/include/opencv4"
-                    ], 
-                    "options": "--sysroot=$(SYSROOT)"
+                        "$(SYSROOT)/usr/include", 
+                        "$(SYSROOT)/usr/include/opencv4"
+                    ]
                 }, 
                 "linker": {
                     "librarypaths": [
                         "$(SYSROOT)/usr/lib", 
                         "${SYSROOT}/opt/xilinx/xrt/lib"
+                    ]
+                }, 
+                "compiler_x86": {
+                    "includepaths": [
+                        "$(OPENCV_INCLUDE)"
+                    ]
+                }, 
+                "linker_x86": {
+                    "librarypaths": [
+                        "$(OPENCV_LIB)"
                     ]
                 }
             }
@@ -112,8 +130,8 @@
         }
     ], 
     "data": [
-        "LIB_DIR/data/cropped1.png",
-		"LIB_DIR/data/cropped3.png"
+        "LIB_DIR/data/cropped1.png", 
+        "LIB_DIR/data/cropped3.png"
     ], 
     "host": {
         "host_exe": "isppipeline_hdr", 
@@ -125,7 +143,7 @@
             "includepaths": [
                 "LIB_DIR/L3/examples/isppipeline_hdr/build"
             ], 
-            "options": "-O3", 
+            "options": "-O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include", 
             "symbols": [
                 "__SDSVHLS__"
             ]
@@ -146,9 +164,11 @@
             "accelerators": [
                 {
                     "name": "ISPPipeline_accel", 
-                    "location": "LIB_DIR/L3/examples/isppipeline_hdr/xf_isp_accel.cpp"
+                    "location": "LIB_DIR/L3/examples/isppipeline_hdr/xf_isp_accel.cpp",
+                    "frequency": 300.0
                 }
-            ]
+            ],
+            "frequency": 300.0
         }
     ], 
     "check_env": [

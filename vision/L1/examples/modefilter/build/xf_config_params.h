@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-#define NO 1 // Normal Operation
-#define RO 0 // Resource Optimized
+#define SPC 1 // Single Pixel per Clock operation
+#define MPC 0 // Multiple Pixels per Clock operation
 
 #define RGB 1
 #define GRAY 0
 /* Filter window size*/
 #define WINDOW_SIZE 5
+#define XF_CV_DEPTH_IN 3
+#define XF_CV_DEPTH_OUT 3

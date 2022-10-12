@@ -15,8 +15,15 @@
  */
 
 /*  set the optimisation type  */
-#define NO 0 // Normal Operation
-#define RO 1 // Resource Optimized
+#define SPC 0 // Single Pixel per Clock operation
+#define MPC 1 // Multiple Pixels per Clock operation
+
+#define XF_CV_DEPTH_IN_0 1
+#define XF_CV_DEPTH_OUT_0 3
+#define XF_CV_DEPTH_IN_1 1
+#define XF_CV_DEPTH_OUT_1 3
+#define XF_CV_DEPTH_IN_2 2
+#define XF_CV_DEPTH_OUT_2 4
 
 // Check if define already passed in command line
 #if !(defined(BGR2NV12) || defined(BGR2NV21) || defined(NV122BGR) || defined(NV122IYUV) || defined(NV122NV21) ||   \

@@ -14,9 +14,24 @@
  * limitations under the License.
  */
 
-#define FILTER_SIZE_3 1
-#define FILTER_SIZE_5 0
-#define FILTER_SIZE_7 0
+#define FILTER_SIZE_1_3 1
+#define FILTER_SIZE_1_5 0
+#define FILTER_SIZE_1_7 0
 
-#define RO 0
-#define NO 1
+#define FILTER_SIZE_2_3 0
+#define FILTER_SIZE_2_5 0
+#define FILTER_SIZE_2_7 1
+#define FILTER_SIZE_2_3 0
+#define FILTER_SIZE_2_5 0
+#define FILTER_SIZE_2_7 1
+
+#define MPC 0
+#define SPC 1
+
+#define XF_CV_DEPTH_IN_0 1
+#define XF_CV_DEPTH_IN_1 1
+#define XF_CV_DEPTH_IN_2 2
+#define XF_CV_DEPTH_IN_3 15360
+#define XF_CV_DEPTH_IN_4 4
+
+#define XF_CV_DEPTH_OUT_1 3

@@ -15,7 +15,7 @@
                     ]
                 }, 
                 "linker": {
-                    "clflags": [
+                    "ldclflags": [
                         "--config PROJECT/system.cfg"
                     ]
                 }, 
@@ -59,7 +59,7 @@
                 "LIB_DIR/L1/include/aie", 
                 "./"
             ], 
-            "options": "--sysroot=$(SYSROOT) -O3", 
+            "options": "--sysroot=$(SYSROOT) -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include", 
             "symbols": [
                 "__PS_ENABLE_AIE__"
             ]
@@ -87,10 +87,10 @@
             "accelerators": [
                 {
                     "location": "LIB_DIR/L2/tests/aie/gaussian/16bit_aie_gmio/graph.cpp", 
-                    "pl-freq": 300,
+                    "pl-freq": 300, 
                     "workdir": "./Work", 
                     "name": "libadf.a", 
-                    "aie_kernel_files": [
+                    "files": [
                         "xf_gaussian.cc"
                     ]
                 }
@@ -123,8 +123,14 @@
         "targets": [
             "vitis_hw_emu", 
             "vitis_hw_build", 
-            "vitis_hw_run"
+            "vitis_hw_run",
+            "vitis_aie_x86sim",
+            "vitis_aie_sim"
         ], 
         "category": "canary"
-    }
+    },
+    "output_files": [
+        "pl_sample_counts",
+        "ISS_RPC_SERVER_PORT"
+    ]    
 }

@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-#define RO 1
-#define NO 0
+#define XF_CV_DEPTH_IN 3
+#define XF_CV_DEPTH_OUT 3
+
+#define MPC 1
+#define SPC 0
 
 #define FILTER_WIDTH 3
 #define BLOCK_WIDTH 5

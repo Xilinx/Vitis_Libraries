@@ -18,7 +18,11 @@
 #define DEGREES 1
 
 /*  set the optimisation type  */
-#define NO 1 // Normal Operation
-#define RO 0 // Resource Optimized
+#define SPC 1 // Single Pixel per Clock operation
+#define MPC 0 // Multiple Pixels per Clock operation
 #define INPUT_PTR_WIDTH 256
 #define OUTPUT_PTR_WIDTH 256
+
+#define XF_CV_DEPTH_IN_1 3
+#define XF_CV_DEPTH_IN_2 3
+#define XF_CV_DEPTH_OUT 3

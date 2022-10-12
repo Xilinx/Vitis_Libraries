@@ -28,9 +28,9 @@
 #define WIDTH 128
 
 // Resolve optimization type:
-#if RO
+#if MPC
 #define NPC1 XF_NPPC8
-#elif NO
+#elif SPC
 #define NPC1 XF_NPPC1
 #endif
 
@@ -43,7 +43,7 @@
 #define CONVERT_TYPE XF_CONVERT_8U_TO_16U
 #define OCV_INTYPE CV_8UC1
 #define OCV_OUTTYPE CV_16UC1
-#if NO
+#if SPC
 #define INPUT_PTR_WIDTH 8
 #define OUTPUT_PTR_WIDTH 16
 #else
@@ -60,7 +60,7 @@
 #define OUT_BYTE 2
 #define OCV_INTYPE CV_8UC1
 #define OCV_OUTTYPE CV_16SC1
-#if NO
+#if SPC
 #define INPUT_PTR_WIDTH 8
 #define OUTPUT_PTR_WIDTH 16
 #else
@@ -77,7 +77,7 @@
 #define OUT_BYTE 4
 #define OCV_INTYPE CV_8UC1
 #define OCV_OUTTYPE CV_32SC1
-#if NO
+#if SPC
 #define INPUT_PTR_WIDTH 8
 #define OUTPUT_PTR_WIDTH 32
 #else
@@ -94,7 +94,7 @@
 #define OUT_BYTE 4
 #define OCV_INTYPE CV_16UC1
 #define OCV_OUTTYPE CV_32SC1
-#if NO
+#if SPC
 #define INPUT_PTR_WIDTH 16
 #define OUTPUT_PTR_WIDTH 32
 #else
@@ -111,7 +111,7 @@
 #define OUT_BYTE 4
 #define OCV_INTYPE CV_16SC1
 #define OCV_OUTTYPE CV_32SC1
-#if NO
+#if SPC
 #define INPUT_PTR_WIDTH 16
 #define OUTPUT_PTR_WIDTH 32
 #else
@@ -128,7 +128,7 @@
 #define CONVERT_TYPE XF_CONVERT_16U_TO_8U
 #define OCV_INTYPE CV_16UC1
 #define OCV_OUTTYPE CV_8UC1
-#if NO
+#if SPC
 #define INPUT_PTR_WIDTH 16
 #define OUTPUT_PTR_WIDTH 8
 #else
@@ -145,7 +145,7 @@
 #define CONVERT_TYPE XF_CONVERT_16S_TO_8U
 #define OCV_INTYPE CV_16SC1
 #define OCV_OUTTYPE CV_8UC1
-#if NO
+#if SPC
 #define INPUT_PTR_WIDTH 16
 #define OUTPUT_PTR_WIDTH 8
 #else
@@ -162,7 +162,7 @@
 #define OUT_BYTE 1
 #define OCV_INTYPE CV_32SC1
 #define OCV_OUTTYPE CV_8UC1
-#if NO
+#if SPC
 #define INPUT_PTR_WIDTH 32
 #define OUTPUT_PTR_WIDTH 8
 #else
@@ -179,7 +179,7 @@
 #define OUT_BYTE 2
 #define OCV_INTYPE CV_32SC1
 #define OCV_OUTTYPE CV_16UC1
-#if NO
+#if SPC
 #define INPUT_PTR_WIDTH 32
 #define OUTPUT_PTR_WIDTH 16
 #else
@@ -196,7 +196,7 @@
 #define OUT_BYTE 2
 #define OCV_INTYPE CV_32SC1
 #define OCV_OUTTYPE CV_16SC1
-#if NO
+#if SPC
 #define INPUT_PTR_WIDTH 32
 #define OUTPUT_PTR_WIDTH 16
 #else

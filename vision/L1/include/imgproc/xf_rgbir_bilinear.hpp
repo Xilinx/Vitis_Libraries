@@ -54,8 +54,16 @@ void bilinearProcess(XF_CTUNAME(TYPE, NPPC) imgblock[3][BWIDTH],
     }
 }
 
-template <int TYPE, int ROWS, int COLS, int NPPC, int BFORMAT, int USE_URAM>
-void xf_ir_bilinear(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& _src, xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& _full_ir) {
+template <int TYPE,
+          int ROWS,
+          int COLS,
+          int NPPC,
+          int XFCVDEPTH_IN_0 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int BFORMAT,
+          int USE_URAM>
+void xf_ir_bilinear(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN_0>& _src,
+                    xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN_1>& _full_ir) {
 #ifndef __SYNTHESIS__
     assert(((BFORMAT == XF_BAYER_BG) || (BFORMAT == XF_BAYER_GB) || (BFORMAT == XF_BAYER_GR) ||
             (BFORMAT == XF_BAYER_RG)) &&
@@ -76,12 +84,12 @@ void xf_ir_bilinear(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& _src, xf::cv::Mat<TYPE,
     XF_TNAME(TYPE, NPPC) linebuffer[FSIZE - 1][COLS >> XF_BITSHIFT(NPPC)];
     if (USE_URAM) {
 // clang-format off
-#pragma HLS RESOURCE variable=linebuffer core=RAM_T2P_URAM
+#pragma HLS bind_storage variable=linebuffer type=RAM_T2P impl=URAM
 #pragma HLS array_reshape variable=linebuffer dim=1 factor=4 cyclic
         // clang-format on
     } else {
 // clang-format off
-#pragma HLS RESOURCE variable=linebuffer core=RAM_T2P_BRAM
+#pragma HLS bind_storage variable=linebuffer type=RAM_T2P impl=BRAM
 #pragma HLS array_partition variable=linebuffer complete dim=1
         // clang-format on
     }
@@ -249,11 +257,18 @@ Row_Loop:
     }
 }
 
-template <int BFORMAT = 0, int INTYPE, int ROWS, int COLS, int NPPC = 1, int XFCV_DEPTH>
+template <int BFORMAT = 0,
+          int INTYPE,
+          int ROWS,
+          int COLS,
+          int NPPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
 void weightedSub(const char weights[4],
-                 xf::cv::Mat<INTYPE, ROWS, COLS, NPPC, XFCV_DEPTH>& _src1,
-                 xf::cv::Mat<INTYPE, ROWS, COLS, NPPC>& _src2,
-                 xf::cv::Mat<INTYPE, ROWS, COLS, NPPC>& _dst) {
+                 xf::cv::Mat<INTYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN_1>& _src1,
+                 xf::cv::Mat<INTYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN_2>& _src2,
+                 xf::cv::Mat<INTYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT>& _dst) {
     ap_uint<4> wgts[4] = {0};
     for (int i = 0; i < 4; i++) {
         wgts[i] = weights[i];
@@ -336,10 +351,18 @@ ROW_LOOP_COPYR:
 
 //===============================================================================
 
-template <int BFORMAT = 0, int INTYPE, int OUTTYPE, int ROWS, int COLS, int NPPC = 1, int XFCV_DEPTH = 2>
-void copyRpixel(xf::cv::Mat<INTYPE, ROWS, COLS, NPPC, XFCV_DEPTH>& _src,
-                xf::cv::Mat<OUTTYPE, ROWS, COLS, NPPC>& _src2,
-                xf::cv::Mat<OUTTYPE, ROWS, COLS, NPPC>& _dst) {
+template <int BFORMAT = 0,
+          int INTYPE,
+          int OUTTYPE,
+          int ROWS,
+          int COLS,
+          int NPPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void copyRpixel(xf::cv::Mat<INTYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN_1>& _src,
+                xf::cv::Mat<OUTTYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN_2>& _src2,
+                xf::cv::Mat<OUTTYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT>& _dst) {
 #pragma HLS INLINE OFF
     int rd_index = 0, wr_index = 0;
     unsigned short candidateRow = 0, candidateCol = 0;

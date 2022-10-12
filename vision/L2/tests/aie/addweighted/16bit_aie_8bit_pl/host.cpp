@@ -35,9 +35,7 @@ int run_opencv_ref(
     return 0;
 }
 
-int main(int argc, char** argv)
-
-{
+int main(int argc, char** argv) {
     try {
         if (argc < 7) {
             std::stringstream errorMessage;
@@ -161,6 +159,7 @@ int main(int argc, char** argv)
             }
             //}
         }
+        mygraph.end();
         std::cout << "Test passed" << std::endl;
         std::cout << "Average time to process frame : " << (((float)tt.count() * 0.001) / (float)iterations) << " ms"
                   << std::endl;

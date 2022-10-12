@@ -1009,10 +1009,16 @@ template <BayerPattern _b, int INPUT_TILE_ELEMENTS>
 inline void DemosaicRGBA<_b, INPUT_TILE_ELEMENTS>::xfSetRGBAMetaData(void* img_ptr) {
     xfSetTileWidth(img_ptr, xfGetTileWidth(img_ptr) * 4);
     xfSetTilePosH(img_ptr, xfGetTilePosH(img_ptr) * 4);
-    xfSetTileCrctPosH(img_ptr, xfGetTileCrctPosH(img_ptr) * 4);
-    xfSetTileCrctTWidth(img_ptr, xfGetTileCrctTWidth(img_ptr) * 4);
+    xfSetTileOutPosH(img_ptr, xfGetTileOutPosH(img_ptr) * 4);
+    xfSetTileOutTWidth(img_ptr, xfGetTileOutTWidth(img_ptr) * 4);
     xfSetTileOVLP_HL(img_ptr, xfGetTileOVLP_HL(img_ptr) * 4);
     xfSetTileOVLP_HR(img_ptr, xfGetTileOVLP_HR(img_ptr) * 4);
+    uint16_t outOffset_U = xfGetTileOutOffset_U(img_ptr);
+    uint16_t outOffset_L = xfGetTileOutOffset_L(img_ptr);
+    int outOffset = (outOffset_U << 16) + outOffset_L;
+    outOffset = 4 * outOffset;
+    xfSetTileOutOffset_L(img_ptr, (outOffset & 0x0000ffff));
+    xfSetTileOutOffset_U(img_ptr, (outOffset >> 16));
 }
 
 template <BayerPattern _b, int INPUT_TILE_ELEMENTS>

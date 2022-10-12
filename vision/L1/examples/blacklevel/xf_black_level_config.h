@@ -18,6 +18,7 @@
 #define __XF_BLACK_LEVEL_CONFIG_H__
 
 #include "imgproc/xf_black_level.hpp"
+#include "xf_config_params.h"
 
 #define T_8U 1
 #define T_16U 0

@@ -30,7 +30,7 @@ typedef unsigned short int uint16_t;
 #define ERROR_THRESHOLD 0 // acceptable error threshold range 0 to 255
 
 // Resolve optimization type:
-#if RO
+#if MPC
 
 #if GRAY
 #define NPC1 XF_NPPC8

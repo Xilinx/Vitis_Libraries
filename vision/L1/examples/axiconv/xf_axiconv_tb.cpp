@@ -63,8 +63,10 @@ int main(int argc, char** argv) {
     float err_per;
     xf::cv::analyzeDiff(diff, 0, err_per);
     if (err_per > 0.0f) {
+        fprintf(stderr, "ERROR: Test Failed.\n ");
         return 1;
-    }
+    } else
+        std::cout << "Test Passed " << std::endl;
     /**** end of validation ****/
 
     return 0;

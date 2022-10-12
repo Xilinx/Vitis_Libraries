@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#define XF_CV_DEPTH_IN 2
+#define XF_CV_DEPTH_OUT 2
 
-#define RO 1 // Resource Optimized (8-pixel implementation)
-#define NO 0 // Normal Operation (1-pixel implementation)
+#define MPC 1 // Multiple Pixels per Clock operation
+#define SPC 0 // Single Pixel per Clock operation
 // port widths
 #define INPUT_PTR_WIDTH 128
 #define OUTPUT_PTR_WIDTH 128

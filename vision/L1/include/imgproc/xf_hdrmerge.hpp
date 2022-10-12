@@ -49,10 +49,19 @@ inline ap_uint<16> xf_satcast_hdr<ap_uint<16> >(int v) {
 namespace xf {
 namespace cv {
 
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int NO_EXPS, int W_SIZE>
-void Hdrmerge_bayer(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat1,
-                    xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat2,
-                    xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat,
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int NO_EXPS,
+          int W_SIZE,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void Hdrmerge_bayer(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat1,
+                    xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& _src_mat2,
+                    xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst_mat,
                     short wr_hls[NO_EXPS * NPC * W_SIZE]) {
 // clang-format off
 	#pragma HLS ARRAY_PARTITION variable=wr_hls dim=1 block factor=NO_EXPS*NPC

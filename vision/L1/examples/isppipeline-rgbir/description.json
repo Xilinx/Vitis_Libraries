@@ -17,14 +17,14 @@
     "topfunction": "ISPPipeline_accel", 
     "top": {
         "source": [
-            "${XF_PROJ_ROOT}/L1/examples/isppipeline/xf_isp_accel.cpp"
+            "${XF_PROJ_ROOT}/L1/examples/isppipeline-rgbir/xf_isp_accel.cpp"
         ], 
         "cflags": " -I ${XF_PROJ_ROOT}/L1/examples/isppipeline-rgbir/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x", 
         "csimflags": " -I ${XF_PROJ_ROOT}/L1/examples/isppipeline-rgbir/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
     }, 
     "testbench": {
         "source": [
-            "${XF_PROJ_ROOT}/L1/examples/isppipeline/xf_isp_tb.cpp"
+            "${XF_PROJ_ROOT}/L1/examples/isppipeline-rgbir/xf_isp_tb.cpp"
         ], 
         "cflags": " -I ${XF_PROJ_ROOT}/L1/examples/isppipeline-rgbir/build -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ ", 
         "ldflags": "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d", 
@@ -36,7 +36,7 @@
         "csimflags": " -I ${XF_PROJ_ROOT}/L1/examples/isppipeline-rgbir/build -I${XF_PROJ_ROOT}/L1/include -I ./ "
     }, 
     "testinfo": {
-        "disable": false, 
+        "disable": true, 
         "jobs": [
             {
                 "index": 0, 

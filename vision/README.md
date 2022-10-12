@@ -2,20 +2,21 @@
 The Vitis Vision library is a set of 90+ kernels, optimized for Xilinx™ FPGAs, AI Engine™, and SoCs, based on the OpenCV computer vision library. The kernels in the Vitis Vision library are optimized and supported in the Xilinx Vitis™ Tool Suite.
 
 ## HARDWARE and SOFTWARE REQUIREMENTS
-The Vitis Vision library is designed to work with Zynq, Zynq Ultrascale+, VCK190, and Alveo™ FPGAs. The library has been verified on zcu102, zcu104, vck190, U50, and U200 boards.
+The Vitis Vision library is designed to work with Zynq™, Zynq Ultrascale+™, VCK190™, and Alveo™ FPGAs. The library has been verified on zcu102, zcu104, vck190, U50, and U200 boards.
 
 ### Prerequisites
 
-* Valid installation of [Vitis™ 2022.1](https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installing-the-Vitis-Software-Platform) or later version and the corresponding licenses.
+* Valid installation of [Vitis™ 2022.2](https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installing-the-Vitis-Software-Platform) or later version and the corresponding licenses.
 * Xilinx® Runtime ([XRT](https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installing-Xilinx-Runtime-and-Platforms)) must be installed. XRT provides software interface to Xilinx FPGAs.
 * Install [OpenCV-4.4.0]((https://github.com/opencv/opencv/tree/4.4.0)) x86 libraries(with compatible libjpeg.so). x86 libs have to be used for
 
 		a) L1 flow irrespective of target FPGA device being PCIe or embedded.
-		b) L2/L3 flow when the target device is PCIe based.
+		b) L2/L3 flow when the target device is PCIe based
+		c) L2/L3 flow when performing software emulation for an embedded platform.
 		
-	For L2/L3 flow targeting embedded platforms, aarch32/aarch64 version OpenCV shipped within their *sysroot* should be used.	
+	For L2/L3 flow targeting embedded platforms (for hardware emulationa and hardware build), aarch32/aarch64 version OpenCV shipped within their *sysroot* should be used.	
 * libOpenCL.so must be [installed](https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/OpenCL-Installable-Client-Driver-Loader) if not present.
-* [Install the card](https://www.xilinx.com/support/documentation/boards_and_kits/accelerator-cards/1_9/ug1301-getting-started-guide-alveo-accelerator-cards.pdf) for which the platform is supported in Vitis 2022.1 or later versions.
+* [Install the card](https://www.xilinx.com/support/documentation/boards_and_kits/accelerator-cards/1_9/ug1301-getting-started-guide-alveo-accelerator-cards.pdf) for which the platform is supported in Vitis 2022.2 or later versions.
 * If targeting an embedded platform, [install]((https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installing-Embedded-Platforms?tocId=hfE7LFeS8mU4dexvgPL31Q)) it and set up the [evaluation board](https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/444006775/Zynq+UltraScale+MPSoC).
 
 ##### OpenCV Installation Guidance:
@@ -104,7 +105,7 @@ Vitis library is organized into L1, L2 and L3 folders so as to facilitate variou
 * Run cycle accurate simulation (Co-simulation)
 * Package as IP, get final resource utilization/timing details (Export RTL)
        
-	**Note**:  Once RTL (or XO file after packaging IP) is generated Vivado flow is invoked for XCLBIN file generation, if required.
+	**Note**:  Once RTL (or XO file after packaging IP) is generated Vivado flow can invoked for XCLBIN file generation if required.
 
 **L2** :
        Makefiles and sources in *L2/examples* and *L2/tests* facilitate building XCLBIN file from various sources (HDL, HLS or XO files) of kernels with host code written in OpenCL/XRT frame work targeting a device. 
@@ -142,7 +143,7 @@ For AIE development *L2/tests/aie* , *L2/examples/aie* has Makefile(s) and sourc
 
 ## OTHER INFORMATION
 Full User Guide for Vitis Vision and using OpenCV on Xilinx devices Check here:
-[Xilinx Vitis Vision User Guide](https://xilinx.github.io/Vitis_Libraries/vision/2022.1/index.html)
+[Xilinx Vitis Vision User Guide](https://docs.xilinx.com/r/en-US/Vitis_Libraries/vision/index.html)
 
 ## SUPPORT
 For questions and to get help on this project or your own projects, visit the [Xilinx Forums](https://support.xilinx.com/s/topic/0TO2E000000YKYAWA4/vitis-acceleration-acceleration?language=en_US)
@@ -150,7 +151,8 @@ For questions and to get help on this project or your own projects, visit the [X
 ## LICENSE AND CONTRIBUTING TO THE REPOSITORY
 The source for this project is licensed under the [Apache License](http://www.apache.org/licenses/LICENSE-2.0)
 
-    Copyright 2022 Xilinx, Inc.
+    Copyright 2016 - 2022 Xilinx, Inc.
+    Copyright (C) 2022, Advanced Micro Devices, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -175,19 +177,51 @@ This library is written by developers at
 **PL additions/enhancements**:
 	
     • New functions:
-		- Rotate
-		- TV-L1 optical flow
-		- Multi-stream ISP (basic) support
+		    • HDR Decompanding : Compress(compand) data in a piece-wise linear (PWL) mapping to a lower bit depth
+		    • Degamma : Designed to linearize the input from sensor or any pre-processing IP
+		    • ISPStats : collects histogram based stats of bayer and color images
+		    • ISP all-in-one pipeline : All the ISP related functions stitched in one pipeline with option to exclude unwanted functions during runtime and compile time.
+		    • Multi-stream ISP : Multiple input stream ISP pipeline
     • Updates:
-		- Added Demosaicing kernel (xf_demosaicing_rt.hpp) having the input Bayer pattern as run time parameter
+		    • Added new template parameter XFCVDEPTH for xf::cv::Mat class that can be used to assign custom depth to the Mat's internal hls::stream.
+		    • All APIs in the library updated with newly added XFCVDEPTH parameter for xf::cv::Mat
+		    • Remove deprecated __SDSVHLS__ macro from all files
+		    • Replaced deprecated RESOURCE pragma with BIND_STORAGE/BIND_OP pragmas
+		    • Rename NO, RO in all files to SPC (Single Pixel per Clock) and MPC (Multiple Pixels per Clock)
+		    • Add missing reference functions in L1, L2, L3 testbench files
+		    • Fixed Gaussian Difference incorrect implementation
+		    • Fixed incorrect dst Mat assignment in xf::cv::Mat member function convertBitdepth
+		    • Updated analyzeDiff in L1/include/common/xf_sw_utils.hpp to a static function
+		    • Added missing "Test Passed/Failed/Finished" check in all L1/L2/L3 functions.
+		    • Added 16 bit and 4 channel support, corrected B and R channel swap issue for channel extract function.
+		    • Fixed a bug in BGR2HLS module of cvtcolor function
+		    • Restructured L1 channel combine accel and testbench code
+		    • Fixed SVM emulation and cosim hang issue
+		    • Updated loop tripcounts of pyrDown, histogram, HDR extract, rgb2yuyv module in cvtColor to fix synthesis latency numbers
+		    • Fix array reshape pragma in xf_sobel.hpp, xf_video_mem.hpp files
+	
     • Lib Infra Changes:
-		- Added API JSON for L2, that helps in usage of a given function's API in Vitis GUI	
+		    • Added frequency setting in L2/L3 JSON files. 300 MHz for NPPC1 and 150MHz for NPPC8 for most cases.
+		    • Updated JSON and Makefiles to use ps_on_x86 feature for software emulation targeting embedded platforms. Software emulation for embedded platforms
+			no longer uses qemu but regular g++ compilation flow only.
+		    • Added missing environment checks in all JSON and Makefiles
+
 
 **AIE additions/enhancements:** :
 
-	• Updates:
-		- RTL Data-movers with improved latency over HLS data-movers
-		- All tests updated with RTL data-movers
+    • New functions/features :
+    	• Resize / Resize + Normalize
+    	• Smart tiling for x86 64-bit platforms
+	
+    • Updates:
+    	• RTL Data movers 
+		- 8-bit PL / 8-bit AIE data movers
+		- Multi-channel support
+		- Optimized implementation
+    	• Optimized smart tiling / stitching for higher performance
+    	• Fix Random crashes in hardware emulation flow
+    	• Miscellaneous bug fixes
+	
 
 
 **Known issues**
@@ -195,9 +229,6 @@ This library is written by developers at
   * Vitis GUI projects on RHEL83 and CEntOS82 may fail because of a lib conflict in the
      LD_LIBRARY_PATH setting. User needs to remove ${env_var:LD_LIBRARY_PATH} from the project
       environment settings for the function to build successfully.
-  * SVM L2 PL function fails hardware emulation with 2022.1 Vitis. Please use 2021.1
-    Vitis for this function.
   * rgbir2bayer, isppipeline_rgbir PL functions are not supplied with input images
   * Software emulation for Warptransform L2 testcases doesn't work because of a known issue with platform.
   * Warptransform L1 URAM cases fail CSim because of a known HLS issue.
-  * Hardware emulation in AIE testcases may throw segmentation fault at the end, although completing the functional test successfully.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,106 @@
 #include <math.h>
 
 using namespace std;
+
+void bayerizeImage(cv::Mat in_img, cv::Mat& bayer_image, cv::Mat& cfa_output, int code) {
+    for (int i = 0; i < in_img.rows; i++) {
+        for (int j = 0; j < in_img.cols; j++) {
+#if T_8U
+            cv::Vec3b in = in_img.at<cv::Vec3b>(i, j);
+            cv::Vec3b b;
+#else
+            cv::Vec3w in = in_img.at<cv::Vec3w>(i, j);
+            cv::Vec3w b;
+#endif
+            b[0] = 0;
+            b[1] = 0;
+            b[2] = 0;
+
+            if (code == 0) {            // BG
+                if ((i & 1) == 0) {     // even row
+                    if ((j & 1) == 0) { // even col
+                        b[0] = in[0];
+                        cfa_output.at<pxltype>(i, j) = in[0];
+                    } else { // odd col
+                        b[1] = in[1];
+                        cfa_output.at<pxltype>(i, j) = in[1];
+                    }
+                } else {                // odd row
+                    if ((j & 1) == 0) { // even col
+                        b[1] = in[1];
+                        cfa_output.at<pxltype>(i, j) = in[1];
+                    } else { // odd col
+                        b[2] = in[2];
+                        cfa_output.at<pxltype>(i, j) = in[2];
+                    }
+                }
+            }
+            if (code == 1) {            // GB
+                if ((i & 1) == 0) {     // even row
+                    if ((j & 1) == 0) { // even col
+                        b[1] = in[1];
+                        cfa_output.at<pxltype>(i, j) = in[1];
+                    } else { // odd col
+                        b[0] = in[0];
+                        cfa_output.at<pxltype>(i, j) = in[0];
+                    }
+                } else {                // odd row
+                    if ((j & 1) == 0) { // even col
+                        b[2] = in[2];
+                        cfa_output.at<pxltype>(i, j) = in[2];
+                    } else { // odd col
+                        b[1] = in[1];
+                        cfa_output.at<pxltype>(i, j) = in[1];
+                    }
+                }
+            }
+            if (code == 2) {            // GR
+                if ((i & 1) == 0) {     // even row
+                    if ((j & 1) == 0) { // even col
+                        b[1] = in[1];
+                        cfa_output.at<pxltype>(i, j) = in[1];
+                    } else { // odd col
+                        b[2] = in[2];
+                        cfa_output.at<pxltype>(i, j) = in[2];
+                    }
+                } else {                // odd row
+                    if ((j & 1) == 0) { // even col
+                        b[0] = in[0];
+                        cfa_output.at<pxltype>(i, j) = in[0];
+                    } else { // odd col
+                        b[1] = in[1];
+                        cfa_output.at<pxltype>(i, j) = in[1];
+                    }
+                }
+            }
+            if (code == 3) {            // RG
+                if ((i & 1) == 0) {     // even row
+                    if ((j & 1) == 0) { // even col
+                        b[2] = in[2];
+                        cfa_output.at<pxltype>(i, j) = in[2];
+                    } else { // odd col
+                        b[1] = in[1];
+                        cfa_output.at<pxltype>(i, j) = in[1];
+                    }
+                } else {                // odd row
+                    if ((j & 1) == 0) { // even col
+                        b[1] = in[1];
+                        cfa_output.at<pxltype>(i, j) = in[1];
+                    } else { // odd col
+                        b[0] = in[0];
+                        cfa_output.at<pxltype>(i, j) = in[0];
+                    }
+                }
+            }
+#if T_8U
+            bayer_image.at<cv::Vec3b>(i, j) = b;
+#else
+            bayer_image.at<cv::Vec3w>(i, j) = b;
+#endif
+        }
+    }
+}
+
 // OpenCV reference function:
 void LSC_ref(cv::Mat& _src, cv::Mat& _dst) {
     int center_pixel_pos_x = (_src.cols / 2);
@@ -29,34 +129,32 @@ void LSC_ref(cv::Mat& _src, cv::Mat& _dst) {
 
     for (int i = 0; i < _src.rows; i++) {
         for (int j = 0; j < _src.cols; j++) {
-            for (int k = 0; k < 3; k++) {
-                float distance = std::sqrt((center_pixel_pos_y - i) * (center_pixel_pos_y - i) +
-                                           (center_pixel_pos_x - j) * (center_pixel_pos_x - j)) /
-                                 max_distance;
+            float distance = std::sqrt((center_pixel_pos_y - i) * (center_pixel_pos_y - i) +
+                                       (center_pixel_pos_x - j) * (center_pixel_pos_x - j)) /
+                             max_distance;
 
-                float gain = (0.01759 * ((distance + 28.37) * (distance + 28.37))) - 13.36;
+            float gain = (0.01759 * ((distance + 28.37) * (distance + 28.37))) - 13.36;
 #if T_8U
-                int value = (_src.at<cv::Vec3b>(i, j)[k] * gain);
-                if (value > 255) {
-                    value = 255;
-                }
-                _dst.at<cv::Vec3b>(i, j)[k] = cv::saturate_cast<unsigned char>(value);
+            int value = (_src.at<unsigned char>(i, j) * gain);
+            if (value > 255) {
+                value = 255;
+            }
+            _dst.at<unsigned char>(i, j) = cv::saturate_cast<unsigned char>(value);
 #endif
 #if T_16U
-                int value = (_src.at<cv::Vec3w>(i, j)[k] * gain);
-                if (value > 65535) {
-                    value = 65535;
-                }
-                _dst.at<cv::Vec3w>(i, j)[k] = cv::saturate_cast<unsigned short>(value);
+            int value = (_src.at<unsigned short>(i, j) * gain);
+            if (value > 65535) {
+                value = 65535;
+            }
+            _dst.at<unsigned short>(i, j) = cv::saturate_cast<unsigned short>(value);
 
 #endif
-            }
         }
     }
 }
 
 int main(int argc, char** argv) {
-    cv::Mat in_img, out_img, out_img_hls, diff;
+    cv::Mat in_img, out_img, out_img_hls, diff, cfa_bayer_output;
 #if T_8U
     in_img = cv::imread(argv[1], 1);
 #else
@@ -71,24 +169,33 @@ int main(int argc, char** argv) {
     std::cout << "Input image width  : " << in_img.cols << std::endl;
 
 #if T_8U
-    out_img.create(in_img.rows, in_img.cols, in_img.type());
-    out_img_hls.create(in_img.rows, in_img.cols, in_img.type());
-    diff.create(in_img.rows, in_img.cols, in_img.type());
-    size_t image_in_size_bytes = in_img.rows * in_img.cols * 3 * sizeof(unsigned char);
+    out_img.create(in_img.rows, in_img.cols, CV_8UC1);
+    out_img_hls.create(in_img.rows, in_img.cols, CV_8UC1);
+    diff.create(in_img.rows, in_img.cols, CV_8UC1);
+    cfa_bayer_output.create(in_img.rows, in_img.cols, CV_8UC1);
+    size_t image_in_size_bytes = in_img.rows * in_img.cols * sizeof(unsigned char);
     size_t image_out_size_bytes = image_in_size_bytes;
 #endif
 #if T_16U
-    out_img.create(in_img.rows, in_img.cols, in_img.type());
-    out_img_hls.create(in_img.rows, in_img.cols, in_img.type());
-    diff.create(in_img.rows, in_img.cols, in_img.type());
-    size_t image_in_size_bytes = in_img.rows * in_img.cols * 3 * sizeof(unsigned short);
+    out_img.create(in_img.rows, in_img.cols, CV_16UC1);
+    out_img_hls.create(in_img.rows, in_img.cols, CV_16UC1);
+    diff.create(in_img.rows, in_img.cols, CV_16UC1);
+    cfa_bayer_output.create(in_img.rows, in_img.cols, CV_16UC1);
+    size_t image_in_size_bytes = in_img.rows * in_img.cols * sizeof(unsigned short);
     size_t image_out_size_bytes = image_in_size_bytes;
 #endif
 
     imwrite("out_img1.png", out_img);
     imwrite("out_img_hls1.png", out_img_hls);
 
-    LSC_ref(in_img, out_img);
+    cv::Mat color_cfa_bayer_output(in_img.rows, in_img.cols, in_img.type()); // Bayer pattern CFA output in color
+    unsigned short bformat = BPATTERN;                                       // Bayer format BG-0; GB-1; GR-2; RG-3
+
+    bayerizeImage(in_img, color_cfa_bayer_output, cfa_bayer_output, bformat);
+    cv::imwrite("bayer_image.png", color_cfa_bayer_output);
+    cv::imwrite("cfa_output.png", cfa_bayer_output);
+
+    LSC_ref(cfa_bayer_output, out_img);
 
     cl_int err;
     std::cout << "INFO: Running OpenCL section." << std::endl;
@@ -131,11 +238,11 @@ int main(int argc, char** argv) {
     cl::Event event;
 
     OCL_CHECK(err,
-              queue.enqueueWriteBuffer(buffer_inImage,      // buffer on the FPGA
-                                       CL_TRUE,             // blocking call
-                                       0,                   // buffer offset in bytes
-                                       image_in_size_bytes, // Size in bytes
-                                       in_img.data,         // Pointer to the data to copy
+              queue.enqueueWriteBuffer(buffer_inImage,        // buffer on the FPGA
+                                       CL_TRUE,               // blocking call
+                                       0,                     // buffer offset in bytes
+                                       image_in_size_bytes,   // Size in bytes
+                                       cfa_bayer_output.data, // Pointer to the data to copy
                                        nullptr, &event));
 
     // Execute the kernel:

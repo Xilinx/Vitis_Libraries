@@ -27,11 +27,11 @@
 #define WIDTH 128
 
 // Resolve optimization type:
-#if NO
+#if SPC
 #define __NPPC XF_NPPC1
 #endif
 
-#if RO
+#if MPC
 #define __NPPC XF_NPPC8
 #endif
 

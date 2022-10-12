@@ -219,6 +219,8 @@ int graph_run(xrtDeviceHandle& dhdl, const axlf* top, std::vector<xrtBufferHandl
     dm_wait_done(mm2s_rhdl);
     dm_wait_done(s2mm_rhdl);
 
+    mygraph.end();
+
     // TODO tiler and stitcher destructor?
     // xrtKernelClose(mm2s_khdl);
     // xrtKernelClose(mm2s_khdl1);

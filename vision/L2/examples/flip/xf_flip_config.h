@@ -30,7 +30,7 @@
 #define WIDTH 3840
 
 // Resolve the optimization type:
-#if NO
+#if SPC
 #define NPC1 XF_NPPC1
 #if GRAY
 #define PTR_WIDTH 8
@@ -38,7 +38,7 @@
 #define PTR_WIDTH 32
 #endif
 #endif
-#if RO
+#if MPC
 #define NPC1 XF_NPPC4
 #if GRAY
 #define PTR_WIDTH 32

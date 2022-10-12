@@ -201,7 +201,7 @@ void xf_pyrdown_gaussian_nxn(hls::stream<XF_TNAME(DEPTH, NPC)>& _src_mat,
     XF_TNAME(DEPTH, NPC) buf[WIN_SZ][(COLS >> XF_BITSHIFT(NPC)) + (WIN_SZ >> 1)];
 // clang-format off
     #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
-    #pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
+    #pragma HLS bind_storage variable=buf type=RAM_S2P impl=BRAM
     // clang-format on
 
     // initializing row index

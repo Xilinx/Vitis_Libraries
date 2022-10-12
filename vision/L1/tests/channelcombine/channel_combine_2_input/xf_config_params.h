@@ -14,11 +14,18 @@
  * limitations under the License.
  */
 
-#define RO 0
-#define NO 1
+#define MPC 0
+#define SPC 1
 
 #define TWO_INPUT 1
 #define THREE_INPUT 0
 #define FOUR_INPUT 0
 
 #define NPC XF_NPPC1
+
+#define XF_CV_DEPTH_IN_1 1
+#define XF_CV_DEPTH_IN_2 2
+#define XF_CV_DEPTH_IN_3 1
+#define XF_CV_DEPTH_IN_4 2
+
+#define XF_CV_DEPTH_OUT_1 3

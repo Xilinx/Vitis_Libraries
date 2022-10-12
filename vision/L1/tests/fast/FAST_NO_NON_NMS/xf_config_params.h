@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-#define NO 1 // Normal
-#define RO 0 // Resource Optimized
+#define XF_CV_DEPTH_IN_1 2
+#define XF_CV_DEPTH_OUT_1 2
+
+#define SPC 1 // Normal
+#define MPC 0 // Multiple Pixels per Clock operation
 
 #define NMS 0
 

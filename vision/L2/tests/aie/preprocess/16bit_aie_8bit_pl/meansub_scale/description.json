@@ -15,11 +15,11 @@
                     ]
                 }, 
                 "linker": {
-                    "clflags": [
+                    "ldclflags": [
                         "--clock.freqHz 400000000:Tiler_top_1", 
                         "--clock.freqHz 400000000:stitcher_top_1", 
                         "--clock.defaultTolerance 0.001", 
-                        "--config PROJECT/system.cfg",
+                        "--config PROJECT/system.cfg", 
                         "LIB_DIR/L1/lib/hw/8_16/tiler.xo", 
                         "LIB_DIR/L1/lib/hw/8_16/stitcher.xo"
                     ]
@@ -40,19 +40,24 @@
     "launch": [
         {
             "name": "hwemu-launch", 
-            "target": "hw_emu",
-			"cmd_args": "kernel.xclbin LIB_DIR/data/HD.jpg 1920 1080 1"
+            "target": "hw_emu", 
+            "cmd_args": "kernel.xclbin LIB_DIR/data/HD.jpg 1920 1080 1"
         }, 
         {
             "name": "aiesim-launch", 
-            "target": "aiesim",
-			"cmd_args": "kernel.xclbin LIB_DIR/data/HD.jpg 1920 1080 1"
+            "target": "aiesim", 
+            "cmd_args": "kernel.xclbin LIB_DIR/data/HD.jpg 1920 1080 1"
         }, 
         {
             "name": "x86-launch", 
-            "target": "x86sim",
-			"cmd_args": "kernel.xclbin LIB_DIR/data/HD.jpg 1920 1080 1"
-        }
+            "target": "x86sim", 
+            "cmd_args": "kernel.xclbin LIB_DIR/data/HD.jpg 1920 1080 1"
+        },
+        {
+            "name": "hw", 
+            "target": "hw", 
+            "cmd_args": "kernel.xclbin LIB_DIR/data/4k.jpg 3840 2160 1"
+        }        
     ], 
     "host": {
         "host_exe": "host.elf", 
@@ -65,10 +70,10 @@
                 "$(SYSROOT)/usr/include/xrt/", 
                 "$(SYSROOT)/usr/include/", 
                 "$(SYSROOT)/usr/include/opencv4", 
-				"LIB_DIR/L1/include/aie", 
+                "LIB_DIR/L1/include/aie", 
                 "./"
             ], 
-            "options": "--sysroot=$(SYSROOT)", 
+            "options": "--sysroot=$(SYSROOT) -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include", 
             "symbols": [
                 "__PS_ENABLE_AIE__"
             ]
@@ -80,7 +85,7 @@
             ], 
             "libraries": [
                 "smartTilerStitcher"
-            ],  
+            ], 
             "options": "--sysroot=$(SYSROOT)"
         }
     }, 
@@ -100,7 +105,7 @@
                     "workdir": "./Work", 
                     "options": "-pl-axi-lite=true", 
                     "name": "libadf.a", 
-                    "aie_kernel_files": [
+                    "files": [
                         "xf_pp_top.cc"
                     ]
                 }
@@ -108,7 +113,7 @@
         }
     ], 
     "containers": [
-        { 
+        {
             "frequency": "300", 
             "name": "kernel"
         }
@@ -134,8 +139,14 @@
         "targets": [
             "vitis_hw_emu", 
             "vitis_hw_build", 
-            "vitis_hw_run"
+            "vitis_hw_run",
+            "vitis_aie_x86sim",
+            "vitis_aie_sim"
         ], 
         "category": "canary"
-    }
+    },
+    "output_files": [
+        "pl_sample_counts",
+        "ISS_RPC_SERVER_PORT"
+    ]    
 }

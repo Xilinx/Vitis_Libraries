@@ -79,9 +79,9 @@ void xFDHOGDescriptorKernel(hls::stream<XF_SNAME(WORD_WIDTH_SRC)>& _phase_strm,
         #pragma HLS ARRAY_RESHAPE variable=HA_1 cyclic factor=9 dim=2
         #pragma HLS ARRAY_RESHAPE variable=HA_2 cyclic factor=9 dim=2
         #pragma HLS ARRAY_RESHAPE variable=HA_3 cyclic factor=9 dim=2
-        #pragma HLS RESOURCE variable=HA_1 core=RAM_S2P_URAM
-        #pragma HLS RESOURCE variable=HA_2 core=RAM_S2P_URAM
-        #pragma HLS RESOURCE variable=HA_3 core=RAM_S2P_URAM
+        #pragma HLS bind_storage variable=HA_1 type=RAM_S2P impl=URAM
+        #pragma HLS bind_storage variable=HA_2 type=RAM_S2P impl=URAM
+        #pragma HLS bind_storage variable=HA_3 type=RAM_S2P impl=URAM
         // clang-format on
     } else {
 // clang-format off
@@ -91,18 +91,18 @@ void xFDHOGDescriptorKernel(hls::stream<XF_SNAME(WORD_WIDTH_SRC)>& _phase_strm,
 // clang-format on
 // specifying the dual-port BRAM
 // clang-format off
-        #pragma HLS RESOURCE variable=HA_1 core=RAM_S2P_BRAM
-        #pragma HLS RESOURCE variable=HA_2 core=RAM_S2P_BRAM
-        #pragma HLS RESOURCE variable=HA_3 core=RAM_S2P_BRAM
+        #pragma HLS bind_storage variable=HA_1 type=RAM_S2P impl=BRAM
+        #pragma HLS bind_storage variable=HA_2 type=RAM_S2P impl=BRAM
+        #pragma HLS bind_storage variable=HA_3 type=RAM_S2P impl=BRAM
         // clang-format on
     }
 
     // array to hold the sum of squared values of each cell
     ap_uint<48> ssv_1[NOHC], ssv_2[NOHC], ssv_3[NOHC];
 // clang-format off
-    #pragma HLS RESOURCE variable=ssv_1 core=RAM_S2P_BRAM
-    #pragma HLS RESOURCE variable=ssv_2 core=RAM_S2P_BRAM
-    #pragma HLS RESOURCE variable=ssv_3 core=RAM_S2P_BRAM
+    #pragma HLS bind_storage variable=ssv_1 type=RAM_S2P impl=BRAM
+    #pragma HLS bind_storage variable=ssv_2 type=RAM_S2P impl=BRAM
+    #pragma HLS bind_storage variable=ssv_3 type=RAM_S2P impl=BRAM
     // clang-format on
 
     // bin center computation, in the Q9.7 format

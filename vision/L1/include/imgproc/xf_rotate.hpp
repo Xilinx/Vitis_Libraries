@@ -42,6 +42,7 @@ void ProcessTile(ap_uint<PXL_WIDTH> Src_Mat[TILE_SZ * NPC_TILESZ],
 		
 		int wr_ptr=0, rd_ptr=0;
 		int n = 0, m = 1;
+		//ap_uint<2> n;
 		int Tile_rows, Tile_cols;
 		
 		const int XF_PWIDTH = XF_PIXELWIDTH(TYPE, NPC);
@@ -118,7 +119,7 @@ void ProcessTile(ap_uint<PXL_WIDTH> Src_Mat[TILE_SZ * NPC_TILESZ],
 		uint64_t OffsetSrc;
 		OffsetSrc = ((row_idx*Cols + col_idx)* PXL_WIDTH/NPC + INPUT_PTR_WIDTH - 1)/INPUT_PTR_WIDTH;
 		
-		MMIterIn<INPUT_PTR_WIDTH, TYPE, TILE_SZ, TILE_SZ, NPC, -1>::Array2xfMat(src_ptr+OffsetSrc, Src_Mat, Tile_rows, Tile_cols, Cols);
+		MMIterIn<INPUT_PTR_WIDTH, TYPE, TILE_SZ, COLS, NPC, -1>::Array2xfMat(src_ptr+OffsetSrc, Src_Mat, Tile_rows, Tile_cols, Cols);
 
 		return;
 	}
@@ -164,7 +165,7 @@ void ProcessTile(ap_uint<PXL_WIDTH> Src_Mat[TILE_SZ * NPC_TILESZ],
 			_rows = Tile_cols;
 			stride = Rows;
 		}
-		MMIterOut<OUTPUT_PTR_WIDTH, TYPE, TILE_SZ, TILE_SZ, NPC, 0, -1>::xfMat2Array(Dst_Mat, dst_ptr+OffsetDst, _rows, _cols, stride);
+		MMIterOut<OUTPUT_PTR_WIDTH, TYPE, TILE_SZ, COLS, NPC, 0, -1>::xfMat2Array(Dst_Mat, dst_ptr+OffsetDst, _rows, _cols, stride);
 		
 		return;
 	}
@@ -194,8 +195,8 @@ void ProcessTile(ap_uint<PXL_WIDTH> Src_Mat[TILE_SZ * NPC_TILESZ],
         ap_uint<PXL_WIDTH> Dst_Mat[TILE_SZ * NPC_TILESZ];
 
 // clang-format off
-#pragma HLS BIND_STORAGE variable = Src_Mat type = ram_s2p impl = bram
-#pragma HLS BIND_STORAGE variable = Dst_Mat type = ram_s2p impl = bram
+#pragma HLS BIND_STORAGE variable = Src_Mat type=ram_s2p impl=bram
+#pragma HLS BIND_STORAGE variable = Dst_Mat type=ram_s2p impl=bram
         // clang-format on
 
         int Row_diff = Rows - (Rows / TILE_SZ) * TILE_SZ;

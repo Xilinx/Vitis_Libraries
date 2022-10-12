@@ -6282,7 +6282,8 @@ int main(int argc, char** argv) {
     if (err_per > 3.0f) {
         fprintf(stderr, "\n1st Image Test Failed\n ");
         return 1;
-    }
+    } else
+        std::cout << "Testcase passed" << std::endl;
 
 #if (IYUV2NV12 || RGBA2NV12 || RGB2NV12 || BGR2NV12 || BGR2NV21 || RGB2NV21 || RGBA2NV21 || UYVY2NV12 || YUYV2NV12 || \
      NV122IYUV || NV212IYUV || IYUV2YUV4 || NV122YUV4 || NV212YUV4 || RGBA2IYUV || RGBA2YUV4 || UYVY2IYUV ||          \
@@ -6306,7 +6307,8 @@ int main(int argc, char** argv) {
     if (err_per > 3.0f) {
         fprintf(stderr, "\n2nd Image Test Failed\n ");
         return 1;
-    }
+    } else
+        std::cout << "Testcase passed" << std::endl;
 
 #endif
 #if (IYUV2YUV4 || NV122IYUV || NV122YUV4 || NV212IYUV || NV212YUV4 || RGBA2IYUV || RGB2IYUV || RGBA2YUV4 || \
@@ -6330,7 +6332,8 @@ int main(int argc, char** argv) {
     if (err_per > 3.0f) {
         fprintf(stderr, "\n3rd Image Test Failed\n ");
         return 1;
-    }
+    } else
+        std::cout << "Testcase passed" << std::endl;
 #endif
     /* ## *************************************************************** ##*/
     return 0;

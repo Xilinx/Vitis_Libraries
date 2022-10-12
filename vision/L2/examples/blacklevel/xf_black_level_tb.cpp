@@ -123,10 +123,12 @@ int main(int argc, char** argv) {
 
     xf::cv::analyzeDiff(DiffImg, 1, ErrorPercent);
 
-    if (ErrorPercent > 10)
+    if (ErrorPercent > 10) {
+        std::cerr << "ERROR: Test Failed." << std::endl;
         return 1;
-    else
-        return 0;
+    } else
+        std::cout << "Test Passed " << std::endl;
+    return 0;
 
     // return XF_APP_SUCCESS;
 }

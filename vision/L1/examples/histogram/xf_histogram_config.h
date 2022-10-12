@@ -30,20 +30,20 @@
 // Resolve optimization type:
 
 #if GRAY
-#if RO
+#if MPC
 #define NPC1 XF_NPPC8
 #define PTR_WIDTH 64
 #endif
-#if NO
+#if SPC
 #define NPC1 XF_NPPC1
 #define PTR_WIDTH 8
 #endif
 #else
-#if RO
+#if MPC
 #define NPC1 XF_NPPC8
 #define PTR_WIDTH 256
 #endif
-#if NO
+#if SPC
 #define NPC1 XF_NPPC1
 #define PTR_WIDTH 32
 #endif

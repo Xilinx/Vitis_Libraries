@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,37 +28,39 @@
 #define HEIGHT 2160
 #define WIDTH 3840
 
-#if NO
+#if T_8U
+#define pxltype unsigned char
+#else
+#define pxltype unsigned short
+#endif
+
+#if SPC
 #define NPIX XF_NPPC1
 #if T_8U
-#define IN_TYPE XF_8UC3
-#define OUT_TYPE XF_8UC3
-#define SIN_CHANNEL_TYPE XF_8UC1
-#define INPUT_PTR_WIDTH 32
-#define OUTPUT_PTR_WIDTH 32
+#define IN_TYPE XF_8UC1
+#define OUT_TYPE XF_8UC1
+#define INPUT_PTR_WIDTH 8
+#define OUTPUT_PTR_WIDTH 8
 #else
-#define IN_TYPE XF_16UC3
-#define OUT_TYPE XF_16UC3
-#define SIN_CHANNEL_TYPE XF_16UC1
-#define INPUT_PTR_WIDTH 64
-#define OUTPUT_PTR_WIDTH 64
+#define IN_TYPE XF_16UC1
+#define OUT_TYPE XF_16UC1
+#define INPUT_PTR_WIDTH 16
+#define OUTPUT_PTR_WIDTH 16
 #endif
 #endif
 
-#if RO
+#if MPC
 #define NPIX XF_NPPC8
 #if T_8U
-#define IN_TYPE XF_8UC3
-#define OUT_TYPE XF_8UC3
-#define SIN_CHANNEL_TYPE XF_8UC1
-#define INPUT_PTR_WIDTH 256
-#define OUTPUT_PTR_WIDTH 256
+#define IN_TYPE XF_8UC1
+#define OUT_TYPE XF_8UC1
+#define INPUT_PTR_WIDTH 64
+#define OUTPUT_PTR_WIDTH 64
 #else
-#define IN_TYPE XF_16UC3
-#define OUT_TYPE XF_16UC3
-#define SIN_CHANNEL_TYPE XF_16UC1
-#define INPUT_PTR_WIDTH 512
-#define OUTPUT_PTR_WIDTH 512
+#define IN_TYPE XF_16UC1
+#define OUT_TYPE XF_16UC1
+#define INPUT_PTR_WIDTH 128
+#define OUTPUT_PTR_WIDTH 128
 #endif
 #endif
 

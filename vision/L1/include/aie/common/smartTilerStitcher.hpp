@@ -33,6 +33,13 @@ void smartTileTilerGenerateMetaDataWithSpecifiedTileSize(std::vector<uint16_t> s
                                                          int tileAlignment = 1,
                                                          bool enableInvalidRegions = true);
 
+void smartTileTilerGenerateMetaDataWithSpecifiedTileSize(std::vector<uint16_t> srcSize,
+                                                         std::vector<uint16_t> outSize,
+                                                         std::vector<xF::smartTileMetaData>& metaDataList,
+                                                         uint16_t& numberOfTileRows,
+                                                         uint16_t& numberOfTileColumns,
+                                                         int tileAlignment = 1,
+                                                         bool enableInvalidRegions = true);
 } // namespace xF
 
 #endif //_SMARTTILERSTITCHER_HPP_

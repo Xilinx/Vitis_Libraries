@@ -237,8 +237,8 @@ int main(int argc, char** argv) {
     if (persuccess < 80) {
         fprintf(stderr, "ERROR: Test Failed.\n ");
         return EXIT_FAILURE;
-    }
-    std::cout << "Test Passed" << std::endl;
+    } else
+        std::cout << "Testcase passed" << std::endl;
 
     std::cout.precision(3);
     std::cout << std::fixed;

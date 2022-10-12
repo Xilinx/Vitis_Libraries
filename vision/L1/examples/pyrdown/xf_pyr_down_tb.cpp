@@ -58,4 +58,9 @@ int main(int argc, char* argv[]) {
     xf::cv::analyzeDiff(output_diff_xf_cv, 0, err_per);
     cv::imwrite("xf_cv_diff_image.png", output_diff_xf_cv);
     cv::imwrite("xf_image.png", output_xf);
+    if (err_per > 1) {
+        std::cerr << "ERROR: Test Failed." << std::endl;
+        return 1;
+    } else
+        std::cout << "Test Passed " << std::endl;
 }

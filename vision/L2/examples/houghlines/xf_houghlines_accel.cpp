@@ -34,10 +34,9 @@ void houghlines_accel(
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(rows, cols);
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> imgInput(rows, cols);
 
 // clang-format off
-    #pragma HLS STREAM variable=imgInput.data depth=2
 // clang-format on
 
 // clang-format off
@@ -45,11 +44,11 @@ void houghlines_accel(
     // clang-format on
 
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1>(img_in, imgInput);
+    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(img_in, imgInput);
 
     // Run xfOpenCV kernel:
-    xf::cv::HoughLines<RHOSTEP, THETASTEP, LINESMAX, DIAGVAL, MINTHETA, MAXTHETA, TYPE, HEIGHT, WIDTH, NPC1>(
-        imgInput, arrayy, arrayx, threshold, maxlines);
+    xf::cv::HoughLines<RHOSTEP, THETASTEP, LINESMAX, DIAGVAL, MINTHETA, MAXTHETA, TYPE, HEIGHT, WIDTH, NPC1,
+                       XF_CV_DEPTH_IN>(imgInput, arrayy, arrayx, threshold, maxlines);
 
     return;
 } // End of kernel

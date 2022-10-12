@@ -109,7 +109,7 @@ int data_buffer_init(xrtDeviceHandle& dhdl,
                      int16_t* imgBuffer1,
                      int sizeIn,
                      int sizeOut,
-                     std::vector<uint16_t*>& bufferMapped) {
+                     std::vector<int16_t*>& bufferMapped) {
     printf("DEBUG: data_buffer_init\n");
     //////////////////////////////////////////
     // input memory
@@ -117,12 +117,12 @@ int data_buffer_init(xrtDeviceHandle& dhdl,
     //////////////////////////////////////////
 
     xrtBufferHandle in_bohdl = xrtBOAlloc(dhdl, sizeIn * sizeof(int16_t), 0, 0);
-    auto in_bomapped = reinterpret_cast<uint16_t*>(xrtBOMap(in_bohdl));
+    auto in_bomapped = reinterpret_cast<int16_t*>(xrtBOMap(in_bohdl));
     memcpy(in_bomapped, imgBuffer, sizeIn * sizeof(int16_t));
     printf("Input memory virtual addr 0x%llu\n", in_bomapped);
 
     xrtBufferHandle in_bohdl1 = xrtBOAlloc(dhdl, sizeIn * sizeof(int16_t), 0, 0);
-    auto in_bomapped1 = reinterpret_cast<uint16_t*>(xrtBOMap(in_bohdl1));
+    auto in_bomapped1 = reinterpret_cast<int16_t*>(xrtBOMap(in_bohdl1));
     memcpy(in_bomapped1, imgBuffer1, sizeIn * sizeof(int16_t));
     printf("Input memory virtual addr 0x%llu\n", in_bomapped1);
 
@@ -131,7 +131,7 @@ int data_buffer_init(xrtDeviceHandle& dhdl,
     //////////////////////////////////////////
 
     xrtBufferHandle out_bohdl = xrtBOAlloc(dhdl, sizeOut * sizeof(int16_t), 0, 0);
-    auto out_bomapped = reinterpret_cast<uint16_t*>(xrtBOMap(out_bohdl));
+    auto out_bomapped = reinterpret_cast<int16_t*>(xrtBOMap(out_bohdl));
     memset(out_bomapped, 0xABCDEF00, sizeOut * sizeof(int16_t));
     printf("Output memory virtual addr 0x%llu\n", out_bomapped);
 
@@ -278,7 +278,7 @@ int run_test(xrtDeviceHandle& dhdl, const axlf* top, std::vector<xrtBufferHandle
  */
 int cleanup_platform(xrtDeviceHandle& dhdl,
                      std::vector<xrtBufferHandle>& bufferHandles,
-                     std::vector<uint16_t*>& bufferMapped) {
+                     std::vector<int16_t*>& bufferMapped) {
     std::cout << "Releasing remaining XRT objects...\n";
     xrtBOFree(bufferHandles[0]);
     xrtBOFree(bufferHandles[1]);
@@ -304,7 +304,7 @@ int main(int argc, char** argv)
         const axlf* top = reinterpret_cast<const axlf*>(xclbin.data());
 
         std::vector<xrtBufferHandle> bufferHandles;
-        std::vector<uint16_t*> bufferMapped;
+        std::vector<int16_t*> bufferMapped;
 
         //////////////////////////////////////////
 

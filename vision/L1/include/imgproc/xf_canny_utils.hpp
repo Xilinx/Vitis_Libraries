@@ -128,7 +128,7 @@ xFFindmax3x3(XF_PTNAME(DEPTH_IN) _i00,
 /**
  * xFComputeMaskValue3x3 function:
  * If PO is enabled then 16 mask_value will be computed, by unrolling the filter_loop.
- * If RO is enabled then 8 mask_value  will be computed, by unrolling the filter_loop.
+ * If MPC is enabled then 8 mask_value  will be computed, by unrolling the filter_loop.
  */
 template <int NPC, int DEPTH_IN, int DEPTH_PHASE, int DEPTH_OUT>
 void xFNMS3x3(XF_PTNAME(DEPTH_OUT) * _mask_value,
@@ -163,6 +163,7 @@ template <int IN_T1,
           int DEPTH_PHASE,
           int DEPTH_OUT,
           int NPC,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_PHASE,
           int WORDWIDTH_DST,
@@ -173,7 +174,7 @@ void ProcessNms3x3canny(
     xf::cv::Mat<IN_T1, ROWS, COLS, NPC, TC2>&
         _magnitude_mat,                                   // hls::stream< XF_SNAME(WORDWIDTH_SRC) > & _magnitude_mat,
     xf::cv::Mat<IN_T2, ROWS, COLS, NPC, TC1>& _phase_mat, // hls::stream< XF_SNAME(WORDWIDTH_PHASE) > & _phase_mat,
-    xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_mat,        // hls::stream< XF_SNAME(WORDWIDTH_DST) > & _dst_mat,
+    xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst_mat, // hls::stream< XF_SNAME(WORDWIDTH_DST) > & _dst_mat,
     XF_SNAME(WORDWIDTH_SRC) buf[3][(COLS >> XF_BITSHIFT(NPC))],
     XF_SNAME(WORDWIDTH_PHASE) angle[2][COLS >> XF_BITSHIFT(NPC)],
     XF_PTNAME(DEPTH_IN) l00_buf[XF_NPIXPERCYCLE(NPC) + 2],
@@ -286,6 +287,7 @@ template <int IN_T1,
           int DEPTH_PHASE,
           int DEPTH_OUT,
           int NPC,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_PHASE,
           int WORDWIDTH_DST,
@@ -295,7 +297,7 @@ template <int IN_T1,
 void xFSuppression3x3(
     xf::cv::Mat<IN_T1, ROWS, COLS, NPC, TC2>& _magnitude_mat, // hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _magnitude_mat,
     xf::cv::Mat<IN_T2, ROWS, COLS, NPC, TC1>& _phase_mat,     // hls::stream<XF_SNAME(WORDWIDTH_PHASE)>& _phase_mat,
-    xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_mat,            // hls::stream<XF_SNAME(WORDWIDTH_DST)>& _dst_mat,
+    xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst_mat, // hls::stream<XF_SNAME(WORDWIDTH_DST)>& _dst_mat,
     uchar_t low_threshold,
     uchar_t high_threshold,
     uint16_t imgheight,
@@ -383,8 +385,8 @@ rowLoop:
         angle_buf[0] = angle_buf[1] = 0;
         P0 = 0;
 
-        ProcessNms3x3canny<IN_T1, IN_T2, DST_T, ROWS, COLS, DEPTH_IN, DEPTH_PHASE, DEPTH_OUT, NPC, WORDWIDTH_SRC,
-                           WORDWIDTH_PHASE, WORDWIDTH_DST, COLS_COUNT, TC1, TC2>(
+        ProcessNms3x3canny<IN_T1, IN_T2, DST_T, ROWS, COLS, DEPTH_IN, DEPTH_PHASE, DEPTH_OUT, NPC, XFCVDEPTH_OUT,
+                           WORDWIDTH_SRC, WORDWIDTH_PHASE, WORDWIDTH_DST, COLS_COUNT, TC1, TC2>(
             _magnitude_mat, _phase_mat, _dst_mat, buf, angle, l00_buf, l10_buf, l20_buf, angle_buf, nmsvalue, P0,
             imgwidth, imgheight, top, mid, bottom, row, row_ind, read_ind, write_ind, low_threshold, high_threshold,
             read_index1, read_index2, write_index);
@@ -432,13 +434,18 @@ template <int SRC_T,
           int DEPTH_SRC,
           int DEPTH_DST,
           int NPC,
+          int XFCVDEPTH_IN_0 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int COLS_TRIP,
           int TC1>
-void xFAngleKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,     // hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _src1,
-                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,     // hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _src2,
-                   xf::cv::Mat<DST_T, ROWS, COLS, NPC, TC1>& _dst, // hls::stream<XF_SNAME(WORDWIDTH_DST)>& _dst,
+void xFAngleKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_0>& _src1,
+                   //    hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _src1,
+                   xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src2,
+                   //    hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _src2,
+                   xf::cv::Mat<DST_T, ROWS, COLS, NPC, TC1>& _dst,
+                   //    hls::stream<XF_SNAME(WORDWIDTH_DST)>& _dst,
                    uint16_t imgheight,
                    uint16_t imgwidth) {
     XF_SNAME(WORDWIDTH_SRC) val_src1, val_src2;
@@ -484,7 +491,7 @@ rowLoop:
 
                 int tg22x;
 // clang-format off
-                #pragma HLS RESOURCE variable=tg22x core=MulnS
+                #pragma HLS BIND_OP variable=tg22x op=Mul
                 // clang-format on
                 tg22x = xa * TG22;
 
@@ -521,20 +528,22 @@ template <int SRC_T,
           int DEPTH_SRC,
           int DEPTH_DST,
           int NPC,
+          int XFCVDEPTH_IN_0 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int TC1>
-void xFAngle(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,     // hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _src1,
-             xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,     // hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _src2,
-             xf::cv::Mat<DST_T, ROWS, COLS, NPC, TC1>& _dst, // hls::stream<XF_SNAME(WORDWIDTH_DST)>& _dst,
+void xFAngle(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_0>& _src1, // hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _src1,
+             xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src2, // hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _src2,
+             xf::cv::Mat<DST_T, ROWS, COLS, NPC, TC1>& _dst,             // hls::stream<XF_SNAME(WORDWIDTH_DST)>& _dst,
              uint16_t imgheight,
              uint16_t imgwidth) {
 // clang-format off
     #pragma HLS inline
     // clang-format on
     imgwidth = imgwidth >> XF_BITSHIFT(NPC);
-    xFAngleKernel<SRC_T, DST_T, ROWS, COLS, DEPTH_SRC, DEPTH_DST, NPC, WORDWIDTH_SRC, WORDWIDTH_DST,
-                  (COLS >> XF_BITSHIFT(NPC)), TC1>(_src1, _src2, _dst, imgheight, imgwidth);
+    xFAngleKernel<SRC_T, DST_T, ROWS, COLS, DEPTH_SRC, DEPTH_DST, NPC, XFCVDEPTH_IN_0, XFCVDEPTH_IN_1, WORDWIDTH_SRC,
+                  WORDWIDTH_DST, (COLS >> XF_BITSHIFT(NPC)), TC1>(_src1, _src2, _dst, imgheight, imgwidth);
 }
 
 #endif

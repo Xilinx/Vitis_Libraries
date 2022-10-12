@@ -30,8 +30,8 @@ namespace cv {
 // enable to run c-sim
 //#define HLS_SIM
 
-template <int TYPE, int ROWS, int COLS, int NPC, int WINDOW_SIZE>
-static void readMatRows16(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& src,
+template <int TYPE, int ROWS, int COLS, int NPC, int XFCVDEDPTH_IN, int WINDOW_SIZE>
+static void readMatRows16(xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEDPTH_IN>& src,
                           hls::stream<mywide_t<XF_NPIXPERCYCLE(NPC)> >& pixStream,
                           int rows,
                           int cols,
@@ -50,7 +50,6 @@ static void readMatRows16(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& src,
         pixStream.write(tmpData);
     }
 }
-
 /*
 template <int ROWS, int COLS, int NPC, int WINDOW_SIZE>
 static void writeMatRowsRGBA16(
@@ -77,13 +76,12 @@ static void writeMatRowsRGBA16(
     }
 }
 */
-
 // write rgba stream to external array dst. The "a" is just padding and is
 // unused
-template <int TYPE, int ROWS, int COLS, int NPC, int WINDOW_SIZE>
+template <int TYPE, int ROWS, int COLS, int NPC, int XFCVDEDPTH_OUT, int WINDOW_SIZE>
 static void pack2Vectors(hls::stream<float>& flow0,
                          hls::stream<float>& flow1,
-                         xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC>& out_flow,
+                         xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC, XFCVDEDPTH_OUT>& out_flow,
                          int rows,
                          int cols,
                          int size) {
@@ -195,15 +193,15 @@ static void computeSums16(hls::stream<mywide_t<XF_NPIXPERCYCLE(NPC)> > img1Col[(
 
     if (USE_URAM) {
 // clang-format off
-        #pragma HLS RESOURCE variable=csIxixO core=RAM_2P_URAM
-        #pragma HLS RESOURCE variable=csIxixE core=RAM_2P_URAM
-        #pragma HLS RESOURCE variable=cbIxixO core=RAM_2P_URAM
+        #pragma HLS bind_storage variable=csIxixO type=RAM_2P impl=URAM
+        #pragma HLS bind_storage variable=csIxixE type=RAM_2P impl=URAM
+        #pragma HLS bind_storage variable=cbIxixO type=RAM_2P impl=URAM
         // clang-format on
     } else {
 // clang-format off
-        #pragma HLS RESOURCE variable=csIxixO core=RAM_2P_BRAM
-        #pragma HLS RESOURCE variable=csIxixE core=RAM_2P_BRAM
-        #pragma HLS RESOURCE variable=cbIxixO core=RAM_2P_BRAM
+        #pragma HLS bind_storage variable=csIxixO type=RAM_2P impl=BRAM
+        #pragma HLS bind_storage variable=csIxixE type=RAM_2P impl=BRAM
+        #pragma HLS bind_storage variable=cbIxixO type=RAM_2P impl=BRAM
         // clang-format on
     }
 
@@ -547,8 +545,8 @@ static void lbWrapper16(hls::stream<mywide_t<XF_NPIXPERCYCLE(NPC)> >& f0Stream,
 
     if (USE_URAM) {
 // clang-format off
-        #pragma HLS RESOURCE variable=lb1 core=RAM_T2P_URAM
-        #pragma HLS RESOURCE variable=lb2 core=RAM_T2P_URAM
+        #pragma HLS bind_storage variable=lb1 type=RAM_T2P impl=URAM
+        #pragma HLS bind_storage variable=lb2 type=RAM_T2P impl=URAM
         // clang-format on
     }
 
@@ -613,11 +611,20 @@ static void lbWrapper16(hls::stream<mywide_t<XF_NPIXPERCYCLE(NPC)> >& f0Stream,
 
 // top level wrapper to avoid dataflow problems
 // void flowWrap (mywide_t frame0[NUM_WORDS], mywide_t frame1[NUM_WORDS], rgba2_t framef[NUM_WORDS])
-template <int TYPE, int ROWS, int COLS, int NPC, int WINDOW_SIZE, bool USE_URAM>
-static void flowWrap16(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& frame0,
-                       xf::cv::Mat<TYPE, ROWS, COLS, NPC>& frame1,
-                       xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC>& flowx,
-                       xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC>& flowy,
+template <int TYPE,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEDPTH_IN_0,
+          int XFCVDEDPTH_IN_1,
+          int XFCVDEDPTH_IN_2,
+          int XFCVDEDPTH_IN_3,
+          int WINDOW_SIZE,
+          bool USE_URAM>
+static void flowWrap16(xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEDPTH_IN_0>& frame0,
+                       xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEDPTH_IN_1>& frame1,
+                       xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC, XFCVDEDPTH_IN_2>& flowx,
+                       xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC, XFCVDEDPTH_IN_3>& flowy,
                        int rows,
                        int cols,
                        int size) {
@@ -679,8 +686,8 @@ static void flowWrap16(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& frame0,
     #pragma HLS STREAM variable=fy1  depth=16
     // clang-format on
 
-    readMatRows16<TYPE, ROWS, COLS, NPC, WINDOW_SIZE>(frame0, f0Stream, rows, cols, size);
-    readMatRows16<TYPE, ROWS, COLS, NPC, WINDOW_SIZE>(frame1, f1Stream, rows, cols, size);
+    readMatRows16<TYPE, ROWS, COLS, NPC, XFCVDEDPTH_IN_0, WINDOW_SIZE>(frame0, f0Stream, rows, cols, size);
+    readMatRows16<TYPE, ROWS, COLS, NPC, XFCVDEDPTH_IN_1, WINDOW_SIZE>(frame1, f1Stream, rows, cols, size);
 
     lbWrapper16<ROWS, COLS, NPC, WINDOW_SIZE, USE_URAM>(f0Stream, f1Stream, img1Col, img2Col, rows, cols, size);
     computeSums16<ROWS, COLS, NPC, WINDOW_SIZE, USE_URAM>(img1Col, img2Col, ixix0, ixiy0, iyiy0, dix0, diy0, ixix1,
@@ -689,8 +696,8 @@ static void flowWrap16(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& frame0,
     computeFlow16<ROWS, COLS, NPC, WINDOW_SIZE>(ixix0, ixiy0, iyiy0, dix0, diy0, fx0, fy0, rows, cols, size);
     computeFlow16<ROWS, COLS, NPC, WINDOW_SIZE>(ixix1, ixiy1, iyiy1, dix1, diy1, fx1, fy1, rows, cols, size);
 
-    pack2Vectors<TYPE, ROWS, COLS, NPC, WINDOW_SIZE>(fx0, fx1, flowx, rows, cols, size);
-    pack2Vectors<TYPE, ROWS, COLS, NPC, WINDOW_SIZE>(fy0, fy1, flowy, rows, cols, size);
+    pack2Vectors<TYPE, ROWS, COLS, NPC, XFCVDEDPTH_IN_2, WINDOW_SIZE>(fx0, fx1, flowx, rows, cols, size);
+    pack2Vectors<TYPE, ROWS, COLS, NPC, XFCVDEDPTH_IN_3, WINDOW_SIZE>(fy0, fy1, flowy, rows, cols, size);
 }
 
 //----------------------------------------------------------------------------
@@ -707,11 +714,20 @@ static void flowWrap16(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& frame0,
 // void fpga_optflow (unsigned short *frame0, unsigned short *frame1, unsigned long long *framef)
 // void fpga_optflow (unsigned short frame0[NUM_WORDS], unsigned short frame1[NUM_WORDS], unsigned long long
 // framef[NUM_WORDS])
-template <int TYPE, int ROWS, int COLS, int NPC, int WINDOW_SIZE, bool USE_URAM>
-static void fpga_optflow16(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& frame0,
-                           xf::cv::Mat<TYPE, ROWS, COLS, NPC>& frame1,
-                           xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC>& flowx,
-                           xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC>& flowy,
+template <int TYPE,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEDPTH_IN_0,
+          int XFCVDEDPTH_IN_1,
+          int XFCVDEDPTH_IN_2,
+          int XFCVDEDPTH_IN_3,
+          int WINDOW_SIZE,
+          bool USE_URAM>
+static void fpga_optflow16(xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEDPTH_IN_0>& frame0,
+                           xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEDPTH_IN_1>& frame1,
+                           xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC, XFCVDEDPTH_IN_2>& flowx,
+                           xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC, XFCVDEDPTH_IN_3>& flowy,
                            int rows,
                            int cols,
                            int size) {
@@ -719,7 +735,8 @@ static void fpga_optflow16(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& frame0,
     #pragma HLS inline off
     // clang-format on
 
-    flowWrap16<TYPE, ROWS, COLS, NPC, WINDOW_SIZE, USE_URAM>(frame0, frame1, flowx, flowy, rows, cols, size);
+    flowWrap16<TYPE, ROWS, COLS, NPC, XFCVDEDPTH_IN_0, XFCVDEDPTH_IN_1, XFCVDEDPTH_IN_2, XFCVDEDPTH_IN_3, WINDOW_SIZE,
+               USE_URAM>(frame0, frame1, flowx, flowy, rows, cols, size);
 
     return;
 }
@@ -727,9 +744,12 @@ static void fpga_optflow16(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& frame0,
 // read external array matB and stream.
 // Can be simplified to a single loop with II=1 TODO, hls::stream< mywide_t< XF_NPIXPERCYCLE(NPC) > > &frame1,
 // hls::stream<rgba_t> &framef
-template <int TYPE, int ROWS, int COLS, int NPC, int WINDOW_SIZE>
-static void readMatRows(
-    xf::cv::Mat<TYPE, ROWS, COLS, NPC>& matB, hls::stream<pix_t>& pixStream, int rows, int cols, int size) {
+template <int TYPE, int ROWS, int COLS, int NPC, int XFCVDEDPTH_IN, int WINDOW_SIZE>
+static void readMatRows(xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEDPTH_IN>& matB,
+                        hls::stream<pix_t>& pixStream,
+                        int rows,
+                        int cols,
+                        int size) {
     const int WORD_SIZE = (NPC == XF_NPPC1) ? 1 : 2;
     for (int i = 0; i < size; i++) {
 // clang-format off
@@ -812,11 +832,11 @@ static void computeSums(hls::stream<pix_t> img1Col[(WINDOW_SIZE + 1)],
 
     if (USE_URAM) {
 // clang-format off
-        #pragma HLS RESOURCE variable=csIxix core=RAM_2P_URAM
+        #pragma HLS bind_storage variable=csIxix type=RAM_2P impl=URAM
         // clang-format on
     } else {
 // clang-format off
-        #pragma HLS RESOURCE variable=csIxix core=RAM_2P_BRAM
+        #pragma HLS bind_storage variable=csIxix type=RAM_2P impl=BRAM
         // clang-format on
     }
 
@@ -838,11 +858,11 @@ static void computeSums(hls::stream<pix_t> img1Col[(WINDOW_SIZE + 1)],
 
     if (USE_URAM) {
 // clang-format off
-        #pragma HLS RESOURCE variable=cbIxix core=RAM_2P_URAM
+        #pragma HLS bind_storage variable=cbIxix type=RAM_2P impl=URAM
         // clang-format on
     } else {
 // clang-format off
-        #pragma HLS RESOURCE variable=cbIxix core=RAM_2P_BRAM
+        #pragma HLS bind_storage variable=cbIxix type=RAM_2P impl=BRAM
         // clang-format on
     }
 
@@ -1047,11 +1067,11 @@ static void computeFlow(hls::stream<int>& ixix,
     }
 }
 
-template <int TYPE, int ROWS, int COLS, int NPC, int WINDOW_SIZE>
+template <int TYPE, int ROWS, int COLS, int NPC, int XFCVDEDPTH_IN_0, int XFCVDEDPTH_IN_1, int WINDOW_SIZE>
 static void writeOutput8(hls::stream<float>& fx_in,
                          hls::stream<float>& fy_in,
-                         xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC>& flowx,
-                         xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC>& flowy,
+                         xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC, XFCVDEDPTH_IN_0>& flowx,
+                         xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC, XFCVDEDPTH_IN_1>& flowy,
                          int size) {
     for (int r = 0; r < size; r++) {
 // clang-format off
@@ -1091,8 +1111,8 @@ static void lbWrapper(hls::stream<pix_t>& f0Stream,
     // clang-format on
     if (USE_URAM) {
 // clang-format off
-        #pragma HLS RESOURCE variable=lb1 core=RAM_T2P_URAM
-        #pragma HLS RESOURCE variable=lb2 core=RAM_T2P_URAM
+        #pragma HLS bind_storage variable=lb1 type=RAM_T2P impl=URAM
+        #pragma HLS bind_storage variable=lb2 type=RAM_T2P impl=URAM
         // clang-format on
     }
 loop_rows:
@@ -1148,11 +1168,20 @@ loop_rows:
 }
 
 // top level wrapper to avoid dataflow problems
-template <int TYPE, int ROWS, int COLS, int NPC, int WINDOW_SIZE, bool USE_URAM>
-static void flowWrap(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& frame0,
-                     xf::cv::Mat<TYPE, ROWS, COLS, NPC>& frame1,
-                     xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC>& flowx,
-                     xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC>& flowy,
+template <int TYPE,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEDPTH_IN_0,
+          int XFCVDEDPTH_IN_1,
+          int XFCVDEDPTH_IN_2,
+          int XFCVDEDPTH_IN_3,
+          int WINDOW_SIZE,
+          bool USE_URAM>
+static void flowWrap(xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEDPTH_IN_0>& frame0,
+                     xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEDPTH_IN_1>& frame1,
+                     xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC, XFCVDEDPTH_IN_2>& flowx,
+                     xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC, XFCVDEDPTH_IN_3>& flowy,
                      int rows,
                      int cols,
                      int size) {
@@ -1198,8 +1227,8 @@ static void flowWrap(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& frame0,
     #pragma HLS ARRAY_PARTITION variable=img2Col complete dim=0
     // clang-format on
 
-    readMatRows<TYPE, ROWS, COLS, NPC, WINDOW_SIZE>(frame0, f0Stream, rows, cols, size);
-    readMatRows<TYPE, ROWS, COLS, NPC, WINDOW_SIZE>(frame1, f1Stream, rows, cols, size);
+    readMatRows<TYPE, ROWS, COLS, NPC, XFCVDEDPTH_IN_0, WINDOW_SIZE>(frame0, f0Stream, rows, cols, size);
+    readMatRows<TYPE, ROWS, COLS, NPC, XFCVDEDPTH_IN_1, WINDOW_SIZE>(frame1, f1Stream, rows, cols, size);
 
     lbWrapper<ROWS, COLS, NPC, WINDOW_SIZE, USE_URAM>(f0Stream, f1Stream, img1Col, img2Col, rows, cols, size);
 
@@ -1207,7 +1236,7 @@ static void flowWrap(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& frame0,
 
     computeFlow<ROWS, COLS, NPC, WINDOW_SIZE>(ixix, ixiy, iyiy, dix, diy, fx, fy, rows, cols, size);
 
-    writeOutput8<TYPE, ROWS, COLS, NPC, WINDOW_SIZE>(fx, fy, flowx, flowy, size);
+    writeOutput8<TYPE, ROWS, COLS, NPC, XFCVDEDPTH_IN_2, XFCVDEDPTH_IN_3, WINDOW_SIZE>(fx, fy, flowx, flowy, size);
 }
 
 //----------------------------------------------------------------------------
@@ -1217,11 +1246,20 @@ static void flowWrap(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& frame0,
 //  frame0 - First input frame (grayscale 1 byte per pixel)
 //  frame1 - Second input frame (grayscale 1 byte per pixel)
 //  framef - Output frame with flows visualized. 3 bytes per pixel + 1 byte padding
-template <int TYPE, int ROWS, int COLS, int NPC, int WINDOW_SIZE, bool USE_URAM>
-static void fpga_optflow8(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& frame0,
-                          xf::cv::Mat<TYPE, ROWS, COLS, NPC>& frame1,
-                          xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC>& flowx,
-                          xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC>& flowy,
+template <int TYPE,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEDPTH_IN_0,
+          int XFCVDEDPTH_IN_1,
+          int XFCVDEDPTH_IN_2,
+          int XFCVDEDPTH_IN_3,
+          int WINDOW_SIZE,
+          bool USE_URAM>
+static void fpga_optflow8(xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEDPTH_IN_0>& frame0,
+                          xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEDPTH_IN_1>& frame1,
+                          xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC, XFCVDEDPTH_IN_2>& flowx,
+                          xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC, XFCVDEDPTH_IN_3>& flowy,
                           int rows,
                           int cols,
                           int size) {
@@ -1229,21 +1267,31 @@ static void fpga_optflow8(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& frame0,
     #pragma HLS inline off
     // clang-format on
 
-    flowWrap<TYPE, ROWS, COLS, NPC, WINDOW_SIZE, USE_URAM>(frame0, frame1, flowx, flowy, rows, cols, size);
+    flowWrap<TYPE, ROWS, COLS, NPC, XFCVDEDPTH_IN_0, XFCVDEDPTH_IN_1, XFCVDEDPTH_IN_2, XFCVDEDPTH_IN_3, WINDOW_SIZE,
+             USE_URAM>(frame0, frame1, flowx, flowy, rows, cols, size);
 
     return;
 }
-template <int WINDOW_SIZE, int TYPE, int ROWS, int COLS, int NPC, bool USE_URAM = false>
-void DenseNonPyrLKOpticalFlow(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& frame0,
-                              xf::cv::Mat<TYPE, ROWS, COLS, NPC>& frame1,
-                              xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC>& flowx,
-                              xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC>& flowy) {
+template <int WINDOW_SIZE,
+          int TYPE,
+          int ROWS,
+          int COLS,
+          int NPC,
+          bool USE_URAM = false,
+          int XFCVDEDPTH_IN_0 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEDPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEDPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEDPTH_IN_3 = _XFCVDEPTH_DEFAULT>
+void DenseNonPyrLKOpticalFlow(xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEDPTH_IN_0>& frame0,
+                              xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEDPTH_IN_1>& frame1,
+                              xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC, XFCVDEDPTH_IN_2>& flowx,
+                              xf::cv::Mat<XF_32FC1, ROWS, COLS, NPC, XFCVDEDPTH_IN_3>& flowy) {
     if (NPC == XF_NPPC1) {
-        fpga_optflow8<TYPE, ROWS, COLS, NPC, WINDOW_SIZE, USE_URAM>(frame0, frame1, flowx, flowy, frame0.rows,
-                                                                    frame0.cols, frame0.size);
+        fpga_optflow8<TYPE, ROWS, COLS, NPC, XFCVDEDPTH_IN_0, XFCVDEDPTH_IN_1, XFCVDEDPTH_IN_2, XFCVDEDPTH_IN_3,
+                      WINDOW_SIZE, USE_URAM>(frame0, frame1, flowx, flowy, frame0.rows, frame0.cols, frame0.size);
     } else {
-        fpga_optflow16<TYPE, ROWS, COLS, NPC, WINDOW_SIZE, USE_URAM>(frame0, frame1, flowx, flowy, frame0.rows,
-                                                                     frame0.cols, frame0.size);
+        fpga_optflow16<TYPE, ROWS, COLS, NPC, XFCVDEDPTH_IN_0, XFCVDEDPTH_IN_1, XFCVDEDPTH_IN_2, XFCVDEDPTH_IN_3,
+                       WINDOW_SIZE, USE_URAM>(frame0, frame1, flowx, flowy, frame0.rows, frame0.cols, frame0.size);
     }
 }
 } // namespace cv

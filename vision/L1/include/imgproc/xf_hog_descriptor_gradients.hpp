@@ -285,7 +285,7 @@ void xFHOGgradientsKernel(hls::stream<XF_SNAME(WORDWIDTH_SRC)> _src_strm[NOS_SRC
     if (USE_URAM) {
 // clang-format off
         #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
-        #pragma HLS RESOURCE variable=buf core=RAM_S2P_URAM
+        #pragma HLS bind_storage variable=buf type=RAM_S2P impl=URAM
         #pragma HLS ARRAY_RESHAPE variable=buf cyclic factor=3 dim=2
         // clang-format on
     } else {

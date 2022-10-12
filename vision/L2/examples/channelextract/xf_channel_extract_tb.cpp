@@ -26,22 +26,36 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    cv::Mat in_src, in_rgba, out_img;
+    cv::Mat in_src, in_brga, in_accel, out_img, in_ref;
+
     // read image
     in_src = cv::imread(argv[1], 1);
+    in_src.convertTo(in_ref, CV_INTYPE);
 
     if (in_src.data == NULL) {
         fprintf(stderr, "Cannot open image \n");
         return 0;
     }
 
-    out_img.create(in_src.rows, in_src.cols, CV_8U);
-    cv::cvtColor(in_src, in_rgba, cv::COLOR_BGR2RGBA);
+    out_img.create(in_src.rows, in_src.cols, CV_OUTTYPE);
+
+    if (BGR) {
+        in_ref.copyTo(in_accel);
+    } else if (BGRA) {
+        cv::cvtColor(in_ref, in_accel, cv::COLOR_BGR2BGRA);
+    }
+
     uint16_t channel = XF_EXTRACT_CH_R;
+    int in_bits;
+    if (T_16U) {
+        in_bits = 2;
+    } else {
+        in_bits = 1;
+    }
 
     /////////////////////////////////////// CL ////////////////////////
-    int height = in_rgba.rows;
-    int width = in_rgba.cols;
+    int height = in_accel.rows;
+    int width = in_accel.cols;
     std::cout << "Input image height : " << height << std::endl;
     std::cout << "Input image width  : " << width << std::endl;
 
@@ -50,9 +64,9 @@ int main(int argc, char** argv) {
     cl::Context context(device);
 
     cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC4, XF_NPPC1) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC4, XF_NPPC1) << std::endl;
-    std::cout << "NPPC:" << XF_NPPC1 << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(INPUT_CH_TYPE, NPC1) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(INPUT_CH_TYPE, NPC1) << std::endl;
+    std::cout << "NPPC:" << NPC1 << std::endl;
 
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_channelextract");
@@ -62,8 +76,8 @@ int main(int argc, char** argv) {
     cl::Kernel krnl(program, "channel_extract_accel");
 
     std::vector<cl::Memory> inBuf_rgba, outBuf_gray;
-    cl::Buffer imageToDevicergba(context, CL_MEM_READ_ONLY, (in_rgba.rows * in_rgba.cols * 4));
-    cl::Buffer imageFromDevicegray(context, CL_MEM_WRITE_ONLY, (in_rgba.rows * in_rgba.cols * 1));
+    cl::Buffer imageToDevicergba(context, CL_MEM_READ_ONLY, (in_accel.rows * in_accel.cols * 4 * in_bits));
+    cl::Buffer imageFromDevicegray(context, CL_MEM_WRITE_ONLY, (in_accel.rows * in_accel.cols * 1 * in_bits));
 
     printf("finished buffer creation task\n");
 
@@ -71,8 +85,8 @@ int main(int argc, char** argv) {
     outBuf_gray.push_back(imageFromDevicegray);
 
     /* Copy input vectors to memory */
-    q.enqueueWriteBuffer(imageToDevicergba, CL_TRUE, 0, (in_rgba.rows * in_rgba.cols * 4),
-                         in_rgba.data); /* 0 means from host*/
+    q.enqueueWriteBuffer(imageToDevicergba, CL_TRUE, 0, (in_accel.rows * in_accel.cols * 4 * in_bits),
+                         in_accel.data); /* 0 means from host*/
     printf("finished enqueueing task\n");
 
     // Set the kernel arguments
@@ -100,21 +114,21 @@ int main(int argc, char** argv) {
     diff_prof = end - start;
     std::cout << (diff_prof / 1000000) << "ms" << std::endl;
 
-    q.enqueueReadBuffer(imageFromDevicegray, CL_TRUE, 0, (in_rgba.rows * in_rgba.cols), out_img.data);
+    q.enqueueReadBuffer(imageFromDevicegray, CL_TRUE, 0, (in_accel.rows * in_accel.cols * in_bits), out_img.data);
     q.finish();
     printf("write output buffer\n");
     /////////////////////////////////////// end of CL /////////////////////
 
     cv::imwrite("hls_out.png", out_img);
-
     std::vector<cv::Mat> bgr_planes;
+
     // call OpenCV function
-    cv::split(in_src, bgr_planes);
+    cv::split(in_ref, bgr_planes);
     // write output and OpenCV reference image
     cv::imwrite("out_ocv.png", bgr_planes[2]);
 
     cv::Mat diff;
-    diff.create(in_src.rows, in_src.cols, CV_8U);
+    diff.create(in_ref.rows, in_ref.cols, CV_OUTTYPE);
 
     // Check with the correct channel. Keep 2 for R, 1 for G and 0 for B in index of bgr_planes
     cv::absdiff(bgr_planes[2], out_img, diff);
@@ -131,13 +145,17 @@ int main(int argc, char** argv) {
             if (maxval < v) maxval = v;
         }
     }
-    float err_per = 100.0 * (float)cnt / (in_src.rows * in_src.cols);
+    float err_per = 100.0 * (float)cnt / (in_ref.rows * in_ref.cols);
 
     std::cout << "\tMinimum error in intensity = " << minval << std::endl;
     std::cout << "\tMaximum error in intensity = " << maxval << std::endl;
     std::cout << "\tPercentage of pixels above error threshold = " << err_per << std::endl;
 
-    if (err_per > 0.0f) return -1;
+    if (err_per > 0.0f) {
+        fprintf(stderr, "ERROR: Test Failed.\n ");
+        return -1;
+    } else
+        std::cout << "Test Passed " << std::endl;
 
     return 0;
 }

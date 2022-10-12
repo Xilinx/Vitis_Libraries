@@ -170,7 +170,8 @@ int main(int argc, char** argv) {
     if (((cv_minloc.y - _min_locy) > 1) || ((cv_minloc.x - _min_locx) > 1)) {
         fprintf(stderr, "ERROR: Test Failed.\n ");
         return EXIT_FAILURE;
-    }
+    } else
+        std::cout << "Testcase passed" << std::endl;
 
     return 0;
 }

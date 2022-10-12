@@ -12,39 +12,44 @@ Level 2 contains the OpenCL host-callable kernels and engines for various Vitis 
 
 ### Commands to run AIE tests:
 
-Please refer to the [Evaluating the functionality ](https://xilinx.github.io/Vitis_Libraries/vision/2022.1/overview-aie.html#evaluating-the-functionality) sub-section in [Getting Started with Vitis Vision AIE](https://xilinx.github.io/Vitis_Libraries/vision/2022.1/overview-aie.html#getting-started-with-vitis-vision-aie) section of [Vitis Vision AIE Library User Guide](https://xilinx.github.io/Vitis_Libraries/vision/2022.1/overview-aie.html#) chapter.
+Please refer to the [L2/tests/aie/README.md](https://github.com/Xilinx/Vitis_Libraries/blob/master/vision/L2/tests/aie/README.md) file.
 
 ### Commands to run PL tests:
 
-    source < path-to-Vitis-installation-directory >/settings64.sh
-
-    export DEVICE=< path-to-platform-directory >/< platform >.xpfm
-
 **For PCIe devices:**
 
+    source < path-to-Vitis-installation-directory >/settings64.sh
     source < path-to-XRT-installation-directory >/setup.sh
-
+    export PLATFORM=< path-to-platform-directory >/< platform >.xpfm
 	export OPENCV_INCLUDE=< path-to-opencv-include-folder >
-
 	export OPENCV_LIB=< path-to-opencv-lib-folder >
-
 	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:< path-to-opencv-lib-folder >
-
     make host xclbin TARGET=< sw_emu|hw_emu|hw >
-
     make run TARGET=< sw_emu|hw_emu|hw >
 
 **For embedded devices:**
+
+Software Emulation:
+
+    source < path-to-Vitis-installation-directory >/settings64.sh
+    source < path-to-XRT-installation-directory >/setup.sh
+    export PLATFORM=< path-to-platform-directory >/< platform >.xpfm
+	export OPENCV_INCLUDE=< path-to-opencv-include-folder >
+	export OPENCV_LIB=< path-to-opencv-lib-folder >
+	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:< path-to-opencv-lib-folder >
+    make run TARGET=sw_emu
+
+Hardware Emulation and Hardware Build:
 
 	Download the platform, and common-image from Xilinx Download Center. Run the sdk.sh script from the common-image directory to install sysroot using the command : "./sdk.sh -y -d ./ -p"
 
 	Unzip the rootfs file : "gunzip ./rootfs.ext4.gz"
 
+    source < path-to-Vitis-installation-directory >/settings64.sh
+    export PLATFORM=< path-to-platform-directory >/< platform >.xpfm
     export SYSROOT=< path-to-platform-sysroot >
-
-    make host xclbin TARGET=< sw_emu|hw_emu|hw > HOST_ARCH=< aarch32 | aarch64 >
-
-    make run TARGET=< sw_emu|hw_emu|hw > HOST_ARCH=< aarch32 | aarch64 > #This command will generate only the sd_card folder in case of hardware build.
+    make host xclbin TARGET=< hw_emu|hw > 
+    make run TARGET=< hw_emu|hw > #This command will generate only the sd_card folder in case of hardware build.
 
 **Note**. For hw run on embedded devices, copy the generated sd_card folder content under package_hw to an SD Card. More information on preparing the SD Card is available [here](https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/18842385/How+to+format+SD+card+for+SD+boot#HowtoformatSDcardforSDboot-CopingtheImagestotheNewPartitions). After successful booting of the board, run the following commands:
 

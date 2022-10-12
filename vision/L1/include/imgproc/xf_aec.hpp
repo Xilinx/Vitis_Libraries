@@ -59,9 +59,16 @@ inline ap_uint<16> xf_satcast_aec<ap_uint<16> >(int v) {
 namespace xf {
 namespace cv {
 
-template <int SRC_T, int DST_T, int SIN_CHANNEL_TYPE, int ROWS, int COLS, int NPC = 1>
-void autoexposurecorrection_mono(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
-                                 xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
+template <int SRC_T,
+          int DST_T,
+          int SIN_CHANNEL_TYPE,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void autoexposurecorrection_mono(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
+                                 xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& dst,
                                  uint32_t hist_array1[1][256],
                                  uint32_t hist_array2[1][256]) {
 #pragma HLS INLINE OFF
@@ -72,22 +79,30 @@ void autoexposurecorrection_mono(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
     uint16_t cols_shifted = cols >> (XF_BITSHIFT(NPC));
     uint16_t rows_shifted = rows;
 
-    xf::cv::Mat<SIN_CHANNEL_TYPE, ROWS, COLS, NPC> vimage1(rows, cols);
-    xf::cv::Mat<SIN_CHANNEL_TYPE, ROWS, COLS, NPC> vimage2(rows, cols);
+    xf::cv::Mat<SIN_CHANNEL_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> vimage1(rows, cols);
+    xf::cv::Mat<SIN_CHANNEL_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> vimage2(rows, cols);
 
     xf::cv::duplicateMat(src, vimage1, vimage2);
 
-    xFHistogramKernel<SIN_CHANNEL_TYPE, ROWS, COLS, XF_DEPTH(SIN_CHANNEL_TYPE, NPC), NPC,
+    xFHistogramKernel<SIN_CHANNEL_TYPE, ROWS, COLS, XF_DEPTH(SIN_CHANNEL_TYPE, NPC), NPC, XFCVDEPTH_IN,
                       XF_WORDWIDTH(SIN_CHANNEL_TYPE, NPC), ((COLS >> (XF_BITSHIFT(NPC))) >> 1),
                       XF_CHANNELS(SIN_CHANNEL_TYPE, NPC)>(vimage1, hist_array1, rows_shifted, cols_shifted);
 
-    xFEqualize<SIN_CHANNEL_TYPE, ROWS, COLS, XF_DEPTH(SIN_CHANNEL_TYPE, NPC), NPC, XF_WORDWIDTH(SIN_CHANNEL_TYPE, NPC),
-               (COLS >> XF_BITSHIFT(NPC))>(vimage2, hist_array2, dst, rows_shifted, cols_shifted);
+    xFEqualize<SIN_CHANNEL_TYPE, ROWS, COLS, XF_DEPTH(SIN_CHANNEL_TYPE, NPC), NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT,
+               XF_WORDWIDTH(SIN_CHANNEL_TYPE, NPC), (COLS >> XF_BITSHIFT(NPC))>(vimage2, hist_array2, dst, rows_shifted,
+                                                                                cols_shifted);
 }
 
-template <int SRC_T, int DST_T, int SIN_CHANNEL_TYPE, int ROWS, int COLS, int NPC = 1>
-void autoexposurecorrection(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
-                            xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst,
+template <int SRC_T,
+          int DST_T,
+          int SIN_CHANNEL_TYPE,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void autoexposurecorrection(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
+                            xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& dst,
                             uint32_t hist_array1[1][256],
                             uint32_t hist_array2[1][256]) {
 #pragma HLS INLINE OFF
@@ -98,20 +113,20 @@ void autoexposurecorrection(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
     uint16_t cols_shifted = cols >> (XF_BITSHIFT(NPC));
     uint16_t rows_shifted = rows;
 
-    xf::cv::Mat<SRC_T, ROWS, COLS, NPC> bgr2hsv(rows, cols);
+    xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN> bgr2hsv(rows, cols);
 
-    xf::cv::Mat<SRC_T, ROWS, COLS, NPC> hsvimg1(rows, cols);
-    xf::cv::Mat<SRC_T, ROWS, COLS, NPC> hsvimg2(rows, cols);
-    xf::cv::Mat<SRC_T, ROWS, COLS, NPC> hsvimg3(rows, cols);
+    xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN> hsvimg1(rows, cols);
+    xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN> hsvimg2(rows, cols);
+    xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN> hsvimg3(rows, cols);
 
-    xf::cv::Mat<SIN_CHANNEL_TYPE, ROWS, COLS, NPC> himage(rows, cols);
-    xf::cv::Mat<SIN_CHANNEL_TYPE, ROWS, COLS, NPC> simage(rows, cols);
-    xf::cv::Mat<SIN_CHANNEL_TYPE, ROWS, COLS, NPC> vimage(rows, cols);
-    xf::cv::Mat<SIN_CHANNEL_TYPE, ROWS, COLS, NPC> vimage1(rows, cols);
-    xf::cv::Mat<SIN_CHANNEL_TYPE, ROWS, COLS, NPC> vimage2(rows, cols);
+    xf::cv::Mat<SIN_CHANNEL_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> himage(rows, cols);
+    xf::cv::Mat<SIN_CHANNEL_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> simage(rows, cols);
+    xf::cv::Mat<SIN_CHANNEL_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> vimage(rows, cols);
+    xf::cv::Mat<SIN_CHANNEL_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> vimage1(rows, cols);
+    xf::cv::Mat<SIN_CHANNEL_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> vimage2(rows, cols);
 
-    xf::cv::Mat<SIN_CHANNEL_TYPE, ROWS, COLS, NPC> vimage_eq(rows, cols);
-    xf::cv::Mat<SRC_T, ROWS, COLS, NPC> imgHelper6(rows, cols);
+    xf::cv::Mat<SIN_CHANNEL_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> vimage_eq(rows, cols);
+    xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN> imgHelper6(rows, cols);
 
     assert(((rows <= ROWS) && (cols <= COLS)) && "ROWS and COLS should be greater than input image");
 
@@ -120,30 +135,33 @@ void autoexposurecorrection(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
     // clang-format on
 
     // Convert RGBA to HSV:
-    xf::cv::bgr2hsv<SRC_T, ROWS, COLS, NPC>(src, bgr2hsv);
+    xf::cv::bgr2hsv<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN>(src, bgr2hsv);
 
-    xf::cv::duplicateimages<SRC_T, ROWS, COLS, NPC>(bgr2hsv, hsvimg1, hsvimg2, hsvimg3);
+    xf::cv::duplicateimages<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN, XFCVDEPTH_IN, XFCVDEPTH_IN>(
+        bgr2hsv, hsvimg1, hsvimg2, hsvimg3);
 
-    xf::cv::extractChannel<SRC_T, SIN_CHANNEL_TYPE, ROWS, COLS, NPC>(hsvimg1, himage, 0);
+    xf::cv::extractChannel<SRC_T, SIN_CHANNEL_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN>(hsvimg1, himage, 0);
 
-    xf::cv::extractChannel<SRC_T, SIN_CHANNEL_TYPE, ROWS, COLS, NPC>(hsvimg2, simage, 1);
+    xf::cv::extractChannel<SRC_T, SIN_CHANNEL_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN>(hsvimg2, simage, 1);
 
-    xf::cv::extractChannel<SRC_T, SIN_CHANNEL_TYPE, ROWS, COLS, NPC>(hsvimg3, vimage, 2);
+    xf::cv::extractChannel<SRC_T, SIN_CHANNEL_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN>(hsvimg3, vimage, 2);
 
     xf::cv::duplicateMat(vimage, vimage1, vimage2);
 
     // xf::cv::equalizeHist<SIN_CHANNEL_TYPE, ROWS, COLS, NPC>(vimage1, vimage2,
     // vimage_eq);
-    xFHistogramKernel<SIN_CHANNEL_TYPE, ROWS, COLS, XF_DEPTH(SIN_CHANNEL_TYPE, NPC), NPC,
+    xFHistogramKernel<SIN_CHANNEL_TYPE, ROWS, COLS, XF_DEPTH(SIN_CHANNEL_TYPE, NPC), NPC, XFCVDEPTH_IN,
                       XF_WORDWIDTH(SIN_CHANNEL_TYPE, NPC), ((COLS >> (XF_BITSHIFT(NPC))) >> 1),
                       XF_CHANNELS(SIN_CHANNEL_TYPE, NPC)>(vimage1, hist_array1, rows_shifted, cols_shifted);
 
-    xFEqualize<SIN_CHANNEL_TYPE, ROWS, COLS, XF_DEPTH(SIN_CHANNEL_TYPE, NPC), NPC, XF_WORDWIDTH(SIN_CHANNEL_TYPE, NPC),
-               (COLS >> XF_BITSHIFT(NPC))>(vimage2, hist_array2, vimage_eq, rows_shifted, cols_shifted);
+    xFEqualize<SIN_CHANNEL_TYPE, ROWS, COLS, XF_DEPTH(SIN_CHANNEL_TYPE, NPC), NPC, XFCVDEPTH_IN, XFCVDEPTH_IN,
+               XF_WORDWIDTH(SIN_CHANNEL_TYPE, NPC), (COLS >> XF_BITSHIFT(NPC))>(vimage2, hist_array2, vimage_eq,
+                                                                                rows_shifted, cols_shifted);
 
-    xf::cv::merge<SIN_CHANNEL_TYPE, SRC_T, ROWS, COLS, NPC>(vimage_eq, simage, himage, imgHelper6);
+    xf::cv::merge<SIN_CHANNEL_TYPE, SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN, XFCVDEPTH_IN, XFCVDEPTH_IN>(
+        vimage_eq, simage, himage, imgHelper6);
 
-    xf::cv::hsv2bgr<SRC_T, SRC_T, ROWS, COLS, NPC>(imgHelper6, dst);
+    xf::cv::hsv2bgr<SRC_T, SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT>(imgHelper6, dst);
 }
 }
 }

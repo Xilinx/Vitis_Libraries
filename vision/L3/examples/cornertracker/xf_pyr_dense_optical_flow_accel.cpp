@@ -60,33 +60,39 @@ void pyr_dense_optical_flow_accel(ap_uint<INPUT_PTR_WIDTH>* _current_img,
     const int pCOLS = WIDTH;
     const int pNPC1 = XF_NPPC1;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> current_img_mat;
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1, XF_CV_DEPTH_PDOF_1> current_img_mat;
     current_img_mat.rows = cur_img_rows;
     current_img_mat.cols = cur_img_cols;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> next_img_mat;
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1, XF_CV_DEPTH_PDOF_2> next_img_mat;
     next_img_mat.rows = next_img_rows;
     next_img_mat.cols = next_img_cols;
 
-    xf::cv::Mat<XF_32UC1, HEIGHT, WIDTH, XF_NPPC1> streamFlowin_mat;
+    xf::cv::Mat<XF_32UC1, HEIGHT, WIDTH, XF_NPPC1, XF_CV_DEPTH_PDOF_3> streamFlowin_mat;
     streamFlowin_mat.rows = flow_rows;
     streamFlowin_mat.cols = flow_cols;
 
-    xf::cv::Mat<XF_32UC1, HEIGHT, WIDTH, XF_NPPC1> streamFlowout_mat;
+    xf::cv::Mat<XF_32UC1, HEIGHT, WIDTH, XF_NPPC1, XF_CV_DEPTH_PDOF_4> streamFlowout_mat;
     streamFlowout_mat.rows = flow_iter_rows;
     streamFlowout_mat.cols = flow_iter_cols;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, XF_NPPC1>(_current_img, current_img_mat);
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, XF_NPPC1>(_next_image, next_img_mat);
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_32UC1, HEIGHT, WIDTH, XF_NPPC1>(_streamFlowin, streamFlowin_mat);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, XF_NPPC1, XF_CV_DEPTH_PDOF_1>(_current_img,
+                                                                                               current_img_mat);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, XF_NPPC1, XF_CV_DEPTH_PDOF_2>(_next_image,
+                                                                                               next_img_mat);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_32UC1, HEIGHT, WIDTH, XF_NPPC1, XF_CV_DEPTH_PDOF_3>(_streamFlowin,
+                                                                                                streamFlowin_mat);
 
     xf::cv::densePyrOpticalFlow<NUM_LEVELS, NUM_LINES_FINDIT, WINSIZE_OFLOW, TYPE_FLOW_WIDTH, TYPE_FLOW_INT, XF_8UC1,
-                                HEIGHT, WIDTH, XF_NPPC1, XF_USE_URAM>(
+
+                                HEIGHT, WIDTH, XF_NPPC1, XF_USE_URAM, XF_CV_DEPTH_PDOF_1, XF_CV_DEPTH_PDOF_2,
+                                XF_CV_DEPTH_PDOF_3, XF_CV_DEPTH_PDOF_4>(
         current_img_mat, next_img_mat, streamFlowin_mat, streamFlowout_mat, level, scale_up_flag, scale_in, init_flag);
 
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_32UC1, HEIGHT, WIDTH, XF_NPPC1>(streamFlowout_mat, _streamFlowout);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_32UC1, HEIGHT, WIDTH, XF_NPPC1, XF_CV_DEPTH_PDOF_4>(streamFlowout_mat,
+                                                                                                 _streamFlowout);
 }
 }

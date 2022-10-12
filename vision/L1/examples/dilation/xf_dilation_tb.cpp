@@ -92,7 +92,11 @@ int main(int argc, char** argv) {
     std::cout << "\tMaximum error in intensity = " << maxval << std::endl;
     std::cout << "\tPercentage of pixels above error threshold = " << err_per << std::endl;
 
-    if (err_per > 0.0f) return 1;
+    if (err_per > 0.0f) {
+        fprintf(stderr, "ERROR: Test Failed.\n ");
+        return 1;
+    } else
+        std::cout << "Test Passed " << std::endl;
 
     return 0;
 }

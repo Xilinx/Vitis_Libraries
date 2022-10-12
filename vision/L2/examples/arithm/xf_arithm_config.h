@@ -71,24 +71,24 @@
 
 // Resolve pixel precision:
 
-#if NO
+#if SPC
 #define NPC1 XF_NPPC1
 #endif
-#if RO
+#if MPC
 #define NPC1 XF_NPPC8
 #endif
 
 #if T_16S
 #if GRAY
 #define TYPE XF_16SC1
-#if NO
+#if SPC
 #define PTR_WIDTH 16
 #else
 #define PTR_WIDTH 128
 #endif
 #else
 #define TYPE XF_16SC3
-#if NO
+#if SPC
 #define PTR_WIDTH 64
 #else
 #define PTR_WIDTH 512
@@ -99,14 +99,14 @@
 #if T_8U
 #if GRAY
 #define TYPE XF_8UC1
-#if NO
+#if SPC
 #define PTR_WIDTH 8
 #else
 #define PTR_WIDTH 64
 #endif
 #else
 #define TYPE XF_8UC3
-#if NO
+#if SPC
 #define PTR_WIDTH 24
 #else
 #define PTR_WIDTH 256

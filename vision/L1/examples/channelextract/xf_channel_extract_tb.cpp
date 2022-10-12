@@ -24,36 +24,44 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    cv::Mat in_src, in_rgba, out_img;
+    cv::Mat in_src, in_brga, in_accel, out_img, in_ref;
+
     // read image
     in_src = cv::imread(argv[1], 1);
+    in_src.convertTo(in_ref, CV_INTYPE);
 
     if (in_src.data == NULL) {
         fprintf(stderr, "Cannot open image \n");
         return 0;
     }
 
-    out_img.create(in_src.rows, in_src.cols, CV_8U);
-    cv::cvtColor(in_src, in_rgba, cv::COLOR_BGR2RGBA);
+    out_img.create(in_ref.rows, in_ref.cols, CV_OUTTYPE);
+
+    if (BGR) {
+        in_ref.copyTo(in_accel);
+    } else if (BGRA) {
+        cv::cvtColor(in_ref, in_accel, cv::COLOR_BGR2BGRA);
+    }
+
     uint16_t channel = XF_EXTRACT_CH_R;
 
-    int height = in_rgba.rows;
-    int width = in_rgba.cols;
+    int height = in_accel.rows;
+    int width = in_accel.cols;
 
     // Call the top function
-    channel_extract_accel((ap_uint<INPUT_PTR_WIDTH>*)in_rgba.data, (ap_uint<OUTPUT_PTR_WIDTH>*)out_img.data, channel,
+    channel_extract_accel((ap_uint<INPUT_PTR_WIDTH>*)in_accel.data, (ap_uint<OUTPUT_PTR_WIDTH>*)out_img.data, channel,
                           height, width);
 
     cv::imwrite("hls_out.png", out_img);
-
     std::vector<cv::Mat> bgr_planes;
+
     // call OpenCV function
-    cv::split(in_src, bgr_planes);
+    cv::split(in_ref, bgr_planes);
     // write output and OpenCV reference image
     cv::imwrite("out_ocv.png", bgr_planes[2]);
 
     cv::Mat diff;
-    diff.create(in_src.rows, in_src.cols, CV_8U);
+    diff.create(in_ref.rows, in_ref.cols, CV_OUTTYPE);
 
     // Check with the correct channel. Keep 2 for R, 1 for G and 0 for B in index of bgr_planes
     cv::absdiff(bgr_planes[2], out_img, diff);
@@ -70,13 +78,17 @@ int main(int argc, char** argv) {
             if (maxval < v) maxval = v;
         }
     }
-    float err_per = 100.0 * (float)cnt / (in_src.rows * in_src.cols);
+    float err_per = 100.0 * (float)cnt / (in_ref.rows * in_ref.cols);
 
-    std::cout << "Minimum error in intensity =" << minval << "\t"
-              << "Maximum error in intensity = " << maxval << "\t"
-              << "Percentage of pixels above error" << err_per << std::endl;
+    std::cout << "\tMinimum error in intensity = " << minval << std::endl;
+    std::cout << "\tMaximum error in intensity = " << maxval << std::endl;
+    std::cout << "\tPercentage of pixels above error threshold = " << err_per << std::endl;
 
-    if (err_per > 0.0f) return -1;
+    if (err_per > 0.0f) {
+        fprintf(stderr, "ERROR: Test Failed.\n ");
+        return 1;
+    } else
+        std::cout << "Test Passed " << std::endl;
 
     return 0;
 }

@@ -30,12 +30,22 @@ namespace cv {
 /********************************************************************
  * 	ChannelCombine: combine multiple 8-bit planes into one
  *******************************************************************/
-template <int ROWS, int COLS, int SRC_T, int DST_T, int NPC, int TC>
-void xfChannelCombineKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _in1,
-                            xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _in2,
-                            xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _in3,
-                            xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _in4,
-                            xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _out,
+template <int ROWS,
+          int COLS,
+          int SRC_T,
+          int DST_T,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_3 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_4 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+          int TC>
+void xfChannelCombineKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _in1,
+                            xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& _in2,
+                            xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_3>& _in3,
+                            xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_4>& _in4,
+                            xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _out,
                             uint16_t height,
                             uint16_t width) {
     XF_TNAME(SRC_T, NPC) val1, val2, val3, val4;
@@ -84,11 +94,20 @@ RowLoop:
     }     // RowLoop
 }
 
-template <int ROWS, int COLS, int SRC_T, int DST_T, int NPC, int TC>
-void xfChannelCombineKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _in1,
-                            xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _in2,
-                            xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _in3,
-                            xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _out,
+template <int ROWS,
+          int COLS,
+          int SRC_T,
+          int DST_T,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_3 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+          int TC>
+void xfChannelCombineKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _in1,
+                            xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& _in2,
+                            xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_3>& _in3,
+                            xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _out,
                             uint16_t height,
                             uint16_t width) {
     XF_TNAME(SRC_T, NPC) val1, val2, val3;
@@ -134,10 +153,18 @@ RowLoop:
     }
 }
 
-template <int ROWS, int COLS, int SRC_T, int DST_T, int NPC, int TC>
-void xfChannelCombineKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _in1,
-                            xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _in2,
-                            xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _out,
+template <int ROWS,
+          int COLS,
+          int SRC_T,
+          int DST_T,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+          int TC>
+void xfChannelCombineKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _in1,
+                            xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& _in2,
+                            xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _out,
                             uint16_t height,
                             uint16_t width) {
     XF_TNAME(SRC_T, NPC) val1, val2;
@@ -185,10 +212,17 @@ Kernel for 2 input configuration
 
 *******************************/
 
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
-void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
-           xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,
-           xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src1,
+           xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& _src2,
+           xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst) {
 #ifndef __SYNTHESIS__
     assert(((_src1.rows <= ROWS) && (_src1.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert(((_src2.rows <= ROWS) && (_src2.cols <= COLS)) && "ROWS and COLS should be greater than input image");
@@ -203,8 +237,8 @@ void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     #pragma HLS inline off
     // clang-format on
 
-    xfChannelCombineKernel<ROWS, COLS, SRC_T, DST_T, NPC, (COLS >> (XF_BITSHIFT(NPC)))>(_src1, _src2, _dst, _src1.rows,
-                                                                                        _src1.cols);
+    xfChannelCombineKernel<ROWS, COLS, SRC_T, DST_T, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_IN_2, XFCVDEPTH_OUT_1,
+                           (COLS >> (XF_BITSHIFT(NPC)))>(_src1, _src2, _dst, _src1.rows, _src1.cols);
 }
 
 /*******************************
@@ -213,11 +247,19 @@ Kernel for 3 input configuration
 
 *******************************/
 
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
-void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
-           xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,
-           xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src3,
-           xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_3 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src1,
+           xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& _src2,
+           xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_3>& _src3,
+           xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst) {
 #ifndef __SYNTHESIS__
     assert(((_src1.rows <= ROWS) && (_src1.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert(((_src2.rows <= ROWS) && (_src2.cols <= COLS)) && "ROWS and COLS should be greater than input image");
@@ -233,8 +275,9 @@ void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     #pragma HLS inline off
     // clang-format on
 
-    xfChannelCombineKernel<ROWS, COLS, SRC_T, DST_T, NPC, (COLS >> (XF_BITSHIFT(NPC)))>(_src1, _src2, _src3, _dst,
-                                                                                        _src1.rows, _src1.cols);
+    xfChannelCombineKernel<ROWS, COLS, SRC_T, DST_T, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_IN_2, XFCVDEPTH_IN_3,
+                           XFCVDEPTH_OUT_1, (COLS >> (XF_BITSHIFT(NPC)))>(_src1, _src2, _src3, _dst, _src1.rows,
+                                                                          _src1.cols);
 }
 
 /*******************************
@@ -243,12 +286,21 @@ Kernel for 4 input configuration
 
 *******************************/
 
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
-void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
-           xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src2,
-           xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src3,
-           xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src4,
-           xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst) {
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_3 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_4 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src1,
+           xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& _src2,
+           xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_3>& _src3,
+           xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_4>& _src4,
+           xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst) {
 #ifndef __SYNTHESIS__
     assert(((_src1.rows <= ROWS) && (_src1.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert(((_src2.rows <= ROWS) && (_src2.cols <= COLS)) && "ROWS and COLS should be greater than input image");
@@ -265,8 +317,9 @@ void merge(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src1,
     #pragma HLS inline off
     // clang-format on
 
-    xfChannelCombineKernel<ROWS, COLS, SRC_T, DST_T, NPC, (COLS >> (XF_BITSHIFT(NPC)))>(_src1, _src2, _src3, _src4,
-                                                                                        _dst, _src1.rows, _src1.cols);
+    xfChannelCombineKernel<ROWS, COLS, SRC_T, DST_T, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_IN_2, XFCVDEPTH_IN_3,
+                           XFCVDEPTH_IN_4, XFCVDEPTH_OUT_1, (COLS >> (XF_BITSHIFT(NPC)))>(_src1, _src2, _src3, _src4,
+                                                                                          _dst, _src1.rows, _src1.cols);
 }
 
 } // namespace cv

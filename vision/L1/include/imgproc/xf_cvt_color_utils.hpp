@@ -1050,13 +1050,13 @@ static uint8_t Calculate_Ycrcb2G(uint8_t Y, uint8_t cr, uint8_t cb) {
     int16_t sat_G1 = ((H_G1) >> 15);
     int16_t sat_G2 = ((H_G2) >> 15);
 
-    uint16_t res = ((Y - sat_G1) - sat_G2);
+    int16_t res = ((Y - sat_G1) - sat_G2);
     if (res > 255) {
         res = 255;
     } else if (res < 0) {
         res = 0;
     }
-    return (res);
+    return (uint8_t)(res);
 }
 static uint8_t Calculate_Ycrcb2B(uint8_t Y, uint8_t cb) {
 // clang-format off

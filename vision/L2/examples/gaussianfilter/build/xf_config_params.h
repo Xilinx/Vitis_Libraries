@@ -18,11 +18,14 @@
 #define FILTER_SIZE_5 0
 #define FILTER_SIZE_7 0
 
-#define RO 0
-#define NO 1
+#define MPC 0
+#define SPC 1
 
 #define INPUT_PTR_WIDTH 256
 #define OUTPUT_PTR_WIDTH 256
 
 #define GRAY 1
 #define RGB 0
+
+#define XF_CV_DEPTH_IN_1 1
+#define XF_CV_DEPTH_OUT_1 3

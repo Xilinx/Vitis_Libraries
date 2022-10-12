@@ -158,7 +158,7 @@ int main(int argc, char** argv) {
         for (int c = 0; c < width + NUM_H_BLANK; c++) {
             if (r < NUM_V_BLANK_LINES) {
                 if (c >= NUM_H_BLANK)
-                    interleaved_img.at<unsigned char>(r, c) = img1.at<unsigned char>(r, c);
+                    interleaved_img.at<unsigned char>(r, c) = img1.at<unsigned char>(r, c - NUM_H_BLANK);
                 else
                     interleaved_img.at<unsigned char>(r, c) = 0;
             }
@@ -166,20 +166,20 @@ int main(int argc, char** argv) {
             if (r >= NUM_V_BLANK_LINES && r <= ((2 * height) - NUM_V_BLANK_LINES)) {
                 if (r % 2 == 0) {
                     if (c >= NUM_H_BLANK)
-                        interleaved_img.at<unsigned char>(r, c) = img2.at<unsigned char>(cnt, c);
+                        interleaved_img.at<unsigned char>(r, c) = img2.at<unsigned char>(cnt, c - NUM_H_BLANK);
                     else
                         interleaved_img.at<unsigned char>(r, c) = 0;
                 } else {
                     if (c >= NUM_H_BLANK)
                         interleaved_img.at<unsigned char>(r, c) =
-                            img1.at<unsigned char>(cnt1 + NUM_V_BLANK_LINES - 1, c);
+                            img1.at<unsigned char>(cnt1 + NUM_V_BLANK_LINES - 1, c - NUM_H_BLANK);
                     else
                         interleaved_img.at<unsigned char>(r, c) = 0;
                 }
             }
             if (r >= ((2 * height) - NUM_V_BLANK_LINES)) {
                 if (c >= NUM_H_BLANK)
-                    interleaved_img.at<unsigned char>(r, c) = img2.at<unsigned char>(cnt, c);
+                    interleaved_img.at<unsigned char>(r, c) = img2.at<unsigned char>(cnt, c - NUM_H_BLANK);
                 else
                     interleaved_img.at<unsigned char>(r, c) = 0;
             }
@@ -198,7 +198,7 @@ int main(int argc, char** argv) {
         for (int c = 0; c < width + NUM_H_BLANK; c++) {
             if (r < NUM_V_BLANK_LINES) {
                 if (c >= NUM_H_BLANK)
-                    interleaved_img.at<unsigned short>(r, c) = img1.at<unsigned short>(r, c);
+                    interleaved_img.at<unsigned short>(r, c) = img1.at<unsigned short>(r, c - NUM_H_BLANK);
                 else
                     interleaved_img.at<unsigned short>(r, c) = 0;
             }
@@ -206,20 +206,20 @@ int main(int argc, char** argv) {
             if (r >= NUM_V_BLANK_LINES && r <= ((2 * height) - NUM_V_BLANK_LINES)) {
                 if (r % 2 == 0) {
                     if (c >= NUM_H_BLANK)
-                        interleaved_img.at<unsigned short>(r, c) = img2.at<unsigned short>(cnt, c);
+                        interleaved_img.at<unsigned short>(r, c) = img2.at<unsigned short>(cnt, c - NUM_H_BLANK);
                     else
                         interleaved_img.at<unsigned short>(r, c) = 0;
                 } else {
                     if (c >= NUM_H_BLANK)
                         interleaved_img.at<unsigned short>(r, c) =
-                            img1.at<unsigned short>(cnt1 + NUM_V_BLANK_LINES - 1, c);
+                            img1.at<unsigned short>(cnt1 + NUM_V_BLANK_LINES - 1, c - NUM_H_BLANK);
                     else
                         interleaved_img.at<unsigned short>(r, c) = 0;
                 }
             }
             if (r >= ((2 * height) - NUM_V_BLANK_LINES)) {
                 if (c >= NUM_H_BLANK)
-                    interleaved_img.at<unsigned short>(r, c) = img2.at<unsigned short>(cnt, c);
+                    interleaved_img.at<unsigned short>(r, c) = img2.at<unsigned short>(cnt, c - NUM_H_BLANK);
                 else
                     interleaved_img.at<unsigned short>(r, c) = 0;
             }

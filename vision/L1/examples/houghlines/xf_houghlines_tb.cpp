@@ -310,7 +310,8 @@ int main(int argc, char** argv) {
     if (successper < 90) {
         fprintf(stderr, "ERROR: Test Failed.\n ");
         return EXIT_FAILURE;
-    }
+    } else
+        std::cout << "Test Passed " << std::endl;
 
 #if 0
 	int heiby2 = (height/2);

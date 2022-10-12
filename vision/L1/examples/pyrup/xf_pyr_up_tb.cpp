@@ -88,8 +88,9 @@ int main(int argc, char* argv[]) {
     std::cout << "Min Error between opencv and xf: " << (unsigned int)min_error << std::endl;
 
     if (max_error > 0) {
-        return -1;
-    } else {
-        return 0;
-    }
+        std::cerr << "ERROR: Test Failed." << std::endl;
+        return 1;
+    } else
+        std::cout << "Test Passed " << std::endl;
+    return 0;
 }

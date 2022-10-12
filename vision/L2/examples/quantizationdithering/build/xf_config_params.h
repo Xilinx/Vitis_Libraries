@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#define RO 0 // Resource Optimized (8-pixel implementation)
-#define NO 1 // Normal Operation (1-pixel implementation)
+#define MPC 0 // Multiple Pixels per Clock operation
+#define SPC 1 // Single Pixel per Clock operation
 
 // port widths
 #define INPUT_PTR_WIDTH 128
@@ -36,3 +36,5 @@
 /* Input image Dimensions */
 #define WIDTH 1024 // Maximum Input image width
 #define HEIGHT 676 // Maximum Input image height
+#define XF_CV_DEPTH_IN 3
+#define XF_CV_DEPTH_OUT 3

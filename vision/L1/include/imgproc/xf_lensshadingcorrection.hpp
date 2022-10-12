@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,8 +65,15 @@ namespace cv {
  * @param src input image
  * @param dst output image
  */
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
-void Lscdistancebased(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src, xf::cv::Mat<DST_T, ROWS, COLS, NPC>& dst) {
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void Lscdistancebased(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
+                      xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& dst) {
     int rows = src.rows;
     int cols = src.cols >> XF_BITSHIFT(NPC);
 
@@ -104,6 +111,9 @@ void Lscdistancebased(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src, xf::cv::Mat<DST_
             in_pix = src.read(i * (cols) + j);
 
             for (ap_uint<9> p = 0; p < XF_NPIXPERCYCLE(NPC); p++) {
+// clang-format off
+#pragma HLS unroll
+                // clang-format on
                 float x_dist = center_pixel_pos_x - (j * NPC + p);
                 float x_dist_2 = x_dist * x_dist;
 
@@ -112,18 +122,11 @@ void Lscdistancebased(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src, xf::cv::Mat<DST_
 
                 float gain_val = (a * ((distance + b) * (distance + b))) - c;
 
-                for (ap_uint<9> k = 0; k < XF_CHANNELS(SRC_T, NPC); k++) {
-// clang-format off
-#pragma HLS unroll
-                    // clang-format on
+                XF_CTUNAME(SRC_T, NPC)
+                val = in_pix.range(p * STEP + STEP - 1, p * STEP);
+                int value = (int)(val * gain_val);
 
-                    XF_CTUNAME(SRC_T, NPC)
-                    val = in_pix.range((k + p * 3) * STEP + STEP - 1, (k + p * 3) * STEP);
-                    int value = (int)(val * gain_val);
-
-                    out_pix.range((k + p * 3) * STEP + STEP - 1, (k + p * 3) * STEP) =
-                        xf_satcast_lsc<XF_CTUNAME(SRC_T, NPC)>(value);
-                }
+                out_pix.range(p * STEP + STEP - 1, p * STEP) = xf_satcast_lsc<XF_CTUNAME(SRC_T, NPC)>(value);
             }
 
             dst.write(i * cols + j, out_pix);

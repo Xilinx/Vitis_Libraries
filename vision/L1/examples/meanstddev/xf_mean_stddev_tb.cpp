@@ -119,7 +119,8 @@ int main(int argc, char** argv) {
         if (abs(diff_mean[c]) > 1 | abs(diff_stddev[c]) > 1) {
             fprintf(stderr, "ERROR: Test Failed.\n ");
             return -1;
-        }
+        } else
+            std::cout << "Test Passed " << std::endl;
     }
 
     free(mean_c);

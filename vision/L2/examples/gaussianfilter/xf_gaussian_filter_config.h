@@ -47,10 +47,10 @@ typedef unsigned short int uint16_t;
 #define FILTER 7
 #endif
 
-#if NO
+#if SPC
 #define NPC1 XF_NPPC1
 #endif
-#if RO
+#if MPC
 #define NPC1 XF_NPPC8
 #endif
 

@@ -25,9 +25,16 @@
 namespace xf {
 namespace cv {
 
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int TC>
-void hsv2y8(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-            xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_mat,
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+          int TC>
+void hsv2y8(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+            xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst_mat,
             struct bgr2y8_params params) {
 // clang-format off
 #pragma HLS INLINE OFF
@@ -101,9 +108,15 @@ void hsv2y8(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     return;
 }
 
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC>
-void custom_bgr2y8(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                   xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_mat,
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void custom_bgr2y8(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
+                   xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst_mat,
                    struct bgr2y8_params params) {
 // clang-format off
 #pragma HLS INLINE OFF
@@ -120,15 +133,16 @@ void custom_bgr2y8(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     int rows = _src_mat.rows;
     int cols = _src_mat.cols;
 
-    xf::cv::Mat<SRC_T, ROWS, COLS, NPC> src_hsv(rows, cols);
+    xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1> src_hsv(rows, cols);
 
 // clang-format off
 		#pragma HLS DATAFLOW
     // clang-format on
 
     // Convert BGR to XYZ:
-    xf::cv::bgr2hsv<SRC_T, ROWS, COLS, NPC>(_src_mat, src_hsv);
-    xf::cv::hsv2y8<SRC_T, DST_T, ROWS, COLS, NPC, (COLS >> XF_BITSHIFT(NPC))>(src_hsv, _dst_mat, params);
+    xf::cv::bgr2hsv<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>(_src_mat, src_hsv);
+    xf::cv::hsv2y8<SRC_T, DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1, XFCVDEPTH_OUT_1, (COLS >> XF_BITSHIFT(NPC))>(
+        src_hsv, _dst_mat, params);
 }
 } // namespace cv
 } // namespace xf

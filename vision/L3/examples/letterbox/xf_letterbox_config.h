@@ -26,7 +26,7 @@
 #include "dnn/xf_insertBorder.hpp"
 
 /* Interface types*/
-#if RO
+#if MPC
 #define NPC_T XF_NPPC4
 #else
 #define NPC_T XF_NPPC1

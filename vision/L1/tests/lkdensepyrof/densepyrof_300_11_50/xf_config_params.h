@@ -28,3 +28,10 @@
 
 #define NUM_LINES_FINDIT 50
 #define XF_USE_URAM false
+
+#define XF_CV_DEPTH_IN 1
+#define XF_CV_DEPTH_OUT 3
+#define XF_CV_DEPTH_CURR_IMG 1
+#define XF_CV_DEPTH_NEXT_IMG 3
+#define XF_CV_DEPTH_STREAM_IN 1
+#define XF_CV_DEPTH_STREAM_OUT 3

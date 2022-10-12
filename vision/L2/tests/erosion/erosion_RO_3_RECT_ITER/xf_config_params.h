@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#define RO 1 // Resource Optimized (8-pixel implementation)
-#define NO 0 // Normal Operation (1-pixel implementation)
+#define MPC 1 // Multiple Pixels per Clock operation
+#define SPC 0 // Single Pixel per Clock operation
 
 #define GRAY 1
 
@@ -24,3 +24,6 @@
 #define KERNEL_SHAPE XF_SHAPE_RECT
 
 #define ITERATIONS 2
+
+#define XF_CV_DEPTH_IN_1 1
+#define XF_CV_DEPTH_OUT_1 3

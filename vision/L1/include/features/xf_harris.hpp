@@ -49,14 +49,16 @@ template <int FILTERSIZE,
           int CHANNELINFO,
           int IN_DEPTH,
           int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
           int IN_WW,
           int OUT_WW,
           int TC,
           int GRAD_WW,
           int DET_WW,
           bool USE_URAM>
-void xFCornerHarrisDetector(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                            xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat,
+void xFCornerHarrisDetector(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+                            xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst_mat,
                             uint16_t img_height,
                             uint16_t img_width,
                             uint16_t _nms_radius,
@@ -70,24 +72,16 @@ void xFCornerHarrisDetector(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     else if (FILTERSIZE == XF_FILTER_7X7)
         scale = 1;
 
-    xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC> gradx_2(img_height, img_width);
-    xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC> grady_2(img_height, img_width);
-    xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC> gradxy(img_height, img_width);
-    xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC> gradx2g(img_height, img_width);
-    xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC> grady2g(img_height, img_width);
-    xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC> gradxyg(img_height, img_width);
-    xf::cv::Mat<XF_32SC1, ROWS, COLS, NPC> score(img_height, img_width);
-    xf::cv::Mat<XF_32SC1, ROWS, COLS, NPC> thresh(img_height, img_width);
+    xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC, XFCVDEPTH_IN> gradx_2(img_height, img_width);
+    xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC, XFCVDEPTH_IN> grady_2(img_height, img_width);
+    xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC, XFCVDEPTH_IN> gradxy(img_height, img_width);
+    xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC, XFCVDEPTH_IN> gradx2g(img_height, img_width);
+    xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC, XFCVDEPTH_IN> grady2g(img_height, img_width);
+    xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC, XFCVDEPTH_IN> gradxyg(img_height, img_width);
+    xf::cv::Mat<XF_32SC1, ROWS, COLS, NPC, XFCVDEPTH_IN> score(img_height, img_width);
+    xf::cv::Mat<XF_32SC1, ROWS, COLS, NPC, XFCVDEPTH_IN> thresh(img_height, img_width);
 
 // clang-format off
-    #pragma HLS STREAM variable=gradx_2.data depth=2
-    #pragma HLS STREAM variable=grady_2.data depth=2
-    #pragma HLS STREAM variable=gradxy.data depth=2
-    #pragma HLS STREAM variable=grady2g.data depth=2
-    #pragma HLS STREAM variable=gradx2g.data depth=2
-    #pragma HLS STREAM variable=gradxyg.data depth=2
-    #pragma HLS STREAM variable=score.data depth=2
-    #pragma HLS STREAM variable=thresh.data depth=2
 // clang-format on
 
 // clang-format off
@@ -95,86 +89,79 @@ void xFCornerHarrisDetector(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     // clang-format on
 
     if (FILTERSIZE == XF_FILTER_7X7) {
-        xf::cv::Mat<XF_32SC1, ROWS, COLS, NPC> gradx_mat(img_height, img_width);
-        xf::cv::Mat<XF_32SC1, ROWS, COLS, NPC> grady_mat(img_height, img_width);
-        xf::cv::Mat<XF_32SC1, ROWS, COLS, NPC> gradx1_mat(img_height, img_width);
-        xf::cv::Mat<XF_32SC1, ROWS, COLS, NPC> gradx2_mat(img_height, img_width);
-        xf::cv::Mat<XF_32SC1, ROWS, COLS, NPC> grady1_mat(img_height, img_width);
-        xf::cv::Mat<XF_32SC1, ROWS, COLS, NPC> grady2_mat(img_height, img_width);
+        xf::cv::Mat<XF_32SC1, ROWS, COLS, NPC, XFCVDEPTH_IN> gradx_mat(img_height, img_width);
+        xf::cv::Mat<XF_32SC1, ROWS, COLS, NPC, XFCVDEPTH_IN> grady_mat(img_height, img_width);
+        xf::cv::Mat<XF_32SC1, ROWS, COLS, NPC, XFCVDEPTH_IN> gradx1_mat(img_height, img_width);
+        xf::cv::Mat<XF_32SC1, ROWS, COLS, NPC, XFCVDEPTH_IN> gradx2_mat(img_height, img_width);
+        xf::cv::Mat<XF_32SC1, ROWS, COLS, NPC, XFCVDEPTH_IN> grady1_mat(img_height, img_width);
+        xf::cv::Mat<XF_32SC1, ROWS, COLS, NPC, XFCVDEPTH_IN> grady2_mat(img_height, img_width);
 
-// clang-format off
-        #pragma HLS STREAM variable=gradx_mat.data depth=2
-        #pragma HLS STREAM variable=grady_mat.data depth=2
-        #pragma HLS STREAM variable=gradx1_mat.data depth=2
-        #pragma HLS STREAM variable=gradx2_mat.data depth=2
-        #pragma HLS STREAM variable=grady1_mat.data depth=2
-        #pragma HLS STREAM variable=grady2_mat.data depth=2
+        // clang-format off
         // clang-format on
 
-        Sobel<XF_BORDER_CONSTANT, FILTERSIZE, SRC_T, XF_32SC1, ROWS, COLS, NPC, USE_URAM>(_src_mat, gradx_mat,
-                                                                                          grady_mat);
+        Sobel<XF_BORDER_CONSTANT, FILTERSIZE, SRC_T, XF_32SC1, ROWS, COLS, NPC, USE_URAM, XFCVDEPTH_IN, XFCVDEPTH_IN,
+              XFCVDEPTH_IN>(_src_mat, gradx_mat, grady_mat);
 
-        xFDuplicate<XF_32SC1, ROWS, COLS, XF_32SP, NPC, DET_WW, TC>(gradx_mat, gradx1_mat, gradx2_mat, img_height,
-                                                                    img_width);
+        xFDuplicate<XF_32SC1, ROWS, COLS, XF_32SP, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN, XFCVDEPTH_IN, DET_WW, TC>(
+            gradx_mat, gradx1_mat, gradx2_mat, img_height, img_width);
 
-        xFDuplicate<XF_32SC1, ROWS, COLS, XF_32SP, NPC, DET_WW, TC>(grady_mat, grady1_mat, grady2_mat, img_height,
-                                                                    img_width);
+        xFDuplicate<XF_32SC1, ROWS, COLS, XF_32SP, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN, XFCVDEPTH_IN, DET_WW, TC>(
+            grady_mat, grady1_mat, grady2_mat, img_height, img_width);
 
-        xFSquare<XF_32SC1, XF_16SC1, ROWS, COLS, XF_32SP, XF_16SP, NPC, DET_WW, GRAD_WW, TC>(
-            gradx1_mat, gradx_2, scale, FILTERSIZE, img_height, img_width);
+        xFSquare<XF_32SC1, XF_16SC1, ROWS, COLS, XF_32SP, XF_16SP, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN, DET_WW, GRAD_WW,
+                 TC>(gradx1_mat, gradx_2, scale, FILTERSIZE, img_height, img_width);
 
-        xFSquare<XF_32SC1, XF_16SC1, ROWS, COLS, XF_32SP, XF_16SP, NPC, DET_WW, GRAD_WW, TC>(
-            grady1_mat, grady_2, scale, FILTERSIZE, img_height, img_width);
+        xFSquare<XF_32SC1, XF_16SC1, ROWS, COLS, XF_32SP, XF_16SP, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN, DET_WW, GRAD_WW,
+                 TC>(grady1_mat, grady_2, scale, FILTERSIZE, img_height, img_width);
 
-        xFMultiply<XF_32SC1, XF_16SC1, ROWS, COLS, XF_32SP, XF_16SP, NPC, DET_WW, GRAD_WW, TC>(
-            gradx2_mat, grady2_mat, gradxy, scale, FILTERSIZE, img_height, img_width);
+        xFMultiply<XF_32SC1, XF_16SC1, ROWS, COLS, XF_32SP, XF_16SP, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN, XFCVDEPTH_IN,
+                   DET_WW, GRAD_WW, TC>(gradx2_mat, grady2_mat, gradxy, scale, FILTERSIZE, img_height, img_width);
     } else {
-        xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC> gradx_mat(img_height, img_width);
-        xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC> grady_mat(img_height, img_width);
-        xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC> gradx1_mat(img_height, img_width);
-        xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC> grady1_mat(img_height, img_width);
-        xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC> gradx2_mat(img_height, img_width);
-        xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC> grady2_mat(img_height, img_width);
+        xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC, XFCVDEPTH_IN> gradx_mat(img_height, img_width);
+        xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC, XFCVDEPTH_IN> grady_mat(img_height, img_width);
+        xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC, XFCVDEPTH_IN> gradx1_mat(img_height, img_width);
+        xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC, XFCVDEPTH_IN> grady1_mat(img_height, img_width);
+        xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC, XFCVDEPTH_IN> gradx2_mat(img_height, img_width);
+        xf::cv::Mat<XF_16SC1, ROWS, COLS, NPC, XFCVDEPTH_IN> grady2_mat(img_height, img_width);
 
-// clang-format off
-        #pragma HLS STREAM variable=gradx_mat.data depth=2
-        #pragma HLS STREAM variable=grady_mat.data depth=2
-        #pragma HLS STREAM variable=gradx1_mat.data depth=2
-        #pragma HLS STREAM variable=gradx2_mat.data depth=2
-        #pragma HLS STREAM variable=grady1_mat.data depth=2
-        #pragma HLS STREAM variable=grady2_mat.data depth=2
+        // clang-format off
         // clang-format on
 
-        Sobel<XF_BORDER_CONSTANT, FILTERSIZE, SRC_T, XF_16SC1, ROWS, COLS, NPC, USE_URAM>(_src_mat, gradx_mat,
-                                                                                          grady_mat);
+        Sobel<XF_BORDER_CONSTANT, FILTERSIZE, SRC_T, XF_16SC1, ROWS, COLS, NPC, USE_URAM, XFCVDEPTH_IN, XFCVDEPTH_IN,
+              XFCVDEPTH_IN>(_src_mat, gradx_mat, grady_mat);
 
-        xFDuplicate<XF_16SC1, ROWS, COLS, XF_16SP, NPC, GRAD_WW, TC>(gradx_mat, gradx1_mat, gradx2_mat, img_height,
-                                                                     img_width);
+        xFDuplicate<XF_16SC1, ROWS, COLS, XF_16SP, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN, XFCVDEPTH_IN, GRAD_WW, TC>(
+            gradx_mat, gradx1_mat, gradx2_mat, img_height, img_width);
 
-        xFDuplicate<XF_16SC1, ROWS, COLS, XF_16SP, NPC, GRAD_WW, TC>(grady_mat, grady1_mat, grady2_mat, img_height,
-                                                                     img_width);
+        xFDuplicate<XF_16SC1, ROWS, COLS, XF_16SP, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN, XFCVDEPTH_IN, GRAD_WW, TC>(
+            grady_mat, grady1_mat, grady2_mat, img_height, img_width);
 
-        xFSquare<XF_16SC1, XF_16SC1, ROWS, COLS, XF_16SP, XF_16SP, NPC, GRAD_WW, GRAD_WW, TC>(
-            gradx1_mat, gradx_2, scale, FILTERSIZE, img_height, img_width);
+        xFSquare<XF_16SC1, XF_16SC1, ROWS, COLS, XF_16SP, XF_16SP, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN, GRAD_WW, GRAD_WW,
+                 TC>(gradx1_mat, gradx_2, scale, FILTERSIZE, img_height, img_width);
 
-        xFSquare<XF_16SC1, XF_16SC1, ROWS, COLS, XF_16SP, XF_16SP, NPC, GRAD_WW, GRAD_WW, TC>(
-            grady1_mat, grady_2, scale, FILTERSIZE, img_height, img_width);
+        xFSquare<XF_16SC1, XF_16SC1, ROWS, COLS, XF_16SP, XF_16SP, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN, GRAD_WW, GRAD_WW,
+                 TC>(grady1_mat, grady_2, scale, FILTERSIZE, img_height, img_width);
 
-        xFMultiply<XF_16SC1, XF_16SC1, ROWS, COLS, XF_16SP, XF_16SP, NPC, GRAD_WW, GRAD_WW, TC>(
-            gradx2_mat, grady2_mat, gradxy, scale, FILTERSIZE, img_height, img_width);
+        xFMultiply<XF_16SC1, XF_16SC1, ROWS, COLS, XF_16SP, XF_16SP, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN, XFCVDEPTH_IN,
+                   GRAD_WW, GRAD_WW, TC>(gradx2_mat, grady2_mat, gradxy, scale, FILTERSIZE, img_height, img_width);
     }
 
-    boxFilter<XF_BORDER_CONSTANT, BLOCKWIDTH, XF_16SC1, ROWS, COLS, NPC, USE_URAM>(gradx_2, gradx2g);
-    boxFilter<XF_BORDER_CONSTANT, BLOCKWIDTH, XF_16SC1, ROWS, COLS, NPC, USE_URAM>(grady_2, grady2g);
-    boxFilter<XF_BORDER_CONSTANT, BLOCKWIDTH, XF_16SC1, ROWS, COLS, NPC, USE_URAM>(gradxy, gradxyg);
+    boxFilter<XF_BORDER_CONSTANT, BLOCKWIDTH, XF_16SC1, ROWS, COLS, NPC, USE_URAM, XFCVDEPTH_IN, XFCVDEPTH_IN>(gradx_2,
+                                                                                                               gradx2g);
+    boxFilter<XF_BORDER_CONSTANT, BLOCKWIDTH, XF_16SC1, ROWS, COLS, NPC, USE_URAM, XFCVDEPTH_IN, XFCVDEPTH_IN>(grady_2,
+                                                                                                               grady2g);
+    boxFilter<XF_BORDER_CONSTANT, BLOCKWIDTH, XF_16SC1, ROWS, COLS, NPC, USE_URAM, XFCVDEPTH_IN, XFCVDEPTH_IN>(gradxy,
+                                                                                                               gradxyg);
 
-    xFComputeScore<XF_16SC1, XF_32SC1, ROWS, COLS, XF_16SP, XF_32SP, NPC, GRAD_WW, DET_WW, TC>(
-        gradx2g, grady2g, gradxyg, score, img_height, img_width, k, FILTERSIZE);
+    xFComputeScore<XF_16SC1, XF_32SC1, ROWS, COLS, XF_16SP, XF_32SP, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN, XFCVDEPTH_IN,
+                   XFCVDEPTH_IN, GRAD_WW, DET_WW, TC>(gradx2g, grady2g, gradxyg, score, img_height, img_width, k,
+                                                      FILTERSIZE);
 
-    xFThreshold<XF_32SC1, ROWS, COLS, XF_32SP, NPC, DET_WW, TC>(score, thresh, _threshold, img_height, img_width);
+    xFThreshold<XF_32SC1, ROWS, COLS, XF_32SP, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN, DET_WW, TC>(score, thresh, _threshold,
+                                                                                            img_height, img_width);
 
-    xFMaxSuppression<XF_32SC1, SRC_T, ROWS, COLS, XF_32SP, XF_8UP, NPC, DET_WW, IN_WW>(thresh, _dst_mat, _nms_radius,
-                                                                                       img_height, img_width);
+    xFMaxSuppression<XF_32SC1, SRC_T, ROWS, COLS, XF_32SP, XF_8UP, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT, DET_WW, IN_WW>(
+        thresh, _dst_mat, _nms_radius, img_height, img_width);
 }
 
 template <int FILTERSIZE,
@@ -184,9 +171,11 @@ template <int FILTERSIZE,
           int ROWS,
           int COLS,
           int NPC = 1,
-          bool USE_URAM = false>
-void cornerHarris(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
-                  xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& dst,
+          bool USE_URAM = false,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void cornerHarris(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
+                  xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& dst,
                   uint16_t threshold,
                   uint16_t k) {
 // clang-format off
@@ -211,12 +200,14 @@ void cornerHarris(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& src,
 
     if (NPC == XF_NPPC8) {
         xFCornerHarrisDetector<FILTERSIZE, BLOCKWIDTH, SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC),
-                               NPC, XF_WORDWIDTH(SRC_T, NPC), XF_32UW, (COLS >> XF_BITSHIFT(NPC)), XF_128UW, XF_256UW,
-                               USE_URAM>(src, dst, img_height, img_width, NMSRADIUS, threshold, k);
+                               NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT, XF_WORDWIDTH(SRC_T, NPC), XF_32UW,
+                               (COLS >> XF_BITSHIFT(NPC)), XF_128UW, XF_256UW, USE_URAM>(
+            src, dst, img_height, img_width, NMSRADIUS, threshold, k);
     } else if (NPC == XF_NPPC1) {
         xFCornerHarrisDetector<FILTERSIZE, BLOCKWIDTH, SRC_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC),
-                               NPC, XF_WORDWIDTH(SRC_T, NPC), XF_32UW, (COLS >> XF_BITSHIFT(NPC)), XF_16UW, XF_32UW,
-                               USE_URAM>(src, dst, img_height, img_width, NMSRADIUS, threshold, k);
+                               NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT, XF_WORDWIDTH(SRC_T, NPC), XF_32UW,
+                               (COLS >> XF_BITSHIFT(NPC)), XF_16UW, XF_32UW, USE_URAM>(src, dst, img_height, img_width,
+                                                                                       NMSRADIUS, threshold, k);
     }
 }
 } // namespace cv

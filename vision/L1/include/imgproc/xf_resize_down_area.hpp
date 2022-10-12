@@ -547,13 +547,15 @@ template <int SRC_ROWS,
           int PLANES,
           int DEPTH,
           int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH,
           int DST_ROWS,
           int DST_COLS,
           int SRC_TC,
           int DST_TC>
-void xFResizeAreaDownScale(xf::cv::Mat<DEPTH, SRC_ROWS, SRC_COLS, NPC>& stream_in,
-                           xf::cv::Mat<DEPTH, DST_ROWS, DST_COLS, NPC>& resize_out) {
+void xFResizeAreaDownScale(xf::cv::Mat<DEPTH, SRC_ROWS, SRC_COLS, NPC, XFCVDEPTH_IN>& stream_in,
+                           xf::cv::Mat<DEPTH, DST_ROWS, DST_COLS, NPC, XFCVDEPTH_OUT>& resize_out) {
     unsigned short height = stream_in.rows;
     unsigned short width = stream_in.cols;
     unsigned short out_height = resize_out.rows;

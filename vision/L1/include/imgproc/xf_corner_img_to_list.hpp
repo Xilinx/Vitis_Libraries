@@ -21,8 +21,13 @@
 #include "common/xf_common.hpp"
 namespace xf {
 namespace cv {
-template <unsigned int MAXCORNERSNO, unsigned int TYPE, unsigned int ROWS, unsigned int COLS, unsigned int NPC>
-void cornersImgToList(xf::cv::Mat<TYPE, ROWS, COLS, NPC>& _src,
+template <unsigned int MAXCORNERSNO,
+          unsigned int TYPE,
+          unsigned int ROWS,
+          unsigned int COLS,
+          unsigned int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT>
+void cornersImgToList(xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src,
                       unsigned int list[MAXCORNERSNO],
                       unsigned int* ncorners) {
     int cornerCount = 0;

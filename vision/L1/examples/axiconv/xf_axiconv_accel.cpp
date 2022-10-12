@@ -25,7 +25,7 @@ void axiconv_accel(hls::stream<ap_axiu<8, 1, 1, 1> >& src, hls::stream<ap_axiu<8
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1> src_mat(rows, cols);
+    xf::cv::Mat<XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1, XF_CV_DEPTH_IN_1> src_mat(rows, cols);
 // clang-format off
     #pragma HLS dataflow
     // clang-format on

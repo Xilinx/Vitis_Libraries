@@ -5,12 +5,12 @@
     ], 
     "flow": "vitis", 
     "platform_allowlist": [
-        "u200",
-		"aws-vu9p-f1",
-		"vck190",		
+        "u200", 
+        "aws-vu9p-f1", 
+        "vck190", 
         "zcu102", 
-        "zcu104",
-		"u50"
+        "zcu104", 
+        "u50"
     ], 
     "platform_blocklist": [
         "u280", 
@@ -44,7 +44,7 @@
                     ]
                 }
             }
-        },
+        }, 
         "aws-vu9p-f1": {
             "host": {
                 "compiler": {
@@ -58,37 +58,55 @@
                     ]
                 }
             }
-        },
+        }, 
         "vck190": {
             "host": {
                 "compiler": {
                     "includepaths": [
-						"$(SYSROOT)/usr/include",
+                        "$(SYSROOT)/usr/include", 
                         "$(SYSROOT)/usr/include/opencv4"
-                    ], 
-                    "options": "--sysroot=$(SYSROOT)"
+                    ]
                 }, 
                 "linker": {
                     "librarypaths": [
                         "$(SYSROOT)/usr/lib", 
                         "${SYSROOT}/lib"
                     ]
+                }, 
+                "compiler_x86": {
+                    "includepaths": [
+                        "$(OPENCV_INCLUDE)"
+                    ]
+                }, 
+                "linker_x86": {
+                    "librarypaths": [
+                        "$(OPENCV_LIB)"
+                    ]
                 }
             }
-        },
+        }, 
         "zcu102": {
             "host": {
                 "compiler": {
                     "includepaths": [
-                        "$(SYSROOT)/usr/include",
-						"$(SYSROOT)/usr/include/opencv4"
-                    ], 
-                    "options": "--sysroot=$(SYSROOT)"
+                        "$(SYSROOT)/usr/include", 
+                        "$(SYSROOT)/usr/include/opencv4"
+                    ]
                 }, 
                 "linker": {
                     "librarypaths": [
                         "$(SYSROOT)/usr/lib", 
                         "${SYSROOT}/lib"
+                    ]
+                }, 
+                "compiler_x86": {
+                    "includepaths": [
+                        "$(OPENCV_INCLUDE)"
+                    ]
+                }, 
+                "linker_x86": {
+                    "librarypaths": [
+                        "$(OPENCV_LIB)"
                     ]
                 }
             }
@@ -97,15 +115,24 @@
             "host": {
                 "compiler": {
                     "includepaths": [
-                        "$(SYSROOT)/usr/include",
-						"$(SYSROOT)/usr/include/opencv4"
-                    ], 
-                    "options": "--sysroot=$(SYSROOT)"
+                        "$(SYSROOT)/usr/include", 
+                        "$(SYSROOT)/usr/include/opencv4"
+                    ]
                 }, 
                 "linker": {
                     "librarypaths": [
                         "$(SYSROOT)/usr/lib", 
                         "${SYSROOT}lib"
+                    ]
+                }, 
+                "compiler_x86": {
+                    "includepaths": [
+                        "$(OPENCV_INCLUDE)"
+                    ]
+                }, 
+                "linker_x86": {
+                    "librarypaths": [
+                        "$(OPENCV_LIB)"
                     ]
                 }
             }
@@ -146,7 +173,7 @@
     ], 
     "data": [
         "LIB_DIR/data/ltm_input_s.png", 
-	"LIB_DIR/data/ltm_input.png"
+        "LIB_DIR/data/ltm_input.png"
     ], 
     "host": {
         "host_exe": "globaltonemapping", 
@@ -156,10 +183,10 @@
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-				"LIB_DIR/L2/tests/globaltonemapping/gtm_RO_16U",
+                "LIB_DIR/L2/tests/globaltonemapping/gtm_RO_16U", 
                 "LIB_DIR/L2/examples/globaltonemapping"
             ], 
-            "options": "-O3", 
+            "options": "-O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include", 
             "symbols": []
         }
     }, 
@@ -167,7 +194,7 @@
         "compiler": {
             "symbols": [], 
             "includepaths": [
-				"LIB_DIR/L2/tests/globaltonemapping/gtm_RO_16U",
+                "LIB_DIR/L2/tests/globaltonemapping/gtm_RO_16U", 
                 "LIB_DIR/L2/examples/globaltonemapping"
             ], 
             "clflags": []
@@ -175,13 +202,15 @@
     }, 
     "containers": [
         {
-            "name": "krnl_gtm",
+            "name": "krnl_gtm", 
             "accelerators": [
                 {
                     "name": "gtm_accel", 
-                    "location": "LIB_DIR/L2/examples/globaltonemapping/xf_gtm_accel.cpp"
+                    "location": "LIB_DIR/L2/examples/globaltonemapping/xf_gtm_accel.cpp",
+                    "frequency": 150.0
                 }
-            ]
+            ],
+            "frequency": 150.0
         }
     ], 
     "check_env": [
@@ -212,5 +241,5 @@
             "vitis_hw"
         ], 
         "category": "full"
-    } 
+    }
 }

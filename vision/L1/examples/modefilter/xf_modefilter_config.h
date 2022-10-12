@@ -29,7 +29,7 @@
 #define WIDTH 128
 
 // Set the optimization type:
-#if NO == 1
+#if SPC == 1
 #define NPC1 XF_NPPC1
 #define PTR_WIDTH 128
 #else

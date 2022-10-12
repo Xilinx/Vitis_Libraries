@@ -31,18 +31,18 @@ void aec_kernel(ap_uint<INPUT_PTR_WIDTH>* src,
                 uint32_t hist0[1][256],
                 uint32_t hist1[1][256]) {
 #pragma HLS INLINE OFF
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPIX> imgInput(rows, cols);
-    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPIX> imgOutput(rows, cols);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_IN_1> imgInput(rows, cols);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_OUT_1> imgOutput(rows, cols);
 
 // clang-format off
 #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPIX>(src, imgInput);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_IN_1>(src, imgInput);
 
-    xf::cv::autoexposurecorrection<IN_TYPE, IN_TYPE, SIN_CHANNEL_TYPE, HEIGHT, WIDTH, NPIX>(imgInput, imgOutput, hist0,
-                                                                                            hist1);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPIX>(imgOutput, dst);
+    xf::cv::autoexposurecorrection<IN_TYPE, IN_TYPE, SIN_CHANNEL_TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_IN_1,
+                                   XF_CV_DEPTH_OUT_1>(imgInput, imgOutput, hist0, hist1);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_OUT_1>(imgOutput, dst);
 }
 extern "C" {
 

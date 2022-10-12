@@ -34,22 +34,23 @@ void cvtcolor_rgba2iyuv(ap_uint<32 * NPC1>* imgInput,
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1> _imgOutput1((HEIGHT / 4), WIDTH);
-    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1> _imgOutput2((HEIGHT / 4), WIDTH);
+    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> _imgOutput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_OUT_1> _imgOutput1((HEIGHT / 4), WIDTH);
+    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_OUT_2> _imgOutput2((HEIGHT / 4), WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC4, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::rgba2iyuv<XF_8UC4, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput0, _imgOutput1, _imgOutput2);
+    xf::cv::rgba2iyuv<XF_8UC4, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_1,
+                      XF_CV_DEPTH_OUT_2>(_imgInput, _imgOutput0, _imgOutput1, _imgOutput2);
 
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput0, imgOutput0);
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1>(_imgOutput1, imgOutput1);
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1>(_imgOutput2, imgOutput2);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(_imgOutput0, imgOutput0);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(_imgOutput1, imgOutput1);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_OUT_2>(_imgOutput2, imgOutput2);
 }
 #endif
 #if RGBA2NV12
@@ -66,20 +67,22 @@ void cvtcolor_rgba2nv12(ap_uint<32 * NPC1>* imgInput, ap_uint<8 * NPC1>* imgOutp
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2> _imgOutput1((HEIGHT / 2), (WIDTH / 2));
+    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> _imgOutput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_OUT_1> _imgOutput1((HEIGHT / 2), (WIDTH / 2));
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC4, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::rgba2nv12<XF_8UC4, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(_imgInput, _imgOutput0, _imgOutput1);
+    xf::cv::rgba2nv12<XF_8UC4, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT_0,
+                      XF_CV_DEPTH_OUT_1>(_imgInput, _imgOutput0, _imgOutput1);
 
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput0, imgOutput0);
-    xf::cv::xfMat2Array<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2>(_imgOutput1, imgOutput1);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(_imgOutput0, imgOutput0);
+    xf::cv::xfMat2Array<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_OUT_1>(_imgOutput1,
+                                                                                                imgOutput1);
 }
 #endif
 #if RGBA2NV21
@@ -96,20 +99,22 @@ void cvtcolor_rgba2nv21(ap_uint<32 * NPC1>* imgInput, ap_uint<8 * NPC1>* imgOutp
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2> _imgOutput1((HEIGHT / 2), (WIDTH / 2));
+    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> _imgOutput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_OUT_1> _imgOutput1((HEIGHT / 2), (WIDTH / 2));
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC4, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::rgba2nv21<XF_8UC4, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(_imgInput, _imgOutput0, _imgOutput1);
+    xf::cv::rgba2nv21<XF_8UC4, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT_0,
+                      XF_CV_DEPTH_OUT_1>(_imgInput, _imgOutput0, _imgOutput1);
 
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput0, imgOutput0);
-    xf::cv::xfMat2Array<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2>(_imgOutput1, imgOutput1);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(_imgOutput0, imgOutput0);
+    xf::cv::xfMat2Array<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_OUT_1>(_imgOutput1,
+                                                                                                imgOutput1);
 }
 #endif
 #if RGBA2YUV4
@@ -130,22 +135,23 @@ void cvtcolor_rgba2yuv4(ap_uint<32 * NPC1>* imgInput,
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput1(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput2(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> _imgOutput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> _imgOutput1(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_2> _imgOutput2(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC4, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::rgba2yuv4<XF_8UC4, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput0, _imgOutput1, _imgOutput2);
+    xf::cv::rgba2yuv4<XF_8UC4, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_1,
+                      XF_CV_DEPTH_OUT_2>(_imgInput, _imgOutput0, _imgOutput1, _imgOutput2);
 
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput0, imgOutput0);
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput1, imgOutput1);
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput2, imgOutput2);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(_imgOutput0, imgOutput0);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(_imgOutput1, imgOutput1);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_2>(_imgOutput2, imgOutput2);
 }
 #endif
 #if RGB2IYUV
@@ -166,22 +172,23 @@ void cvtcolor_rgb2iyuv(ap_uint<32 * NPC1>* imgInput,
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1> _imgOutput1((HEIGHT / 4), WIDTH);
-    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1> _imgOutput2((HEIGHT / 4), WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> _imgOutput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_OUT_1> _imgOutput1((HEIGHT / 4), WIDTH);
+    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_OUT_2> _imgOutput2((HEIGHT / 4), WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::rgb2iyuv<XF_8UC3, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput0, _imgOutput1, _imgOutput2);
+    xf::cv::rgb2iyuv<XF_8UC3, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_1,
+                     XF_CV_DEPTH_OUT_2>(_imgInput, _imgOutput0, _imgOutput1, _imgOutput2);
 
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput0, imgOutput0);
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1>(_imgOutput1, imgOutput1);
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1>(_imgOutput2, imgOutput2);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(_imgOutput0, imgOutput0);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(_imgOutput1, imgOutput1);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_OUT_2>(_imgOutput2, imgOutput2);
 }
 #endif
 #if RGB2NV12
@@ -198,20 +205,22 @@ void cvtcolor_rgb2nv12(ap_uint<32 * NPC1>* imgInput, ap_uint<8 * NPC1>* imgOutpu
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2> _imgOutput1((HEIGHT / 2), (WIDTH / 2));
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> _imgOutput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_OUT_1> _imgOutput1((HEIGHT / 2), (WIDTH / 2));
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::rgb2nv12<XF_8UC3, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(_imgInput, _imgOutput0, _imgOutput1);
+    xf::cv::rgb2nv12<XF_8UC3, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT_0,
+                     XF_CV_DEPTH_OUT_1>(_imgInput, _imgOutput0, _imgOutput1);
 
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput0, imgOutput0);
-    xf::cv::xfMat2Array<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2>(_imgOutput1, imgOutput1);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(_imgOutput0, imgOutput0);
+    xf::cv::xfMat2Array<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_OUT_1>(_imgOutput1,
+                                                                                                imgOutput1);
 }
 #endif
 #if RGB2NV21
@@ -228,20 +237,22 @@ void cvtcolor_rgb2nv21(ap_uint<32 * NPC1>* imgInput, ap_uint<8 * NPC1>* imgOutpu
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2> _imgOutput1((HEIGHT / 2), (WIDTH / 2));
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> _imgOutput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_OUT_1> _imgOutput1((HEIGHT / 2), (WIDTH / 2));
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::rgb2nv21<XF_8UC3, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(_imgInput, _imgOutput0, _imgOutput1);
+    xf::cv::rgb2nv21<XF_8UC3, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT_0,
+                     XF_CV_DEPTH_OUT_1>(_imgInput, _imgOutput0, _imgOutput1);
 
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput0, imgOutput0);
-    xf::cv::xfMat2Array<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2>(_imgOutput1, imgOutput1);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(_imgOutput0, imgOutput0);
+    xf::cv::xfMat2Array<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_OUT_1>(_imgOutput1,
+                                                                                                imgOutput1);
 }
 #endif
 #if RGB2YUV4
@@ -262,22 +273,23 @@ void cvtcolor_rgb2yuv4(ap_uint<32 * NPC1>* imgInput,
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput1(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput2(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> _imgOutput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> _imgOutput1(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_2> _imgOutput2(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::rgb2yuv4<XF_8UC3, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput0, _imgOutput1, _imgOutput2);
+    xf::cv::rgb2yuv4<XF_8UC3, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_1,
+                     XF_CV_DEPTH_OUT_2>(_imgInput, _imgOutput0, _imgOutput1, _imgOutput2);
 
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput0, imgOutput0);
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput1, imgOutput1);
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput2, imgOutput2);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(_imgOutput0, imgOutput0);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(_imgOutput1, imgOutput1);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_2>(_imgOutput2, imgOutput2);
 }
 #endif
 #if RGB2UYVY
@@ -291,18 +303,18 @@ void cvtcolor_rgb2uyvy(ap_uint<32 * NPC1>* imgInput, ap_uint<16 * NPC1>* imgOutp
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::rgb2uyvy<XF_8UC3, XF_16UC1, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::rgb2uyvy<XF_8UC3, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if RGB2YUYV
@@ -316,18 +328,18 @@ void cvtcolor_rgb2yuyv(ap_uint<32 * NPC1>* imgInput, ap_uint<16 * NPC1>* imgOutp
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::rgb2yuyv<XF_8UC3, XF_16UC1, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::rgb2yuyv<XF_8UC3, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if RGB2BGR
@@ -341,18 +353,18 @@ void cvtcolor_rgb2bgr(ap_uint<32 * NPC1>* imgInput, ap_uint<32 * NPC1>* imgOutpu
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::rgb2bgr<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::rgb2bgr<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if BGR2UYVY
@@ -366,18 +378,18 @@ void cvtcolor_bgr2uyvy(ap_uint<32 * NPC1>* imgInput, ap_uint<16 * NPC1>* imgOutp
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::bgr2uyvy<XF_8UC3, XF_16UC1, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::bgr2uyvy<XF_8UC3, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if BGR2YUYV
@@ -391,18 +403,18 @@ void cvtcolor_bgr2yuyv(ap_uint<32 * NPC1>* imgInput, ap_uint<16 * NPC1>* imgOutp
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::bgr2yuyv<XF_8UC3, XF_16UC1, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::bgr2yuyv<XF_8UC3, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if BGR2RGB
@@ -416,18 +428,18 @@ void cvtcolor_bgr2rgb(ap_uint<32 * NPC1>* imgInput, ap_uint<32 * NPC1>* imgOutpu
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::bgr2rgb<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::bgr2rgb<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if BGR2NV12
@@ -444,20 +456,22 @@ void cvtcolor_bgr2nv12(ap_uint<32 * NPC1>* imgInput, ap_uint<8 * NPC1>* imgOutpu
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2> _imgOutput1((HEIGHT / 2), (WIDTH / 2));
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> _imgOutput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_OUT_1> _imgOutput1((HEIGHT / 2), (WIDTH / 2));
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::bgr2nv12<XF_8UC3, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(_imgInput, _imgOutput0, _imgOutput1);
+    xf::cv::bgr2nv12<XF_8UC3, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT_0,
+                     XF_CV_DEPTH_OUT_1>(_imgInput, _imgOutput0, _imgOutput1);
 
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput0, imgOutput0);
-    xf::cv::xfMat2Array<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2>(_imgOutput1, imgOutput1);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(_imgOutput0, imgOutput0);
+    xf::cv::xfMat2Array<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_OUT_1>(_imgOutput1,
+                                                                                                imgOutput1);
 }
 #endif
 #if BGR2NV21
@@ -474,20 +488,22 @@ void cvtcolor_bgr2nv21(ap_uint<32 * NPC1>* imgInput, ap_uint<8 * NPC1>* imgOutpu
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2> _imgOutput1((HEIGHT / 2), (WIDTH / 2));
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> _imgOutput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_OUT_1> _imgOutput1((HEIGHT / 2), (WIDTH / 2));
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::bgr2nv21<XF_8UC3, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(_imgInput, _imgOutput0, _imgOutput1);
+    xf::cv::bgr2nv21<XF_8UC3, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT_0,
+                     XF_CV_DEPTH_OUT_1>(_imgInput, _imgOutput0, _imgOutput1);
 
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput0, imgOutput0);
-    xf::cv::xfMat2Array<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2>(_imgOutput1, imgOutput1);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(_imgOutput0, imgOutput0);
+    xf::cv::xfMat2Array<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_OUT_1>(_imgOutput1,
+                                                                                                imgOutput1);
 }
 #endif
 #if IYUV2NV12
@@ -512,25 +528,27 @@ void cvtcolor_iyuv2nv12(ap_uint<8 * NPC1>* imgInput0,
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgInput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1> _imgInput1((HEIGHT / 4), WIDTH);
-    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1> _imgInput2((HEIGHT / 4), WIDTH);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2> _imgOutput1((HEIGHT / 2), (WIDTH / 2));
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> _imgInput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_IN_1> _imgInput1((HEIGHT / 4), WIDTH);
+    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_IN_2, XF_CV_DEPTH_IN_2> _imgInput2((HEIGHT / 4), WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> _imgOutput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_OUT_1> _imgOutput1((HEIGHT / 2), (WIDTH / 2));
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput0, _imgInput0);
-    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1>(imgInput1, _imgInput1);
-    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1>(imgInput2, _imgInput2);
+    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(imgInput0, _imgInput0);
+    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_IN_1>(imgInput1, _imgInput1);
+    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_IN_2>(imgInput2, _imgInput2);
 
-    xf::cv::iyuv2nv12<XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(_imgInput0, _imgInput1, _imgInput2, _imgOutput0,
-                                                                   _imgOutput1);
+    xf::cv::iyuv2nv12<XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2,
+                      XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_1>(_imgInput0, _imgInput1, _imgInput2, _imgOutput0,
+                                                            _imgOutput1);
 
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput0, imgOutput0);
-    xf::cv::xfMat2Array<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2>(_imgOutput1, imgOutput1);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(_imgOutput0, imgOutput0);
+    xf::cv::xfMat2Array<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_OUT_1>(_imgOutput1,
+                                                                                                imgOutput1);
 }
 #endif
 #if IYUV2RGBA
@@ -551,22 +569,23 @@ void cvtcolor_iyuv2rgba(ap_uint<8 * NPC1>* imgInput0,
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgInput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1> _imgInput1((HEIGHT / 4), WIDTH);
-    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1> _imgInput2((HEIGHT / 4), WIDTH);
-    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> _imgInput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_IN_1> _imgInput1((HEIGHT / 4), WIDTH);
+    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_IN_2, XF_CV_DEPTH_IN_2> _imgInput2((HEIGHT / 4), WIDTH);
+    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput0, _imgInput0);
-    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1>(imgInput1, _imgInput1);
-    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1>(imgInput2, _imgInput2);
+    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(imgInput0, _imgInput0);
+    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_IN_1>(imgInput1, _imgInput1);
+    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_IN_2>(imgInput2, _imgInput2);
 
-    xf::cv::iyuv2rgba<XF_8UC1, XF_8UC4, HEIGHT, WIDTH, NPC1>(_imgInput0, _imgInput1, _imgInput2, _imgOutput);
+    xf::cv::iyuv2rgba<XF_8UC1, XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2,
+                      XF_CV_DEPTH_OUT>(_imgInput0, _imgInput1, _imgInput2, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC4, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if IYUV2RGB
@@ -587,22 +606,23 @@ void cvtcolor_iyuv2rgb(ap_uint<8 * NPC1>* imgInput0,
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgInput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1> _imgInput1((HEIGHT / 4), WIDTH);
-    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1> _imgInput2((HEIGHT / 4), WIDTH);
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> _imgInput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_IN_1> _imgInput1((HEIGHT / 4), WIDTH);
+    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_IN_2> _imgInput2((HEIGHT / 4), WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput0, _imgInput0);
-    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1>(imgInput1, _imgInput1);
-    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1>(imgInput2, _imgInput2);
+    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(imgInput0, _imgInput0);
+    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_IN_1>(imgInput1, _imgInput1);
+    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_IN_2>(imgInput2, _imgInput2);
 
-    xf::cv::iyuv2rgb<XF_8UC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgInput0, _imgInput1, _imgInput2, _imgOutput);
+    xf::cv::iyuv2rgb<XF_8UC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2,
+                     XF_CV_DEPTH_OUT>(_imgInput0, _imgInput1, _imgInput2, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if IYUV2YUV4
@@ -629,27 +649,28 @@ void cvtcolor_iyuv2yuv4(ap_uint<8 * NPC1>* imgInput0,
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgInput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1> _imgInput1((HEIGHT / 4), WIDTH);
-    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1> _imgInput2((HEIGHT / 4), WIDTH);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput1(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput2(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> _imgInput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_IN_1> _imgInput1((HEIGHT / 4), WIDTH);
+    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_IN_2> _imgInput2((HEIGHT / 4), WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> _imgOutput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> _imgOutput1(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_2> _imgOutput2(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput0, _imgInput0);
-    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1>(imgInput1, _imgInput1);
-    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1>(imgInput2, _imgInput2);
+    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(imgInput0, _imgInput0);
+    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_IN_1>(imgInput1, _imgInput1);
+    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_IN_2>(imgInput2, _imgInput2);
 
-    xf::cv::iyuv2yuv4<XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgInput0, _imgInput1, _imgInput2, _imgOutput0, _imgOutput1,
-                                                    _imgOutput2);
+    xf::cv::iyuv2yuv4<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2,
+                      XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_1, XF_CV_DEPTH_OUT_2>(_imgInput0, _imgInput1, _imgInput2,
+                                                                               _imgOutput0, _imgOutput1, _imgOutput2);
 
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput0, imgOutput0);
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput1, imgOutput1);
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput2, imgOutput2);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(_imgOutput0, imgOutput0);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(_imgOutput1, imgOutput1);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_2>(_imgOutput2, imgOutput2);
 }
 #endif
 #if NV122IYUV
@@ -674,25 +695,26 @@ void cvtcolor_nv122iyuv(ap_uint<8 * NPC1>* imgInput0,
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgInput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2> _imgInput1((HEIGHT / 2), (WIDTH / 2));
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1> _imgOutput1((HEIGHT / 4), WIDTH);
-    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1> _imgOutput2((HEIGHT / 4), WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> _imgInput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1> _imgInput1((HEIGHT / 2), (WIDTH / 2));
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> _imgOutput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_OUT_1> _imgOutput1((HEIGHT / 4), WIDTH);
+    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_OUT_2> _imgOutput2((HEIGHT / 4), WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput0, _imgInput0);
-    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2>(imgInput1, _imgInput1);
+    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(imgInput0, _imgInput0);
+    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1>(imgInput1, _imgInput1);
 
-    xf::cv::nv122iyuv<XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(_imgInput0, _imgInput1, _imgOutput0, _imgOutput1,
-                                                                   _imgOutput2);
+    xf::cv::nv122iyuv<XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                      XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_1, XF_CV_DEPTH_OUT_2>(_imgInput0, _imgInput1, _imgOutput0,
+                                                                               _imgOutput1, _imgOutput2);
 
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput0, imgOutput0);
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1>(_imgOutput1, imgOutput1);
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1>(_imgOutput2, imgOutput2);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(_imgOutput0, imgOutput0);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(_imgOutput1, imgOutput1);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_OUT_2>(_imgOutput2, imgOutput2);
 }
 #endif
 #if NV122RGBA
@@ -709,20 +731,21 @@ void cvtcolor_nv122rgba(ap_uint<8 * NPC1>* imgInput0, ap_uint<16 * NPC2>* imgInp
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgInput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2> _imgInput1((HEIGHT / 2), (WIDTH / 2));
-    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> _imgInput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1> _imgInput1((HEIGHT / 2), (WIDTH / 2));
+    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput0, _imgInput0);
-    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2>(imgInput1, _imgInput1);
+    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(imgInput0, _imgInput0);
+    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1>(imgInput1, _imgInput1);
 
-    xf::cv::nv122rgba<XF_8UC1, XF_8UC2, XF_8UC4, HEIGHT, WIDTH, NPC1, NPC2>(_imgInput0, _imgInput1, _imgOutput);
+    xf::cv::nv122rgba<XF_8UC1, XF_8UC2, XF_8UC4, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                      XF_CV_DEPTH_OUT>(_imgInput0, _imgInput1, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC4, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if NV122YUV4
@@ -747,25 +770,26 @@ void cvtcolor_nv122yuv4(ap_uint<8 * NPC1>* imgInput0,
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgInput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2> _imgInput1((HEIGHT / 2), (WIDTH / 2));
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput1(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput2(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> _imgInput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1> _imgInput1((HEIGHT / 2), (WIDTH / 2));
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> _imgOutput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> _imgOutput1(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_2> _imgOutput2(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput0, _imgInput0);
-    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2>(imgInput1, _imgInput1);
+    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(imgInput0, _imgInput0);
+    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1>(imgInput1, _imgInput1);
 
-    xf::cv::nv122yuv4<XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(_imgInput0, _imgInput1, _imgOutput0, _imgOutput1,
-                                                                   _imgOutput2);
+    xf::cv::nv122yuv4<XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                      XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_1, XF_CV_DEPTH_OUT_2>(_imgInput0, _imgInput1, _imgOutput0,
+                                                                               _imgOutput1, _imgOutput2);
 
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput0, imgOutput0);
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput1, imgOutput1);
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput2, imgOutput2);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(_imgOutput0, imgOutput0);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(_imgOutput1, imgOutput1);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_2>(_imgOutput2, imgOutput2);
 }
 #endif
 #if NV122RGB
@@ -782,20 +806,21 @@ void cvtcolor_nv122rgb(ap_uint<8 * NPC1>* imgInput0, ap_uint<16 * NPC2>* imgInpu
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgInput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2> _imgInput1((HEIGHT / 2), (WIDTH / 2));
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> _imgInput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1> _imgInput1((HEIGHT / 2), (WIDTH / 2));
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput0, _imgInput0);
-    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2>(imgInput1, _imgInput1);
+    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(imgInput0, _imgInput0);
+    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1>(imgInput1, _imgInput1);
 
-    xf::cv::nv122rgb<XF_8UC1, XF_8UC2, XF_8UC3, HEIGHT, WIDTH, NPC1, NPC2>(_imgInput0, _imgInput1, _imgOutput);
+    xf::cv::nv122rgb<XF_8UC1, XF_8UC2, XF_8UC3, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                     XF_CV_DEPTH_OUT>(_imgInput0, _imgInput1, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if NV122BGR
@@ -812,20 +837,21 @@ void cvtcolor_nv122bgr(ap_uint<8 * NPC1>* imgInput0, ap_uint<16 * NPC2>* imgInpu
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgInput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2> _imgInput1((HEIGHT / 2), (WIDTH / 2));
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> _imgInput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1> _imgInput1((HEIGHT / 2), (WIDTH / 2));
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput0, _imgInput0);
-    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2>(imgInput1, _imgInput1);
+    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(imgInput0, _imgInput0);
+    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1>(imgInput1, _imgInput1);
 
-    xf::cv::nv122bgr<XF_8UC1, XF_8UC2, XF_8UC3, HEIGHT, WIDTH, NPC1, NPC2>(_imgInput0, _imgInput1, _imgOutput);
+    xf::cv::nv122bgr<XF_8UC1, XF_8UC2, XF_8UC3, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                     XF_CV_DEPTH_OUT>(_imgInput0, _imgInput1, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if NV122UYVY
@@ -842,20 +868,21 @@ void cvtcolor_nv122uyvy(ap_uint<8 * NPC1>* imgInput0, ap_uint<16 * NPC2>* imgInp
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgInput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2> _imgInput1((HEIGHT / 2), (WIDTH / 2));
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> _imgInput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1> _imgInput1((HEIGHT / 2), (WIDTH / 2));
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput0, _imgInput0);
-    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2>(imgInput1, _imgInput1);
+    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(imgInput0, _imgInput0);
+    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1>(imgInput1, _imgInput1);
 
-    xf::cv::nv122uyvy<XF_8UC1, XF_8UC2, XF_16UC1, HEIGHT, WIDTH, NPC1, NPC2>(_imgInput0, _imgInput1, _imgOutput);
+    xf::cv::nv122uyvy<XF_8UC1, XF_8UC2, XF_16UC1, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                      XF_CV_DEPTH_OUT>(_imgInput0, _imgInput1, _imgOutput);
 
-    xf::cv::xfMat2Array<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if NV122YUYV
@@ -872,20 +899,21 @@ void cvtcolor_nv122yuyv(ap_uint<8 * NPC1>* imgInput0, ap_uint<16 * NPC2>* imgInp
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgInput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2> _imgInput1((HEIGHT / 2), (WIDTH / 2));
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> _imgInput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1> _imgInput1((HEIGHT / 2), (WIDTH / 2));
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput0, _imgInput0);
-    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2>(imgInput1, _imgInput1);
+    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(imgInput0, _imgInput0);
+    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1>(imgInput1, _imgInput1);
 
-    xf::cv::nv122yuyv<XF_8UC1, XF_8UC2, XF_16UC1, HEIGHT, WIDTH, NPC1, NPC2>(_imgInput0, _imgInput1, _imgOutput);
+    xf::cv::nv122yuyv<XF_8UC1, XF_8UC2, XF_16UC1, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                      XF_CV_DEPTH_OUT>(_imgInput0, _imgInput1, _imgOutput);
 
-    xf::cv::xfMat2Array<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if NV122NV21
@@ -908,22 +936,24 @@ void cvtcolor_nv122nv21(ap_uint<8 * NPC1>* imgInput0,
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgInput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2> _imgInput1((HEIGHT / 2), (WIDTH / 2));
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2> _imgOutput1((HEIGHT / 2), (WIDTH / 2));
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> _imgInput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1> _imgInput1((HEIGHT / 2), (WIDTH / 2));
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> _imgOutput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_OUT_1> _imgOutput1((HEIGHT / 2), (WIDTH / 2));
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput0, _imgInput0);
-    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2>(imgInput1, _imgInput1);
+    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(imgInput0, _imgInput0);
+    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1>(imgInput1, _imgInput1);
 
-    xf::cv::nv122nv21<XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(_imgInput0, _imgInput1, _imgOutput0, _imgOutput1);
+    xf::cv::nv122nv21<XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                      XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_1>(_imgInput0, _imgInput1, _imgOutput0, _imgOutput1);
 
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput0, imgOutput0);
-    xf::cv::xfMat2Array<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2>(_imgOutput1, imgOutput1);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(_imgOutput0, imgOutput0);
+    xf::cv::xfMat2Array<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_OUT_1>(_imgOutput1,
+                                                                                                imgOutput1);
 }
 #endif
 #if NV212IYUV
@@ -948,25 +978,26 @@ void cvtcolor_nv212iyuv(ap_uint<8 * NPC1>* imgInput0,
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgInput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2> _imgInput1((HEIGHT / 2), (WIDTH / 2));
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1> _imgOutput1((HEIGHT / 4), WIDTH);
-    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1> _imgOutput2((HEIGHT / 4), WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> _imgInput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1> _imgInput1((HEIGHT / 2), (WIDTH / 2));
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> _imgOutput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_OUT_1> _imgOutput1((HEIGHT / 4), WIDTH);
+    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_OUT_2> _imgOutput2((HEIGHT / 4), WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput0, _imgInput0);
-    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2>(imgInput1, _imgInput1);
+    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(imgInput0, _imgInput0);
+    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1>(imgInput1, _imgInput1);
 
-    xf::cv::nv212iyuv<XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(_imgInput0, _imgInput1, _imgOutput0, _imgOutput1,
-                                                                   _imgOutput2);
+    xf::cv::nv212iyuv<XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                      XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_1, XF_CV_DEPTH_OUT_2>(_imgInput0, _imgInput1, _imgOutput0,
+                                                                               _imgOutput1, _imgOutput2);
 
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput0, imgOutput0);
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1>(_imgOutput1, imgOutput1);
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1>(_imgOutput2, imgOutput2);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(_imgOutput0, imgOutput0);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(_imgOutput1, imgOutput1);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_OUT_2>(_imgOutput2, imgOutput2);
 }
 #endif
 #if NV212RGBA
@@ -983,20 +1014,21 @@ void cvtcolor_nv212rgba(ap_uint<8 * NPC1>* imgInput0, ap_uint<16 * NPC2>* imgInp
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgInput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2> _imgInput1((HEIGHT / 2), (WIDTH / 2));
-    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> _imgInput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1> _imgInput1((HEIGHT / 2), (WIDTH / 2));
+    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput0, _imgInput0);
-    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2>(imgInput1, _imgInput1);
+    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(imgInput0, _imgInput0);
+    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1>(imgInput1, _imgInput1);
 
-    xf::cv::nv212rgba<XF_8UC1, XF_8UC2, XF_8UC4, HEIGHT, WIDTH, NPC1, NPC2>(_imgInput0, _imgInput1, _imgOutput);
+    xf::cv::nv212rgba<XF_8UC1, XF_8UC2, XF_8UC4, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                      XF_CV_DEPTH_OUT>(_imgInput0, _imgInput1, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC4, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if NV212RGB
@@ -1013,20 +1045,21 @@ void cvtcolor_nv212rgb(ap_uint<8 * NPC1>* imgInput0, ap_uint<16 * NPC2>* imgInpu
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgInput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2> _imgInput1((HEIGHT / 2), (WIDTH / 2));
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> _imgInput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1> _imgInput1((HEIGHT / 2), (WIDTH / 2));
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput0, _imgInput0);
-    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2>(imgInput1, _imgInput1);
+    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(imgInput0, _imgInput0);
+    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1>(imgInput1, _imgInput1);
 
-    xf::cv::nv212rgb<XF_8UC1, XF_8UC2, XF_8UC3, HEIGHT, WIDTH, NPC1, NPC2>(_imgInput0, _imgInput1, _imgOutput);
+    xf::cv::nv212rgb<XF_8UC1, XF_8UC2, XF_8UC3, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                     XF_CV_DEPTH_OUT>(_imgInput0, _imgInput1, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if NV212BGR
@@ -1043,20 +1076,21 @@ void cvtcolor_nv212bgr(ap_uint<8 * NPC1>* imgInput0, ap_uint<16 * NPC2>* imgInpu
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgInput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2> _imgInput1((HEIGHT / 2), (WIDTH / 2));
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> _imgInput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1> _imgInput1((HEIGHT / 2), (WIDTH / 2));
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput0, _imgInput0);
-    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2>(imgInput1, _imgInput1);
+    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(imgInput0, _imgInput0);
+    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1>(imgInput1, _imgInput1);
 
-    xf::cv::nv212bgr<XF_8UC1, XF_8UC2, XF_8UC3, HEIGHT, WIDTH, NPC1, NPC2>(_imgInput0, _imgInput1, _imgOutput);
+    xf::cv::nv212bgr<XF_8UC1, XF_8UC2, XF_8UC3, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                     XF_CV_DEPTH_OUT>(_imgInput0, _imgInput1, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if NV212YUV4
@@ -1081,25 +1115,26 @@ void cvtcolor_nv212yuv4(ap_uint<8 * NPC1>* imgInput0,
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgInput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2> _imgInput1((HEIGHT / 2), (WIDTH / 2));
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput1(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput2(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> _imgInput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1> _imgInput1((HEIGHT / 2), (WIDTH / 2));
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> _imgOutput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> _imgOutput1(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_2> _imgOutput2(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput0, _imgInput0);
-    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2>(imgInput1, _imgInput1);
+    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(imgInput0, _imgInput0);
+    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1>(imgInput1, _imgInput1);
 
-    xf::cv::nv212yuv4<XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(_imgInput0, _imgInput1, _imgOutput0, _imgOutput1,
-                                                                   _imgOutput2);
+    xf::cv::nv212yuv4<XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                      XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_1, XF_CV_DEPTH_OUT_2>(_imgInput0, _imgInput1, _imgOutput0,
+                                                                               _imgOutput1, _imgOutput2);
 
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput0, imgOutput0);
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput1, imgOutput1);
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput2, imgOutput2);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(_imgOutput0, imgOutput0);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(_imgOutput1, imgOutput1);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_2>(_imgOutput2, imgOutput2);
 }
 #endif
 #if NV212UYVY
@@ -1116,20 +1151,21 @@ void cvtcolor_nv212uyvy(ap_uint<8 * NPC1>* imgInput0, ap_uint<16 * NPC2>* imgInp
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgInput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2> _imgInput1((HEIGHT / 2), (WIDTH / 2));
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> _imgInput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1> _imgInput1((HEIGHT / 2), (WIDTH / 2));
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput0, _imgInput0);
-    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2>(imgInput1, _imgInput1);
+    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(imgInput0, _imgInput0);
+    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1>(imgInput1, _imgInput1);
 
-    xf::cv::nv212uyvy<XF_8UC1, XF_8UC2, XF_16UC1, HEIGHT, WIDTH, NPC1, NPC2>(_imgInput0, _imgInput1, _imgOutput);
+    xf::cv::nv212uyvy<XF_8UC1, XF_8UC2, XF_16UC1, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                      XF_CV_DEPTH_OUT>(_imgInput0, _imgInput1, _imgOutput);
 
-    xf::cv::xfMat2Array<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if NV212YUYV
@@ -1146,20 +1182,21 @@ void cvtcolor_nv212yuyv(ap_uint<8 * NPC1>* imgInput0, ap_uint<16 * NPC2>* imgInp
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgInput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2> _imgInput1((HEIGHT / 2), (WIDTH / 2));
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> _imgInput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1> _imgInput1((HEIGHT / 2), (WIDTH / 2));
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput0, _imgInput0);
-    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2>(imgInput1, _imgInput1);
+    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(imgInput0, _imgInput0);
+    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1>(imgInput1, _imgInput1);
 
-    xf::cv::nv212yuyv<XF_8UC1, XF_8UC2, XF_16UC1, HEIGHT, WIDTH, NPC1, NPC2>(_imgInput0, _imgInput1, _imgOutput);
+    xf::cv::nv212yuyv<XF_8UC1, XF_8UC2, XF_16UC1, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                      XF_CV_DEPTH_OUT>(_imgInput0, _imgInput1, _imgOutput);
 
-    xf::cv::xfMat2Array<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if NV212NV12
@@ -1182,22 +1219,24 @@ void cvtcolor_nv212nv12(ap_uint<8 * NPC1>* imgInput0,
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgInput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2> _imgInput1((HEIGHT / 2), (WIDTH / 2));
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2> _imgOutput1((HEIGHT / 2), (WIDTH / 2));
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> _imgInput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1> _imgInput1((HEIGHT / 2), (WIDTH / 2));
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> _imgOutput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_OUT_1> _imgOutput1((HEIGHT / 2), (WIDTH / 2));
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput0, _imgInput0);
-    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2>(imgInput1, _imgInput1);
+    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(imgInput0, _imgInput0);
+    xf::cv::Array2xfMat<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_IN_1>(imgInput1, _imgInput1);
 
-    xf::cv::nv212nv12<XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(_imgInput0, _imgInput1, _imgOutput0, _imgOutput1);
+    xf::cv::nv212nv12<XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1,
+                      XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_1>(_imgInput0, _imgInput1, _imgOutput0, _imgOutput1);
 
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput0, imgOutput0);
-    xf::cv::xfMat2Array<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2>(_imgOutput1, imgOutput1);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(_imgOutput0, imgOutput0);
+    xf::cv::xfMat2Array<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_OUT_1>(_imgOutput1,
+                                                                                                imgOutput1);
 }
 #endif
 #if UYVY2IYUV
@@ -1218,22 +1257,23 @@ void cvtcolor_uyvy2iyuv(ap_uint<16 * NPC1>* imgInput,
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1> _imgOutput1((HEIGHT / 4), WIDTH);
-    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1> _imgOutput2((HEIGHT / 4), WIDTH);
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> _imgOutput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_OUT_1> _imgOutput1((HEIGHT / 4), WIDTH);
+    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_OUT_2> _imgOutput2((HEIGHT / 4), WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::uyvy2iyuv<XF_16UC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput0, _imgOutput1, _imgOutput2);
+    xf::cv::uyvy2iyuv<XF_16UC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_1,
+                      XF_CV_DEPTH_OUT_2>(_imgInput, _imgOutput0, _imgOutput1, _imgOutput2);
 
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput0, imgOutput0);
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1>(_imgOutput1, imgOutput1);
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1>(_imgOutput2, imgOutput2);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(_imgOutput0, imgOutput0);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(_imgOutput1, imgOutput1);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_OUT_2>(_imgOutput2, imgOutput2);
 }
 #endif
 #if UYVY2NV12
@@ -1250,20 +1290,22 @@ void cvtcolor_uyvy2nv12(ap_uint<16 * NPC1>* imgInput, ap_uint<8 * NPC1>* imgOutp
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2> _imgOutput1((HEIGHT / 2), (WIDTH / 2));
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> _imgOutput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_OUT_1> _imgOutput1((HEIGHT / 2), (WIDTH / 2));
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::uyvy2nv12<XF_16UC1, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(_imgInput, _imgOutput0, _imgOutput1);
+    xf::cv::uyvy2nv12<XF_16UC1, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT_0,
+                      XF_CV_DEPTH_OUT_1, XF_CV_DEPTH_OUT_2>(_imgInput, _imgOutput0, _imgOutput1);
 
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput0, imgOutput0);
-    xf::cv::xfMat2Array<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2>(_imgOutput1, imgOutput1);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(_imgOutput0, imgOutput0);
+    xf::cv::xfMat2Array<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_OUT_1>(_imgOutput1,
+                                                                                                imgOutput1);
 }
 #endif
 #if UYVY2NV21
@@ -1280,20 +1322,22 @@ void cvtcolor_uyvy2nv21(ap_uint<16 * NPC1>* imgInput, ap_uint<8 * NPC1>* imgOutp
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2> _imgOutput1((HEIGHT / 2), (WIDTH / 2));
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> _imgOutput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_OUT_1> _imgOutput1((HEIGHT / 2), (WIDTH / 2));
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::uyvy2nv21<XF_16UC1, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(_imgInput, _imgOutput0, _imgOutput1);
+    xf::cv::uyvy2nv21<XF_16UC1, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT_0,
+                      XF_CV_DEPTH_OUT_1>(_imgInput, _imgOutput0, _imgOutput1);
 
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput0, imgOutput0);
-    xf::cv::xfMat2Array<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2>(_imgOutput1, imgOutput1);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(_imgOutput0, imgOutput0);
+    xf::cv::xfMat2Array<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_OUT_1>(_imgOutput1,
+                                                                                                imgOutput1);
 }
 #endif
 #if UYVY2RGBA
@@ -1307,18 +1351,18 @@ void cvtcolor_uyvy2rgba(ap_uint<16 * NPC1>* imgInput, ap_uint<32 * NPC1>* imgOut
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::uyvy2rgba<XF_16UC1, XF_8UC4, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::uyvy2rgba<XF_16UC1, XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC4, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if UYVY2RGB
@@ -1332,18 +1376,18 @@ void cvtcolor_uyvy2rgb(ap_uint<16 * NPC1>* imgInput, ap_uint<32 * NPC1>* imgOutp
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::uyvy2rgb<XF_16UC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::uyvy2rgb<XF_16UC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if UYVY2BGR
@@ -1357,18 +1401,18 @@ void cvtcolor_uyvy2bgr(ap_uint<16 * NPC1>* imgInput, ap_uint<32 * NPC1>* imgOutp
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::uyvy2bgr<XF_16UC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::uyvy2bgr<XF_16UC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if UYVY2YUYV
@@ -1382,18 +1426,18 @@ void cvtcolor_uyvy2yuyv(ap_uint<16 * NPC1>* imgInput, ap_uint<16 * NPC1>* imgOut
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::uyvy2yuyv<XF_16UC1, XF_16UC1, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::uyvy2yuyv<XF_16UC1, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if YUYV2IYUV
@@ -1414,22 +1458,23 @@ void cvtcolor_yuyv2iyuv(ap_uint<16 * NPC1>* imgInput,
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1> _imgOutput1((HEIGHT / 4), WIDTH);
-    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1> _imgOutput2((HEIGHT / 4), WIDTH);
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> _imgOutput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_OUT_1> _imgOutput1((HEIGHT / 4), WIDTH);
+    xf::cv::Mat<XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_OUT_2> _imgOutput2((HEIGHT / 4), WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::yuyv2iyuv<XF_16UC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput0, _imgOutput1, _imgOutput2);
+    xf::cv::yuyv2iyuv<XF_16UC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_1,
+                      XF_CV_DEPTH_OUT_2>(_imgInput, _imgOutput0, _imgOutput1, _imgOutput2);
 
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput0, imgOutput0);
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1>(_imgOutput1, imgOutput1);
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1>(_imgOutput2, imgOutput2);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(_imgOutput0, imgOutput0);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(_imgOutput1, imgOutput1);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, (HEIGHT / 4), WIDTH, NPC1, XF_CV_DEPTH_OUT_2>(_imgOutput2, imgOutput2);
 }
 #endif
 #if YUYV2NV12
@@ -1446,20 +1491,22 @@ void cvtcolor_yuyv2nv12(ap_uint<16 * NPC1>* imgInput, ap_uint<8 * NPC1>* imgOutp
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2> _imgOutput1((HEIGHT / 2), (WIDTH / 2));
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> _imgOutput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_OUT_1> _imgOutput1((HEIGHT / 2), (WIDTH / 2));
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::yuyv2nv12<XF_16UC1, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(_imgInput, _imgOutput0, _imgOutput1);
+    xf::cv::yuyv2nv12<XF_16UC1, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT_0,
+                      XF_CV_DEPTH_OUT_1>(_imgInput, _imgOutput0, _imgOutput1);
 
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput0, imgOutput0);
-    xf::cv::xfMat2Array<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2>(_imgOutput1, imgOutput1);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(_imgOutput0, imgOutput0);
+    xf::cv::xfMat2Array<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_OUT_1>(_imgOutput1,
+                                                                                                imgOutput1);
 }
 #endif
 #if YUYV2NV21
@@ -1476,20 +1523,22 @@ void cvtcolor_yuyv2nv21(ap_uint<16 * NPC1>* imgInput, ap_uint<8 * NPC1>* imgOutp
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput0(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2> _imgOutput1((HEIGHT / 2), (WIDTH / 2));
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> _imgOutput0(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_OUT_1> _imgOutput1((HEIGHT / 2), (WIDTH / 2));
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::yuyv2nv21<XF_16UC1, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2>(_imgInput, _imgOutput0, _imgOutput1);
+    xf::cv::yuyv2nv21<XF_16UC1, XF_8UC1, XF_8UC2, HEIGHT, WIDTH, NPC1, NPC2, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT_0,
+                      XF_CV_DEPTH_OUT_1>(_imgInput, _imgOutput0, _imgOutput1);
 
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput0, imgOutput0);
-    xf::cv::xfMat2Array<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2>(_imgOutput1, imgOutput1);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(_imgOutput0, imgOutput0);
+    xf::cv::xfMat2Array<16 * NPC2, XF_8UC2, (HEIGHT / 2), (WIDTH / 2), NPC2, XF_CV_DEPTH_OUT_1>(_imgOutput1,
+                                                                                                imgOutput1);
 }
 #endif
 #if YUYV2RGBA
@@ -1503,18 +1552,18 @@ void cvtcolor_yuyv2rgba(ap_uint<16 * NPC1>* imgInput, ap_uint<32 * NPC1>* imgOut
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::yuyv2rgba<XF_16UC1, XF_8UC4, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::yuyv2rgba<XF_16UC1, XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC4, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC4, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if YUYV2RGB
@@ -1528,18 +1577,18 @@ void cvtcolor_yuyv2rgb(ap_uint<16 * NPC1>* imgInput, ap_uint<32 * NPC1>* imgOutp
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::yuyv2rgb<XF_16UC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::yuyv2rgb<XF_16UC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if YUYV2BGR
@@ -1553,18 +1602,18 @@ void cvtcolor_yuyv2bgr(ap_uint<16 * NPC1>* imgInput, ap_uint<32 * NPC1>* imgOutp
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::yuyv2bgr<XF_16UC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::yuyv2bgr<XF_16UC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if YUYV2UYVY
@@ -1578,18 +1627,18 @@ void cvtcolor_yuyv2uyvy(ap_uint<16 * NPC1>* imgInput, ap_uint<16 * NPC1>* imgOut
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::yuyv2uyvy<XF_16UC1, XF_16UC1, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::yuyv2uyvy<XF_16UC1, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<16 * NPC1, XF_16UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if RGB2GRAY
@@ -1603,18 +1652,18 @@ void cvtcolor_rgb2gray(ap_uint<32 * NPC1>* imgInput, ap_uint<8 * NPC1>* imgOutpu
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::rgb2gray<XF_8UC3, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::rgb2gray<XF_8UC3, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if BGR2GRAY
@@ -1628,18 +1677,18 @@ void cvtcolor_bgr2gray(ap_uint<32 * NPC1>* imgInput, ap_uint<8 * NPC1>* imgOutpu
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::bgr2gray<XF_8UC3, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::bgr2gray<XF_8UC3, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if GRAY2RGB
@@ -1653,18 +1702,18 @@ void cvtcolor_gray2rgb(ap_uint<8 * NPC1>* imgInput, ap_uint<32 * NPC1>* imgOutpu
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::gray2rgb<XF_8UC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::gray2rgb<XF_8UC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if GRAY2BGR
@@ -1678,18 +1727,18 @@ void cvtcolor_gray2bgr(ap_uint<8 * NPC1>* imgInput, ap_uint<32 * NPC1>* imgOutpu
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<8 * NPC1, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::gray2bgr<XF_8UC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::gray2bgr<XF_8UC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if RGB2XYZ
@@ -1703,18 +1752,18 @@ void cvtcolor_rgb2xyz(ap_uint<32 * NPC1>* imgInput, ap_uint<32 * NPC1>* imgOutpu
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::rgb2xyz<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::rgb2xyz<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if BGR2XYZ
@@ -1728,18 +1777,18 @@ void cvtcolor_bgr2xyz(ap_uint<32 * NPC1>* imgInput, ap_uint<32 * NPC1>* imgOutpu
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::bgr2xyz<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::bgr2xyz<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if XYZ2RGB
@@ -1753,18 +1802,18 @@ void cvtcolor_xyz2rgb(ap_uint<32 * NPC1>* imgInput, ap_uint<32 * NPC1>* imgOutpu
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::xyz2rgb<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::xyz2rgb<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if XYZ2BGR
@@ -1778,18 +1827,18 @@ void cvtcolor_xyz2bgr(ap_uint<32 * NPC1>* imgInput, ap_uint<32 * NPC1>* imgOutpu
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::xyz2bgr<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::xyz2bgr<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if RGB2YCrCb
@@ -1803,18 +1852,18 @@ void cvtcolor_rgb2ycrcb(ap_uint<32 * NPC1>* imgInput, ap_uint<32 * NPC1>* imgOut
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::rgb2ycrcb<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::rgb2ycrcb<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if BGR2YCrCb
@@ -1828,18 +1877,18 @@ void cvtcolor_bgr2ycrcb(ap_uint<32 * NPC1>* imgInput, ap_uint<32 * NPC1>* imgOut
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::bgr2ycrcb<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::bgr2ycrcb<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if YCrCb2RGB
@@ -1853,18 +1902,18 @@ void cvtcolor_ycrcb2rgb(ap_uint<32 * NPC1>* imgInput, ap_uint<32 * NPC1>* imgOut
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::ycrcb2rgb<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::ycrcb2rgb<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if YCrCb2BGR
@@ -1878,18 +1927,18 @@ void cvtcolor_ycrcb2bgr(ap_uint<32 * NPC1>* imgInput, ap_uint<32 * NPC1>* imgOut
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::ycrcb2bgr<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::ycrcb2bgr<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if RGB2HLS
@@ -1903,18 +1952,18 @@ void cvtcolor_rgb2hls(ap_uint<32 * NPC1>* imgInput, ap_uint<32 * NPC1>* imgOutpu
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::rgb2hls<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::rgb2hls<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if BGR2HLS
@@ -1928,18 +1977,18 @@ void cvtcolor_bgr2hls(ap_uint<32 * NPC1>* imgInput, ap_uint<32 * NPC1>* imgOutpu
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::bgr2hls<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::bgr2hls<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if HLS2RGB
@@ -1953,18 +2002,18 @@ void cvtcolor_hls2rgb(ap_uint<32 * NPC1>* imgInput, ap_uint<32 * NPC1>* imgOutpu
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::hls2rgb<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::hls2rgb<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if HLS2BGR
@@ -1978,18 +2027,18 @@ void cvtcolor_hls2bgr(ap_uint<32 * NPC1>* imgInput, ap_uint<32 * NPC1>* imgOutpu
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::hls2bgr<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::hls2bgr<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if RGB2HSV
@@ -2003,18 +2052,18 @@ void cvtcolor_rgb2hsv(ap_uint<32 * NPC1>* imgInput, ap_uint<32 * NPC1>* imgOutpu
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::rgb2hsv<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::rgb2hsv<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if BGR2HSV
@@ -2028,18 +2077,18 @@ void cvtcolor_bgr2hsv(ap_uint<32 * NPC1>* imgInput, ap_uint<32 * NPC1>* imgOutpu
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::bgr2hsv<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::bgr2hsv<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if HSV2RGB
@@ -2053,18 +2102,18 @@ void cvtcolor_hsv2rgb(ap_uint<32 * NPC1>* imgInput, ap_uint<32 * NPC1>* imgOutpu
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::hsv2rgb<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::hsv2rgb<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif
 #if HSV2BGR
@@ -2078,17 +2127,17 @@ void cvtcolor_hsv2bgr(ap_uint<32 * NPC1>* imgInput, ap_uint<32 * NPC1>* imgOutpu
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgInput(HEIGHT, WIDTH);
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1> _imgOutput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> _imgInput(HEIGHT, WIDTH);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _imgOutput(HEIGHT, WIDTH);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(imgInput, _imgInput);
+    xf::cv::Array2xfMat<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, _imgInput);
 
-    xf::cv::hsv2bgr<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgInput, _imgOutput);
+    xf::cv::hsv2bgr<XF_8UC3, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(_imgInput, _imgOutput);
 
-    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1>(_imgOutput, imgOutput);
+    xf::cv::xfMat2Array<32 * NPC1, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_imgOutput, imgOutput);
 }
 #endif

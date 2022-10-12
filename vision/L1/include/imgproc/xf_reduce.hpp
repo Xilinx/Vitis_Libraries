@@ -38,12 +38,14 @@ template <int SRC_T,
           int ONE_D_WIDTH,
           int DEPTH,
           int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int COLS_TRIP,
           int REDUCE_OP>
-void xFreduceKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                    xf::cv::Mat<DST_T, ONE_D_HEIGHT, ONE_D_WIDTH, 1>& _dst_mat,
+void xFreduceKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+                    xf::cv::Mat<DST_T, ONE_D_HEIGHT, ONE_D_WIDTH, 1, XFCVDEPTH_OUT>& _dst_mat,
                     unsigned char dim,
                     unsigned short height,
                     unsigned short width) {
@@ -58,7 +60,7 @@ void xFreduceKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 
     XF_SNAME(WORDWIDTH_DST) line_buf[(COLS >> XF_BITSHIFT(NPC))];
 // clang-format off
-    #pragma HLS RESOURCE variable=line_buf core=RAM_S2P_BRAM
+    #pragma HLS bind_storage variable=line_buf type=RAM_S2P impl=BRAM
     // clang-format on
 
     if (dim == 0) {
@@ -156,9 +158,18 @@ rowLoop:
     }
 }
 
-template <int REDUCE_OP, int SRC_T, int DST_T, int ROWS, int COLS, int ONE_D_HEIGHT, int ONE_D_WIDTH, int NPC = 1>
-void reduce(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-            xf::cv::Mat<DST_T, ONE_D_HEIGHT, ONE_D_WIDTH, 1>& _dst_mat,
+template <int REDUCE_OP,
+          int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int ONE_D_HEIGHT,
+          int ONE_D_WIDTH,
+          int NPC = 1,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void reduce(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+            xf::cv::Mat<DST_T, ONE_D_HEIGHT, ONE_D_WIDTH, 1, XFCVDEPTH_OUT>& _dst_mat,
             unsigned char dim) {
     unsigned short width = _src_mat.cols >> XF_BITSHIFT(NPC);
     unsigned short height = _src_mat.rows;
@@ -172,9 +183,9 @@ void reduce(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     #pragma HLS INLINE OFF
     // clang-format on
 
-    xFreduceKernel<SRC_T, DST_T, ROWS, COLS, ONE_D_HEIGHT, ONE_D_WIDTH, XF_DEPTH(SRC_T, NPC), NPC,
-                   XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC), (COLS >> XF_BITSHIFT(NPC)), REDUCE_OP>(
-        _src_mat, _dst_mat, dim, height, width);
+    xFreduceKernel<SRC_T, DST_T, ROWS, COLS, ONE_D_HEIGHT, ONE_D_WIDTH, XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN,
+                   XFCVDEPTH_OUT, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC), (COLS >> XF_BITSHIFT(NPC)),
+                   REDUCE_OP>(_src_mat, _dst_mat, dim, height, width);
 }
 } // namespace cv
 } // namespace xf

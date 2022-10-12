@@ -28,7 +28,7 @@
 typedef ap_uint<8> ap_uint8_t;
 typedef ap_uint<64> ap_uint64_t;
 
-#if NO
+#if SPC
 #define NPIX XF_NPPC1
 #endif
 

@@ -35,9 +35,9 @@ void stereolbm_accel(ap_uint<INPUT_PTR_WIDTH>* img_in_l,
 	#pragma HLS INTERFACE s_axilite  port=return		bundle=control
     // clang-format on
 
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC> imgInputL(rows, cols);
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC> imgInputR(rows, cols);
-    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC> imgOutput(rows, cols);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_IN_L> imgInputL(rows, cols);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_IN_R> imgInputR(rows, cols);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_OUT> imgOutput(rows, cols);
 
     xf::cv::xFSBMState<SAD_WINDOW_SIZE, NO_OF_DISPARITIES, PARALLEL_UNITS> bmState;
 
@@ -52,15 +52,16 @@ void stereolbm_accel(ap_uint<INPUT_PTR_WIDTH>* img_in_l,
     // clang-format on
 
     // Retrieve xf::Mat objects from img_in data:
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC>(img_in_l, imgInputL);
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC>(img_in_r, imgInputR);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_IN_L>(img_in_l, imgInputL);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_IN_R>(img_in_r, imgInputR);
 
     // Run xfOpenCV kernel:
     xf::cv::StereoBM<SAD_WINDOW_SIZE, NO_OF_DISPARITIES, PARALLEL_UNITS, IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPC,
-                     XF_USE_URAM>(imgInputL, imgInputR, imgOutput, bmState);
+                     XF_USE_URAM, XF_CV_DEPTH_IN_L, XF_CV_DEPTH_IN_R, XF_CV_DEPTH_OUT>(imgInputL, imgInputR, imgOutput,
+                                                                                       bmState);
 
     // Convert _dst xf::Mat object to output array:
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPC>(imgOutput, img_out);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_OUT>(imgOutput, img_out);
 
     return;
 } // End of kernel

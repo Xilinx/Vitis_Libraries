@@ -19,6 +19,60 @@
 
 #define _DISPLAY_TRACKING_ 0
 
+float range_[] = {0, 180};
+const float* range[] = {range_};
+int histSize[] = {180};
+int channels[] = {0};
+cv::TermCriteria term_crit(cv::TermCriteria::EPS | cv::TermCriteria::COUNT, 10, 1);
+
+struct _Box {
+    float ymin = 0.0f;
+    float ymax = 0.0f;
+    float xmin = 0.0f;
+    float xmax = 0.0f;
+    float score = 0.0f;
+};
+
+class MST_REF {
+   public:
+    int no_of_obj_to_track;
+    MST_REF(int num) { no_of_obj_to_track = num; }
+    void setup_mst(cv::Mat& frame, std::vector<cv::Mat>& roi_hist, std::vector<cv::Rect>& track_window) {
+        // set up the ROI for tracking
+        cv::Mat roi, hsv_roi, mask;
+        for (int i = 0; i < no_of_obj_to_track; i++) {
+            roi = frame(track_window[i]);
+            cv::cvtColor(roi, hsv_roi, cv::COLOR_BGR2HSV);
+            cv::inRange(hsv_roi, cv::Scalar(0, 60, 32), cv::Scalar(180, 255, 255), mask);
+            cv::calcHist(&hsv_roi, 1, channels, mask, roi_hist[i], 1, histSize, range);
+            cv::normalize(roi_hist[i], roi_hist[i], 0, 255, cv::NORM_MINMAX);
+        }
+    }
+
+    void track_mst(cv::Mat& frame, std::vector<cv::Mat>& roi_hist, std::vector<cv::Rect>& track_window) {
+        cv::Mat hsv, dst;
+        cv::cvtColor(frame, hsv, cv::COLOR_BGR2HSV);
+        for (int i = 0; i < no_of_obj_to_track; i++) {
+            cv::calcBackProject(&hsv, 1, channels, roi_hist[i], dst, range);
+            // apply meanshift to get the new location
+            cv::meanShift(dst, track_window[i], term_crit);
+        }
+    }
+};
+
+float compIOU(_Box box_i, _Box box_j) {
+    float area_i = (box_i.ymax - box_i.ymin) * (box_i.xmax - box_i.xmin);
+    float area_j = (box_j.ymax - box_j.ymin) * (box_j.xmax - box_j.xmin);
+    if (area_i <= 0 || area_j <= 0) return 0.0;
+    float intersection_ymin = std::max<float>(box_i.ymin, box_j.ymin);
+    float intersection_xmin = std::max<float>(box_i.xmin, box_j.xmin);
+    float intersection_ymax = std::min<float>(box_i.ymax, box_j.ymax);
+    float intersection_xmax = std::min<float>(box_i.xmax, box_j.xmax);
+    float intersection_area = std::max<float>(intersection_ymax - intersection_ymin, 0.0) *
+                              std::max<float>(intersection_xmax - intersection_xmin, 0.0);
+    return (intersection_area / (area_i + area_j - intersection_area));
+}
+
 int main(int argc, char* argv[]) {
     if (argc != 3) {
         fprintf(stderr,
@@ -59,6 +113,12 @@ int main(int argc, char* argv[]) {
         dy[i] = 0;
     }
 
+#if !VIDEO_INPUT
+    MST_REF mst(no_objects);
+    std::vector<cv::Mat> roi_hist(no_objects);
+    std::vector<cv::Rect> track_window(no_objects);
+#endif
+
     // object loop, for reading input to the object
     for (uint16_t i = 0; i < no_objects; i++) {
         h_x[i] = WIDTH_MST[i] / 2;
@@ -74,11 +134,25 @@ int main(int argc, char* argv[]) {
         brx[i] = c_x[i] + h_x[i];
         bry[i] = c_y[i] + h_y[i];
         track[i] = 1;
+
+#if !VIDEO_INPUT
+        // OCV
+        track_window[i].x = X1[i];
+        track_window[i].y = Y1[i];
+        track_window[i].height = HEIGHT_MST[i];
+        track_window[i].width = WIDTH_MST[i];
+#endif
     }
 
     cv::Mat frame, image;
     int no_of_frames = TOTAL_FRAMES;
     char nm[1000];
+
+#if !VIDEO_INPUT
+    sprintf(nm, "%s/img%d.png", path, 1);
+    frame = cv::imread(nm, 1);
+    mst.setup_mst(frame, roi_hist, track_window);
+#endif
 
     for (int f_no = 1; f_no <= no_of_frames; f_no++) {
 #if VIDEO_INPUT
@@ -86,6 +160,8 @@ int main(int argc, char* argv[]) {
 #else
         sprintf(nm, "%s/img%d.png", path, f_no);
         frame = cv::imread(nm, 1);
+        // ocv tracking
+        mst.track_mst(frame, roi_hist, track_window);
 #endif
 
         image.create(frame.size(), frame.type());
@@ -124,7 +200,31 @@ int main(int argc, char* argv[]) {
             brx[k] = c_x[k] + h_x[k];
             bry[k] = c_y[k] + h_y[k];
 
-            std::cout << " " << c_x[k] << " " << c_y[k] << std::endl;
+            std::cout << "box " << k + 1 << ":\n"
+                      << "hls: " << c_x[k] << " " << c_y[k] << std::endl;
+#if !VIDEO_INPUT
+            std::cout << "ref: " << (track_window[k].x + track_window[k].width / 2) << " "
+                      << (track_window[k].y + track_window[k].height / 2) << std::endl;
+            _Box box_t;
+            box_t.xmin = tlx[k];
+            box_t.xmax = brx[k];
+            box_t.ymin = tly[k];
+            box_t.ymax = bry[k];
+            _Box box_r;
+            box_r.xmin = track_window[k].x;
+            box_r.xmax = track_window[k].x + track_window[k].width;
+            box_r.ymin = track_window[k].y;
+            box_r.ymax = track_window[k].y + track_window[k].height;
+
+            // test validity with the reference
+            float iou_val = compIOU(box_t, box_r);
+            if (iou_val > 0.8f)
+                std::cout << "Test Passed .... !!!" << std::endl;
+            else {
+                fprintf(stderr, "ERROR: Test Failed.\n ");
+                return -1;
+            }
+#endif
         }
 
         std::cout << std::endl;

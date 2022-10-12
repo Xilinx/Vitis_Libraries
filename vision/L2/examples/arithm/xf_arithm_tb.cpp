@@ -294,7 +294,7 @@ int main(int argc, char** argv) {
     if (err_per > 0.0f) {
         fprintf(stderr, "ERROR: Test Failed.\n ");
         return EXIT_FAILURE;
-    }
-
+    } else
+        std::cout << "Testcase passed" << std::endl;
     return 0;
 }

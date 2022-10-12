@@ -15,7 +15,7 @@
                     ]
                 }, 
                 "linker": {
-                    "clflags": [
+                    "ldclflags": [
                         "--clock.freqHz 400000000:Tiler_top_1", 
                         "--clock.freqHz 400000000:stitcher_top_1", 
                         "--clock.defaultTolerance 0.001", 
@@ -63,7 +63,7 @@
                 "LIB_DIR/L1/include/aie", 
                 "./"
             ], 
-            "options": "--sysroot=$(SYSROOT)", 
+            "options": "--sysroot=$(SYSROOT) -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include", 
             "symbols": [
                 "__PS_ENABLE_AIE__"
             ]
@@ -95,7 +95,7 @@
                     "workdir": "./Work", 
                     "options": "-pl-axi-lite=true", 
                     "name": "libadf.a", 
-                    "aie_kernel_files": [
+                    "files": [
                         "xf_filter2d.cc"
                     ]
                 }
@@ -106,6 +106,26 @@
         {
             "frequency": "400", 
             "name": "kernel"
+        }
+    ], 
+    "check_env": [
+        {
+            "env": "OPENCV_INCLUDE", 
+            "platform": [
+                "u200", 
+                "u50", 
+                "aws-vu9p-f1"
+            ], 
+            "echo": "Cannot find OpenCV include path. Please set OPENCV_INCLUDE variable"
+        }, 
+        {
+            "env": "OPENCV_LIB", 
+            "platform": [
+                "u200", 
+                "u50", 
+                "aws-vu9p-f1"
+            ], 
+            "echo": "Cannot find Opencv lib path. Please set OPENCV_LIB variable"
         }
     ], 
     "testinfo": {
@@ -129,8 +149,14 @@
         "targets": [
             "vitis_hw_emu", 
             "vitis_hw_build", 
-            "vitis_hw_run"
+            "vitis_hw_run",
+            "vitis_aie_x86sim",
+            "vitis_aie_sim"
         ], 
         "category": "canary"
-    }
+    },
+    "output_files": [
+        "pl_sample_counts",
+        "ISS_RPC_SERVER_PORT"
+    ]    
 }

@@ -18,8 +18,8 @@
 #define T_16S 0 // Input type of 16S
 
 /*  set the optimisation type  */
-#define NO 0 // Normal Operation
-#define RO 1 // Resource Optimized
+#define SPC 0 // Single Pixel per Clock operation
+#define MPC 1 // Multiple Pixels per Clock operation
 
 #define GRAY 1
 
@@ -33,3 +33,7 @@
 // OpenCV reference macros
 #define CV_FUNCT_NAME bitwise_or
 //#define CV_EXTRA_ARG 0.05
+
+#define XF_CV_DEPTH_IN_1 1
+#define XF_CV_DEPTH_IN_2 2
+#define XF_CV_DEPTH_OUT_1 3

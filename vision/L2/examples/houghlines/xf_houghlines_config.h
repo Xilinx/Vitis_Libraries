@@ -22,7 +22,7 @@
 #include "common/xf_utility.hpp"
 #include "hls_stream.h"
 #include "imgproc/xf_houghlines.hpp"
-//#include "xf_config_params.h"
+#include "xf_config_params.h"
 
 #define HEIGHT 1080
 #define WIDTH 1920

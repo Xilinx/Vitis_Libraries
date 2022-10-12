@@ -185,12 +185,15 @@ template <int SRC_T,
           int DEPTH_SRC,
           int DEPTH_DST,
           int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_gradx = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_grady = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int TC>
-void ProcessSobel3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                     xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _gradx_mat,
-                     xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _grady_mat,
+void ProcessSobel3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+                     xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_gradx>& _gradx_mat,
+                     xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_grady>& _grady_mat,
                      XF_SNAME(WORDWIDTH_SRC) buf[3][(COLS >> XF_BITSHIFT(NPC))],
                      XF_PTNAME(DEPTH_SRC) src_buf1[XF_NPIXPERCYCLE(NPC) + 2],
                      XF_PTNAME(DEPTH_SRC) src_buf2[XF_NPIXPERCYCLE(NPC) + 2],
@@ -293,13 +296,16 @@ template <int SRC_T,
           int DEPTH_SRC,
           int DEPTH_DST,
           int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_X = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_Y = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int TC,
           bool USE_URAM>
-void xFSobelFilter3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                      xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_matx,
-                      xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_maty,
+void xFSobelFilter3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+                      xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_X>& _dst_matx,
+                      xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_Y>& _dst_maty,
                       uint16_t img_height,
                       uint16_t img_width) {
     ap_uint<13> row_ind;
@@ -333,12 +339,12 @@ void xFSobelFilter3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     XF_SNAME(WORDWIDTH_SRC) buf[3][(COLS >> XF_BITSHIFT(NPC))]; // Line buffer
     if (USE_URAM) {
 // clang-format off
-#pragma HLS array reshape variable=buf dim=1 factor=3 cyclic
-#pragma HLS RESOURCE variable=buf core=RAM_S2P_URAM
+#pragma HLS array_reshape variable=buf dim=1 factor=3 cyclic
+#pragma HLS bind_storage variable=buf type=RAM_S2P impl=URAM
         // clang-format on
     } else {
 // clang-format off
-#pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
+#pragma HLS bind_storage variable=buf type=RAM_S2P impl=BRAM
 #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
         // clang-format on
     }
@@ -383,11 +389,12 @@ Row_Loop: // Process complete image
         /***********		Process complete row
          * **********/
         P0 = P1 = 0;
-        ProcessSobel3x3<SRC_T, DST_T, ROWS, COLS, PLANES, DEPTH_SRC, DEPTH_DST, NPC, WORDWIDTH_SRC, WORDWIDTH_DST, TC>(
+        ProcessSobel3x3<SRC_T, DST_T, ROWS, COLS, PLANES, DEPTH_SRC, DEPTH_DST, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT_X,
+                        XFCVDEPTH_OUT_Y, WORDWIDTH_SRC, WORDWIDTH_DST, TC>(
             _src_mat, _dst_matx, _dst_maty, buf, src_buf1, src_buf2, src_buf3, GradientValuesX, GradientValuesY, P0, P1,
             img_width, img_height, row_ind, shift_x, shift_y, tp, mid, bottom, row, read_index, write_index);
 
-        /*			Last column border care	for RO & PO Case
+        /*			Last column border care	for MPC & PO Case
          */
         if ((NPC == XF_NPPC8)) {
             //	Compute gradient at last column
@@ -411,7 +418,7 @@ Row_Loop: // Process complete image
                     src_buf3[buf_size - 2].range(k + STEP - 1, k), src_buf3[buf_size - 1].range(k + STEP - 1, k), 0);
                 p += STEP_OUT;
             }
-        } else /*			Last column border care	for NO Case
+        } else /*			Last column border care	for SPC Case
          */
         {
             int STEP, STEP_OUT, q = 0;
@@ -631,7 +638,7 @@ xFGradientY5x5(XF_PTNAME(DEPTH_SRC) * src_buf1,
  * xFSobel5x5 : Applies the mask and Computes the gradient values
  *
  */
-template <int NPC, int PLANES, int DEPTH_SRC, int DEPTH_DST>
+template <int NPC, int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT, int PLANES, int DEPTH_SRC, int DEPTH_DST>
 void xFSobel5x5(XF_PTNAME(DEPTH_DST) * GradientvaluesX,
                 XF_PTNAME(DEPTH_DST) * GradientvaluesY,
                 XF_PTNAME(DEPTH_SRC) * src_buf1,
@@ -667,12 +674,15 @@ template <int SRC_T,
           int DEPTH_SRC,
           int DEPTH_DST,
           int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_X = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_Y = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int TC>
-void ProcessSobel5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                     xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_matx,
-                     xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_maty,
+void ProcessSobel5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+                     xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_X>& _dst_matx,
+                     xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_Y>& _dst_maty,
 
                      XF_SNAME(WORDWIDTH_SRC) buf[5][(COLS >> XF_BITSHIFT(NPC))],
                      XF_PTNAME(DEPTH_SRC) src_buf1[XF_NPIXPERCYCLE(NPC) + 4],
@@ -736,8 +746,8 @@ Col_Loop:
             src_buf4[4] = buf3;
             src_buf5[4] = buf4;
         }
-        xFSobel5x5<NPC, PLANES, DEPTH_SRC, DEPTH_DST>(GradientValuesX, GradientValuesY, src_buf1, src_buf2, src_buf3,
-                                                      src_buf4, src_buf5);
+        xFSobel5x5<NPC, XFCVDEPTH_IN, PLANES, DEPTH_SRC, DEPTH_DST>(GradientValuesX, GradientValuesY, src_buf1,
+                                                                    src_buf2, src_buf3, src_buf4, src_buf5);
 
         for (ap_uint<4> i = 0; i < 4; i++) {
 // clang-format off
@@ -798,13 +808,16 @@ template <int SRC_T,
           int DEPTH_SRC,
           int DEPTH_DST,
           int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_X = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_Y = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int TC,
           bool USE_URAM>
-void xFSobelFilter5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                      xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_matx,
-                      xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_maty,
+void xFSobelFilter5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+                      xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_X>& _dst_matx,
+                      xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_Y>& _dst_maty,
                       uint16_t img_height,
                       uint16_t img_width) {
     ap_uint<13> row_ind;
@@ -844,12 +857,12 @@ void xFSobelFilter5x5(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     XF_SNAME(WORDWIDTH_SRC) buf[5][(COLS >> XF_BITSHIFT(NPC))];
     if (USE_URAM) {
 // clang-format off
-#pragma HLS RESOURCE variable=buf core=RAM_S2P_URAM
-#pragma HLS array reshape variable=buf dim=1 factor=5 cyclic
+#pragma HLS bind_storage variable=buf type=RAM_S2P impl=URAM
+#pragma HLS array_reshape variable=buf dim=1 factor=5 cyclic
         // clang-format on
     } else {
 // clang-format off
-#pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
+#pragma HLS bind_storage variable=buf type=RAM_S2P impl=BRAM
 #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
         // clang-format on
     }
@@ -927,7 +940,8 @@ Row_Loop:
 
         inter_valx = inter_valy = 0;
 
-        ProcessSobel5x5<SRC_T, DST_T, ROWS, COLS, PLANES, DEPTH_SRC, DEPTH_DST, NPC, WORDWIDTH_SRC, WORDWIDTH_DST, TC>(
+        ProcessSobel5x5<SRC_T, DST_T, ROWS, COLS, PLANES, DEPTH_SRC, DEPTH_DST, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT_X,
+                        XFCVDEPTH_OUT_Y, WORDWIDTH_SRC, WORDWIDTH_DST, TC>(
             _src_mat, _dst_matx, _dst_maty, buf, src_buf1, src_buf2, src_buf3, src_buf4, src_buf5, GradientValuesX,
             GradientValuesY, inter_valx, inter_valy, img_width, img_height, row_ind, shift_x, shift_y, tp1, tp2, mid,
             bottom1, bottom2, row, read_index, write_index);
@@ -1379,7 +1393,7 @@ xFGradientY7x7(XF_PTNAME(DEPTH_SRC) * src_buf1,
  * xFSobel7x7 : Applies the mask and Computes the gradient values
  *              for filtersize 7x7
  */
-template <int NPC, int PLANES, int DEPTH_SRC, int DEPTH_DST>
+template <int NPC, int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT, int PLANES, int DEPTH_SRC, int DEPTH_DST>
 void xFSobel7x7(XF_PTNAME(DEPTH_DST) * GradientvaluesX,
                 XF_PTNAME(DEPTH_DST) * GradientvaluesY,
                 XF_PTNAME(DEPTH_SRC) src_buf1[XF_NPIXPERCYCLE(NPC) + 6],
@@ -1417,12 +1431,15 @@ template <int SRC_T,
           int DEPTH_SRC,
           int DEPTH_DST,
           int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_X = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_Y = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int TC>
-void ProcessSobel7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                     xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _gradx_mat,
-                     xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _grady_mat,
+void ProcessSobel7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+                     xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_X>& _gradx_mat,
+                     xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_Y>& _grady_mat,
                      XF_SNAME(WORDWIDTH_SRC) buf[7][(COLS >> XF_BITSHIFT(NPC))],
                      XF_PTNAME(DEPTH_SRC) src_buf1[XF_NPIXPERCYCLE(NPC) + 6],
                      XF_PTNAME(DEPTH_SRC) src_buf2[XF_NPIXPERCYCLE(NPC) + 6],
@@ -1489,8 +1506,8 @@ Col_Loop:
             src_buf6[6] = buf5;
             src_buf7[6] = buf6;
         }
-        xFSobel7x7<NPC, PLANES, DEPTH_SRC, DEPTH_DST>(GradientValuesX, GradientValuesY, src_buf1, src_buf2, src_buf3,
-                                                      src_buf4, src_buf5, src_buf6, src_buf7);
+        xFSobel7x7<NPC, XFCVDEPTH_IN, PLANES, DEPTH_SRC, DEPTH_DST>(
+            GradientValuesX, GradientValuesY, src_buf1, src_buf2, src_buf3, src_buf4, src_buf5, src_buf6, src_buf7);
 
         xfCopyData<NPC, DEPTH_SRC>(src_buf1, src_buf2, src_buf3, src_buf4, src_buf5, src_buf6, src_buf7);
 
@@ -1538,12 +1555,15 @@ template <int SRC_T,
           int DEPTH_SRC,
           int DEPTH_DST,
           int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_X = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_Y = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int TC>
-void RightBorder7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                    xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _gradx_mat,
-                    xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _grady_mat,
+void RightBorder7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+                    xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_X>& _gradx_mat,
+                    xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_Y>& _grady_mat,
                     XF_PTNAME(DEPTH_SRC) src_buf1[XF_NPIXPERCYCLE(NPC) + 6],
                     XF_PTNAME(DEPTH_SRC) src_buf2[XF_NPIXPERCYCLE(NPC) + 6],
                     XF_PTNAME(DEPTH_SRC) src_buf3[XF_NPIXPERCYCLE(NPC) + 6],
@@ -1646,13 +1666,16 @@ template <int SRC_T,
           int DEPTH_SRC,
           int DEPTH_DST,
           int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_X = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_Y = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int TC,
           bool USE_URAM>
-void xFSobelFilter7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                      xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _gradx_mat,
-                      xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _grady_mat,
+void xFSobelFilter7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+                      xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_X>& _gradx_mat,
+                      xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_Y>& _grady_mat,
                       uint16_t img_height,
                       uint16_t img_width) {
     ap_uint<13> row_ind, row, col;
@@ -1693,12 +1716,12 @@ void xFSobelFilter7x7(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     XF_SNAME(WORDWIDTH_SRC) buf[7][(COLS >> XF_BITSHIFT(NPC))];
     if (USE_URAM) {
 // clang-format off
-#pragma HLS RESOURCE variable=buf core=RAM_S2P_URAM
-#pragma HLS array reshape variable=buf dim=1 factor=7 cyclic
+#pragma HLS bind_storage variable=buf type=RAM_S2P impl=URAM
+#pragma HLS array_reshape variable=buf dim=1 factor=7 cyclic
         // clang-format on
     } else {
 // clang-format off
-#pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
+#pragma HLS bind_storage variable=buf type=RAM_S2P impl=BRAM
 #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
         // clang-format on
     }
@@ -1817,12 +1840,14 @@ Row_Loop:
         inter_valx = inter_valy = 0;
         /***********		Process complete row
          * **********/
-        ProcessSobel7x7<SRC_T, DST_T, ROWS, COLS, PLANES, DEPTH_SRC, DEPTH_DST, NPC, WORDWIDTH_SRC, WORDWIDTH_DST, TC>(
+        ProcessSobel7x7<SRC_T, DST_T, ROWS, COLS, PLANES, DEPTH_SRC, DEPTH_DST, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT_X,
+                        XFCVDEPTH_OUT_Y, WORDWIDTH_SRC, WORDWIDTH_DST, TC>(
             _src_mat, _gradx_mat, _grady_mat, buf, src_buf1, src_buf2, src_buf3, src_buf4, src_buf5, src_buf6, src_buf7,
             GradientValuesX, GradientValuesY, inter_valx, inter_valy, img_width, img_height, row_ind, shiftx, shifty,
             tp1, tp2, tp3, mid, bottom1, bottom2, bottom3, row, read_index, write_index);
 
-        RightBorder7x7<SRC_T, DST_T, ROWS, COLS, PLANES, DEPTH_SRC, DEPTH_DST, NPC, WORDWIDTH_SRC, WORDWIDTH_DST, TC>(
+        RightBorder7x7<SRC_T, DST_T, ROWS, COLS, PLANES, DEPTH_SRC, DEPTH_DST, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT_X,
+                       XFCVDEPTH_OUT_Y, WORDWIDTH_SRC, WORDWIDTH_DST, TC>(
             _src_mat, _gradx_mat, _grady_mat, src_buf1, src_buf2, src_buf3, src_buf4, src_buf5, src_buf6, src_buf7,
             GradientValuesX, GradientValuesY, inter_valx, inter_valy, shiftx, shifty, read_index, write_index);
 
@@ -1841,10 +1866,13 @@ template <int BORDER_TYPE,
           int ROWS,
           int COLS,
           int NPC = 1,
-          bool USE_URAM = false>
-void Sobel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-           xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_matx,
-           xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst_maty) {
+          bool USE_URAM = false,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_X = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_Y = _XFCVDEPTH_DEFAULT>
+void Sobel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+           xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_X>& _dst_matx,
+           xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_Y>& _dst_maty) {
 // clang-format off
 #pragma HLS INLINE OFF
     // clang-format on
@@ -1864,20 +1892,23 @@ void Sobel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
 #endif
     if (FILTER_TYPE == XF_FILTER_3X3) {
         xFSobelFilter3x3<SRC_T, DST_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), XF_DEPTH(DST_T, NPC),
-                         NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC), (COLS >> XF_BITSHIFT(NPC)), USE_URAM>(
-            _src_mat, _dst_matx, _dst_maty, height, width);
+                         NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT_X, XFCVDEPTH_OUT_Y, XF_WORDWIDTH(SRC_T, NPC),
+                         XF_WORDWIDTH(DST_T, NPC), (COLS >> XF_BITSHIFT(NPC)), USE_URAM>(_src_mat, _dst_matx, _dst_maty,
+                                                                                         height, width);
     }
 
     else if (FILTER_TYPE == XF_FILTER_5X5) {
         xFSobelFilter5x5<SRC_T, DST_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), XF_DEPTH(DST_T, NPC),
-                         NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC), (COLS >> XF_BITSHIFT(NPC)), USE_URAM>(
-            _src_mat, _dst_matx, _dst_maty, height, width);
+                         NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT_X, XFCVDEPTH_OUT_Y, XF_WORDWIDTH(SRC_T, NPC),
+                         XF_WORDWIDTH(DST_T, NPC), (COLS >> XF_BITSHIFT(NPC)), USE_URAM>(_src_mat, _dst_matx, _dst_maty,
+                                                                                         height, width);
     }
 
     else if (FILTER_TYPE == XF_FILTER_7X7) {
         xFSobelFilter7x7<SRC_T, DST_T, ROWS, COLS, XF_CHANNELS(SRC_T, NPC), XF_DEPTH(SRC_T, NPC), XF_DEPTH(DST_T, NPC),
-                         NPC, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(DST_T, NPC), (COLS >> XF_BITSHIFT(NPC)), USE_URAM>(
-            _src_mat, _dst_matx, _dst_maty, height, width);
+                         NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT_X, XFCVDEPTH_OUT_Y, XF_WORDWIDTH(SRC_T, NPC),
+                         XF_WORDWIDTH(DST_T, NPC), (COLS >> XF_BITSHIFT(NPC)), USE_URAM>(_src_mat, _dst_matx, _dst_maty,
+                                                                                         height, width);
     }
 }
 } // namespace cv

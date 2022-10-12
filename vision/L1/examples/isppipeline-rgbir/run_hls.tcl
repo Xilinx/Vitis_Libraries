@@ -33,7 +33,6 @@ open_solution -reset $SOLN
 
 
 
-
 set_part $XPART
 create_clock -period $CLKP
 

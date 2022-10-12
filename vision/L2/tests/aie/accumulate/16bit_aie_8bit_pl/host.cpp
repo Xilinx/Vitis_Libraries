@@ -144,8 +144,8 @@ int main(int argc, char** argv) {
             std::cerr << "Test failed" << std::endl;
             exit(-1);
         }
-
         //}
+        accum_graph.end();
         std::cout << "Test passed" << std::endl;
         return 0;
     } catch (std::exception& e) {

@@ -98,16 +98,16 @@ int main(int argc, char** argv) {
         dstData = xrtBOMap(dst_hndl);
         cv::Mat dst(op_height, op_width, srcImageR.type(), dstData);
 
-        xF::xfcvDataMovers<xF::TILER, int16_t, TILE_HEIGHT, TILE_WIDTH, VECTORIZATION_FACTOR, CORES> tiler(1, 1);
-        xF::xfcvDataMovers<xF::STITCHER, int16_t, TILE_HEIGHT, TILE_WIDTH, VECTORIZATION_FACTOR, CORES> stitcher;
+        xF::xfcvDataMovers<xF::TILER, int16_t, TILE_HEIGHT, TILE_WIDTH, VECTORIZATION_FACTOR, AIE_CORES> tiler(1, 1);
+        xF::xfcvDataMovers<xF::STITCHER, int16_t, TILE_HEIGHT, TILE_WIDTH, VECTORIZATION_FACTOR, AIE_CORES> stitcher;
 
         std::cout << "Graph init. This does nothing because CDO in boot PDI "
                      "already configures AIE.\n";
-        for (int i = 0; i < CORES; i++) {
+        for (int i = 0; i < AIE_CORES; i++) {
             filter_graph[i].init();
         }
 
-        for (int i = 0; i < CORES; i++) {
+        for (int i = 0; i < AIE_CORES; i++) {
             filter_graph[i].update(filter_graph[i].kernelCoefficients, float2fixed_coeff<10, 16>(kData).data(), 16);
         }
 
@@ -123,14 +123,12 @@ int main(int argc, char** argv) {
             auto tiles_sz = tiler.host2aie_nb(src_hndl, srcImageR.size());
             stitcher.aie2host_nb(dst_hndl, dst.size(), tiles_sz);
 
-            // tiler.tilesPerCore() is same as (tiles_sz[0] * tiles_sz[1])
-            std::cout << "Graph run(" << tiler.tilesPerCore() << ")\n";
-
-            for (int j = 0; j < CORES; j++) {
+            for (int j = 0; j < AIE_CORES; j++) {
+                std::cout << "Graph run(" << tiler.tilesPerCore(j) << ")\n";
                 filter_graph[j].run(tiler.tilesPerCore(j));
             }
 
-            for (int j = 0; j < CORES; j++) {
+            for (int j = 0; j < AIE_CORES; j++) {
                 filter_graph[j].wait();
             }
 
@@ -156,8 +154,12 @@ int main(int argc, char** argv) {
                 std::cerr << "Test failed" << std::endl;
                 exit(-1);
             }
+            //}
         }
-        //}
+
+        for (int j = 0; j < AIE_CORES; j++) {
+            filter_graph[j].end();
+        }
         std::cout << "Test passed" << std::endl;
         std::cout << "Average time to process frame : " << (((float)tt.count() * 0.001) / (float)iterations) << " ms"
                   << std::endl;

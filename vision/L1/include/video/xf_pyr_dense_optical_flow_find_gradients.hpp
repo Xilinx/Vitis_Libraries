@@ -114,6 +114,8 @@ ap_fixed<IT_WIDTH, IT_INT> findIntensity(unsigned char lineBuffer[NUM_LINES + 1]
 template <unsigned short MAXHEIGHT,
           unsigned short MAXWIDTH,
           int NUM_PYR_LEVELS,
+          int XFCVDEPTH_CURR_IMG = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_NEXT_IMG = _XFCVDEPTH_DEFAULT,
           int NUM_LINES,
           int WINSIZE,
           int IT_WIDTH,
@@ -125,8 +127,8 @@ template <unsigned short MAXHEIGHT,
           int RMAPPX_WIDTH,
           int RMAPPX_INT,
           bool USE_URAM>
-void findGradients(xf::cv::Mat<XF_8UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1>& currImg3,
-                   xf::cv::Mat<XF_8UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1>& nextImg,
+void findGradients(xf::cv::Mat<XF_8UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1, XFCVDEPTH_CURR_IMG>& currImg3,
+                   xf::cv::Mat<XF_8UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1, XFCVDEPTH_NEXT_IMG>& nextImg,
                    hls::stream<ap_fixed<IT_WIDTH, IT_INT> >& strmIt,
                    hls::stream<ap_int<9> >& strmIx,
                    hls::stream<ap_int<9> >& strmIy,
@@ -194,8 +196,8 @@ void findGradients(xf::cv::Mat<XF_8UC1, MAXHEIGHT, MAXWIDTH, XF_NPPC1>& currImg3
 
     if (USE_URAM) {
 // clang-format off
-        #pragma HLS RESOURCE variable=lineBuffer   core=RAM_2P_URAM
-        #pragma HLS RESOURCE variable=curr_img_buf core=RAM_2P_URAM
+        #pragma HLS bind_storage variable=lineBuffer   type=RAM_2P impl=URAM
+        #pragma HLS bind_storage variable=curr_img_buf type=RAM_2P impl=URAM
         // clang-format on
     }
 

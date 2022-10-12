@@ -29,5 +29,8 @@
 #define GRAY 0
 /* Interpolation type*/
 #define INTERPOLATION 1
-#define RO 1
-#define NO 0
+#define MPC 1
+#define SPC 0
+#define XF_CV_DEPTH_IN_0 3
+#define XF_CV_DEPTH_OUT_1 3
+#define XF_CV_DEPTH_OUT_2 3

@@ -207,13 +207,13 @@ int main(int argc, char** argv) {
         // Copying Device result data to Host memory
         q.enqueueReadBuffer(imageFromDevice, CL_TRUE, 0, image_out_size_bytes, out_img.data);
     }
-
     q.finish();
 
     /////////////////////////////////////// end of CL ////////////////////////
 
     // Write output image
     imwrite("hls_out.png", out_img);
+    std::cout << "Test Finished" << std::endl;
 
     return 0;
 }

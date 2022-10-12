@@ -104,7 +104,8 @@ int main(int argc, char** argv) {
     if (err_cnt > 0) {
         fprintf(stderr, "ERROR: Test Failed.\n ");
         return EXIT_FAILURE;
-    }
+    } else
+        std::cout << "Test Passed " << std::endl;
 
     return 0;
 }

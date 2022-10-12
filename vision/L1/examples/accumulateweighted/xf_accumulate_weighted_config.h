@@ -28,7 +28,7 @@
 #define WIDTH 128
 
 // Resolve optimization type:
-#if NO
+#if SPC
 #define NPC1 XF_NPPC1
 #if GRAY
 #define INPUT_PTR_WIDTH 8
@@ -38,7 +38,7 @@
 #define OUTPUT_PTR_WIDTH 64
 #endif
 #endif
-#if RO
+#if MPC
 #define NPC1 XF_NPPC8
 #if GRAY
 #define INPUT_PTR_WIDTH 64

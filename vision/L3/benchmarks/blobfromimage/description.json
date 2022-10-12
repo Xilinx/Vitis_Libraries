@@ -5,8 +5,8 @@
     ], 
     "flow": "vitis", 
     "platform_allowlist": [
-        "u200",
-	"u50",
+        "u200", 
+        "u50", 
         "aws-vu9p-f1", 
         "vck190", 
         "zcu102"
@@ -29,7 +29,7 @@
                     ]
                 }
             }
-        },
+        }, 
         "aws-vu9p-f1": {
             "host": {
                 "compiler": {
@@ -57,20 +57,29 @@
                     ]
                 }
             }
-        },
+        }, 
         "vck190": {
             "host": {
                 "compiler": {
                     "includepaths": [
-			"$(SYSROOT)/usr/include",
+                        "$(SYSROOT)/usr/include", 
                         "$(SYSROOT)/usr/include/opencv4"
-                    ], 
-                    "options": "--sysroot=$(SYSROOT)"
+                    ]
                 }, 
                 "linker": {
                     "librarypaths": [
                         "$(SYSROOT)/usr/lib", 
                         "${SYSROOT}/lib"
+                    ]
+                }, 
+                "compiler_x86": {
+                    "includepaths": [
+                        "$(OPENCV_INCLUDE)"
+                    ]
+                }, 
+                "linker_x86": {
+                    "librarypaths": [
+                        "$(OPENCV_LIB)"
                     ]
                 }
             }
@@ -79,15 +88,24 @@
             "host": {
                 "compiler": {
                     "includepaths": [
-                        "$(SYSROOT)/usr/include",
+                        "$(SYSROOT)/usr/include", 
                         "$(SYSROOT)/usr/include/opencv4"
-                    ], 
-                    "options": "--sysroot=$(SYSROOT)"
+                    ]
                 }, 
                 "linker": {
                     "librarypaths": [
                         "$(SYSROOT)/usr/lib", 
                         "${SYSROOT}/lib"
+                    ]
+                }, 
+                "compiler_x86": {
+                    "includepaths": [
+                        "$(OPENCV_INCLUDE)"
+                    ]
+                }, 
+                "linker_x86": {
+                    "librarypaths": [
+                        "$(OPENCV_LIB)"
                     ]
                 }
             }
@@ -97,7 +115,7 @@
     "launch": [
         {
             "target": "sw_emu", 
-            "cmd_args": "PROJECT/im0.png 224 224", 
+            "cmd_args": "LIB_DIR/data/im0.png 224 224", 
             "name": "sw_emu", 
             "ld_library_path": [
                 "$(OPENCV_LIB)", 
@@ -107,7 +125,7 @@
         }, 
         {
             "target": "hw_emu", 
-            "cmd_args": "PROJECT/im0.png 224 224", 
+            "cmd_args": "LIB_DIR/data/im0.png 224 224", 
             "name": "hw_emu", 
             "ld_library_path": [
                 "$(OPENCV_LIB)", 
@@ -117,7 +135,7 @@
         }, 
         {
             "target": "hw", 
-            "cmd_args": "PROJECT/im0.png 224 224", 
+            "cmd_args": "LIB_DIR/data/im0.png 224 224", 
             "name": "Hardware", 
             "ld_library_path": [
                 "$(OPENCV_LIB)", 
@@ -127,7 +145,7 @@
         }
     ], 
     "data": [
-        "PROJECT/im0.png"
+        "LIB_DIR/data/im0.png"
     ], 
     "host": {
         "host_exe": "blobfromimage", 
@@ -136,7 +154,7 @@
                 "LIB_DIR/L3/benchmarks/blobfromimage/xf_blobfromimage_tb.cpp", 
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
-            "options": "-O3 ", 
+            "options": "-O3  -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include", 
             "symbols": [
                 "__SDSVHLS__"
             ]
@@ -154,37 +172,31 @@
             "accelerators": [
                 {
                     "name": "blobfromimage_accel", 
-                    "location": "LIB_DIR/L3/benchmarks/blobfromimage/xf_blobfromimage_accel.cpp"
+                    "location": "LIB_DIR/L3/benchmarks/blobfromimage/xf_blobfromimage_accel.cpp",
+                    "frequency": 300.0
                 }
-            ]
+            ],
+            "frequency": 300.0
         }
     ], 
     "check_env": [
         {
-            "env": "OPENCV_INCLUDE",
-            "platform" :[
-                "u200",
-                "u50",
-				"aws-vu9p-f1"
+            "env": "OPENCV_INCLUDE", 
+            "platform": [
+                "u200", 
+                "u50", 
+                "aws-vu9p-f1"
             ], 
             "echo": "Cannot find OpenCV include path. Please set OPENCV_INCLUDE variable"
         }, 
         {
-            "env": "OPENCV_LIB",
-            "platform" :[
-                "u200",
-                "u50",
-				"aws-vu9p-f1"
+            "env": "OPENCV_LIB", 
+            "platform": [
+                "u200", 
+                "u50", 
+                "aws-vu9p-f1"
             ], 
             "echo": "Cannot find Opencv lib path. Please set OPENCV_LIB variable"
-        },
-		{
-            "env": "EDGE_COMMON_SW",
-            "platform" :[
-                "zcu102",
-				"vck190"
-            ], 
-            "echo": "Please set EDGE_COMMON_SW variable"
         }
     ], 
     "testinfo": {

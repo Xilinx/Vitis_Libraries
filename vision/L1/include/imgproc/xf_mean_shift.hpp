@@ -24,8 +24,16 @@
 
 namespace xf {
 namespace cv {
-template <int MAXOBJ, int MAXITERS, int OBJ_ROWS, int OBJ_COLS, int SRC_T, int ROWS, int COLS, int NPC>
-void MeanShift(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _in_mat,
+template <int MAXOBJ,
+          int MAXITERS,
+          int OBJ_ROWS,
+          int OBJ_COLS,
+          int SRC_T,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT>
+void MeanShift(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _in_mat,
                uint16_t* x1,
                uint16_t* y1,
                uint16_t* obj_height,
@@ -55,7 +63,7 @@ void MeanShift(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _in_mat,
         track_status[i] = status[i];
     }
 
-    xFMeanShiftKernel<OBJ_ROWS, OBJ_COLS, SRC_T, ROWS, COLS, MAXOBJ, MAXITERS, NPC>(
+    xFMeanShiftKernel<OBJ_ROWS, OBJ_COLS, SRC_T, ROWS, COLS, MAXOBJ, MAXITERS, NPC, XFCVDEPTH_IN>(
         _in_mat, tlx, tly, _obj_height, _obj_width, dispx, dispy, track_status, frame_status, no_objects, no_iters);
 
     for (int i = 0; i < no_objects; i++) {

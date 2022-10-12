@@ -30,8 +30,8 @@ void dilation_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC_T> in_mat(height, width);
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC_T> out_mat(height, width);
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC_T, XF_CV_DEPTH_IN_1> in_mat(height, width);
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC_T, XF_CV_DEPTH_OUT_1> out_mat(height, width);
 
     unsigned char locKernel[FILTER_SIZE * FILTER_SIZE];
     for (int ki = 0; ki < (FILTER_SIZE * FILTER_SIZE); ki++) {
@@ -45,8 +45,8 @@ void dilation_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC_T>(img_inp, in_mat);
-    xf::cv::dilate<XF_BORDER_CONSTANT, TYPE, HEIGHT, WIDTH, KERNEL_SHAPE, FILTER_SIZE, FILTER_SIZE, ITERATIONS, NPC_T>(
-        in_mat, out_mat, kernel);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC_T>(out_mat, img_out);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC_T, XF_CV_DEPTH_IN_1>(img_inp, in_mat);
+    xf::cv::dilate<XF_BORDER_CONSTANT, TYPE, HEIGHT, WIDTH, KERNEL_SHAPE, FILTER_SIZE, FILTER_SIZE, ITERATIONS, NPC_T,
+                   XF_CV_DEPTH_IN_1, XF_CV_DEPTH_OUT_1>(in_mat, out_mat, kernel);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC_T, XF_CV_DEPTH_OUT_1>(out_mat, img_out);
 }

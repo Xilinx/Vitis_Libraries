@@ -38,13 +38,16 @@ template <int SRC_T,
           int COLS,
           int DEPTH,
           int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_MASK_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int WORDWIDTH_MASK,
           int COLS_TRIP>
-void xFpaintmaskKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-                       xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _in_mask,
-                       xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat,
+void xFpaintmaskKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+                       xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_MASK_IN>& _in_mask,
+                       xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst_mat,
                        xf::cv::Scalar<XF_CHANNELS(SRC_T, NPC), unsigned char>& color,
                        unsigned short height,
                        unsigned short width) {
@@ -101,10 +104,17 @@ rowLoop:
 }
 
 /* Paint mask API call*/
-template <int SRC_T, int MASK_T, int ROWS, int COLS, int NPC = 1>
-void paintmask(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
-               xf::cv::Mat<MASK_T, ROWS, COLS, NPC>& in_mask,
-               xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _dst_mat,
+template <int SRC_T,
+          int MASK_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_MASK_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void paintmask(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
+               xf::cv::Mat<MASK_T, ROWS, COLS, NPC, XFCVDEPTH_MASK_IN>& in_mask,
+               xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst_mat,
                unsigned char _color[XF_CHANNELS(SRC_T, NPC)]) {
     unsigned short width = _src_mat.cols >> XF_BITSHIFT(NPC);
     unsigned short height = _src_mat.rows;
@@ -121,9 +131,9 @@ void paintmask(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,
     #pragma HLS INLINE OFF
     // clang-format on
 
-    xFpaintmaskKernel<SRC_T, MASK_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XF_WORDWIDTH(SRC_T, NPC),
-                      XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(MASK_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(
-        _src_mat, in_mask, _dst_mat, color, height, width);
+    xFpaintmaskKernel<SRC_T, MASK_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN, XFCVDEPTH_MASK_IN,
+                      XFCVDEPTH_OUT, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(MASK_T, NPC),
+                      (COLS >> XF_BITSHIFT(NPC))>(_src_mat, in_mask, _dst_mat, color, height, width);
 }
 } // namespace cv
 } // namespace xf

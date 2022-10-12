@@ -30,17 +30,17 @@ void mean_stddev_accel(
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, __NPPC> imgInput(height, width);
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, __NPPC, XF_CV_DEPTH_IN> imgInput(height, width);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, __NPPC>(img_in, imgInput);
+    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, __NPPC, XF_CV_DEPTH_IN>(img_in, imgInput);
 
     // Run xfOpenCV kernel:
-    xf::cv::meanStdDev<TYPE, HEIGHT, WIDTH, __NPPC>(imgInput, mean, stddev);
+    xf::cv::meanStdDev<TYPE, HEIGHT, WIDTH, __NPPC, XF_CV_DEPTH_IN>(imgInput, mean, stddev);
 
     return;
 } // End of kernel

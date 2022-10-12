@@ -28,7 +28,7 @@
 #define WIDTH 128
 #define HEIGHT 128
 // Resolve optimization type:
-#if NO
+#if SPC
 #define NPC1 XF_NPPC1
 #if GRAY
 #define PTR_WIDTH 8
@@ -37,7 +37,7 @@
 #endif
 #endif
 
-#if RO
+#if MPC
 #define NPC1 XF_NPPC8
 #if GRAY
 #define PTR_WIDTH 64

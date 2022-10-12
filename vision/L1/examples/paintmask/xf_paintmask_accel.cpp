@@ -32,9 +32,9 @@ void paintmask_accel(ap_uint<PTR_WIDTH>* img_in,
     #pragma HLS INTERFACE s_axilite  port=return 		      bundle=control
     // clang-format on
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(height, width);
-    xf::cv::Mat<M_TYPE, HEIGHT, WIDTH, NPC1> maskInput(height, width);
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgOutput(height, width);
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> imgInput(height, width);
+    xf::cv::Mat<M_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_MASK_IN> maskInput(height, width);
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> imgOutput(height, width);
 
 // clang-format off
 // clang-format on
@@ -50,14 +50,15 @@ void paintmask_accel(ap_uint<PTR_WIDTH>* img_in,
     }
 
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1>(img_in, imgInput);
-    xf::cv::Array2xfMat<PTR_WIDTH, M_TYPE, HEIGHT, WIDTH, NPC1>(mask_in, maskInput);
+    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(img_in, imgInput);
+    xf::cv::Array2xfMat<PTR_WIDTH, M_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_MASK_IN>(mask_in, maskInput);
 
     // Run xfOpenCV kernel:
-    xf::cv::paintmask<TYPE, M_TYPE, HEIGHT, WIDTH, NPC1>(imgInput, maskInput, imgOutput, color_local);
+    xf::cv::paintmask<TYPE, M_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_MASK_IN, XF_CV_DEPTH_OUT>(
+        imgInput, maskInput, imgOutput, color_local);
 
     // Convert _dst xf::cv::Mat object to output array:
-    xf::cv::xfMat2Array<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1>(imgOutput, img_out);
+    xf::cv::xfMat2Array<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(imgOutput, img_out);
 
     return;
 } // End of kernel

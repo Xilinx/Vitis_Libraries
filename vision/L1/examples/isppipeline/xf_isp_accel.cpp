@@ -30,8 +30,8 @@ static int igain_1[3] = {0};
  * Return:      None
  * Description: Read data from multiple pixel/clk AXI stream into user defined stream
  ************************************************************************************/
-template <int TYPE, int ROWS, int COLS, int NPPC>
-void AXIVideo2BayerMat(InVideoStrm_t& bayer_strm, xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& bayer_mat) {
+template <int TYPE, int ROWS, int COLS, int NPPC, int XFCVDEPTH_BAYER>
+void AXIVideo2BayerMat(InVideoStrm_t& bayer_strm, xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_BAYER>& bayer_mat) {
 // clang-format off
 #pragma HLS INLINE OFF
     // clang-format on
@@ -96,8 +96,8 @@ loop_row_axi2mat:
 
     return;
 }
-template <int TYPE, int ROWS, int COLS, int NPPC>
-void ColorMat2AXIvideo(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& color_mat, OutVideoStrm_t& color_strm) {
+template <int TYPE, int ROWS, int COLS, int NPPC, int XFCVDEPTH_color>
+void ColorMat2AXIvideo(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_color>& color_mat, OutVideoStrm_t& color_strm) {
 // clang-format off
 #pragma HLS INLINE OFF
     // clang-format on
@@ -170,9 +170,9 @@ loop_row_mat2axi:
     return;
 }
 
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
-void fifo_copy(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& demosaic_out,
-               xf::cv::Mat<DST_T, ROWS, COLS, NPC>& ltm_in,
+template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int XFCVDEPTH_DEMOSAIC_OUT, int XFCVDEPTH_LTM_IN>
+void fifo_copy(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_DEMOSAIC_OUT>& demosaic_out,
+               xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_LTM_IN>& ltm_in,
                unsigned short height,
                unsigned short width) {
 // clang-format off
@@ -201,9 +201,9 @@ Row_Loop:
         }
     }
 }
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
-void fifo_awb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& demosaic_out,
-              xf::cv::Mat<DST_T, ROWS, COLS, NPC>& ltm_in,
+template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int XFCVDEPTH_DEMOSAIC_OUT, int XFCVDEPTH_LTM_IN>
+void fifo_awb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_DEMOSAIC_OUT>& demosaic_out,
+              xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_LTM_IN>& ltm_in,
               uint32_t hist0[3][HIST_SIZE],
               uint32_t hist1[3][HIST_SIZE],
               int gain0[3],
@@ -214,7 +214,7 @@ void fifo_awb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& demosaic_out,
 // clang-format off
 #pragma HLS INLINE OFF
     // clang-format on	
-	xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> impop(height, width);
+	xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_DEMOSAIC_OUT> impop(height, width);
 
 	float inputMin = 0.0f;
     float inputMax = (1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC))) - 1; // 65535.0f;
@@ -225,19 +225,23 @@ void fifo_awb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& demosaic_out,
 #pragma HLS DATAFLOW
     // clang-format on
     if (WB_TYPE) {
-        xf::cv::AWBhistogram<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, WB_TYPE, HIST_SIZE>(
-            demosaic_out, impop, hist0, thresh, inputMin, inputMax, outputMin, outputMax);
-        xf::cv::AWBNormalization<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, WB_TYPE, HIST_SIZE>(
-            impop, ltm_in, hist1, thresh, inputMin, inputMax, outputMin, outputMax);
+        xf::cv::AWBhistogram<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, WB_TYPE, HIST_SIZE,
+                             XFCVDEPTH_DEMOSAIC_OUT, XFCVDEPTH_DEMOSAIC_OUT>(demosaic_out, impop, hist0, thresh,
+                                                                             inputMin, inputMax, outputMin, outputMax);
+        xf::cv::AWBNormalization<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, WB_TYPE, HIST_SIZE,
+                                 XFCVDEPTH_DEMOSAIC_OUT, XFCVDEPTH_LTM_IN>(impop, ltm_in, hist1, thresh, inputMin,
+                                                                           inputMax, outputMin, outputMax);
     } else {
-        xf::cv::AWBChannelGain<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0>(demosaic_out, impop, thresh, gain0);
-        xf::cv::AWBGainUpdate<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0>(impop, ltm_in, thresh, gain1);
+        xf::cv::AWBChannelGain<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0, XFCVDEPTH_DEMOSAIC_OUT,
+                               XFCVDEPTH_DEMOSAIC_OUT>(demosaic_out, impop, thresh, gain0);
+        xf::cv::AWBGainUpdate<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0, XFCVDEPTH_DEMOSAIC_OUT,
+                              XFCVDEPTH_LTM_IN>(impop, ltm_in, thresh, gain1);
     }
 }
 
-template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1>
-void function_awb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& demosaic_out,
-                  xf::cv::Mat<DST_T, ROWS, COLS, NPC>& ltm_in,
+template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int XFCVDEPTH_DEMOSAIC_OUT, int XFCVDEPTH_LTM_IN>
+void function_awb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_DEMOSAIC_OUT>& demosaic_out,
+                  xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_LTM_IN>& ltm_in,
                   uint32_t hist0[3][HIST_SIZE],
                   uint32_t hist1[3][HIST_SIZE],
                   int gain0[3],
@@ -254,10 +258,11 @@ void function_awb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& demosaic_out,
     ap_uint<1> mode_flg = mode.range(0, 0);
 
     if (mode_flg) {
-        fifo_awb<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(demosaic_out, ltm_in, hist0, hist1, gain0, gain1,
-                                                                   height, width, thresh);
+        fifo_awb<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_DEMOSAIC_OUT, XFCVDEPTH_LTM_IN>(
+            demosaic_out, ltm_in, hist0, hist1, gain0, gain1, height, width, thresh);
     } else {
-        fifo_copy<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(demosaic_out, ltm_in, height, width);
+        fifo_copy<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_DEMOSAIC_OUT, XFCVDEPTH_LTM_IN>(
+            demosaic_out, ltm_in, height, width);
     }
 }
 
@@ -343,17 +348,17 @@ void ISPpipeline(InVideoStrm_t& s_axis_video,
 
 #pragma HLS INLINE OFF
     // clang-format on
-    xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> imgInput1(height, width);
-    xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> imgInput2(height, width);
-    xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> bpc_out(height, width);
-    xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> gain_out(height, width);
-    xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> demosaic_out(height, width);
-    xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> impop(height, width);
-    xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> ltm_in(height, width);
-    xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> lsc_out(height, width);
-    xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> _dst(height, width);
-    xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> aecin(height, width);
-    xf::cv::Mat<XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC> _imgOutput(height, width);
+    xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_1> imgInput1(height, width);
+    xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_2> imgInput2(height, width);
+    xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_BPC_OUT> bpc_out(height, width);
+    xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_GAIN_OUT> gain_out(height, width);
+    xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_DEMOSAIC_OUT> demosaic_out(height, width);
+    xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IMPOP> impop(height, width);
+    xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_LTM_IN> ltm_in(height, width);
+    xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_LSC_OUT> lsc_out(height, width);
+    xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_DST> _dst(height, width);
+    xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_AEC_IN> aecin(height, width);
+    xf::cv::Mat<XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT> _imgOutput(height, width);
 
 // clang-format off
 #pragma HLS DATAFLOW
@@ -366,25 +371,31 @@ void ISPpipeline(InVideoStrm_t& s_axis_video,
 
     float mul_fact = (inputMax / (inputMax - BLACK_LEVEL));
 
-    AXIVideo2BayerMat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(s_axis_video, imgInput1);
-    xf::cv::blackLevelCorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1>(imgInput1, imgInput2, BLACK_LEVEL,
-                                                                                    mul_fact);
+    AXIVideo2BayerMat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_1>(s_axis_video, imgInput1);
+    xf::cv::blackLevelCorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2>(
+        imgInput1, imgInput2, BLACK_LEVEL, mul_fact);
     // xf::cv::badpixelcorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0, 0>(imgInput2, bpc_out);
-    xf::cv::gaincontrol<XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(imgInput2, gain_out, rgain, bgain);
-    xf::cv::demosaicing<XF_BAYER_PATTERN, XF_SRC_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0>(gain_out, demosaic_out);
+    xf::cv::gaincontrol<XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_2,
+                        XF_CV_DEPTH_GAIN_OUT>(imgInput2, gain_out, rgain, bgain);
+    xf::cv::demosaicing<XF_BAYER_PATTERN, XF_SRC_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0, XF_CV_DEPTH_GAIN_OUT,
+                        XF_CV_DEPTH_DEMOSAIC_OUT>(gain_out, demosaic_out);
 
-    function_awb<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(demosaic_out, ltm_in, hist0, hist1, gain0, gain1,
-                                                                   height, width, mode_reg, thresh);
+    function_awb<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_DEMOSAIC_OUT, XF_CV_DEPTH_LTM_IN>(
+        demosaic_out, ltm_in, hist0, hist1, gain0, gain1, height, width, mode_reg, thresh);
 
-    xf::cv::colorcorrectionmatrix<XF_CCM_TYPE, XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(ltm_in, lsc_out);
+    xf::cv::colorcorrectionmatrix<XF_CCM_TYPE, XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_LTM_IN,
+                                  XF_CV_DEPTH_LSC_OUT>(ltm_in, lsc_out);
 
     if (XF_DST_T == XF_8UC3) {
-        fifo_copy<XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(lsc_out, aecin, height, width);
+        fifo_copy<XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_LSC_OUT, XF_CV_DEPTH_AEC_IN>(
+            lsc_out, aecin, height, width);
     } else {
-        xf::cv::xf_QuatizationDithering<XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPC>(lsc_out, aecin);
+        xf::cv::xf_QuatizationDithering<XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPC,
+                                        XF_CV_DEPTH_LSC_OUT, XF_CV_DEPTH_AEC_IN>(lsc_out, aecin);
     }
-    xf::cv::gammacorrection<XF_LTM_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(aecin, _dst, gamma_lut);
-    ColorMat2AXIvideo<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(_dst, m_axis_video);
+    xf::cv::gammacorrection<XF_LTM_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_AEC_IN, XF_CV_DEPTH_DST>(
+        aecin, _dst, gamma_lut);
+    ColorMat2AXIvideo<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_DST>(_dst, m_axis_video);
     //    xf::cv::rgb2yuyv<XF_LTM_T, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC>(_dst, _imgOutput);
 
     //    ColorMat2AXIvideo_yuv<XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC>(_imgOutput, m_axis_video);

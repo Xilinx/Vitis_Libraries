@@ -35,3 +35,7 @@
 #define FUNCT_NAME subtract
 //#define EXTRA_ARG 0.05
 #define EXTRA_PARM XF_CONVERT_POLICY_SATURATE
+#define XF_CV_DEPTH_IN 2
+#define XF_CV_DEPTH_OUT_1 2
+#define XF_CV_DEPTH_OUT_2 2
+#define XF_CV_DEPTH_3XWIDTH 3 * WIDTH

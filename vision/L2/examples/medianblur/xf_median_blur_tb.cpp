@@ -136,8 +136,10 @@ int main(int argc, char** argv) {
     xf::cv::analyzeDiff(diff, 10, err_per);
 
     if (err_per > 0.0f) {
-        return 1;
-    }
+        fprintf(stderr, "ERROR: Test Failed.\n ");
+        return -1;
+    } else
+        std::cout << "Test Passed " << std::endl;
 
     return 0;
 }

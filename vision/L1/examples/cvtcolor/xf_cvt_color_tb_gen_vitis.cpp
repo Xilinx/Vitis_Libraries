@@ -2746,14 +2746,17 @@ int main(int argc, char** argv) {
 
     if (err_per > 3.0f) {
         fprintf(stderr, "\n1st Image Test Failed\n");
-    }
+        return 1;
+    } else
+        std::cout << "Test Passed " << std::endl;
 #if (IYUV2NV12 || RGBA2NV12 || RGBA2NV21 || UYVY2NV12 || YUYV2NV12 || NV122IYUV || NV212IYUV || IYUV2YUV4 || \
      NV122YUV4 || NV212YUV4 || RGBA2IYUV || RGBA2YUV4 || UYVY2IYUV || YUYV2IYUV || NV122NV21 || NV212NV12)
     xf::cv::analyzeDiff(errImg1, ERROR_THRESHOLD, err_per);
     if (err_per > 3.0f) {
         fprintf(stderr, "\n2nd Image Test Failed\n");
         return 1;
-    }
+    } else
+        std::cout << "Test Passed " << std::endl;
 
 #endif
 #if (IYUV2YUV4 || NV122IYUV || NV122YUV4 || NV212IYUV || NV212YUV4 || RGBA2IYUV || RGBA2YUV4 || UYVY2IYUV || YUYV2IYUV)
@@ -2761,7 +2764,8 @@ int main(int argc, char** argv) {
     if (err_per > 3.0f) {
         fprintf(stderr, "\n3rd Image Test Failed\n");
         return 1;
-    }
+    } else
+        std::cout << "Test Passed " << std::endl;
 #endif
     /* ## *************************************************************** ##*/
     return 0;

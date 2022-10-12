@@ -191,6 +191,7 @@ int main(int argc, char** argv) {
             }
             //}
         }
+        gc.end();
         std::cout << "Test passed" << std::endl;
         std::cout << "Average time to process frame : " << (((float)tt.count() * 0.001) / (float)iterations) << " ms"
                   << std::endl;

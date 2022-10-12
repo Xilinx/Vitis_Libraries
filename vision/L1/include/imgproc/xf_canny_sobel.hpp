@@ -141,29 +141,33 @@ template <int SRC_T,
           int DEPTH_SRC,
           int DEPTH_DST,
           int NPC,
+          int XFCVDEPTH_IN_0 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_0 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int TC,
           int WIN_SZ,
           int WIN_SZ_SQ>
-void ProcessSobelfunc(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,  // hls::stream< XF_SNAME(WORDWIDTH_SRC) > &_src,
-                      xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _out_mat,  // hls::stream< XF_SNAME(WORDWIDTH_DST) > &_dst,
-                      xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _out_mat1, // hls::stream< XF_SNAME(WORDWIDTH_DST) > &_dst1,
-                      XF_SNAME(WORDWIDTH_SRC) buf[WIN_SZ][(COLS >> XF_BITSHIFT(NPC))],
-                      XF_PTNAME(DEPTH_SRC) src_buf[WIN_SZ][XF_NPIXPERCYCLE(NPC) + (WIN_SZ - 1)],
-                      XF_PTNAME(DEPTH_DST) OutputValues[XF_NPIXPERCYCLE(NPC)],
-                      XF_PTNAME(DEPTH_DST) OutputValues1[XF_NPIXPERCYCLE(NPC)],
-                      XF_SNAME(WORDWIDTH_DST) & P0,
-                      XF_SNAME(WORDWIDTH_DST) & P1,
-                      uint16_t img_width,
-                      uint16_t img_height,
-                      uint16_t& shift_x,
-                      ap_uint<13> row_ind[WIN_SZ],
-                      ap_uint<13> row,
-                      ap_uint<8> win_size,
-                      int& readind,
-                      int& writeind,
-                      int& writeind1) {
+void ProcessSobelfunc(
+    xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_0>& _src_mat,   // hls::stream< XF_SNAME(WORDWIDTH_SRC) > &_src,
+    xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_0>& _out_mat,  // hls::stream< XF_SNAME(WORDWIDTH_DST) > &_dst,
+    xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _out_mat1, // hls::stream< XF_SNAME(WORDWIDTH_DST) > &_dst1,
+    XF_SNAME(WORDWIDTH_SRC) buf[WIN_SZ][(COLS >> XF_BITSHIFT(NPC))],
+    XF_PTNAME(DEPTH_SRC) src_buf[WIN_SZ][XF_NPIXPERCYCLE(NPC) + (WIN_SZ - 1)],
+    XF_PTNAME(DEPTH_DST) OutputValues[XF_NPIXPERCYCLE(NPC)],
+    XF_PTNAME(DEPTH_DST) OutputValues1[XF_NPIXPERCYCLE(NPC)],
+    XF_SNAME(WORDWIDTH_DST) & P0,
+    XF_SNAME(WORDWIDTH_DST) & P1,
+    uint16_t img_width,
+    uint16_t img_height,
+    uint16_t& shift_x,
+    ap_uint<13> row_ind[WIN_SZ],
+    ap_uint<13> row,
+    ap_uint<8> win_size,
+    int& readind,
+    int& writeind,
+    int& writeind1) {
 // clang-format off
     #pragma HLS INLINE
     // clang-format on
@@ -394,18 +398,22 @@ template <int SRC_T,
           int DEPTH_SRC,
           int DEPTH_DST,
           int NPC,
+          int XFCVDEPTH_IN_0 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_0 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int TC,
           int WIN_SZ,
           int WIN_SZ_SQ,
           bool USE_URAM>
-void xFSobel3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,  // hls::stream< XF_SNAME(WORDWIDTH_SRC) > &_src,
-                xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _out_mat,  // hls::stream< XF_SNAME(WORDWIDTH_DST) > &_dst,
-                xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _out_mat1, // hls::stream< XF_SNAME(WORDWIDTH_DST) > &_dst1,
-                ap_uint<8> win_size,
-                uint16_t img_height,
-                uint16_t img_width) {
+void xFSobel3x3(
+    xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_0>& _src_mat,   // hls::stream< XF_SNAME(WORDWIDTH_SRC) > &_src,
+    xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_0>& _out_mat,  // hls::stream< XF_SNAME(WORDWIDTH_DST) > &_dst,
+    xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _out_mat1, // hls::stream< XF_SNAME(WORDWIDTH_DST) > &_dst1,
+    ap_uint<8> win_size,
+    uint16_t img_height,
+    uint16_t img_width) {
     ap_uint<13> row_ind[WIN_SZ];
 // clang-format off
     #pragma HLS ARRAY_PARTITION variable=row_ind complete dim=1
@@ -434,12 +442,12 @@ void xFSobel3x3(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src_mat,  // hls::stream< 
     XF_SNAME(WORDWIDTH_SRC) buf[WIN_SZ][(COLS >> XF_BITSHIFT(NPC))];
     if (USE_URAM) {
 // clang-format off
-        #pragma HLS array reshape variable=buf dim=1 factor=WIN_SZ cyclic
-        #pragma HLS RESOURCE variable=buf core=RAM_S2P_URAM
+        #pragma HLS array_reshape variable=buf dim=1 factor=WIN_SZ cyclic
+        #pragma HLS bind_storage variable=buf type=RAM_S2P impl=URAM
         // clang-format on
     } else {
 // clang-format off
-        #pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
+        #pragma HLS bind_storage variable=buf type=RAM_S2P impl=BRAM
         #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
         // clang-format on
     }
@@ -489,10 +497,10 @@ Row_Loop:
 
         P0 = 0;
         P1 = 0;
-        ProcessSobelfunc<SRC_T, DST_T, ROWS, COLS, DEPTH_SRC, DEPTH_DST, NPC, WORDWIDTH_SRC, WORDWIDTH_DST, TC, WIN_SZ,
-                         WIN_SZ_SQ>(_src_mat, _out_mat, _out_mat1, buf, src_buf, OutputValues, OutputValues1, P0, P1,
-                                    img_width, img_height, shift_x, row_ind, row, win_size, readind, writeind,
-                                    writeind1);
+        ProcessSobelfunc<SRC_T, DST_T, ROWS, COLS, DEPTH_SRC, DEPTH_DST, NPC, XFCVDEPTH_IN_0, XFCVDEPTH_OUT_0,
+                         XFCVDEPTH_OUT_1, WORDWIDTH_SRC, WORDWIDTH_DST, TC, WIN_SZ, WIN_SZ_SQ>(
+            _src_mat, _out_mat, _out_mat1, buf, src_buf, OutputValues, OutputValues1, P0, P1, img_width, img_height,
+            shift_x, row_ind, row, win_size, readind, writeind, writeind1);
 
         // update indices
         ap_uint<13> zero_ind = row_ind[0];
@@ -514,20 +522,24 @@ template <int SRC_T,
           int DEPTH_SRC,
           int DEPTH_DST,
           int NPC,
+          int XFCVDEPTH_IN_0 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_0 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH_SRC,
           int WORDWIDTH_DST,
           int WIN_SZ,
           bool USE_URAM = false>
-void xFSobel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& _src,  // hls::stream< XF_SNAME(WORDWIDTH_SRC) > &_src,
-             xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst,  // hls::stream< XF_SNAME(WORDWIDTH_DST) > &_dst,
-             xf::cv::Mat<DST_T, ROWS, COLS, NPC>& _dst1, // hls::stream< XF_SNAME(WORDWIDTH_DST) > &_dst1,
-             int _border_type,
-             uint16_t imgheight,
-             uint16_t imgwidth) {
+void xFSobel(
+    xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_0>& _src,   // hls::stream< XF_SNAME(WORDWIDTH_SRC) > &_src,
+    xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_0>& _dst,  // hls::stream< XF_SNAME(WORDWIDTH_DST) > &_dst,
+    xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& _dst1, // hls::stream< XF_SNAME(WORDWIDTH_DST) > &_dst1,
+    int _border_type,
+    uint16_t imgheight,
+    uint16_t imgwidth) {
 #ifndef __SYNTHESIS__
     assert(((imgheight <= ROWS) && (imgwidth <= COLS)) && "ROWS and COLS should be greater than input image");
 #endif
-    xFSobel3x3<SRC_T, DST_T, ROWS, COLS, DEPTH_SRC, DEPTH_DST, NPC, WORDWIDTH_SRC, WORDWIDTH_DST,
-               (COLS >> XF_BITSHIFT(NPC)) + (WIN_SZ >> 1), WIN_SZ, WIN_SZ * WIN_SZ, USE_URAM>(_src, _dst, _dst1, WIN_SZ,
-                                                                                              imgheight, imgwidth);
+    xFSobel3x3<SRC_T, DST_T, ROWS, COLS, DEPTH_SRC, DEPTH_DST, NPC, XFCVDEPTH_IN_0, XFCVDEPTH_OUT_0, XFCVDEPTH_OUT_1,
+               WORDWIDTH_SRC, WORDWIDTH_DST, (COLS >> XF_BITSHIFT(NPC)) + (WIN_SZ >> 1), WIN_SZ, WIN_SZ * WIN_SZ,
+               USE_URAM>(_src, _dst, _dst1, WIN_SZ, imgheight, imgwidth);
 }

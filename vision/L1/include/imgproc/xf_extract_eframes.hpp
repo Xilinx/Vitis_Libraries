@@ -29,7 +29,16 @@
 namespace xf {
 namespace cv {
 
-template <int SRC_T, int N_ROWS, int N_COLS, int MAX_ROWS, int MAX_COLS, int NPPC = XF_NPPC1, int USE_URAM = 0>
+template <int SRC_T,
+          int N_ROWS,
+          int N_COLS,
+          int MAX_ROWS,
+          int MAX_COLS,
+          int NPPC = XF_NPPC1,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_LEF = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_SEF = _XFCVDEPTH_DEFAULT,
+          int USE_URAM = 0>
 class ExposureFramesExtract {
    public:
     // Internal buffers, registers
@@ -83,9 +92,9 @@ class ExposureFramesExtract {
     //   This function synchronizes input frames of different exposures by storing initial
     //   blank lines into temporary buffer (BRAM or URAM)
     // ....................................................................................
-    void extract(xf::cv::Mat<SRC_T, MAX_ROWS * 2, MAX_COLS + N_COLS, NPPC>& _hdrSrc,
-                 xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPPC>& _lefSrc,
-                 xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPPC>& _sefSrc) {
+    void extract(xf::cv::Mat<SRC_T, MAX_ROWS * 2, MAX_COLS + N_COLS, NPPC, XFCVDEPTH_IN_1>& _hdrSrc,
+                 xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPPC, XFCVDEPTH_LEF>& _lefSrc,
+                 xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPPC, XFCVDEPTH_SEF>& _sefSrc) {
 // clang-format off
             #pragma HLS INLINE OFF
         // clang-format on
@@ -93,7 +102,7 @@ class ExposureFramesExtract {
         // Constants for loopcounts
         const uint32_t _TC1 = N_ROWS - 1;
         const uint32_t _TC2 = MAX_ROWS - N_ROWS;
-
+        const uint32_t _TC3 = MAX_COLS + N_COLS;
         // Initialize read and write pointers
         initialize();
 
@@ -101,10 +110,13 @@ class ExposureFramesExtract {
     // -----------------------------------------------------------------
     BUFFER_LINES:
         for (int row = 0; row < N_ROWS - 1; row++) {
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min = 1 max = _TC1
+            // clang-format on
             for (int col = 0; col<_hdrSrc.cols>> (XF_BITSHIFT(NPPC)); col++) {
 // clang-format off
                     #pragma HLS PIPELINE II=1
-                    #pragma HLS LOOP_TRIPCOUNT min=_TC1 max=_TC1
+                    #pragma HLS LOOP_TRIPCOUNT min=1 max=_TC3/NPPC
                 // clang-format on
 
                 buff.val[fifo_wr_ptr][col] = _hdrSrc.read(src_rd_ptr++);
@@ -120,11 +132,15 @@ class ExposureFramesExtract {
     // -----------------------------------------------------------------
     SPLIT_LINES:
         for (int row = N_ROWS - 1; row < _lefSrc.rows; row++) {
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min = 1 max = _TC2
+            // clang-format on
             // LEF (Long Exposure Frame's Line, into internal buffer)
             for (int col = 0; col<_hdrSrc.cols>> (XF_BITSHIFT(NPPC)); col++) {
 // clang-format off
                     #pragma HLS PIPELINE II=1
-                    #pragma HLS LOOP_TRIPCOUNT min=1 max=_TC2
+                    #pragma HLS LOOP_TRIPCOUNT min=1 max=_TC3/NPPC
+
                 // clang-format on
 
                 buff.val[fifo_wr_ptr][col] = _hdrSrc.read(src_rd_ptr++);
@@ -136,7 +152,7 @@ class ExposureFramesExtract {
             for (int col = 0; col<_hdrSrc.cols>> (XF_BITSHIFT(NPPC)); col++) {
 // clang-format off
                     #pragma HLS PIPELINE II=1
-                    #pragma HLS LOOP_TRIPCOUNT min=1 max=_TC2
+                    #pragma HLS LOOP_TRIPCOUNT min=1 max=_TC3/NPPC
                 // clang-format on
 
                 if (col >= (N_COLS >> (XF_BITSHIFT(NPPC)))) {
@@ -165,10 +181,13 @@ class ExposureFramesExtract {
     // -----------------------------------------------------------------
     LAST_LINES:
         for (int row = 0; row < N_ROWS - 1; row++) {
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min = 1 max = _TC1
+            // clang-format on
             for (int col = 0; col<_hdrSrc.cols>> (XF_BITSHIFT(NPPC)); col++) {
 // clang-format off
                     #pragma HLS PIPELINE II=1
-                    #pragma HLS LOOP_TRIPCOUNT min=_TC1 max=_TC1
+                    #pragma HLS LOOP_TRIPCOUNT min=1 max=_TC3/NPPC
                 // clang-format on
 
                 //_lefSrc.write(lef_ptr++, buff.val[fifo_rd_ptr][col]);
@@ -193,15 +212,26 @@ class ExposureFramesExtract {
 };
 
 // Extract HDR exposure frames
-template <int SRC_T, int N_ROWS, int N_COLS, int MAX_ROWS, int MAX_COLS, int NPPC = XF_NPPC1, int USE_URAM = 0>
-void extractExposureFrames(xf::cv::Mat<SRC_T, MAX_ROWS * 2, MAX_COLS + N_COLS, NPPC>& _hdrSrc,
-                           xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPPC>& _lefSrc,
-                           xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPPC>& _sefSrc) {
+template <int SRC_T,
+          int N_ROWS,
+          int N_COLS,
+          int MAX_ROWS,
+          int MAX_COLS,
+          int NPPC = XF_NPPC1,
+          int USE_URAM = 0,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_LEF = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_SEF = _XFCVDEPTH_DEFAULT>
+void extractExposureFrames(xf::cv::Mat<SRC_T, MAX_ROWS * 2, MAX_COLS + N_COLS, NPPC, XFCVDEPTH_IN_1>& _hdrSrc,
+                           xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPPC, XFCVDEPTH_LEF>& _lefSrc,
+                           xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPPC, XFCVDEPTH_SEF>& _sefSrc) {
 // clang-format off
         #pragma HLS INLINE OFF
     // clang-format on
 
-    xf::cv::ExposureFramesExtract<SRC_T, N_ROWS, N_COLS, MAX_ROWS, MAX_COLS, NPPC, USE_URAM> extractor;
+    xf::cv::ExposureFramesExtract<SRC_T, N_ROWS, N_COLS, MAX_ROWS, MAX_COLS, NPPC, XFCVDEPTH_IN_1, XFCVDEPTH_LEF,
+                                  XFCVDEPTH_SEF, USE_URAM>
+        extractor;
 
     extractor.extract(_hdrSrc, _lefSrc, _sefSrc);
 

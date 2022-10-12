@@ -42,9 +42,9 @@ void rgbir_accel(InStream& img_in,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC> imgInput(height, width);
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC> rggbOutput(height, width);
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC> fullIrOutput(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_IN> imgInput(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_OUT_1> rggbOutput(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_OUT_2> fullIrOutput(height, width);
 
 #pragma HLS DATAFLOW
 
@@ -55,9 +55,10 @@ void rgbir_accel(InStream& img_in,
 
     // Run xfOpenCV kernels:
 
-    xf::cv::rgbir2bayer<FILTERSIZE1, FILTERSIZE2, BPATTERN, IN_TYPE, HEIGHT, WIDTH, NPC, 3 * WIDTH, XF_BORDER_CONSTANT,
-                        XF_USE_URAM>(imgInput, R_IR_C1_wgts, R_IR_C2_wgts, B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts,
-                                     sub_wgts, rggbOutput, fullIrOutput);
+    xf::cv::rgbir2bayer<FILTERSIZE1, FILTERSIZE2, BPATTERN, IN_TYPE, HEIGHT, WIDTH, NPC, XF_BORDER_CONSTANT,
+                        XF_USE_URAM, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT_1, XF_CV_DEPTH_OUT_2, XF_CV_DEPTH_3XWIDTH>(
+        imgInput, R_IR_C1_wgts, R_IR_C2_wgts, B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts, sub_wgts, rggbOutput,
+        fullIrOutput);
 
     xf::cv::xfMat2AXIvideo(rggbOutput, rggb_out);
     xf::cv::xfMat2AXIvideo(fullIrOutput, ir_out);

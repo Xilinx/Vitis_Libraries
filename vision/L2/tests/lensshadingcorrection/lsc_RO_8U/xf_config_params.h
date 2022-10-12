@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#define XF_CV_DEPTH_IN 3
+#define XF_CV_DEPTH_OUT 3
 
-#define NO 0 // Normal Operation
-#define RO 1 // Resource Optimized
+#define SPC 0 // Single Pixel per Clock operation
+#define MPC 1 // Multiple Pixels per Clock operation
 
 #define T_8U 1
 #define T_16U 0
+
+#define BPATTERN XF_BAYER_BG

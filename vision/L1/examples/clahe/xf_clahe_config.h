@@ -16,6 +16,7 @@
 
 #ifndef _XF_CLAHE_CONFIG_HPP_
 #define _XF_CLAHE_CONFIG_HPP_
+#include "xf_config_params.h"
 #include "imgproc/xf_clahe.hpp"
 
 /*  User configurable parameters */

@@ -44,17 +44,31 @@
 #include "imgproc/xf_gammacorrection.hpp"
 #include "imgproc/xf_median_blur.hpp"
 #include "imgproc/xf_clahe.hpp"
+#include "imgproc/xf_hdrmerge.hpp"
+#include "imgproc/xf_extract_eframes.hpp"
 
 #define S_DEPTH 4096
+#define NO_EXPS 2
+#if T_8U
+#define W_B_SIZE 256
+#endif
+#if T_10U
+#define W_B_SIZE 1024
+#endif
+#if T_12U
+#define W_B_SIZE 4096
+#endif
+#if T_16U
+#define W_B_SIZE 65536
+#endif
 
 static constexpr int CLIPLIMIT = 32;
 static constexpr int TILES_Y_MIN = 2;
 static constexpr int TILES_X_MIN = 2;
 static constexpr int TILES_Y_MAX = 4;
 static constexpr int TILES_X_MAX = 4;
-
 // --------------------------------------------------------------------
-// Macros definations
+// Macros definitions
 // --------------------------------------------------------------------
 
 // Useful macro functions definitions
@@ -70,8 +84,8 @@ static constexpr int TILES_X_MAX = 4;
 #define AXI_WIDTH_OUT _BYTE_ALIGN_(OUT_DATA_WIDTH)
 
 #define NR_COMPONENTS 3
-static constexpr int BLOCK_HEIGHT = 64;
-static constexpr int BLOCK_WIDTH = 64;
+static constexpr int BLOCK_HEIGHT = 32;
+static constexpr int BLOCK_WIDTH = 32;
 // --------------------------------------------------------------------
 // Internal types
 // --------------------------------------------------------------------
@@ -108,6 +122,10 @@ struct ispparams_config {
     unsigned short pawb = 128;
     unsigned short bayer_p = 3;
     unsigned short black_level = 32;
+    unsigned short height = 128;
+    unsigned short width = 128;
+    unsigned short blk_height = 32;
+    unsigned short blk_width = 32;
 };
 
 #endif //_XF_ISP_TYPES_H_

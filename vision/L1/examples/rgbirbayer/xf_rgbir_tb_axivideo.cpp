@@ -5,6 +5,7 @@
 #include "xf_rgbir_config_axivideo.h"
 #include "common/xf_axi.hpp"
 #include "common/xf_sw_utils.hpp"
+#include "common/xf_headers.hpp"
 
 void subtract_ref(cv::Mat input1, cv::Mat input2, cv::Mat& output) {
     for (int row = 0; row < input1.rows; row++) {
@@ -80,10 +81,6 @@ CVTYPE bilinear_interp(CVTYPE val0, CVTYPE val1, CVTYPE val2, CVTYPE val3) {
 }
 
 void apply_bilinear_ref(CVTYPE patch[3][3], CVTYPE& out) {
-    /*CVTYPE val1 = interp1_ref(patch[1][0], patch[1][2], 2);
-    CVTYPE val2 = interp1_ref(patch[0][1], patch[2][1], 2);
-    CVTYPE res = interp1_ref(val1, val2, 2);
-     */
     CVTYPE res = bilinear_interp(patch[0][1], patch[1][0], patch[1][2], patch[2][1]);
 
     out = res;
@@ -113,7 +110,8 @@ void ir_bilinear_ref(cv::Mat half_ir, cv::Mat& full_ir) {
                 }
                 full_ir.at<CVTYPE>(row, col) = out_pix;
             } else if ((BPATTERN == XF_BAYER_GR)) {
-                if ((((row & 0x0001) == 0) && (col & 0x0001) == 1)) // GR Mode - Even row, odd column
+                if ((((row & 0x0001) == 0) && ((col & 0x0001) == 0)) ||
+                    (((row & 0x0001) == 1) && ((col & 0x0001) == 1))) // GR Mode - Even row, odd column
                 {
                     apply_bilinear_ref(block_half_ir, out_pix);
                 }
@@ -141,14 +139,12 @@ void apply_filter_ref(CVTYPE patch[FROWS][FCOLS], float weights[FROWS][FCOLS], C
     if (out_pix < 0) {
         out_pix = 0;
     }
-
     out = (CVTYPE)out_pix;
 }
 
 void rgb_ir_ref(cv::Mat in, cv::Mat& output_image, cv::Mat& output_image_ir) {
     CVTYPE block_rgb[5][5];
     CVTYPE block_ir[3][3];
-    bool toggle_weights = 0;
 
     float R_IR_C1_wgts[5][5] = {{-1.0 / 32.0f, -1.0 / 32.0f, 0, -1.0 / 32.0f, -1.0 / 32.0f},
                                 {0, 1.0 / 2.0f, -1.0 / 16.0f, -1.0 / 4.0f, 0},
@@ -168,12 +164,13 @@ void rgb_ir_ref(cv::Mat in, cv::Mat& output_image, cv::Mat& output_image_ir) {
     float IR_at_R_wgts[3][3] = {{1.0 / 4.0f, 0, 1.0 / 4.0f}, {0, -1.0 / 16.0f, 0}, {1.0 / 4.0f, 0, 1.0 / 4.0f}};
     float IR_at_B_wgts[3][3] = {{1.0 / 4.0f, 0, 1.0 / 4.0f}, {0, -1.0 / 16.0f, 0}, {1.0 / 4.0f, 0, 1.0 / 4.0f}};
 
+    int a = 0;
     // Extracting a 5x5 block from input image
-    for (int row = 0; row < output_image.rows; row++) {
-        for (int col = 0; col < output_image.cols; col++) {
+    for (int row = 0; row < in.rows; row++) {
+        for (int col = 0; col < in.cols; col++) {
             for (int k = -2, ki = 0; k < 3; k++, ki++) {
                 for (int l = -2, li = 0; l < 3; l++, li++) {
-                    if (row + k >= 0 && row + k < output_image.rows && col + l >= 0 && col + l < output_image.cols) {
+                    if (row + k >= 0 && row + k < in.rows && col + l >= 0 && col + l < in.cols) {
                         block_rgb[ki][li] = (CVTYPE)in.at<CVTYPE>(row + k, col + l);
                     } else {
                         block_rgb[ki][li] = 0;
@@ -194,20 +191,30 @@ void rgb_ir_ref(cv::Mat in, cv::Mat& output_image, cv::Mat& output_image_ir) {
                      (((col - 2) % 4) == 0))) // BG Mode - This is even row, R location. Compute B here with 5x5 filter
                 {
                     apply_filter_ref<5, 5>(block_rgb, B_at_R_wgts, out_pix); // B at R
-                } else if (((row & 0x0001) == 1) && ((col & 0x0001) == 1))   // BG Mode - This is odd row, odd column,
+                }
+
+                else if (((row - 1) % 4) == 0) // BG Mode - This is odd row, odd column,
                 // hence IR location. Compute R here with 5x5
                 // filter
                 {
-                    if (toggle_weights) {
+                    if (((col - 1) % 4) == 0) {
                         apply_filter_ref<5, 5>(block_rgb, R_IR_C2_wgts,
                                                out_pix); // R at IR - Constellation-2 (Red on the left)
-                        toggle_weights = 0;
-                    } else {
+
+                    } else if (((col + 1) % 4) == 0) {
                         apply_filter_ref<5, 5>(block_rgb, R_IR_C1_wgts,
                                                out_pix); // R at IR - Constellation-1 (Blue on the left)
-                        toggle_weights = 1;
+                    }
+                } else if (((row + 1) % 4) == 0) {
+                    if (((col - 1) % 4) == 0) {
+                        apply_filter_ref<5, 5>(block_rgb, R_IR_C1_wgts,
+                                               out_pix); // R at IR - Constellation-1 (Blue on the left)
+                    } else if (((col + 1) % 4) == 0) {
+                        apply_filter_ref<5, 5>(block_rgb, R_IR_C2_wgts,
+                                               out_pix); // R at IR - Constellation-2 (Red on the left)
                     }
                 }
+
                 // IR-calculations
                 if ((((row % 4) == 0) && (((col) % 4) == 0)) ||
                     ((((row - 2) % 4) == 0) &&
@@ -224,24 +231,34 @@ void rgb_ir_ref(cv::Mat in, cv::Mat& output_image, cv::Mat& output_image_ir) {
             } else if (BPATTERN == XF_BAYER_GR) { // For GR format
 
                 if ((((row - 1) % 4 == 0) &&
-                     ((col - 2) % 4) == 0) || // GR Mode - This is R location. Compute B here with 5x5 filter
+                     ((col - 2) % 4 == 0)) || // GR Mode - This is R location. Compute B here with 5x5 filter
                     (((row + 1) % 4 == 0) && (col % 4) == 0)) {
                     // Apply the filter on the NxM_src_blk
                     apply_filter_ref<5, 5>(block_rgb, B_at_R_wgts, out_pix); // R at B
-                } else if (((row & 0x0001) == 0) && ((col & 0x0001) == 1)) // GR Mode - This is even row, odd col, hence
-                                                                           // IR location. Compute R here with 5x5
-                                                                           // filter
+                }
+
+                else if (((row - 2) % 4) == 0) // BG Mode - This is odd row, odd column,
+                // hence IR location. Compute R here with 5x5
+                // filter
                 {
-                    if (toggle_weights) {
-                        apply_filter_ref<5, 5>(block_rgb, R_IR_C1_wgts,
-                                               out_pix); // R at IR - Constellation-1 (Red on the left top)
-                        toggle_weights = 0;
-                    } else {
+                    if (((col - 1) % 4) == 0) {
                         apply_filter_ref<5, 5>(block_rgb, R_IR_C2_wgts,
-                                               out_pix); // R at IR - Constellation-2 (Blue on the left top)
-                        toggle_weights = 1;
+                                               out_pix); // R at IR - Constellation-2 (Red on the left)
+
+                    } else if (((col + 1) % 4) == 0) {
+                        apply_filter_ref<5, 5>(block_rgb, R_IR_C1_wgts,
+                                               out_pix); // R at IR - Constellation-1 (Blue on the left)
+                    }
+                } else if (((row) % 4) == 0) {
+                    if (((col - 1) % 4) == 0) {
+                        apply_filter_ref<5, 5>(block_rgb, R_IR_C1_wgts,
+                                               out_pix); // R at IR - Constellation-1 (Blue on the left)
+                    } else if (((col + 1) % 4) == 0) {
+                        apply_filter_ref<5, 5>(block_rgb, R_IR_C2_wgts,
+                                               out_pix); // R at IR - Constellation-2 (Red on the left)
                     }
                 }
+
                 // IR-calculations
                 if (((((row - 1) % 4) == 0) &&
                      (((col - 2) % 4) == 0)) || // GR Mode - Odd row, R location. Apply 3x3 IR filter
@@ -253,45 +270,10 @@ void rgb_ir_ref(cv::Mat in, cv::Mat& output_image, cv::Mat& output_image_ir) {
                     apply_filter_ref<3, 3>(block_ir, IR_at_B_wgts, out_pix_ir);  // Calculating IR at B location
                 }
             }
-            /*			else if (BPATTERN == XF_BAYER_GR){ //For GR format
-
-                    if(((row & 0x0001 ) == 0) && (((col+1) % 4) == 0 )) //GR Mode - This is even row, B location.
-            Compute R here with 5x5 filter
-                    {
-                            // Apply the filter on the NxM_src_blk
-                            apply_filter_ref<5,5>(block_rgb, B_at_R_wgts, out_pix);	//R at B
-                    }
-                    else if(((row & 0x0001 ) == 1) && ((col & 0x0001) == 0 )) //GR Mode - This is odd row, even col,
-            hence IR location. Compute B here with 5x5 filter
-                    {
-                            if(toggle_weights){
-                                    apply_filter_ref<5,5>(block_rgb, R_IR_C2_wgts, out_pix);	//R at IR -
-            Constellation-2 (Red on the left)
-                                    toggle_weights = 0;
-                            }
-                            else{
-                                    apply_filter_ref<5,5>(block_rgb, R_IR_C1_wgts, out_pix);	//R at IR -
-            Constellation-1 (Blue on the left)
-                                    toggle_weights = 1;
-                            }
-                    }
-                    //IR-calculations
-                    if (((row & 0x0001) == 0) && (((col-1) % 4) == 0)){//GR Mode - Even row, R location. Apply 3x3 IR
-            filter
-
-                            apply_filter_ref<3,3>(block_ir, IR_at_R_wgts, out_pix_ir);	//Calculating IR at R location
-                    }
-                    else if (((row & 0x0001) == 0) && ((col & 0x0001) == 1)){//GR Mode - Even row, odd column, B
-            location, apply 3x3 IR filter
-
-                            apply_filter_ref<3,3>(block_ir, IR_at_B_wgts, out_pix_ir);	//Calculating IR at B location
-                    }
-            }*/
             output_image.at<CVTYPE>(row, col) = out_pix;
             output_image_ir.at<CVTYPE>(row, col) = out_pix_ir;
         }
     }
-
     cv::imwrite("WithIR_RGGB_ref.png", output_image);
     cv::imwrite("Half_ir_ref.png", output_image_ir);
 }
@@ -311,7 +293,7 @@ void ref_rgb_ir(cv::Mat in, cv::Mat& rggb_output_image, cv::Mat& output_image_ir
 #ifndef __SYNTHESIS
 #ifdef __DEBUG
 
-    FILE* fp1 = fopen("rggb_with_ir_ref.txt", "w");
+    FILE* fp1 = fopen("rggb_with_ir_ref.csv", "w");
     for (int i = 0; i < in_rows; ++i) {
         for (int j = 0; j < in_cols; ++j) {
             CVTYPE val = rggb_out_ref.at<CVTYPE>(i, j);
@@ -321,7 +303,7 @@ void ref_rgb_ir(cv::Mat in, cv::Mat& rggb_output_image, cv::Mat& output_image_ir
     }
     fclose(fp1);
 
-    FILE* fp4 = fopen("half_ir_out_ref.txt", "w");
+    FILE* fp4 = fopen("half_ir_out_ref.csv", "w");
     for (int i = 0; i < in_rows; ++i) {
         for (int j = 0; j < in_cols; ++j) {
             CVTYPE val = half_ir_out_ref.at<CVTYPE>(i, j);
@@ -331,7 +313,7 @@ void ref_rgb_ir(cv::Mat in, cv::Mat& rggb_output_image, cv::Mat& output_image_ir
     }
     fclose(fp4);
 
-    FILE* fp5 = fopen("sub_out_img.txt", "w");
+    FILE* fp5 = fopen("sub_out_img_ref.csv", "w");
     for (int i = 0; i < in_rows; ++i) {
         for (int j = 0; j < in_cols; ++j) {
             CVTYPE val = rggb_output_image.at<CVTYPE>(i, j);
@@ -340,6 +322,16 @@ void ref_rgb_ir(cv::Mat in, cv::Mat& rggb_output_image, cv::Mat& output_image_ir
         fprintf(fp5, "\n");
     }
     fclose(fp5);
+
+    FILE* fpO1 = fopen("output_image_ir.csv", "w");
+    for (int i = 0; i < in_rows; ++i) {
+        for (int j = 0; j < in_cols; ++j) {
+            CVTYPE val = output_image_ir.at<CVTYPE>(i, j);
+            fprintf(fpO1, "%d ", val);
+        }
+        fprintf(fpO1, "\n");
+    }
+    fclose(fpO1);
 #endif
 #endif
 }
@@ -398,7 +390,7 @@ int main(int argc, char* argv[]) {
 
 #ifndef __SYNTHESIS
 #ifdef __DEBUG
-    FILE* fp2 = fopen("input.txt", "w");
+    FILE* fp2 = fopen("input_ref.csv", "w");
     for (int i = 0; i < in_rows; ++i) {
         for (int j = 0; j < in_cols; ++j) {
             CVTYPE val = img_in.at<CVTYPE>(i, j);
@@ -408,7 +400,7 @@ int main(int argc, char* argv[]) {
     }
     fclose(fp2);
 
-    FILE* fp3 = fopen("rggb_out_ref.txt", "w");
+    FILE* fp3 = fopen("rggb_out_ref.csv", "w");
     for (int i = 0; i < in_rows; ++i) {
         for (int j = 0; j < in_cols; ++j) {
             CVTYPE val = rggb_out_ref.at<CVTYPE>(i, j);
@@ -418,7 +410,7 @@ int main(int argc, char* argv[]) {
     }
     fclose(fp3);
 
-    FILE* fp9 = fopen("ir_out_ref.txt", "w");
+    FILE* fp9 = fopen("ir_out_ref.csv", "w");
     for (int i = 0; i < in_rows; ++i) {
         for (int j = 0; j < in_cols; ++j) {
             CVTYPE val = ir_out_ref.at<CVTYPE>(i, j);
@@ -448,15 +440,6 @@ int main(int argc, char* argv[]) {
     char IR_at_B_wgts[9] = {2, 6, 2, 6, -4, 6, 2, 6, 2};
     char wgts[4] = {3, 1, 2, 5}; // Order for GR Format: G, R, B, Calculated B
 
-    /*
-            char R_IR_C1_wgts[25] = {-5,-5,0,-5,-5, 0,1,-4,-2,0, 0,-5,-4,-5,0, 0,-2,-4,1,0, -5,-5,0,-5,-5};
-            char R_IR_C2_wgts[25] = {-5,-5,0,-5,-5, 0,-2,-4,1,0, 0,-5,-4,-5,0, 0,1,-4,-2,0, -5,-5,0,-5,-5};
-            char B_at_R_wgts[25]  = {3,0,-3,0,3, 0,0,0,0,0, 3,0,-1,0,3, 0,0,0,0,0, 3,0,-3,0,3};
-            char IR_at_R_wgts[9]  = {2,0,2, 0,-4,0, 2,0,2};
-            char IR_at_B_wgts[9]  = {2,0,2, 0,-4,0, 2,0,2};
-        char wgts[4]    	  = {3, 1, 2, 5}; // Order for GR Format: G, R, B, Calculated B
-    */
-
     InStream Input;
     OutStream rggbOutput, irOutput;
     rggb_out.create(in_rows, in_cols, CV_INTYPE);
@@ -471,12 +454,39 @@ int main(int argc, char* argv[]) {
     xf::cv::AXIvideo2cvMatxf<NPC>(rggbOutput, rggb_out);
     xf::cv::AXIvideo2cvMatxf<NPC>(irOutput, ir_out);
 
+#ifndef __SYNTHESIS
+#ifdef __DEBUG
+
+    FILE* fp10 = fopen("rggb_out_tb.csv", "w");
+    for (int i = 0; i < in_rows; ++i) {
+        for (int j = 0; j < in_cols; ++j) {
+            CVTYPE val = rggb_out.at<CVTYPE>(i, j);
+            fprintf(fp10, "%d ", val);
+        }
+        fprintf(fp10, "\n");
+    }
+    fclose(fp10);
+
+    FILE* fp11 = fopen("IrOutput.csv", "w");
+    for (int i = 0; i < in_rows; ++i) {
+        for (int j = 0; j < in_cols; ++j) {
+            CVTYPE val = ir_out.at<CVTYPE>(i, j);
+            fprintf(fp11, "%d ", val);
+        }
+        fprintf(fp11, "\n");
+    }
+    fclose(fp11);
+
+#endif
+#endif
     cv::imwrite("rggb_out.png", rggb_out);
     cv::imwrite("ir_out.png", ir_out);
 
     // Result comparison
     cv::Mat diff_img_rggb(in_rows, in_cols, CV_INTYPE);
     cv::Mat diff_img_ir(in_rows, in_cols, CV_INTYPE);
+
+    int count = 0;
     for (int i = 0; i < img_in.rows; i++) {
         for (int j = 0; j < img_in.cols; j++) {
             CVTYPE val_rggb = rggb_out.at<CVTYPE>(i, j);
@@ -500,10 +510,10 @@ int main(int argc, char* argv[]) {
     cv::imwrite("diffImageRGGB.png", diff_img_rggb);
     cv::imwrite("diffImageIR.png", diff_img_ir);
     if (err_per_rggb > 1) {
-        std::cout << "RGGB Test Failed" << std::endl;
+        std::cerr << "RGGB Test Failed" << std::endl;
         return 1;
     } else if (err_per_ir > 2) {
-        std::cout << "IR Test Failed" << std::endl;
+        std::cerr << "IR Test Failed" << std::endl;
         return 1;
     } else {
         std::cout << "Test Passed" << std::endl;

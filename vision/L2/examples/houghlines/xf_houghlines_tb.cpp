@@ -402,7 +402,8 @@ int main(int argc, char** argv) {
     if (successper < 90) {
         fprintf(stderr, "ERROR: Test Failed.\n ");
         return EXIT_FAILURE;
-    }
+    } else
+        std::cout << "Testcase passed" << std::endl;
 
 #endif
 

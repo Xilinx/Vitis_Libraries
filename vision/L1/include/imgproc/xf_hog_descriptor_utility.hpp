@@ -219,7 +219,7 @@ void xFWriteHOGDescKernelRB(hls::stream<XF_SNAME(WORDWIDTH_SRC)>& _block_strm,
     XF_SNAME(WORDWIDTH_SRC) feature_buf[NOVBPW][NOHB], block_data_1, block_data_2;
     if (USE_URAM) {
 // clang-format off
-        #pragma HLS RESOURCE variable=feature_buf core=RAM_1P_URAM
+        #pragma HLS bind_storage variable=feature_buf type=RAM_1P impl=URAM
         // clang-format on
     }
 

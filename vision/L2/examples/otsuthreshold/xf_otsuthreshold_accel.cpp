@@ -27,19 +27,19 @@ void otsuthreshold_accel(ap_uint<PTR_WIDTH>* img_in, unsigned char* Otsuval, int
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(height, width);
+    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> imgInput(height, width);
 
 // clang-format off
-    #pragma HLS STREAM variable=imgInput.data depth=2
+    //#pragma HLS STREAM variable=imgInput.data depth=2
 
     #pragma HLS DATAFLOW
     // clang-format on
 
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1>(img_in, imgInput);
+    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(img_in, imgInput);
 
     // Run xfOpenCV kernel:
-    xf::cv::OtsuThreshold<TYPE, HEIGHT, WIDTH, NPC1>(imgInput, *Otsuval);
+    xf::cv::OtsuThreshold<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, *Otsuval);
 
     return;
 } // End of kernel

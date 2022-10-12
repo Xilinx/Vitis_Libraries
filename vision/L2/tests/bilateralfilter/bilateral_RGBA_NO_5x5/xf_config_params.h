@@ -17,11 +17,14 @@
 #define WIDTH 3840
 #define HEIGHT 2160
 #define __SDSOC 1
-#define RO 0
-#define NO 1
+#define MPC 0
+#define SPC 1
 #define FILTER_SIZE_3 0
 #define FILTER_SIZE_5 1
 #define FILTER_SIZE_7 0
 
 #define GRAY 0
 #define RGB 1
+
+#define XF_CV_DEPTH_IN_1 1
+#define XF_CV_DEPTH_OUT_1 3

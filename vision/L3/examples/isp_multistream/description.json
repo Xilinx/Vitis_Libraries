@@ -1,7 +1,7 @@
 {
-    "name": "Xilinx Isppipeline_multistream L3 Test", 
+    "name": "Xilinx isp_multistream L3 Test", 
     "description": [
-        "Isppipeline Multistream L3 function example"
+        "isp_multistream L3 function example"
     ], 
     "flow": "vitis", 
     "platform_allowlist": [
@@ -13,7 +13,7 @@
     "platform_blocklist": [
         "u280", 
         "u250"
-    ],
+    ], 
     "platform_properties": {
         "u200": {
             "host": {
@@ -47,15 +47,24 @@
             "host": {
                 "compiler": {
                     "includepaths": [
-                        "$(SYSROOT)/usr/include",
-			"$(SYSROOT)/usr/include/opencv4"
-                    ], 
-                    "options": "--sysroot=$(SYSROOT)"
+                        "$(SYSROOT)/usr/include", 
+                        "$(SYSROOT)/usr/include/opencv4"
+                    ]
                 }, 
                 "linker": {
                     "librarypaths": [
                         "$(SYSROOT)/usr/lib", 
-                        "${SYSROOT}/opt/xilinx/xrt/lib"
+                        "${SYSROOT}/lib"
+                    ]
+                }, 
+                "compiler_x86": {
+                    "includepaths": [
+                        "$(OPENCV_INCLUDE)"
+                    ]
+                }, 
+                "linker_x86": {
+                    "librarypaths": [
+                        "$(OPENCV_LIB)"
                     ]
                 }
             }
@@ -64,25 +73,47 @@
             "host": {
                 "compiler": {
                     "includepaths": [
-                        "$(SYSROOT)/usr/include",
-			"$(SYSROOT)/usr/include/opencv4"
-                    ], 
-                    "options": "--sysroot=$(SYSROOT)"
+                        "$(SYSROOT)/usr/include", 
+                        "$(SYSROOT)/usr/include/opencv4"
+                    ]
                 }, 
                 "linker": {
                     "librarypaths": [
                         "$(SYSROOT)/usr/lib", 
-                        "${SYSROOT}/opt/xilinx/xrt/lib"
+                        "${SYSROOT}/lib"
+                    ]
+                }, 
+                "compiler_x86": {
+                    "includepaths": [
+                        "$(OPENCV_INCLUDE)"
+                    ]
+                }, 
+                "linker_x86": {
+                    "librarypaths": [
+                        "$(OPENCV_LIB)"
                     ]
                 }
-            }
+            },
+			"containers": [
+				{
+					"name": "krnl_ISPPipeline", 
+					"accelerators": [
+						{
+							"name": "ISPPipeline_accel", 
+							"frequency": 150.0
+						}
+					],
+					"frequency": 150.0
+				}
+			]
         }
     }, 
     "gui": true, 
     "launch": [
         {
             "target": "sw_emu", 
-            "cmd_args": "LIB_DIR/data/HD.jpg LIB_DIR/data/HD1.jpg LIB_DIR/data/HD2.JPG LIB_DIR/data/HD3.jpg", 
+            "cmd_args": "LIB_DIR/data/128x128_bayer_16bit_sef.png LIB_DIR/data/128x128_bayer_16bit_lef.png LIB_DIR/data/128x128_1_bayer_16bit_sef.png LIB_DIR/data/128x128_1_bayer_16bit_lef.png LIB_DIR/data/128x128_2_bayer_16bit_sef.png LIB_DIR/data/128x128_2_bayer_16bit_lef.png LIB_DIR/data/128x128_3_bayer_16bit_sef.png LIB_DIR/data/128x128_3_bayer_16bit_lef.png",
+                   
             "name": "sw_emu", 
             "ld_library_path": [
                 "$(OPENCV_LIB)", 
@@ -92,7 +123,7 @@
         }, 
         {
             "target": "hw_emu", 
-            "cmd_args": "LIB_DIR/data/HD.jpg LIB_DIR/data/HD1.jpg LIB_DIR/data/HD2.JPG LIB_DIR/data/HD3.jpg", 
+            "cmd_args": "LIB_DIR/data/128x128_bayer_16bit_sef.png LIB_DIR/data/128x128_bayer_16bit_lef.png LIB_DIR/data/128x128_1_bayer_16bit_sef.png LIB_DIR/data/128x128_1_bayer_16bit_lef.png LIB_DIR/data/128x128_2_bayer_16bit_sef.png LIB_DIR/data/128x128_2_bayer_16bit_lef.png LIB_DIR/data/128x128_3_bayer_16bit_sef.png LIB_DIR/data/128x128_3_bayer_16bit_lef.png",
             "name": "hw_emu", 
             "ld_library_path": [
                 "$(OPENCV_LIB)", 
@@ -102,7 +133,7 @@
         }, 
         {
             "target": "hw", 
-            "cmd_args": "LIB_DIR/data/HD.jpg LIB_DIR/data/HD1.jpg LIB_DIR/data/HD2.JPG LIB_DIR/data/HD3.jpg", 
+            "cmd_args": "LIB_DIR/data/128x128_bayer_16bit_sef.png LIB_DIR/data/128x128_bayer_16bit_lef.png LIB_DIR/data/128x128_1_bayer_16bit_sef.png LIB_DIR/data/128x128_1_bayer_16bit_lef.png LIB_DIR/data/128x128_2_bayer_16bit_sef.png LIB_DIR/data/128x128_2_bayer_16bit_lef.png LIB_DIR/data/128x128_3_bayer_16bit_sef.png LIB_DIR/data/128x128_3_bayer_16bit_lef.png",
             "name": "hardware_build", 
             "ld_library_path": [
                 "$(OPENCV_LIB)", 
@@ -112,13 +143,17 @@
         }
     ], 
     "data": [
-        "LIB_DIR/data/HD.jpg",
-        "LIB_DIR/data/HD1.jpg",
-        "LIB_DIR/data/HD2.JPG",
-        "LIB_DIR/data/HD3.jpg"
+        "LIB_DIR/data/128x128_bayer_16bit_sef.png",
+        "LIB_DIR/data/128x128_bayer_16bit_lef.png",
+        "LIB_DIR/data/128x128_1_bayer_16bit_sef.png",
+        "LIB_DIR/data/128x128_1_bayer_16bit_lef.png",
+        "LIB_DIR/data/128x128_2_bayer_16bit_sef.png",
+        "LIB_DIR/data/128x128_2_bayer_16bit_lef.png",
+        "LIB_DIR/data/128x128_3_bayer_16bit_sef.png",
+        "LIB_DIR/data/128x128_3_bayer_16bit_lef.png"  
     ], 
     "host": {
-        "host_exe": "isp_multistream", 
+        "host_exe": "isppipeline", 
         "compiler": {
             "sources": [
                 "LIB_DIR/L3/examples/isp_multistream/xf_isp_tb.cpp", 
@@ -127,7 +162,7 @@
             "includepaths": [
                 "LIB_DIR/L3/examples/isp_multistream/build"
             ], 
-            "options": "-O3", 
+            "options": "-O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include", 
             "symbols": [
                 "__SDSVHLS__"
             ]
@@ -148,9 +183,11 @@
             "accelerators": [
                 {
                     "name": "ISPPipeline_accel", 
-                    "location": "LIB_DIR/L3/examples/isp_multistream/xf_isp_accel.cpp"
+                    "location": "LIB_DIR/L3/examples/isp_multistream/xf_isp_accel.cpp",
+                    "frequency": 150.0
                 }
-            ]
+            ],
+            "frequency": 150.0
         }
     ], 
     "check_env": [

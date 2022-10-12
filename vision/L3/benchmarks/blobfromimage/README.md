@@ -15,11 +15,13 @@ The below code snippet shows the top level wrapper function which contains vario
 void preprocessing ()
 {
 ...
+	xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_IN> imgInput0(in_img_height, in_img_width);
+	xf::cv::Mat<OUT_TYPE, NEWHEIGHT, NEWWIDTH, NPC, XF_CV_DEPTH_RESIZE_OUT> resize_out_mat(resize_height, resize_width);
+	
         xf::cv::Array2xfMat<INPUT_PTR_WIDTH,XF_8UC3,HEIGHT, WIDTH, NPC1>  (img_inp, imgInput0);
-        xf::cv::resize<INTERPOLATION,TYPE,HEIGHT,WIDTH,NEWHEIGHT,NEWWIDTH,NPC_T,MAXDOWNSCALE> (imgInput0, out_mat);
-        xf::cv::accel_utils obj;
-        obj.xfMat2hlsStrm<INPUT_PTR_WIDTH, TYPE, NEWHEIGHT, NEWWIDTH, NPC_T, (NEWWIDTH*NEWHEIGHT/8)>(out_mat, resizeStrmout, srcMat_cols_align_npc);
-        xf::cv::preProcess <INPUT_PTR_WIDTH, OUTPUT_PTR_WIDTH, T_CHANNELS, CPW, HEIGHT, WIDTH, NPC_TEST, PACK_MODE, X_WIDTH, ALPHA_WIDTH, BETA_WIDTH, GAMMA_WIDTH, OUT_WIDTH, X_IBITS, ALPHA_IBITS, BETA_IBITS, GAMMA_IBITS, OUT_IBITS, SIGNED_IN, OPMODE> (resizeStrmout, img_out, params, rows_out, cols_out, th1, th2);
+        xf::cv::resize<INTERPOLATION,TYPE,HEIGHT,WIDTH,NEWHEIGHT,NEWWIDTH,NPC_T,MAXDOWNSCALE> (imgInput0, resize_out_mat);
+        xf::cv::preProcess<IN_TYPE, OUT_TYPE, NEWHEIGHT, NEWWIDTH, NPC, WIDTH_A, IBITS_A, WIDTH_B, IBITS_B, WIDTH_OUT,
+                       IBITS_OUT, XF_CV_DEPTH_RESIZE_OUT, XF_CV_DEPTH_OUT>(resize_out_mat, out_mat, params);
 
 
 ```
@@ -34,40 +36,43 @@ Table below shows the speed up achieved compared to various CPU implementations.
 
 
 
-### Commands to run for building the design:
+### Commands to run:
+
+**For PCIe Devices:**
 
     source < path-to-Vitis-installation-directory >/settings64.sh
-
-    export DEVICE=< path-to-platform-directory >/< platform >.xpfm
-
-**For PCIe devices:**
-
     source < path-to-XRT-installation-directory >/setup.sh
-
+    export PLATFORM=< path-to-platform-directory >/< platform >.xpfm
 	export OPENCV_INCLUDE=< path-to-opencv-include-folder >
-
 	export OPENCV_LIB=< path-to-opencv-lib-folder >
-
 	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:< path-to-opencv-lib-folder >
-
     make host xclbin TARGET=< sw_emu|hw_emu|hw >
+    make run TARGET=< sw_emu|hw_emu|hw >
 
-**For embedded devices:**
+**For Embedded Devices:**
+
+Software Emulation:
+
+    source < path-to-Vitis-installation-directory >/settings64.sh
+    source < path-to-XRT-installation-directory >/setup.sh
+    export PLATFORM=< path-to-platform-directory >/< platform >.xpfm
+	export OPENCV_INCLUDE=< path-to-opencv-include-folder >
+	export OPENCV_LIB=< path-to-opencv-lib-folder >
+	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:< path-to-opencv-lib-folder >
+    make run TARGET=sw_emu
+
+Hardware Emulation and Hardware Build:
 
 	Download the platform, and common-image from Xilinx Download Center. Run the sdk.sh script from the common-image directory to install sysroot using the command : "./sdk.sh -y -d ./ -p"
 
 	Unzip the rootfs file : "gunzip ./rootfs.ext4.gz"
 
+    source < path-to-Vitis-installation-directory >/settings64.sh
+    export PLATFORM=< path-to-platform-directory >/< platform >.xpfm
     export SYSROOT=< path-to-platform-sysroot >
-
-	export EDGE_COMMON_SW=< path-to-rootfs-and-Image-files >
-
-	export PERL=<path-to-perl-installation-location> #For example, "export PERL=/usr/bin/perl". Please make sure that Expect.pm package is available in your Perl installation.
-
-    make host xclbin TARGET=< sw_emu|hw_emu|hw > HOST_ARCH=< aarch32 | aarch64 >
-
-    make run TARGET=< sw_emu|hw_emu|hw > HOST_ARCH=< aarch32 | aarch64 > #This command will generate only the sd_card folder in case of hardware build.
-
+    make host xclbin TARGET=< hw_emu|hw > 
+    make run TARGET=< hw_emu|hw > #This command will generate only the sd_card folder in case of hardware build.
+    
 **Note**. For hw run on embedded devices, copy the generated sd_card folder content under package_hw to an SD Card. More information on preparing the SD Card is available [here](https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/18842385/How+to+format+SD+card+for+SD+boot#HowtoformatSDcardforSDboot-CopingtheImagestotheNewPartitions):
 
     cd /mnt

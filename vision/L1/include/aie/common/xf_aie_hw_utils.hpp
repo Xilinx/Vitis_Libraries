@@ -26,8 +26,8 @@ namespace cv {
 namespace aie {
 
 // Utility functions which can be used only inside kernel programs
-inline void xfCopyMetaData(metadata_elem_t* img_in_ptr, metadata_elem_t* img_out_ptr) {
-    ::aie::store_v(img_out_ptr, ::aie::load_v<METADATA_ELEMENTS>(img_in_ptr));
+inline void xfCopyMetaData(void* img_in_ptr, void* img_out_ptr) {
+    ::aie::store_v(((metadata_elem_t*)img_out_ptr), ::aie::load_v<METADATA_ELEMENTS>(((metadata_elem_t*)img_in_ptr)));
     return;
 }
 }

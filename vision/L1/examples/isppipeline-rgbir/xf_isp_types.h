@@ -25,7 +25,7 @@
 //#include "common/xf_utility.h"
 #include "ap_axi_sdata.h"
 #include "common/xf_axi_io.hpp"
-#include "xf_config_params.h"
+#include "build/xf_config_params.h"
 
 #include "common/xf_infra.hpp"
 #include "imgproc/xf_rgbir.hpp"
@@ -112,7 +112,8 @@ typedef struct {
 void ISPPipeline_accel(uint16_t height,
                        uint16_t width,
                        InVideoStrm_t& s_axis_video,
-                       InVideoStrm_t& m_axis_video,
+                       OutVideoStrm_t& m_axis_video,
+                       // InVideoStrm_t& m_axis_video,
                        OutVideoStrmIR_t& ir_axis_video,
                        char R_IR_C1_wgts[25],
                        char R_IR_C2_wgts[25],

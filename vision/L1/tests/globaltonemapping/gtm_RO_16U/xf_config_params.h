@@ -15,8 +15,11 @@
  */
 
 /* Set the optimisation type */
-#define NO 0 // Normal Operation
-#define RO 1 // Resource Optimized
+#define SPC 0 // Single Pixel per Clock operation
+#define MPC 1 // Multiple Pixels per Clock operation
 
 /* Image type */
 #define T_16U 1
+
+#define XF_CV_DEPTH_IN 3
+#define XF_CV_DEPTH_OUT 3

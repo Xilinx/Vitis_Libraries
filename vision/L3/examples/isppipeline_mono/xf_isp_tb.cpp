@@ -190,6 +190,7 @@ int main(int argc, char** argv) {
 
     // Write output image
     imwrite("hls_out.png", out_img);
+    std::cout << "Test Finished" << std::endl;
 
     return 0;
 }

@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#define XF_CV_DEPTH_IN 3
+#define XF_CV_DEPTH_OUT 3
 
-#define RO 1
-#define NO 0
+#define MPC 1
+#define SPC 0
 
 #define GRAY 1
 #define RGBA 0

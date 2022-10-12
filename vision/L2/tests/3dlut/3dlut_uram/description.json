@@ -5,11 +5,11 @@
     ], 
     "flow": "vitis", 
     "platform_allowlist": [
-        "u200",
+        "u200", 
         "aws-vu9p-f1", 
         "vck190", 
-        "zcu104",
-	"u50"
+        "zcu104", 
+        "u50"
     ], 
     "platform_blocklist": [
         "u280", 
@@ -30,8 +30,8 @@
                     ]
                 }
             }
-        },
-		"u50": {
+        }, 
+        "u50": {
             "host": {
                 "compiler": {
                     "includepaths": [
@@ -44,7 +44,7 @@
                     ]
                 }
             }
-        },
+        }, 
         "aws-vu9p-f1": {
             "host": {
                 "compiler": {
@@ -58,37 +58,55 @@
                     ]
                 }
             }
-        },  
+        }, 
         "zcu104": {
             "host": {
                 "compiler": {
                     "includepaths": [
-						"$(SYSROOT)/usr/include",
+                        "$(SYSROOT)/usr/include", 
                         "$(SYSROOT)/usr/include/opencv4"
-                    ], 
-                    "options": "--sysroot=$(SYSROOT)"
+                    ]
                 }, 
                 "linker": {
                     "librarypaths": [
                         "$(SYSROOT)/usr/lib", 
                         "${SYSROOT}/lib"
                     ]
+                }, 
+                "compiler_x86": {
+                    "includepaths": [
+                        "$(OPENCV_INCLUDE)"
+                    ]
+                }, 
+                "linker_x86": {
+                    "librarypaths": [
+                        "$(OPENCV_LIB)"
+                    ]
                 }
             }
-        },
+        }, 
         "vck190": {
             "host": {
                 "compiler": {
                     "includepaths": [
-						"$(SYSROOT)/usr/include",
+                        "$(SYSROOT)/usr/include", 
                         "$(SYSROOT)/usr/include/opencv4"
-                    ], 
-                    "options": "--sysroot=$(SYSROOT)"
+                    ]
                 }, 
                 "linker": {
                     "librarypaths": [
                         "$(SYSROOT)/usr/lib", 
                         "${SYSROOT}/lib"
+                    ]
+                }, 
+                "compiler_x86": {
+                    "includepaths": [
+                        "$(OPENCV_INCLUDE)"
+                    ]
+                }, 
+                "linker_x86": {
+                    "librarypaths": [
+                        "$(OPENCV_LIB)"
                     ]
                 }
             }
@@ -129,8 +147,8 @@
     ], 
     "data": [
         "LIB_DIR/data/4k.jpg", 
-        "LIB_DIR/data/128x128.png",
-	"LIB_DIR/data/input-lut-33.txt"
+        "LIB_DIR/data/128x128.png", 
+        "LIB_DIR/data/input-lut-33.txt"
     ], 
     "host": {
         "host_exe": "lut3d", 
@@ -140,17 +158,17 @@
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
- 		"LIB_DIR/L2/examples/3dlut",
+                "LIB_DIR/L2/examples/3dlut", 
                 "LIB_DIR/L2/tests/3dlut/3dlut_uram"
             ], 
-            "options": "-O3"
+            "options": "-O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include"
         }
     }, 
     "v++": {
         "compiler": {
             "symbols": [], 
             "includepaths": [
- 		"LIB_DIR/L2/examples/3dlut",
+                "LIB_DIR/L2/examples/3dlut", 
                 "LIB_DIR/L2/tests/3dlut/3dlut_uram"
             ], 
             "clflags": []
@@ -162,9 +180,31 @@
             "accelerators": [
                 {
                     "name": "lut3d_accel", 
-                    "location": "LIB_DIR/L2/examples/3dlut/xf_3dlut_accel.cpp"
+                    "location": "LIB_DIR/L2/examples/3dlut/xf_3dlut_accel.cpp",
+                    "frequency": 300.0
                 }
-            ]
+            ],
+            "frequency": 300.0
+        }
+    ], 
+    "check_env": [
+        {
+            "env": "OPENCV_INCLUDE", 
+            "platform": [
+                "u200", 
+                "u50", 
+                "aws-vu9p-f1"
+            ], 
+            "echo": "Cannot find OpenCV include path. Please set OPENCV_INCLUDE variable"
+        }, 
+        {
+            "env": "OPENCV_LIB", 
+            "platform": [
+                "u200", 
+                "u50", 
+                "aws-vu9p-f1"
+            ], 
+            "echo": "Cannot find Opencv lib path. Please set OPENCV_LIB variable"
         }
     ], 
     "testinfo": {

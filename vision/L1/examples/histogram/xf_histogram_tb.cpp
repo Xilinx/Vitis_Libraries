@@ -82,7 +82,8 @@ int main(int argc, char** argv) {
         if (val != histogram[cnt]) {
             fprintf(stderr, "Test Failed.\n ");
             return 1;
-        }
+        } else
+            std::cout << "Test Passed " << std::endl;
         fprintf(fp1, "%u\n", val);
     }
     fclose(fp);
@@ -104,7 +105,8 @@ int main(int argc, char** argv) {
         if ((b_val != histogram[cnt]) && (g_val != histogram[256 + cnt]) && (r_val != histogram[512 + cnt])) {
             fprintf(stderr, "ERROR: Test Failed.\n ");
             return 1;
-        }
+        } else
+            std::cout << "Test Passed " << std::endl;
         fprintf(fp1, "%u	%u	%u\n", b_val, g_val, r_val);
     }
     fclose(fp);

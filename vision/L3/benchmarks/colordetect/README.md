@@ -50,9 +50,9 @@ hardware accelerated xf::cv::colordetect on FPGA  : 133 images(full-hd)/sec
 
 	export PERL=<path-to-perl-installation-location> #For example, "export PERL=/usr/bin/perl". Please make sure that Expect.pm package is available in your Perl installation.
 
-    make host xclbin TARGET=< sw_emu|hw_emu|hw > HOST_ARCH=< aarch32 | aarch64 >
+    make host xclbin TARGET=< sw_emu|hw_emu|hw > 
 
-    make run TARGET=< sw_emu|hw_emu|hw > HOST_ARCH=< aarch32 | aarch64 > #This command will generate only the sd_card folder in case of hardware build.
+    make run TARGET=< sw_emu|hw_emu|hw > #This command will generate only the sd_card folder in case of hardware build.
 
 
 **Note1**. For non-DFX platforms, BOOT.BIN has to be manually copied from < build-directory >/< xclbin-folder >/sd\_card / to the top level sd_card folder.

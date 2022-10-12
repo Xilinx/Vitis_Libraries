@@ -33,25 +33,26 @@ void dense_non_pyr_of_accel(ap_uint<INPUT_PTR_WIDTH>* img_curr,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, MAX_HEIGHT, MAX_WIDTH, NPPC> in_curr_mat(rows, cols);
+    xf::cv::Mat<XF_8UC1, MAX_HEIGHT, MAX_WIDTH, NPPC, XF_CV_DEPTH_IN_1> in_curr_mat(rows, cols);
 
-    xf::cv::Mat<XF_8UC1, MAX_HEIGHT, MAX_WIDTH, NPPC> in_prev_mat(rows, cols);
+    xf::cv::Mat<XF_8UC1, MAX_HEIGHT, MAX_WIDTH, NPPC, XF_CV_DEPTH_IN_2> in_prev_mat(rows, cols);
 
-    xf::cv::Mat<XF_32FC1, MAX_HEIGHT, MAX_WIDTH, NPPC> outx_mat(rows, cols);
+    xf::cv::Mat<XF_32FC1, MAX_HEIGHT, MAX_WIDTH, NPPC, XF_CV_DEPTH_OUT_1> outx_mat(rows, cols);
 
-    xf::cv::Mat<XF_32FC1, MAX_HEIGHT, MAX_WIDTH, NPPC> outy_mat(rows, cols);
+    xf::cv::Mat<XF_32FC1, MAX_HEIGHT, MAX_WIDTH, NPPC, XF_CV_DEPTH_OUT_2> outy_mat(rows, cols);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, MAX_HEIGHT, MAX_WIDTH, NPPC>(img_curr, in_curr_mat);
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, MAX_HEIGHT, MAX_WIDTH, NPPC>(img_prev, in_prev_mat);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, MAX_HEIGHT, MAX_WIDTH, NPPC, XF_CV_DEPTH_IN_1>(img_curr, in_curr_mat);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, MAX_HEIGHT, MAX_WIDTH, NPPC, XF_CV_DEPTH_IN_2>(img_prev, in_prev_mat);
 
-    xf::cv::DenseNonPyrLKOpticalFlow<KMED, XF_8UC1, MAX_HEIGHT, MAX_WIDTH, NPPC>(in_curr_mat, in_prev_mat, outx_mat,
-                                                                                 outy_mat);
+    xf::cv::DenseNonPyrLKOpticalFlow<KMED, XF_8UC1, MAX_HEIGHT, MAX_WIDTH, NPPC, XF_USE_URAM, XF_CV_DEPTH_IN_1,
+                                     XF_CV_DEPTH_IN_2, XF_CV_DEPTH_OUT_1, XF_CV_DEPTH_OUT_2>(in_curr_mat, in_prev_mat,
+                                                                                             outx_mat, outy_mat);
 
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_32FC1, MAX_HEIGHT, MAX_WIDTH, NPPC>(outx_mat, img_outx);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_32FC1, MAX_HEIGHT, MAX_WIDTH, NPPC>(outy_mat, img_outy);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_32FC1, MAX_HEIGHT, MAX_WIDTH, NPPC, XF_CV_DEPTH_OUT_1>(outx_mat, img_outx);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_32FC1, MAX_HEIGHT, MAX_WIDTH, NPPC, XF_CV_DEPTH_OUT_2>(outy_mat, img_outy);
 }
 }

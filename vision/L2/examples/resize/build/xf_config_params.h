@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#define RO 0 // Resource Optimized (8-pixel implementation)
-#define NO 1 // Normal Operation (1-pixel implementation)
+#define MPC 0 // Multiple Pixels per Clock operation
+#define SPC 1 // Single Pixel per Clock operation
 
 // port widths
 #define INPUT_PTR_WIDTH 128
@@ -42,7 +42,7 @@
 #define NEWHEIGHT 1080 // Maximum output image height
 
 /* Interface types*/
-#if RO
+#if MPC
 
 #if RGB
 #define NPC_T XF_NPPC4
@@ -53,3 +53,6 @@
 #else
 #define NPC_T XF_NPPC1
 #endif
+
+#define XF_CV_DEPTH_IN 2
+#define XF_CV_DEPTH_OUT 2

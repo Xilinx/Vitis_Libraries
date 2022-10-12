@@ -15,8 +15,8 @@
  */
 
 /* Set the optimisation type */
-#define NO 0 // Normal Operation
-#define RO 1 // Resource Optimized
+#define SPC 0 // Single Pixel per Clock operation
+#define MPC 1 // Multiple Pixels per Clock operation
 
 /* Image type */
 #define RGB 0

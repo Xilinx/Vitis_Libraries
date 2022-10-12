@@ -43,8 +43,8 @@ __attribute__((noinline)) void accumulateweighted(const T* restrict img_in1,
                                                   const float& scale) {
     //    int16_t fix_scale=float2fix(scale,SRS_SHIFT) ;//(float)scale*(1<<8);
     //    int16_t fix_scale1=float2fix((1-scale),SRS_SHIFT) ;// (1-scale)*(1<<8);
-    T fix_scale = ::aie::to_fixed<float>(scale, SRS_SHIFT);        //(float)scale*(1<<8);
-    T fix_scale1 = ::aie::to_fixed<float>((1 - scale), SRS_SHIFT); //(float)scale*(1<<8);
+    T fix_scale = ::aie::to_fixed<T>(scale, SRS_SHIFT);        //(float)scale*(1<<8);
+    T fix_scale1 = ::aie::to_fixed<T>((1 - scale), SRS_SHIFT); //(float)scale*(1<<8);
 
     ::aie::vector<T, N> weight(fix_scale, fix_scale1);
 

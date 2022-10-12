@@ -120,10 +120,9 @@ int main(int argc, char** argv) {
     std::cout << "Maximum difference = " << maxError << std::endl;
     if (err > 0) {
         std::cerr << "Test Failed " << std::endl;
-        return -1;
-    }
-
-    std::cout << "Test Passed" << std::endl;
+        return 1;
+    } else
+        std::cout << "Test Passed" << std::endl;
 
     return 0;
 }

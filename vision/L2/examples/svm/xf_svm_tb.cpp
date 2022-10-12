@@ -48,8 +48,8 @@ int main(int argc, char** argv) {
     std::vector<uint16_t> svm_params = {INDEX_ARR_1, INDEX_ARR_2, IN_FRAC_BITS_1, IN_FRAC_BITS_2,
                                         NO_OF_KERNEL_ELEMENTS};
 
-    size_t input_1_size_bytes = IN_ARRAY_SIZE_1 * sizeof(float);
-    size_t input_2_size_bytes = IN_ARRAY_SIZE_2 * sizeof(float);
+    size_t input_1_size_bytes = IN_ARRAY_SIZE_1 * sizeof(short);
+    size_t input_2_size_bytes = IN_ARRAY_SIZE_2 * sizeof(short);
     size_t vec_in_size_bytes = svm_params.size() * sizeof(uint16_t);
     size_t out_frac_size_bytes = sizeof(unsigned char);
     size_t out_result_size_bytes = sizeof(int64_t);

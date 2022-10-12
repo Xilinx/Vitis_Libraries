@@ -415,8 +415,11 @@ int main(int argc, char** argv) {
             if (err) {
                 exit(-1);
             }
+            //}
         }
-        //}
+        for (int i = 0; i < CORES; i++) {
+            demo[i].end();
+        }
         std::cout << "Test passed" << std::endl;
         std::cout << "Average time to process frame : " << (((float)tt.count() * 0.001) / (float)iterations) << " ms"
                   << std::endl;

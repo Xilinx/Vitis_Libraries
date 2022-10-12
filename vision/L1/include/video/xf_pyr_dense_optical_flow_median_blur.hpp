@@ -25,7 +25,7 @@ void auMedianProc(ap_fixed<FLOW_WIDTH, FLOW_INT> OutputValues[1],
     // clang-format on
 
     ap_fixed<FLOW_WIDTH, FLOW_INT> array[WIN_SZ_SQ];
-// #pragma HLS RESOURCE variable=array core=DSP48
+// #pragma HLS BIND_OP variable=array op=dsp
 // clang-format off
     #pragma HLS ARRAY_PARTITION variable=array complete dim=1
     // clang-format on
@@ -262,12 +262,12 @@ void auMedian3x3(hls::stream<ap_fixed<FLOW_WIDTH, FLOW_INT> >& _src_mat,
     if (USE_URAM) {
 // clang-format off
         #pragma HLS ARRAY_RESHAPE variable=buf complete dim=1
-        #pragma HLS RESOURCE variable=buf core=RAM_S2P_URAM
+        #pragma HLS bind_storage variable=buf type=RAM_S2P impl=URAM
         // clang-format on
     } else {
 // clang-format off
         #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
-        #pragma HLS RESOURCE variable=buf core=RAM_S2P_BRAM
+        #pragma HLS bind_storage variable=buf type=RAM_S2P impl=BRAM
         // clang-format on
     }
     // initializing row index

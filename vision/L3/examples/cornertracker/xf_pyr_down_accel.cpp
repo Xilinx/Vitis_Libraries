@@ -52,21 +52,21 @@ void pyr_down_accel(ap_uint<INPUT_PTR_WIDTH>* inImgPyr1,
     const int pROWS = HEIGHT;
     const int pCOLS = WIDTH;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> pyr1_in_mat;
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1, XF_CV_DEPTH_PD_1> pyr1_in_mat;
 
     pyr1_in_mat.rows = pyr_h;
     pyr1_in_mat.cols = pyr_w;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> pyr1_out_mat;
+    xf::cv::Mat<XF_8UC1, (HEIGHT / 2), (WIDTH / 2), XF_NPPC1, XF_CV_DEPTH_PD_2> pyr1_out_mat;
 
     pyr1_out_mat.rows = pyr_out_h;
     pyr1_out_mat.cols = pyr_out_w;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> pyr2_in_mat;
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1, XF_CV_DEPTH_PD_3> pyr2_in_mat;
 
     pyr2_in_mat.rows = pyr_h;
     pyr2_in_mat.cols = pyr_w;
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> pyr2_out_mat;
+    xf::cv::Mat<XF_8UC1, (HEIGHT / 2), (WIDTH / 2), XF_NPPC1, XF_CV_DEPTH_PD_4> pyr2_out_mat;
 
     pyr2_out_mat.rows = pyr_out_h;
     pyr2_out_mat.cols = pyr_out_w;
@@ -75,14 +75,17 @@ void pyr_down_accel(ap_uint<INPUT_PTR_WIDTH>* inImgPyr1,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, XF_NPPC1>(inImgPyr1, pyr1_in_mat);
-    xf::cv::pyrDown<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1>(pyr1_in_mat, pyr1_out_mat);
-    xf::cv::xfMat2Array<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, XF_NPPC1>(pyr1_out_mat, outImgPyr1);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, XF_NPPC1, XF_CV_DEPTH_PD_1>(inImgPyr1, pyr1_in_mat);
+    xf::cv::pyrDown<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1, XF_USE_URAM, XF_CV_DEPTH_PD_1, XF_CV_DEPTH_PD_2>(pyr1_in_mat,
+                                                                                                       pyr1_out_mat);
+    xf::cv::xfMat2Array<INPUT_PTR_WIDTH, XF_8UC1, (HEIGHT / 2), (WIDTH / 2), XF_NPPC1, XF_CV_DEPTH_PD_2>(pyr1_out_mat,
+                                                                                                         outImgPyr1);
 
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, XF_NPPC1>(inImgPyr2, pyr2_in_mat);
-    xf::cv::pyrDown<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1>(pyr2_in_mat, pyr2_out_mat);
-    xf::cv::xfMat2Array<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, XF_NPPC1>(pyr2_out_mat, outImgPyr2);
-
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, XF_NPPC1, XF_CV_DEPTH_PD_3>(inImgPyr2, pyr2_in_mat);
+    xf::cv::pyrDown<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1, XF_USE_URAM, XF_CV_DEPTH_PD_3, XF_CV_DEPTH_PD_4>(pyr2_in_mat,
+                                                                                                       pyr2_out_mat);
+    xf::cv::xfMat2Array<INPUT_PTR_WIDTH, XF_8UC1, (HEIGHT / 2), (WIDTH / 2), XF_NPPC1, XF_CV_DEPTH_PD_4>(pyr2_out_mat,
+                                                                                                         outImgPyr2);
     return;
 }
 }

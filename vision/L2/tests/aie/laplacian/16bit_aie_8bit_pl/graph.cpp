@@ -46,7 +46,7 @@ auto float2fixed_coeff(float data[9]) {
     return ret;
 }
 
-#if defined(__AIESIM__) || defined(__X86Sim__)
+#if defined(__AIESIM__) || defined(__X86SIM__)
 int main(int argc, char** argv) {
     mygraph.init();
 

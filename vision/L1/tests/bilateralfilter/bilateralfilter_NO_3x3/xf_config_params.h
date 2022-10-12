@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
+#define XF_CV_DEPTH_IN_1 2
+#define XF_CV_DEPTH_OUT_1 2
+
 #define WIDTH 128
 #define HEIGHT 128
 
-#define RO 0
-#define NO 1
+#define MPC 0
+#define SPC 1
 #define FILTER_SIZE_3 1
 #define FILTER_SIZE_5 0
 #define FILTER_SIZE_7 0

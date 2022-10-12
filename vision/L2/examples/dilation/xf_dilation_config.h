@@ -29,9 +29,9 @@
 #define HEIGHT 2160
 
 /*  define the input and output types  */
-#if NO
+#if SPC
 #define NPC_T XF_NPPC1
-#else // RO
+#else // MPC
 #define NPC_T XF_NPPC8
 #endif
 
