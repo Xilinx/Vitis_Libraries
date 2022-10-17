@@ -5,7 +5,10 @@ import json
 def vmc_validate_point_size(args):
     point_size = args["point_size"]
     dyn_point_size = 1;
-    return fn_validate_point_size(point_size, dyn_point_size)
+    data_type = args["data_type"]
+    parallel_power = 0;
+    api = 0;
+    return fn_validate_point_size(point_size, dyn_point_size, data_type, parallel_power, api)
 
 def vmc_validate_shift_val(args):
     data_type = args["data_type"]

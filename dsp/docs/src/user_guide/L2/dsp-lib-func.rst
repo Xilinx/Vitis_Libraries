@@ -21,20 +21,18 @@
 DSP Library Functions
 *********************
 
-The Xilinx |reg| digital signal processing library (DSPLib) is a configurable library of elements that can be used to develop applications on Versal |reg| ACAP AI Engines. This is an Open Source library for DSP applications.
-The user entry point for each function in this library is a graph (L2 level).
-Each entry point graph class will contain one or more L1 level kernels and may contain one or more graph objects. Direct use of kernel classes (L1 level) or any other graph class not identified as an entry point is not recommended as this may bypass legality checking.
+| The Xilinx |reg| digital signal processing library (DSPLib) is a configurable library of elements that can be used to develop applications on Versal |reg| ACAP AI Engines. This is an Open Source library for DSP applications.
+| The user entry point for each function in this library is a graph (L2 level).
+| Each entry point graph class will contain one or more L1 level kernels and may contain one or more graph objects. Direct use of kernel classes (L1 level) or any other graph class not identified as an entry point is not recommended as this may bypass legality checking.
+
 The DSPLib consists the following DSP elements:
-
-
 
 .. toctree::
    :maxdepth: 2
 
-
-
    Filters <func-fir-filters.rst>
    FFT/iFFT <func-fft.rst>
+   FFT Window <func-fft_window.rst>
    Matrix Multiply <func-matmul.rst>
    Widget API Cast <func-widget-apicast.rst>
    Widget Real to Complex <func-widget-real2comp.rst>

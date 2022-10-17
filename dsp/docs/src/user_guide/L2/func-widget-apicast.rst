@@ -69,40 +69,9 @@ Code Example including constraints
 The following code example shows how the widget_api_cast graph class may be used within a user super-graph, including how to set the runtime<ratio> of internal kernels. This example shows the widget configured to interlace two input streams on a sample-by-sample basis, with the output written to a window.
 
 .. code-block::
-
-  #include <adf.h>
-  #include "widget_api_cast_graph.hpp"
-  #define DATA_TYPE cint16
-  #define IN_API 1
-  #define OUT_API 0
-  #define NUM_INPUTS 2
-  #define WINDOW_VSIZE 1024
-  #define NUM_OUTPUT_CLONES 1
-  #define PATTERN 1
-
-  class myWidget : public adf::graph
-  {
-  public:
-    adf::port<input> in[NUM_INPUTS];
-    adf::port<output> out[NUM_OUTPUT_CLONES];
-    xf::dsp::aie::widget::api_cast::widget_api_cast_graph<DATA_TYPE, IN_API, OUT_API, NUM_INPUTS, WINDOW_VSIZE,
-                                                          NUM_OUTPUT_CLONES, PATTERN>
-                                                          widget();
-    myWidget()
-    {
-      for(int i = 0; i<NUM_INPUTS; i++)
-      {
-        adf::connect<> net0(in[i] , widget.in[i]);
-      }
-      for(int i = 0; i<NUM_OUTPUT_CLONES; i++)
-      {
-        adf::connect<> net1(widget.out[i] , out[i]);
-      }
-      adf::kernel *kernels = widget.getKernels();
-      adf::runtime<ratio>(*kernels) = 0.5;
-    }
-  };
-
+.. literalinclude:: ../../../../L2/examples/docs_examples/test_widget_api_cast.hpp
+    :language: cpp
+    :lines: 15-
 
 
 

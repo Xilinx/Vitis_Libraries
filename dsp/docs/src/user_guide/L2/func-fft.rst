@@ -22,7 +22,7 @@ FFT/iFFT
 ========
 
 The DSPLib contains one FFT/iFFT solution. This is a single channel, decimation in time (DIT) implementation. It has configurable point size, data type, forward/reverse direction, scaling (as a shift), cascade length, static/dynamic point size, window size, interface api (stream/window) and parallelism factor.
-Table 6 lists the template parameters used to configure the top level graph of the fft_ifft_dit_1ch_graph class.
+Table :ref:`FFT_IFFT_HEADER_FORMAT`  lists the template parameters used to configure the top level graph of the fft_ifft_dit_1ch_graph class.
 
 ~~~~~~~~~~~
 Entry Point
@@ -47,7 +47,7 @@ Template Parameters
 
 To see details on the template parameters for the FFT, see :ref:`API_REFERENCE`.
 
-For guidance on configuration with some example scenarios, see :ref:`Configuration Notes` 
+For guidance on configuration with some example scenarios, see :ref:`Configuration Notes`
 
 See also :ref:`Parameter Legality Notes` regarding legality checking of parameters.
 
@@ -72,8 +72,9 @@ Dynamic Point Size
 
 The FFT supports dynamic (run-time controlled) point sizes. This feature is available when the template parameter TP_DYN_PT_SIZE is set. When set to 0 (static point size) all data will be expected in frames of TP_POINT_SIZE data samples, though multiple frames may be input together using TP_WINDOW_VSIZE. When set to 1 (dynamic point size) each _window_ must be preceeded by a 256bit header to describe the run-time parameters of that window. Note that TP_WINDOW_VSIZE described the number of samples in a window so does not include this header. The format of the header is described in Table 5. When TP_DYN_PT_SIZE =1 TP_POINT_SIZE describes the maximum point size which may be input.
 
+.. _FFT_IFFT_HEADER_FORMAT:
 
-.. table:: Table 5 : Header Format
+.. table:: Header Format
    :align: center
 
    +-------------------------------+----------------------+---------------------------------------------------------------------------------+
@@ -102,13 +103,13 @@ Super Sample Rate Operation
 ---------------------------
 
 While the term Super Sample Rate strictly means the processing of more than one sample per clock cycle, in the AIE context it is taken to mean an implementation using parallel kernels to improve performance at the expense of additional resource use.
-In the FFT, SSR operation is controlled by the template parameter TP_PARALLEL_POWER. This parameter is intended to improve performance and also allow support of point sizes beyond the limitations of a single tile. Diagram :ref:`FIGURE_2` shows an example graph with TP_PARALLEL_POWER set to 2. This results in 4 subframe processors in parallel each performing an FFT of N/2^TP_PARALLEL_POWER point size. These subframe outputs are then combined by TP_PARALLEL_POWER stages of radix2  to create the final result. The order of samples is described in the note for TP_API above.
+In the FFT, SSR operation is controlled by the template parameter TP_PARALLEL_POWER. This parameter is intended to improve performance and also allow support of point sizes beyond the limitations of a single tile. Diagram :ref:`FIGURE_FFT_CONSTRAINTS` shows an example graph with TP_PARALLEL_POWER set to 2. This results in 4 subframe processors in parallel each performing an FFT of N/2^TP_PARALLEL_POWER point size. These subframe outputs are then combined by TP_PARALLEL_POWER stages of radix2  to create the final result. The order of samples is described in the note for TP_API above.
 
 The parameter TP_PARALLEL_POWER allows a trade of performance for resource use in the form of tiles used. The following table shows the tile utilization versus TP_PARALLEL_POWER assuming that all widgets co-habit with FFT processing kernels.
 
 
 
-.. table:: Table 6 : FFT Resource Usage
+.. table:: FFT Resource Usage
    :align: center
 
    +-------------------+------------------+
@@ -149,12 +150,12 @@ For DATA_TYPE=cfloat, the FFT performs no scaling, nor saturation. Any saturatio
 Constraints
 -----------
 
-The FFT design has large memory requirements for data buffering and twiddle storage. Constraints may be necessary to fit a design or to achieve high performance, such as ensuring FFT kernels do not share tiles with other FFT kernels or user kernels. To apply constraints you must know the instance names of the internal graph hierarchy of the FFT. See :ref:`FIGURE_2` below.
+The FFT design has large memory requirements for data buffering and twiddle storage. Constraints may be necessary to fit a design or to achieve high performance, such as ensuring FFT kernels do not share tiles with other FFT kernels or user kernels. To apply constraints you must know the instance names of the internal graph hierarchy of the FFT. See :ref:`FIGURE_FFT_CONSTRAINTS` below.
 
-.. _FIGURE_2:
+.. _FIGURE_FFT_CONSTRAINTS:
 .. figure:: ./media/X25897.png
 
-    *Figure 2:* **Applying Design Constraints**
+    **Applying Design Constraints**
 
 The FFT class is implemented as a recursion of the top level to implement the parallelism. The instance names of each pair of subgraphs in the recursion are FFTsubframe(0) and FFTsubframe(1). In the final level of recursion, the FFT graph will contain an instance of either FFTwinproc (for TP_API = 0) or FFTstrproc (when TP_API=1). Within this level there is an array of kernels called m_fftKernels which will have TP_CASC_LEN members.
 
@@ -178,12 +179,15 @@ For large point sizes, e.g. 65536, the design is large, requiring 80 tiles. With
 
 Use of single_buffer
 --------------------
-When configured for TP_API=0, i.e. window API, the FFT will default to use ping-pong buffers for performance. However, for the FFT, the resulting buffers can be very large and can limit the point size achievable by a single kernel. It is possible to apply the single_buffer constraint to the input and/or output buffers to reduce the memory cost of the FFT. By this means an FFT with TT_DATA=cint32 of TP_POINT_SIZE=4096 can be made to fit in a single kernel. The following code shows how such a constraint may be applied.
+
+When configured for ``TP_API=0``, i.e. window API, the FFT will default to use ping-pong buffers for performance. However, for the FFT, the resulting buffers can be very large and can limit the point size achievable by a single kernel. It is possible to apply the single_buffer constraint to the input and/or output buffers to reduce the memory cost of the FFT. By this means an FFT with ``TT_DATA=cint32`` of ``TP_POINT_SIZE=4096`` can be made to fit in a single kernel. The following code shows how such a constraint may be applied.
 
 .. code-block::
 
-xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph<DATA_TYPE, TWIDDLE_TYPE, POINT_SIZE, FFT_NIFFT, SHIFT, CASC_LEN, DYN_PT_SIZE, WINDOW_VSIZE, API_IO, PARALLEL_POWER> fftGraph; 
-single_buffer(fftGraph.FFTwinproc.m_fftKernels[0].in[0]);
+    xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph<DATA_TYPE, TWIDDLE_TYPE, POINT_SIZE, FFT_NIFFT, SHIFT, CASC_LEN,
+                                                       DYN_PT_SIZE, WINDOW_VSIZE, API_IO, PARALLEL_POWER>
+                                                       fftGraph;
+    single_buffer(fftGraph.FFTwinproc.m_fftKernels[0].in[0]);
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Code Example including constraints
@@ -191,90 +195,9 @@ Code Example including constraints
 
 The following code block shows example code of how to include an instance of the fft_ifft_dit_1ch graph in a super-graph and also how constraints may be applied to kernels within the FFT graph. Note that in this example not all kernels within the fft_ifft_dit_1ch graph are subject to location constraints. It is sufficient for the mapper to find a solution in this case by constraining only the r2comb kernels.
 
-.. code-block::
-
-  #define LOC_XBASE 0
-  #define LOC_YBASE 0
-  #define DATA_TYPE cint16
-  #define TWIDDLE_TYPE cint16
-  #define POINT_SIZE 65536
-  #define FFT_NIFFT 1
-  #define SHIFT 17
-  #define CASC_LEN 1
-  #define DYN_PT_SIZE 0
-  #define WINDOW_VSIZE 65536
-  #define API_IO 1
-  #define PARALLEL_POWER 4
-  #include <adf.h>
-  #include "fft_ifft_dit_1ch_graph.hpp"
-
-  class myFft : public adf::graph
-  {
-  public:
-    static constexpr int kParFactor = 1<<PARALLEL_POWER;
-    adf::port<input> in[kParFactor];
-    adf::port<output> out[kParFactor];
-    xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph<DATA_TYPE, TWIDDLE_TYPE, POINT_SIZE, FFT_NIFFT, SHIFT, CASC_LEN,
-                                                       DYN_PT_SIZE, WINDOW_VSIZE, API_IO, PARALLEL_POWER>
-                                                       fftGraph;
-    myFft()
-    {
-      //make connections
-      for (int i=0; i< kParFactor; i++)
-      {
-        connect<>(in[i], fftGraph.in[i]);
-        connect<>(fftGraph.out[i], out[i]);
-      }
-      //constraint location to allow mapper to complete before timeout
-      #if (POINT_SIZE==65536)
-      for (int lane=0; lane<kParFactor; lane++)
-      {
-        location<kernel>(fftGraph.m_r2Comb[lane]) = tile(LOC_XBASE + lane * 2, LOC_YBASE + CASC_LEN + 4);
-        }
-
-        for (int lane=0; lane<kParFactor/2; lane++)
-        {
-                location<kernel>(fftGraph.FFTsubframe0.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2, LOC_YBASE + CASC_LEN + 3);
-                location<kernel>(fftGraph.FFTsubframe1.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2 + 16, LOC_YBASE + CASC_LEN + 3);
-        }
-
-        for (int lane=0; lane<kParFactor/4; lane++)
-        {
-                location<kernel>(fftGraph.FFTsubframe0.FFTsubframe0.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2, LOC_YBASE + CASC_LEN + 2);
-                location<kernel>(fftGraph.FFTsubframe0.FFTsubframe1.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2 + 8, LOC_YBASE + CASC_LEN + 2);
-                location<kernel>(fftGraph.FFTsubframe1.FFTsubframe0.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2 + 16, LOC_YBASE + CASC_LEN + 2);
-                location<kernel>(fftGraph.FFTsubframe1.FFTsubframe1.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2 + 24, LOC_YBASE + CASC_LEN + 2);
-            }
-        }
-
-        for (int lane=0; lane<kParFactor/8; lane++)
-        {
-                location<kernel>(fftGraph.FFTsubframe0.FFTsubframe0.FFTsubframe0.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2, LOC_YBASE + CASC_LEN + 1);
-                location<kernel>(fftGraph.FFTsubframe0.FFTsubframe0.FFTsubframe1.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2 + 4, LOC_YBASE + CASC_LEN + 1);
-                location<kernel>(fftGraph.FFTsubframe0.FFTsubframe1.FFTsubframe0.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2 + 8, LOC_YBASE + CASC_LEN + 1);
-                location<kernel>(fftGraph.FFTsubframe0.FFTsubframe1.FFTsubframe1.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2 + 12, LOC_YBASE + CASC_LEN + 1);
-                location<kernel>(fftGraph.FFTsubframe1.FFTsubframe0.FFTsubframe0.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2 + 16, LOC_YBASE + CASC_LEN + 1);
-                location<kernel>(fftGraph.FFTsubframe1.FFTsubframe0.FFTsubframe1.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2 + 20, LOC_YBASE + CASC_LEN + 1);
-                location<kernel>(fftGraph.FFTsubframe1.FFTsubframe1.FFTsubframe0.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2 + 24, LOC_YBASE + CASC_LEN + 1);
-                location<kernel>(fftGraph.FFTsubframe1.FFTsubframe1.FFTsubframe1.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2 + 28, LOC_YBASE + CASC_LEN + 1);
-        }
-        #endif //(POINT_SIZE == 65536)
-      }
-    };//end of class
+.. literalinclude:: ../../../../L2/examples/docs_examples/test_fft.hpp
+    :language: cpp
+    :lines: 15-
 
 ~~~~~~~~~~~~~~~~~~~
 Configuration Notes
@@ -283,7 +206,7 @@ This section is intended to provide guidance for the user on how best to configu
 
 Configuration for performance vs resource
 -----------------------------------------
-Simple configurations of the FFT use a single kernel. Multiple kernels will be used when either TP_PARALLEL_POWER > 0 or TP_CASC_LEN > 1. Both of these parameters exist to allow higher throughput, though TP_PARALLEL_POWER also allows larger point sizes that can be implemented in a single kernel. 
+Simple configurations of the FFT use a single kernel. Multiple kernels will be used when either TP_PARALLEL_POWER > 0 or TP_CASC_LEN > 1. Both of these parameters exist to allow higher throughput, though TP_PARALLEL_POWER also allows larger point sizes that can be implemented in a single kernel.
 If higher throughput is required than can be achieved with a single kernel then TP_CASC_LEN should be increased in preference to TP_PARALLEL_POWER. This is because resource (number of kernels) will match TP_CASC_LEN, whereas for TP_PARALLEL_POWER, resource increases quadratically.
 It is recommended that TP_PARALLEL_POWER is only increased after TP_CASC_LEN has been increased, but where throughput still needs to be increased.
 Of course, TP_PARALLEL_POWER may be required if the point size required is greater than a single kernel can be achieved. In this case, to keep resource minimised, increase TP_PARALLEL_POWER as required to support the point size in question, then increase TP_CASC_LEN to achieve the required throughput, before again increasing TP_PARALLEL_POWER if higher throughput is still required.
@@ -303,10 +226,10 @@ Notes: TP_SHIFT is set to 12 for nominal 1/N scaling. TP_WINDOW_VSIZE has been s
 ~~~~~~~~~~~~~~~~~~~~~~~~
 Parameter Legality Notes
 ~~~~~~~~~~~~~~~~~~~~~~~~
-Where possible, illegal values for template parameters, or illegal combinations of values of template parameters are detected at compilation time. 
+Where possible, illegal values for template parameters, or illegal combinations of values of template parameters are detected at compilation time.
 Where an illegal configuration is detected, compilation will fail with an error message indicating the constraint in question.
-However, no attempt has been made to detect and error upon configurations which are simply too large for the resource available, as the library element cannot know how much of the device is used by the user code and also because the resource limits vary by device. In these cases, compilation will likely fail, but due to the over-use of a resource detected by the aie tools. 
-For example, an FFT of TT_DATA = cint16 can be supported up to TP_POINT_SIZE=65536 using TP_PARALLEL_POWER=4. 
+However, no attempt has been made to detect and error upon configurations which are simply too large for the resource available, as the library element cannot know how much of the device is used by the user code and also because the resource limits vary by device. In these cases, compilation will likely fail, but due to the over-use of a resource detected by the aie tools.
+For example, an FFT of TT_DATA = cint16 can be supported up to TP_POINT_SIZE=65536 using TP_PARALLEL_POWER=4.
 A similarly configured FFT with TT_DATA=cint32 will not compile because the per-tile memory use, which is constant and predictable, is exceeded. This condition is detected and an error would be issued.
 An FFT with TT_DATA=cint32 and TP_PARALLEL_POWER=5 should, in theory, be possible to implement, but this will use 192 tiles directly and will use the memory of many other tiles, so is likely to exceed the capacity of the AIE array. However, the available capacity cannot easily be determined, so no error check is applied here.
 

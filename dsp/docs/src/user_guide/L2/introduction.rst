@@ -15,17 +15,17 @@
 
 .. _INTRODUCTION:
 
-************
-Introduction
-************
+********************************
+Introduction for AIE DSP library
+********************************
 
-The DSP Library for AI Engine provides a set of DSP library elements. Each library element consists of a main graph class and a corresponding kernel class, but also includes a reference model graph class.
+The DSP Library for AI Engine provides a set of DSP library elements. Each library element consists of a main graph class and a corresponding kernel class, but also includes reference model graph and kernel classes.
 
 ====================================
 Navigating Content by Design Process
 ====================================
 
-Xilinx |reg| documentation is organized around a set of standard design processes to help you find relevant content for your current development task. This document covers the following design processes:
+AMD |reg| documentation is organized around a set of standard design processes to help you find relevant content for your current development task. This document covers the following design processes:
 
 -  **AI Engine Development:** Creating the AI Engine graph and kernels, library use, simulation debugging and profiling, and algorithm development. Also includes the integration of the Programmable Logic (PL) and AI Engine kernels. Topics in this document that apply to this design process include:
 
@@ -72,12 +72,13 @@ Organization
 
 The following figure shows the DSPLib organization.
 
-.. figure:: ./media/X24061-Page-1.png
+.. _FIGURE_DSP_ORG:
+.. figure:: ./media/X24061-Page-1.svg
 
-*Figure 1:* **DSPLib Organization**
+   **DSPLib Organization**
 
 
-The directories L1, L2, and L3 correspond to AI Engine kernels, AI Engine graphs, and drivers for each function, respectively. Inclusion of an L2 graph rather than an L1 element is recommended in your design.
+The directories L1, and L2 correspond to AI Engine kernels and AI Engine graphs for each function, respectively. Inclusion of an L2 graph rather than an L1 element is recommended in your design. L3 is reserved for future software drivers.
 
 .. note:: The L3 directory is not yet available.
 

@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.7
+# vitis makefile-generator v2.0.8
 #
 #+-------------------------------------------------------------------------------
 # The following parameters are assigned with default values. These parameters can
@@ -40,14 +40,10 @@ ifeq ($(DEBUG), yes)
 VPP_LDFLAGS += --dk protocol:all:all:all
 endif
 
-#Check environment setup
+#Check vitis setup
 ifndef XILINX_VITIS
   XILINX_VITIS = /opt/xilinx/Vitis/$(TOOL_VERSION)
   export XILINX_VITIS
-endif
-ifndef XILINX_XRT
-  XILINX_XRT = /opt/xilinx/xrt
-  export XILINX_XRT
 endif
 
 .PHONY: check_device
@@ -83,6 +79,7 @@ endif
 endif
 
 
+
 # Special processing for tool version/platform type
 VITIS_VER = $(shell v++ --version | grep 'v++' | sed 's/^[[:space:]]*//' | sed -e 's/^[*]* v++ v//g' | cut -d " " -f1)
 # 1) for versal flow from 2022.1
@@ -109,8 +106,28 @@ ifneq ($(HOST_ARCH), x86)
 ifeq ($(shell expr $(VITIS_VER) \>= 2022.2), 1)
 ifeq ($(TARGET), sw_emu)
 ps_on_x86 := on
+HOST_ARCH := x86
 endif
 endif
+endif
+
+#when x86 arch, check XRT setup
+ifeq ($(HOST_ARCH), x86)
+ifndef XILINX_XRT
+  XILINX_XRT = /opt/xilinx/xrt
+  export XILINX_XRT
+endif
+endif
+
+#check if need sd_card
+ifeq ($(HOST_ARCH), aarch32)
+SD_CARD_NEEDED := on
+endif
+ifeq ($(HOST_ARCH), aarch64)
+SD_CARD_NEEDED := on
+endif
+ifeq ($(ps_on_x86), on)
+SD_CARD_NEEDED := on
 endif
 
 #Checks for Device Family
@@ -162,17 +179,8 @@ ifeq (,$(wildcard $(ROOTFS)))
 endif
 endif
 
-#Checks for g++
-ifeq ($(HOST_ARCH), x86)
-X86_CXX := true
-else
-ifeq ($(ps_on_x86), true)
-X86_CXX := true
-endif
-endif
-
 CXX := g++
-ifeq ($(X86_CXX), true)
+ifeq ($(HOST_ARCH), x86)
 ifeq ($(shell expr $(VITIS_VER) \>= 2022.1), 1)
 CXX_VER := 8.3.0
 else

@@ -12,9 +12,17 @@ def fn_get_parallel_power(ssr):
 
 #### VMC validators ####
 def vmc_validate_point_size(args):
+    ssr = args["ssr"]
+    pp = fn_get_parallel_power(ssr)
+
+    if pp == -1:
+      return isError(f"Invalid SSR value specified. The value should be of the form 2^N between 2 and 512.")
+
     point_size = args["point_size"]
     dyn_point_size = 0;
-    return fn_validate_point_size(point_size, dyn_point_size)
+    data_type = args["data_type"]
+    api = 1;
+    return fn_validate_point_size(point_size, dyn_point_size, data_type, pp, api)
 
 def vmc_validate_shift_val(args):
     data_type = args["data_type"]
@@ -38,19 +46,14 @@ def vmc_validate_casc_length(args):
     return fn_validate_casc_len(data_type, point_size, casc_length)
 
 def vmc_validate_ssr(args):
-    point_size = args["point_size"]
+    api = 1;
     ssr = args["ssr"]
     pp = fn_get_parallel_power(ssr)
 
     if pp == -1:
       return isError(f"Invalid SSR value specified. The value should be of the form 2^N between 2 and 512.")
-
-    tmp_ratio = point_size >> pp
-    if tmp_ratio > 4096 or tmp_ratio < 16:
-      return isError(f"Specify Point size and SSR values such that (Point size/SSR) lies between 8 and 2048.")
-
-    return isValid
-
+	
+    return fn_validate_parallel_power(api, pp)
 	
 # Get twiddle types	
 k_twiddle_type = {"cfloat":"cfloat", "cint32":"cint16", "cint16":"cint16"}

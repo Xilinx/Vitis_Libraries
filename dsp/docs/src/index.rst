@@ -82,44 +82,31 @@ Vitis |trade| AIE DSP Library provides a SSR FFT implementation targeting AIE, a
 .. toctree::
    :caption: L1 PL DSP Library User Guide
    :maxdepth: 4
-   :numbered:
 
    1-Dimensional(Line) SSR FFT L1 FPGA Module <user_guide/L1.rst>
    2-Dimensional(Matrix) SSR FFT L1 FPGA Module <user_guide/L1_2dfft.rst>
 
 .. toctree::
-   :caption: L2 DSP Library User Guide
+   :caption: L2 AIE DSP Library User Guide
    :maxdepth: 4
-   :numbered:
-
 
    Introduction <user_guide/L2/introduction.rst>
    DSP Library Functions <user_guide/L2/dsp-lib-func.rst>
    Compiling and Simulating Using the Makefile <user_guide/L2/compiling-and-simulating.rst>
    Benchmark/QoR <user_guide/L2/benchmark.rst>
 
-
 .. toctree::
-   :maxdepth: 4
    :caption: API Reference
+   :maxdepth: 4
 
    API Reference Overview <user_guide/L2/api-reference.rst>
-   dds_mixer_graph <rst/class_xf_dsp_aie_mixer_dds_mixer_dds_mixer_graph.rst>
+   DDS Mixer <rst/group_dds_graph.rst>
    Graph utils <rst/group_graph_utils.rst>
    FFT IFFT <rst/group_fft_graphs.rst>
    FFT Window <rst/group_fft_window.rst>
-   fir_sr_asym_graph <rst/class_xf_dsp_aie_fir_sr_asym_fir_sr_asym_graph.rst>
-   fir_sr_sym_graph <rst/class_xf_dsp_aie_fir_sr_sym_fir_sr_sym_graph.rst>
-   fir_interpolate_asym_graph <rst/class_xf_dsp_aie_fir_interpolate_asym_fir_interpolate_asym_graph.rst>
-   fir_decimate_hb_graph <rst/class_xf_dsp_aie_fir_decimate_hb_fir_decimate_hb_graph.rst>
-   fir_interpolate_hb_graph <rst/class_xf_dsp_aie_fir_interpolate_hb_fir_interpolate_hb_graph.rst>
-   fir_decimate_asym_graph <rst/class_xf_dsp_aie_fir_decimate_asym_fir_decimate_asym_graph.rst>
-   fir_interpolate_fract_asym_graph <rst/class_xf_dsp_aie_fir_interpolate_fract_asym_fir_interpolate_fract_asym_graph.rst>
-   fir_resampler_graph <rst/class_xf_dsp_aie_fir_resampler_fir_resampler_graph.rst>
-   fir_decimate_sym_graph <rst/class_xf_dsp_aie_fir_decimate_sym_fir_decimate_sym_graph.rst>
-   matrix_mult_graph <rst/class_xf_dsp_aie_blas_matrix_mult_matrix_mult_graph.rst>
-   widget_api_cast_graph <rst/class_xf_dsp_aie_widget_api_cast_widget_api_cast_graph.rst>
-   widget_real2complex_graph <rst/class_xf_dsp_aie_widget_real2complex_widget_real2complex_graph.rst>
+   FIRs <rst/group_fir_graphs.rst>
+   GeMM <rst/group_gemm_graph.rst>
+   Widgets <rst/group_widget_graph.rst>
 
 .. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
    :ltrim:

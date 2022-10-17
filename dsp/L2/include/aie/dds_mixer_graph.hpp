@@ -32,6 +32,13 @@ namespace mixer {
 namespace dds_mixer {
 using namespace adf;
 
+/**
+ * @defgroup dds_graph DDS / Mixer
+ *
+ * DDS contains a DDS and Mixer solution.
+ *
+ */
+
 //--------------------------------------------------------------------------------------------------
 // dds_mixer_graph template
 //--------------------------------------------------------------------------------------------------
@@ -50,6 +57,9 @@ using namespace adf;
  *                       input ports. \n Each data sample of the first input is complex multiplied
  *                       with the corresponding dds sample to create a modulated signal. \n
  * These are the templates to configure the dds_mixer class. \n
+ *
+ * @ingroup dds_graph
+ *
  * @tparam TT_DATA describes the type of individual data samples input to and
  *         output from the dds_mixer function. This is a typename and must be one
  *         of the following: \n

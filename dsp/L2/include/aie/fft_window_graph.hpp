@@ -133,15 +133,11 @@ class fft_window_graph : public graph {
      * An API of TT_DATA type.
      **/
     port_array<output, kAPIFactor * TP_SSR> out;
-    /**
-      * @cond NOCOMMENTS
-      */
-    kernel m_kernels[TP_SSR];
 
-    // Access function for AIE synthesizer
     /**
-     * @endcond
-     */
+     * The array of kernels that will be created and mapped onto AIE tiles.
+     **/
+    kernel m_kernels[TP_SSR];
 
     /**
      * Access function to get pointer to kernel (or first kernel in a chained configuration).

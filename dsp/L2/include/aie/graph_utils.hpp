@@ -36,9 +36,9 @@ class empty {};
 /**
  * @ingroup graph_utils
  *
- * @brief no_port struct is a helper utility to conditionally remove instances of other classes.
+ * @brief no_port class is a helper utility to conditionally remove instances of other classes.
  */
-struct no_port {};
+class no_port {};
 
 //--------------------------------------------------------------------------------------------------
 // port_conditional

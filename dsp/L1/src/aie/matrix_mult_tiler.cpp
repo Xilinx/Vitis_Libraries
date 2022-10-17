@@ -60,12 +60,9 @@ constexpr unsigned int makeShuffleOffsets(
 
         for (unsigned int mIndex = 0; mIndex < M; ++mIndex) {
             for (unsigned int nIndex = 0; nIndex < N; ++nIndex) {
-                // printf("t=%d mIndex=%d nIndex=%d\t", tileIndex, mIndex, nIndex);
                 const unsigned laneIndex = nIndex + mIndex * N + tileIndex * M * N;
                 // This effectively deals with tranpose at the offsets level.
                 const unsigned sampleIndex = (tileStartIndex + mIndex * mIncr + nIndex * nIncr);
-                // printf("%d + %d + %d = ", tileStartIndex, mIndex * mIncr, nIndex * nIncr);
-                // printf("%d ", sampleIndex);
                 if (laneIndex < 8 && !hiLo) {
                     ret += ((unsigned long)sampleIndex) << (4 * (laneIndex % 8));
                 } else if (laneIndex >= 8 && hiLo) {
@@ -74,9 +71,6 @@ constexpr unsigned int makeShuffleOffsets(
             }
         }
     }
-    // printf("full: %0lX \t", ret );
-    // printf("hi: %0X \t lo: %0X\n", (unsigned int) (ret >> 32), (unsigned int) (ret & 0xFFFFFFFF) );
-    // printf("\n");
     return ret;
 }
 constexpr loHi getShuffleOffsets(unsigned M, unsigned N, unsigned vectorSize, unsigned leadingDim) {
@@ -132,14 +126,11 @@ static void doTile(T_D* inPtr, T_D* outPtr) {
     // Window size in terms of elements
     const unsigned windowSizeA = inRow * inCol;
     const unsigned largeTile = (M * N) * (inCol / N);
-    // printf("LargeTileSize=%d\n",largeTile);
 
     // This will get optimised away if not used.
     // Offsets for the shuffle intrinsic
     const loHi offsets = std::is_same_v<T_D, int16> ? getShuffleOffsetsInt16(M, N, vectorSize, leadingDim)
                                                     : getShuffleOffsets(M, N, vectorSize, leadingDim);
-    // printf("M: %d, N: %d, vectorSize: %d, leadingDim: %d\n", M, N, vectorSize, leadingDim);
-    // printf("Offsets: lo : %0X, hi: %0X\n", offsets.lo, offsets.hi);
     const unsigned loadsPerVector = vectorSize / loadSize;
 
     const unsigned columnsPerVector =
@@ -169,13 +160,6 @@ static void doTile(T_D* inPtr, T_D* outPtr) {
                     // printf("rowPos=%d, colPos=%d\n",rowPos, colPos );
                     const unsigned colIndex = colPos * colElementDist * columnsPerVector;
                     aie::vector<T_D, vectorSize> chunk;
-// if constexpr (vectorSize == loadSize) {
-//  chunk = aie::load_v<loadSize>(pBase+AChunk);
-//  resultIndex = (N*(
-//    offsetX*(((AChunk%largeTile)/N)/incrX % wrapX) +
-//    offsetY*(((AChunk%largeTile)/N)/incrY % wrapY)))+
-//    (AChunk/largeTile)*largeTile;
-//} else {
 #pragma unroll((loadsPerVector))
                     for (unsigned i = 0; i < (loadsPerVector); ++i) {
                         // Todo: deal with the possibility that inCol < loadSize for COL_MAJOR
@@ -185,14 +169,8 @@ static void doTile(T_D* inPtr, T_D* outPtr) {
                                 : (loadSize >= M) ? inRow * i
                                                   : inRow * (i / (M / loadSize)) + (i % (M / loadSize)) * loadSize;
                         const unsigned pointerLoc = colIndex + rowIndex + loadPos;
-                        // printf("loadPos=%d, pointerLoc=%d\n",loadPos, pointerLoc );
-                        //(AChunk+((i%M)*inCol + (i/M)*loadSize)) :
-                        //(largeTileIndex*loadSize + ((AChunk - largeTileIndex*largeTile)*inRow)+((i%M)*inCol +
-                        //(i/M)*loadSize));
 
                         chunk.insert(i, aie::load_v<loadSize>(inPtr + pointerLoc));
-                        // printf("pointerLoc=%d\n", pointerLoc);
-                        // myprint(chunk, true, "incChunk: ");
                     }
                     // If N is 4
                     // shuffle16(chunk, 0, 0xD951C840)
@@ -208,69 +186,25 @@ static void doTile(T_D* inPtr, T_D* outPtr) {
                     else {
                         mychunk = chunk;
                     }
-                    // chunk = shuffle16(chunk, 0, offsets.lo, offsets.hi);
-
-                    // myprint(mychunk, true, "ShuffleChunk: ");
-
                     const unsigned resultIndexBase =
                         vectorSize * (vectorsPerRow)*rowPos + (vectorSize / rowTilesPerVector) * colPos;
                     outI += vectorSize;
-// printf("ResultIndex = %d\n",resultIndexBase);
-// chunk.shuffle()
-//}
-// N*(
-//  offsetX*(((AChunk%largeTile)/N)/incrX % wrapX) +
-//  offsetY*(((AChunk%largeTile)/N)/incrY % wrapY))+
-//  (AChunk/largeTile)*largeTile;
-// printf("%d : %d\n, ",AChunk,resultIndexBase );
-// printf("\toffX[%d]*(n[%d]/incrX[%d] mod wrapX[%d]) = %d\n", offsetX, AChunk/N, incrX, wrapX,
-// offsetX*((AChunk/N)/incrX % wrapX) );
-// printf("\toffY[%d]*(n[%d]/incrY[%d] mod wrapY[%d]) = %d\n", offsetY, AChunk/N, incrY, wrapY,
-// offsetY*((AChunk/N)/incrY % wrapY) );
-// myprint(chunk, true, "chunk: ");
+
 // If we end up loading more rows than we need for a single tile in a vector, need to store this somewhere else
 #pragma unroll((rowTilesPerVector))
                     for (unsigned tile = 0; tile < rowTilesPerVector; ++tile) {
                         const unsigned resultIndexPos = resultIndexBase + tile * largeTile;
-                        // printf("Proposed outPos = %d\n", resultIndexBase + tile*largeTile);
                         aie::store_v(outPtr + resultIndexPos,
                                      mychunk.template extract<vectorSize / rowTilesPerVector>(tile));
                     }
                 }
         }
-    // printf("\n");
-    // for (unsigned row=0; row < 4; ++row){
-    //  #pragma unroll(M)
-    //  for (unsigned mslice=row*M/2; mslice<M; ++mslice){
-    //    //myprint(A0,true,"A0preProc: ");
-    //
-    //    A0.insert(mslice, aie::load_v<N>(pBase+N*mslice) );
-    //    A1.insert(mslice, aie::load_v<N>(pBase+inCol*mslice) );
-    //    //myprint(A1,true,"A1preProc: ");
-    //    aie::store_v(outPtr+inCol*mslice, A0.template extract<N>(mslice));
-    //
-    //    aie::store_v(outPtr+N*mslice, A1.template extract<N>(mslice));
-    //  }
-    //  myprint(A0,true,"A0preProc: ");
-    //
-    //  myprint(A1,true,"A1preProc: ");
-    //}
-    // T_D* debugPtr = outPtr;
-    // for (unsigned AChunk=0; AChunk<windowSizeA; AChunk+=sizeTileA){
-    //  aie::vector<T_D, sizeTileA> APost = aie::load_v<sizeTileA>(debugPtr); debugPtr += sizeTileA;
-    ////  //aie::vector<T_D, sizeTileA> A1 = aie::load_v<sizeTileA>(pA1); pA1 += sizeTileA;
-    //  myprint(APost, true, "A0postProc: ");
-    ////  myprint(A1,true,"A1preProc: ");
-    /////
-    //}
-    // return outPtr;
 }
 
 namespace aie = ::aie;
 template <unsigned M, unsigned N, unsigned inRow, unsigned inCol, unsigned leadingDim, typename T_D>
 void tilerKernelClass<M, N, inRow, inCol, leadingDim, T_D>::tile(input_window<T_D>* inWindow,
                                                                  output_window<T_D>* __restrict outWindow) {
-    // printf("Going to tile matrix\n");
     doTile<M, N, inRow, inCol, leadingDim, T_D>((T_D*)inWindow->ptr, (T_D*)outWindow->ptr);
 };
 }

@@ -75,7 +75,7 @@ The following table demonstrates how a 16x16 input matrix should be rearranged i
 .. note:: Indices are quoted assuming a row major matrix. A column major matrix would be the transpose of the table below.
 
 
-.. table:: Table 7 : Matrix Multiply 4x4 tiling pattern
+.. table:: Matrix Multiply 4x4 tiling pattern
    :align: center
 
    +------------+-------------------------------+-------------------------------+-------------------------------+-------------------------------+
@@ -121,7 +121,7 @@ This is stored contiguously in memory like:
 The following table demonstrates how a 16x16 input matrix should be rearranged into a 4x2 tiling pattern.
 
 
-.. table:: Table 8 : Matrix Multiply 4x2 tiling pattern
+.. table:: Matrix Multiply 4x2 tiling pattern
    :align: center
 
    +------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------+
@@ -170,7 +170,7 @@ Multiplying a 16x16 matrix (with 4x4 tiling) with a 16x16 matrix (with 4x2 tilin
 The following table specifies the tiling scheme used for a given data type combination and the corresponding output data type:
 
 .. _table-tile-pattern:
-.. table:: Table 9 : Matrix Multiply tiling pattern combination
+.. table:: Matrix Multiply tiling pattern combination
    :align: center
 
    +------------------------+----------------+--------------+
@@ -221,20 +221,20 @@ The following table specifies the tiling scheme used for a given data type combi
 
 The parameters TP_ADD_TILING_A, TP_ADD_TILING_B, and TP_ADD_DETILING_OUT control the inclusion of an additional pre-processing / post-processing kernel to perform the required data data storage re-ordering. When used with TP_DIM_A_LEADING, TP_DIM_B_LEADING, or TP_DIM_OUT_LEADING, the matrix is also transposed in the tiling kernel.
 
-If the additional kernels are not selected, then the matrix multiply kernels assume incoming data is in the correct format, as specified above. 
+If the additional kernels are not selected, then the matrix multiply kernels assume incoming data is in the correct format, as specified above.
 
 The tiling imposes a restriction that the matrix dimensions need to be multiples of the tile dimensions. If you require dimensions that do not satisfy these requirements, please pad the matrices up to the closet multiple of the tile dimensions in table :ref:`table-tile-pattern` with zeros.
 
 Cascaded kernels
 ----------------
-When using the TP_CASC_LEN parameter, the matrix multiply operation is split across TP_DIM_AB and processed in a TP_CASC_LEN number of kernels. The accumulated partial results of each kernel are passed down the cascade port to the next kernel in the cascade chain until the final kernel provides the expected output. Cascade connections are made internally to the matrix multiply graph and external interfaces to the graph remain unchanged. 
+When using the TP_CASC_LEN parameter, the matrix multiply operation is split across TP_DIM_AB and processed in a TP_CASC_LEN number of kernels. The accumulated partial results of each kernel are passed down the cascade port to the next kernel in the cascade chain until the final kernel provides the expected output. Cascade connections are made internally to the matrix multiply graph and external interfaces to the graph remain unchanged.
 
-Each AI Engine kernel in the array is given a sub-matrix, so the interface to the graph is an array of ports for both A and B. The sub matrices are obtained by dividing the input matrices in their common dimension TP_DIM_AB. 
+Each AI Engine kernel in the array is given a sub-matrix, so the interface to the graph is an array of ports for both A and B. The sub matrices are obtained by dividing the input matrices in their common dimension TP_DIM_AB.
 
 **Input Matrix A (16x16 - 4x4 Tile - Cascade Length 2)**:
 
 
-.. table:: Table 10 : Input Matrix A (16x16 - 4x4 Tile - Cascade Length 2)
+.. table:: Input Matrix A (16x16 - 4x4 Tile - Cascade Length 2)
    :align: center
 
    +------------+---------------------------------------------------------------+---------------------------------------------------------------+
@@ -277,7 +277,7 @@ Each AI Engine kernel in the array is given a sub-matrix, so the interface to th
 
 **Input Matrix B (16x16 - 4x2 Tile - Cascade Length 2)**:
 
-.. table:: Table 11 : Input Matrix B (16x16 - 4x2 Tile - Cascade Length 2)
+.. table:: Input Matrix B (16x16 - 4x2 Tile - Cascade Length 2)
    :align: center
 
    +------------+------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------+
@@ -351,65 +351,9 @@ Code Example including constraints
 
 The following code example shows how the matrix_multiply_graph class may be used within a user super-graph, including how to set the runtime<ratio> of internal kernels. This example shows the matric multiplier configured to multiply a 32x16 matrix by a 16x32 matrix giving a 32x32 matrix.
 
-.. code-block::
-
-  #include <adf.h>
-  #include "matrix_mult_graph.hpp"
-  #define T_DATA_A cint16
-  #define T_DATA_B cint16
-  #define P_DIM_A 32
-  #define P_DIM_AB 16
-  #define P_DIM_B 32
-  #define P_SHIFT 16
-  #define P_ROUND_MODE 0
-  #define P_DIM_A_LEADING 0
-  #define P_DIM_B_LEADING 1
-  #define P_DIM_OUT_LEADING 0
-  #define P_ADD_TILING_A 0
-  #define P_ADD_TILING_B 0
-  #define P_ADD_DETILING_OUT 0
-  #define P_INPUT_WINDOW_VSIZE_A 512
-  #define P_INPUT_WINDOW_VSIZE_B 512
-  #define P_CASC_LEN 1
-
-  class myMM : public adf::graph
-  {
-  public:
-    adf::port<input> inA;
-    adf::port<input> inB;
-    adf::port<output> out;
-    xf::dsp::aie::blas::matrix_mult::matrix_mult_graph<T_DATA_A,
-                                                T_DATA_B,
-                                                P_DIM_A,
-                                                P_DIM_AB,
-                                                P_DIM_B,
-                                                P_SHIFT,
-                                                P_ROUND_MODE,
-                                                P_DIM_A_LEADING,
-                                                P_DIM_B_LEADING,
-                                                P_DIM_OUT_LEADING,
-                                                P_ADD_TILING_A,
-                                                P_ADD_TILING_B,
-                                                P_ADD_DETILING_OUT,
-                                                P_INPUT_WINDOW_VSIZE_A,
-                                                P_INPUT_WINDOW_VSIZE_B,
-                                                P_CASC_LEN> matrixMult;
-    myMM()
-    {
-      adf::connect<> net0(inA , matrixMult.inA);
-      adf::connect<> net1(inB , matrixMult.inB);
-      adf::connect<> net2(matrixMult.out , out);
-      adf::kernel *kernels = matrixMult.getKernels();
-      for(int i=0; i<TP_CASC_LEN; i++)
-      {
-        adf::runtime<ratio>(kernels[i]) = 0.7;
-        adf::runtime<ratio>(&matrixMult.tilerA[i]) = 0.5;
-        adf::runtime<ratio>(&matrixMult.tilerA[i]) = 0.5;
-    }
-    adf::runtime<ratio>(&matrixMult.untiler) = 0.5;
-  };
-
-
+.. literalinclude:: ../../../../L2/examples/docs_examples/test_matmul.hpp
+    :language: cpp
+    :lines: 15-73
 
 
 

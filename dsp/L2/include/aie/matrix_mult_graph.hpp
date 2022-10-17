@@ -39,14 +39,20 @@ namespace matrix_mult {
 using namespace adf;
 
 /**
-  * @endcond
-  */
+ * @defgroup gemm_graph GEneral Matrix Multiply (GEMM)
+ *
+ * Matrix Multiply/GEMM (GEneral Matrix Multiply) solution.
+ *
+ */
 
 /**
  * @brief matrix_mult performs a GEneral Matrix Multiply (GEMM), taking two input matrices of configurable dimensions
  *and data type.
  *
  * These are the templates to configure the Matrix Multiply graph class.
+ *
+ * @ingroup gemm_graph
+ *
  * @tparam TT_DATA_A describes the type of individual data samples input of
  *         Matrix A to the gemm function. This is a typename and must be one
  *         of the following: \n
@@ -139,30 +145,50 @@ template <typename TT_DATA_A,
 class matrix_mult_graph : public graph {
    public:
     /**
-     * The input data to the function. This input is two windows of samples of
-     * TT_DATA_A and TT_DATA_B type. The number of samples in the window is
-     * described by TP_INPUT_WINDOW_VSIZE_A and TP_INPUT_WINDOW_VSIZE_B, which are
-     * derived from TP_DIM_A, TP_DIM_AB and TP_DIM_B.
+     * The input A data to the function. This input is a window of samples of
+     * TT_DATA_A type. The number of samples in the window is
+     * described by TP_INPUT_WINDOW_VSIZE_A, which is
+     * derived from TP_DIM_A, TP_DIM_AB.
      **/
     port<input> inA[TP_CASC_LEN];
+
+    /**
+     * The input B data to the function. This input is a window of samples of
+     * TT_DATA_B type. The number of samples in the window is
+     * described by TP_INPUT_WINDOW_VSIZE_B, which is
+     * derived from TP_DIM_AB and TP_DIM_B.
+     **/
     port<input> inB[TP_CASC_LEN];
+
     /**
      * A window API of
      * TP_INPUT_WINDOW_VSIZE_A/TP_DIM_AB * TP_INPUT_WINDOW_VSIZE_B/TP_DIM_AB samples,
      * or simply TP_DIM_A * TP_DIM_B samples of a derived output type.
      **/
     port<output> out;
+
     /**
-      * @cond NOCOMMENTS
-      */
+     * The array of kernels that will be created and mapped onto AIE tiles.
+     * Number of kernels (``TP_CASC_LEN``) will be connected with each other by cascade interface.
+     **/
     kernel m_MatmultKernels[TP_CASC_LEN];
-    kernel untiler;
-    kernel tilerA[TP_CASC_LEN];
-    kernel tilerB[TP_CASC_LEN];
-    // Access function
+
     /**
-      * @endcond
-      */
+     * The kernel that that will be created when output tiling is enabled (``TP_ADD_DETILING_OUT = 1``).
+     **/
+    kernel untiler;
+
+    /**
+     * The array of kernels that will be created when tiling on input A is enabled (``TP_ADD_TILING_A = 1``).
+     * Kernels will pre-process and sent the data through cascade interface to corresponding: ``m_MatmultKernels``.
+     **/
+    kernel tilerA[TP_CASC_LEN];
+
+    /**
+     * The array of kernels that will be created when tiling on input A is enabled (``TP_ADD_TILING_A = 1``).
+     * Kernels will pre-process and sent the data through cascade interface to corresponding: ``m_MatmultKernels``.
+     **/
+    kernel tilerB[TP_CASC_LEN];
 
     /**
      * Access function to get pointer to kernel (or first kernel in a chained configuration).

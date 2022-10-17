@@ -43,6 +43,8 @@ using namespace adf;
 /**
  * @brief widget_real2complex is utility to convert real data to complex or vice versa
  *
+ * @ingroup widget_graph
+ *
  * These are the templates to configure the function.
  * @tparam TT_DATA describes the type of individual data samples input to the function.
  *         This is a typename and must be one of the following: \n
@@ -59,8 +61,6 @@ using namespace adf;
  *         Note: Margin size should not be included in TP_INPUT_WINDOW_VSIZE.
  **/
 template <typename TT_DATA, typename TT_OUT_DATA, unsigned int TP_WINDOW_VSIZE>
-/**
- **/
 class widget_real2complex_graph : public graph {
    public:
     static_assert((std::is_same<TT_DATA, cint16>::value && std::is_same<TT_OUT_DATA, int16>::value) ||
@@ -80,20 +80,15 @@ class widget_real2complex_graph : public graph {
      * An API of TT_DATA type.
      **/
     port<output> out;
-    /**
-      * @cond NOCOMMENTS
-      */
-    kernel m_kernel;
 
-    // Access function for AIE synthesizer
     /**
-      * @endcond
-      */
+     * The kernel that that will be created and mapped onto AIE tile.
+     **/
+    kernel m_kernel;
 
     /**
      * Access function to get pointer to kernel (or first kernel in a chained configuration).
      **/
-
     kernel* getKernels() { return &m_kernel; };
 
     /**

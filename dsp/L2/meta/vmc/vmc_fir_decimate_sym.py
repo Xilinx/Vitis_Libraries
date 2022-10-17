@@ -20,13 +20,7 @@ def vmc_validate_input_window_size(args):
 	decimate_factor = args["decimate_factor"]
 	api = 0
 	ssr = 1
-	if use_coeff_reload:
-		fir_length = args["fir_length"]
-	else:
-		if fn_is_complex(coef_type):
-			fir_length = int(len(coeff)/2)
-		else:
-			fir_length = int(len(coeff))
+	fir_length = args["fir_length"]
 	return fn_validate_input_window_size(data_type, coef_type, fir_length, decimate_factor, input_window_size, api, ssr)
 
 def vmc_validate_casc_length(args):
@@ -51,13 +45,7 @@ def vmc_validate_coeff(args):
 	decimate_factor = args["decimate_factor"]
 	ssr = 1
 	api = 0
-	if use_coeff_reload:
-		fir_length = args["fir_length"]
-	else:
-		if fn_is_complex(coef_type):
-			fir_length = int(len(coeff)/2)
-		else:
-			fir_length = int(len(coeff))
+	fir_length = args["fir_length"]
 	#TODO: Talk to DSP Lib team about separating casc length from fir_length API
 	if use_casc_length:
 		return fn_validate_fir_len(data_type, coef_type, fir_length, decimate_factor, casc_length, ssr, api, use_coeff_reload )

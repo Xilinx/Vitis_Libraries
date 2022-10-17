@@ -25,7 +25,7 @@
       "validator": {
         "file": "vmc_fft_common.py",
         "function": "vmc_validate_point_size",
-        "args": []
+        "args": ["data_type", "ssr"]
       }
     },
     {
@@ -67,7 +67,7 @@
       "validator": {
         "file": "vmc_fft_common.py",
         "function": "vmc_validate_ssr",
-        "args": ["point_size"]
+        "args": []
       }
     },
     {

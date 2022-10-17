@@ -331,6 +331,8 @@ class create_casc_kernel<1,
  * @brief fir_resampler is a generic asymmetric FIR filter that can do fractional and integer interpolation and
  *decimation.
  *
+ * @ingroup fir_graphs
+ *
  * These are the templates to configure the generic FIR class.
  * @tparam TT_DATA describes the type of individual data samples input to and
  *         output from the filter function. This is a typename and must be one
@@ -670,6 +672,10 @@ class fir_resampler_graph : public graph {
     }
 
    public:
+    /**
+     * The array of kernels that will be created and mapped onto AIE tiles.
+     * Number of kernels (``TP_CASC_LEN * TP_SSR``) will be connected with each other by cascade interface.
+     **/
     kernel m_firKernels[TP_CASC_LEN];
 
     /**

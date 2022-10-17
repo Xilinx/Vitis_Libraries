@@ -67,29 +67,9 @@ Code Example including constraints
 
 The following code example shows how the widget_real2complex graph class may be used within a user super-graph, including how to set the runtime<ratio> of internal kernels. This example shows the widget configured to convert a window of int16 samples to cint16 samples.
 
-.. code-block::
-
-  #include <adf.h>
-  #include "widget_real2complex_graph.hpp"
-  #define DATA_TYPE int16
-  #define DATA_OUT_TYPE cint16
-  #define WINDOW_VSIZE 1024
-
-  class myWidget : public adf::graph
-  {
-  public:
-    adf::port<input> in;
-    adf::port<output> out;
-    xf::dsp::aie::widget::real2complex::widget_real2complex_graph<DATA_TYPE, DATA_OUT_TYPE, WINDOW_VSIZE> widget;
-    myWidget()
-    {
-      adf::connect<> net0(in , widget.in);
-      adf::connect<> net1(widget.out , out);
-      adf::kernel *kernels = widget.getKernels();
-      adf::runtime<ratio>(*kernels) = 0.5;
-    }
-  };
-
+.. literalinclude:: ../../../../L2/examples/docs_examples/test_widg_r2c.hpp
+    :language: cpp
+    :lines: 15-
 
 
 .. |image1| image:: ./media/image1.png

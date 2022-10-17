@@ -37,6 +37,15 @@ namespace widget {
 namespace api_cast {
 using namespace adf;
 
+/**
+ * @defgroup widget_graph Widgets
+ *
+ * Contains elements that provide flexibilty when connecting other kernels.
+ * Widgets may change the interface type between Window buffers and Streams, as well as change the data pattern by
+ * reordering or converting data samples.
+ *
+ */
+
 //--------------------------------------------------------------------------------------------------
 // widget_api_cast_graph template
 //--------------------------------------------------------------------------------------------------
@@ -44,6 +53,8 @@ using namespace adf;
  * @brief widget_api_cast is a design to change the interface between connected components.
  *        This component is able to change the stream interface to window interface and vice-versa.
  *        In addition, multiple input stream ports may be defined, as well as multiple copies of the window output.
+ *
+ * @ingroup widget_graph
  *
  * These are the templates to configure the Widget API Cast class.
  * @tparam TT_DATA describes the type of individual data samples input to and
@@ -83,8 +94,6 @@ template <typename TT_DATA,
           unsigned int TP_NUM_OUTPUT_CLONES = 1,
           unsigned int TP_PATTERN = 0,
           unsigned int TP_HEADER_BYTES = 0>
-/**
- **/
 class widget_api_cast_graph : public graph {
    public:
     static_assert(TP_IN_API == kStreamAPI || TP_IN_API == kWindowAPI,
@@ -118,21 +127,15 @@ class widget_api_cast_graph : public graph {
      * An API of TT_DATA type.
      **/
     port<output> out[TP_NUM_OUTPUT_CLONES];
+
     /**
-      * @cond NOCOMMENTS
-      */
+     * The kernel that that will be created and mapped onto AIE tile.
+     **/
     kernel m_kernel;
-
-    // Access function for AIE synthesizer
-
-    /**
-      * @endcond
-      */
 
     /**
      * Access function to get pointer to kernel (or first kernel in a chained configuration).
      **/
-
     kernel* getKernels() { return &m_kernel; };
 
     /**

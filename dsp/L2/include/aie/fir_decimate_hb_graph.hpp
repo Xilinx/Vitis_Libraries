@@ -82,6 +82,8 @@ class ct_kernels {
 /**
  * @brief fir_decimate_hb is a Halfband Decimation FIR filter
  *
+ * @ingroup fir_graphs
+ *
  * These are the templates to configure the halfband decimator FIR class.
  * @tparam TT_DATA describes the type of individual data samples input to and
  *         output from the filter function. This is a typename and must be one
@@ -510,6 +512,10 @@ class fir_decimate_hb_graph : public graph {
     };
 
    public:
+    /**
+     * The array of kernels that will be created and mapped onto AIE tiles.
+     * Number of kernels (``TP_CASC_LEN * TP_SSR``) will be connected with each other by cascade interface.
+     **/
     kernel m_firKernels[TP_SSR * TP_SSR * TP_CASC_LEN];
     kernel m_ct_firKernels[TP_SSR];
 

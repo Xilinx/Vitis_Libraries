@@ -36,7 +36,18 @@ namespace decimate_asym {
 using namespace adf;
 
 /**
+ * @defgroup fir_graphs FIRs
+ *
+ * FIR Group  contains several variants of Finite Impulse Response (FIR) filters.
+ * These include single-rate FIRs, half-band interpolation/decimation FIRs, as well as integer and fractional
+ * interpolation/decimation FIRs.
+ *
+ */
+
+/**
  * @brief fir_decimate_asym is an Asymmetric Decimation FIR filter
+ *
+ * @ingroup fir_graphs
  *
  * These are the templates to configure the asymmetric decimator FIR class.
  * @tparam TT_DATA describes the type of individual data samples input to and
@@ -295,6 +306,10 @@ class fir_decimate_asym_graph : public graph {
     };
 
    public:
+    /**
+     * The array of kernels that will be created and mapped onto AIE tiles.
+     * Number of kernels (``TP_CASC_LEN * TP_SSR``) will be connected with each other by cascade interface.
+     **/
     kernel m_firKernels[TP_CASC_LEN * TP_SSR * TP_SSR];
 
     /**

@@ -46,35 +46,6 @@ namespace matrix_mult {
 
 // aie_api is external to xf::dsp::aie namespace
 namespace aie = ::aie;
-// doesn't import properly from aie_api/utils.hpp
-template <typename T, unsigned Elems>
-void print(const aie::vector<T, Elems>& v, bool nl = false, const char* prefix = nullptr) {
-    if (prefix) printf("%s", prefix);
-
-    using vector_type = aie::vector<T, Elems>;
-
-    for (unsigned i = 0; i < Elems; ++i) {
-        T e = v[i];
-
-        if
-            constexpr(vector_type::is_complex()) {
-                if
-                    constexpr(vector_type::is_floating_point()) printf("%f %f ", (float)e.real, (float)e.imag);
-                else
-                    printf("%d %d ", (int)e.real, (int)e.imag);
-            }
-        else {
-            if
-                constexpr(vector_type::is_floating_point()) printf("%f ", (float)e);
-            else if
-                constexpr(!vector_type::is_signed()) printf("%u ", (unsigned)e);
-            else
-                printf("%d ", (int)e);
-        }
-    }
-
-    if (nl) printf("\n");
-}
 
 //-----------------------------------------------------------------------------------------------------
 //#TEMPLATE_FUNCTION_DEFINITION
@@ -178,24 +149,13 @@ kernelMatMultClass<TT_DATA_A,
 
     constexpr unsigned int numAReg = (parallelA) ? 2 : 1;
     constexpr unsigned int numBReg = (parallelB) ? 2 : 1;
-    // ADL-719 workaround
+
     // 0 disable pipelining, 1 do not decrement loop count, 2 decrement loop count once and duplicate loop to POSTAMBLE,
     // 3 decrement loop count once for PREAMBLE, 4 decrement twice for PREAMBLE & POSTAMBLE
     const unsigned int non_leaf_loop_sol = 4;
-    // printf("M %d, N %d, K%d\n", M, N, K);
-    // TT_DATA_A tiledWindowA[TP_DIM_A * TP_DIM_AB];
-    // doTiling<M,N, TP_DIM_A, TP_DIM_AB, TP_DIM_A_LEADING>(inInterface.inWindowA, &tiledWindowA[0]);
-    // TT_DATA_B tiledWindowB[TP_DIM_AB * TP_DIM_B];
-    // doTiling<N,K, TP_DIM_AB, TP_DIM_B, TP_DIM_B_LEADING>(inInterface.inWindowB, &tiledWindowB[0]);
-    TT_DATA_A* inputAPtr =
-        //&tiledWindowA[0];
-        (TT_DATA_A*)inInterface.inWindowA->ptr;
-    TT_DATA_B* inputBPtr =
-        //&tiledWindowB[0];
-        (TT_DATA_B*)inInterface.inWindowB->ptr;
-    // TT_OUT* outWindowPtr = (TT_OUT*) outInterface.outWindow->ptr;
+    TT_DATA_A* inputAPtr = (TT_DATA_A*)inInterface.inWindowA->ptr;
+    TT_DATA_B* inputBPtr = (TT_DATA_B*)inInterface.inWindowB->ptr;
 
-    // TT_OUT tiledOutWindow[TP_DIM_A * TP_DIM_B];
     TT_OUT* tiledOutWindowPtr;
     if
         constexpr(TP_CASC_OUT == CASC_OUT_FALSE) { tiledOutWindowPtr = (TT_OUT*)outInterface.outWindow->ptr; }
@@ -310,8 +270,6 @@ kernelMatMultClass<TT_DATA_A,
                                 constexpr(parallelA && parallelB) { C11.mac(A1, B1); }
                         }
 
-                    // TT_DATA_A * __restrict pAtest1 = ((TT_DATA_A *)pA1)+4*sizeTileA; aie::store_v(pAtest1,
-                    // C00.template to_vector<TT_OUT>(TP_SHIFT)); //pA1 -= 4*sizeTileA;
                     if
                         constexpr(TP_CASC_OUT == CASC_OUT_FALSE) {
                             aie::store_v(pC1, C00.template to_vector<TT_OUT>(TP_SHIFT));
@@ -343,8 +301,6 @@ kernelMatMultClass<TT_DATA_A,
                     }
                 }
         }
-
-    // doUnTiling<M,K, TP_DIM_A, TP_DIM_B, TP_DIM_OUT_LEADING>(tiledOutWindowPtr, outWindowPtr);
 }
 
 // function overloaded with cascade interface variations

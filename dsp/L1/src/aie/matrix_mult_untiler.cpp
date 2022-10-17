@@ -127,7 +127,6 @@ static void doUnTile(T_D* __restrict inPtr, T_D* outPtr) {
     static_assert(!(leadingDim == COL_MAJOR && std::is_same_v<T_D, int16>),
                   "UnTiling is not supported for int16 matrix if matrix is column major.");
     const unsigned largeTile = (M * N) * (inCol / N);
-    // printf("LargeTileSize=%d\n",largeTile);
     loHi offsets = std::is_same_v<T_D, int16> ? getUnTileShuffleOffsetsInt16(M, N, vectorSize, leadingDim)
                                               : getUnTileShuffleOffsets(M, N, vectorSize, leadingDim);
 
@@ -235,7 +234,6 @@ namespace aie = ::aie;
 template <unsigned M, unsigned N, unsigned inRow, unsigned inCol, unsigned leadingDim, typename T_D>
 void untilerKernelClass<M, N, inRow, inCol, leadingDim, T_D>::unTile(input_window<T_D>* inWindow,
                                                                      output_window<T_D>* __restrict outWindow) {
-    // printf("Going to untile\n");
     doUnTile<M, N, inRow, inCol, leadingDim, T_D>((T_D*)inWindow->ptr, (T_D*)outWindow->ptr);
 };
 }

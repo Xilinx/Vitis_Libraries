@@ -4,9 +4,17 @@ import json
 
 #### VMC validators ####
 def vmc_validate_point_size(args):
+    ssr = args["ssr"]
+    pp = fn_get_parallel_power(ssr)
+
+    if pp == -1:
+      return isError(f"Invalid SSR value specified. The value should be of the form 2^N between 2 and 512.")
+
     point_size = args["point_size"]
     dyn_point_size = 1;
-    return fn_validate_point_size(point_size, dyn_point_size)
+    data_type = args["data_type"]
+    api = 1;
+    return fn_validate_point_size(point_size, dyn_point_size, data_type, pp, api)
 
 def vmc_validate_shift_val(args):
     data_type = args["data_type"]
