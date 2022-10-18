@@ -30,11 +30,11 @@
                         {
                             "name": "reEngineKernel", 
                             "location": "PROJECT/kernel/re_engine_kernel.cpp", 
-                            "frequency": 250, 
+                            "frequency": 150, 
                             "num_compute_units": 1
                         }
                     ], 
-                    "frequency": 250, 
+                    "frequency": 150, 
                     "ldclflags": "--config PROJECT/conn_u200.cfg --config PROJECT/opts.cfg", 
                     "name": "reEngineKernel"
                 }
@@ -57,11 +57,11 @@
                         {
                             "name": "reEngineKernel", 
                             "location": "PROJECT/kernel/re_engine_kernel.cpp", 
-                            "frequency": 250, 
+                            "frequency": 150, 
                             "num_compute_units": 1
                         }
                     ], 
-                    "frequency": 250, 
+                    "frequency": 150, 
                     "ldclflags": "--config PROJECT/conn_u250.cfg", 
                     "name": "reEngineKernel"
                 }
@@ -84,11 +84,11 @@
                         {
                             "name": "reEngineKernel", 
                             "location": "PROJECT/kernel/re_engine_kernel.cpp", 
-                            "frequency": 250, 
+                            "frequency": 150, 
                             "num_compute_units": 1
                         }
                     ], 
-                    "frequency": 250, 
+                    "frequency": 150, 
                     "ldclflags": "--config PROJECT/conn_u50.cfg", 
                     "name": "reEngineKernel"
                 }

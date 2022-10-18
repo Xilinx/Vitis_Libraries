@@ -38,7 +38,7 @@ Building Blocks:
 
 - CSV Parser(DataAnalytic Library L1 Primitive) :ref:`guide-csv-parser`: parse input csv file according to schema configurations, output spatial object coordinate (x, y) and index.
 - Distance: compute distance between base location and spatial object location; Euclidean distance is applied.
-- `Sort Top-K(Graph Library L1 Primitive) <https://xilinx.github.io/Vitis_Libraries/graph/2021.2/guide_L1/primitives/sortTopK.html>`_ : sort distance in ascending order and keep top-k objects.
+- `Sort Top-K(Graph Library L1 Primitive) <https://docs.xilinx.com/r/en-US/Vitis_Libraries/graph/guide_L1/primitives/sortTopK.html>`_ : sort distance in ascending order and keep top-k objects.
 
 End2End Performance
 ===================

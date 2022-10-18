@@ -1,4 +1,5 @@
-# Copyright 2019-2022 Xilinx, Inc.
+#
+# Copyright 2022 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.8
+#
 
 ############################## Help Section ##############################
 .PHONY: help
@@ -141,23 +142,28 @@ PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args
 endif
 
 ########################## Kernel compiler global settings ##########################
-ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
-VPP_FLAGS +=   --config $(CUR_DIR)/conn_u250.cfg
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L2/include/hw -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L2/include/hw
-
-else 
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L2/include/hw -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L2/include/hw
-
-endif
 
 ######################### binary container global settings ##########################
-VPP_FLAGS_DecisionTree += --hls.clock 250000000:DecisionTree
+ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
+VPP_FLAGS_DecisionTree += --hls.clock 200000000:DecisionTree
+ifneq ($(HOST_ARCH_temp), x86)
+VPP_LDFLAGS_decision_tree += --clock.defaultFreqHz 150000000
+else
+VPP_LDFLAGS_decision_tree += --kernel_frequency 150
+endif
+VPP_LDFLAGS_decision_tree_temp := --config $(CUR_DIR)/conn_u250.cfg --config $(CUR_DIR)/opts.cfg
+VPP_LDFLAGS_decision_tree += $(VPP_LDFLAGS_decision_tree_temp)
+
+else 
+VPP_FLAGS_DecisionTree += --hls.clock 200000000:DecisionTree
 ifneq ($(HOST_ARCH_temp), x86)
 VPP_LDFLAGS_decision_tree += --clock.defaultFreqHz 150000000
 else
 VPP_LDFLAGS_decision_tree += --kernel_frequency 150
 endif
 
+endif
 ifneq ($(SD_CARD_NEEDED), on)
 BINARY_CONTAINERS += $(BUILD_DIR)/decision_tree.xclbin
 else
@@ -254,7 +260,9 @@ mkflag:
 	mkdir -p $(BUILD_DIR)
 	rm -rf $(BUILD_DIR)/makefile_args.txt
 	@for var in $(MAKEFLAGS); do echo $$var >> $(BUILD_DIR)/makefile_args.txt; done
+
 all: check_device check_vpp check_platform mkflag $(RUN_DEPS)
+
 run: all
 #hw_emu
 ifneq (,$(filter hw_emu, $(TARGET)))

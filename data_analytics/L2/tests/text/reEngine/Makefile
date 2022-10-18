@@ -1,4 +1,5 @@
-# Copyright 2019-2022 Xilinx, Inc.
+#
+# Copyright 2022 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.8
+#
 
 ############################## Help Section ##############################
 .PHONY: help
@@ -193,39 +194,39 @@ endif
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
 VPP_FLAGS_reEngineKernel += --hls.clock 250000000:reEngineKernel
 ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_reEngineKernel += --clock.defaultFreqHz 250000000
+VPP_LDFLAGS_reEngineKernel += --clock.defaultFreqHz 150000000
 else
-VPP_LDFLAGS_reEngineKernel += --kernel_frequency 250
+VPP_LDFLAGS_reEngineKernel += --kernel_frequency 150
 endif
 VPP_LDFLAGS_reEngineKernel_temp := --config $(CUR_DIR)/conn_u200.cfg --config $(CUR_DIR)/opts.cfg
 VPP_LDFLAGS_reEngineKernel += $(VPP_LDFLAGS_reEngineKernel_temp)
 
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
-VPP_FLAGS_reEngineKernel += --hls.clock 250000000:reEngineKernel
+VPP_FLAGS_reEngineKernel += --hls.clock 150000000:reEngineKernel
 ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_reEngineKernel += --clock.defaultFreqHz 250000000
+VPP_LDFLAGS_reEngineKernel += --clock.defaultFreqHz 150000000
 else
-VPP_LDFLAGS_reEngineKernel += --kernel_frequency 250
+VPP_LDFLAGS_reEngineKernel += --kernel_frequency 150
 endif
 VPP_LDFLAGS_reEngineKernel_temp := --config $(CUR_DIR)/conn_u250.cfg
 VPP_LDFLAGS_reEngineKernel += $(VPP_LDFLAGS_reEngineKernel_temp)
 
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
-VPP_FLAGS_reEngineKernel += --hls.clock 250000000:reEngineKernel
+VPP_FLAGS_reEngineKernel += --hls.clock 150000000:reEngineKernel
 ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_reEngineKernel += --clock.defaultFreqHz 250000000
+VPP_LDFLAGS_reEngineKernel += --clock.defaultFreqHz 150000000
 else
-VPP_LDFLAGS_reEngineKernel += --kernel_frequency 250
+VPP_LDFLAGS_reEngineKernel += --kernel_frequency 150
 endif
 VPP_LDFLAGS_reEngineKernel_temp := --config $(CUR_DIR)/conn_u50.cfg
 VPP_LDFLAGS_reEngineKernel += $(VPP_LDFLAGS_reEngineKernel_temp)
 
 else 
-VPP_FLAGS_reEngineKernel += --hls.clock 250000000:reEngineKernel
+VPP_FLAGS_reEngineKernel += --hls.clock 150000000:reEngineKernel
 ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_reEngineKernel += --clock.defaultFreqHz 250000000
+VPP_LDFLAGS_reEngineKernel += --clock.defaultFreqHz 150000000
 else
-VPP_LDFLAGS_reEngineKernel += --kernel_frequency 250
+VPP_LDFLAGS_reEngineKernel += --kernel_frequency 150
 endif
 
 endif

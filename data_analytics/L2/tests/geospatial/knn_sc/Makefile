@@ -1,4 +1,5 @@
-# Copyright 2019-2021 Xilinx, Inc.
+#
+# Copyright 2022 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# sc makefile-generator v1.0.0
+#
 
 ############################## Help Section ##############################
 .PHONY: help
@@ -86,7 +87,7 @@ CXXFLAGS += -DXILINX_SC_PFM_EXT=$(XILINX_SC_PFM_EXT)
 endif
 ifeq ($(HOST_ARCH), x86)
 CXXFLAGS += -I $(XILINX_VITIS)/system_compiler/include -I $(XILINX_HLS)/include 
-LDFLAGS += -L$(XILINX_XRT)/lib -L$(XILINX_VITIS)/system_compiler/lib/x86 -lvpp_acc -l$(LIB_XRT) -lxrt_coreutil  -Wl,-rpath=$(XILINX_VITIS)/system_compiler/lib/x86:$(XILINX_XRT)/lib:$(GCC_HOME)/lib64  -Wl,--enable-new-dtags -lpthread 
+LDFLAGS += -L$(XILINX_XRT)/lib -L$(SYS_COMP_LIB) -lvpp_acc -l$(LIB_XRT) -lxrt_coreutil  -Wl,-rpath=$(XILINX_VITIS)/system_compiler/lib/x86:$(XILINX_XRT)/lib:$(GCC_HOME)/lib64  -Wl,--enable-new-dtags -lpthread 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --temp_dir $(TEMP_DIR) --save-temps -g -I $(XILINX_VITIS)/system_compiler/include 
 VPP_LDFLAGS += --optimize 2 -R 2 
 else ifeq ($(HOST_ARCH), aarch64)
@@ -169,11 +170,11 @@ ACC_OBJS_kernel_knn  := $(addprefix $(TEMP_DIR)/, $(addsuffix .o,$(basename $(sh
 $(ACC_OBJS_kernel_knn): $(TEMP_DIR)/%.o : %.cpp $$(@D)/.f
 	@echo "--> Making $@ from: $?"
 	$(MAKEDEPEND)
-	$(VPP) $(VPP_FLAGS) $(VPP_FLAGS_kernel_knn) -o $@  -c $(shell find $(ACC_SRCS_kernel_knn) -name  $(subst .o,.cpp,$(notdir $@)) )
+	$(VPP) -o $@  -c $(shell find $(ACC_SRCS_kernel_knn) -name  $(subst .o,.cpp,$(notdir $@)) ) $(VPP_FLAGS) $(VPP_FLAGS_kernel_knn)
 BINARY_CONTAINERS_DEPS  += $(ACC_OBJS_kernel_knn) 
 $(BINARY_CONTAINERS_TMP) : $(BINARY_CONTAINERS_DEPS)
 	@echo "--> Making $@ from: $?"
-	$(VPP) $(VPP_FLAGS) $(VPP_LDFLAGS) $(VPP_LDFLAGS_kernel_knn) -o $(BINARY_CONTAINERS) -l $^
+	$(VPP) -o $(BINARY_CONTAINERS) $(VPP_FLAGS) $(VPP_LDFLAGS) $(VPP_LDFLAGS_kernel_knn) -l $^
 EXE_FILE_DEPS += $(BINARY_CONTAINERS_TMP)
 EXE_FILE_DEPS += $(BINARY_CONTAINERS_DEPS)
 

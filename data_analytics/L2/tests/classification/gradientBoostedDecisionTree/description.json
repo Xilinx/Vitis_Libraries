@@ -16,13 +16,12 @@
                     ]
                 }
             }, 
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u250.cfg"
-                    ]
+            "containers": [
+                {
+                    "name": "decision_tree",
+                    "ldclflags": "--config PROJECT/conn_u250.cfg --config PROJECT/opts.cfg"
                 }
-            }
+            ]
         }
     }, 
     "launch": [
@@ -67,7 +66,7 @@
             "accelerators": [
                 {
                     "location": "LIB_DIR/L2/src/classification/gbdt.cpp", 
-                    "frequency": 250.0, 
+                    "frequency": 200.0, 
                     "name": "DecisionTree", 
                     "num_compute_units": 1, 
                     "compute_units": [

@@ -1,5 +1,5 @@
 .. 
-   Copyright 2021 Xilinx, Inc.
+   Copyright 2022 Xilinx, Inc.
   
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -71,18 +71,16 @@ Here are benchmarks of the Vitis Data Analytics Library using the Vitis environm
 
 .. _l2_vitis_data_analytics:
 
-Vitis Data Analytics Library
-~~~~~~~~~~~~~~~~~~~
 
 * **Download code**
 
-These data analytics benchmarks can be downloaded from `vitis libraries <https://github.com/Xilinx/Vitis_Libraries.git>`_ ``master`` branch.
+These data analytics benchmarks can be downloaded from `vitis libraries <https://github.com/Xilinx/Vitis_Libraries.git>`_ ``main`` branch.
 
 .. code-block:: bash
 
    git clone https://github.com/Xilinx/Vitis_Libraries.git 
    cd Vitis_Libraries
-   git checkout master
+   git checkout main
    cd data_analytics
 
 * **Setup environment**
