@@ -35,7 +35,7 @@ Loop_per_Unit:
     for (int p = (j + 1) / NCU; p < (n + NCU - 1) / NCU; p++) {
 #pragma HLS loop_tripcount min = 1 max = 8
         T tmp_i[16] = {0}, tmp3_i, tmp1[8], tmp2[4], tmp3[2];
-#pragma HLS BIND_STORAGE variable = tmp_i  type=ram_2p impl=lutram
+#pragma HLS BIND_STORAGE variable = tmp_i type = ram_2p impl = lutram
 
     Loop_vec_mul:
         for (int k = 0; k < j; k++) {
@@ -73,7 +73,7 @@ Loop_per_Unit:
 template <typename T, int N, int NCU>
 void chol_jj(T dataA[NCU][(N + NCU - 1) / NCU][N], T dataj[NCU][N], T& tmp1_j, int& j) {
     T tmp[16] = {0}, tmp3_j, tmp1[8], tmp2[4], tmp3[2];
-#pragma HLS BIND_STORAGE variable = tmp  type=ram_2p impl=lutram
+#pragma HLS BIND_STORAGE variable = tmp type = ram_2p impl = lutram
 
 Loop_vec_mul_jj:
     for (int k = 0; k < j; k++) {
@@ -172,7 +172,7 @@ void potrf(int m, T* A, int lda, int& info) {
     else {
         static T matA[NCU][(NMAX + NCU - 1) / NCU][NMAX];
 #pragma HLS array_partition variable = matA cyclic factor = NCU
-#pragma HLS BIND_STORAGE variable = matA  type=xpm_memory impl=uram
+#pragma HLS BIND_STORAGE variable = matA type = xpm_memory impl = uram
 
     Loop_read:
         for (int r = 0; r < m; r++) {

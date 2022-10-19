@@ -28,6 +28,14 @@ Release Note
    :hidden:
    :maxdepth: 1
 
+2022.2
+------
+
+In this release, we add two API running on AI Engine.
+
+* QRF (QR decomposition)
+* Cholesky decomposition
+
 2022.1
 ------
 

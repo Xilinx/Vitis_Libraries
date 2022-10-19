@@ -62,22 +62,7 @@
                 }
             }
         },
-        "vck190": {
-            "host": {
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib",
-                        "${SYSROOT}/opt/xilinx/xrt/lib"
-                    ]
-                },
-                "compiler": {
-                    "includepaths": [
-                        "$(SYSROOT)/usr/include"
-                    ],
-                    "options": "--sysroot=$(SYSROOT)"
-                }
-            }
-        }
+        "vck190": {}
     },
     "launch": [
         {
@@ -113,7 +98,7 @@
             "accelerators": [
                 {
                     "location": "kernel_trtrs.cpp",
-                    "frequency": 300.0,
+                    "frequency": 200.0,
                     "clflags": " -D KERNEL_NAME=kernel_trtrs_0",
                     "name": "kernel_trtrs_0",
                     "num_compute_units": 1,
@@ -135,7 +120,7 @@
                     ]
                 }
             ],
-            "frequency": 300.0,
+            "frequency": 200.0,
             "name": "kernel_trtrs"
         }
     ],

@@ -71,7 +71,7 @@ Loop_row:
 template <typename T, int N, int NCU>
 void inverse(int n, int P[N], T dataA[NCU][(N + NCU - 1) / NCU][N], T dataX[N][N]) {
     T dataD[NCU][(N + NCU - 1) / NCU];
-#pragma HLS BIND_STORAGE variable = dataD  type=xpm_memory impl=uram
+#pragma HLS BIND_STORAGE variable = dataD type = xpm_memory impl = uram
 #pragma HLS array_partition variable = dataD cyclic factor = NCU
     T buf[N], buf_i[NCU][(N + NCU - 1) / NCU], buf_o[N];
 #pragma HLS array_partition variable = buf_i cyclic factor = NCU
@@ -147,7 +147,7 @@ void gematrixinverse(int m, T* A, int lda, int& info) {
         A[0] = 1.0 / A[0];
     else {
         static T matA[NCU][(NMAX + NCU - 1) / NCU][NMAX];
-#pragma HLS BIND_STORAGE variable = matA  type=xpm_memory impl=uram
+#pragma HLS BIND_STORAGE variable = matA type = xpm_memory impl = uram
 #pragma HLS array_partition variable = matA cyclic factor = NCU
 
     Loop_read:

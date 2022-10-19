@@ -63,20 +63,6 @@
             }
         },
         "vck190": {
-            "host": {
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib",
-                        "${SYSROOT}/opt/xilinx/xrt/lib"
-                    ]
-                },
-                "compiler": {
-                    "includepaths": [
-                        "$(SYSROOT)/usr/include"
-                    ],
-                    "options": "--sysroot=$(SYSROOT)"
-                }
-            },
             "containers": [
                 {
                     "frequency": 250
@@ -118,7 +104,7 @@
             "accelerators": [
                 {
                     "location": "kernel_potrf.cpp",
-                    "frequency": 300.0,
+                    "frequency": 200.0,
                     "clflags": " -D KERNEL_NAME=kernel_potrf_0",
                     "name": "kernel_potrf_0",
                     "num_compute_units": 1,
@@ -136,7 +122,7 @@
                     ]
                 }
             ],
-            "frequency": 300.0,
+            "frequency": 200.0,
             "name": "kernel_potrf"
         }
     ],

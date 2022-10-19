@@ -272,7 +272,7 @@ int geqrf(int m, int n, T A[NRMAX * NCMAX], int lda, T tau[NCMAX]) {
 #endif
 
     static T data[NCU][NRMAX][(NCMAX + NCU - 1) / NCU];
-#pragma HLS BIND_STORAGE variable = data  type=xpm_memory impl=uram
+#pragma HLS BIND_STORAGE variable = data type = xpm_memory impl = uram
 #pragma HLS array_partition variable = data cyclic factor = NCU
 
     // read
@@ -299,7 +299,7 @@ int geqrf(int m, int n, T A[NRMAX * NCMAX], int lda, T tau[NCMAX]) {
 template <typename T, int NRMAX, int NCMAX, int NCU>
 int geqrf(int m, int n, T A[NRMAX][NCMAX], int lda, T tau[NCMAX]) {
     static T data[NCU][NRMAX][(NCMAX + NCU - 1) / NCU];
-#pragma HLS BIND_STORAGE variable = data  type=xpm_memory impl=uram
+#pragma HLS BIND_STORAGE variable = data type = xpm_memory impl = uram
 #pragma HLS array_partition variable = data complete
 
     // read

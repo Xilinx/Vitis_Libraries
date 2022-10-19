@@ -59,7 +59,7 @@ LoopSweeps:
     for (int s = 0; s < (m - 1); s++) {
         T pivot[NCU][NCMAX];
 #pragma HLS array_partition variable = pivot
-#pragma HLS BIND_STORAGE variable = pivot  type=ram_2p impl=bram
+#pragma HLS BIND_STORAGE variable = pivot type = ram_2p impl = bram
 
     LoopPivot:
         for (int k = s; k < n; k++) {
@@ -120,7 +120,7 @@ void getrf_nopivot(int n, T* A, int lda, int& info) {
 
     T matA[NCU][NRCU][NMAX];
 #pragma HLS array_partition variable = matA complete
-#pragma HLS BIND_STORAGE variable = matA  type=xpm_memory impl=uram
+#pragma HLS BIND_STORAGE variable = matA type = xpm_memory impl = uram
 
 LoopRead:
     for (int r = 0; r < n; r++) {

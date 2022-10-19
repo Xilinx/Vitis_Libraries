@@ -855,10 +855,10 @@ int gtsv_core(unsigned int n, T matDiagLow[N], T matDiag[N], T matDiagUp[N], T r
     T outdiag[N];
     T outup[N];
     T outrhs[N];
-#pragma HLS BIND_STORAGE variable = outlow  type=ram_2p impl=bram
-#pragma HLS BIND_STORAGE variable = outdiag  type=ram_2p impl=bram
-#pragma HLS BIND_STORAGE variable = outup  type=ram_2p impl=bram
-#pragma HLS BIND_STORAGE variable = outrhs  type=ram_2p impl=bram
+#pragma HLS BIND_STORAGE variable = outlow type = ram_2p impl = bram
+#pragma HLS BIND_STORAGE variable = outdiag type = ram_2p impl = bram
+#pragma HLS BIND_STORAGE variable = outup type = ram_2p impl = bram
+#pragma HLS BIND_STORAGE variable = outrhs type = ram_2p impl = bram
 #pragma HLS array_partition variable = outlow cyclic factor = NCU
 #pragma HLS array_partition variable = outdiag cyclic factor = NCU
 #pragma HLS array_partition variable = outup cyclic factor = NCU
@@ -917,10 +917,10 @@ LoopWrite:
 template <typename T, unsigned int NMAX, unsigned int NCU>
 int gtsv(unsigned int n, T* matDiagLow, T* matDiag, T* matDiagUp, T* rhs) {
     T DiagLow[NMAX], Diag[NMAX], DiagUp[NMAX], RHS[NMAX];
-#pragma HLS BIND_STORAGE variable = DiagLow  type=ram_2p impl=bram
-#pragma HLS BIND_STORAGE variable = Diag  type=ram_2p impl=bram
-#pragma HLS BIND_STORAGE variable = DiagUp  type=ram_2p impl=bram
-#pragma HLS BIND_STORAGE variable = RHS  type=ram_2p impl=bram
+#pragma HLS BIND_STORAGE variable = DiagLow type = ram_2p impl = bram
+#pragma HLS BIND_STORAGE variable = Diag type = ram_2p impl = bram
+#pragma HLS BIND_STORAGE variable = DiagUp type = ram_2p impl = bram
+#pragma HLS BIND_STORAGE variable = RHS type = ram_2p impl = bram
 #pragma HLS array_partition variable = DiagLow cyclic factor = NCU
 #pragma HLS array_partition variable = Diag cyclic factor = NCU
 #pragma HLS array_partition variable = DiagUp cyclic factor = NCU

@@ -57,7 +57,7 @@ void jacobi_rotation_2x2(T alpha, T beta, T gamma, hls::stream<T>& s_strm, hls::
     m01 = gamma;
     m11 = alpha;
     double d;
-#pragma HLS BIND_OP variable = d  op=dsub impl=fabric
+#pragma HLS BIND_OP variable = d op = dsub impl = fabric
     d = m00 - m11; // calculate the off-diagonal value
     ap_uint<11> exp1;
     ap_uint<52> sig1;
@@ -83,12 +83,12 @@ void jacobi_rotation_2x2(T alpha, T beta, T gamma, hls::stream<T>& s_strm, hls::
     ///////////////////////////
 
     double deno2, d2;
-#pragma HLS BIND_OP variable = d2  op=dmul impl=maxdsp
-#pragma HLS BIND_OP variable = deno2  op=dmul impl=maxdsp
+#pragma HLS BIND_OP variable = d2 op = dmul impl = maxdsp
+#pragma HLS BIND_OP variable = deno2 op = dmul impl = maxdsp
     d2 = d * d;          // d2 = (m00 - m11)^2
     deno2 = deno * deno; // deno2 = 4*(m01)^2
     double m;
-#pragma HLS BIND_OP variable = m  op=dadd impl=fabric
+#pragma HLS BIND_OP variable = m op = dadd impl = fabric
     m = deno2 + d2;                                  // m = (m00 - m11)^2 + 4*(m01)^2
     double sqrtM = xf::solver::internal::m::sqrt(m); // sqrtM = sqrt((m00-m11)^2 + 4*(m01)^2)
     //////////////////
@@ -102,12 +102,12 @@ void jacobi_rotation_2x2(T alpha, T beta, T gamma, hls::stream<T>& s_strm, hls::
     double M2 = dc.d; // M2 = 2*m
     ////////////////////////////////////
     double tmpMul, tmpSum, tmpSub;
-#pragma HLS BIND_OP variable = tmpMul  op=dmul impl=maxdsp
+#pragma HLS BIND_OP variable = tmpMul op = dmul impl = maxdsp
     tmpMul = KK * sqrtM; // tmpMul = 2*abs(m00 - m11) * sqrt((m00-m11)^2 + 4*(m01)^2)
-#pragma HLS BIND_OP variable = tmpSum  op=dadd impl=fabric
+#pragma HLS BIND_OP variable = tmpSum op = dadd impl = fabric
     tmpSum = tmpMul + M2;
     double tmpDivider = deno2 / tmpSum;
-#pragma HLS BIND_OP variable = tmpSub  op=dsub impl=fabric
+#pragma HLS BIND_OP variable = tmpSub op = dsub impl = fabric
     tmpSub = 1 - tmpDivider;
     T c_right = xf::solver::internal::m::sqrt(tmpSub);
     double tmp = xf::solver::internal::m::sqrt(tmpDivider);
@@ -205,13 +205,13 @@ void read_and_gen_2x2(T matA[MCU][ACUM][NCMAX],
     const int DEP = 16;
     // used for accumulate alpha*alpha, beta*beta, gamma*gamma
     T alpha_acc[MCU][DEP];
-#pragma HLS BIND_STORAGE variable = alpha_acc  type=ram_2p impl=bram
+#pragma HLS BIND_STORAGE variable = alpha_acc type = ram_2p impl = bram
 #pragma HLS ARRAY_PARTITION variable = alpha_acc complete
     T beta_acc[MCU][DEP];
-#pragma HLS BIND_STORAGE variable = beta_acc  type=ram_2p impl=bram
+#pragma HLS BIND_STORAGE variable = beta_acc type = ram_2p impl = bram
 #pragma HLS ARRAY_PARTITION variable = beta_acc complete
     T gamma_acc[MCU][DEP];
-#pragma HLS BIND_STORAGE variable = gamma_acc  type=ram_2p impl=bram
+#pragma HLS BIND_STORAGE variable = gamma_acc type = ram_2p impl = bram
 #pragma HLS ARRAY_PARTITION variable = gamma_acc complete
 
     T alpha_sum[DEP];
@@ -381,28 +381,28 @@ void gesvj(int m, int n, T* A, T* U, T* S, T* V) {
     const int ACUN = (NCMAX + NCU - 1) / NCU;
 
     T matA[MCU][ACUM][NCMAX];
-#pragma HLS BIND_STORAGE variable = matA  type=ram_t2p impl=uram
+#pragma HLS BIND_STORAGE variable = matA type = ram_t2p impl = uram
 #pragma HLS ARRAY_PARTITION variable = matA
     T matU[NRMAX][NRMAX];
-#pragma HLS BIND_STORAGE variable = matU  type=ram_t2p impl=uram
+#pragma HLS BIND_STORAGE variable = matU type = ram_t2p impl = uram
     T matV[NCU][ACUN][NCMAX];
-#pragma HLS BIND_STORAGE variable = matV  type=ram_t2p impl=uram
+#pragma HLS BIND_STORAGE variable = matV type = ram_t2p impl = uram
 #pragma HLS ARRAY_PARTITION variable = matV
     T A_i[MCU][ACUM];
-#pragma HLS BIND_STORAGE variable = A_i  type=ram_s2p impl=bram
+#pragma HLS BIND_STORAGE variable = A_i type = ram_s2p impl = bram
 #pragma HLS ARRAY_PARTITION variable = A_i
     T A_j[MCU][ACUM];
-#pragma HLS BIND_STORAGE variable = A_j  type=ram_s2p impl=bram
+#pragma HLS BIND_STORAGE variable = A_j type = ram_s2p impl = bram
 #pragma HLS ARRAY_PARTITION variable = A_j
     T V_i[NCU][ACUN];
-#pragma HLS BIND_STORAGE variable = V_i  type=ram_s2p impl=bram
+#pragma HLS BIND_STORAGE variable = V_i type = ram_s2p impl = bram
 #pragma HLS ARRAY_PARTITION variable = V_i
     T V_j[NCU][ACUN];
-#pragma HLS BIND_STORAGE variable = V_j  type=ram_s2p impl=bram
+#pragma HLS BIND_STORAGE variable = V_j type = ram_s2p impl = bram
 #pragma HLS ARRAY_PARTITION variable = V_j
 
     T sigma[NCMAX];
-#pragma HLS BIND_STORAGE variable = sigma  type=ram_s2p impl=bram
+#pragma HLS BIND_STORAGE variable = sigma type = ram_s2p impl = bram
 
 INIT_S:
     for (int j = 0; j < n; j++) {

@@ -67,18 +67,16 @@ Here are benchmarks of the Vitis Solver Library using the Vitis environment.
 
 .. _l2_vitis_solver:
 
-Vitis Solver Library
-~~~~~~~~~~~~~~~~~~~
 
 * **Download code**
 
-These solver benchmarks can be downloaded from `vitis libraries <https://github.com/Xilinx/Vitis_Libraries.git>`_ ``master`` branch.
+These solver benchmarks can be downloaded from `vitis libraries <https://github.com/Xilinx/Vitis_Libraries.git>`_ ``main`` branch.
 
 .. code-block:: bash
 
    git clone https://github.com/Xilinx/Vitis_Libraries.git 
    cd Vitis_Libraries
-   git checkout master
+   git checkout main
    cd solver 
 
 * **Setup environment**
@@ -87,6 +85,6 @@ Specifying the corresponding Vitis, XRT, and path to the platform repository by 
 
 .. code-block:: bash
 
-   source /opt/xilinx/Vitis/2021.1/settings64.sh
+   source /opt/xilinx/Vitis/2022.2/settings64.sh
    source /opt/xilinx/xrt/setup.sh
    export PLATFORM_REPO_PATHS=/opt/xilinx/platforms

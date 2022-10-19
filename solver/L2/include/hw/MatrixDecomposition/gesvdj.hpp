@@ -53,7 +53,7 @@ void jacobi_rotation_2x2(T matrix[3], T considerAsZero, T& m_c_left, T& m_s_left
         m_s_right = 0;
     } else {
         T d;
-#pragma HLS BIND_OP variable = d  op=dsub impl=fabric
+#pragma HLS BIND_OP variable = d op = dsub impl = fabric
         d = m00 - m11; // calculate the off-diagonal value
         ap_uint<11> exp1;
         ap_uint<52> sig1;
@@ -79,12 +79,12 @@ void jacobi_rotation_2x2(T matrix[3], T considerAsZero, T& m_c_left, T& m_s_left
         T KK = dc.d;
 
         T deno2, d2;
-#pragma HLS BIND_OP variable = d2  op=dmul impl=maxdsp
-#pragma HLS BIND_OP variable = deno2  op=dmul impl=maxdsp
+#pragma HLS BIND_OP variable = d2 op = dmul impl = maxdsp
+#pragma HLS BIND_OP variable = deno2 op = dmul impl = maxdsp
         d2 = d * d;          // d2 = (m00 - m11)^2
         deno2 = deno * deno; // deno2 = 4*(m01)^2
         T m;
-#pragma HLS BIND_OP variable = m  op=dadd impl=fabric
+#pragma HLS BIND_OP variable = m op = dadd impl = fabric
         m = deno2 + d2;                             // m = (m00 - m11)^2 + 4*(m01)^2
         T sqrtM = xf::solver::internal::m::sqrt(m); // sqrtM = sqrt((m00-m11)^2 + 4*(m01)^2)
 
@@ -98,12 +98,12 @@ void jacobi_rotation_2x2(T matrix[3], T considerAsZero, T& m_c_left, T& m_s_left
         T M2 = dc.d; // M2 = 2*m
 
         T tmpMul, tmpSum, tmpSub;
-#pragma HLS BIND_OP variable = tmpMul  op=dmul impl=maxdsp
+#pragma HLS BIND_OP variable = tmpMul op = dmul impl = maxdsp
         tmpMul = KK * sqrtM; // tmpMul = 2*abs(m00 - m11) * sqrt((m00-m11)^2 + 4*(m01)^2)
-#pragma HLS BIND_OP variable = tmpSum  op=dadd impl=fabric
+#pragma HLS BIND_OP variable = tmpSum op = dadd impl = fabric
         tmpSum = tmpMul + M2;
         T tmpDivider = deno2 / tmpSum;
-#pragma HLS BIND_OP variable = tmpSub  op=dsub impl=fabric
+#pragma HLS BIND_OP variable = tmpSub op = dsub impl = fabric
         tmpSub = 1 - tmpDivider;
         m_c_right = xf::solver::internal::m::sqrt(tmpSub);
         T tmp = xf::solver::internal::m::sqrt(tmpDivider);
@@ -133,7 +133,7 @@ void GenBlockMat(int dim, int order[maxDim][maxDim]) {
     int tmpOrder[maxDim];
 #endif
 
-#pragma HLS BIND_STORAGE variable = tmpOrder  type=ram_t2p impl=bram
+#pragma HLS BIND_STORAGE variable = tmpOrder type = ram_t2p impl = bram
     int dim_1 = dim - 1;
     int dim_1_2 = dim_1 >> 1; //(dim - 1)/ 2
     int dim_2 = dim >> 1;     //(dim)/ 2
@@ -391,9 +391,9 @@ void unrollCol(int lda,
                             m1 = -m01;
                         }
                         T tmpMul0, tmpMul1, sum;
-#pragma HLS BIND_OP variable = tmpMul0  op=dmul impl=maxdsp
-#pragma HLS BIND_OP variable = tmpMul1  op=dmul impl=maxdsp
-#pragma HLS BIND_OP variable = sum  op=dadd impl=fabric
+#pragma HLS BIND_OP variable = tmpMul0 op = dmul impl = maxdsp
+#pragma HLS BIND_OP variable = tmpMul1 op = dmul impl = maxdsp
+#pragma HLS BIND_OP variable = sum op = dadd impl = fabric
                         tmpMul0 = m0 * cl;
                         tmpMul1 = m1 * sl;
                         sum = tmpMul0 + tmpMul1;
@@ -719,9 +719,9 @@ void unrollRow(int lda,
                             m1 = -m10;
                         }
                         T tmpMul0, tmpMul1, sum;
-#pragma HLS BIND_OP variable = tmpMul0  op=dmul impl=maxdsp
-#pragma HLS BIND_OP variable = tmpMul1  op=dmul impl=maxdsp
-#pragma HLS BIND_OP variable = sum  op=dadd impl=fabric
+#pragma HLS BIND_OP variable = tmpMul0 op = dmul impl = maxdsp
+#pragma HLS BIND_OP variable = tmpMul1 op = dmul impl = maxdsp
+#pragma HLS BIND_OP variable = sum op = dadd impl = fabric
                         tmpMul0 = m0 * cr;
                         tmpMul1 = m1 * sr;
                         sum = tmpMul0 + tmpMul1;
@@ -953,7 +953,7 @@ void Jacobi_svd(T dataA[UN][UN][NMAXUN][NMAXUN], T dataU_out[UN][UN][NMAXUN][NMA
     }
 #else
     int Order[m_diagSize][m_diagSize];
-#pragma HLS BIND_STORAGE variable = Order  type=ram_t2p impl=bram
+#pragma HLS BIND_STORAGE variable = Order type = ram_t2p impl = bram
 #endif
     int odd = lda % 2;
     int rank;
@@ -1153,8 +1153,8 @@ void gesvdj(int m,
 #else
     T dataA_2D[NCU][NCU][NMAXUN][NMAXUN];
     T dataU_2D[NCU][NCU][NMAXUN][NMAXUN];
-#pragma HLS BIND_STORAGE variable = dataA_2D  type=ram_t2p impl=uram
-#pragma HLS BIND_STORAGE variable = dataU_2D  type=ram_t2p impl=uram
+#pragma HLS BIND_STORAGE variable = dataA_2D type = ram_t2p impl = uram
+#pragma HLS BIND_STORAGE variable = dataU_2D type = ram_t2p impl = uram
 #pragma HLS ARRAY_PARTITION variable = dataA_2D
 #pragma HLS ARRAY_PARTITION variable = dataU_2D
 #pragma HLS ARRAY_PARTITION variable = dataA_2D
