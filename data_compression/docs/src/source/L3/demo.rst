@@ -30,7 +30,7 @@ instructions are applicable for all the demos under this category.
 
 .. code-block:: bash
 
-    $source <Vitis_Installation_Path>/installs/lin64/Vitis/2021.1/settings64.csh
+    $source <Vitis_Installation_Path>/installs/lin64/Vitis/2022.2/settings64.csh
     $source <Vitis_Installation_Path>/xbb/xrt/packages/setup.sh
 
 Build Instructions

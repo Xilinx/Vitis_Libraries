@@ -54,7 +54,7 @@ Software & Hardware
 
 ::
 
-     Software: Xilinx Vitis 2021.2
+     Software: Xilinx Vitis 2022.2
      Hardware: xilinx_u200_xdma_201830_2 (Xilinx Alveo U200)
 
 Usage

@@ -6,7 +6,7 @@ import os
 import subprocess
 
 XSA = 'xilinx_u200_xdma_201830_2'
-VERSION = 'VITIS 2021.1'
+VERSION = 'VITIS 2022.2'
 
 def overview(target,data):
     target.write(data["name"])

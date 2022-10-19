@@ -26,7 +26,7 @@ Demo examples for **lz4**, **snappy**, **lz4_streaming**, **zlib**, **gzip** and
 
 .. code-block:: bash
       
-   $ source <Vitis_Installed_Path>/installs/lin64/Vitis/2021.1/settings64.sh
+   $ source <Vitis_Installed_Path>/installs/lin64/Vitis/2022.2/settings64.sh
    $ source <Vitis_Installed_Path>/xbb/xrt/packages/setup.sh
 
 Build Instructions

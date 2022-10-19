@@ -6,6 +6,10 @@ Release Note
 .. toctree::
    :hidden
    :maxdepth: 1
+2022.2
+------
+
+All Compression and Decompression applications are migrated to Vitis 2022.2 version.
 
 2022.1
 ------

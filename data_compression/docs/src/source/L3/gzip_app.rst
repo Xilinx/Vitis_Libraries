@@ -25,8 +25,8 @@ compression and decompression, it also supports Zlib with a host argument switch
 
 .. code-block:: bash
 
-   Tested Tool: 2021.1
-   Tested XRT:  2021.1
+   Tested Tool: 2022.2
+   Tested XRT:  2022.2
    Tested XSA:  xilinx_u250_gen3x16_xdma_3_1_202020_1
 
 

@@ -1,5 +1,5 @@
 {
-	"vitis" : "2021.1",
+	"vitis" : "2022.2",
 	"device_name" : "xilinx_u250_gen3x16_xdma_3_1_202020_1",
 	"containers": [
 	{

@@ -30,7 +30,7 @@ Requirements
 Software Platform
 ~~~~~~~~~~~~~~~~~
 
-This library is designed to work with Vitis 2021.2 and later, and
+This library is designed to work with Vitis 2022.2 and later, and
 therefore inherits the system requirements of Vitis and XRT.
 
 Supported operating systems are RHEL/CentOS 7.4, 7.5 and Ubuntu 16.04.4
@@ -94,25 +94,25 @@ Tables below showcases throughput details of compression for various Alveo accel
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
 | `Snappy Streaming <L2/demos/snappy_streaming>`_                        |        2.13          |      290 MB/s     |  300MHz  |  3K     |  4    |  6    |
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `GZip/Zlib 32KB Memory Mapped <L2/tests/gzipc_block_mm>`_              |        2.70          |      2 GB/s       |  300MHz  |  57K    |  135  |  64   |
+| `GZip/Zlib 32KB Memory Mapped <L2/tests/gzipc_block_mm>`_              |        2.70          |      2 GB/s       |  290MHz  |  53K    |  140  |  64   |
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `GZip 32KB Compress Stream <L2/tests/gzipc>`_                          |        2.70          |      2 GB/s       |  300MHz  |  54K    |  141  |  64   |
+| `GZip 32KB Compress Stream <L2/tests/gzipc>`_                          |        2.70          |      2 GB/s       |  300MHz  |  57K    |  142  |  64   |
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `GZip 16KB Compress Stream <L2/tests/gzipc_16KB>`_                     |        2.62          |      2 GB/s       |  282MHz  |  58K    |  164  |  48   |
+| `GZip 16KB Compress Stream <L2/tests/gzipc_16KB>`_                     |        2.62          |      2 GB/s       |  292MHz  |  62K    |  175  |  48   |
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `GZip 8KB Compress Stream <L2/tests/gzipc_8KB>`_                       |        2.50          |      2 GB/s       |  300MHz  |  57.5K  |  100  |  48   |
+| `GZip 8KB Compress Stream <L2/tests/gzipc_8KB>`_                       |        2.50          |      2 GB/s       |  300MHz  |  61K    |  111  |  48   |
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `GZip Fixed 32KB Compress Stream <L2/tests/gzipc_static>`_             |        2.31          |      2 GB/s       |  300MHz  |  35K    |  45   |  64   |
+| `GZip Fixed 32KB Compress Stream <L2/tests/gzipc_static>`_             |        2.31          |      2 GB/s       |  300MHz  |  39K    |  53   |  64   |
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `Zlib 32KB Compress Stream <L2/tests/zlibc>`_                          |        2.70          |      2 GB/s       |  300MHz  |  54K    |  128  |  64   |
+| `Zlib 32KB Compress Stream <L2/tests/zlibc>`_                          |        2.70          |      2 GB/s       |  300MHz  |  57K    |  131  |  64   |
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `Zlib 16KB Compress Stream <L2/tests/zlibc_16KB>`_                     |        2.62          |      2 GB/s       |  300MHz  |  58K    |  160  |  48   |
+| `Zlib 16KB Compress Stream <L2/tests/zlibc_16KB>`_                     |        2.62          |      2 GB/s       |  300MHz  |  62K    |  165  |  48   |
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `Zlib 8KB Compress Stream <L2/tests/zlibc_8KB>`_                       |        2.50          |      2 GB/s       |  300MHz  |  57.4K  |  96   |  48   |
+| `Zlib 8KB Compress Stream <L2/tests/zlibc_8KB>`_                       |        2.50          |      2 GB/s       |  300MHz  |  61K    |  101  |  48   |
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `Zlib Fixed 32KB Compress Stream <L2/tests/zlibc_static>`_             |        2.31          |      2 GB/s       |  300MHz  |  35.7K  |  39   |  64   |
+| `Zlib Fixed 32KB Compress Stream <L2/tests/zlibc_static>`_             |        2.31          |      2 GB/s       |  300MHz  |  39K    |  43   |  64   |
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
-| `Zstd Compress Quad Core <L2/tests/zstd_quadcore_compress>`_           |        2.68          |     1.17 GB/s     |  284MHz  |  40K    |  79   |  37   |
+| `Zstd Compress Quad Core <L2/tests/zstd_quadcore_compress>`_           |        2.68          |     1.17 GB/s     |  275MHz  |  44K    |  94   |  37   |
 +------------------------------------------------------------------------+----------------------+-------------------+----------+---------+-------+-------+
 
 * GZip/Zlib Memory Mapped and GZip/Zlib Compress Stream: Supports Dynamic Huffman
@@ -126,16 +126,16 @@ Tables below showcases throughput details of decompression for various Alveo acc
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
 | Architecture                                                         |    Throughput     |  FMax    |  LUT    |  BRAM | URAM |           
 +======================================================================+===================+==========+=========+=======+======+
-| `LZ4 Streaming <L2/tests/lz4_dec_streaming_parallelByte8>`_          |     1.8  GB/s     |  300MHz  |  5.5K   |  0    |  4   |
+| `LZ4 Streaming <L2/tests/lz4_dec_streaming_parallelByte8>`_          |     1.8  GB/s     |  292MHz  |  11K    |  15   |  2   |
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
-| `Snappy Streaming <L2/tests/snappy_dec_streaming_parallelByte8>`_    |     1.97 GB/s     |  300MHz  |  6.5K   |  0    |  4   |
+| `Snappy Streaming <L2/tests/snappy_dec_streaming_parallelByte8>`_    |     1.97 GB/s     |  300MHz  |  12K    |  15   |  2   |
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
 | `GZip/Zlib Streaming <L2/demos/gzip>`_                               |     518  MB/s     |  283MHz  |  6.7K   |  8    |  0   |
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
-| `ZStd Streaming <L2/tests/zstdd_32KB>`_                              |   658.86 MB/s     |  234MHz  |  22K    |  32   |  3   |
+| `ZStd Streaming <L2/tests/zstdd_32KB>`_                              |   658.86 MB/s     |  240MHz  |  23K    |  34   |  3   |
 +----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
-| `ZStd Full File Streaming <L2/tests/zstdd_32KB>`_                    |   658.86 MB/s     |  234MHz  |  22K    |  32   |  3   |
-+----------------------------------------------------------------------+-------------------+----------+---------+-------+------+
+
+
 
 * GZip/Zlib Streaming: Full standard support (Dynamic Huffman, Fixed Huffman and Stored Blocks supported).
 * ZStd Streaming: Full Standard support with limited Window Size upto 128KB.
@@ -149,7 +149,7 @@ license. <https://www.apache.org/licenses/LICENSE-2.0>`__
 
 ::
 
-   Copyright 2019-2021 Xilinx, Inc.
+   Copyright 2019-2022 Xilinx, Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -162,7 +162,7 @@ license. <https://www.apache.org/licenses/LICENSE-2.0>`__
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-   Copyright 2019-2021 Xilinx, Inc.
+   Copyright 2019-2022 Xilinx, Inc.
 
 Contribution/Feedback
 ---------------------

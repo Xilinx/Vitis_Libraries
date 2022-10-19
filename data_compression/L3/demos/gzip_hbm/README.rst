@@ -25,8 +25,8 @@ This demo is aimed at showcasing Xilinx Alveo U50 (HBM Platform) acceleration of
 
 .. code-block:: bash
 
-           Tested Tool: 2021.2
-           Tested XRT:  2021.2
+           Tested Tool: 2022.2
+           Tested XRT:  2022.2
            Tested XSA:  xilinx_u50_gen3x16_xdma_201920_3 
 
 
