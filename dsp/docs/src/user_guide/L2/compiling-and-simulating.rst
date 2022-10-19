@@ -114,6 +114,221 @@ An example of how a library element may be configured by a parent graph is provi
 L2 Library Element Configuration Parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. _CONFIGURATION_PARAMETERS_DDS_MIXER:
+
+L2 DDS/Mixer Configuration Parameters
+-------------------------------------
+
+For the DDS/Mixer library element, the list of configurable parameters and default values is presented below.
+
+.. table:: L2 DDS/Mixer Configuration Parameters
+
+    +------------------------+----------------+----------------+--------------------------------------+
+    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
+    +========================+================+================+======================================+
+    | DATA_TYPE              |    typename    |    cint16      | Data Type.                           |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | WINDOW_VSIZE           |    unsigned    |    256         | Input/Output window size.            |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | MIXER_MODE             |    unsigned    |    2           | The mode of operation of the         |
+    |                        |                |                | dds_mixer.                           |
+    |                        |                |                |                                      |
+    |                        |                |                | 0 = dds only                         |
+    |                        |                |                |                                      |
+    |                        |                |                | 1 = dds plus single data channel     |
+    |                        |                |                | mixer                                |
+    |                        |                |                |                                      |
+    |                        |                |                | 2 = dds plus two data channel        |
+    |                        |                |                | mixer, for symmetrical carrier       |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | P_API                  |    unsigned    |    0           | 0 = window,                          |
+    |                        |                |                |                                      |
+    |                        |                |                | 1 = stream                           |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | UUT_SSR                |    unsigned    |    1           | Super Sample Rate  SSR parameter.    |
+    |                        |                |                | Defaults to 1.                       |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NITER                  |    unsigned    |    16          | Number of iterations to execute.     |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
+    |                        |                |                | output sample with reference model,  |
+    |                        |                |                | e.g. 0.0025 for floats and cfloats.  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | INITIAL_DDS_OFFSET     |    unsigned    |    0           | Initial DDS offset.                  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DDS_PHASE_INC          |    unsigned    | 0xD6555555     | DDS Phase Increment.                 |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DATA_STIM_TYPE         |    unsigned    |    0           | Supported types:                     |
+    |                        |                |                |                                      |
+    |                        |                |                | 0 - random                           |
+    |                        |                |                |                                      |
+    |                        |                |                | 3 - impulse                          |
+    |                        |                |                |                                      |
+    |                        |                |                | 4 - all ones                         |
+    |                        |                |                |                                      |
+    |                        |                |                | 5 - incrementing pattern             |
+    |                        |                |                |                                      |
+    |                        |                |                | 6 - sym incrementing pattern         |
+    |                        |                |                |                                      |
+    |                        |                |                | 8 - sine wave                        |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+
+
+.. _CONFIGURATION_PARAMETERS_FFT:
+
+L2 FFT configuration parameters
+-------------------------------
+
+For the FFT/iFFT library element the list of configurable parameters and default values is presented below.
+
+.. table:: L2 FFT configuration parameters
+
+    +------------------------+----------------+----------------+--------------------------------------+
+    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
+    +========================+================+================+======================================+
+    | DATA_TYPE              |    typename    |    cint16      | Data Type.                           |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | TWIDDLE_TYPE           |    typename    |    cint16      | Twiddle Type.                        |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | POINT_SIZE             |    unsigned    |    1024        | FFT point size.                      |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | SHIFT                  |    unsigned    |    17          | Acc results shift down value.        |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | FFT_NIFFT              |    unsigned    |    0           | Forward (1) or reverse (0) transform.|
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | WINDOW_VSIZE           |    unsigned    |    1024        | Input/Output window size.            |
+    |                        |                |                |                                      |
+    |                        |                |                | By default, set to: $(POINT_SIZE).   |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | CASC_LEN               |    unsigned    |    1           | Cascade length.                      |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DYN_PT_SIZE            |    unsigned    |    0           | Enable (1) Dynamic Point size        |
+    |                        |                |                | feature.                             |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | API_IO                 |    unsigned    |    0           | Graph's port API.                    |
+    |                        |                |                |                                      |
+    |                        |                |                | 0 - window                           |
+    |                        |                |                |                                      |
+    |                        |                |                | 1 - stream                           |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | PARALLEL_POWER         |    unsigned    |   0            | Parallelism, controlling             |
+    |                        |                |                | Super Sample Rate operation.         |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NITER                  |    unsigned    |    4           | Number of iterations to execute.     |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
+    |                        |                |                | output sample with reference model,  |
+    |                        |                |                | e.g. 0.0025 for floats and cfloats.  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | GEN_INPUT_DATA         |    bool        |    true        | Generate random input data samples.  |
+    |                        |                |                |                                      |
+    |                        |                |                | When false, use the input file       |
+    |                        |                |                | defined in: INPUT_FILE               |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | STIM_TYPE              |    unsigned    |    0           | Supported types:                     |
+    |                        |                |                |                                      |
+    |                        |                |                | 0 - random                           |
+    |                        |                |                |                                      |
+    |                        |                |                | 3 - impulse                          |
+    |                        |                |                |                                      |
+    |                        |                |                | 4 - all ones                         |
+    |                        |                |                |                                      |
+    |                        |                |                | 5 - incrementing pattern             |
+    |                        |                |                |                                      |
+    |                        |                |                | 6 - sym incrementing pattern         |
+    |                        |                |                |                                      |
+    |                        |                |                | 8 - sine wave                        |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | INPUT_FILE             |    string      | data/input.txt | Input data samples file.             |
+    |                        |                |                |                                      |
+    |                        |                |                | Only used when GEN_INPUT_DATA=false. |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+
+.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
+
+.. _CONFIGURATION_PARAMETERS_FFT_WINDOW:
+
+L2 FFT Window configuration parameters
+--------------------------------------
+
+For the FFT Window library element the list of configurable parameters and default values is presented below.
+
+.. table:: L2 FFT Window configuration parameters
+
+    +------------------------+----------------+----------------+--------------------------------------+
+    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
+    +========================+================+================+======================================+
+    | DATA_TYPE              |    typename    |    cint16      | Data Type.                           |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | TWIDDLE_TYPE           |    typename    |    cint16      | Twiddle Type.                        |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | POINT_SIZE             |    unsigned    |    1024        | FFT point size.                      |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | SHIFT                  |    unsigned    |    17          | Acc results shift down value.        |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | WINDOW_VSIZE           |    unsigned    |    1024        | Input/Output window size.            |
+    |                        |                |                |                                      |
+    |                        |                |                | By default, set to: $(POINT_SIZE).   |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DYN_PT_SIZE            |    unsigned    |    0           | Enable (1) Dynamic Point size        |
+    |                        |                |                | feature.                             |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | API_IO                 |    unsigned    |    0           | Graph's port API.                    |
+    |                        |                |                |                                      |
+    |                        |                |                | 0 - window                           |
+    |                        |                |                |                                      |
+    |                        |                |                | 1 - stream                           |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | WINDOW_CHOICE          |    unsigned    |    0           | Supported types:                     |
+    |                        |                |                |                                      |
+    |                        |                |                | 0 - Hamming                          |
+    |                        |                |                |                                      |
+    |                        |                |                | 1 - Hann                             |
+    |                        |                |                |                                      |
+    |                        |                |                | 2 - Blackman                         |
+    |                        |                |                |                                      |
+    |                        |                |                | 3 - Keiser                           |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | NITER                  |    unsigned    |    4           | Number of iterations to execute.     |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+    | DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
+    |                        |                |                | output sample with reference model,  |
+    |                        |                |                | e.g. 0.0025 for floats and cfloats.  |
+    |                        |                |                |                                      |
+    +------------------------+----------------+----------------+--------------------------------------+
+
+.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
+
 .. _CONFIGURATION_PARAMETERS_FILTERS:
 
 L2 FIR configuration parameters
@@ -265,93 +480,6 @@ The list below consists of configurable parameters for FIR library elements with
 .. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
 
 .. note:: Not all dsplib elements support all of the above configurable parameters. Unsupported parameters which are not used have no impact on execution, e.g., parameter `INTERPOLATE_FACTOR` is only supported by interpolation filters and will be ignored by other library elements.
-
-
-.. _CONFIGURATION_PARAMETERS_FFT:
-
-L2 FFT configuration parameters
--------------------------------
-
-For the FFT/iFFT library element the list of configurable parameters and default values is presented below.
-
-.. table:: L2 FFT configuration parameters
-
-    +------------------------+----------------+----------------+--------------------------------------+
-    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
-    +========================+================+================+======================================+
-    | DATA_TYPE              |    typename    |    cint16      | Data Type.                           |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | TWIDDLE_TYPE           |    typename    |    cint16      | Twiddle Type.                        |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | POINT_SIZE             |    unsigned    |    1024        | FFT point size.                      |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | SHIFT                  |    unsigned    |    17          | Acc results shift down value.        |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | FFT_NIFFT              |    unsigned    |    0           | Forward (1) or reverse (0) transform.|
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | WINDOW_VSIZE           |    unsigned    |    1024        | Input/Output window size.            |
-    |                        |                |                |                                      |
-    |                        |                |                | By default, set to: $(POINT_SIZE).   |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | CASC_LEN               |    unsigned    |    1           | Cascade length.                      |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DYN_PT_SIZE            |    unsigned    |    0           | Enable (1) Dynamic Point size        |
-    |                        |                |                | feature.                             |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | API_IO                 |    unsigned    |    0           | Graph's port API.                    |
-    |                        |                |                |                                      |
-    |                        |                |                | 0 - window                           |
-    |                        |                |                |                                      |
-    |                        |                |                | 1 - stream                           |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | PARALLEL_POWER         |    unsigned    |   0            | Parallelism, controlling             |
-    |                        |                |                | Super Sample Rate operation.         |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    4           | Number of iterations to execute.     |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
-    |                        |                |                | output sample with reference model,  |
-    |                        |                |                | e.g. 0.0025 for floats and cfloats.  |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | GEN_INPUT_DATA         |    bool        |    true        | Generate random input data samples.  |
-    |                        |                |                |                                      |
-    |                        |                |                | When false, use the input file       |
-    |                        |                |                | defined in: INPUT_FILE               |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | STIM_TYPE              |    unsigned    |    0           | Supported types:                     |
-    |                        |                |                |                                      |
-    |                        |                |                | 0 - random                           |
-    |                        |                |                |                                      |
-    |                        |                |                | 3 - impulse                          |
-    |                        |                |                |                                      |
-    |                        |                |                | 4 - all ones                         |
-    |                        |                |                |                                      |
-    |                        |                |                | 5 - incrementing pattern             |
-    |                        |                |                |                                      |
-    |                        |                |                | 6 - sym incrementing pattern         |
-    |                        |                |                |                                      |
-    |                        |                |                | 8 - sine wave                        |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | INPUT_FILE             |    string      | data/input.txt | Input data samples file.             |
-    |                        |                |                |                                      |
-    |                        |                |                | Only used when GEN_INPUT_DATA=false. |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-
-.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
-
 
 .. _CONFIGURATION_PARAMETERS_GEMM:
 
@@ -561,75 +689,6 @@ For the Widgets library elements the list of configurable parameters and default
 
 .. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
 
-
-.. _CONFIGURATION_PARAMETERS_DDS_MIXER:
-
-L2 DDS/Mixer Configuration Parameters
--------------------------------------
-
-For the DDS/Mixer library element, the list of configurable parameters and default values is presented below.
-
-.. table:: L2 DDS/Mixer Configuration Parameters
-
-    +------------------------+----------------+----------------+--------------------------------------+
-    |     **Name**           |    **Type**    |  **Default**   |   Description                        |
-    +========================+================+================+======================================+
-    | DATA_TYPE              |    typename    |    cint16      | Data Type.                           |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | WINDOW_VSIZE           |    unsigned    |    256         | Input/Output window size.            |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | MIXER_MODE             |    unsigned    |    2           | The mode of operation of the         |
-    |                        |                |                | dds_mixer.                           |
-    |                        |                |                |                                      |
-    |                        |                |                | 0 = dds only                         |
-    |                        |                |                |                                      |
-    |                        |                |                | 1 = dds plus single data channel     |
-    |                        |                |                | mixer                                |
-    |                        |                |                |                                      |
-    |                        |                |                | 2 = dds plus two data channel        |
-    |                        |                |                | mixer, for symmetrical carrier       |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | P_API                  |    unsigned    |    0           | 0 = window,                          |
-    |                        |                |                |                                      |
-    |                        |                |                | 1 = stream                           |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | UUT_SSR                |    unsigned    |    1           | Super Sample Rate  SSR parameter.    |
-    |                        |                |                | Defaults to 1.                       |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    16          | Number of iterations to execute.     |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
-    |                        |                |                | output sample with reference model,  |
-    |                        |                |                | e.g. 0.0025 for floats and cfloats.  |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | INITIAL_DDS_OFFSET     |    unsigned    |    0           | Initial DDS offset.                  |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DDS_PHASE_INC          |    unsigned    | 0xD6555555     | DDS Phase Increment.                 |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | DATA_STIM_TYPE         |    unsigned    |    0           | Supported types:                     |
-    |                        |                |                |                                      |
-    |                        |                |                | 0 - random                           |
-    |                        |                |                |                                      |
-    |                        |                |                | 3 - impulse                          |
-    |                        |                |                |                                      |
-    |                        |                |                | 4 - all ones                         |
-    |                        |                |                |                                      |
-    |                        |                |                | 5 - incrementing pattern             |
-    |                        |                |                |                                      |
-    |                        |                |                | 6 - sym incrementing pattern         |
-    |                        |                |                |                                      |
-    |                        |                |                | 8 - sine wave                        |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
 
 .. |image1| image:: ./media/image1.png
 .. |image2| image:: ./media/image2.png

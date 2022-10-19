@@ -268,7 +268,8 @@ Note that some parameters are not present on certain variants of FIR where the p
    |                        |                | interpolation   | max = ``TP_INTERPOLATE_FACTOR`` |
    |                        |                | polyphases that |                                 |
    |                        |                | produce output  | must be a factor of             |
-   |                        |                | data parallelly | interpolate factor              |
+   |                        |                | data in         | interpolate factor              |
+   |                        |                | parallel        |                                 |
    +------------------------+----------------+-----------------+---------------------------------+
    | TP_PARA_DECI_POLY      | Unsigned int   | Number of       | min = 1                         |
    |                        |                | decimation      | max = ``TP_DECIMATE_FACTOR``    |
@@ -321,11 +322,8 @@ Stream API uses the additional output port to increase the FIR's throughput. Ple
 
 For more details about the internals of the graph with SSR operation, refer to :ref:`SSR_OPERATION`.
 
-| **TP_PARA_INTERP_POLY** sets the number of interpolator polyphases to be computed in parallel.
-| The polyphases are executed in parallel with output data produced by each polyphase output directly its own output port (or ports when TP_SSR>1).
+| **TP_PARA_INTERP_POLY** sets the number of interpolator polyphases which are executed in parallel with output data produced by each polyphase output directly its own output port (or ports when TP_SSR>1).
 | TP_PARA_INTERP_POLY does not affect the number of input data ports.
-| TP_PARA_INTERP_POLY = TP_INTERPOLATE_FACTOR will result in each interpolation polyphase to be implemented as a single rate filter.
-| TP_PARA_INTERP_POLY < TP_INTERPOLATE_FACTOR will result in the kernels in the polyphase branches operating as independent interpolators.
 | TP_PARA_INTERP_POLY can be used in combination with TP_SSR.
 | The number of AIEs used is given by ``TP_PARA_INTERP_POLY * TP_SSR^2 * TP_CASC_LEN``.
 
@@ -336,9 +334,7 @@ For more details about the internals of the graph with SSR operation, refer to :
 | TP_PARA_DECI_POLY does not affect the number of output data ports.
 | The number of AIEs used is given by ``TP_PARA_DECI_POLY * TP_SSR^2 * TP_CASC_LEN``.
 
-For more details about how to configure the various parameters to meet various performance metrics, refer to  see :ref:`SSR_OPERATION_PARA_DECI_POLY`
-
-.. note:: Currently, only Half-band decimation FIR supports TP_PARA_DECI_POLY > 1.
+For more details about how to configure the various parameters to meet various performance metrics, refer to  see :ref:`SSR_OPERATION_MODES`
 
 ~~~~~~~~~~~~~~~~
 Access functions
@@ -445,26 +441,39 @@ As mentioned above, asymmetrical filters expect the port to contain the full arr
 Window interface for Filters
 -------------------------------
 
-| On the AI Engine processor, data may be packetized into window buffers.
-| In the case of FIRs, each window is extended by a margin so that the state of the filter at the end of the previous iteration of the window may be restored before new computations begin.
+On the AI Engine processor, data may be packetized into window buffers, which are mapped to local memory.
 
-| Window buffers are implemented using a `ping-pong` mechanism, where consumer kernel would read the `ping` portion of the buffer while producer would fill `pong` portion of the buffer that would be consumed in the next iteration.
-| Each iteration run, the kernel operates on a set number of samples from the  window buffer - defined by template parameter ``TP_INPUT_WINDOW_VSIZE``. To allow the kernel to safely operate on buffered data a mechanism of lock acquires and releases is implemented.
-| The above requirements introduce a fixed overhead when a kernel is triggered.
-| Therefore, to maximize throughput, the window size should be set to the maximum that the system will allow, though this will lead to a corresponding increase in latency.
-| For example, with a small window, say 32 samples, the overheads of window acquisition and release will be incurred for every 32 samples. Using a larger window will mean that a greater portion of time will be spent in active computation.
+Window buffers can be accessed with 256-bit wide load/store operation, hence offering a throughput of up to 256 Gbps (based on 1 GHz AIE clock).
 
-| Latency of a window based architecture is highly dependent on the buffer size, as well as data and coefficient type.
-| For example, a single-rate symmetric FIR with a 512 sample input/output window operating on ``cint16`` data with ``int16`` coefficients will need around `2.56 us` before a full window of output samples is available for the consumer to read.
+In the case of FIRs, each window is extended by a margin so that the state of the filter at the end of the previous iteration of the window may be restored before new computations begin.
+
+Window buffers are implemented using a `ping-pong` mechanism, where the consumer kernel would read the `ping` portion of the buffer while the producer would fill the `pong` portion of the buffer that would be consumed in the next iteration.
+
+In each iteration run, the kernel operates on a set number of samples from the window buffer - defined by the template parameter ``TP_INPUT_WINDOW_VSIZE``. To allow the kernel to safely operate on buffered data a mechanism of lock acquires and releases is implemented.
 
 .. note::  Window interface is not available in Super Sample Rate modes.
+
+**Maximizing Throughput**
+
+The above requirements introduce a fixed overhead when a kernel is triggered.
+Therefore, to maximize throughput, the window size should be set to the maximum that the system will allow.
+
+For example, a 4 tap single-rate symmetric FIR with a `2560` sample input/output window operating on ``int32`` data with ``int16`` can produce an output window buffer in `357` clock cycles, which - taking into account kernel's startup overhead (`40` lock cycles) - equates to throughput of up to `6448 MSPS` (based on 1 GHz AIE clock).
+
+.. note:: To achieve maximum performance, producer and consumer kernels should be placed in adjacent AIE tiles, so the window buffers can be accessed without a requirement for MM2S/S2MM DMA stream conversions.
+
+**Latency**
+
+Latency of a window-based FIR is predominantly due to the buffering in the input and output windows. Other factors which affect latency are data and type and FIR length, though these tend to have a lesser effect.
+
+For example, a 16 tap single-rate symmetric FIR with a `512` sample input/output window operating on ``cint16`` data with ``int16`` coefficients will need around `2.56 us` (based on 1 GHz AIE clock) before a full window of output samples is available for the consumer to read.
 
 
 Maximum Window size
 ///////////////////
 
-| Window buffer is mapped into a single Memory Group in the area surrounding the kernel that accesses it.
-| A Memory Group is 32 kB, and the maximum size of the `ping-pong` window buffer should not exceed this limit.
+| Window buffer is mapped into a local memory in the area surrounding the kernel that accesses it.
+| A local memory storage is 32 kB, and the maximum size of the `ping-pong` window buffer should not exceed this limit.
 
 .. _SINGLE_BUFFER_CONSTRAINT:
 
@@ -482,24 +491,36 @@ Single buffer constraint
 Streaming interface for Filters
 -------------------------------
 
-| Streaming interfaces are now supported by all FIRs.
-| When ``TP_API = 1`` the FIR will have stream API input and output ports, allowing greater interoperability and flexibility in placement of the design.
-| Streaming interfaces may be configured to connect a single or dual stream inputs (driven by ``TP_DUAL_IP``) or one or two stream outputs (driven by ``TP_NUM_OUTPUTS``).
+Streaming interfaces are now supported by all FIRs. Streaming interfaces are based on 32-bit AXI4-Stream and offer throughput of upto 32 Gbps (based on 1 GHz AIE) per stream used.
 
-| In general, stream based filters have lower latency than window API filters.
+When ``TP_API = 1`` the FIR will have stream API input and output ports, allowing greater interoperability and flexibility in placement of the design.
+Streaming interfaces may be configured to connect a single or dual stream inputs (driven by ``TP_DUAL_IP``) or one or two stream outputs (driven by ``TP_NUM_OUTPUTS``).
 
-| Asymmetric FIRs (single-rate, as well as rate-changing FIRs) will use input and output streams directly, hence offering very low latency.
-| For example, a single-rate asymmetric FIR with a single kernel (``TP_CASC_LEN = 1``) offers latency as low as tens of nanoseconds (the exact figure depends on FIR length and data/coeff data type).
+In general, stream based filters require less ot no data buffering and therefore have lesser memory requirements and lower latency than window API filters.
 
-| When operating in a non-SSR mode, i.e. ``TP_SSR``, ``TP_PARA_INTERP_POLY`` and ``TP_PARA_DECI_POLY`` are all set to 1, symmetric FIRs including half-band FIRs, cannot take full advantage of input streams.
-| Instead, input stream will be converted to window buffer and FIR kernels will operate in a windowed based architecture.
-| Output data will be directly sed out through a stream port.
-| Such designs allow a more flexible connnetion and mapping onto AIE tiles.
-| Latency is halved, when compared to a window based equivalent, but is much greater than compared with an asymmetric design.
-| For example, a single-rate symmetric FIR with a 512 sample input/output window operating on ``cint16`` data with ``int16`` coefficients will need around 1.4 us before a full window of output samples is available for the consumer to read.
+**Asymmetric FIRs**
 
-| When operating in an SSR mode, i.e. ``TP_SSR``, ``TP_PARA_INTERP_POLY`` or ``TP_PARA_DECI_POLY`` are greater than 1, all FIRs including half-band FIRs, will be implemented based on asymmetric equivalent FIR kernel.
-| For example, a single-rate asymmetric FIR with a single kernel (``TP_CASC_LEN = 1``) offers latency as low as tens of nanoseconds (the exact figure depends on FIR length and data/coeff data type and the amount of kernels connected in series).
+Asymmetric FIRs (single-rate, as well as rate-changing FIRs) will use input and output streams directly.
+As a result, there is no need for input/output buffering, hence Asymmetric FIRs offer offer very low latency and very low memory footprint.
+In addition, due to the lack of memory requirements, such designs may operate on very large number of samples within each kernel iteration (``TP_INPUT_WINDOW_VSIZE`` is limited to ``2^31 - 1``  achieving maximum performance and maximum throughput.
+
+For example, a single kernel (``TP_CASC_LEN = 1``), 16 tap single-rate asymmetric FIR, using ``cint16`` data with frame size of `25600` and ``int16`` coefficients, is offering throughput of `998 MSPS` (based on 1 GHz AIE clock) and latency as low as tens of nanoseconds.
+
+**Hybrid Streaming interface for Symmetric and Half-band FIRs in non-SSR mode**
+
+Symmetric FIRs including half-band FIRs, cannot take full advantage of input streams, when operating in a non-SSR mode, i.e. ``TP_SSR``, ``TP_PARA_INTERP_POLY`` and ``TP_PARA_DECI_POLY`` are all set to 1.
+Instead, the input stream will be converted to a window buffer and the FIR kernels will operate in a windowed based architecture.
+Output data will be sent directly out through a stream port.
+Such designs allow a more flexible connection and mapping onto AIE tiles.
+Latency is reduced, when compared to a window based equivalent, but is much greater than compared with an asymmetric design. Lack of an output buffer also reduces the memory requirements.
+
+For example, a 16 tap single-rate symmetric FIR with a `512` sample input/output window operating on ``cint16`` data and ``int16`` coefficients achieves throughput of `978 MSPS` (based on 1 GHz AIE clock) and will need around `1.4 us` before a full window of output samples is available for the consumer to read.
+
+**Symmetric and Half-band FIRs in SSR mode**
+
+When operating in an SSR mode, i.e. ``TP_SSR``, ``TP_PARA_INTERP_POLY`` or ``TP_PARA_DECI_POLY`` are greater than 1, all Symmetric and Half-band FIRs, in addition to all Asymmetric FIRs, will operate on input and output streams directly, offering very low latency and minimal memory footprint.
+
+For example, a 32 tap, single-rate symmetric FIR with a SSR set to 2 (``TP_SSR = 2``), using ``cint16`` data with frame size of `25600` and ``int16`` coefficients achieves throughput of `1998 MSPS` (based on 1 GHz AIE clock) and latency as low as tens of nanoseconds.
 
 
 .. _FIR_STREAM_OUTPUT:
@@ -507,13 +528,13 @@ Streaming interface for Filters
 Stream Output
 /////////////
 
-Stream output allows computed data samples to be directly sent over the stream without the requirement for a ping-pong window buffer.
+Stream output allows computed data samples to be sent directly over the stream without the requirement for a ping-pong window buffer.
 As a result, memory use and latency are reduced.
 Furthermore, the streaming output allows data samples to be broadcast to multiple destinations.
 
 To maximize the throughput, FIRs can be configured with 2 output stream ports. However, this may not improve performance if the throughput is bottlenecked by other factors, i.e., the input stream bandwidth or the vector processor.
 Set ``TP_NUM_OUTPUTS`` template parameter to 2, to create a FIR kernel with 2 output stream ports.
-In this scenario, the output data from the two streams is interleaved in chunks of 128 bits. E.g.:
+In this scenario, the output data from the two streams is split into chunks of 128 bits. E.g.:
 
 * samples 0-3 to be sent over output stream 0 for cint16 data type,
 
@@ -523,12 +544,12 @@ In this scenario, the output data from the two streams is interleaved in chunks 
 Stream Input for Asymmetric FIRs
 ////////////////////////////////
 
-Stream input allows data samples to be directly written from the input stream to one of the Input Vector Registers without the requirement for a ping-pong window buffer.
+Stream input allows data samples to be written directly from the input stream to one of the Input Vector Registers without the requirement for a ping-pong window buffer.
 As a result, memory requirements and latency are reduced.
 
 To maximize the throughput, FIRs can be configured with 2 input stream ports. Although this may not improve performance if the throughput is bottlenecked by other factors, i.e., the output stream bandwidth or the vector processor.
 Set ``TP_DUAL_IP`` to 1, to create a FIR instance with 2 input stream ports.
-In such a case the input data will be interleaved from the two ports to one data stream internally in 128 bit chunks, e.g.:
+In such a case the input data will be merged from the two ports in 128 bit chunks, onto one data stream internally, e.g.:
 
 * samples 0-3 to be received on input stream 0 for cint16 data type,
 
@@ -598,39 +619,13 @@ where T_FIR_LEN is the tap length of the fir, T_API refers to thee type of port 
 
 .. code-block::
 
-   #include "fir_sr_asym_graph.hpp"
-
-   #define DATA_TYPE cint16
-   #define COEFF_TYPE int16
-   #define FIR_LEN 32
-   #define SHIFT 0
-   #define RND 0
-   #define INPUT_WINDOW_VSIZE 256
-   #define CASC_LEN 1
-   #define USE_COEFF_RELOAD 0
-   #define NUM_OUTPUTS 1
-   #define API 0
-   #define SSR 0
-
-   class myFir : public adf::graph
-   {
-   public:
-      adf::port<input> in;
-      adf::port<output> out;
-      std::vector<int16> taps = {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-      using fir_graph = xf::dsp::aie::fir::sr_sym::fir_sr_asym_graph<DATA_TYPE, COEFF_TYPE, FIR_LEN, SHIFT, RND, INPUT_WINDOW_VSIZE,
-                                                   CASC_LEN, USE_COEFF_RELOAD, NUM_OUTPUTS, API, SSR>;
+      using fir_graph = xf::dsp::aie::fir::sr_sym::fir_sr_asym_graph<DATA_TYPE, COEFF_TYPE, FIR_LEN, SHIFT, RND, INPUT_WINDOW_VSIZE>;
 
       static constexpr int kMinLen = fir_graph::getMinCascLen<FIR_LEN, API, DATA_TYPE, COEFF_TYPE, TP_SSR>();
 
       xf::dsp::aie::fir::sr_sym::fir_sr_asym_graph<DATA_TYPE, COEFF_TYPE, FIR_LEN, SHIFT, RND, INPUT_WINDOW_VSIZE,
                                                    kMinLen, USE_COEFF_RELOAD, NUM_OUTPUTS, API, SSR> firGraphWithMinLen;
-      myFir() : firGraphWithMinLen(taps)
-      {
-         adf::connect<> net0(in , filter.in);
-         adf::connect<> net1(filter.out , out);
-      }
-   };
+
 
 More details are provided in the  :ref:`API_REFERENCE`.
 
@@ -654,55 +649,33 @@ An example use of the getOptCascLen and getMinCascLen is shown below. You can fi
 
 .. code-block::
 
-   #include "fir_sr_asym_graph.hpp"
-
-   #define DATA_TYPE cint16
-   #define COEFF_TYPE int16
-   #define FIR_LEN 32
-   #define SHIFT 0
-   #define RND 0
-   #define INPUT_WINDOW_VSIZE 256
-   #define CASC_LEN 1
-   #define USE_COEFF_RELOAD 0
-   #define NUM_OUTPUTS 1
-   #define API 0
-   #define SSR 0
-
-   class myFir : public adf::graph
-   {
-   public:
-      adf::port<input> in;
-      adf::port<output> out;
-      std::vector<int16> taps = {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-      using fir_graph = xf::dsp::aie::fir::sr_sym::fir_sr_asym_graph<DATA_TYPE, COEFF_TYPE, FIR_LEN, SHIFT, RND, INPUT_WINDOW_VSIZE,
-                                                   CASC_LEN, USE_COEFF_RELOAD, NUM_OUTPUTS, API, SSR>;
+      using fir_graph = xf::dsp::aie::fir::sr_sym::fir_sr_asym_graph<DATA_TYPE, COEFF_TYPE, FIR_LEN, SHIFT, RND, INPUT_WINDOW_VSIZE>;
 
       static constexpr int kOptLen = fir_graph::getOptCascLen<FIR_LEN, DATA_TYPE, COEFF_TYPE, NUM_OUTPUTS, TP_SSR>();
 
       xf::dsp::aie::fir::sr_sym::fir_sr_asym_graph<DATA_TYPE, COEFF_TYPE, FIR_LEN, SHIFT, RND, INPUT_WINDOW_VSIZE,
                                                    kOptLen, USE_COEFF_RELOAD, NUM_OUTPUTS, API, SSR> firGraphWithOptLen;
-      myFir() : firGraphWithOptLen(taps)
-      {
-         adf::connect<> net0(in , filter.in);
-         adf::connect<> net1(filter.out , out);
-      }
-   };
+
 
 More details are provided in the  :ref:`API_REFERENCE`.
 
 .. _SSR_OPERATION:
 
-Super Sample Rate Operation Modes
----------------------------------
+Super Sample Rate
+-----------------
 
 The term Super Sample Rate strictly means the processing of more than one sample per clock cycle. Since the AIE is a vector processor, almost every operation is SSR by this definition making it superfluous. Therefore in the AIE context SSR is taken to mean an implementation using multiple computation paths to improve performance at the expense of additional resource use.
 
-In the FIR, SSR operation can be achieved in multiple ways where SSR operation is controlled by one or more of template parameters:
+.. _SSR_OPERATION_MODES:
 
-- :ref:`SSR_OPERATION_COEFF_DATA_DISTRO` - details
-- :ref:`SSR_OPERATION_PARA_DECI_POLY`
-- :ref:`SSR_OPERATION_PARA_INTERP_POLY`
-- TP_PARA_INTERP_POLY.
+Super Sample Rate - Operation Modes
+///////////////////////////////////
+
+In the FIR, SSR operation can be achieved using one of the following modes:
+
+- :ref:`SSR_OPERATION_COEFF_DATA_DISTRO` - driven by template parameter: ``TP_SSR``. Mode will create an array of ``TP_SSR^2`` kernels and create ``TP_SSR`` amount of **input** and **output** ports.
+- :ref:`SSR_OPERATION_PARA_DECI_POLY` - driven by template parameter: ``TP_PARA_DECI_POLY``. Mode will create an array of ``TP_PARA_DECI_POLY`` kernels and create ``TP_PARA_DECI_POLY`` amount of **input** ports.
+- :ref:`SSR_OPERATION_PARA_INTERP_POLY` - driven by template parameter: ``TP_PARA_INTERP_POLY``. Mode will create an array of ``TP_PARA_INTERP_POLY`` kernels and create data ``TP_PARA_INTERP_POLY`` amount of **output** ports.
 
 .. _SSR_OPERATION_RESOURCE_UTILIZATION:
 
@@ -771,9 +744,6 @@ Therefore, the maximum throughput achievable for a given data type, e.g. cint16,
 
 * maximum theoretical sample rate at output = ``THROUGHPUT_OUT  = NUM_OUTPUT_PORTS x 1 GSa/s``.
 
-
-symmetric hybrid window gone with SSR> 1.
-
 .. _SSR_OPERATION_COEFF_DATA_DISTRO:
 
 Super Sample Rate - Coefficient & Data distribution
@@ -808,7 +778,7 @@ Super Sample Rate - Sample to Port Mapping
 | Output samples are output from the multiple output ports in the same fashion.
 
 | In addition, where ``TP_DUAL_IP`` is also enabled, there will be two sets of SSR input ports, :code:`in` and :code:`in2`, where data must organized in 128-bit interleaved pattern.
-| Allocate samples to ports 0 to N-1 of port :code:`in` in the round robin fashion above until each port has 128bits of data, then allocate the next samples in a round robin fashion to ports 0 through N-1 of port :code:`in2` until these too have 128bits of data, then return to allocating samples to ports 0 through N-1 of :code:`in`, and repeat.
+| Allocate samples to ports 0 to N-1 of port :code:`in` in the round robin fashion above until each port has 128-bits of data, then allocate the next samples in a round robin fashion to ports 0 through N-1 of port :code:`in2` until these too have 128-bits of data, then return to allocating samples to ports 0 through N-1 of :code:`in`, and repeat.
 
 For example, if we have a data stream like :code:`int32 x = 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, ...`, then an SSR of 3 with dual input ports would look like the below:
 
@@ -831,7 +801,7 @@ For example, if we have a data stream like :code:`int32 x = 0, 1, 2, 3, 4, 5, 6,
 
 .. _SSR_OPERATION_PARA_INTERP_POLY:
 
-Super Sample Rate - Intepolation polyphases
+Super Sample Rate - Interpolation polyphases
 ///////////////////////////////////////////
 
 In addition to the method described above,  :ref:`SSR_OPERATION`, FIR can decompose the interpolation process into multiple parallel polyphases using template parameter: ``TP_PARA_INTERP_POLY``.
@@ -840,7 +810,7 @@ When used a ``TP_PARA_INTERP_POLY`` number of output paths will be created.
 
 .. note:: Total number of output paths will be the result of multiplication of: ``NUM_OUTPUT_PORTS  = TP_PARA_INTERP_POLY x TP_SSR``.
 
-The polyphases are executed parallelly and output data produced by each polyphase directly becomes the filter's output.
+The polyphases are executed in parallel and output data produced by each polyphase directly becomes the filter's output.
 ``TP_PARA_INTERP_POLY`` does not affect the number of input data paths. It is only useful when the filter has an interpolation factor greater than 1.
 
 For example, when ``TP_SSR = 1``, and ``TP_PARA_INTERP_POLY = 3``, the input stream would look like this:
@@ -895,8 +865,7 @@ Super Sample Rate - Decimation polyphases
 In addition to the methods described above, FIR can decompose the decimation process into multiple polyphases using template parameter: ``TP_PARA_DECI_POLY``.
 
 | The effect of ``TP_PARA_DECI_POLY`` is to remove the bottleneck posed by the input bandwidth on the overall throughput of the FIR filter.
-| In decimators, every DECIMATE_FACTOR number of inputs produce one more output. So, when the input streams are utilised at their maximum bandwidth, the output stream can
-| only be utilised at 1/DECIMATE_FACTOR of their maximum bandwidth. With ``TP_PARA_DECI_POLY > 1``, we use `TP_PARA_DECI_POLY` number of input phases to provide extra input stream bandwidth.
+| In decimators, every DECIMATE_FACTOR number of inputs produce one more output. So, when the input streams are utilised at their maximum bandwidth, the output stream can only be utilised at 1/DECIMATE_FACTOR of their maximum bandwidth. With ``TP_PARA_DECI_POLY > 1``, we use `TP_PARA_DECI_POLY` number of input phases to provide extra input stream bandwidth.
 | The input data stream is split into `TP_PARA_DECI_POLY` input data phases. Outputs from these input phases are then added together to produce the overall filter's output.
 
 .. note:: Total number of input phases will be the result of multiplication of: ``NUM_INPUT_PORTS  = TP_PARA_DECI_POLY x TP_SSR``.

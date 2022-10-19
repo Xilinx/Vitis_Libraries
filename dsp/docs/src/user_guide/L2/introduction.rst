@@ -48,15 +48,17 @@ AMD |reg| documentation is organized around a set of standard design processes t
 
 -  **System and Solution Planning:** Identifying the components, performance, I/O, and data transfer requirements at a system level. Includes application mapping for the solution to Processing Subsystem (PS), PL, and AI Engine. Topics in this document that apply to this design process include:
 
-   -  :ref:`FILTERS`
+   -  :ref:`DDS_MIXER`
 
    -  :ref:`FFT_IFFT`
+
+   -  :ref:`FFT_WINDOW`
+
+   -  :ref:`FILTERS`
 
    -  :ref:`MATRIX_MULTIPLY`
 
    -  :ref:`WIDGETS`
-
-   -  :ref:`DDS_MIXER`
 
 -  **System Integration and Validation:** Integrating and validating the system functional performance, including timing, resource use, and power closure. Topics in this document that apply to this design process include:
 

@@ -39,6 +39,46 @@ To give a good comparison figure, the highest value of `cycleCountAvg` reported 
 
 Furthermore, PROGRAM_MEMORY metrics are harvested for each kernel the design consists of. For example a FIR configured to be implemented on two tiles (CASC_LEN=2) will have two sets of figures displayed in the table below (space deliminated).
 
+DDS/Mixer
+~~~~~~~~~
+
+Following table gives results for the DDS/Mixer with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_DDS_MIXER`.
+
+:download:`dds_mixer_benchmark.csv <../../csv_data_files/L2/dds_mixer_benchmark.csv>`
+
+.. csv-table:: DDS/Mixer benchmark
+   :file: ../../csv_data_files/L2/dds_mixer_benchmark.csv
+   :align: center
+   :header-rows: 1
+   :widths: auto
+
+FFT IFFT
+~~~~~~~~
+
+Following table gives results for the FFT/IFFT function with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_FFT`.
+
+:download:`fft_ifft_benchmark.csv <../../csv_data_files/L2/fft_ifft_benchmark.csv>`
+
+.. csv-table:: FFT IFFT benchmark
+   :file: ../../csv_data_files/L2/fft_ifft_benchmark.csv
+   :align: center
+   :header-rows: 1
+   :widths: auto
+
+
+FFT Window
+~~~~~~~~~~
+
+Following table gives results for the FFT/IFFT function with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_FFT`.
+
+:download:`fft_window_benchmark.csv <../../csv_data_files/L2/fft_window_benchmark.csv>`
+
+.. csv-table:: FFT Window benchmark
+   :file: ../../csv_data_files/L2/fft_window_benchmark.csv
+   :align: center
+   :header-rows: 1
+   :widths: auto
+
 Filters
 ~~~~~~~
 
@@ -51,22 +91,6 @@ Following table gives results for FIR filter with a wide variety of supported pa
    :align: center
    :header-rows: 1
    :widths: auto
-
-
-
-FFT
-~~~
-
-Following table gives results for the FFT/IFFT function with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_FFT`.
-
-:download:`fft_benchmark.csv <../../csv_data_files/L2/fft_benchmark.csv>`
-
-.. csv-table:: FFT benchmark
-   :file: ../../csv_data_files/L2/fft_benchmark.csv
-   :align: center
-   :header-rows: 1
-   :widths: auto
-
 
 
 Matrix Multiply
@@ -85,7 +109,6 @@ Following table gives results for the Matrix Multiply function with a wide varie
    :widths: auto
 
 
-
 Widgets
 ~~~~~~~
 
@@ -100,19 +123,6 @@ Following table gives results for the Widgets with a wide variety of supported p
    :widths: auto
 
 
-
-DDS/Mixer
-~~~~~~~~~
-
-Following table gives results for the DDS/Mixer with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_DDS_MIXER`.
-
-:download:`dds_mixer_benchmark.csv <../../csv_data_files/L2/dds_mixer_benchmark.csv>`
-
-.. csv-table:: DDS/Mixer benchmark
-   :file: ../../csv_data_files/L2/dds_mixer_benchmark.csv
-   :align: center
-   :header-rows: 1
-   :widths: auto
 
 
 

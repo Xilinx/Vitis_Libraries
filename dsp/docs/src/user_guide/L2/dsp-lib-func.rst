@@ -30,13 +30,13 @@ The DSPLib consists the following DSP elements:
 .. toctree::
    :maxdepth: 2
 
-   Filters <func-fir-filters.rst>
+   DDS / Mixer <func-dds.rst>
    FFT/iFFT <func-fft.rst>
    FFT Window <func-fft_window.rst>
+   Filters <func-fir-filters.rst>
    Matrix Multiply <func-matmul.rst>
    Widget API Cast <func-widget-apicast.rst>
    Widget Real to Complex <func-widget-real2comp.rst>
-   DDS / Mixer <func-dds.rst>
 
 .. |image1| image:: ./media/image1.png
 .. |image2| image:: ./media/image2.png
