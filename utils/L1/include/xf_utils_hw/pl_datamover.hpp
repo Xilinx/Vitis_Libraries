@@ -296,6 +296,26 @@ void cmdParser(hls::burst_maxi<ap_uint<64> > descriptor,
 }
 } // namespace details
 
+/**
+ * @brief datamover for reading multiple 4D cuboids.
+ * It will read the descriptors, access data as descriptors demand and feed data to AXI stream.
+ * Descriptors are stored in descriptor buffer, which starts with 64 bit integer which represent number of descriptors
+ * inside the buffer. It's followed by one or multiple descritpors, each of which consists 9 x 64bits interger, cfg[0],
+ * cfg[1] .. cfg[8].
+ * All descriptors will be processed one by one, from the first to the last.
+ * Each descriptor represent the access pattern of 4D cuboid, which could be treated like a 4-layer nested loop.
+ * Please take reference from design internal doc page for details of descriptor format.
+ *
+ * @tparam WDATA Bit width of data element
+ * @tparam LATENCY MAXI port latency, should be the same with pragma setup
+ * @tparam OUTSTANDING MAXI port read/write outstanding, should be the same with pragma setup
+ * @tparam BURSTLEN MAXI port read/write burst length, should be the same with pragma setup
+ *
+ * @param descriptor_buffer Buffer that stores one or multiple descriptors.
+ * @param data Buffer that contains data to be accessed
+ * @param w_data AXI Stream which data will be written to.
+ */
+
 template <int WDATA, int LATENCY, int OUTSTANDING, int BURSTLEN>
 void read4D(
     // input
@@ -314,6 +334,26 @@ void read4D(
     details::cmdParser<BURSTLEN>(descriptor_buffer, r_offset, r_burst, e_r);
     details::manualBurstRead<WDATA, LATENCY, OUTSTANDING, BURSTLEN>(data, r_offset, r_burst, e_r, w_data);
 }
+
+/**
+ * @brief datamover for write multiple 4D cuboids.
+ * It will read data from AXI stream, write access data to the address as descriptors demand.
+ * Descriptors are stored in descriptor buffer, which starts with 64 bit integer which represent number of descriptors
+ * inside the buffer. It's followed by one or multiple descritpors, each of which consists 9 x 64bits interger, cfg[0],
+ * cfg[1] .. cfg[8].
+ * All descriptors will be processed one by one, from the first to the last.
+ * Each descriptor represent the access pattern of 4D cuboid, which could be treated like a 4-layer nested loop.
+ * Please take reference from design internal doc page for details of descriptor format.
+ *
+ * @tparam WDATA Bit width of data element
+ * @tparam LATENCY MAXI port latency, should be the same with pragma setup
+ * @tparam OUTSTANDING MAXI port read/write outstanding, should be the same with pragma setup
+ * @tparam BURSTLEN MAXI port read/write burst length, should be the same with pragma setup
+ *
+ * @param descriptor_buffer Buffer that stores one or multiple descriptors.
+ * @param w_data AXI Stream which data will be written to.
+ * @param data Buffer that contains data to be accessed
+ */
 
 template <int WDATA, int LATENCY, int OUTSTANDING, int BURSTLEN>
 void write4D(

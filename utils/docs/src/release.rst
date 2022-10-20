@@ -22,6 +22,14 @@ Release Note
    :hidden:
    :maxdepth: 1
 
+2022.2
+------
+
+In this release, we add 4D datamover to support AIE application. 4D Datamover will take a queue of 9x64bits descriptors as input to describe 4D access pattern. It will read the 4D cuboid with the pattern desired and finish descriptors one by one.
+
+* read4D
+* write4D
+
 2021.2
 ------
 

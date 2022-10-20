@@ -36,5 +36,4 @@ Vitis Utility Library
 .. toctree::
    :caption: Data-Mover User Guide
 
-   Generating PL Data-Mover Kernels <datamover/kernel_gen_guide.rst>
-
+   PL Data-Mover Kernels <datamover/kernel_gen_guide.rst>

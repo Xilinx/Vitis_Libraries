@@ -16,6 +16,7 @@
 
 MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 MK_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
+SHELL := /bin/bash
 override XFLIB_DIR := $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L2/scripts/*}')
 
 DEST_DIR ?= $(CURDIR)

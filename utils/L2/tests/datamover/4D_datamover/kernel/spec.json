@@ -1,0 +1,64 @@
+{
+    "cuboid_read": {
+        "impl": "4DCuboidRead",
+        "map": [
+            {
+                "in_port": {
+                    "buffer": "din_0",
+                    "descriptors": "desp_0",
+                    "latency": 32,
+                    "outstanding": 32,
+                    "burst_len": 32
+                },
+                "out_port": {
+                    "stream": "dout_0",
+                    "width": 64
+                }
+            },
+            {
+                "in_port": {
+                    "buffer": "din_1",
+                    "descriptors": "desp_1",
+                    "latency": 32,
+                    "outstanding": 32,
+                    "burst_len": 32
+                },
+                "out_port": {
+                    "stream": "dout_1",
+                    "width": 64
+                }
+            }
+        ]
+    },
+    "cuboid_write": {
+        "impl": "4DCuboidWrite",
+        "map": [
+            {
+                "in_port": {
+                    "stream": "din_0",
+                    "descriptors": "desp_0",
+                    "width": 64
+                },
+                "out_port": {
+                    "buffer": "dout_0",
+                    "latency": 32,
+                    "outstanding": 32,
+                    "burst_len": 32
+                }
+            },
+            {
+                "in_port": {
+                    "stream": "din_1",
+                    "descriptors": "desp_1",
+                    "width": 64
+                },
+                "out_port": {
+                    "buffer": "dout_1",
+                    "latency": 32,
+                    "outstanding": 32,
+                    "burst_len": 32
+                }
+            }
+        ]
+    }
+}

@@ -35,4 +35,3 @@ Module Design Internals
    ./synced/stream_sync.rst
 
    ./windowed/stream_reorder.rst
-

@@ -35,7 +35,7 @@ help::
 	$(ECHO) "        Run the sdk.sh script from the common-image directory to install sysroot using the command : ./sdk.sh -y -d ./ -p "
 	$(ECHO) "        Unzip the rootfs file : gunzip ./rootfs.ext4.gz"
 	$(ECHO) "        export SYSROOT=< path-to-platform-sysroot >"
-	$(ECHO) "      b. User could also define SYSROOT, K_IMAGE and ROOTFS by themselves: "
+	$(ECHO) "      b.User could also define SYSROOT, K_IMAGE and ROOTFS by themselves: "
 	$(ECHO) "        export SYSROOT=< path-to-platform-sysroot >"
 	$(ECHO) "        export K_IMAGE=< path-to-Image-files >"
 	$(ECHO) "        export ROOTFS=< path-to-rootfs >"
@@ -43,7 +43,7 @@ help::
 	$(ECHO) "  make clean "
 	$(ECHO) "      Command to remove the generated non-hardware files."
 	$(ECHO) ""
-	$(ECHO) "  make cleanall"
+	$(ECHO) "  make cleanall TARGET=<hw/hw_emu/>"
 	$(ECHO) "      Command to remove all the generated files."
 	$(ECHO) ""
 
@@ -112,11 +112,11 @@ endif
 #Inclue Required Host Source Files
 ifeq ($(ps_on_x86), on)
 HOST_SRCS += $(CUR_DIR)/host/main.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(CUR_DIR)/host -I $(CUR_DIR)/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L1/include
+CXXFLAGS +=  -I $(CUR_DIR)/host -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L1/include
 CXXFLAGS += -std=c++14
 else
 HOST_SRCS += $(CUR_DIR)/host/main.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(CUR_DIR)/host -I $(CUR_DIR)/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L1/include
+CXXFLAGS +=  -I $(CUR_DIR)/host -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L1/include
 CXXFLAGS += -std=c++14
 endif
 
@@ -135,9 +135,16 @@ PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args
 endif
 
 ########################## Kernel compiler global settings ##########################
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/hw -I $(CUR_DIR)/kernel -I $(XFLIB_DIR)/L1/include
+VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(CUR_DIR)/kernel -I $(XFLIB_DIR)/L1/include
 
 ######################### binary container global settings ##########################
+VPP_FLAGS_cuboid_read += --hls.clock 200000000:cuboid_read
+VPP_FLAGS_cuboid_write += --hls.clock 200000000:cuboid_write
+ifneq ($(HOST_ARCH_temp), x86)
+VPP_LDFLAGS_datamover += --clock.defaultFreqHz 200000000
+else
+VPP_LDFLAGS_datamover += --kernel_frequency 200
+endif
 VPP_LDFLAGS_datamover_temp := --config $(CUR_DIR)/conn.cfg
 VPP_LDFLAGS_datamover += $(VPP_LDFLAGS_datamover_temp)
 
@@ -149,16 +156,16 @@ BINARY_CONTAINERS_PKG += $(BUILD_DIR)/datamover.xclbin
 endif
 
 # ################ Setting Rules for Binary Containers (Building Kernels) ################
-$(TEMP_DIR)/rom2s_x2.xo: $(CUR_DIR)/kernel/rom2s_x2.cpp 
-	$(ECHO) "Compiling Kernel: rom2s_x2"
+$(TEMP_DIR)/cuboid_read.xo: $(CUR_DIR)/kernel/cuboid_read.cpp 
+	$(ECHO) "Compiling Kernel: cuboid_read"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_rom2s_x2) $(VPP_FLAGS) -k rom2s_x2 -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
-BINARY_CONTAINER_datamover_OBJS += $(TEMP_DIR)/rom2s_x2.xo
-$(TEMP_DIR)/s2m_x2.xo: $(CUR_DIR)/kernel/s2m_x2.cpp 
-	$(ECHO) "Compiling Kernel: s2m_x2"
+	$(VPP) -c $(VPP_FLAGS_cuboid_read) $(VPP_FLAGS) -k cuboid_read -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+BINARY_CONTAINER_datamover_OBJS += $(TEMP_DIR)/cuboid_read.xo
+$(TEMP_DIR)/cuboid_write.xo: $(CUR_DIR)/kernel/cuboid_write.cpp 
+	$(ECHO) "Compiling Kernel: cuboid_write"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_s2m_x2) $(VPP_FLAGS) -k s2m_x2 -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
-BINARY_CONTAINER_datamover_OBJS += $(TEMP_DIR)/s2m_x2.xo
+	$(VPP) -c $(VPP_FLAGS_cuboid_write) $(VPP_FLAGS) -k cuboid_write -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+BINARY_CONTAINER_datamover_OBJS += $(TEMP_DIR)/cuboid_write.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_datamover_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	mkdir -p $(BUILD_DIR)
@@ -195,8 +202,8 @@ endif
 	@echo 'fi' >> $(RUN_SCRIPT)
 	@echo 'echo "INFO: Embedded host run completed."' >> $(RUN_SCRIPT)
 	@echo 'exit $$return_code' >> $(RUN_SCRIPT)
-DATA_FILE := 
-DATA_DIR := 
+DATA_FILE := $(custom_data_file)
+DATA_DIR := $(custom_data_dir)
 SD_FILES += $(RUN_SCRIPT)
 SD_FILES += $(EXE_FILE)
 SD_FILES += $(EMCONFIG)
@@ -242,7 +249,9 @@ mkflag:
 	mkdir -p $(BUILD_DIR)
 	rm -rf $(BUILD_DIR)/makefile_args.txt
 	@for var in $(MAKEFLAGS); do echo $$var >> $(BUILD_DIR)/makefile_args.txt; done
+
 all: check_device check_vpp check_platform mkflag $(RUN_DEPS)
+
 run: all
 #hw_emu
 ifneq (,$(filter hw_emu, $(TARGET)))
@@ -307,19 +316,19 @@ endif
 
 .PHONY: xclbin
 ifeq ($(HOST_ARCH), x86)
-xclbin: check_vpp check_xrt pre_build $(BINARY_CONTAINERS)
+xclbin: check_vpp check_xrt  pre_build $(BINARY_CONTAINERS)
 else
-xclbin: check_vpp check_sysroot pre_build $(BINARY_CONTAINERS)
+xclbin: check_vpp check_sysroot  pre_build $(BINARY_CONTAINERS)
 endif
 
 ############################## Cleaning Rules ##############################
 cleanh:
 	-$(RMDIR) $(EXE_FILE) vitis_* TempConfig system_estimate.xtxt *.rpt .run/
-	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb sample_link.ini sample_compile.ini obj*  bin* *.csv *.jpg *.jpeg *.png
+	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb sample_link.ini sample_compile.ini obj*  bin* *.csv *.jpg *.jpeg *.png *.db
 
 cleank:
 	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl*start_simulation. sh *.xclbin
-	-$(RMDIR) _x_temp.*
+	-$(RMDIR) _x_temp.* _x*
 
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR)  emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str

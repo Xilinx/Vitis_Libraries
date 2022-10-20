@@ -20,7 +20,9 @@ impl2file = {
 	'StoreStreamToMasterWithCounter': 'store_stream_to_master_with_counter.cpp.j2',
 	'ValidateStreamWithMaster': 'validate_stream_with_master.cpp.j2',
 	'ValidateStreamWithRam': 'validate_stream_with_ram.cpp.j2',
-	'ValidateStreamWithRom': 'validate_stream_with_rom.cpp.j2'
+	'ValidateStreamWithRom': 'validate_stream_with_rom.cpp.j2',
+    '4DCuboidRead': 'load_4D_cuboid_from_master_to_stream.cpp.j2',
+    '4DCuboidWrite': 'store_4D_cuboid_from_stream_to_master.cpp.j2'
 }
 
 def canonical_name(s):
@@ -37,8 +39,8 @@ def get_name(e):
     if 'buffer' in e:
         return canonical_name(e['buffer'])
     elif 'stream' in e:
-        if e['width'] != 16 and e['width'] != 32 and e['width'] != 64 and e['width'] != 128:
-            sys.exit('[ERROR] Width of AXI stream have to be 16, 32, 64, or 128 bits');
+        if e['width'] != 16 and e['width'] != 32 and e['width'] != 64 and e['width'] != 128 and e['width'] != 256 and e['width'] != 512:
+            sys.exit('[ERROR] Width of AXI stream have to be 16, 32, 64, 128, 256 or 512 bits');
         return canonical_name(e['stream'])
     else:
         sys.exit('[ERROR] File name not defined');
@@ -93,7 +95,8 @@ def main():
                 print('[INFO] created ' + m['in_file']['name'] + '.inc')
             if m.get('in_ref'):
                 m['in_ref']['name'] = get_name(m['in_ref'])
-            m['out']['name'] = get_name(m['out'])
+            if m.get('out'):
+                m['out']['name'] = get_name(m['out'])
 
     #print(d)
 

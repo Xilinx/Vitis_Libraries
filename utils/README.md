@@ -4,7 +4,7 @@ Vitis Utility Library is an open-sourced Vitis library of common patterns of str
 It aims to assist developers to efficiently access memory in DDR, HBM or URAM, and perform data distribution, collection,
 reordering, insertion, and discarding along stream-based transfer.
 
-Check the [comprehensive HTML document](https://xilinx.github.io/Vitis_Libraries/utils/2021.2/index.html) for more details.
+Check the [comprehensive HTML document](https://docs.xilinx.com/r/en-US/Vitis_Libraries/utils/index.html) for more details.
 
 ## Requirements
 
@@ -18,8 +18,27 @@ With CentOS/RHEL 7.4 and 7.5, C++11/C++14 should be enabled via
 
 ### Development Tools
 
-This library is designed to work with Vitis 2020.2,
+This library is designed to work with Vitis 2022.2,
 and a matching version of XRT should be installed.
+
+## Source Files and Application Development
+Vitis libraries are organized into L1, L2, and L3 folders, each relating to a different stage of application development.
+
+**L1**:
+      Makefiles and sources in L1 facilitate HLS based flow for quick checks. Tasks at this level include:
+
+* Check the functionality of an individual kernel (C-simulation)
+* Estimate resource usage, latency, etc. (Synthesis)
+* Run cycle accurate simulations (Co-simulation)
+* Package as IP and get final resource utilization/timing details (Export RTL)
+       
+	**Note**:  Once RTL (or XO file after packaging IP) is generated, the Vivado flow is invoked for XCLBIN file generation if required.
+
+**L2**: Makefiles and sources in L2 facilitate building XCLBIN file from various sources (HDL, HLS or XO files) of kernels with host code written in OpenCL/XRT framework targeting a device. This flow supports:
+
+* Software emulation to check the functionality
+* Hardware emulation to check RTL level simulation
+* Build and test on hardware
 
 ## Design Flows
 
@@ -33,7 +52,7 @@ Recommended design flow is shown as follows:
 Setup the build environment using the Vitis script, and set the installation folder of platform files via `PLATFORM_REPO_PATHS` variable.
 
 ```console
-source /opt/xilinx/Vitis/2020.2/settings64.sh
+source /opt/xilinx/Vitis/2022.2/settings64.sh
 export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 ```
 
