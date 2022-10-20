@@ -283,8 +283,8 @@ Note that some parameters are not present on certain variants of FIR where the p
 
 For a list of template parameters for each FIR variant, see :ref:`API_REFERENCE`.
 
-**TP_CASC_LEN** describes the number of AIE processors to split the operation over, which allows resource to be traded for higher performance. TP_CASC_LEN must be in the range 1 (default) to 9.
-FIR graph instance consists of TP_CASC_LEN kernels and the FIR length (TP_FIR_LEN) is divided by the requested cascade length and each kernel in the graph gets assigned a fraction of the workload.
+**TP_CASC_LEN** describes the number of AIE processors to split the operation over, which allows resources to be traded for higher performance. TP_CASC_LEN must be in the range 1 (default) to 9.
+FIR graph instance creates TP_CASC_LEN kernels. Computation workload of the FIR (defined by its length parameter TP_FIR_LEN) is divided and each kernel in the graph is then assigned a fraction of the workload, i.e. each kernel performs TP_FIR_LEN / TP_CASC_LEN.
 Kernels are connected with cascade ports, which pass partial accumulation products downstream until last kernel in chain produces the output.
 
 **TP_DUAL_IP** is an implementation trade-off between performance and resource utilization.
@@ -295,7 +295,7 @@ In addition, FIRs with streaming interface may utilize the second input port to 
 
 * When set to 1, two input ports will be created.
 
-  .. note:: when used, port ``port<input> in2;`` will be added to the FIR.
+  .. note:: When used, port ``port<input> in2;`` will be added to the FIR.
 
 **TP_USE_COEFF_RELOAD**  allows the user to select if runtime coefficient reloading should be used.
 When defining the parameter:
@@ -304,7 +304,7 @@ When defining the parameter:
 
 * 1 = reloadable coefficients, passed as argument to runtime function.
 
-  .. note:: when used, port ``port<input> coeff;`` will be added to the FIR.
+  .. note:: When used, port ``port<input> coeff;`` will be added to the FIR.
 
 
 **TP_NUM_OUTPUTS** sets the number of output ports to send the output data to. Supported range: 1 to 2.
@@ -314,7 +314,7 @@ Additional output ``out2`` is an exact copy of the data of the output port ``out
 
 Stream API uses the additional output port to increase the FIR's throughput. Please refer to :ref:`FIR_STREAM_OUTPUT` for more details.
 
-.. note:: when used, port ``port<output> out2;`` will be added to the FIR.
+.. note:: When used, port ``port<output> out2;`` will be added to the FIR.
 
 .. _SSR_PORTS_EXPLANATION:
 
@@ -363,7 +363,7 @@ For all non-reloadable filter configurations, the coefficient values are passed 
 Static Coefficients - array size
 ////////////////////////////////
 
-Asymmetrical filters expect the port to contain the full array of coefficients, i.e. coefficient array size is of the order of the filter.
+Asymmetrical filters expect the port to contain the full array of coefficients, i.e. coefficient array size is equal to the ``TP_FIR_LEN``.
 
 | In the case of symmetrical filters, only the first half (plus any odd centre tap) need be passed, as the remaining may be derived by symmetry.
 | The length of the array expected will therefore be ``(TP_FIR_LEN+1)/2``, e.g. for a filter of length 7, where coeffs are ``int16``: ``{1, 2, 3, 5, 3, 2, 1}``, 4 non-zero tap values, including the centre tap, are expected, i.e. constructor expects an argument: ``std::array<int16, 4> tapsIn =  {1, 2, 3, 5}``.
@@ -387,7 +387,7 @@ Reloadable Coefficients - array size for non-SSR cases
 Array size of an argument passed to the graphs `update()` method depends on the FIR variant type, as well as operational mode the FIR is configured to run.
 
 | In case the FIR is configured in a non-SSR mode, i.e. ``TP_SSR`` is set to 1, the reloadable coefficient array size is similar to static coefficient variant.
-| Asymmetrical filters expect the port to contain the full array of coefficients, i.e. coefficient array size is of the order of the filter.
+| Asymmetrical filters expect the port to contain the full array of coefficients, i.e. coefficient array size is equal to the ``TP_FIR_LEN``r.
 
 | In the case of symmetrical (non-halfband) filters, only the first half (plus any odd centre tap) need be passed, as the remaining may be derived by symmetry.
 | The length of the array expected will therefore be ``(TP_FIR_LEN+1)/2``,
@@ -416,7 +416,7 @@ When the FIR is configured in an SSR mode that creates multiple parallel computa
 
 .. note:: For example, an interpolation FIR is configured with: ``TP_SSR = 2`` and ``TP_PARA_INTERP_POLY = 3``. Such configuration will result in ``2 * 3 = 6`` distinct computation paths, which all require an RTP port duplicate.
 
-As mentioned above, asymmetrical filters expect the port to contain the full array of coefficients, i.e. coefficient array size is of the order of the filter.
+As mentioned above, asymmetrical filters expect the port to contain the full array of coefficients, i.e. coefficient array size is equal to the ``TP_FIR_LEN``.
 
 | In the case of symmetrical filters, the size of each port will be dependent on the underlying kernel structure, which for SSR cases is based on an Asymmetric FIR variant.
 | As a results, deriving symmetric coeffs from the argument passed to graph's `update()` method is not available.
