@@ -67,13 +67,13 @@ Vitis Sparse Library
 
 * **Download code**
 
-These sparse benchmarks can be downloaded from `vitis libraries <https://github.com/Xilinx/Vitis_Libraries.git>`_ ``master`` branch.
+These sparse benchmarks can be downloaded from `vitis libraries <https://github.com/Xilinx/Vitis_Libraries.git>`_ ``main`` branch.
 
 .. code-block:: bash
 
    git clone https://github.com/Xilinx/Vitis_Libraries.git 
    cd Vitis_Libraries
-   git checkout master
+   git checkout main
    cd sparse
 
 * **Setup environment**
@@ -82,8 +82,8 @@ Specifying the corresponding Vitis, XRT, and path to the platform repository by 
 
 .. code-block:: bash
 
-   source <intstall_path>/installs/lin64/Vitis/2021.1_released/settings64.sh
+   source <intstall_path>/Vitis/2022.2/settings64.sh
    source /opt/xilinx/xrt/setup.sh
    export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 
-Python3 environment: follow the steps as per https://xilinx.github.io/Vitis_Libraries/blas/2020.2/user_guide/L1/pyenvguide.html to set up Python3 environment.
+Python3 environment: follow the steps as per https://docs.xilinx.com/r/en-US/Vitis_Libraries/blas/user_guide/L1/pyenvguide.html to set up Python3 environment.

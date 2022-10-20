@@ -61,17 +61,17 @@ Each time a ``selMultX`` CU is triggered, a channel partition is processed. Each
 2. Build and test the design
 ----------------------------
 
-To build and test the design on Linux platform, please make sure your **XILINX_VITIS** and **XILINX_XRT** environment variables are set up correctly and point to the corresponding **Vitis 2021.1** locations. Once your environment is set up properly, please navigate to the **L2/tests/fp64/spmv** directory and follow the steps below to run emulation and launch accelerator on Alveo U280.
+To build and test the design on Linux platform, please make sure your **XILINX_VITIS** and **XILINX_XRT** environment variables are set up correctly and point to the corresponding **Vitis 2022.2** locations. Once your environment is set up properly, please navigate to the **L2/tests/fp64/spmv** directory and follow the steps below to run emulation and launch accelerator on Alveo U280.
 
 
-* To run hardware emulation, please enter following commands. Please replace the **$XILINX_VITIS** with your Vitis 2021.1 installation location.
+* To run hardware emulation, please enter following commands. Please replace the **$XILINX_VITIS** with your Vitis 2022.2 installation location.
 
 .. code-block:: bash
 
    make cleanall
    make run PLATFORM_REPO_PATHS=$XILINX_VITIS/platforms  DEVICE=xilinx_u280_xdma_201920_3  TARGET=hw_emu
 
-* To build and launch the hardware accelerator on the Alveo U280, please enter following commands. Please replace the **$XILINX_VITIS** with your Vitis 2021.1 installation location.
+* To build and launch the hardware accelerator on the Alveo U280, please enter following commands. Please replace the **$XILINX_VITIS** with your Vitis 2022.2 installation location.
 
 .. code-block:: bash
 

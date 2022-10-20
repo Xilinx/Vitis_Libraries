@@ -43,9 +43,9 @@ copyright = '2022, Xilinx Inc.'
 author = 'Xilinx Inc.'
 
 # The short X.Y version
-version = '2022.1'
+version = '2022.2'
 # The full version, including alpha/beta/rc tags
-release = 'v2022.1'
+release = 'v2022.2'
 html_last_updated_fmt = '%B %d, %Y'
 
 #-- Define custom Xilinx variables---------------------------------------------

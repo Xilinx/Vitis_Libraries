@@ -33,7 +33,7 @@ As shown in the figure below, the CSCMV accelerator implemented on the Alveo U28
    :alt: cscmv Diagram
    :align: center
 
-Although the above hardware architecture offers high computation power, it alone doesn't provide a guarantee for the high system level performance. To achieve that, the sparse matrix data has to be partitioned evenly across the HBM channels. The following paragraghs present the details of the matrix partitioning strategy implemented in the software, the device memory layouts that facilitate the parition metadata decoding, the functionality of the CUs and the steps for building and simulating the design with Vitis 2020.2.
+Although the above hardware architecture offers high computation power, it alone doesn't provide a guarantee for the high system level performance. To achieve that, the sparse matrix data has to be partitioned evenly across the HBM channels. The following paragraghs present the details of the matrix partitioning strategy implemented in the software, the device memory layouts that facilitate the parition metadata decoding, the functionality of the CUs and the steps for building and simulating the design with Vitis 2022.2.
 
 1. Matrix partitioning and device memory layout
 ----------------------
@@ -77,23 +77,23 @@ The matrix block partition information is stored in the DDR and HBM channels. Th
 3. Build and test the design
 ----------------------------
 
-To build and test the design on Linux platform, please make sure your **XILINX_VITIS** and **XILINX_XRT** environment variables are set up correctly and point to the corresponding **Vitis 2020.2** locations. Once your environment is set up properly, please navigate to the **L2/tests/csmv** directory and follow the steps below to run emulation and launch accelerator on Alveo U280.
+To build and test the design on Linux platform, please make sure your **XILINX_VITIS** and **XILINX_XRT** environment variables are set up correctly and point to the corresponding **Vitis 2022.2** locations. Once your environment is set up properly, please navigate to the **L2/tests/csmv** directory and follow the steps below to run emulation and launch accelerator on Alveo U280.
 
-* To run software emulation, please enter following commands. Please replace the **$XILINX_VITIS** with your Vitis 2020.2 installation location. The software emulation treats each CU as a dataflow module, and uses a wrapper called ``cscmvSeqKernel`` as the top module to run the software emulation process. This is purely used for C++ level functionality test.
+* To run software emulation, please enter following commands. Please replace the **$XILINX_VITIS** with your Vitis 2022.2 installation location. The software emulation treats each CU as a dataflow module, and uses a wrapper called ``cscmvSeqKernel`` as the top module to run the software emulation process. This is purely used for C++ level functionality test.
 
 .. code-block:: bash
 
    make cleanall
    make run PLATFORM_REPO_PATHS=$XILINX_VITIS/platforms  DEVICE=$XILINX_VITIS/platform/xilinx_u280_xdma_201920_1/xilinx_u280_xdma_201920_1.xpfm  TARGET=sw_emu
 
-* To run hardware emulation, please enter following commands. Please replace the **$XILINX_VITIS** with your Vitis 2020.2 installation location.
+* To run hardware emulation, please enter following commands. Please replace the **$XILINX_VITIS** with your Vitis 2022.2 installation location.
 
 .. code-block:: bash
 
    make cleanall
    make run PLATFORM_REPO_PATHS=$XILINX_VITIS/platforms  DEVICE=$XILINX_VITIS/platform/xilinx_u280_xdma_201920_1/xilinx_u280_xdma_201920_1.xpfm  TARGET=hw_emu
 
-* To build and launch the hardware accelerator on the Alveo U280, please enter following commands. Please replace the **$XILINX_VITIS** with your Vitis 2020.2 installation location.
+* To build and launch the hardware accelerator on the Alveo U280, please enter following commands. Please replace the **$XILINX_VITIS** with your Vitis 2022.2 installation location.
 
 .. code-block:: bash
 

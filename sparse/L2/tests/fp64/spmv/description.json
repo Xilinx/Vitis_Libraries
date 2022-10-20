@@ -37,7 +37,12 @@
             "includepaths": [
                 "LIB_DIR/..",
                 "LIB_DIR/../blas/L2/include/xcl2",
-                "LIB_DIR/L2/include/sw/fp64"
+                "LIB_DIR/L2/include/sw/fp64",
+                "LIB_DIR/L1/include/hw",
+                "LIB_DIR/L1/include/sw",
+                "LIB_DIR/L2/include/hw",
+                "LIB_DIR/L2/include/sw",
+                "PROJECT/src"
             ], 
             "symbols": [
                 "SPARSE_dataType=double", 
@@ -67,6 +72,11 @@
                 "LIB_DIR/L1/include/hw/", 
                 "LIB_DIR/L2/include/hw/fp64", 
                 "LIB_DIR/..",
+                "LIB_DIR/../blas/L1/include/hw",
+                "LIB_DIR/L1/include/hw",
+                "LIB_DIR/L1/include/sw",
+                "LIB_DIR/L2/include/hw",
+                "LIB_DIR/L2/include/sw",
                 "LIB_DIR/../blas/L1/include/hw"
             ]
         }

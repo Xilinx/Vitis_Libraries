@@ -12,7 +12,7 @@ Currently, this library offers two levels of acceleration:
 
 * At module level is for the C++ implementation of basic components used in SpMV functions. These implementations are intended to be used by HLS (High Level Synthesis) users to build FPGA logic for their applications. 
 * The kernel level is for pre-defined kernels that are the C++ implementation of SpMV functions. These implementations are intended to demonstrate how FPGA kernels are defined and how L1 primitive functions can be used by any Vitis users to build their kernels for their applications. 
-Check the [comprehensive HTML document](https://xilinx.github.io/Vitis_Libraries/sparse/2021.1/) for more details.
+Check the [comprehensive HTML document](https://docs.xilinx.com/r/en-US/Vitis_Libraries/sparse/index.html) for more details.
 
 ## Requirements
 
@@ -32,15 +32,36 @@ With CentOS/RHEL 7.4 and 7.5, C++11/C++14 should be enabled via
 
 ### Development Tools
 
-This library is designed to work with Vitis 2021.1,
+This library is designed to work with Vitis 2022.2,
 and a matching version of XRT should be installed.
+
+## Source Files and Application Development
+Vitis libraries are organized into L1, L2, and L3 folders, each relating to a different stage of application development.
+
+**L1**:
+      Makefiles and sources in L1 facilitate HLS based flow for quick checks. Tasks at this level include:
+
+* Check the functionality of an individual kernel (C-simulation)
+* Estimate resource usage, latency, etc. (Synthesis)
+* Run cycle accurate simulations (Co-simulation)
+* Package as IP and get final resource utilization/timing details (Export RTL)
+       
+	**Note**:  Once RTL (or XO file after packaging IP) is generated, the Vivado flow is invoked for XCLBIN file generation if required.
+
+**L2**: Makefiles and sources in L2 facilitate building XCLBIN file from various sources (HDL, HLS or XO files) of kernels with host code written in OpenCL/XRT framework targeting a device. This flow supports:
+
+* Software emulation to check the functionality
+* Hardware emulation to check RTL level simulation
+* Build and test on hardware
+
+**L3**: Makefiles and sources in L3 demonstrate applications developed involving multiple kernels in pipeline. These Makefiles can be used for executing tasks, as with the L2 Makefiles.
 
 ## Benchmark Result
 
-In `L2/benchmarks`, more details about the benchmarks, please kindly find them in [benchmark results](https://xilinx.github.io/Vitis_Libraries/sparse/2021.1/benchmark/spmv_double.html).
+In `L2/benchmarks`, more details about the benchmarks, please kindly find them in [benchmark results](https://docs.xilinx.com/r/en-US/Vitis_Libraries/sparse/benchmark/spmv_double.html).
 
 ## Documentations
-For more details of the sparse library, please refer to [sparse Library Documentation](https://xilinx.github.io/Vitis_Libraries/sparse/2021.1/index.html).
+For more details of the sparse library, please refer to [sparse Library Documentation](https://docs.xilinx.com/r/en-US/Vitis_Libraries/sparse/index.html).
 
 ## License
 

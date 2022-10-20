@@ -7,10 +7,10 @@ We provide a benchmark for the SpMV function of the Vitis SPARSE library. The be
 ### Vitis SPARSE Library
 - Alveo U280 installed and configured as per https://www.xilinx.com/products/boards-and-kits/alveo/u280.html#gettingStarted (when running hardware)
 - Xilinx runtime (XRT) installed
-- Xilinx Vitis 2021.1 installed and configured
+- Xilinx Vitis 2022.2 installed and configured
 
 ### Python3
-Follow the steps as per https://xilinx.github.io/Vitis_Libraries/blas/2020.2/user_guide/L1/pyenvguide.html to set up Python3 environment.
+Follow the steps as per https://docs.xilinx.com/r/en-US/Vitis_Libraries/blas/user_guide/L1/pyenvguide.html to set up Python3 environment.
 
 ### Datasets
 - Datasets from https://sparse.tamu.edu/ will be downloaded during benchmarking process
@@ -47,12 +47,12 @@ Table 1 Datasets for benchmarking
 
 ### Download code
 
-The sparse benchmark can be downloaded from [vitis libraries](https://github.com/Xilinx/Vitis_Libraries.git) ``master`` branch.
+The sparse benchmark can be downloaded from [vitis libraries](https://github.com/Xilinx/Vitis_Libraries.git) ``main`` branch.
 
 ```
    git clone https://github.com/Xilinx/Vitis_Libraries.git
    cd Vitis_Libraries
-   git checkout master
+   git checkout main
    cd sparse/L2/benchmarks/spmv_double
 ```
 
@@ -61,7 +61,7 @@ The sparse benchmark can be downloaded from [vitis libraries](https://github.com
 Setup hardware build and run envrionment using the Vitis and XRT scripts:
 
 ```
-    source <install path>/Vitis/2021.1/settings64.sh
+    source <install path>/Vitis/2022.1/settings64.sh
     source /opt/xilinx/xrt/setup.sh
 ```
 
