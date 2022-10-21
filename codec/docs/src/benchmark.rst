@@ -95,18 +95,16 @@ Here are benchmarks of the Vitis Codec Library using the Vitis environment and c
 
 .. _l2_vitis_codec:
 
-Vitis Codec Library
-~~~~~~~~~~~~~~~~~~~
 
 * **Download code**
 
-These graph benchmarks can be downloaded from `vitis libraries <https://github.com/Xilinx/Vitis_Libraries.git>`_ ``master`` branch.
+These graph benchmarks can be downloaded from `vitis libraries <https://github.com/Xilinx/Vitis_Libraries.git>`_ ``main`` branch.
 
 .. code-block:: bash
 
    git clone https://github.com/Xilinx/Vitis_Libraries.git 
    cd Vitis_Libraries
-   git checkout master
+   git checkout main
    cd codec 
 
 * **Setup environment**

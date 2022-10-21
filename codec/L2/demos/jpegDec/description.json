@@ -5,11 +5,13 @@
     "flow": "vitis",
     "platform_allowlist": [
         "u200",
-        "u50",
         "u280"
     ],
     "platform_blocklist": [
         "zc"
+    ],
+    "data":[
+        "PROJECT/images"
     ],
     "platform_properties": {
         "u200": {
@@ -17,22 +19,6 @@
 	        "compiler": {
 		    "clflags": [
 		        "--config PROJECT/conn_u200.cfg"
-		    ]
-		}
-	    }
-	},
-        "u50": {
-	    "host": {
-	        "compiler": {
-		    "symbols": [
-		        "USE_HBM"
-		    ]
-		}
-	    },
-	    "v++": {
-	        "compiler": {
-		    "clflags": [
-		        "--config PROJECT/conn_u50_u280.cfg"
 		    ]
 		}
 	    }

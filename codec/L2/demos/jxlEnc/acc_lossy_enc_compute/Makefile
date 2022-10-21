@@ -11,28 +11,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.7
+# vitis makefile-generator v2.0.8
 
 ############################## Help Section ##############################
 .PHONY: help
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<x86>"
+	$(ECHO) "  make all TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<x86>"
+	$(ECHO) "  make run TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to run application in emulation."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make xclbin TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<x86>"
+	$(ECHO) "  make xclbin TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to build xclbin application."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
 	$(ECHO) "  make host TARGET=<hw/hw_emu/sw_emu/>"
 	$(ECHO) "      Command to build host application."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
 	$(ECHO) "  NOTE: For embedded devices, e.g. zcu102/zcu104/vck190, HOST_ARCH is either aarch32 or aarch64."
 	$(ECHO) "      a.IF Download the platform, and common-image from Xilinx Download Center(Suggested):"
@@ -97,13 +93,8 @@ LDFLAGS += -pthread -L$(XILINX_XRT)/lib -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -Wl
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
 VPP_LDFLAGS += --optimize 2 -R 2 
 else ifeq ($(HOST_ARCH), aarch64)
-ifeq ($(ps_on_x86), true) 
-CXXFLAGS += -fmessage-length=0 -I$(CUR_DIR)/src/ -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
-LDFLAGS += -pthread -L$(XILINX_XRT)/lib -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -Wl,--as-needed -lOpenCL -lxrt_coreutil -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel 
-else
 CXXFLAGS += -I$(CUR_DIR)/src/ -fmessage-length=0 --sysroot=$(SYSROOT)  -I$(SYSROOT)/usr/include/xrt -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
 LDFLAGS += -pthread -L$(SYSROOT)/usr/lib -Wl,--as-needed -lxilinxopencl -lxrt_coreutil 
-endif
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
 VPP_LDFLAGS += --optimize 2 -R 2 
 endif
@@ -119,7 +110,7 @@ CXXFLAGS += -D HW_EMU_TEST
 endif
 
 #Inclue Required Host Source Files
-ifeq ($(ps_on_x86), true)
+ifeq ($(ps_on_x86), on)
 HOST_SRCS += $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/tools/cjxl.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/tools/cjxl_main.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/tools/cmdline.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/tools/codec_config.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/tools/speed_stats.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/tools/cpu/cpu.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/tools/cpu/os_specific.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/tools/box/box.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/extras/codec.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/extras/time.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/extras/codec_png.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/extras/codec_pgx.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/extras/codec_pnm.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/extras/codec_jpg.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/extras/codec_psd.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/threads/thread_parallel_runner_internal.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/toc.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/decode_to_jpeg.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/enc_huffman.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/quantizer.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/ans_common.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/coeff_order.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/dec_context_map.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/progressive_split.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/enc_detect_dots.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/opsin_params.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/toc.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/entropy_coder.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/blending.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/enc_comparator.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/huffman_table.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/huffman_tree.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/linalg.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/enc_file.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/aux_out.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/headers.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/alpha.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/image_bundle.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/image_metadata.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/frame_header.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/color_encoding_internal.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/quant_weights.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/enc_fast_heuristics.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/jxl_encode.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/fields.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/luminance.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/enc_color_management.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/enc_bit_writer.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/image.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/loop_filter.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/color_management.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/dec_modular.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/enc_quant_weights.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/enc_chroma_from_luma.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/enc_adaptive_quantization.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/enc_modular.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/enc_cache.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/enc_group.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/enc_ac_strategy.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/enc_photon_noise.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/enc_noise.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/enc_splines.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/enc_patch_dictionary.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/splines.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/enc_xyb.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/gaborish.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/enc_ar_control_field.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/gauss_blur.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/memory_manager_internal.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/enc_external_image.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/dec_file.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/enc_image_bundle.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/dec_external_image.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/enc_toc.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/enc_ans.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/passes_state.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/chroma_from_luma.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/enc_context_map.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/enc_coeff_order.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/dec_ans.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/enc_entropy_coder.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/icc_codec_common.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/compressed_dc.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/epf.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/enc_dot_dictionary.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/dec_xyb.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/dec_frame.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/dec_patch_dictionary.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/enc_butteraugli_comparator.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/dec_reconstruct.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/dec_group.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/dec_group_border.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/filters.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/dec_upsample.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/convolve.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/dec_cache.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/dec_noise.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/dec_upsample.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/dec_huffman.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/dct_scales.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/ac_strategy.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/jxl_decode.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/icc_codec.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/enc_icc_codec.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/butteraugli/butteraugli.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/enc_cluster.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/jpeg/dec_jpeg_data.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/jpeg/enc_jpeg_huffman_decode.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/jpeg/dec_jpeg_data_writer.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/jpeg/enc_jpeg_data.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/jpeg/jpeg_data.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/jpeg/enc_jpeg_data_reader.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/base/padded_bytes.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/base/data_parallel.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/base/cache_aligned.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/base/status.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/modular/encoding/dec_ma.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/modular/modular_image.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/modular/encoding/encoding.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/modular/transform/enc_rct.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/modular/transform/enc_squeeze.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/modular/transform/enc_palette.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/modular/transform/squeeze.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/modular/transform/enc_transform.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/modular/transform/jxl_transform.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/modular/encoding/enc_ma.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/jxl/modular/encoding/enc_encoding.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/brotli/c/enc/encode.c $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/brotli/c/enc/memory.c $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/brotli/c/enc/backward_references_hq.c $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/brotli/c/enc/brotli_bit_stream.c $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/brotli/c/enc/block_splitter.c $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/brotli/c/enc/metablock.c $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/brotli/c/enc/compress_fragment.c $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/brotli/c/enc/compress_fragment_two_pass.c $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/brotli/c/enc/backward_references.c $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/brotli/c/enc/encoder_dict.c $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/brotli/c/enc/utf8_util.c $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/brotli/c/dec/decode.c $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/brotli/c/enc/static_dict.c $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/brotli/c/enc/literal_cost.c $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/brotli/c/enc/entropy_encode.c $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/brotli/c/enc/bit_cost.c $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/brotli/c/enc/cluster.c $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/brotli/c/enc/dictionary_hash.c $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/brotli/c/enc/histogram.c $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/brotli/c/dec/bit_reader.c $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/brotli/c/dec/huffman.c $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/brotli/c/dec/state.c $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/brotli/c/common/dictionary.c $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/brotli/c/common/transform.c $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/lcms/src/cmslut.cpp $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/lcms/src/cmsnamed.cpp $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/lcms/src/cmspack.cpp $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/lcms/src/cmscnvrt.cpp $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/lcms/src/cmsio1.cpp $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/lcms/src/cmsgmt.cpp $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/lcms/src/cmsopt.cpp $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/lcms/src/cmsalpha.cpp $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/lcms/src/cmstypes.cpp $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/lcms/src/cmsintrp.cpp $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/lcms/src/cmsgamma.cpp $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/lcms/src/cmscam02.cpp $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/lcms/src/cmscgats.cpp $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/lcms/src/cmshalf.cpp $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/lcms/src/cmsmtrx.cpp $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/lcms/src/cmsps2.cpp $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/lcms/src/cmssamp.cpp $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/lcms/src/cmssm.cpp $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/lcms/src/cmsxform.cpp $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/lcms/src/cmsio0.cpp $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/lcms/src/cmsplugin.cpp $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/lcms/src/cmserr.cpp $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/lcms/src/cmspcs.cpp $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/lcms/src/cmswtpnt.cpp $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/lcms/src/cmsvirt.cpp $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/lodepng/lodepng.cpp $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/highway/hwy/aligned_allocator.cc $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/highway/hwy/targets.cc $(XFLIB_DIR)/L2/demos/jxlEnc/others/src/acc_enc_frame.cpp $(XFLIB_DIR)/L2/demos/jxlEnc/others/src/host_acc_lossy_enc_compute/acc_host.cpp $(XFLIB_DIR)/L2/demos/jxlEnc/others/src/host_acc_lossy_enc_compute/acc_phase1.cpp $(XFLIB_DIR)/L2/demos/jxlEnc/others/src/host_acc_lossy_enc_compute/acc_phase2.cpp $(XFLIB_DIR)/L2/demos/jxlEnc/others/src/host_acc_lossy_enc_compute/acc_phase3.cpp $(XFLIB_DIR)/L2/demos/jxlEnc/acc_lossy_enc_compute/host/host_lossy_enc_compute.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -I $(XFLIB_DIR)/../utils/L1/include/ -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/ -I $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/lib/include -I $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/build/lib/include -I $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/lcms/include -I $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/highway -I $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/brotli/c/include -I $(XFLIB_DIR)/L2/demos/jxlEnc/third_partys/third_party/lodepng -I $(XFLIB_DIR)/L2/demos/jxlEnc/others/include/host_acc_lossy_enc_compute -I $(XFLIB_DIR)/L2/demos/jxlEnc/others/include/ -I $(XFLIB_DIR)/L2/demos/jxlEnc/acc_lossy_enc_compute/kernel -I $(XFLIB_DIR)/L2/demos/jxlEnc/acc_lossy_enc_compute/host
 CXXFLAGS += -O3 
@@ -156,7 +147,7 @@ endif
 ######################### binary container global settings ##########################
 VPP_FLAGS_JxlEnc_lossy_enc_compute +=  -D KERNEL_NAME=JxlEnc_lossy_enc_compute
 VPP_FLAGS_JxlEnc_lossy_enc_compute += --hls.clock 300000000:JxlEnc_lossy_enc_compute
-ifneq ($(HOST_ARCH), x86)
+ifneq ($(HOST_ARCH_temp), x86)
 VPP_LDFLAGS_jxlEnc += --clock.defaultFreqHz 300000000
 else
 VPP_LDFLAGS_jxlEnc += --kernel_frequency 300
@@ -164,7 +155,7 @@ endif
 VPP_LDFLAGS_jxlEnc_temp := -g --advanced.param compiler.userPostSysLinkOverlayTcl=postSysLink.tcl
 VPP_LDFLAGS_jxlEnc += $(VPP_LDFLAGS_jxlEnc_temp)
 
-ifeq ($(HOST_ARCH), x86)
+ifneq ($(SD_CARD_NEEDED), on)
 BINARY_CONTAINERS += $(BUILD_DIR)/jxlEnc.xclbin
 else
 BINARY_CONTAINERS += $(BUILD_DIR)/jxlEnc_pkg.$(LINK_TARGET_FMT)
@@ -183,22 +174,15 @@ $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/jxlEnc $(VPP_LDFLAGS)  $(VPP_LDFLAGS_jxlEnc) $(AIE_LDFLAGS)   -o $@ $^
 
 ############################## Setting Rules for Host (Building Host Executable) ##############################
-ifeq ($(HOST_ARCH), x86)
-$(EXE_FILE): $(EXE_FILE_DEPS) |  check_xrt
+$(EXE_FILE): $(EXE_FILE_DEPS)
 	mkdir -p $(BUILD_DIR)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
-
-else
-$(EXE_FILE): $(EXE_FILE_DEPS) |  check_sysroot
-	mkdir -p $(BUILD_DIR)
-	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
-
-endif
 
 $(EMCONFIG):
 	emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
+
 ############################## Preparing sdcard folder ##############################
-ifneq ($(HOST_ARCH), x86)
+ifeq ($(SD_CARD_NEEDED), on)
 RUN_SCRIPT := $(BUILD_DIR)/run_script.sh
 $(RUN_SCRIPT):
 	rm -rf $(RUN_SCRIPT)
@@ -232,24 +216,24 @@ SD_DIRS_WITH_PREFIX = $(foreach sd_dir,$(DATA_DIR),--package.sd_dir $(sd_dir))
 PACKAGE_FILES := $(BINARY_CONTAINERS)
 PACKAGE_FILES += $(AIE_CONTAINER)
 SD_CARD := $(CUR_DIR)/package_$(TARGET)
-$(SD_CARD): $(EXE_FILE) $(BINARY_CONTAINERS) $(RUN_SCRIPT) $(EMCONFIG) check_kimage check_rootfs
+$(SD_CARD): host xclbin $(RUN_SCRIPT) $(EMCONFIG) check_kimage check_rootfs
 	@echo "Generating sd_card folder...."
 	mkdir -p $(SD_CARD)
 	chmod a+rx $(BUILD_DIR)/run_script.sh
 # 1. DFX HW Flow
-ifeq ($(dfx_hw), true)
+ifeq ($(dfx_hw), on)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p $(PACKAGE_FILES) $(VPP_PACKAGE) -o $(BINARY_CONTAINERS_PKG)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX) --package.sd_file $(BINARY_CONTAINERS_PKG)
 	@echo "### ***** sd_card generation done! ***** ###"
 endif
 # 2. PS_ON_X86 - From 2022.2, Target:sw_emu
-ifeq ($(ps_on_x86), true)
+ifeq ($(ps_on_x86), on)
 	@echo "### ***** running PS X86 SE_EMU ***** ###"
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir $(SD_CARD) --package.emu_ps x86
 endif
 #3. General Embeded flow
-ifeq ($(dfx_hw), false)
-ifeq ($(ps_on_x86), false)
+ifeq ($(dfx_hw), off)
+ifeq ($(ps_on_x86), off)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 	@echo "### ***** sd_card generation done! ***** ###"
 endif
@@ -259,7 +243,7 @@ endif
 sd_card: $(SD_CARD)
 endif
 ############################## Setting Essential Checks and Building Rules ##############################
-RUN_DEPS += $(EXE_FILE) $(BINARY_CONTAINERS) $(EMCONFIG)
+RUN_DEPS += host xclbin $(EMCONFIG)
 RUN_DEPS += $(SD_CARD)
 
 .PHONY: mkflag all run
@@ -267,7 +251,7 @@ mkflag:
 	mkdir -p $(BUILD_DIR)
 	rm -rf $(BUILD_DIR)/makefile_args.txt
 	@for var in $(MAKEFLAGS); do echo $$var >> $(BUILD_DIR)/makefile_args.txt; done
-all: check_device  check_vpp check_platform mkflag $(RUN_DEPS)
+all: check_device check_vpp check_platform mkflag $(RUN_DEPS)
 run: all
 #hw_emu
 ifneq (,$(filter hw_emu, $(TARGET)))
@@ -277,8 +261,8 @@ ifeq ($(HOST_ARCH), x86)
 	./check.sh
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_output.log
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_stdout.log
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_stdout.log || exit 1
 	./check.sh
 endif
 endif
@@ -289,16 +273,10 @@ ifeq ($(HOST_ARCH), x86)
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) 
 	./check.sh
 else
-ifeq ($(ps_on_x86), true)
-	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
-	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) 
-	./check.sh
-else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_output.log 
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_stdout.log
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_stdout.log || exit 1
 	./check.sh
-endif
 endif
 endif
 #hw
@@ -328,16 +306,16 @@ emconfig: $(EMCONFIG)
 
 .PHONY: host
 ifeq ($(HOST_ARCH), x86)
-host:  check_xrt $(EXE_FILE)
+host: check_xrt   $(EXE_FILE)
 else
-host:  check_sysroot $(EXE_FILE)
+host: check_sysroot   $(EXE_FILE)
 endif
 
 .PHONY: xclbin
 ifeq ($(HOST_ARCH), x86)
-xclbin:  check_vpp check_xrt $(BINARY_CONTAINERS) 
+xclbin: check_vpp check_xrt  $(BINARY_CONTAINERS)
 else
-xclbin:  check_vpp check_sysroot $(BINARY_CONTAINERS) 
+xclbin: check_vpp check_sysroot  $(BINARY_CONTAINERS)
 endif
 
 ############################## Cleaning Rules ##############################

@@ -1,5 +1,5 @@
 {
-    "gui": false, 
+    "gui": true, 
     "name": "Xilinx Resize Test", 
     "description": "An example for fast resize in codec cases", 
     "flow": "vitis", 
@@ -70,15 +70,15 @@
                             "slr": "SLR0", 
                             "arguments": [
                                 {
-                                    "name": "gmem0", 
+                                    "name": "m_axi_gmem0", 
                                     "memory": "HBM[0]"
                                 }, 
                                 {
-                                    "name": "gmem1", 
+                                    "name": "m_axi_gmem1", 
                                     "memory": "HBM[1]"
                                 }, 
                                 {
-                                    "name": "gmem2", 
+                                    "name": "m_axi_gmem2", 
                                     "memory": "HBM[2]"
                                 }
                             ]

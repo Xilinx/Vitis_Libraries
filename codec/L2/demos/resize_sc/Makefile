@@ -18,17 +18,14 @@
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<x86>"
+	$(ECHO) "  make all TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<x86>"
+	$(ECHO) "  make run TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to run application in emulation."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH required for SoC shells"
 	$(ECHO) ""
 	$(ECHO) "  make host HOST_ARCH=<hw/hw_emu/sw_emu/>"
 	$(ECHO) "      Command to build host application."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
 	$(ECHO) "  make clean "
 	$(ECHO) "      Command to remove the generated non-hardware files."
@@ -53,7 +50,7 @@ ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := xilinx_u50_gen3x16_xdma_5_202120_1
+PLATFORM := xilinx_u50_gen3x16_xdma_5_202210_1
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
@@ -80,6 +77,19 @@ ifneq ($(debug),yes)
 CXXFLAGS += -O3
 endif
 
+# workaround for compiling on CentOS7 (Must match "RedHat*" and "Red Hat*")
+ifneq ($(filter Cent% Red%,$(shell lsb_release -is)),)
+  ifeq ($(shell lsb_release -rs|cut -d. -f1),7)
+    $(info CentOS/RHEL 7)
+    CXXFLAGS  += -D_GLIBCXX_USE_CXX11_ABI=0
+    VPP_FLAGS  += -D_GLIBCXX_USE_CXX11_ABI=0
+    VPP_LDFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0
+    SYS_COMP_LIB := $(XILINX_VITIS)/system_compiler/lib/centos7
+  else
+    SYS_COMP_LIB := $(XILINX_VITIS)/system_compiler/lib/x86
+  endif
+endif
+
 # get global setting
 ifdef XILINX_SC_PFM_CONFIG
 CXXFLAGS += -DXILINX_SC_PFM_CONFIG=$(XILINX_SC_PFM_CONFIG)
@@ -89,9 +99,9 @@ CXXFLAGS += -DXILINX_SC_PFM_EXT=$(XILINX_SC_PFM_EXT)
 endif
 ifeq ($(HOST_ARCH), x86)
 CXXFLAGS += -I $(XILINX_VITIS)/system_compiler/include -I $(XILINX_HLS)/include 
-LDFLAGS += -L$(XILINX_XRT)/lib -L$(XILINX_VITIS)/system_compiler/lib/x86 -lvpp_acc -l$(LIB_XRT) -lxrt_coreutil  -Wl,-rpath=$(XILINX_VITIS)/system_compiler/lib/x86:$(XILINX_XRT)/lib:$(GCC_HOME)/lib64  -Wl,--enable-new-dtags -lpthread 
+LDFLAGS += -L$(XILINX_XRT)/lib -L$(SYS_COMP_LIB) -lvpp_acc -l$(LIB_XRT) -lxrt_coreutil  -Wl,-rpath=$(SYS_COMP_LIB):$(XILINX_XRT)/lib:$(XILINX_XRT)/lib:$(GCC_HOME)/lib64  -Wl,--enable-new-dtags -lpthread 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --temp_dir $(TEMP_DIR) --save-temps -g -I $(XILINX_VITIS)/system_compiler/include 
-VPP_LDFLAGS += 
+VPP_LDFLAGS += --optimize 2 -R 2 
 else ifeq ($(HOST_ARCH), aarch64)
 CXXFLAGS += 
 LDFLAGS += 
@@ -127,7 +137,8 @@ CXXFLAGS +=  -I $(XFLIB_DIR)/L2/include/hw/resize -I $(XFLIB_DIR)/L2/demos/resiz
 CXXFLAGS += -O3
 
 EXE_NAME := host.exe
-EXE_OBJS := $(addprefix $(TEMP_DIR)/, $(addsuffix .o,$(basename $(HOST_SRCS))))
+REL_HOST_SRCS := $(shell realpath --relative-to $(CUR_DIR) $(HOST_SRCS))
+EXE_OBJS := $(addprefix $(TEMP_DIR)/, $(addsuffix .o,$(basename $(shell realpath --relative-to $(CUR_DIR) $(HOST_SRCS) | sed "s|\.\.\/||g"))))
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 EXE_FILE_DEPS := $(EXE_OBJS) 
 MAKEDEPEND = $(CXX) $< -MM -MP -MF $(basename $@).d -MT $@  $(CXXFLAGS)
@@ -143,7 +154,7 @@ VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/include/hw/resize -I $(XFLIB_DIR)/L2/demos/resi
 ######################### binary container global settings ##########################
 VPP_FLAGS_kernel_resize += --hls.clock 300000000:kernel_resize
 ifneq ($(HOST_ARCH), x86)
-VPP_LDFLAGS_kernel_resize += --clock.defaultFreqHz 300000000
+VPP_LDFLAGS_kernel_resize += --clock.defaultFreqHz 200000000
 else
 VPP_LDFLAGS_kernel_resize += --kernel_frequency 200
 endif
@@ -161,11 +172,11 @@ endif
 .SECONDEXPANSION:
 # ################ Setting Rules for Binary Containers (Building Kernels) ################
 ACC_SRCS_kernel_resize += $(CUR_DIR)/kernel/kernel_resize.cpp
-ACC_OBJS_kernel_resize  := $(addprefix $(TEMP_DIR)/, $(addsuffix .o,$(basename $(ACC_SRCS_kernel_resize))))
+ACC_OBJS_kernel_resize  := $(addprefix $(TEMP_DIR)/, $(addsuffix .o,$(basename $(shell realpath --relative-to $(CUR_DIR)  $(ACC_SRCS_kernel_resize) | sed "s|\.\.\/||g"))))
 $(ACC_OBJS_kernel_resize): $(TEMP_DIR)/%.o : %.cpp $$(@D)/.f
 	@echo "--> Making $@ from: $?"
 	$(MAKEDEPEND)
-	$(VPP) $(VPP_FLAGS) $(VPP_FLAGS_kernel_resize) -o $@  -c $<
+	$(VPP) $(VPP_FLAGS) $(VPP_FLAGS_kernel_resize) -o $@  -c $(shell find $(ACC_SRCS_kernel_resize) -name  $(subst .o,.cpp,$(notdir $@)) )
 BINARY_CONTAINERS_DEPS  += $(ACC_OBJS_kernel_resize) 
 $(BINARY_CONTAINERS_TMP) : $(BINARY_CONTAINERS_DEPS)
 	@echo "--> Making $@ from: $?"
@@ -175,11 +186,12 @@ EXE_FILE_DEPS += $(BINARY_CONTAINERS_DEPS)
 
 ############################## Setting Rules for Host (Building Host Executable) ##############################
 ifeq ($(HOST_ARCH), x86)
-$(TEMP_DIR)/%.o : %.cpp $$(@D)/.f
+$(TEMP_DIR)/%.o : $(REL_HOST_SRCS) $$(@D)/.f
 	@echo "--> Making $@ from: $?"
 	mkdir -p $(BUILD_DIR)
 	$(MAKEDEPEND)
-	$(CXX) -o $@ $(CXXFLAGS)  -I . -c $<
+	$(CXX) -o $@ $(CXXFLAGS)  -I . -c $(shell find $(HOST_SRCS) -name $(subst .o,.cpp,$(notdir $@)) )
+ 
 $(EXE_FILE): $(EXE_FILE_DEPS)  
 	mkdir -p $(BUILD_DIR)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
@@ -257,12 +269,11 @@ cleanh:
 
 cleank:
 	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl*start_simulation. sh *.xclbin
-	-$(RMDIR) _x_temp.*/_x.* _x_temp.*/.Xil _x_temp.*/profile_summary.* xo_* _x*
-	-$(RMDIR) _x_temp.*/dltmp* _x_temp.*/kernel_info.dat _x_temp.*/*.log
-	-$(RMDIR) _x_temp.* 
+	-$(RMDIR) _x_temp.*
 
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR)  build_dir.* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
 	-$(RMDIR) $(XFLIB_DIR)/common/data/*.xe2xd* $(XFLIB_DIR)/common/data/*.orig*
+	-$(RMDIR) 
 
 clean: cleanh

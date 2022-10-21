@@ -9,6 +9,9 @@
     "platform_blocklist": [
         "zc"
     ],
+    "data":[
+        "PROJECT/images"
+    ],
     "platform_properties": {
         "u50": {
 	    "host": {

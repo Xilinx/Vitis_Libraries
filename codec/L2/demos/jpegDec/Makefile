@@ -11,28 +11,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.7
+# vitis makefile-generator v2.0.8
 
 ############################## Help Section ##############################
 .PHONY: help
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<x86>"
+	$(ECHO) "  make all TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<x86>"
+	$(ECHO) "  make run TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to run application in emulation."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH required for SoC shells"
 	$(ECHO) ""
-	$(ECHO) "  make xclbin TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform> HOST_ARCH=<x86>"
+	$(ECHO) "  make xclbin TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to build xclbin application."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
 	$(ECHO) "  make host TARGET=<hw/hw_emu/sw_emu/>"
 	$(ECHO) "      Command to build host application."
-	$(ECHO) "      By default, HOST_ARCH=x86. HOST_ARCH is required for SoC shells"
 	$(ECHO) ""
 	$(ECHO) "  NOTE: For embedded devices, e.g. zcu102/zcu104/vck190, HOST_ARCH is either aarch32 or aarch64."
 	$(ECHO) "      a.IF Download the platform, and common-image from Xilinx Download Center(Suggested):"
@@ -71,7 +67,7 @@ PLATFORM := xilinx_u200_gen3x16_xdma_2_202110_1
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST +=  u200
+PLATFORM_ALLOWLIST +=  u200 u50 u280
 PLATFORM_BLOCKLIST +=  zc
 
 include ./utils.mk
@@ -97,13 +93,8 @@ LDFLAGS += -pthread -L$(XILINX_XRT)/lib -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -Wl
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
 VPP_LDFLAGS += --optimize 2 -R 2 
 else ifeq ($(HOST_ARCH), aarch64)
-ifeq ($(ps_on_x86), true) 
-CXXFLAGS += -fmessage-length=0 -I$(CUR_DIR)/src/ -I$(XILINX_XRT)/include -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
-LDFLAGS += -pthread -L$(XILINX_XRT)/lib -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -Wl,--as-needed -lOpenCL -lxrt_coreutil -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel 
-else
 CXXFLAGS += -I$(CUR_DIR)/src/ -fmessage-length=0 --sysroot=$(SYSROOT)  -I$(SYSROOT)/usr/include/xrt -I$(XILINX_HLS)/include -std=c++14 -O3 -Wall -Wno-unknown-pragmas -Wno-unused-label 
 LDFLAGS += -pthread -L$(SYSROOT)/usr/lib -Wl,--as-needed -lxilinxopencl -lxrt_coreutil 
-endif
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --save-temps 
 VPP_LDFLAGS += --optimize 2 -R 2 
 endif
@@ -130,7 +121,7 @@ CXXFLAGS +=  -D USE_HBM
 CXXFLAGS +=  -I $(XFLIB_DIR)/L2/include/hw/jpegDec -I $(XFLIB_DIR)/L2/demos/jpegDec/host -I $(XFLIB_DIR)/L2/demos/jpegDec/kernel -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2
 CXXFLAGS += -O3 
 else 
-ifeq ($(ps_on_x86), true)
+ifeq ($(ps_on_x86), on)
 HOST_SRCS += $(XFLIB_DIR)/L2/demos/jpegDec/host/test_decoder.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -I $(XFLIB_DIR)/L2/include/hw/jpegDec -I $(XFLIB_DIR)/L2/demos/jpegDec/host -I $(XFLIB_DIR)/L2/demos/jpegDec/kernel -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2
 CXXFLAGS += -O3 
@@ -176,13 +167,13 @@ endif
 ######################### binary container global settings ##########################
 VPP_FLAGS_kernelJpegDecoder +=  -D KERNEL0
 VPP_FLAGS_kernelJpegDecoder += --hls.clock 300000000:kernelJpegDecoder
-ifneq ($(HOST_ARCH), x86)
+ifneq ($(HOST_ARCH_temp), x86)
 VPP_LDFLAGS_kernelJpegDecoder += --clock.defaultFreqHz 300000000
 else
 VPP_LDFLAGS_kernelJpegDecoder += --kernel_frequency 300
 endif
 
-ifeq ($(HOST_ARCH), x86)
+ifneq ($(SD_CARD_NEEDED), on)
 BINARY_CONTAINERS += $(BUILD_DIR)/kernelJpegDecoder.xclbin
 else
 BINARY_CONTAINERS += $(BUILD_DIR)/kernelJpegDecoder_pkg.$(LINK_TARGET_FMT)
@@ -201,22 +192,15 @@ $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/kernelJpegDecoder $(VPP_LDFLAGS)  $(VPP_LDFLAGS_kernelJpegDecoder) $(AIE_LDFLAGS)   -o $@ $^
 
 ############################## Setting Rules for Host (Building Host Executable) ##############################
-ifeq ($(HOST_ARCH), x86)
-$(EXE_FILE): $(EXE_FILE_DEPS) |  check_xrt
+$(EXE_FILE): $(EXE_FILE_DEPS)
 	mkdir -p $(BUILD_DIR)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
-
-else
-$(EXE_FILE): $(EXE_FILE_DEPS) |  check_sysroot
-	mkdir -p $(BUILD_DIR)
-	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
-
-endif
 
 $(EMCONFIG):
 	emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
+
 ############################## Preparing sdcard folder ##############################
-ifneq ($(HOST_ARCH), x86)
+ifeq ($(SD_CARD_NEEDED), on)
 RUN_SCRIPT := $(BUILD_DIR)/run_script.sh
 $(RUN_SCRIPT):
 	rm -rf $(RUN_SCRIPT)
@@ -250,24 +234,24 @@ SD_DIRS_WITH_PREFIX = $(foreach sd_dir,$(DATA_DIR),--package.sd_dir $(sd_dir))
 PACKAGE_FILES := $(BINARY_CONTAINERS)
 PACKAGE_FILES += $(AIE_CONTAINER)
 SD_CARD := $(CUR_DIR)/package_$(TARGET)
-$(SD_CARD): $(EXE_FILE) $(BINARY_CONTAINERS) $(RUN_SCRIPT) $(EMCONFIG) check_kimage check_rootfs
+$(SD_CARD): host xclbin $(RUN_SCRIPT) $(EMCONFIG) check_kimage check_rootfs
 	@echo "Generating sd_card folder...."
 	mkdir -p $(SD_CARD)
 	chmod a+rx $(BUILD_DIR)/run_script.sh
 # 1. DFX HW Flow
-ifeq ($(dfx_hw), true)
+ifeq ($(dfx_hw), on)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p $(PACKAGE_FILES) $(VPP_PACKAGE) -o $(BINARY_CONTAINERS_PKG)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX) --package.sd_file $(BINARY_CONTAINERS_PKG)
 	@echo "### ***** sd_card generation done! ***** ###"
 endif
 # 2. PS_ON_X86 - From 2022.2, Target:sw_emu
-ifeq ($(ps_on_x86), true)
+ifeq ($(ps_on_x86), on)
 	@echo "### ***** running PS X86 SE_EMU ***** ###"
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir $(SD_CARD) --package.emu_ps x86
 endif
 #3. General Embeded flow
-ifeq ($(dfx_hw), false)
-ifeq ($(ps_on_x86), false)
+ifeq ($(dfx_hw), off)
+ifeq ($(ps_on_x86), off)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 	@echo "### ***** sd_card generation done! ***** ###"
 endif
@@ -277,7 +261,7 @@ endif
 sd_card: $(SD_CARD)
 endif
 ############################## Setting Essential Checks and Building Rules ##############################
-RUN_DEPS += $(EXE_FILE) $(BINARY_CONTAINERS) $(EMCONFIG)
+RUN_DEPS += host xclbin $(EMCONFIG)
 RUN_DEPS += $(SD_CARD)
 
 .PHONY: mkflag all run
@@ -285,7 +269,7 @@ mkflag:
 	mkdir -p $(BUILD_DIR)
 	rm -rf $(BUILD_DIR)/makefile_args.txt
 	@for var in $(MAKEFLAGS); do echo $$var >> $(BUILD_DIR)/makefile_args.txt; done
-all: check_device  check_vpp check_platform mkflag $(RUN_DEPS)
+all: check_device check_vpp check_platform mkflag $(RUN_DEPS)
 run: all
 #hw_emu
 ifneq (,$(filter hw_emu, $(TARGET)))
@@ -295,8 +279,8 @@ ifeq ($(HOST_ARCH), x86)
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_output.log
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_stdout.log
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_stdout.log || exit 1
 	
 endif
 endif
@@ -307,16 +291,10 @@ ifeq ($(HOST_ARCH), x86)
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) 
 	
 else
-ifeq ($(ps_on_x86), true)
-	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
-	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) 
-	
-else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_output.log 
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_stdout.log
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_stdout.log || exit 1
 	
-endif
 endif
 endif
 #hw
@@ -346,16 +324,16 @@ emconfig: $(EMCONFIG)
 
 .PHONY: host
 ifeq ($(HOST_ARCH), x86)
-host:  check_xrt $(EXE_FILE)
+host: check_xrt   $(EXE_FILE)
 else
-host:  check_sysroot $(EXE_FILE)
+host: check_sysroot   $(EXE_FILE)
 endif
 
 .PHONY: xclbin
 ifeq ($(HOST_ARCH), x86)
-xclbin:  check_vpp check_xrt $(BINARY_CONTAINERS) 
+xclbin: check_vpp check_xrt  $(BINARY_CONTAINERS)
 else
-xclbin:  check_vpp check_sysroot $(BINARY_CONTAINERS) 
+xclbin: check_vpp check_sysroot  $(BINARY_CONTAINERS)
 endif
 
 ############################## Cleaning Rules ##############################

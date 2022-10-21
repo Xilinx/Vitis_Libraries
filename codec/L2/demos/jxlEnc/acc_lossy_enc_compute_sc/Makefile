@@ -80,6 +80,19 @@ ifneq ($(debug),yes)
 CXXFLAGS += -O3
 endif
 
+# workaround for compiling on CentOS7 (Must match "RedHat*" and "Red Hat*")
+ifneq ($(filter Cent% Red%,$(shell lsb_release -is)),)
+  ifeq ($(shell lsb_release -rs|cut -d. -f1),7)
+    $(info CentOS/RHEL 7)
+    CXXFLAGS  += -D_GLIBCXX_USE_CXX11_ABI=0
+    VPP_FLAGS  += -D_GLIBCXX_USE_CXX11_ABI=0
+    VPP_LDFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0
+    SYS_COMP_LIB := $(XILINX_VITIS)/system_compiler/lib/centos7
+  else
+    SYS_COMP_LIB := $(XILINX_VITIS)/system_compiler/lib/x86
+  endif
+endif
+
 # get global setting
 ifdef XILINX_SC_PFM_CONFIG
 CXXFLAGS += -DXILINX_SC_PFM_CONFIG=$(XILINX_SC_PFM_CONFIG)
@@ -89,7 +102,7 @@ CXXFLAGS += -DXILINX_SC_PFM_EXT=$(XILINX_SC_PFM_EXT)
 endif
 ifeq ($(HOST_ARCH), x86)
 CXXFLAGS += -I $(XILINX_VITIS)/system_compiler/include -I $(XILINX_HLS)/include 
-LDFLAGS += -L$(XILINX_XRT)/lib -L$(XILINX_VITIS)/system_compiler/lib/x86 -lvpp_acc -l$(LIB_XRT) -lxrt_coreutil  -Wl,-rpath=$(XILINX_VITIS)/system_compiler/lib/x86:$(XILINX_XRT)/lib:$(GCC_HOME)/lib64  -Wl,--enable-new-dtags -lpthread 
+LDFLAGS += -L$(XILINX_XRT)/lib -L$(SYS_COMP_LIB) -lvpp_acc -l$(LIB_XRT) -lxrt_coreutil  -Wl,-rpath=$(SYS_COMP_LIB):$(XILINX_XRT)/lib:$(XILINX_XRT)/lib:$(GCC_HOME)/lib64  -Wl,--enable-new-dtags -lpthread 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --temp_dir $(TEMP_DIR) --save-temps -g -I $(XILINX_VITIS)/system_compiler/include 
 VPP_LDFLAGS += 
 else ifeq ($(HOST_ARCH), aarch64)

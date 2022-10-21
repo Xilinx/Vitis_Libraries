@@ -30,12 +30,12 @@ Here, TriangleCount is taken as an example to indicate how to build the applicat
 
 - ### Download code
 
-These codec benchmarks can be downloaded from [vitis libraries](https://github.com/Xilinx/Vitis_Libraries.git) ``master`` branch.
+These codec benchmarks can be downloaded from [vitis libraries](https://github.com/Xilinx/Vitis_Libraries.git) ``main`` branch.
 
 ```
    git clone https://github.com/Xilinx/Vitis_Libraries.git
    cd Vitis_Libraries
-   git checkout master
+   git checkout main
    cd codec 
 ```
 
