@@ -68,7 +68,7 @@
             "accelerators": [
                 {
                     "location": "kernel/aes256CbcEncryptKernel.cpp",
-                    "frequency": 300.0,
+                    "frequency": 200.0,
                     "name": "aes256CbcEncryptKernel",
                     "num_compute_units": 1,
                     "compute_units": [
@@ -89,7 +89,7 @@
                     ]
                 }
             ],
-            "frequency": 300.0,
+            "frequency": 200.0,
             "name": "aes256CbcEncryptKernel"
         }
     ],

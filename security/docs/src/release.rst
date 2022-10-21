@@ -29,10 +29,19 @@ Release Note
    :hidden:
    :maxdepth: 1
 
+2022.2
+------
+
+In this release, we add support for:
+
+* Poseidon Hash function
+* ECDSA NIST-P384
+
 2021.2
 ------
 
 The 2021.2 release provide support for:
+
 * KECCAK-256
 * CRC32C
 * NIST P-256
@@ -41,6 +50,7 @@ The 2021.2 release provide support for:
 ------
 
 The 2021.1 release provide support for:
+
 * RIPEMD160
 * Initial support for BLS (not complete)
 
@@ -48,6 +58,7 @@ The 2021.1 release provide support for:
 ------
 
 The 2020.2 release provide support for signatures algorithms and VDF funtions.
+
 * DSA
 * ECC
 * ECDSA

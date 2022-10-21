@@ -42,6 +42,7 @@ Design Internals
    Elliptic-curve Cryptography <internals/ecc.rst>
    ECDSA nistp256 <internals/ecdsa_nistp256.rst>
    ECDSA secp256k1 <internals/ecdsa_secp256k1.rst>
+   ECDSA nistp384 <internals/ecdsa_nistp384.rst>
    GCM Mode <internals/gcm.rst>
    GMAC <internals/gmac.rst>
    HMAC Algorithms <internals/hmac.rst>
@@ -58,4 +59,5 @@ Design Internals
    SM2 <internals/sm234.rst>
    Verifiable Delay Function <internals/vdf.rst>
    XTS mode <internals/xts.rst>
+   Poseidon Hash Algorithm <internals/poseidon.rst>
 

@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.4
+# sc makefile-generator v1.0.0
 #
 #+-------------------------------------------------------------------------------
 # The following parameters are assigned with default values. These parameters can
@@ -70,14 +70,15 @@ check_device:
 	fi;
 
 #get HOST_ARCH by PLATFORM
+ifneq (,$(PLATFORM))
 HOST_ARCH_temp = $(shell platforminfo -p $(PLATFORM) | grep 'CPU Type' | sed 's/.*://' | sed '/ai_engine/d' | sed 's/^[[:space:]]*//')
-$(warning HOST_ARCH_temp:$(HOST_ARCH_temp))
 ifeq ($(HOST_ARCH_temp), x86)
 HOST_ARCH := x86
 else ifeq ($(HOST_ARCH_temp), cortex-a9)
 HOST_ARCH := aarch32
-else ifeq ($(HOST_ARCH_temp), cortex-a*)
+else ifneq (,$(findstring cortex-a, $(HOST_ARCH_temp)))
 HOST_ARCH := aarch64
+endif
 endif
 
 #Checks for Device Family
@@ -135,6 +136,27 @@ BINUTILS := $(shell ld -v | cut -f 4 -d " " | cut -f 1 -d "-")
 BINUTILS_REQ := $(BINUTILS_INTOOL)
 ifneq ($(shell expr $(BINUTILS) \>= $(BINUTILS_REQ)), 1)
 export PATH := $(XILINX_VIVADO)/tps/lnx64/binutils-$(BINUTILS_INTOOL)/bin:$(PATH)
+endif
+
+#Check OS and setting env for xrt c++ api
+OSDIST = $(shell lsb_release -i |awk -F: '{print tolower($$2)}' | tr -d ' \t' )
+OSREL = $(shell lsb_release -r |awk -F: '{print tolower($$2)}' |tr -d ' \t')
+SYS_COMP_LIB := $(XILINX_VITIS)/system_compiler/lib/x86
+# for centos and redhat
+ifneq ($(findstring centos,$(OSDIST)),)
+ifeq (7,$(shell echo $(OSREL) | awk -F. '{print tolower($$1)}' ))
+ifeq ($(HOST_ARCH), x86)
+XRT_CXXFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0
+SYS_COMP_LIB := $(XILINX_VITIS)/system_compiler/lib/centos7
+endif
+endif
+else ifneq ($(findstring redhat,$(OSDIST)),)
+ifeq (7,$(shell echo $(OSREL) | awk -F. '{print tolower($$1)}' ))
+ifeq ($(HOST_ARCH), x86)
+XRT_CXXFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0
+SYS_COMP_LIB := $(XILINX_VITIS)/system_compiler/lib/centos7
+endif
+endif
 endif
 
 #Setting VPP

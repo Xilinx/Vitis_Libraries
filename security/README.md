@@ -9,11 +9,11 @@ Since all the primitive code is developed in HLS C++ with the permissive Apache 
 advanced users can easily tailor, optimize or assemble property logic.
 Benchmarks of 4 different acceleration applications are also provided with the library for easy on-boarding and comparison.
 
-[Comprehensive documentation](https://xilinx.github.io/Vitis_Libraries/security/2021.2/index.html)
+[Comprehensive documentation](https://docs.xilinx.com/r/en-US/Vitis_Libraries/security/index.html)
 
 ## Benchmark Result
 
-A list of Vitis projects can be found `L1/benchmarks`. They are provided to help users to evaluate the performance of most critical primitives. For further detials, please refer to [benchmark result](https://xilinx.github.io/Vitis_Libraries/security/2021.2/benchmark.html).
+A list of Vitis projects can be found `L1/benchmarks`. They are provided to help users to evaluate the performance of most critical primitives. For further detials, please refer to [benchmark result](https://docs.xilinx.com/r/en-US/Vitis_Libraries/security/benchmark.html).
 
 ## Library Contents
 
@@ -133,7 +133,7 @@ A list of Vitis projects can be found `L1/benchmarks`. They are provided to help
 
 ### Software Platform
 
-This library is designed to work with Vitis 2019.2 and later, and therefore inherits the system requirements of Vitis and XRT.
+This library is designed to work with Vitis 2022.2, and therefore inherits the system requirements of Vitis and XRT.
 
 Supported operating systems are RHEL/CentOS 7.4, 7.5 and Ubuntu 16.04.4 LTS, 18.04.1 LTS.
 With CentOS/RHEL 7.4 and 7.5, C++11/C++14 should be enabled via
@@ -151,10 +151,32 @@ Hardware modules are designed to work with 16nm Alveo cards. Benchmarks are best
 Setup the build environment using the Vitis and XRT scripts:
 
 ```console
-    $ source <install path>/Vitis/2019.2/settings64.sh
+    $ source <install path>/Vitis/2022.2/settings64.sh
     $ source /opt/xilinx/xrt/setup.sh
 ```
+## Source Files and Application Development
+Vitis libraries are organized into L1, L2, and L3 folders, each relating to a different stage of application development.
 
+**L1** :
+      Makefiles and sources in L1 facilitate HLS based flow for quick checks. Tasks at this level include:
+
+* Check the functionality of an individual kernel (C-simulation)
+* Estimate resource usage, latency, etc. (Synthesis)
+* Run cycle accurate simulations (Co-simulation)
+* Package as IP and get final resource utilization/timing details (Export RTL)
+       
+	**Note**:  Once RTL (or XO file after packaging IP) is generated, the Vivado flow is invoked for XCLBIN file generation if required.
+
+**L2** :
+       Makefiles and sources in L2 facilitate building XCLBIN file from various sources (HDL, HLS or XO files) of kernels with host code written in OpenCL/XRT framework targeting a device. This flow supports:
+
+* Software emulation to check the functionality
+* Hardware emulation to check RTL level simulation
+* Build and test on hardware
+
+**L3** :
+       Makefiles and sources in L3 demonstrate applications developed involving multiple kernels in pipeline. These Makefiles can be used for executing tasks, as with the L2 Makefiles.
+       
 ## Design Flows
 
 The common tool and library pre-requisites that apply across all design flows are documented in the requirements section above.

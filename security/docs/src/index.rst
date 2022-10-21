@@ -256,7 +256,7 @@ Setup the build environment using the Vitis and XRT scripts, and set the ``PLATF
 
 .. code-block:: bash
 
-    source <Vitis 2021.1 install path>/settings64.sh
+    source <Vitis 2022.2 install path>/settings64.sh
     source /opt/xilinx/xrt/setup.sh
     export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 

@@ -22,7 +22,7 @@ The steps for library download and environment setup can be found in :ref:`l1_vi
 Run the following make command to build your XCLBIN and host binary targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
 
 ```
-   source /opt/xilinx/Vitis/2021.1/settings64.sh
+   source /opt/xilinx/Vitis/2022.2/settings64.sh
    source /opt/xilinx/xrt/setenv.sh
    export DEVICE=u50_gen3x16
    export TARGET=hw

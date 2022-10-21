@@ -85,7 +85,7 @@
             "accelerators": [
                 {
                     "location": "kernel/aes256CbcDecryptKernel.cpp", 
-                    "frequency": 300.0, 
+                    "frequency": 200.0, 
                     "name": "aes256CbcDecryptKernel", 
                     "num_compute_units": 1, 
                     "compute_units": [
@@ -99,14 +99,14 @@
                                 }, 
                                 {
                                     "name": "outputData", 
-                                    "memory": "DDR[1]"
+                                    "memory": "DDR[3]"
                                 }
                             ]
                         }
                     ]
                 }
             ], 
-            "frequency": 300.0, 
+            "frequency": 200.0, 
             "name": "aes256CbcDecryptKernel"
         }
     ], 

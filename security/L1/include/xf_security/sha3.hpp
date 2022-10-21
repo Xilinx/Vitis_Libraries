@@ -204,32 +204,6 @@ LOOP_5_STEP_MAPPING:
 
 } // end KECCAK_f
 
-inline ap_uint<512> sha3_512_40(ap_uint<512> input) {
-    // This is a special version of sha3_512 for ethash, limited on input message size and padding method
-    ap_uint<64> state[25];
-#pragma HLS array_partition variable = state dim = 1
-    for (int i = 0; i < 25; i++) {
-#pragma HLS unroll
-        state[i] = 0;
-    }
-
-    for (int i = 0; i < 5; i++) {
-#pragma HLS unroll
-        state[i] ^= input.range(i * 64 + 63, i * 64);
-    }
-    state[5] ^= 0x0000000000000001UL; // delim is 01 for sha3 in ethereum, and 06 for sha3 in NIST
-    state[8] ^= 0x8000000000000000UL;
-
-    KECCAK_f(state);
-
-    ap_uint<512> digest = 0;
-    for (int i = 0; i < 8; i++) {
-#pragma HLS unroll
-        digest.range(64 * i + 63, 64 * i) = state[i];
-    }
-    return digest;
-}
-
 /**
  *
  * @brief This function performs the computation of SHA-3.
