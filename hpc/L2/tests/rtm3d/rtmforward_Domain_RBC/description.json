@@ -83,12 +83,12 @@
         {
             "name": "rtmforward", 
             "ldclflags": "--config opts.cfg", 
-            "frequency": 250,
+            "frequency": 200,
             "accelerators": [
                 {
                     "name": "rtmforward", 
                     "location": "LIB_DIR/L2/src/hw/rtm3d/rtmforward_rbc.cpp", 
-                    "frequency": 300
+                    "frequency": 200
                 }
             ]
         }

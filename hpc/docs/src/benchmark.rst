@@ -129,24 +129,22 @@ These are details for benchmark result and usage steps.
    GEMV-based Conjugate Gradient Solver with Jacobi Preconditioner <user_guide/L2/benchmark/cg_gemv_jacobi.rst>
    SPMV-based Conjugate Gradient Solver with Jacobi Preconditioner <user_guide/L2/benchmark/cg_spmv_jacobi.rst>
 
-Benchmark Overview
+Benchmark Test Flow
 ###################
 
 
 .. _l2_vitis_hpc:
 
-Vitis HPC Library
-*****************
 
 * **Download code**
 
-These hpc benchmarks can be downloaded from `vitis libraries <https://github.com/Xilinx/Vitis_Libraries.git>`_ ``master`` branch.
+These hpc benchmarks can be downloaded from `vitis libraries <https://github.com/Xilinx/Vitis_Libraries.git>`_ ``main`` branch.
 
 .. code-block:: bash
 
    git clone https://github.com/Xilinx/Vitis_Libraries.git 
    cd Vitis_Libraries
-   git checkout master
+   git checkout main
    cd hpc  
 
 * **Setup environment**
@@ -156,7 +154,7 @@ Set up Python environment with :doc:`Python environment setup guide <../pyenvgui
 
 .. code-block:: bash
 
-   source <intstall_path>/installs/lin64/Vitis/2021.2/settings64.sh
+   source <intstall_path>/installs/lin64/Vitis/2022.2/settings64.sh
    source /opt/xilinx/xrt/setup.sh
    export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 
