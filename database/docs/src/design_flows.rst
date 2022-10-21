@@ -41,7 +41,7 @@ Setup the build environment using the Vitis and XRT scripts.
 
 .. code-block:: shell
 
-    source /opt/xilinx/Vitis/2020.2/settings64.sh
+    source /opt/xilinx/Vitis/2022.2/settings64.sh
     source /opt/xilinx/xrt/setup.sh
     export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 

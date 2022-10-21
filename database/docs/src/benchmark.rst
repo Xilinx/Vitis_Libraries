@@ -88,18 +88,16 @@ Here are benchmarks of the Vitis Database Library using the Vitis environment.
 
 .. _l2_vitis_database:
 
-Vitis Database Library
-~~~~~~~~~~~~~~~~~~~
 
 * **Download code**
 
-These database benchmarks can be downloaded from `vitis libraries <https://github.com/Xilinx/Vitis_Libraries.git>`_ ``master`` branch.
+These database benchmarks can be downloaded from `vitis libraries <https://github.com/Xilinx/Vitis_Libraries.git>`_ ``main`` branch.
 
 .. code-block:: bash
 
    git clone https://github.com/Xilinx/Vitis_Libraries.git 
    cd Vitis_Libraries
-   git checkout master
+   git checkout main
    cd database
 
 * **Setup environment**
@@ -108,6 +106,6 @@ Specifying the corresponding Vitis, XRT, and path to the platform repository by 
 
 .. code-block:: bash
 
-   source <intstall_path>/installs/lin64/Vitis/2021.1_released/settings64.sh
+   source <intstall_path>/settings64.sh
    source /opt/xilinx/xrt/setup.sh
    export PLATFORM_REPO_PATHS=/opt/xilinx/platforms

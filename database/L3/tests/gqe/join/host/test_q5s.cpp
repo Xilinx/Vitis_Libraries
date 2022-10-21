@@ -30,6 +30,9 @@
 
 using namespace std;
 
+#define VAL(s) #s
+#define STRING(s) VAL(s)
+
 #define VEC_LEN 8
 #define USER_DEBUG 1
 
@@ -311,7 +314,8 @@ int main(int argc, const char* argv[]) {
         tab_part_l.addSec({((char*)tmp_l1), ((char*)tmp_l2), ((char*)tmp_l3)}, nullptr, d_part_l_nrow);
     }
 
-    gqe::Workshop wksp("xilinx_u50_gen3x16_xdma_5_202210_1", xclbin_path, gqe::WorkerFunctions::JOIN);
+    std::string shell_name(STRING(XDEVICE));
+    gqe::Workshop wksp(shell_name, xclbin_path, gqe::WorkerFunctions::JOIN);
 
     auto smanual = new gqe::JoinStrategyManualSet(solution, sec_o, sec_l, slice_num, log_part, coef_exp_partO,
                                                   coef_exp_partL, coef_exp_join);

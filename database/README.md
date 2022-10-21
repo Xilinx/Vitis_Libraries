@@ -19,7 +19,7 @@ At each level, this library strives to make modules configurable through documen
 so that advanced users can easily tailor, optimize or combine with property logic for specific needs.
 Test cases are provided for all the public APIs, and can be used as examples of usage.
 
-Check the [comprehensive HTML document](https://docs.xilinx.com/r/en-US/Vitis_Libraries/Vitis-Libraries) for more details.
+Check the [comprehensive HTML document](https://docs.xilinx.com/r/en-US/Vitis_Libraries/database/index.html) for more details.
 
 ## Requirements
 
@@ -56,6 +56,29 @@ This library depends on the Vitis Utility Library, which is assumed to be placed
 /cloned/path/database # This library, which contains L1, L2, etc.
 /cloned/path/utils # The Vitis Utility Library, which contains its L1.
 ```
+
+## Source Files and Application Development
+Vitis libraries are organized into L1, L2, and L3 folders, each relating to a different stage of application development.
+
+**L1** :
+      Makefiles and sources in L1 facilitate HLS based flow for quick checks. Tasks at this level include:
+
+* Check the functionality of an individual kernel (C-simulation)
+* Estimate resource usage, latency, etc. (Synthesis)
+* Run cycle accurate simulations (Co-simulation)
+* Package as IP and get final resource utilization/timing details (Export RTL)
+       
+	**Note**:  Once RTL (or XO file after packaging IP) is generated, the Vivado flow is invoked for XCLBIN file generation if required.
+
+**L2** :
+       Makefiles and sources in L2 facilitate building XCLBIN file from various sources (HDL, HLS or XO files) of kernels with host code written in OpenCL/XRT framework targeting a device. This flow supports:
+
+* Software emulation to check the functionality
+* Hardware emulation to check RTL level simulation
+* Build and test on hardware
+
+**L3** :
+       Makefiles and sources in L3 demonstrate applications developed involving multiple kernels in pipeline. These Makefiles can be used for executing tasks, as with the L2 Makefiles.
 
 ## Running Test Cases
 
@@ -127,7 +150,7 @@ Besides ``run``, the Vitis case makefile also allows ``host`` and ``xclbin`` as 
 
 In `L1/benchmarks`, a list of key primitives are combined with data-loading/storing modules and built into xclbins targeting Alveo U280.
 For more details about the benchmarks, please kindly find them in Database Library's Benchmarking section of
-[documentation](https://docs.xilinx.com/r/en-US/Vitis_Libraries/Vitis-Libraries).
+[documentation](https://docs.xilinx.com/r/en-US/Vitis_Libraries/database/index.html).
 
 
 ## License
