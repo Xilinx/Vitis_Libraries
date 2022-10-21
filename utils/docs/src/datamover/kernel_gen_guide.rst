@@ -6,69 +6,55 @@
 
    L2.rst
 
-
-================================
-Generating PL Data-Mover Kernels
-================================
-
-.. _KERNEL_GEN_LABEL:
+======================
+Data-Mover User Guide
+======================
 
 Overview
-========
+=========
 
-To provide "codeless" support for testing and validating the AIE or other AXI stream-based designs.
-Users can create the OpenCL kernels by simply calling the kernel source code generator with a JSON description
-and ROM content (if needed) as text file.
+AIE applications often need to read data in or write data out of AIE array.
+Kernel on PL is one of the way to exchange data between AIE and other types of memory.
+We introduce ``Programmable 4D Data-Mover`` and ``Static Data-Mover`` to help generate kernel design and improve development efficiency.
+``Programmable 4D Data-Mover`` have 2 types of kernel: ``4DCuboidRead`` and ``4DCuboidWrite`` which provide both flexible access pattern and keep high performance between DDR and AIE.
+``Static Data-Mover`` has 9 types of kernel which help AIE connect with DDR / URAM and BRAM. Their access pattern is simple continously read / write.
 
-**Kernel Generator**
+All Data-Mover design is "codeless" that user need to create the OpenCL kernels by simply calling the ``Kernel Generator`` with a JSON description and ROM content (if needed) as text file.
 
-The kernel generator consists of the following parts:
+``Kernel Generator`` consists of:
 
-- Kernel templates (in Jinja2): Can be instantiated through configurations from JSON
-- Data converter: For transforming the user provided texture ROM content into usable initialization file
-- Python script: For automating the kernel generation from JSON to HLS C++ OpenCL kernel, which is ``L2/scripts/internal/generate_kernels.py``
+- Kernel templates (in Jinja2), which can be instantiated through configurations from JSON
+- Data converter to transform the user provided texture ROM content into usable initialization file
+- Python script to automate the kernel generation from JSON to HLS C++ OpenCL kernel, which is ``L2/scripts/internal/generate_kernels.py``.
 
 .. ATTENTION::
     Generated kernels are not self-contained source code, they would reference low-level block implementation headers in ``L1/include`` folder.
     Ensure that folder is passed to Vitis compiler as header search path when compiling project using generated PL kernels.
 
+Programmable 4D Data-Mover
+===========================
 
-Kernel Templates
-----------------
+Feature
+--------
 
-These kernel templates cannot be used as kernel top directly, they have to be instantiated by the Python script with the configurations coming from JSON.
+AIE application often need to deal with multi-dimension data.
+The mostly common cases are that AIE application need to select and read/write a regularly distributed sub-set from multi-dimensional array.
+Because multi-dimension array has to be stored in linear addressing memory space, such sub-set is rarely a contiguous block in memory but always a lot of data segment.
+It's not convenient for user to implement logic to calculate all segments' address and size and not efficient for AIE to do so.
 
-We provide ``Programmable 4D Data Mover`` and ``Static Data Mover``.
+Programmable 4D Data-Mover includes:
 
-``Programmable 4D Data Mover`` has 2 types of kernels, both of them will move data as ``descriptor buffer`` commanded.
-The access pattern will vary according to ``descriptor`` in ``descriptor buffer``.
+- Concise descriptor design that use 9x64bits to fully describe access on 4-dimension (and low-dimension) data.
+- Template kernel design that can read multiple descriptor and accomplish the defined access pattern one by one.
 
-- 4DCuboidRead: For loading multiple 4D arrays from PL's DDR to AIE through AXI stream. For each 4D array, the address / dimension / access pattern is defined as a 9x64 bits descriptor.
-- 4DCuboidWrite: For recieving data of multiple 4D arrays from AXI through AXI stream and save them to PL's DDR. For each 4D array, the address / dimension / access pattern is defined as a 9x64 bits descriptor.
+**Descriptor Design**
 
-``Static Data Mover`` has 9 types of kernels in 2 different categories.
-They all access certain amount of data in Memory/URAM/BRAM in a continuous style.
-This is the only access pattern.
+Descriptor design is the most important part of Programmable 4D Data-Mover. It defines:
 
-Data to AIE:
-
-- LoadDdrToStream: For loading data from PL's DDR to AIE through AXI stream
-- LoadDdrToStreamWithCounter: For loading data from PL's DDR to AIE through AXI stream and recording the data count sending to AIE 
-- SendRomToStream: For sending data from on-chip BRAM to AIE through AXI stream
-- SendRamToStream: The same as ``SendRomToStream``, but the difference is that the source data is coming from URAM instead of BRAM
-
-Data from AIE:
-
-- StoreStreamToMaster: For receiving data from AIE through AXI stream and save them to PL's DDR
-- StoreStreamToMasterWithCounter: For receiving data from AIE through AXI stream and saving them to PL's DDR, as well as recording the data count sending to DDR
-- ValidateStreamWithMaster: For receiving data from AIE through AXI stream and comparing with the goldens in PL's DDR, as well as putting the overall pass/fail flag into PL's DDR
-- ValidateStreamWithRom: For receiving data from AIE through AXI stream and comparing with the goldens in PL's BRAM, as well as putting the overall pass/fail flag into PL's DDR
-- ValidateStreamWithRam: For receiving data from AIE through AXI stream and comparing with the goldens in PL's URAM, as well as putting the overall pass/fail flag into PL's DDR
-
-**Programmable 4D Data Mover**
-
-We introduce Programmable 4D Data Mover ``4DCuboidRead`` and ``4DCuboidWrite`` to provide more flexible access to 4- or lower dimension array.
-1/2/3-dimension array could be treated as special cases of 4-dimension array, thus can cover large proportion of use cases.
+- How 4-dimension data mapped to linear address
+- Where to find the sub-set to access
+- What's the dimension of sub-set
+- How to serialize the sub-set
 
 To store 4D array ``A[W][Z][Y][X]`` in memory, it has to be mapped into linear address space which will certainly lead to addressing like ``&A[w][z][y][x] = bias + w * (Z*Y*X) + z * (Y*X) + y * (X) + x``. In such condition, adjacent elements in 4D array will have const strid. Then 9 parameters { bias (address of first element), X, X_stride, Y, Y_stride, Z, Z_stride, W, W_stride } will be enough to define the 4D array in memory.
 
@@ -77,7 +63,7 @@ To store 4D array ``A[W][Z][Y][X]`` in memory, it has to be mapped into linear a
 - &A[w][z+1][y][x] – &A[w][z][y][x] = X * Y         (Z_stride)
 - &A[w+1][z][y][x] – &A[w][z][y][x] = X * Y * Z     (W_stride)
 
-Since 4D Data Mover need to write to / read from AXI stream, it also needs to define how to serialize 4D array.
+Since Programmable 4D Data Mover need to write to / read from AXI stream, it also needs to define how to serialize 4D array.
 We define ``ap_int<64> cfg[9]`` as descriptor to define one access:
 
 - cfg[0]:           bias (address of 4D array's first element in memory)
@@ -86,8 +72,8 @@ We define ``ap_int<64> cfg[9]`` as descriptor to define one access:
 - cfg[5], cfg[6]:   stride of third accessed dimension, size of third accessed dimension
 - cfg[7], cfg[8]:   stride of fourth accessed dimension, size of fourth accessed dimension
 
-With the descriptor above, 4D Data Mover will serialize the read/write as pseudo-code below (take read as example):
-4D Data Mover will load one or multiple descriptors from a descriptor buffer.
+With the descriptor above, Programmable 4D Data Mover will serialize the read/write as pseudo-code below (take read as example):
+Programmable 4D Data Mover will load one or multiple descriptors from a descriptor buffer.
 The descriptor buffer begins with a 64bits ``num`` which indicate how many descriptors are there in the buffer.
 Then ``num`` will be followed by one or multiple 9x64bits descriptors, all compact stored.
 It will start parsing the first descriptor, finish the access, then parse and finish the next descriptor.
@@ -106,12 +92,157 @@ It will keep the processing until it finishes all descriptors.
         }
     }
 
-Here's examples of descriptors and their corresponding pattern.
+**Kernel Design**
+
+Programmable 4D Data Movers are templated design to access elements of 32 / 64 / 128 / 256 / 512 bits width.
+They have standalone AXI master port to access descriptor buffer.
+AXI master to access descriptors are configured to be 64 bits wide. Other AXI master and AXI stream port are configured to be same width of data elements.
+AXI master ports share the same "latency" "outstanding" "burst length" setup, and they should be the same with the pragma setup in kernels that wrap up the data mover.
+They share the same kernel generator and JSON spec, please take reference from example below.
+
+.. image:: /images/4d_kernl_interface.png 
+   :alt: various pattern
+   :width: 100%
+   :align: center
+
+Programmable 4D Data Mover's performance depends on:
+
+- Compile time: data width, larger data width, larger bandwidth.
+- Run time: cfg[1] of each descriptor. When cfg[1] = 1, it will lead to burst access and bandwidth will be nice, otherwise it will lead to non-burst access and bandwidth won't be as good as burst access.
+
+.. image:: /images/dm_perf.png 
+   :alt: various pattern
+   :width: 50%
+   :align: center
+
+Build Time Configuration
+-------------------------
+
+**Example Kernel Specification (JSON)**
+
+The following kernel specification in JSON describes a ``4DCuboidRead`` kernel and a ``4DCuboidWrite`` kernel.
+
+The ``4DCuboidRead`` kernel should have 2 data paths as we can see that there are 2 specifications in ``map`` field. 
+Let's take the first data path for example, it will use AXI-M port ``din_0`` to read 4D array and AXI-M ``desp_0`` to access descriptor buffer.
+Both AXI-M ports have "latency", "outstanding" and "burst_len" setup in their HLS kernel pragma. Its output port is AXI-stream ``dout_0`` and both ``din_0`` and ``dout_0``'s port width are 64.
+
+The ``4DCuboidWrite`` kernel should have 2 data paths as we can see that there are 2 specifications in ``map`` field. 
+Let's take the first data path for example, it will use AXI-stream port ``din_0`` to read 4D array and AXI-M ``desp_0`` to access descriptor buffer.
+It will use AXI-M port ``dout_0`` for output. Both AXI-M ports have "latency", "outstanding" and "burst_len" setup in their HLS kernel pragma. Both ``din_0`` and ``dout_0``'s port width are 64.
+
+
+.. code-block:: JSON
+
+    {
+        "cuboid_read": {
+            "impl": "4DCuboidRead",
+            "map": [
+                {
+                    "in_port": {
+                        "buffer": "din_0",
+                        "descriptors": "desp_0",
+                        "latency": 32,
+                        "outstanding": 32,
+                        "burst_len": 32
+                    },
+                    "out_port": {
+                        "stream": "dout_0",
+                        "width": 64
+                    }
+                },
+                {
+                    "in_port": {
+                        "buffer": "din_1",
+                        "descriptors": "desp_1",
+                        "latency": 32,
+                        "outstanding": 32,
+                        "burst_len": 32
+                    },
+                    "out_port": {
+                        "stream": "dout_1",
+                        "width": 64
+                    }
+                }
+            ]
+        },
+        "cuboid_write": {
+            "impl": "4DCuboidWrite",
+            "map": [
+                {
+                    "in_port": {
+                        "stream": "din_0",
+                        "descriptors": "desp_0",
+                        "width": 64
+                    },
+                    "out_port": {
+                        "buffer": "dout_0",
+                        "latency": 32,
+                        "outstanding": 32,
+                        "burst_len": 32
+                    }
+                },
+                {
+                    "in_port": {
+                        "stream": "din_1",
+                        "descriptors": "desp_1",
+                        "width": 64
+                    },
+                    "out_port": {
+                        "buffer": "dout_1",
+                        "latency": 32,
+                        "outstanding": 32,
+                        "burst_len": 32
+                    }
+                }
+            ]
+        }
+    }
+
+**Example of How to generate kernels**
+
+.. code-block:: bash
+
+    cd L2/tests/datamover/4D_datamover
+    make pre_build
+    # The pre_build command is as follows:
+    # pre_build:
+    #     make -f $(CUR_DIR)/ksrc.mk GENKERNEL=$(XFLIB_DIR)/L2/scripts/generate_kernels SPEC=$(CUR_DIR)/kernel/spec.json TOOLDIR=$(CUR_DIR)/_krnlgen
+
+**Example of How to run hardware emulation of hardware**
+
+.. code-block:: bash
+
+   cd L2/tests/datamover/4D_datamover
+   source /opt/xilinx/Vitis/2022.2/settings64.sh
+   source /opt/xilinx/xrt/setup.sh
+   export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
+   make run TARGET=hw DEVICE=${PLATFORM_REPO_PATHS}/xilinx_vck190_base_202210_1/xilinx_vck190_base_202210_1.xpfm
+
+Run Time Configuration
+-----------------------
+
+Programmable 4D Data-Mover will read multiple descriptors from descriptor buffer which can be configed from host side in run-time.
+Descriptor buffer is compacted store in memory and start with 1x64bit ``num`` that indicate how many descriptors are there in the buffer.
+Then ``num`` is followed by one or multiple descriptors.
+
+Here's examples of descriptor buffer and corresponding patterns.
 The underlying array is a 3D array (due to difficulties to draw a actual 4D array): ``A[10][7][8]`` which could be treated as ``A[1][10][7][8]``.
 Its first element's address is 0, which means 'bias' = 0. Its size means that W = 1, Z = 10, Y = 7, X = 8.
 We can assume that its mapping lead to W_stride = 0 (), Z_stride = 56, Y_stride = 8, X_stride = 1.
 
-Descriptor 1: {0, 1, 8, 8, 7, 56, 10, 0, 1}. The implied pattern is:
+.. code-block:: cpp
+
+   {4,
+    0, 1, 8, 8, 7, 56, 10, 0, 1,
+    0, 8, 7, 1, 8, 56, 10, 0, 1,
+    0, 56, 10, 8, 7, 1, 8, 0, 1,
+    4, 1, 4, 8, 3, 56, 2, 0, 1}
+
+
+The first number in buffer is ``4`` which means there are 4 descriptors followed.
+Their implied pattern are as below:
+
+Descriptor[0]: {0, 1, 8, 8, 7, 56, 10, 0, 1}. The implied pattern is:
 
 .. code-block:: cpp
 
@@ -132,7 +263,7 @@ Descriptor 1: {0, 1, 8, 8, 7, 56, 10, 0, 1}. The implied pattern is:
    :width: 30%
    :align: center
 
-Descriptor 2: {0, 8, 7, 1, 8, 56, 10, 0, 1}. The implied pattern is:
+Descriptor[1]: {0, 8, 7, 1, 8, 56, 10, 0, 1}. The implied pattern is:
 
 .. code-block:: cpp
 
@@ -153,7 +284,7 @@ Descriptor 2: {0, 8, 7, 1, 8, 56, 10, 0, 1}. The implied pattern is:
    :width: 30%
    :align: center
 
-Descriptor 3: {0, 56, 10, 8, 7, 1, 8, 0, 1}. The implied pattern is:
+Descriptor[2]: {0, 56, 10, 8, 7, 1, 8, 0, 1}. The implied pattern is:
 
 .. code-block:: cpp
 
@@ -174,7 +305,7 @@ Descriptor 3: {0, 56, 10, 8, 7, 1, 8, 0, 1}. The implied pattern is:
    :width: 30%
    :align: center
 
-Descriptor 4: {4, 1, 4, 8, 3, 56, 2, 0, 1}. The implied pattern is:
+Descriptor[3]: {4, 1, 4, 8, 3, 56, 2, 0, 1}. The implied pattern is:
 
 .. code-block:: cpp
 
@@ -195,30 +326,35 @@ Descriptor 4: {4, 1, 4, 8, 3, 56, 2, 0, 1}. The implied pattern is:
    :width: 30%
    :align: center
 
-Programmable 4D Data Movers are templated design to access elements of 32 / 64 / 128 / 256 / 512 bits width.
-They have standalone AXI master port to access descriptor buffer.
-AXI master to access descriptors are configured to be 64 bits wide. Other AXI master and AXI stream port are configured to be same width of data elements.
-AXI master ports share the same "latency" "outstanding" "burst length" setup, and they should be the same with the pragma setup in kernels that wrap up the data mover.
-They share the same kernel generator and JSON spec, please take reference from example below.
 
-.. image:: /images/4d_kernl_interface.png 
-   :alt: various pattern
-   :width: 100%
-   :align: center
+Static Data-Mover
+==================
 
+Feature
+--------
 
-Programmable 4D Data Mover's performance depends on:
+``Static Data Mover`` has 9 types of kernels in 2 different categories.
+They all access certain amount of data in Memory/URAM/BRAM in a continuous style.
+This is the only access pattern.
 
-- Compile time: data width, larger data width, larger bandwidth.
-- Run time: cfg[1] of each descriptor. When cfg[1] = 1, it will lead to burst access and bandwidth will be nice, otherwise it will lead to non-burst access and bandwidth won't be as good as burst access.
+Data to AIE:
 
-.. image:: /images/dm_perf.png 
-   :alt: various pattern
-   :width: 50%
-   :align: center
+- LoadDdrToStream: For loading data from PL's DDR to AIE through AXI stream
+- LoadDdrToStreamWithCounter: For loading data from PL's DDR to AIE through AXI stream and recording the data count sending to AIE
+- SendRomToStream: For sending data from on-chip BRAM to AIE through AXI stream
+- SendRamToStream: The same as ``SendRomToStream``, but the difference is that the source data is coming from URAM instead of BRAM
 
+Data from AIE:
 
- 
+- StoreStreamToMaster: For receiving data from AIE through AXI stream and save them to PL's DDR
+- StoreStreamToMasterWithCounter: For receiving data from AIE through AXI stream and saving them to PL's DDR, as well as recording the data count sending to DDR
+- ValidateStreamWithMaster: For receiving data from AIE through AXI stream and comparing with the goldens in PL's DDR, as well as putting the overall pass/fail flag into PL's DDR
+- ValidateStreamWithRom: For receiving data from AIE through AXI stream and comparing with the goldens in PL's BRAM, as well as putting the overall pass/fail flag into PL's DDR
+- ValidateStreamWithRam: For receiving data from AIE through AXI stream and comparing with the goldens in PL's URAM, as well as putting the overall pass/fail flag into PL's DDR
+
+Build Time Configuration
+-------------------------
+
 **Example Kernel Specification (JSON)**
 
 The following kernel specification in JSON describes a ``SendRomToStream`` kernel and a ``StoreStreamToMaster`` kernel.
@@ -282,10 +418,9 @@ The ``StoreStreamToMater`` kernel should also have 2 data paths. As we want to l
         }
     }
 
-
 Kindly refer to ``L2/tests/datamover`` for JSON format of all 9 types of kernels that can be generated.
 
-**Exampple of How to generate kernels**
+**Example of How to generate kernels**
 
 .. code-block:: bash
 
@@ -294,7 +429,20 @@ Kindly refer to ``L2/tests/datamover`` for JSON format of all 9 types of kernels
     # The pre_build command is as follows:
     # pre_build:
     #     make -f $(CUR_DIR)/ksrc.mk GENKERNEL=$(XFLIB_DIR)/L2/scripts/generate_kernels SPEC=$(CUR_DIR)/kernel/spec.json TOOLDIR=$(CUR_DIR)/_krnlgen
+    
+**Example of How to run hardware emulation of hardware**
 
+.. code-block:: bash
+
+   cd L2/tests/datamover/load_master_to_stream
+   source /opt/xilinx/Vitis/2022.2/settings64.sh
+   source /opt/xilinx/xrt/setup.sh
+   export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
+   make run TARGET=hw DEVICE=${PLATFORM_REPO_PATHS}/xilinx_vck190_base_202210_1/xilinx_vck190_base_202210_1.xpfm
+
+.. ATTENTION::
+   * Only HW_EMU and HW run available
+   * Kernel-to-kernel streaming is not available in software emulation, design can only be enulated in hardware emulation.
 
 
 Data Converter
@@ -328,59 +476,4 @@ Please be noticed that there are several limitations for this data converter, so
 +--------------+
 | int64_t      |
 +--------------+
-
-Full Example Projects
----------------------
-
-* **Work Directory**
-Choose `load_master_to_stream` as example, show the steps of build and run kernel
-
-.. code-block:: bash
-
-    cd L2/tests/datamover/load_master_to_stream
-
-* **Setup environment**
-Specifying the corresponding Vitis, XRT, and path to the platform repository by running following commands.
-
-.. code-block:: bash
-
-   source /opt/xilinx/Vitis/2022.2/settings64.sh
-   source /opt/xilinx/xrt/setup.sh
-   export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
-
-* **Build and Run Kernel**
-
-.. code-block:: bash
-
-    make run TARGET=hw DEVICE=${PLATFORM_REPO_PATHS}/xilinx_vck190_base_202210_1/xilinx_vck190_base_202210_1.xpfm 
-
-.. ATTENTION::
-    * Only HW_EMU and HW run available
-    * Kernel-to-kernel streaming is not available in software emulation, design can only be enulated in hardware emulation.
-
-
-* **Performance**
-    A serial of tests for 1 channel datamover from DDR to Stream is as bellow. The frequency in this test is 300MHz, and the platform is vck190.
-
-    +------------------------+--------------------+-------------------+
-    | Input_Size (Byte)      |  Kernel_Time (ms)  |  BandWidth(GB/s)  |
-    +------------------------+--------------------+-------------------+
-    | 16777216 (2^24 Byte)   |       8.51274      |   1.879535849     | 
-    +------------------------+--------------------+-------------------+
-    | 33554432 (2^25 Byte)   |       17.1036      |   1.870951145     | 
-    +------------------------+--------------------+-------------------+
-    | 67108864 (2^26 Byte)   |       34.4284      |   1.858930418     | 
-    +------------------------+--------------------+-------------------+
-    | 134217728 (2^27 Byte)  |       70.3489      |   1.819502508     | 
-    +------------------------+--------------------+-------------------+
-    | 268435456 (2^28 Byte)  |       137.864      |   1.856902455     | 
-    +------------------------+--------------------+-------------------+
-    | 536870912 (2^29 Byte)  |       274.997      |   1.861838493     | 
-    +------------------------+--------------------+-------------------+
-    | 1073741824 (2^30 Byte) |       551.768      |   1.85585246      | 
-    +------------------------+--------------------+-------------------+
-
-
-
-
 
