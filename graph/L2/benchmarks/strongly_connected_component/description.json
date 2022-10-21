@@ -1,18 +1,17 @@
 {
-    "gui": false, 
-    "name": "Xilinx Strongly Connected Components Benchmark", 
-    "description": "An example for the strongly connected component (SCC) of each vertex and return a graph with the vertex value containing the lowest vertex id in the SCC containing that vertex", 
-    "flow": "vitis", 
+    "gui": false,
+    "name": "Xilinx Strongly Connected Components Benchmark",
+    "description": "An example for the strongly connected component (SCC) of each vertex and return a graph with the vertex value containing the lowest vertex id in the SCC containing that vertex",
+    "flow": "vitis",
     "platform_allowlist": [
-        "u50", 
-        "u200", 
+        "u50",
+        "u200",
         "u250",
-        "aws-vu9p-f1", 
-        "vck190"
-    ], 
+        "aws-vu9p-f1"
+    ],
     "platform_blocklist": [
         "zc"
-    ], 
+    ],
     "platform_properties": {
         "u50": {
             "v++": {
@@ -22,7 +21,7 @@
                     ]
                 }
             }
-        }, 
+        },
         "u200": {
             "v++": {
                 "compiler": {
@@ -31,7 +30,7 @@
                     ]
                 }
             }
-        }, 
+        },
         "aws-vu9p-f1": {
             "v++": {
                 "compiler": {
@@ -49,179 +48,153 @@
                     ]
                 }
             }
-        },
-        "vck190": {
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_vck190.cfg"
-                    ]
-                }
-            },
-            "containers": [
-                {
-                    "frequency": 150.0,
-                    "name": "scc_kernel"
-                }
-            ]
         }
     },
-    "data":[
+    "data": [
         "PROJECT/data/test_offset.csr",
         "PROJECT/data/test_column.csr",
         "PROJECT/data/test_golden.mtx"
     ],
     "launch": [
         {
-            "cmd_args": " -xclbin BUILD/scc_kernel.xclbin -o PROJECT/data/test_offset.csr -c PROJECT/data/test_column.csr -g PROJECT/data/test_golden.mtx", 
+            "cmd_args": " -xclbin BUILD/scc_kernel.xclbin -o PROJECT/data/test_offset.csr -c PROJECT/data/test_column.csr -g PROJECT/data/test_golden.mtx",
             "name": "generic launch for all flows"
-        },
-        {
-            "cmd_args": " -xclbin scc_kernel.xclbin -o test_offset.csr -c test_column.csr -g PROJECT/data/test_golden.mtx", 
-            "platform": "vck190",
-            "name": "vck 190 launch"
-        },
-        {
-            "cmd_args": " -xclbin BUILD/scc_kernel.xclbin -o PROJECT/data/test_offset.csr -c PROJECT/data/test_column.csr -g PROJECT/data/test_golden.mtx", 
-            "target": "sw_emu",
-            "platform": "vck190",
-            "name": "sw_emu vck 190 launch"
         }
-    ], 
+    ],
     "host": {
-        "host_exe": "host.exe", 
+        "host_exe": "host.exe",
         "compiler": {
             "sources": [
-                "LIB_DIR/L2/benchmarks/strongly_connected_component/host/main.cpp", 
+                "LIB_DIR/L2/benchmarks/strongly_connected_component/host/main.cpp",
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
-            ], 
+            ],
             "includepaths": [
-                "LIB_DIR/L2/include", 
-                "LIB_DIR/L2/benchmarks/strongly_connected_component/host", 
-                "LIB_DIR/L2/benchmarks/strongly_connected_component/kernel", 
+                "LIB_DIR/L2/include",
+                "LIB_DIR/L2/benchmarks/strongly_connected_component/host",
+                "LIB_DIR/L2/benchmarks/strongly_connected_component/kernel",
                 "LIB_DIR/ext/xcl2"
-            ], 
+            ],
             "options": "-O3 "
         }
-    }, 
+    },
     "v++": {
         "compiler": {
             "includepaths": [
-                "LIB_DIR/L2/include", 
+                "LIB_DIR/L2/include",
                 "LIB_DIR/L2/benchmarks/strongly_connected_component/kernel"
             ]
         }
-    }, 
+    },
     "containers": [
         {
             "accelerators": [
                 {
-                    "location": "LIB_DIR/L2/benchmarks/strongly_connected_component/kernel/scc_kernel.cpp", 
-                    "frequency": 300.0, 
-                    "clflags": " -D KERNEL_NAME=scc_kernel", 
-                    "name": "scc_kernel", 
-                    "num_compute_units": 1, 
+                    "location": "LIB_DIR/L2/benchmarks/strongly_connected_component/kernel/scc_kernel.cpp",
+                    "frequency": 300.0,
+                    "clflags": " -D KERNEL_NAME=scc_kernel",
+                    "name": "scc_kernel",
+                    "num_compute_units": 1,
                     "compute_units": [
                         {
-                            "name": "scc_kernel", 
-                            "slr": "SLR0", 
+                            "name": "scc_kernel",
+                            "slr": "SLR0",
                             "arguments": [
                                 {
-                                    "name": "columnG1", 
+                                    "name": "columnG1",
                                     "memory": "DDR[0]"
-                                }, 
+                                },
                                 {
-                                    "name": "offsetG1", 
+                                    "name": "offsetG1",
                                     "memory": "DDR[0]"
-                                }, 
+                                },
                                 {
-                                    "name": "column512G2", 
+                                    "name": "column512G2",
                                     "memory": "DDR[1]"
-                                }, 
+                                },
                                 {
-                                    "name": "column32G2", 
+                                    "name": "column32G2",
                                     "memory": "DDR[1]"
-                                }, 
+                                },
                                 {
-                                    "name": "offsetG2", 
+                                    "name": "offsetG2",
                                     "memory": "DDR[1]"
-                                }, 
+                                },
                                 {
-                                    "name": "columnG3", 
+                                    "name": "columnG3",
                                     "memory": "DDR[0]"
-                                }, 
+                                },
                                 {
-                                    "name": "offsetG3", 
+                                    "name": "offsetG3",
                                     "memory": "DDR[0]"
-                                }, 
+                                },
                                 {
-                                    "name": "offsetG2Tmp1", 
+                                    "name": "offsetG2Tmp1",
                                     "memory": "DDR[1]"
-                                }, 
+                                },
                                 {
-                                    "name": "offsetG2Tmp2", 
+                                    "name": "offsetG2Tmp2",
                                     "memory": "DDR[1]"
-                                }, 
+                                },
                                 {
-                                    "name": "colorMap512G1", 
+                                    "name": "colorMap512G1",
                                     "memory": "DDR[0]"
-                                }, 
+                                },
                                 {
-                                    "name": "colorMap32G1", 
+                                    "name": "colorMap32G1",
                                     "memory": "DDR[0]"
-                                }, 
+                                },
                                 {
-                                    "name": "queueG1", 
+                                    "name": "queueG1",
                                     "memory": "DDR[0]"
-                                }, 
+                                },
                                 {
-                                    "name": "colorMap512G2", 
+                                    "name": "colorMap512G2",
                                     "memory": "DDR[0]"
-                                }, 
+                                },
                                 {
-                                    "name": "colorMap32G2", 
+                                    "name": "colorMap32G2",
                                     "memory": "DDR[0]"
-                                }, 
+                                },
                                 {
-                                    "name": "queueG2", 
+                                    "name": "queueG2",
                                     "memory": "DDR[0]"
-                                }, 
+                                },
                                 {
-                                    "name": "queueG3", 
+                                    "name": "queueG3",
                                     "memory": "DDR[0]"
                                 }
                             ]
                         }
                     ]
                 }
-            ], 
-            "frequency": 300.0, 
+            ],
+            "frequency": 300.0,
             "name": "scc_kernel"
         }
-    ], 
+    ],
     "testinfo": {
-        "disable": false, 
+        "disable": false,
         "jobs": [
             {
-                "index": 0, 
-                "dependency": [], 
-                "env": "", 
-                "cmd": "", 
-                "max_memory_MB": 32768, 
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": 32768,
                 "max_time_min": {
-                    "vitis_hw_build": 470, 
-                    "vitis_hw_emu": 300, 
-                    "vitis_sw_emu": 60, 
+                    "vitis_hw_build": 470,
+                    "vitis_hw_emu": 300,
+                    "vitis_sw_emu": 60,
                     "vitis_hw_run": 10
                 }
             }
-        ], 
+        ],
         "targets": [
-            "vitis_sw_emu", 
-            "vitis_hw_emu", 
-            "vitis_hw_build", 
+            "vitis_sw_emu",
+            "vitis_hw_emu",
+            "vitis_hw_build",
             "vitis_hw_run"
-        ], 
+        ],
         "category": "canary"
     }
 }

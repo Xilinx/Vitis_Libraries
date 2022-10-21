@@ -24,6 +24,12 @@ Release Note
 
 Vitis Graph Library is an open-sourced Vitis library written in C++ for accelerating graph applications in a variety of use cases. It now covers a level of acceleration: the module level (L1), the pre-defined kernel level (L2) and the asynchronous software level (L3).
 
+2022.2
+----
+- Add a new algorithm for merging vertices belong to same community.
+- Enhanced Louvain Modularity. L2 Louvain Modularity is able to support large-degree graphs.
+- One known issue for L3 Louvain Modularity: it works well on U55C in 2022.1 release, but it has been enouncing routing problem in this release. To be fixed in comming addition release.
+
 2022.1
 ----
 - Add a new algorithm Maximal Independent Set.

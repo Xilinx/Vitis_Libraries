@@ -72,23 +72,23 @@
                             "slr": "SLR0", 
                             "arguments": [
                                 {
-                                    "name": "gmem0", 
+                                    "name": "m_axi_gmem0", 
                                     "memory": "HBM[8]"
                                 }, 
                                 {
-                                    "name": "gmem1", 
+                                    "name": "m_axi_gmem1", 
                                     "memory": "HBM[0:1]"
                                 }, 
                                 {
-                                    "name": "gmem2", 
+                                    "name": "m_axi_gmem2", 
                                     "memory": "HBM[2:3]"
                                 }, 
                                 {
-                                    "name": "gmem3", 
+                                    "name": "m_axi_gmem3", 
                                     "memory": "HBM[4:5]"
                                 }, 
                                 {
-                                    "name": "gmem4", 
+                                    "name": "m_axi_gmem4", 
                                     "memory": "HBM[6:7]"
                                 } 
                             ]

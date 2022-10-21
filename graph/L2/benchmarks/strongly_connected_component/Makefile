@@ -35,7 +35,7 @@ help::
 	$(ECHO) "        Run the sdk.sh script from the common-image directory to install sysroot using the command : ./sdk.sh -y -d ./ -p "
 	$(ECHO) "        Unzip the rootfs file : gunzip ./rootfs.ext4.gz"
 	$(ECHO) "        export SYSROOT=< path-to-platform-sysroot >"
-	$(ECHO) "      b. User could also define SYSROOT, K_IMAGE and ROOTFS by themselves: "
+	$(ECHO) "      b.User could also define SYSROOT, K_IMAGE and ROOTFS by themselves: "
 	$(ECHO) "        export SYSROOT=< path-to-platform-sysroot >"
 	$(ECHO) "        export K_IMAGE=< path-to-Image-files >"
 	$(ECHO) "        export ROOTFS=< path-to-rootfs >"
@@ -43,7 +43,7 @@ help::
 	$(ECHO) "  make clean "
 	$(ECHO) "      Command to remove the generated non-hardware files."
 	$(ECHO) ""
-	$(ECHO) "  make cleanall"
+	$(ECHO) "  make cleanall TARGET=<hw/hw_emu/sw_emu/>"
 	$(ECHO) "      Command to remove all the generated files."
 	$(ECHO) ""
 
@@ -67,7 +67,7 @@ PLATFORM := xilinx_u50_gen3x16_xdma_5_202210_1
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST +=  u50 u200 u250 aws-vu9p-f1 vck190
+PLATFORM_ALLOWLIST +=  u50 u200 u250 aws-vu9p-f1
 PLATFORM_BLOCKLIST +=  zc
 
 include ./utils.mk
@@ -125,19 +125,13 @@ ifeq (,$(findstring opencv,$(CXXFLAGS)))
 CXXFLAGS += $(XRT_CXXFLAGS)
 endif
 
-EXE_NAME := host.exe
+EXE_NAME := host.exe 
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 EXE_FILE_DEPS := $(HOST_SRCS) $(EXE_FILE_DEPS)
 
 HOST_ARGS :=  -xclbin $(BUILD_DIR)/scc_kernel.xclbin -o $(CUR_DIR)/data/test_offset.csr -c $(CUR_DIR)/data/test_column.csr -g $(CUR_DIR)/data/test_golden.mtx
 ifneq ($(HOST_ARCH), x86)
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
-endif
-ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
-HOST_ARGS :=  -xclbin $(BUILD_DIR)/scc_kernel.xclbin -o $(CUR_DIR)/data/test_offset.csr -c $(CUR_DIR)/data/test_column.csr -g $(CUR_DIR)/data/test_golden.mtx
-ifneq ($(HOST_ARCH), x86)
-PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
-endif
 endif
 
 ########################## Kernel compiler global settings ##########################
@@ -157,26 +151,12 @@ else ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
 VPP_FLAGS +=   --config $(CUR_DIR)/conn_u200_u250.cfg
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L2/benchmarks/strongly_connected_component/kernel -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/../database/L1/include/hw -I $(XFLIB_DIR)/../quantitative_finance/L1/include -I $(XFLIB_DIR)/../utils/L1/include
 
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
-VPP_FLAGS +=   --config $(CUR_DIR)/conn_vck190.cfg
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L2/benchmarks/strongly_connected_component/kernel -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/../database/L1/include/hw -I $(XFLIB_DIR)/../quantitative_finance/L1/include -I $(XFLIB_DIR)/../utils/L1/include
-
 else 
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L2/benchmarks/strongly_connected_component/kernel -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/../database/L1/include/hw -I $(XFLIB_DIR)/../quantitative_finance/L1/include -I $(XFLIB_DIR)/../utils/L1/include
 
 endif
 
 ######################### binary container global settings ##########################
-ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
-VPP_FLAGS_scc_kernel +=  -D KERNEL_NAME=scc_kernel
-VPP_FLAGS_scc_kernel += --hls.clock 300000000:scc_kernel
-ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_scc_kernel += --clock.defaultFreqHz 150000000
-else
-VPP_LDFLAGS_scc_kernel += --kernel_frequency 150
-endif
-
-else 
 VPP_FLAGS_scc_kernel +=  -D KERNEL_NAME=scc_kernel
 VPP_FLAGS_scc_kernel += --hls.clock 300000000:scc_kernel
 ifneq ($(HOST_ARCH_temp), x86)
@@ -185,7 +165,6 @@ else
 VPP_LDFLAGS_scc_kernel += --kernel_frequency 300
 endif
 
-endif
 ifneq ($(SD_CARD_NEEDED), on)
 BINARY_CONTAINERS += $(BUILD_DIR)/scc_kernel.xclbin
 else
@@ -235,8 +214,8 @@ endif
 	@echo 'fi' >> $(RUN_SCRIPT)
 	@echo 'echo "INFO: Embedded host run completed."' >> $(RUN_SCRIPT)
 	@echo 'exit $$return_code' >> $(RUN_SCRIPT)
-DATA_FILE := $(CUR_DIR)//data/test_golden.mtx $(CUR_DIR)//data/test_column.csr $(CUR_DIR)//data/test_offset.csr 
-DATA_DIR := 
+DATA_FILE := $(CUR_DIR)//data/test_golden.mtx $(CUR_DIR)//data/test_column.csr $(CUR_DIR)//data/test_offset.csr $(custom_data_file)
+DATA_DIR := $(custom_data_dir)
 SD_FILES += $(RUN_SCRIPT)
 SD_FILES += $(EXE_FILE)
 SD_FILES += $(EMCONFIG)
@@ -282,7 +261,9 @@ mkflag:
 	mkdir -p $(BUILD_DIR)
 	rm -rf $(BUILD_DIR)/makefile_args.txt
 	@for var in $(MAKEFLAGS); do echo $$var >> $(BUILD_DIR)/makefile_args.txt; done
+
 all: check_device check_vpp check_platform mkflag $(RUN_DEPS)
+
 run: all
 #hw_emu
 ifneq (,$(filter hw_emu, $(TARGET)))
@@ -352,11 +333,11 @@ endif
 ############################## Cleaning Rules ##############################
 cleanh:
 	-$(RMDIR) $(EXE_FILE) vitis_* TempConfig system_estimate.xtxt *.rpt .run/
-	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb sample_link.ini sample_compile.ini obj*  bin* *.csv *.jpg *.jpeg *.png
+	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb sample_link.ini sample_compile.ini obj*  bin* *.csv *.jpg *.jpeg *.png *.db
 
 cleank:
 	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl*start_simulation. sh *.xclbin
-	-$(RMDIR) _x_temp.*
+	-$(RMDIR) _x_temp.* _x*
 
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR)  emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str

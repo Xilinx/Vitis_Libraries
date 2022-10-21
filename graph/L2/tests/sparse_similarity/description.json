@@ -71,119 +71,103 @@
                             "slr": "SLR0",
                             "arguments": [
                                 {
-                                    "name": "config",
-                                    "memory": "HBM[24]"
-                                },
-                                {
-                                    "name": "sourceIndice",
-                                    "memory": "HBM[24]"
-                                },
-                                {
-                                    "name": "sourceWeight",
-                                    "memory": "HBM[24]"
-                                },
-                                {
-                                    "name": "resultID",
-                                    "memory": "HBM[24]"
-                                },
-                                {
-                                    "name": "similarity",
+                                    "name": "m_axi_gmem8_0",
                                     "memory": "HBM[24]"
                                 },
 				                {
-                                    "name": "offsetCSR0",
+                                    "name": "m_axi_gmem0_0",
                                     "memory": "HBM[0]"
                                 },
 				                {
-                                    "name": "indiceCSR0",
+                                    "name": "m_axi_gmem0_1",
                                     "memory": "HBM[1]"
                                 },
 				                {
-                                    "name": "weight0",
+                                    "name": "m_axi_gmem0_2",
                                     "memory": "HBM[2]"
                                 },
 				                {
-                                    "name": "offsetCSR1",
+                                    "name": "m_axi_gmem1_0",
                                     "memory": "HBM[3]"
                                 },
 				                {
-                                    "name": "indiceCSR1",
+                                    "name": "m_axi_gmem1_1",
                                     "memory": "HBM[4]"
                                 },
 				                {
-                                    "name": "weight1",
+                                    "name": "m_axi_gmem1_2",
                                     "memory": "HBM[5]"
                                 },
 				                {
-                                    "name": "offsetCSR2",
+                                    "name": "m_axi_gmem2_0",
                                     "memory": "HBM[6]"
                                 },
 				                {
-                                    "name": "indiceCSR2",
+                                    "name": "m_axi_gmem2_1",
                                     "memory": "HBM[7]"
                                 },
                                 {
-                                    "name": "weight2",
+                                    "name": "m_axi_gmem2_2",
                                     "memory": "HBM[8]"
                                 },
 				                {
-                                    "name": "offsetCSR3",
+                                    "name": "m_axi_gmem3_0",
                                     "memory": "HBM[9]"
                                 },
 				                {
-                                    "name": "dindiceCSR3",
+                                    "name": "m_axi_gmem3_1",
                                     "memory": "HBM[10]"
                                 },
 				                {
-                                    "name": "weight3",
+                                    "name": "m_axi_gmem3_2",
                                     "memory": "HBM[11]"
                                 },
 				                {
-                                    "name": "offsetCSR4",
+                                    "name": "m_axi_gmem4_0",
                                     "memory": "HBM[12]"
                                 },
 				                {
-                                    "name": "indiceCSR4",
+                                    "name": "m_axi_gmem4_1",
                                     "memory": "HBM[13]"
                                 },
 				                {
-                                    "name": "weight4",
+                                    "name": "m_axi_gmem4_2",
                                     "memory": "HBM[14]"
                                 },
 				                {
-                                    "name": "offsetCSR5",
+                                    "name": "m_axi_gmem5_0",
                                     "memory": "HBM[15]"
                                 },
                                 {
-                                    "name": "indiceCSR5",
+                                    "name": "m_axi_gmem5_1",
                                     "memory": "HBM[16]"
                                 },
 				                {
-                                    "name": "weight5",
+                                    "name": "m_axi_gmem5_2",
                                     "memory": "HBM[17]"
                                 },
 				                {
-                                    "name": "offsetCSR6",
+                                    "name": "m_axi_gmem6_0",
                                     "memory": "HBM[18]"
                                 },
 				                {
-                                    "name": "indiceCSR6",
+                                    "name": "m_axi_gmem6_1",
                                     "memory": "HBM[19]"
                                 },
                                 {
-                                    "name": "weight6",
+                                    "name": "m_axi_gmem6_2",
                                     "memory": "HBM[20]"
                                 },
 				                {
-                                    "name": "offsetCSR7",
+                                    "name": "m_axi_gmem7_0",
                                     "memory": "HBM[21]"
                                 },
 				                {
-                                    "name": "dindiceCSR7",
+                                    "name": "m_axi_gmem7_1",
                                     "memory": "HBM[22]"
                                 },
 				                {
-                                    "name": "weight7",
+                                    "name": "m_axi_gmem7_2",
                                     "memory": "HBM[23]"
                                 }
                             ]

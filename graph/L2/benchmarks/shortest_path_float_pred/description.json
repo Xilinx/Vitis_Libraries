@@ -79,47 +79,47 @@
                             "slr": "SLR0", 
                             "arguments": [
                                 {
-                                    "name": "config", 
+                                    "name": "m_axi_gmem0", 
                                     "memory": "HBM[0]"
                                 }, 
                                 {
-                                    "name": "offset", 
+                                    "name": "m_axi_gmem0", 
                                     "memory": "HBM[0]"
                                 }, 
                                 {
-                                    "name": "column", 
+                                    "name": "m_axi_gmem1", 
                                     "memory": "HBM[2]"
                                 }, 
                                 {
-                                    "name": "weight", 
+                                    "name": "m_axi_gmem2", 
                                     "memory": "HBM[4]"
                                 }, 
                                 {
-                                    "name": "ddrQue", 
+                                    "name": "m_axi_gmem3", 
                                     "memory": "HBM[0]"
                                 }, 
                                 {
-                                    "name": "ddrQue512", 
+                                    "name": "m_axi_gmem3", 
                                     "memory": "HBM[0]"
                                 }, 
                                 {
-                                    "name": "result512", 
+                                    "name": "m_axi_gmem4", 
                                     "memory": "HBM[2]"
                                 }, 
                                 {
-                                    "name": "info", 
+                                    "name": "m_axi_gmem4", 
                                     "memory": "HBM[2]"
                                 }, 
                                 {
-                                    "name": "result", 
+                                    "name": "m_axi_gmem4", 
                                     "memory": "HBM[2]"
                                 }, 
                                 {
-                                    "name": "pred512", 
+                                    "name": "m_axi_gmem5", 
                                     "memory": "HBM[4]"
                                 }, 
                                 {
-                                    "name": "pred", 
+                                    "name": "m_axi_gmem5", 
                                     "memory": "HBM[4]"
                                 }
                             ]

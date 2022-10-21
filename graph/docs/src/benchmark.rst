@@ -130,23 +130,21 @@ Spark
 
 Tigergraph
 ~~~~~~~~~~
-* `Tigergraph 2.4.1 installed and configured <https://xilinx.github.io/Vitis_Libraries/graph/2022.1/plugin/tigergraph_integration.html>`_.
+* `Tigergraph 2.4.1 installed and configured <https://docs.xilinx.com/r/en-US/Vitis_Libraries/graph/plugin/tigergraph_integration.html>`_.
 * Tigergraph running on platform with Intel(R) Xeon(R) CPU E5-2640 v3 @2.600GHz, 32 Threads (16 Core(s)).
 
 .. _l2_vitis_graph:
 
-Vitis Graph Library
-~~~~~~~~~~~~~~~~~~~
 
 * **Download code**
 
-These graph benchmarks can be downloaded from `vitis libraries <https://github.com/Xilinx/Vitis_Libraries.git>`_ ``master`` branch.
+These graph benchmarks can be downloaded from `vitis libraries <https://github.com/Xilinx/Vitis_Libraries.git>`_ ``main`` branch.
 
 .. code-block:: bash
 
    git clone https://github.com/Xilinx/Vitis_Libraries.git 
    cd Vitis_Libraries
-   git checkout master
+   git checkout main
    cd graph
 
 * **Setup environment**

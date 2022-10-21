@@ -15,22 +15,44 @@ The algorithms implemented by Vitis Graph Library include:
 - Search: Breadth First Search and 2-Hop Search.
 - Graph Format: Renumber, Calculate Degree and Format Convertion between CSR and CSC.
 
+## Source Files and Application Development
+Vitis libraries are organized into L1, L2, and L3 folders, each relating to a different stage of application development.
+
+**L1** :
+      Makefiles and sources in L1 facilitate HLS based flow for quick checks. Tasks at this level include:
+
+* Check the functionality of an individual kernel (C-simulation)
+* Estimate resource usage, latency, etc. (Synthesis)
+* Run cycle accurate simulations (Co-simulation)
+* Package as IP and get final resource utilization/timing details (Export RTL)
+       
+	**Note**:  Once RTL (or XO file after packaging IP) is generated, the Vivado flow is invoked for XCLBIN file generation if required.
+
+**L2** :
+       Makefiles and sources in L2 facilitate building XCLBIN file from various sources (HDL, HLS or XO files) of kernels with host code written in OpenCL/XRT framework targeting a device. This flow supports:
+
+* Software emulation to check the functionality
+* Hardware emulation to check RTL level simulation
+* Build and test on hardware
+
+**L3** :
+       Makefiles and sources in L3 demonstrate applications developed involving multiple kernels in pipeline. These Makefiles can be used for executing tasks, as with the L2 Makefiles.
 
 ## Benchmark Result
 
-In `L2/benchmarks`, these kernels are built into xclbins targeting Alveo U250/U50. We achieved a good performance on several dataset. For more details about the benchmarks, please find them in [benchmark results](https://xilinx.github.io/Vitis_Libraries/graph/2022.1/benchmark.html).
+In `L2/benchmarks`, these kernels are built into xclbins targeting Alveo U250/U50. We achieved a good performance on several dataset. For more details about the benchmarks, please find them in [benchmark results](https://docs.xilinx.com/r/en-US/Vitis_Libraries/graph/benchmark.html).
 
 ## Software level API
 
-`L3` offers asynchronous software level APIs. The L3 framework can fully use the hardware resources and achieve high throughput scheduling. And users can send multiple requests at the same time. For details on running these cases, please refer to [Vitis Graph Library Documentation](https://xilinx.github.io/Vitis_Libraries/graph/2022.1/guide_L3/L3_internal/getting_started.html).
+`L3` offers asynchronous software level APIs. The L3 framework can fully use the hardware resources and achieve high throughput scheduling. And users can send multiple requests at the same time. For details on running these cases, please refer to [Vitis Graph Library Documentation](https://docs.xilinx.com/r/en-US/Vitis_Libraries/graph/guide_L3/L3_internal/getting_started.html).
 
-## Get Start
+## Get Started
 
-To get start with the Vitis Graph Library, please have a visit on our [tutorial page](https://xilinx.github.io/Vitis_Libraries/graph/2022.1/tutorial.html).
+To get started with the Vitis Graph Library, please have a visit on our [tutorial page](https://docs.xilinx.com/r/en-US/Vitis_Libraries/graph/tutorial.html).
 
 ## Documentations
 
-For more details of the Graph library, please refer to [Vitis Graph Library Documentation](https://xilinx.github.io/Vitis_Libraries/graph/2022.1/index.html).
+For more details of the Graph library, please refer to [Vitis Graph Library Documentation](https://docs.xilinx.com/r/en-US/Vitis_Libraries/graph/index.html).
 
 ## License
 
