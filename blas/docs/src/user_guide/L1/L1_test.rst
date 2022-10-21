@@ -34,12 +34,12 @@ Please follow the instructions described in :doc:`Python environment setup guide
 
 2. Set up Vivado_hls environment
 =================================
-Please navigate to directory L1/tests, and change the setting of environment variable **TA_PATH** to point to the installation path of your Vitis 2020.2, and run following command to set up Vivado_hls environment.
+Please navigate to directory L1/tests, and change the setting of environment variable **TA_PATH** to point to the installation path of your Vitis 2022.2, and run following command to set up Vivado_hls environment.
 
 .. code-block:: bash
 
-   export XILINX_VITIS=${TA_PATH}/Vitis/2020.2
-   export XILINX_VIVADO=${TA_PATH}/Vivado/2020.2
+   export XILINX_VITIS=${TA_PATH}/Vitis/2022.2
+   export XILINX_VIVADO=${TA_PATH}/Vivado/2022.2
    source ${XILINX_VIVADO}/settings64.sh
 
 3. Test L1 primitives

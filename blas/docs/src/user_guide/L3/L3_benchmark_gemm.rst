@@ -38,7 +38,7 @@ This example resides in ``L3/benchmarks/gemm/memKernel`` directory. The tutorial
 1.1.1 Work Directory(Step 1)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The steps for library download and environment setup can be found in [here](https://github.com/Xilinx/Vitis_Libraries/tree/master/blas/L2/benchmarks#building). For getting the design,
+The steps for library download and environment setup can be found in [here](https://github.com/Xilinx/Vitis_Libraries/tree/main/blas/L2/benchmarks#building). For getting the design,
 
 .. code-block:: bash 
 
@@ -146,7 +146,7 @@ This example resides in ``L3/benchmarks/gemm/streamingKernel`` directory. The tu
 2.1.1 Work Directory(Step 1)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The steps for library download and environment setup can be found in [here](https://github.com/Xilinx/Vitis_Libraries/tree/master/blas/L2/benchmarks#building). For getting the design,
+The steps for library download and environment setup can be found in [here](https://github.com/Xilinx/Vitis_Libraries/tree/main/blas/L2/benchmarks#building). For getting the design,
 
 .. code-block:: bash 
 

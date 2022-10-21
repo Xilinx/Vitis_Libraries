@@ -7,7 +7,7 @@ Here are benchmarks of the Vitis BLAS library using the Vitis environment. It su
 ### Vitis BLAS Library
 - Alveo U250 installed and configured as per https://www.xilinx.com/products/boards-and-kits/alveo/u250.html#gettingStarted (when running hardware)
 - Xilinx runtime (XRT) installed
-- Xilinx Vitis 2021.1 installed and configured
+- Xilinx Vitis 2022.2 installed and configured
 
 ## Building
 
@@ -15,12 +15,12 @@ Taken gemm_4CU as an example to indicate how to build the application and kernel
 
 ### Download code
 
-These blas benchmarks can be downloaded from [vitis libraries](https://github.com/Xilinx/Vitis_Libraries.git) ``master`` branch.
+These blas benchmarks can be downloaded from [vitis libraries](https://github.com/Xilinx/Vitis_Libraries.git) ``main`` branch.
 
 ```
    git clone https://github.com/Xilinx/Vitis_Libraries.git
    cd Vitis_Libraries
-   git checkout master
+   git checkout main
    cd blas
 ```
 
@@ -29,7 +29,7 @@ These blas benchmarks can be downloaded from [vitis libraries](https://github.co
 Setup and build envrionment using the Vitis and XRT scripts:
 
 ```
-    source <install path>/Vitis/2021.1/settings64.sh
+    source <install path>/Vitis/2022.2/settings64.sh
     source /opt/xilinx/xrt/setup.sh
 ```
 

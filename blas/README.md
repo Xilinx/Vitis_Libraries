@@ -12,7 +12,7 @@ Currently, this library offers three levels of acceleration:
 * The kernel level is for pre-defined kernels that are the C++ implementation of BLAS functions. These implementations are intended to demonstrate how FPGA kernels are defined and how L1 primitive functions can be used by any Vitis users to build their kernels for their applications. 
 * The software APIs level is an implementation of BLAS on top of the XILINX runtime (XRT). It allows software developers to use Vitis BLAS library without writing any runtime functions and hardware configurations.
 
-Check the [comprehensive HTML document](https://xilinx.github.io/Vitis_Libraries/blas/2021.2/) for more details.
+Check the [comprehensive HTML document](https://docs.xilinx.com/r/en-US/Vitis_Libraries/blas/index.html) for more details.
 
 
 ## Requirements
@@ -36,8 +36,31 @@ With CentOS/RHEL 7.4 and 7.5, C++11/C++14 should be enabled via
 
 ### Development Tools
 
-This library is designed to work with Vitis 2021.2,
+This library is designed to work with Vitis 2022.2,
 and a matching version of XRT should be installed.
+
+## Source Files and Application Development
+Vitis libraries are organized into L1, L2, and L3 folders, each relating to a different stage of application development.
+
+**L1** :
+      Makefiles and sources in L1 facilitate HLS based flow for quick checks. Tasks at this level include:
+
+* Check the functionality of an individual kernel (C-simulation)
+* Estimate resource usage, latency, etc. (Synthesis)
+* Run cycle accurate simulations (Co-simulation)
+* Package as IP and get final resource utilization/timing details (Export RTL)
+       
+	**Note**:  Once RTL (or XO file after packaging IP) is generated, the Vivado flow is invoked for XCLBIN file generation if required.
+
+**L2** :
+       Makefiles and sources in L2 facilitate building XCLBIN file from various sources (HDL, HLS or XO files) of kernels with host code written in OpenCL/XRT framework targeting a device. This flow supports:
+
+* Software emulation to check the functionality
+* Hardware emulation to check RTL level simulation
+* Build and test on hardware
+
+**L3** :
+       Makefiles and sources in L3 demonstrate applications developed involving multiple kernels in pipeline. These Makefiles can be used for executing tasks, as with the L2 Makefiles.
 
 ## Running Test Cases
 
@@ -49,7 +72,7 @@ HLS cases can only be found in `L1/tests` folder, and are created to test module
 Setup and build envrionment using the Vitis and XRT scripts:
 
 ```
-    source <install path>/Vitis/2021.2/settings64.sh
+    source <install path>/Vitis/2022.2/settings64.sh
     source /opt/xilinx/xrt/setup.sh
 ```
 
@@ -102,10 +125,10 @@ Besides ``run``, the Vitis case makefile also allows ``host`` and ``xclbin`` as 
 
 ## Benchmark Result
 
-More details about the benchmarks, please kindly find them in [benchmark results](https://xilinx.github.io/Vitis_Libraries/blas/2021.2/benchmark.html).
+More details about the benchmarks, please kindly find them in [benchmark results](https://docs.xilinx.com/r/en-US/Vitis_Libraries/blas/benchmark.html).
 
 ## Documentations
-For more details of the blas library, please refer to [blas Library Documentation](https://xilinx.github.io/Vitis_Libraries/blas/2021.2/index.html).
+For more details of the blas library, please refer to [blas Library Documentation](https://docs.xilinx.com/r/en-US/Vitis_Libraries/blas/index.html).
 
 
 ## License

@@ -29,4 +29,4 @@ L1 API Overview
 .. toctree::
    :maxdepth: 3
 
-   1. Introduction <L1_overview_content.rst>
+   Introduction <L1_overview_content.rst>

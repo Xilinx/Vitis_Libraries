@@ -37,7 +37,7 @@ This example resides in ``L2/benchmarks/memKernel/gemm_4CU`` directory. The tuto
 1.1.1 Work Directory(Step 1)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The steps for library download and environment setup can be found in [here](https://github.com/Xilinx/Vitis_Libraries/tree/master/blas/L2/benchmarks#building). For getting the design,
+The steps for library download and environment setup can be found in [here](https://github.com/Xilinx/Vitis_Libraries/tree/main/blas/L2/benchmarks#building). For getting the design,
 
 .. code-block:: bash 
 

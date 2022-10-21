@@ -29,4 +29,4 @@ L2 API Overview
 .. toctree::
    :maxdepth: 3
 
-   1. Introduction <L2_overview_content.rst>
+   Introduction <L2_overview_content.rst>

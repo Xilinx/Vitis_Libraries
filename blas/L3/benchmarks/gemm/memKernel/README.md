@@ -8,7 +8,7 @@ Executable Usage
 
 * **Work Directory(Step 1)**
 
-The steps for library download and environment setup can be found in [here](https://github.com/Xilinx/Vitis_Libraries/tree/master/blas/L2/benchmarks#building). For getting the design,
+The steps for library download and environment setup can be found in [here](https://github.com/Xilinx/Vitis_Libraries/tree/main/blas/L2/benchmarks#building). For getting the design,
 
 ```
    cd L3/benchmarks/gemm/memKernel

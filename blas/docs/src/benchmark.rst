@@ -149,13 +149,13 @@ Here are benchmarks of the Vitis BLAS library using the Vitis environment. It su
 2.2.1 Download code
 ^^^^^^^^^^^^^^^^^^^^^
 
-These blas benchmarks can be downloaded from [vitis libraries](https://github.com/Xilinx/Vitis_Libraries.git) ``master`` branch.
+These blas benchmarks can be downloaded from [vitis libraries](https://github.com/Xilinx/Vitis_Libraries.git) ``main`` branch.
 
 .. code-block:: bash 
 
    git clone https://github.com/Xilinx/Vitis_Libraries.git
    cd Vitis_Libraries
-   git checkout master
+   git checkout main
    cd blas
 
    
