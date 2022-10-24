@@ -9,12 +9,12 @@
         "aws-vu9p-f1", 
         "vck190", 
         "zcu102", 
-        "u50", 
-        "zcu104"
+        "u50"
     ], 
     "platform_blocklist": [
         "u280", 
-        "u250"
+        "u250", 
+        "zcu104"
     ], 
     "platform_properties": {
         "u200": {

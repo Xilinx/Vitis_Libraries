@@ -9,12 +9,12 @@
         "aws-vu9p-f1", 
         "vck190", 
         "zcu102", 
-        "zcu104", 
         "u50"
     ], 
     "platform_blocklist": [
         "u280", 
-        "u250"
+        "u250", 
+        "zcu104"
     ], 
     "platform_properties": {
         "u200": {
@@ -85,7 +85,8 @@
                 "linker_x86": {
                     "librarypaths": [
                         "$(OPENCV_LIB)"
-                    ]
+                    ],
+                    "options" : "-l opencv_optflow"
                 }
             },
 			"containers": [
@@ -128,7 +129,8 @@
                 "linker_x86": {
                     "librarypaths": [
                         "$(OPENCV_LIB)"
-                    ]
+                    ],
+                    "options" : "-l opencv_optflow"
                 }
             },
 			"containers": [
@@ -171,7 +173,8 @@
                 "linker_x86": {
                     "librarypaths": [
                         "$(OPENCV_LIB)"
-                    ]
+                    ],
+                    "options" : "-l opencv_optflow"
                 }
             },
 			"containers": [

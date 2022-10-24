@@ -9,9 +9,9 @@ Defect detection application detects defects in a mango.
 
 The Application has following pipelines
 
-Gaussian Otsu pipeline, which includes functions `xf::cv::custom-bgr2y8 <https://xilinx.github.io/Vitis_Libraries/vision/2022.2/api-reference.html#custom-bgr2y8>`__, 
-`xf::cv::GaussianBlur <https://xilinx.github.io/Vitis_Libraries/vision/2022.2/api-reference.html#gaussian-filter>`__, `xf::cv::OtsuThreshold <https://xilinx.github.io/Vitis_Libraries/vision/2022.2/api-reference.html#otsu-threshold>`__.
-Preprocess pipeline, which includes functions `xf::cv::Threshold <https://xilinx.github.io/Vitis_Libraries/vision/2022.2/api-reference.html#thresholding>`__, ``xf::cv::fw_cca``.
+Gaussian Otsu pipeline, which includes functions `xf::cv::custom-bgr2y8 <https://docs.xilinx.com/r/en-US/Vitis_Libraries/vision/api-reference.html#custom-bgr2y8>`__, 
+`xf::cv::GaussianBlur <https://docs.xilinx.com/r/en-US/Vitis_Libraries/vision/api-reference.html#gaussian-filter>`__, `xf::cv::OtsuThreshold <https://docs.xilinx.com/r/en-US/Vitis_Libraries/vision/api-reference.html#otsu-threshold>`__.
+Preprocess pipeline, which includes functions `xf::cv::Threshold <https://docs.xilinx.com/r/en-US/Vitis_Libraries/vision/api-reference.html#thresholding>`__, ``xf::cv::fw_cca``.
 CCA custom pipeline, which includes functions ``xf::cv::rev_cca``, ``xf::cv::pass_2``.
  
 In Gaussian Otsu pipeline, BGR input image is converted to custom y8 format and the output is processed through GaussianBlur 

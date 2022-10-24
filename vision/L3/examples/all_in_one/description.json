@@ -130,7 +130,9 @@
         }
     ], 
     "data": [
-        "LIB_DIR/data/cropped1_128x128.png LIB_DIR/data/cropped3_128x128.png LIB_DIR/data/input-lut-33.txt"
+        "LIB_DIR/data/cropped1_128x128.png",
+        "LIB_DIR/data/cropped3_128x128.png",
+        "LIB_DIR/data/input-lut-33.txt"
     ], 
     "host": {
         "host_exe": "isppipeline", 
@@ -163,9 +165,11 @@
             "accelerators": [
                 {
                     "name": "ISPPipeline_accel", 
-                    "location": "LIB_DIR/L3/examples/all_in_one/xf_isp_accel.cpp"
+                    "location": "LIB_DIR/L3/examples/all_in_one/xf_isp_accel.cpp",
+                    "frequency": 150.0
                 }
-            ]
+            ],
+            "frequency": 150.0
         }
     ], 
     "check_env": [

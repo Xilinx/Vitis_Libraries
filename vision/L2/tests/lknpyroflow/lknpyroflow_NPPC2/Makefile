@@ -218,6 +218,15 @@ endif
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/tests/lknpyroflow/lknpyroflow_NPPC2 -I $(XFLIB_DIR)/L2/examples/lknpyroflow -I $(XFLIB_DIR)/L1/include/
 
 ######################### binary container global settings ##########################
+ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
+VPP_FLAGS_dense_non_pyr_of_accel += --hls.clock 200000000:dense_non_pyr_of_accel
+ifneq ($(HOST_ARCH_temp), x86)
+VPP_LDFLAGS_krnl_lknpyrof += --clock.defaultFreqHz 200000000
+else
+VPP_LDFLAGS_krnl_lknpyrof += --kernel_frequency 200
+endif
+
+else 
 VPP_FLAGS_dense_non_pyr_of_accel += --hls.clock 300000000:dense_non_pyr_of_accel
 ifneq ($(HOST_ARCH_temp), x86)
 VPP_LDFLAGS_krnl_lknpyrof += --clock.defaultFreqHz 300000000
@@ -225,6 +234,7 @@ else
 VPP_LDFLAGS_krnl_lknpyrof += --kernel_frequency 300
 endif
 
+endif
 ifneq ($(SD_CARD_NEEDED), on)
 BINARY_CONTAINERS += $(BUILD_DIR)/krnl_lknpyrof.xclbin
 else
@@ -321,7 +331,9 @@ mkflag:
 	mkdir -p $(BUILD_DIR)
 	rm -rf $(BUILD_DIR)/makefile_args.txt
 	@for var in $(MAKEFLAGS); do echo $$var >> $(BUILD_DIR)/makefile_args.txt; done
+
 all: check_device check_vpp check_platform mkflag $(RUN_DEPS)
+
 run: all
 #hw_emu
 ifneq (,$(filter hw_emu, $(TARGET)))

@@ -21,7 +21,7 @@
 unsigned short mode_reg = 0;
 unsigned char awb_en = 1;
 unsigned char hdr_en = 1;
-unsigned char rgbir_en = 1;
+unsigned char rgbir_en = 0;
 unsigned char qnd_en = 0;
 unsigned char ltm_en = 0;
 unsigned char gtm_en = 1;
@@ -163,7 +163,7 @@ void wr_ocv_gen(float& alpha,
 int main(int argc, char** argv) {
     if (argc != 4) {
         fprintf(stderr, "Invalid Number of Arguments!\nUsage:\n");
-        fprintf(stderr, "<Executable Name> <input image path> <Input LUT file> \n");
+        fprintf(stderr, "<Executable Name> <input image 1 (SEF) path> <input image 2 (LEF) path> <Input LUT file> \n");
         return -1;
     }
 
@@ -354,7 +354,7 @@ int main(int argc, char** argv) {
     for (int k = 0; k < XF_NPPC; k++) {
         for (int i = 0; i < NO_EXPS; i++) {
             for (int j = 0; j < (W_B_SIZE); j++) {
-                wr_hls[(i + k * XF_NPPC) * W_B_SIZE + j] = wr_ocv[i][j];
+                wr_hls[(i + k * NO_EXPS) * W_B_SIZE + j] = wr_ocv[i][j];
             }
         }
     }

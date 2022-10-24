@@ -395,12 +395,12 @@ int main(int argc, char** argv) {
 
 #if T_8U
     size_t vec_in_size_bytes = NUM_STREAMS * 256 * 3 * sizeof(unsigned char);
-    size_t vec_weight_size_bytes = NO_EXPS * XF_NPPC * W_B_SIZE * sizeof(short);
+    size_t vec_weight_size_bytes = NUM_STREAMS * NO_EXPS * XF_NPPC * W_B_SIZE * sizeof(short);
     size_t image_in_size_bytes = in_img1.rows * in_img1.cols * sizeof(unsigned char);
     size_t image_out_size_bytes = in_img1.rows * in_img1.cols * 1 * sizeof(unsigned short);
 #else
     size_t vec_in_size_bytes = NUM_STREAMS * 256 * 3 * sizeof(unsigned char);
-    size_t vec_weight_size_bytes = NO_EXPS * XF_NPPC * W_B_SIZE * sizeof(short);
+    size_t vec_weight_size_bytes = NUM_STREAMS * NO_EXPS * XF_NPPC * W_B_SIZE * sizeof(short);
     size_t image_in_size_bytes = interleaved_img1.rows * interleaved_img1.cols * sizeof(unsigned short);
     size_t image_out_size_bytes = in_img1.rows * in_img1.cols * 1 * sizeof(unsigned short);
 #endif
@@ -412,16 +412,20 @@ int main(int argc, char** argv) {
     float rho = 512;
     float imax = (W_B_SIZE - 1);
     float t[NO_EXPS] = {1.0f, 0.25f}; //{1.0f,0.25f,0.0625f};
-    short wr_ocv[NO_EXPS][W_B_SIZE];
+    short wr_ocv[NUM_STREAMS][NO_EXPS][W_B_SIZE];
 
     // wr_ocv_gen function call
-    wr_ocv_gen(alpha, optical_black_value, intersec, rho, imax, t, wr_ocv);
+    for (int i = 0; i < NUM_STREAMS; i++) {
+        wr_ocv_gen(alpha, optical_black_value, intersec, rho, imax, t, wr_ocv[i]);
+    }
 
-    short wr_hls[NO_EXPS * XF_NPPC * W_B_SIZE];
-    for (int k = 0; k < XF_NPPC; k++) {
-        for (int i = 0; i < NO_EXPS; i++) {
-            for (int j = 0; j < (W_B_SIZE); j++) {
-                wr_hls[(i + k * NO_EXPS) * W_B_SIZE + j] = wr_ocv[i][j];
+    short wr_hls[NUM_STREAMS][NO_EXPS * XF_NPPC * W_B_SIZE];
+    for (int n = 0; n < NUM_STREAMS; n++) {
+        for (int k = 0; k < XF_NPPC; k++) {
+            for (int i = 0; i < NO_EXPS; i++) {
+                for (int j = 0; j < (W_B_SIZE); j++) {
+                    wr_hls[n][(i + k * NO_EXPS) * W_B_SIZE + j] = wr_ocv[n][i][j];
+                }
             }
         }
     }

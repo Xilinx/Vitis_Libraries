@@ -132,7 +132,7 @@ void Streampipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                     int gain1[3],
                     struct ispparams_config params,
                     unsigned char _gamma_lut[256 * 3],
-                    short* wr_hls,
+                    short wr_hls[NO_EXPS * XF_NPPC * W_B_SIZE],
                     XF_CTUNAME(XF_DST_T, XF_NPPC) omin_r[MinMaxVArrSize][MinMaxHArrSize],
                     XF_CTUNAME(XF_DST_T, XF_NPPC) omax_r[MinMaxVArrSize][MinMaxHArrSize],
                     XF_CTUNAME(XF_DST_T, XF_NPPC) omin_w[MinMaxVArrSize][MinMaxHArrSize],
@@ -222,7 +222,7 @@ void Streampipeline_wrap(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                          int gain1[3],
                          struct ispparams_config params,
                          unsigned char _gamma_lut[256 * 3],
-                         short* wr_hls,
+                         short wr_hls[NO_EXPS * XF_NPPC * W_B_SIZE],
                          XF_CTUNAME(XF_DST_T, XF_NPPC) omin_r[MinMaxVArrSize][MinMaxHArrSize],
                          XF_CTUNAME(XF_DST_T, XF_NPPC) omax_r[MinMaxVArrSize][MinMaxHArrSize],
                          XF_CTUNAME(XF_DST_T, XF_NPPC) omin_w[MinMaxVArrSize][MinMaxHArrSize],
@@ -264,7 +264,7 @@ void ISPPipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp1,
                        ap_uint<OUTPUT_PTR_WIDTH>* img_out4,
                        unsigned short array_params[NUM_STREAMS][10],
                        unsigned char gamma_lut[NUM_STREAMS][256 * 3],
-                       short* wr_hls) {
+                       short wr_hls[NUM_STREAMS][NO_EXPS * XF_NPPC * W_B_SIZE]) {
 // clang-format off
 #pragma HLS INTERFACE m_axi     port=img_inp1  offset=slave bundle=gmem1
 #pragma HLS INTERFACE m_axi     port=img_inp2  offset=slave bundle=gmem2
@@ -289,11 +289,12 @@ void ISPPipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp1,
 
     uint32_t tot_rows = 0;
     int rem_rows[NUM_STREAMS];
+    short wr_hls_tmp[NUM_STREAMS][NO_EXPS * XF_NPPC * W_B_SIZE];
 
 PARAMS_SET_LOOP:
     for (int i = 0; i < NUM_STREAMS; i++) {
 // clang-format off
-#pragma HLS UNROLL
+#pragma HLS LOOP_TRIPCOUNT min=1 max=NUM_STREAMS
         // clang-format on
 
         params[i].rgain = array_params[i][0];
@@ -310,6 +311,29 @@ PARAMS_SET_LOOP:
         params[i].height = params[i].height * 2;
         tot_rows = tot_rows + params[i].height;
         rem_rows[i] = params[i].height;
+    }
+
+WR_HLS_INIT_LOOP:
+    for (int n = 0; n < NUM_STREAMS; n++) {
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=NUM_STREAMS max=NUM_STREAMS
+        // clang-format on
+        for (int k = 0; k < XF_NPPC; k++) {
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=XF_NPPC max=XF_NPPC
+            // clang-format on
+            for (int i = 0; i < NO_EXPS; i++) {
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=NO_EXPS max=NO_EXPS
+                // clang-format on
+                for (int j = 0; j < (W_B_SIZE); j++) {
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=W_B_SIZE max=W_B_SIZE
+                    // clang-format on
+                    wr_hls_tmp[n][(i + k * NO_EXPS) * W_B_SIZE + j] = wr_hls[n][(i + k * NO_EXPS) * W_B_SIZE + j];
+                }
+            }
+        }
     }
 
     const uint16_t pt[NUM_STREAMS] = {STRM1_ROWS, STRM2_ROWS, STRM3_ROWS, STRM4_ROWS};
@@ -329,6 +353,9 @@ PARAMS_SET_LOOP:
 
 TOTAL_ROWS_LOOP:
     for (int r = 0; r < tot_rows;) {
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=(XF_HEIGHT/STRM_HEIGHT)*NUM_STREAMS max=(XF_HEIGHT/STRM_HEIGHT)*NUM_STREAMS
+        // clang-format on        
         // Compute no.of rows to process
         if (rem_rows[idx] / 2 > pt[idx]) { // Check number for remaining rows of 1 interleaved image
             num_rows = pt[idx];
@@ -340,7 +367,7 @@ TOTAL_ROWS_LOOP:
 
         if (idx == 0 && num_rows > 0) {
             Streampipeline_wrap(img_inp1 + rd_offset1, img_out1 + wr_offset1, num_rows, params[idx].width,
-                                hist0_awb[idx], hist1_awb[idx], igain_0, igain_1, params[idx], gamma_lut[idx], wr_hls,
+                                hist0_awb[idx], hist1_awb[idx], igain_0, igain_1, params[idx], gamma_lut[idx], wr_hls_tmp[idx],
                                 omin_r[idx], omax_r[idx], omin_w[idx], omax_w[idx], flag[idx], eof[idx]);
 
             rd_offset1 += 2 * num_rows * ((params[idx].width + 8) >> XF_BITSHIFT(XF_NPPC));
@@ -348,7 +375,7 @@ TOTAL_ROWS_LOOP:
 
         } else if (idx == 1 && num_rows > 0) {
             Streampipeline_wrap(img_inp2 + rd_offset2, img_out2 + wr_offset2, num_rows, params[idx].width,
-                                hist0_awb[idx], hist1_awb[idx], igain_0, igain_1, params[idx], gamma_lut[idx], wr_hls,
+                                hist0_awb[idx], hist1_awb[idx], igain_0, igain_1, params[idx], gamma_lut[idx], wr_hls_tmp[idx],
                                 omin_r[idx], omax_r[idx], omin_w[idx], omax_w[idx], flag[idx], eof[idx]);
 
             rd_offset2 += 2 * num_rows * ((params[idx].width + 8) >> XF_BITSHIFT(XF_NPPC));
@@ -356,14 +383,14 @@ TOTAL_ROWS_LOOP:
 
         } else if (idx == 2 && num_rows > 0) {
             Streampipeline_wrap(img_inp3 + rd_offset3, img_out3 + wr_offset3, num_rows, params[idx].width,
-                                hist0_awb[idx], hist1_awb[idx], igain_0, igain_1, params[idx], gamma_lut[idx], wr_hls,
+                                hist0_awb[idx], hist1_awb[idx], igain_0, igain_1, params[idx], gamma_lut[idx], wr_hls_tmp[idx],
                                 omin_r[idx], omax_r[idx], omin_w[idx], omax_w[idx], flag[idx], eof[idx]);
 
             rd_offset3 += 2 * num_rows * ((params[idx].width + 8) >> XF_BITSHIFT(XF_NPPC));
             wr_offset3 += num_rows * (params[idx].width >> XF_BITSHIFT(XF_NPPC));
         } else if (idx == 3 && num_rows > 0) {
             Streampipeline_wrap(img_inp4 + rd_offset4, img_out4 + wr_offset4, num_rows, params[idx].width,
-                                hist0_awb[idx], hist1_awb[idx], igain_0, igain_1, params[idx], gamma_lut[idx], wr_hls,
+                                hist0_awb[idx], hist1_awb[idx], igain_0, igain_1, params[idx], gamma_lut[idx], wr_hls_tmp[idx],
                                 omin_r[idx], omax_r[idx], omin_w[idx], omax_w[idx], flag[idx], eof[idx]);
 
             rd_offset4 += 2 * num_rows * ((params[idx].width + 8) >> XF_BITSHIFT(XF_NPPC));

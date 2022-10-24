@@ -291,6 +291,9 @@ table lists the template parameters and their descriptions:
    **All the functions in the library are implemented in streaming model except 7. Bounding box, Canny, Cornertracker, Crop, EdgeTracing, MeanShiftTracking, Rotate are memory mapped implemenations. These functions need to have the flag __SDA_MEM_MAP__ set for compiling correctly**
 
 .. Important::
+   **Depth of the image mentioned in the API parameter description tables represents the depth of the hls::stream defined inside the xf::cv::Mat**
+
+.. Important::
    **Default depth value for all the memory mapped implemenations(Bounding box, Canny, Cornertracker, Crop, EdgeTracing, MeanShiftTracking, Rotate) is "_XFCVDEPTH_DEFAULT = -1". 
    Default depth value for all the streaming model implemenations is "_XFCVDEPTH_DEFAULT = 2".**
 

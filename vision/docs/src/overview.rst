@@ -37,6 +37,7 @@ properties hold true for all the functions.
    -  Maximum size of the image to be processed
    -  Datatype defining the properties of each pixel
    -  Number of pixels to be processed per clock cycle
+   -  Depth of the hls::stream defined in ``xf::cv::Mat``
    -  Other compile-time arguments relevent to the functionality.
 
 The Vitis vision library contains enumerated datatypes which enables you to

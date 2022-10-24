@@ -135,7 +135,19 @@
                         "$(OPENCV_LIB)"
                     ]
                 }
-            }
+            },
+			"containers": [
+				{
+					"name": "krnl_lknpyrof", 
+					"accelerators": [
+						{
+							"name": "dense_non_pyr_of_accel",
+							"frequency": 200.0
+						}
+					],
+					"frequency": 200.0
+				}
+			]
         }
     }, 
     "gui": true, 

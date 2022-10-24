@@ -206,6 +206,12 @@ endif
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L3/examples/all_in_one/build -I $(XFLIB_DIR)/L1/include/
 
 ######################### binary container global settings ##########################
+VPP_FLAGS_ISPPipeline_accel += --hls.clock 150000000:ISPPipeline_accel
+ifneq ($(HOST_ARCH_temp), x86)
+VPP_LDFLAGS_krnl_ISPPipeline += --clock.defaultFreqHz 150000000
+else
+VPP_LDFLAGS_krnl_ISPPipeline += --kernel_frequency 150
+endif
 
 ifneq ($(SD_CARD_NEEDED), on)
 BINARY_CONTAINERS += $(BUILD_DIR)/krnl_ISPPipeline.xclbin

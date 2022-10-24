@@ -72,7 +72,7 @@ Row_Loop:
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int XFCVDEPTH_imgInput, int XFCVDEPTH_hdr_out>
 void function_extract_merge(xf::cv::Mat<SRC_T, ROWS * 2, COLS + NUM_H_BLANK, NPC, XFCVDEPTH_imgInput>& imgInput1,
                             xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_hdr_out>& hdr_out,
-                            short* wr_hls,
+                            short wr_hls[NO_EXPS * XF_NPPC * W_B_SIZE],
                             unsigned short height,
                             unsigned short width) {
 // clang-format off
@@ -555,25 +555,25 @@ void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
  * Description:
  **********************************************************************************/
 extern "C" {
-void ISPPipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,     /* Array2xfMat */
-                       ap_uint<OUTPUT_PTR_WIDTH>* img_out,    /* xfMat2Array */
-                       ap_uint<OUTPUT_PTR_WIDTH>* img_out_ir, /* xfMat2Array */
-                       int height,                            /* HDR, rgbir2bayer, fifo_copy */
-                       int width,                             /* HDR, rgbir2bayer, fifo_copy */
-                       short* wr_hls,                         /* HDR */
-                       uint16_t rgain,                        /* gaincontrol */
-                       uint16_t bgain,                        /* gaincontrol */
-                       char R_IR_C1_wgts[25],                 /* rgbir2bayer */
-                       char R_IR_C2_wgts[25],                 /* rgbir2bayer */
-                       char B_at_R_wgts[25],                  /* rgbir2bayer */
-                       char IR_at_R_wgts[9],                  /* rgbir2bayer */
-                       char IR_at_B_wgts[9],                  /* rgbir2bayer */
-                       char sub_wgts[4],                      /* rgbir2bayer */
-                       int blk_height,                        /* LTM */
-                       int blk_width,                         /* LTM */
-                       float c1,                              /* gtm */
-                       float c2,                              /* gtm */
-                       unsigned char gamma_lut[256 * 3],      /* gammacorrection */
+void ISPPipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,          /* Array2xfMat */
+                       ap_uint<OUTPUT_PTR_WIDTH>* img_out,         /* xfMat2Array */
+                       ap_uint<OUTPUT_PTR_WIDTH>* img_out_ir,      /* xfMat2Array */
+                       int height,                                 /* HDR, rgbir2bayer, fifo_copy */
+                       int width,                                  /* HDR, rgbir2bayer, fifo_copy */
+                       short wr_hls[NO_EXPS * XF_NPPC * W_B_SIZE], /* HDR */
+                       uint16_t rgain,                             /* gaincontrol */
+                       uint16_t bgain,                             /* gaincontrol */
+                       char R_IR_C1_wgts[25],                      /* rgbir2bayer */
+                       char R_IR_C2_wgts[25],                      /* rgbir2bayer */
+                       char B_at_R_wgts[25],                       /* rgbir2bayer */
+                       char IR_at_R_wgts[9],                       /* rgbir2bayer */
+                       char IR_at_B_wgts[9],                       /* rgbir2bayer */
+                       char sub_wgts[4],                           /* rgbir2bayer */
+                       int blk_height,                             /* LTM */
+                       int blk_width,                              /* LTM */
+                       float c1,                                   /* gtm */
+                       float c2,                                   /* gtm */
+                       unsigned char gamma_lut[256 * 3],           /* gammacorrection */
                        unsigned short mode_reg,
                        ap_uint<INPUT_PTR_WIDTH>* lut, /* lut3d */
                        int lutDim,                    /* lut3d */
@@ -602,18 +602,37 @@ void ISPPipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,     /* Array2xfMat */
 #pragma HLS ARRAY_PARTITION variable=omax dim=1   complete
 #pragma HLS ARRAY_PARTITION variable=omax dim=2   cyclic factor=2
 #pragma HLS ARRAY_PARTITION variable=omax dim=3   cyclic factor=2
-
     // clang-format on
 
+    static short wr_hls_tmp[NO_EXPS * XF_NPPC * W_B_SIZE];
+
+WR_HLS_INIT_LOOP:
+    for (int k = 0; k < XF_NPPC; k++) {
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=XF_NPPC max=XF_NPPC
+        // clang-format on
+        for (int i = 0; i < NO_EXPS; i++) {
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=NO_EXPS max=NO_EXPS
+            // clang-format on
+            for (int j = 0; j < (W_B_SIZE); j++) {
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=W_B_SIZE max=W_B_SIZE
+                // clang-format on
+                wr_hls_tmp[(i + k * NO_EXPS) * W_B_SIZE + j] = wr_hls[(i + k * NO_EXPS) * W_B_SIZE + j];
+            }
+        }
+    }
+
     if (!flag) {
-        ISPpipeline(img_inp, img_out, img_out_ir, mode_reg, height, width, wr_hls, R_IR_C1_wgts, R_IR_C2_wgts,
+        ISPpipeline(img_inp, img_out, img_out_ir, mode_reg, height, width, wr_hls_tmp, R_IR_C1_wgts, R_IR_C2_wgts,
                     B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts, sub_wgts, rgain, bgain, hist0_awb, hist1_awb, igain_0,
                     igain_1, pawb, gamma_lut, omin[0], omax[0], omin[1], omax[1], blk_height, blk_width, mean2, mean1,
                     L_max2, L_max1, L_min2, L_min1, c1, c2, lut, lutDim);
         flag = 1;
 
     } else {
-        ISPpipeline(img_inp, img_out, img_out_ir, mode_reg, height, width, wr_hls, R_IR_C1_wgts, R_IR_C2_wgts,
+        ISPpipeline(img_inp, img_out, img_out_ir, mode_reg, height, width, wr_hls_tmp, R_IR_C1_wgts, R_IR_C2_wgts,
                     B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts, sub_wgts, rgain, bgain, hist1_awb, hist0_awb, igain_1,
                     igain_0, pawb, gamma_lut, omin[1], omax[1], omin[0], omax[0], blk_height, blk_width, mean1, mean2,
                     L_max1, L_max2, L_min1, L_min2, c1, c2, lut, lutDim);

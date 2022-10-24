@@ -187,7 +187,7 @@ Running the Tutorial
 Create and run a Vitis HLS project
 -----------------------------------
 
-In this step, we are going to create an HLS project by using the files provided in Vitis Library at this link: https://github.com/Xilinx/Vitis_Libraries/tree/master/vision/L1/examples/customconv. 
+In this step, we are going to create an HLS project by using the files provided in Vitis Library at this link: https://github.com/Xilinx/Vitis_Libraries/tree/main/vision/L1/examples/customconv. 
 The source files and script file are all located under this folder. Here we assume you have cloned the Vitis Libraries into */home/project/Vitis_Libraries* directory.
 
 1. Go into the */home/project/Vitis_libraries/vision/L1/examples/customconv* folder and run below command to create the HLS project.
@@ -236,7 +236,7 @@ Difference image:
 
 You may browse into the source files, synthesis report or waveform viewer by simply selecting them from the *Explorer* window and *Flow Navigator* window.
 
-The *xf_custom_convolution_tb.cpp* calls the *Filter2d* accel and the parameters are defined in the *xf_custom_convolution_config.h* and *xf_config_params.h* files. For detailed instructions about how to use *custom convolution*, please refer to the github page at: https://xilinx.github.io/Vitis_Libraries/vision/2022.2/api-reference.html#custom-convolution.
+The *xf_custom_convolution_tb.cpp* calls the *Filter2d* accel and the parameters are defined in the *xf_custom_convolution_config.h* and *xf_config_params.h* files. For detailed instructions about how to use *custom convolution*, please refer to the github page at: https://docs.xilinx.com/r/en-US/Vitis_Libraries/vision/api-reference.html#custom-convolution.
 
 3. Export IP in HLS project
 
@@ -285,7 +285,7 @@ In this section, we are going to create a Vitis project by using an L2 example.
 L2/L3 functions are targeted for Vitis flow, where software-emulation, hardware-emulation, and hardware build (to generate FPGA binaries) can be performed. 
 OpenCL is used in the testbench for calling the accelerator in L2/L3.
 
-We will use the files provided in Vitis Library at this link: https://github.com/Xilinx/Vitis_Libraries/tree/master/vision/L2/examples/customconv. 
+We will use the files provided in Vitis Library at this link: https://github.com/Xilinx/Vitis_Libraries/tree/main/vision/L2/examples/customconv. 
 The source files and script file are all located under this folder. Here we assume you have cloned the Vitis Libraries into */home/project/Vitis_Libraries* directory.
 
 Go into the */home/project/Vitis_libraries/vision/L2/examples/customconv* folder and run below command to create the Vitis project for a DC platform like U200.
@@ -406,7 +406,7 @@ You may follow similar flow to use other library elements.
 Reference
 ==========
 
-Documentation on Vitis Libraries: https://xilinx.github.io/Vitis_Libraries/
+Documentation on Vitis Libraries: https://docs.xilinx.com/r/en-US/Vitis_Libraries/index.html
 
 .. |in_img| image:: ./images/128x128.png
    :class: image 
