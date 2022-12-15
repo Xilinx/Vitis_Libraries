@@ -20,8 +20,6 @@ Theoretical foundations
    :hidden:
    :maxdepth: 1
 
-Introduction
-------------
 This section explains the theory behind the libraries and the possible range of applications.
 
 This beamformer works with 3D data inputs axial, lateral and elevation, captured from ultrasound transducers to produce a visible image of the region impinged by ultrasonic waves. There are two modalities specific to this library: 
@@ -87,7 +85,3 @@ Modifying the formulation of the virtual sources to fit a different type of emis
 Performing these three operations "rectifies" the insonification by aligning a PW emitted (which covers the overall area of the transducers) and obtains the same result as the SA.
 
 Whether we use SA or PW, there is the necessity to use virtual transmit sources. Virtual transmit sources are a construct which overcome the problem of increasing the SNR parameter in SA while simultaneously increasing the investigation depth. The calculation of the transmitted field is ambiguous if multiple transducers are involved. The emited focal point is then considered as a source of spherical emission itself and the computation of the propagation in transmission is computable by a unique formula. 
-
-In Summary
-----------
-The formulation of virtual sources is no less important than other parts in the beamforming formulation, as they are fundamental to compute a valid delay time and select the correct samples for the interpolation. Not all the samples are valid, and so we must interpolate just between the indexes of samples that are considered valid. As mentioned earlier, this process is fundamental to increasing the investigation depth and a high signal quality thanks to the higher SNR generated. One third of the beamforming process is in the selection of the samples, and so it is important to understand the aspects of this process.

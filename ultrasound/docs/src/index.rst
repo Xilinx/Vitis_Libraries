@@ -37,9 +37,9 @@ Current version provides:
    :caption: Background
    :maxdepth: 2
 
-   Theoretical_foundation <background/theoretical_foundations.rst>
-   Theoretical_foundation_2 <background/theoretical_foundations_2.rst>
-   Theoretical_foundation_3 <background/theoretical_foundations_3.rst>
+   Theoretical Foundation <background/theoretical_foundations.rst>
+   Theoretical Foundation 2 <background/theoretical_foundations_2.rst>
+   Theoretical Foundation 3 <background/theoretical_foundations_3.rst>
 
 .. toctree::
    :caption: Features

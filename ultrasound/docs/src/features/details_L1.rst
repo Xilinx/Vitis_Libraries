@@ -42,11 +42,11 @@ We now detail every L1 kernel available in the library:
 Kernel name: `absV`
 ####################
 
-.. ref-code-block:: cpp
-	:class: title-code-block
+.. code-block:: cpp
 
 	template<typename T, const unsigned LEN, const unsigned INCREMENT, const unsigned VECDIM>
 	void absV(input_stream<T>* in1, output_stream<T>* out);
+
 
 Element-Wise absolute values of a vector.
 
@@ -62,12 +62,11 @@ Element-Wise absolute values of a vector.
 Kernel name: `cosV`
 ###################
 
-
-.. ref-code-block:: cpp
-	:class: title-code-block
+.. code-block:: cpp
 
     template<typename T, const unsigned LEN, const unsigned INCREMENT, const unsigned VECDIM>
     void cosV(input_stream<float>* in1, output_stream<float>* out);
+
 
 Element-Wise cosine values of a vector. Elements must be expressed in radians with the range [0...2kPI] 
 
@@ -83,11 +82,11 @@ Element-Wise cosine values of a vector. Elements must be expressed in radians wi
 Kernel name: `diffMV`
 ######################
 
-.. ref-code-block:: cpp
-	:class: title-code-block
+.. code-block:: cpp
 
     template<typename T, const unsigned LEN, const unsigned INCREMENT, const unsigned VECDIM>
     void diffMV(input_stream<T>* in1, input_stream<T>* in2, output_stream<T>* out);
+
 
 Element-Wise difference between the of the row of a matrix and the values of a vector. The number of the column of the matrix and the entry of the vector must have the same size.
 
@@ -104,11 +103,11 @@ Element-Wise difference between the of the row of a matrix and the values of a v
 Kernel name: `diffSV`
 ######################
 
-.. ref-code-block:: cpp
-	:class: title-code-block
+.. code-block:: cpp
 
     template<typename T, const unsigned int LEN, const unsigned int INCREMENT, const unsigned VECDIM>
     void diffSV(input_stream<T>* in1, input_stream<T>* in2, output_window<T>* out);
+
 
 Element-Wise difference between a scalar and the values of a vector. For every iteration (expressed by `LEN`) we need to pass 4 times the scalar value to the stream of the scalar value.
 
@@ -125,11 +124,11 @@ Element-Wise difference between a scalar and the values of a vector. For every i
 Kernel name: `diffVS`
 ######################
 
-.. ref-code-block:: cpp
-	:class: title-code-block
+.. code-block:: cpp
 
     template<typename T, const unsigned LEN, const unsigned INCREMENT, const unsigned VECDIM>
     void diffVS(input_stream<T>* in1, input_stream<T>* in2, output_stream<T>* out);
+
 
 Element-Wise difference between the values of a vector and a scalar. For every iteration (expressed by `LEN`) we need to pass 4 times the scalar value to the stream of the scalar value.
 
@@ -146,11 +145,11 @@ Element-Wise difference between the values of a vector and a scalar. For every i
 Kernel name: `divVS`
 #####################
 
-.. ref-code-block:: cpp
-	:class: title-code-block
+.. code-block:: cpp
 
     template<typename T, const unsigned LEN, const unsigned INCREMENT, const unsigned VECDIM>
     void divVS(input_stream<T>* in1, output_stream<T>* out);
+
 
 Element-Wise division between the values of a vector and a scalar. For every iteration (expressed by `LEN`) we need to pass 4 times the scalar value to the stream of the scalar value.
 
@@ -167,11 +166,11 @@ Element-Wise division between the values of a vector and a scalar. For every ite
 Kernel name: `equalS`
 ######################
 
-.. ref-code-block:: cpp
-	:class: title-code-block
+.. code-block:: cpp
 
     template<typename T, const unsigned LEN, const unsigned INCREMENT, const unsigned VECDIM, const unsigned SCALAR>
     void equalS(input_stream<T>* in1, output_stream<T>* out);
+
 
 Check whether the element of an array are equal to a specific number. An array of 0s or 1s is returned. 1 means that the element at that specific position is equal to the scalar, otherwise 0 is returned.
 
@@ -188,11 +187,11 @@ Check whether the element of an array are equal to a specific number. An array o
 Kernel name: `lessOrEqualThanS`
 ################################
 
-.. ref-code-block:: cpp
-	:class: title-code-block
+.. code-block:: cpp
 
     template<typename T, const unsigned LEN, const unsigned INCREMENT, const unsigned VECDIM, const unsigned SCALAR>
     void lessOrEqualThanS(input_stream<T>* in1, output_stream<T>* out);
+
 
 Check whether the element of an array are less or equal to a specific number. An array of 0s or 1s is returned. 1 means that the element at that specific position is less or equal to the scalar, otherwise 0 is returned.
 
@@ -209,11 +208,11 @@ Check whether the element of an array are less or equal to a specific number. An
 Kernel name: `mulMM`
 #####################
 
-.. ref-code-block:: cpp
-	:class: title-code-block
+.. code-block:: cpp
 
     template<typename T, const unsigned LEN, const unsigned INCREMENT, const unsigned VECDIM>
     void mulMM(input_stream<T>* in1, input_stream<T>* in2, output_stream<T>* out);
+
 
 Element-Wise multiplication of two matrixes. The first matrix and the second one must have the same size.
 
@@ -230,11 +229,11 @@ Element-Wise multiplication of two matrixes. The first matrix and the second one
 Kernel name: `mulVS`
 #####################
 
-.. ref-code-block:: cpp
-	:class: title-code-block
+.. code-block:: cpp
 
     template<typename T, const unsigned LEN, const unsigned INCREMENT, const unsigned VECDIM>
     void mulVS(input_stream<T>* in1, output_stream<T>* out);
+
 
 Element-Wise multiplication between the values of a vector and a scalar. For every iteration (expressed by `LEN`) we need to pass 4 times the scalar value to the stream of the scalar value.
 
@@ -251,11 +250,11 @@ Element-Wise multiplication between the values of a vector and a scalar. For eve
 Kernel name: `mulVV`
 #####################
 
-.. ref-code-block:: cpp
-	:class: title-code-block
+.. code-block:: cpp
 
     template<typename T, const unsigned LEN, const unsigned INCREMENT, const unsigned VECDIM>
     void mulVV(input_stream<T>* in1, input_stream<T>* in2, output_stream<T>* out);
+
 
 Element-Wise multiplication of two vectors. The first vector and the second one must have the same size.
 
@@ -272,11 +271,11 @@ Element-Wise multiplication of two vectors. The first vector and the second one 
 Kernel name: `norm_axis_1`
 ###########################
 
-.. ref-code-block:: cpp
-	:class: title-code-block
+.. code-block:: cpp
 
     template<typename T, const unsigned LEN, const unsigned INCREMENT, const unsigned VECDIM>
     void norm_axis_1(input_stream<T>* in1, output_stream<T>* out);
+
 
 Perform row wise the euclidean norm of a matrix of the columns. Because for every row returns a number, the result is a vector of values which represents for every row the magnitude of the euclidean norm.
 
@@ -292,11 +291,11 @@ Perform row wise the euclidean norm of a matrix of the columns. Because for ever
 Kernel name: `ones`
 ####################
 
-.. ref-code-block:: cpp
-	:class: title-code-block
+.. code-block:: cpp
 
     template<typename T, const unsigned LEN, const unsigned INCREMENT, const unsigned VECDIM>
     void ones_stream(output_stream<T>* out);
+
 
 Return a vector of with all entry set to 1. 
 
@@ -311,11 +310,11 @@ Return a vector of with all entry set to 1.
 Kernel name: `outer`
 #####################
 
-.. ref-code-block:: cpp
-	:class: title-code-block
+.. code-block:: cpp
 
     template<typename T, const unsigned LEN, const unsigned INCREMENT, const unsigned VECDIM>
     void outer(input_window<T>* in1, input_window<T>* in2, output_stream<T>* out);
+
 
 Perform the outer product (also named cross-product or vector-product) between two vectors. The result of this operation is a matrix which rows are the number of the entry of the first vector and the column the number of the entry of the second one.
 
@@ -332,11 +331,11 @@ Perform the outer product (also named cross-product or vector-product) between t
 Kernel name: `reciprocalV`
 ##########################
 
-.. ref-code-block:: cpp
-	:class: title-code-block
+.. code-block:: cpp
 
     template<typename T, const unsigned LEN, const unsigned INCREMENT, const unsigned VECDIM>
     void reciprocalV(input_stream<T>* in1, output_stream<T>* out);
+
 
 Element-wise inverse operation of the entry of the vector.
 
@@ -352,11 +351,11 @@ Element-wise inverse operation of the entry of the vector.
 Kernel name: `sqrtV`
 #####################
 
-.. ref-code-block:: cpp
-	:class: title-code-block
+.. code-block:: cpp
 
     template<typename T, const unsigned LEN, const unsigned INCREMENT, const unsigned VECDIM>
     void sqrtV(input_stream<T>* in1, output_stream<T>* out);
+
 
 Element-wise square root operation of the entry of the vector.
 
@@ -372,11 +371,11 @@ Element-wise square root operation of the entry of the vector.
 Kernel name: `squareV`
 #######################
 
-.. ref-code-block:: cpp
-	:class: title-code-block
+.. code-block:: cpp
 
     template<typename T, const unsigned LEN, const unsigned INCREMENT, const unsigned VECDIM>
     void squareV(input_stream<T>* in1, output_stream<T>* out);
+
 
 Element-wise square operation of the entry of the vector.
 
@@ -392,11 +391,11 @@ Element-wise square operation of the entry of the vector.
 Kernel name: `sum_axis_1`
 ##########################
 
-.. ref-code-block:: cpp
-	:class: title-code-block
+.. code-block:: cpp
 
     template<typename T, const unsigned LEN, const unsigned INCREMENT, const unsigned VECDIM>
     void sum_axis_1(input_stream<T>* in1, output_stream<T>* out);
+
 
 Perform row wise the reduce add of a matrix of the columns. Because for every row returns a number, the result is a vector of values which represents for every row the magnitude of the reduce add operation.
 
@@ -412,11 +411,11 @@ Perform row wise the reduce add of a matrix of the columns. Because for every ro
 Kernel name: `sumMM`
 #####################
 
-.. ref-code-block:: cpp
-	:class: title-code-block
+.. code-block:: cpp
 
     template<typename T, const unsigned LEN, const unsigned INCREMENT, const unsigned VECDIM>
     void sumMM(input_window<T>* in1, input_window<T>* in2, output_stream<T>* out);
+
 
 Element-Wise sum of two matrixes. The first matrix and the second one must have the same size.
 
@@ -433,11 +432,11 @@ Element-Wise sum of two matrixes. The first matrix and the second one must have 
 Kernel name: `sumVS`
 #####################
 
-.. ref-code-block:: cpp
-	:class: title-code-block
+.. code-block:: cpp
 
     template<typename T, const unsigned LEN, const unsigned INCREMENT, const unsigned VECDIM>
     void sumVS(input_stream<T>* in1, input_stream<T>* in2, output_stream<T>* out);
+
 
 Element-Wise addition between the values of a vector and a scalar. For every iteration (expressed by `LEN`) we need to pass 4 times the scalar value to the stream of the scalar value.
 
@@ -454,11 +453,11 @@ Element-Wise addition between the values of a vector and a scalar. For every ite
 Kernel name: `sumVV`
 #####################
 
-.. ref-code-block:: cpp
-	:class: title-code-block
+.. code-block:: cpp
 
     template<typename T, const unsigned LEN, const unsigned INCREMENT, const unsigned VECDIM>
     void sumVV(input_stream<T>* in1, input_stream<T>* in2, output_stream<T>* out);
+
 
 Element-Wise addition of two vectors. The first vector and the second one must have the same size.
 
@@ -475,11 +474,11 @@ Element-Wise addition of two vectors. The first vector and the second one must h
 Kernel name: `tileV`
 #####################
 
-.. ref-code-block:: cpp
-	:class: title-code-block
+.. code-block:: cpp
 
-	template<typename T, const unsigned LEN, const unsigned INCREMENT, const unsigned VECDIM>
+    template<typename T, const unsigned LEN, const unsigned INCREMENT, const unsigned VECDIM>
     void tileV(input_stream<T>* in1, output_stream<T>* out);
+
 
 This kernel read in input a vector and returns it `LEN` times. This operation creates a matrix with the rows all equal to the others.
 

@@ -28,10 +28,15 @@ Our beamformer is a Sum-And-Delay (SAD) one, and thus allow the user to select w
 The beamforming can then be divided into 6 categories labelled as:
 
 1.Image Points
+
 2.Focusing
+
 3.Delay
+
 4.Samples Selection
+
 5.Apodization
+
 6.Interpolation
 
 Image Points
