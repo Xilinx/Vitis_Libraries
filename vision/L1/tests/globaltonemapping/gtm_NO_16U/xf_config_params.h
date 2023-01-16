@@ -21,5 +21,5 @@
 /* Image type */
 #define T_16U 1
 
-#define XF_CV_DEPTH_IN 3
-#define XF_CV_DEPTH_OUT 3
+#define XF_CV_DEPTH_IN 2
+#define XF_CV_DEPTH_OUT 2

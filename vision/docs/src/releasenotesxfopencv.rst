@@ -46,6 +46,10 @@ New features and functions
 		    • Fixed SVM emulation and cosim hang issue
 		    • Updated loop tripcounts of pyrDown, histogram, HDR extract, rgb2yuyv module in cvtColor to fix synthesis latency numbers
 		    • Fix array reshape pragma in xf_sobel.hpp, xf_video_mem.hpp files
+			• Modified XFCVDEPTH values in all functions
+		    • Stride support added in the preprocess kernel of L3 Defect Detection pipeline
+		    • Order of kernels changed in all-in-one pipeline and renamed as all-in-one-adas
+		    • Array partitions in accel file moved to kernel file in isp multistream pipeline
 	
     • Lib Infra Changes:
 		    • Added frequency setting in L2/L3 JSON files. 300 MHz for NPPC1 and 150MHz for NPPC8 for most cases.

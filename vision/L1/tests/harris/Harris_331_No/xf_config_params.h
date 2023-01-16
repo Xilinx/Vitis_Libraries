@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#define XF_CV_DEPTH_IN 3
-#define XF_CV_DEPTH_OUT 3
+#define XF_CV_DEPTH_IN 2
+#define XF_CV_DEPTH_OUT 2
 
 #define MPC 0
 #define SPC 1

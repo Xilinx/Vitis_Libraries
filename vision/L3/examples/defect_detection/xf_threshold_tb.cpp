@@ -96,12 +96,13 @@ int main(int argc, char** argv) {
     in_height = in_img.rows;
     in_depth = in_img.depth();
 
+    int stride = STRIDE;
     fprintf(stderr, "row = %d col = %d depth = %d\n", in_height, in_width, in_depth);
 
     ocv_ref.create(in_img.rows, in_img.cols, in_img.depth());
     out_img.create(in_img.rows, in_img.cols, CV_8UC1);
-    preout_img.create(in_img.rows, in_img.cols, CV_8UC1);
-    fw_outimg.create(in_img.rows, in_img.cols, CV_8UC1);
+    preout_img.create(in_img.rows, stride, CV_8UC1);
+    fw_outimg.create(in_img.rows, stride, CV_8UC1);
     diff.create(in_img.rows, in_img.cols, in_img.depth());
 
 ////////////////  reference code  ////////////////
@@ -193,8 +194,8 @@ int main(int argc, char** argv) {
 
     OCL_CHECK(err, cl::Kernel krnl(program, "preprocess_accel", &err));
     OCL_CHECK(err, cl::Buffer imageToDevice(context, CL_MEM_READ_ONLY, (height * width), NULL, &err));
-    OCL_CHECK(err, cl::Buffer imageFromDevice(context, CL_MEM_READ_WRITE, (height * width), NULL, &err));
-    OCL_CHECK(err, cl::Buffer cca_tempbuffer(context, CL_MEM_READ_WRITE, (height * width), NULL, &err));
+    OCL_CHECK(err, cl::Buffer imageFromDevice(context, CL_MEM_READ_WRITE, (height * stride), NULL, &err));
+    OCL_CHECK(err, cl::Buffer cca_tempbuffer(context, CL_MEM_READ_WRITE, (height * stride), NULL, &err));
     OCL_CHECK(err, cl::Buffer obj_pix_buffer(context, CL_MEM_READ_WRITE, 4, NULL, &err));
 
     // Profiling Objects
@@ -210,16 +211,16 @@ int main(int argc, char** argv) {
     unsigned char* tmp_out_data1 = (unsigned char*)malloc(height * width);
     unsigned char* tmp_out_data2 = (unsigned char*)malloc(height * width);
     cv::Mat cca_outimg;
-    cca_outimg.create(in_img.rows, in_img.cols, CV_8UC1);
+    cca_outimg.create(in_img.rows, stride, CV_8UC1);
     int def_pix, obj_pix;
 
     double time_taken;
 
     OCL_CHECK(err, cl::Kernel cca_krnl(program, "cca_custom_accel", &err));
-    OCL_CHECK(err, cl::Buffer cca_imageToDevice(context, CL_MEM_READ_ONLY, (height * width), NULL, &err));
-    OCL_CHECK(err, cl::Buffer cca_tempbuffer_2(context, CL_MEM_READ_ONLY, (height * width), NULL, &err));
-    OCL_CHECK(err, cl::Buffer cca_imageFromDevice(context, CL_MEM_READ_WRITE, (height * width), NULL, &err));
-    OCL_CHECK(err, cl::Buffer def_pix_buffer(context, CL_MEM_READ_WRITE, (height * width), NULL, &err));
+    OCL_CHECK(err, cl::Buffer cca_imageToDevice(context, CL_MEM_READ_ONLY, (height * stride), NULL, &err));
+    OCL_CHECK(err, cl::Buffer cca_tempbuffer_2(context, CL_MEM_READ_ONLY, (height * stride), NULL, &err));
+    OCL_CHECK(err, cl::Buffer cca_imageFromDevice(context, CL_MEM_READ_WRITE, (height * stride), NULL, &err));
+    OCL_CHECK(err, cl::Buffer def_pix_buffer(context, CL_MEM_READ_WRITE, 4, NULL, &err));
 
     // Set the kernel arguments
     OCL_CHECK(err, err = cca_krnl.setArg(0, cca_imageToDevice));
@@ -227,7 +228,7 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, err = cca_krnl.setArg(2, cca_imageFromDevice));
     OCL_CHECK(err, err = cca_krnl.setArg(3, def_pix_buffer));
     OCL_CHECK(err, err = cca_krnl.setArg(4, height));
-    OCL_CHECK(err, err = cca_krnl.setArg(5, width));
+    OCL_CHECK(err, err = cca_krnl.setArg(5, stride));
 
     OCL_CHECK(err, q.enqueueWriteBuffer(imageToGaus,                     // buffer on the FPGA
                                         CL_TRUE,                         // blocking call
@@ -308,6 +309,7 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, err = krnl.setArg(5, maxval));
     OCL_CHECK(err, err = krnl.setArg(6, height));
     OCL_CHECK(err, err = krnl.setArg(7, width));
+    OCL_CHECK(err, err = krnl.setArg(8, stride));
 
     OCL_CHECK(err, q.enqueueWriteBuffer(imageToDevice, CL_TRUE, 0, (height * width), out_img.data));
 
@@ -330,8 +332,8 @@ int main(int argc, char** argv) {
     std::cout << (th_diff_prof / 1000000) << "pre-process took ms" << std::endl;
 
     // Copying Device result data to Host memory
-    q.enqueueReadBuffer(imageFromDevice, CL_TRUE, 0, (height * width), preout_img.data, nullptr, &event_sp);
-    q.enqueueReadBuffer(cca_tempbuffer, CL_TRUE, 0, (height * width), fw_outimg.data, nullptr, &event_sp);
+    q.enqueueReadBuffer(imageFromDevice, CL_TRUE, 0, (height * stride), preout_img.data, nullptr, &event_sp);
+    q.enqueueReadBuffer(cca_tempbuffer, CL_TRUE, 0, (height * stride), fw_outimg.data, nullptr, &event_sp);
     q.enqueueReadBuffer(obj_pix_buffer, CL_TRUE, 0, 4, &obj_pix);
 
 #if ENABLE_DEBUG_LOG
@@ -340,6 +342,7 @@ int main(int argc, char** argv) {
 
 #if ENABLE_INERMEDIATE_STORE
     imwrite("preprocess.jpg", preout_img);
+    imwrite("fw_img.jpg", fw_outimg);
 #endif
 
     q.finish();
@@ -355,8 +358,8 @@ int main(int argc, char** argv) {
 
     cl_kernel_mgr::exec_all(); */
 
-    OCL_CHECK(err, q.enqueueWriteBuffer(cca_imageToDevice, CL_TRUE, 0, (height * width), preout_img.data));
-    OCL_CHECK(err, q.enqueueWriteBuffer(cca_tempbuffer_2, CL_TRUE, 0, (height * width), fw_outimg.data));
+    OCL_CHECK(err, q.enqueueWriteBuffer(cca_imageToDevice, CL_TRUE, 0, (height * stride), preout_img.data));
+    OCL_CHECK(err, q.enqueueWriteBuffer(cca_tempbuffer_2, CL_TRUE, 0, (height * stride), fw_outimg.data));
 
     OCL_CHECK(err, err = q.enqueueTask(cca_krnl, NULL, &cca_event_sp));
     clWaitForEvents(1, (const cl_event*)&cca_event_sp);
@@ -368,7 +371,7 @@ int main(int argc, char** argv) {
     cca_diff_prof = cca_end - cca_start;
     std::cout << (cca_diff_prof / 1000000) << "cca took ms" << std::endl;
 
-    q.enqueueReadBuffer(cca_imageFromDevice, CL_TRUE, 0, (height * width), cca_outimg.data);
+    q.enqueueReadBuffer(cca_imageFromDevice, CL_TRUE, 0, (height * stride), cca_outimg.data);
     q.enqueueReadBuffer(def_pix_buffer, CL_TRUE, 0, 4, &def_pix);
 
     printf("Mango Pixel = %d Defect Pixel = %d\n", obj_pix, def_pix);

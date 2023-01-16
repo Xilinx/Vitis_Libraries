@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#define XF_CV_DEPTH_IN_1 1
+#define XF_CV_DEPTH_IN_1 2
 #define XF_CV_DEPTH_RGB2HSV 2
-#define XF_CV_DEPTH_HELP_1 3
-#define XF_CV_DEPTH_HELP_2 4
-#define XF_CV_DEPTH_HELP_3 5
-#define XF_CV_DEPTH_HELP_4 6
-#define XF_CV_DEPTH_OUT_1 7
+#define XF_CV_DEPTH_HELP_1 2
+#define XF_CV_DEPTH_HELP_2 2
+#define XF_CV_DEPTH_HELP_3 2
+#define XF_CV_DEPTH_HELP_4 2
+#define XF_CV_DEPTH_OUT_1 2

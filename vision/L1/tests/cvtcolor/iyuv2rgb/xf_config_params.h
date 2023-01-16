@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-#define XF_CV_DEPTH_IN 3
-#define XF_CV_DEPTH_OUT 4
+#define XF_CV_DEPTH_IN 2
+#define XF_CV_DEPTH_OUT 2
 
-#define XF_CV_DEPTH_IN_0 3
-#define XF_CV_DEPTH_OUT_0 4
+#define XF_CV_DEPTH_IN_0 2
+#define XF_CV_DEPTH_OUT_0 2
 
-#define XF_CV_DEPTH_IN_1 3
-#define XF_CV_DEPTH_OUT_1 3
+#define XF_CV_DEPTH_IN_1 2
+#define XF_CV_DEPTH_OUT_1 2
 #define XF_CV_DEPTH_IN_2 2
-#define XF_CV_DEPTH_OUT_2 4
+#define XF_CV_DEPTH_OUT_2 2
 
 /*  set the optimisation type  */
 #define SPC 1 // Single Pixel per Clock operation

@@ -1043,7 +1043,6 @@ class MMIterIn : public _MMITER {
         //  stride_bound_per_npc = _MMITER::cols_npc_aligned(stride);
         //  strideBased_last_blk_width = _MMITER::last_blk_pxl_width(stride, stride_bound_per_npc);
         //}
-
         int rd_cnt = 0;
 
         int rem = 0;
@@ -1075,7 +1074,6 @@ class MMIterIn : public _MMITER {
                 localbuffer = val.range(((ptr_width_plus - 1) - rem), (PTR_WIDTH - rem));
                 rem = rem - xf_bits_per_clock;
             }
-
             bool bLast_width = (j == (cols_bound_per_npc - 1));
             ap_uint<XF_BITS_PER_CLOCK> localbuffer2 = 0;
             if (bLast_width == 0)
@@ -1084,6 +1082,7 @@ class MMIterIn : public _MMITER {
                 localbuffer2 = localbuffer.range(last_blk_width - 1, 0);
 
             if (j < cols_bound_per_npc) dout.write(localbuffer2);
+
             j = (bLast) ? 0 : (j + 1);
         }
     }
@@ -1286,11 +1285,11 @@ class MMIterOut : public _MMITER {
                                     int last_blk_width,
                                     int stride = -1) {
         ap_uint<16> strideBased_cols_bound_per_npc;
-        // if (stride == -1 || FILLZERO == 0) {
-        strideBased_cols_bound_per_npc = cols_bound_per_npc;
-        //} else {
-        //    strideBased_cols_bound_per_npc = _MMITER::cols_npc_aligned(stride);
-        //}
+        if (stride == -1 || FILLZERO == 0) {
+            strideBased_cols_bound_per_npc = cols_bound_per_npc;
+        } else {
+            strideBased_cols_bound_per_npc = _MMITER::cols_npc_aligned(stride);
+        }
 
         ap_uint<log2<PTR_WIDTH>::cvalue + 1> filled = 0; // valid bits remaining in current buffer
         ap_uint<PTR_WIDTH> localbuffer = 0;

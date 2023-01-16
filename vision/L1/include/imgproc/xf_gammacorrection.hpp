@@ -118,6 +118,25 @@ void gammacorrection(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src,
                   XFCVDEPTH_OUT_1, XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(
         src, dst, lut_table, height, width);
 }
+
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int STREAMS = 2,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void gammacorrection_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src,
+                           xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst,
+                           unsigned char lut_table[STREAMS][256 * XF_CHANNELS(SRC_T, NPC)],
+                           int strm_id) {
+// clang-format off
+#pragma HLS ARRAY_PARTITION variable= lut_table dim=1 complete
+    // clang-format on
+
+    gammacorrection<SRC_T, DST_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>(src, dst, lut_table[strm_id]);
+}
 }
 }
 

@@ -41,19 +41,13 @@ typedef ap_uint<64> ap_uint64_t;
 /*  set the height and weight */
 #define HEIGHT 1080
 #define WIDTH 1920
+#define STRIDE 2048
 
 #define RGB2GRAY 0
 #define GRAY 1
 
 #define NPIX XF_NPPC1
 #define NPC1 XF_NPPC1
-
-#if MPC
-#define NPIX XF_NPPC8
-#endif
-#if SPC
-#define NPIX XF_NPPC1
-#endif
 
 #define TYPE XF_8UC1
 

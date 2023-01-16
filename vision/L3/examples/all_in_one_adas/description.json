@@ -1,7 +1,7 @@
 {
-    "name": "Xilinx all_in_one L3 Test", 
+    "name": "Xilinx all_in_one_adas L3 Test", 
     "description": [
-        "all_in_one L3 function example"
+        "all_in_one_adas L3 function example"
     ], 
     "flow": "vitis", 
     "platform_allowlist": [
@@ -138,11 +138,11 @@
         "host_exe": "isppipeline", 
         "compiler": {
             "sources": [
-                "LIB_DIR/L3/examples/all_in_one/xf_isp_tb.cpp", 
+                "LIB_DIR/L3/examples/all_in_one_adas/xf_isp_tb.cpp", 
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-                "LIB_DIR/L3/examples/all_in_one/build"
+                "LIB_DIR/L3/examples/all_in_one_adas/build"
             ], 
             "options": "-O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include", 
             "symbols": [
@@ -154,7 +154,7 @@
         "compiler": {
             "symbols": [], 
             "includepaths": [
-                "LIB_DIR/L3/examples/all_in_one/build"
+                "LIB_DIR/L3/examples/all_in_one_adas/build"
             ], 
             "clflags": []
         }
@@ -165,7 +165,7 @@
             "accelerators": [
                 {
                     "name": "ISPPipeline_accel", 
-                    "location": "LIB_DIR/L3/examples/all_in_one/xf_isp_accel.cpp",
+                    "location": "LIB_DIR/L3/examples/all_in_one_adas/xf_isp_accel.cpp",
                     "frequency": 150.0
                 }
             ],

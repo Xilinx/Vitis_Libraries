@@ -31,6 +31,6 @@
 
 #define XF_USE_URAM 0
 
-#define XF_CV_DEPTH_IN 3
-#define XF_CV_DEPTH_LEF 3
-#define XF_CV_DEPTH_SEF 3
+#define XF_CV_DEPTH_IN 2
+#define XF_CV_DEPTH_LEF 2
+#define XF_CV_DEPTH_SEF 2

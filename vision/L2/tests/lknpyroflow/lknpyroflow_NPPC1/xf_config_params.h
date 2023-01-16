@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define XF_CV_DEPTH_IN_1 3
-#define XF_CV_DEPTH_IN_2 3
-#define XF_CV_DEPTH_OUT_1 3
-#define XF_CV_DEPTH_OUT_2 3
+#define XF_CV_DEPTH_IN_1 2
+#define XF_CV_DEPTH_IN_2 2
+#define XF_CV_DEPTH_OUT_1 2
+#define XF_CV_DEPTH_OUT_2 2
 
 #define MAX_HEIGHT 2160
 #define MAX_WIDTH 3840

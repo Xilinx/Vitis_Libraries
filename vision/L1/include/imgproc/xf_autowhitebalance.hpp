@@ -712,6 +712,217 @@ void AWBChannelGain(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src,
                                  XF_WORDWIDTH(SRC_T, NPC), XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(
         src, dst, thresh, i_gain);
 }
+
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int WB_TYPE,
+          int HISTSIZE,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void hist_nor_awb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
+                  xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst,
+                  uint32_t hist0[3][HISTSIZE],
+                  uint32_t hist1[3][HISTSIZE],
+                  unsigned short rows,
+                  unsigned short cols,
+                  float thresh,
+                  float inputMin,
+                  float inputMax,
+                  float outputMin,
+                  float outputMax) {
+// clang-format off
+#pragma HLS INLINE OFF
+    // clang-format on
+    xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1> src2(rows, cols);
+// clang-format off
+#pragma HLS DATAFLOW
+    // clang-format on
+    AWBhistogram<DST_T, DST_T, ROWS, COLS, NPC, WB_TYPE, HISTSIZE, XFCVDEPTH_IN_1, XFCVDEPTH_IN_1>(
+        src1, src2, hist0, thresh, inputMin, inputMax, outputMin, outputMax);
+
+    AWBNormalization<DST_T, DST_T, ROWS, COLS, NPC, WB_TYPE, HISTSIZE, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>(
+        src2, dst, hist1, thresh, inputMin, inputMax, outputMin, outputMax);
+}
+
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int WB_TYPE,
+          int HISTSIZE,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void hist_nor_awb_wrap(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
+                       xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst,
+                       uint32_t hist0[3][HISTSIZE],
+                       uint32_t hist1[3][HISTSIZE],
+                       unsigned short rows,
+                       unsigned short cols,
+                       float thresh,
+                       float inputMin,
+                       float inputMax,
+                       float outputMin,
+                       float outputMax,
+                       bool& flag,
+                       bool& eof) {
+// clang-format off
+#pragma HLS INLINE OFF
+    // clang-format on
+
+    if (!flag) {
+        hist_nor_awb<DST_T, DST_T, ROWS, COLS, NPC, WB_TYPE, HISTSIZE, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>(
+            src1, dst, hist0, hist1, rows, cols, thresh, inputMin, inputMax, outputMin, outputMax);
+        if (eof) flag = 1;
+    } else {
+        hist_nor_awb<DST_T, DST_T, ROWS, COLS, NPC, WB_TYPE, HISTSIZE, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>(
+            src1, dst, hist1, hist0, rows, cols, thresh, inputMin, inputMax, outputMin, outputMax);
+        if (eof) flag = 0;
+    }
+    return;
+}
+
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int WB_TYPE,
+          int HISTSIZE,
+          int STREAMS = 2,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void hist_nor_awb_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
+                        xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst,
+                        uint32_t hist0[STREAMS][3][HISTSIZE],
+                        uint32_t hist1[STREAMS][3][HISTSIZE],
+                        unsigned short rows,
+                        unsigned short cols,
+                        float inputMin,
+                        float inputMax,
+                        float outputMin,
+                        float outputMax,
+                        bool flag[STREAMS],
+                        bool eof[STREAMS],
+                        unsigned short pawb[STREAMS],
+                        int strm_id) {
+// clang-format off
+
+#pragma HLS ARRAY_PARTITION variable=hist0 complete dim=1
+#pragma HLS ARRAY_PARTITION variable=hist0 complete dim=2
+#pragma HLS ARRAY_PARTITION variable=hist1 complete dim=1
+#pragma HLS ARRAY_PARTITION variable=hist1 complete dim=2
+#pragma HLS ARRAY_PARTITION variable=flag complete dim=1
+#pragma HLS ARRAY_PARTITION variable=eof complete dim=1
+#pragma HLS ARRAY_PARTITION variable=pawb complete dim=1
+
+    // clang-format on
+    float thresh = (float)pawb[strm_id] / 256;
+
+    hist_nor_awb_wrap<DST_T, DST_T, ROWS, COLS, NPC, WB_TYPE, HISTSIZE, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>(
+        src1, dst, hist0[strm_id], hist1[strm_id], rows, cols, thresh, inputMin, inputMax, outputMin, outputMax,
+        flag[strm_id], eof[strm_id]);
+}
+
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int WB_TYPE,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void chgain_update_awb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
+                       xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst,
+                       float thresh,
+                       int i_gain0[3],
+                       int i_gain1[3],
+                       unsigned short rows,
+                       unsigned short cols) {
+// clang-format off
+#pragma HLS INLINE OFF
+    // clang-format on  
+    xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1> src2(rows, cols); 
+
+// clang-format off
+#pragma HLS DATAFLOW
+    // clang-format on                        
+    AWBChannelGain<DST_T, DST_T, ROWS, COLS, NPC, WB_TYPE, XFCVDEPTH_IN_1, XFCVDEPTH_IN_1>(src1, src2, thresh, i_gain0);
+    AWBGainUpdate<DST_T, DST_T, ROWS, COLS, NPC, WB_TYPE, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>(src2, dst, thresh, i_gain1);
+   
+}    
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int WB_TYPE,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void chgain_update_awb_wrap(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
+                    xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst,
+                    float thresh,
+                    int i_gain0[3],
+                    int i_gain1[3],
+                    unsigned short rows,
+                    unsigned short cols,
+                    bool &flag,
+                    bool &eof) {
+// clang-format off
+#pragma HLS INLINE OFF
+    // clang-format on                       
+ 
+    if(!flag){ 
+        chgain_update_awb<DST_T, DST_T, ROWS, COLS, NPC, WB_TYPE, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>(src1, dst, thresh, i_gain0, i_gain1, rows, cols);
+        
+        if(eof) flag = 1;
+    }
+    else {
+               
+        chgain_update_awb<DST_T, DST_T, ROWS, COLS, NPC, WB_TYPE, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>(src1, dst, thresh, i_gain1, i_gain0, rows, cols);
+        
+        if(eof) flag = 0;                
+    }  
+    return;
+}    
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int WB_TYPE,
+          int STREAMS= 2,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void chgain_update_awb_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
+                    xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst,
+                    int i_gain0[STREAMS][3],
+                    int i_gain1[STREAMS][3],
+                    unsigned short rows,
+                    unsigned short cols,
+                    bool flag[STREAMS],
+                    bool eof[STREAMS],
+                    unsigned short pawb[STREAMS],
+                    int strm_id) { 
+                                      
+// clang-format off
+#pragma HLS ARRAY_PARTITION variable= pawb dim=1 complete
+#pragma HLS ARRAY_PARTITION variable=i_gain0 complete dim=1
+#pragma HLS ARRAY_PARTITION variable=i_gain0 complete dim=2
+#pragma HLS ARRAY_PARTITION variable=i_gain1 complete dim=1
+#pragma HLS ARRAY_PARTITION variable=i_gain1 complete dim=2
+#pragma HLS ARRAY_PARTITION variable=flag complete dim=1
+#pragma HLS ARRAY_PARTITION variable=eof complete dim=1
+
+    // clang-format on
+    float thresh = (float)pawb[strm_id] / 256;
+
+    chgain_update_awb_wrap<DST_T, DST_T, ROWS, COLS, NPC, WB_TYPE, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>(
+        src1, dst, thresh, i_gain0[strm_id], i_gain1[strm_id], rows, cols, flag[strm_id], eof[strm_id]);
+}
 }
 }
 #endif //_XF_AWB_HPP_

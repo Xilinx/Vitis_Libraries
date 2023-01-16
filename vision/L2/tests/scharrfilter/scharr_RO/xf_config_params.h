@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#define XF_CV_DEPTH_IN 3
-#define XF_CV_DEPTH_OUT_1 3
-#define XF_CV_DEPTH_OUT_2 3
+#define XF_CV_DEPTH_IN 2
+#define XF_CV_DEPTH_OUT_1 2
+#define XF_CV_DEPTH_OUT_2 2
 
 #define MPC 1 // Multiple Pixels per Clock operation
 #define SPC 0 // Single Pixel per Clock operation

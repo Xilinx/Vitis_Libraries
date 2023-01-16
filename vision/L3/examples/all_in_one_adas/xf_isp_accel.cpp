@@ -16,9 +16,7 @@
 
 #include "xf_isp_types.h"
 
-using namespace std;
 static bool flag = 0;
-
 static uint32_t hist0_awb[3][HIST_SIZE] = {0};
 static uint32_t hist1_awb[3][HIST_SIZE] = {0};
 
@@ -340,11 +338,18 @@ void function_rgbir_or_fifo(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_hdr_ou
     }
 }
 
-template <int GTM_T, int ROWS, int COLS, int NPC = 1, int XFCVDEPTH_dst, int XFCVDEPTH_3dlut>
-void function_3d_lut(xf::cv::Mat<GTM_T, ROWS, COLS, NPC, XFCVDEPTH_dst>& _dst,
-                     xf::cv::Mat<GTM_T, ROWS, COLS, NPC, XFCVDEPTH_3dlut>& ccm_3dlut_out,
-                     ap_uint<INPUT_PTR_WIDTH>* lut,
-                     int lutDim) {
+template <int DST_T,
+          int GTM_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_dst,
+          int XFCVDEPTH_lutout,
+          int XFCVDEPTH_3dlut>
+void function_3dlut(xf::cv::Mat<GTM_T, ROWS, COLS, NPC, XFCVDEPTH_dst>& _dst,
+                    xf::cv::Mat<GTM_T, ROWS, COLS, NPC, XFCVDEPTH_lutout>& lut_out,
+                    ap_uint<INPUT_PTR_WIDTH>* lut,
+                    int lutDim) {
 // clang-format off
 #pragma HLS INLINE OFF
     // clang-format on
@@ -353,39 +358,65 @@ void function_3d_lut(xf::cv::Mat<GTM_T, ROWS, COLS, NPC, XFCVDEPTH_dst>& _dst,
 #pragma HLS DATAFLOW
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_32FC3, SQ_LUTDIM, LUT_DIM, XF_NPPC, XFCVDEPTH_3dlut>(lut, lutMat);
     xf::cv::lut3d<LUT_DIM, SQ_LUTDIM, XF_GTM_T, XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_USE_URAM, XFCVDEPTH_dst,
-                  XFCVDEPTH_3dlut>(_dst, lutMat, ccm_3dlut_out, lutDim);
+                  XFCVDEPTH_3dlut, XFCVDEPTH_lutout>(_dst, lutMat, lut_out, lutDim);
 }
 
-template <int GTM_T, int ROWS, int COLS, int NPC = 1, int XFCVDEPTH_dst, int XFCVDEPTH_ccm, int XFCVDEPTH_3dlut>
-void function_ccm_3dlut_fifo(xf::cv::Mat<GTM_T, ROWS, COLS, NPC, XFCVDEPTH_dst>& _dst,
-                             xf::cv::Mat<GTM_T, ROWS, COLS, NPC, XFCVDEPTH_ccm>& ccm_3dlut_out,
-                             int lutDim,
-                             ap_uint<INPUT_PTR_WIDTH>* lut,
-                             unsigned short mode_reg,
-                             unsigned short height,
-                             unsigned short width) {
+template <int DST_T,
+          int GTM_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_dst,
+          int XFCVDEPTH_lutout,
+          int XFCVDEPTH_3dlut>
+void function_3dlut_fifo(xf::cv::Mat<GTM_T, ROWS, COLS, NPC, XFCVDEPTH_dst>& _dst,
+                         xf::cv::Mat<GTM_T, ROWS, COLS, NPC, XFCVDEPTH_lutout>& lut_out,
+                         ap_uint<INPUT_PTR_WIDTH>* lut,
+                         int lutDim,
+                         unsigned short mode_reg,
+                         unsigned short height,
+                         unsigned short width) {
+// clang-format off
+#pragma HLS INLINE OFF
+    // clang-format on
+
+    ap_uint<16> mode = (ap_uint<16>)mode_reg;
+    ap_uint<1> mode_lut3d = mode.range(LUT3D_EN_LSB, LUT3D_EN_LSB);
+
+    if (mode_lut3d) {
+        function_3dlut<XF_GTM_T, XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_dst, XFCVDEPTH_lutout,
+                       XFCVDEPTH_3dlut>(_dst, lut_out, lut, lutDim);
+
+    } else {
+        fifo_copy<XF_GTM_T, XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_dst, XFCVDEPTH_lutout>(_dst, lut_out,
+                                                                                                     height, width);
+    }
+}
+
+template <int DST_T, int ROWS, int COLS, int NPC = 1, int XFCVDEPTH_dst, int XFCVDEPTH_ccm>
+void function_ccm_fifo(xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_dst>& awb_out,
+                       xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_ccm>& ccm_out,
+                       unsigned short mode_reg,
+                       unsigned short height,
+                       unsigned short width) {
 // clang-format off
 #pragma HLS INLINE OFF
     // clang-format on
 
     ap_uint<16> mode = (ap_uint<16>)mode_reg;
     ap_uint<1> mode_ccm = mode.range(CCM_EN_LSB, CCM_EN_LSB);
-    ap_uint<1> mode_lut_3d = mode.range(LUT3D_EN_LSB, LUT3D_EN_LSB);
 
-    if (mode_lut_3d) {
-        function_3d_lut<XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_dst, XFCVDEPTH_3dlut>(_dst, ccm_3dlut_out,
-                                                                                                lut, lutDim);
-    } else if (mode_ccm) {
-        xf::cv::colorcorrectionmatrix<XF_CCM_TYPE, XF_GTM_T, XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_dst,
-                                      XFCVDEPTH_ccm>(_dst, ccm_3dlut_out);
+    if (mode_ccm) {
+        xf::cv::colorcorrectionmatrix<XF_CCM_TYPE, XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_dst,
+                                      XFCVDEPTH_ccm>(awb_out, ccm_out);
     } else {
-        fifo_copy<XF_GTM_T, XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_dst, XFCVDEPTH_ccm>(_dst, ccm_3dlut_out,
+        fifo_copy<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_dst, XFCVDEPTH_ccm>(awb_out, ccm_out,
                                                                                                   height, width);
     }
 }
 
-template <int GTM_T, int ROWS, int COLS, int NPC = 1, int XFCVDEPTH_ccm>
-void function_csc(xf::cv::Mat<GTM_T, ROWS, COLS, NPC, XFCVDEPTH_ccm>& ccm_3dlut_out,
+template <int GTM_T, int ROWS, int COLS, int NPC = 1, int XFCVDEPTH_csc>
+void function_csc(xf::cv::Mat<GTM_T, ROWS, COLS, NPC, XFCVDEPTH_csc>& csc_out,
                   ap_uint<OUTPUT_PTR_WIDTH>* img_out,
                   unsigned short height,
                   unsigned short width) {
@@ -393,18 +424,18 @@ void function_csc(xf::cv::Mat<GTM_T, ROWS, COLS, NPC, XFCVDEPTH_ccm>& ccm_3dlut_
 #pragma HLS INLINE OFF
     // clang-format on
 
-    xf::cv::Mat<XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_ccm> _imgOutput(height, width);
+    xf::cv::Mat<XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_csc> _imgOutput(height, width);
 
 // clang-format off
 #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::rgb2yuyv<XF_GTM_T, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_ccm>(ccm_3dlut_out, _imgOutput);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_ccm>(_imgOutput, img_out);
+    xf::cv::rgb2yuyv<XF_GTM_T, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_csc>(csc_out, _imgOutput);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_csc>(_imgOutput, img_out);
 }
 
-template <int GTM_T, int ROWS, int COLS, int NPC = 1, int XFCVDEPTH_ccm>
-void function_csc_or_mat_array(xf::cv::Mat<GTM_T, ROWS, COLS, NPC, XFCVDEPTH_ccm>& ccm_3dlut_out,
+template <int GTM_T, int ROWS, int COLS, int NPC = 1, int XFCVDEPTH_csc>
+void function_csc_or_mat_array(xf::cv::Mat<GTM_T, ROWS, COLS, NPC, XFCVDEPTH_csc>& csc_out,
                                ap_uint<OUTPUT_PTR_WIDTH>* img_out,
                                unsigned short mode_reg,
                                unsigned short height,
@@ -417,10 +448,9 @@ void function_csc_or_mat_array(xf::cv::Mat<GTM_T, ROWS, COLS, NPC, XFCVDEPTH_ccm
     ap_uint<1> mode_csc = mode.range(CSC_EN_LSB, CSC_EN_LSB);
 
     if (mode_csc) {
-        function_csc<XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_ccm>(ccm_3dlut_out, img_out, height, width);
+        function_csc<XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_csc>(csc_out, img_out, height, width);
     } else {
-        xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_ccm>(ccm_3dlut_out,
-                                                                                                     img_out);
+        xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_csc>(csc_out, img_out);
     }
 }
 
@@ -488,10 +518,11 @@ void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_lsc_out> LscOut(height, width);
     xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_gain_out> gain_out(height, width);
     xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_demosaic_out> demosaic_out(height, width);
-    xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_ltm_in> ltm_in(height, width);
+    xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_awb_out> awb_out(height, width);
+    xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_ccm> ccm_out(height, width);
     xf::cv::Mat<XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_aecin> aecin(height, width);
     xf::cv::Mat<XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_dst> _dst(height, width);
-    xf::cv::Mat<XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_ccm> ccm_3dlut_out(height, width);
+    xf::cv::Mat<XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_lut_out> lut_out(height, width);
 
 // clang-format off
 #pragma HLS DATAFLOW
@@ -513,14 +544,14 @@ void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
         hdr_out, rggb_out, img_out_ir, R_IR_C1_wgts, R_IR_C2_wgts, B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts, sub_wgts,
         mode_reg, height, width);
 
-    xf::cv::badpixelcorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0, 0, XF_CV_DEPTH_rggb_out, XF_CV_DEPTH_bpc_out>(
-        rggb_out, bpc_out);
+    xf::cv::blackLevelCorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1, XF_CV_DEPTH_rggb_out,
+                                 XF_CV_DEPTH_blc_out>(rggb_out, blc_out, BLACK_LEVEL, mul_fact);
 
-    xf::cv::blackLevelCorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1, XF_CV_DEPTH_bpc_out,
-                                 XF_CV_DEPTH_blc_out>(bpc_out, blc_out, BLACK_LEVEL, mul_fact);
+    xf::cv::badpixelcorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0, 0, XF_CV_DEPTH_blc_out, XF_CV_DEPTH_bpc_out>(
+        blc_out, bpc_out);
 
-    xf::cv::Lscdistancebased<XF_SRC_T, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_blc_out,
-                             XF_CV_DEPTH_lsc_out>(blc_out, LscOut);
+    xf::cv::Lscdistancebased<XF_SRC_T, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_bpc_out,
+                             XF_CV_DEPTH_lsc_out>(bpc_out, LscOut);
 
     xf::cv::gaincontrol<XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_lsc_out,
                         XF_CV_DEPTH_gain_out>(LscOut, gain_out, rgain, bgain);
@@ -528,25 +559,28 @@ void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     xf::cv::demosaicing<XF_BAYER_PATTERN, XF_SRC_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0, XF_CV_DEPTH_gain_out,
                         XF_CV_DEPTH_demosaic_out>(gain_out, demosaic_out);
 
-    function_awb<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_demosaic_out, XF_CV_DEPTH_ltm_in>(
-        demosaic_out, ltm_in, hist0, hist1, gain0, gain1, height, width, mode_reg, thresh);
+    function_awb<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_demosaic_out, XF_CV_DEPTH_awb_out>(
+        demosaic_out, awb_out, hist0, hist1, gain0, gain1, height, width, mode_reg, thresh);
+
+    function_ccm_fifo<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_awb_out, XF_CV_DEPTH_ccm>(
+        awb_out, ccm_out, mode_reg, height, width);
 
     if (XF_DST_T == XF_8UC3) {
-        fifo_copy<XF_DST_T, XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_ltm_in, XF_CV_DEPTH_aecin>(
-            ltm_in, aecin, height, width);
+        fifo_copy<XF_DST_T, XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_ccm, XF_CV_DEPTH_aecin>(ccm_out, aecin,
+                                                                                                        height, width);
     } else {
-        function_tm<XF_DST_T, XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_ltm_in, XF_CV_DEPTH_aecin>(
-            ltm_in, aecin, omin_r, omax_r, omin_w, omax_w, blk_height, blk_width, mean1, mean2, L_max1, L_max2, L_min1,
+        function_tm<XF_DST_T, XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_ccm, XF_CV_DEPTH_aecin>(
+            ccm_out, aecin, omin_r, omax_r, omin_w, omax_w, blk_height, blk_width, mean1, mean2, L_max1, L_max2, L_min1,
             L_min2, c1, c2, mode_reg, height, width);
     }
     xf::cv::gammacorrection<XF_GTM_T, XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_aecin, XF_CV_DEPTH_dst>(
         aecin, _dst, gamma_lut);
 
-    function_ccm_3dlut_fifo<XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_dst, XF_CV_DEPTH_ccm,
-                            XF_CV_DEPTH_3dlut>(_dst, ccm_3dlut_out, lutDim, lut, mode_reg, height, width);
+    function_3dlut_fifo<XF_GTM_T, XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_dst, XF_CV_DEPTH_lut_out,
+                        XF_CV_DEPTH_3dlut>(_dst, lut_out, lut, lutDim, mode_reg, height, width);
 
-    function_csc_or_mat_array<XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_ccm>(ccm_3dlut_out, img_out, mode_reg,
-                                                                                       height, width);
+    function_csc_or_mat_array<XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_lut_out>(lut_out, img_out, mode_reg,
+                                                                                           height, width);
 }
 /*********************************************************************************
  * Function:    ISPPipeline_accel

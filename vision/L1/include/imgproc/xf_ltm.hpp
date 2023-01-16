@@ -602,6 +602,108 @@ class LTM {
     }
 };
 
+// multistream
+
+template <int IN_TYPE,
+          int OUT_TYPE,
+          int BLK_ROWS,
+          int BLK_COLS,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+class LTM_multi {
+   public:
+    static constexpr int MinMaxVArrSize = LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxVArrSize;
+    static constexpr int MinMaxHArrSize = LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxHArrSize;
+
+    static void LTM_multistream(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& in,
+                                int block_rows,
+                                int block_cols,
+                                XF_CTUNAME(IN_TYPE, NPC) omin_r[MinMaxVArrSize][MinMaxHArrSize],
+                                XF_CTUNAME(IN_TYPE, NPC) omax_r[MinMaxVArrSize][MinMaxHArrSize],
+                                XF_CTUNAME(IN_TYPE, NPC) omin_w[MinMaxVArrSize][MinMaxHArrSize],
+                                XF_CTUNAME(IN_TYPE, NPC) omax_w[MinMaxVArrSize][MinMaxHArrSize],
+                                xf::cv::Mat<OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& out,
+                                bool& flag,
+                                bool& eof) {
+// clang-format off
+#pragma HLS INLINE OFF
+        // clang-format on
+
+        if (!flag) {
+            LTM<IN_TYPE, OUT_TYPE, BLK_ROWS, BLK_COLS, ROWS, COLS, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>::process(
+                in, block_rows, block_cols, omin_r, omax_r, omin_w, omax_w, out);
+            if (eof) flag = 1;
+        } else {
+            LTM<IN_TYPE, OUT_TYPE, BLK_ROWS, BLK_COLS, ROWS, COLS, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>::process(
+                in, block_rows, block_cols, omin_w, omax_w, omin_r, omax_r, out);
+            if (eof) flag = 0;
+        }
+        return;
+    }
+};
+
+template <int IN_TYPE,
+          int OUT_TYPE,
+          int BLK_ROWS,
+          int BLK_COLS,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int STREAMS = 2,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+class LTM_multi_wrap {
+   public:
+    static constexpr int MinMaxVArrSize = LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxVArrSize;
+    static constexpr int MinMaxHArrSize = LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxHArrSize;
+
+    static void LTM_multistream_wrap(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& in,
+                                     unsigned short block_rows[STREAMS],
+                                     unsigned short block_cols[STREAMS],
+                                     XF_CTUNAME(IN_TYPE, NPC) omin_r[STREAMS][MinMaxVArrSize][MinMaxHArrSize],
+                                     XF_CTUNAME(IN_TYPE, NPC) omax_r[STREAMS][MinMaxVArrSize][MinMaxHArrSize],
+                                     XF_CTUNAME(IN_TYPE, NPC) omin_w[STREAMS][MinMaxVArrSize][MinMaxHArrSize],
+                                     XF_CTUNAME(IN_TYPE, NPC) omax_w[STREAMS][MinMaxVArrSize][MinMaxHArrSize],
+                                     xf::cv::Mat<OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& out,
+                                     bool flag[STREAMS],
+                                     bool eof[STREAMS],
+                                     int strm_id) {
+// clang-format off
+#pragma HLS ARRAY_PARTITION variable= block_rows dim=1 complete
+#pragma HLS ARRAY_PARTITION variable= block_cols dim=1 complete
+#pragma HLS ARRAY_PARTITION variable=omin_r dim=1 complete
+#pragma HLS ARRAY_PARTITION variable=omin_r dim=2 cyclic factor=2
+#pragma HLS ARRAY_PARTITION variable=omin_r dim=3 cyclic factor=2
+
+#pragma HLS ARRAY_PARTITION variable=omax_r dim=1 complete
+#pragma HLS ARRAY_PARTITION variable=omax_r dim=2 cyclic factor=2
+#pragma HLS ARRAY_PARTITION variable=omax_r dim=3 cyclic factor=2
+
+#pragma HLS ARRAY_PARTITION variable=omin_w dim=1 complete
+#pragma HLS ARRAY_PARTITION variable=omin_w dim=2 cyclic factor=2
+#pragma HLS ARRAY_PARTITION variable=omin_w dim=3 cyclic factor=2
+
+#pragma HLS ARRAY_PARTITION variable=omax_w dim=1 complete
+#pragma HLS ARRAY_PARTITION variable=omax_w dim=2 cyclic factor=2
+#pragma HLS ARRAY_PARTITION variable=omax_w dim=3 cyclic factor=2  
+ 
+#pragma HLS ARRAY_PARTITION variable=flag dim=1 complete
+#pragma HLS ARRAY_PARTITION variable=eof dim=1 complete
+
+
+    // clang-format on                   
+   
+    LTM_multi<IN_TYPE, OUT_TYPE, BLK_ROWS, BLK_COLS, ROWS, COLS, NPC, XFCVDEPTH_IN_1,
+                    XFCVDEPTH_OUT_1>::LTM_multistream(in, block_rows[strm_id], block_cols[strm_id], omin_r[strm_id],
+                    omax_r[strm_id], omin_w[strm_id], omax_w[strm_id], out, flag[strm_id], eof[strm_id]);  
+                                              
+}                                              
+
+};  
+                                                 
 } // namespace cv
 } // namespace xf
 

@@ -34,6 +34,6 @@
 #define CV_FUNCT_NAME compare
 #define CV_EXTRA_ARG cv::CMP_NE
 #define FUNCT_COMPARE
-#define XF_CV_DEPTH_IN_1 1
+#define XF_CV_DEPTH_IN_1 2
 #define XF_CV_DEPTH_IN_2 2
-#define XF_CV_DEPTH_OUT_1 3
+#define XF_CV_DEPTH_OUT_1 2

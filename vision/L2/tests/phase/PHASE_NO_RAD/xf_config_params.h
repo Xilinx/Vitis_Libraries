@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#define XF_CV_DEPTH_IN_1 3
-#define XF_CV_DEPTH_IN_2 3
-#define XF_CV_DEPTH_OUT 3
+#define XF_CV_DEPTH_IN_1 2
+#define XF_CV_DEPTH_IN_2 2
+#define XF_CV_DEPTH_OUT 2
 
 #define RADIANS 1
 #define DEGREES 0

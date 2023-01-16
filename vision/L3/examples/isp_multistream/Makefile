@@ -272,7 +272,8 @@ endif
 	@echo 'fi' >> $(RUN_SCRIPT)
 	@echo 'echo "INFO: Embedded host run completed."' >> $(RUN_SCRIPT)
 	@echo 'exit $$return_code' >> $(RUN_SCRIPT)
-DATA_FILE := $(XFLIB_DIR)/data/128x128_3_bayer_16bit_lef.png $(XFLIB_DIR)/data/128x128_3_bayer_16bit_sef.png $(XFLIB_DIR)/data/128x128_2_bayer_16bit_lef.png $(XFLIB_DIR)/data/128x128_2_bayer_16bit_sef.png $(XFLIB_DIR)/data/128x128_1_bayer_16bit_lef.png $(XFLIB_DIR)/data/128x128_1_bayer_16bit_sef.png $(XFLIB_DIR)/data/128x128_bayer_16bit_lef.png $(XFLIB_DIR)/data/128x128_bayer_16bit_sef.png $(custom_data_file)
+DATA_FILE := $(XFLIB_DIR)/data/128x128_bayer_16bit_sef.png $(XFLIB_DIR)/data/128x128_bayer_16bit_lef.png $(XFLIB_DIR)/data/128x128_1_bayer_16bit_sef.png $(XFLIB_DIR)/data/128x128_1_bayer_16bit_lef.png $(XFLIB_DIR)/data/128x128_2_bayer_16bit_sef.png $(XFLIB_DIR)/data/128x128_2_bayer_16bit_lef.png $(XFLIB_DIR)/data/128x128_3_bayer_16bit_sef.png $(XFLIB_DIR)/data/128x128_3_bayer_16bit_lef.png $(custom_data_file)
+
 DATA_DIR := $(custom_data_dir)
 SD_FILES += $(RUN_SCRIPT)
 SD_FILES += $(EXE_FILE)

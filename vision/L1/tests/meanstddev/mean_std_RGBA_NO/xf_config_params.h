@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define XF_CV_DEPTH_IN 3
+#define XF_CV_DEPTH_IN 2
 
 #define SPC 1 // Single Pixel per Clock operation
 #define MPC 0 // Multiple Pixels per Clock operation

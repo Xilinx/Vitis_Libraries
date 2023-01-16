@@ -21,5 +21,5 @@
 #define GRAY 0
 /* Filter window size*/
 #define WINDOW_SIZE 5
-#define XF_CV_DEPTH_IN 3
-#define XF_CV_DEPTH_OUT 3
+#define XF_CV_DEPTH_IN 2
+#define XF_CV_DEPTH_OUT 2

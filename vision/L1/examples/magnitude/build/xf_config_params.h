@@ -18,6 +18,6 @@
 #define SPC 1 // Single Pixel per Clock operation
 
 #define L1NORM 1
-#define XF_CV_DEPTH_IN1 3
-#define XF_CV_DEPTH_IN2 3
-#define XF_CV_DEPTH_OUT 3
+#define XF_CV_DEPTH_IN1 2
+#define XF_CV_DEPTH_IN2 2
+#define XF_CV_DEPTH_OUT 2

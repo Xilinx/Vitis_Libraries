@@ -28,9 +28,9 @@
 
 #define NUM_LINES_FINDIT 50
 #define XF_USE_URAM false
-#define XF_CV_DEPTH_IN_1 3
-#define XF_CV_DEPTH_IN_2 3
-#define XF_CV_DEPTH_IN_3 3
-#define XF_CV_DEPTH_IN_4 3
-#define XF_CV_DEPTH_IN 3
-#define XF_CV_DEPTH_OUT 3
+#define XF_CV_DEPTH_IN_1 2
+#define XF_CV_DEPTH_IN_2 2
+#define XF_CV_DEPTH_IN_3 2
+#define XF_CV_DEPTH_IN_4 2
+#define XF_CV_DEPTH_IN 2
+#define XF_CV_DEPTH_OUT 2

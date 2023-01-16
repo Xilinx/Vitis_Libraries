@@ -111,62 +111,62 @@ endif
 
 #Inclue Required Host Source Files
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
-HOST_SRCS += $(XFLIB_DIR)/L3/examples/all_in_one/xf_isp_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
+HOST_SRCS += $(XFLIB_DIR)/L3/examples/all_in_one_adas/xf_isp_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -D __SDSVHLS__
-CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L3/examples/all_in_one/build -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L3/examples/all_in_one_adas/build -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
 LDFLAGS +=  -L $(OPENCV_LIB)
 LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
-HOST_SRCS += $(XFLIB_DIR)/L3/examples/all_in_one/xf_isp_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
+HOST_SRCS += $(XFLIB_DIR)/L3/examples/all_in_one_adas/xf_isp_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -D __SDSVHLS__
-CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L3/examples/all_in_one/build -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L3/examples/all_in_one_adas/build -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
 LDFLAGS +=  -L $(OPENCV_LIB)
 LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/zcu102/'))
 ifeq ($(ps_on_x86), on)
-HOST_SRCS += $(XFLIB_DIR)/L3/examples/all_in_one/xf_isp_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
+HOST_SRCS += $(XFLIB_DIR)/L3/examples/all_in_one_adas/xf_isp_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -D __SDSVHLS__
-CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L3/examples/all_in_one/build -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L3/examples/all_in_one_adas/build -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
 LDFLAGS +=  -L $(OPENCV_LIB)
 LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 else
-HOST_SRCS += $(XFLIB_DIR)/L3/examples/all_in_one/xf_isp_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
+HOST_SRCS += $(XFLIB_DIR)/L3/examples/all_in_one_adas/xf_isp_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -D __SDSVHLS__
-CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L3/examples/all_in_one/build -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L3/examples/all_in_one_adas/build -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
 LDFLAGS +=  -L $(SYSROOT)/usr/lib -L ${SYSROOT}/opt/xilinx/xrt/lib
 LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 endif
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/zcu104/'))
 ifeq ($(ps_on_x86), on)
-HOST_SRCS += $(XFLIB_DIR)/L3/examples/all_in_one/xf_isp_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
+HOST_SRCS += $(XFLIB_DIR)/L3/examples/all_in_one_adas/xf_isp_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -D __SDSVHLS__
-CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L3/examples/all_in_one/build -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L3/examples/all_in_one_adas/build -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
 LDFLAGS +=  -L $(OPENCV_LIB)
 LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 else
-HOST_SRCS += $(XFLIB_DIR)/L3/examples/all_in_one/xf_isp_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
+HOST_SRCS += $(XFLIB_DIR)/L3/examples/all_in_one_adas/xf_isp_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -D __SDSVHLS__
-CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L3/examples/all_in_one/build -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L3/examples/all_in_one_adas/build -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
 LDFLAGS +=  -L $(SYSROOT)/usr/lib -L ${SYSROOT}/opt/xilinx/xrt/lib
 LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 endif
 else 
 ifeq ($(ps_on_x86), on)
-HOST_SRCS += $(XFLIB_DIR)/L3/examples/all_in_one/xf_isp_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
+HOST_SRCS += $(XFLIB_DIR)/L3/examples/all_in_one_adas/xf_isp_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -D __SDSVHLS__
-CXXFLAGS +=  -I $(XFLIB_DIR)/L3/examples/all_in_one/build -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS +=  -I $(XFLIB_DIR)/L3/examples/all_in_one_adas/build -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
 LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 else
-HOST_SRCS += $(XFLIB_DIR)/L3/examples/all_in_one/xf_isp_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
+HOST_SRCS += $(XFLIB_DIR)/L3/examples/all_in_one_adas/xf_isp_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -D __SDSVHLS__
-CXXFLAGS +=  -I $(XFLIB_DIR)/L3/examples/all_in_one/build -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS +=  -I $(XFLIB_DIR)/L3/examples/all_in_one_adas/build -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
 CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
 LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 endif
@@ -203,7 +203,7 @@ LIBRARY_PATH := $(OPENCV_LIB):$(LD_LIBRARY_PATH):$(XILINX_XRT)/lib
 endif
 
 ########################## Kernel compiler global settings ##########################
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L3/examples/all_in_one/build -I $(XFLIB_DIR)/L1/include/
+VPP_FLAGS +=  -I $(XFLIB_DIR)/L3/examples/all_in_one_adas/build -I $(XFLIB_DIR)/L1/include/
 
 ######################### binary container global settings ##########################
 VPP_FLAGS_ISPPipeline_accel += --hls.clock 150000000:ISPPipeline_accel
@@ -221,7 +221,7 @@ BINARY_CONTAINERS_PKG += $(BUILD_DIR)/krnl_ISPPipeline.xclbin
 endif
 
 # ################ Setting Rules for Binary Containers (Building Kernels) ################
-$(TEMP_DIR)/ISPPipeline_accel.xo: $(XFLIB_DIR)/L3/examples/all_in_one/xf_isp_accel.cpp 
+$(TEMP_DIR)/ISPPipeline_accel.xo: $(XFLIB_DIR)/L3/examples/all_in_one_adas/xf_isp_accel.cpp 
 	$(ECHO) "Compiling Kernel: ISPPipeline_accel"
 	mkdir -p $(TEMP_DIR)
 	$(VPP) -c $(VPP_FLAGS_ISPPipeline_accel) $(VPP_FLAGS) -k ISPPipeline_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
@@ -263,6 +263,7 @@ endif
 	@echo 'echo "INFO: Embedded host run completed."' >> $(RUN_SCRIPT)
 	@echo 'exit $$return_code' >> $(RUN_SCRIPT)
 DATA_FILE := $(XFLIB_DIR)/data/cropped1_128x128.png $(XFLIB_DIR)/data/cropped3_128x128.png $(XFLIB_DIR)/data/input-lut-33.txt 
+
 DATA_DIR := 
 SD_FILES += $(RUN_SCRIPT)
 SD_FILES += $(EXE_FILE)

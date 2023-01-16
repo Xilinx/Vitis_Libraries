@@ -361,14 +361,8 @@ int main(int argc, char** argv) {
                           IR_at_R_wgts, IR_at_B_wgts, sub_wgts, rgain, bgain, gamma_lut, mode_reg, pawb);
 
         // Convert processed image back to CV image
-        // MultiPixelAXIvideo2Mat(dst_axi, final_output, 0);
         AXIvideo2cvMatxf<XF_NPPC, XF_DTPIXELDEPTH(XF_YUV_T, XF_NPPC)>(dst_axi, final_output);
-#if T_8U
         AXIvideo2cvMatxf<XF_NPPC, XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC)>(ir_axi, ir_output);
-#else
-        MultiPixelAXIvideo2Mat(ir_axi, ir_output, 0);
-#endif
-        // AXIvideo2cvMatxf<XF_NPPC, XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC)>(ir_axi, ir_output);
     }
 
     imwrite("output.png", final_output);

@@ -16,8 +16,8 @@
 
 #define XF_NPPC XF_NPPC1 // XF_NPPC1 --1PIXEL , XF_NPPC2--2PIXEL ,XF_NPPC4--4 and XF_NPPC8--8PIXEL
 
-#define XF_WIDTH 3840  // MAX_COLS
-#define XF_HEIGHT 2160 // MAX_ROWS
+#define XF_WIDTH 1920  // 3840  // MAX_COLS
+#define XF_HEIGHT 1080 // 2160 // MAX_ROWS
 
 #define XF_BAYER_PATTERN XF_BAYER_RG // bayer pattern Used in gaincontrol, demosaicing, rgbir2bayer
 
@@ -61,20 +61,22 @@
 #define NUM_H_BLANK 8       /* Used in HDR */
 
 #define XF_USE_URAM 0 // uram enable Used in HDR, rgbir2bayer, lut3d
-#define XF_CV_DEPTH_imgInput 3
-#define XF_CV_DEPTH_hdr_out 3
-#define XF_CV_DEPTH_LEF 3
-#define XF_CV_DEPTH_SEF 3
-#define XF_CV_DEPTH_rggb_out 3
-#define XF_CV_DEPTH_fullir_out 3
-#define XF_CV_DEPTH_bpc_out 3
-#define XF_CV_DEPTH_blc_out 3
-#define XF_CV_DEPTH_lsc_out 3
-#define XF_CV_DEPTH_gain_out 3
-#define XF_CV_DEPTH_demosaic_out 3
-#define XF_CV_DEPTH_ltm_in 3
-#define XF_CV_DEPTH_aecin 3
-#define XF_CV_DEPTH_dst 3
-#define XF_CV_DEPTH_ccm 3
-#define XF_CV_DEPTH_3dlut 3
+#define XF_CV_DEPTH_imgInput 2
+#define XF_CV_DEPTH_hdr_out 2
+#define XF_CV_DEPTH_LEF 2
+#define XF_CV_DEPTH_SEF 2
+#define XF_CV_DEPTH_rggb_out 2
+#define XF_CV_DEPTH_fullir_out 2
+#define XF_CV_DEPTH_bpc_out 2
+#define XF_CV_DEPTH_blc_out 2
+#define XF_CV_DEPTH_lsc_out 2
+#define XF_CV_DEPTH_gain_out 2
+#define XF_CV_DEPTH_demosaic_out 2
+#define XF_CV_DEPTH_ltm_in 2
+#define XF_CV_DEPTH_aecin 2
+#define XF_CV_DEPTH_dst 2
+#define XF_CV_DEPTH_ccm 2
+#define XF_CV_DEPTH_3dlut 2
+#define XF_CV_DEPTH_awb_out 2
+#define XF_CV_DEPTH_lut_out 2
 #define XF_CV_DEPTH_3XWIDTH 3 * XF_WIDTH

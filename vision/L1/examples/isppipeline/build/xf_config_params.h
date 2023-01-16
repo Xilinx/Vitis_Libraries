@@ -56,14 +56,14 @@
 
 #define XF_USE_URAM 0 // uram enable
 
-#define XF_CV_DEPTH_IN_1 3
-#define XF_CV_DEPTH_IN_2 3
-#define XF_CV_DEPTH_BPC_OUT 3
-#define XF_CV_DEPTH_GAIN_OUT 3
-#define XF_CV_DEPTH_DEMOSAIC_OUT 3
-#define XF_CV_DEPTH_IMPOP 3
-#define XF_CV_DEPTH_LTM_IN 3
-#define XF_CV_DEPTH_LSC_OUT 3
-#define XF_CV_DEPTH_DST 3
-#define XF_CV_DEPTH_AEC_IN 3
-#define XF_CV_DEPTH_OUT 3
+#define XF_CV_DEPTH_IN_1 2
+#define XF_CV_DEPTH_IN_2 2
+#define XF_CV_DEPTH_BPC_OUT 2
+#define XF_CV_DEPTH_GAIN_OUT 2
+#define XF_CV_DEPTH_DEMOSAIC_OUT 2
+#define XF_CV_DEPTH_IMPOP 2
+#define XF_CV_DEPTH_LTM_IN 2
+#define XF_CV_DEPTH_LSC_OUT 2
+#define XF_CV_DEPTH_DST 2
+#define XF_CV_DEPTH_AEC_IN 2
+#define XF_CV_DEPTH_OUT 2

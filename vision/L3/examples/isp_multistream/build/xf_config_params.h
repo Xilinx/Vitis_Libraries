@@ -61,9 +61,8 @@
 #define AEC_EN 0
 
 #define XF_AXI_GBR 1
-
-#define INPUT_PTR_WIDTH 32
-#define OUTPUT_PTR_WIDTH 32
+#define INPUT_PTR_WIDTH 64
+#define OUTPUT_PTR_WIDTH 64
 #define NUM_V_BLANK_LINES 8
 #define NUM_H_BLANK 8
 

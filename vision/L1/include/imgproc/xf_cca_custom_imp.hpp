@@ -69,7 +69,7 @@ PROC_ROW_LOOP:
 }
 template <int SRC_T, int HEIGHT, int WIDTH, int NPC, int XFCVDEPTH_OUT>
 void process_mat_row(xf::cv::Mat<SRC_T, HEIGHT, WIDTH, NPC, XFCVDEPTH_OUT>& _src,
-                     uint8_t* tmp_out_ptr,
+                     xf::cv::Mat<SRC_T, HEIGHT, WIDTH, NPC, XFCVDEPTH_OUT>& tmp_out_ptr,
                      bool* lab_arr,
                      int& obj_pix,
                      int offset,
@@ -108,7 +108,7 @@ PROC_ROW_LOOP:
         }
 
         lab_arr[j] = lab;
-        tmp_out_ptr[j] = out;
+        tmp_out_ptr.write(offset + j, out);
         a = b;
         b = c;
         c = lab_arr[j + 2];
@@ -187,7 +187,7 @@ void proc_write_to_out(
 
 template <int SRC_T, int HEIGHT, int WIDTH, int NPC, int XFCVDEPTH_OUT>
 void fw_cca(xf::cv::Mat<SRC_T, HEIGHT, WIDTH, NPC, XFCVDEPTH_OUT>& _src,
-            uint8_t* tmp_out_ptr,
+            xf::cv::Mat<SRC_T, HEIGHT, WIDTH, NPC, XFCVDEPTH_OUT>& tmp_out_ptr,
             int& obj_pix,
             int height,
             int width) {
@@ -210,8 +210,7 @@ void fw_cca(xf::cv::Mat<SRC_T, HEIGHT, WIDTH, NPC, XFCVDEPTH_OUT>& _src,
 // clang-format off
 #pragma HLS LOOP_TRIPCOUNT min=1 max=HEIGHT
         // clang-format on
-        process_mat_row<SRC_T, HEIGHT, WIDTH, NPC, XFCVDEPTH_OUT>(_src, tmp_out_ptr + offset, lab_arr, obj_pix, offset,
-                                                                  width);
+        process_mat_row<SRC_T, HEIGHT, WIDTH, NPC, XFCVDEPTH_OUT>(_src, tmp_out_ptr, lab_arr, obj_pix, offset, width);
         offset += width;
     }
 }

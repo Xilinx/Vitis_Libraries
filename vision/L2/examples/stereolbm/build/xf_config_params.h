@@ -24,6 +24,6 @@
 #define PARALLEL_UNITS 32
 
 #define XF_USE_URAM false
-#define XF_CV_DEPTH_IN_0 3
-#define XF_CV_DEPTH_IN_1 3
-#define XF_CV_DEPTH_OUT 3
+#define XF_CV_DEPTH_IN_0 2
+#define XF_CV_DEPTH_IN_1 2
+#define XF_CV_DEPTH_OUT 2

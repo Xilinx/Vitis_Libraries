@@ -30,9 +30,9 @@
 
 // Requried Vision modules
 #include "imgproc/xf_bpc.hpp"
-#include "imgproc/xf_gaincontrol_multi.hpp"
+#include "imgproc/xf_gaincontrol.hpp"
 #include "imgproc/xf_autowhitebalance.hpp"
-#include "imgproc/xf_demosaicing_rt.hpp"
+#include "imgproc/xf_demosaicing.hpp"
 #include "imgproc/xf_ltm.hpp"
 #include "imgproc/xf_quantizationdithering.hpp"
 #include "imgproc/xf_lensshadingcorrection.hpp"
@@ -68,7 +68,7 @@ static constexpr int TILES_X_MIN = 2;
 static constexpr int TILES_Y_MAX = 4;
 static constexpr int TILES_X_MAX = 4;
 // --------------------------------------------------------------------
-// Macros definitions
+// Macros definations
 // --------------------------------------------------------------------
 
 // Useful macro functions definitions

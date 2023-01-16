@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#define XF_CV_DEPTH_IN_0 3
-#define XF_CV_DEPTH_IN_1 3
-#define XF_CV_DEPTH_OUT 3
+#define XF_CV_DEPTH_IN_0 2
+#define XF_CV_DEPTH_IN_1 2
+#define XF_CV_DEPTH_OUT 2
 
 #define SAD_WINDOW_SIZE 9
 

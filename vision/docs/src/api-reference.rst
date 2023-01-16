@@ -423,7 +423,7 @@ class. The following are a few supported types:
    ``XF_TNAME(XF_8UC1,XF_NPPC8)`` resolves to ``ap_uint<64>``.
 -  ``XF_CTUNAME(TYPE,NPPC)`` resolves to the data type specified in the TYPE (number of bits) of the data member
    of the ``xf::cv::Mat`` object. For instance,
-   ``XF_TNAME(XF_16SC3,XF_NPPC8)`` resolves to ``ap_int<16>``.
+   ``XF_CTUNAME(XF_16SC3,XF_NPPC8)`` resolves to ``ap_int<16>``.
 -  ``Word width = pixel depth * number of channels * number of pixels to process per             cycle (NPPC)``.
 -  ``XF_DTUNAME(TYPE,NPPC)`` resolves to the unsigned data type of the pixel (number of bits * number of channels). For
    instance, ``XF_DTUNAME(XF_32FC1,XF_NPPC1)`` resolves to ``float`` ,  ``XF_DTUNAME(XF_16SC3,XF_NPPC4)`` resolves to ``ap_uint<48>``.

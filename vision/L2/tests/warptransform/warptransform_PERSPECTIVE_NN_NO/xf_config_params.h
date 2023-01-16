@@ -37,5 +37,5 @@
 // transform type 0-AFFINE 1-PERSPECTIVE
 #define TRANSFORM_TYPE 1
 #define XF_USE_URAM false
-#define XF_CV_DEPTH_IN 3
-#define XF_CV_DEPTH_OUT 3
+#define XF_CV_DEPTH_IN 2
+#define XF_CV_DEPTH_OUT 2

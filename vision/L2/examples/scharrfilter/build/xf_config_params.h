@@ -22,6 +22,6 @@
 #define INPUT_PTR_WIDTH 256
 #define OUTPUT_PTR_WIDTH 256
 
-#define XF_CV_DEPTH_IN 3
-#define XF_CV_DEPTH_OUT_1 3
-#define XF_CV_DEPTH_OUT_2 3
+#define XF_CV_DEPTH_IN 2
+#define XF_CV_DEPTH_OUT_1 2
+#define XF_CV_DEPTH_OUT_2 2

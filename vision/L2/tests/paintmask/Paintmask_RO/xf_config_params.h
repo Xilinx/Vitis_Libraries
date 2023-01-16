@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define XF_CV_DEPTH_IN_1 3
-#define XF_CV_DEPTH_IN_2 3
-#define XF_CV_DEPTH_OUT 3
+#define XF_CV_DEPTH_IN_1 2
+#define XF_CV_DEPTH_IN_2 2
+#define XF_CV_DEPTH_OUT 2
 
 #define SPC 0 // Single Pixel per Clock operation
 #define MPC 1 // Multiple Pixels per Clock operation

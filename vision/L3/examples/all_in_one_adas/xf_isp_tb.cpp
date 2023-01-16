@@ -23,10 +23,10 @@ unsigned char awb_en = 1;
 unsigned char hdr_en = 1;
 unsigned char rgbir_en = 0;
 unsigned char qnd_en = 0;
-unsigned char ltm_en = 0;
-unsigned char gtm_en = 1;
+unsigned char ltm_en = 1;
+unsigned char gtm_en = 0;
 unsigned char ccm_en = 1;
-unsigned char lut3d_en = 0;
+unsigned char lut3d_en = 1;
 unsigned char csc_en = 1;
 
 int g_value_com(unsigned short& value_in, float& alpha, float& ob) {
@@ -291,7 +291,6 @@ int main(int argc, char** argv) {
     mode_reg = (awb_en << AWB_EN_LSB) + (hdr_en << HDR_EN_LSB) + (rgbir_en << RGBIR_EN_LSB) + (qnd_en << QnD_EN_LSB) +
                (ltm_en << LTM_EN_LSB) + (gtm_en << GTM_EN_LSB) + (ccm_en << CCM_EN_LSB) + (lut3d_en << LUT3D_EN_LSB) +
                (csc_en << CSC_EN_LSB);
-
     size_t image_out_size_bytes;
     size_t image_in_size_bytes;
 
@@ -580,7 +579,6 @@ int main(int argc, char** argv) {
 
         diff_prof = end - start;
         std::cout << (diff_prof / 1000000) << "ms" << std::endl;
-
         // Copying Device result data to Host memory
         q.enqueueReadBuffer(imageFromDevice, CL_TRUE, 0, image_out_size_bytes, out_img.data);
         if (rgbir_en) {
@@ -589,7 +587,6 @@ int main(int argc, char** argv) {
     }
 
     q.finish();
-
     /////////////////////////////////////// end of CL ////////////////////////
 
     // Write output image

@@ -162,7 +162,7 @@ int main(int argc, char** argv) {
 
 /*  reading in the color image  */
 #if T_8U
-    std::cout << "T_8U selected" << std::endl;
+
     in_img1 = cv::imread(argv[1], 0);
     in_img2 = cv::imread(argv[2], 0);
     in_img3 = cv::imread(argv[3], 0);
@@ -232,6 +232,23 @@ int main(int argc, char** argv) {
     interleaved_img2.create(cv::Size(in_img1.cols + NUM_H_BLANK, in_img1.rows * 2), CV_16UC1);
     interleaved_img3.create(cv::Size(in_img1.cols + NUM_H_BLANK, in_img1.rows * 2), CV_16UC1);
     interleaved_img4.create(cv::Size(in_img1.cols + NUM_H_BLANK, in_img1.rows * 2), CV_16UC1);
+
+    struct ispparams_config params[NUM_STREAMS];
+
+    unsigned short array_params[NUM_STREAMS][10];
+
+    for (int i = 0; i < NUM_STREAMS; i++) {
+        array_params[i][0] = params[i].rgain;
+        array_params[i][1] = params[i].bgain;
+        array_params[i][2] = params[i].ggain;
+        array_params[i][3] = params[i].pawb;
+        array_params[i][4] = params[i].bayer_p;
+        array_params[i][5] = params[i].black_level;
+        array_params[i][6] = params[i].height;
+        array_params[i][7] = params[i].width;
+        array_params[i][8] = params[i].blk_height;
+        array_params[i][9] = params[i].blk_width;
+    }
 
 #if T_8U
     int sc = 1;
@@ -392,7 +409,6 @@ int main(int argc, char** argv) {
     cv::Mat out_img2(in_img2.rows, in_img2.cols, CV_16UC1);
     cv::Mat out_img3(in_img3.rows, in_img3.cols, CV_16UC1);
     cv::Mat out_img4(in_img4.rows, in_img4.cols, CV_16UC1);
-
 #if T_8U
     size_t vec_in_size_bytes = NUM_STREAMS * 256 * 3 * sizeof(unsigned char);
     size_t vec_weight_size_bytes = NUM_STREAMS * NO_EXPS * XF_NPPC * W_B_SIZE * sizeof(short);
@@ -412,6 +428,7 @@ int main(int argc, char** argv) {
     float rho = 512;
     float imax = (W_B_SIZE - 1);
     float t[NO_EXPS] = {1.0f, 0.25f}; //{1.0f,0.25f,0.0625f};
+
     short wr_ocv[NUM_STREAMS][NO_EXPS][W_B_SIZE];
 
     // wr_ocv_gen function call
@@ -430,23 +447,6 @@ int main(int argc, char** argv) {
         }
     }
 
-    struct ispparams_config params[NUM_STREAMS];
-
-    unsigned short array_params[NUM_STREAMS][10];
-
-    for (int i = 0; i < NUM_STREAMS; i++) {
-        array_params[i][0] = params[i].rgain;
-        array_params[i][1] = params[i].bgain;
-        array_params[i][2] = params[i].ggain;
-        array_params[i][3] = params[i].pawb;
-        array_params[i][4] = params[i].bayer_p;
-        array_params[i][5] = params[i].black_level;
-        array_params[i][6] = params[i].height;
-        array_params[i][7] = params[i].width;
-        array_params[i][8] = params[i].blk_height;
-        array_params[i][9] = params[i].blk_width;
-    }
-
     unsigned char gamma_lut[NUM_STREAMS][256 * 3];
     uint32_t hist0_awb[NUM_STREAMS][3][HIST_SIZE] = {0};
     uint32_t hist1_awb[NUM_STREAMS][3][HIST_SIZE] = {0};
@@ -457,15 +457,11 @@ int main(int argc, char** argv) {
     compute_gamma(gamma_val_r, gamma_val_g, gamma_val_b, gamma_lut[1]);
     compute_gamma(gamma_val_r, gamma_val_g, gamma_val_b, gamma_lut[2]);
     compute_gamma(gamma_val_r, gamma_val_g, gamma_val_b, gamma_lut[3]);
-
-    //    int blk_height = 32;
-    //    int blk_width = 32;
     // int channels=out_img.channels();
     size_t array_size_bytes = NUM_STREAMS * 10 * sizeof(unsigned short);
 
     cl_int err;
     std::cout << "INFO: Running OpenCL section." << std::endl;
-
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
@@ -494,7 +490,7 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, cl::Buffer buffer_inVec_Weights(context, CL_MEM_READ_ONLY, vec_weight_size_bytes, NULL, &err));
     OCL_CHECK(err, cl::Buffer buffer_array(context, CL_MEM_READ_ONLY, array_size_bytes, NULL, &err));
 
-    // Set the kernel arguments
+    // Set kernel arguments
     OCL_CHECK(err, err = kernel.setArg(0, buffer_inImage1));
     OCL_CHECK(err, err = kernel.setArg(1, buffer_inImage2));
     OCL_CHECK(err, err = kernel.setArg(2, buffer_inImage3));
@@ -545,7 +541,6 @@ int main(int argc, char** argv) {
         event_sp.getProfilingInfo(CL_PROFILING_COMMAND_END, &end);
         diff_prof = end - start;
         std::cout << (diff_prof / 1000000) << "ms" << std::endl;
-
         // Copying Device result data to Host memory
         q.enqueueReadBuffer(buffer_outImage1, CL_TRUE, 0, image_out_size_bytes, out_img1.data);
         q.enqueueReadBuffer(buffer_outImage2, CL_TRUE, 0, image_out_size_bytes, out_img2.data);
@@ -553,9 +548,7 @@ int main(int argc, char** argv) {
         q.enqueueReadBuffer(buffer_outImage4, CL_TRUE, 0, image_out_size_bytes, out_img4.data);
     }
     q.finish();
-
     /////////////////////////////////////// end of CL ////////////////////////
-
     // Write output image
     imwrite("hls_out1.png", out_img1);
     imwrite("hls_out2.png", out_img2);

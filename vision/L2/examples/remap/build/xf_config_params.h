@@ -26,7 +26,7 @@
 #define XF_REMAP_INTERPOLATION XF_INTERPOLATION_BILINEAR
 
 #define XF_USE_URAM false
-#define XF_CV_DEPTH_IN_1 3
-#define XF_CV_DEPTH_IN_2 3
-#define XF_CV_DEPTH_IN_3 3
-#define XF_CV_DEPTH_OUT 3
+#define XF_CV_DEPTH_IN_1 2
+#define XF_CV_DEPTH_IN_2 2
+#define XF_CV_DEPTH_IN_3 2
+#define XF_CV_DEPTH_OUT 2
