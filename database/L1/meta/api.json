@@ -83,27 +83,27 @@
                     {
                         "name": "kin_strm",
                         "direction": "",
-                        "type": "hls::stream< Key_Type > &_end,"
+                        "type": "hls::stream< Key_Type > &"
                     },
                     {
                         "name": "kin_strm_end",
                         "direction": "",
-                        "type": "hls::stream< Key_Type > &kout_strm, hls::stream< bool > &kout_strm_end, bool orde"
+                        "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "kout_strm",
                         "direction": "",
-                        "type": "hls::stream< Key_Type > &_end,"
+                        "type": "hls::stream< Key_Type > &"
                     },
                     {
                         "name": "kout_strm_end",
                         "direction": "",
-                        "type": "bool ord"
+                        "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "order",
                         "direction": "",
-                        "type": "bool ord"
+                        "type": "bool"
                     }
                 ]
             }
@@ -702,7 +702,7 @@
                     {
                         "name": "strm_out_end",
                         "direction": "",
-                        "type": "_end"
+                        "type": "hls::stream<bool> &"
                     }
                 ]
             }
@@ -844,7 +844,7 @@
                     {
                         "name": "e_pay_out_strm",
                         "direction": "",
-                        "type": ""
+                        "type": "hls::stream<bool>&"
                     }
                 ]
             }
@@ -981,17 +981,17 @@
                     {
                         "name": "k0_strm_arry",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< KEYW > >[CH_NM],"
+                        "type": "hls::stream< ap_uint< KEYW > >[CH_NM]"
                     },
                     {
                         "name": "p0_strm_arry",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< PW > >[CH_NM],"
+                        "type": "hls::stream< ap_uint< PW > >[CH_NM]"
                     },
                     {
                         "name": "e0_strm_arry",
                         "direction": "",
-                        "type": "hls::stream< bool >[CH_NM],"
+                        "type": "hls::stream< bool >[CH_NM]"
                     },
                     {
                         "name": "htb0_buf",
@@ -1091,7 +1091,7 @@
                     {
                         "name": "j_e_strm",
                         "direction": "",
-                        "type": "hls::stream< bool > &j_e_s"
+                        "type": "hls::stream< bool > &"
                     }
                 ]
             }
@@ -1177,17 +1177,17 @@
                     {
                         "name": "strm_key_in",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< _WKey > >[_CHNM][_KeyNM],"
+                        "type": "hls::stream< ap_uint< _WKey > >[_CHNM][_KeyNM]"
                     },
                     {
                         "name": "strm_pld_in",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< _WPay > >[_CHNM][_PayNM],"
+                        "type": "hls::stream< ap_uint< _WPay > >[_CHNM][_PayNM]"
                     },
                     {
                         "name": "strm_e_in",
                         "direction": "",
-                        "type": "hls::stream< bool >[_CHNM],"
+                        "type": "hls::stream< bool >[_CHNM]"
                     },
                     {
                         "name": "config",
@@ -1242,17 +1242,17 @@
                     {
                         "name": "aggr_key_out",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< _WKey > >[_KeyNM],"
+                        "type": "hls::stream< ap_uint< _WKey > >[_KeyNM]"
                     },
                     {
                         "name": "aggr_pld_out",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< _WPay > >[3][_PayNM],"
+                        "type": "hls::stream< ap_uint< _WPay > >[3][_PayNM]"
                     },
                     {
                         "name": "strm_e_out",
                         "direction": "",
-                        "type": "hls::stream< bool > &strm_"
+                        "type": "hls::stream< bool > &"
                     }
                 ]
             }
@@ -1338,17 +1338,17 @@
                     {
                         "name": "k0_strm_arry",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< KEYW > >[CH_NM],"
+                        "type": "hls::stream< ap_uint< KEYW > >[CH_NM]"
                     },
                     {
                         "name": "p0_strm_arry",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< PW > >[CH_NM],"
+                        "type": "hls::stream< ap_uint< PW > >[CH_NM]"
                     },
                     {
                         "name": "e0_strm_arry",
                         "direction": "",
-                        "type": "hls::stream< bool >[CH_NM],"
+                        "type": "hls::stream< bool >[CH_NM]"
                     },
                     {
                         "name": "stb0_buf",
@@ -1398,7 +1398,7 @@
                     {
                         "name": "e5_strm",
                         "direction": "",
-                        "type": "hls::stream< bool > &e5_s"
+                        "type": "hls::stream< bool > &"
                     }
                 ]
             }
@@ -1469,17 +1469,17 @@
                     {
                         "name": "k0_strm_arry",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< KEYW > >[CH_NM],"
+                        "type": "hls::stream< ap_uint< KEYW > >[CH_NM]"
                     },
                     {
                         "name": "p0_strm_arry",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< PW > >[CH_NM],"
+                        "type": "hls::stream< ap_uint< PW > >[CH_NM]"
                     },
                     {
                         "name": "e0_strm_arry",
                         "direction": "",
-                        "type": "hls::stream< bool >[CH_NM],"
+                        "type": "hls::stream< bool >[CH_NM]"
                     },
                     {
                         "name": "htb0_buf",
@@ -1579,7 +1579,7 @@
                     {
                         "name": "j_e_strm",
                         "direction": "",
-                        "type": "hls::stream< bool > &j_e_s"
+                        "type": "hls::stream< bool > &"
                     }
                 ]
             }
@@ -1665,17 +1665,17 @@
                     {
                         "name": "k0_strm_arry",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< KEYW > >[CH_NM],"
+                        "type": "hls::stream< ap_uint< KEYW > >[CH_NM]"
                     },
                     {
                         "name": "p0_strm_arry",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< PW > >[CH_NM],"
+                        "type": "hls::stream< ap_uint< PW > >[CH_NM]"
                     },
                     {
                         "name": "e0_strm_arry",
                         "direction": "",
-                        "type": "hls::stream< bool >[CH_NM],"
+                        "type": "hls::stream< bool >[CH_NM]"
                     },
                     {
                         "name": "htb0_buf",
@@ -1775,7 +1775,7 @@
                     {
                         "name": "j_e_strm",
                         "direction": "",
-                        "type": "hls::stream< bool > &j_e_s"
+                        "type": "hls::stream< bool > &"
                     }
                 ]
             }
@@ -1861,17 +1861,17 @@
                     {
                         "name": "k0_strm_arry",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< KEYW > >[CH_NM],"
+                        "type": "hls::stream< ap_uint< KEYW > >[CH_NM]"
                     },
                     {
                         "name": "p0_strm_arry",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< PW > >[CH_NM],"
+                        "type": "hls::stream< ap_uint< PW > >[CH_NM]"
                     },
                     {
                         "name": "e0_strm_arry",
                         "direction": "",
-                        "type": "hls::stream< bool >[CH_NM],"
+                        "type": "hls::stream< bool >[CH_NM]"
                     },
                     {
                         "name": "htb0_buf",
@@ -1971,7 +1971,7 @@
                     {
                         "name": "j_e_strm",
                         "direction": "",
-                        "type": "hls::stream< bool > &j_e_s"
+                        "type": "hls::stream< bool > &"
                     }
                 ]
             }
@@ -2062,17 +2062,17 @@
                     {
                         "name": "k0_strm_arry",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< KEYW > >[CH_NM],"
+                        "type": "hls::stream< ap_uint< KEYW > >[CH_NM]"
                     },
                     {
                         "name": "p0_strm_arry",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< PW > >[CH_NM],"
+                        "type": "hls::stream< ap_uint< PW > >[CH_NM]"
                     },
                     {
                         "name": "e0_strm_arry",
                         "direction": "",
-                        "type": "hls::stream< bool >[CH_NM],"
+                        "type": "hls::stream< bool >[CH_NM]"
                     },
                     {
                         "name": "htb0_buf",
@@ -2172,7 +2172,7 @@
                     {
                         "name": "j_e_strm",
                         "direction": "",
-                        "type": "hls::stream< bool > &j_e_s"
+                        "type": "hls::stream< bool > &"
                     }
                 ]
             }
@@ -2284,17 +2284,17 @@
                     {
                         "name": "k0_strm_arry",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< KEYW > >[CH_NM],"
+                        "type": "hls::stream< ap_uint< KEYW > >[CH_NM]"
                     },
                     {
                         "name": "p0_strm_arry",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< PW > >[CH_NM],"
+                        "type": "hls::stream< ap_uint< PW > >[CH_NM]"
                     },
                     {
                         "name": "e0_strm_arry",
                         "direction": "",
-                        "type": "hls::stream< bool >[CH_NM],"
+                        "type": "hls::stream< bool >[CH_NM]"
                     },
                     {
                         "name": "htb0_buf",
@@ -2394,7 +2394,7 @@
                     {
                         "name": "j_e_strm",
                         "direction": "",
-                        "type": "hls::stream< bool > &j_e_s"
+                        "type": "hls::stream< bool > &"
                     }
                 ]
             }
@@ -2470,17 +2470,17 @@
                     {
                         "name": "k0_strm_arry",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< KEYW > >[CH_NM],"
+                        "type": "hls::stream< ap_uint< KEYW > >[CH_NM]"
                     },
                     {
                         "name": "p0_strm_arry",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< PW > >[CH_NM],"
+                        "type": "hls::stream< ap_uint< PW > >[CH_NM]"
                     },
                     {
                         "name": "e0_strm_arry",
                         "direction": "",
-                        "type": "hls::stream< bool >[CH_NM],"
+                        "type": "hls::stream< bool >[CH_NM]"
                     },
                     {
                         "name": "htb0_buf",
@@ -2580,7 +2580,7 @@
                     {
                         "name": "j_e_strm",
                         "direction": "",
-                        "type": "hls::stream< bool > &j_e_s"
+                        "type": "hls::stream< bool > &"
                     }
                 ]
             }
@@ -2737,17 +2737,17 @@
                     {
                         "name": "k0_strm_arry",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< KEYW > >[CH_NM],"
+                        "type": "hls::stream< ap_uint< KEYW > >[CH_NM]"
                     },
                     {
                         "name": "p0_strm_arry",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< PW > >[CH_NM],"
+                        "type": "hls::stream< ap_uint< PW > >[CH_NM]"
                     },
                     {
                         "name": "e0_strm_arry",
                         "direction": "",
-                        "type": "hls::stream< bool >[CH_NM],"
+                        "type": "hls::stream< bool >[CH_NM]"
                     },
                     {
                         "name": "o_bkpu_num_strm",
@@ -2838,17 +2838,17 @@
                     {
                         "name": "key_istrms",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< WKey > >[NChannels],"
+                        "type": "hls::stream< ap_uint< WKey > >[NChannels]"
                     },
                     {
                         "name": "payload_istrms",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< WPayload > >[NChannels],"
+                        "type": "hls::stream< ap_uint< WPayload > >[NChannels]"
                     },
                     {
                         "name": "e0_strm_arry",
                         "direction": "",
-                        "type": "hls::stream< bool >[NChannels],"
+                        "type": "hls::stream< bool >[NChannels]"
                     },
                     {
                         "name": "pu0_tmp_rwtpr",
@@ -2898,7 +2898,7 @@
                     {
                         "name": "end_ostrm",
                         "direction": "",
-                        "type": "hls::stream< bool > &end_os"
+                        "type": "hls::stream< bool > &"
                     }
                 ]
             }
@@ -3288,22 +3288,22 @@
                     {
                         "name": "strm_out_left_key",
                         "direction": "",
-                        "type": "hls::stream< KEY_T >[CMP_NUM],"
+                        "type": "hls::stream< KEY_T >[CMP_NUM]"
                     },
                     {
                         "name": "strm_out_left_field",
                         "direction": "",
-                        "type": "hls::stream< LEFT_FIELD_T >[CMP_NUM],"
+                        "type": "hls::stream< LEFT_FIELD_T >[CMP_NUM]"
                     },
                     {
                         "name": "strm_out_right_key",
                         "direction": "",
-                        "type": "hls::stream< KEY_T >[CMP_NUM],"
+                        "type": "hls::stream< KEY_T >[CMP_NUM]"
                     },
                     {
                         "name": "strm_out_right_field",
                         "direction": "",
-                        "type": "hls::stream< RIGHT_FIELD_T >[CMP_NUM],"
+                        "type": "hls::stream< RIGHT_FIELD_T >[CMP_NUM]"
                     },
                     {
                         "name": "strm_out_e",
@@ -3470,7 +3470,7 @@
                     {
                         "name": "e_out_strm",
                         "direction": "",
-                        "type": ""
+                        "type": "hls::stream<bool>& "
                     }
                 ]
             }

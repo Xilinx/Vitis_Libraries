@@ -205,56 +205,6 @@
                     }
                 ]
             }
-        },
-        {
-            "api_name": "xf::hpc::cg::Task",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::hpc::cg::Task",
-                "display_name": "Task",
-                "brief": "Basic CG components: Task",
-                "target_domain": "",
-                "header_file_name": [
-                    "tasks.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/hw/cgSolver"
-                ],
-                "instance": "class",
-                "parameters": [
-                    {
-                        "name": "t_DataType",
-                        "type": "typename",
-                        "description": "is the datatype"
-                    }
-                ],
-                "ports": []
-            }
-        },
-        {
-            "api_name": "xf::hpc::cg::Token",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::hpc::cg::Token",
-                "display_name": "Token",
-                "brief": "Basic CG components: Token",
-                "target_domain": "",
-                "header_file_name": [
-                    "token.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/hw/cgSolver"
-                ],
-                "instance": "class",
-                "parameters": [
-                    {
-                        "name": "t_DataType",
-                        "type": "typename",
-                        "description": "is the datatype"
-                    }
-                ],
-                "ports": []
-            }
         }
     ],
     "target_domain": ""

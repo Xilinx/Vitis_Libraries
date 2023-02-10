@@ -27,27 +27,27 @@
                     {
                         "name": "inStream",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< DATAWIDTH > > &Size,"
-                    },
-                    {
-                        "name": "outStream",
-                        "direction": "",
-                        "type": "hls::stream< ap_uint< DATAWIDTH > > &Eos,"
+                        "type": "hls::stream< ap_uint< DATAWIDTH > > &"
                     },
                     {
                         "name": "inStreamSize",
                         "direction": "",
-                        "type": "hls::stream< uint32_t > &outCompressedSi"
+                        "type": "hls::stream< uint32_t > &"
+                    },
+                    {
+                        "name": "outStream",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< DATAWIDTH > > &"
                     },
                     {
                         "name": "outStreamEos",
                         "direction": "",
-                        "type": "hls::stream< uint32_t > &outCompressedSi"
+                        "type": "hls::stream<bool> &"
                     },
                     {
                         "name": "outCompressedSize",
                         "direction": "",
-                        "type": "hls::stream< uint32_t > &outCompressedSi"
+                        "type": "hls::stream< uint32_t > &"
                     }
                 ]
             }
@@ -73,7 +73,23 @@
                         "type": "int"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "in",
+                        "direction": "",
+                        "type": "const ap_uint<PARALLEL_BYTE * 8>*"
+                    },
+                    {
+                        "name": "adlerData",
+                        "direction": "",
+                        "type": "ap_uint<32>*"
+                    },
+                    {
+                        "name": "inputSize",
+                        "direction": "",
+                        "type": "ap_uint<32>"
+                    }
+                ]
             }
         },
         {
@@ -97,7 +113,23 @@
                         "type": "int"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "in",
+                        "direction": "",
+                        "type": "const ap_uint<PARALLEL_BYTE * 8>*"
+                    },
+                    {
+                        "name": "crcData",
+                        "direction": "",
+                        "type": "ap_uint<32>*"
+                    },
+                    {
+                        "name": "inputSize",
+                        "direction": "",
+                        "type": "ap_uint<32>"
+                    }
+                ]
             }
         },
         {
@@ -121,7 +153,43 @@
                         "type": "int"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "checksumInitStrm",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<32> >&"
+                    },
+                    {
+                        "name": "inStrm",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<8 * W> >&"
+                    },
+                    {
+                        "name": "inLenStrm",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<32> >&"
+                    },
+                    {
+                        "name": "endInStrm",
+                        "direction": "",
+                        "type": "hls::stream<bool>&"
+                    },
+                    {
+                        "name": "outStrm",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<32> >&"
+                    },
+                    {
+                        "name": "endOutStrm",
+                        "direction": "",
+                        "type": "hls::stream<bool>&"
+                    },
+                    {
+                        "name": "checksumType",
+                        "direction": "",
+                        "type": "bool"
+                    }
+                ]
             }
         },
         {
@@ -145,7 +213,28 @@
                         "type": "int"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "in",
+                        "direction": "",
+                        "type": "const ap_uint<PARALLEL_BYTE * 8>*"
+                    },
+                    {
+                        "name": "checksumData",
+                        "direction": "",
+                        "type": "ap_uint<32>*"
+                    },
+                    {
+                        "name": "inputSize",
+                        "direction": "",
+                        "type": "ap_uint<32>"
+                    },
+                    {
+                        "name": "checksumType",
+                        "direction": "",
+                        "type": "const bool"
+                    }
+                ]
             }
         },
         {
@@ -194,7 +283,7 @@
                     {
                         "name": "checkSum",
                         "direction": "",
-                        "type": ""
+                        "type": "hls::stream<ap_uint<32> >&"
                     }
                 ]
             }
@@ -256,7 +345,18 @@
                 ],
                 "instance": "function",
                 "parameters": [],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "inStream",
+                        "direction": "",
+                        "type": "hls::stream< IntVectorStream_dt< 32, 1 > > &"
+                    },
+                    {
+                        "name": "hufCodeOutStream",
+                        "direction": "",
+                        "type": "hls::stream< DSVectorStream_dt< HuffmanCode_dt< c_maxBits >, 1 > > &"
+                    }
+                ]
             }
         },
         {
@@ -319,7 +419,28 @@
                         "type": "int"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "inFreqStream",
+                        "direction": "",
+                        "type": "hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> >&"
+                    },
+                    {
+                        "name": "outCodeStream",
+                        "direction": "",
+                        "type": "hls::stream<DSVectorStream_dt<HuffmanCode_dt<MAX_BITS>, 1> >&"
+                    },
+                    {
+                        "name": "outWeightStream",
+                        "direction": "",
+                        "type": "hls::stream<IntVectorStream_dt<4, 1> >&"
+                    },
+                    {
+                        "name": "weightFreqStream",
+                        "direction": "",
+                        "type": "hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> >&"
+                    }
+                ]
             }
         },
         {
@@ -363,7 +484,18 @@
                         "type": "int"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "inaxistream",
+                        "direction": "",
+                        "type": "hls::stream<ap_axiu<64, 0, 0, 0> >&"
+                    },
+                    {
+                        "name": "outaxistream",
+                        "direction": "",
+                        "type": "hls::stream<ap_axiu<64, 0, 0, 0> >&"
+                    }
+                ]
             }
         },
         {
@@ -403,7 +535,18 @@
                         "type": "int"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "inaxistream",
+                        "direction": "",
+                        "type": "hls::stream<ap_axiu<16, 0, 0, 0> >&"
+                    },
+                    {
+                        "name": "outaxistream",
+                        "direction": "",
+                        "type": "hls::stream<ap_axiu<PARALLEL_BYTES * 8, 0, 0, 0> >&"
+                    }
+                ]
             }
         },
         {
@@ -443,7 +586,18 @@
                         "type": "int"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "inaxistream",
+                        "direction": "",
+                        "type": "hls::stream<ap_axiu<16, 0, 0, 0> >&"
+                    },
+                    {
+                        "name": "outaxistream",
+                        "direction": "",
+                        "type": "hls::stream<ap_axiu<PARALLEL_BYTES * 8, TUSER_WIDTH, 0, 0> >&"
+                    }
+                ]
             }
         },
         {
@@ -491,7 +645,28 @@
                         "type": "int"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "in",
+                        "direction": "",
+                        "type": "const ap_uint<GMEM_DATAWIDTH>*"
+                    },
+                    {
+                        "name": "out",
+                        "direction": "",
+                        "type": "ap_uint<GMEM_DATAWIDTH>*"
+                    },
+                    {
+                        "name": "encodedSize",
+                        "direction": "",
+                        "type": "uint32_t*"
+                    },
+                    {
+                        "name": "inputSize",
+                        "direction": "",
+                        "type": "uint32_t"
+                    }
+                ]
             }
         },
         {
@@ -535,7 +710,7 @@
                     {
                         "name": "max_lit_limit",
                         "direction": "",
-                        "type": "uint32_t[PARALLEL_UNITS],"
+                        "type": "uint32_t[PARALLEL_UNITS]"
                     },
                     {
                         "name": "input_size",
@@ -555,7 +730,7 @@
                     {
                         "name": "index",
                         "direction": "",
-                        "type": "uint32_t inde"
+                        "type": "uint32_t"
                     }
                 ]
             }
@@ -621,7 +796,43 @@
                         "type": "int"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "inStream",
+                        "direction": "",
+                        "type": "hls::stream<data_t>&"
+                    },
+                    {
+                        "name": "outStream",
+                        "direction": "",
+                        "type": "hls::stream<data_t>&"
+                    },
+                    {
+                        "name": "outStreamEos",
+                        "direction": "",
+                        "type": "hls::stream<bool>&"
+                    },
+                    {
+                        "name": "compressedSize",
+                        "direction": "",
+                        "type": "hls::stream<uint32_t>&"
+                    },
+                    {
+                        "name": "max_lit_limit",
+                        "direction": "",
+                        "type": "uint32_t[NUM_BLOCK]"
+                    },
+                    {
+                        "name": "input_size",
+                        "direction": "",
+                        "type": "uint32_t"
+                    },
+                    {
+                        "name": "core_idx",
+                        "direction": "",
+                        "type": "uint32_t"
+                    }
+                ]
             }
         },
         {
@@ -685,7 +896,43 @@
                         "type": "int"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "in",
+                        "direction": "",
+                        "type": "const data_t*"
+                    },
+                    {
+                        "name": "out",
+                        "direction": "",
+                        "type": "data_t*"
+                    },
+                    {
+                        "name": "input_idx",
+                        "direction": "",
+                        "type": "const uint32_t[NUM_BLOCK]"
+                    },
+                    {
+                        "name": "output_idx",
+                        "direction": "",
+                        "type": "const uint32_t[NUM_BLOCK]"
+                    },
+                    {
+                        "name": "input_size",
+                        "direction": "",
+                        "type": "const uint32_t[NUM_BLOCK]"
+                    },
+                    {
+                        "name": "output_size",
+                        "direction": "",
+                        "type": "const uint32_t[NUM_BLOCK]"
+                    },
+                    {
+                        "name": "max_lit_limit",
+                        "direction": "",
+                        "type": "const uint32_t[NUM_BLOCK]"
+                    }
+                ]
             }
         },
         {
@@ -749,7 +996,28 @@
                         "type": "int"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "in",
+                        "direction": "",
+                        "type": "const data_t*"
+                    },
+                    {
+                        "name": "out",
+                        "direction": "",
+                        "type": "data_t*"
+                    },
+                    {
+                        "name": "compressd_size",
+                        "direction": "",
+                        "type": "uint32_t*"
+                    },
+                    {
+                        "name": "input_size",
+                        "direction": "",
+                        "type": "const uint32_t"
+                    }
+                ]
             }
         },
         {
@@ -773,7 +1041,13 @@
                         "type": "typename"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "d",
+                        "direction": "",
+                        "type": "T"
+                    }
+                ]
             }
         },
         {
@@ -797,7 +1071,28 @@
                         "type": "int"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "inStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<PARALLEL_BYTES * 8> >&"
+                    },
+                    {
+                        "name": "outStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<PARALLEL_BYTES * 8> >&"
+                    },
+                    {
+                        "name": "blockInfoStream",
+                        "direction": "",
+                        "type": "hls::stream<dt_lz4BlockInfo>&"
+                    },
+                    {
+                        "name": "inputSize",
+                        "direction": "",
+                        "type": "const uint32_t"
+                    }
+                ]
             }
         },
         {
@@ -851,7 +1146,28 @@
                 ],
                 "instance": "function",
                 "parameters": [],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "inStream",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< 8 > > &"
+                    },
+                    {
+                        "name": "outStream",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< 32 > > &"
+                    },
+                    {
+                        "name": "input_size",
+                        "direction": "",
+                        "type": "uint32_t"
+                    },
+                    {
+                        "name": "uncomp_flag",
+                        "direction": "",
+                        "type": "bool"
+                    }
+                ]
             }
         },
         {
@@ -879,7 +1195,38 @@
                         "type": "class"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "inStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<PARALLEL_BYTES * 8> >&"
+                    },
+                    {
+                        "name": "litlenStream",
+                        "direction": "",
+                        "type": "hls::stream<SIZE_DT>&"
+                    },
+                    {
+                        "name": "litStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<PARALLEL_BYTES * 8> >&"
+                    },
+                    {
+                        "name": "offsetStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<16> >&"
+                    },
+                    {
+                        "name": "matchlenStream",
+                        "direction": "",
+                        "type": "hls::stream<SIZE_DT>&"
+                    },
+                    {
+                        "name": "blockInfoStream",
+                        "direction": "",
+                        "type": "hls::stream<dt_lz4BlockInfo>&"
+                    }
+                ]
             }
         },
         {
@@ -907,7 +1254,23 @@
                         "type": "int"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "inStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<PARALLEL_BYTES * 8> >&"
+                    },
+                    {
+                        "name": "outStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<(PARALLEL_BYTES * 8) + PARALLEL_BYTES> >& "
+                    },
+                    {
+                        "name": "blockSizeStream",
+                        "direction": "",
+                        "type": "hls::stream<uint32_t>&"
+                    }
+                ]
             }
         },
         {
@@ -935,7 +1298,23 @@
                         "type": "int"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "inStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<PARALLEL_BYTES * 8> >&"
+                    },
+                    {
+                        "name": "outStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<(PARALLEL_BYTES * 8) + PARALLEL_BYTES> >& "
+                    },
+                    {
+                        "name": "_input_size",
+                        "direction": "",
+                        "type": "const uint32_t"
+                    }
+                ]
             }
         },
         {
@@ -963,7 +1342,58 @@
                         "type": "int"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "in",
+                        "direction": "",
+                        "type": "const ap_uint<DATAWIDTH>*"
+                    },
+                    {
+                        "name": "orig_input_data",
+                        "direction": "",
+                        "type": "ap_uint<DATAWIDTH>*"
+                    },
+                    {
+                        "name": "outStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<DATAWIDTH> >&"
+                    },
+                    {
+                        "name": "outStreamSize",
+                        "direction": "",
+                        "type": "hls::stream<uint32_t>&"
+                    },
+                    {
+                        "name": "compressd_size",
+                        "direction": "",
+                        "type": "uint32_t*"
+                    },
+                    {
+                        "name": "in_block_size",
+                        "direction": "",
+                        "type": "uint32_t*"
+                    },
+                    {
+                        "name": "no_blocks",
+                        "direction": "",
+                        "type": "uint32_t"
+                    },
+                    {
+                        "name": "block_size_in_kb",
+                        "direction": "",
+                        "type": "uint32_t"
+                    },
+                    {
+                        "name": "xxhashVal",
+                        "direction": "",
+                        "type": "uint32_t"
+                    },
+                    {
+                        "name": "input_size",
+                        "direction": "",
+                        "type": "uint32_t"
+                    }
+                ]
             }
         },
         {
@@ -991,7 +1421,58 @@
                         "type": "int"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "orig_input_data",
+                        "direction": "",
+                        "type": "ap_uint<DATAWIDTH>*"
+                    },
+                    {
+                        "name": "in",
+                        "direction": "",
+                        "type": "ap_uint<DATAWIDTH>*"
+                    },
+                    {
+                        "name": "out",
+                        "direction": "",
+                        "type": "ap_uint<DATAWIDTH>*"
+                    },
+                    {
+                        "name": "in_block_size",
+                        "direction": "",
+                        "type": "uint32_t*"
+                    },
+                    {
+                        "name": "compressd_size",
+                        "direction": "",
+                        "type": "uint32_t*"
+                    },
+                    {
+                        "name": "packerCompressedSize",
+                        "direction": "",
+                        "type": "uint32_t*"
+                    },
+                    {
+                        "name": "xxhashVal",
+                        "direction": "",
+                        "type": "uint32_t"
+                    },
+                    {
+                        "name": "block_length",
+                        "direction": "",
+                        "type": "uint32_t"
+                    },
+                    {
+                        "name": "no_blocks",
+                        "direction": "",
+                        "type": "uint32_t"
+                    },
+                    {
+                        "name": "input_size",
+                        "direction": "",
+                        "type": "uint32_t"
+                    }
+                ]
             }
         },
         {
@@ -1143,7 +1624,23 @@
                         "type": "class"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "litStream",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint< PARALLEL_BYTES *8 > > &"
+                    },
+                    {
+                        "name": "infoStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<11 + OWIDTH> >&"
+                    },
+                    {
+                        "name": "outStream",
+                        "direction": "",
+                        "type": "hls::stream< ap_uint<(PARALLEL_BYTES *8)+PARALLEL_BYTES > > &"
+                    }
+                ]
             }
         },
         {
@@ -1175,7 +1672,39 @@
                         "type": "class"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "litlenStream",
+                        "direction": "",
+                        "type": "hls::stream<SIZE_DT>&"
+                    },
+                    {
+                        "name": "litStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<PARALLEL_BYTES * 8> >&"
+                    },
+                    {
+                        "name": "offsetStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<16> >&"
+                    },
+                    {
+                        "name": "matchlenStream",
+                        "direction": "",
+                        "type": "hls::stream<SIZE_DT>&"
+                    },
+                    {
+                        "name": "outStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<PARALLEL_BYTES * 8> >&"
+                    },
+                    {
+                        "name": "outStrb",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<PARALLEL_BYTES> >&"
+                    }
+
+                ]
             }
         },
         {
@@ -1203,7 +1732,33 @@
                         "type": "int"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "inStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<32> >&"
+                    },
+                    {
+                        "name": "inStream_eos",
+                        "direction": "",
+                        "type": "hls::stream<bool>&"
+                    },
+                    {
+                        "name": "outStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<8> >&"
+                    },
+                    {
+                        "name": "outStream_eos",
+                        "direction": "",
+                        "type": "hls::stream<bool>&"
+                    },
+                    {
+                        "name": "outSize_val",
+                        "direction": "",
+                        "type": "hls::stream<uint64_t>&"
+                    }
+                ]
             }
         },
         {
@@ -1231,7 +1786,38 @@
                         "type": "int"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "inStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<32> >&"
+                    },
+                    {
+                        "name": "inStream_eos",
+                        "direction": "",
+                        "type": "hls::stream<bool>&"
+                    },
+                    {
+                        "name": "outStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<8> >&"
+                    },
+                    {
+                        "name": "outStream_eos",
+                        "direction": "",
+                        "type": "hls::stream<bool>&"
+                    },
+                    {
+                        "name": "outSize_val",
+                        "direction": "",
+                        "type": "hls::stream<uint64_t>&"
+                    },
+                    {
+                        "name": "inSize",
+                        "direction": "",
+                        "type": "hls::stream<uint32_t>&"
+                    }
+                ]
             }
         },
         {
@@ -1250,7 +1836,38 @@
                 ],
                 "instance": "function",
                 "parameters": [],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "inStream",
+                        "direction": "",
+                        "type": "hls::stream<compressd_dt>&"
+                    },
+                    {
+                        "name": "outStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<32> >&"
+                    },
+                    {
+                        "name": "endOfStream",
+                        "direction": "",
+                        "type": "hls::stream<bool>&"
+                    },
+                    {
+                        "name": "outStreamTree",
+                        "direction": "",
+                        "type": "hls::stream<uint32_t>&"
+                    },
+                    {
+                        "name": "compressedSize",
+                        "direction": "",
+                        "type": "hls::stream<uint32_t>&"
+                    },
+                    {
+                        "name": "input_size",
+                        "direction": "",
+                        "type": "uint32_t"
+                    }
+                ]
             }
         },
         {
@@ -1278,7 +1895,23 @@
                         "type": "int"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "inStream",
+                        "direction": "",
+                        "type": "hls::stream<IntVectorStream_dt<32, 1> >&"
+                    },
+                    {
+                        "name": "outStream",
+                        "direction": "",
+                        "type": "hls::stream<IntVectorStream_dt<9, 1> >&"
+                    },
+                    {
+                        "name": "outTreeStream",
+                        "direction": "",
+                        "type": "hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> >&"
+                    }
+                ]
             }
         },
         {
@@ -1297,7 +1930,18 @@
                 ],
                 "instance": "function",
                 "parameters": [],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "inStream",
+                        "direction": "",
+                        "type": "hls::stream<IntVectorStream_dt<32, 1> >&"
+                    },
+                    {
+                        "name": "outStream",
+                        "direction": "",
+                        "type": "hls::stream<IntVectorStream_dt<9, 1> >&"
+                    }
+                ]
             }
         },
         {
@@ -1432,11 +2076,6 @@
                         "name": "input_size",
                         "direction": "",
                         "type": "uint32_t"
-                    },
-                    {
-                        "name": "left_bytes",
-                        "direction": "",
-                        "type": ""
                     }
                 ]
             }
@@ -1466,7 +2105,33 @@
                         "type": "int"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "inStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<PARALLEL_BYTES * 8> >&"
+                    },
+                    {
+                        "name": "outStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<PARALLEL_BYTES * 8> >&"
+                    },
+                    {
+                        "name": "outStreamEoS",
+                        "direction": "",
+                        "type": "hls::stream<bool>&"
+                    },
+                    {
+                        "name": "outSizeStream",
+                        "direction": "",
+                        "type": "hls::stream<uint64_t>&"
+                    },
+                    {
+                        "name": "_input_size",
+                        "direction": "",
+                        "type": "const uint32_t"
+                    }
+                ]
             }
         },
         {
@@ -1515,7 +2180,7 @@
                     {
                         "name": "max_lit_limit",
                         "direction": "",
-                        "type": "uint32_t[PARALLEL_UNITS],"
+                        "type": "uint32_t[PARALLEL_UNITS]"
                     },
                     {
                         "name": "input_size",
@@ -1535,7 +2200,7 @@
                     {
                         "name": "index",
                         "direction": "",
-                        "type": "uint32_t inde"
+                        "type": "uint32_t"
                     }
                 ]
             }
@@ -1604,7 +2269,38 @@
                         "type": "bool"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "inStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<PARALLEL_BYTES * 8> >&"
+                    },
+                    {
+                        "name": "litlenStream",
+                        "direction": "",
+                        "type": "hls::stream<SIZE_DT>&"
+                    },
+                    {
+                        "name": "litStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<PARALLEL_BYTES * 8> >&"
+                    },
+                    {
+                        "name": "offsetStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<16> >&"
+                    },
+                    {
+                        "name": "matchlenStream",
+                        "direction": "",
+                        "type": "hls::stream<SIZE_DT>&"
+                    },
+                    {
+                        "name": "blockInfoStream",
+                        "direction": "",
+                        "type": "hls::stream<dt_blockInfo>&"
+                    }
+                ]
             }
         },
         {
@@ -1644,7 +2340,23 @@
                         "type": "class"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "blockDataStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<PARALLEL_BYTES * 8> >&"
+                    },
+                    {
+                        "name": "blockInfoStream",
+                        "direction": "",
+                        "type": "hls::stream<dt_blockInfo>&"
+                    },
+                    {
+                        "name": "lzDataStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<(PARALLEL_BYTES * 8) + 8> >&"
+                    }
+                ]
             }
         },
         {
@@ -1684,7 +2396,23 @@
                         "type": "class"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "inStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<PARALLEL_BYTES * 8> >&"
+                    },
+                    {
+                        "name": "inSizeStream",
+                        "direction": "",
+                        "type": "hls::stream<uint32_t>&"
+                    },
+                    {
+                        "name": "outStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<(PARALLEL_BYTES * 8) + 8> >&"
+                    }
+                ]
             }
         },
         {
@@ -1716,7 +2444,23 @@
                         "type": "class"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "inStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<PARALLEL_BYTES * 8> >&"
+                    },
+                    {
+                        "name": "outStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<(PARALLEL_BYTES * 8) + 8> >&"
+                    },
+                    {
+                        "name": "_input_size",
+                        "direction": "",
+                        "type": "const uint32_t"
+                    }
+                ]
             }
         },
         {
@@ -1748,7 +2492,23 @@
                         "type": "class"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "inStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<PARALLEL_BYTES * 8> >&"
+                    },
+                    {
+                        "name": "outStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<(PARALLEL_BYTES * 8) + PARALLEL_BYTES> >&"
+                    },
+                    {
+                        "name": "blockSizeStream",
+                        "direction": "",
+                        "type": "hls::stream<uint32_t>&"
+                    }
+                ]
             }
         },
         {
@@ -1796,7 +2556,23 @@
                         "type": "int"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "inStream",
+                        "direction": "",
+                        "type": "hls::stream<IntVectorStream_dt<8, 1> >&"
+                    },
+                    {
+                        "name": "lz77OutStream",
+                        "direction": "",
+                        "type": "hls::stream<IntVectorStream_dt<9, 1> >&"
+                    },
+                    {
+                        "name": "outTreeStream",
+                        "direction": "",
+                        "type": "hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> >&"
+                    }
+                ]
             }
         },
         {
@@ -1840,7 +2616,18 @@
                         "type": "int"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "inStream",
+                        "direction": "",
+                        "type": "hls::stream<IntVectorStream_dt<8, 1> >&"
+                    },
+                    {
+                        "name": "lz77OutStream",
+                        "direction": "",
+                        "type": "hls::stream<IntVectorStream_dt<9, 1> >&"
+                    }
+                ]
             }
         },
         {
@@ -1859,7 +2646,23 @@
                 ],
                 "instance": "function",
                 "parameters": [],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "inStream",
+                        "direction": "",
+                        "type": "hls::stream<IntVectorStream_dt<9, 1> >&"
+                    },
+                    {
+                        "name": "hufCodeInStream",
+                        "direction": "",
+                        "type": "hls::stream<DSVectorStream_dt<HuffmanCode_dt<c_maxBits>, 1> >&"
+                    },
+                    {
+                        "name": "huffOutStream",
+                        "direction": "",
+                        "type": "hls::stream<IntVectorStream_dt<8, 2> >&"
+                    }
+                ]
             }
         },
         {
@@ -1878,7 +2681,18 @@
                 ],
                 "instance": "function",
                 "parameters": [],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "inStream",
+                        "direction": "",
+                        "type": "hls::stream<IntVectorStream_dt<9, 1> >&"
+                    },
+                    {
+                        "name": "huffOutStream",
+                        "direction": "",
+                        "type": "hls::stream<IntVectorStream_dt<8, 2> >&"
+                    }
+                ]
             }
         },
         {
@@ -1906,7 +2720,48 @@
                         "type": "int"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "inStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<64> >&"
+                    },
+                    {
+                        "name": "inSizeStream",
+                        "direction": "",
+                        "type": "hls::stream<uint32_t>&"
+                    },
+                    {
+                        "name": "checksumInitStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<32> >&"
+                    },
+                    {
+                        "name": "outStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<64> >&"
+                    },
+                    {
+                        "name": "outStreamEos",
+                        "direction": "",
+                        "type": "hls::stream<bool>&"
+                    },
+                    {
+                        "name": "outSizeStream",
+                        "direction": "",
+                        "type": "hls::stream<uint32_t>&"
+                    },
+                    {
+                        "name": "checksumOutStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<32> >&"
+                    },
+                    {
+                        "name": "checksumTypeStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<2> >&"
+                    }
+                ]
             }
         },
         {
@@ -1938,7 +2793,18 @@
                         "type": "int"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "inStream",
+                        "direction": "",
+                        "type": "hls::stream<IntVectorStream_dt<8, 8> >&"
+                    },
+                    {
+                        "name": "outStream",
+                        "direction": "",
+                        "type": "hls::stream<IntVectorStream_dt<8, 8> >&"
+                    }
+                ]
             }
         },
         {
@@ -1970,7 +2836,18 @@
                         "type": "int"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "inStream",
+                        "direction": "",
+                        "type": "hls::stream<IntVectorStream_dt<8, 8> >&"
+                    },
+                    {
+                        "name": "outStream",
+                        "direction": "",
+                        "type": "hls::stream<IntVectorStream_dt<8, 8> >&"
+                    }
+                ]
             }
         },
         {
@@ -2006,7 +2883,18 @@
                         "type": "int"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "inAxiStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_axiu<64, 0, 0, 0> >&"
+                    },
+                    {
+                        "name": "outAxiStream",
+                        "direction": "",
+                        "type": "hls::stream<ap_axiu<64, TUSR_DWIDTH, 0, 0> >&"
+                    }
+                ]
             }
         },
         {

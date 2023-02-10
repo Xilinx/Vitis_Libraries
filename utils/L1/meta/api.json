@@ -57,7 +57,7 @@
                     {
                         "name": "e_ostrm0",
                         "direction": "",
-                        "type": "hls::stream< _TStrm1 > &ostrm1, hls::stream< bool > &e_ostrm1, hls::stream< _TStrm2 > &ostrm2, hls::stream< bool > &e_ostrm2, const int len[3], const int offset[3]"
+                        "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "ostrm1",
@@ -67,7 +67,7 @@
                     {
                         "name": "e_ostrm1",
                         "direction": "",
-                        "type": "hls::stream< _TStrm2 > &ostrm2, hls::stream< bool > &e_ostrm2, const int len[3], const int offset[3]"
+                        "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "ostrm2",
@@ -143,7 +143,7 @@
                     {
                         "name": "e_ostrm",
                         "direction": "",
-                        "type": ""
+                        "type": "hls::stream<bool>&"
                     }
                 ]
             }
@@ -194,7 +194,7 @@
                     {
                         "name": "e_ostrm",
                         "direction": "",
-                        "type": "const int len, const int offset=0"
+                        "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "len",
@@ -227,7 +227,7 @@
                 "parameters": [
                     {
                         "name": "S",
-                        "type": "Muxide",
+                        "type": "MuxSide",
                         "description": "side of FIFO, must be provide by user."
                     },
                     {
@@ -240,7 +240,7 @@
                     {
                         "name": "p",
                         "direction": "",
-                        "type": "hls::stream< a"
+                        "type": "stream<ap_uint<W> >&"
                     }
                 ]
             }
@@ -281,7 +281,7 @@
                     {
                         "name": "istrms",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< _WIn > >[_NStrm],"
+                        "type": "hls::stream<ap_uint<_WIn> >"
                     },
                     {
                         "name": "e_istrm",
@@ -291,17 +291,17 @@
                     {
                         "name": "ostrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< _WIn *_NStrm > > &"
+                        "type": "hls::stream<ap_uint<_WIn * _NStrm> >&"
                     },
                     {
                         "name": "e_ostrm",
                         "direction": "",
-                        "type": "LSBSideT al"
+                        "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "alg",
                         "direction": "",
-                        "type": "LSBSideT al"
+                        "type": "LSBSideT"
                     }
                 ]
             }
@@ -342,7 +342,7 @@
                     {
                         "name": "e_istrms",
                         "direction": "",
-                        "type": "[_NStrm]"
+                        "type": "hls::stream<bool>"
                     }
                 ]
             }
@@ -383,7 +383,7 @@
                     {
                         "name": "e_istrm",
                         "direction": "",
-                        "type": "hls::stream< _TIn > ostrms[_NStrm], hls::stream< bool > e_ostrms[_NStrm]"
+                        "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "ostrms",
@@ -393,7 +393,7 @@
                     {
                         "name": "e_ostrms",
                         "direction": "",
-                        "type": "[_NStrm]"
+                        "type": "hls::stream<bool>"
                     }
                 ]
             }
@@ -434,27 +434,27 @@
                     {
                         "name": "istrms",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< _WInStrm > >[_NStrm],"
+                        "type": "hls::stream<ap_uint<_WInStrm> >"
                     },
                     {
                         "name": "e_istrms",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< _WOutStrm > > &ostrm, hls::stream< bool > &e_ostrm, LoadBalanceT al"
+                        "type": "hls::stream<bool>"
                     },
                     {
                         "name": "ostrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< _WOutStrm > > &"
+                        "type": "hls::stream<ap_uint<_WOutStrm> >&"
                     },
                     {
                         "name": "e_ostrm",
                         "direction": "",
-                        "type": "LoadBalanceT al"
+                        "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "alg",
                         "direction": "",
-                        "type": "LoadBalanceT al"
+                        "type": "LoadBalanceT"
                     }
                 ]
             }
@@ -500,22 +500,22 @@
                     {
                         "name": "e_istrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< _WOutStrm > > ostrms[_NStrm], hls::stream< bool > e_ostrms[_NStrm], LoadBalanceT alg"
+                        "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "ostrms",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< _WOutStrm > >[_NStrm],"
+                        "type": "hls::stream<ap_uint<_WOutStrm> >"
                     },
                     {
                         "name": "e_ostrms",
                         "direction": "",
-                        "type": "LoadBalanceT al"
+                        "type": "hls::stream<bool>"
                     },
                     {
                         "name": "alg",
                         "direction": "",
-                        "type": "LoadBalanceT al"
+                        "type": "LoadBalanceT"
                     }
                 ]
             }
@@ -561,7 +561,7 @@
                     {
                         "name": "e_istrm",
                         "direction": "",
-                        "type": "hls::stream< _TIn > &ostrm, hls::stream< bool > &e_ostrm"
+                        "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "ostrm",
@@ -571,7 +571,7 @@
                     {
                         "name": "e_ostrm",
                         "direction": "",
-                        "type": ""
+                        "type": "hls::stream<bool>&"
                     }
                 ]
             }
@@ -617,7 +617,7 @@
                     {
                         "name": "istrms",
                         "direction": "",
-                        "type": "hls::stream< _TIn >[_INStrm],"
+                        "type": "hls::stream<_TIn>"
                     },
                     {
                         "name": "e_istrm",
@@ -627,12 +627,12 @@
                     {
                         "name": "ostrms",
                         "direction": "",
-                        "type": "hls::stream< _TIn >[_ONstrm],"
+                        "type": "hls::stream<_TIn>"
                     },
                     {
                         "name": "e_ostrm",
                         "direction": "",
-                        "type": "hls::stream< bool > &e_ost"
+                        "type": "hls::stream<bool>&"
                     }
                 ]
             }
@@ -678,12 +678,12 @@
                     {
                         "name": "e_istrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< _WOut > > ostrms[_NStrm], hls::stream< bool > &e_ostrm, LSBSideT alg"
+                        "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "ostrms",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< _WOut > >[_NStrm],"
+                        "type": "hls::stream<ap_uint<_WOut> >"
                     },
                     {
                         "name": "e_ostrm",
@@ -693,7 +693,7 @@
                     {
                         "name": "alg",
                         "direction": "",
-                        "type": "LSBSideT al"
+                        "type": "LSBSideT"
                     }
                 ]
             }
@@ -729,22 +729,22 @@
                     {
                         "name": "istrms",
                         "direction": "",
-                        "type": "hls::stream< _TIn >[_NStrm],"
+                        "type": "hls::stream<_TIn>"
                     },
                     {
                         "name": "e_istrms",
                         "direction": "",
-                        "type": "hls::stream< _TIn > ostrms[_NStrm], hls::stream< bool > &e_ostr"
+                        "type": "hls::stream<bool>"
                     },
                     {
                         "name": "ostrms",
                         "direction": "",
-                        "type": "hls::stream< _TIn >[_NStrm],"
+                        "type": "hls::stream<_TIn>"
                     },
                     {
                         "name": "e_ostrm",
                         "direction": "",
-                        "type": "hls::stream< bool > &e_ost"
+                        "type": "hls::stream<bool>&"
                     }
                 ]
             }
@@ -795,7 +795,7 @@
                     {
                         "name": "e_istrm",
                         "direction": "",
-                        "type": ""
+                        "type": "hls::stream<bool>&"
                     }
                 ]
             }
@@ -816,7 +816,13 @@
                 ],
                 "instance": "function",
                 "parameters": [],
-                "ports": []
+                "ports": [
+		    {
+			"name": "err",
+			"direction": "",
+			"type": "int"
+		    }
+		]
             }
         }
     ],

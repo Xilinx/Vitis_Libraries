@@ -32,12 +32,12 @@
                     {
                         "name": "fftInStrm",
                         "direction": "",
-                        "type": "hls::stream< T_in >[ssr_fft_param_struct::R],"
+                        "type": "hls::stream< T_in >[ssr_fft_param_struct::R]"
                     },
                     {
                         "name": "fftOutStrm",
                         "direction": "",
-                        "type": "hls::stream< typename FFTOutputTraits< ssr_fft_param_struct::N, ssr_fft_param_struct::R, ssr_fft_param_struct::scaling_mode, ssr_fft_param_struct::transform_direction, ssr_fft_param_struct::butterfly_rnd_mode, typename FFTInputTraits< T_in >::T_castedType >::T_FFTOutType >"
+                        "type": "hls::stream< typename FFTOutputTraits< ssr_fft_param_struct::N, ssr_fft_param_struct::R, ssr_fft_param_struct::scaling_mode, ssr_fft_param_struct::transform_direction, ssr_fft_param_struct::butterfly_rnd_mode, typename FFTInputTraits< T_in >::T_castedType >::T_FFTOutType >[ssr_fft_param_struct::R]"
                     }
                 ]
             }
@@ -78,12 +78,12 @@
                     {
                         "name": "fftInStrm",
                         "direction": "",
-                        "type": "hls::stream< T_in >[ssr_fft_param_struct::R],"
+                        "type": "hls::stream< T_in >[ssr_fft_param_struct::R]"
                     },
                     {
                         "name": "fftOutStrm",
                         "direction": "",
-                        "type": "hls::stream< typename FFTOutputTraits< ssr_fft_param_struct::N, ssr_fft_param_struct::R, ssr_fft_param_struct::scaling_mode, ssr_fft_param_struct::transform_direction, ssr_fft_param_struct::butterfly_rnd_mode, typename FFTInputTraits< T_in >::T_castedType >::T_FFTOutType >"
+                        "type": "hls::stream< typename FFTOutputTraits< ssr_fft_param_struct::N, ssr_fft_param_struct::R, ssr_fft_param_struct::scaling_mode, ssr_fft_param_struct::transform_direction, ssr_fft_param_struct::butterfly_rnd_mode, typename FFTInputTraits< T_in >::T_castedType >::T_FFTOutType >[ssr_fft_param_struct::R]"
                     }
                 ]
             }
@@ -119,12 +119,12 @@
                     {
                         "name": "fftInStrm",
                         "direction": "",
-                        "type": "hls::stream< T_in >[ssr_fft_param_struct::R],"
+                        "type": "hls::stream< T_in >[ssr_fft_param_struct::R]"
                     },
                     {
                         "name": "fftOutStrm",
                         "direction": "",
-                        "type": "hls::stream< typename FFTOutputTraits< ssr_fft_param_struct::N, ssr_fft_param_struct::R, ssr_fft_param_struct::scaling_mode, ssr_fft_param_struct::transform_direction, ssr_fft_param_struct::butterfly_rnd_mode, typename FFTInputTraits< T_in >::T_castedType >::T_FFTOutType >"
+                        "type": "hls::stream< typename FFTOutputTraits< ssr_fft_param_struct::N, ssr_fft_param_struct::R, ssr_fft_param_struct::scaling_mode, ssr_fft_param_struct::transform_direction, ssr_fft_param_struct::butterfly_rnd_mode, typename FFTInputTraits< T_in >::T_castedType >::T_FFTOutType >[ssr_fft_param_struct::R]"
                     }
                 ]
             }
@@ -165,12 +165,12 @@
                     {
                         "name": "fftInStrm",
                         "direction": "",
-                        "type": "hls::stream< T_in >[ssr_fft_param_struct::R],"
+                        "type": "hls::stream< T_in >[ssr_fft_param_struct::R]"
                     },
                     {
                         "name": "fftOutStrm",
                         "direction": "",
-                        "type": "hls::stream< typename FFTOutputTraits< ssr_fft_param_struct::N, ssr_fft_param_struct::R, ssr_fft_param_struct::scaling_mode, ssr_fft_param_struct::transform_direction, ssr_fft_param_struct::butterfly_rnd_mode, typename FFTInputTraits< T_in >::T_castedType >::T_FFTOutType >"
+                        "type": "hls::stream< typename FFTOutputTraits< ssr_fft_param_struct::N, ssr_fft_param_struct::R, ssr_fft_param_struct::scaling_mode, ssr_fft_param_struct::transform_direction, ssr_fft_param_struct::butterfly_rnd_mode, typename FFTInputTraits< T_in >::T_castedType >::T_FFTOutType >[ssr_fft_param_struct::R]"
                     }
                 ]
             }

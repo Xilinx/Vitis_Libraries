@@ -138,7 +138,7 @@
                     {
                         "name": "p_rowEntryStr",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< t_DataBits+t_IndexBits > >[1<< t_LogParEntries],"
+                        "type": "hls::stream<ap_uint<t_DataBits + t_IndexBits> >"
                     },
                     {
                         "name": "p_isEndStr",
@@ -199,12 +199,12 @@
                     {
                         "name": "p_rowValStr",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< t_DataBits > >[t_ParEntries],"
+                        "type": "hls::stream<ap_uint<t_DataBits> >"
                     },
                     {
                         "name": "p_rowAggStr",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< t_DataBits *t_ParEntries > > &p_rowAggSt"
+                        "type": "hls::stream<ap_uint<t_DataBits * t_ParEntries> >&"
                     }
                 ]
             }

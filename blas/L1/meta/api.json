@@ -197,9 +197,14 @@
                         "type": "unsigned int"
                     },
                     {
+                        "name": "p_alpha",
+                        "direction": "",
+                        "type": "const t_DataType"
+                    },
+                    {
                         "name": "p_x",
                         "direction": "",
-                        "type": "const t_DataType p_alpha, hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
+                        "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
                     },
                     {
                         "name": "p_y",
@@ -311,9 +316,14 @@
                         "type": "hls::stream< typename WideType< t_DataType,(1<< t_LogParEntries)>::t_TypeInt > &"
                     },
                     {
+                        "name": "p_y",
+                        "direction": "",
+                        "type": "hls::stream< typename WideType< t_DataType,(1<< t_LogParEntries)>::t_TypeInt > &"
+                    },
+                    {
                         "name": "p_res",
                         "direction": "",
-                        "type": "hls::stream< typename WideType< t_DataType,(1<< t_LogParEntries)>::t_TypeInt > &p_y, t_DataType &"
+                        "type": "t_DataType &"
                     }
                 ]
             }
@@ -361,7 +371,140 @@
                         "description": "the datatype of the output stream"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "p_m",
+                        "direction": "",
+                        "type": "const unsigned int"
+                    },
+                    {
+                        "name": "p_n",
+                        "direction": "",
+                        "type": "const unsigned int"
+                    },
+                    {
+                        "name": "p_kl",
+                        "direction": "",
+                        "type": "const unsigned int"
+                    },
+                    {
+                        "name": "p_ku",
+                        "direction": "",
+                        "type": "const unsigned int"
+                    },
+                    {
+                        "name": "p_A",
+                        "direction": "",
+                        "type": "hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt>&"
+                    },
+                    {
+                        "name": "p_x",
+                        "direction": "",
+                        "type": "hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt>&"
+                    },
+                    {
+                        "name": "p_y",
+                        "direction": "",
+                        "type": "hls::stream<typename WideType<t_MacType, t_ParEntries>::t_TypeInt>&"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::blas::gbmv",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::blas::gbmv",
+                "display_name": "gbmv",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "gbmv.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw",
+                    "L1/include/hw/xf_blas"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "t_DataType",
+                        "type": "typename",
+                        "description": "the data type of the vector entries"
+                    },
+                    {
+                        "name": "t_ParEntries",
+                        "type": "unsigned int",
+                        "description": "the number of parallelly processed entries in the input vector"
+                    },
+                    {
+                        "name": "t_MaxRows",
+                        "type": "unsigned int",
+                        "description": "the maximum size of buffers for output vector"
+                    },
+                    {
+                        "name": "t_IndexType",
+                        "type": "typename",
+                        "description": "the datatype of the index"
+                    },
+                    {
+                        "name": "t_MacType",
+                        "type": "typename",
+                        "description": "the datatype of the output stream"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "p_m",
+                        "direction": "",
+                        "type": "const unsigned int"
+                    },
+                    {
+                        "name": "p_n",
+                        "direction": "",
+                        "type": "const unsigned int"
+                    },
+                    {
+                        "name": "p_kl",
+                        "direction": "",
+                        "type": "const unsigned int"
+                    },
+                    {
+                        "name": "p_ku",
+                        "direction": "",
+                        "type": "const unsigned int"
+                    },
+                    {
+                        "name": "p_alpha",
+                        "direction": "",
+                        "type": "const t_DataType"
+                    },
+                    {
+                        "name": "p_M",
+                        "direction": "",
+                        "type": "hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt>&"
+                    },
+                    {
+                        "name": "p_x",
+                        "direction": "",
+                        "type": "hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt>&"
+                    },
+                    {
+                        "name": "p_beta",
+                        "direction": "",
+                        "type": "const t_DataType"
+                    },
+                    {
+                        "name": "p_y",
+                        "direction": "",
+                        "type": "hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt>&"
+                    },
+                    {
+                        "name": "p_yr",
+                        "direction": "",
+                        "type": "hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt>&"
+                    }
+                ]
             }
         },
         {
@@ -397,7 +540,38 @@
                         "description": "the number of parallelly processed entries in the input vector"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "p_m",
+                        "direction": "",
+                        "type": "const unsigned int"
+                    },
+                    {
+                        "name": "p_n",
+                        "direction": "",
+                        "type": "const unsigned int"
+                    },
+                    {
+                        "name": "p_k",
+                        "direction": "",
+                        "type": "const unsigned int"
+                    },
+                    {
+                        "name": "p_A",
+                        "direction": "",
+                        "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
+                    },
+                    {
+                        "name": "p_B",
+                        "direction": "",
+                        "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
+                    },
+                    {
+                        "name": "p_C",
+                        "direction": "",
+                        "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
+                    }
+                ]
             }
         },
         {
@@ -433,7 +607,48 @@
                         "description": "the datatype of the index"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "p_m",
+                        "direction": "",
+                        "type": "const unsigned int"
+                    },
+                    {
+                        "name": "p_n",
+                        "direction": "",
+                        "type": "const unsigned int"
+                    },
+                    {
+                        "name": "p_alpha",
+                        "direction": "",
+                        "type": "const t_DataType"
+                    },
+                    {
+                        "name": "p_M",
+                        "direction": "",
+                        "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
+                    },
+                    {
+                        "name": "p_x",
+                        "direction": "",
+                        "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
+                    },
+                    {
+                        "name": "p_beta",
+                        "direction": "",
+                        "type": "const t_DataType"
+                    },
+                    {
+                        "name": "p_y",
+                        "direction": "",
+                        "type": "hls::stream<typename WideType<t_DataType, 1>::t_TypeInt>&"
+                    },
+                    {
+                        "name": "p_yr",
+                        "direction": "",
+                        "type": "hls::stream<typename WideType<t_DataType, 1>::t_TypeInt>&"
+                    }
+                ]
             }
         },
         {
@@ -528,9 +743,14 @@
                         "type": "unsigned int"
                     },
                     {
+                        "name": "p_alpha",
+                        "direction": "",
+                        "type": "t_DataType"
+                    },
+                    {
                         "name": "p_x",
                         "direction": "",
-                        "type": "t_DataType p_alpha, hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
+                        "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
                     },
                     {
                         "name": "p_res",
@@ -582,7 +802,7 @@
                     {
                         "name": "p_x",
                         "direction": "",
-                        "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &Res,"
+                        "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
                     },
                     {
                         "name": "p_y",
@@ -592,12 +812,12 @@
                     {
                         "name": "p_xRes",
                         "direction": "",
-                        "type": "Re"
+                        "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
                     },
                     {
                         "name": "p_yRes",
                         "direction": "",
-                        "type": "Re"
+                        "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
                     }
                 ]
             }
@@ -635,7 +855,43 @@
                         "description": "the datatype of the index"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "p_n",
+                        "direction": "",
+                        "type": "const unsigned int"
+                    },
+                    {
+                        "name": "p_alpha",
+                        "direction": "",
+                        "type": "const t_DataType"
+                    },
+                    {
+                        "name": "p_M",
+                        "direction": "",
+                        "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
+                    },
+                    {
+                        "name": "p_x",
+                        "direction": "",
+                        "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
+                    },
+                    {
+                        "name": "p_beta",
+                        "direction": "",
+                        "type": "const t_DataType"
+                    },
+                    {
+                        "name": "p_y",
+                        "direction": "",
+                        "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
+                    },
+                    {
+                        "name": "p_yr",
+                        "direction": "",
+                        "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
+                    }
+                ]
             }
         },
         {
@@ -672,7 +928,48 @@
                         "description": "the datatype of the index"
                     }
                 ],
-                "ports": []
+                "ports": [
+                    {
+                        "name": "p_uplo",
+                        "direction": "",
+                        "type": "const bool"
+                    },
+                    {
+                        "name": "p_n",
+                        "direction": "",
+                        "type": "const unsigned int"
+                    },
+                    {
+                        "name": "p_alpha",
+                        "direction": "",
+                        "type": "const t_DataType"
+                    },
+                    {
+                        "name": "p_M",
+                        "direction": "",
+                        "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
+                    },
+                    {
+                        "name": "p_x",
+                        "direction": "",
+                        "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
+                    },
+                    {
+                        "name": "p_beta",
+                        "direction": "",
+                        "type": "const t_DataType"
+                    },
+                    {
+                        "name": "p_y",
+                        "direction": "",
+                        "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
+                    },
+                    {
+                        "name": "p_yr",
+                        "direction": "",
+                        "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
+                    }
+                ]
             }
         }
     ],

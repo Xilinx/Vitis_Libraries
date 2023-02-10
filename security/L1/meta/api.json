@@ -27,32 +27,32 @@
                     {
                         "name": "adlerStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 32 > > &"
+                        "type": "hls::stream<ap_uint<32> >&"
                     },
                     {
                         "name": "inStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< W *8 > > &"
+                        "type": "hls::stream<ap_uint<W * 8> >&"
                     },
                     {
                         "name": "inLenStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 32 > > &"
+                        "type": "hls::stream<ap_uint<32> >&"
                     },
                     {
                         "name": "endInLenStrm",
                         "direction": "",
-                        "type": "hls::stream< bool > &"
+                        "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "outStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 32 > > &"
+                        "type": "hls::stream<ap_uint<32> >&"
                     },
                     {
-                        "name": "end",
+                        "name": "endOutStrm",
                         "direction": "",
-                        "type": "hls::stream< bool > &"
+                        "type": "hls::stream<bool>&"
                     }
                 ]
             }
@@ -77,42 +77,42 @@
                     {
                         "name": "msg_strm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &"
+                        "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "msg_len_strm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
+                        "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "key_strm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 512 > > &"
+                        "type": "hls::stream<ap_uint<512> >&"
                     },
                     {
                         "name": "key_len_strm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 8 > > &"
+                        "type": "hls::stream<ap_uint<8> >&"
                     },
                     {
                         "name": "out_len_strm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 8 > > &"
+                        "type": "hls::stream<ap_uint<8> >&"
                     },
                     {
                         "name": "end_len_strm",
                         "direction": "",
-                        "type": "hls::stream< bool > &"
+                        "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "digest_strm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 8 *64 > > &"
+                        "type": "hls::stream<ap_uint<8 * 64> >&"
                     },
                     {
                         "name": "end_digest_strm",
                         "direction": "",
-                        "type": ""
+                        "type": "hls::stream<bool>&"
                     }
                 ]
             }
@@ -137,32 +137,32 @@
                     {
                         "name": "plaintextStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &"
+                        "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "endPlaintextStrm",
                         "direction": "",
-                        "type": "hls::stream< bool > &"
+                        "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "cipherkeyStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &"
+                        "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "IVStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &"
+                        "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "ciphertextStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &"
+                        "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "endCiphertextStrm",
                         "direction": "",
-                        "type": "hls::stream< bool > &"
+                        "type": "hls::stream<bool>&"
                     }
                 ]
             }
@@ -187,27 +187,27 @@
                     {
                         "name": "ciphertextStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &"
+                        "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "endCiphertextStrm",
                         "direction": "",
-                        "type": "hls::stream< bool > &"
+                        "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "cipherkeyStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &"
+                        "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "IVStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &"
+                        "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "plaintextStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &"
+                        "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "endPlaintextStrm",
@@ -237,32 +237,32 @@
                     {
                         "name": "plaintextStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
+                        "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "endPlaintextStrm",
                         "direction": "",
-                        "type": "hls::stream< bool > &"
+                        "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "cipherkeyStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
+                        "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "IVStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
+                        "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "ciphertextStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
+                        "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "endCiphertextStrm",
                         "direction": "",
-                        "type": "hls::stream< bool > &"
+                        "type": "hls::stream<bool>&"
                     }
                 ]
             }
@@ -287,22 +287,22 @@
                     {
                         "name": "ciphertextStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
+                        "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "endCiphertextStrm",
                         "direction": "",
-                        "type": "hls::stream< bool > &"
+                        "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "cipherkeyStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
+                        "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "IVStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
+                        "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "plaintextStrm",
@@ -312,7 +312,7 @@
                     {
                         "name": "endPlaintextStrm",
                         "direction": "",
-                        "type": "hls::stream< bool > &"
+                        "type": "hls::stream<bool>&"
                     }
                 ]
             }
@@ -337,32 +337,32 @@
                     {
                         "name": "plaintextStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
+                        "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "endPlaintextStrm",
                         "direction": "",
-                        "type": "hls::stream< bool > &"
+                        "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "cipherkeyStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 192 > > &"
+                        "type": "hls::stream<ap_uint<192> >&"
                     },
                     {
                         "name": "IVStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
+                        "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "ciphertextStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
+                        "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "endCiphertextStrm",
                         "direction": "",
-                        "type": "hls::stream< bool > &"
+                        "type": "hls::stream<bool>&"
                     }
                 ]
             }
@@ -387,32 +387,32 @@
                     {
                         "name": "ciphertextStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
+                        "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "endCiphertextStrm",
                         "direction": "",
-                        "type": "hls::stream< bool > &"
+                        "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "cipherkeyStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 192 > > &"
+                        "type": "hls::stream<ap_uint<192> >&"
                     },
                     {
                         "name": "IVStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
+                        "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "plaintextStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
+                        "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "endPlaintextStrm",
                         "direction": "",
-                        "type": "hls::stream< bool > &"
+                        "type": "hls::stream<bool>&"
                     }
                 ]
             }
@@ -437,32 +437,32 @@
                     {
                         "name": "plaintextStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
+                        "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "endPlaintextStrm",
                         "direction": "",
-                        "type": "hls::stream< bool > &"
+                        "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "cipherkeyStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 256 > > &"
+                        "type": "hls::stream<ap_uint<256> >&"
                     },
                     {
                         "name": "IVStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
+                        "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "ciphertextStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
+                        "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "endCiphertextStrm",
                         "direction": "",
-                        "type": "hls::stream< bool > &"
+                        "type": "hls::stream<bool>&"
                     }
                 ]
             }
@@ -487,32 +487,32 @@
                     {
                         "name": "ciphertextStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
+                        "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "endCiphertextStrm",
                         "direction": "",
-                        "type": "hls::stream< bool > &"
+                        "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "cipherkeyStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 256 > > &"
+                        "type": "hls::stream<ap_uint<256> >&"
                     },
                     {
                         "name": "IVStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
+                        "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "plaintextStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &"
+                        "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "endPlaintextStrm",
                         "direction": "",
-                        "type": "hls::stream< bool > &"
+                        "type": "hls::stream<bool>&"
                     }
                 ]
             }
@@ -568,7 +568,7 @@
                     {
                         "name": "lenADStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &lenPldStrm, hls::stream< bool > &endLenStrm, hls::stream< ap_uint< 128 > > &cipherStrm, hls::stream< ap_uint< 64 > > &lenCphStrm, hls::stream< ap_uint< 8 *_t > > &tagStrm, hls::stream< bool > &endTagStrm"
+                        "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "lenPldStrm",
@@ -654,7 +654,7 @@
                     {
                         "name": "lenADStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &lenPldStrm, hls::stream< bool > &endLenStrm, hls::stream< ap_uint< 128 > > &cipherStrm, hls::stream< ap_uint< 64 > > &lenCphStrm, hls::stream< ap_uint< 8 *_t > > &tagStrm, hls::stream< bool > &endTagStrm"
+                        "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "lenPldStrm",
@@ -740,7 +740,7 @@
                     {
                         "name": "lenADStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &lenPldStrm, hls::stream< bool > &endLenStrm, hls::stream< ap_uint< 128 > > &cipherStrm, hls::stream< ap_uint< 64 > > &lenCphStrm, hls::stream< ap_uint< 8 *_t > > &tagStrm, hls::stream< bool > &endTagStrm"
+                        "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "lenPldStrm",
@@ -826,7 +826,7 @@
                     {
                         "name": "lenADStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &lenPldStrm, hls::stream< bool > &endLenStrm, hls::stream< ap_uint< 128 > > &cipherStrm, hls::stream< ap_uint< 64 > > &lenCphStrm, hls::stream< ap_uint< 8 *_t > > &tagStrm, hls::stream< bool > &endTagStrm"
+                        "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "lenPldStrm",
@@ -912,7 +912,7 @@
                     {
                         "name": "lenADStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &lenPldStrm, hls::stream< bool > &endLenStrm, hls::stream< ap_uint< 128 > > &cipherStrm, hls::stream< ap_uint< 64 > > &lenCphStrm, hls::stream< ap_uint< 8 *_t > > &tagStrm, hls::stream< bool > &endTagStrm"
+                        "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "lenPldStrm",
@@ -998,7 +998,7 @@
                     {
                         "name": "lenADStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &lenPldStrm, hls::stream< bool > &endLenStrm, hls::stream< ap_uint< 128 > > &cipherStrm, hls::stream< ap_uint< 64 > > &lenCphStrm, hls::stream< ap_uint< 8 *_t > > &tagStrm, hls::stream< bool > &endTagStrm"
+                        "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "lenPldStrm",
@@ -2258,12 +2258,12 @@
                     {
                         "name": "counterNonceStm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &counterNonceStrm, hls::stream< ap_uint< 512 > > &plainStrm, hls::stream< bool > &ePlainStrm, hls::stream< ap_uint< 512 > > &cipherStrm, hls::stream< bool > &eCipherStrm"
+                        "type": "hls::stream<ap_uint<128> >&"
                     },
                     {
                         "name": "plainStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &counterNonceStrm, hls::stream< ap_uint< 512 > > &"
+                        "type": "hls::stream< ap_uint< 512 > > &"
                     },
                     {
                         "name": "ePlainStrm",
@@ -2308,12 +2308,12 @@
                     {
                         "name": "nonceStm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 192 > > &nonceStrm, hls::stream< ap_uint< 512 > > &plainStrm, hls::stream< bool > &ePlainStrm, hls::stream< ap_uint< 512 > > &cipherStrm, hls::stream< bool > &eCipherStrm"
+                        "type": "hls::stream<ap_uint<192> >&"
                     },
                     {
                         "name": "plainStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 192 > > &nonceStrm, hls::stream< ap_uint< 512 > > &"
+                        "type": "hls::stream<ap_uint<512> >&"
                     },
                     {
                         "name": "ePlainStrm",
@@ -2765,17 +2765,17 @@
                     {
                         "name": "in",
                         "direction": "",
-                        "type": "ap_u"
+                        "type": "ap_uint<64>"
                     },
                     {
                         "name": "key",
                         "direction": "",
-                        "type": "t< 64 > &out"
+                        "type": "ap_uint<64>"
                     },
                     {
                         "name": "out",
                         "direction": "",
-                        "type": "t< 64 > &"
+                        "type": "ap_uint<64>&"
                     }
                 ]
             }
@@ -2800,17 +2800,17 @@
                     {
                         "name": "in",
                         "direction": "",
-                        "type": "ap_u"
+                        "type": "ap_uint<64>"
                     },
                     {
                         "name": "cipherKey",
                         "direction": "",
-                        "type": "t< 64 > &out"
+                        "type": "ap_uint<64>"
                     },
                     {
                         "name": "out",
                         "direction": "",
-                        "type": "t< 64 > &"
+                        "type": "ap_uint<64>&"
                     }
                 ]
             }
@@ -2835,27 +2835,27 @@
                     {
                         "name": "in",
                         "direction": "",
-                        "type": "ap_u"
+                        "type": "ap_uint<64>"
                     },
                     {
                         "name": "key1",
                         "direction": "",
-                        "type": "t< 64 > &out"
+                        "type": "ap_uint<64>"
                     },
                     {
                         "name": "key2",
                         "direction": "",
-                        "type": "t< 64 > &out"
+                        "type": "ap_uint<64>"
                     },
                     {
                         "name": "key3",
                         "direction": "",
-                        "type": "t< 64 > &out"
+                        "type": "ap_uint<64>"
                     },
                     {
                         "name": "out",
                         "direction": "",
-                        "type": "t< 64 > &"
+                        "type": "ap_uint<64>&"
                     }
                 ]
             }
@@ -2880,27 +2880,27 @@
                     {
                         "name": "in",
                         "direction": "",
-                        "type": "ap_u"
+                        "type": "ap_uint<64>"
                     },
                     {
                         "name": "key1",
                         "direction": "",
-                        "type": "t< 64 > &out"
+                        "type": "ap_uint<64>"
                     },
                     {
                         "name": "key2",
                         "direction": "",
-                        "type": "t< 64 > &out"
+                        "type": "ap_uint<64>"
                     },
                     {
                         "name": "key3",
                         "direction": "",
-                        "type": "t< 64 > &out"
+                        "type": "ap_uint<64>"
                     },
                     {
                         "name": "out",
                         "direction": "",
-                        "type": "t< 64 > &"
+                        "type": "ap_uint<64>&"
                     }
                 ]
             }
@@ -3330,17 +3330,17 @@
                     {
                         "name": "r",
                         "direction": "",
-                        "type": "ap_uint< 256 >"
+                        "type": "ap_uint<256>"
                     },
                     {
                         "name": "s",
                         "direction": "",
-                        "type": "ap_uint< 256 >h,"
+                        "type": "ap_uint<256>"
                     },
                     {
                         "name": "hash",
                         "direction": "",
-                        "type": "ap_uint< 256 > Px, ap_uint< 256 > P"
+                        "type": "ap_uint<256>"
                     },
                     {
                         "name": "Px",
@@ -3395,7 +3395,7 @@
                     {
                         "name": "lenAADStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &lenPldStrm, hls::stream< bool > &endLenStrm, hls::stream< ap_uint< 128 > > &cipherStrm, hls::stream< ap_uint< 64 > > &lenCphStrm, hls::stream< ap_uint< 128 > > &tagStrm, hls::stream< bool > &endTagStrm"
+                        "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "lenPldStrm",
@@ -3470,7 +3470,7 @@
                     {
                         "name": "lenAADStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &lenPldStrm, hls::stream< bool > &endLenStrm, hls::stream< ap_uint< 128 > > &cipherStrm, hls::stream< ap_uint< 64 > > &lenCphStrm, hls::stream< ap_uint< 128 > > &tagStrm, hls::stream< bool > &endTagStrm"
+                        "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "lenPldStrm",
@@ -3545,7 +3545,7 @@
                     {
                         "name": "lenAADStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &lenPldStrm, hls::stream< bool > &endLenStrm, hls::stream< ap_uint< 128 > > &cipherStrm, hls::stream< ap_uint< 64 > > &lenCphStrm, hls::stream< ap_uint< 128 > > &tagStrm, hls::stream< bool > &endTagStrm"
+                        "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "lenPldStrm",
@@ -3620,7 +3620,7 @@
                     {
                         "name": "lenAADStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &lenPldStrm, hls::stream< bool > &endLenStrm, hls::stream< ap_uint< 128 > > &cipherStrm, hls::stream< ap_uint< 64 > > &lenCphStrm, hls::stream< ap_uint< 128 > > &tagStrm, hls::stream< bool > &endTagStrm"
+                        "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "lenPldStrm",
@@ -3695,7 +3695,7 @@
                     {
                         "name": "lenAADStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &lenPldStrm, hls::stream< bool > &endLenStrm, hls::stream< ap_uint< 128 > > &cipherStrm, hls::stream< ap_uint< 64 > > &lenCphStrm, hls::stream< ap_uint< 128 > > &tagStrm, hls::stream< bool > &endTagStrm"
+                        "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "lenPldStrm",
@@ -3770,7 +3770,7 @@
                     {
                         "name": "lenAADStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 64 > > &lenPldStrm, hls::stream< bool > &endLenStrm, hls::stream< ap_uint< 128 > > &cipherStrm, hls::stream< ap_uint< 64 > > &lenCphStrm, hls::stream< ap_uint< 128 > > &tagStrm, hls::stream< bool > &endTagStrm"
+                        "type": "hls::stream<ap_uint<64> >&"
                     },
                     {
                         "name": "lenPldStrm",
@@ -4096,7 +4096,7 @@
                     {
                         "name": "end_len_strm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &digest_strm, hls::stream< bool > &end_digest_strm"
+                        "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "digest_strm",
@@ -4141,7 +4141,7 @@
                     {
                         "name": "end_len_strm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 128 > > &digest_strm, hls::stream< bool > &end_digest_strm"
+                        "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "digest_strm",
@@ -4682,22 +4682,22 @@
                     {
                         "name": "plaintStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 8 > > &plainStream, hls::stream< bool > &ePlainStream, hls::stream< ap_uint< 8 > > &cipherStream, hls::stream< bool > &eCipherStream"
+                        "type": "hls::stream<ap_uint<8> >&"
                     },
                     {
                         "name": "ePlaintStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 8 > > &plainStream, hls::stream< bool > &ePlainStream, hls::stream< ap_uint< 8 > > &cipherStream, hls::stream< bool > &eCipherStream"
+                        "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "cipherStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 8 > > &plainStream, hls::stream< bool > &ePlainStream, hls::stream< ap_uint< 8 > > &cipherStream, hls::stream< bool > &eCipherStream"
+                        "type": "hls::stream<ap_uint<8> >&"
                     },
                     {
                         "name": "eCipherStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 8 > > &plainStream, hls::stream< bool > &ePlainStream, hls::stream< ap_uint< 8 > > &cipherStream, hls::stream< bool > &eCipherStream"
+                        "type": "hls::stream<bool>&"
                     }
                 ]
             }
@@ -4718,7 +4718,33 @@
                 ],
                 "instance": "function",
                 "parameters": [],
-                "ports": []
+                "ports": [
+                    {
+			"name": "inStrm",
+			"direction": "",
+			"type": "hls::stream<ap_uint<32> >&"
+		    },
+		    {
+			"name": "inLenStrm",
+			"direction": "",
+			"type": "hls::stream<ap_uint<64> >&"
+		    },
+		    {
+			"name": "endInLenStrm",
+			"direction": "",
+                        "type": "hls::stream<bool>&"
+		    },
+		    {
+			"name": "outStrm",
+			"direction": "",
+			"type": "hls::stream<ap_uint<160> >&"
+		    },
+		    {
+			"name": "endOutStrm",
+			"direction": "",
+			"type": "hls::stream<bool>&"
+		    }
+		]
             }
         },
         {
@@ -4757,7 +4783,7 @@
                     {
                         "name": "end_len_strm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 5 *w > > &digest_strm, hls::stream< bool > &end_digest_strm"
+                        "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "digest_strm",
@@ -4767,7 +4793,7 @@
                     {
                         "name": "end_digest_strm",
                         "direction": "",
-                        "type": ""
+                        "type": "hls::stream<bool>&"
                     }
                 ]
             }
@@ -4808,7 +4834,7 @@
                     {
                         "name": "end_len_strm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 224 > > &hash_strm, hls::stream< bool > &end_hash_strm"
+                        "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "hash_strm",
@@ -4818,7 +4844,7 @@
                     {
                         "name": "end_hash_strm",
                         "direction": "",
-                        "type": ""
+                        "type": "hls::stream<bool>&"
                     }
                 ]
             }
@@ -4859,7 +4885,7 @@
                     {
                         "name": "end_len_strm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 256 > > &hash_strm, hls::stream< bool > &end_hash_strm"
+                        "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "hash_strm",
@@ -4869,7 +4895,7 @@
                     {
                         "name": "end_hash_strm",
                         "direction": "",
-                        "type": ""
+                        "type": "hls::stream<bool>&"
                     }
                 ]
             }
@@ -5180,7 +5206,7 @@
                     {
                         "name": "end_len_strm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 384 > > &digest_strm, hls::stream< bool > &end_digest_strm"
+                        "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "digest_strm",
@@ -5190,7 +5216,7 @@
                     {
                         "name": "end_digest_strm",
                         "direction": "",
-                        "type": ""
+                        "type": "hls::stream<bool>&"
                     }
                 ]
             }
@@ -5231,7 +5257,7 @@
                     {
                         "name": "end_len_strm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< 512 > > &digest_strm, hls::stream< bool > &end_digest_strm"
+                        "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "digest_strm",
@@ -5287,7 +5313,7 @@
                     {
                         "name": "end_len_strm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< t > > &digest_strm, hls::stream< bool > &end_digest_strm"
+                        "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "digest_strm",
@@ -5378,37 +5404,37 @@
                     {
                         "name": "g",
                         "direction": "",
-                        "type": "ap_uint< L >"
+                        "type": "ap_uint<L>"
                     },
                     {
                         "name": "l",
                         "direction": "",
-                        "type": "ap_uint< L >us,"
+                        "type": "ap_uint<L>"
                     },
                     {
                         "name": "modulus",
                         "direction": "",
-                        "type": "ap_uint< L > r2Mod, ap_uint< N > t, ap_uint< L > &y, ap_uint< L > &p"
+                        "type": "ap_uint<L>"
                     },
                     {
                         "name": "r2Mod",
                         "direction": "",
-                        "type": "ap_uint< L >"
+                        "type": "ap_uint<L>"
                     },
                     {
                         "name": "t",
                         "direction": "",
-                        "type": "ap_uin"
+                        "type": "ap_uint<N>"
                     },
                     {
                         "name": "y",
                         "direction": "",
-                        "type": "< L > &p"
+                        "type": "ap_uint<L>&"
                     },
                     {
                         "name": "pi",
                         "direction": "",
-                        "type": "< L > &p"
+                        "type": "ap_uint<L>&"
                     }
                 ]
             }
@@ -5444,42 +5470,42 @@
                     {
                         "name": "g",
                         "direction": "",
-                        "type": "ap_uint< L >"
+                        "type": "ap_uint<L>"
                     },
                     {
                         "name": "l",
                         "direction": "",
-                        "type": "ap_uint< L >us,"
+                        "type": "ap_uint<L>"
                     },
                     {
                         "name": "modulus",
                         "direction": "",
-                        "type": "ap_uint< L > r2Mod, ap_uint< L > tMod, ap_uint< N > t, ap_uint< L > y, ap_uint< L > &p"
+                        "type": "ap_uint<L>"
                     },
                     {
                         "name": "r2Mod",
                         "direction": "",
-                        "type": "ap_uint< L >"
+                        "type": "ap_uint<L>"
                     },
                     {
                         "name": "tMod",
                         "direction": "",
-                        "type": "ap_uint< L >"
+                        "type": "ap_uint<L>"
                     },
                     {
                         "name": "t",
                         "direction": "",
-                        "type": "ap_uin"
+                        "type": "ap_uint<N>"
                     },
                     {
                         "name": "y",
                         "direction": "",
-                        "type": "< L > &p"
+                        "type": "ap_uint<L>"
                     },
                     {
                         "name": "pi",
                         "direction": "",
-                        "type": "< L > &p"
+                        "type": "ap_uint<L>&"
                     }
                 ]
             }

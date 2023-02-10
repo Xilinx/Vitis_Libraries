@@ -129,12 +129,12 @@
                     {
                         "name": "inMatrix",
                         "direction": "",
-                        "type": "DT[N][M],"
+                        "type": "DT[N][M]"
                     },
                     {
                         "name": "outCovMatrix",
                         "direction": "",
-                        "type": "DT"
+                        "type": "DT[N][N]"
                     }
                 ]
             }
@@ -200,12 +200,12 @@
                     {
                         "name": "inMatStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< DTLEN *TI > > &"
+                        "type": "hls::stream<ap_uint<DTLEN * TI> >&"
                     },
                     {
                         "name": "outCovStrm",
                         "direction": "",
-                        "type": "hls::stream< ap_uint< DTLEN *TO > > &"
+                        "type": "hls::stream<ap_uint<DTLEN * TO> >&"
                     }
                 ]
             }
@@ -236,22 +236,22 @@
                     {
                         "name": "n",
                         "direction": "",
-                        "type": "iMatStrm,"
+                        "type": "int"
                     },
                     {
                         "name": "threshold",
                         "direction": "",
-                        "type": "hls::stream< DT > &outMatStr"
+                        "type": "DT"
                     },
                     {
                         "name": "inMatStrm",
                         "direction": "",
-                        "type": "hls::stream< DT > &outMatStr"
+                        "type": "hls::stream<DT>&"
                     },
                     {
                         "name": "outMatStrm",
                         "direction": "",
-                        "type": "hls::stream< DT > &outMatStr"
+                        "type": "hls::stream<DT>&"
                     }
                 ]
             }
@@ -282,22 +282,22 @@
                     {
                         "name": "n",
                         "direction": "",
-                        "type": "iMatStrm,"
+                        "type": "int"
                     },
                     {
                         "name": "threshold",
                         "direction": "",
-                        "type": "hls::stream< DT > &outMatStr"
+                        "type": "DT"
                     },
                     {
                         "name": "inMatStrm",
                         "direction": "",
-                        "type": "hls::stream< DT > &outMatStr"
+                        "type": "hls::stream<DT>&"
                     },
                     {
                         "name": "outMatStrm",
                         "direction": "",
-                        "type": "hls::stream< DT > &outMatStr"
+                        "type": "hls::stream<DT>&"
                     }
                 ]
             }
@@ -328,22 +328,22 @@
                     {
                         "name": "n",
                         "direction": "",
-                        "type": "iMatStrm,"
+                        "type": "int"
                     },
                     {
                         "name": "k",
                         "direction": "",
-                        "type": "hls::stream< DT > &outMatStr"
+                        "type": "int"
                     },
                     {
                         "name": "inMatStrm",
                         "direction": "",
-                        "type": "hls::stream< DT > &outMatStr"
+                        "type": "hls::stream< DT > &inMatStrm"
                     },
                     {
                         "name": "outMatStrm",
                         "direction": "",
-                        "type": "hls::stream< DT > &outMatStr"
+                        "type": "hls::stream< DT > &outMatStrm"
                     }
                 ]
             }
@@ -374,27 +374,27 @@
                     {
                         "name": "n",
                         "direction": "",
-                        "type": "iMatStrm,"
+                        "type": "int"
                     },
                     {
                         "name": "l",
                         "direction": "",
-                        "type": "h"
+                        "type": "int"
                     },
                     {
                         "name": "h",
                         "direction": "",
-                        "type": "s::stream< DT > &outMatStr"
+                        "type": "DT"
                     },
                     {
                         "name": "inMatStrm",
                         "direction": "",
-                        "type": "s::stream< DT > &outMatStr"
+                        "type": "hls::stream<DT>&"
                     },
                     {
                         "name": "outMatStrm",
                         "direction": "",
-                        "type": "s::stream< DT > &outMatStr"
+                        "type": "hls::stream<DT>&"
                     }
                 ]
             }
@@ -481,7 +481,7 @@
                     {
                         "name": "dataV_out2",
                         "direction": "",
-                        "type": "dataType"
+                        "type": "dataType[diagSize][diagSize]"
                     }
                 ]
             }
@@ -522,12 +522,12 @@
                     {
                         "name": "arrX",
                         "direction": "",
-                        "type": "DT *"
+                        "type": "DT*"
                     },
                     {
                         "name": "arrY",
                         "direction": "",
-                        "type": "DT *"
+                        "type": "DT*"
                     }
                 ]
             }
@@ -593,37 +593,37 @@
                     {
                         "name": "timeSteps",
                         "direction": "",
-                        "type": "ap_uint< 16 >"
+                        "type": "ap_uint<16>"
                     },
                     {
                         "name": "maxSamples",
                         "direction": "",
-                        "type": "ap_uint< 27 >"
+                        "type": "ap_uint<27>"
                     },
                     {
                         "name": "requiredTolerance",
                         "direction": "",
-                        "type": "ap_uint< 27 > requiredSamples, DT"
+                        "type": "DT"
                     },
                     {
                         "name": "requiredSamples",
                         "direction": "",
-                        "type": "PathGeneratorT pathGenInst[UN][1], PathPricerT pathPriInst[UN][1], RNGSeqT rngSeqInst[UN][1]"
+                        "type": "ap_uint<27>"
                     },
                     {
                         "name": "pathGenInst",
                         "direction": "",
-                        "type": "PathGeneratorT[UN][1],"
+                        "type": "PathGeneratorT[UN][1]"
                     },
                     {
                         "name": "pathPriInst",
                         "direction": "",
-                        "type": "PathPricerT[UN][1],"
+                        "type": "PathPricerT[UN][1]"
                     },
                     {
                         "name": "rngSeqInst",
                         "direction": "",
-                        "type": "RNGSeqT"
+                        "type": "RNGSeqT[UN][1]"
                     }
                 ]
             }
@@ -910,37 +910,37 @@
                     {
                         "name": "c",
                         "direction": "",
-                        "type": "T a[P_SIZE], T b[P_SIZE], T[P_SIZE],"
+                        "type": "T[P_SIZE]"
                     },
                     {
                         "name": "b",
                         "direction": "",
-                        "type": "T d[P_SIZE], T e[P_SIZE], T v[P_SIZE], T u[P_SIZE"
+                        "type": "T[P_SIZE]"
                     },
                     {
                         "name": "a",
                         "direction": "",
-                        "type": "T d[P_SIZE], T e[P_SIZE], T v[P_SIZE], T u[P_SIZE"
+                        "type": "T[P_SIZE]"
                     },
                     {
                         "name": "d",
                         "direction": "",
-                        "type": "T[P_SIZE],"
+                        "type": "T[P_SIZE]"
                     },
                     {
                         "name": "e",
                         "direction": "",
-                        "type": "T[P_SIZE],"
+                        "type": "T[P_SIZE]"
                     },
                     {
                         "name": "v",
                         "direction": "",
-                        "type": "T[P_SIZE],"
+                        "type": "T[P_SIZE]"
                     },
                     {
                         "name": "u",
                         "direction": "",
-                        "type": "T"
+                        "type": "T[P_SIZE]"
                     }
                 ]
             }
@@ -1018,10 +1018,10 @@
             }
         },
         {
-            "api_name": "xf::fech::poissonICDF",
+            "api_name": "xf::fintech::poissonICDF",
             "spec": {
                 "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::fech::poissonICDF",
+                "api_name": "xf::fintech::poissonICDF",
                 "display_name": "poissonICDF",
                 "brief": "poissonICDF it implement a inverse cumulative distribution function for poisson distribution",
                 "target_domain": "",
@@ -1089,12 +1089,12 @@
                     {
                         "name": "evalX",
                         "direction": "",
-                        "type": "const DT[MAX_WIDTH],"
+                        "type": "const DT[MAX_WIDTH]"
                     },
                     {
                         "name": "evalPoints",
                         "direction": "",
-                        "type": "const DT[MAX_WIDTH],"
+                        "type": "const DT[MAX_WIDTH]"
                     },
                     {
                         "name": "sizeEval",
@@ -1104,7 +1104,7 @@
                     {
                         "name": "coefficients",
                         "direction": "",
-                        "type": "DT"
+                        "type": "DT[D]"
                     }
                 ]
             }
@@ -1140,7 +1140,7 @@
                     {
                         "name": "coeff",
                         "direction": "",
-                        "type": "const DT[D],"
+                        "type": "const DT[D]"
                     },
                     {
                         "name": "x",
@@ -1181,12 +1181,12 @@
                     {
                         "name": "pf",
                         "direction": "",
-                        "type": "DTInt[D+1],"
+                        "type": "DT[D]"
                     },
                     {
                         "name": "pfInt",
                         "direction": "",
-                        "type": "DT c=0."
+                        "type": "DT[D + 1]"
                     },
                     {
                         "name": "c",
@@ -1238,85 +1238,10 @@
             }
         },
         {
-            "api_name": "xf::fintech::stack_init",
+            "api_name": "xf::fintech::trap_integrate",
             "spec": {
                 "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::fintech::stack_init",
-                "display_name": "stack_init",
-                "brief": "",
-                "target_domain": "",
-                "header_file_name": [
-                    "quadrature.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/xf_fintech"
-                ],
-                "instance": "function",
-                "parameters": [
-                    {
-                        "name": "DT",
-                        "type": "typename",
-                        "description": "data type supported include float and double"
-                    }
-                ],
-                "ports": []
-            }
-        },
-        {
-            "api_name": "xf::fech::stack_push",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::fech::stack_push",
-                "display_name": "stack_push",
-                "brief": "",
-                "target_domain": "",
-                "header_file_name": [
-                    "quadrature.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/xf_fintech"
-                ],
-                "instance": "function",
-                "parameters": [
-                    {
-                        "name": "DT",
-                        "type": "typename",
-                        "description": "data type supported include float and double"
-                    }
-                ],
-                "ports": []
-            }
-        },
-        {
-            "api_name": "xf::fech::stack_pop",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::fech::stack_pop",
-                "display_name": "stack_pop",
-                "brief": "",
-                "target_domain": "",
-                "header_file_name": [
-                    "quadrature.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/xf_fintech"
-                ],
-                "instance": "function",
-                "parameters": [
-                    {
-                        "name": "DT",
-                        "type": "typename",
-                        "description": "data type supported include float and double"
-                    }
-                ],
-                "ports": []
-            }
-        },
-        {
-            "api_name": "xf::fech::trap_egrate",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::fech::trap_egrate",
+                "api_name": "xf::fintech::trap_egrate",
                 "display_name": "trap_integrate",
                 "brief": "integration function using the adaptive trapezoidal technique",
                 "target_domain": "",
@@ -1353,46 +1278,21 @@
                     {
                         "name": "res",
                         "direction": "",
-                        "type": "DT *"
+                        "type": "DT*"
                     },
                     {
                         "name": "p",
                         "direction": "",
-                        "type": "XF_USER_DATA_TYPE *"
+                        "type": "XF_USER_DATA_TYPE*"
                     }
                 ]
             }
         },
         {
-            "api_name": "xf::fintech::simp_elem",
+            "api_name": "xf::fintech::simp_integrate",
             "spec": {
                 "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::fintech::simp_elem",
-                "display_name": "simp_elem",
-                "brief": "",
-                "target_domain": "",
-                "header_file_name": [
-                    "quadrature.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/xf_fintech"
-                ],
-                "instance": "function",
-                "parameters": [
-                    {
-                        "name": "DT",
-                        "type": "typename",
-                        "description": "data type supported include float and double"
-                    }
-                ],
-                "ports": []
-            }
-        },
-        {
-            "api_name": "xf::fech::simp_egrate",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::fech::simp_egrate",
+                "api_name": "xf::fintech::simp_egrate",
                 "display_name": "simp_integrate",
                 "brief": "integration function using the adaptive simpson 1/3 technique",
                 "target_domain": "",
@@ -1429,21 +1329,21 @@
                     {
                         "name": "res",
                         "direction": "",
-                        "type": "DT *"
+                        "type": "DT*"
                     },
                     {
                         "name": "p",
                         "direction": "",
-                        "type": "XF_USER_DATA_TYPE *"
+                        "type": "XF_USER_DATA_TYPE*"
                     }
                 ]
             }
         },
         {
-            "api_name": "xf::fech::romberg_egrate",
+            "api_name": "xf::fintech::romberg_integrate",
             "spec": {
                 "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "xf::fech::romberg_egrate",
+                "api_name": "xf::fintech::romberg_egrate",
                 "display_name": "romberg_integrate",
                 "brief": "integration function using the romberg technique Based on",
                 "target_domain": "",
@@ -1480,12 +1380,12 @@
                     {
                         "name": "res",
                         "direction": "",
-                        "type": "DT *"
+                        "type": "DT*"
                     },
                     {
                         "name": "p",
                         "direction": "",
-                        "type": "XF_USER_DATA_TYPE *"
+                        "type": "XF_USER_DATA_TYPE*"
                     }
                 ]
             }
@@ -1526,12 +1426,12 @@
                     {
                         "name": "z1",
                         "direction": "",
-                        "type": "mType &"
+                        "type": "mType&"
                     },
                     {
                         "name": "z2",
                         "direction": "",
-                        "type": "mType &"
+                        "type": "mType&"
                     }
                 ]
             }
@@ -1639,22 +1539,22 @@
                     {
                         "name": "inlow",
                         "direction": "",
-                        "type": "T[N],"
+                        "type": "T[N]"
                     },
                     {
                         "name": "indiag",
                         "direction": "",
-                        "type": "T[N],"
+                        "type": "T[N]"
                     },
                     {
                         "name": "inup",
                         "direction": "",
-                        "type": "T[N],"
+                        "type": "T[N]"
                     },
                     {
                         "name": "inrhs",
                         "direction": "",
-                        "type": "T"
+                        "type": "T[N]"
                     }
                 ]
             }
