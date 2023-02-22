@@ -138,7 +138,7 @@ output of the SSR FFT. Following is the recommended ﬂow for working with 1-D S
 
 Start With Floating Point Model
 -------------------------------
-Currently, 1-D SSR FFT can be used with ap_fxied<>, ﬂoat, and double types. The following table list
+Currently, 1-D SSR FFT can be used with ap_fixed<>, ﬂoat, and double types. The following table list
 the support for synthesis and simulation.
 
 +------------------------------+---------------------------+----------------------------+
