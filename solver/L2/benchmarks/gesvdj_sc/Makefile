@@ -86,9 +86,10 @@ CXXFLAGS += -DXILINX_SC_PFM_EXT=$(XILINX_SC_PFM_EXT)
 endif
 ifeq ($(HOST_ARCH), x86)
 CXXFLAGS += -I $(XILINX_VITIS)/system_compiler/include -I $(XILINX_HLS)/include 
-LDFLAGS += -L$(XILINX_XRT)/lib -L$(XILINX_VITIS)/system_compiler/lib/x86 -lvpp_acc -l$(LIB_XRT) -lxrt_coreutil  -Wl,-rpath=$(XILINX_VITIS)/system_compiler/lib/x86:$(XILINX_XRT)/lib:$(GCC_HOME)/lib64  -Wl,--enable-new-dtags -lpthread 
+LDFLAGS += 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --temp_dir $(TEMP_DIR) --save-temps -g -I $(XILINX_VITIS)/system_compiler/include 
 VPP_LDFLAGS += --optimize 2 -R 2 
+LDFLAGS += -L$(XILINX_XRT)/lib -L$(SYS_COMP_LIB) -lvpp_acc -l$(LIB_XRT) -lxrt_coreutil  -Wl,-rpath=$(SYS_COMP_LIB):$(XILINX_XRT)/lib:$(GCC_HOME)/lib64  -Wl,--enable-new-dtags -lpthread
 else ifeq ($(HOST_ARCH), aarch64)
 CXXFLAGS += 
 LDFLAGS += 
@@ -122,6 +123,13 @@ endif
 HOST_SRCS += $(CUR_DIR)/host/main.cpp 
 CXXFLAGS +=  -I $(XFLIB_DIR)/ext/MatrixGen -I $(XFLIB_DIR)/../utils/L1/include -I $(CUR_DIR)/kernel -I $(CUR_DIR)/host -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2
 LDFLAGS += -L $(XILINX_HLS)/lnx64/lib/csim -lhlsmc++-GCC46 -L $(XILINX_HLS)/lnx64/tools/fpo_v7_1 -lIp_floating_point_v7_1_bitacc_cmodel -lgmp -Wl,-rpath=$(XILINX_HLS)/lnx64/lib/csim:$(XILINX_HLS)/lnx64/tools/fpo_v7_1
+
+# workaround for opencv
+ifeq (,$(findstring opencv,$(CXXFLAGS)))
+CXXFLAGS += $(XRT_CXXFLAGS)
+VPP_FLAGS += $(XRT_CXXFLAGS)
+VPP_LDFLAGS += $(XRT_CXXFLAGS)
+endif
 
 EXE_NAME := host.exe
 REL_HOST_SRCS := $(shell realpath --relative-to $(CUR_DIR) $(HOST_SRCS))

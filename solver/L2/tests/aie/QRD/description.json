@@ -2,13 +2,13 @@
     "name": "Xilinx QRD Test",
     "description": "QR Decomposition on AIE",
     "flow": "versal",
-    "platform_whitelist": [
+    "platform_allowlist": [
         "vck190"
     ],
     "data": [
         "PROJECT/data"
     ],
-    "platform_blacklist": [],
+    "platform_blocklist": [],
     "platform_properties": {
         "vck190": {
             "v++": {
