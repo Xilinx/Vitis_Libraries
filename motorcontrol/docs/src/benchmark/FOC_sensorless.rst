@@ -1,0 +1,229 @@
+.. 
+   Copyright 2022 Xilinx, Inc.
+  
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+  
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+.. _l1_manual_ip_foc_senser:
+
+=============================================
+Sensorless field-orientated control (FOC)
+=============================================
+
+Sensorless field-orientated control(FOC) example resides in ``L1/tests/IP_FOC_sensorless`` directory. The tutorial provides a step-by-step guide that covers commands for building and running IP.
+
+Executable Usage
+==================
+
+* **Work Directory(Step 1)**
+
+The steps for library download and environment setup can be found in :ref:`l2_vitis_motorcontrol`. For getting the design,
+
+.. code-block:: bash
+
+   cd L1/tests/IP_FOC_sensorless
+
+* **Run and Build IP(Step 2)**
+
+Run the following make command to build your IP targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
+
+.. code-block:: bash
+
+   make run CSIM=1 CSYNTH=1 COSIM=1 XPART=xc7z010-clg400-1
+
+Command will create IP*sim.project for simulation
+
+.. code-block:: bash
+
+   make run VIVADO_SYN=1 VIVADO_IMPL=1 XPART=xc7z010-clg400-1
+
+Command will create IP.project for export IP
+
+Note: Default arguments are set in run_hls.tcl
+
+* **Example output(Step 2)** 
+
+.. code-block:: bash
+
+   SIM_FOC_M:********** Simulation parameters ************* Motor parameter ******************** Log files***************************************
+   SIM_FOC_M:  Timescale  :      0 (us)    |  motor.w     : 716.1515       (rad/s) |  Log of parameters : sim_torqueWithoutSpeed.para.foc
+   SIM_FOC_M:  Total step : 300000         |  motor.theta :  4.984830      (rad)   |  Log of FOC inputs : sim_torqueWithoutSpeed.in.foc
+   SIM_FOC_M:  Total time : 0.030000 (s)   |  motor.Id    : 0.342486       ( A )   |  Log of FOC outputs: sim_torqueWithoutSpeed.out.foc
+   SIM_FOC_M:  Inteval    :    300         |  motor.Iq    : 1.253088       ( A )
+   SIM_FOC_M:  FOC MODE   : MOD_TORQUE_WITHOUT_SPEED
+   SIM_FOC_M:  FOC CPR    :   1000         |  FOC PPR:      2
+   SIM_FOC_M:************ PID Final Status *********
+   SIM_FOC_M:  SPEED SP   : 10000.0        |  FLUX SP: 0.0000                      |  TORQUE SP: 4.8000            |  FW SP: --
+   SIM_FOC_M:  SPEED KP   : 2.7000         |  FLUX KP: 1.0000                      |  TORQUE KP: 5.0000            |  FW KP: --
+   SIM_FOC_M:  SPEED KI   : 0.0033         |  FLUX KI: 0.0000                      |  TORQUE KI: 0.0033            |  FW KI: --
+   SIM_FOC_M:  SPEED ERR  : 3085.000       |  FLUX ERR:  -0.320                    |  TORQUE ERR:  3.5391  |  FW ERR: --
+   SIM_FOC_M:  SPEED ACC  : -1.000 |  FLUX ACC: -17205.031                 |  TORQUE ACC: 11541.7383       |  FW ACC: --
+   SIM_FOC_M:************************************************************************************************************************************
+
+   ...
+
+
+Note: The current test is a hybrid test of the 8 modes run serially. Each mode's simulation parameter and Motor parameter is shown up. For example: 
+
+   * title of "simulation parameters" shows the setting for simulation. The first 300000 test steps use MOD_SPEED_WITH_TORQUE, Speed setpoint is 10000, as we could check the "motor parameter" motor.w=1023.9831 (rad/s) is near the setting rpm 10000. (RPM = motor.w * 60 / (2 * pi) ).
+
+   * title of "log files" shows the log files generate for this 300000 steps. They will be used as input and golden files for the file flow test, which better simulate the actual running. Then still apply MOD_SPEED_WITH_TORQUE for the next 300000 steps, Speed setpoint is 16000.
+
+Now we firstly run Model Based Sim to get the input and output of FOC with Motor module, and save them to files. This sim will restart the FOC ip for every input.
+
+Then we run File Based Sim to simulate the actually status when FOC IP is running. Benchmark system is shown by Figure 1:
+
+Figure 1 : Benchmark system of field-orientated control(FOC)
+
+.. image:: /images/foc_test.png
+   :alt: Benchmark system of FOC
+   :width: 70%
+   :align: center
+
+Motor speed in 8 modes in simulation is shown by Figure 2:
+
+Figure 2 : Motor speed in 8 modes in simulation
+
+.. image:: /images/foc_8_modes.png
+   :alt: Motor speed in 8 modes in simulation
+   :width: 70%
+   :align: center
+
+The Motor Model parameters by default simulation and Derived Motor Configuration is setting in the commen.hpp and is shown by table 1 and table 2:
+
+Table 1 : Motor Model parameters by default
+
+.. image:: /images/Motor_parameters.png
+   :alt: Motor parameters
+   :width: 40%
+   :align: center
+
+Table 2 : Derived Motor Configuration
+
+.. image:: /images/Derived_Motor_Configuration.png
+   :alt: Derived Motor Configuration
+   :width: 40%
+   :align: center
+
+* Important: Change the sine and cosine tables in the file foc.h accordingly when changing this CPR(COMM_MACRO_CPR) in the commen.hpp .
+
+File Based Simulation of FOC IP's result is shown blow.
+
+.. code-block:: bash
+
+   SIM_FOC_F:****Loading parameters and input from files ************************************************************************************
+   SIM_FOC_F:  parameters file is sim_torqueWithoutSpeed.para.foc, format: 
+   SIM_FOC_F:  FOC inputs file is sim_torqueWithoutSpeed.in.foc, format: <float va> <float vb> <float vb> <theta_m, rpm> <int va> <int vb> <int vc>
+   SIM_FOC_F:  FOC output file is sim_torqueWithoutSpeed.out.foc, format: <float va> <float vb> <float vb> <theta_m, rpm> <int va> <int vb> <int vc>
+   SIM_FOC_F:  MODE      : 2
+   SIM_FOC_F:  FLUX_SP   : 0.000000
+   SIM_FOC_F:  FLUX_KP   : 1.000000
+   SIM_FOC_F:  FLUX_KI   : 0.000000
+   SIM_FOC_F:  TORQUE_SP : 4.799988
+   SIM_FOC_F:  TORQUE_KP : 5.000000
+   SIM_FOC_F:  TORQUE_KI : 0.003311
+   SIM_FOC_F:  SPEED_SP  : 10000.000000
+   SIM_FOC_F:  SPEED_KP  : 2.699997
+   SIM_FOC_F:  SPEED_KI  : 0.003311
+   SIM_FOC_F:  VD        : 0.000000
+   SIM_FOC_F:  VQ        : 15000.000000
+   SIM_FOC_F:  FW_KP     : 1.000000
+   SIM_FOC_F:  FW_KI     : 0.003311
+   SIM_FOC_F:  CNT_TRIP  : 300000
+   SIM_FOC_F: ***********   Comparison with golden file: ********
+   SIM_FOC_F:  Total step  : 300000  
+   SIM_FOC_F:  Golden File : sim_torqueWithoutSpeed.out.foc
+   SIM_FOC_F:  Max Voltage : 24.000	100.00%
+   SIM_FOC_F:  threshold   : 1.200	5.00%
+   SIM_FOC_F:  Mean error  : 0.000	0.00%
+   SIM_FOC_F:  Max error   : 0.000	0.00%
+   SIM_FOC_F:  Min error   : 0.000	0.00%
+   SIM_FOC_F:  Total error :      0  
+   SIM_FOC_F:********************************************************************************************************************************
+   ...
+
+
+Note: Test summary all the result of 8 modes on the file flow.
+
+.. code-block:: bash
+   
+   SIM_FOC********************************************************** TEST SUMMARY ***********************************************************
+   SIM_FOC_M:  ------ Summary for Model-based simulation -----------------------------------------------------------
+   SIM_FOC_M:  Kernel sampling mode           : one calling one sample 
+   SIM_FOC_M:  Simulation resolution          : 0.000100 (ms)
+   SIM_FOC_M:  Simulation total time          : 270.000000 (ms)
+   SIM_FOC_M:  Inteval for printing wave data : 300
+   SIM_FOC_M:  Wave data for all 4 phases test: sim_foc_ModelFoc.log 
+   SIM_FOC_M:  Phase-1 generated files        : sim_torqueWithoutSpeed<.para.foc> <.in.foc> <.out.foc> 
+   SIM_FOC_M:  Phase-2 generated files        : sim_rpm10k<.para.foc> <.in.foc> <.out.foc> 
+   SIM_FOC_M:  Phase-3 generated files        : sim_rpm16k<.para.foc> <.in.foc> <.out.foc> 
+   SIM_FOC_M:  Phase-4 generated files        : sim_rpm16k_weak<.para.foc> <.in.foc> <.out.foc> 
+   SIM_FOC_M:  Phase-5 generated files        : sim_manualTorqueFlux<.para.foc> <.in.foc> <.out.foc> 
+   SIM_FOC_M:  Phase-6 generated files        : sim_manualTorque<.para.foc> <.in.foc> <.out.foc> 
+   SIM_FOC_M:  Phase-7 generated files        : sim_manualTorqueFluxFixedSpeed<.para.foc> <.in.foc> <.out.foc> 
+   SIM_FOC_M:  Phase-8 generated files        : sim_manualFlux<.para.foc> <.in.foc> <.out.foc> 
+   SIM_FOC_M:  Phase-9 generated files        : sim_stop<.para.foc> <.in.foc> <.out.foc> 
+   SIM_FOC_F:  ------ Summary for File-based simulation based on Model-based outputs -------------------------------
+   SIM_FOC_F:  Kernel sampling mode           : one calling multi-sample 
+   SIM_FOC_F:  Phase-1: 0.000(ms) ~ 30.000(ms)	 Mode: MOD_TORQUE_WITHOUT_SPEED           RPM: 10000	 Sampling II: Depending on II after synthesis	 Over threshold(1.20V): 0 
+   SIM_FOC_F:  Phase-2: 30.000(ms) ~ 60.000(ms)	 Mode: MOD_SPEED_WITH_TORQUE              RPM: 10000	 Sampling II: Depending on II after synthesis	 Over threshold(1.20V): 0 
+   SIM_FOC_F:  Phase-3: 60.000(ms) ~ 90.000(ms)	 Mode: MOD_SPEED_WITH_TORQUE              RPM: 16000	 Sampling II: Depending on II after synthesis	 Over threshold(1.20V): 0 
+   SIM_FOC_F:  Phase-4: 90.000(ms) ~ 120.000(ms)	 Mode: MOD_FLUX                           RPM: 16000	 Sampling II: Depending on II after synthesis	 Over threshold(1.20V): 0 
+   SIM_FOC_F:  Phase-5: 120.000(ms) ~ 150.000(ms)	 Mode: MOD_MANUAL_TORQUE_FLUX             RPM: 16000	 Sampling II: Depending on II after synthesis	 Over threshold(1.20V): 0 
+   SIM_FOC_F:  Phase-6: 150.000(ms) ~ 180.000(ms)	 Mode: MOD_MANUAL_TORQUE                  RPM: 16000	 Sampling II: Depending on II after synthesis	 Over threshold(1.20V): 0 
+   SIM_FOC_F:  Phase-7: 180.000(ms) ~ 210.000(ms)	 Mode: MOD_MANUAL_TORQUE_FLUX_FIXED_SPEED RPM: 16000	 Sampling II: Depending on II after synthesis	 Over threshold(1.20V): 0 
+   SIM_FOC_F:  Phase-8: 210.000(ms) ~ 240.000(ms)	 Mode: MOD_MANUAL_FLUX                    RPM: 16000	 Sampling II: Depending on II after synthesis	 Over threshold(1.20V): 0 
+   SIM_FOC_F:  Phase-9: 240.000(ms) ~ 270.000(ms)	 Mode: MOD_STOPPED                        RPM: 16000	 Sampling II: Depending on II after synthesis	 Over threshold(1.20V): 0 
+   SIM_FOC_F:********************************************************************************************************************************
+
+
+   csim.exe [-dt <time scale in sec> ]	 Simulation resolution
+            [-pii <print interval>]   	 Wave data filesim_foc_ModelFoc.log sampling interval
+            [-log <char*>]            	 Setting log file's prefix with surfix _ModelFoc.log
+            [-range]                  	 Enable range tracing for internal varialbes in FOC
+            [-cnt <Number of input>]  	 Number of sample for a mode
+
+   INFO [HLS SIM]: The maximum depth reached by any hls::stream() instance in the design is 300000
+   INFO: [SIM 1] CSim done with 0 errors.
+
+   
+Profiling
+=========
+
+The hardware resource utilizations are listed in the following table.
+Different tool versions may result slightly different resource.
+
+* Important: Change the sine and cosine tables in the file foc.h accordingly when changing this CPR(COMM_MACRO_CPR) in the commen.hpp .
+
+
+.. table:: Table 3 IP resources for sensorless foc 
+    :align: center
+
+    +----------------+----------+----------+----------+----------+---------+-----------------+
+    |        IP      |   BRAM   |   URAM   |    DSP   |    FF    |   LUT   | Frequency(MHz)  |
+    +----------------+----------+----------+----------+----------+---------+-----------------+
+    | FOC_sensorless |     4    |     0    |    100   |   5655   |   6569  |       300       |
+    +----------------+----------+----------+----------+----------+---------+-----------------+
+
+Table 4 : IP profiling of Sensorless field-orientated control
+
+.. image:: /images/foc_8_modes.png
+   :alt: Sensorless field-orientated control
+   :width: 70%
+   :align: center
+
+.. note::
+    | 1. Time unit: 30us per sample.   
+
+.. toctree::
+   :maxdepth: 1
+

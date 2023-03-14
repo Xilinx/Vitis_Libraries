@@ -1,0 +1,70 @@
+{
+    "name": "Xilinx Quadrature Encoder Interface", 
+    "description": "Test Design to validate IP Quadrature Encoder Interface kernel", 
+    "flow": "hls", 
+    "platform_allowlist": [
+        "u200", 
+        "vck190", 
+        "aws-vu9p-f1",
+	"xilinx_zcu104_base_202220_1"
+    ], 
+    "platform_blocklist": [], 
+    "part_allowlist": [
+        "xc7z020-clg400-1"
+    ],
+    "part_blocklist": [],
+    "project": "hls_qei", 
+    "solution": "sol1", 
+    "clock": "10", 
+    "clock_uncertainty": 1.250000,
+    "topfunction": "hls_qei", 
+    "top": {
+        "source": [
+            "${CUR_DIR}/src/ip_qei.cpp"
+        ], 
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -I${CUR_DIR}/src"
+    }, 
+    "testbench": {
+        "source": [
+            "${CUR_DIR}/src/test_ip_qei.cpp"
+        ], 
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -I${CUR_DIR}/src", 
+        "argv": {
+            "hls_csim": "", 
+            "hls_cosim": ""
+        }
+    }, 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": {
+                    "vivado_syn": 16384, 
+                    "hls_csim": 10240, 
+                    "hls_cosim": 16384, 
+                    "vivado_impl": 16384, 
+                    "hls_csynth": 10240
+                }, 
+                "max_time_min": {
+                    "vivado_syn": 300,
+                    "hls_csim": 60,
+                    "hls_cosim": 300,
+                    "vivado_impl": 300,
+                    "hls_csynth": 60
+                }
+            }
+        ], 
+        "targets": [
+            "hls_csim", 
+            "hls_csynth", 
+            "hls_cosim", 
+            "vivado_syn", 
+            "vivado_impl"
+        ], 
+        "category": "canary"
+    }
+}

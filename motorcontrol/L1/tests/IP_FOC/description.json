@@ -1,0 +1,63 @@
+{
+    "name": "Sensor based FOC IP HLS Test",
+    "description": "Test Design FOC IP with 8 modes",
+    "flow": "hls",
+    "platform_allowlist": [
+        "u200"
+    ],
+    "platform_blocklist": [],
+    "part_allowlist": [
+        "xc7z020-clg400-1"
+    ],
+    "part_blocklist": [],
+    "project": "test_ip_foc_ap_fixed",
+    "solution": "sol1",
+    "clock": "10",
+    "clock_uncertainty": 1.250000,
+    "topfunction": "hls_foc_periodic_ap_fixed",
+    "top": {
+        "source": [
+            "${CUR_DIR}/../FOC/IP_FOC/src/ip_foc.cpp"
+        ],
+        "cflags": "-DSIM_FINITE -O0 -I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L1/tests/FOC/IP_FOC/src"
+    },
+    "testbench": {
+        "source": [
+            "${CUR_DIR}/../FOC/IP_FOC/src/test_ip_foc.cpp"
+        ],
+        "cflags": "-DSIM_FINITE -O0 -I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L1/tests/FOC/IP_FOC/src -I${XF_PROJ_ROOT}/L1/tests/FOC/src -I${XF_PROJ_ROOT}/L1/tests/Model -Wno-write-strings"
+    },
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": {
+                    "vivado_syn": 16384,
+                    "hls_csim": 10240,
+                    "hls_cosim": 16384,
+                    "vivado_impl": 16384,
+                    "hls_csynth": 10240
+                },
+                "max_time_min": {
+                    "vivado_syn": 300,
+                    "hls_csim": 60,
+                    "hls_cosim": 300,
+                    "vivado_impl": 300,
+                    "hls_csynth": 60
+                }
+            }
+        ],
+        "targets": [
+            "hls_csim",
+            "hls_csynth",
+            "hls_cosim",
+            "vivado_syn",
+            "vivado_impl"
+        ],
+        "category": "canary"
+    }
+}
