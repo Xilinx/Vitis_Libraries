@@ -106,7 +106,10 @@
                 "dependency": [], 
                 "env": "", 
                 "cmd": "", 
-                "max_memory_MB": 32768, 
+                "max_memory_MB": {
+		    "vitis_hw_emu": 32768,
+		    "vitis_hw": 40960
+		}, 
                 "max_time_min": 520
             }
         ], 
