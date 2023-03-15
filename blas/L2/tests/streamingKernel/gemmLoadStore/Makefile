@@ -278,8 +278,8 @@ ifeq ($(HOST_ARCH), x86)
 	make check
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_stdout.log
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_stdout.log || exit 1
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
 	make check
 endif
 endif
@@ -291,8 +291,8 @@ ifeq ($(HOST_ARCH), x86)
 	make check
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_stdout.log
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_stdout.log || exit 1
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
 	make check
 endif
 endif
