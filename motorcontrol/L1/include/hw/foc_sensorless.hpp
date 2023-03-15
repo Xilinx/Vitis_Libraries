@@ -140,20 +140,29 @@ void hls_foc_strm_ap_fixed_sensorless(
     const T_IO RPM_factor = 60.0 / 2 / 3.1415926535;
     T_IO speed_to_RPM = RPM_factor / (T_IO)ppr_args;
     T_IO RPM_to_speed = (T_IO)ppr_args / RPM_factor;
+    bool Filebased_flag = (control_mode_args & 0x40000000) != 0;
 LOOP_FOC_STRM:
     for (long i = 0; i < trip_cnt; i++) {
 //#pragma HLS pipeline II = 1
 #pragma HLS PIPELINE off
+        control_mode_args &= 0xBFFFFFFF;
         static int FOC_RPM_THETA_m_in; // = FOC_RPM_THETA_m.read();
-        static T_IO Ia_in;             // = Ia.read();
-        static T_IO Ib_in;             // = Ib.read();
-        static T_IO Ic_in;             // = Ic.read();
-        if (!Ia.empty()) {
-            Ia_in = Ia.read();
-            Ib_in = Ib.read();
-            Ic_in = Ic.read();
+        static T_IO Ia_in;
+        static T_IO Ib_in;
+        static T_IO Ic_in;
+        if (Filebased_flag) {
+            if (!Ia.empty()) {
+                Ia_in = Ia.read();
+                Ib_in = Ib.read();
+                Ic_in = Ic.read();
+            }
+        } else {
+            while (!Ia.empty()) {
+                Ia_in = Ia.read();
+                Ib_in = Ib.read();
+                Ic_in = Ic.read();
+            }
         }
-
         if (!FOC_RPM_THETA_m.empty()) FOC_RPM_THETA_m_in = FOC_RPM_THETA_m.read();
 
         short RPM_in = (FOC_RPM_THETA_m_in & 0x0000FFFF);

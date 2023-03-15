@@ -1041,7 +1041,7 @@ void hls_foc_strm_ap_fixed(
     T_IO RPM_to_speed = (t_glb_q15q16)ppr_args / RPM_factor;
 LOOP_FOC_STRM:
     for (long i = 0; i < trip_cnt; i++) {
-#pragma HLS pipeline II = 1
+#pragma HLS pipeline II = 5
         static int FOC_RPM_THETA_m_in;
         static T_IO Ia_in;
         static T_IO Ib_in;
@@ -1152,7 +1152,7 @@ void hls_foc_strm_int(
     T_M RPM_to_speed = (t_glb_q15q16)ppr_args / RPM_factor;
 LOOP_FOC_STRM:
     for (long i = 0; i < trip_cnt; i++) {
-#pragma HLS pipeline II = 1
+#pragma HLS pipeline II = 5
         static int FOC_RPM_THETA_m_in;
         static int Ia_in0;
         static int Ib_in0;

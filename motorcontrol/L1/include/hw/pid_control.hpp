@@ -206,7 +206,7 @@ void PID_Control_ap_fixed(T_IO& Res_out,
                           T_PID Ki,
                           T_PID Kd,
                           bool mode_change) {
-#pragma HLS INLINE off
+#pragma HLS INLINE
     T_ERR err;
 #pragma HLS BIND_OP variable = err op = add impl = dsp
     err = Sp - in_data;

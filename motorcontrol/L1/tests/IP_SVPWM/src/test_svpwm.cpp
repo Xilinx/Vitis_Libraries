@@ -384,10 +384,6 @@ int main(int argc, char** argv) {
         // clang-format on
     }
 
-    ap_ufixed<17, 1> ratio_compensate = (t_glb_q15q16)dc_link_adc / (t_glb_q15q16)axi_para.args_dc_link_ref;
-    ratio_compensate = 2 - ratio_compensate;
-    unsigned int ratio_compensate_int = ratio_compensate.range(16, 0);
-
     t_svpwm_cmd V_ref = (axi_para.args_dc_src_mode == xf::motorcontrol::MODE_PWM_DC_SRC::DC_SRC_ADC)
                             ? dc_link_adc
                             : (t_svpwm_cmd)axi_para.args_dc_link_ref;
@@ -432,14 +428,12 @@ int main(int argc, char** argv) {
     printf("SIM_SVPWM: -------------------------------------------- Inside kernel key values ----------------------------------------------------\n");
     printf("SIM_SVPWM: ** dc_link_adc      stream   \t0x%8x\t %12d \t V          \t   int\n", dc_link_adc, dc_link_adc);
     printf("SIM_SVPWM: ** V_ref            internal \t0x%8x\t %12d \t V          \t   int\n", (int)V_ref_f, (int)V_ref_f);
-    printf("SIM_SVPWM: ** ratio_compensate internal \t0x%8x\t     %5.5f\t V         \t  ap_ufixed<17,1> \n",ratio_compensate_int, ratio_compensate.to_float());
 #else
     printf("SIM_SVPWM: **  Using ap_ufixed<%d, %d> type  for Va, Vb, Vc and dc_link_adc\t using ap_ufixed<16, 0> for ratio\n",  dc_link_adc.length(), PWM_AP_FIXED_PARA_I2);
     printf("SIM_SVPWM: --------------------------------------------------------------------------------------------------------------------------\n");
     printf("SIM_SVPWM: -------------------------------------------- Inside kernel key values ----------------------------------------------------\n");
     printf("SIM_SVPWM: ** dc_link_adc      stream   \t0x%8x\t     %5.5f\t V         \t  ap_ufixed<%d, %d>\n", dc_link_adc_int, dc_link_adc.to_float(), dc_link_adc.length(), PWM_AP_FIXED_PARA_I2);
     printf("SIM_SVPWM: ** V_ref            internal \t0x%8x\t     %5.0f\t V         \t  int\n", V_ref_f, V_ref_f);
-    printf("SIM_SVPWM: ** ratio_compensate internal \t0x%8x\t     %5.5f\t times     \t  ap_ufixed<17,1> \n",ratio_compensate_int, ratio_compensate.to_float());
 #endif
     printf("SIM_SVPWM: ----------------------------------------------    SVPWM_DUTY END   ---------------------------------------------------------\n");
     printf("SIM_SVPWM: **************************************************************************************************************************\n");  
@@ -463,50 +457,6 @@ int main(int argc, char** argv) {
     printf("SIM_SVPWM: All %d commands' waveform data can be found in file %s\n", TESTNUMBER, fname2);
     printf("SIM_SVPWM: csim.exe [-shift_0/-shift_120] | [-dc_adc/-dc_ref] | [-pwm_fq <pwm frequency>] | [-dead <dead cycles>] [-ii <sampling II>]\n");
     printf("SIM_SVPWM:          [-v0/-v1/-v2] #for selecting different test vector \n\n");
-
-    // printf("SIM_SVPWM: ***************************************  Parameter Value  ****************************************************************\n");
-    // printf("SIM_SVPWM: ** NAME              Type    \tHex Value        Physic Value   Unit           ValueFormat      Command-line   \n");
-    // printf("SIM_SVPWM: --------------------------------------------------------------------------------------------------------------------------\n");
-    // printf("SIM_SVPWM: ---------------------------------------- Const Parameter -----------------------------------------------------------------\n");
-    // printf("SIM_SVPWM: ** TESTNUMBER        const   \t0x%8x\t %12d \t               \t  long\n", TESTNUMBER, TESTNUMBER);
-    // printf("SIM_SVPWM: ** clock freq.       const   \t0x%8x\t %12d \tMHz            \t   int\n", clk_fq, clk_fq/1000000);
-    // printf("SIM_SVPWM: --------------------------------------------------------------------------------------------------------------------------\n");
-    // printf("SIM_SVPWM: ---------------------------------------- AXI Interface  ------------------------------------------------------------------\n");
-    // printf("SIM_SVPWM: ** stt_cnt_iter      Read    \t0x%8x\t %12d \ttimes          \t   int\n", axi_para.stt_cnt_read_foc+1, axi_para.stt_cnt_iter+1);//as in kernel: stt_cnt_iter = iter++;
-    // printf("SIM_SVPWM: ** stt_pwm_cycle     Read    \t0x%8x\t %12d \tcycle of clk_fq\t   int\n", axi_para.stt_pwm_cycle, axi_para.stt_pwm_cycle);
-    // printf("SIM_SVPWM: ** args_pwm_freq     Write   \t0x%8x\t %12d \tHz             \t   int\t\t[-pwm_fq <pwm frequency>]\n", axi_para.args_pwm_freq, axi_para.args_pwm_freq);
-    // printf("SIM_SVPWM: ** args_dead_cycles  Write   \t0x%8x\t %12d \tcycle of clk_fq\t   int\t\t[-dead <dead cycles>]\n", axi_para.args_dead_cycles, axi_para.args_dead_cycles);
-    // printf("SIM_SVPWM: ** args_phase_shift  Write   \t0x%8x\t ", axi_para.args_phase_shift);
-    // if(axi_para.args_phase_shift==xf::motorcontrol::MODE_PWM_PHASE_SHIFT::SHIFT_ZERO) printf("  SHIFT_ZERO\t"); else printf("  SHIFT_120\t"); printf("\t\t\t\t[-shift_0/-shift_120]\n");
-    // printf("SIM_SVPWM: ** args_dc_link_ref  Write   \t0x%8x\t     %5.5f\t V         \t   q15q16 \n",tmp_link, axi_para.args_dc_link_ref.to_float());
-    // printf("SIM_SVPWM: ** args_dc_src_mode  Write   \t0x%8x\t ", axi_para.args_dc_src_mode);
-    // if(axi_para.args_dc_src_mode==xf::motorcontrol::MODE_PWM_DC_SRC::DC_SRC_ADC) printf("  DC_SRC_ADC\t"); else printf("  DC_SRC_REF\t"); printf("\t\t\t\t[-dc_adc/-dc_ref]\n");
-    // printf("SIM_SVPWM: ** args_sample_ii    Write   \t0x%8x\t %12d \t               \t   int\t\t[-ii <sampling II>]\n", axi_para.args_sample_ii, axi_para.args_sample_ii);
-    // printf("SIM_SVPWM: ** \033[1;31;40margs_sample_ii    IMPORTANT NOTICE for value setting: \033[0m\n");
-    // printf("SIM_SVPWM: **                   for CSIM  \t any value allowed\n");
-    // printf("SIM_SVPWM: **                   for COSIM \t dependes on the latency of cascading cousumer. Suggested value in run_hls_sim.tcl\n");
-    // printf("SIM_SVPWM: **                   for HW run\t '1' is better to avoid backpressure to upstream ADC \n");
-    // printf("SIM_SVPWM: --------------------------------------------------------------------------------------------------------------------------\n");
-//     printf("SIM_SVPWM: ---------------------------------------- Static data types ---------------------------------------------------------------\n");
-// #ifdef _SVPWM_USING_INT_
-//     printf("SIM_SVPWM: ** Using integer type for Va, Vb, Vc and dc_link_adc \t using ap_uint<16> for ratio \n");
-//     printf("SIM_SVPWM: --------------------------------------------------------------------------------------------------------------------------\n");
-//     printf("SIM_SVPWM: ---------------------------------------- Inside kernel key values --------------------------------------------------------\n");
-//     printf("SIM_SVPWM: ** dc_link_adc      stream   \t0x%8x\t %12d \t V          \t   int\n", dc_link_adc, dc_link_adc);
-//     printf("SIM_SVPWM: ** V_ref            internal \t0x%8x\t %12d \t V          \t   int\n", (int)V_ref_f, (int)V_ref_f);
-//     printf("SIM_SVPWM: ** ratio_compensate internal \t0x%8x\t     %5.5f\t V         \t  ap_ufixed<17,1> \n",ratio_compensate_int, ratio_compensate.to_float());
-// #else
-//     printf("SIM_SVPWM: **  Using ap_ufixed<%d, %d> type  for Va, Vb, Vc and dc_link_adc\t using ap_ufixed<16, 0> for ratio\n",  dc_link_adc.length(), PWM_AP_FIXED_PARA_I2);
-//     printf("SIM_SVPWM: --------------------------------------------------------------------------------------------------------------------------\n");
-//     printf("SIM_SVPWM: ---------------------------------------- Inside kernel key values --------------------------------------------------------\n");
-//     printf("SIM_SVPWM: ** dc_link_adc      stream   \t0x%8x\t     %5.5f\t V         \t  ap_ufixed<%d, %d>\n", dc_link_adc_int, dc_link_adc.to_float(), dc_link_adc.length(), PWM_AP_FIXED_PARA_I2);
-//     printf("SIM_SVPWM: ** V_ref            internal \t0x%8x\t     %5.0f\t V         \t  int\n", V_ref_f, V_ref_f);
-//     printf("SIM_SVPWM: ** ratio_compensate internal \t0x%8x\t     %5.5f\t times     \t  ap_ufixed<17,1> \n",ratio_compensate_int, ratio_compensate.to_float());
-// #endif
-    // printf("SIM_SVPWM: **************************************************************************************************************************\n");  
-    // printf("SIM_SVPWM: All %d commands' waveform data can be found in file %s\n", TESTNUMBER, fname2);
-    // printf("SIM_SVPWM: csim.exe [-shift_0/-shift_120] | [-dc_adc/-dc_ref] | [-pwm_fq <pwm frequency>] | [-dead <dead cycles>] [-ii <sampling II>]\n");
-    // printf("SIM_SVPWM:          [-v0/-v1/-v2] #for selecting different test vector \n\n");
 
     // clang-format on
     return ret_err_val; // to be checked use motor modul

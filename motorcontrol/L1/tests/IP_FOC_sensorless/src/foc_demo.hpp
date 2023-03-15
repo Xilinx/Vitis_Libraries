@@ -687,7 +687,7 @@ int compareGoldenFromFile(const char* filename,
         Vc_strm.read(vc);
 
         cnt_err +=
-            checkError(va.to_float(), ref_a.to_float(), threshold, "cmd_c", i, err_all, err_all_abs, err_max, err_min);
+            checkError(va.to_float(), ref_a.to_float(), threshold, "cmd_a", i, err_all, err_all_abs, err_max, err_min);
         cnt_err +=
             checkError(vb.to_float(), ref_b.to_float(), threshold, "cmd_b", i, err_all, err_all_abs, err_max, err_min);
         cnt_err +=

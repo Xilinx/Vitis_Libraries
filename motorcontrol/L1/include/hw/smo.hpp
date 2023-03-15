@@ -87,6 +87,53 @@ void smo_control_T(SMO_Observer<T_V, T_I, T_MID, T_ANGLE, T_RPM>& smoer,
     rpm_o = smoer.updatingRPM();
 };
 
+template <class T_IO, class T_ACC, class T_ERR, class T_PID>
+void PID_Control_ap_fixed_smo(T_IO& Res_out,
+                              T_ACC& GiE_prev,
+                              T_ERR& Err_prev,
+                              T_IO in_data,
+                              T_IO Sp,
+                              T_PID Kp,
+                              T_PID Ki,
+                              T_PID Kd,
+                              bool mode_change) {
+#pragma HLS INLINE off
+    T_ERR err;
+#pragma HLS BIND_OP variable = err op = add impl = dsp
+    err = Sp - in_data;
+
+    T_ACC acc;
+#pragma HLS BIND_OP variable = acc op = add impl = dsp
+    // acc = mode_change==true ? (T_ACC)0 : GiE_prev + err;
+    if (mode_change == true)
+        acc = 0;
+    else
+        acc = GiE_prev + err;
+
+    T_ERR diff;
+#pragma HLS BIND_OP variable = diff op = add impl = dsp
+    diff = err - Err_prev;
+
+    T_ERR P;
+#pragma HLS BIND_OP variable = P op = mul impl = dsp
+    P = Kp * err;
+
+    T_ERR I;
+#pragma HLS BIND_OP variable = I op = mul impl = dsp
+    I = Ki * acc;
+
+    T_ERR D;
+#pragma HLS BIND_OP variable = D op = mul impl = dsp
+    D = Kd * diff;
+
+    T_ACC sum;
+#pragma HLS BIND_OP variable = sum op = add impl = dsp
+    sum = (P + I + D);
+    Res_out = (T_IO)sum;
+    Err_prev = err;
+    GiE_prev = acc; // mode_change==true? (T_ACC)err : acc;
+}
+
 template <int VALUE_CPR, class T_IO, int MAX_IO>
 void smo_ap_fixed(
     // Input
@@ -181,7 +228,7 @@ void smo_ap_fixed(
     t_mid2 kp = 30000;
     t_mid2 ki = 0;
     // clang-format off
-    PID_Control_ap_fixed<t_mid2, t_mid2, t_mid2, t_mid2>(
+    PID_Control_ap_fixed_smo<t_mid2, t_mid2, t_mid2, t_mid2>(
         Speed_pid_dout, 
         Speed_GiE_prev, 
         Speed_Err_prev,
@@ -319,7 +366,7 @@ void smo_in_foc_ap_fixed(
     t_pid kp = 40000;
     t_pid ki = 0;
     // clang-format off
-    PID_Control_ap_fixed<t_speed, t_speedI, t_speedE, t_pid>(
+    PID_Control_ap_fixed_smo<t_speed, t_speedI, t_speedE, t_pid>(
         Speed_pid_dout, 
         Speed_GiE_prev, 
         Speed_Err_prev,
@@ -627,7 +674,7 @@ void foc_core_ap_fixed_sensorless(
 
     t_RPM         Speed_pid_din  = RPM;
     t_RPM         Speed_pid_dout;
-    PID_Control_ap_fixed<t_RPM, t_RPMI, t_RPME, t_pid>(
+    PID_Control_ap_fixed_smo<t_RPM, t_RPMI, t_RPME, t_pid>(
         Speed_pid_dout, 
         Speed_GiE_prev, 
         Speed_Err_prev, 
@@ -657,7 +704,7 @@ void foc_core_ap_fixed_sensorless(
     t_ID Flux_sp = (FOC_mode == MOD_FLUX) 
                     ? (t_ID)(apx_flux_sp_args - Vd_weakened)
                     : (t_ID)apx_flux_sp_args;
-    PID_Control_ap_fixed<t_ID, t_IDI, t_IDE, t_pid>(
+    PID_Control_ap_fixed_smo<t_ID, t_IDI, t_IDE, t_pid>(
         Flux_pid_dout, 
         Flux_GiE_prev, 
         Flux_Err_prev, 
@@ -683,7 +730,7 @@ void foc_core_ap_fixed_sensorless(
     t_IQ Torque_Sp = (FOC_mode == MOD_TORQUE_WITHOUT_SPEED)
                     ? (t_IQ)(apx_torque_sp_args)
                     : (t_IQ)Speed_pid_dout; // Only in Torque mode Speed_pid not be the setpoint
-    PID_Control_ap_fixed<t_IQ, t_IQI, t_IQE, t_pid>(
+    PID_Control_ap_fixed_smo<t_IQ, t_IQI, t_IQE, t_pid>(
         Torque_pid_dout, 
         Torque_GiE_prev, 
         Torque_Err_prev, 
@@ -738,7 +785,7 @@ void foc_core_ap_fixed_sensorless(
 
     //M_index = Clip_AP<T_IO>(M_index, (T_IO)(0-MAX_IO), (T_IO)MAX_IO);  
 
-    PID_Control_ap_fixed<t_ID, t_IDI, t_IDE, t_pid>(
+    PID_Control_ap_fixed_smo<t_ID, t_IDI, t_IDE, t_pid>(
         Vd_weakened, 
         FWiE_prev, 
         FW_err_prev, 

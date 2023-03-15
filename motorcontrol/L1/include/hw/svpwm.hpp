@@ -110,7 +110,7 @@ T GetVoff(T V[3]) {
 }
 
 template <class t_val, class t_ratio>
-void GetRatio(t_val V_saddle, t_val MAXVAL, t_ratio ratio_compensate, t_ratio& duty_ratio) {
+void GetRatio(t_val V_saddle, t_val MAXVAL, t_ratio& duty_ratio) {
     t_val MINVAL = -(MAXVAL);
     V_saddle = (V_saddle > MAXVAL) ? MAXVAL : V_saddle;
     V_saddle = (V_saddle < MINVAL) ? MINVAL : V_saddle;
@@ -120,8 +120,7 @@ void GetRatio(t_val V_saddle, t_val MAXVAL, t_ratio ratio_compensate, t_ratio& d
     t_ratio ratio;
 #pragma HLS BIND_OP variable = ratio op = mul impl = dsp
     ratio = ((Vp_saddle >> 1) / MAXVAL);
-#pragma HLS BIND_OP variable = ratio op = mul impl = dsp
-    ratio = ratio * ratio_compensate;
+
     if (ratio >= 1) ratio = 0.99999;
     duty_ratio = ratio;
 }
@@ -138,18 +137,6 @@ void calculate_ratios_core(
     t_glb_q15q16 apx_dc_ref;
     apx_dc_ref(31, 0) = args_dc_link_ref;
 
-    // Calculating compensating ratio based on ADC and AXI sources
-    ap_ufixed<17, 1> ratio_compensate; // value range from [1, 2)
-                                       // ratio_compensate = 2 - (t_glb_q15q16)dcLink_adc / (t_glb_q15q16)apx_dc_ref;
-    if (apx_dc_ref == 0) {
-        ratio_compensate = 1;
-    } else {
-#pragma HLS BIND_OP variable = ratio_compensate op = mul impl = dsp
-        ratio_compensate = (t_glb_q15q16)dcLink_adc / (t_glb_q15q16)apx_dc_ref;
-#pragma HLS BIND_OP variable = ratio_compensate op = sub impl = dsp
-        ratio_compensate = 2 - ratio_compensate;
-    }
-
     // Selecting reference source from ADC and AXI sources
     T_FOC_COM V_ref = (args_dc_src_mode == MODE_PWM_DC_SRC::DC_SRC_ADC) ? dcLink_adc : (T_FOC_COM)apx_dc_ref;
 
@@ -161,9 +148,9 @@ void calculate_ratios_core(
     Vcmd[1] = Vcmd[1] - Voff;
     Vcmd[2] = Vcmd[2] - Voff;
 
-    GetRatio<T_FOC_COM, ap_ufixed<17, 1> >(Vcmd[0], V_ref, ratio_compensate, duty_ratio[0]);
-    GetRatio<T_FOC_COM, ap_ufixed<17, 1> >(Vcmd[1], V_ref, ratio_compensate, duty_ratio[1]);
-    GetRatio<T_FOC_COM, ap_ufixed<17, 1> >(Vcmd[2], V_ref, ratio_compensate, duty_ratio[2]);
+    GetRatio<T_FOC_COM, ap_ufixed<17, 1> >(Vcmd[0], V_ref, duty_ratio[0]);
+    GetRatio<T_FOC_COM, ap_ufixed<17, 1> >(Vcmd[1], V_ref, duty_ratio[1]);
+    GetRatio<T_FOC_COM, ap_ufixed<17, 1> >(Vcmd[2], V_ref, duty_ratio[2]);
 }
 
 template <class T_FOC_COM, class T_RATIO_16b>
@@ -558,9 +545,9 @@ LOOP_GEN_WAVE:
 
         pwm_stt_pwm_cycle = pwm_cycle;
 
-        pwm_duty_ratio_a_temp = (t_glb_q15q16) local_duty_ratio_a_inuse;
-        pwm_duty_ratio_b_temp = (t_glb_q15q16) local_duty_ratio_b_inuse;
-        pwm_duty_ratio_c_temp = (t_glb_q15q16) local_duty_ratio_c_inuse;
+        pwm_duty_ratio_a_temp = (t_glb_q15q16)local_duty_ratio_a_inuse;
+        pwm_duty_ratio_b_temp = (t_glb_q15q16)local_duty_ratio_b_inuse;
+        pwm_duty_ratio_c_temp = (t_glb_q15q16)local_duty_ratio_c_inuse;
 
         pwm_stt_duty_ratio_a = pwm_duty_ratio_a_temp.range(31, 0);
         pwm_stt_duty_ratio_b = pwm_duty_ratio_b_temp.range(31, 0);
@@ -572,8 +559,6 @@ LOOP_GEN_WAVE:
                                            local_duty_ratio_b_inuse, strm_h_b, strm_l_b, strm_sync_b);
         generate_output_chnl<ap_uint<18> >(pwm_cycle, pwm_cnt, dead_cycles_inuse, shift[2], len[2],
                                            local_duty_ratio_c_inuse, strm_h_c, strm_l_c, strm_sync_c);
-
-
 
         if (pwm_cnt + 1 == pwm_cycle) {
             if (toBeEnd)

@@ -300,6 +300,7 @@ int FileBasedSim(
     // cnt_sim_in++; // to compensate error in getInputFromFile
 
     AxiPara.trip_cnt = cnt_sim_in;
+    AxiPara.control_mode_args += 0x40000000;
     // bool usePeriodic = false;
     if (usePeriodic)
         call_foc_strm(usePeriodic, strm_ia, strm_ib, strm_ic, strm_speed_theta_m, Va_cmd, Vb_cmd, Vc_cmd, AxiPara);
