@@ -24,6 +24,9 @@
             ]
         }
     ],
+    "data": [
+        "PROJECT/data/sample.txt"
+    ],
     "match_ini": "false",
     "config_make": "./config.mk",
     "host": {

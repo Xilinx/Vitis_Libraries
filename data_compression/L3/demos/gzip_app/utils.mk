@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.7
+# vitis makefile-generator v2.0.8
 #
 #+-------------------------------------------------------------------------------
 # The following parameters are assigned with default values. These parameters can
@@ -82,9 +82,14 @@ endif
 
 # Special processing for tool version/platform type
 VITIS_VER = $(shell v++ --version | grep 'v++' | sed 's/^[[:space:]]*//' | sed -e 's/^[*]* v++ v//g' | cut -d " " -f1)
-# 1) for versal flow from 2022.1
-DEVICE_TYPE = $(shell platforminfo -p $(PLATFORM) | grep 'FPGA Family' | sed 's/.*://' | sed '/ai_engine/d' | sed 's/^[[:space:]]*//')
-ifeq ($(DEVICE_TYPE), versal)
+AIE_TYPE := $(shell platforminfo $(PLATFORM) -f -j | grep "arch.:" | sed 's|"arch":||g' | sed 's|["|,]||g')
+ifeq (AIE ,$(findstring AIE, $(AIE_TYPE)))
+HAS_AIE := on
+else
+HAS_AIE := off
+endif
+# 1) for aie+embedded flow from 2022.1
+ifeq (on, $(HAS_AIE))
 ifeq ($(shell expr $(VITIS_VER) \>= 2022.1), 1)
 LINK_TARGET_FMT := xsa
 else

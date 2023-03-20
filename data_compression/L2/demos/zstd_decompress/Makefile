@@ -140,7 +140,7 @@ VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/tests/src -I $(XFLIB_DIR)/../security/L1/includ
 
 ######################### binary container global settings ##########################
 ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
-VPP_LDFLAGS_xilZstdDecompressStream_temp := --clock.id 4:xilZstdDecompressStream_1
+VPP_LDFLAGS_xilZstdDecompressStream_temp := --config $(CUR_DIR)/connectivity.cfg --clock.id 4:xilZstdDecompressStream_1
 VPP_LDFLAGS_xilZstdDecompressStream += $(VPP_LDFLAGS_xilZstdDecompressStream_temp)
 
 else 
