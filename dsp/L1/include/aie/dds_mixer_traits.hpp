@@ -22,6 +22,8 @@
 #define NOINLINE_DECL inline __attribute__((noinline))
 #endif
 
+#define USE_INBUILT_SINCOS 0
+#define USE_LUT_SINCOS 1
 /*
 This file contains sets of overloaded, templatized and specialized templatized functions which
 encapsulate properties of the intrinsics used by the main kernal class. Specifically,
@@ -35,22 +37,97 @@ namespace aie {
 namespace mixer {
 namespace dds_mixer {
 
-template <typename TT_DATA>
+template <typename TT_DATA, unsigned int tp_sincos_mode>
 constexpr int ddsMulVecScalarLanes() {
     return 0;
 } // effectively an error trap
 template <>
-constexpr int ddsMulVecScalarLanes<cint16>() {
+constexpr int ddsMulVecScalarLanes<cint16, USE_INBUILT_SINCOS>() {
     return 8;
 };
 template <>
-constexpr int ddsMulVecScalarLanes<cint32>() {
+constexpr int ddsMulVecScalarLanes<cint32, USE_INBUILT_SINCOS>() {
+    return 4;
+};
+#if __SUPPORTS_CFLOAT__ == 1
+template <>
+constexpr int ddsMulVecScalarLanes<cfloat, USE_INBUILT_SINCOS>() {
+    return 4;
+};
+#endif
+#if __SUPPORTS_CFLOAT__ == 1
+template <>
+constexpr int ddsMulVecScalarLanes<cfloat, USE_LUT_SINCOS>() {
+    return 2;
+};
+template <>
+constexpr int ddsMulVecScalarLanes<cint32, USE_LUT_SINCOS>() {
     return 4;
 };
 template <>
-constexpr int ddsMulVecScalarLanes<cfloat>() {
+constexpr int ddsMulVecScalarLanes<cint16, USE_LUT_SINCOS>() {
+    return 8;
+};
+#else
+template <>
+constexpr int ddsMulVecScalarLanes<cint32, USE_LUT_SINCOS>() {
+    return 8;
+};
+template <>
+constexpr int ddsMulVecScalarLanes<cint16, USE_LUT_SINCOS>() {
+    return 16;
+};
+#endif
+
+// this is a temporary fix until the stream read CR is fixed
+template <typename TT_DATA, unsigned int tp_sincos_mode>
+constexpr int ddsMulVecScalarLanesStream() {
+    return 0;
+} // effectively an error trap
+#if __SUPPORTS_CFLOAT__ == 1
+template <>
+constexpr int ddsMulVecScalarLanesStream<cfloat, USE_LUT_SINCOS>() {
+    return 2;
+};
+template <>
+constexpr int ddsMulVecScalarLanesStream<cint32, USE_LUT_SINCOS>() {
     return 4;
 };
+template <>
+constexpr int ddsMulVecScalarLanesStream<cint16, USE_LUT_SINCOS>() {
+    return 8;
+};
+template <>
+constexpr int ddsMulVecScalarLanesStream<cfloat, USE_INBUILT_SINCOS>() {
+    return 2;
+};
+template <>
+constexpr int ddsMulVecScalarLanesStream<cint32, USE_INBUILT_SINCOS>() {
+    return 4;
+};
+template <>
+constexpr int ddsMulVecScalarLanesStream<cint16, USE_INBUILT_SINCOS>() {
+    return 8;
+};
+#else
+template <>
+constexpr int ddsMulVecScalarLanesStream<cint32, USE_LUT_SINCOS>() {
+    return 2;
+};
+template <>
+constexpr int ddsMulVecScalarLanesStream<cint16, USE_LUT_SINCOS>() {
+    return 4;
+};
+template <>
+constexpr int ddsMulVecScalarLanesStream<cint32, USE_INBUILT_SINCOS>() {
+    return 2;
+};
+template <>
+constexpr int ddsMulVecScalarLanesStream<cint16, USE_INBUILT_SINCOS>() {
+    return 4;
+};
+#endif
+
 /**
 Base IO_API interface struct for shared functions across specialisations
 */
@@ -111,12 +188,14 @@ template <>
 INLINE_DECL constexpr unsigned int fnEnumType<cint32>() {
     return enumCint32;
 };
+#if __SUPPORTS_CFLOAT__ == 1
 template <>
 INLINE_DECL constexpr unsigned int fnEnumType<cfloat>() {
     return enumCfloat;
 };
+#endif
 
-enum IO_API { WINDOW = 0, STREAM };
+enum IO_API { WINDOW = 0, STREAM = 1 };
 }
 }
 }

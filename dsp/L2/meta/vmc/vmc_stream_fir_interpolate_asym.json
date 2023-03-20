@@ -3,7 +3,7 @@
   "ip_name": "vmc_stream_fir_interpolate_asym",
   "block_info": {
     "label": "FIR Interpolation Stream",
-    "description": ""
+    "description": "Stream-based FIR Asymmetric Interpolation filter block for AI Engines."
   },
   "parameters": [
     {
@@ -12,7 +12,11 @@
       "description": "The type of individual data samples input to and output of the filter function",
       "enum": [ "int16", "cint16", "int32", "cint32", "float", "cfloat" ],
       "default": "cint16",
-      "type": "typename"
+      "type": "typename",
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"popup"
+      }
     },
     {
       "name": "coef_type",
@@ -25,6 +29,10 @@
         "file": "vmc_stream_fir_interpolate_asym.py",
         "function": "vmc_validate_coef_type",
         "args": ["data_type"]
+      },
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"popup"
       }
     },
     {
@@ -32,16 +40,13 @@
       "label": "Use runtime coefficient reloading",
       "description": "Allows the user to select of runtime coefficient reloading",
       "default": false,
-      "type": "bool"
-    },
-    {
-      "name": "fir_length",
-      "label": "fir filter length",
-      "description": "Specify fir length for coefficient reloading",
-      "default": 32,
-      "minimum": 4,
-      "maximum": 8192,
-      "type": "int"
+      "type": "bool",
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"checkbox",
+            "disable":"coeff",
+            "enable":"fir_length"
+      }
     },
     {
       "name": "coeff",
@@ -54,6 +59,23 @@
         "file": "vmc_stream_fir_interpolate_asym.py",
         "function": "vmc_validate_coeff",
         "args": ["use_coeff_reload", "coef_type" ,"fir_length", "data_type", "casc_length", "interpolate_factor", "ssr"]
+      },
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
+      }
+    },
+    {
+      "name": "fir_length",
+      "label": "fir filter length",
+      "description": "Specify fir length for coefficient reloading",
+      "default": 32,
+      "minimum": 4,
+      "maximum": 8192,
+      "type": "int",
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
       }
     },
 	{
@@ -63,7 +85,11 @@
       "default": 2,
       "minimum": 2,
       "maximum": 16,
-      "type": "int"
+      "type": "int",
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
+      }
     },
     {
       "name": "input_window_size",
@@ -77,20 +103,10 @@
         "file": "vmc_stream_fir_interpolate_asym.py",
         "function": "vmc_validate_input_window_size",
         "args": ["data_type", "coef_type", "use_coeff_reload", "coeff", "fir_length", "interpolate_factor", "ssr"]
-      }
-    },
-    {
-      "name": "casc_length",
-      "label": "Number of cascade stages",
-      "description": "The length of cascaded kernels",
-      "default": 1,
-      "type": "int",
-      "maximum": 9,
-      "minimum": 1,
-      "validator": {
-        "file": "vmc_stream_fir_interpolate_asym.py",
-        "function": "vmc_validate_casc_length",
-        "args": ["use_coeff_reload", "fir_length"]
+      },
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
       }
     },
     {
@@ -105,6 +121,10 @@
         "file": "vmc_stream_fir_interpolate_asym.py",
         "function": "vmc_validate_shift_val",
         "args": ["data_type"]
+      },
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
       }
     },
     {
@@ -114,7 +134,11 @@
       "enum": [0, 1, 2, 3, 4, 5, 6, 7],
       "enum_str": ["Floor", "Ceiling", "Round to positive infinity", "Round to negative infinity", "Round symmetrical to infinity", "Round symmetrical to zero", "Round convergent to even", "Round convergent to odd"],
       "default": 2,
-      "type": "int"
+      "type": "int",
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"popup"
+      }
     },
     {
       "name": "ssr",
@@ -127,6 +151,10 @@
         "file": "vmc_stream_fir_interpolate_asym.py",
         "function": "vmc_validate_ssr",
         "args": ["interpolate_factor"]
+      },
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
       }
     },
     {
@@ -134,11 +162,34 @@
       "label": "Interpolate polyphase",
       "description": "The number of parallel polyphases to decompose over",
       "type": "int",
+      "default": 1,
       "minimum": 1,
       "validator": {
         "file": "vmc_stream_fir_interpolate_asym.py",
         "function": "vmc_validate_interp_poly",
         "args": ["interpolate_factor"]
+      },
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
+      }
+    },
+    {
+      "name": "casc_length",
+      "label": "Number of cascade stages",
+      "description": "The length of cascaded kernels",
+      "default": 1,
+      "type": "int",
+      "maximum": 9,
+      "minimum": 1,
+      "validator": {
+        "file": "vmc_stream_fir_interpolate_asym.py",
+        "function": "vmc_validate_casc_length",
+        "args": ["use_coeff_reload", "fir_length"]
+      },
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
       }
     }
   ],

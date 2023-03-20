@@ -2,7 +2,11 @@ from aie_common import *
 from aie_common_fir import *
 import json
 import fir_sr_asym as sr_asym
+import fir_polyphase_decomposer as poly
 
+import importlib
+from pathlib import Path
+current_uut_kernel = Path(__file__).stem
 # fir_decimate_asym.hpp:        // static_assert(TP_FIR_RANGE_LEN >= FIR_LEN_MIN,"ERROR: Illegal combination of design FIR length and cascade length, resulting in kernel FIR length below minimum required value. ");
 # fir_decimate_asym.hpp:        static_assert(TP_FIR_LEN % TP_DECIMATE_FACTOR == 0,"ERROR: TP_FIR_LEN must be a multiple of TP_DECIMATE_FACTOR");
 # fir_decimate_asym.hpp:        static_assert(TP_FIR_RANGE_LEN % TP_DECIMATE_FACTOR == 0,"ERROR: Illegal combination of design FIR length and cascade length. TP_FIR_RANGE_LEN must be a multiple of TP_DECIMATE_FACTOR");
@@ -177,7 +181,6 @@ def fn_xoffset_range_valid(TT_DATA, TT_COEF, TP_DECIMATE_FACTOR, TP_API):
 
 # This logic is copied from the kernel class.
 
-
 def fn_validate_decimate_factor(TT_DATA, TT_COEF, TP_DECIMATE_FACTOR, TP_API):
 
     offsetRangeCheck = fn_xoffset_range_valid(TT_DATA, TT_COEF, TP_DECIMATE_FACTOR, TP_API )
@@ -214,6 +217,21 @@ def validate_TP_SHIFT(args):
   return fn_validate_shift(TT_DATA, TP_SHIFT)
 
 def validate_TP_INPUT_WINDOW_VSIZE(args):
+  check_valid_decompose = poly.fn_validate_decomposer_TP_INPUT_WINDOW_VSIZE(args)
+  if (check_valid_decompose["is_valid"] == False):
+    # error out before continuing to validate
+    return check_valid_decompose
+
+  # valid decompose
+  #overwrite args with the decomposed version
+  args, uut_kernel = poly.get_modified_args_from_polyphase_decomposer(args, current_uut_kernel)
+  # if we've decomposed to another type of kernel, then import that kernel and use that validate function
+  if uut_kernel != current_uut_kernel:
+    other_kernel = importlib.import_module(uut_kernel)
+    return other_kernel.validate_TP_INPUT_WINDOW_VSIZE(args)
+
+
+  # continue using current library element's validator (with potentially modified parameters)
   TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
   TT_DATA = args["TT_DATA"]
   TT_COEF = args["TT_COEF"]
@@ -226,6 +244,20 @@ def validate_TP_INPUT_WINDOW_VSIZE(args):
 
 
 def validate_TP_FIR_LEN(args):
+  check_valid_decompose = poly.fn_validate_decomposer_TP_FIR_LEN(args)
+  if (check_valid_decompose["is_valid"] == False):
+    # error out before continuing to validate
+    return check_valid_decompose
+  # valid decompose
+  #overwrite args with the decomposed version
+  args, uut_kernel = poly.get_modified_args_from_polyphase_decomposer(args, current_uut_kernel)
+  # if we've decomposed to another type of kernel, then import that kernel and use that validate function
+  if uut_kernel != current_uut_kernel:
+    other_kernel = importlib.import_module(uut_kernel)
+    return other_kernel.validate_TP_FIR_LEN(args)
+
+  # continue using current library element's validator (with potentially modified parameters)
+
   TT_DATA = args["TT_DATA"]
   TT_COEF = args["TT_COEF"]
   TP_FIR_LEN = args["TP_FIR_LEN"]
@@ -234,7 +266,6 @@ def validate_TP_FIR_LEN(args):
   TP_SSR = args["TP_SSR"]
   TP_API = args["TP_API"]
   TP_USE_COEF_RELOAD = args["TP_USE_COEF_RELOAD"]
-
   return fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD)
 
 def validate_TP_DECIMATE_FACTOR(args):
@@ -242,7 +273,20 @@ def validate_TP_DECIMATE_FACTOR(args):
   TT_COEF = args["TT_COEF"]
   TP_API = args["TP_API"]
   TP_DECIMATE_FACTOR = args["TP_DECIMATE_FACTOR"]
-  return fn_validate_decimate_factor(TT_DATA, TT_COEF, TP_DECIMATE_FACTOR, TP_API)
+  TP_PARA_DECI_POLY = args["TP_PARA_DECI_POLY"]
+
+  paraPolyValid = poly.validate_TP_PARA_DECI_POLY(args)
+
+  kernelDecimate = TP_DECIMATE_FACTOR//TP_PARA_DECI_POLY
+  decimateValid = (
+    fn_validate_decimate_factor(TT_DATA, TT_COEF, kernelDecimate, TP_API) if kernelDecimate > 1
+    else isValid  # no decimate factor to validate
+  )
+
+  for check in (paraPolyValid,decimateValid):
+    if check["is_valid"] == False :
+      return check
+  return isValid
 
 
 
@@ -254,7 +298,10 @@ def validate_TP_DUAL_IP(args):
 def validate_TP_SSR(args):
     TP_API = args["TP_API"]
     TP_SSR = args["TP_SSR"]
-    return fn_validate_ssr(TP_SSR, TP_API)
+    TP_DECIMATE_FACTOR = args["TP_DECIMATE_FACTOR"]
+    TP_PARA_DECI_POLY = args["TP_PARA_DECI_POLY"]
+
+    return  fn_validate_ssr(TP_SSR, TP_API)
 
 # Example of updater.
 #
@@ -301,7 +348,12 @@ def info_ports(args):
     TP_FIR_LEN = args["TP_FIR_LEN"]
     TP_SSR = args["TP_SSR"]
     TP_DECIMATE_FACTOR = args["TP_DECIMATE_FACTOR"]
+    TP_PARA_DECI_POLY = args["TP_PARA_DECI_POLY"]
     margin_size = sr_asym.fn_margin_size(TP_FIR_LEN, TT_DATA)
+    num_in_ports = TP_SSR * TP_PARA_DECI_POLY
+    in_win_size = TP_INPUT_WINDOW_VSIZE//num_in_ports
+    num_out_ports = TP_SSR
+    out_win_size = (TP_INPUT_WINDOW_VSIZE//TP_DECIMATE_FACTOR) // num_out_ports
 
     in_ports = get_port_info("in", "in", TT_DATA, TP_INPUT_WINDOW_VSIZE//TP_SSR, TP_SSR, marginSize=margin_size, TP_API=args["TP_API"])
     in2_ports = (get_port_info("in2", "in", TT_DATA, TP_INPUT_WINDOW_VSIZE//TP_SSR, TP_SSR, marginSize=margin_size, TP_API=args["TP_API"]) if (args["TP_DUAL_IP"] == 1) else [])
@@ -334,12 +386,13 @@ def generate_graph(graphname, args):
   TP_DUAL_IP = args["TP_DUAL_IP"]
   TP_API = args["TP_API"]
   TP_SSR = args["TP_SSR"]
+  TP_PARA_DECI_POLY = args["TP_PARA_DECI_POLY"]
   coeff_list = args["coeff"]
 
   taps = sr_asym.fn_get_taps_vector(TT_COEF, coeff_list)
   constr_args_str = f"taps" if TP_USE_COEF_RELOAD == 0 else ""
-  dual_ip_declare_str = f"ssr_port_array<input> in2;" if TP_DUAL_IP == 1 else "// No dual input"
-  dual_ip_connect_str = f"adf::connect<> net_in2(in2[i], filter.in2[i]);" if TP_DUAL_IP == 1 else "// No dual input"
+  dual_ip_declare_str = f"std::array<adf::port<input>, TP_SSR*TP_PARA_DECI_POLY> in2;" if TP_DUAL_IP == 1 else "// No dual input"
+  dual_ip_connect_str = f"adf::connect<> net_in2(in2[inPortIdx], filter.in2[inPortIdx]);" if TP_DUAL_IP == 1 else "// No dual input"
   coeff_ip_declare_str = f"ssr_port_array<input> coeff;" if TP_USE_COEF_RELOAD == 1 else "//No coeff port"
   coeff_ip_connect_str = f"adf::connect<> net_coeff(coeff[i], filter.coeff[i]);" if TP_USE_COEF_RELOAD == 1 else "//No coeff port"
   dual_op_declare_str = f"ssr_port_array<output> out2;" if TP_NUM_OUTPUTS == 2 else "// No dual output"
@@ -350,10 +403,11 @@ f"""
 class {graphname} : public adf::graph {{
 public:
   static constexpr unsigned int TP_SSR = {TP_SSR};
+  static constexpr unsigned int TP_PARA_DECI_POLY = {TP_PARA_DECI_POLY};
   template <typename dir>
   using ssr_port_array = std::array<adf::port<dir>, TP_SSR>;
 
-  ssr_port_array<input> in;
+  std::array<adf::port<input>, TP_SSR*TP_PARA_DECI_POLY> in;
   {dual_ip_declare_str}
   {coeff_ip_declare_str}
   ssr_port_array<output> out;
@@ -373,7 +427,8 @@ public:
     {TP_NUM_OUTPUTS}, //TP_NUM_OUTPUTS
     {TP_DUAL_IP}, //TP_DUAL_IP
     {TP_API}, //TP_API
-    {TP_SSR} //TP_SSR
+    {TP_SSR}, //TP_SSR
+    {TP_PARA_DECI_POLY} //TP_PARA_DECI_POLY
   > filter;
 
   {graphname}() : filter({constr_args_str}) {{
@@ -381,11 +436,17 @@ public:
     for (int i=0; i < 1; i++) {{
       adf::runtime<ratio>(filter_kernels[i]) = 0.9;
     }}
-    for (int i=0; i < TP_SSR; i++) {{
-      adf::connect<> net_in(in[i], filter.in[i]);
-      {dual_ip_connect_str}
+    for (int paraPolyIdx=0; paraPolyIdx < TP_PARA_DECI_POLY; paraPolyIdx++) {{
+      for (int ssrIdx=0; ssrIdx < TP_SSR; ssrIdx++) {{
+        unsigned inPortIdx = paraPolyIdx + ssrIdx*TP_PARA_DECI_POLY;
+        adf::connect<> net_in(in[inPortIdx], filter.in[inPortIdx]);
+        {dual_ip_connect_str}
+      }}
+    }}
+    for (int ssrIdx=0; ssrIdx < TP_SSR; ssrIdx++) {{
+      unsigned outPortIdx = ssrIdx;
       {coeff_ip_connect_str}
-      adf::connect<> net_out(filter.out[i], out[i]);
+      adf::connect<> net_out(filter.out[outPortIdx], out[outPortIdx]);
       {dual_op_connect_str}
     }}
   }}

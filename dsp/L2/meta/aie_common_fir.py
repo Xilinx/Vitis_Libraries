@@ -16,6 +16,7 @@ def fnNumLanes384b(TT_DATA, TT_COEF):
 
         if (
             (TT_DATA == "int16" and TT_COEF == "int16") or
+            (TT_DATA == "int16" and TT_COEF == "int32") or
             (TT_DATA == "int32" and TT_COEF == "int16") or
             (TT_DATA == "float" and TT_COEF == "float")
         ):
@@ -23,6 +24,8 @@ def fnNumLanes384b(TT_DATA, TT_COEF):
         elif (
             (TT_DATA == "cint16" and TT_COEF == "int16") or
             (TT_DATA == "cint16" and TT_COEF == "cint16") or
+            (TT_DATA == "cint16" and TT_COEF == "int32") or
+            (TT_DATA == "cint16" and TT_COEF == "cint32") or
             (TT_DATA == "int32" and TT_COEF == "int32") or
             (TT_DATA == "cint32" and TT_COEF == "int16") or
             (TT_DATA == "cint32" and TT_COEF == "cint16") or
@@ -55,12 +58,15 @@ def fnNumLanes(TT_DATA, TT_COEF, TP_API=0):
             return 16
         elif ((TT_DATA == "cint16" and TT_COEF == "int16")
                 or (TT_DATA == "cint16" and TT_COEF == "cint16")
+                or (TT_DATA == "int16" and TT_COEF == "int32")
                 or (TT_DATA == "int32" and TT_COEF == "int16")
                 or (TT_DATA == "int32" and TT_COEF == "int32")
                 or (TT_DATA == "float" and TT_COEF == "float")):
             return 8
         elif ((TT_DATA == "cint32" and TT_COEF == "int16")
                 or (TT_DATA == "cint32" and TT_COEF == "cint16")
+                or (TT_DATA == "cint16" and TT_COEF == "int32")
+                or (TT_DATA == "cint16" and TT_COEF == "cint16")
                 or (TT_DATA == "cint32" and TT_COEF == "int32")
                 or (TT_DATA == "cint32" and TT_COEF == "cint32")
                 or (TT_DATA == "cfloat" and TT_COEF == "float")
@@ -79,32 +85,32 @@ def fnNumCols(TT_DATA, TT_COEF, TP_API=0):
 
 # function to return the number of columns for a short-wide atomic intrinsic for a type combo
 def fnNumCols384(TT_DATA, TT_COEF):
-
-
   if (
-    (TT_DATA == "int16" and TT_COEF == "int16") or
-    (TT_DATA == "cint16" and TT_COEF == "int16")
-  ):
-    return 8
-
-  if (
-     (TT_DATA == "cint16" and TT_COEF == "cint16") or
-     (TT_DATA == "int32" and TT_COEF == "int16") or # 80bit
-     (TT_DATA == "int32" and TT_COEF == "int32")or
-     (TT_DATA == "cint32" and TT_COEF == "int16")
+     (TT_DATA == "int16" and TT_COEF == "int16") or
+     (TT_DATA == "cint16" and TT_COEF == "int16")
   ) :
     return 4
   if (
+     (TT_DATA == "cint16" and TT_COEF == "int32") or
+     (TT_DATA == "cint16" and TT_COEF == "cint32") or
+     (TT_DATA == "int32" and TT_COEF == "int32")or
+     (TT_DATA == "int32" and TT_COEF == "int16") or
+     (TT_DATA == "int16" and TT_COEF == "int32") or
+     (TT_DATA == "cint32" and TT_COEF == "int16") or
      (TT_DATA == "cint32" and TT_COEF == "cint16")  or
      (TT_DATA == "cint32" and TT_COEF == "int32") or
-     (TT_DATA == "cint32" and TT_COEF == "cint32") or
+     (TT_DATA == "cint32" and TT_COEF == "cint32")
+  ) :
+    return 2
+  if (
+     (TT_DATA == "cint16" and TT_COEF == "cint32") or
      (TT_DATA == "float" and TT_COEF == "float") or
      (TT_DATA == "cfloat" and TT_COEF == "float") or
      (TT_DATA == "cfloat" and TT_COEF == "cfloat")
   ) :
-    return 2
+    return 1
 
-  return 2*fnNumCols(TT_DATA, TT_COEF);
+  return 2 * (2 if fn_size_by_byte(TT_COEF)==2 else 1)
 
 ### Common constraints based on traits
 

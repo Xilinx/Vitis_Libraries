@@ -64,6 +64,7 @@ template <>
 INLINE_DECL constexpr unsigned int fnNumLanesStream<float, float>() {
     return fnNumLanes<float, float>();
 };
+#if __SUPPORTS_CFLOAT__ == 1
 template <>
 INLINE_DECL constexpr unsigned int fnNumLanesStream<cfloat, float>() {
     return fnNumLanes<cfloat, float>();
@@ -72,7 +73,7 @@ template <>
 INLINE_DECL constexpr unsigned int fnNumLanesStream<cfloat, cfloat>() {
     return fnNumLanes<cfloat, cfloat>();
 };
-
+#endif
 //
 template <typename T_D, typename T_C>
 INLINE_DECL constexpr unsigned int fnNumColsStream() {
@@ -98,6 +99,7 @@ template <>
 INLINE_DECL constexpr unsigned int fnNumColsStream<float, float>() {
     return fnNumCols<float, float>();
 };
+#if __SUPPORTS_CFLOAT__ == 1
 template <>
 INLINE_DECL constexpr unsigned int fnNumColsStream<cfloat, float>() {
     return fnNumCols<cfloat, float>();
@@ -106,7 +108,7 @@ template <>
 INLINE_DECL constexpr unsigned int fnNumColsStream<cfloat, cfloat>() {
     return fnNumCols<cfloat, cfloat>();
 };
-
+#endif
 //
 template <typename T_D, typename T_C>
 INLINE_DECL constexpr unsigned int fnStreamReadWidth() {
@@ -132,6 +134,7 @@ template <>
 INLINE_DECL constexpr unsigned int fnStreamReadWidth<float, float>() {
     return 256;
 };
+#if __SUPPORTS_CFLOAT__ == 1
 template <>
 INLINE_DECL constexpr unsigned int fnStreamReadWidth<cfloat, float>() {
     return 256;
@@ -140,7 +143,7 @@ template <>
 INLINE_DECL constexpr unsigned int fnStreamReadWidth<cfloat, cfloat>() {
     return 256;
 };
-
+#endif
 // align to num cols coeffs for FIR cascade splitting for optimal mac efficiency
 template <typename T_D, typename T_C>
 INLINE_DECL constexpr unsigned int fnStreamFirRangeRound() {

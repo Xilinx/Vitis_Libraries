@@ -20,6 +20,27 @@
 #include "device_defs.h"
 
 // Inter-rank temporary storage buffers
+
+#ifdef __X86SIM__
+alignas(32) thread_local extern cint32_t fft_16_tmp1[FFT16_SIZE];
+alignas(32) thread_local extern cint32_t fft_16_tmp2[FFT16_SIZE];
+alignas(32) thread_local extern cint32_t fft_32_tmp1[FFT32_SIZE];
+alignas(32) thread_local extern cint32_t fft_32_tmp2[FFT32_SIZE];
+alignas(32) thread_local extern cint32_t fft_64_tmp1[FFT64_SIZE];
+alignas(32) thread_local extern cint32_t fft_64_tmp2[FFT64_SIZE];
+alignas(32) thread_local extern cint32_t fft_128_tmp1[FFT128_SIZE];
+alignas(32) thread_local extern cint32_t fft_128_tmp2[FFT128_SIZE];
+alignas(32) thread_local extern cint32_t fft_256_tmp1[FFT256_SIZE];
+alignas(32) thread_local extern cint32_t fft_256_tmp2[FFT256_SIZE];
+alignas(32) thread_local extern cint32_t fft_512_tmp1[FFT512_SIZE];
+alignas(32) thread_local extern cint32_t fft_512_tmp2[FFT512_SIZE];
+alignas(32) thread_local extern cint32_t fft_1024_tmp1[FFT1024_SIZE];
+alignas(32) thread_local extern cint32_t fft_1024_tmp2[FFT1024_SIZE];
+alignas(32) thread_local extern cint32_t fft_2048_tmp1[FFT2048_SIZE];
+alignas(32) thread_local extern cint32_t fft_2048_tmp2[FFT2048_SIZE];
+alignas(32) thread_local extern cint32_t fft_4096_tmp1[FFT4096_SIZE];
+alignas(32) thread_local extern cint32_t fft_4096_tmp2[FFT4096_SIZE];
+#else
 alignas(32) extern cint32_t fft_16_tmp1[FFT16_SIZE];
 alignas(32) extern cint32_t fft_16_tmp2[FFT16_SIZE];
 alignas(32) extern cint32_t fft_32_tmp1[FFT32_SIZE];
@@ -38,6 +59,7 @@ alignas(32) extern cint32_t fft_2048_tmp1[FFT2048_SIZE];
 alignas(32) extern cint32_t fft_2048_tmp2[FFT2048_SIZE];
 alignas(32) extern cint32_t fft_4096_tmp1[FFT4096_SIZE];
 alignas(32) extern cint32_t fft_4096_tmp2[FFT4096_SIZE];
+#endif
 
 // Twiddle tables
 // Half-size integer tables

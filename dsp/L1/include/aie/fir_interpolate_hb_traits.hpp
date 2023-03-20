@@ -61,74 +61,30 @@ enum eArchType {
 // Function to return #columns in mul_sym intrinsic
 template <typename TT_DATA, typename TT_COEFF>
 INLINE_DECL constexpr unsigned int fnNumSymColsIntHb() {
-    return 0;
+    return fnNumCols384<TT_DATA, TT_COEFF>();
 };
-template <>
-INLINE_DECL constexpr unsigned int fnNumSymColsIntHb<int16, int16>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumSymColsIntHb<cint16, int16>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumSymColsIntHb<cint16, cint16>() {
-    return 2;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumSymColsIntHb<int32, int16>() {
-    return 2;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumSymColsIntHb<int32, int32>() {
-    return 2;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumSymColsIntHb<cint32, int16>() {
-    return 2;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumSymColsIntHb<cint32, cint16>() {
-    return 1;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumSymColsIntHb<cint32, int32>() {
-    return 1;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumSymColsIntHb<cint32, cint32>() {
-    return 1;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumSymColsIntHb<float, float>() {
-    return 1;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumSymColsIntHb<cfloat, float>() {
-    return 1;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumSymColsIntHb<cfloat, cfloat>() {
-    return 1;
-};
+// template<> INLINE_DECL constexpr unsigned int fnNumSymColsIntHb< int16,  int16>(){  return 4;};
+// template<> INLINE_DECL constexpr unsigned int fnNumSymColsIntHb<cint16,  int16>(){  return 4;};
+// template<> INLINE_DECL constexpr unsigned int fnNumSymColsIntHb<cint16, cint16>(){  return 2;};
+// template<> INLINE_DECL constexpr unsigned int fnNumSymColsIntHb< int32,  int16>(){  return 2;};
+// template<> INLINE_DECL constexpr unsigned int fnNumSymColsIntHb< int32,  int32>(){  return 2;};
+// template<> INLINE_DECL constexpr unsigned int fnNumSymColsIntHb<cint32,  int16>(){  return 2;};
+// template<> INLINE_DECL constexpr unsigned int fnNumSymColsIntHb<cint32, cint16>(){  return 1;};
+// template<> INLINE_DECL constexpr unsigned int fnNumSymColsIntHb<cint32,  int32>(){  return 1;};
+// template<> INLINE_DECL constexpr unsigned int fnNumSymColsIntHb<cint32, cint32>(){  return 1;};
+// template<> INLINE_DECL constexpr unsigned int fnNumSymColsIntHb< float,  float>(){  return 1;};
+// template<> INLINE_DECL constexpr unsigned int fnNumSymColsIntHb<cfloat,  float>(){  return 1;};
+// template<> INLINE_DECL constexpr unsigned int fnNumSymColsIntHb<cfloat, cfloat>(){  return 1;};
 
 // Function to return #lanes in mul_sym function - NOT intrinsic (see cint32/cint32)
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_UPSHIFT_CT = 0>
 INLINE_DECL constexpr unsigned int fnNumSymLanesIntHb() {
     return fnNumLanes384<TT_DATA, TT_COEFF>();
 };
-template <>
-INLINE_DECL constexpr unsigned int fnNumSymLanesIntHb<int16, int16, 1>() {
-    return 8;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumSymLanesIntHb<cint16, int16, 1>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumSymLanesIntHb<cint16, cint16, 1>() {
-    return 4;
-};
+// template<> INLINE_DECL constexpr unsigned int fnNumSymLanesIntHb< int16,  int16, 1>(){  return 8;};
+// template<> INLINE_DECL constexpr unsigned int fnNumSymLanesIntHb<cint16,  int16, 1>(){  return 4;};
+// template<> INLINE_DECL constexpr unsigned int fnNumSymLanesIntHb<cint16, cint16, 1>(){  return 4;};
+
 // template<> INLINE_DECL constexpr unsigned int fnNumSymLanesIntHb< int32,  int16>(){  return 8;};
 // template<> INLINE_DECL constexpr unsigned int fnNumSymLanesIntHb< int32,  int32>(){  return 4;};
 // template<> INLINE_DECL constexpr unsigned int fnNumSymLanesIntHb<cint32,  int16>(){  return 4;};
@@ -156,6 +112,18 @@ INLINE_DECL constexpr unsigned int fnDataLoadsInReg<kArch1Buff, cint16, int16>()
 };
 template <>
 INLINE_DECL constexpr unsigned int fnDataLoadsInReg<kArch1Buff, cint16, cint16>() {
+    return 8;
+};
+template <>
+INLINE_DECL constexpr unsigned int fnDataLoadsInReg<kArch1Buff, int16, int32>() {
+    return 8;
+};
+template <>
+INLINE_DECL constexpr unsigned int fnDataLoadsInReg<kArch1Buff, cint16, int32>() {
+    return 8;
+};
+template <>
+INLINE_DECL constexpr unsigned int fnDataLoadsInReg<kArch1Buff, cint16, cint32>() {
     return 8;
 };
 template <>
@@ -205,6 +173,18 @@ INLINE_DECL constexpr unsigned int fnDataLoadsInReg<kArch2Buff, cint16, int16>()
 };
 template <>
 INLINE_DECL constexpr unsigned int fnDataLoadsInReg<kArch2Buff, cint16, cint16>() {
+    return 4;
+};
+template <>
+INLINE_DECL constexpr unsigned int fnDataLoadsInReg<kArch2Buff, int16, int32>() {
+    return 4;
+};
+template <>
+INLINE_DECL constexpr unsigned int fnDataLoadsInReg<kArch2Buff, cint16, int32>() {
+    return 4;
+};
+template <>
+INLINE_DECL constexpr unsigned int fnDataLoadsInReg<kArch2Buff, cint16, cint32>() {
     return 4;
 };
 template <>
@@ -261,15 +241,27 @@ template <>
 INLINE_DECL constexpr unsigned int fnUpshiftCTSupport<cint16, cint16>() {
     return SUPPORTED;
 };
+template <>
+INLINE_DECL constexpr unsigned int fnUpshiftCTSupport<int16, int32>() {
+    return NOT_SUPPORTED;
+};
+template <>
+INLINE_DECL constexpr unsigned int fnUpshiftCTSupport<cint16, int32>() {
+    return NOT_SUPPORTED;
+};
+template <>
+INLINE_DECL constexpr unsigned int fnUpshiftCTSupport<cint16, cint32>() {
+    return NOT_SUPPORTED;
+};
 
 // ZigZag only supports UCT mode with cint16 data and int16 coeffs right now.
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_UPSHIFT_CT>
 INLINE_DECL constexpr unsigned int fnSupportZigZag() {
-    return 0;
+    return NOT_SUPPORTED;
 };
 template <>
 INLINE_DECL constexpr unsigned int fnSupportZigZag<cint16, int16, 1>() {
-    return 1;
+    return SUPPORTED;
 };
 
 // Calculate SYM FIR range for cascaded kernel

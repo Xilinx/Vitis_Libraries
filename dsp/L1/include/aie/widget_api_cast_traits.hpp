@@ -16,12 +16,15 @@
 #define _DSPLIB_WIDGET_API_CAST_TRAITS_HPP_
 
 /*
-Single Rate Asymetrical FIR traits.
 This file contains sets of overloaded, templatized and specialized templatized functions which
 encapsulate properties of the intrinsics used by the main kernal class. Specifically,
 this file does not contain any vector types or intrinsics since it is required for construction
 and therefore must be suitable for the aie compiler graph-level compilation.
 */
+#include "adf.h"
+#include "device_defs.h"
+
+using namespace adf;
 
 namespace xf {
 namespace dsp {
@@ -32,51 +35,56 @@ namespace api_cast {
 // TP_API values
 static constexpr unsigned int kWindowAPI = 0;
 static constexpr unsigned int kStreamAPI = 1;
+static constexpr unsigned int kCascStreamAPI = 2;
+static constexpr unsigned int kStreamCascAPI = 3;
 
 // TP_PATTERN values
-static constexpr unsigned int kDefaultIntlv = 0;
-static constexpr unsigned int kSampleIntlv = 1;
-static constexpr unsigned int kSplit = 2;
+static constexpr unsigned int kDefaultIntlv = 0; // dual streams interleave (128bits granularity).
+static constexpr unsigned int kSampleIntlv = 1;  // card dealing, sample granularity
+static constexpr unsigned int kSplit = 2;        // deck cutting
 
 // This interface is maximally sized (3) since it doesn't matter if some inputs are unused.
 template <typename T_D, unsigned int T_IN_API>
 struct T_inputIF {};
 template <>
 struct T_inputIF<int16, 0> {
-    input_window<int16>* inWindow0;
-    input_window<int16>* inWindow1;
-    input_window<int16>* inWindow2;
+    void* inWindow0;
+    void* inWindow1;
+    void* inWindow2;
 };
 template <>
 struct T_inputIF<cint16, 0> {
-    input_window<cint16>* inWindow0;
-    input_window<cint16>* inWindow1;
-    input_window<cint16>* inWindow2;
+    void* inWindow0;
+    void* inWindow1;
+    void* inWindow2;
 };
 template <>
 struct T_inputIF<int32, 0> {
-    input_window<int32>* inWindow0;
-    input_window<int32>* inWindow1;
-    input_window<int32>* inWindow2;
+    void* inWindow0;
+    void* inWindow1;
+    void* inWindow2;
 };
 template <>
 struct T_inputIF<cint32, 0> {
-    input_window<cint32>* inWindow0;
-    input_window<cint32>* inWindow1;
-    input_window<cint32>* inWindow2;
+    void* inWindow0;
+    void* inWindow1;
+    void* inWindow2;
 };
+
+#if __SUPPORTS_CFLOAT__ == 1
 template <>
 struct T_inputIF<float, 0> {
-    input_window<float>* inWindow0;
-    input_window<float>* inWindow1;
-    input_window<float>* inWindow2;
+    void* inWindow0;
+    void* inWindow1;
+    void* inWindow2;
 };
 template <>
 struct T_inputIF<cfloat, 0> {
-    input_window<cfloat>* inWindow0;
-    input_window<cfloat>* inWindow1;
-    input_window<cfloat>* inWindow2;
+    void* inWindow0;
+    void* inWindow1;
+    void* inWindow2;
 };
+#endif //__SUPPORTS_CFLOAT__ == 1
 
 template <>
 struct T_inputIF<int16, 1> {
@@ -102,6 +110,7 @@ struct T_inputIF<cint32, 1> {
     input_stream<cint32>* inStream1;
     input_stream<cint32>* inStream2;
 };
+#if __SUPPORTS_CFLOAT__ == 1
 template <>
 struct T_inputIF<float, 1> {
     input_stream<float>* inStream0;
@@ -114,51 +123,54 @@ struct T_inputIF<cfloat, 1> {
     input_stream<cfloat>* inStream1;
     input_stream<cfloat>* inStream2;
 };
+#endif //__SUPPORTS_CFLOAT__ == 1
 
 template <typename T_D, unsigned int T_out_API>
 struct T_outputIF {};
 template <>
 struct T_outputIF<int16, 0> {
-    output_window<int16>* outWindow0;
-    output_window<int16>* outWindow1;
-    output_window<int16>* outWindow2;
-    output_window<int16>* outWindow3;
+    void* outWindow0;
+    void* outWindow1;
+    void* outWindow2;
+    void* outWindow3;
 };
 template <>
 struct T_outputIF<cint16, 0> {
-    output_window<cint16>* outWindow0;
-    output_window<cint16>* outWindow1;
-    output_window<cint16>* outWindow2;
-    output_window<cint16>* outWindow3;
+    void* outWindow0;
+    void* outWindow1;
+    void* outWindow2;
+    void* outWindow3;
 };
 template <>
 struct T_outputIF<int32, 0> {
-    output_window<int32>* outWindow0;
-    output_window<int32>* outWindow1;
-    output_window<int32>* outWindow2;
-    output_window<int32>* outWindow3;
+    void* outWindow0;
+    void* outWindow1;
+    void* outWindow2;
+    void* outWindow3;
 };
 template <>
 struct T_outputIF<cint32, 0> {
-    output_window<cint32>* outWindow0;
-    output_window<cint32>* outWindow1;
-    output_window<cint32>* outWindow2;
-    output_window<cint32>* outWindow3;
+    void* outWindow0;
+    void* outWindow1;
+    void* outWindow2;
+    void* outWindow3;
 };
+#if __SUPPORTS_CFLOAT__ == 1
 template <>
 struct T_outputIF<float, 0> {
-    output_window<float>* outWindow0;
-    output_window<float>* outWindow1;
-    output_window<float>* outWindow2;
-    output_window<float>* outWindow3;
+    void* outWindow0;
+    void* outWindow1;
+    void* outWindow2;
+    void* outWindow3;
 };
 template <>
 struct T_outputIF<cfloat, 0> {
-    output_window<cfloat>* outWindow0;
-    output_window<cfloat>* outWindow1;
-    output_window<cfloat>* outWindow2;
-    output_window<cfloat>* outWindow3;
+    void* outWindow0;
+    void* outWindow1;
+    void* outWindow2;
+    void* outWindow3;
 };
+#endif //__SUPPORTS_CFLOAT__ == 1
 
 template <>
 struct T_outputIF<int16, 1> {
@@ -188,6 +200,7 @@ struct T_outputIF<cint32, 1> {
     output_stream<cint32>* outStream2;
     output_stream<cint32>* outStream3;
 };
+#if __SUPPORTS_CFLOAT__ == 1
 template <>
 struct T_outputIF<float, 1> {
     output_stream<float>* outStream0;
@@ -202,6 +215,7 @@ struct T_outputIF<cfloat, 1> {
     output_stream<cfloat>* outStream2;
     output_stream<cfloat>* outStream3;
 };
+#endif //__SUPPORTS_CFLOAT__ == 1
 }
 }
 }

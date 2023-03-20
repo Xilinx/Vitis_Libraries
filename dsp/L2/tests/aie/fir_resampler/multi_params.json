@@ -173,6 +173,73 @@
             "DUAL_IP":"1",
             "PORT_API":"1",
             "USE_CUSTOM_CONSTRAINT":"1"
+        },
+        "test_16_fir_ssr_if3_df2": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int16",
+            "FIR_LEN":"18",
+            "INTERPOLATE_FACTOR":"3",
+            "UUT_PARA_INTERP_POLY":"3",
+            "DECIMATE_FACTOR":"2",
+            "UUT_PARA_DECI_POLY":"2",
+            "CASC_LEN":"1",
+            "SHIFT":"16",
+            "INPUT_WINDOW_VSIZE":"49152",
+            "PORT_API":"1"
+        },
+        "test_17_fir_ssr_if2_df3": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int16",
+            "FIR_LEN":"18",
+            "INTERPOLATE_FACTOR":"2",
+            "UUT_PARA_INTERP_POLY":"2",
+            "DECIMATE_FACTOR":"3",
+            "UUT_PARA_DECI_POLY":"3",
+            "CASC_LEN":"1",
+            "SHIFT":"16",
+            "INPUT_WINDOW_VSIZE":"49152",
+            "PORT_API":"1"
+        },
+        "test_8_fir_cint16_int32_9t_3d": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int32",
+            "FIR_LEN":"9",
+            "DECIMATE_FACTOR":"3",
+            "SHIFT":"15",
+            "INPUT_WINDOW_VSIZE":"384"
+        },
+        "test_16_fir_cint16_int32": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int32",
+            "FIR_LEN":"18",
+            "INTERPOLATE_FACTOR":"3",
+            "DECIMATE_FACTOR":"2",
+            "CASC_LEN":"1",
+            "SHIFT":"16",
+            "INPUT_WINDOW_VSIZE":"49152",
+            "PORT_API":"1"
+        },
+        "test_17_fir_cint16_cint32": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"cint32",
+            "FIR_LEN":"18",
+            "INTERPOLATE_FACTOR":"2",
+            "DECIMATE_FACTOR":"3",
+            "CASC_LEN":"1",
+            "SHIFT":"16",
+            "INPUT_WINDOW_VSIZE":"49152",
+            "PORT_API":"1"
+        },
+        "test_18_fir_int16_int32": {
+            "DATA_TYPE":"int16",
+            "COEFF_TYPE":"int32",
+            "FIR_LEN":"24",
+            "INTERPOLATE_FACTOR":"5",
+            "DECIMATE_FACTOR":"3",
+            "CASC_LEN":"1",
+            "SHIFT":"16",
+            "INPUT_WINDOW_VSIZE":"1200",
+            "PORT_API":"0"
         }
     }
 }

@@ -56,7 +56,7 @@ cint32 INLINE_DECL unitVector<cint32>() {
 };
 template <>
 cfloat INLINE_DECL unitVector<cfloat>() {
-    cfloat temp;
+    cfloat temp = {0.0, 0.0};
     temp.real = 1.0;
     temp.imag = 0.0;
     return temp;
@@ -138,7 +138,7 @@ template <typename TT_DATA,
           unsigned int TP_DYN_PT_SIZE>
 NOINLINE_DECL void
 fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, TP_API, TP_SSR, TP_DYN_PT_SIZE>::
-    fft_window_main(input_window<TT_DATA>* __restrict inWindow, output_window<TT_DATA>* __restrict outWindow) {
+    fft_window_main(input_buffer<TT_DATA>& __restrict inWindow, output_buffer<TT_DATA>& __restrict outWindow) {
     using dataVect_t = ::aie::vector<TT_DATA, kSamplesInVect>;
     using coeffVect_t = ::aie::vector<TT_COEFF, kSamplesInVect>;
     using accVect_t = ::aie::detail::accum<fnAccClass<TT_DATA>(),          // int, cint, FP or CFP
@@ -149,6 +149,8 @@ fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, TP_API, 
     coeffVect_t coeffVect;
     accVect_t acc;
     dataVect_t outVect;
+    dataVect_t* inPtr = (dataVect_t*)inWindow.data();
+    dataVect_t* outPtr = (dataVect_t*)outWindow.data();
 
     set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
     set_sat();            // do saturate.
@@ -158,11 +160,13 @@ fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, TP_API, 
             coeffVectPtr = (coeffVect_t*)(&this->weights[0]);
             //#pragma unroll (kVecInFrame)
             for (int vect = 0; vect < kVecInFrame; vect++) {
-                dataVect = window_readincr_v<kSamplesInVect>(inWindow);
+                // dataVect = window_readincr_v<kSamplesInVect>(inWindow);
+                dataVect = *inPtr++;
                 coeffVect = *coeffVectPtr++;
                 acc = ::aie::mul(dataVect, coeffVect);
                 outVect = acc.template to_vector<TT_DATA>(TP_SHIFT);
-                window_writeincr(outWindow, outVect);
+                // window_writeincr(outWindow, outVect);
+                *outPtr++ = outVect;
             }
         }
 };
@@ -178,7 +182,7 @@ template <typename TT_DATA,
           unsigned int TP_DYN_PT_SIZE>
 NOINLINE_DECL void
 fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, TP_API, TP_SSR, TP_DYN_PT_SIZE>::
-    fft_window_main_dyn(input_window<TT_DATA>* __restrict inWindow, output_window<TT_DATA>* __restrict outWindow) {
+    fft_window_main_dyn(input_buffer<TT_DATA>& __restrict inWindow, output_buffer<TT_DATA>& __restrict outWindow) {
     using dataVect_t = ::aie::vector<TT_DATA, kSamplesInVect>;
     using coeffVect_t = ::aie::vector<TT_COEFF, kSamplesInVect>;
     using accVect_t = ::aie::detail::accum<fnAccClass<TT_DATA>(),          // int, cint, FP or CFP
@@ -194,47 +198,58 @@ fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, TP_API, 
     int ptSize;
     int tableBase;
     unsigned int vecInFrame;
-    T_buff_256b<TT_DATA> header;
+    dataVect_t header;
+    // T_buff_256b<TT_DATA> header;
     TT_DATA headerVal;
+    dataVect_t* inPtr = (dataVect_t*)inWindow.data();
+    dataVect_t* outPtr = (dataVect_t*)outWindow.data();
 
     set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
     set_sat();            // do saturate.
 
-    header = window_readincr_256b(inWindow);
-    headerVal = header.val.get(1);
+    // header = window_readincr_256b(inWindow);
+    header = *inPtr++;
+    //  headerVal = header.val.get(1);
+    headerVal = header.get(1);
     ptSizePwr = (int)headerVal.real - kLogSSR;
     ptSize = (1 << ptSizePwr);
     tableBase = tableStarts[kPtSizePwr - ptSizePwr];
 
     if (ptSizePwr >= kMinPtSizePwr && ptSizePwr <= kMaxPtSizePwr) {
-        window_writeincr(outWindow, header.val);
+        //    window_writeincr(outWindow, header.val);
+        *outPtr++ = header;
         vecInFrame = ptSize >> kLogSamplesInVect;
         for (int frame = 0; frame < TP_WINDOW_VSIZE / TP_POINT_SIZE; frame++)
             chess_prepare_for_pipelining chess_loop_range(TP_WINDOW_VSIZE / TP_POINT_SIZE, ) {
                 coeffVectPtr = (coeffVect_t*)(&this->weights[tableBase]);
                 //#pragma unroll (kVecInFrame)
                 for (int vect = 0; vect < vecInFrame; vect++) {
-                    dataVect = window_readincr_v<kSamplesInVect>(inWindow);
+                    // dataVect = window_readincr_v<kSamplesInVect>(inWindow);
+                    dataVect = *inPtr++;
                     coeffVect = *coeffVectPtr++;
                     acc = ::aie::mul(dataVect, coeffVect);
                     outVect = acc.template to_vector<TT_DATA>(TP_SHIFT);
-                    window_writeincr(outWindow, outVect);
+                    // window_writeincr(outWindow, outVect);
+                    *outPtr++ = outVect;
                 }
                 for (int vect = vecInFrame; vect < kVecInFrame; vect++) {
-                    dataVect = window_readincr_v<kSamplesInVect>(inWindow);
-                    window_writeincr(outWindow, blankVect);
+                    dataVect = *inPtr++;
+                    *outPtr++ = blankVect;
                 }
             }
     } else {
         // indicate that the frame is invalid by setting the flag in the status field of the header.
-        header.val.set(unitVector<TT_DATA>(),
-                       std::is_same<TT_DATA, cint16>::value ? 7 : 3); // set the invalid flag in the status location.
-        window_writeincr(outWindow, header.val);
+        // header.val.set(unitVector<TT_DATA>(), std::is_same<TT_DATA,cint16>::value ? 7:3); //set the invalid flag in
+        // the status location.
+        header.set(unitVector<TT_DATA>(), std::is_same<TT_DATA, cint16>::value ? 7 : 3);
+        // window_writeincr(outWindow, header.val);
+        *outPtr++ = header;
 
         // write out blank window
-        TT_DATA* ybuff = (TT_DATA*)outWindow->ptr;
+        // TT_DATA* ybuff = (TT_DATA*)outWindow->ptr;
         using write_type = ::aie::vector<TT_DATA, 128 / 8 / sizeof(TT_DATA)>;
-        write_type* blankDataPtr = (write_type*)(ybuff); // addition is in TT_DATA currency, then cast to 128b
+        // write_type* blankDataPtr = (write_type*)(ybuff); //addition is in TT_DATA currency, then cast to 128b
+        write_type* blankDataPtr = (write_type*)(outPtr);
         for (int i = 0; i < TP_WINDOW_VSIZE / (16 / sizeof(TT_DATA)); i++) {
             *blankDataPtr++ = ::aie::zeros<TT_DATA, 16 / sizeof(TT_DATA)>();
         }

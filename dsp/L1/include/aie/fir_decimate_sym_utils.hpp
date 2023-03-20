@@ -59,66 +59,36 @@ struct T_outValDecSym : T_outVal384<TT_DATA, TT_COEFF> {
 // Functions
 
 template <typename TT_DATA, typename TT_COEFF, unsigned int T_SIZE>
-INLINE_DECL void fnLoadXIpData(T_buff_1024b<TT_DATA>& buff,
-                               const unsigned int splice,
-                               input_window<TT_DATA>* inWindow) {
-    if
-        constexpr(T_SIZE == 256) {
-            T_buff_256b<TT_DATA> readData;
-            const short kSpliceRange = 4;
-            readData = window_readincr_256b<TT_DATA>(inWindow);
-            buff.val = upd_w(buff.val, splice % kSpliceRange, readData.val);
-        }
-    else {
-        T_buff_128b<TT_DATA> readData;
-        const short kSpliceRange = 8;
-        readData = window_readincr_128b<TT_DATA>(inWindow);
-        buff.val = upd_v(buff.val, splice % kSpliceRange, readData.val);
-    }
+INLINE_DECL void fnLoadXIpData(T_buff_1024b<TT_DATA>& buff, const unsigned int splice, auto& inItr) {
+    constexpr short kSpliceRange = T_SIZE == 256 ? 4 : 8;
+    constexpr int kVectSize = T_SIZE / 8 / sizeof(TT_DATA);
+    using t_vect = ::aie::vector<TT_DATA, kVectSize>;
+    t_vect* readPtr = (t_vect*)&*inItr;
+    t_vect readVal = *readPtr;
+    inItr += kVectSize;
+    buff.val.insert(splice % kSpliceRange, readVal);
 };
 
 template <typename TT_DATA, typename TT_COEFF, unsigned int T_SIZE>
-INLINE_DECL void fnLoadXIpData(T_buff_512b<TT_DATA>& buff, unsigned int splice, input_window<TT_DATA>* inWindow) {
-    using buf_type = typename T_buff_512b<TT_DATA>::v_type;
-    buf_type chess_storage(L_BUFFER) buffTmp;
-
-    if
-        constexpr(T_SIZE == 256) {
-            T_buff_256b<TT_DATA> readData;
-            const short kSpliceRange = 2;
-            readData = window_readincr_256b<TT_DATA>(inWindow);
-            buffTmp = upd_w(buff.val, splice % kSpliceRange, readData.val);
-            buff.val = buffTmp;
-        }
-    else {
-        T_buff_128b<TT_DATA> readData;
-        const short kSpliceRange = 4;
-        readData = window_readincr_128b<TT_DATA>(inWindow);
-        buffTmp = upd_v(buff.val, splice % kSpliceRange, readData.val);
-        buff.val = buffTmp;
-    }
+INLINE_DECL void fnLoadXIpData(T_buff_512b<TT_DATA>& buff, unsigned int splice, auto& inItr) {
+    constexpr short kSpliceRange = T_SIZE == 256 ? 2 : 4;
+    constexpr int kVectSize = T_SIZE / 8 / sizeof(TT_DATA);
+    using t_vect = ::aie::vector<TT_DATA, kVectSize>;
+    t_vect* readPtr = (t_vect*)&*inItr;
+    t_vect readVal = *readPtr;
+    inItr += kVectSize;
+    buff.val.insert(splice % kSpliceRange, readVal);
 };
 
 template <typename TT_DATA, typename TT_COEFF, unsigned int T_SIZE>
-INLINE_DECL void fnLoadYIpData(T_buff_512b<TT_DATA>& buff, unsigned int splice, input_window<TT_DATA>* inWindow) {
-    using buf_type = typename T_buff_512b<TT_DATA>::v_type;
-    buf_type chess_storage(R_BUFFER) buffTmp;
-
-    if
-        constexpr(T_SIZE == 256) {
-            T_buff_256b<TT_DATA> readData;
-            const short kSpliceRange = 2;
-            readData = window_readdecr_256b<TT_DATA>(inWindow);
-            buffTmp = upd_w(buff.val, splice % kSpliceRange, readData.val);
-            buff.val = buffTmp;
-        }
-    else {
-        T_buff_128b<TT_DATA> readData;
-        const short kSpliceRange = 4;
-        readData = window_readdecr_128b<TT_DATA>(inWindow);
-        buffTmp = upd_v(buff.val, splice % kSpliceRange, readData.val);
-        buff.val = buffTmp;
-    }
+INLINE_DECL void fnLoadYIpData(T_buff_512b<TT_DATA>& buff, unsigned int splice, auto& inItr) {
+    constexpr short kSpliceRange = T_SIZE == 256 ? 2 : 4;
+    constexpr int kVectSize = T_SIZE / 8 / sizeof(TT_DATA);
+    using t_vect = ::aie::vector<TT_DATA, kVectSize>;
+    t_vect* readPtr = (t_vect*)&*inItr;
+    t_vect readVal = *readPtr;
+    inItr -= kVectSize;
+    buff.val.insert(splice % kSpliceRange, readVal);
 };
 
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_DECIMATE_FACTOR>
@@ -135,6 +105,20 @@ INLINE_DECL T_accDecSym<TT_DATA, TT_COEFF> macDecSym1Buff(T_accDecSym<TT_DATA, T
 
     // Do nothing here
     return acc;
+    // constexpr unsigned int Lanes             = fnNumLanesDecSym<TT_DATA, TT_COEFF>();
+    // constexpr unsigned int Points            = 2*fnNumColumnsDecSym<TT_DATA, TT_COEFF>();
+    // constexpr unsigned int CoeffStep         = 1;
+    // constexpr unsigned int DataStepX         = 1;
+    // constexpr unsigned int DataStepY         = TP_DECIMATE_FACTOR;
+    // T_accDecSym<TT_DATA, TT_COEFF> retVal;
+    // retVal.val = ::aie::sliding_mul_sym_ops<Lanes,
+    //                                 Points,
+    //                                 CoeffStep, DataStepX, DataStepY,
+    //                                 TT_COEFF, TT_DATA,
+    //                                 accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>
+    //                                 >::mac_sym
+    //                 (acc.val, zbuff.val, zstart, xbuff.val, xstart, ystart);
+    // return retVal;
 }
 
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_DECIMATE_FACTOR>
@@ -152,6 +136,33 @@ INLINE_DECL T_accDecSym<TT_DATA, TT_COEFF> macDecSym1Buffct(T_accDecSym<TT_DATA,
 
     // Do nothing here
     return acc;
+
+    //     constexpr unsigned int Lanes             = fnNumLanesDecSym<TT_DATA, TT_COEFF>();
+    //     constexpr unsigned int Points            = 2*fnNumColumnsDecSym<TT_DATA, TT_COEFF>()-1;
+    //     constexpr unsigned int CoeffStep         = 1;
+    //     constexpr unsigned int DataStepX         = 1;
+    //     constexpr unsigned int DataStepY         = TP_DECIMATE_FACTOR;
+    //     // constexpr unsigned int DataStepY         = 1;
+
+    //     T_accDecSym<TT_DATA, TT_COEFF> retVal;
+    //     if constexpr (Points == 1){
+    //         retVal.val = ::aie::sliding_mul_ops<Lanes,
+    //                                     Points,
+    //                                     CoeffStep, DataStepX, DataStepY,
+    //                                     TT_COEFF, TT_DATA,
+    //                                     accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>
+    //                                     >::mac
+    //                     (acc.val, zbuff.val, zstart, xbuff.val, xstart);
+    //     } else {
+    //         retVal.val = ::aie::sliding_mul_sym_ops<Lanes,
+    //                                     Points,
+    //                                     CoeffStep, DataStepX, DataStepY,
+    //                                     TT_COEFF, TT_DATA,
+    //                                     accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>
+    //                                     >::mac_sym
+    //                     (acc.val, zbuff.val, zstart, xbuff.val, xstart);
+    //     }
+    //     return retVal;
 }
 
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_FIR_LEN, unsigned int TP_DECIMATE_FACTOR>
@@ -284,6 +295,8 @@ INLINE_DECL T_accDecSym<TT_DATA, TT_COEFF> initMacDecSym1Buff(T_inputIF<CASC_IN_
                                                               unsigned int zstart,
                                                               const unsigned int decimateOffsets) {
     return macDecSym1Buff<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR>(acc, xbuff, xstart, zbuff, zstart);
+    // return macDecSym1Buff<TT_DATA, TT_COEFF, TP_DECIMATE_FACTOR>(acc, xbuff, xstart, ystart, zbuff, zstart,
+    // decimateOffsets);
 };
 
 template <typename TT_DATA,
@@ -300,6 +313,8 @@ INLINE_DECL T_accDecSym<TT_DATA, TT_COEFF> initMacDecSym1Buff(T_inputIF<CASC_IN_
                                                               unsigned int zstart,
                                                               const unsigned int decimateOffsets) {
     return macDecSym1Buff<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR>(acc, xbuff, xstart, zbuff, zstart);
+    // return macDecSym1Buff<TT_DATA, TT_COEFF, TP_DECIMATE_FACTOR>(acc, xbuff, xstart, ystart, zbuff, zstart,
+    // decimateOffsets);
 };
 
 template <typename TT_DATA,
@@ -318,6 +333,8 @@ INLINE_DECL T_accDecSym<TT_DATA, TT_COEFF> initMacDecSym1Buffct(
     unsigned int zstart,
     const unsigned int decimateOffsets) {
     return macDecSym1Buffct<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR>(acc, xbuff, xstart, zbuff, zstart);
+    // return macDecSym1Buffct<TT_DATA, TT_COEFF, TP_DECIMATE_FACTOR>(acc, xbuff, xstart, ystart, ct, zbuff, zstart,
+    // decimateOffsets);
 };
 
 template <typename TT_DATA,
@@ -336,6 +353,8 @@ INLINE_DECL T_accDecSym<TT_DATA, TT_COEFF> initMacDecSym1Buffct(
     unsigned int zstart,
     const unsigned int decimateOffsets) {
     return macDecSym1Buffct<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR>(acc, xbuff, xstart, zbuff, zstart);
+    // return macDecSym1Buffct<TT_DATA, TT_COEFF, TP_DECIMATE_FACTOR>(acc, xbuff, xstart, ystart, ct, zbuff, zstart,
+    // decimateOffsets);
 };
 
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_DECIMATE_FACTOR, unsigned int TP_DUAL_IP>

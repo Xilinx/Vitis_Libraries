@@ -39,6 +39,9 @@ compilation.
 //#include "fft_window_traits.hpp"
 #include <vector>
 #include <array>
+#include <adf.h>
+
+using namespace adf;
 
 //#define _DSPLIB_FFT_WINDOW_HPP_DEBUG_
 
@@ -96,8 +99,8 @@ class fft_window {
     }
 
     // Main function
-    void fft_window_main(input_window<TT_DATA>* __restrict inWindow, output_window<TT_DATA>* __restrict outWindow);
-    void fft_window_main_dyn(input_window<TT_DATA>* __restrict inWindow, output_window<TT_DATA>* __restrict outWindow);
+    void fft_window_main(input_buffer<TT_DATA>& __restrict inWindow, output_buffer<TT_DATA>& __restrict outWindow);
+    void fft_window_main_dyn(input_buffer<TT_DATA>& __restrict inWindow, output_buffer<TT_DATA>& __restrict outWindow);
 };
 
 // fft window kernel class - stream specialization.

@@ -24,7 +24,6 @@ Reference model graph.
 #include <vector>
 #include "test_stim.hpp"
 #include "graph_utils.hpp"
-#include "uut_config.h"
 
 #define Q(x) #x
 #define QUOTE(x) Q(x)

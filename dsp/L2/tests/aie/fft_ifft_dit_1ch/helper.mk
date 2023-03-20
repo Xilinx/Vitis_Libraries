@@ -45,6 +45,14 @@ else ifeq ($(POINT_SIZE), 2048)
 	PT_SIZE_PWR       := 11
 else ifeq ($(POINT_SIZE), 4096)
 	PT_SIZE_PWR       := 12
+else ifeq ($(POINT_SIZE), 8192)
+	PT_SIZE_PWR       := 13
+else ifeq ($(POINT_SIZE), 16384)
+	PT_SIZE_PWR       := 14
+else ifeq ($(POINT_SIZE), 32768)
+	PT_SIZE_PWR       := 15
+else ifeq ($(POINT_SIZE), 65536)
+	PT_SIZE_PWR       := 16
 endif
 
 ifeq ($(API_IO),0)

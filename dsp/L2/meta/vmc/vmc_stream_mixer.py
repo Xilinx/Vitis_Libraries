@@ -15,10 +15,12 @@ def vmc_validate_output_window_size(args):
 def vmc_generate_graph(name, args):
     tmpargs = {}
     tmpargs["TT_DATA"] = args["data_type"]
-    tmpargs["TP_MIXER_MODE"] = 0
+    tmpargs["TP_MIXER_MODE"] = args["mixer_mode"] 
     tmpargs["TP_INPUT_WINDOW_VSIZE"] = args["input_window_size"]
     tmpargs["TP_NUM_OUTPUTS"] = 1
     tmpargs["TP_SSR"] = args["ssr"]
     tmpargs["TP_API"] = 1
+    tmpargs["phaseInc"] = args["phase_increment"]
+    tmpargs["initialPhaseOffset"] = 0
 	  
     return generate_graph(name, tmpargs)

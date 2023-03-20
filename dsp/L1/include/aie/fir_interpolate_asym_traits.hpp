@@ -42,162 +42,31 @@ static constexpr unsigned int kBuffSize32Byte = 32;   // 256-bit buffer size in 
 // maximum tap lengths.
 template <typename TT_DATA, typename TT_COEFF>
 unsigned int fnMaxTapssIntAsym() {
-    return 0;
-}; // default error trap
-template <>
-INLINE_DECL constexpr unsigned int fnMaxTapssIntAsym<cint16, int16>() {
-    return 4096;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnMaxTapssIntAsym<cint16, cint16>() {
-    return 2048;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnMaxTapssIntAsym<int32, int16>() {
-    return 4096;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnMaxTapssIntAsym<int32, int32>() {
-    return 2048;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnMaxTapssIntAsym<cint32, int16>() {
-    return 2048;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnMaxTapssIntAsym<cint32, cint16>() {
-    return 2048;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnMaxTapssIntAsym<cint32, int32>() {
-    return 2048;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnMaxTapssIntAsym<cint32, cint32>() {
-    return 1024;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnMaxTapssIntAsym<float, float>() {
-    return 2048;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnMaxTapssIntAsym<cfloat, float>() {
-    return 2048;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnMaxTapssIntAsym<cfloat, cfloat>() {
-    return 1024;
-};
+    return 8192 / sizeof(TT_COEFF);
+}; //
 
 // The following is a set of type-specialized functions which return the number of accumulator registers
 // available in the processor. Since these may be 384 or 768 bit registers the number could vary by type.
 template <typename TT_DATA, typename TT_COEFF>
 unsigned int fnAccRegsIntAsym() {
-    return 0;
-}; // default error trap
-template <>
-INLINE_DECL constexpr unsigned int fnAccRegsIntAsym<int16, int16>() {
     return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnAccRegsIntAsym<cint16, int16>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnAccRegsIntAsym<cint16, cint16>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnAccRegsIntAsym<int32, int16>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnAccRegsIntAsym<int32, int32>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnAccRegsIntAsym<cint32, int16>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnAccRegsIntAsym<cint32, cint16>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnAccRegsIntAsym<cint32, int32>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnAccRegsIntAsym<cint32, cint32>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnAccRegsIntAsym<float, float>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnAccRegsIntAsym<cfloat, float>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnAccRegsIntAsym<cfloat, cfloat>() {
-    return 4;
-};
+}; //
 
 // function to return the number of lanes for a type combo
-// The default is effectively an error trap, but adding an error message to a constexpr return results in a warning.
 template <typename TT_DATA, typename TT_COEFF>
 INLINE_DECL constexpr unsigned int fnNumLanesIntAsym() {
-    return 0;
+    return fnNumLanes<TT_DATA, TT_COEFF>();
+};
+
+// function to return the columns of lanes for a type combo
+template <typename TT_DATA, typename TT_COEFF>
+INLINE_DECL constexpr unsigned int fnNumColsIntAsym() {
+    return fnNumCols<TT_DATA, TT_COEFF>();
 };
 template <>
-INLINE_DECL constexpr unsigned int fnNumLanesIntAsym<int16, int16>() {
-    return 16;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesIntAsym<cint16, int16>() {
-    return 8;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesIntAsym<cint16, cint16>() {
-    return 8;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesIntAsym<int32, int16>() {
-    return 8;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesIntAsym<int32, int32>() {
-    return 8;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesIntAsym<cint32, int16>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesIntAsym<cint32, cint16>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesIntAsym<cint32, int32>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesIntAsym<cint32, cint32>() {
-    return 2;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesIntAsym<float, float>() {
-    return 8;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesIntAsym<cfloat, float>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesIntAsym<cfloat, cfloat>() {
-    return 4;
-};
+INLINE_DECL constexpr unsigned int fnNumColsIntAsym<int16, int32>() {
+    return 1;
+}; // only single columns can be used due to MAC operating on 256-bit coeff buffer.
 
 // Function to return the lowest common multiple of two numbers
 // A full implementation of this would entail prime factor decomposition, but here

@@ -25,6 +25,8 @@
 #include <vector>
 #include "fir_decimate_asym.hpp"
 #include "fir_graph_utils.hpp"
+#include "fir_decomposer_utils.hpp"
+
 #include "fir_common_traits.hpp"
 
 namespace xf {
@@ -140,6 +142,19 @@ using namespace adf;
  * @tparam TP_API specifies if the input/output interface should be window-based or stream-based.  \n
  *         The values supported are 0 (window API) or 1 (stream API).
  * @tparam TP_SSR specifies the number of parallel input/output paths where samples are interleaved between paths,
+ giving an overall higher throughput.   \n
+ *         An SSR of 1 means just one output leg, and is the backwards compatible option.
+ * @tparam TP_PARA_DECI_POLY specifies the number of decimator polyphases that will be split up
+ * and executed in a series of pipelined cascade stages, resulting in additional input paths. \n
+ *         A TP_PARA_DECI_POLY of 1 means just one input leg, and is the backwards compatible option. \n
+ *         TP_PARA_DECI_POLY = TP_DECIMATE_FACTOR will result in an decimate factor of polyphases,
+ * operating as independant single rate filters connected by cascades.
+ *          TP_PARA_DECI_POLY < TP_DECIMATE_FACTOR will result in the polyphase branches operating as
+ * independant decimators connected by cascades.
+ *
+ *         The number of AIEs used is given by PARA_DECI_POLY*SSR^2*CASC_LEN. \n
+ *
+ * @tparam TP_SSR specifies the number of parallel input/output paths where samples are interleaved between paths,
  *         giving an overall higher throughput.   \n
  *         A TP_SSR of 1 means just one output leg and 1 input phase, and is the backwards compatible option. \n
  *         The number of AIEs used is given by ``TP_SSR^2 * TP_CASC_LEN``. \n
@@ -157,7 +172,8 @@ template <typename TT_DATA,
           unsigned int TP_NUM_OUTPUTS = 1,
           unsigned int TP_DUAL_IP = 0,
           unsigned int TP_API = 0,
-          unsigned int TP_SSR = 1>
+          unsigned int TP_SSR = 1,
+          unsigned int TP_PARA_DECI_POLY = 1>
 class fir_decimate_asym_graph : public graph {
    private:
     static_assert(TP_CASC_LEN <= 40, "ERROR: Unsupported Cascade length");
@@ -191,10 +207,17 @@ class fir_decimate_asym_graph : public graph {
                   "Module size of 32kB");
     static_assert(TP_API == 1 || TP_SSR == 1, "ERROR: SSR > 1 is only supported for streaming API");
     // static_assert(TP_USE_COEFF_RELOAD==0 || TP_SSR == 1, "ERROR: SSR > 1 is only supported for static coefficients");
+
     // 3d array for storing net information.
     // address[inPhase][outPath][cascPos]
-    std::array<std::array<std::array<connect<stream, stream>*, TP_CASC_LEN>, TP_SSR>, TP_SSR> net;
-    std::array<std::array<std::array<connect<stream, stream>*, TP_CASC_LEN>, TP_SSR>, TP_SSR> net2;
+    std::array<std::array<std::array<std::array<std::array<connect<stream, stream>*, TP_CASC_LEN>, TP_SSR>, TP_SSR>,
+                          TP_PARA_DECI_POLY>,
+               1>
+        net;
+    std::array<std::array<std::array<std::array<std::array<connect<stream, stream>*, TP_CASC_LEN>, TP_SSR>, TP_SSR>,
+                          TP_PARA_DECI_POLY>,
+               1>
+        net2;
 
     /**
      * Base value FIFO Depth, in words (32-bits).
@@ -240,11 +263,12 @@ class fir_decimate_asym_graph : public graph {
         using BTT_COEFF = TT_COEFF;
         static constexpr unsigned int BTP_FIR_LEN = TP_FIR_LEN;
         static constexpr unsigned int BTP_FIR_RANGE_LEN =
-            TRUNC((CEIL(TP_FIR_LEN, rnd) / (TP_CASC_LEN * TP_SSR)), TP_DECIMATE_FACTOR);
+            TRUNC((CEIL(TP_FIR_LEN, rnd) / (TP_CASC_LEN * TP_SSR * TP_PARA_DECI_POLY)),
+                  TP_DECIMATE_FACTOR / TP_PARA_DECI_POLY);
         static constexpr unsigned int BTP_DECIMATE_FACTOR = TP_DECIMATE_FACTOR;
         static constexpr unsigned int BTP_SHIFT = TP_SHIFT;
         static constexpr unsigned int BTP_RND = TP_RND;
-        static constexpr unsigned int BTP_INPUT_WINDOW_VSIZE = TP_INPUT_WINDOW_VSIZE / TP_SSR;
+        static constexpr unsigned int BTP_INPUT_WINDOW_VSIZE = TP_INPUT_WINDOW_VSIZE / (TP_SSR * TP_PARA_DECI_POLY);
         static constexpr bool BTP_CASC_IN = TP_CASC_IN;
         static constexpr bool BTP_CASC_OUT = TP_CASC_OUT;
         static constexpr unsigned int BTP_CASC_LEN = TP_CASC_LEN;
@@ -253,14 +277,11 @@ class fir_decimate_asym_graph : public graph {
         static constexpr unsigned int BTP_DUAL_IP = TP_DUAL_IP;
         static constexpr unsigned int BTP_API = TP_API;
         static constexpr unsigned int BTP_SSR = TP_SSR;
+        static constexpr unsigned int BTP_PARA_DECI_POLY = TP_PARA_DECI_POLY;
         static constexpr unsigned int BTP_COEFF_PHASES = TP_SSR;
         static constexpr unsigned int BTP_COEFF_PHASES_LEN = TP_FIR_LEN;
         static constexpr int BTP_MODIFY_MARGIN_OFFSET = 0;
     };
-
-    template <int ssr_dim>
-    using ssrKernelLookup = ssr_kernels<ssr_params<ssr_dim>, fir::decimate_asym::fir_decimate_asym_tl>;
-    using lastSSRKernel = ssrKernelLookup<(TP_SSR * TP_SSR) - 1>;
 
     template <unsigned int CL>
     struct tmp_ssr_params : public ssr_params<0> {
@@ -307,10 +328,15 @@ class fir_decimate_asym_graph : public graph {
 
    public:
     /**
+     * Size of the Input port array in SSR operation mode
+     **/
+    static constexpr unsigned int IN_SSR = TP_SSR * TP_PARA_DECI_POLY;
+
+    /**
      * The array of kernels that will be created and mapped onto AIE tiles.
      * Number of kernels (``TP_CASC_LEN * TP_SSR``) will be connected with each other by cascade interface.
      **/
-    kernel m_firKernels[TP_CASC_LEN * TP_SSR * TP_SSR];
+    kernel m_firKernels[TP_CASC_LEN * TP_SSR * TP_SSR * TP_PARA_DECI_POLY];
 
     /**
      * The input data to the function. This input is either a window API of
@@ -321,7 +347,7 @@ class fir_decimate_asym_graph : public graph {
      * Margin size (in Bytes) equals to TP_FIR_LEN rounded up to a nearest
      * multiple of 32 bytes.
      **/
-    port_array<input, TP_SSR> in;
+    port_array<input, IN_SSR> in;
 
     /**
      * The output data from the function. This output is either a window API of
@@ -336,7 +362,7 @@ class fir_decimate_asym_graph : public graph {
      * samples of TT_DATA type or stream API (depending on TP_API).
      *
      **/
-    port_conditional_array<input, (TP_DUAL_IP == 1), TP_SSR> in2;
+    port_conditional_array<input, (TP_DUAL_IP == 1), IN_SSR> in2;
 
     /**
      * The conditional array of input ports  used to pass run-time programmable (RTP) coeficients.
@@ -379,7 +405,8 @@ class fir_decimate_asym_graph : public graph {
      * @param[in] cascadePosition   an index to the kernel's position in the cascade.
      **/
     connect<stream, stream>* getInNet(int ssrOutPathIndex, int ssrInPhaseIndex, int cascadePosition) {
-        return net[ssrOutPathIndex][ssrInPhaseIndex][cascadePosition];
+        // return net[0][0][ssrOutPathIndex][ssrInPhaseIndex][cascadePosition];
+        return getInNet(cascadePosition, ssrInPhaseIndex, ssrOutPathIndex, 0);
     };
 
     /**
@@ -392,7 +419,41 @@ class fir_decimate_asym_graph : public graph {
      * @param[in] cascadePosition   an index to the kernel's position in the cascade.
      **/
     connect<stream, stream>* getIn2Net(int ssrOutPathIndex, int ssrInPhaseIndex, int cascadePosition) {
-        return net2[ssrOutPathIndex][ssrInPhaseIndex][cascadePosition];
+        // return net2[0][0][ssrOutPathIndex][ssrInPhaseIndex][cascadePosition];
+        return getIn2Net(cascadePosition, ssrInPhaseIndex, ssrOutPathIndex, 0);
+    };
+
+    /**
+     * Access function to get pointer to net of the ``` in ``` port.
+     * Nets only get assigned when streaming interface is being broadcast, i.e.
+     * nets only get used when TP_API == 1 and TP_CASC_LEN > 1
+     * @param[in] cascadePosition   an index to the kernel's position in the cascade.
+     * @param[in] ssrInPhaseIndex     an index to the input data Phase
+     * @param[in] ssrOutPathIndex      an index to the output data Path.
+     * @param[in] paraPolpyhaseIndex   an index to the kernel's parallel polyphase.
+     **/
+    connect<stream, stream>* getInNet(int cascadePosition,
+                                      int ssrInPhaseIndex,
+                                      int ssrOutPathIndex,
+                                      int paraPolpyhaseIndex) {
+        return net[0][paraPolpyhaseIndex][ssrOutPathIndex][ssrInPhaseIndex][cascadePosition];
+    };
+
+    /**
+     * Access function to get pointer to net of the ``` in2 ``` port,
+     * when port is being generated, i.e. when TP_DUAL_IP == 1.
+     * Nets only get assigned when streaming interface is being broadcast, i.e.
+     * nets only get used when TP_API == 1 and TP_CASC_LEN > 1
+     * @param[in] cascadePosition   an index to the kernel's position in the cascade.
+     * @param[in] ssrInPhaseIndex     an index to the input data Phase
+     * @param[in] ssrOutPathIndex      an index to the output data Path.
+     * @param[in] paraPolpyhaseIndex   an index to the kernel's parallel polyphase.
+     **/
+    connect<stream, stream>* getIn2Net(int cascadePosition,
+                                       int ssrInPhaseIndex,
+                                       int ssrOutPathIndex,
+                                       int paraPolpyhaseIndex) {
+        return net2[0][paraPolpyhaseIndex][ssrOutPathIndex][ssrInPhaseIndex][cascadePosition];
     };
 
     /**
@@ -402,24 +463,32 @@ class fir_decimate_asym_graph : public graph {
         // return the architecture for first kernel in the design (only one for single kernel designs).
         // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
         // best.
-        constexpr unsigned int firRangeSSR = CEIL(TP_FIR_LEN, TP_SSR) / TP_SSR;
+        constexpr unsigned int firRangeSSR =
+            CEIL(TP_FIR_LEN, (TP_SSR * TP_PARA_DECI_POLY)) / (TP_SSR * TP_PARA_DECI_POLY);
         constexpr unsigned int firRange =
             (TP_CASC_LEN == 1) ? firRangeSSR : fnFirRange<firRangeSSR, TP_CASC_LEN, 0, TP_DECIMATE_FACTOR>();
-        return fir_decimate_asym<TT_DATA, TT_COEFF, firRangeSSR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
-                                 (TP_INPUT_WINDOW_VSIZE / TP_SSR), false, true, firRange, 0, TP_CASC_LEN,
-                                 TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_API, TP_SSR>::get_m_kArch();
+        // TODO restructure this to take the architecture from the resolved decomposer instead of this kludge
+        return 0;
+        // return fir_decimate_asym<TT_DATA, TT_COEFF, firRangeSSR, TP_DECIMATE_FACTOR/TP_PARA_DECI_POLY, TP_SHIFT,
+        // TP_RND,
+        //                          (TP_INPUT_WINDOW_VSIZE / TP_SSR), false, true, firRangeSSR, 0, TP_CASC_LEN,
+        //                          TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_API, 0>::get_m_kArch();
     };
 
+    static constexpr unsigned int lastSSRDim = (TP_SSR * TP_SSR) - 1;
+
+    // src file might not be interpolate_asym - use decomposer utility to get sourcefile.
+    static constexpr const char* srcFileName = decomposer::getSourceFile<ssr_params<0> >();
     /**
      * @brief This is the constructor function for the FIR graph with static coefficients.
      * @param[in] taps   a reference to the std::vector array of taps values of type TT_COEFF.
      **/
-    fir_decimate_asym_graph(const std::vector<TT_COEFF>& taps) : net{} {
+    fir_decimate_asym_graph(const std::vector<TT_COEFF>& taps) {
         // create kernels
-        lastSSRKernel::create_and_recurse(m_firKernels, taps);
-        lastSSRKernel::create_connections(m_firKernels, &in[0], in2, &out[0], out2, coeff, net, net2, casc_in,
-                                          "fir_decimate_asym.cpp");
-    };
+        decomposer::polyphase_decomposer<ssr_params<lastSSRDim> >::create(m_firKernels, taps);
+        decomposer::polyphase_decomposer<ssr_params<lastSSRDim> >::create_connections(
+            m_firKernels, &in[0], in2, &out[0], out2, coeff, net, net2, casc_in, srcFileName);
+    }
 
     /**
      * @brief This is the constructor function for the FIR graph with reloadable coefficients.
@@ -427,10 +496,10 @@ class fir_decimate_asym_graph : public graph {
     fir_decimate_asym_graph() {
         // create kernels
         // printParams<ssr_params<0>>();
-        lastSSRKernel::create_and_recurse(m_firKernels);
-        lastSSRKernel::create_connections(m_firKernels, &in[0], in2, &out[0], out2, coeff, net, net2, casc_in,
-                                          "fir_decimate_asym.cpp");
-    };
+        decomposer::polyphase_decomposer<ssr_params<lastSSRDim> >::create(m_firKernels);
+        decomposer::polyphase_decomposer<ssr_params<lastSSRDim> >::create_connections(
+            m_firKernels, &in[0], in2, &out[0], out2, coeff, net, net2, casc_in, srcFileName);
+    }
 
     /**
     * @brief Access function to get Graphs minimum cascade length for a given configuration.

@@ -1,0 +1,30 @@
+{
+    "graphSourceFile": "DDS_8e251ae8.cpp",
+    "graphName": "DDS_8e251ae8",
+    "graphHeaderFile": "DDS_8e251ae8.h",
+    "graphSearchPath": [
+        "L2/include/aie",
+        "L2/tests/aie/common/inc",
+        "L1/include/aie",
+        "L1/src/aie",
+        "L1/tests/aie/inc",
+        "L1/tests/aie/src"
+    ],
+    "graphPreProcOptions": [],
+    "ports": [
+        {
+            "name": "out[0]",
+            "portkind": "window",
+            "direction": "out",
+            "basictype": "int16",
+            "windowsize": 4096,
+            "margin": 0,
+            "synchronicity": "sync",
+            "isArray": false,
+            "numElements": 1,
+            "isComplex": true,
+            "isStdComplex": false
+        }
+    ],
+    "graphSourceFileUpdated": false
+}

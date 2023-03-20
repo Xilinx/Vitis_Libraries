@@ -225,6 +225,7 @@ class fir_sr_asym_graph : public graph {
     using first_casc_kernel_in_first_ssr = fir_sr_asym_tl<first_casc_params>;
 
     static_assert(TP_SSR >= 1, "ERROR: TP_SSR must be 1 or higher");
+    static_assert(TP_SSR == 1 || TP_API != USE_WINDOW_API, "Window interfaces are not supported for SSR");
 
     static_assert(TP_FIR_LEN % TP_SSR == 0, "TP_FIR LEN must be divisble by TP_SSR"); //
     // static_assert(TP_USE_COEFF_RELOAD != 2 || (TP_FIR_LEN % TP_SSR == 0), "TP_FIR LEN must be divisble by TP_SSR, at

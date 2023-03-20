@@ -65,22 +65,30 @@ INLINE_DECL T_outVal384<TT_DATA, TT_COEFF> shiftAndSaturateDecAsym(const T_acc38
 
 //
 template <typename TT_DATA, unsigned int T_SIZE>
-INLINE_DECL void fnLoadXIpData(T_buff_1024b<TT_DATA>& buff,
-                               const unsigned int splice,
-                               input_window<TT_DATA>* inWindow) {
+INLINE_DECL void fnLoadXIpData(T_buff_1024b<TT_DATA>& buff, const unsigned int splice, auto& inItr) {
+    constexpr int k128Vsize = 128 / 8 / sizeof(TT_DATA);
+    using t_128vect = ::aie::vector<TT_DATA, k128Vsize>;
+    t_128vect* read128Ptr;
+    constexpr int k256Vsize = 256 / 8 / sizeof(TT_DATA);
+    using t_256vect = ::aie::vector<TT_DATA, k256Vsize>;
+    t_256vect* read256Ptr;
     using buf_type = typename T_buff_1024b<TT_DATA>::v_type;
     if
         constexpr(T_SIZE == 256) {
             T_buff_256b<TT_DATA> readData;
             const short kSpliceRange = 4;
-            readData = window_readincr_256b<TT_DATA>(inWindow); // Read 256b from input window
+            read256Ptr = (t_256vect*)&*inItr;
+            inItr += k256Vsize;
+            readData.val = *read256Ptr;
             buf_type chess_storage(Y_BUFFER) sb = upd_w(buff.val, splice % kSpliceRange, readData.val);
             buff.val = sb;
         }
     else {
         T_buff_128b<TT_DATA> readData;
         const short kSpliceRange = 8;
-        readData = window_readincr_128b<TT_DATA>(inWindow);
+        read128Ptr = (t_128vect*)&*inItr;
+        inItr += k128Vsize;
+        readData.val = *read128Ptr;
         buf_type chess_storage(Y_BUFFER) sb = upd_v(buff.val, splice % kSpliceRange, readData.val);
         buff.val = sb;
     }
@@ -125,7 +133,16 @@ INLINE_DECL T_buff_512b<int16> select(const unsigned int sel,
                                       const unsigned int xOffsets,
                                       const unsigned int xstartUpper) {
     T_buff_512b<int16> retVal;
-    // select32 if int16/int16 was supported
+    const unsigned int xoffsets = xOffsets << 1;
+    const unsigned int xoffsets_hi = 0;
+    const unsigned int yoffsets = xOffsets << 1;
+    const unsigned int yoffsets_hi = xOffsets << 1;
+    const unsigned int xsquare = 0x3210;
+    const unsigned int ysquare = 0x3210;
+    // Due to xsqure limitations (only able to offset 0x3 samples), int16 data is not able to use pre-select.
+
+    retVal.val =
+        select32(sel, xbuff.val, xstart, xoffsets, xoffsets_hi, xsquare, xstartUpper, yoffsets, yoffsets_hi, ysquare);
     return retVal;
 }
 template <>
@@ -180,7 +197,7 @@ INLINE_DECL T_buff_512b<TT_DATA> select(T_buff_1024b<TT_DATA> xbuff,
     // Samples from 1-24-bit buffer that are offset by decimate_factor are placed in adjacent position in the temp
     // 512-bit buffer and can be indexed nicely.
     const unsigned int selAddr = Cols * Lanes / 2;                                // lanes 2 to 8.
-    const unsigned int sel = selAddr == 2 ? 0xC : selAddr == 4 ? 0xFFF0 : 0xFF00; // lanes 2 to 8.
+    const unsigned int sel = selAddr == 2 ? 0xC : selAddr == 4 ? 0xFFF0 : 0xFF00; // lanes 4 to 8.
 
     retVal = select(sel, xbuff, xstart, xOffsets, xstartUpper);
     return retVal;
@@ -240,6 +257,7 @@ INLINE_DECL T_accDecAsym<TT_DATA, TT_COEFF> macDecAsym(T_accDecAsym<TT_DATA, TT_
     constexpr unsigned int Cols = fnNumColumnsDecAsym<TT_DATA, TT_COEFF>();
     constexpr unsigned int CoeffStep = 1;
     constexpr unsigned int DataStepX = 1;
+
     if
         constexpr(TP_DFX == kLowDF) {
             constexpr unsigned int DataStepY = TP_DECIMATE_FACTOR;

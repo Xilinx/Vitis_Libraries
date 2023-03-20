@@ -3,7 +3,7 @@
   "ip_name": "vmc_fir_decimate_asym",
   "block_info": {
     "label": "FIR Asymmetric Decimation",
-    "description": ""
+    "description": "FIR Asymmetric Decimation filter block for AI Engines."
   },
   "parameters": [
     {
@@ -12,7 +12,11 @@
       "description": "The type of individual data samples input to and output of the filter function",
       "enum": [ "int16", "cint16", "int32", "cint32", "float", "cfloat" ],
       "default": "cint16",
-      "type": "typename"
+      "type": "typename",
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"popup"
+      }
     },
     {
       "name": "coef_type",
@@ -25,6 +29,10 @@
         "file": "vmc_fir_decimate_asym.py",
         "function": "vmc_validate_coef_type",
         "args": ["data_type"]
+      },
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"popup"
       }
     },
     {
@@ -32,16 +40,13 @@
       "label": "Use runtime coefficient reloading",
       "description": "Allows the user to select of runtime coefficient reloading",
       "default": false,
-      "type": "bool"
-    },
-    {
-      "name": "fir_length",
-      "label": "fir filter length",
-      "description": "Specify fir length for coefficient reloading",
-      "default": 32,
-      "minimum": 4,
-      "maximum": 8192,
-      "type": "int"
+      "type": "bool",
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"checkbox",
+            "disable":"coeff",
+            "enable":"fir_length"
+      }
     },
     {
       "name": "coeff",
@@ -53,9 +58,26 @@
       "validator": {
         "file": "vmc_fir_decimate_asym.py",
         "function": "vmc_validate_coeff",
-        "args": ["use_coeff_reload", "coef_type" ,"fir_length", "data_type", "casc_length", "use_casc_length", "decimate_factor"]
+        "args": ["use_coeff_reload", "coef_type" ,"fir_length", "data_type", "casc_length", "decimate_factor"]
+      },
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
       }
     },
+    {
+      "name": "fir_length",
+      "label": "fir filter length",
+      "description": "Specify fir length for coefficient reloading",
+      "default": 32,
+      "minimum": 4,
+      "maximum": 8192,
+      "type": "int",
+        "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
+      }
+    },    
 	{
       "name": "decimate_factor",
       "label": "The decimation factor of the filter function.",
@@ -68,6 +90,10 @@
         "file": "vmc_fir_decimate_asym.py",
         "function": "vmc_validate_decimate_factor",
         "args": ["data_type", "coef_type"]
+      },
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
       }
     },
     {
@@ -82,36 +108,10 @@
         "file": "vmc_fir_decimate_asym.py",
         "function": "vmc_validate_input_window_size",
         "args": ["data_type", "coef_type", "use_coeff_reload", "coeff", "fir_length", "decimate_factor"]
-      }
-    },
-    {
-      "name": "input_sampling_rate",
-      "label": "Target input throughput (MSPS)",
-      "description": "The target input throughput of the filter function in MSPS",
-      "default": 200,
-      "maximum": 1000,
-      "minimum": 1,
-      "type": "int"
-    },
-    {
-      "name": "use_casc_length",
-      "label": "Specify cascade length",
-      "description": "Allows the user to specify length of the cascaded kernels",
-      "default": false,
-      "type": "bool"
-    },
-    {
-      "name": "casc_length",
-      "label": "Number of cascade stages",
-      "description": "The length of cascaded kernels",
-      "default": 1,
-      "type": "int",
-      "maximum": 40,
-      "minimum": 1,
-      "validator": {
-        "file": "vmc_fir_decimate_asym.py",
-        "function": "vmc_validate_casc_length",
-        "args": ["use_coeff_reload", "use_casc_length", "fir_length"]
+      },
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
       }
     },
     {
@@ -126,6 +126,10 @@
         "file": "vmc_fir_decimate_asym.py",
         "function": "vmc_validate_shift_val",
         "args": ["data_type"]
+      },
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
       }
     },
     {
@@ -135,8 +139,30 @@
       "enum": [0, 1, 2, 3, 4, 5, 6, 7],
       "enum_str": ["Floor", "Ceiling", "Round to positive infinity", "Round to negative infinity", "Round symmetrical to infinity", "Round symmetrical to zero", "Round convergent to even", "Round convergent to odd"],
       "default": 2,
-      "type": "int"
-    }
+      "type": "int",
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"popup"
+      }
+    },
+    {
+      "name": "casc_length",
+      "label": "Number of cascade stages",
+      "description": "The length of cascaded kernels",
+      "default": 1,
+      "type": "int",
+      "maximum": 40,
+      "minimum": 1,
+      "validator": {
+        "file": "vmc_fir_decimate_asym.py",
+        "function": "vmc_validate_casc_length",
+        "args": ["use_coeff_reload", "fir_length"]
+      },
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
+      }
+    }   
   ],
   "generator": {
     "file": "vmc_fir_decimate_asym.py",

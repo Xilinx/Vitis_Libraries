@@ -224,6 +224,9 @@ class test_graph : public graph {
 
         if (inputBufferSize > MAX_PING_PONG_SIZE) {
             single_buffer(firGraph.getKernels()[0].in[0]);
+#if (DUAL_IP == 1)
+            single_buffer(firGraph.getKernels()[0].in[1]);
+#endif
         }
         if (outputBufferSize > MAX_PING_PONG_SIZE) {
             single_buffer(firGraph.getKernels()[CASC_LEN - 1].out[0]);

@@ -1,0 +1,14 @@
+{
+    "spec": "vmc_dyn_pt_fft.json",
+    "outdir": "./xmc_aie_lib/FFT_Dynamic_Point_bd8c8330",
+    "parameters": {
+        "data_type": "cint16",
+        "point_size": 64,
+        "input_window_size": 64,
+        "shift_val": 0,
+        "input_sampling_rate": 200,
+        "use_casc_length": false,
+        "casc_length": 1
+    },
+    "updated_parameter": ""
+}

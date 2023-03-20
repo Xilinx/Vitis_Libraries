@@ -20,6 +20,8 @@ def vmc_generate_graph(name, args):
     tmpargs["TP_NUM_OUTPUTS"] = 1
     tmpargs["TP_SSR"] = args["ssr"]
     tmpargs["TP_API"] = 1
+    tmpargs["phaseInc"] = args["phase_increment"]
+    tmpargs["initialPhaseOffset"] = 0
 	
    
     return generate_graph(name, tmpargs)

@@ -176,8 +176,6 @@ INLINE_DECL T_accIntAsym<int32, int16> mulIntAsym(v32int32 xbuff,
                                                   int64 xoffsetslut,
                                                   int xstartlut) {
     T_accIntAsym<int32, int16> retVal;
-    const unsigned int kDRegLen = 8;
-    const unsigned int kBitsInNibble = 4;
     const unsigned int zoffsets = 0x76543210;
     const unsigned int xstep = 1;
     const unsigned int zstep = lanes;
@@ -197,8 +195,6 @@ INLINE_DECL T_accIntAsym<int32, int16> macIntAsym(T_accIntAsym<int32, int16> acc
                                                   int64 xoffsetslut,
                                                   int xstartlut) {
     T_accIntAsym<int32, int16> retVal;
-    const unsigned int kDRegLen = 8;
-    const unsigned int kBitsInNibble = 4;
     const unsigned int zoffsets = 0x76543210;
     const unsigned int xstep = 1;
     const unsigned int zstep = lanes;
@@ -210,6 +206,128 @@ INLINE_DECL T_accIntAsym<int32, int16> macIntAsym(T_accIntAsym<int32, int16> acc
     return retVal;
 }
 
+// DATA = cint16, COEFF = int32
+INLINE_DECL T_accIntAsym<cint16, int32> mulIntAsym(v32cint16 xbuff,
+                                                   v8int32 zbuff,
+                                                   unsigned int interpolateFactor,
+                                                   unsigned int lanes,
+                                                   int64 xoffsetslut,
+                                                   int xstartlut) {
+    T_accIntAsym<cint16, int32> retVal;
+    const unsigned int xstep = 1;
+    const unsigned int zoffsets = 0x76543210;
+    const unsigned int zstep = lanes;
+    unsigned int xstart = xstartlut;
+    unsigned int xoffsets = (int32)xoffsetslut;
+    unsigned int zstart = 0;
+
+    retVal.val = lmul4(xbuff, xstart, xoffsets, xstep, zbuff, zstart, zoffsets, zstep);
+    return retVal;
+}
+
+INLINE_DECL T_accIntAsym<cint16, int32> macIntAsym(T_accIntAsym<cint16, int32> acc,
+                                                   v32cint16 xbuff,
+                                                   v8int32 zbuff,
+                                                   unsigned int interpolateFactor,
+                                                   unsigned int lanes,
+                                                   int64 xoffsetslut,
+                                                   int xstartlut) {
+    T_accIntAsym<cint16, int32> retVal;
+    const unsigned int xstep = 1;
+    const unsigned int zoffsets = 0x76543210;
+    const unsigned int zstep = lanes;
+    unsigned int xstart = xstartlut;
+    unsigned int xoffsets = (int32)xoffsetslut;
+    unsigned int zstart = 0;
+
+    retVal.val = lmac4(acc.val, xbuff, xstart, xoffsets, xstep, zbuff, zstart, zoffsets, zstep);
+    return retVal;
+}
+
+// DATA = cint16, COEFF = cint32
+INLINE_DECL T_accIntAsym<cint16, cint32> mulIntAsym(v32cint16 xbuff,
+                                                    v4cint32 zbuff,
+                                                    unsigned int interpolateFactor,
+                                                    unsigned int lanes,
+                                                    int64 xoffsetslut,
+                                                    int xstartlut) {
+    T_accIntAsym<cint16, cint32> retVal;
+    const unsigned int zoffsets = 0x76543210;
+    unsigned int xstart = xstartlut;
+    unsigned int xoffsets = (int32)xoffsetslut;
+    unsigned int zstart = 0;
+
+    retVal.val = lmul4(xbuff, xstart, xoffsets, zbuff, zstart, zoffsets);
+    return retVal;
+}
+
+INLINE_DECL T_accIntAsym<cint16, cint32> macIntAsym(T_accIntAsym<cint16, cint32> acc,
+                                                    v32cint16 xbuff,
+                                                    v4cint32 zbuff,
+                                                    unsigned int interpolateFactor,
+                                                    unsigned int lanes,
+                                                    int64 xoffsetslut,
+                                                    int xstartlut) {
+    T_accIntAsym<cint16, cint32> retVal;
+    const unsigned int zoffsets = 0x76543210;
+    unsigned int xstart = xstartlut;
+    unsigned int xoffsets = (int32)xoffsetslut;
+    unsigned int zstart = 0;
+
+    retVal.val = lmac4(acc.val, xbuff, xstart, xoffsets, zbuff, zstart, zoffsets);
+    return retVal;
+}
+
+// DATA = int16, COEFF = int32
+INLINE_DECL T_accIntAsym<int16, int32> mulIntAsym(v64int16 xbuff,
+                                                  v8int32 zbuff,
+                                                  unsigned int interpolateFactor,
+                                                  unsigned int lanes,
+                                                  int64 xoffsetslut,
+                                                  int xstartlut) {
+    T_accIntAsym<int16, int32> retVal;
+    const unsigned int zoffsets = 0x76543210;
+    const unsigned int xstep = 1;
+    const unsigned int mtap = 0;
+    const unsigned int zstep = 0;
+    unsigned int xstart = xstartlut;
+    unsigned int ystart = xstart;
+    unsigned int xoffsets = (int32)xoffsetslut;
+    unsigned int zstart = 0;
+
+    // retVal.val = lmul8(     xbuff, xstart, xoffsets, xstep, zbuff, zstart, zoffsets, zstep);
+    // workaround for exceeding 256-bit zbuff.
+    // Do: acc0 = z00*(x00 - y00) + z01*x01, where z00 = z01, x00=y00=x01
+    retVal.val = lmul8_antisym_ct(xbuff, xstart, xoffsets, ystart, mtap, zbuff, zstart, zoffsets, zstep);
+
+    return retVal;
+}
+
+INLINE_DECL T_accIntAsym<int16, int32> macIntAsym(T_accIntAsym<int16, int32> acc,
+                                                  v64int16 xbuff,
+                                                  v8int32 zbuff,
+                                                  unsigned int interpolateFactor,
+                                                  unsigned int lanes,
+                                                  int64 xoffsetslut,
+                                                  int xstartlut) {
+    T_accIntAsym<int16, int32> retVal;
+    const unsigned int zoffsets = 0x76543210;
+    const unsigned int xstep = 1;
+    const unsigned int mtap = 0;
+    const unsigned int zstep = 0;
+    unsigned int xstart = xstartlut;
+    unsigned int ystart = xstart;
+    unsigned int xoffsets = (int32)xoffsetslut;
+    unsigned int zstart = 0;
+
+    // retVal.val = lmac8(acc.val, xbuff, xstart, xoffsets, xstep, zbuff, zstart, zoffsets, zstep);
+    // workaround for exceeding 256-bit zbuff.
+    // Do: acc0 = z00*(x00 - y00) + z01*x01, where z00 = z01, x00=y00=x01
+    retVal.val = lmac8_antisym_ct(acc.val, xbuff, xstart, xoffsets, ystart, mtap, zbuff, zstart, zoffsets, zstep);
+
+    return retVal;
+}
+
 // DATA = int32,  COEFF = int32>
 INLINE_DECL T_accIntAsym<int32, int32> mulIntAsym(v32int32 xbuff,
                                                   v8int32 zbuff,
@@ -218,8 +336,6 @@ INLINE_DECL T_accIntAsym<int32, int32> mulIntAsym(v32int32 xbuff,
                                                   int64 xoffsetslut,
                                                   int xstartlut) {
     T_accIntAsym<int32, int32> retVal;
-    const unsigned int kDRegLen = 8;
-    const unsigned int kBitsInNibble = 4;
     const unsigned int zoffsets = 0x76543210; // was = 0x00000000;
     unsigned int xstart = xstartlut;
     unsigned int xoffsets = (int32)xoffsetslut;
@@ -237,8 +353,6 @@ INLINE_DECL T_accIntAsym<int32, int32> macIntAsym(T_accIntAsym<int32, int32> acc
                                                   int64 xoffsetslut,
                                                   int xstartlut) {
     T_accIntAsym<int32, int32> retVal;
-    const unsigned int kDRegLen = 8;
-    const unsigned int kBitsInNibble = 4;
     const unsigned int zoffsets = 0x76543210; // 0x00000000;
     unsigned int xstart = xstartlut;
     unsigned int xoffsets = (int32)xoffsetslut;

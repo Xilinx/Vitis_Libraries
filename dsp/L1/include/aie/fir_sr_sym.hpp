@@ -106,11 +106,10 @@ class kernelFilterClass {
     static constexpr unsigned int m_kVOutSize =
         fnNumLanesSym<TT_DATA, TT_COEFF>(); // Output vector size, equal to number of operations in parallel of this
                                             // type combinations that the vector processor performs.
-    // static constexpr unsigned int m_kArchFirLen             =
-    // TP_KERNEL_POSITION==TP_CASC_LEN-1?TP_FIR_RANGE_LEN:TP_FIR_LEN;  //Check if only the remainder of the FIR
-    // (TP_FIR_RANGE_LEN + m_Lanes - due to xoffset alignment) for last kernel in chain fits, otherwise check if full
-    // FIR (TP_FIR_LEN) fits.
-    static constexpr unsigned int m_kArchFirLen = TP_FIR_LEN; // Debug.
+    // static constexpr unsigned int m_kArchFirLen             = TP_FIR_LEN - m_kFirRangeOffset;  // Take all data
+    // samples into account apart from loaded to tbuff in upstream kernels.
+    static constexpr unsigned int m_kArchFirLen =
+        TP_FIR_LEN; // Overrestricting - potentially leading to selecting to 2buff arch where 1buff would be sufficient
     static constexpr eArchType m_kSmallFirArch =
         (TP_INPUT_WINDOW_VSIZE % (m_kLanes * m_kDataLoadsInReg1Buff) == 0)
             ? kArch1Buff
@@ -222,7 +221,7 @@ class kernelFilterClass {
 };
 
 //-----------------------------------------------------------------------------------------------------
-// Single kernel specialization. No cascade ports. Static coefficients
+// Single kernel specialization. Window API. No cascade ports. Static coefficients
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -279,10 +278,12 @@ class fir_sr_sym : public kernelFilterClass<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow);
+    void filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
+                    inWindow,
+                output_circular_buffer<TT_DATA>& outWindow);
 };
 
-// Single kernel specialization. No cascade ports. Static coefficients, dual outputs. Dual Input
+// Single kernel specialization. Window API. No cascade ports. Static coefficients, single output. Dual Input
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -346,10 +347,14 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow, input_window<TT_DATA>* inWindowRev, output_window<TT_DATA>* outWindow);
+    void filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
+                    inWindow,
+                input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
+                    inWindowRev,
+                output_circular_buffer<TT_DATA>& outWindow);
 };
 
-// Single kernel specialization. No cascade ports. Static coefficients, dual output. Single Input
+// Single kernel specialization. Window API. No cascade ports. Static coefficients, dual output. Single Input
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -413,10 +418,13 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow, output_window<TT_DATA>* outWindow2);
+    void filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
+                    inWindow,
+                output_circular_buffer<TT_DATA>& outWindow,
+                output_circular_buffer<TT_DATA>& outWindow2);
 };
 
-// Single kernel specialization. No cascade ports. Static coefficients, dual outputs. Dual Input
+// Single kernel specialization. Window API. No cascade ports. Static coefficients, dual outputs. Dual Input
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -480,14 +488,16 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
-                input_window<TT_DATA>* inWindowRev,
-                output_window<TT_DATA>* outWindow,
-                output_window<TT_DATA>* outWindow2);
+    void filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
+                    inWindow,
+                input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
+                    inWindowRev,
+                output_circular_buffer<TT_DATA>& outWindow,
+                output_circular_buffer<TT_DATA>& outWindow2);
 };
 
 //-----------------------------------------------------------------------------------------------------
-// Single kernel specialization. No cascade ports. Using coefficient reload, single output. Single Input
+// Single kernel specialization. Window API. No cascade ports. Using coefficient reload, single output. Single Input
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -553,13 +563,14 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
-                output_window<TT_DATA>* outWindow,
+    void filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
+                    inWindow,
+                output_circular_buffer<TT_DATA>& outWindow,
                 const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / kSymmetryFactor]);
 };
 
 //-----------------------------------------------------------------------------------------------------
-// Single kernel specialization. No cascade ports. Using coefficient reload, single output. Dual Input
+// Single kernel specialization. Window API. No cascade ports. Using coefficient reload, single output. Dual Input
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -625,12 +636,14 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
-                input_window<TT_DATA>* inWindowRev,
-                output_window<TT_DATA>* outWindow,
+    void filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
+                    inWindow,
+                input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
+                    inWindowRev,
+                output_circular_buffer<TT_DATA>& outWindow,
                 const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / kSymmetryFactor]);
 };
-// Single kernel specialization. No cascade ports. Using coefficient reload, dual output. Single Input
+// Single kernel specialization. Window API. No cascade ports. Using coefficient reload, dual output. Single Input
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -696,13 +709,14 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
-                output_window<TT_DATA>* outWindow,
-                output_window<TT_DATA>* outWindow2,
+    void filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
+                    inWindow,
+                output_circular_buffer<TT_DATA>& outWindow,
+                output_circular_buffer<TT_DATA>& outWindow2,
                 const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / kSymmetryFactor]);
 };
 
-// Single kernel specialization. No cascade ports. Using coefficient reload, dual output. Dual Input
+// Single kernel specialization. Window API. No cascade ports. Using coefficient reload, dual output. Dual Input
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -768,14 +782,16 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
-                input_window<TT_DATA>* inWindowRev,
-                output_window<TT_DATA>* outWindow,
-                output_window<TT_DATA>* outWindow2,
+    void filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
+                    inWindow,
+                input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
+                    inWindowRev,
+                output_circular_buffer<TT_DATA>& outWindow,
+                output_circular_buffer<TT_DATA>& outWindow2,
                 const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / kSymmetryFactor]);
 };
 //-----------------------------------------------------------------------------------------------------
-// Partially specialized classes for cascaded interface - final kernel. Static coefficients, single output
+// Partially specialized classes for: Window API. cascaded interface - final kernel. Static coefficients, single output
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -842,10 +858,12 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow, input_stream_cacc48* inCascade, output_window<TT_DATA>* outWindow);
+    void filter(input_async_buffer<TT_DATA>& __restrict inWindow,
+                input_stream_cacc48* inCascade,
+                output_circular_buffer<TT_DATA>& outWindow);
 };
 
-// Partially specialized classes for cascaded interface - final kernel. Static coefficients, dual output
+// Partially specialized classes for: Window API. cascaded interface - final kernel. Static coefficients, dual output
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -912,14 +930,14 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
+    void filter(input_async_buffer<TT_DATA>& inWindow,
                 input_stream_cacc48* inCascade,
-                output_window<TT_DATA>* outWindow,
-                output_window<TT_DATA>* outWindow2);
+                output_circular_buffer<TT_DATA>& outWindow,
+                output_circular_buffer<TT_DATA>& outWindow2);
 };
 
 //-----------------------------------------------------------------------------------------------------
-// Partially specialized classes for cascaded interface - first kernel. Static coefficients. single Input
+// Partially specialized classes for: Window API. cascaded interface - first kernel. Static coefficients. single Input
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -985,13 +1003,14 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
+    void filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
+                    inWindow,
                 output_stream_cacc48* outCascade,
-                output_window<TT_DATA>* broadcastWindow);
+                output_async_buffer<TT_DATA>& __restrict broadcastWindow);
 };
 
 //-----------------------------------------------------------------------------------------------------
-// Partially specialized classes for cascaded interface - first kernel. Static coefficients. Dual Input
+// Partially specialized classes for: Window API. cascaded interface - first kernel. Static coefficients. Dual Input
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -1057,14 +1076,16 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
-                input_window<TT_DATA>* inWindowRev,
+    void filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
+                    inWindow,
+                input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
+                    inWindowRev,
                 output_stream_cacc48* outCascade,
-                output_window<TT_DATA>* broadcastWindow);
+                output_async_buffer<TT_DATA>& __restrict broadcastWindow);
 };
 
 //-----------------------------------------------------------------------------------------------------
-// Partially specialized classes for cascaded interface - middle kernel. Static coefficients
+// Partially specialized classes for: Window API. cascaded interface - middle kernel. Static coefficients
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -1131,14 +1152,15 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
+    void filter(input_async_buffer<TT_DATA>& inWindow,
                 input_stream_cacc48* inCascade,
                 output_stream_cacc48* outCascade,
-                output_window<TT_DATA>* broadcastWindow);
+                output_async_buffer<TT_DATA>& __restrict broadcastWindow);
 };
 
 //-----------------------------------------------------------------------------------------------------
-// Partially specialized classes for cascaded interface - final kernel. Reloadable coefficients, single output
+// Partially specialized classes for: Window API. cascaded interface - final kernel. Reloadable coefficients, single
+// output
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -1205,10 +1227,13 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow, input_stream_cacc48* inCascade, output_window<TT_DATA>* outWindow);
+    void filter(input_async_buffer<TT_DATA>& inWindow,
+                input_stream_cacc48* inCascade,
+                output_circular_buffer<TT_DATA>& outWindow);
 };
 
-// Partially specialized classes for cascaded interface - final kernel. Reloadable coefficients, dual output
+// Partially specialized classes for: Window API. cascaded interface - final kernel. Reloadable coefficients, dual
+// output
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -1275,14 +1300,15 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
+    void filter(input_async_buffer<TT_DATA>& inWindow,
                 input_stream_cacc48* inCascade,
-                output_window<TT_DATA>* outWindow,
-                output_window<TT_DATA>* outWindow2);
+                output_circular_buffer<TT_DATA>& outWindow,
+                output_circular_buffer<TT_DATA>& outWindow2);
 };
 
 //-----------------------------------------------------------------------------------------------------
-// Partially specialized classes for cascaded interface - first kernel. Reloadable coefficients. Single Input
+// Partially specialized classes for: Window API. cascaded interface - first kernel. Reloadable coefficients. Single
+// Input
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -1348,14 +1374,16 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
+    void filter(input_circular_buffer<TT_DATA,
+                                      extents<inherited_extent>,
+                                      margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
                 output_stream_cacc48* outCascade,
                 const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / kSymmetryFactor],
-                output_window<TT_DATA>* broadcastWindow);
+                output_async_buffer<TT_DATA>& __restrict broadcastWindow);
 };
 
 //-----------------------------------------------------------------------------------------------------
-// Partially specialized classes for cascaded interface - first kernel. Reloadable coefficients. Dual Input
+// Partially specialized classes for: Window API. cascaded interface - first kernel. Reloadable coefficients. Dual Input
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -1421,15 +1449,19 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
-                input_window<TT_DATA>* inWindowRev,
+    void filter(input_circular_buffer<TT_DATA,
+                                      extents<inherited_extent>,
+                                      margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
+                input_circular_buffer<TT_DATA,
+                                      extents<inherited_extent>,
+                                      margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindowRev,
                 output_stream_cacc48* outCascade,
                 const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / kSymmetryFactor],
-                output_window<TT_DATA>* broadcastWindow);
+                output_async_buffer<TT_DATA>& __restrict broadcastWindow);
 };
 
 //-----------------------------------------------------------------------------------------------------
-// Partially specialized classes for cascaded interface - middle kernel. Reeloadable coefficients
+// Partially specialized classes for: Window API. cascaded interface - middle kernel. Reeloadable coefficients
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -1496,10 +1528,10 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
+    void filter(input_async_buffer<TT_DATA>& __restrict inWindow,
                 input_stream_cacc48* inCascade,
                 output_stream_cacc48* outCascade,
-                output_window<TT_DATA>* broadcastWindow);
+                output_async_buffer<TT_DATA>& __restrict broadcastWindow);
 };
 
 // ----------------------------------------------------------------------------
@@ -1507,7 +1539,7 @@ class fir_sr_sym<TT_DATA,
 // ----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------------------------------
-// Single kernel specialization. No cascade ports. Static coefficients
+// Single kernel specialization. Stream API. No cascade ports. Static coefficients
 //-----------------------------------------------------------------------------------------------------
 template <typename TT_DATA,
           typename TT_COEFF,
@@ -1573,10 +1605,13 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow, output_stream<TT_DATA>* outStream);
+    void filter(input_circular_buffer<TT_DATA,
+                                      extents<inherited_extent>,
+                                      margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
+                output_stream<TT_DATA>* outStream);
 };
 
-// Single kernel specialization. No cascade ports. Static coefficients, dual outputs
+// Single kernel specialization. Stream API. No cascade ports. Static coefficients, dual outputs
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -1641,11 +1676,15 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow, output_stream<TT_DATA>* outStream, output_stream<TT_DATA>* outStream2);
+    void filter(input_circular_buffer<TT_DATA,
+                                      extents<inherited_extent>,
+                                      margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
+                output_stream<TT_DATA>* outStream,
+                output_stream<TT_DATA>* outStream2);
 };
 
 //-----------------------------------------------------------------------------------------------------
-// Single kernel specialization. No cascade ports. Using coefficient reload, single output
+// Single kernel specialization. Stream API. No cascade ports. Using coefficient reload, single output
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -1712,12 +1751,14 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
+    void filter(input_circular_buffer<TT_DATA,
+                                      extents<inherited_extent>,
+                                      margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
                 output_stream<TT_DATA>* outStream,
                 const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / kSymmetryFactor]);
 };
 
-// Single kernel specialization. No cascade ports. Using coefficient reload, dual output
+// Single kernel specialization. Stream API. No cascade ports. Using coefficient reload, dual output
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -1784,14 +1825,17 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
+    void filter(input_circular_buffer<TT_DATA,
+                                      extents<inherited_extent>,
+                                      margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
                 output_stream<TT_DATA>* outStream,
                 output_stream<TT_DATA>* outStream2,
                 const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / kSymmetryFactor]);
 };
 
 //-----------------------------------------------------------------------------------------------------
-// Partially specialized classes for cascaded interface - final kernel. Static coefficients, single output
+// Partially specialized classes for Stream API. cascaded interface - final kernel. Static coefficients, (single input),
+// single output
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -1860,10 +1904,90 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow, input_stream_cacc48* inCascade, output_stream<TT_DATA>* outStream);
+    void filter(input_circular_buffer<TT_DATA,
+                                      extents<inherited_extent>,
+                                      margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
+                input_stream_cacc48* inCascade,
+                output_stream<TT_DATA>* outStream);
 };
 
-// Partially specialized classes for cascaded interface - final kernel. Static coefficients, dual output
+//-----------------------------------------------------------------------------------------------------
+// Partially specialized classes for Stream API. cascaded interface - final kernel. Static coefficients, dual input,
+// single output
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
+class fir_sr_sym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_TRUE,
+                 CASC_OUT_FALSE,
+                 TP_FIR_RANGE_LEN,
+                 TP_KERNEL_POSITION,
+                 TP_CASC_LEN,
+                 DUAL_IP_DUAL,
+                 USE_COEFF_RELOAD_FALSE,
+                 1,
+                 USE_STREAM_API,
+                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                     TT_COEFF,
+                                                                     TP_FIR_LEN,
+                                                                     TP_SHIFT,
+                                                                     TP_RND,
+                                                                     TP_INPUT_WINDOW_VSIZE,
+                                                                     CASC_IN_TRUE,
+                                                                     CASC_OUT_FALSE,
+                                                                     TP_FIR_RANGE_LEN,
+                                                                     TP_KERNEL_POSITION,
+                                                                     TP_CASC_LEN,
+                                                                     DUAL_IP_DUAL,
+                                                                     USE_COEFF_RELOAD_FALSE,
+                                                                     1,
+                                                                     USE_STREAM_API,
+                                                                     TP_MODIFY_MARGIN_OFFSET> {
+   public:
+    // Constructor
+    fir_sr_sym(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / kSymmetryFactor])
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_TRUE,
+                            CASC_OUT_FALSE,
+                            TP_FIR_RANGE_LEN,
+                            TP_KERNEL_POSITION,
+                            TP_CASC_LEN,
+                            DUAL_IP_DUAL,
+                            USE_COEFF_RELOAD_FALSE,
+                            1,
+                            USE_STREAM_API,
+                            TP_MODIFY_MARGIN_OFFSET>(taps) {
+        printf("final kernel\n");
+    }
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
+
+    // FIR
+    void filter(input_async_buffer<TT_DATA>& __restrict inWindow,
+                input_stream_cacc48* inCascade,
+                output_stream<TT_DATA>* outStream);
+};
+
+// Partially specialized classes for Stream API. cascaded interface - final kernel. Static coefficients, (single input),
+// dual output
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -1930,14 +2054,89 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
+    void filter(input_circular_buffer<TT_DATA,
+                                      extents<inherited_extent>,
+                                      margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
+                input_stream_cacc48* inCascade,
+                output_stream<TT_DATA>* outStream,
+                output_stream<TT_DATA>* outStream2);
+};
+
+// Partially specialized classes for Stream API. cascaded interface - final kernel. Static coefficients, dual input,
+// dual output
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
+class fir_sr_sym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_TRUE,
+                 CASC_OUT_FALSE,
+                 TP_FIR_RANGE_LEN,
+                 TP_KERNEL_POSITION,
+                 TP_CASC_LEN,
+                 DUAL_IP_DUAL,
+                 USE_COEFF_RELOAD_FALSE,
+                 2,
+                 USE_STREAM_API,
+                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                     TT_COEFF,
+                                                                     TP_FIR_LEN,
+                                                                     TP_SHIFT,
+                                                                     TP_RND,
+                                                                     TP_INPUT_WINDOW_VSIZE,
+                                                                     CASC_IN_TRUE,
+                                                                     CASC_OUT_FALSE,
+                                                                     TP_FIR_RANGE_LEN,
+                                                                     TP_KERNEL_POSITION,
+                                                                     TP_CASC_LEN,
+                                                                     DUAL_IP_DUAL,
+                                                                     USE_COEFF_RELOAD_FALSE,
+                                                                     2,
+                                                                     USE_STREAM_API,
+                                                                     TP_MODIFY_MARGIN_OFFSET> {
+   public:
+    // Constructor
+    fir_sr_sym(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / kSymmetryFactor])
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_TRUE,
+                            CASC_OUT_FALSE,
+                            TP_FIR_RANGE_LEN,
+                            TP_KERNEL_POSITION,
+                            TP_CASC_LEN,
+                            DUAL_IP_DUAL,
+                            USE_COEFF_RELOAD_FALSE,
+                            2,
+                            USE_STREAM_API,
+                            TP_MODIFY_MARGIN_OFFSET>(taps) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
+
+    // FIR
+    void filter(input_async_buffer<TT_DATA>& __restrict inWindow,
                 input_stream_cacc48* inCascade,
                 output_stream<TT_DATA>* outStream,
                 output_stream<TT_DATA>* outStream2);
 };
 
 //-----------------------------------------------------------------------------------------------------
-// Partially specialized classes for cascaded interface - first kernel. Static coefficients. Single Input
+// Partially specialized classes for Stream API. cascaded interface - first kernel. Static coefficients. Single Input
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -2005,11 +2204,14 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow, output_stream_cacc48* outCascade);
+    void filter(input_circular_buffer<TT_DATA,
+                                      extents<inherited_extent>,
+                                      margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
+                output_stream_cacc48* outCascade);
 };
 
 //-----------------------------------------------------------------------------------------------------
-// Partially specialized classes for cascaded interface - first kernel. Static coefficients. Dual Input
+// Partially specialized classes for Stream API. cascaded interface - first kernel. Static coefficients. Dual Input
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -2075,12 +2277,14 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
+    void filter(input_circular_buffer<TT_DATA,
+                                      extents<inherited_extent>,
+                                      margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
                 output_stream_cacc48* outCascade,
-                output_window<TT_DATA>* broadcastWindow);
+                output_async_buffer<TT_DATA>& __restrict broadcastWindow);
 };
 //-----------------------------------------------------------------------------------------------------
-// Partially specialized classes for cascaded interface - middle kernel. Static coefficients. Single Input
+// Partially specialized classes for Stream API. cascaded interface - middle kernel. Static coefficients. Single Input
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -2146,10 +2350,14 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow, input_stream_cacc48* inCascade, output_stream_cacc48* outCascade);
+    void filter(input_circular_buffer<TT_DATA,
+                                      extents<inherited_extent>,
+                                      margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
+                input_stream_cacc48* inCascade,
+                output_stream_cacc48* outCascade);
 };
 //-----------------------------------------------------------------------------------------------------
-// Partially specialized classes for cascaded interface - middle kernel. Static coefficients. Dual Input
+// Partially specialized classes for Stream API. cascaded interface - middle kernel. Static coefficients. Dual Input
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -2215,14 +2423,15 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
+    void filter(input_async_buffer<TT_DATA>& __restrict inWindow,
                 input_stream_cacc48* inCascade,
                 output_stream_cacc48* outCascade,
-                output_window<TT_DATA>* broadcastWindow);
+                output_async_buffer<TT_DATA>& __restrict broadcastWindow);
 };
 
 //-----------------------------------------------------------------------------------------------------
-// Partially specialized classes for cascaded interface - final kernel. Reloadable coefficients, single output
+// Partially specialized classes for Stream API. cascaded interface - final kernel. Reloadable coefficients, (single
+// input), single output
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -2289,10 +2498,88 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow, input_stream_cacc48* inCascade, output_stream<TT_DATA>* outStream);
+    void filter(input_circular_buffer<TT_DATA,
+                                      extents<inherited_extent>,
+                                      margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
+                input_stream_cacc48* inCascade,
+                output_stream<TT_DATA>* outStream);
 };
 
-// Partially specialized classes for cascaded interface - final kernel. Reloadable coefficients, dual output
+//-----------------------------------------------------------------------------------------------------
+// Partially specialized classes for Stream API. cascaded interface - final kernel. Reloadable coefficients, dual input,
+// single output
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
+class fir_sr_sym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_TRUE,
+                 CASC_OUT_FALSE,
+                 TP_FIR_RANGE_LEN,
+                 TP_KERNEL_POSITION,
+                 TP_CASC_LEN,
+                 DUAL_IP_DUAL,
+                 USE_COEFF_RELOAD_TRUE,
+                 1,
+                 USE_STREAM_API,
+                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                     TT_COEFF,
+                                                                     TP_FIR_LEN,
+                                                                     TP_SHIFT,
+                                                                     TP_RND,
+                                                                     TP_INPUT_WINDOW_VSIZE,
+                                                                     CASC_IN_TRUE,
+                                                                     CASC_OUT_FALSE,
+                                                                     TP_FIR_RANGE_LEN,
+                                                                     TP_KERNEL_POSITION,
+                                                                     TP_CASC_LEN,
+                                                                     DUAL_IP_DUAL,
+                                                                     USE_COEFF_RELOAD_TRUE,
+                                                                     1,
+                                                                     USE_STREAM_API,
+                                                                     TP_MODIFY_MARGIN_OFFSET> {
+   public:
+    // Constructor
+    fir_sr_sym()
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_TRUE,
+                            CASC_OUT_FALSE,
+                            TP_FIR_RANGE_LEN,
+                            TP_KERNEL_POSITION,
+                            TP_CASC_LEN,
+                            DUAL_IP_DUAL,
+                            USE_COEFF_RELOAD_TRUE,
+                            1,
+                            USE_STREAM_API,
+                            TP_MODIFY_MARGIN_OFFSET>() {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
+
+    // FIR
+    void filter(input_async_buffer<TT_DATA>& __restrict inWindow,
+                input_stream_cacc48* inCascade,
+                output_stream<TT_DATA>* outStream);
+};
+
+// Partially specialized classes for Stream API. cascaded interface - final kernel. Reloadable coefficients, (single
+// input), dual output
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -2359,14 +2646,90 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
+    void filter(input_circular_buffer<TT_DATA,
+                                      extents<inherited_extent>,
+                                      margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
+                input_stream_cacc48* inCascade,
+                output_stream<TT_DATA>* outStream,
+                output_stream<TT_DATA>* outStream2);
+};
+
+// Partially specialized classes for Stream API. cascaded interface - final kernel. Reloadable coefficients, dual input,
+// dual output
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          int TP_MODIFY_MARGIN_OFFSET>
+class fir_sr_sym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 CASC_IN_TRUE,
+                 CASC_OUT_FALSE,
+                 TP_FIR_RANGE_LEN,
+                 TP_KERNEL_POSITION,
+                 TP_CASC_LEN,
+                 DUAL_IP_DUAL,
+                 USE_COEFF_RELOAD_TRUE,
+                 2,
+                 USE_STREAM_API,
+                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
+                                                                     TT_COEFF,
+                                                                     TP_FIR_LEN,
+                                                                     TP_SHIFT,
+                                                                     TP_RND,
+                                                                     TP_INPUT_WINDOW_VSIZE,
+                                                                     CASC_IN_TRUE,
+                                                                     CASC_OUT_FALSE,
+                                                                     TP_FIR_RANGE_LEN,
+                                                                     TP_KERNEL_POSITION,
+                                                                     TP_CASC_LEN,
+                                                                     DUAL_IP_DUAL,
+                                                                     USE_COEFF_RELOAD_TRUE,
+                                                                     2,
+                                                                     USE_STREAM_API,
+                                                                     TP_MODIFY_MARGIN_OFFSET> {
+   public:
+    // Constructor
+    fir_sr_sym()
+        : kernelFilterClass<TT_DATA,
+                            TT_COEFF,
+                            TP_FIR_LEN,
+                            TP_SHIFT,
+                            TP_RND,
+                            TP_INPUT_WINDOW_VSIZE,
+                            CASC_IN_TRUE,
+                            CASC_OUT_FALSE,
+                            TP_FIR_RANGE_LEN,
+                            TP_KERNEL_POSITION,
+                            TP_CASC_LEN,
+                            DUAL_IP_DUAL,
+                            USE_COEFF_RELOAD_TRUE,
+                            2,
+                            USE_STREAM_API,
+                            TP_MODIFY_MARGIN_OFFSET>() {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
+
+    // FIR
+    void filter(input_async_buffer<TT_DATA>& __restrict inWindow,
                 input_stream_cacc48* inCascade,
                 output_stream<TT_DATA>* outStream,
                 output_stream<TT_DATA>* outStream2);
 };
 
 //-----------------------------------------------------------------------------------------------------
-// Partially specialized classes for cascaded interface - first kernel. Reloadable coefficients. Single input
+// Partially specialized classes for Stream API. cascaded interface - first kernel. Reloadable coefficients. Single
+// input
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -2432,13 +2795,15 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
+    void filter(input_circular_buffer<TT_DATA,
+                                      extents<inherited_extent>,
+                                      margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
                 output_stream_cacc48* outCascade,
                 const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / kSymmetryFactor]);
 };
 
 //-----------------------------------------------------------------------------------------------------
-// Partially specialized classes for cascaded interface - first kernel. Reloadable coefficients. Dual Input
+// Partially specialized classes for Stream API. cascaded interface - first kernel. Reloadable coefficients. Dual Input
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -2504,14 +2869,17 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
+    void filter(input_circular_buffer<TT_DATA,
+                                      extents<inherited_extent>,
+                                      margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
                 output_stream_cacc48* outCascade,
-                output_window<TT_DATA>* broadcastWindow,
+                output_async_buffer<TT_DATA>& __restrict broadcastWindow,
                 const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / kSymmetryFactor]);
 };
 
 //-----------------------------------------------------------------------------------------------------
-// Partially specialized classes for cascaded interface - middle kernel. Reeloadable coefficients. Single Input
+// Partially specialized classes for Stream API. cascaded interface - middle kernel. Reeloadable coefficients. Single
+// Input
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -2577,11 +2945,16 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow, input_stream_cacc48* inCascade, output_stream_cacc48* outCascade);
+    void filter(input_circular_buffer<TT_DATA,
+                                      extents<inherited_extent>,
+                                      margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
+                input_stream_cacc48* inCascade,
+                output_stream_cacc48* outCascade);
 };
 
 //-----------------------------------------------------------------------------------------------------
-// Partially specialized classes for cascaded interface - middle kernel. Reeloadable coefficients. Dual Input
+// Partially specialized classes for Stream API. cascaded interface - middle kernel. Reeloadable coefficients. Dual
+// Input
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -2647,10 +3020,10 @@ class fir_sr_sym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
+    void filter(input_async_buffer<TT_DATA>& __restrict inWindow,
                 input_stream_cacc48* inCascade,
                 output_stream_cacc48* outCascade,
-                output_window<TT_DATA>* broadcastWindow);
+                output_async_buffer<TT_DATA>& __restrict broadcastWindow);
 };
 
 template <typename fp = fir_params_defaults>

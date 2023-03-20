@@ -48,6 +48,8 @@ struct fir_params_defaults {
     static constexpr unsigned int BTP_COEFF_PHASES_LEN = BTP_FIR_RANGE_LEN * BTP_COEFF_PHASES;
     static constexpr unsigned int BTP_PARA_INTERP_POLY = 1;
     static constexpr unsigned int BTP_PARA_DECI_POLY = 1;
+    static constexpr unsigned int BTP_PARA_INTERP_INDEX = 0;
+    static constexpr unsigned int BTP_PARA_DECI_INDEX = 0;
     static constexpr bool BTP_CASC_IN = false;
     static constexpr bool BTP_CASC_OUT = false;
     static constexpr int BTP_MODIFY_MARGIN_OFFSET = 0;
@@ -74,6 +76,8 @@ void printParams() {
     printf("BTP_COEFF_PHASE_OFFSET    = %d.\n", fp::BTP_COEFF_PHASE_OFFSET);
     printf("BTP_COEFF_PHASES          = %d.\n", fp::BTP_COEFF_PHASES);
     printf("BTP_COEFF_PHASES_LEN      = %d.\n", fp::BTP_COEFF_PHASES_LEN);
+    printf("BTP_PARA_INTERP_INDEX     = %d.\n", fp::BTP_PARA_INTERP_INDEX);
+    printf("BTP_PARA_DECI_INDEX       = %d.\n", fp::BTP_PARA_DECI_INDEX);
     printf("BTP_PARA_INTERP_POLY      = %d.\n", fp::BTP_PARA_INTERP_POLY);
     printf("BTP_PARA_DECI_POLY        = %d.\n", fp::BTP_PARA_DECI_POLY);
     printf("BTP_CASC_IN               = %d.\n", fp::BTP_CASC_IN);

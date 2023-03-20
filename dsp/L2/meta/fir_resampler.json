@@ -126,7 +126,7 @@
         "file": "aie_common_fir.py",
         "function": "validate_TP_USE_COEF_RELOAD_NON_SSR",
         "args": ["TP_API"]
-        }                    
+        }
     },
     {
       "name": "TP_NUM_OUTPUTS",
@@ -153,6 +153,34 @@
       "type": "uint",
       "minimum": 0,
       "maximum": 1
+    },
+    {
+      "name": "TP_SSR",
+      "description": "TP_SSR specifies the number of parallel input/output paths where samples are interleaved between paths, giving an overall higher throughput.",
+      "minimum": 1,
+      "type": "uint",
+            "validator": {
+        "file": "fir_interpolate_asym.py",
+        "function": "validate_TP_SSR",
+        "args": ["TP_API", "TP_INTERPOLATE_FACTOR", "TP_PARA_INTERP_POLY"]
+      }
+    },
+    {
+      "name": "TP_PARA_INTERP_POLY",
+      "description" : "Number of parallel polyphases to decompose interpolator over.",
+      "type" : "uint",
+      "minimum": 1,
+      "validator": {
+        "file": "fir_polyphase_decomposer.py",
+        "function": "validate_TP_PARA_INTERP_POLY",
+        "args": ["TP_INTERPOLATE_FACTOR"]
+      }
+    },
+    {
+      "name": "TP_PARA_DECI_POLY",
+      "description": "Number of parallel polyphases to decompose decimator over.",
+      "minimum": 1,
+      "type": "uint"
     },
     {
       "name": "coeff",

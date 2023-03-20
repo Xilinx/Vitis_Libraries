@@ -57,7 +57,7 @@
       "validator": {
         "file": "fir_decimate_asym.py",
         "function": "validate_TP_FIR_LEN",
-        "args": ["TT_DATA", "TT_COEF", "TP_DECIMATE_FACTOR","TP_CASC_LEN", "TP_API", "TP_USE_COEF_RELOAD", "TP_SSR"]
+        "args": ["TT_DATA", "TT_COEF", "TP_DECIMATE_FACTOR","TP_CASC_LEN", "TP_API", "TP_USE_COEF_RELOAD", "TP_SSR", "TP_PARA_DECI_POLY"]
       }
     },
     {
@@ -69,7 +69,7 @@
       "validator": {
         "file": "fir_decimate_asym.py",
         "function": "validate_TP_DECIMATE_FACTOR",
-        "args": ["TT_DATA", "TT_COEF", "TP_API"]
+        "args": ["TT_DATA", "TT_COEF", "TP_API", "TP_PARA_DECI_POLY"]
       }
     },
     {
@@ -99,7 +99,7 @@
       "validator": {
         "file": "fir_decimate_asym.py",
         "function": "validate_TP_INPUT_WINDOW_VSIZE",
-        "args": ["TT_DATA", "TT_COEF", "TP_FIR_LEN", "TP_DECIMATE_FACTOR", "TP_API", "TP_SSR"]
+        "args": ["TT_DATA", "TT_COEF", "TP_FIR_LEN", "TP_DECIMATE_FACTOR", "TP_API", "TP_SSR" , "TP_PARA_DECI_POLY"]
       }
     },
     {
@@ -119,7 +119,7 @@
         "file": "aie_common_fir.py",
         "function": "validate_TP_USE_COEF_RELOAD",
         "args": ["TP_API", "TP_SSR"]
-        }                    
+        }
     },
     {
       "name": "TP_NUM_OUTPUTS",
@@ -150,8 +150,14 @@
       "validator": {
         "file": "fir_decimate_asym.py",
         "function": "validate_TP_SSR",
-        "args": ["TP_API", "TP_DECIMATE_FACTOR"]
-      }      
+        "args": ["TP_API", "TP_DECIMATE_FACTOR", "TP_PARA_DECI_POLY"]
+      }
+    },
+    {
+      "name": "TP_PARA_DECI_POLY",
+      "description": "Number of parallel polyphases to decompose decimator over.",
+      "minimum": 1,
+      "type": "uint"
     },
     {
       "name": "coeff",

@@ -84,6 +84,58 @@ INLINE_DECL T_acc<cint16, cint16> macResampler(T_acc<cint16, cint16> acc,
     return retVal;
 }
 
+// DATA = cint16, COEFF = int32
+INLINE_DECL T_acc<cint16, int32> macResampler(T_acc<cint16, int32> acc,
+                                              T_buff_1024b<cint16> xbuff,
+                                              unsigned int xstart,
+                                              unsigned int xoffsets,
+                                              T_buff_256b<int32> zbuff,
+                                              unsigned int zstart,
+                                              unsigned int zoffsets) {
+    T_acc<cint16, int32> retVal;
+    const unsigned int xstep = 1;
+    const unsigned int zstep = 4; // lanes
+
+    retVal.val = lmac4(acc.val, xbuff.val, xstart, xoffsets, xstep, zbuff.val, zstart, zoffsets, zstep);
+    return retVal;
+}
+
+// DATA = cint16, COEFF = cint32
+INLINE_DECL T_acc<cint16, cint32> macResampler(T_acc<cint16, cint32> acc,
+                                               T_buff_1024b<cint16> xbuff,
+                                               unsigned int xstart,
+                                               unsigned int xoffsets,
+                                               T_buff_256b<cint32> zbuff,
+                                               unsigned int zstart,
+                                               unsigned int zoffsets) {
+    T_acc<cint16, cint32> retVal;
+
+    retVal.val = lmac4(acc.val, xbuff.val, xstart, xoffsets, zbuff.val, zstart, zoffsets);
+    return retVal;
+}
+
+// DATA = int16, COEFF = int32
+INLINE_DECL T_acc<int16, int32> macResampler(T_acc<int16, int32> acc,
+                                             T_buff_1024b<int16> xbuff,
+                                             unsigned int xstart,
+                                             unsigned int xoffsets,
+                                             T_buff_256b<int32> zbuff,
+                                             unsigned int zstart,
+                                             unsigned int zoffsets) {
+    T_acc<int16, int32> retVal;
+    const unsigned int xstep = 1;
+    const unsigned int mtap = 0;
+    const unsigned int zstep = 0;
+    unsigned int ystart = xstart;
+
+    // retVal.val = lmac8(acc.val, xbuff.val, xstart, xoffsets, xstep, zbuff.val, zstart, zoffsets, zstep);
+    // workaround for exceeding 256-bit zbuff.
+    // Do: acc0 = z00*(x00 - y00) + z01*x01, where z00 = z01, x00=y00=x01
+    retVal.val =
+        lmac8_antisym_ct(acc.val, xbuff.val, xstart, xoffsets, ystart, mtap, zbuff.val, zstart, zoffsets, zstep);
+    return retVal;
+}
+
 // DATA = int32, COEFF = int16
 INLINE_DECL T_acc<int32, int16> macResampler(T_acc<int32, int16> acc,
                                              T_buff_1024b<int32> xbuff,
@@ -258,6 +310,57 @@ inline T_acc384<cint16, cint16> macResampler(T_acc384<cint16, cint16> acc,
     return retVal;
 }
 
+// DATA = cint16, COEFF = int32
+INLINE_DECL T_acc384<cint16, int32> macResampler(T_acc384<cint16, int32> acc,
+                                                 T_buff_1024b<cint16> xbuff,
+                                                 unsigned int xstart,
+                                                 unsigned int xoffsets,
+                                                 T_buff_256b<int32> zbuff,
+                                                 unsigned int zstart,
+                                                 unsigned int zoffsets) {
+    T_acc384<cint16, int32> retVal;
+    const unsigned int xstep = 1;
+    const unsigned int zstep = 4; // lanes
+
+    retVal.val = lmac4(acc.val, xbuff.val, xstart, xoffsets, xstep, zbuff.val, zstart, zoffsets, zstep);
+    return retVal;
+}
+
+// DATA = cint16, COEFF = cint32
+INLINE_DECL T_acc384<cint16, cint32> macResampler(T_acc384<cint16, cint32> acc,
+                                                  T_buff_1024b<cint16> xbuff,
+                                                  unsigned int xstart,
+                                                  unsigned int xoffsets,
+                                                  T_buff_256b<cint32> zbuff,
+                                                  unsigned int zstart,
+                                                  unsigned int zoffsets) {
+    T_acc384<cint16, cint32> retVal;
+
+    retVal.val = lmac4(acc.val, xbuff.val, xstart, xoffsets, zbuff.val, zstart, zoffsets);
+    return retVal;
+}
+
+// DATA = int16, COEFF = int32
+INLINE_DECL T_acc384<int16, int32> macResampler(T_acc384<int16, int32> acc,
+                                                T_buff_1024b<int16> xbuff,
+                                                unsigned int xstart,
+                                                unsigned int xoffsets,
+                                                T_buff_256b<int32> zbuff,
+                                                unsigned int zstart,
+                                                unsigned int zoffsets) {
+    T_acc384<int16, int32> retVal;
+    const unsigned int xstep = 1;
+    const unsigned int mtap = 0;
+    const unsigned int zstep = 0;
+    unsigned int ystart = xstart;
+
+    // retVal.val = lmac8(acc.val, xbuff.val, xstart, xoffsets, xstep, zbuff.val, zstart, zoffsets, zstep);
+    // workaround for exceeding 256-bit zbuff.
+    // Do: acc0 = z00*(x00 - y00) + z01*x01, where z00 = z01, x00=y00=x01
+    retVal.val =
+        lmac8_antisym_ct(acc.val, xbuff.val, xstart, xoffsets, ystart, mtap, zbuff.val, zstart, zoffsets, zstep);
+    return retVal;
+}
 // DATA = int32, COEFF = int16
 inline T_acc384<int32, int16> macResampler(T_acc384<int32, int16> acc,
                                            T_buff_1024b<int32> xbuff,

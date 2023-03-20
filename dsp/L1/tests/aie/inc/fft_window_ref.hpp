@@ -24,6 +24,8 @@ FFT Window reference model
 #include <array>
 #include "fft_ref_utils.hpp"
 
+using namespace adf;
+
 //#define _DSPLIB_FFT_WINDOW_REF_DEBUG_
 
 namespace xf {
@@ -120,7 +122,7 @@ class fft_window_ref
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fft_window_ref::fft_window_main); }
     // FIR
-    void fft_window_main(input_window<TT_DATA>* inWindow0, output_window<TT_DATA>* outWindow0);
+    void fft_window_main(input_buffer<TT_DATA>& inWindow0, output_buffer<TT_DATA>& outWindow0);
 };
 
 template <typename TT_DATA,

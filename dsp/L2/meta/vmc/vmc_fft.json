@@ -3,7 +3,7 @@
   "ip_name": "vmc_fft",
   "block_info": {
     "label": "FFT",
-    "description": ""
+    "description": "FFT block targeted for AI Engines."
   },
   "parameters": [
     {
@@ -12,11 +12,15 @@
       "description": "The type of individual data samples input to and output of the FFT function",
       "enum": [ "cint16", "cint32", "cfloat" ],
       "default": "cint16",
-      "type": "typename"
+      "type": "typename",
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"popup"
+      }
     },
     {
       "name": "point_size",
-      "label": "Point Size",
+      "label": "FFT Size",
       "description": "The number of samples in the transform",
       "default": 64,
       "maximum": 4096,
@@ -26,20 +30,10 @@
         "file": "vmc_fft.py",
         "function": "vmc_validate_point_size",
         "args": ["data_type"]
-      }
-    },
-    {
-      "name": "shift_val",
-      "label": "Scale output down by 2^",
-      "description": "The power of 2 shift down applied to the accumulation of FIR before output",
-      "default": 0,
-      "maximum": 60,
-      "minimum": 0,
-      "type": "int",
-      "validator": {
-        "file": "vmc_fft.py",
-        "function": "vmc_validate_shift_val",
-        "args": ["data_type", "point_size"]
+      },
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
       }
     },
     {
@@ -54,23 +48,29 @@
         "file": "vmc_fft.py",
         "function": "vmc_validate_input_window_size",
         "args": ["point_size"]
+      },
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
       }
     },
-	{
-	  "name":"input_sampling_rate",
-      "label": "Target input throughput (MSPS)",
-      "description": "The target input throughput of the function in MSPS",
-      "default": 200,
-      "maximum": 1000,
-      "minimum": 1,
-      "type": "int"
-    },
     {
-      "name": "use_casc_length",
-      "label": "Specify cascade length",
-      "description": "Allows the user to specify length of the cascaded kernels",
-      "default": false,
-      "type": "bool"
+      "name": "shift_val",
+      "label": "Scale output down by 2^",
+      "description": "The power of 2 shift down applied to the accumulation of FIR before output",
+      "default": 0,
+      "maximum": 60,
+      "minimum": 0,
+      "type": "int",
+      "validator": {
+        "file": "vmc_fft.py",
+        "function": "vmc_validate_shift_val",
+        "args": ["data_type", "point_size"]
+      },
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
+      }
     },
     {
       "name": "casc_length",
@@ -83,7 +83,11 @@
       "validator": {
         "file": "vmc_fft.py",
         "function": "vmc_validate_casc_length",
-        "args": ["data_type", "point_size", "use_casc_length"]
+        "args": ["data_type", "point_size"]
+      },
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
       }
     }
   ],

@@ -1,0 +1,15 @@
+{
+  "spec":   "dds_mixer_lut.json",
+  "parameters":{
+      "TT_DATA" : "cint16",
+      "TP_INPUT_WINDOW_VSIZE" : 256,
+      "TP_MIXER_MODE" : 0,
+      "TP_API" : 0,
+      "TP_SSR" : 1,
+      "TP_SFDR": 90,
+      "AIE_VARIANT": 1,
+      "phaseInc" : 1, 
+      "initialPhaseOffset": 0
+  },
+  "outdir" : "./dds_mixer_lut_generated_graph"
+}

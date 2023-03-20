@@ -1,0 +1,28 @@
+{
+    "spec": "vmc_fir_decimate_hb.json",
+    "outdir": "./xmc_aie_lib/FIR_Halfband_Decimator_225db10e",
+    "parameters": {
+        "data_type": "cint16",
+        "coef_type": "int16",
+        "use_coeff_reload": false,
+        "coeff": [
+            -2,
+            5,
+            -9,
+            17,
+            -30,
+            52,
+            -98,
+            316,
+            500
+        ],
+        "fir_length": 31,
+        "input_window_size": 256,
+        "shift_val": 0,
+        "rnd_mode": 2,
+        "input_sampling_rate": 200,
+        "use_casc_length": false,
+        "casc_length": 1
+    },
+    "updated_parameter": ""
+}

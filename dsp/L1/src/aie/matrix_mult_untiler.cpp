@@ -232,9 +232,9 @@ static void doUnTile(T_D* __restrict inPtr, T_D* outPtr) {
 
 namespace aie = ::aie;
 template <unsigned M, unsigned N, unsigned inRow, unsigned inCol, unsigned leadingDim, typename T_D>
-void untilerKernelClass<M, N, inRow, inCol, leadingDim, T_D>::unTile(input_window<T_D>* inWindow,
-                                                                     output_window<T_D>* __restrict outWindow) {
-    doUnTile<M, N, inRow, inCol, leadingDim, T_D>((T_D*)inWindow->ptr, (T_D*)outWindow->ptr);
+void untilerKernelClass<M, N, inRow, inCol, leadingDim, T_D>::unTile(input_buffer<T_D>& __restrict inWindow,
+                                                                     output_buffer<T_D>& __restrict outWindow) {
+    doUnTile<M, N, inRow, inCol, leadingDim, T_D>((T_D*)inWindow.data(), (T_D*)outWindow.data());
 };
 }
 }

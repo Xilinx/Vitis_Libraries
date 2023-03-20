@@ -49,9 +49,9 @@ void matrix_mult_ref<TT_DATA_A,
                      TP_DIM_B_LEADING,
                      TP_DIM_OUT_LEADING,
                      TP_INPUT_WINDOW_VSIZE_A,
-                     TP_INPUT_WINDOW_VSIZE_B>::mmult(input_window<TT_DATA_A>* inWindowA,
-                                                     input_window<TT_DATA_B>* inWindowB,
-                                                     output_window<outType_t<TT_DATA_A, TT_DATA_B> >* outWindow) {
+                     TP_INPUT_WINDOW_VSIZE_B>::mmult(input_buffer<TT_DATA_A>& inWindowA,
+                                                     input_buffer<TT_DATA_B>& inWindowB,
+                                                     output_buffer<outType_t<TT_DATA_A, TT_DATA_B> >& outWindow) {
     // typename TT_OUT = outType_t<TT_DATA_A,TT_DATA_B>;
     using TT_OUT = outType_t<TT_DATA_A, TT_DATA_B>;
     const unsigned int shift = TP_SHIFT;
@@ -59,6 +59,10 @@ void matrix_mult_ref<TT_DATA_A,
     TT_DATA_A dA_in[TP_DIM_AB];
     TT_DATA_B dB_in[TP_DIM_AB];
     TT_OUT accum_srs;
+
+    TT_DATA_A* inPtrA = (TT_DATA_A*)inWindowA.data();
+    TT_DATA_B* inPtrB = (TT_DATA_B*)inWindowB.data();
+    TT_OUT* outPtr = (TT_OUT*)outWindow.data();
 
     /*
     Most Ideal Case                  |   Good for A
@@ -117,18 +121,13 @@ void matrix_mult_ref<TT_DATA_A,
                 // The vector that gets multiplied
                 // printf("A: ");
                 for (unsigned int j = 0; j < TP_DIM_AB; ++j) {
-                    dA_in[j] = window_read(inWindowA);    // read input data
-                    window_incr(inWindowA, matALoadIncr); // read from the next column.
-                    // printf("%d ", dA_in[j].real);
+                    dA_in[j] = *inPtrA;
+                    inPtrA += matALoadIncr;
                 }
-                // printf("\n");
-                // printf("B: ");
                 for (unsigned int j = 0; j < TP_DIM_AB; ++j) {
-                    dB_in[j] = window_read(inWindowB);    // read input data
-                    window_incr(inWindowB, matBLoadIncr); // read from the next row.
-                    // printf("%d ", dB_in[j].real);
+                    dB_in[j] = *inPtrB;
+                    inPtrB += matBLoadIncr;
                 }
-                // printf("\n");
 
                 accum = null_accRef<TT_OUT>(); // reset accumulator at the start of the mult-add for each output sample
                 for (unsigned int j = 0; j < TP_DIM_AB; ++j) {
@@ -139,24 +138,25 @@ void matrix_mult_ref<TT_DATA_A,
                 roundAcc(TP_RND, shift, accum);
                 saturateAcc(accum);
                 accum_srs = castAcc(accum);
-                // window_writeincr((output_window<TT_OUT> *)outWindow, accum_srs) ;
-                window_write((output_window<TT_OUT>*)outWindow, accum_srs);
-                window_incr((output_window<TT_OUT>*)outWindow, (TP_DIM_OUT_LEADING == ROW_MAJOR) ? 1 : TP_DIM_A);
+
+                *outPtr = accum_srs;
+                outPtr += (TP_DIM_OUT_LEADING == ROW_MAJOR) ? 1 : TP_DIM_A;
+
                 // Revert data pointer by the amount we've incremented
-                window_decr(inWindowB, (matBPostABDimDecr));
+                inPtrB -= matBPostABDimDecr;
                 // revert A back to start of row
-                window_decr(inWindowA, matAPostABDimDecr);
+                inPtrA -= matAPostABDimDecr;
             }
             // Point A one row forward
-            window_incr(inWindowA, matAPostBDimIncr);
-            window_incr(inWindowB, matBPostBDimIncr);
+            inPtrA += matAPostBDimIncr;
+            inPtrB += matBPostBDimIncr;
             if (TP_DIM_OUT_LEADING == COL_MAJOR) {
-                window_incr((output_window<TT_OUT>*)outWindow, (-(int)TP_DIM_A * TP_DIM_B) + 1);
+                outPtr += (-(int)TP_DIM_A * TP_DIM_B) + 1;
             }
         }
         if (num_matrix_A < num_matrix_B && num_matrix_A == 1) {
             // Fixed_A - Move it back to the start
-            window_decr(inWindowA, (TP_DIM_A - 1) * TP_DIM_AB);
+            inPtrA -= (TP_DIM_A - 1) * TP_DIM_AB;
         }
         // if fixed_B, all the pointers in the right place
         // if only one matrix for both, we're done

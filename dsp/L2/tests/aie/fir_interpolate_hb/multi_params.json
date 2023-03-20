@@ -32,10 +32,10 @@
             "SHIFT":"15",
             "INPUT_WINDOW_VSIZE":"256"
         },
-        "test_4_fir_43t_sym_hb_2i": {
+        "test_4_fir_83t_sym_hb_2i": {
             "DATA_TYPE":"cint16",
             "COEFF_TYPE":"int16",
-            "FIR_LEN":"43",
+            "FIR_LEN":"83",
             "UPSHIFT_CT":"1",
             "SHIFT":"15",
             "INPUT_WINDOW_VSIZE":"256"
@@ -120,6 +120,49 @@
             "CASC_LEN":"3",
             "USE_COEFF_RELOAD":"1",
             "UUT_PARA_INTERP_POLY":"2"
+        },
+        "test_14_fir_43t_int16_int32": {
+            "DATA_TYPE":"int16",
+            "COEFF_TYPE":"int32",
+            "FIR_LEN":"43",
+            "SHIFT":"16",
+            "UPSHIFT_CT":"0",
+            "INPUT_WINDOW_VSIZE":"2560"
+        },
+        "test_15_fir_83t_cint16_int32": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int32",
+            "FIR_LEN":"83",
+            "SHIFT":"16",
+            "UPSHIFT_CT":"0",
+            "CASC_LEN":"3",
+            "INPUT_WINDOW_VSIZE":"2560"
+        },
+        "test_16_fir_31t_cint16_cint32": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"cint32",
+            "FIR_LEN":"31",
+            "SHIFT":"16",
+            "CASC_LEN":"3",
+            "INPUT_WINDOW_VSIZE":"2560"
+        },
+        "test_17_fir_11t_float": {
+            "DATA_TYPE":"float",
+            "COEFF_TYPE":"float",
+            "FIR_LEN":"11",
+            "SHIFT":"0",
+            "DIFF_TOLERANCE":"0.0025",
+            "CC_TOLERANCE":"0.0025",
+            "INPUT_WINDOW_VSIZE":"1024"
+        },
+        "test_18_fir_11t_cfloat": {
+            "DATA_TYPE":"cfloat",
+            "COEFF_TYPE":"float",
+            "FIR_LEN":"11",
+            "SHIFT":"0",
+            "DIFF_TOLERANCE":"0.0025",
+            "CC_TOLERANCE":"0.0025",
+            "INPUT_WINDOW_VSIZE":"1024"
         }
     }
 }

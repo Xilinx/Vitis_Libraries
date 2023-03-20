@@ -21,6 +21,8 @@ This file contains sets of overloaded, templatized and specialized templatized
 functions for use by the reference model classes.
 */
 
+#include "device_defs.h"
+
 // Rounding modes
 #ifndef rnd_floor
 #define rnd_floor 0
@@ -72,14 +74,24 @@ functions for use by the reference model classes.
 // isComplex
 template <typename T>
 constexpr bool isComplex() {
+#if __SUPPORTS_CFLOAT__ == 1
     return (std::is_same<T, cint16>::value || std::is_same<T, cint32>::value || std::is_same<T, cfloat>::value) ? true
                                                                                                                 : false;
+#endif
+#if __SUPPORTS_CFLOAT__ == 0
+    return (std::is_same<T, cint16>::value || std::is_same<T, cint32>::value) ? true : false;
+#endif
 };
 
 // isFloat
 template <typename T>
 constexpr bool isFloat() {
+#if __SUPPORTS_CFLOAT__ == 1
     return (std::is_same<T, float>::value || std::is_same<T, cfloat>::value) ? true : false;
+#endif
+#if __SUPPORTS_CFLOAT__ == 0
+    return (std::is_same<T, float>::value) ? true : false;
+#endif
 };
 
 static const int C_PMAX16 = std::numeric_limits<short int>::max();
@@ -89,31 +101,23 @@ static const int C_NMAX32 = std::numeric_limits<int32_t>::min();
 
 // Accumulator types
 template <typename T_D>
-struct T_accRef {};
-template <>
-struct T_accRef<int16> {
-    int64_t real;
-};
-template <>
-struct T_accRef<int32> {
-    int64_t real;
-};
-template <>
-struct T_accRef<cint16> {
+struct T_accRef {
     int64_t real, imag;
 };
-template <>
-struct T_accRef<cint32> {
-    int64_t real, imag;
-};
+// template<> struct T_accRef<int16>   {int64_t    real;};
+// template<> struct T_accRef<int32>   {int64_t    real;};
+// template<> struct T_accRef<cint16>  {int64_t    real, imag;};
+// template<> struct T_accRef<cint32>  {int64_t    real, imag;};
 template <>
 struct T_accRef<float> {
     float real;
 };
+#if __SUPPORTS_CFLOAT__ == 1
 template <>
 struct T_accRef<cfloat> {
     float real, imag;
 };
+#endif
 
 // Zero accumulator type
 template <typename T_A>
@@ -150,6 +154,8 @@ inline T_accRef<float> null_accRef() {
     retVal.real = 0.0;
     return retVal;
 };
+
+#if __SUPPORTS_CFLOAT__ == 1
 template <>
 inline T_accRef<cfloat> null_accRef() {
     T_accRef<cfloat> retVal;
@@ -157,10 +163,11 @@ inline T_accRef<cfloat> null_accRef() {
     retVal.imag = 0.0;
     return retVal;
 };
+#endif
 
 // Rounding and shift function
 inline int64_t rounding(int rndMode, int shift, int64_t accum) {
-    const unsigned int round_const = shift == 0 ? 0 : (1 << (shift - 1)) - 1; // 0.0111...
+    int64_t round_const = shift == 0 ? 0 : ((int64_t)1 << (shift - 1)) - 1; // 0.0111...
     // Rounding
     if (shift > 0) {
         switch (rndMode) {
@@ -204,9 +211,9 @@ inline int64_t rounding(int rndMode, int shift, int64_t accum) {
                     accum += round_const + 1;
                 }
                 break;
-            default:;
+            default:
                 // unsupported, so error
-                printf("Error: unrecognised value for ROUND_MODE\n");
+                printf("Error: unrecognised value for ROUND_MODE %d\n", rndMode);
                 break;
         }
     }
@@ -218,6 +225,9 @@ inline int64_t rounding(int rndMode, int shift, int64_t accum) {
     }
     return accum;
 }
+
+template <typename T>
+inline void roundAcc(int rndMode, int shift, T_accRef<T>& accum) {}
 
 inline void roundAcc(int rndMode, int shift, T_accRef<int16>& accum) {
     // cint64_t ret;
@@ -243,10 +253,6 @@ inline void roundAcc(int rndMode, int shift, T_accRef<cint16>& accum) {
     accum.imag = rounding(rndMode, shift, accum.imag);
     // return ret;
 };
-
-// Rounding and shift - do not apply to float
-inline void roundAcc(int rndMode, int shift, T_accRef<float>& accum){};
-inline void roundAcc(int rndMode, int shift, T_accRef<cfloat>& accum){};
 
 // Saturation
 template <typename T_A>
@@ -302,10 +308,6 @@ inline void saturateAcc(T_accRef<cint32>& accum) {
     }
     // return ret;
 };
-template <>
-inline void saturateAcc(T_accRef<float>& accum){};
-template <>
-inline void saturateAcc(T_accRef<cfloat>& accum){};
 
 // Cast
 template <typename T>
@@ -338,6 +340,8 @@ inline cint32_t castAcc(T_accRef<cint32_t> acc) {
     cacc32.imag = (int32)acc.imag;
     return cacc32;
 };
+
+#if __SUPPORTS_CFLOAT__ == 1
 template <>
 inline cfloat castAcc(T_accRef<cfloat> acc) {
     cfloat caccfloat;
@@ -345,6 +349,7 @@ inline cfloat castAcc(T_accRef<cfloat> acc) {
     caccfloat.imag = (float)acc.imag;
     return caccfloat;
 };
+#endif
 
 // Multiply
 template <typename T_D, typename T_C, typename T_A = T_D>
@@ -373,12 +378,21 @@ inline void multiplyAcc(T_accRef<int32_t>& accum, int32_t data, int16_t coeff) {
     accum.real += (int64_t)data * coeff;
 };
 template <>
+inline void multiplyAcc(T_accRef<int16_t>& accum, int16_t data, int32_t coeff) {
+    accum.real += (int64_t)data * coeff;
+};
+template <>
 inline void multiplyAcc(T_accRef<int32_t>& accum, int16_t data, int32_t coeff) {
     accum.real += (int64_t)data * coeff;
 };
 template <>
 inline void multiplyAcc(T_accRef<int32_t>& accum, int32_t data, int32_t coeff) {
     accum.real += (int64_t)data * coeff;
+};
+template <>
+inline void multiplyAcc(T_accRef<cint16_t>& accum, cint16_t data, int32_t coeff) {
+    accum.real += (int64_t)data.real * (int64_t)coeff;
+    accum.imag += (int64_t)data.imag * (int64_t)coeff;
 };
 template <>
 inline void multiplyAcc(T_accRef<cint32_t>& accum, cint16_t data, int32_t coeff) {
@@ -416,6 +430,11 @@ inline void multiplyAcc(T_accRef<cint32_t>& accum, cint32_t data, cint16_t coeff
     accum.imag += (int64_t)coeff.real * (int64_t)data.imag + (int64_t)coeff.imag * (int64_t)data.real;
 };
 template <>
+inline void multiplyAcc(T_accRef<cint16_t>& accum, cint16_t data, cint32_t coeff) {
+    accum.real += (int64_t)coeff.real * (int64_t)data.real - (int64_t)coeff.imag * (int64_t)data.imag;
+    accum.imag += (int64_t)coeff.real * (int64_t)data.imag + (int64_t)coeff.imag * (int64_t)data.real;
+};
+template <>
 inline void multiplyAcc(T_accRef<cint32_t>& accum, cint16_t data, cint32_t coeff) {
     accum.real += (int64_t)coeff.real * (int64_t)data.real - (int64_t)coeff.imag * (int64_t)data.imag;
     accum.imag += (int64_t)coeff.real * (int64_t)data.imag + (int64_t)coeff.imag * (int64_t)data.real;
@@ -429,6 +448,8 @@ template <>
 inline void multiplyAcc(T_accRef<float>& accum, float data, float coeff) {
     accum.real += (float)data * coeff;
 };
+
+#if __SUPPORTS_CFLOAT__ == 1
 template <>
 inline void multiplyAcc(T_accRef<cfloat>& accum, cfloat data, float coeff) {
     accum.real += (float)data.real * coeff;
@@ -444,6 +465,7 @@ inline void multiplyAcc(T_accRef<cfloat>& accum, cfloat data, cfloat coeff) {
     accum.real += (float)coeff.real * (float)data.real - (float)coeff.imag * (float)data.imag;
     accum.imag += (float)coeff.real * (float)data.imag + (float)coeff.imag * (float)data.real;
 };
+#endif
 
 // Multiply Accumulate - using UCT shift.
 template <typename T_D>
@@ -470,11 +492,13 @@ template <>
 inline void multiplyAccUct(T_accRef<float>& accum, float data, unsigned int shift) {
     accum.real += (float)data * (float)(1 << shift);
 };
+#if __SUPPORTS_CFLOAT__ == 1
 template <>
 inline void multiplyAccUct(T_accRef<cfloat>& accum, cfloat data, unsigned int shift) {
     accum.real += (float)data.real * (float)(1 << shift);
     accum.imag += (float)data.imag * (float)(1 << shift);
 };
+#endif
 
 // function to return Margin length.
 template <size_t TP_FIR_LEN, typename TT_DATA>
@@ -513,6 +537,7 @@ inline float nullElem() {
     return 0.0;
 };
 
+#if __SUPPORTS_CFLOAT__ == 1
 // Null cint32 element
 template <>
 inline cfloat nullElem() {
@@ -522,5 +547,6 @@ inline cfloat nullElem() {
     retVal.imag = 0.0;
     return retVal;
 };
+#endif
 
 #endif // ifdef _DSPLIB_FIR_REF_UTILS_HPP_

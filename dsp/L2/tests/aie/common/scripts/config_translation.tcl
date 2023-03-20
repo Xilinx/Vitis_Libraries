@@ -74,6 +74,8 @@ proc get_param_map {libElement} {
             "DDS_PHASE_INC" "phaseInc"
             "INITIAL_DDS_OFFSET" "initialPhaseOffset"
             "UUT_WINDOW_VSIZE" "TP_INPUT_WINDOW_VSIZE"
+            "SFDR" "TP_SFDR"
+            "AIE_VARIANT" "AIE_VARIANT"
         }
     }
     return $param_map

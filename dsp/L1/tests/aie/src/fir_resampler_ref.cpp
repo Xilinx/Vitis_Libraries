@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "aie_api/aie_adf.hpp"
 #include "fir_resampler_ref.hpp"
 #include "fir_ref_utils.hpp"
 #include "fir_ref_coeff_header.hpp"
@@ -35,24 +36,31 @@ template <typename TT_DATA,  // type of data input and output
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE>
-void filter_ref(input_window<TT_DATA>* inWindow,
-                output_window<TT_DATA>* outWindow,
-                const TT_COEFF (&taps)[TP_FIR_LEN]) {
+void filter_ref(
+    input_circular_buffer<
+        TT_DATA,
+        extents<inherited_extent>,
+        margin<fnFirMargin<(TP_FIR_LEN + TP_INTERPOLATE_FACTOR - 1) / TP_INTERPOLATE_FACTOR, TT_DATA>()> >& inWindow,
+    output_circular_buffer<TT_DATA>& outWindow,
+    const TT_COEFF (&taps)[TP_FIR_LEN]) {
     const unsigned int shift = TP_SHIFT;
     const unsigned int kPolyLen = (TP_FIR_LEN + TP_INTERPOLATE_FACTOR - 1) / TP_INTERPOLATE_FACTOR;
     T_accRef<TT_DATA> accum;
     TT_DATA d_in[kPolyLen + TP_DECIMATE_FACTOR - 1];
     TT_DATA accumSrs;
 
+    auto inItr = ::aie::begin_random_circular(inWindow);
+    auto outItr = ::aie::begin_random_circular(outWindow);
+
     unsigned int dataIndex, coefIndex;
     const unsigned int kFirMarginOffset = fnFirMargin<kPolyLen, TT_DATA>() - kPolyLen + 1; // FIR Margin Offset.
-    window_incr(inWindow, kFirMarginOffset); // move input data pointer past the margin padding
+    inItr += kFirMarginOffset; // move input data pointer past the margin padding
 
     for (unsigned int i = 0; i < TP_INPUT_WINDOW_VSIZE / TP_DECIMATE_FACTOR; i++) {
         // We produce interpolate factor number of ouputs over decimate factor of inputs
         // so we need extra samples
         for (unsigned int j = 0; j < kPolyLen + TP_DECIMATE_FACTOR; j++) {
-            d_in[j] = window_readincr(inWindow); // read input data
+            d_in[j] = *inItr++; // read input data
         }
         // TP_INTERPOLATE_FACTOR outputs over TP_DECIMATE_FACTOR input samples
         for (unsigned int k = 0; k < TP_INTERPOLATE_FACTOR; k++) {
@@ -74,10 +82,10 @@ void filter_ref(input_window<TT_DATA>* inWindow,
             saturateAcc(accum);
             accumSrs = castAcc(accum);
 
-            window_writeincr((output_window<TT_DATA>*)outWindow, accumSrs);
+            *outItr++ = accumSrs;
         }
         // Revert data pointer for next set of samples
-        window_decr(inWindow, (kPolyLen + TP_DECIMATE_FACTOR) - TP_DECIMATE_FACTOR);
+        inItr -= (kPolyLen + TP_DECIMATE_FACTOR) - TP_DECIMATE_FACTOR;
     }
 };
 
@@ -101,9 +109,15 @@ void fir_resampler_ref<TT_DATA,
                        TP_RND,
                        TP_INPUT_WINDOW_VSIZE,
                        TP_USE_COEFF_RELOAD,
-                       TP_NUM_OUTPUTS>::filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow) {
-    firHeaderReload<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_USE_COEFF_RELOAD>(inWindow,
-                                                                                               m_internalTaps);
+                       TP_NUM_OUTPUTS>::
+    filter(input_circular_buffer<
+               TT_DATA,
+               extents<inherited_extent>,
+               margin<fnFirMargin<(TP_FIR_LEN + TP_INTERPOLATE_FACTOR - 1) / TP_INTERPOLATE_FACTOR, TT_DATA>()> >&
+               inWindow,
+           output_circular_buffer<TT_DATA>& outWindow) {
+    //    firHeaderReload<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_USE_COEFF_RELOAD>(inWindow,
+    //    m_internalTaps); //coeff reload from header is no longer supported
     filter_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
                TP_INPUT_WINDOW_VSIZE>(inWindow, outWindow, m_internalTaps);
 };
@@ -128,9 +142,14 @@ void fir_resampler_ref<TT_DATA,
                        TP_RND,
                        TP_INPUT_WINDOW_VSIZE,
                        TP_USE_COEFF_RELOAD,
-                       TP_NUM_OUTPUTS>::filterRtp(input_window<TT_DATA>* inWindow,
-                                                  output_window<TT_DATA>* outWindow,
-                                                  const TT_COEFF (&inTaps)[TP_FIR_LEN]) {
+                       TP_NUM_OUTPUTS>::
+    filterRtp(input_circular_buffer<
+                  TT_DATA,
+                  extents<inherited_extent>,
+                  margin<fnFirMargin<(TP_FIR_LEN + TP_INTERPOLATE_FACTOR - 1) / TP_INTERPOLATE_FACTOR, TT_DATA>()> >&
+                  inWindow,
+              output_circular_buffer<TT_DATA>& outWindow,
+              const TT_COEFF (&inTaps)[TP_FIR_LEN]) {
     // Coefficient reload
     for (int i = 0; i < TP_FIR_LEN; i++) {
         m_internalTaps[i] = inTaps[i];

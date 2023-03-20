@@ -47,13 +47,11 @@ class test_graph : public graph {
     COEFF_TYPE taps[FIR_LEN];
 
    public:
-#ifdef USING_UUT
     static constexpr int DUAL_INPUT_SAMPLES = (PORT_API == 1) && (DUAL_IP == 1) ? 1 : 0;
-#else
-    static constexpr int DUAL_INPUT_SAMPLES = 0;
-#endif
-    std::array<input_plio, P_SSR*(DUAL_INPUT_SAMPLES + 1)> in;
-    std::array<output_plio, P_SSR * NUM_OUTPUTS> out;
+
+    static constexpr unsigned int IN_SSR = P_SSR * P_PARA_DECI_POLY;
+    std::array<input_plio, IN_SSR*(DUAL_INPUT_SAMPLES + 1)> in; // 0? dual_ip - not supported by sr_sym
+    std::array<output_plio, P_SSR * NUM_OUTPUTS> out;           // NUM_OUTPUTS forces to 1 for ref
 
 #if (USE_COEFF_RELOAD == 1) // Reloadable coefficients
     port_conditional_array<input, USE_COEFF_RELOAD == 1, P_SSR> coeff;
@@ -75,7 +73,8 @@ class test_graph : public graph {
                                                         NUM_OUTPUTS,
                                                         DUAL_IP,
                                                         PORT_API,
-                                                        P_SSR>;
+                                                        P_SSR,
+                                                        P_PARA_DECI_POLY>;
 
     // Constructor
     test_graph() {
@@ -89,9 +88,6 @@ class test_graph : public graph {
         int error_tap =
             rand() %
             FIR_LEN; // Randomly selects a single coefficient to be changed in second coefficient array to test reload
-#ifdef _DSPLIB_FIR_DEBUG_ADL_
-        error_tap = FIR_LEN - 1; // Always overwrite the last coeff only.
-#endif                           // _DSPLIB_FIR_DEBUG_ADL_
         for (int j = 0; j < 2; j++) {
             taps_gen.prepSeed(COEFF_SEED);
             taps_gen.gen(STIM_TYPE, taps);
@@ -134,8 +130,7 @@ class test_graph : public graph {
         //  default. Pass coeffs through graph constructor.
         uut_g<INPUT_SAMPLES> firGraph(m_taps_v);
 #endif
-// Connect two identical FIRs to ensure we don't get any errors regarding interoperability.
-// don't mix up num_outputs to different number of inputs
+
 #if (USE_CHAIN == 1 && ((NUM_OUTPUTS == 1 && DUAL_IP == 0) || (NUM_OUTPUTS == 2 && DUAL_INPUT_SAMPLES == 1)))
 // FIR sub-graph
 #if (USE_COEFF_RELOAD == 1) // Reloadable coefficients
@@ -146,28 +141,33 @@ class test_graph : public graph {
 #endif
 
         // Make connections
-        createPLIOFileConnections<P_SSR, DUAL_INPUT_SAMPLES>(in, QUOTE(INPUT_FILE), "in");
+        createPLIOFileConnections<IN_SSR, DUAL_INPUT_SAMPLES>(in, QUOTE(INPUT_FILE), "in");
         createPLIOFileConnections<P_SSR, (NUM_OUTPUTS - 1)>(out, QUOTE(OUTPUT_FILE), "out");
 
-        for (unsigned int i = 0; i < P_SSR; ++i) {
+        for (unsigned int i = 0; i < IN_SSR; ++i) {
+            // Size of window in Bytes.
             unsigned int plioBaseIdxIn = i * (DUAL_INPUT_SAMPLES + 1);
-            unsigned int plioBaseIdxOut = i * (NUM_OUTPUTS);
 
             connect<>(in[plioBaseIdxIn].out[0], firGraph.in[i]);
 #if (DUAL_IP == 1)
-            connect<>(in[plioBaseIdxIn + 1].out[0], firGraph.in2[i]);
+            connect<>(in[plioBaseIdxIn + 1].out[0], firGraph.in2[i]); // will change when fir adopts array ports
 #endif
+        }
+
 #if (USE_CHAIN == 1 && NUM_OUTPUTS == 1)
-            // Chained connections mutually explusive with multiple outputs.
-            connect<>(firGraph.out[plioBaseIdxOut], firGraph2.in[plioBaseIdxIn]);
-            connect<>(firGraph2.out[plioBaseIdxOut], out[plioBaseIdxOut].in[0]);
+        // Chained connections mutually explusive with multiple outputs.
+        connect<>(firGraph.out[plioBaseIdxOut], firGraph2.in[plioBaseIdxIn]);
+        connect<>(firGraph2.out[plioBaseIdxOut], out[plioBaseIdxOut].in[0]);
 #else
+
+        for (unsigned int i = 0; i < P_SSR; ++i) {
+            unsigned int plioBaseIdxOut = i * (NUM_OUTPUTS);
             connect<>(firGraph.out[i], out[plioBaseIdxOut].in[0]);
 #if (NUM_OUTPUTS == 2)
             connect<>(firGraph.out2[i], out[plioBaseIdxOut + 1].in[0]);
 #endif
-#endif
         }
+#endif
 
 #if (USE_COEFF_RELOAD == 1)
         for (int i = 0; i < P_SSR; i++) {
@@ -204,6 +204,9 @@ class test_graph : public graph {
         const int bufferSize = (PORT_API == 1 ? 0 : (FIR_LEN + INPUT_SAMPLES) * sizeof(DATA_TYPE));
         if (bufferSize > MAX_PING_PONG_SIZE) {
             single_buffer(firGraph.getKernels()->in[0]);
+            if (DUAL_IP == 1) {
+                single_buffer(firGraph.getKernels()->in[1]);
+            }
         }
         static_assert(bufferSize < MEMORY_MODULE_SIZE,
                       "ERROR: Input Window size (based on requrested window size and FIR length margin) exceeds Memory "

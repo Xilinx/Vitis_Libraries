@@ -23,6 +23,8 @@ Widget API Cast reference model
 #include <limits>
 #include "fir_ref_utils.hpp"
 
+using namespace adf;
+
 #define _DSPLIB_WIDGET_REAL2COMPLEX_REF_DEBUG_
 
 namespace xf {
@@ -44,7 +46,7 @@ class widget_real2complex_ref {
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(widget_real2complex_ref::convertData); }
     // FIR
-    void convertData(input_window<TT_DATA>* inWindow0, output_window<TT_OUT_DATA>* outWindow0);
+    void convertData(input_buffer<TT_DATA>& inWindow0, output_buffer<TT_OUT_DATA>& outWindow0);
 };
 
 template <unsigned int TP_WINDOW_VSIZE>
@@ -57,7 +59,7 @@ class widget_real2complex_ref<int32, cint32, TP_WINDOW_VSIZE> {
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(widget_real2complex_ref::convertData); }
     // FIR
-    void convertData(input_window<int32>* inWindow0, output_window<cint32>* outWindow0);
+    void convertData(input_buffer<int32>& inWindow0, output_buffer<cint32>& outWindow0);
 };
 
 template <unsigned int TP_WINDOW_VSIZE>
@@ -70,7 +72,7 @@ class widget_real2complex_ref<float, cfloat, TP_WINDOW_VSIZE> {
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(widget_real2complex_ref::convertData); }
     // FIR
-    void convertData(input_window<float>* inWindow0, output_window<cfloat>* outWindow0);
+    void convertData(input_buffer<float>& inWindow0, output_buffer<cfloat>& outWindow0);
 };
 
 template <unsigned int TP_WINDOW_VSIZE>
@@ -83,7 +85,7 @@ class widget_real2complex_ref<cint16, int16, TP_WINDOW_VSIZE> {
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(widget_real2complex_ref::convertData); }
     // FIR
-    void convertData(input_window<cint16>* inWindow0, output_window<int16>* outWindow0);
+    void convertData(input_buffer<cint16>& inWindow0, output_buffer<int16>& outWindow0);
 };
 
 template <unsigned int TP_WINDOW_VSIZE>
@@ -96,7 +98,7 @@ class widget_real2complex_ref<cint32, int32, TP_WINDOW_VSIZE> {
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(widget_real2complex_ref::convertData); }
     // FIR
-    void convertData(input_window<cint32>* inWindow0, output_window<int32>* outWindow0);
+    void convertData(input_buffer<cint32>& inWindow0, output_buffer<int32>& outWindow0);
 };
 
 template <unsigned int TP_WINDOW_VSIZE>
@@ -109,7 +111,7 @@ class widget_real2complex_ref<cfloat, float, TP_WINDOW_VSIZE> {
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(widget_real2complex_ref::convertData); }
     // FIR
-    void convertData(input_window<cfloat>* inWindow0, output_window<float>* outWindow0);
+    void convertData(input_buffer<cfloat>& inWindow0, output_buffer<float>& outWindow0);
 };
 }
 }

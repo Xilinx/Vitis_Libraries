@@ -16,6 +16,13 @@
 #include <float.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "device_defs.h"
+#if __SUPPORTS_CFLOAT__ == 0
+typedef struct {
+    float real;
+    float imag;
+} cfloat;
+#endif
 #include "fft_ifft_dit_1ch_ref.hpp"
 
 namespace xf {
@@ -196,16 +203,130 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
                           TP_SHIFT,
                           TP_DYN_PT_SIZE,
                           TP_WINDOW_VSIZE,
-                          TP_ORIG_PAR_POWER>::r4StageInt(T_int_data<TT_DATA>* samplesIn,
-                                                         TT_TWIDDLE* twiddles1,
-                                                         TT_TWIDDLE* twiddles2,
-                                                         unsigned int n,
-                                                         unsigned int r,
-                                                         unsigned int shift,
-                                                         unsigned int rank,
-                                                         T_int_data<TT_DATA>* samplesOut,
-                                                         int pptSize,
-                                                         bool inv) {
+                          TP_ORIG_PAR_POWER>::r4StageIntTrue(T_int_data<TT_DATA>* samplesIn,
+                                                             TT_TWIDDLE* twiddles1,
+                                                             TT_TWIDDLE* twiddles2,
+                                                             unsigned int n,
+                                                             unsigned int r,
+                                                             unsigned int shift,
+                                                             unsigned int rank,
+                                                             T_int_data<TT_DATA>* samplesOut,
+                                                             int pptSize,
+                                                             bool inv) {
+    int ptSize = TP_DYN_PT_SIZE == 0 ? TP_POINT_SIZE : pptSize;
+    constexpr unsigned int kMaxPointSize = 4096;
+    constexpr unsigned int kRadix = 4;
+    constexpr unsigned int kStdShift =
+        15; // derived from cint16's binary point position. No need to worry about float, which is all radix2
+    T_int_data<TT_DATA> sam0, sam1, sam2, sam3;
+    cint32 tempsamp;
+    TT_TWIDDLE tw[kRadix];
+    TT_TWIDDLE jtw0, jtw2;
+    unsigned int inIndex[kRadix];
+    unsigned int twIndex[kRadix];
+    unsigned int temp1, temp2;
+    cint32 sam2raw, sam3raw;
+    cint64 sam2rot, sam3rot;
+    cint64 a0, a1, a2, a3, o0, o1, o2, o3;
+    T_int_data<TT_DATA> y0, y1, y2, y3;
+    T_int_data<TT_DATA> yd0, yd1, yd2, yd3;
+    T_int_data<TT_DATA> z0, z1, z2, z3;
+    cint64 y1rot, y3rot;
+    cint64 term0, term1a, term1b, term2, term3a, term3b;
+    unsigned int opLowMask = (1 << rank) - 1;
+    unsigned int opHiMask = ptSize - 1 - opLowMask;
+    constexpr int64 kRoundConst =
+        ((int64)1 << (kStdShift - 1)) *
+        2; //*2 - because this is the rounding constant of a 4 input adder, not a 2 input adder
+
+    for (int op = 0; op < (ptSize >> 2); op++) {
+        for (int i = 0; i < 4; i++) {
+            inIndex[i] = ((op & opHiMask) << 2) + (i << rank) + (op & opLowMask);
+        }
+        temp1 = inIndex[0] << (kMaxLogPtSize - 1 - rank);
+        temp2 = temp1 & ((1 << (kMaxLogPtSize - 1)) - 1);
+        twIndex[0] = temp2;
+
+        temp1 = inIndex[1] << (kMaxLogPtSize - 1 - rank);
+        temp2 = temp1 & ((1 << (kMaxLogPtSize - 1)) - 1);
+        twIndex[1] = temp2;
+
+        temp1 = inIndex[0] << (kMaxLogPtSize - 1 - rank);
+        temp2 = temp1 & ((1 << (kMaxLogPtSize - 1)) - 1);
+        twIndex[2] = temp2;
+
+        for (int i = 0; i < 2; i++) {
+            tw[i].real = twiddles1[twIndex[i]].real;
+            tw[i].imag = twiddles1[twIndex[i]].imag;
+        }
+        tw[2].real = twiddles2[twIndex[2]].real;
+        tw[2].imag = twiddles2[twIndex[2]].imag;
+
+        jtw0.real = -tw[0].imag;
+        jtw0.imag = tw[0].real;
+        jtw2.real = -tw[2].imag;
+        jtw2.imag = tw[2].real;
+
+        sam0 = samplesIn[inIndex[0]];
+        sam1 = samplesIn[inIndex[1]];
+        sam2 = samplesIn[inIndex[2]];
+        sam3 = samplesIn[inIndex[3]];
+
+        term0.real = (int64)sam0.real << kStdShift;
+        term0.imag = (int64)sam0.imag << kStdShift;
+        tempsamp.real = sam1.real;
+        tempsamp.imag = sam1.imag;
+        term1a = cmpy<cint32, TT_TWIDDLE>(tempsamp, tw[0], inv);
+        term1b = cmpy<cint32, TT_TWIDDLE>(tempsamp, jtw0, inv);
+        tempsamp.real = sam2.real;
+        tempsamp.imag = sam2.imag;
+        term2 = cmpy<cint32, TT_TWIDDLE>(tempsamp, tw[1], inv);
+        tempsamp.real = sam3.real;
+        tempsamp.imag = sam3.imag;
+        term3a = cmpy<cint32, TT_TWIDDLE>(tempsamp, tw[2], inv);
+        term3b = cmpy<cint32, TT_TWIDDLE>(tempsamp, jtw2, inv);
+
+        z0.real = (int32)(((term0.real) + (term1a.real) + (term2.real) + (term3a.real) + kRoundConst) >> shift);
+        z1.real = (int32)(((term0.real) + (term1b.real) - (term2.real) - (term3b.real) + kRoundConst) >> shift);
+        z2.real = (int32)(((term0.real) - (term1a.real) + (term2.real) - (term3a.real) + kRoundConst) >> shift);
+        z3.real = (int32)(((term0.real) - (term1b.real) - (term2.real) + (term3b.real) + kRoundConst) >> shift);
+        z0.imag = (int32)(((term0.imag) + (term1a.imag) + (term2.imag) + (term3a.imag) + kRoundConst) >> shift);
+        z1.imag = (int32)(((term0.imag) + (term1b.imag) - (term2.imag) - (term3b.imag) + kRoundConst) >> shift);
+        z2.imag = (int32)(((term0.imag) - (term1a.imag) + (term2.imag) - (term3a.imag) + kRoundConst) >> shift);
+        z3.imag = (int32)(((term0.imag) - (term1b.imag) - (term2.imag) + (term3b.imag) + kRoundConst) >> shift);
+        samplesOut[inIndex[0]] = z0; // z0 = apc+bpd
+        samplesOut[inIndex[1]] = z1; // z1 = w1p*(amc-jbmd)       ifft (amc+jbmd)
+        samplesOut[inIndex[2]] = z2; // z2 = w2p*(apc-bpd)
+        samplesOut[inIndex[3]] = z3; // z3 = w3p*(amc+jbmd)       ifft (amc-jbmd)
+    }
+    // end of true R4
+}
+
+template <typename TT_DATA,
+          typename TT_TWIDDLE, // type of coefficients           (e.g. int16, cint32)
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
+void fft_ifft_dit_1ch_ref<TT_DATA,
+                          TT_TWIDDLE,
+                          TP_POINT_SIZE,
+                          TP_FFT_NIFFT,
+                          TP_SHIFT,
+                          TP_DYN_PT_SIZE,
+                          TP_WINDOW_VSIZE,
+                          TP_ORIG_PAR_POWER>::r4StageIntSpoof(T_int_data<TT_DATA>* samplesIn,
+                                                              TT_TWIDDLE* twiddles1,
+                                                              TT_TWIDDLE* twiddles2,
+                                                              unsigned int n,
+                                                              unsigned int r,
+                                                              unsigned int shift,
+                                                              unsigned int rank,
+                                                              T_int_data<TT_DATA>* samplesOut,
+                                                              int pptSize,
+                                                              bool inv) {
     int ptSize = TP_DYN_PT_SIZE == 0 ? TP_POINT_SIZE : pptSize;
     constexpr unsigned int kMaxPointSize = 4096;
     constexpr unsigned int kRadix = 4;    // actually spoofed by 4 radix2 operations.
@@ -295,9 +416,15 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
                           TP_SHIFT,
                           TP_DYN_PT_SIZE,
                           TP_WINDOW_VSIZE,
-                          TP_ORIG_PAR_POWER>::fft(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow) {
-    constexpr unsigned int kMaxPtSizePwr = 12;                   // largest is 4096 = 1<<12;
-    constexpr unsigned int kMinPtSizePwr = 4;                    // largest is 16 = 1<<4;
+                          TP_ORIG_PAR_POWER>::fft(input_buffer<TT_DATA>& inWindow, output_buffer<TT_DATA>& outWindow) {
+    constexpr unsigned int kMaxPtSizePwr = 12; // largest is 4096 = 1<<12;
+#if __FFT_R4_IMPL__ == 0
+    constexpr unsigned int kMinPtSizePwr = 4; // smallest is 16 = 1<<4;
+#endif                                        //__FFT_R4_IMPL__ == 0
+#if __FFT_R4_IMPL__ == 1
+    constexpr unsigned int kMinPtSizePwr = 5; // smallest is 16 = 1<<4;
+#endif                                        //__FFT_R4_IMPL__ == 1
+
     constexpr unsigned int kHeaderSize = 32 / (sizeof(TT_DATA)); // dynamic point size header size in samples
     constexpr unsigned int kPtSizePwr = fnGetPointSizePower<TP_POINT_SIZE>();
     constexpr unsigned int kScaleFactor = kPtSizePwr - 1; // 1 is for initial rotation factor of 1/sqrt(2).
@@ -316,8 +443,10 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
     T_int_data<TT_DATA> rotB; // Sample B after rotation.
     TT_TWIDDLE twiddle;
     TT_TWIDDLE twiddles[1 << (kMaxPtSizePwr - 1)];
+    TT_TWIDDLE tw3s[1 << (kMaxPtSizePwr - 2)];
     T_int_data<TT_DATA> chess_storage(% chess_alignof(cint32)) samplesStoreA[TP_POINT_SIZE];
     T_int_data<TT_DATA> chess_storage(% chess_alignof(cint32)) samplesStoreB[TP_POINT_SIZE];
+
     T_int_data<TT_DATA> inSampleA, inSampleB, outSampleA, outSampleB;
     unsigned int posLoMask, posHiMask;
     unsigned int twiddleMask, twiddleIndex, twiddlePos;
@@ -325,6 +454,7 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
     unsigned int posA, posB;
     unsigned int rank = 0;
     TT_DATA* headerPtr;
+    TT_DATA* outHeaderPtr;
     TT_DATA header;
     int16 ptSizePwr =
         kPtSizePwr;      // default to static point size value. May be overwritten if dynamic point size selected.
@@ -341,26 +471,39 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
     T_accRef<T_int_data<TT_DATA> > accum;
     T_int_data<TT_DATA> *samplesA, *samplesB, *tempPtr;
     const TT_TWIDDLE* twiddle_master = fnGetTwiddleMasterBase<TT_TWIDDLE>();
+#if __FFT_R4_IMPL__ == 0
+    const TT_TWIDDLE* tw3_master = NULL;
+#endif //__FFT_R4_IMPL__ == 1
+#if __FFT_R4_IMPL__ == 1
+    const TT_TWIDDLE* tw3_master = tw3_twiddle_master_cint16;
+#endif //__FFT_R4_IMPL__ == 2
 
+    headerPtr = (TT_DATA*)inWindow.data();
+    outHeaderPtr = (TT_DATA*)outWindow.data();
     if
         constexpr(TP_DYN_PT_SIZE == 1) {
-            headerPtr = (TT_DATA*)inWindow->ptr;
             header = *headerPtr++; // saved for later when output to outWindow
-            window_writeincr(outWindow, header);
+            *outHeaderPtr++ = header;
+            //    window_writeincr(outWindow, header);
             inv = header.real == 0 ? true : false;
             header = *headerPtr++;                              // saved for later when output to outWindow
             ptSizePwr = (int32)header.real - TP_ORIG_PAR_POWER; // Modified for case where FFT is a subframe processor.
                                                                 // Then the header refers to the overall point size.
-            window_writeincr(outWindow, header);
+            *outHeaderPtr++ = header;
+            //    window_writeincr(outWindow, header);
             for (int i = 2; i < kHeaderSize - 1; i++) {
-                window_writeincr(outWindow, blankVector<TT_DATA>());
+                *outHeaderPtr++ = blankVector<TT_DATA>();
+                //      window_writeincr(outWindow, blankVector<TT_DATA>());
             }
             if ((ptSizePwr >= kMinPtSizePwr) && (ptSizePwr <= kMaxPtSizePwr)) {
-                window_writeincr(outWindow, blankVector<TT_DATA>()); // Status word. 0 indicated all ok.
+                *outHeaderPtr++ = blankVector<TT_DATA>();
+                // window_writeincr(outWindow, blankVector<TT_DATA>()); //Status word. 0 indicated all ok.
             } else {
-                window_writeincr(outWindow, unitVector<TT_DATA>()); // Status word. 0 indicated all ok.
+                *outHeaderPtr++ = unitVector<TT_DATA>();
+                // window_writeincr(outWindow, unitVector<TT_DATA>()); //Status word. 0 indicated all ok.
             }
-            window_incr(inWindow, kHeaderSize);
+            headerPtr = inWindow.data() + kHeaderSize;
+            //    window_incr(inWindow,kHeaderSize);
             // override values set for constant point size with values derived from the header in a dynamic point size
             // frame
             r2Stages = std::is_same<TT_DATA, cfloat>::value
@@ -375,13 +518,20 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
         if ((ptSizePwr >= kMinPtSizePwr) && (ptSizePwr <= kMaxPtSizePwr)) {
             // read samples in
             for (unsigned int i = 0; i < ptSize; i++) {
-                window_readincr(inWindow, sampleIn);
+                sampleIn = *headerPtr++;
+                //        window_readincr(inWindow, sampleIn);
                 samplesStoreA[bitRev(ptSizePwr, i)] = castInput<TT_DATA>(sampleIn);
             }
-            window_incr(inWindow, TP_POINT_SIZE - ptSize);
+            headerPtr += TP_POINT_SIZE - ptSize;
+            //      window_incr(inWindow, TP_POINT_SIZE-ptSize);
             for (unsigned int i = 0; i < (1 << (kMaxPtSizePwr - 1)); i++) {
                 twiddles[i] = twiddle_master[i];
             }
+#if __FFT_R4_IMPL__ == 2
+            for (unsigned int i = 0; i < (1 << (kMaxPtSizePwr - 1)); i++) {
+                tw3s[i] = tw3_master[i];
+            }
+#endif //__FFT_R4_IMPL__ == 2
 
             samplesA = samplesStoreA;
             samplesB = samplesStoreB;
@@ -409,9 +559,15 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
                 } else {
                     stageShift = shift;
                 }
-                r4StageInt(samplesA, twiddles, twiddles, ptSize, ptSize >> 2, stageShift, rank, samplesB, ptSize,
-                           inv); //<TT_DATA,TT_TWIDDLE,TP_POINT_SIZE,TP_FFT_NIFFT>, but not required because this is a
-                                 // member function.
+                //#if __FFT_R4_IMPL__ == 0
+                r4StageIntSpoof(samplesA, twiddles, twiddles, ptSize, ptSize >> 2, stageShift, rank, samplesB, ptSize,
+                                inv); //<TT_DATA,TT_TWIDDLE,TP_POINT_SIZE,TP_FFT_NIFFT>, but not required because this
+                                      // is a member function.
+                //#else //if __FFT_R4_IMPL__ == 1
+                // r4StageIntTrue(samplesA, twiddles, tw3s, ptSize, ptSize>>2, stageShift, rank, samplesB, ptSize,
+                // inv);//<TT_DATA,TT_TWIDDLE,TP_POINT_SIZE,TP_FFT_NIFFT>, but not required because this is a member
+                // function.
+                //#endif
 
                 // Now watch carefully. The pea is under the cup labelled samplesB (the output).
                 tempPtr = samplesA;
@@ -425,10 +581,12 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
             TT_DATA outSample;
             for (unsigned int i = 0; i < ptSize; i++) {
                 outSample = castOutput<TT_DATA>(samplesA[i], 0);
-                window_writeincr(outWindow, outSample);
+                *outHeaderPtr++ = outSample;
+                //        window_writeincr(outWindow, outSample);
             }
             for (int i = ptSize; i < TP_POINT_SIZE; i++) {
-                window_writeincr(outWindow, blankVector<TT_DATA>());
+                *outHeaderPtr++ = blankVector<TT_DATA>();
+                // window_writeincr(outWindow, blankVector<TT_DATA>());
             }
 
         } else { // ptSizePwr is out of range
@@ -440,8 +598,9 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
             window_writeincr(outWindow, unitVector<TT_DATA>());  //error flag out
             */
             // write out blank frame
-            for (int i = 0; i < ptSize * sizeof(TT_DATA) / sizeof(int32); i++) {
-                window_writeincr(outWindow, blankVector<TT_DATA>());
+            for (int i = 0; i < TP_WINDOW_VSIZE * sizeof(TT_DATA) / sizeof(int32); i++) {
+                *outHeaderPtr++ = blankVector<TT_DATA>();
+                // window_writeincr(outWindow, blankVector<TT_DATA>() );
             }
 
             rank += 2;
@@ -467,8 +626,8 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
                           TP_SHIFT,
                           TP_DYN_PT_SIZE,
                           TP_WINDOW_VSIZE,
-                          TP_ORIG_PAR_POWER>::nonBitAccfft(input_window<TT_DATA>* inWindow,
-                                                           output_window<TT_DATA>* outWindow) {
+                          TP_ORIG_PAR_POWER>::nonBitAccfft(input_buffer<TT_DATA>& inWindow,
+                                                           output_buffer<TT_DATA>& outWindow) {
     constexpr unsigned int kPtSizePwr = fnGetPointSizePower<TP_POINT_SIZE>();
     constexpr unsigned int kScaleFactor = TP_SHIFT; // was kPtSizePwr -1; //1 is for initial rotation factor of
                                                     // 1/sqrt(2), but with TP_SHIFT this is user-config
@@ -487,6 +646,8 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
     unsigned int posA, posB;
     T_accRef<T_int_data<TT_DATA> > accum;
     T_int_data<TT_DATA> *samplesA, *samplesB, *tempPtr;
+    TT_DATA* inWindowPtr = inWindow.data();
+    TT_DATA* outWindowPtr = outWindow.data();
 
     // Form twiddle table for this point size;
     for (int i = 0; i < TP_POINT_SIZE / 2; i++) {
@@ -497,7 +658,8 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
     for (int iter = 0; iter < TP_WINDOW_VSIZE / TP_POINT_SIZE; iter++) {
         // read samples in
         for (unsigned int i = 0; i < TP_POINT_SIZE; i++) {
-            window_readincr(inWindow, sampleIn);
+            sampleIn = *inWindowPtr++;
+            //      window_readincr(inWindow, sampleIn);
             samplesStoreA[i] = castInput<TT_DATA>(sampleIn);
         }
 
@@ -537,8 +699,9 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
         }
         // Write samples out (natural order)
         for (unsigned int i = 0; i < TP_POINT_SIZE; i++) {
-            window_writeincr((output_window<TT_DATA>*)outWindow,
-                             castOutput<TT_DATA>(samplesA[bitRev(kPtSizePwr, i)], kScaleFactor));
+            *outWindowPtr++ = castOutput<TT_DATA>(samplesA[bitRev(kPtSizePwr, i)], kScaleFactor);
+            //      window_writeincr((output_window<TT_DATA> *)outWindow,
+            //      castOutput<TT_DATA>(samplesA[bitRev(kPtSizePwr,i)],kScaleFactor));
         }
     }
 };

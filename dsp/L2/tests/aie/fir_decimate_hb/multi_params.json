@@ -85,6 +85,46 @@
             "PORT_API":"1",
             "UUT_PARA_DECI_POLY":"2",
             "CASC_LEN":"3"
+        },
+        "test_10_fir_43t_int16_int32": {
+            "DATA_TYPE":"int16",
+            "COEFF_TYPE":"int32",
+            "FIR_LEN":"43",
+            "SHIFT":"16",
+            "INPUT_WINDOW_VSIZE":"2560"
+        },
+        "test_15_fir_83t_cint16_int32": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int32",
+            "FIR_LEN":"11",
+            "SHIFT":"16",
+            "PORT_API":"1",
+            "DUAL_IP":"1",
+            "CASC_LEN":"1",
+            "INPUT_WINDOW_VSIZE":"2560"
+        },
+        "test_16_fir_31t_cint16_cint32": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"cint32",
+            "FIR_LEN":"31",
+            "SHIFT":"16",
+            "CASC_LEN":"3",
+            "INPUT_WINDOW_VSIZE":"2560"
+        },
+        "test_17_fir_16t_float": {
+            "DATA_TYPE":"float",
+            "COEFF_TYPE":"float",
+            "FIR_LEN":"11",
+            "SHIFT":"0",
+            "INPUT_WINDOW_VSIZE":"2560"
+        },
+        "test_18_fir_16t_cfloat": {
+            "DATA_TYPE":"cfloat",
+            "COEFF_TYPE":"float",
+            "FIR_LEN":"11",
+            "SHIFT":"0",
+            "DIFF_TOLERANCE":"0.025",
+            "INPUT_WINDOW_VSIZE":"2560"
         }
     }
 }

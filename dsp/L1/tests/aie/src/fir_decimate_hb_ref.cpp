@@ -19,6 +19,7 @@ The reference model is agnostic of intrinsics, so is simpler and easier to valid
 It is then used as the verification golden reference for the kernel class.
 */
 
+#include "aie_api/aie_adf.hpp"
 #include "fir_decimate_hb_ref.hpp"
 #include "fir_ref_utils.hpp"
 
@@ -100,12 +101,17 @@ void fir_decimate_hb_ref<TT_DATA,
                          TP_INPUT_WINDOW_VSIZE,
                          TP_USE_COEFF_RELOAD,
                          TP_NUM_OUTPUTS,
-                         TP_API>::filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow) {
+                         TP_API>::
+    filter(input_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
+           output_buffer<TT_DATA>& outWindow) {
     const unsigned int shift = TP_SHIFT;
     T_accRef<TT_DATA> accum;
     TT_DATA d_in;
     unsigned int dataReads = 0;
     TT_DATA accumSrs;
+
+    auto inItr = ::aie::begin_random_circular(inWindow);
+    auto outItr = ::aie::begin_random_circular(outWindow);
 
     // alternate architecture - to attempt bit-accuracy with UUT by executing float operations in the same order.
     TT_DATA d[TP_FIR_LEN];
@@ -115,7 +121,7 @@ void fir_decimate_hb_ref<TT_DATA,
     // padded to be a multiple of 32bytes. This additional padding is stepped over by advancing the window pointer.
     const unsigned int kFirLen = TP_FIR_LEN;
     const unsigned int kFirMarginOffset = fnFirMargin<kFirLen, TT_DATA>() - kFirLen + 1; // FIR Margin Offset.
-    window_incr(inWindow, kFirMarginOffset); // move input data pointer past the margin padding
+    inItr += kFirMarginOffset;
 
     for (unsigned int i = 0; i < TP_INPUT_WINDOW_VSIZE; i += 2) {
         accum = null_accRef<TT_DATA>(); // reset accumulator at the start of the mult-add for each output sample
@@ -125,7 +131,7 @@ void fir_decimate_hb_ref<TT_DATA,
         // The following form, of the reference model matches the UUT order of calculations which is necessary
         // for bit-accuracy when using float types.
         for (unsigned int j = 0; j < TP_FIR_LEN; j++) {
-            d[j] = window_readincr(inWindow);
+            d[j] = *inItr++;
             dataReads++;
         }
         for (unsigned int j = 0; j < (TP_FIR_LEN + 1) / 4; j++) {
@@ -142,10 +148,10 @@ void fir_decimate_hb_ref<TT_DATA,
         roundAcc(TP_RND, shift, accum);
         saturateAcc(accum);
         accumSrs = castAcc(accum);
-        window_writeincr((output_window<TT_DATA>*)outWindow, accumSrs);
+        *outItr++ = accumSrs;
 
         // Revert data pointer for next sample
-        window_decr(inWindow, dataReads - 2);
+        inItr -= dataReads - 2;
     }
 };
 
@@ -166,9 +172,10 @@ void fir_decimate_hb_ref<TT_DATA,
                          TP_INPUT_WINDOW_VSIZE,
                          USE_COEFF_RELOAD_TRUE,
                          TP_NUM_OUTPUTS,
-                         TP_API>::filter(input_window<TT_DATA>* inWindow,
-                                         output_window<TT_DATA>* outWindow,
-                                         const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 4 + 1]) {
+                         TP_API>::
+    filter(input_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
+           output_buffer<TT_DATA>& outWindow,
+           const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 4 + 1]) {
     // Reload coefficients
     int inputIndex = 0;
     for (int i = 0; i < TP_FIR_LEN; ++i) {
@@ -193,12 +200,15 @@ void fir_decimate_hb_ref<TT_DATA,
     // alternate architecture - to attempt bit-accuracy with UUT by executing float operations in the same order.
     TT_DATA d[TP_FIR_LEN];
 
+    auto inItr = ::aie::begin_random_circular(inWindow);
+    auto outItr = ::aie::begin_random_circular(outWindow);
+
     // The margin in the window allows the state of the FIR to be re-established at the start of each new window
     // to match the state of the FIR at the end of the previous window. This margin is the length of the FIR, but
     // padded to be a multiple of 32bytes. This additional padding is stepped over by advancing the window pointer.
     const unsigned int kFirLen = TP_FIR_LEN;
     const unsigned int kFirMarginOffset = fnFirMargin<kFirLen, TT_DATA>() - kFirLen + 1; // FIR Margin Offset.
-    window_incr(inWindow, kFirMarginOffset); // move input data pointer past the margin padding
+    inItr += kFirMarginOffset; // move input data pointer past the margin padding
 
     for (unsigned int i = 0; i < TP_INPUT_WINDOW_VSIZE; i += 2) {
         accum = null_accRef<TT_DATA>(); // reset accumulator at the start of the mult-add for each output sample
@@ -208,7 +218,7 @@ void fir_decimate_hb_ref<TT_DATA,
         // The following form, of the reference model matches the UUT order of calculations which is necessary
         // for bit-accuracy when using float types.
         for (unsigned int j = 0; j < TP_FIR_LEN; j++) {
-            d[j] = window_readincr(inWindow);
+            d[j] = *inItr++;
             dataReads++;
         }
         for (unsigned int j = 0; j < (TP_FIR_LEN + 1) / 4; j++) {
@@ -225,10 +235,10 @@ void fir_decimate_hb_ref<TT_DATA,
         roundAcc(TP_RND, shift, accum);
         saturateAcc(accum);
         accumSrs = castAcc(accum);
-        window_writeincr((output_window<TT_DATA>*)outWindow, accumSrs);
+        *outItr++ = accumSrs;
 
         // Revert data pointer for next sample
-        window_decr(inWindow, dataReads - 2);
+        inItr -= dataReads - 2;
     }
 };
 }

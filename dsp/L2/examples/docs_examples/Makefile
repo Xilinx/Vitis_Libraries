@@ -63,7 +63,7 @@ ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := xilinx_vck190_base_202220_1
+PLATFORM := xilinx_vck190_base_202310_1
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
@@ -102,21 +102,20 @@ CXXFLAGS += $(EXTRA_CXXFLAGS)
 VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 
 # aie template
-XILINX_VITIS_AIETOOLS ?=
-XILINX_VITIS_AIELIBS ?=
-ifneq ($(wildcard $(XILINX_VITIS)/aietools/.*),)
 XILINX_VITIS_AIETOOLS := $(XILINX_VITIS)/aietools
 ifeq ($(HOST_ARCH), x86)
-XILINX_VITIS_AIELIBS := -L$(XILINX_VITIS_AIETOOLS)/lib/lnx64.o -ladf_api_xrt
+AIE_CXXFLAGS_INC +=  -I $(XILINX_VITIS)/aietools/include 
+AIE_LDFLAGS_LD += -L $(XILINX_VITIS)/aietools/lib/lnx64.o -ladf_api_xrt 
 else
-XILINX_VITIS_AIELIBS := -L$(XILINX_VITIS_AIETOOLS)/lib/aarch64.o -ladf_api_xrt
+AIE_CXXFLAGS_INC +=  -I $(XILINX_VITIS)/aietools/include 
+AIE_LDFLAGS_LD += -L $(XILINX_VITIS)/aietools/lib/aarch64.o  -ladf_api_xrt 
 endif
-else
-XILINX_VITIS_AIETOOLS := $(XILINX_VITIS)/cardano
-XILINX_VITIS_AIELIBS:= -lcardano_api_xrt -lxaiengine -lxrt_core
-endif
-CXXFLAGS += -I$(XILINX_VITIS_AIETOOLS)/include
-LDFLAGS += $(XILINX_VITIS_AIELIBS)
+CXXFLAGS += $(AIE_CXXFLAGS_INC)
+LDFLAGS += $(AIE_LDFLAGS_LD)
+
+AIE_WORK_DIR ?= Work
+AIE_PKG_DIR ?= Work
+
 # Setting customized_params in aiecompiler
 
 ############################ setting AIE Compiler ###########################
@@ -125,25 +124,24 @@ AIETARGET := hw
 else
 AIETARGET := x86sim
 endif
+
 AIE_CXXFLAGS += --target=$(AIETARGET) --platform=$(XPLATFORM) --pl-freq=1000 
-AIE_CXXFLAGS += -I $(XILINX_VITIS_AIETOOLS)/include
+AIE_CXXFLAGS += $(AIE_CXXFLAGS_INC)
 AIE_CONTAINER = $(TEMP_DIR)/libadf.a
-AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie
-AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/src/aie
-AIE_CXXFLAGS += -I $(XFLIB_DIR)/L2/include/aie
-AIE_CXXFLAGS += -I $(CUR_DIR)
-AIE_CXXFLAGS += --dataflow -Xchess=llvm.xargs=-std=c++2a 
-$(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp: $(AIE_CONTAINER)
+AIE_WORK_DIR = $(CUR_DIR)/Work
+AIE_PKG_DIR = $(AIE_WORK_DIR)
+
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L2/include/aie -I $(CUR_DIR)
+
+AIE_CXXFLAGS +=  $(CUR_DIR)/--dataflow -Xchess=llvm.xargs=-std=c++2a 
+
+$(AIE_WORK_DIR)/ps/c_rts/aie_control_xrt.cpp: $(AIE_CONTAINER)
 
 EXE_FILE_DEPS += $(AIE_CONTAINER)
 BINARY_CONTAINERS_DEPS += $(AIE_CONTAINER)
+AIESIMFLAGS += $(EXTRA_AIESIMFLAGS)
+
 ########################## Setting up Host Variables ##########################
-ifeq ($(TARGET),sw_emu)
-CXXFLAGS += -D SW_EMU_TEST
-endif
-ifeq ($(TARGET),hw_emu)
-CXXFLAGS += -D HW_EMU_TEST
-endif
 
 #Inclue Required Host Source Files
 ifeq ($(ps_on_x86), on)
@@ -161,7 +159,7 @@ endif
 
 EXE_NAME := 
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-EXE_FILE_DEPS := $(HOST_SRCS) $(EXE_FILE_DEPS)
+EXE_FILE_DEPS := $(HOST_SRCS) $(INSTANCE_FILES)  $(EXE_FILE_DEPS)
 
 ########################## Kernel compiler global settings ##########################
 ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
@@ -176,7 +174,7 @@ endif
 ######################### binary container global settings ##########################
 
 ############################## Setting Rules for AIE (Building Kernels) ##################
-$(AIE_CONTAINER): $(XFLIB_DIR)/L2/examples/docs_examples/test_all.cpp  
+$(AIE_CONTAINER): $(XFLIB_DIR)/L2/examples/docs_examples/test_all.cpp   
 	$(ECHO) "Compiling: libadf.a"
 	mkdir -p $(dir $@)
 	$(AIECXX) $(AIE_CXXFLAGS) $^
@@ -240,11 +238,19 @@ ifeq ($(ps_on_x86), on)
 	@echo "### ***** running PS X86 SE_EMU ***** ###"
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir $(SD_CARD) --package.emu_ps x86
 endif
-#3. General Embeded flow
+# 3. AIE_ON_X86 Flow
+ifeq ($(pcie_aie), on)
+	@echo "### ***** running AIE ON_X86 ***** ###"
+	${VPP} -p $(VPP_PACKAGE) -t ${TARGET} -f ${XPLATFORM} ${AIE_CONTAINER} ${BINARY_CONTAINERS} -o $(BINARY_CONTAINERS_PKG) --package.boot_mode ospi
+	@echo "### ***** sd_card generation done! ***** ###"
+endif
+# 4. General Embeded flow
 ifeq ($(dfx_hw), off)
 ifeq ($(ps_on_x86), off)
+ifeq ($(pcie_aie), off)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE) --package.boot_mode sd  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 	@echo "### ***** sd_card generation done! ***** ###"
+endif
 endif
 endif
 
@@ -270,17 +276,24 @@ all: check_device check_vpp check_platform mkflag $(RUN_DEPS)
 run: all
 #x86sim
 ifeq ($(TARGET), x86sim)
-	$(X86SIMULATOR) --pkg-dir=./Work 
+	$(X86SIMULATOR) --pkg-dir=$(AIE_PKG_DIR) 
 	
 endif
 #aiesim
 ifeq ($(TARGET), aiesim)
-	$(AIESIMULATOR) --pkg-dir=./Work --profile 
+	$(AIESIMULATOR) --pkg-dir=$(AIE_PKG_DIR) --profile  $(AIESIMFLAGS)
 	
 endif
 #hw_emu
 ifneq (,$(filter hw_emu, $(TARGET)))
 ifeq ($(HOST_ARCH), x86)
+ifeq ($(pcie_aie), on)
+	cp $(AIE_WORK_DIR)/reports/dma_lock_report.json ./
+	cp $(AIE_WORK_DIR)/ps/c_rts/aie_control_config.json ./
+	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) $(BINARY_CONTAINERS_PKG)
+	
+endif
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
 	
@@ -317,7 +330,7 @@ endif
 
 ############################## Setting Targets ##############################
 
-.PHONY: clean cleanall emconfig
+.PHONY: clean cleanall emconfig gen_instances valid_params
 emconfig: $(EMCONFIG)
 
 .PHONY: host
@@ -334,18 +347,24 @@ else
 xclbin: check_vpp check_sysroot  $(BINARY_CONTAINERS)
 endif
 
+gen_instances: $(INSTANCE_FILES)
+	@echo "Nothing to generate."
+
+valid_params:
+	@echo "Nothing to validate."
+
 ############################## Cleaning Rules ##############################
 cleanh:
-	-$(RMDIR) $(EXE_FILE) vitis_* TempConfig system_estimate.xtxt *.rpt .run/
+	-$(RMDIR) $(EXE_FILE)  vitis_* TempConfig system_estimate.xtxt *.rpt .run/  $(INST_TB_FILES)
 	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb sample_link.ini sample_compile.ini obj*  bin* *.csv *.jpg *.jpeg *.png *.db
 
 cleank:
 	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl*start_simulation. sh *.xclbin
-	-$(RMDIR) _x_temp.* _x*
+	-$(RMDIR) _x_temp.* _x* $(INST_FILES)
 
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR) sd_card* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
-	-$(RMDIR) $(AIE_CONTAINER) aiesimulator_output .AIE_SIM_CMD_LINE_OPTIONS x86simulator_output $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
-	-$(RMDIR) 
+	-$(RMDIR) $(AIE_CONTAINER) aiesimulator_output .AIE_SIM_CMD_LINE_OPTIONS x86simulator_output $(AIE_WORK_DIR) $(AIE_PKG_DIR) $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
+	-$(RMDIR)  *.html $(INSTANCE_FILES)
 
 clean: cleanh

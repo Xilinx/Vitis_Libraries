@@ -203,9 +203,9 @@ static void doTile(T_D* inPtr, T_D* outPtr) {
 
 namespace aie = ::aie;
 template <unsigned M, unsigned N, unsigned inRow, unsigned inCol, unsigned leadingDim, typename T_D>
-void tilerKernelClass<M, N, inRow, inCol, leadingDim, T_D>::tile(input_window<T_D>* inWindow,
-                                                                 output_window<T_D>* __restrict outWindow) {
-    doTile<M, N, inRow, inCol, leadingDim, T_D>((T_D*)inWindow->ptr, (T_D*)outWindow->ptr);
+void tilerKernelClass<M, N, inRow, inCol, leadingDim, T_D>::tile(input_buffer<T_D>& __restrict inWindow,
+                                                                 output_buffer<T_D>& __restrict outWindow) {
+    doTile<M, N, inRow, inCol, leadingDim, T_D>((T_D*)inWindow.data(), (T_D*)outWindow.data());
 };
 }
 }

@@ -53,7 +53,6 @@
                 "mkdir -p logs",
                 "perl LIB_DIR/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./aiesimulator_output/data/uut_output.txt --type $(DATA_TYPE) --ssr $(UUT_SSR) --zip --dual 0 -k 0 -w $(UUT_SSR_WINDOW_VSIZE)",
                 "grep -ve '[XT]' ./aiesimulator_output/data/uut_output.txt > ./logs/uut_output.txt",
-                "grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./logs/ref_output.txt",
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE) abs",
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP)",
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/get_stats.tcl $(UUT_SSR_WINDOW_VSIZE) 1 $(STATUS_FILE) ./aiesimulator_output dds $(NITER_UUT)",
@@ -65,11 +64,12 @@
         {
             "target": "x86sim",
             "launch_cmd": [
-                "$(if $(filter-out REF,$(TAG)), mkdir -p logs)",
+                "mkdir -p logs",
                 "$(if $(filter-out REF,$(TAG)), perl LIB_DIR/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./x86simulator_output/data/uut_output.txt --type $(DATA_TYPE) --ssr $(UUT_SSR) --zip --dual 0 -k 0 -w $(UUT_SSR_WINDOW_VSIZE))",
                 "$(if $(filter-out REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/uut_output.txt > ./logs/uut_output.txt)",
-                "$(if $(filter-out REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./logs/ref_output.txt)",
+                "$(if $(filter REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./logs/ref_output.txt)",
                 "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE) abs)",
+                "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP))",
                 "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./)"
             ]
         }

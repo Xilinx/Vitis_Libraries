@@ -25,6 +25,8 @@ the FIR_RESAMPLER library element.
 #include <tuple>
 #include "fir_common_traits.hpp"
 #include "fir_resampler.hpp"
+#include "fir_decomposer_utils.hpp"
+
 namespace xf {
 namespace dsp {
 namespace aie {
@@ -33,295 +35,6 @@ namespace resampler {
 using namespace adf;
 
 enum IO_API { WINDOW = 0, STREAM };
-
-//---------------------------------------------------------------------------------------------------
-// create_casc_kernel_recur
-// Where the FIR function is split over multiple processors to increase throughput, recursion
-// is used to generate the multiple kernels, rather than a for loop due to constraints of
-// c++ template handling.
-// For each such kernel, only a splice of the full array of coefficients is processed.
-//---------------------------------------------------------------------------------------------------
-/**
-  * @cond NOCOMMENTS
-  */
-// Recursive kernel creation, static coefficients
-template <int dim,
-          typename TT_DATA,
-          typename TT_COEFF,
-          unsigned int TP_FIR_LEN,
-          unsigned int TP_INTERPOLATE_FACTOR,
-          unsigned int TP_DECIMATE_FACTOR,
-          unsigned int TP_SHIFT,
-          unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_CASC_LEN,
-          unsigned int TP_USE_COEFF_RELOAD = 0,
-          unsigned int TP_DUAL_IP = 0,
-          unsigned int TP_API = 0>
-class create_casc_kernel_recur {
-   public:
-    static void create(kernel (&firKernels)[TP_CASC_LEN], const std::vector<TT_COEFF>& taps) {
-        firKernels[dim - 1] = kernel::create_object<fir_resampler<
-            TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
-            TP_INPUT_WINDOW_VSIZE, true, true,
-            fnFirRange<CEIL(TP_FIR_LEN, TP_INTERPOLATE_FACTOR), TP_CASC_LEN, dim - 1, TP_INTERPOLATE_FACTOR>(), dim - 1,
-            TP_CASC_LEN, TP_USE_COEFF_RELOAD, 1, TP_DUAL_IP, TP_API> >(taps);
-        create_casc_kernel_recur<dim - 1, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR,
-                                 TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_DUAL_IP,
-                                 TP_API>::create(firKernels, taps);
-    }
-};
-// Recursive kernel creation, static coefficients
-template <typename TT_DATA,
-          typename TT_COEFF,
-          unsigned int TP_FIR_LEN,
-          unsigned int TP_INTERPOLATE_FACTOR,
-          unsigned int TP_DECIMATE_FACTOR,
-          unsigned int TP_SHIFT,
-          unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_CASC_LEN,
-          unsigned int TP_DUAL_IP,
-          unsigned int TP_API>
-class create_casc_kernel_recur<1,
-                               TT_DATA,
-                               TT_COEFF,
-                               TP_FIR_LEN,
-                               TP_INTERPOLATE_FACTOR,
-                               TP_DECIMATE_FACTOR,
-                               TP_SHIFT,
-                               TP_RND,
-                               TP_INPUT_WINDOW_VSIZE,
-                               TP_CASC_LEN,
-                               USE_COEFF_RELOAD_FALSE,
-                               TP_DUAL_IP,
-                               TP_API> {
-   public:
-    static void create(kernel (&firKernels)[TP_CASC_LEN], const std::vector<TT_COEFF>& taps) {
-        firKernels[0] = kernel::create_object<
-            fir_resampler<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
-                          TP_INPUT_WINDOW_VSIZE, false, true,
-                          fnFirRange<CEIL(TP_FIR_LEN, TP_INTERPOLATE_FACTOR), TP_CASC_LEN, 0, TP_INTERPOLATE_FACTOR>(),
-                          0, TP_CASC_LEN, USE_COEFF_RELOAD_FALSE, 1, TP_DUAL_IP, TP_API> >(taps);
-    }
-};
-// Recursive kernel creation, reloadable coefficients
-template <int dim,
-          typename TT_DATA,
-          typename TT_COEFF,
-          unsigned int TP_FIR_LEN,
-          unsigned int TP_INTERPOLATE_FACTOR,
-          unsigned int TP_DECIMATE_FACTOR,
-          unsigned int TP_SHIFT,
-          unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_CASC_LEN,
-          unsigned int TP_DUAL_IP,
-          unsigned int TP_API>
-class create_casc_kernel_recur<dim,
-                               TT_DATA,
-                               TT_COEFF,
-                               TP_FIR_LEN,
-                               TP_INTERPOLATE_FACTOR,
-                               TP_DECIMATE_FACTOR,
-                               TP_SHIFT,
-                               TP_RND,
-                               TP_INPUT_WINDOW_VSIZE,
-                               TP_CASC_LEN,
-                               USE_COEFF_RELOAD_TRUE,
-                               TP_DUAL_IP,
-                               TP_API> {
-   public:
-    static void create(kernel (&firKernels)[TP_CASC_LEN]) {
-        firKernels[dim - 1] = kernel::create_object<fir_resampler<
-            TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
-            TP_INPUT_WINDOW_VSIZE, true, true,
-            fnFirRange<CEIL(TP_FIR_LEN, TP_INTERPOLATE_FACTOR), TP_CASC_LEN, dim - 1, TP_INTERPOLATE_FACTOR>(), dim - 1,
-            TP_CASC_LEN, USE_COEFF_RELOAD_TRUE, 1, TP_DUAL_IP, TP_API> >();
-        create_casc_kernel_recur<dim - 1, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR,
-                                 TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, USE_COEFF_RELOAD_TRUE,
-                                 TP_DUAL_IP, TP_API>::create(firKernels);
-    }
-};
-// Recursive kernel creation, reloadable coefficients
-template <typename TT_DATA,
-          typename TT_COEFF,
-          unsigned int TP_FIR_LEN,
-          unsigned int TP_INTERPOLATE_FACTOR,
-          unsigned int TP_DECIMATE_FACTOR,
-          unsigned int TP_SHIFT,
-          unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_CASC_LEN,
-          unsigned int TP_DUAL_IP,
-          unsigned int TP_API>
-class create_casc_kernel_recur<1,
-                               TT_DATA,
-                               TT_COEFF,
-                               TP_FIR_LEN,
-                               TP_INTERPOLATE_FACTOR,
-                               TP_DECIMATE_FACTOR,
-                               TP_SHIFT,
-                               TP_RND,
-                               TP_INPUT_WINDOW_VSIZE,
-                               TP_CASC_LEN,
-                               USE_COEFF_RELOAD_TRUE,
-                               TP_DUAL_IP,
-                               TP_API> {
-   public:
-    static void create(kernel (&firKernels)[TP_CASC_LEN]) {
-        firKernels[0] = kernel::create_object<
-            fir_resampler<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
-                          TP_INPUT_WINDOW_VSIZE, false, true,
-                          fnFirRange<CEIL(TP_FIR_LEN, TP_INTERPOLATE_FACTOR), TP_CASC_LEN, 0, TP_INTERPOLATE_FACTOR>(),
-                          0, TP_CASC_LEN, USE_COEFF_RELOAD_TRUE, 1, TP_DUAL_IP, TP_API> >();
-    }
-};
-// Kernel creation, static coefficients
-template <int dim,
-          typename TT_DATA,
-          typename TT_COEFF,
-          unsigned int TP_FIR_LEN,
-          unsigned int TP_INTERPOLATE_FACTOR,
-          unsigned int TP_DECIMATE_FACTOR,
-          unsigned int TP_SHIFT,
-          unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_CASC_LEN,
-          unsigned int TP_USE_COEFF_RELOAD = 0,
-          unsigned int TP_NUM_OUTPUTS = 1,
-          unsigned int TP_DUAL_IP = 0,
-          unsigned int TP_API = 0>
-class create_casc_kernel {
-   public:
-    static void create(kernel (&firKernels)[TP_CASC_LEN], const std::vector<TT_COEFF>& taps) {
-        firKernels[dim - 1] = kernel::create_object<fir_resampler<
-            TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
-            TP_INPUT_WINDOW_VSIZE, true, false,
-            fnFirRangeRem<CEIL(TP_FIR_LEN, TP_INTERPOLATE_FACTOR), TP_CASC_LEN, dim - 1, TP_INTERPOLATE_FACTOR>(),
-            dim - 1, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_API> >(taps);
-        create_casc_kernel_recur<dim - 1, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR,
-                                 TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_DUAL_IP,
-                                 TP_API>::create(firKernels, taps);
-    }
-};
-// Kernel creation, reloadable coefficients
-template <int dim,
-          typename TT_DATA,
-          typename TT_COEFF,
-          unsigned int TP_FIR_LEN,
-          unsigned int TP_INTERPOLATE_FACTOR,
-          unsigned int TP_DECIMATE_FACTOR,
-          unsigned int TP_SHIFT,
-          unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_CASC_LEN,
-          unsigned int TP_NUM_OUTPUTS,
-          unsigned int TP_DUAL_IP,
-          unsigned int TP_API>
-class create_casc_kernel<dim,
-                         TT_DATA,
-                         TT_COEFF,
-                         TP_FIR_LEN,
-                         TP_INTERPOLATE_FACTOR,
-                         TP_DECIMATE_FACTOR,
-                         TP_SHIFT,
-                         TP_RND,
-                         TP_INPUT_WINDOW_VSIZE,
-                         TP_CASC_LEN,
-                         USE_COEFF_RELOAD_TRUE,
-                         TP_NUM_OUTPUTS,
-                         TP_DUAL_IP,
-                         TP_API> {
-   public:
-    static void create(kernel (&firKernels)[TP_CASC_LEN]) {
-        firKernels[dim - 1] = kernel::create_object<fir_resampler<
-            TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
-            TP_INPUT_WINDOW_VSIZE, true, false,
-            fnFirRangeRem<CEIL(TP_FIR_LEN, TP_INTERPOLATE_FACTOR), TP_CASC_LEN, dim - 1, TP_INTERPOLATE_FACTOR>(),
-            dim - 1, TP_CASC_LEN, USE_COEFF_RELOAD_TRUE, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_API> >();
-        create_casc_kernel_recur<dim - 1, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR,
-                                 TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, USE_COEFF_RELOAD_TRUE,
-                                 TP_DUAL_IP, TP_API>::create(firKernels);
-    }
-};
-// Kernel creation, single kernel, static coefficients
-template <typename TT_DATA,
-          typename TT_COEFF,
-          unsigned int TP_FIR_LEN,
-          unsigned int TP_INTERPOLATE_FACTOR,
-          unsigned int TP_DECIMATE_FACTOR,
-          unsigned int TP_SHIFT,
-          unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_NUM_OUTPUTS,
-          unsigned int TP_DUAL_IP,
-          unsigned int TP_API>
-class create_casc_kernel<1,
-                         TT_DATA,
-                         TT_COEFF,
-                         TP_FIR_LEN,
-                         TP_INTERPOLATE_FACTOR,
-                         TP_DECIMATE_FACTOR,
-                         TP_SHIFT,
-                         TP_RND,
-                         TP_INPUT_WINDOW_VSIZE,
-                         1,
-                         USE_COEFF_RELOAD_FALSE,
-                         TP_NUM_OUTPUTS,
-                         TP_DUAL_IP,
-                         TP_API> {
-   public:
-    static constexpr unsigned int dim = 1;
-    static constexpr unsigned int TP_CASC_LEN = 1;
-    static void create(kernel (&firKernels)[TP_CASC_LEN], const std::vector<TT_COEFF>& taps) {
-        firKernels[dim - 1] = kernel::create_object<fir_resampler<
-            TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
-            TP_INPUT_WINDOW_VSIZE, false, false,
-            fnFirRangeRem<CEIL(TP_FIR_LEN, TP_INTERPOLATE_FACTOR), TP_CASC_LEN, dim - 1, TP_INTERPOLATE_FACTOR>(),
-            dim - 1, TP_CASC_LEN, USE_COEFF_RELOAD_FALSE, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_API> >(taps);
-    }
-};
-// Kernel creation, single kernel, reloadable coefficients
-template <typename TT_DATA,
-          typename TT_COEFF,
-          unsigned int TP_FIR_LEN,
-          unsigned int TP_INTERPOLATE_FACTOR,
-          unsigned int TP_DECIMATE_FACTOR,
-          unsigned int TP_SHIFT,
-          unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_NUM_OUTPUTS,
-          unsigned int TP_DUAL_IP,
-          unsigned int TP_API>
-class create_casc_kernel<1,
-                         TT_DATA,
-                         TT_COEFF,
-                         TP_FIR_LEN,
-                         TP_INTERPOLATE_FACTOR,
-                         TP_DECIMATE_FACTOR,
-                         TP_SHIFT,
-                         TP_RND,
-                         TP_INPUT_WINDOW_VSIZE,
-                         1,
-                         USE_COEFF_RELOAD_TRUE,
-                         TP_NUM_OUTPUTS,
-                         TP_DUAL_IP,
-                         TP_API> {
-   public:
-    static constexpr unsigned int dim = 1;
-    static constexpr unsigned int TP_CASC_LEN = 1;
-    static void create(kernel (&firKernels)[TP_CASC_LEN]) {
-        firKernels[dim - 1] = kernel::create_object<fir_resampler<
-            TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
-            TP_INPUT_WINDOW_VSIZE, false, false,
-            fnFirRangeRem<CEIL(TP_FIR_LEN, TP_INTERPOLATE_FACTOR), TP_CASC_LEN, dim - 1, TP_INTERPOLATE_FACTOR>(),
-            dim - 1, TP_CASC_LEN, USE_COEFF_RELOAD_TRUE, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_API> >();
-    }
-};
-/**
-  * @endcond
-  */
 
 //--------------------------------------------------------------------------------------------------
 // fir_resampler_graph template
@@ -430,7 +143,10 @@ template <typename TT_DATA,
           unsigned int TP_USE_COEFF_RELOAD = 0,
           unsigned int TP_NUM_OUTPUTS = 1,
           unsigned int TP_DUAL_IP = 0,
-          unsigned int TP_API = 0>
+          unsigned int TP_API = 0,
+          unsigned int TP_SSR = 1,
+          unsigned int TP_PARA_INTERP_POLY = 1,
+          unsigned int TP_PARA_DECI_POLY = 1>
 class fir_resampler_graph : public graph {
    private:
     static_assert(TP_CASC_LEN <= 40, "ERROR: Unsupported Cascade length");
@@ -467,16 +183,19 @@ class fir_resampler_graph : public graph {
                   "ERROR: Input Window size (based on requrested window size and FIR length margin) exceeds Memory "
                   "Module size of 32kB");
 
-    static constexpr unsigned int TP_SSR = 1;
     static constexpr unsigned int TP_CASC_IN = 0;
     static constexpr unsigned int TP_CASC_OUT = 0;
 
     // 3d array for storing net information.
     // address[inPhase][outPath][cascPos]
-    // std::array<std::array<std::array<connect<stream,stream> *, TP_CASC_LEN>, TP_SSR>, TP_SSR> net;
-    // std::array<std::array<std::array<connect<stream,stream> *, TP_CASC_LEN>, TP_SSR>, TP_SSR> net2;
-    std::array<connect<stream, stream>*, TP_CASC_LEN> net;
-    std::array<connect<stream, stream>*, TP_CASC_LEN> net2;
+    std::array<std::array<std::array<std::array<std::array<connect<stream, stream>*, TP_CASC_LEN>, TP_SSR>, TP_SSR>,
+                          TP_PARA_DECI_POLY>,
+               TP_PARA_INTERP_POLY>
+        net;
+    std::array<std::array<std::array<std::array<std::array<connect<stream, stream>*, TP_CASC_LEN>, TP_SSR>, TP_SSR>,
+                          TP_PARA_DECI_POLY>,
+               TP_PARA_INTERP_POLY>
+        net2;
 
     static constexpr unsigned int firRange =
         (TP_CASC_LEN == 1)
@@ -511,6 +230,8 @@ class fir_resampler_graph : public graph {
      *position in the cascade.
      **/
     int baseFifoDepth = 32;
+    int MARGIN_BYTESIZE =
+        fnFirMargin<((TP_FIR_LEN + TP_INTERPOLATE_FACTOR - 1) / TP_INTERPOLATE_FACTOR), TT_DATA>() * sizeof(TT_DATA);
 
     int calculate_fifo_depth(int kernelPos) {
         // In FIFO mode, FIFO size has to be a multiple of 128 bits.
@@ -543,84 +264,6 @@ class fir_resampler_graph : public graph {
         return fifoDepthCap;
     }
 
-    void create_connections() {
-        // make input connections
-        if (TP_API == USE_WINDOW_API) {
-            connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA),
-                           fnFirMargin<((TP_FIR_LEN + TP_INTERPOLATE_FACTOR - 1) / TP_INTERPOLATE_FACTOR), TT_DATA>() *
-                               sizeof(TT_DATA)> >(in[0], m_firKernels[0].in[0]);
-
-            for (int i = 1; i < TP_CASC_LEN; i++) {
-                single_buffer(m_firKernels[i].in[0]);
-                connect<
-                    window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) +
-                           fnFirMargin<((TP_FIR_LEN + TP_INTERPOLATE_FACTOR - 1) / TP_INTERPOLATE_FACTOR), TT_DATA>() *
-                               sizeof(TT_DATA)> >(async(m_firKernels[i - 1].out[1]), async(m_firKernels[i].in[0]));
-            }
-
-        } else if (TP_API == USE_STREAM_API) {
-            for (int i = 0; i < TP_CASC_LEN; i++) {
-                net[i] = new connect<stream, stream>(in[0], m_firKernels[i].in[0]);
-                fifo_depth(*net[i]) = calculate_fifo_depth(i);
-            }
-        }
-
-        // make input in2 connections
-        if
-            constexpr(TP_DUAL_IP == DUAL_IP_DUAL) {
-                if (TP_API == USE_STREAM_API) {
-                    for (int i = 0; i < TP_CASC_LEN; i++) {
-                        net2[i] = new connect<stream, stream>(in2[0], m_firKernels[i].in[1]);
-                        fifo_depth(*net2[i]) = calculate_fifo_depth(i);
-                    }
-                } else {
-                    for (int i = 0; i < TP_CASC_LEN; i++) {
-                        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA),
-                                       fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(in2[0],
-                                                                                               m_firKernels[i].in[1]);
-                    }
-                }
-            }
-
-        int rtpPortPos = TP_DUAL_IP == DUAL_IP_DUAL ? 2 : 1;
-        // make conditional RTP connection
-        if
-            constexpr(TP_USE_COEFF_RELOAD == 1) { connect<parameter>(coeff[0], async(m_firKernels[0].in[rtpPortPos])); }
-
-        // make cascade connections
-        int cascPos = TP_DUAL_IP == 0 ? 1 : 2;
-        for (int i = 1; i < TP_CASC_LEN; i++) {
-            connect<cascade>(m_firKernels[i - 1].out[0], m_firKernels[i].in[cascPos]);
-        }
-
-        // make output connections
-        if (TP_API == USE_WINDOW_API) {
-            connect<window<TP_INTERPOLATE_FACTOR * TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) / TP_DECIMATE_FACTOR> >(
-                m_firKernels[TP_CASC_LEN - 1].out[0], out[0]);
-        } else {
-            connect<stream>(m_firKernels[TP_CASC_LEN - 1].out[0], out[0]);
-        }
-
-        if
-            constexpr(TP_NUM_OUTPUTS == 2) {
-                // make output connections
-                if (TP_API == USE_WINDOW_API) {
-                    connect<
-                        window<TP_INTERPOLATE_FACTOR * TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) / TP_DECIMATE_FACTOR> >(
-                        m_firKernels[TP_CASC_LEN - 1].out[1], out2[0]);
-                } else {
-                    connect<stream>(m_firKernels[TP_CASC_LEN - 1].out[1], out2[0]);
-                }
-            }
-
-        for (int i = 0; i < TP_CASC_LEN; i++) {
-            // Specify mapping constraints
-            runtime<ratio>(m_firKernels[i]) = 0.8;
-            // Source files
-            source(m_firKernels[i]) = "fir_resampler.cpp";
-        }
-    }
-
     static constexpr unsigned int rnd = TP_DECIMATE_FACTOR * TP_SSR;
 
     template <int dim>
@@ -630,24 +273,30 @@ class fir_resampler_graph : public graph {
         using BTT_COEFF = TT_COEFF;
         static constexpr unsigned int BTP_FIR_LEN = TP_FIR_LEN;
         static constexpr unsigned int BTP_FIR_RANGE_LEN =
-            TRUNC((CEIL(TP_FIR_LEN, rnd) / (TP_CASC_LEN * TP_SSR)), TP_DECIMATE_FACTOR);
+            TRUNC((CEIL(TP_FIR_LEN, rnd) / (TP_CASC_LEN * TP_SSR * TP_PARA_DECI_POLY)),
+                  TP_DECIMATE_FACTOR / TP_PARA_DECI_POLY);
         static constexpr unsigned int BTP_DECIMATE_FACTOR = TP_DECIMATE_FACTOR;
         static constexpr unsigned int BTP_INTERPOLATE_FACTOR = TP_INTERPOLATE_FACTOR;
         static constexpr unsigned int BTP_SHIFT = TP_SHIFT;
         static constexpr unsigned int BTP_RND = TP_RND;
-        static constexpr unsigned int BTP_INPUT_WINDOW_VSIZE = TP_INPUT_WINDOW_VSIZE;
-        static constexpr bool BTP_CASC_IN = TP_CASC_IN;
-        static constexpr bool BTP_CASC_OUT = TP_CASC_OUT;
+        static constexpr unsigned int BTP_INPUT_WINDOW_VSIZE = TP_INPUT_WINDOW_VSIZE / (TP_SSR * TP_PARA_DECI_POLY);
         static constexpr unsigned int BTP_CASC_LEN = TP_CASC_LEN;
         static constexpr unsigned int BTP_USE_COEFF_RELOAD = TP_USE_COEFF_RELOAD;
         static constexpr unsigned int BTP_NUM_OUTPUTS = TP_NUM_OUTPUTS;
         static constexpr unsigned int BTP_DUAL_IP = TP_DUAL_IP;
         static constexpr unsigned int BTP_API = TP_API;
         static constexpr unsigned int BTP_SSR = TP_SSR;
+        static constexpr unsigned int BTP_PARA_DECI_POLY = TP_PARA_DECI_POLY;
+        static constexpr unsigned int BTP_COEFF_PHASES = TP_SSR;
+        static constexpr unsigned int BTP_COEFF_PHASES_LEN = TP_FIR_LEN;
+        static constexpr unsigned int BTP_PARA_INTERP_POLY = TP_PARA_INTERP_POLY;
         static constexpr int BTP_MODIFY_MARGIN_OFFSET = 0;
     };
+    static constexpr unsigned int lastSSRDim = (TP_SSR * TP_SSR) - 1;
 
-    using lastSSRKernel = ssr_kernels<ssr_params<TP_SSR - 1>, fir_resampler_tl>;
+    static constexpr const char* srcFileName = decomposer::getSourceFile<ssr_params<lastSSRDim> >();
+
+    using lastSSRKernel = ssr_kernels<ssr_params<lastSSRDim>, fir_resampler_tl>;
 
     template <unsigned int CL>
     struct tmp_ssr_params : public ssr_params<0> {
@@ -671,12 +320,46 @@ class fir_resampler_graph : public graph {
         }
     }
 
+    template <unsigned int T_API, typename T_D>
+    static constexpr unsigned int getMaxTapsPerKernel() {
+        if
+            constexpr(T_API == 0) { return 256; }
+        else {
+            constexpr unsigned int m_kSamplesInBuff = fnSamplesIn1024<T_D>();
+            constexpr unsigned int m_kDataLoadVsize = (32 / sizeof(T_D));
+            return m_kSamplesInBuff - m_kDataLoadVsize;
+        }
+    }
+
+    template <typename T_D, typename T_C, int T_PORTS>
+    static constexpr unsigned int getOptTapsPerKernel() {
+        unsigned int optTaps = getOptTapsPerKernelSrAsym<T_D, T_C, T_PORTS>();
+        return optTaps;
+    };
+
+    /**
+     * The conditional input array data to the function.
+     * This input is (generated when TP_CASC_IN == CASC_IN_TRUE) either a cascade input.
+     **/
+    port_conditional_array<output, (TP_CASC_IN == CASC_IN_TRUE), TP_SSR> casc_in;
+
    public:
+    /**
+     * Size of the Input port array in SSR operation mode
+     **/
+    static constexpr unsigned int IN_SSR = TP_SSR * TP_PARA_DECI_POLY;
+
+    /**
+     * OUT_SSR defines the number of output paths, equal to ``TP_SSR * TP_PARA_INTERP_POLY``.
+     **/
+
+    static constexpr unsigned int OUT_SSR = TP_SSR * TP_PARA_INTERP_POLY;
+
     /**
      * The array of kernels that will be created and mapped onto AIE tiles.
      * Number of kernels (``TP_CASC_LEN * TP_SSR``) will be connected with each other by cascade interface.
      **/
-    kernel m_firKernels[TP_CASC_LEN];
+    kernel m_firKernels[TP_CASC_LEN * TP_SSR * TP_SSR * TP_PARA_DECI_POLY * TP_PARA_INTERP_POLY];
 
     /**
      * The input data to the function. This input is either a window API of
@@ -687,14 +370,14 @@ class fir_resampler_graph : public graph {
      * Margin size (in Bytes) equals to TP_FIR_LEN rounded up to a nearest
      * multiple of 32 bytes.
      **/
-    port_array<input, 1> in;
+    port_array<input, IN_SSR> in;
 
     /**
      * The output data from the function. This output is either a window API of
      * samples of TT_DATA type or stream API (depending on TP_API).
      * Number of output samples is determined by interpolation & decimation factors (if present).
      **/
-    port_array<output, 1> out;
+    port_array<output, OUT_SSR> out;
 
     /**
      * The conditional input data to the function.
@@ -702,7 +385,7 @@ class fir_resampler_graph : public graph {
      * samples of TT_DATA type or stream API (depending on TP_API).
      *
      **/
-    port_conditional_array<input, (TP_DUAL_IP == 1), 1> in2;
+    port_conditional_array<input, (TP_DUAL_IP == 1), IN_SSR> in2;
 
     /**
      * The conditional array of input ports  used to pass run-time programmable (RTP) coeficients.
@@ -710,7 +393,7 @@ class fir_resampler_graph : public graph {
      *defined by TP_SSR.
      * Each port in the array holds a duplicate of the coefficient array, required to connect to each SSR input path.
      **/
-    port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), 1> coeff;
+    port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), TP_SSR * TP_PARA_INTERP_POLY> coeff;
 
     /**
      * The output data from the function.
@@ -718,7 +401,7 @@ class fir_resampler_graph : public graph {
      * samples of TT_DATA type or stream API (depending on TP_API).
      * Number of output samples is determined by interpolation & decimation factors (if present).
      **/
-    port_conditional_array<output, (TP_NUM_OUTPUTS == 2), 1> out2;
+    port_conditional_array<output, (TP_NUM_OUTPUTS == 2), OUT_SSR> out2;
 
     /**
      * Access function to get pointer to kernel (or first kernel in a chained configuration).
@@ -737,7 +420,12 @@ class fir_resampler_graph : public graph {
      * nets only get used when TP_API == 1 and TP_CASC_LEN > 1
      * @param[in] cascadePosition   an index to the kernel's position in the cascade.
      **/
-    connect<stream, stream>* getInNet(int cascadePosition) { return net[cascadePosition]; };
+    connect<stream, stream>* getInNet(
+        int cascadePosition, int ssrInPhaseIndex, int ssrOutPathIndex, int paraDeciPolyIndex, int paraInterpPolyIndex) {
+        return net[paraInterpPolyIndex][paraDeciPolyIndex][ssrOutPathIndex][ssrInPhaseIndex][cascadePosition];
+    };
+
+    connect<stream, stream>* getInNet(int cascadePosition) { return getInNet(cascadePosition, 0, 0, 0, 0); };
 
     /**
      * Access function to get pointer to net of the ``` in2 ``` port,
@@ -746,7 +434,12 @@ class fir_resampler_graph : public graph {
      * nets only get used when TP_API == 1 and TP_CASC_LEN > 1
      * @param[in] cascadePosition   an index to the kernel's position in the cascade.
      **/
-    connect<stream, stream>* getIn2Net(int cascadePosition) { return net2[cascadePosition]; };
+    connect<stream, stream>* getIn2Net(
+        int cascadePosition, int ssrInPhaseIndex, int ssrOutPathIndex, int paraDeciPolyIndex, int paraInterpPolyIndex) {
+        return net2[paraInterpPolyIndex][paraDeciPolyIndex][ssrOutPathIndex][ssrInPhaseIndex][cascadePosition];
+    };
+
+    connect<stream, stream>* getIn2Net(int cascadePosition) { return getIn2Net(cascadePosition, 0, 0, 0, 0); };
 
     /**
     * @brief Access function to get kernel's architecture (or first kernel's architecture in a chained configuration).
@@ -755,7 +448,8 @@ class fir_resampler_graph : public graph {
         // return the architecture for first kernel in the design (only one for single kernel designs).
         // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
         // best.
-        return firstKernelClass::get_m_kArch();
+        return 0;
+        // return firstKernelClass::get_m_kArch();
     };
 
     /**
@@ -763,7 +457,8 @@ class fir_resampler_graph : public graph {
      **/
     unsigned int getPolyphaseLaneAlias() {
         // return PoliphaseLaneAlias
-        return firstKernelClass::get_polyphaseLaneAlias();
+        return 0;
+        // return firstKernelClass::get_polyphaseLaneAlias();
     };
 
     /**
@@ -771,39 +466,18 @@ class fir_resampler_graph : public graph {
      * @param[in] taps   a reference to the std::vector array of taps values of type TT_COEFF.
      **/
     fir_resampler_graph(const std::vector<TT_COEFF>& taps) : net{}, net2{} {
-        // create kernels
-        create_casc_kernel<TP_CASC_LEN, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR,
-                           TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS,
-                           TP_DUAL_IP, TP_API>::create(m_firKernels, taps);
-        create_connections();
+        decomposer::polyphase_decomposer<ssr_params<lastSSRDim> >::create(m_firKernels, taps);
+        decomposer::polyphase_decomposer<ssr_params<lastSSRDim> >::create_connections(
+            m_firKernels, &in[0], in2, &out[0], out2, coeff, net, net2, casc_in, srcFileName);
     };
 
     /**
      * @brief This is the constructor function for the FIR graph with reloadable coefficients.
      **/
     fir_resampler_graph() : net{}, net2{} {
-        // create kernels
-        create_casc_kernel<TP_CASC_LEN, TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR,
-                           TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS,
-                           TP_DUAL_IP, TP_API>::create(m_firKernels);
-        create_connections();
-    };
-
-    template <unsigned int T_API, typename T_D>
-    static constexpr unsigned int getMaxTapsPerKernel() {
-        if
-            constexpr(T_API == 0) { return 256; }
-        else {
-            constexpr unsigned int m_kSamplesInBuff = fnSamplesIn1024<T_D>();
-            constexpr unsigned int m_kDataLoadVsize = (32 / sizeof(T_D));
-            return m_kSamplesInBuff - m_kDataLoadVsize;
-        }
-    }
-
-    template <typename T_D, typename T_C, int T_PORTS>
-    static constexpr unsigned int getOptTapsPerKernel() {
-        unsigned int optTaps = getOptTapsPerKernelSrAsym<T_D, T_C, T_PORTS>();
-        return optTaps;
+        decomposer::polyphase_decomposer<ssr_params<lastSSRDim> >::create(m_firKernels);
+        decomposer::polyphase_decomposer<ssr_params<lastSSRDim> >::create_connections(
+            m_firKernels, &in[0], in2, &out[0], out2, coeff, net, net2, casc_in, srcFileName);
     };
 
     /**

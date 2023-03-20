@@ -50,8 +50,10 @@ namespace testcase {
 class test_graph : public graph {
    private:
    public:
-    std::array<input_plio, ((1 + API_IO) << PARALLEL_POWER)> in;
-    std::array<output_plio, ((1 + API_IO) << PARALLEL_POWER)> out;
+    static constexpr int kStreamsPerTile = get_input_streams_core_module(); // a device trait
+    static constexpr int kPortsPerTile = API_IO == 0 ? 1 : kStreamsPerTile;
+    std::array<input_plio, (kPortsPerTile << PARALLEL_POWER)> in;
+    std::array<output_plio, (kPortsPerTile << PARALLEL_POWER)> out;
 
     // Constructor
     test_graph() {
@@ -66,7 +68,7 @@ class test_graph : public graph {
         printf("Point size           = %d \n", POINT_SIZE);
         printf("FFT/nIFFT            = %d \n", FFT_NIFFT);
         printf("Final scaling Shift  = %d \n", SHIFT);
-        printf("Number of kernels    = %d \n", CASC_LEN);
+        printf("Cascade Length       = %d \n", CASC_LEN);
         printf("Dynamic point size   = %d \n", DYN_PT_SIZE);
         printf("Window Size          = %d \n", WINDOW_VSIZE);
         printf("API_IO               = %d \n", API_IO);
@@ -87,7 +89,7 @@ class test_graph : public graph {
         xf::dsp::aie::fft::dit_1ch::UUT_GRAPH<DATA_TYPE, TWIDDLE_TYPE, POINT_SIZE, FFT_NIFFT, SHIFT, CASC_LEN,
                                               DYN_PT_SIZE, WINDOW_VSIZE, API_IO, PARALLEL_POWER>
             fftGraph;
-        for (int i = 0; i < ((1 + API_IO) << PARALLEL_POWER); i++) {
+        for (int i = 0; i < (kPortsPerTile << PARALLEL_POWER); i++) {
             std::string filenameOut = QUOTE(OUTPUT_FILE);
             std::string filenameIn = QUOTE(INPUT_FILE);
 
@@ -105,84 +107,64 @@ class test_graph : public graph {
             connect<>(fftGraph.out[i], out[i].in[0]);
 
 // apply location constraints for TP_POINT_SIZE=64k
+#if 0
 #ifdef USING_UUT
 #if (PARALLEL_POWER == 1)
-            for (int lane = 0; lane < 2; lane++) {
-                location<kernel>(fftGraph.m_r2Comb[lane]) = tile(LOC_XBASE + lane * 2, LOC_YBASE + CASC_LEN + 1);
-            }
+        for (int lane=0; lane<2; lane++) {
+          location<kernel>(fftGraph.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2, LOC_YBASE + CASC_LEN + 1);
+        }
 #endif //(PARALLEL_POWER == 1)
 #if (PARALLEL_POWER == 2)
-            for (int lane = 0; lane < 4; lane++) {
-                location<kernel>(fftGraph.m_r2Comb[lane]) = tile(LOC_XBASE + lane * 2, LOC_YBASE + CASC_LEN + 2);
-            }
-            for (int lane = 0; lane < 2; lane++) {
-                location<kernel>(fftGraph.FFTsubframe0.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2, LOC_YBASE + CASC_LEN + 1);
-                location<kernel>(fftGraph.FFTsubframe1.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2 + 4, LOC_YBASE + CASC_LEN + 1);
-            }
+        for (int lane=0; lane<4; lane++) {
+          location<kernel>(fftGraph.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2, LOC_YBASE + CASC_LEN + 2);
+        }
+        for (int lane=0; lane<2; lane++) {
+          location<kernel>(fftGraph.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2,    LOC_YBASE + CASC_LEN + 1);
+          location<kernel>(fftGraph.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+4,  LOC_YBASE + CASC_LEN + 1);
+        }
 #endif //(PARALLEL_POWER == 2)
 #if (PARALLEL_POWER == 3)
-            for (int lane = 0; lane < 8; lane++) {
-                location<kernel>(fftGraph.m_r2Comb[lane]) = tile(LOC_XBASE + lane * 2, LOC_YBASE + CASC_LEN + 3);
-            }
-            for (int lane = 0; lane < 4; lane++) {
-                location<kernel>(fftGraph.FFTsubframe0.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2, LOC_YBASE + CASC_LEN + 2);
-                location<kernel>(fftGraph.FFTsubframe1.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2 + 8, LOC_YBASE + CASC_LEN + 2);
-            }
-            for (int lane = 0; lane < 2; lane++) {
-                location<kernel>(fftGraph.FFTsubframe0.FFTsubframe0.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2, LOC_YBASE + CASC_LEN + 1);
-                location<kernel>(fftGraph.FFTsubframe0.FFTsubframe1.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2 + 4, LOC_YBASE + CASC_LEN + 1);
-                location<kernel>(fftGraph.FFTsubframe1.FFTsubframe0.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2 + 8, LOC_YBASE + CASC_LEN + 1);
-                location<kernel>(fftGraph.FFTsubframe1.FFTsubframe1.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2 + 12, LOC_YBASE + CASC_LEN + 1);
-            }
+        for (int lane=0; lane<8; lane++) {
+          location<kernel>(fftGraph.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2, LOC_YBASE + CASC_LEN + 3);
+        }
+        for (int lane=0; lane<4; lane++) {
+          location<kernel>(fftGraph.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2,    LOC_YBASE + CASC_LEN + 2);
+          location<kernel>(fftGraph.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+8,  LOC_YBASE + CASC_LEN + 2);
+        }
+        for (int lane=0; lane<2; lane++) {
+          location<kernel>(fftGraph.FFTsubframe0.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2,    LOC_YBASE + CASC_LEN + 1);
+          location<kernel>(fftGraph.FFTsubframe0.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+4,  LOC_YBASE + CASC_LEN + 1);
+          location<kernel>(fftGraph.FFTsubframe1.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+8,  LOC_YBASE + CASC_LEN + 1);
+          location<kernel>(fftGraph.FFTsubframe1.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+12, LOC_YBASE + CASC_LEN + 1);
+        }
 #endif //(PARALLEL_POWER == 3)
 #if (PARALLEL_POWER == 4)
-            for (int lane = 0; lane < 16; lane++) {
-                location<kernel>(fftGraph.m_r2Comb[lane]) = tile(LOC_XBASE + lane * 2, LOC_YBASE + CASC_LEN + 4);
-            }
-            for (int lane = 0; lane < 8; lane++) {
-                location<kernel>(fftGraph.FFTsubframe0.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2, LOC_YBASE + CASC_LEN + 3);
-                location<kernel>(fftGraph.FFTsubframe1.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2 + 16, LOC_YBASE + CASC_LEN + 3);
-            }
-            for (int lane = 0; lane < 4; lane++) {
-                location<kernel>(fftGraph.FFTsubframe0.FFTsubframe0.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2, LOC_YBASE + CASC_LEN + 2);
-                location<kernel>(fftGraph.FFTsubframe0.FFTsubframe1.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2 + 8, LOC_YBASE + CASC_LEN + 2);
-                location<kernel>(fftGraph.FFTsubframe1.FFTsubframe0.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2 + 16, LOC_YBASE + CASC_LEN + 2);
-                location<kernel>(fftGraph.FFTsubframe1.FFTsubframe1.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2 + 24, LOC_YBASE + CASC_LEN + 2);
-            }
-            for (int lane = 0; lane < 2; lane++) {
-                location<kernel>(fftGraph.FFTsubframe0.FFTsubframe0.FFTsubframe0.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2, LOC_YBASE + CASC_LEN + 1);
-                location<kernel>(fftGraph.FFTsubframe0.FFTsubframe0.FFTsubframe1.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2 + 4, LOC_YBASE + CASC_LEN + 1);
-                location<kernel>(fftGraph.FFTsubframe0.FFTsubframe1.FFTsubframe0.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2 + 8, LOC_YBASE + CASC_LEN + 1);
-                location<kernel>(fftGraph.FFTsubframe0.FFTsubframe1.FFTsubframe1.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2 + 12, LOC_YBASE + CASC_LEN + 1);
-                location<kernel>(fftGraph.FFTsubframe1.FFTsubframe0.FFTsubframe0.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2 + 16, LOC_YBASE + CASC_LEN + 1);
-                location<kernel>(fftGraph.FFTsubframe1.FFTsubframe0.FFTsubframe1.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2 + 20, LOC_YBASE + CASC_LEN + 1);
-                location<kernel>(fftGraph.FFTsubframe1.FFTsubframe1.FFTsubframe0.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2 + 24, LOC_YBASE + CASC_LEN + 1);
-                location<kernel>(fftGraph.FFTsubframe1.FFTsubframe1.FFTsubframe1.m_r2Comb[lane]) =
-                    tile(LOC_XBASE + lane * 2 + 28, LOC_YBASE + CASC_LEN + 1);
-            }
+        for (int lane=0; lane<16; lane++) {
+          location<kernel>(fftGraph.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2, LOC_YBASE + CASC_LEN + 4);
+        }
+        for (int lane=0; lane<8; lane++) {
+          location<kernel>(fftGraph.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2,    LOC_YBASE + CASC_LEN + 3);
+          location<kernel>(fftGraph.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+16, LOC_YBASE + CASC_LEN + 3);
+        }
+        for (int lane=0; lane<4; lane++) {
+          location<kernel>(fftGraph.FFTsubframe0.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2,    LOC_YBASE + CASC_LEN + 2);
+          location<kernel>(fftGraph.FFTsubframe0.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+8,  LOC_YBASE + CASC_LEN + 2);
+          location<kernel>(fftGraph.FFTsubframe1.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+16, LOC_YBASE + CASC_LEN + 2);
+          location<kernel>(fftGraph.FFTsubframe1.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+24, LOC_YBASE + CASC_LEN + 2);
+        }
+        for (int lane=0; lane<2; lane++) {
+          location<kernel>(fftGraph.FFTsubframe0.FFTsubframe0.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2,    LOC_YBASE + CASC_LEN +1);
+          location<kernel>(fftGraph.FFTsubframe0.FFTsubframe0.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+4,  LOC_YBASE + CASC_LEN +1);
+          location<kernel>(fftGraph.FFTsubframe0.FFTsubframe1.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+8,  LOC_YBASE + CASC_LEN +1);
+          location<kernel>(fftGraph.FFTsubframe0.FFTsubframe1.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+12, LOC_YBASE + CASC_LEN +1);
+          location<kernel>(fftGraph.FFTsubframe1.FFTsubframe0.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+16, LOC_YBASE + CASC_LEN +1);
+          location<kernel>(fftGraph.FFTsubframe1.FFTsubframe0.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+20, LOC_YBASE + CASC_LEN +1);
+          location<kernel>(fftGraph.FFTsubframe1.FFTsubframe1.FFTsubframe0.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+24, LOC_YBASE + CASC_LEN +1);
+          location<kernel>(fftGraph.FFTsubframe1.FFTsubframe1.FFTsubframe1.m_r2Comb[lane]) = tile(LOC_XBASE+lane*2+28, LOC_YBASE + CASC_LEN +1);
+        }
 #endif //(PARALLEL_POWER == 4)
 #endif // USING_UUT
+#endif
         }
     };
 };

@@ -55,6 +55,10 @@
 #define UUT_SSR 1
 #endif
 
+#ifndef UUT_PARA_DECI_POLY
+#define UUT_PARA_DECI_POLY 1
+#endif
+
 #ifndef CASC_LEN
 #define CASC_LEN 1
 #endif
@@ -75,13 +79,6 @@
 #define COEFF_SEED 0xC0FFEE
 #endif
 
-// Force reference model to ignore SSR and only use array length 1
-#ifdef USING_UUT
-#define P_SSR UUT_SSR
-#else
-#define P_SSR 1
-#endif
-
 #ifndef USING_UUT
 #undef PORT_API
 #undef NUM_OUTPUTS
@@ -95,10 +92,13 @@
 #define DUAL_IP 0
 #endif
 
+// Force reference model to ignore SSR and only use array length 1
 #ifdef USING_UUT
 #define P_SSR UUT_SSR
+#define P_PARA_DECI_POLY UUT_PARA_DECI_POLY
 #else
 #define P_SSR 1
+#define P_PARA_DECI_POLY 1
 #endif
 
 // END OF UUT CONFIGURATION

@@ -40,6 +40,7 @@ compilation.
 #include "widget_real2complex_traits.hpp"
 #include <vector>
 
+using namespace adf;
 //#define _DSPLIB_WIDGET_REAL2COMPLEX_HPP_DEBUG_
 #ifndef INLINE_DECL
 #define INLINE_DECL inline __attribute__((always_inline))
@@ -115,7 +116,7 @@ class widget_real2complex : public kernelClass<TT_DATA, TT_OUT_DATA, TP_WINDOW_V
     static void registerKernelClass() { REGISTER_FUNCTION(widget_real2complex::convertData); }
 
     // Main function
-    void convertData(input_window<TT_DATA>* __restrict inWindow, output_window<TT_OUT_DATA>* __restrict outWindow0);
+    void convertData(input_buffer<TT_DATA>& __restrict inWindow, output_buffer<TT_OUT_DATA>& __restrict outWindow0);
 };
 }
 }

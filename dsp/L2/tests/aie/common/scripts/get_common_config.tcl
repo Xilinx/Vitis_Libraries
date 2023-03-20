@@ -37,14 +37,14 @@ if {[catch {exec grep -i $funcPhrase -c $diffFile}]} {
     set compilation 1
 }
 if {[catch {exec grep -i $simPhrase -c $aieSimLogFile}]} {
-    #nothing to do - if functional pass assume simulation passed otherwise will default to fail. 
+    #nothing to do - if functional pass assume simulation passed otherwise will default to fail.
     set simulation $simulation
 } else {
     # simulation completed fine
     set simulation 1
 }
 if {[catch {exec grep -i $compPhrase -c $aieCompileLogFile}]} {
-    #nothing to do - if functional pass assume compilation passed otherwise will default to fail. 
+    #nothing to do - if functional pass assume compilation passed otherwise will default to fail.
     set compilation $compilation
 } else {
     # compliation completed fine

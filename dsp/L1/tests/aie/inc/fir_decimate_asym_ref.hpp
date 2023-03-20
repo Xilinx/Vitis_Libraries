@@ -23,6 +23,8 @@ Asymmetric Decimation FIR filter reference model
 #include <limits>
 #include "fir_ref_utils.hpp"
 
+using namespace adf;
+
 namespace xf {
 namespace dsp {
 namespace aie {
@@ -62,10 +64,14 @@ class fir_decimate_asym_ref {
         }
     }
     // FIR
-    void filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow);
-    void filterRtp(input_window<TT_DATA>* inWindow,
-                   output_window<TT_DATA>* outWindow,
-                   const TT_COEFF (&inTaps)[TP_FIR_LEN]);
+    void filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
+                    inWindow,
+                output_circular_buffer<TT_DATA>& outWindow);
+    void filterRtp(
+        input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
+            inWindow,
+        output_circular_buffer<TT_DATA>& outWindow,
+        const TT_COEFF (&inTaps)[TP_FIR_LEN]);
 
    private:
     alignas(32) TT_COEFF m_internalTaps[TP_FIR_LEN];

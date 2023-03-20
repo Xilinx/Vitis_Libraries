@@ -52,13 +52,12 @@
             "launch_cmd": [
                 "mkdir -p logs",
                 "perl LIB_DIR/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./aiesimulator_output/data/uut_output.txt --type $(DATA_TYPE) --ssr $(UUT_SSR) --zip --dual $(DUAL_OUTPUT_SAMPLES) -k 0 -w $(SSR_OUTPUT_WINDOW_VSIZE)",
-                "perl LIB_DIR/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./x86simulator_output/data/ref_output.txt --type $(DATA_TYPE) --ssr 1 --zip --dual 0 -k 0 -w $(REF_OUTPUT_WINDOW_VSIZE)",
                 "grep -ve '[XT]' ./aiesimulator_output/data/uut_output.txt > ./logs/uut_output.txt",
-                "grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./logs/ref_output.txt",
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE)",
-                "tclsh LIB_DIR/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP) UUT_SSR $(UUT_SSR)",
+                "tclsh LIB_DIR/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP)",
+                "tclsh LIB_DIR/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output $(STATUS_FILE) $(SSR_INPUT_WINDOW_VSIZE) $(NITER_UUT)",
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/get_stats.tcl $(SSR_INPUT_WINDOW_VSIZE) $(CASC_LEN) $(STATUS_FILE) ./aiesimulator_output filter $(NITER_UUT)",
-                "tclsh LIB_DIR/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_fir_theoretical_min.tcl $(DATA_TYPE) $(COEFF_TYPE) $(FIR_LEN) $(SSR_INPUT_WINDOW_VSIZE) $(CASC_LEN) $(INTERPOLATE_FACTOR) $(DECIMATE_FACTOR) $(SYMMETRY_FACTOR) $(UUT_SSR) $(STATUS_FILE) $(UUT_KERNEL)",
+                "tclsh LIB_DIR/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_fir_theoretical_min.tcl $(DATA_TYPE) $(COEFF_TYPE) $(FIR_LEN) $(SSR_INPUT_WINDOW_VSIZE) $(CASC_LEN) $(INTERPOLATE_FACTOR) $(DECIMATE_FACTOR) $(SYMMETRY_FACTOR) $(UUT_SSR) $(UUT_PARA_INTERP_POLY) $(UUT_PARA_DECI_POLY) $(STATUS_FILE) $(UUT_KERNEL)",
                 "LIB_DIR/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) LIB_DIR/L2/tests/aie/common/scripts",
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./"
             ]
@@ -66,12 +65,13 @@
         {
             "target": "x86sim",
             "launch_cmd": [
-                "$(if $(filter-out REF,$(TAG)), mkdir -p logs)",
+                "mkdir -p logs",
                 "$(if $(filter-out REF,$(TAG)), perl LIB_DIR/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./x86simulator_output/data/uut_output.txt --type $(DATA_TYPE) --ssr $(UUT_SSR) --zip --dual $(DUAL_OUTPUT_SAMPLES) -k 0 -w $(SSR_OUTPUT_WINDOW_VSIZE))",
-                "$(if $(filter-out REF,$(TAG)), perl LIB_DIR/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./x86simulator_output/data/ref_output.txt --type $(DATA_TYPE) --ssr 1 --zip --dual 0 -k 0 -w $(REF_OUTPUT_WINDOW_VSIZE))",
+                "$(if $(filter REF,$(TAG)), perl LIB_DIR/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./x86simulator_output/data/ref_output.txt --type $(DATA_TYPE) --ssr 1 --zip --dual 0 -k 0 -w $(REF_OUTPUT_WINDOW_VSIZE))",
                 "$(if $(filter-out REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/uut_output.txt > ./logs/uut_output.txt)",
-                "$(if $(filter-out REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./logs/ref_output.txt)",
+                "$(if $(filter REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./logs/ref_output.txt)",
                 "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE))",
+                "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP))",
                 "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./)"
             ]
         }
@@ -79,7 +79,8 @@
     "launch": [
         {
             "name": "aiesim-launch",
-            "target": "aiesim"
+            "target": "aiesim",
+            "sim_options": "--graph-latency"
         },
         {
             "name": "x86sim-launch",
@@ -128,6 +129,8 @@
                     "DECIMATE_FACTOR": "3",
                     "NUM_OUTPUTS": "1",
                     "USE_CHAIN": "0",
+                    "UUT_PARA_DECI_POLY": "1",
+                    "UUT_PARA_INTERP_POLY": "1",
                     "UUT_SSR": "1",
                     "DUAL_INPUT_SAMPLES": "$$(( $(PORT_API) * $(DUAL_IP) ))",
                     "DUAL_OUTPUT_SAMPLES": "$$(( $(PORT_API) * ($(NUM_OUTPUTS)-1) ))",

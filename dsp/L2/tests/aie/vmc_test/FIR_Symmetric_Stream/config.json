@@ -1,0 +1,34 @@
+{
+    "spec": "vmc_stream_fir_sr_sym.json",
+    "outdir": "./xmc_aie_lib/FIR_Symmetric_Stream_ba71117a",
+    "parameters": {
+        "data_type": "cint16",
+        "coef_type": "int16",
+        "use_coeff_reload": false,
+        "coeff": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ],
+        "fir_length": 32,
+        "input_window_size": 256,
+        "shift_val": 0,
+        "rnd_mode": 2,
+        "ssr": 1,
+        "casc_length": 1
+    },
+    "updated_parameter": ""
+}

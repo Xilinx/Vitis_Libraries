@@ -90,8 +90,9 @@ The FFT supports dynamic (run-time controlled) point sizes. This feature is avai
    |                               |                      |                                                                                 |
    | Reserved                      | 2                    | reserved                                                                        |
    +-------------------------------+----------------------+---------------------------------------------------------------------------------+
-   |                               |                      |                                                                                 |
-   | Status (output only)          | 3 (real part)        | 0 = legal point size, 1 = illegal point size                                    |
+   |                               | 3 (cint32 or cfloat) |                                                                                 |
+   | Status (output only)          | 7 (cint16)           |                                 |
+   |                               |   (real part)        | 0 = legal point size, 1 = illegal point size                                    |
    +-------------------------------+----------------------+---------------------------------------------------------------------------------+
 
 The locations are set to suit TT_DATA type. That is, for TT_DATA=cint16, direction is described in the first cint16 (real part) of the 256 bit header and point size is described in the real part of the second cint16 value.
@@ -233,6 +234,24 @@ For example, an FFT of TT_DATA = cint16 can be supported up to TP_POINT_SIZE=655
 A similarly configured FFT with TT_DATA=cint32 will not compile because the per-tile memory use, which is constant and predictable, is exceeded. This condition is detected and an error would be issued.
 An FFT with TT_DATA=cint32 and TP_PARALLEL_POWER=5 should, in theory, be possible to implement, but this will use 192 tiles directly and will use the memory of many other tiles, so is likely to exceed the capacity of the AIE array. However, the available capacity cannot easily be determined, so no error check is applied here.
 
+The largest point size which can be supported in a single kernel is limited by data memory availability. Since iobuffer connections default to double buffering for maximal throughput, the choice of API_IO (iobuffer or streams) affects the maximum point size, since the limit will be reached for iobuffers for a lower POINT_SIZE than for streams. The following table indicates the maximum point size possible for a single kernel for various values of TP_DATA_TYPE and TP_API_IO.
+
+.. table:: Maximum Point Size in a single kernel
+   :align: center
+
+   +-------------------+------------------+------------------+
+   | TP_DATA_TYPE      | API_IO           | Max Point size   |
+   +===================+==================+==================+
+   |     cint16        |  0 (iobuffer)    |  2048            |
+   +-------------------+------------------+------------------+
+   |     cint16        |  1 (streams)     |  4096            |
+   +-------------------+------------------+------------------+
+   |  cint32 or cfloat |  0 (iobuffer)    |  1024            |
+   +-------------------+------------------+------------------+
+   |  cint32 or cfloat |  1 (streams)     |  2048            |
+   +-------------------+------------------+------------------+
+
+The maximum point size supported per kernel puts a practical limit on the maximum point size supported when using TP_PARALLEL_POWER>1. This is because the largest devices available currently support a maximum TP_PARALLEL_POWER of 4. Essentially, the largest possible FFT can be found by multiplying the values in the table by 2^4. E.g. the largest practical FFT with stream IO and cint32 data is 2048 << 4 = 32768.
 
 
 .. |image1| image:: ./media/image1.png

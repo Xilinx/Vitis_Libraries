@@ -37,18 +37,40 @@ namespace fir {
 
 // To optimize performance, 256-bit vectors are copied, so storage element must be padded to 256-bits.
 template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE>
-INLINE_DECL void windowBroadcast(input_window<TT_DATA>* inWindow, output_stream_cacc48* outCascade) {
-    using buff_type = typename T_buff_256b<int32>::v_type;
-    buff_type buff256;
-    buff_type* __restrict inWindowPtr = (buff_type*)inWindow->head;
-    // const int samplesPer256Buff = sizeof(buff_type)/sizeof(TT_DATA);
-    const int samplesPer256Buff = 256 / 8 / sizeof(TT_DATA);
-    static_assert(TP_INPUT_WINDOW_VSIZE % samplesPer256Buff == 0, "Error: Window size must be a multiple of 256-bits");
+INLINE_DECL void windowBroadcast(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<16> >* inWindow,
+                                 output_stream_cacc48* outCascade) {
+    //#define _DEBUG_
+    const int samplesPerBuffWrite = MCD_SIZE / 8 / sizeof(TT_DATA);
+    const int writesPerLoop = MCD_SIZE / 8 / sizeof(int32);
+    using buff_type = typename ::aie::vector<int32, writesPerLoop>;
+    buff_type writeBuff;
+    buff_type* buff_ptr;
+    auto inItr = ::aie::begin_random_circular(*(inWindow));
+    static_assert(TP_INPUT_WINDOW_VSIZE % samplesPerBuffWrite == 0,
+                  "Error: Window size must be a multiple of 256-bits");
 
-    for (int i = 0; i < TP_INPUT_WINDOW_VSIZE; i += samplesPer256Buff) {
+    for (int i = 0; i < TP_INPUT_WINDOW_VSIZE; i += samplesPerBuffWrite) {
         // copy 256-bit vector at a time
-        buff256 = *inWindowPtr++;
-        put_mcd(buff256);
+        buff_ptr = (buff_type*)&*inItr;
+        writeBuff = *buff_ptr;
+        inItr += samplesPerBuffWrite;
+        put_mcd(writeBuff);
+    }
+}
+
+template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE>
+INLINE_DECL void windowBroadcast(input_async_buffer<TT_DATA>* inWindow, output_stream_cacc48* outCascade) {
+    const int writesPerLoop = MCD_SIZE / 8 / sizeof(TT_DATA);
+    const int samplesPerBuffWrite = MCD_SIZE / 8 / sizeof(int32);
+    using buff_type = typename ::aie::vector<int32, samplesPerBuffWrite>;
+    buff_type writeBuff;
+    buff_type* inItr = (buff_type*)inWindow->data();
+
+    static_assert(TP_INPUT_WINDOW_VSIZE % writesPerLoop == 0, "Error: Window size must be a multiple of 256-bits");
+    for (int i = 0; i < TP_INPUT_WINDOW_VSIZE; i += writesPerLoop) {
+        // copy 256-bit vector at a time
+        writeBuff = *inItr++;
+        put_mcd(writeBuff);
     }
 }
 
@@ -56,36 +78,44 @@ INLINE_DECL void windowBroadcast(input_window<TT_DATA>* inWindow, output_stream_
 template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE>
 INLINE_DECL void windowBroadcast(input_stream_cacc48* inCascade,
                                  output_stream_cacc48* outCascade,
-                                 input_window<TT_DATA>* outWindow) {
-    using buff_type = typename T_buff_256b<int32>::v_type;
-    buff_type buff256;
-    buff_type* __restrict outWindowPtr = (buff_type*)outWindow->head;
-    // const int samplesPer256Buff = sizeof(buff_type)/sizeof(TT_DATA);
-    const int samplesPer256Buff = 256 / 8 / sizeof(TT_DATA);
-    static_assert(TP_INPUT_WINDOW_VSIZE % samplesPer256Buff == 0, "Error: Window size must be a multiple of 256-bits");
+                                 input_async_buffer<TT_DATA>* outWindow) {
+    const int samplesPerLoop = SCD_SIZE / 8 / sizeof(TT_DATA);
+    const int samplesPerBuffWrite = SCD_SIZE / 8 / sizeof(int32);
+    using buff_type = typename ::aie::vector<int32, samplesPerBuffWrite>;
+    buff_type rwBuff;
+    buff_type* outItr = (buff_type*)outWindow->data();
+    static_assert(TP_INPUT_WINDOW_VSIZE % samplesPerLoop == 0, "Error: Window size must be a multiple of 256-bits");
 
-    for (int i = 0; i < TP_INPUT_WINDOW_VSIZE; i += samplesPer256Buff) {
-        // copy 256-bit vector at a time
-        buff256 = get_scd_v8int32();
-        put_mcd(buff256);
-        *outWindowPtr++ = buff256;
+    for (int i = 0; i < TP_INPUT_WINDOW_VSIZE; i += samplesPerLoop) {
+// copy 256-bit vector at a time
+#if SCD_SIZE == 256
+        rwBuff = get_scd_v8int32(); // int32
+#else
+        rwBuff = get_scd_v16int32();
+#endif // SCD_SIZE
+        put_mcd(rwBuff);
+        *outItr++ = rwBuff;
     }
 }
 
 // To optimize performance, 256-bit vectors are copied, so storage element must be padded to 256-bits.
 template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE>
-INLINE_DECL void windowBroadcast(input_stream_cacc48* inCascade, input_window<TT_DATA>* outWindow) {
-    using buff_type = typename T_buff_256b<int32>::v_type;
-    buff_type buff256;
-    buff_type* __restrict outWindowPtr = (buff_type*)outWindow->head;
-    // const int samplesPer256Buff = sizeof(buff_type)/sizeof(TT_DATA);
-    const int samplesPer256Buff = 256 / 8 / sizeof(TT_DATA);
-    static_assert(TP_INPUT_WINDOW_VSIZE % samplesPer256Buff == 0, "Error: Window size must be a multiple of 256-bits");
+INLINE_DECL void windowBroadcast(input_stream_cacc48* inCascade, input_async_buffer<TT_DATA>* outWindow) {
+    const int samplesPerBuffRead = SCD_SIZE / 8 / sizeof(TT_DATA);
+    const int _32bSamplesPerBuffRead = SCD_SIZE / 8 / sizeof(int32);
+    using buff_type = typename ::aie::vector<int32, _32bSamplesPerBuffRead>;
+    buff_type readBuff;
+    buff_type* outItr = (buff_type*)outWindow->data();
+    static_assert(TP_INPUT_WINDOW_VSIZE % samplesPerBuffRead == 0, "Error: Window size must be a multiple of 256-bits");
 
-    for (int i = 0; i < TP_INPUT_WINDOW_VSIZE; i += samplesPer256Buff) {
-        // copy 256-bit vector at a time
-        buff256 = get_scd_v8int32();
-        *outWindowPtr++ = buff256;
+    for (int i = 0; i < TP_INPUT_WINDOW_VSIZE; i += samplesPerBuffRead) {
+// copy 256-bit vector at a time
+#if MCD_SIZE == 256
+        readBuff = get_scd_v8int32();
+#else
+        readBuff = get_scd_v16int32();
+#endif
+        *outItr++ = readBuff;
     }
 }
 
@@ -97,7 +127,7 @@ INLINE_DECL void windowAcquire(T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> inI
 template <typename TT_DATA, unsigned int TP_DUAL_IP = 0>
 INLINE_DECL void windowAcquire(T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface) {
     // Reset async input window pointer
-    inInterface.inWindow->ptr = inInterface.inWindow->head;
+    inInterface.inWindowLin->ptr = inInterface.inWindowLin->head;
 }
 
 template <typename TT_DATA, bool TP_CASC_IN, unsigned int TP_DUAL_IP, unsigned int TP_API>
@@ -105,7 +135,10 @@ INLINE_DECL void windowReset(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterf
     // Reset async window pointers when windows are used.
     // Pointer reset is needed to revert the window after the previous iteration.
     if
-        constexpr(TP_API == 0 && TP_CASC_IN == CASC_IN_TRUE) { inInterface.inWindow->ptr = inInterface.inWindow->head; }
+        constexpr(TP_API == 0 && TP_CASC_IN == CASC_IN_TRUE) {
+            //        inInterface.inWindow->ptr = inInterface.inWindow->head; //redundant for IO buffer, since iterator
+            //        initializes to start each iteration.
+        }
 }
 
 // Window Lock Release. Overloaded with IO interface.
@@ -150,7 +183,11 @@ INLINE_DECL void windowBroadcast(T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> i
         constexpr(TP_API == 0) {
             if
                 constexpr(kernelPosEnum == first_kernel_in_chain) {
-                    windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE>(inInterface.inWindow, outInterface.outCascade);
+                    // if (inInterface.inWindow == NULL) {
+                    windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE>(inInterface.inWindowCirc, outInterface.outCascade);
+                    //} else {
+                    //  windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE>(inInterface.inWindow, outInterface.outCascade);
+                    //}
                 }
             else if
                 constexpr(kernelPosEnum == only_kernel) {
@@ -177,17 +214,17 @@ INLINE_DECL void windowBroadcast(T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> in
                     // Normal middle kernel processing - take data from the cascde, put it in our window and also
                     // broadcast it out to the output cascade
                     windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE>(inInterface.inCascade, outInterface.outCascade,
-                                                                    inInterface.inWindow);
+                                                                    inInterface.inWindowLin);
                 }
             else if
                 constexpr(kernelPosEnum == first_kernel_in_chain) {
                     // Call the overload that takes data from the window and broadcasts it on the cascade only.
-                    windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE>(inInterface.inWindow, outInterface.outCascade);
+                    windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE>(inInterface.inWindowCirc, outInterface.outCascade);
                 }
             else if
                 constexpr(kernelPosEnum == last_kernel_in_chain) {
                     // Call the overload that takes data from the cascade and doesn't also broadcast it on the cascade.
-                    windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE>(inInterface.inCascade, inInterface.inWindow);
+                    windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE>(inInterface.inCascade, inInterface.inWindowLin);
                 }
             else if
                 constexpr(kernelPosEnum == only_kernel) {
@@ -214,7 +251,7 @@ INLINE_DECL void windowBroadcast(T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> in
 
             if
                 constexpr(kernelPosEnum == last_kernel_in_chain) {
-                    windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE>(inInterface.inCascade, inInterface.inWindow);
+                    windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE>(inInterface.inCascade, inInterface.inWindowLin);
                 }
             else if
                 constexpr(kernelPosEnum == only_kernel) {

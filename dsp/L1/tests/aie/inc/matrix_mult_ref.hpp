@@ -28,6 +28,8 @@
 #include <adf.h>
 #include <limits>
 
+using namespace adf;
+
 namespace xf {
 namespace dsp {
 namespace aie {
@@ -161,9 +163,9 @@ class matrix_mult_ref {
     // If A or B is float then output is float, else int.
     // if A or B is *int32, then output is int32, else int16.
     //    - This can be user decision and simply changes SRS.
-    void mmult(input_window<TT_DATA_A>* inWindowA,
-               input_window<TT_DATA_B>* inWindowB,
-               output_window<outType_t<TT_DATA_A, TT_DATA_B> >* outWindow);
+    void mmult(input_buffer<TT_DATA_A>& inWindowA,
+               input_buffer<TT_DATA_B>& inWindowB,
+               output_buffer<outType_t<TT_DATA_A, TT_DATA_B> >& outWindow);
 
    private:
 };

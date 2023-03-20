@@ -94,10 +94,6 @@ class casc_kernels {
     }
 };
 
-#ifndef COEFF_DATA_ALIGNMENT
-#define COEFF_DATA_ALIGNMENT 1 // data
-#endif
-
 template <typename ssr_params = fir_params_defaults, template <typename> typename fir_type = fir_type_default>
 class ssr_kernels {
    public:
@@ -121,13 +117,14 @@ class ssr_kernels {
     static constexpr unsigned int TP_COEFF_PHASE_OFFSET = ssr_params::DTP_COEFF_PHASE_OFFSET;
     static constexpr unsigned int TP_COEFF_PHASES = ssr_params::BTP_COEFF_PHASES;
     static constexpr unsigned int TP_COEFF_PHASES_LEN = ssr_params::BTP_COEFF_PHASES_LEN;
+    static constexpr unsigned int TP_PARA_DECI_INDEX = ssr_params::BTP_PARA_DECI_INDEX;
+    static constexpr unsigned int TP_PARA_INTERP_INDEX = ssr_params::BTP_PARA_INTERP_INDEX;
+    static constexpr unsigned int TP_PARA_DECI_POLY = ssr_params::BTP_PARA_DECI_POLY;
     static constexpr unsigned int TP_PARA_INTERP_POLY =
         ssr_params::BTP_PARA_INTERP_POLY; // ssr_kernels class is already decomposed, so should not have any need for
                                           // decomposition polyphases.
     static constexpr bool TP_CASC_IN = ssr_params::BTP_CASC_IN;
     static constexpr bool TP_CASC_OUT = ssr_params::BTP_CASC_OUT;
-    static constexpr int TP_MODIFY_MARGIN_OFFSET = ssr_params::BTP_MODIFY_MARGIN_OFFSET;
-    static constexpr unsigned int TP_KERNEL_POSITION = ssr_params::BTP_KERNEL_POSITION;
 
     static constexpr unsigned int totalKernels = TP_CASC_LEN * TP_SSR * TP_SSR;
 
@@ -151,7 +148,11 @@ class ssr_kernels {
         // On top of that, the placement of input source wrt brodcast kernel inputs may introduce significant routing
         // delays.
         // which may have an adverse effect on the amount of FIFO storage available for filter design purposes.
-        int fifoStep = (TP_CASC_LEN - kernelPos + 1);
+        int fifoStep =
+            (TP_INTERPOLATE_FACTOR <= TP_DECIMATE_FACTOR
+                 ? (TP_CASC_LEN - kernelPos + 1) * CEIL(TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR) / TP_DECIMATE_FACTOR
+                 : (kernelPos + 1) * CEIL(TP_DECIMATE_FACTOR, TP_INTERPOLATE_FACTOR) / TP_INTERPOLATE_FACTOR);
+
         const int baseFifoDepth = 32;
         unsigned int fifo_depth_multiple = 40;
 
@@ -165,16 +166,34 @@ class ssr_kernels {
     static void create_and_recurse(kernel (&firKernels)[totalKernels], const std::vector<TT_COEFF>& taps) {
         // only pass a subset of the taps to the casc_kernels, and have it treat that as it normally would.
         std::vector<TT_COEFF> ssrPhaseTaps(segment_taps_array_for_phase(taps, ssrCoeffPhase));
-        printf("creating kernels for dataphase %d coeffPhase %d range length %d\n\n", ssrDataPhase, ssrCoeffPhase,
-               TP_FIR_RANGE_LEN);
-        if
-            constexpr(ssr_params::Bdim == (TP_SSR * TP_SSR) - 1) {
-                printf(
-                    "m_firKernels[range] corresponds to ssrOutputPath,ssrInnerPhase D(ssrDataPhase) C(ssrCoeffPhase) "
-                    ":\n");
-            }
-        printf("m_firKernels[%d:%d] = %d,%d D(%d) C(%d) \n", kernelStartingIndex, kernelStartingIndex + TP_CASC_LEN - 1,
-               ssrOutputPath, ssrInnerPhase, ssrDataPhase, ssrCoeffPhase);
+        // printf("creating kernels for dataphase %d coeffPhase %d range length %d\n\n", ssrDataPhase, ssrCoeffPhase,
+        //        TP_FIR_RANGE_LEN);
+        // if
+        //     constexpr(ssr_params::Bdim == (TP_SSR * TP_SSR) - 1) {
+        //         printf(
+        //             "m_firKernels[range] corresponds to ssrOutputPath,ssrInnerPhase D(ssrDataPhase) C(ssrCoeffPhase)
+        //             "
+        //             ":\n");
+        //     }
+        // // printParams<ssr_params>();
+
+        // printf(
+        //     "m_firKernels[%d]: decompInnerPhase %d, decompInnerSSRPhase %d, decompInnerDeciPhase %d
+        //     ,decompInnerInterpPhase %d, \n",
+        //     kernelStartingIndex, decompInnerPhase, decompInnerSSRPhase, decompInnerDeciPhase,
+        //     decompInnerInterpPhase);
+        // printf(
+        //     "m_firKernels[%d]: ssrOutputPath %d, TP_PARA_INTERP_INDEX %d, TP_PARA_INTERP_POLY %d , TP_PARA_DECI_INDEX
+        //     %d, TP_PARA_DECI_POLY %d decompInnerPhase %d decompInnerPhase2 %d, decompInnerPhases %d ssrInnerPhase %d,
+        //     posFirstDataOfPhase %d, MODIFY_MARGIN_OFFSET %d \n",
+        //     kernelStartingIndex, ssrOutputPath, TP_PARA_INTERP_INDEX, TP_PARA_INTERP_POLY, TP_PARA_DECI_INDEX,
+        //     TP_PARA_DECI_POLY, decompInnerPhase, decompInnerPhase2, decompInnerPhases, ssrInnerPhase,
+        //     posFirstDataOfPhase, MODIFY_MARGIN_OFFSET);
+        // printf("m_firKernels[%d]: MARGIN_BYTESIZE %d, MODIFY_MARGIN_OFFSET %d \n", kernelStartingIndex,
+        // MARGIN_BYTESIZE, MODIFY_MARGIN_OFFSET);
+        // for (unsigned int i = 0; i < taps.size(); i++) {
+        //     printf("ssr_kernels::create_and_recurse: taps[%d] = %d \n", i, taps[i]);
+        // }
         // pass the kernels from a specific index so cascades can be placed as normal.
 
         static_assert(TP_FIR_LEN % TP_SSR == 0, "TP_FIR LEN must be divisble by TP_SSR. "); //
@@ -188,6 +207,20 @@ class ssr_kernels {
 
     static void create_and_recurse(kernel (&firKernels)[totalKernels]) {
         // pass the kernels from a specific index so cascades can be placed as "normal" from that position.
+        // printf(
+        //     "m_firKernels[%d]: decompInnerPhase %d, decompInnerSSRPhase %d, decompInnerDeciPhase %d
+        //     ,decompInnerInterpPhase %d, \n",
+        //     kernelStartingIndex, decompInnerPhase, decompInnerSSRPhase, decompInnerDeciPhase,
+        //     decompInnerInterpPhase);
+        // printf(
+        //     "m_firKernels[%d]: ssrOutputPath %d, TP_PARA_INTERP_INDEX %d, TP_PARA_INTERP_POLY %d , TP_PARA_DECI_INDEX
+        //     %d, TP_PARA_DECI_POLY %d decompInnerPhase %d decompInnerPhase2 %d, decompInnerPhases %d ssrInnerPhase %d,
+        //     posFirstDataOfPhase %d, MODIFY_MARGIN_OFFSET %d \n",
+        //     kernelStartingIndex, ssrOutputPath, TP_PARA_INTERP_INDEX, TP_PARA_INTERP_POLY, TP_PARA_DECI_INDEX,
+        //     TP_PARA_DECI_POLY, decompInnerPhase, decompInnerPhase2, decompInnerPhases, ssrInnerPhase,
+        //     posFirstDataOfPhase, MODIFY_MARGIN_OFFSET);
+        // printf("m_firKernels[%d]: MARGIN_BYTESIZE %d, MODIFY_MARGIN_OFFSET %d \n", kernelStartingIndex,
+        // MARGIN_BYTESIZE, MODIFY_MARGIN_OFFSET);
         this_casc_kernels::create_and_recurse(firKernels + kernelStartingIndex);
 
         if
@@ -198,17 +231,15 @@ class ssr_kernels {
                                    port<input>* in,
                                    in2_type(&in2),
                                    port<output>* out,
-                                   out2_type(&out2),
+                                   out2_type out2,
                                    coeff_type coeff,
                                    net_type& net,
                                    net_type& net2,
                                    casc_in_type(&casc_in),
                                    const char* srcFileName = "fir_sr_asym.cpp") {
-        printf("ssrOutputPath, ssrInnerPhase : D(ssrDataPhase) C(ssrCoeffPhase) Starts at kernelStartingIndex: \n");
         for (unsigned int ssrOutputPath = 0; ssrOutputPath < TP_SSR; ssrOutputPath++) {
             for (unsigned int ssrInnerPhase = 0; ssrInnerPhase < TP_SSR; ssrInnerPhase++) {
                 unsigned int ssrDataPhase = getSSRDataPhase(ssrOutputPath, ssrInnerPhase, TP_SSR);
-                unsigned int ssrCoeffPhase = getSSRCoeffPhase(ssrOutputPath, ssrInnerPhase, TP_SSR);
                 unsigned int kernelStartingIndex =
                     getKernelStartingIndex(ssrDataPhase, ssrOutputPath, TP_SSR, TP_CASC_LEN);
                 kernel* firstKernelOfCascadeChain = m_firKernels + kernelStartingIndex;
@@ -217,19 +248,12 @@ class ssr_kernels {
                     getSSRDataPhase(ssrOutputPath, ssrInnerPhase + 1, TP_SSR), ssrOutputPath, TP_SSR, TP_CASC_LEN);
                 kernel* firstKernelOfNextCascadeChain = m_firKernels + nextChainKernelStartingIndex;
 
-                printf("%d, %d : D(%d) C(%d) Starts at %d\n", ssrOutputPath, ssrInnerPhase, ssrDataPhase, ssrCoeffPhase,
-                       kernelStartingIndex);
                 input_connections(in[ssrDataPhase], firstKernelOfCascadeChain, ssrOutputPath, ssrInnerPhase, net);
-
+                // printf("casc_connections\n");
                 cascade_connections(firstKernelOfCascadeChain); // connect all cascades together
 
                 // Connect SSR Inner phases cascade ports together.
                 if (ssrInnerPhase != TP_SSR - 1) {
-                    printf(
-                        "cascade between ssrInnerPhase (%d) kernels. d(%d) c(%d)\nStartingIndex=%d, "
-                        "nextChainKernelStartingIndex=%d, nextChainDataPhase=%d\n",
-                        ssrInnerPhase, ssrDataPhase, ssrCoeffPhase, kernelStartingIndex, nextChainKernelStartingIndex,
-                        getSSRDataPhase(ssrOutputPath, ssrInnerPhase + 1, TP_SSR));
                     connect<cascade>(lastKernelOfCascadeChain->out[0],
                                      firstKernelOfNextCascadeChain->in[CASC_IN_PORT_POS]);
                 }
@@ -274,6 +298,10 @@ class ssr_kernels {
             }
         }
     };
+
+#ifndef COEFF_DATA_ALIGNMENT
+#define COEFF_DATA_ALIGNMENT 1 // data
+#endif
 
     static constexpr unsigned int getSSRDataPhase(unsigned int ssrOutputPath,
                                                   unsigned int ssrInnerPhase,
@@ -327,47 +355,18 @@ class ssr_kernels {
     static_assert(ssr_params::Bdim >= 0, "ERROR: ssr_params::Bdim must be a positive integer");
     // static_assert(TP_FIR_LEN %  TP_SSR == 0, "ERROR: TP_FIR_LEN must be an integer multiple of TP_SSR. Please ceil up
     // TP_FIR_LEN" );
-    static constexpr int tmp_rnd = TP_SSR * TP_DECIMATE_FACTOR * TP_INTERPOLATE_FACTOR;
 
-    struct tmp_flen_params : public ssr_params {
-        static constexpr int BTP_FIR_LEN = CEIL(TP_FIR_LEN, tmp_rnd) / (TP_SSR);
-    };
-    struct tmp_clen_params : public ssr_params {
-        static constexpr int BTP_CASC_LEN =
-            CEIL(TP_FIR_LEN, tmp_rnd) /
-            (TP_SSR * TP_DECIMATE_FACTOR * TP_INTERPOLATE_FACTOR); // arbitrarily choosing casc len to be large enough
-                                                                   // to not trigger static assert. 4 is chosen as the
-                                                                   // number of taps per kernel
-        static constexpr int BTP_FIR_RANGE_LEN = TP_DECIMATE_FACTOR * TP_INTERPOLATE_FACTOR;
-    };
-    static constexpr unsigned int kDF = fir_type<tmp_flen_params>::getDF();
-    static constexpr unsigned int kIF = fir_type<tmp_flen_params>::getIF();
+    static constexpr unsigned int kDF = fir_type<ssr_params>::getDF();
+    static constexpr unsigned int kIF = fir_type<ssr_params>::getIF();
     static constexpr unsigned int ssrOutputPath = (dim / TP_SSR);
     static constexpr unsigned int ssrInnerPhase = (dim % TP_SSR);
 
     // aligned by coefficients
     static constexpr unsigned int ssrDataPhase = getSSRDataPhase(ssrOutputPath, ssrInnerPhase, ssr_params::BTP_SSR);
-    static constexpr unsigned int ssrCoeffPhase = getSSRCoeffPhase(ssrOutputPath, ssrInnerPhase, ssr_params::BTP_SSR);
-
-    // static constexpr unsigned int FIR_LEN_SSR_RANGE = (CEIL(ssr_params::BTP_FIR_LEN,
-    // ssr_params::BTP_SSR)/ssr_params::BTP_SSR); // to be ceiled or something
-    static constexpr unsigned int firTypeTapLenPerPhase = fir_type<tmp_clen_params>::getTapLen();
-    static constexpr unsigned int kernelStartingIndex =
-        getKernelStartingIndex(ssrDataPhase, ssrOutputPath, ssr_params::BTP_SSR, ssr_params::BTP_CASC_LEN);
-
-    // helpers to create connections
-    static constexpr unsigned int CASC_IN_PORT_POS = (ssr_params::BTP_DUAL_IP == DUAL_IP_DUAL) ? 2 : 1;
-    static constexpr unsigned int RTP_PORT_POS =
-        (ssr_params::BTP_CASC_IN == CASC_IN_TRUE || ssr_params::BTP_KERNEL_POSITION != 0) ? CASC_IN_PORT_POS + 1
-                                                                                          : CASC_IN_PORT_POS;
-    static constexpr unsigned int DUAL_OUT_PORT_POS = 1;
-    static constexpr unsigned int DUAL_IP_PORT_POS = 1;
-    static constexpr unsigned int INPUT_WINDOW_BYTESIZE =
-        ssr_params::BTP_INPUT_WINDOW_VSIZE * sizeof(typename ssr_params::BTT_DATA);
-    static constexpr unsigned int OUTPUT_WINDOW_BYTESIZE =
-        TP_INTERPOLATE_FACTOR * INPUT_WINDOW_BYTESIZE / TP_DECIMATE_FACTOR;
-    static constexpr unsigned int MARGIN_BYTESIZE =
-        fir_type<tmp_clen_params>::getSSRMargin() * sizeof(typename ssr_params::BTT_DATA);
+    static constexpr unsigned int ssrCoeffPhase =
+        ((getSSRCoeffPhase(ssrOutputPath, ssrInnerPhase, ssr_params::BTP_SSR)) +
+         ((TP_PARA_DECI_INDEX == 0) ? 0 : (TP_SSR - 1))) %
+        TP_SSR; //
 
     /** SSR 4 Example why we need margin offset.
      * numbers are data indexes contributing at each ssr kernel.
@@ -402,18 +401,27 @@ class ssr_kernels {
      * because we request FIR_LEN margin samples rather than FIR_LEN-1 margin samples.
      */
 
-    static constexpr unsigned int firstRowDataPhase =
-        (CEIL((ssrDataPhase * TP_INTERPOLATE_FACTOR), kDF) /
-         kDF); // calculates first row that the first data of this dataPhase is used
-    static constexpr int emptyRowsInOutputPath =
-        (firstRowDataPhase / TP_SSR) + (ssrOutputPath < (firstRowDataPhase % TP_SSR));
-    // static constexpr int MODIFY_MARGIN_OFFSET = (ssrOutputPath * kDF < ssrDataPhase * kIF) ? -1 * kDF *
-    // (emptyRowsInOutputPath) + ((ssrOutputPath + TP_SSR) * kDF - ssrDataPhase * kIF)/TP_SSR:
-    //                                            (ssrOutputPath * kDF - ssrInnerPhase * kIF)/TP_SSR;
-    static constexpr int posFirstDataOfPhase = ssrOutputPath * kDF - ssrDataPhase * kIF;
-    static constexpr int MODIFY_MARGIN_OFFSET = (posFirstDataOfPhase < 0)
-                                                    ? -1 * (CEIL((-1 * posFirstDataOfPhase), TP_SSR) / TP_SSR)
-                                                    : (posFirstDataOfPhase) / TP_SSR;
+    // Decomposed Inner Phase - takes position in the decomposed structure into account
+    static constexpr unsigned int decompInnerPhases = TP_SSR * TP_PARA_DECI_POLY;
+    static constexpr unsigned int decompInnerSSRPhase = dim * TP_PARA_DECI_POLY;
+    static constexpr unsigned int decompInnerDeciPhase = TP_PARA_DECI_INDEX;
+    static constexpr unsigned int decompInnerInterpPhase =
+        ((TP_PARA_INTERP_INDEX * TP_PARA_DECI_INDEX * TP_PARA_DECI_POLY) /
+         (TP_INTERPOLATE_FACTOR * TP_PARA_INTERP_POLY));
+    static constexpr unsigned int decompInnerPhase =
+        (decompInnerSSRPhase + decompInnerDeciPhase + decompInnerInterpPhase) % decompInnerPhases;
+    static constexpr unsigned int decompInnerPhase2 =
+        (dim * TP_PARA_DECI_POLY + (TP_PARA_DECI_POLY - TP_PARA_DECI_INDEX) % TP_PARA_DECI_POLY +
+         (TP_PARA_INTERP_INDEX * TP_PARA_DECI_INDEX * kDF * TP_PARA_DECI_POLY) / (kIF * TP_PARA_INTERP_POLY)) %
+        decompInnerPhases;
+    // unsigned int inputDataIndex = ssrIdx * TP_PARA_DECI_POLY + (TP_PARA_DECI_POLY - deciPolyIdx + ((interpPolyIdx *
+    // TP_DECIMATE_FACTOR) / TP_INTERPOLATE_FACTOR)) % TP_PARA_DECI_POLY;
+
+    static constexpr int posFirstDataOfPhase = ssrOutputPath * kDF * TP_PARA_DECI_POLY - decompInnerPhase2 * kIF;
+    static constexpr int MODIFY_MARGIN_OFFSET =
+        ((posFirstDataOfPhase < 0) ? -1 * (CEIL((-1 * posFirstDataOfPhase), decompInnerPhases) / decompInnerPhases)
+                                   : (posFirstDataOfPhase) / decompInnerPhases) +
+        ssr_params::BTP_MODIFY_MARGIN_OFFSET; // add whatever margin offset that is sent to ssr kernels
     /**
      * @brief Seperate taps into a specific SSR phase.
      *    Phase 0 contains taps index 0, TP_SSR, 2*TP_SSR, ...
@@ -447,17 +455,39 @@ class ssr_kernels {
     static constexpr bool casc_in = (ssrInnerPhase == 0) ? (false || TP_CASC_IN) : true; // first kernel of output phase
     static constexpr bool casc_out =
         (ssrInnerPhase == TP_SSR - 1) ? (false || TP_CASC_OUT) : true; // last kernel of output phase
-    static constexpr int rnd = TP_SSR * kDF * kIF;
+    // static constexpr int rnd = TP_SSR * kDF * kIF; // causes resampler to create excessive FIR lenths
+    static constexpr int rnd = TP_SSR;
     struct last_casc_params : public ssr_params {
         static constexpr int Bdim = TP_CASC_LEN - 1;
         static constexpr int BTP_FIR_LEN = CEIL(TP_FIR_LEN, rnd) / TP_SSR;
         static constexpr int BTP_CASC_IN = casc_in;
         static constexpr int BTP_CASC_OUT = casc_out;
-        static constexpr int BTP_COEFF_PHASE = ssrCoeffPhase;
-        static constexpr int BTP_COEFF_PHASES = TP_SSR;
+        static constexpr int BTP_COEFF_PHASE = ssrCoeffPhase * TP_PARA_INTERP_POLY * TP_PARA_DECI_POLY +
+                                               (TP_PARA_INTERP_INDEX * TP_PARA_DECI_POLY) % TP_PARA_INTERP_POLY +
+                                               TP_PARA_DECI_INDEX * TP_PARA_INTERP_POLY;
+        static constexpr int BTP_SSR = 1; // this struct calls decomposed kernels
+        static constexpr int BTP_COEFF_PHASES = TP_SSR * TP_PARA_INTERP_POLY * TP_PARA_DECI_POLY;
         static constexpr int BTP_COEFF_PHASES_LEN = TP_COEFF_PHASES_LEN;
         static constexpr int BTP_MODIFY_MARGIN_OFFSET = MODIFY_MARGIN_OFFSET;
     };
+
+    static constexpr unsigned int firTypeTapLenPerPhase = fir_type<ssr_params>::getTapLen();
+    static constexpr unsigned int kernelStartingIndex =
+        getKernelStartingIndex(ssrDataPhase, ssrOutputPath, ssr_params::BTP_SSR, ssr_params::BTP_CASC_LEN);
+
+    // helpers to create connections
+    static constexpr unsigned int CASC_IN_PORT_POS = (ssr_params::BTP_DUAL_IP == DUAL_IP_DUAL) ? 2 : 1;
+    static constexpr unsigned int RTP_PORT_POS =
+        (ssr_params::BTP_CASC_IN == CASC_IN_TRUE || ssr_params::BTP_KERNEL_POSITION != 0) ? CASC_IN_PORT_POS + 1
+                                                                                          : CASC_IN_PORT_POS;
+    static constexpr unsigned int DUAL_OUT_PORT_POS = 1;
+    static constexpr unsigned int DUAL_IP_PORT_POS = 1;
+    static constexpr unsigned int INPUT_WINDOW_BYTESIZE =
+        ssr_params::BTP_INPUT_WINDOW_VSIZE * sizeof(typename ssr_params::BTT_DATA);
+    static constexpr unsigned int OUTPUT_WINDOW_BYTESIZE =
+        TP_INTERPOLATE_FACTOR * INPUT_WINDOW_BYTESIZE / TP_DECIMATE_FACTOR;
+    static constexpr unsigned int MARGIN_BYTESIZE =
+        fir_type<last_casc_params>::getSSRMargin() * sizeof(typename ssr_params::BTT_DATA);
 
     using this_casc_kernels = casc_kernels<last_casc_params, fir_type>;
 
@@ -478,20 +508,27 @@ class ssr_kernels {
         // printParams<ssr_params>();
         // make in connections
         if (TP_API == USE_WINDOW_API) {
-            connect<window<INPUT_WINDOW_BYTESIZE, MARGIN_BYTESIZE> >(in, firKernels[0].in[0]);
+            // connect<window<INPUT_WINDOW_BYTESIZE, MARGIN_BYTESIZE> >(in, firKernels[0].in[0]);
+            connect<>(in, firKernels[0].in[0]);
+            dimensions(firKernels[0].in[0]) = {INPUT_WINDOW_BYTESIZE / sizeof(TT_DATA)};
             for (int i = 1; i < TP_CASC_LEN; i++) {
                 single_buffer(firKernels[i].in[0]);
-                connect<window<INPUT_WINDOW_BYTESIZE + MARGIN_BYTESIZE> >(async(firKernels[i - 1].out[1]),
-                                                                          async(firKernels[i].in[0]));
+                // connect<window<INPUT_WINDOW_BYTESIZE + MARGIN_BYTESIZE> >(async(firKernels[i - 1].out[1]),
+                //                                                         async(firKernels[i].in[0]));
+                connect<>(firKernels[i - 1].out[1], firKernels[i].in[0]);
+                dimensions(firKernels[i - 1].out[1]) = {(INPUT_WINDOW_BYTESIZE + MARGIN_BYTESIZE) / sizeof(TT_DATA)};
+                dimensions(firKernels[i].in[0]) = {(INPUT_WINDOW_BYTESIZE + MARGIN_BYTESIZE) / sizeof(TT_DATA)};
             }
         } else if (TP_API == USE_STREAM_API) {
             for (int i = 0; i < TP_CASC_LEN; i++) {
-                net[ssrInPhaseIndex][ssrOutPathIndex][i] = new connect<stream, stream>(in, firKernels[i].in[0]);
-                fifo_depth(*net[ssrInPhaseIndex][ssrOutPathIndex][i]) = calculate_fifo_depth(i);
+                net[ssrOutPathIndex][ssrInPhaseIndex][i] = new connect<stream, stream>(in, firKernels[i].in[0]);
+                fifo_depth(*net[ssrOutPathIndex][ssrInPhaseIndex][i]) = calculate_fifo_depth(i);
             }
         } else {
             for (int i = 0; i < TP_CASC_LEN; i++) {
-                connect<window<INPUT_WINDOW_BYTESIZE, MARGIN_BYTESIZE> >(in, firKernels[i].in[0]);
+                // connect<window<INPUT_WINDOW_BYTESIZE, MARGIN_BYTESIZE> >(in, firKernels[i].in[0]);
+                connect<>(in, firKernels[i].in[0]);
+                dimensions(firKernels[i].in[0]) = {INPUT_WINDOW_BYTESIZE / sizeof(TT_DATA)};
             }
         }
     }
@@ -499,6 +536,7 @@ class ssr_kernels {
     // make cascade connections
     static void cascade_connections(kernel firKernels[TP_CASC_LEN]) {
         for (int i = 1; i < TP_CASC_LEN; i++) {
+            // printf("connect casc %d\n",i );
             connect<cascade>(firKernels[i - 1].out[0], firKernels[i].in[CASC_IN_PORT_POS]);
         }
     }
@@ -509,7 +547,9 @@ class ssr_kernels {
             connect<cascade>(firKernels[TP_CASC_LEN - 1].out[0], out);
         } else {
             if (TP_API == USE_WINDOW_API) {
-                connect<window<OUTPUT_WINDOW_BYTESIZE> >(firKernels[TP_CASC_LEN - 1].out[0], out);
+                // connect<window<OUTPUT_WINDOW_BYTESIZE> >(firKernels[TP_CASC_LEN - 1].out[0], out);
+                connect<>(firKernels[TP_CASC_LEN - 1].out[0], out);
+                dimensions(firKernels[TP_CASC_LEN - 1].out[0]) = {OUTPUT_WINDOW_BYTESIZE / sizeof(TT_DATA)};
             } else {
                 connect<stream>(firKernels[TP_CASC_LEN - 1].out[0], out);
             }
@@ -533,16 +573,23 @@ class ssr_kernels {
 
     // make cascade input connection
     static void conditional_casc_in_connections(port<input>(&casc_in), kernel firKernels[TP_CASC_LEN]) {
+        // printf("Conditional casc connection\n");
         if
             constexpr(TP_CASC_IN == CASC_IN_TRUE) { connect<cascade>(casc_in, firKernels[0].in[CASC_IN_PORT_POS]); }
+
+        // printf("Finished casc connection\n");
     }
 
     // make output connections
     static void conditional_out_connections(port<output>(&out2), kernel firKernels[TP_CASC_LEN]) {
         if
-            constexpr(TP_NUM_OUTPUTS == 2) {
+            constexpr(TP_NUM_OUTPUTS == 2 && casc_out == false) {
                 if (TP_API == USE_WINDOW_API) {
-                    connect<window<OUTPUT_WINDOW_BYTESIZE> >(firKernels[TP_CASC_LEN - 1].out[DUAL_OUT_PORT_POS], out2);
+                    // connect<window<OUTPUT_WINDOW_BYTESIZE> >(firKernels[TP_CASC_LEN - 1].out[DUAL_OUT_PORT_POS],
+                    // out2);
+                    connect<>(firKernels[TP_CASC_LEN - 1].out[DUAL_OUT_PORT_POS], out2);
+                    dimensions(firKernels[TP_CASC_LEN - 1].out[DUAL_OUT_PORT_POS]) = {OUTPUT_WINDOW_BYTESIZE /
+                                                                                      sizeof(TT_DATA)};
                 } else {
                     connect<stream>(firKernels[TP_CASC_LEN - 1].out[DUAL_OUT_PORT_POS], out2);
                 }

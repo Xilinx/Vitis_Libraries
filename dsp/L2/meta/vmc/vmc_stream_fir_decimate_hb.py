@@ -53,33 +53,34 @@ def vmc_validate_shift_val(args):
 	return fn_validate_shift(data_type, shift_val)
 
 def vmc_validate_deci_poly(args):
-        deci_poly = args["deci_poly"]
-        ssr = args["ssr"]
-        api = 1
-        ret = fn_validate_para_deci_poly(api, deci_poly, ssr)
-        if ret["is_valid"] == False:
-          err_msg = ret["err_message"]
-          err_msg = err_msg.replace("TP_PARA_DECI_POLY", "'Decimate polyphase'")
-          return {"is_valid": False, "err_message": err_msg}
-        else:
-          return {"is_valid": True}
+     deci_poly = args["deci_poly"]
+     ssr = args["ssr"]
+     api = 1
+     ret = fn_validate_para_deci_poly(api, deci_poly, ssr)
+     if ret["is_valid"] == False:
+       err_msg = ret["err_message"]
+       err_msg = err_msg.replace("TP_PARA_DECI_POLY", "'Decimate polyphase'")
+       return {"is_valid": False, "err_message": err_msg}
+     else:
+       return {"is_valid": True}
 
 #### VMC graph generator ####
 def vmc_generate_graph(name, args):
-    tmpargs = {}
-    tmpargs["TT_DATA"] = args["data_type"]
-    tmpargs["TT_COEF"] = args["coef_type"]
-    tmpargs["TP_FIR_LEN"] = args["fir_length"]
-    tmpargs["TP_SHIFT"] = args["shift_val"]
-    tmpargs["TP_RND"] = args["rnd_mode"]
-    tmpargs["TP_INPUT_WINDOW_VSIZE"] = args["input_window_size"]
-    casc_length = args["casc_length"]
-    tmpargs["TP_CASC_LEN"] = casc_length
-    tmpargs["TP_USE_COEF_RELOAD"] = 1 if args["use_coeff_reload"] else 0
-    tmpargs["TP_NUM_OUTPUTS"] = 1
-    tmpargs["TP_DUAL_IP"] = 0
-    tmpargs["TP_API"] = 1
-    tmpargs["TP_SSR"] = args["ssr"]
-    tmpargs["coeff"] = args["coeff"]
-   
-    return generate_graph(name, tmpargs)
+	tmpargs = {}
+	tmpargs["TT_DATA"] = args["data_type"]
+	tmpargs["TT_COEF"] = args["coef_type"]
+	tmpargs["TP_FIR_LEN"] = fn_get_fir_length_hb(args)
+	tmpargs["TP_SHIFT"] = args["shift_val"]
+	tmpargs["TP_RND"] = args["rnd_mode"]
+	tmpargs["TP_INPUT_WINDOW_VSIZE"] = args["input_window_size"]
+	casc_length = args["casc_length"]
+	tmpargs["TP_CASC_LEN"] = casc_length
+	tmpargs["TP_USE_COEF_RELOAD"] = 1 if args["use_coeff_reload"] else 0
+	tmpargs["TP_NUM_OUTPUTS"] = 1
+	tmpargs["TP_DUAL_IP"] = 0
+	tmpargs["TP_API"] = 1
+	tmpargs["TP_SSR"] = args["ssr"]
+	tmpargs["coeff"] = args["coeff"]
+	tmpargs["TP_PARA_DECI_POLY"] = args["deci_poly"]
+	
+	return generate_graph(name, tmpargs)

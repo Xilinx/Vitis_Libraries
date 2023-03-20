@@ -23,7 +23,7 @@
 
 // Vector Print functions. These are overloaded according to vector type for ease of use.
 
-// #define PRINT_KERNEL_NAMES // turn this off if this annoys you
+#define PRINT_KERNEL_NAMES // turn this off if this annoys you
 
 namespace xf {
 namespace dsp {
@@ -34,6 +34,7 @@ namespace aie {
 #include <adf/x86sim/x86simDebug.h> // When debugging on hw, all functions still compile but don't do anything.
 std::string getKernelFilename() {
     std::string x86kernelFilename(X86SIM_KERNEL_NAME);
+
     std::replace(x86kernelFilename.begin(), x86kernelFilename.end(), '.',
                  '_'); // replace dots with underscore for filename.
     // C++20 erase to remove spaces from filename
@@ -53,7 +54,7 @@ void printf(const char* preamble, Types... args) {
 
 //--------------------------------------------------------------------------------------
 // int16
-
+#if __SUPPORTS_V8INT16__ == 1
 void vPrintf(const char* preamble, const v8int16 myVec) {
     const int kVLen = 8;
     printf("%s = (", preamble);
@@ -93,12 +94,12 @@ void vPrintf(const char* preamble, const v64int16 myVec) {
     }
     printf(")\n");
 }
-
 //--------------------------------------------------------------------------------------
 // cint16
 
 // No support for v2cint16 as this is less than the shortest AIE vector size supported
 
+#if __SUPPORTS_V16INT16__ == 1
 void vPrintf(const char* preamble, const v4cint16 myVec) {
     const int kVLen = 4;
     cint16_t myElem;
@@ -110,7 +111,6 @@ void vPrintf(const char* preamble, const v4cint16 myVec) {
     }
     printf(")\n");
 }
-
 void vPrintf(const char* preamble, const v8cint16 myVec) {
     const int kVLen = 8;
     cint16_t myElem;
@@ -122,6 +122,7 @@ void vPrintf(const char* preamble, const v8cint16 myVec) {
     }
     printf(")\n");
 }
+#endif
 
 void vPrintf(const char* preamble, const v16cint16 myVec) {
     const int kVLen = 16;
@@ -150,13 +151,11 @@ void vPrintf(const char* preamble, const v32cint16 myVec) {
     }
     printf(")\n");
 }
-
 // No support for v64cint16 as this exceeds the largest AIE vector size supported
 
 //--------------------------------------------------------------------------------------float
 
 // No support for v2int32 as this is less than the shortest AIE vector size supported
-
 void vPrintf(const char* preamble, const v4int32 myVec) {
     const int kVLen = 4;
     printf("%s = (", preamble);
@@ -304,7 +303,6 @@ void vPrintf(const char* preamble, const v32float myVec) {
     }
     printf(")\n");
 }
-
 // No support for v64float as this exceeds the largest AIE vector size supported
 
 //--------------------------------------------------------------------------------------
@@ -367,12 +365,28 @@ void vPrintf(const char* preamble, const v16cfloat myVec) {
     }
     printf(")\n");
 }
-
+#endif
 template <typename T, unsigned Elems>
 void vPrintf(const char* preamble, const ::aie::vector<T, Elems>& myVec) {
     // Convert to native so that our version of printf overload still works (kernel name in cascade designs)
-    vPrintf(preamble, myVec.to_native());
-    //::aie::print(myVec, true,  preamble);
+    // vPrintf(preamble, myVec.to_native());
+    ::aie::print(myVec, true, preamble);
+
+    auto* x86kernel_fh = fopen(getKernelFilename().c_str(), "a");
+    std::fprintf(x86kernel_fh, preamble);
+    for (int i = 0; i < Elems; i++) {
+        T tmp = myVec[i];
+        if
+            constexpr(std::is_same<T, cint16>::value) {
+                std::fprintf(x86kernel_fh, "{%d, %d}", tmp.real, tmp.imag);
+                std::fprintf(x86kernel_fh, "\t");
+            }
+        else {
+            std::fprintf(x86kernel_fh, "{%d}", tmp);
+            std::fprintf(x86kernel_fh, "\t");
+        }
+    }
+    fclose(x86kernel_fh);
 }
 
 // No support for v32cfloat or v64cfloat as these exceed the largest AIE vector size supported

@@ -274,6 +274,8 @@ if {$using_plio_class == 0} {
     }
 }
 
+# flag to be set when minimum dyn_pt_size is reached. Used to keep pt_size_pwr at max_pt_pwer
+set endOfDynPt 0
 # Process iterations
 for {set iter_nr 0} {$iter_nr < [expr ($iterations*$overkill)]} {incr iter_nr} {
 
@@ -282,9 +284,12 @@ for {set iter_nr 0} {$iter_nr < [expr ($iterations*$overkill)]} {incr iter_nr} {
         set headRand [randInt16 $headRand]
         # use fields of the random number to choose FFT_NIFFT and PT_SIZE_PWR. Choose a legal size
         set fft_nifft [expr (($headRand >> 14) % 2)]
-        set pt_size_pwr [expr ($pt_size_pwr - 1)]
+        if {!$endOfDynPt} {
+            set pt_size_pwr [expr ($pt_size_pwr - 1)]
+        }        
         if {$pt_size_pwr < (4+$par_power)} {
             set pt_size_pwr $max_pt_size_pwr
+            set endOfDynPt 1
         }
         # Header size = 256-bit, i.e. 4 cint32/cfloat or 8 cint16
         set header_size 4

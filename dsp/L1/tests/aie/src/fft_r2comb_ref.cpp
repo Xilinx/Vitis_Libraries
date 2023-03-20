@@ -16,6 +16,16 @@
 #include <float.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "device_defs.h"
+
+#if __SUPPORTS_CFLOAT__ == 0
+typedef struct {
+    float real;
+    float imag;
+} cfloat;
+#endif //__SUPPORTS_CFLOAT__ == 0
+
 #include "fft_r2comb_ref.hpp"
 
 #ifndef _DSPLIB_FFT_R2_COMB_REF_DEBUG_
@@ -53,7 +63,6 @@ namespace dsp {
 namespace aie {
 namespace fft {
 namespace r2comb {
-
 /*
   FFT/iFFT DIT r2 combiner  reference model
 */
@@ -212,12 +221,12 @@ void fft_r2comb_ref<TT_DATA,
                     TP_DYN_PT_SIZE,
                     TP_WINDOW_VSIZE,
                     TP_PARALLEL_POWER,
-                    TP_ORIG_PAR_POWER>::fft_r2comb_ref_main(input_window<TT_DATA>* inWindow,
-                                                            output_window<TT_DATA>* outWindow) {
+                    TP_ORIG_PAR_POWER>::fft_r2comb_ref_main(input_buffer<TT_DATA>& inWindow,
+                                                            output_buffer<TT_DATA>& outWindow) {
     if
         constexpr(TP_DYN_PT_SIZE == 1) {
             constexpr int kMinPtSizePwr = 4;
-            constexpr int kMaxPtSizePwr = 12;
+            constexpr int kMaxPtSizePwr = 16;
             constexpr unsigned int kHeaderSize = 32 / (sizeof(TT_DATA)); // dynamic point size header size in samples
             constexpr unsigned int kPtSizePwr = fnGetPointSizePower<TP_POINT_SIZE>();
             constexpr unsigned int kR2Stages =
@@ -230,7 +239,7 @@ void fft_r2comb_ref<TT_DATA,
             unsigned int stageShift = 0;
 
             TT_DATA* headerPtr;
-            TT_DATA header;
+            TT_DATA headerVal; // a single sample from the header. Each component of the complex sample is a field
             int16 ptSizePwr =
                 kPtSizePwr; // default to static point size value. May be overwritten if dynamic point size selected.
             TT_DATA dummyttdata; // used to consume blank data in header.
@@ -238,33 +247,30 @@ void fft_r2comb_ref<TT_DATA,
                 TP_POINT_SIZE; // default to static point size value. May be overwritten if dynamic point size selected.
             bool inv = TP_FFT_NIFFT == 1 ? false : true; // may be overwritten if dyn_pt_size is set
             TT_DATA headerOut;
+            TT_DATA* xbuff = (TT_DATA*)inWindow.data();
+            TT_DATA* obuff = (TT_DATA*)outWindow.data();
 
-            headerPtr = (TT_DATA*)inWindow->ptr;
-            header = window_readincr(inWindow);
-            ; //*headerPtr++;//saved for later when output to outWindow
-            window_writeincr(outWindow, header);
-            inv = header.real == 0 ? true : false;
-            header = window_readincr(inWindow); //*headerPtr++;//saved for later when output to outWindow
-            ptSizePwr = (int32)header.real - (TP_ORIG_PAR_POWER - TP_PARALLEL_POWER);
-            window_writeincr(outWindow, header);
+            headerVal = *xbuff++; // direction field
+            *obuff++ = headerVal;
+            inv = headerVal.real == 0 ? true : false;
+            headerVal = *xbuff++; // radix2 field
+            *obuff++ = headerVal;
+            ptSizePwr = (int32)headerVal.real - (TP_ORIG_PAR_POWER - TP_PARALLEL_POWER);
             for (int i = 2; i < kHeaderSize - 1; i++) {
-                header = window_readincr(inWindow);
-                window_writeincr(outWindow, header);
+                headerVal = *xbuff++; // reserved  fields
+                *obuff++ = headerVal;
             }
-            header = window_readincr(inWindow);
+            headerVal = *xbuff++; // status field
 
-            if (ptSizePwr >= kMinPtSizePwr && ptSizePwr <= kMaxPtSizePwr && (int32)header.real == 0) {
-                window_writeincr(outWindow, header); // Status word. 0 indicated all ok.
-                // window_incr(inWindow,kHeaderSize);
+            if (ptSizePwr >= kMinPtSizePwr && ptSizePwr <= kMaxPtSizePwr && (int32)headerVal.real == 0) {
+                *obuff++ = headerVal; // legal header, so copy to output
+
                 // override values set for constant point size with values derived from the header in a dynamic point
                 // size frame
                 ptSize = ((unsigned int)1) << ptSizePwr;
 
                 int tw_base = twiddle_tables[kPtSizePwr - ptSizePwr];
                 int n = ptSize;
-
-                TT_DATA* xbuff = (TT_DATA*)inWindow->ptr;
-                TT_DATA* obuff = (TT_DATA*)outWindow->ptr;
 
                 // first, blank the whole output window (bar the header which has already been output)
                 for (int i = 0; i < TP_WINDOW_VSIZE; i++) {
@@ -282,10 +288,8 @@ void fft_r2comb_ref<TT_DATA,
                                    inv); // only called for the first stage so stage is implied
                     }
                 }
-            } else { // illegal dynamic point size
-                header = kunitVector<TT_DATA>();
-                window_writeincr(outWindow, header);
-                TT_DATA* obuff = (TT_DATA*)outWindow->ptr;
+            } else {                               // illegal dynamic point size
+                *obuff++ = kunitVector<TT_DATA>(); // set status field to 1 = invalid point size
                 // blank the whole output window (bar the header which has already been output)
                 for (int i = 0; i < TP_WINDOW_VSIZE; i++) {
                     obuff[i] = nullElem<TT_DATA>();
@@ -294,8 +298,8 @@ void fft_r2comb_ref<TT_DATA,
         }
     else {                                 // static frame size
         constexpr int n = (TP_POINT_SIZE); // actually a dummy. The stage functions below use TP_POINT_SIZE directly.
-        TT_DATA* xbuff = (TT_DATA*)inWindow->ptr;
-        TT_DATA* obuff = (TT_DATA*)outWindow->ptr;
+        TT_DATA* xbuff = (TT_DATA*)inWindow.data();
+        TT_DATA* obuff = (TT_DATA*)outWindow.data();
         constexpr bool inv = TP_FFT_NIFFT == 1 ? false : true; // may be overwritten if dyn_pt_size is set
         for (int frameStart = 0; frameStart < TP_WINDOW_VSIZE; frameStart += n) {
             if

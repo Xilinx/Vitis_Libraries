@@ -159,9 +159,10 @@ template <typename TT_DATA,
 NOINLINE_DECL // This function is the hook for QoR profiling, so must be identifiable after compilation.
     void
     widget_real2complex<TT_DATA, TT_OUT_DATA, TP_WINDOW_VSIZE>::convertData(
-        input_window<TT_DATA>* __restrict inWindow0, output_window<TT_OUT_DATA>* __restrict outWindow0) {
-    TT_DATA* inPtr = (TT_DATA*)inWindow0->ptr;
-    TT_OUT_DATA* outPtr = (TT_OUT_DATA*)outWindow0->ptr;
+        input_buffer<TT_DATA>& __restrict inWindow0, output_buffer<TT_OUT_DATA>& __restrict outWindow0) {
+    TT_DATA* inPtr = (TT_DATA*)inWindow0.data();
+    ;
+    TT_OUT_DATA* outPtr = (TT_OUT_DATA*)outWindow0.data();
     this->kernelClassMain(inPtr, outPtr);
 };
 }

@@ -17,6 +17,8 @@
 
 #include <adf.h>
 
+using namespace adf;
+
 namespace xf {
 namespace dsp {
 namespace aie {
@@ -28,7 +30,7 @@ namespace matrix_mult {
 template <unsigned M, unsigned N, unsigned inRow, unsigned inCol, unsigned leadingDim, typename T_D>
 class untilerKernelClass {
    public:
-    void unTile(input_window<T_D>* inWindow, output_window<T_D>* __restrict outWindow);
+    void unTile(input_buffer<T_D>& __restrict inWindow, output_buffer<T_D>& __restrict outWindow);
 
     static void registerKernelClass() { REGISTER_FUNCTION(untilerKernelClass::unTile); }
 };

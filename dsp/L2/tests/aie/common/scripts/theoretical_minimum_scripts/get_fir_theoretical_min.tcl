@@ -24,8 +24,10 @@ set interpolateFactor   [lindex $argv 5]
 set decimateFactor      [lindex $argv 6]
 set symmetryFactor      [lindex $argv 7]
 set ssr                 [lindex $argv 8]
-set outStatus           [lindex $argv 9]
-set uutKernel           [lindex $argv 10]
+set paraInterpPoly      [lindex $argv 9]
+set paraDeciPoly        [lindex $argv 10]
+set outStatus           [lindex $argv 11]
+set uutKernel           [lindex $argv 12]
 
 # ----------------------------------------------
 # --- Compute Data Type and Coeff Type Sizes ---
@@ -90,7 +92,7 @@ if { ( $symmetryFactor == 2 ) && ( $firLength % 2 == 1 ) } {
 # ------------------------------
 # set up some constants
 set kAieMacsPerCyclePerKernel   [expr {128 / $dataTypeSize / $coeffTypeSize}]
-set numKernels                  [expr {$ssr * $ssr * $cascLen}]
+set numKernels                  [expr {$ssr * $ssr * $cascLen * $paraInterpPoly * $paraDeciPoly}]
 set kAieMacsPerCycle            [expr { $kAieMacsPerCyclePerKernel * $numKernels}] ;
 
 set numberOfOutputs [expr ($windowSize * $interpolateFactor) / $decimateFactor ] ;

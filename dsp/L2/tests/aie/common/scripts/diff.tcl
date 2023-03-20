@@ -54,6 +54,7 @@ if { $::argc >= 6} {
             set toleranceMode  abs
             # Absolute tolerance Mode
            puts "Using Absolute Tolerance Mode"
+           puts  "tolerance = $tolerance"
         } else {
             # Percentage tolerance Mode
            puts "Using Percentage Tolerance Mode"

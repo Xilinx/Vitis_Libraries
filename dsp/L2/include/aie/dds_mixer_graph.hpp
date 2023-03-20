@@ -65,14 +65,14 @@ using namespace adf;
  *         of the following: \n
  *         cint16, cint32, cfloat. Note that for cint32, the internal DDS still works to int16 precision,
  *         so Mixer Mode 0 will be cast, though for Modes 1 and 2, data to be mixed will be cint32.
- * @tparam TP_INPUT_WINDOW_VSIZE describes the number of samples in the input/output window API
+ * @tparam TP_INPUT_WINDOW_VSIZE describes the number of samples in the input/output buffer API
  *          or number of samples to process per iteration.
  * @tparam TP_MIXER_MODE describes the mode of operation of the dds_mixer.  \n
  *         The values supported are: \n
  *         0 (dds only mode), \n 1 (dds plus single data channel mixer),  \n
  *         2 (dds plus two data channel mixer for symmetrical carriers)
- * @tparam TP_API specifies if the input/output interface should be window-based or stream-based.  \n
- *         The values supported are 0 (window API) or 1 (stream API).
+ * @tparam TP_API specifies if the input/output interface should be buffer-based or stream-based.  \n
+ *         The values supported are 0 (buffer API) or 1 (stream API).
  * @tparam TP_SSR specifies the super sample rate, ie how much data input/output in parallel for a single channel.  \n
  *         There will be a TP_SSR number of kernels, with a TP_SSR number of each port used on the interface. \n
  *         A default value of 1 corresponds to the typical single kernel case.
@@ -118,7 +118,7 @@ class dds_mixer_graph : public graph {
     **/
     kernel* getKernels() { return m_ddsKernel; };
 
-    using kernelClass = dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API>;
+    using kernelClass = dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_INBUILT_SINCOS>;
 
     /**
      * @brief This is the constructor function for the dds_mixer graph.
@@ -131,10 +131,37 @@ class dds_mixer_graph : public graph {
         for (unsigned int ssrIdx = 0; ssrIdx < TP_SSR; ssrIdx++) {
             m_ddsKernel[ssrIdx] = kernel::create_object<kernelClass>(uint32_t(phaseInc * TP_SSR),
                                                                      uint32_t(initialPhaseOffset + phaseInc * ssrIdx));
-            if (TP_MIXER_MODE == 1 || TP_MIXER_MODE == 2) connect<inPortType>(in1[ssrIdx], m_ddsKernel[ssrIdx].in[0]);
-            if (TP_MIXER_MODE == 2) connect<inPortType>(in2[ssrIdx], m_ddsKernel[ssrIdx].in[1]);
+            if
+                constexpr(TP_MIXER_MODE == 1 || TP_MIXER_MODE == 2) {
+                    if
+                        constexpr(TP_API == 0) {
+                            connect<>(in1[ssrIdx], m_ddsKernel[ssrIdx].in[0]);
+                            dimensions(m_ddsKernel[ssrIdx].in[0]) = {TP_INPUT_WINDOW_VSIZE};
+                        }
+                    else {
+                        connect<stream>(in1[ssrIdx], m_ddsKernel[ssrIdx].in[0]);
+                    }
+                }
+            if
+                constexpr(TP_MIXER_MODE == 2) {
+                    if
+                        constexpr(TP_API == 0) {
+                            connect<>(in2[ssrIdx], m_ddsKernel[ssrIdx].in[1]);
+                            dimensions(m_ddsKernel[ssrIdx].in[1]) = {TP_INPUT_WINDOW_VSIZE};
+                        }
+                    else {
+                        connect<stream>(in2[ssrIdx], m_ddsKernel[ssrIdx].in[1]);
+                    }
+                }
 
-            connect<outPortType>(m_ddsKernel[ssrIdx].out[0], out[ssrIdx]);
+            if
+                constexpr(TP_API == 0) {
+                    connect<>(m_ddsKernel[ssrIdx].out[0], out[ssrIdx]);
+                    dimensions(m_ddsKernel[ssrIdx].out[0]) = {TP_INPUT_WINDOW_VSIZE};
+                }
+            else {
+                connect<stream>(m_ddsKernel[ssrIdx].out[0], out[ssrIdx]);
+            }
             // Specify mapping constraints
             runtime<ratio>(m_ddsKernel[ssrIdx]) = 0.8;
             // Source files

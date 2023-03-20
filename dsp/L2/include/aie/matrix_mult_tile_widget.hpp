@@ -51,17 +51,18 @@ using namespace adf;
 template <unsigned int addWidget, unsigned int windowSize, class widgetClass>
 class ConditionalWidget {
    public:
-    using portConnect = connect<window<windowSize> >;
     ConditionalWidget(){}; // default constructor
     template <typename inType, typename outType>
     static kernel create(port<inType>& inPort, port<outType>& outPort) {
         kernel widget;
         if (addWidget == 1) {
             widget = kernel::create_object<widgetClass>();
-            portConnect(inPort, widget.in[0]);
-            portConnect(widget.out[0], outPort);
+            connect<>(inPort, widget.in[0]);
+            dimensions(widget.in[0]) = {windowSize};
+            connect<>(widget.out[0], outPort);
+            dimensions(widget.out[0]) = {windowSize};
         } else {
-            portConnect(inPort, outPort);
+            connect<>(inPort, outPort);
         }
 
         return widget;

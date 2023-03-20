@@ -143,7 +143,7 @@ if {[llength $cycleCountAvg] == 0} {
 # ------------------------------------------
 for {set x 0} {$x < $cascLen} {incr x} {
     # Actual average throughput in MSa per second
-    lappend throughputAvg  [expr {1000 * $windowSize / [lindex $cycleCountAvg $x]}]
+    lappend throughputCycleCount  [expr {1000 * $windowSize / [lindex $cycleCountAvg $x]}]
     lappend throughputIIAvg  [expr {1000 * $windowSize / [lindex $initiationIntervalAprx $x]}]
 }
 
@@ -158,30 +158,20 @@ set maxDesCycleCountAvg [max $cycleCountAvg]
 set maxDesInitiationInterval [max $initiationIntervalAprx]
 
 # Similarly, get the lowest throughput figure.
-set minDesThroughputAvg  [min $throughputAvg]
+set minDesThroughputAvg  [min $throughputCycleCount]
 set minDesThroughputIIAvg  [min $throughputIIAvg]
 
 # ----------------------
 # --- Display Result ---
 # ----------------------
-puts "cycleCountTotal:      $maxDescycleCountTotal"
-puts "cycleCountMin:        $minDesCycleCountMin"
-puts "cycleCountMax:        $maxDescycleCountMax"
 puts "cycleCountAvg:        $maxDesCycleCountAvg"
-puts "throughputAvg:        $minDesThroughputAvg MSa/s"
-puts "initiationInterval:   $maxDesInitiationInterval"
-puts "throughputInitIntAvg: $minDesThroughputIIAvg MSa/s"
+puts "throughputCycleCount: $minDesThroughputAvg MSa/s"
 
 # ----------------------------
 # --- Store in status file ---
 # ----------------------------
 set outFile [open $outStatus a]
-puts $outFile "    cycleCountTotal:      $maxDescycleCountTotal"
-puts $outFile "    cycleCountMin:        $minDesCycleCountMin"
-puts $outFile "    cycleCountMax:        $maxDescycleCountMax"
 puts $outFile "    cycleCountAvg:        $maxDesCycleCountAvg"
-puts $outFile "    throughputAvg:        $minDesThroughputAvg MSa/s"
-puts $outFile "    initiationInterval:   $maxDesInitiationInterval"
-puts $outFile "    throughputInitIntAvg: $minDesThroughputIIAvg MSa/s"
+puts $outFile "    throughputCycleCount: $minDesThroughputAvg MSa/s"
 close $outFile
 

@@ -22,6 +22,8 @@
 #define NOINLINE_DECL inline __attribute__((noinline))
 #endif
 
+#include "device_defs.h"
+
 /*
 FFT traits.
 This file contains sets of overloaded, templatized and specialized templatized functions which
@@ -68,10 +70,12 @@ template <>
 struct T_inputIF<float> {
     input_window<float>* inWindow;
 };
+#if __SUPPORTS_CFLOAT__ == 1
 template <>
 struct T_inputIF<cfloat> {
     input_window<cfloat>* inWindow;
 };
+#endif //__SUPPORTS_CFLOAT__ == 1
 
 template <typename T_D>
 struct T_outputIF {};
@@ -95,10 +99,12 @@ template <>
 struct T_outputIF<float> {
     output_window<float>* outWindow;
 };
+#if __SUPPORTS_CFLOAT__ == 1
 template <>
 struct T_outputIF<cfloat> {
     output_window<cfloat>* outWindow;
 };
+#endif //__SUPPORTS_CFLOAT__ == 1
 
 //---------------------------------------
 // Configuration Defensive check functions
@@ -114,10 +120,12 @@ template <>
 INLINE_DECL constexpr bool fnCheckDataType<cint32>() {
     return true;
 };
+#if __SUPPORTS_CFLOAT__ == 1
 template <>
 INLINE_DECL constexpr bool fnCheckDataType<cfloat>() {
     return true;
 };
+#endif //__SUPPORTS_CFLOAT__ == 1
 
 template <typename TT_IN_DATA, typename TT_OUT_DATA>
 INLINE_DECL constexpr bool fnCheckDataIOType() {
@@ -139,10 +147,12 @@ template <>
 INLINE_DECL constexpr bool fnCheckDataIOType<cint32, cint32>() {
     return true;
 };
+#if __SUPPORTS_CFLOAT__ == 1
 template <>
 INLINE_DECL constexpr bool fnCheckDataIOType<cfloat, cfloat>() {
     return true;
 };
+#endif //__SUPPORTS_CFLOAT__ == 1
 
 template <typename TT_TWIDDLE>
 INLINE_DECL constexpr bool fnCheckTwiddleType() {
@@ -152,10 +162,12 @@ template <>
 INLINE_DECL constexpr bool fnCheckTwiddleType<cint16>() {
     return true;
 };
+#if __SUPPORTS_CFLOAT__ == 1
 template <>
 INLINE_DECL constexpr bool fnCheckTwiddleType<cfloat>() {
     return true;
 };
+#endif //__SUPPORTS_CFLOAT__ == 1
 
 template <typename TT_DATA, typename TT_TWIDDLE>
 INLINE_DECL constexpr bool fnCheckDataTwiddleType() {
@@ -169,16 +181,23 @@ template <>
 INLINE_DECL constexpr bool fnCheckDataTwiddleType<cint32, cint16>() {
     return true;
 };
+#if __SUPPORTS_CFLOAT__ == 1
 template <>
 INLINE_DECL constexpr bool fnCheckDataTwiddleType<cfloat, cfloat>() {
     return true;
 };
+#endif //__SUPPORTS_CFLOAT__ == 1
 
 template <unsigned int TP_POINT_SIZE>
 INLINE_DECL constexpr bool fnCheckPointSize() {
-    return (TP_POINT_SIZE == 16 || TP_POINT_SIZE == 32 || TP_POINT_SIZE == 64 || TP_POINT_SIZE == 128 ||
-            TP_POINT_SIZE == 256 || TP_POINT_SIZE == 512 || TP_POINT_SIZE == 1024 || TP_POINT_SIZE == 2048 ||
-            TP_POINT_SIZE == 4096);
+    return (
+#if __FFT_R4_IMPL__ == 0
+        // AIE1 outputs vectors of 4, so radix4 outputs 16 samples.
+        // AIEML outputs vectors of 8, so the minimum point size is 32.
+        TP_POINT_SIZE == 16 ||
+#endif // __FFT_R4_IMPL__
+        TP_POINT_SIZE == 32 || TP_POINT_SIZE == 64 || TP_POINT_SIZE == 128 || TP_POINT_SIZE == 256 ||
+        TP_POINT_SIZE == 512 || TP_POINT_SIZE == 1024 || TP_POINT_SIZE == 2048 || TP_POINT_SIZE == 4096);
 };
 
 template <unsigned int TP_SHIFT>
@@ -188,23 +207,35 @@ INLINE_DECL constexpr bool fnCheckShift() {
 
 template <typename TT_DATA, unsigned int TP_SHIFT>
 INLINE_DECL constexpr bool fnCheckShiftFloat() {
+#if __SUPPORTS_CFLOAT__ == 1
     return !(std::is_same<TT_DATA, cfloat>::value) || // This check traps shift != 0 when data = cfloat
            (TP_SHIFT == 0);
+#else
+    return true;
+#endif //__SUPPORTS_CFLOAT__ == 1
 };
 
 template <typename TT_DATA, unsigned int RANKS, unsigned int TP_CASC_LEN>
 INLINE_DECL constexpr bool fnCheckCascLen() {
-    // equation for integer ffts is complicated by the fact that odd power of 2 point sizes start with a radix 2 stage
+// equation for integer ffts is complicated by the fact that odd power of 2 point sizes start with a radix 2 stage
+#if __SUPPORTS_CFLOAT__ == 1
     return (TP_CASC_LEN > 0) &&
            (std::is_same<TT_DATA, cfloat>::value ? (TP_CASC_LEN <= RANKS) : (TP_CASC_LEN <= (RANKS + 1) / 2));
+#else
+    return (TP_CASC_LEN > 0) && (TP_CASC_LEN <= (RANKS + 1) / 2);
+#endif //__SUPPORTS_CFLOAT__ == 1
 }
 
 template <typename TT_DATA, unsigned int TP_POINT_SIZE, unsigned int TP_CASC_LEN>
 INLINE_DECL constexpr bool fnCheckCascLen2() {
     return true;
-    // The worry here was that since cfloat 16pt requires special buffering, it will not yield to cascade, but
-    // all cascade configurations possible will not run into the issue of buffer overwrite involved.
+// The worry here was that since cfloat 16pt requires special buffering, it will not yield to cascade, but
+// all cascade configurations possible will not run into the issue of buffer overwrite involved.
+#if __SUPPORTS_CFLOAT__ == 1
     return (TP_CASC_LEN == 1) || (!std::is_same<TT_DATA, cfloat>::value) || (TP_POINT_SIZE != 16);
+#else
+    return (TP_CASC_LEN == 1) || (TP_POINT_SIZE != 16);
+#endif //__SUPPORTS_CFLOAT__ == 1
 }
 
 // End of Defensive check functions
@@ -217,7 +248,13 @@ INLINE_DECL constexpr int fnHeapSize() {
     int retVal = 0;
     int buffsize = 0;
     // cfloat twiddles are cfloat size and cam not use half table trick.
-    if (std::is_same<TT_DATA, cfloat>::value) {
+    if (
+#if __SUPPORTS_CFLOAT__ == 1
+        std::is_same<TT_DATA, cfloat>::value
+#else
+        false
+#endif //__SUPPORTS_CFLOAT__ == 1
+        ) {
         switch (TP_POINT_SIZE) {
             case 16:
                 retVal += 5 * 32;
@@ -346,6 +383,22 @@ template <>
 INLINE_DECL constexpr int fnPointSizePower<4096>() {
     return 12;
 }
+template <>
+INLINE_DECL constexpr int fnPointSizePower<8192>() {
+    return 13;
+}
+template <>
+INLINE_DECL constexpr int fnPointSizePower<16384>() {
+    return 14;
+}
+template <>
+INLINE_DECL constexpr int fnPointSizePower<32768>() {
+    return 15;
+}
+template <>
+INLINE_DECL constexpr int fnPointSizePower<65536>() {
+    return 16;
+}
 
 template <unsigned int TP_POINT_SIZE>
 INLINE_DECL constexpr int fnOddPower() {
@@ -365,6 +418,14 @@ INLINE_DECL constexpr int fnOddPower<512>() {
 }
 template <>
 INLINE_DECL constexpr int fnOddPower<2048>() {
+    return 1;
+}
+template <>
+INLINE_DECL constexpr int fnOddPower<8192>() {
+    return 1;
+}
+template <>
+INLINE_DECL constexpr int fnOddPower<32768>() {
     return 1;
 }
 
@@ -404,15 +465,14 @@ INLINE_DECL float nullElem() {
     return 0.0;
 };
 
+#if __SUPPORTS_CFLOAT__ == 1
 // Null cint32 element
 template <>
 INLINE_DECL cfloat nullElem() {
-    cfloat retVal;
-
-    retVal.real = 0.0;
-    retVal.imag = 0.0;
+    cfloat retVal = {0.0, 0.0};
     return retVal;
 };
+#endif //__SUPPORTS_CFLOAT__ == 1
 }
 }
 }

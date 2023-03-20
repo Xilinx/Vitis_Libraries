@@ -1,0 +1,12 @@
+{
+    "spec": "vmc_mixer.json",
+    "outdir": "./xmc_aie_lib/Mixer_5e7ce2a5",
+    "parameters": {
+        "data_type": "cint16",
+        "input_window_size": 32,
+        "mixer_mode": 1,
+        "phase_increment": 0,
+        "input_sampling_rate": 200
+    },
+    "updated_parameter": ""
+}

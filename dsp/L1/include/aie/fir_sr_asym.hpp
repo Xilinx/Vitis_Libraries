@@ -47,9 +47,6 @@ compilation.
 #include "fir_utils.hpp"
 #include "fir_sr_asym_traits.hpp"
 #include <vector>
-//#include "kernel_api_utils.hpp"
-
-//#define _DSPLIB_FIR_SR_ASYM_HPP_DEBUG_
 
 namespace xf {
 namespace dsp {
@@ -101,8 +98,9 @@ class fir_sr_asym_tl {
             fnFirRangeOffsetAsym<T_FIR_LEN, CLEN, pos, T_D, T_C, 1>(); // FIR Cascade Offset for this kernel position
         constexpr unsigned int m_kFirMarginOffset = fnFirMargin<T_FIR_LEN, T_D>() - T_FIR_LEN + 1; // FIR Margin Offset.
         constexpr unsigned int m_kFirMarginRangeOffset = m_kFirMarginOffset + m_kFirRangeOffset;   // FIR Margin Offset.
+        constexpr unsigned int m_kOffsetResolution = (32 / sizeof(T_D));
         constexpr unsigned int m_kDataBuffXOffset =
-            m_kFirMarginRangeOffset % (16 / sizeof(T_D)); // Remainder of m_kFirInitOffset divided by 128bit
+            m_kFirMarginRangeOffset % m_kOffsetResolution; // Remainder of m_kFirInitOffset divided by 128bit
         constexpr unsigned int fir_range_len = getKernelFirRangeLen<pos>();
         constexpr unsigned int m_kArchFirLen =
             fir_range_len + m_kDataBuffXOffset; // This will check if only the portion of the FIR (TP_FIR_RANGE_LEN +
@@ -198,8 +196,13 @@ class kernelFilterClass {
     static_assert(fnTypeStreamSupport<TT_DATA, TT_COEFF, TP_API>() != 0,
                   "ERROR: Unsupported API interface for requested TT_DATA and TT_COEFF type combination.");
     static_assert(TP_NUM_OUTPUTS > 0 && TP_NUM_OUTPUTS <= 2, "ERROR: only single or dual outputs are supported.");
+#if __SUPPORTS_CFLOAT__ == 1
     static_assert(!(std::is_same<TT_DATA, cfloat>::value || std::is_same<TT_DATA, float>::value) || (TP_SHIFT == 0),
                   "ERROR: TP_SHIFT cannot be performed for TT_DATA=cfloat, so must be set to 0");
+#else
+    static_assert(!(std::is_same<TT_DATA, float>::value) || (TP_SHIFT == 0),
+                  "ERROR: TP_SHIFT cannot be performed for TT_DATA=cfloat, so must be set to 0");
+#endif
     // There are additional defensive checks after architectural constants have been calculated.
 
     static constexpr unsigned int m_kColumns =
@@ -225,8 +228,9 @@ class kernelFilterClass {
     static constexpr unsigned int m_kFirMarginRangeOffset =
         m_kFirMarginOffset + m_kFirRangeOffset; // FIR Margin Offset.
     static constexpr unsigned int m_kFirInitOffset = m_kFirMarginRangeOffset;
+    static constexpr unsigned int m_kOffsetResolution = (32 / sizeof(TT_DATA));
     static constexpr unsigned int m_kDataBuffXOffset =
-        m_kFirInitOffset % (16 / sizeof(TT_DATA)); // Remainder of m_kFirInitOffset divided by 128bit
+        m_kFirInitOffset % m_kOffsetResolution; // Remainder of m_kFirInitOffset divided by 128bit
     static constexpr unsigned int m_kArchFirLen =
         TP_FIR_RANGE_LEN + m_kDataBuffXOffset; // This will check if only the portion of the FIR (TP_FIR_RANGE_LEN +
                                                // m_kDataBuffXOffset - due to xoffset alignment) fits.
@@ -296,8 +300,8 @@ class kernelFilterClass {
                   "ERROR: TP_FIR_RANGE_LEN exceeds max supported range for this data/coeff type combination. Increase "
                   "TP_CASC_LEN to split the workload over more kernels.");
 
-    // Coefficient Load Size - number of samples in 256-bits
-    static constexpr unsigned int m_kCoeffLoadSize = 256 / 8 / sizeof(TT_COEFF);
+    // Coefficient Load Size - number of samples in a cascade read/write
+    static constexpr unsigned int m_kCoeffLoadSize = SCD_SIZE / 8 / sizeof(TT_COEFF);
 
     // The coefficients array must include zero padding up to a multiple of the number of columns
     // the MAC intrinsic used to eliminate the accidental inclusion of terms beyond the FIR length.
@@ -475,7 +479,10 @@ class fir_sr_asym : public kernelFilterClass<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow);
+    void filter(input_circular_buffer<TT_DATA,
+                                      extents<inherited_extent>,
+                                      margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
+                output_circular_buffer<TT_DATA>& __restrict outWindow);
 };
 
 //-----------------------------------------------------------------------------------------------------
@@ -603,33 +610,46 @@ class fir_sr_asym<TT_DATA,
             }
     }
 
-    void filterSingleKernelSingleOP(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow);
+    void filterSingleKernelSingleOP(
+        input_circular_buffer<TT_DATA,
+                              extents<inherited_extent>,
+                              margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
+        output_circular_buffer<TT_DATA>& __restrict outWindow);
 
-    void filterSingleKernelDualOP(input_window<TT_DATA>* inWindow,
-                                  output_window<TT_DATA>* outWindow,
-                                  output_window<TT_DATA>* outWindow2);
+    void filterSingleKernelDualOP(
+        input_circular_buffer<TT_DATA,
+                              extents<inherited_extent>,
+                              margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
+        output_circular_buffer<TT_DATA>& __restrict outWindow,
+        output_circular_buffer<TT_DATA>& __restrict outWindow2);
 
-    void filterFinalKernelSingleOP(input_window<TT_DATA>* inWindow,
+    void filterFinalKernelSingleOP(input_async_buffer<TT_DATA>& __restrict inWindow,
                                    input_stream_cacc48* inCascade,
-                                   output_window<TT_DATA>* outWindow);
+                                   output_circular_buffer<TT_DATA>& __restrict outWindow);
 
-    void filterFinalKernelDualOP(input_window<TT_DATA>* inWindow,
+    void filterFinalKernelDualOP(input_async_buffer<TT_DATA>& __restrict inWindow,
                                  input_stream_cacc48* inCascade,
-                                 output_window<TT_DATA>* outWindow,
-                                 output_window<TT_DATA>* outWindow2);
+                                 output_circular_buffer<TT_DATA>& __restrict outWindow,
+                                 output_circular_buffer<TT_DATA>& __restrict outWindow2);
 
-    void filterFirstKernel(input_window<TT_DATA>* inWindow,
+    void filterFirstKernel(input_circular_buffer<TT_DATA,
+                                                 extents<inherited_extent>,
+                                                 margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
                            output_stream_cacc48* outCascade,
-                           output_window<TT_DATA>* broadcastWindow);
+                           output_async_buffer<TT_DATA>& __restrict broadcastWindow);
 
-    void filterFirstKernelWithoutBroadcast(input_window<TT_DATA>* inWindow, output_stream_cacc48* outCascade);
+    void filterFirstKernelWithoutBroadcast(
+        input_circular_buffer<TT_DATA,
+                              extents<inherited_extent>,
+                              margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
+        output_stream_cacc48* outCascade);
 
-    void filterMiddleKernel(input_window<TT_DATA>* inWindow,
+    void filterMiddleKernel(input_async_buffer<TT_DATA>& __restrict inWindow,
                             input_stream_cacc48* inCascade,
                             output_stream_cacc48* outCascade,
-                            output_window<TT_DATA>* broadcastWindow);
+                            output_async_buffer<TT_DATA>& __restrict broadcastWindow);
 
-    void filterMiddleKernelWithoutBroadcast(input_window<TT_DATA>* inWindow,
+    void filterMiddleKernelWithoutBroadcast(input_async_buffer<TT_DATA>& __restrict inWindow,
                                             input_stream_cacc48* inCascade,
                                             output_stream_cacc48* outCascade);
 };
@@ -760,39 +780,50 @@ class fir_sr_asym<TT_DATA,
     }
 
     // FIR
-    void filterSingleKernelSingleOP(input_window<TT_DATA>* __restrict inWindow,
-                                    output_window<TT_DATA>* __restrict outWindow,
-                                    const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
+    void filterSingleKernelSingleOP(
+        input_circular_buffer<TT_DATA,
+                              extents<inherited_extent>,
+                              margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
+        output_circular_buffer<TT_DATA>& __restrict outWindow,
+        const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
 
-    void filterSingleKernelDualOP(input_window<TT_DATA>* __restrict inWindow,
-                                  output_window<TT_DATA>* __restrict outWindow,
-                                  output_window<TT_DATA>* __restrict outWindow2,
-                                  const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
+    void filterSingleKernelDualOP(
+        input_circular_buffer<TT_DATA,
+                              extents<inherited_extent>,
+                              margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
+        output_circular_buffer<TT_DATA>& __restrict outWindow,
+        output_circular_buffer<TT_DATA>& __restrict outWindow2,
+        const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
 
-    void filterFinalKernelSingleOP(input_window<TT_DATA>* inWindow,
+    void filterFinalKernelSingleOP(input_async_buffer<TT_DATA>& __restrict inWindow,
                                    input_stream_cacc48* inCascade,
-                                   output_window<TT_DATA>* outWindow);
+                                   output_circular_buffer<TT_DATA>& __restrict outWindow);
 
-    void filterFinalKernelDualOP(input_window<TT_DATA>* inWindow,
+    void filterFinalKernelDualOP(input_async_buffer<TT_DATA>& __restrict inWindow,
                                  input_stream_cacc48* inCascade,
-                                 output_window<TT_DATA>* outWindow,
-                                 output_window<TT_DATA>* outWindow2);
+                                 output_circular_buffer<TT_DATA>& __restrict outWindow,
+                                 output_circular_buffer<TT_DATA>& __restrict outWindow2);
 
-    void filterFirstKernel(input_window<TT_DATA>* inWindow,
+    void filterFirstKernel(input_circular_buffer<TT_DATA,
+                                                 extents<inherited_extent>,
+                                                 margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
                            output_stream_cacc48* outCascade,
-                           output_window<TT_DATA>* broadcastWindow,
+                           output_async_buffer<TT_DATA>& __restrict broadcastWindow,
                            const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
 
-    void filterFirstKernelWithoutBroadcast(input_window<TT_DATA>* inWindow,
-                                           output_stream_cacc48* outCascade,
-                                           const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
+    void filterFirstKernelWithoutBroadcast(
+        input_circular_buffer<TT_DATA,
+                              extents<inherited_extent>,
+                              margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
+        output_stream_cacc48* outCascade,
+        const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
 
-    void filterMiddleKernel(input_window<TT_DATA>* inWindow,
+    void filterMiddleKernel(input_async_buffer<TT_DATA>& __restrict inWindow,
                             input_stream_cacc48* inCascade,
                             output_stream_cacc48* outCascade,
-                            output_window<TT_DATA>* broadcastWindow);
+                            output_async_buffer<TT_DATA>& __restrict broadcastWindow);
 
-    void filterMiddleKernelWithoutBroadcast(input_window<TT_DATA>* inWindow,
+    void filterMiddleKernelWithoutBroadcast(input_async_buffer<TT_DATA>& __restrict inWindow,
                                             input_stream_cacc48* inCascade,
                                             output_stream_cacc48* outCascade);
 };

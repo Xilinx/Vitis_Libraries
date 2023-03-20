@@ -24,14 +24,11 @@ def vmc_validate_coeff(args):
 	coeff = args["coeff"]
 	data_type = args["data_type"]
 	casc_length = args["casc_length"]
-	use_casc_length = args["use_casc_length"]
 	ssr = 1
 	api = 0
 	fir_length = args["fir_length"]
 	#TODO: Talk to DSP Lib team about separating casc length from fir_length API
-	if use_casc_length:
-		return fn_validate_fir_len(data_type, coef_type, fir_length, casc_length, ssr, api, use_coeff_reload)
-	return {"is_valid": True}
+	return fn_validate_fir_len(data_type, coef_type, fir_length, casc_length, ssr, api, use_coeff_reload)
 
 def vmc_validate_shift_val(args):
 	data_type = args["data_type"]
@@ -48,14 +45,7 @@ def vmc_generate_graph(name, args):
     tmpargs["TP_SHIFT"] = args["shift_val"]
     tmpargs["TP_RND"] = args["rnd_mode"]
     tmpargs["TP_INPUT_WINDOW_VSIZE"] = args["input_window_size"]
-    use_casc_length = args["use_casc_length"]
-    if use_casc_length:
-      casc_length = args["casc_length"]
-    else:
-      #TODO: call to partitioner to determine cascade length
-      casc_length = 1
-
-    tmpargs["TP_CASC_LEN"] = casc_length
+    tmpargs["TP_CASC_LEN"] = args["casc_length"]
     tmpargs["TP_USE_COEF_RELOAD"] = 1 if args["use_coeff_reload"] else 0
     tmpargs["TP_NUM_OUTPUTS"] = 1
     tmpargs["TP_DUAL_IP"] = 0

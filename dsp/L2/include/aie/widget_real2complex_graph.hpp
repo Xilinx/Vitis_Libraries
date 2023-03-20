@@ -102,8 +102,12 @@ class widget_real2complex_graph : public graph {
         source(m_kernel) = "widget_real2complex.cpp";
 
         // make connections
-        connect<window<TP_WINDOW_VSIZE * sizeof(TT_DATA)> >(in, m_kernel.in[0]);
-        connect<window<TP_WINDOW_VSIZE * sizeof(TT_OUT_DATA)> >(m_kernel.out[0], out);
+        //      connect<window<TP_WINDOW_VSIZE*sizeof(TT_DATA)>>(in, m_kernel.in[0]);
+        //      connect<window<TP_WINDOW_VSIZE*sizeof(TT_OUT_DATA)>>(m_kernel.out[0], out);
+        connect(in, m_kernel.in[0]);
+        dimensions(m_kernel.in[0]) = {TP_WINDOW_VSIZE};
+        connect(m_kernel.out[0], out);
+        dimensions(m_kernel.out[0]) = {TP_WINDOW_VSIZE};
     }; // constructor
 };
 }

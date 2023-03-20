@@ -40,7 +40,7 @@ namespace fir {
 namespace sr_sym {
 // Global constants,
 static constexpr unsigned int kSymmetryFactor = 2;
-static constexpr unsigned int kMaxColumns = 4;
+static constexpr unsigned int kMaxColumns = 2;
 static constexpr unsigned int kFirRangeRound =
     kSymmetryFactor * kMaxColumns;            // Round cascaded FIR SYM kernels to multiples of 8,
 static constexpr unsigned int kUpdWSize = 32; // Upd_w size in Bytes (256bit) - const for all data/coeff types
@@ -66,10 +66,6 @@ enum eBuffVariant {
 // This allows better xbuff and ybuff buffers alignment and reduces the amount of data loads.
 template <typename TT_DATA, typename TT_COEFF>
 INLINE_DECL constexpr unsigned int fnWinAccessByteSize() {
-    return 0;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnWinAccessByteSize<int16, int16>() {
     return 32;
 };
 template <>
@@ -78,43 +74,27 @@ INLINE_DECL constexpr unsigned int fnWinAccessByteSize<cint16, int16>() {
 };
 template <>
 INLINE_DECL constexpr unsigned int fnWinAccessByteSize<cint16, cint16>() {
-    return 32;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnWinAccessByteSize<int32, int16>() {
-    return 32;
+    return 16;
 };
 template <>
 INLINE_DECL constexpr unsigned int fnWinAccessByteSize<int32, int32>() {
-    return 32;
+    return 16;
 };
 template <>
-INLINE_DECL constexpr unsigned int fnWinAccessByteSize<cint32, int16>() {
-    return 32;
+INLINE_DECL constexpr unsigned int fnWinAccessByteSize<int16, int16>() {
+    return 16;
 };
 template <>
-INLINE_DECL constexpr unsigned int fnWinAccessByteSize<cint32, int32>() {
-    return 32;
+INLINE_DECL constexpr unsigned int fnWinAccessByteSize<int16, int32>() {
+    return 16;
 };
 template <>
-INLINE_DECL constexpr unsigned int fnWinAccessByteSize<cint32, cint16>() {
-    return 32;
+INLINE_DECL constexpr unsigned int fnWinAccessByteSize<cint16, int32>() {
+    return 16;
 };
 template <>
-INLINE_DECL constexpr unsigned int fnWinAccessByteSize<cint32, cint32>() {
-    return 32;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnWinAccessByteSize<float, float>() {
-    return 32;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnWinAccessByteSize<cfloat, float>() {
-    return 32;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnWinAccessByteSize<cfloat, cfloat>() {
-    return 32;
+INLINE_DECL constexpr unsigned int fnWinAccessByteSize<cint16, cint32>() {
+    return 16;
 };
 
 template <typename TT_DATA>
@@ -156,164 +136,36 @@ INLINE_DECL constexpr int fnFirRangeOffsetSym() {
 // Function returns number of columns used by MUL/MACs in Sym FIR for a specific data/coeff combo.
 template <typename TT_DATA, typename TT_COEFF>
 INLINE_DECL constexpr unsigned int fnNumColumnsSym() {
-    return 0;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumColumnsSym<int16, int16>() {
-    return 2;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumColumnsSym<cint16, int16>() {
-    return 4;
-}; // using short and wide intrinsic - 4 lanes by 4 columns
-template <>
-INLINE_DECL constexpr unsigned int fnNumColumnsSym<cint16, cint16>() {
-    return 1;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumColumnsSym<int32, int16>() {
-    return 2;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumColumnsSym<int32, int32>() {
-    return 1;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumColumnsSym<cint32, int16>() {
-    return 2;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumColumnsSym<cint32, int32>() {
-    return 1;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumColumnsSym<cint32, cint16>() {
-    return 1;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumColumnsSym<cint32, cint32>() {
-    return 1;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumColumnsSym<float, float>() {
-    return 1;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumColumnsSym<cfloat, float>() {
-    return 1;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumColumnsSym<cfloat, cfloat>() {
-    return 1;
+    return fnNumCols384<TT_DATA, TT_COEFF>();
 };
 
 // function to return the number of lanes for a type combo
 template <typename TT_DATA, typename TT_COEFF>
 INLINE_DECL constexpr unsigned int fnNumLanesSym() {
-    return 0; // effectively an error trap, but adding an error message to a constexpr return results in a warning.
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesSym<int16, int16>() {
-    return 16;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesSym<cint16, int16>() {
-    return 4;
-}; // using short and wide intrinsic - 4 lanes by 4 columns
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesSym<cint16, cint16>() {
-    return 8;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesSym<int32, int16>() {
-    return 8;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesSym<int32, int32>() {
-    return 8;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesSym<cint32, int16>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesSym<cint32, cint16>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesSym<cint32, int32>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesSym<cint32, cint32>() {
-    return 2;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesSym<float, float>() {
-    return 8;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesSym<cfloat, float>() {
-    return 4;
-};
-template <>
-INLINE_DECL constexpr unsigned int fnNumLanesSym<cfloat, cfloat>() {
-    return 4;
+    return fnNumLanes384<TT_DATA, TT_COEFF>();
 };
 
 // function to return info about x & y buffer update scheme
+// Update scheme scheduled load in such way that some memory conflicts are avoided.
+// As a result, higher performance is obtained when single input buffer is used.
+// No effect when DUAL_IP, i.e. 2 input buffers are used, since memory conflicts are avoided altogether.
 template <typename TT_DATA, typename TT_COEFF>
 INLINE_DECL constexpr eBuffVariant fnBufferUpdateScheme() {
     return kNoPreLoad;
 };
-template <>
-INLINE_DECL constexpr eBuffVariant fnBufferUpdateScheme<int16, int16>() {
-    return kPreLoadUsing128;
-};
-template <>
-INLINE_DECL constexpr eBuffVariant fnBufferUpdateScheme<cint16, int16>() {
-    return kPreLoadUsing256;
-};
-template <>
-INLINE_DECL constexpr eBuffVariant fnBufferUpdateScheme<cint16, cint16>() {
-    return kPreLoadUsing256;
-};
-template <>
-INLINE_DECL constexpr eBuffVariant fnBufferUpdateScheme<int32, int16>() {
-    return kPreLoadUsing128;
-};
-template <>
-INLINE_DECL constexpr eBuffVariant fnBufferUpdateScheme<int32, int32>() {
-    return kPreLoadUsing256;
-};
-template <>
-INLINE_DECL constexpr eBuffVariant fnBufferUpdateScheme<cint32, int16>() {
-    return kNoPreLoad;
-}; // combo not fit for pre-load optimization,
-template <>
-INLINE_DECL constexpr eBuffVariant fnBufferUpdateScheme<cint32, cint16>() {
-    return kPreLoadUsing256;
-};
-template <>
-INLINE_DECL constexpr eBuffVariant fnBufferUpdateScheme<cint32, int32>() {
-    return kPreLoadUsing256;
-};
-template <>
-INLINE_DECL constexpr eBuffVariant fnBufferUpdateScheme<cint32, cint32>() {
-    return kPreLoadUsing256;
-};
-template <>
-INLINE_DECL constexpr eBuffVariant fnBufferUpdateScheme<float, float>() {
-    return kPreLoadUsing256;
-};
-template <>
-INLINE_DECL constexpr eBuffVariant fnBufferUpdateScheme<cfloat, float>() {
-    return kPreLoadUsing256;
-};
-template <>
-INLINE_DECL constexpr eBuffVariant fnBufferUpdateScheme<cfloat, cfloat>() {
-    return kPreLoadUsing256;
-};
+// template<> INLINE_DECL constexpr eBuffVariant fnBufferUpdateScheme< int16,  int16>() { return kPreLoadUsing128;};
+// template<> INLINE_DECL constexpr eBuffVariant fnBufferUpdateScheme<cint16,  int16>() { return kPreLoadUsing256;};
+// template<> INLINE_DECL constexpr eBuffVariant fnBufferUpdateScheme<cint16, cint16>() { return kPreLoadUsing256;};
+// template<> INLINE_DECL constexpr eBuffVariant fnBufferUpdateScheme< int32,  int16>() { return kPreLoadUsing128;};
+// template<> INLINE_DECL constexpr eBuffVariant fnBufferUpdateScheme< int32,  int32>() { return kPreLoadUsing256;};
+// template<> INLINE_DECL constexpr eBuffVariant fnBufferUpdateScheme<cint32,  int16>() { return kNoPreLoad;};        //
+// combo not fit for pre-load optimization,
+// template<> INLINE_DECL constexpr eBuffVariant fnBufferUpdateScheme<cint32, cint16>() { return kPreLoadUsing256;};
+// template<> INLINE_DECL constexpr eBuffVariant fnBufferUpdateScheme<cint32,  int32>() { return kPreLoadUsing256;};
+// template<> INLINE_DECL constexpr eBuffVariant fnBufferUpdateScheme<cint32, cint32>() { return kPreLoadUsing256;};
+// template<> INLINE_DECL constexpr eBuffVariant fnBufferUpdateScheme< float,  float>() { return kPreLoadUsing256;};
+// template<> INLINE_DECL constexpr eBuffVariant fnBufferUpdateScheme<cfloat,  float>() { return kPreLoadUsing256;};
+// template<> INLINE_DECL constexpr eBuffVariant fnBufferUpdateScheme<cfloat, cfloat>() { return kPreLoadUsing256;};
 
 // function anwsers whether 1 Buff architecture is supported for a given data/coeff type combinations.
 template <typename TT_DATA, typename TT_COEFF>

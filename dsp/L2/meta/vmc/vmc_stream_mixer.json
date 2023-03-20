@@ -3,7 +3,7 @@
   "ip_name": "vmc_stream_mixer",
   "block_info": {
     "label": "Mixer Stream",
-    "description": ""
+    "description": "Stream- based mixer block for AI Engines."
   },
   "parameters": [
     {
@@ -12,7 +12,11 @@
       "description": "The type of individual data samples input to and output of the mixer function",
       "enum": [ "cint16", "cint32", "cfloat" ],
       "default": "cint16",
-      "type": "typename"
+      "type": "typename",
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"popup"
+      }
     },
     {
       "name": "input_window_size",
@@ -26,6 +30,10 @@
         "file": "vmc_stream_mixer.py",
         "function": "vmc_validate_output_window_size",
         "args": ["data_type"]
+      },
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
       }
     },
     {
@@ -35,7 +43,11 @@
       "enum": [ 1, 2 ],
       "enum_str": [ "Single Input Mode", "Dual Input Mode" ],
       "default": 1,
-      "type" : "int"
+      "type" : "int",
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"popup"
+      }
     },
     {
 	  "name": "ssr",
@@ -44,7 +56,11 @@
       "default": 1,
       "minimum": 1,
       "maximum": 10,
-      "type": "int"
+      "type": "int",
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
+      }
     },
     {
 	  "name": "phase_increment", 
@@ -53,7 +69,11 @@
       "default": 0,
       "minimum": 0,
       "maximum": 2147483648,
-      "type": "uint"
+      "type": "uint",
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
+      }
     },
     {
 	  "name":   "initial_phase_offset",
@@ -62,16 +82,11 @@
       "default": 0,
       "minimum": 0,
       "maximum": 2147483648,
-      "type": "uint"
-    },
-    {
-	  "name": "input_sampling_rate", 
-      "label": "Target input throughput (MSPS)",
-      "description": "The target input throughput of the function in MSPS",
-      "default": 200,
-      "maximum": 1000,
-      "minimum": 1,
-      "type": "int"
+      "type": "uint",
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
+      }
     }
 
   ],

@@ -61,6 +61,10 @@ template <typename TT_DATA, typename TT_COEFF, unsigned int TP_API = 0>
 INLINE_DECL constexpr unsigned int fnNumColumnsResampler() {
     return (TP_API == 0 ? fnNumCols<TT_DATA, TT_COEFF>() : fnNumCols384<TT_DATA, TT_COEFF>());
 };
+template <>
+INLINE_DECL constexpr unsigned int fnNumColumnsResampler<int16, int32>() {
+    return 1;
+}; // only single columns can be used due to MAC operating on 256-bit coeff buffer.
 
 // Obsolete
 template <typename TT_DATA>

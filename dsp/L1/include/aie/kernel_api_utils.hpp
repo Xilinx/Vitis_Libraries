@@ -25,12 +25,12 @@
 // by more than the types used for some combinations of library element parameter types
 // then the set of templatized functions will be particular to that library element and should
 // therefore be in <library_element>_utils.hpp
-
 #include <stdio.h>
 #include <adf.h>
+#include "device_defs.h"
 #include "aie_api/aie_adf.hpp"
 #include "fir_utils.hpp"
-
+//#include "debug_utils.h"
 namespace xf {
 namespace dsp {
 namespace aie {
@@ -65,9 +65,10 @@ INLINE_DECL constexpr::aie::detail::AccumClass fnAccClass<cfloat>() {
     return ::aie::detail::AccumClass::CFP;
 };
 
-// function to return ::aie::detail:AccumClass enum based on input data type
 template < ::aie::detail::AccumClass Accum, unsigned Size>
 struct accClassTag {};
+#ifdef __SUPPORTS_ACC48__
+// function to return ::aie::detail:AccumClass enum based on input data type
 template <>
 struct accClassTag< ::aie::detail::AccumClass::Int, 48> {
     using type = acc48;
@@ -92,6 +93,33 @@ template <>
 struct accClassTag< ::aie::detail::AccumClass::CFP, 32> {
     using type = caccfloat;
 };
+#endif //__SUPPORTS_ACC48__
+#ifdef __SUPPORTS_ACC64__
+template <>
+struct accClassTag< ::aie::detail::AccumClass::Int, 32> {
+    using type = acc32;
+};
+template <>
+struct accClassTag< ::aie::detail::AccumClass::Int, 64> {
+    using type = acc64;
+};
+template <>
+struct accClassTag< ::aie::detail::AccumClass::CInt, 32> {
+    using type = cacc32;
+};
+template <>
+struct accClassTag< ::aie::detail::AccumClass::CInt, 64> {
+    using type = cacc64;
+};
+template <>
+struct accClassTag< ::aie::detail::AccumClass::FP, 32> {
+    using type = accfloat;
+};
+template <>
+struct accClassTag< ::aie::detail::AccumClass::CFP, 32> {
+    using type = caccfloat;
+};
+#endif //__SUPPORTS_ACC64__
 
 template < ::aie::detail::AccumClass Acc, unsigned Size>
 using accClassTag_t = typename accClassTag<Acc, Size>::type;
@@ -174,11 +202,13 @@ T_buff_128b<TT_DATA> INLINE_DECL stream_readincr_128b(input_stream<TT_DATA>* inS
     T_buff_128b<TT_DATA> result;
     using wss_type = typename T_buff_128b<cint16>::v_type;
     wss_type data0;
+#ifdef __SUPPORTS_GETC_WSS__
     if (phase % 2 == 0) {
         data0 = getc_wss(0);
     } else {
         data0 = getc_wss(1);
     }
+#endif //__SUPPORTS_GETC_WSS__
     result.val = data0.template cast_to<TT_DATA>();
     return result;
 };
@@ -195,13 +225,23 @@ void INLINE_DECL stream_writeincr_128b(output_stream<TT_DATA>* outStream, T_buff
 
 // Update 1024-bit buffer with 256-bit read from the input window with pointer increment.
 template <typename TT_DATA>
-INLINE_DECL void upd_win_incr_256b(T_buff_1024b<TT_DATA>& xbuff, int index, input_window<TT_DATA>* inWindow) {
-    xbuff.val.insert(index % 4, window_readincr_v<256 / 8 / sizeof(TT_DATA)>(inWindow));
+INLINE_DECL void upd_win_incr_256b(T_buff_1024b<TT_DATA>& xbuff, int index, auto& inItr) {
+    constexpr int kVsize = 256 / 8 / sizeof(TT_DATA);
+    using t_vect = ::aie::vector<TT_DATA, kVsize>;
+    t_vect* vPtr = (t_vect*)&*inItr;
+    t_vect vect = *vPtr;
+    xbuff.val.insert(index % 4, vect);
+    inItr += kVsize;
 };
 // Update 1024-bit buffer with 256-bit read from the input window with pointer decrement.
 template <typename TT_DATA>
-INLINE_DECL void upd_win_decr_256b(T_buff_1024b<TT_DATA>& xbuff, int index, input_window<TT_DATA>* inWindow) {
-    xbuff.val.insert(index % 4, window_readdecr_v<256 / 8 / sizeof(TT_DATA)>(inWindow));
+INLINE_DECL void upd_win_decr_256b(T_buff_1024b<TT_DATA>& xbuff, int index, auto& inItr) {
+    constexpr int kVsize = 256 / 8 / sizeof(TT_DATA);
+    using t_vect = ::aie::vector<TT_DATA, kVsize>;
+    t_vect* vPtr = (t_vect*)&*inItr;
+    t_vect vect = *vPtr;
+    xbuff.val.insert(index % 4, vect);
+    inItr -= kVsize;
 };
 
 // Update 1024-bit buffer with 128-bit read from the input window with pointer increment.
@@ -282,6 +322,7 @@ struct T_acc {
         ::aie::detail::accum<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>(), fnNumLanes<TT_DATA, TT_COEFF>()>;
     v_type val, uval;
     static constexpr unsigned getLanes() { return fnNumLanes<TT_DATA, TT_COEFF>(); };
+    static constexpr unsigned getSize() { return fnAccSize<TT_DATA, TT_COEFF>(); };
 };
 
 // T_acc384 struct with ::aie::accum
@@ -290,6 +331,7 @@ struct T_acc384 {
     using v_type =
         ::aie::detail::accum<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>(), fnNumLanes384<TT_DATA, TT_COEFF>()>;
     static constexpr unsigned getLanes() { return fnNumLanes384<TT_DATA, TT_COEFF>(); };
+    static constexpr unsigned getSize() { return fnAccSize<TT_DATA, TT_COEFF>(); };
     v_type val, uval;
 };
 
@@ -305,7 +347,21 @@ T_acc<TT_DATA, TT_COEFF> INLINE_DECL null_acc() {
 // T_outVal struct with ::aie::vector
 template <typename TT_DATA, typename TT_COEFF>
 struct T_outVal {
+    typedef typename std::conditional_t<
+        std::is_same<TT_DATA, int16>::value && std::is_same<TT_COEFF, int32>::value,
+        int32_t,
+        std::conditional_t<
+            std::is_same<TT_DATA, cint16>::value && std::is_same<TT_COEFF, int32>::value,
+            cint32_t,
+            std::conditional_t<std::is_same<TT_DATA, cint16>::value && std::is_same<TT_COEFF, cint32>::value,
+                               cint32_t,
+                               TT_DATA> > >
+        T_OutType;
+
+    // using v_type = ::aie::vector<T_OutType, fnNumLanes<TT_DATA, TT_COEFF>()>;
+    // using out_type = T_OutType;
     using v_type = ::aie::vector<TT_DATA, fnNumLanes<TT_DATA, TT_COEFF>()>;
+    using out_type = TT_DATA;
     v_type val;
     static constexpr unsigned getLanes() { return fnNumLanes<TT_DATA, TT_COEFF>(); };
 };
@@ -483,7 +539,8 @@ template <typename TT_DATA,
           unsigned int ENABLE_WRITE = 0>
 INLINE_DECL void writeOutput(T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface,
                              T_outVal<TT_DATA, TT_COEFF> outVal,
-                             int phase = 0) {
+                             int phase = 0,
+                             auto& outItr = 0) {
     // By default: Do nothing if cascade output is present, but window output is not.
     // However, SSR operation introduces a structure where both streams & cascades are used as outputs to increase
     // throughput.
@@ -496,9 +553,13 @@ INLINE_DECL void writeOutput(T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface,
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_NUM_OUTPUTS = 1, unsigned int TP_API = USE_WINDOW_API>
 INLINE_DECL void writeOutput(T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface,
                              T_outVal<TT_DATA, TT_COEFF> outVal,
-                             int phase = 0) {
+                             int phase = 0,
+                             auto& outItr = 0) {
     if
-        constexpr(TP_API == USE_WINDOW_API) { writeWindow<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS>(outInterface, outVal); }
+        constexpr(TP_API == USE_WINDOW_API) {
+            // writeWindow<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS>(outInterface, outVal);
+            *outItr++ = outVal.val;
+        }
     else {
         writeStream<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS>(outInterface, outVal, phase);
     }
@@ -508,7 +569,8 @@ INLINE_DECL void writeOutput(T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface,
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_NUM_OUTPUTS = 1, unsigned int TP_API = USE_WINDOW_API>
 INLINE_DECL void writeOutput(T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface,
                              T_outVal384<TT_DATA, TT_COEFF> outVal,
-                             int phase = 0) {
+                             int phase = 0,
+                             auto& outItr = 0) {
     // By default: Do nothing if cascade output is present, but window output is not.
     // However, SSR operation may introduce a structure where both streams & cascades are used as outputs to increase
     // throughput.
@@ -517,9 +579,13 @@ INLINE_DECL void writeOutput(T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface,
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_NUM_OUTPUTS = 1, unsigned int TP_API = USE_WINDOW_API>
 INLINE_DECL void writeOutput(T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface,
                              T_outVal384<TT_DATA, TT_COEFF> outVal,
-                             int phase = 0) {
+                             int phase = 0,
+                             auto& outItr = 0) {
     if
-        constexpr(TP_API == USE_WINDOW_API) { writeWindow<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS>(outInterface, outVal); }
+        constexpr(TP_API == USE_WINDOW_API) {
+            // writeWindow<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS>(outInterface, outVal);
+            *outItr++ = outVal.val;
+        }
     else {
         writeStream<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS>(outInterface, outVal, phase);
     }
@@ -608,8 +674,10 @@ INLINE_DECL void readStream256(T_buff_1024b<TT_DATA>& xbuff,
                                T_inputIF<TP_CASC_IN, TT_DATA, DUAL_IP_DUAL> inInterface) {
     using wss_type = typename T_buff_128b<cint16>::v_type;
     wss_type data0, data1;
+#ifdef __SUPPORTS_GETC_WSS__
     data0 = getc_wss(0);
     data1 = getc_wss(1);
+#endif //__SUPPORTS_GETC_WSS__
     xbuff.val.insert(index % 4, concat_vector(data0.template cast_to<TT_DATA>(), data1.template cast_to<TT_DATA>()));
 };
 
@@ -628,8 +696,10 @@ INLINE_DECL void readStream256(T_buff_512b<TT_DATA>& xbuff,
                                T_inputIF<TP_CASC_IN, TT_DATA, DUAL_IP_DUAL> inInterface) {
     using wss_type = typename T_buff_128b<cint16>::v_type;
     wss_type data0, data1;
+#ifdef __SUPPORTS_GETC_WSS__
     data0 = getc_wss(0);
     data1 = getc_wss(1);
+#endif //__SUPPORTS_GETC_WSS__
     xbuff.val.insert(index % 2, concat_vector(data0.template cast_to<TT_DATA>(), data1.template cast_to<TT_DATA>()));
 };
 
@@ -648,9 +718,27 @@ INLINE_DECL void readStream256(T_buff_256b<TT_DATA>& xbuff,
                                T_inputIF<TP_CASC_IN, TT_DATA, DUAL_IP_DUAL> inInterface) {
     using wss_type = typename T_buff_128b<cint16>::v_type;
     wss_type data0, data1;
+#ifdef __SUPPORTS_GETC_WSS__
     data0 = getc_wss(0);
     data1 = getc_wss(1);
+#endif //__SUPPORTS_GETC_WSS__
     xbuff.val.insert(0, concat_vector(data0.template cast_to<TT_DATA>(), data1.template cast_to<TT_DATA>()));
+};
+
+// Read 256-bits from 2 streams. Read 128-bits from each.
+template <bool TP_CASC_IN, typename TT_DATA, unsigned int TP_DUAL_IP>
+INLINE_DECL void readStream256(::aie::vector<TT_DATA, 256 / 8 / sizeof(TT_DATA)> xbuff,
+                               int index,
+                               T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface) {
+    using wss_type = typename T_buff_128b<cint16>::v_type;
+    wss_type data0, data1;
+#ifdef __SUPPORTS_GETC_WSS__
+    data0 = getc_wss(0);
+    data1 = getc_wss(1);
+    xbuff.insert(0, concat_vector(data0.template cast_to<TT_DATA>(), data1.template cast_to<TT_DATA>()));
+#else
+    xbuff.insert(0, readincr_v<256 / 8 / sizeof(TT_DATA)>(inInterface.inStream));
+#endif //__SUPPORTS_GETC_WSS__
 };
 
 // Read 128-bits from a stream.
@@ -670,13 +758,32 @@ INLINE_DECL void readStream128(T_buff_1024b<TT_DATA>& xbuff,
                                const int phase = 0) {
     using wss_type = typename T_buff_128b<cint16>::v_type;
     wss_type data0;
+#ifdef __SUPPORTS_GETC_WSS__
     if (phase % 2 == 0) {
         data0 = getc_wss(0);
     } else {
         data0 = getc_wss(1);
     }
+#endif //__SUPPORTS_GETC_WSS__
     xbuff.val.insert(index % 8, data0.template cast_to<TT_DATA>());
 };
+
+template <bool COND, unsigned int NUM_LANES, typename PORT_TYPE>
+INLINE_DECL auto cond_begin_vector_random_or_scalar_circular(PORT_TYPE& port) {
+    if
+        constexpr(NUM_LANES == 1) {
+            if
+                constexpr(COND) return ::aie::begin_random_circular(port);
+            else
+                return ::aie::random_circular_iterator<typename PORT_TYPE::value_type, 1024>(nullptr);
+        }
+    else {
+        if
+            constexpr(COND) return ::aie::begin_vector_random_circular<NUM_LANES>(port);
+        else
+            return ::aie::vector_random_circular_iterator<typename PORT_TYPE::value_type, NUM_LANES, 1024>(nullptr);
+    }
+}
 }
 }
 }

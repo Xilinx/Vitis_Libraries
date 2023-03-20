@@ -39,6 +39,7 @@ template <typename T_D, typename T_C>
 struct T_accIntHb : T_acc<T_D, T_C> {
     using T_acc<T_D, T_C>::operator=;
 };
+
 // Smaller type for each polyphase
 template <typename T_D, typename T_C, unsigned int T_UCT = 0>
 struct T_accSymIntHb : T_acc384<T_D, T_C> {
@@ -58,533 +59,12 @@ template <>
 struct T_accSymIntHb<cint16, cint16, 1> : T_acc<cint16, cint16> {
     using T_acc<cint16, cint16>::operator=;
 };
+
 // Final output value type after shift and rounding
 template <typename T_D, typename T_C>
 struct T_outValIntHb : T_outVal<T_D, T_C> {
     using T_outVal<T_D, T_C>::operator=;
 };
-
-// Symmetric mul/mac for use in halfband interpolator.
-//-----------------------------------------------------------------------------------------------------
-// DATA = int16, COEFF = int16
-INLINE_DECL T_accSymIntHb<int16, int16> mulSym2buffIntHb(
-    v32int16 xbuff, unsigned int xstart, v32int16 ybuff, unsigned int ystart, v16int16 zbuff, unsigned int zstart) {
-    T_accSymIntHb<int16, int16> retVal;
-    const unsigned int xoffsets = 0x03020100;
-    const unsigned int xstep = 2;
-    const unsigned int zoffsets = 0x00000000;
-    const unsigned int zstep = 1;
-    const unsigned int kLanes = 8;
-    unsigned int xstartmod = (xstart & 1) == 0 ? xstart : xstart - 1;
-    unsigned int xsquare = (xstart & 1) == 0 ? 0x2110 : 0x3221;
-    unsigned int ystartmod = (ystart & 1) == 0 ? ystart - 2 : ystart - 1;
-    unsigned int ysquare = (ystart & 1) == 0 ? 0x2312 : 0x1201;
-
-    retVal.val =
-        mul8_sym(xbuff, xstartmod, xoffsets, xstep, xsquare, ybuff, ystartmod, ysquare, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<int16, int16> macSym2buffIntHb(T_accSymIntHb<int16, int16> acc,
-                                                         v32int16 xbuff,
-                                                         unsigned int xstart,
-                                                         v32int16 ybuff,
-                                                         unsigned int ystart,
-                                                         v16int16 zbuff,
-                                                         unsigned int zstart) {
-    T_accSymIntHb<int16, int16> retVal;
-    const unsigned int xoffsets = 0x03020100;
-    const unsigned int xstep = 2;
-    const unsigned int zoffsets = 0x00000000;
-    const unsigned int zstep = 1;
-    const unsigned int kLanes = 8;
-    unsigned int xstartmod = (xstart & 1) == 0 ? xstart : xstart - 1;
-    unsigned int xsquare = (xstart & 1) == 0 ? 0x2110 : 0x3221;
-    unsigned int ystartmod = (ystart & 1) == 0 ? ystart - 2 : ystart - 1;
-    unsigned int ysquare = (ystart & 1) == 0 ? 0x2312 : 0x1201;
-
-    retVal.val = mac8_sym(acc.val, xbuff, xstartmod, xoffsets, xstep, xsquare, ybuff, ystartmod, ysquare, zbuff, zstart,
-                          zoffsets, zstep);
-    return retVal;
-}
-
-// DATA = cint16, COEFF = int16
-INLINE_DECL T_accSymIntHb<cint16, int16> mulSym2buffIntHb(
-    v16cint16 xbuff, unsigned int xstart, v16cint16 ybuff, unsigned int ystart, v16int16 zbuff, unsigned int zstart) {
-    T_accSymIntHb<cint16, int16> retVal;
-    const unsigned int xoffsets = 0x76543210;
-    const unsigned int xstep = 1;
-    const unsigned int zoffsets = 0x00000000;
-    const unsigned int zstep = 1;
-    const unsigned int kLanes = 4;
-
-    retVal.val = mul4_sym(xbuff, xstart, xoffsets, xstep, ybuff, ystart, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cint16, int16> macSym2buffIntHb(T_accSymIntHb<cint16, int16> acc,
-                                                          v16cint16 xbuff,
-                                                          unsigned int xstart,
-                                                          v16cint16 ybuff,
-                                                          unsigned int ystart,
-                                                          v16int16 zbuff,
-                                                          unsigned int zstart) {
-    T_accSymIntHb<cint16, int16> retVal;
-    const unsigned int xoffsets = 0x76543210;
-    const unsigned int xstep = 1;
-    const unsigned int zoffsets = 0x00000000;
-    const unsigned int zstep = 1;
-    const unsigned int kLanes = 4;
-
-    retVal.val = mac4_sym(acc.val, xbuff, xstart, xoffsets, xstep, ybuff, ystart, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-// DATA = cint16, COEFF = cint16
-INLINE_DECL T_accSymIntHb<cint16, cint16> mulSym2buffIntHb(
-    v16cint16 xbuff, unsigned int xstart, v16cint16 ybuff, unsigned int ystart, v8cint16 zbuff, unsigned int zstart) {
-    T_accSymIntHb<cint16, cint16> retVal;
-    const unsigned int xoffsets = 0x76543210;
-    const unsigned int xstep = 1;
-    const unsigned int zoffsets = 0x00000000;
-    const unsigned int zstep = 1;
-    const unsigned int kLanes = 4;
-
-    retVal.val = mul4_sym(xbuff, xstart, xoffsets, xstep, ybuff, ystart, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cint16, cint16> macSym2buffIntHb(T_accSymIntHb<cint16, cint16> acc,
-                                                           v16cint16 xbuff,
-                                                           unsigned int xstart,
-                                                           v16cint16 ybuff,
-                                                           unsigned int ystart,
-                                                           v8cint16 zbuff,
-                                                           unsigned int zstart) {
-    T_accSymIntHb<cint16, cint16> retVal;
-    const unsigned int xoffsets = 0x76543210;
-    const unsigned int xstep = 1;
-    const unsigned int zoffsets = 0x00000000;
-    const unsigned int zstep = 1;
-    const unsigned int kLanes = 4;
-
-    retVal.val = mac4_sym(acc.val, xbuff, xstart, xoffsets, xstep, ybuff, ystart, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-// DATA = int32, COEFF = int16
-INLINE_DECL T_accSymIntHb<int32, int16> mulSym2buffIntHb(
-    v16int32 xbuff, unsigned int xstart, v16int32 ybuff, unsigned int ystart, v16int16 zbuff, unsigned int zstart) {
-    T_accSymIntHb<int32, int16> retVal;
-    const unsigned int xoffsets = 0x76543210;
-    const unsigned int xstep = 1;
-    const unsigned int zoffsets = 0x00000000;
-    const unsigned int zstep = 1;
-
-    retVal.val = lmul8_sym(xbuff, xstart, xoffsets, xstep, ybuff, ystart, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<int32, int16> macSym2buffIntHb(T_accSymIntHb<int32, int16> acc,
-                                                         v16int32 xbuff,
-                                                         unsigned int xstart,
-                                                         v16int32 ybuff,
-                                                         unsigned int ystart,
-                                                         v16int16 zbuff,
-                                                         unsigned int zstart) {
-    T_accSymIntHb<int32, int16> retVal;
-    const unsigned int xoffsets = 0x76543210;
-    const unsigned int xstep = 1;
-    const unsigned int zoffsets = 0x00000000;
-    const unsigned int zstep = 1;
-
-    retVal.val = lmac8_sym(acc.val, xbuff, xstart, xoffsets, xstep, ybuff, ystart, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-// DATA = int32,  COEFF = int32>
-INLINE_DECL T_accSymIntHb<int32, int32> mulSym2buffIntHb(
-    v16int32 xbuff, unsigned int xstart, v16int32 ybuff, unsigned int ystart, v8int32 zbuff, unsigned int zstart) {
-    T_accSymIntHb<int32, int32> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int xstep = 1;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int zstep = 1;
-    const unsigned int kLanes = 4;
-
-    retVal.val = lmul4_sym(xbuff, xstart, xoffsets, xstep, ybuff, ystart, zbuff, zstart, zoffsets, zstep);
-    // retVal.uval = lmul4_sym( xbuff, xstart+kLanes, xoffsets, xstep, ybuff, ystart+kLanes, zbuff, zstart, zoffsets,
-    // zstep);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<int32, int32> macSym2buffIntHb(T_accSymIntHb<int32, int32> acc,
-                                                         v16int32 xbuff,
-                                                         unsigned int xstart,
-                                                         v16int32 ybuff,
-                                                         unsigned int ystart,
-                                                         v8int32 zbuff,
-                                                         unsigned int zstart) {
-    T_accSymIntHb<int32, int32> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int xstep = 1;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int zstep = 1;
-    const unsigned int kLanes = 4;
-
-    retVal.val = lmac4_sym(acc.val, xbuff, xstart, xoffsets, xstep, ybuff, ystart, zbuff, zstart, zoffsets, zstep);
-    // retVal.uval = lmac4_sym(acc.uval, xbuff, xstart+kLanes, xoffsets, xstep, ybuff, ystart+kLanes, zbuff, zstart,
-    // zoffsets, zstep);
-    return retVal;
-}
-
-// DATA = cint32,  COEFF = int16>
-INLINE_DECL T_accSymIntHb<cint32, int16> mulSym2buffIntHb(
-    v8cint32 xbuff, unsigned int xstart, v8cint32 ybuff, unsigned int ystart, v16int16 zbuff, unsigned int zstart) {
-    T_accSymIntHb<cint32, int16> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int xstep = 1;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int zstep = 1;
-
-    retVal.val = lmul4_sym(xbuff, xstart, xoffsets, xstep, ybuff, ystart, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cint32, int16> macSym2buffIntHb(T_accSymIntHb<cint32, int16> acc,
-                                                          v8cint32 xbuff,
-                                                          unsigned int xstart,
-                                                          v8cint32 ybuff,
-                                                          unsigned int ystart,
-                                                          v16int16 zbuff,
-                                                          unsigned int zstart) {
-    T_accSymIntHb<cint32, int16> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int xstep = 1;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int zstep = 1;
-
-    retVal.val = lmac4_sym(acc.val, xbuff, xstart, xoffsets, xstep, ybuff, ystart, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-// DATA = cint32,  COEFF = cint16>
-INLINE_DECL T_accSymIntHb<cint32, cint16> mulSym2buffIntHb(
-    v8cint32 xbuff, unsigned int xstart, v8cint32 ybuff, unsigned int ystart, v8cint16 zbuff, unsigned int zstart) {
-    T_accSymIntHb<cint32, cint16> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int xstep = 1;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int zstep = 1;
-
-    retVal.val = lmul4_sym(xbuff, xstart, xoffsets, ybuff, ystart, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cint32, cint16> macSym2buffIntHb(T_accSymIntHb<cint32, cint16> acc,
-                                                           v8cint32 xbuff,
-                                                           unsigned int xstart,
-                                                           v8cint32 ybuff,
-                                                           unsigned int ystart,
-                                                           v8cint16 zbuff,
-                                                           unsigned int zstart) {
-    T_accSymIntHb<cint32, cint16> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int xstep = 1;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int zstep = 1;
-
-    retVal.val = lmac4_sym(acc.val, xbuff, xstart, xoffsets, ybuff, ystart, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-// DATA = cint32,  COEFF = int32>
-INLINE_DECL T_accSymIntHb<cint32, int32> mulSym2buffIntHb(
-    v8cint32 xbuff, unsigned int xstart, v8cint32 ybuff, unsigned int ystart, v8int32 zbuff, unsigned int zstart) {
-    T_accSymIntHb<cint32, int32> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int zoffsets = 0x0000;
-
-    retVal.val = lmul4_sym(xbuff, xstart, xoffsets, ybuff, ystart, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cint32, int32> macSym2buffIntHb(T_accSymIntHb<cint32, int32> acc,
-                                                          v8cint32 xbuff,
-                                                          unsigned int xstart,
-                                                          v8cint32 ybuff,
-                                                          unsigned int ystart,
-                                                          v8int32 zbuff,
-                                                          unsigned int zstart) {
-    T_accSymIntHb<cint32, int32> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int zoffsets = 0x0000;
-
-    retVal.val = lmac4_sym(acc.val, xbuff, xstart, xoffsets, ybuff, ystart, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-// DATA = cint32,  COEFF = cint32>
-INLINE_DECL T_accSymIntHb<cint32, cint32> mulSym2buffIntHb(
-    v8cint32 xbuff, unsigned int xstart, v8cint32 ybuff, unsigned int ystart, v4cint32 zbuff, unsigned int zstart) {
-    T_accSymIntHb<cint32, cint32> retVal;
-    const unsigned int xoffsets = 0x10;
-    const unsigned int zoffsets = 0x00;
-    const unsigned int kLanes = 2;
-
-    retVal.val = lmul2_sym(xbuff, xstart, xoffsets, ybuff, ystart, zbuff, zstart, zoffsets);
-    // retVal.uval = lmul2_sym( xbuff, xstart+kLanes, xoffsets, ybuff, ystart+kLanes, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cint32, cint32> macSym2buffIntHb(T_accSymIntHb<cint32, cint32> acc,
-                                                           v8cint32 xbuff,
-                                                           unsigned int xstart,
-                                                           v8cint32 ybuff,
-                                                           unsigned int ystart,
-                                                           v4cint32 zbuff,
-                                                           unsigned int zstart) {
-    T_accSymIntHb<cint32, cint32> retVal;
-    const unsigned int xoffsets = 0x10;
-    const unsigned int zoffsets = 0x00;
-    const unsigned int kLanes = 2;
-
-    retVal.val = lmac2_sym(acc.val, xbuff, xstart, xoffsets, ybuff, ystart, zbuff, zstart, zoffsets);
-    // retVal.uval = lmac2_sym(acc.uval, xbuff, xstart+kLanes, xoffsets, ybuff, ystart+kLanes, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-// DATA = float,  COEFF = float>
-INLINE_DECL T_accSymIntHb<float, float> mulSym2buffIntHb(
-    v16float xbuff, unsigned int xstart, v16float ybuff, unsigned int ystart, v8float zbuff, unsigned int zstart) {
-    T_accSymIntHb<float, float> retVal;
-    const unsigned int xoffsets = 0x76543210;
-    const unsigned int zoffsets = 0x00000000;
-    const unsigned int kLanes = 8;
-
-    retVal.val = fpmul(xbuff, xstart, xoffsets, zbuff, zstart, zoffsets);
-    retVal.val = fpmac(retVal.val, ybuff, ystart, xoffsets, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<float, float> macSym2buffIntHb(T_accSymIntHb<float, float> acc,
-                                                         v16float xbuff,
-                                                         unsigned int xstart,
-                                                         v16float ybuff,
-                                                         unsigned int ystart,
-                                                         v8float zbuff,
-                                                         unsigned int zstart) {
-    T_accSymIntHb<float, float> retVal;
-    const unsigned int xoffsets = 0x76543210;
-    const unsigned int zoffsets = 0x00000000;
-    const unsigned int kLanes = 8;
-
-    retVal.val = fpmac(acc.val, xbuff, xstart, xoffsets, zbuff, zstart, zoffsets);
-    retVal.val = fpmac(retVal.val, ybuff, ystart, xoffsets, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-// DATA = cfloat,  COEFF = float>
-INLINE_DECL T_accSymIntHb<cfloat, float> mulSym2buffIntHb(
-    v8cfloat xbuff, unsigned int xstart, v8cfloat ybuff, unsigned int ystart, v8float zbuff, unsigned int zstart) {
-    T_accSymIntHb<cfloat, float> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int kLanes = 4;
-
-    retVal.val = fpmul(xbuff, xstart, xoffsets, zbuff, zstart, zoffsets);
-    retVal.val = fpmac(retVal.val, ybuff, ystart, xoffsets, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cfloat, float> macSym2buffIntHb(T_accSymIntHb<cfloat, float> acc,
-                                                          v8cfloat xbuff,
-                                                          unsigned int xstart,
-                                                          v8cfloat ybuff,
-                                                          unsigned int ystart,
-                                                          v8float zbuff,
-                                                          unsigned int zstart) {
-    T_accSymIntHb<cfloat, float> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int kLanes = 4;
-
-    retVal.val = fpmac(acc.val, xbuff, xstart, xoffsets, zbuff, zstart, zoffsets);
-    retVal.val = fpmac(retVal.val, ybuff, ystart, xoffsets, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-// DATA = cfloat,  COEFF = cfloat>
-INLINE_DECL T_accSymIntHb<cfloat, cfloat> mulSym2buffIntHb(
-    v8cfloat xbuff, unsigned int xstart, v8cfloat ybuff, unsigned int ystart, v4cfloat zbuff, unsigned int zstart) {
-    T_accSymIntHb<cfloat, cfloat> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int kLanes = 4;
-
-    retVal.val = fpmul(xbuff, xstart, xoffsets, zbuff, zstart, zoffsets);
-    retVal.val = fpmac(retVal.val, ybuff, ystart, xoffsets, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cfloat, cfloat> macSym2buffIntHb(T_accSymIntHb<cfloat, cfloat> acc,
-                                                           v8cfloat xbuff,
-                                                           unsigned int xstart,
-                                                           v8cfloat ybuff,
-                                                           unsigned int ystart,
-                                                           v4cfloat zbuff,
-                                                           unsigned int zstart) {
-    T_accSymIntHb<cfloat, cfloat> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int kLanes = 4;
-
-    retVal.val = fpmac(acc.val, xbuff, xstart, xoffsets, zbuff, zstart, zoffsets);
-    retVal.val = fpmac(retVal.val, ybuff, ystart, xoffsets, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-// Centre tap mul for use in halfband
-//-----------------------------------------------------------------------------------------------------
-INLINE_DECL T_accSymIntHb<int16, int16> mulCentreTap2buffIntHb(v32int16 xbuff, unsigned int xstart, v16int16 zbuff) {
-    T_accSymIntHb<int16, int16> retVal;
-    const unsigned int xoffsets = 0x03020100;
-    const unsigned int xstep = 0;
-    const unsigned int zoffsets = 0x00000000;
-    const unsigned int zstart = 0;
-    const unsigned int zstep = 1;
-    const unsigned int kLanes = 8;
-    unsigned int xstartmod = (xstart & 1) == 0 ? xstart : xstart - 1;
-    unsigned int xsquare = (xstart & 1) == 0 ? 0x2110 : 0x3221;
-    retVal.val = mul8(xbuff, xstartmod, xoffsets, xstep, xsquare, zbuff, zstart, zoffsets, zstep);
-    // retVal.uval = mul8(xbuff, xstartmod+kLanes, xoffsets, xstep, xsquare, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cint16, int16> mulCentreTap2buffIntHb(v16cint16 xbuff, unsigned int xstart, v16int16 zbuff) {
-    T_accSymIntHb<cint16, int16> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int xstep = 0;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int zstart = 0;
-    const unsigned int zstep = 1;
-    const unsigned int kLanes = 4;
-    retVal.val = mul4(xbuff, xstart, xoffsets, xstep, zbuff, zstart, zoffsets, zstep);
-    // retVal.uval = mul4(xbuff, xstart+kLanes, xoffsets, xstep, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cint16, cint16> mulCentreTap2buffIntHb(v16cint16 xbuff, unsigned int xstart, v8cint16 zbuff) {
-    T_accSymIntHb<cint16, cint16> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int xstep = 0;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int zstart = 0;
-    const unsigned int zstep = 1;
-    const unsigned int kLanes = 4;
-    retVal.val = mul4(xbuff, xstart, xoffsets, xstep, zbuff, zstart, zoffsets, zstep);
-    // retVal.uval = mul4(xbuff, xstart+kLanes, xoffsets, xstep, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<int32, int16> mulCentreTap2buffIntHb(v16int32 xbuff, unsigned int xstart, v16int16 zbuff) {
-    T_accSymIntHb<int32, int16> retVal;
-    const unsigned int xoffsets = 0x76543210;
-    const unsigned int xstep = 0;
-    const unsigned int zoffsets = 0x00000000;
-    const unsigned int zstart = 0;
-    const unsigned int zstep = 1;
-    retVal.val = lmul8(xbuff, xstart, xoffsets, xstep, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<int32, int32> mulCentreTap2buffIntHb(v16int32 xbuff, unsigned int xstart, v8int32 zbuff) {
-    T_accSymIntHb<int32, int32> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int xstep = 0;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int zstart = 0;
-    const unsigned int zstep = 1;
-    const unsigned int kLanes = 4;
-    retVal.val = lmul4(xbuff, xstart, xoffsets, xstep, zbuff, zstart, zoffsets, zstep);
-    // retVal.uval = lmul4(xbuff, xstart+kLanes, xoffsets, xstep, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cint32, int16> mulCentreTap2buffIntHb(v8cint32 xbuff, unsigned int xstart, v16int16 zbuff) {
-    T_accSymIntHb<cint32, int16> retVal;
-    retVal.val = null_v4cacc80();
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int xstep = 0;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int zstart = 0;
-    const unsigned int zstep = 1;
-    retVal.val = lmac4(retVal.val, xbuff, xstart, xoffsets, xstep, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cint32, cint16> mulCentreTap2buffIntHb(v8cint32 xbuff, unsigned int xstart, v8cint16 zbuff) {
-    T_accSymIntHb<cint32, cint16> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int xstep = 0;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int zstart = 0;
-    const unsigned int zstep = 1;
-    retVal.val = lmul4(xbuff, xstart, xoffsets, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cint32, int32> mulCentreTap2buffIntHb(v8cint32 xbuff, unsigned int xstart, v8int32 zbuff) {
-    T_accSymIntHb<cint32, int32> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int zstart = 0;
-    retVal.val = lmul4(xbuff, xstart, xoffsets, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cint32, cint32> mulCentreTap2buffIntHb(v8cint32 xbuff, unsigned int xstart, v4cint32 zbuff) {
-    T_accSymIntHb<cint32, cint32> retVal;
-    const unsigned int xoffsets = 0x10;
-    const unsigned int zoffsets = 0x00;
-    const unsigned int zstart = 0;
-    retVal.val = lmul2(xbuff, xstart, xoffsets, zbuff, zstart, zoffsets);
-    // retVal.uval = lmul2(xbuff, xstart+2, xoffsets, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<float, float> mulCentreTap2buffIntHb(v16float xbuff, unsigned int xstart, v8float zbuff) {
-    T_accSymIntHb<float, float> retVal;
-    const unsigned int xoffsets = 0x76543210;
-    const unsigned int zoffsets = 0x00000000;
-    const unsigned int zstart = 0;
-    const unsigned int kLanes = 8;
-
-    retVal.val = fpmul(xbuff, xstart, xoffsets, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cfloat, float> mulCentreTap2buffIntHb(v8cfloat xbuff, unsigned int xstart, v8float zbuff) {
-    T_accSymIntHb<cfloat, float> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int zstart = 0;
-    const unsigned int kLanes = 4;
-
-    retVal.val = fpmul(xbuff, xstart, xoffsets, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cfloat, cfloat> mulCentreTap2buffIntHb(v8cfloat xbuff, unsigned int xstart, v4cfloat zbuff) {
-    T_accSymIntHb<cfloat, cfloat> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int zstart = 0;
-    const unsigned int kLanes = 4;
-
-    retVal.val = fpmul(xbuff, xstart, xoffsets, zbuff, zstart, zoffsets);
-    return retVal;
-}
 
 // Halfband Output. This function takes the two polyphase lane sets, interleaves them and outputs them
 // however for some types, the lane vector is too large for the interleave intrinsic, so they have to be split and for
@@ -592,690 +72,122 @@ INLINE_DECL T_accSymIntHb<cfloat, cfloat> mulCentreTap2buffIntHb(v8cfloat xbuff,
 // int16/int16
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_NUM_OUTPUTS = 1, unsigned int TP_API = USE_WINDOW_API>
 INLINE_DECL void writeOutputIntHb(T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface,
-                                  const T_accSymIntHb<int16, int16> accLow,
-                                  const T_accSymIntHb<int16, int16> accHigh,
-                                  const int shift) {
-    T_outValIntHb<int16, int16> outVal;
-    T_accIntHb<int16, int16> acc;
-    acc.val = concat(accLow.val, accHigh.val);
-    outVal.val = srs_ilv(acc.val, shift);
-    writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0);
+                                  const T_accSymIntHb<TT_DATA, TT_COEFF> accLow,
+                                  const T_accSymIntHb<TT_DATA, TT_COEFF> accHigh,
+                                  const int shift,
+                                  auto& outItr) {
+    using acc_type = typename T_accSymIntHb<TT_DATA, TT_COEFF, 0>::v_type;
+    using out_type = typename T_outValIntHb<TT_DATA, TT_COEFF>::out_type;
+    typedef typename std::conditional_t<
+        std::is_same<TT_DATA, int16>::value && std::is_same<TT_COEFF, int32>::value, int32_t,
+        std::conditional_t<
+            std::is_same<TT_DATA, cint16>::value && std::is_same<TT_COEFF, int32>::value, cint32_t,
+            std::conditional_t<std::is_same<TT_DATA, cint16>::value && std::is_same<TT_COEFF, cint32>::value, cint32_t,
+                               TT_DATA> > >
+        T_OutType;
+    T_outValIntHb<TT_DATA, TT_COEFF> outVal;
+    T_accIntHb<TT_DATA, TT_COEFF> acc;
+    if
+        constexpr(std::is_same<TT_DATA, cfloat>::value) {
+            // Special case for cfloats
+
+            // copied from overloaded function.
+            // TODO: convert to ::aie::interleave_zip
+            v4cacc80 acc1, acc2, concatacc;
+            v2cacc80 acc3, acc4;
+            acc1 = lups(as_v4cint32(accLow.val), 0);
+            acc2 = lups(as_v4cint32(accHigh.val), 0);
+            acc3 = ext_lo(acc1);
+            acc4 = ext_lo(acc2);
+            concatacc = concat(acc3, acc4);
+            outVal.val = as_v4cfloat(srs_ilv(concatacc, 0));
+            writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0, outItr);
+            acc3 = ext_hi(acc1);
+            acc4 = ext_hi(acc2);
+            concatacc = concat(acc3, acc4);
+            outVal.val = as_v4cfloat(srs_ilv(concatacc, 0));
+            writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0, outItr);
+        }
+    else if
+        constexpr(std::is_same<TT_DATA, float>::value) {
+            // Special case for floats
+            // copied from overloaded function.
+            // TODO: convert to ::aie::interleave_zip
+            v8acc80 acc1, acc2, concatacc;
+            v4acc80 acc3, acc4;
+            acc1 = lups(as_v8int32(accLow.val), 0);
+            acc2 = lups(as_v8int32(accHigh.val), 0);
+            acc3 = ext_lo(acc1);
+            acc4 = ext_lo(acc2);
+            concatacc = concat(acc3, acc4);
+            outVal.val = as_v8float(srs_ilv(concatacc, 0));
+            writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0, outItr);
+            acc3 = ext_hi(acc1);
+            acc4 = ext_hi(acc2);
+            concatacc = concat(acc3, acc4);
+            outVal.val = as_v8float(srs_ilv(concatacc, 0));
+            writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0, outItr);
+        }
+    else if
+        constexpr((std::is_same<TT_DATA, int16>::value && std::is_same<TT_COEFF, int16>::value) ||
+                  (std::is_same<TT_DATA, cint16>::value && std::is_same<TT_COEFF, int16>::value) ||
+                  (std::is_same<TT_DATA, cint16>::value && std::is_same<TT_COEFF, cint16>::value) ||
+                  (std::is_same<TT_DATA, int32>::value && std::is_same<TT_COEFF, int32>::value)) {
+            // accLow & accHigh are short 384-bit accums, acc is an 768-bit long acc.
+            acc.val = ::aie::concat<acc_type, acc_type>(accLow.val, accHigh.val);
+            outVal.val = acc.val.template to_vector_zip<TT_DATA>(shift);
+            writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0, outItr);
+        }
+    else {
+        if
+            constexpr(std::is_same<TT_DATA, cint32>::value && std::is_same<TT_COEFF, cint32>::value) {
+                // Special case for cint32 data and cint32 coeffs.
+                // Concat of accs, shifted down is only 256-bits, instead of 512-bits like other combo types.
+                // Need to split accs into 2 128-bit splices, when sending data to 2 128-bit stream outputs.
+                outVal.val = ext_v(srs_ilv(concat((accLow.val), (accHigh.val)), shift), 0);
+                writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0, outItr);
+                outVal.val = ext_v(srs_ilv(concat((accLow.val), (accHigh.val)), shift), 1);
+                writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 1, outItr);
+            }
+        else if
+            constexpr(std::is_same<TT_DATA, T_OutType>::value) {
+                // accLow & accHigh are long 768-bit accums, acc is an 768-bit long acc.
+                acc.val = ::aie::concat(accLow.val.template extract<accLow.getLanes() / 2>(0),
+                                        accHigh.val.template extract<accHigh.getLanes() / 2>(0));
+                outVal.val = acc.val.template to_vector_zip<TT_DATA>(shift);
+                writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0, outItr);
+                acc.val = ::aie::concat(accLow.val.template extract<accLow.getLanes() / 2>(1),
+                                        accHigh.val.template extract<accHigh.getLanes() / 2>(01));
+                outVal.val = acc.val.template to_vector_zip<TT_DATA>(shift);
+                writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0, outItr);
+            }
+        else {
+            // Special case for 16-bit data and 32-bit coeffs.
+            // 80-bit accs shifted down to 16-bit output type require a 2-stage srs.
+            // First, shift and interleave.
+            // Then, shift down further to 16-bit output
+            T_outValIntHb<T_OutType, int16> outIntermediateVal;
+            T_accIntHb<T_OutType, int16> accIntermediate;
+
+            acc.val = ::aie::concat(accLow.val.template extract<accLow.getLanes() / 2>(0),
+                                    accHigh.val.template extract<accHigh.getLanes() / 2>(0));
+            outIntermediateVal.val = acc.val.template to_vector_zip<T_OutType>(shift);
+            accIntermediate.val.from_vector(outIntermediateVal.val, 0); // upshift back to 48-bit acc
+            outVal.val = accIntermediate.val.template to_vector<TT_DATA>(0);
+            // outVal.val = acc.val.template to_vector_zip<out_type>(shift);
+            writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0, outItr);
+            acc.val = ::aie::concat(accLow.val.template extract<accLow.getLanes() / 2>(1),
+                                    accHigh.val.template extract<accHigh.getLanes() / 2>(01));
+            outIntermediateVal.val = acc.val.template to_vector_zip<T_OutType>(shift);
+            accIntermediate.val.from_vector(outIntermediateVal.val, 0); // upshift back to 48-bit acc
+            outVal.val = accIntermediate.val.template to_vector<TT_DATA>(0);
+            writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 1, outItr);
+        }
+    }
 }
 
-// cint16/int16
-template <typename TT_DATA, typename TT_COEFF, unsigned int TP_NUM_OUTPUTS = 1, unsigned int TP_API = USE_WINDOW_API>
-INLINE_DECL void writeOutputIntHb(T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface,
-                                  const T_accSymIntHb<cint16, int16> accLow,
-                                  const T_accSymIntHb<cint16, int16> accHigh,
-                                  const int shift) {
-    T_outValIntHb<cint16, int16> outVal;
-    T_accIntHb<cint16, int16> acc;
-    acc.val = concat(accLow.val, accHigh.val);
-    outVal.val = srs_ilv(acc.val, shift);
-    writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0);
-}
-
-// cint16/cint16
-template <typename TT_DATA, typename TT_COEFF, unsigned int TP_NUM_OUTPUTS = 1, unsigned int TP_API = USE_WINDOW_API>
-INLINE_DECL void writeOutputIntHb(T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface,
-                                  const T_accSymIntHb<cint16, cint16> accLow,
-                                  const T_accSymIntHb<cint16, cint16> accHigh,
-                                  const int shift) {
-    T_outValIntHb<cint16, cint16> outVal;
-    T_accIntHb<cint16, cint16> acc;
-    acc.val = concat(accLow.val, accHigh.val);
-    outVal.val = srs_ilv(acc.val, shift);
-    writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0);
-}
-
-// int32/int16
-template <typename TT_DATA, typename TT_COEFF, unsigned int TP_NUM_OUTPUTS = 1, unsigned int TP_API = USE_WINDOW_API>
-INLINE_DECL void writeOutputIntHb(T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface,
-                                  const T_accSymIntHb<int32, int16> accLow,
-                                  const T_accSymIntHb<int32, int16> accHigh,
-                                  const int shift) {
-    T_outValIntHb<int32, int16> outVal;
-    T_accIntHb<int32, int16> acc;
-    acc.val = concat(ext_lo(accLow.val), ext_lo(accHigh.val));
-    outVal.val = srs_ilv(acc.val, shift);
-    writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0);
-    acc.val = concat(ext_hi(accLow.val), ext_hi(accHigh.val));
-    outVal.val = srs_ilv(acc.val, shift);
-    writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0);
-}
-
-// int32/int32
-template <typename TT_DATA, typename TT_COEFF, unsigned int TP_NUM_OUTPUTS = 1, unsigned int TP_API = USE_WINDOW_API>
-INLINE_DECL void writeOutputIntHb(T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface,
-                                  const T_accSymIntHb<int32, int32> accLow,
-                                  const T_accSymIntHb<int32, int32> accHigh,
-                                  const int shift) {
-    T_outValIntHb<int32, int32> outVal;
-    T_accIntHb<int32, int32> acc;
-    acc.val = concat(accLow.val, accHigh.val);
-    outVal.val = srs_ilv(acc.val, shift);
-    writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0);
-}
-
-// cint32/int16
-template <typename TT_DATA, typename TT_COEFF, unsigned int TP_NUM_OUTPUTS = 1, unsigned int TP_API = USE_WINDOW_API>
-INLINE_DECL void writeOutputIntHb(T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface,
-                                  const T_accSymIntHb<cint32, int16> accLow,
-                                  const T_accSymIntHb<cint32, int16> accHigh,
-                                  const int shift) {
-    T_outValIntHb<cint32, int16> outVal;
-    T_accIntHb<cint32, int16> acc;
-    acc.val = concat(ext_lo(accLow.val), ext_lo(accHigh.val));
-    outVal.val = srs_ilv(acc.val, shift);
-    writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0);
-    acc.val = concat(ext_hi(accLow.val), ext_hi(accHigh.val));
-    outVal.val = srs_ilv(acc.val, shift);
-    writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0);
-}
-
-// cint32/cint16
-template <typename TT_DATA, typename TT_COEFF, unsigned int TP_NUM_OUTPUTS = 1, unsigned int TP_API = USE_WINDOW_API>
-INLINE_DECL void writeOutputIntHb(T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface,
-                                  const T_accSymIntHb<cint32, cint16> accLow,
-                                  const T_accSymIntHb<cint32, cint16> accHigh,
-                                  const int shift) {
-    T_outValIntHb<cint32, cint16> outVal;
-    T_accIntHb<cint32, cint16> acc;
-    acc.val = concat(ext_lo(accLow.val), ext_lo(accHigh.val));
-    outVal.val = srs_ilv(acc.val, shift);
-    writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0);
-    acc.val = concat(ext_hi(accLow.val), ext_hi(accHigh.val));
-    outVal.val = srs_ilv(acc.val, shift);
-    writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0);
-}
-
-// cint32/int32
-template <typename TT_DATA, typename TT_COEFF, unsigned int TP_NUM_OUTPUTS = 1, unsigned int TP_API = USE_WINDOW_API>
-INLINE_DECL void writeOutputIntHb(T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface,
-                                  const T_accSymIntHb<cint32, int32> accLow,
-                                  const T_accSymIntHb<cint32, int32> accHigh,
-                                  const int shift) {
-    T_outValIntHb<cint32, int32> outVal;
-    T_accIntHb<cint32, int32> acc;
-    acc.val = concat(ext_lo(accLow.val), ext_lo(accHigh.val));
-    outVal.val = srs_ilv(acc.val, shift);
-    writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0);
-    acc.val = concat(ext_hi(accLow.val), ext_hi(accHigh.val));
-    outVal.val = srs_ilv(acc.val, shift);
-    writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0);
-}
-
-// cint32/cint32
-template <typename TT_DATA, typename TT_COEFF, unsigned int TP_NUM_OUTPUTS = 1, unsigned int TP_API = USE_WINDOW_API>
-INLINE_DECL void writeOutputIntHb(T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface,
-                                  const T_accSymIntHb<cint32, cint32> accLow,
-                                  const T_accSymIntHb<cint32, cint32> accHigh,
-                                  const int shift) {
-    T_outValIntHb<cint32, cint32> outVal;
-    // v4cacc80 acc;
-    T_accIntHb<cint32, cint32> acc;
-    // acc.val = concat((accLow.val), (accHigh.val));
-    outVal.val = ext_v(srs_ilv(concat((accLow.val), (accHigh.val)), shift), 0);
-    // outVal.val = srs_ilv(acc.val, shift);
-    // writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0);
-    // acc = concat(accLow.uval, accHigh.uval);
-    // outVal.val = srs_ilv(acc, shift);
-    // writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0);
-    // 2 lane low phase + 2 lane high phase
-    // window_writeincr(outWindow,  srs_ilv(concat((accLow.val), (accHigh.val)), shift));
-    writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0);
-    outVal.val = ext_v(srs_ilv(concat((accLow.val), (accHigh.val)), shift), 1);
-    writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 1);
-}
-
-// float/float
-template <typename TT_DATA, typename TT_COEFF, unsigned int TP_NUM_OUTPUTS = 1, unsigned int TP_API = USE_WINDOW_API>
-INLINE_DECL void writeOutputIntHb(T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface,
-                                  const T_accSymIntHb<float, float> accLow,
-                                  const T_accSymIntHb<float, float> accHigh,
-                                  const int shift) {
-    T_outValIntHb<float, float> outVal;
-    v8acc80 acc1, acc2, concatacc;
-    v4acc80 acc3, acc4;
-    acc1 = lups(as_v8int32(accLow.val), 0);
-    acc2 = lups(as_v8int32(accHigh.val), 0);
-    acc3 = ext_lo(acc1);
-    acc4 = ext_lo(acc2);
-    concatacc = concat(acc3, acc4);
-    outVal.val = as_v8float(srs_ilv(concatacc, 0));
-    writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0);
-    acc3 = ext_hi(acc1);
-    acc4 = ext_hi(acc2);
-    concatacc = concat(acc3, acc4);
-    outVal.val = as_v8float(srs_ilv(concatacc, 0));
-    writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0);
-}
-
-// cfloat/float
-template <typename TT_DATA, typename TT_COEFF, unsigned int TP_NUM_OUTPUTS = 1, unsigned int TP_API = USE_WINDOW_API>
-INLINE_DECL void writeOutputIntHb(T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface,
-                                  const T_accSymIntHb<cfloat, float> accLow,
-                                  const T_accSymIntHb<cfloat, float> accHigh,
-                                  const int shift) {
-    T_outValIntHb<cfloat, float> outVal;
-    v4cacc80 acc1, acc2, concatacc;
-    v2cacc80 acc3, acc4;
-    acc1 = lups(as_v4cint32(accLow.val), 0);
-    acc2 = lups(as_v4cint32(accHigh.val), 0);
-    acc3 = ext_lo(acc1);
-    acc4 = ext_lo(acc2);
-    concatacc = concat(acc3, acc4);
-    outVal.val = as_v4cfloat(srs_ilv(concatacc, 0));
-    writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0);
-    acc3 = ext_hi(acc1);
-    acc4 = ext_hi(acc2);
-    concatacc = concat(acc3, acc4);
-    outVal.val = as_v4cfloat(srs_ilv(concatacc, 0));
-    writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0);
-}
-
-// cfloat/cfloat
-template <typename TT_DATA, typename TT_COEFF, unsigned int TP_NUM_OUTPUTS = 1, unsigned int TP_API = USE_WINDOW_API>
-INLINE_DECL void writeOutputIntHb(T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface,
-                                  const T_accSymIntHb<cfloat, cfloat> accLow,
-                                  const T_accSymIntHb<cfloat, cfloat> accHigh,
-                                  const int shift) {
-    T_outValIntHb<cfloat, cfloat> outVal;
-    v4cacc80 acc1, acc2, concatacc;
-    v2cacc80 acc3, acc4;
-    acc1 = lups(as_v4cint32(accLow.val), 0);
-    acc2 = lups(as_v4cint32(accHigh.val), 0);
-    acc3 = ext_lo(acc1);
-    acc4 = ext_lo(acc2);
-    concatacc = concat(acc3, acc4);
-    outVal.val = as_v4cfloat(srs_ilv(concatacc, 0));
-    writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0);
-    acc3 = ext_hi(acc1);
-    acc4 = ext_hi(acc2);
-    concatacc = concat(acc3, acc4);
-    outVal.val = as_v4cfloat(srs_ilv(concatacc, 0));
-    writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0);
-}
-
-// Symmetric mul/mac for use in 1buff
-//-----------------------------------------------------------------------------------------------------
-// DATA = int16, COEFF = int16
-INLINE_DECL T_accSymIntHb<int16, int16> mulSym1buffIntHb(
-    v64int16 xbuff, unsigned int xstart, unsigned int ystart, v16int16 zbuff, unsigned int zstart) {
-    T_accSymIntHb<int16, int16> retVal;
-    const unsigned int xoffsets = 0x03020100;
-    const unsigned int xstep = 2;
-    const unsigned int zoffsets = 0x00000000;
-    const unsigned int zstep = 1;
-    unsigned int xstartmod = (xstart & 1) == 0 ? xstart : xstart - 1;
-    unsigned int xsquare = (xstart & 1) == 0 ? 0x2110 : 0x3221;
-    unsigned int ystartmod = (ystart & 1) == 0 ? ystart - 2 : ystart - 1;
-    unsigned int ysquare = (ystart & 1) == 0 ? 0x2312 : 0x1201;
-
-    retVal.val =
-        mul8_sym(xbuff, xstartmod, xoffsets, xstep, xsquare, ystartmod, ysquare, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<int16, int16> macSym1buffIntHb(T_accSymIntHb<int16, int16> acc,
-                                                         v64int16 xbuff,
-                                                         unsigned int xstart,
-                                                         unsigned int ystart,
-                                                         v16int16 zbuff,
-                                                         unsigned int zstart) {
-    T_accSymIntHb<int16, int16> retVal;
-    const unsigned int xoffsets = 0x03020100;
-    const unsigned int xstep = 2;
-    const unsigned int zoffsets = 0x00000000;
-    const unsigned int zstep = 1;
-    unsigned int xstartmod = (xstart & 1) == 0 ? xstart : xstart - 1;
-    unsigned int xsquare = (xstart & 1) == 0 ? 0x2110 : 0x3221;
-    unsigned int ystartmod = (ystart & 1) == 0 ? ystart - 2 : ystart - 1;
-    unsigned int ysquare = (ystart & 1) == 0 ? 0x2312 : 0x1201;
-
-    retVal.val = mac8_sym(acc.val, xbuff, xstartmod, xoffsets, xstep, xsquare, ystartmod, ysquare, zbuff, zstart,
-                          zoffsets, zstep);
-    return retVal;
-}
-
-// DATA = cint16, COEFF = int16
-INLINE_DECL T_accSymIntHb<cint16, int16> mulSym1buffIntHb(
-    v32cint16 xbuff, unsigned int xstart, unsigned int ystart, v16int16 zbuff, unsigned int zstart) {
-    T_accSymIntHb<cint16, int16> retVal;
-    const unsigned int xoffsets = 0x76543210;
-    const unsigned int xstep = 1;
-    const unsigned int zoffsets = 0x00000000;
-    const unsigned int zstep = 1;
-
-    retVal.val = mul4_sym(xbuff, xstart, xoffsets, xstep, ystart, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cint16, int16> macSym1buffIntHb(T_accSymIntHb<cint16, int16> acc,
-                                                          v32cint16 xbuff,
-                                                          unsigned int xstart,
-                                                          unsigned int ystart,
-                                                          v16int16 zbuff,
-                                                          unsigned int zstart) {
-    T_accSymIntHb<cint16, int16> retVal;
-    const unsigned int xoffsets = 0x76543210;
-    const unsigned int xstep = 1;
-    const unsigned int zoffsets = 0x00000000;
-    const unsigned int zstep = 1;
-
-    retVal.val = mac4_sym(acc.val, xbuff, xstart, xoffsets, xstep, ystart, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-// DATA = cint16, COEFF = cint16
-INLINE_DECL T_accSymIntHb<cint16, cint16> mulSym1buffIntHb(
-    v32cint16 xbuff, unsigned int xstart, unsigned int ystart, v8cint16 zbuff, unsigned int zstart) {
-    T_accSymIntHb<cint16, cint16> retVal;
-    const unsigned int xoffsets = 0x76543210;
-    const unsigned int xstep = 1;
-    const unsigned int zoffsets = 0x00000000;
-    const unsigned int zstep = 1;
-
-    retVal.val = mul4_sym(xbuff, xstart, xoffsets, xstep, ystart, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cint16, cint16> macSym1buffIntHb(T_accSymIntHb<cint16, cint16> acc,
-                                                           v32cint16 xbuff,
-                                                           unsigned int xstart,
-                                                           unsigned int ystart,
-                                                           v8cint16 zbuff,
-                                                           unsigned int zstart) {
-    T_accSymIntHb<cint16, cint16> retVal;
-    const unsigned int xoffsets = 0x76543210;
-    const unsigned int xstep = 1;
-    const unsigned int zoffsets = 0x00000000;
-    const unsigned int zstep = 1;
-
-    retVal.val = mac4_sym(acc.val, xbuff, xstart, xoffsets, xstep, ystart, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-// DATA = int32, COEFF = int16
-INLINE_DECL T_accSymIntHb<int32, int16> mulSym1buffIntHb(
-    v32int32 xbuff, unsigned int xstart, unsigned int ystart, v16int16 zbuff, unsigned int zstart) {
-    T_accSymIntHb<int32, int16> retVal;
-    const unsigned int xoffsets = 0x76543210;
-    const unsigned int xstep = 1;
-    const unsigned int zoffsets = 0x00000000;
-    const unsigned int zstep = 1;
-
-    retVal.val = lmul8_sym(xbuff, xstart, xoffsets, xstep, ystart, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<int32, int16> macSym1buffIntHb(T_accSymIntHb<int32, int16> acc,
-                                                         v32int32 xbuff,
-                                                         unsigned int xstart,
-                                                         unsigned int ystart,
-                                                         v16int16 zbuff,
-                                                         unsigned int zstart) {
-    T_accSymIntHb<int32, int16> retVal;
-    const unsigned int xoffsets = 0x76543210;
-    const unsigned int xstep = 1;
-    const unsigned int zoffsets = 0x00000000;
-    const unsigned int zstep = 1;
-
-    retVal.val = lmac8_sym(acc.val, xbuff, xstart, xoffsets, xstep, ystart, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-// DATA = int32,  COEFF = int32>
-INLINE_DECL T_accSymIntHb<int32, int32> mulSym1buffIntHb(
-    v32int32 xbuff, unsigned int xstart, unsigned int ystart, v8int32 zbuff, unsigned int zstart) {
-    T_accSymIntHb<int32, int32> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int xstep = 1;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int zstep = 1;
-
-    retVal.val = lmul4_sym(xbuff, xstart, xoffsets, xstep, ystart, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<int32, int32> macSym1buffIntHb(T_accSymIntHb<int32, int32> acc,
-                                                         v32int32 xbuff,
-                                                         unsigned int xstart,
-                                                         unsigned int ystart,
-                                                         v8int32 zbuff,
-                                                         unsigned int zstart) {
-    T_accSymIntHb<int32, int32> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int xstep = 1;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int zstep = 1;
-
-    retVal.val = lmac4_sym(acc.val, xbuff, xstart, xoffsets, xstep, ystart, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-// DATA = cint32,  COEFF = int16>
-INLINE_DECL T_accSymIntHb<cint32, int16> mulSym1buffIntHb(
-    v16cint32 xbuff, unsigned int xstart, unsigned int ystart, v16int16 zbuff, unsigned int zstart) {
-    T_accSymIntHb<cint32, int16> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int xstep = 1;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int zstep = 1;
-
-    retVal.val = lmul4_sym(xbuff, xstart, xoffsets, xstep, ystart, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cint32, int16> macSym1buffIntHb(T_accSymIntHb<cint32, int16> acc,
-                                                          v16cint32 xbuff,
-                                                          unsigned int xstart,
-                                                          unsigned int ystart,
-                                                          v16int16 zbuff,
-                                                          unsigned int zstart) {
-    T_accSymIntHb<cint32, int16> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int xstep = 1;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int zstep = 1;
-
-    retVal.val = lmac4_sym(acc.val, xbuff, xstart, xoffsets, xstep, ystart, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-// DATA = cint32,  COEFF = cint16>
-INLINE_DECL T_accSymIntHb<cint32, cint16> mulSym1buffIntHb(
-    v16cint32 xbuff, unsigned int xstart, unsigned int ystart, v8cint16 zbuff, unsigned int zstart) {
-    T_accSymIntHb<cint32, cint16> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int xstep = 1;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int zstep = 1;
-
-    retVal.val = lmul4_sym(xbuff, xstart, xoffsets, ystart, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cint32, cint16> macSym1buffIntHb(T_accSymIntHb<cint32, cint16> acc,
-                                                           v16cint32 xbuff,
-                                                           unsigned int xstart,
-                                                           unsigned int ystart,
-                                                           v8cint16 zbuff,
-                                                           unsigned int zstart) {
-    T_accSymIntHb<cint32, cint16> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int xstep = 1;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int zstep = 1;
-
-    retVal.val = lmac4_sym(acc.val, xbuff, xstart, xoffsets, ystart, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-// DATA = cint32,  COEFF = int32>
-INLINE_DECL T_accSymIntHb<cint32, int32> mulSym1buffIntHb(
-    v16cint32 xbuff, unsigned int xstart, unsigned int ystart, v8int32 zbuff, unsigned int zstart) {
-    T_accSymIntHb<cint32, int32> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int zoffsets = 0x0000;
-
-    retVal.val = lmul4_sym(xbuff, xstart, xoffsets, ystart, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cint32, int32> macSym1buffIntHb(T_accSymIntHb<cint32, int32> acc,
-                                                          v16cint32 xbuff,
-                                                          unsigned int xstart,
-                                                          unsigned int ystart,
-                                                          v8int32 zbuff,
-                                                          unsigned int zstart) {
-    T_accSymIntHb<cint32, int32> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int zoffsets = 0x0000;
-
-    retVal.val = lmac4_sym(acc.val, xbuff, xstart, xoffsets, ystart, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-// DATA = cint32,  COEFF = cint32>
-INLINE_DECL T_accSymIntHb<cint32, cint32> mulSym1buffIntHb(
-    v16cint32 xbuff, unsigned int xstart, unsigned int ystart, v4cint32 zbuff, unsigned int zstart) {
-    T_accSymIntHb<cint32, cint32> retVal;
-    const unsigned int xoffsets = 0x10;
-    const unsigned int zoffsets = 0x00;
-
-    retVal.val = lmul2_sym(xbuff, xstart, xoffsets, ystart, zbuff, zstart, zoffsets);
-    // retVal.uval = lmul2_sym( xbuff, xstart+2, xoffsets, ystart+2, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cint32, cint32> macSym1buffIntHb(T_accSymIntHb<cint32, cint32> acc,
-                                                           v16cint32 xbuff,
-                                                           unsigned int xstart,
-                                                           unsigned int ystart,
-                                                           v4cint32 zbuff,
-                                                           unsigned int zstart) {
-    T_accSymIntHb<cint32, cint32> retVal;
-    const unsigned int xoffsets = 0x10;
-    const unsigned int zoffsets = 0x00;
-
-    retVal.val = lmac2_sym(acc.val, xbuff, xstart, xoffsets, ystart, zbuff, zstart, zoffsets);
-    // retVal.uval = lmac2_sym(acc.uval, xbuff, xstart+2, xoffsets, ystart+2, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-// DATA = float,  COEFF = float>
-INLINE_DECL T_accSymIntHb<float, float> mulSym1buffIntHb(
-    v32float xbuff, unsigned int xstart, unsigned int ystart, v8float zbuff, unsigned int zstart) {
-    T_accSymIntHb<float, float> retVal;
-    const unsigned int xoffsets = 0x76543210;
-    const unsigned int zoffsets = 0x00000000;
-
-    retVal.val = fpmul(xbuff, xstart, xoffsets, zbuff, zstart, zoffsets);
-    retVal.val = fpmac(retVal.val, xbuff, ystart, xoffsets, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<float, float> macSym1buffIntHb(T_accSymIntHb<float, float> acc,
-                                                         v32float xbuff,
-                                                         unsigned int xstart,
-                                                         unsigned int ystart,
-                                                         v8float zbuff,
-                                                         unsigned int zstart) {
-    T_accSymIntHb<float, float> retVal;
-    const unsigned int xoffsets = 0x76543210;
-    const unsigned int zoffsets = 0x00000000;
-
-    retVal.val = fpmac(acc.val, xbuff, xstart, xoffsets, zbuff, zstart, zoffsets);
-    retVal.val = fpmac(retVal.val, xbuff, ystart, xoffsets, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-// DATA = cfloat,  COEFF = float>
-INLINE_DECL T_accSymIntHb<cfloat, float> mulSym1buffIntHb(
-    v16cfloat xbuff, unsigned int xstart, unsigned int ystart, v8float zbuff, unsigned int zstart) {
-    T_accSymIntHb<cfloat, float> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int zoffsets = 0x0000;
-
-    retVal.val = fpmul(xbuff, xstart, xoffsets, zbuff, zstart, zoffsets);
-    retVal.val = fpmac(retVal.val, xbuff, ystart, xoffsets, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cfloat, float> macSym1buffIntHb(T_accSymIntHb<cfloat, float> acc,
-                                                          v16cfloat xbuff,
-                                                          unsigned int xstart,
-                                                          unsigned int ystart,
-                                                          v8float zbuff,
-                                                          unsigned int zstart) {
-    T_accSymIntHb<cfloat, float> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int zoffsets = 0x0000;
-
-    retVal.val = fpmac(acc.val, xbuff, xstart, xoffsets, zbuff, zstart, zoffsets);
-    retVal.val = fpmac(retVal.val, xbuff, ystart, xoffsets, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-// DATA = cfloat,  COEFF = cfloat>
-INLINE_DECL T_accSymIntHb<cfloat, cfloat> mulSym1buffIntHb(
-    v16cfloat xbuff, unsigned int xstart, unsigned int ystart, v4cfloat zbuff, unsigned int zstart) {
-    T_accSymIntHb<cfloat, cfloat> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int zoffsets = 0x0000;
-
-    retVal.val = fpmul(xbuff, xstart, xoffsets, zbuff, zstart, zoffsets);
-    retVal.val = fpmac(retVal.val, xbuff, ystart, xoffsets, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cfloat, cfloat> macSym1buffIntHb(T_accSymIntHb<cfloat, cfloat> acc,
-                                                           v16cfloat xbuff,
-                                                           unsigned int xstart,
-                                                           unsigned int ystart,
-                                                           v4cfloat zbuff,
-                                                           unsigned int zstart) {
-    T_accSymIntHb<cfloat, cfloat> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int zoffsets = 0x0000;
-
-    retVal.val = fpmac(acc.val, xbuff, xstart, xoffsets, zbuff, zstart, zoffsets);
-    retVal.val = fpmac(retVal.val, xbuff, ystart, xoffsets, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-// Centre tap mul for 1buff architecture using 1024b buffer
-//-----------------------------------------------------------------------------------------------------
-INLINE_DECL T_accSymIntHb<int16, int16> mulCentreTap1buffIntHb(v64int16 xbuff, unsigned int xstart, v16int16 zbuff) {
-    T_accSymIntHb<int16, int16> retVal;
-    const unsigned int xoffsets = 0x03020100;
-    const unsigned int xstep = 0;
-    const unsigned int zoffsets = 0x00000000;
-    const unsigned int zstart = 0;
-    const unsigned int zstep = 1;
-    unsigned int xstartmod = (xstart & 1) == 0 ? xstart : xstart - 1;
-    unsigned int xsquare = (xstart & 1) == 0 ? 0x2110 : 0x3221;
-    retVal.val = mul8(xbuff, xstartmod, xoffsets, xstep, xsquare, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cint16, int16> mulCentreTap1buffIntHb(v32cint16 xbuff, unsigned int xstart, v16int16 zbuff) {
-    T_accSymIntHb<cint16, int16> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int xstep = 0;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int zstart = 0;
-    const unsigned int zstep = 1;
-    retVal.val = mul4(xbuff, xstart, xoffsets, xstep, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cint16, cint16> mulCentreTap1buffIntHb(v32cint16 xbuff, unsigned int xstart, v8cint16 zbuff) {
-    T_accSymIntHb<cint16, cint16> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int xstep = 0;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int zstart = 0;
-    const unsigned int zstep = 1;
-    retVal.val = mul4(xbuff, xstart, xoffsets, xstep, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<int32, int16> mulCentreTap1buffIntHb(v32int32 xbuff, unsigned int xstart, v16int16 zbuff) {
-    T_accSymIntHb<int32, int16> retVal;
-    const unsigned int xoffsets = 0x76543210;
-    const unsigned int xstep = 0;
-    const unsigned int zoffsets = 0x00000000;
-    const unsigned int zstart = 0;
-    const unsigned int zstep = 1;
-    retVal.val = lmul8(xbuff, xstart, xoffsets, xstep, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<int32, int32> mulCentreTap1buffIntHb(v32int32 xbuff, unsigned int xstart, v8int32 zbuff) {
-    T_accSymIntHb<int32, int32> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int xstep = 0;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int zstart = 0;
-    const unsigned int zstep = 1;
-    retVal.val = lmul4(xbuff, xstart, xoffsets, xstep, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cint32, int16> mulCentreTap1buffIntHb(v16cint32 xbuff, unsigned int xstart, v16int16 zbuff) {
-    T_accSymIntHb<cint32, int16> retVal;
-    retVal.val = null_v4cacc80();
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int xstep = 0;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int zstart = 0;
-    const unsigned int zstep = 1;
-    retVal.val = lmac4(retVal.val, xbuff, xstart, xoffsets, xstep, zbuff, zstart, zoffsets, zstep);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cint32, cint16> mulCentreTap1buffIntHb(v16cint32 xbuff, unsigned int xstart, v8cint16 zbuff) {
-    T_accSymIntHb<cint32, cint16> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int xstep = 0;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int zstart = 0;
-    const unsigned int zstep = 1;
-    retVal.val = lmul4(xbuff, xstart, xoffsets, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cint32, int32> mulCentreTap1buffIntHb(v16cint32 xbuff, unsigned int xstart, v8int32 zbuff) {
-    T_accSymIntHb<cint32, int32> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int zstart = 0;
-    retVal.val = lmul4(xbuff, xstart, xoffsets, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cint32, cint32> mulCentreTap1buffIntHb(v16cint32 xbuff, unsigned int xstart, v4cint32 zbuff) {
-    T_accSymIntHb<cint32, cint32> retVal;
-    const unsigned int xoffsets = 0x10;
-    const unsigned int zoffsets = 0x00;
-    const unsigned int zstart = 0;
-    retVal.val = lmul2(xbuff, xstart, xoffsets, zbuff, zstart, zoffsets);
-    // retVal.uval = lmul2(xbuff, xstart+2, xoffsets, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<float, float> mulCentreTap1buffIntHb(v32float xbuff, unsigned int xstart, v8float zbuff) {
-    T_accSymIntHb<float, float> retVal;
-    const unsigned int xoffsets = 0x76543210;
-    const unsigned int zoffsets = 0x00000000;
-    const unsigned int zstart = 0;
-    retVal.val = fpmul(xbuff, xstart, xoffsets, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cfloat, float> mulCentreTap1buffIntHb(v16cfloat xbuff, unsigned int xstart, v8float zbuff) {
-    T_accSymIntHb<cfloat, float> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int zstart = 0;
-    retVal.val = fpmul(xbuff, xstart, xoffsets, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-INLINE_DECL T_accSymIntHb<cfloat, cfloat> mulCentreTap1buffIntHb(v16cfloat xbuff, unsigned int xstart, v4cfloat zbuff) {
-    T_accSymIntHb<cfloat, cfloat> retVal;
-    const unsigned int xoffsets = 0x3210;
-    const unsigned int zoffsets = 0x0000;
-    const unsigned int zstart = 0;
-    retVal.val = fpmul(xbuff, xstart, xoffsets, zbuff, zstart, zoffsets);
-    return retVal;
-}
-
-// Halfband Output. This function takes the two polyphase lane sets, interleaves them and outputs them
-// however for some types, the lane vector is too large for the interleave intrinsic, so they have to be split and for
-// the splices to be interleaved.
+// Halfband Output. This function takes the two polyphase lanes passed in one acc argument, interleaves them and outputs
+// them.
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_UPSHIFT_CT,
@@ -1283,13 +195,14 @@ template <typename TT_DATA,
           unsigned int TP_API>
 INLINE_DECL void writeOutputIntHb(T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface,
                                   const T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> accHigh,
-                                  const int shift) {
+                                  const int shift,
+                                  auto& outItr) {
     using acc_type = typename T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT>::v_type;
     acc_type chess_storage(bm0) tmp;
     tmp = accHigh.val;
     T_outValIntHb<TT_DATA, TT_COEFF> outVal;
     outVal.val = tmp.template to_vector_zip<TT_DATA>(shift);
-    writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0);
+    writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0, outItr);
 }
 
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_FIR_LEN>
@@ -1308,7 +221,8 @@ template <typename TT_DATA,
 INLINE_DECL void writeOutputSel(T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface,
                                 T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> accHP,
                                 T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> accLP,
-                                unsigned int shift) {
+                                unsigned int shift,
+                                auto& outItr) {
     // Do nothing
 }
 
@@ -1320,48 +234,24 @@ template <typename TT_DATA,
 INLINE_DECL void writeOutputSel(T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface,
                                 T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> accHP,
                                 T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> accLP,
-                                unsigned int shift) {
+                                unsigned int shift,
+                                auto& outItr) {
     if
         constexpr(TP_UPSHIFT_CT == 0) {
-            writeOutputIntHb<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, accHP, accLP, shift);
-            // if constexpr(TP_NUM_OUTPUTS==2 && TP_API==0) {
-            //    writeOutputIntHb<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, accHP, accLP, shift);
-            //}
+            writeOutputIntHb<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, accHP, accLP, shift, outItr);
         }
     else {
-        writeOutputIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT, TP_NUM_OUTPUTS, TP_API>(outInterface, accHP, shift);
-        // if constexpr(TP_NUM_OUTPUTS==2 && TP_API==0) {
-        //    writeOutputIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT, TP_NUM_OUTPUTS, TP_API>(outInterface, accHP, shift);
-        //}
+        writeOutputIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT, TP_NUM_OUTPUTS, TP_API>(outInterface, accHP, shift, outItr);
     }
 }
-// template for mulSlidingSym1buffIntHb - uses ::aie::api HLI
+
+#ifdef __X86SIM__
+// #define _DSPLIB_FIR_SR_SYM_DEBUG_ 1
+#endif
+
+// template for macSlidingSymUCT1buff - uses ::aie::api HLI
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_FIR_LEN, unsigned int TP_UPSHIFT_CT>
-INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> mulSlidingSym1buffIntHb(
-    T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> acc,
-    T_buff_1024b<TT_DATA> xbuff,
-    unsigned int xstart, // no ystart - API calculates ystart based on Points size
-    T_buff_256b<TT_COEFF> zbuff,
-    unsigned int zstart,
-    unsigned int cfShift) {
-    constexpr unsigned int Lanes = 2 * fnNumSymLanesIntHb<TT_DATA, TT_COEFF>();
-    constexpr unsigned int Points = (TP_FIR_LEN + 1) / 2;
-    constexpr unsigned int CoeffStep = 1;
-    constexpr unsigned int DataStep = 1;
-    using acc_type = typename T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT>::v_type;
-    acc_type chess_storage(bm0) tmp;
-
-    // #define _DSPLIB_FIR_INT_HB_UTILS_DEBUG_
-
-    T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> retVal;
-    tmp = ::aie::sliding_mul_sym_uct<Lanes, Points, CoeffStep, DataStep>(zbuff.val, zstart, xbuff.val, xstart, cfShift);
-    retVal.val = tmp;
-    return retVal;
-}
-
-// template for macSlidingSym1buffIntHb - uses ::aie::api HLI
-template <typename TT_DATA, typename TT_COEFF, unsigned int TP_FIR_LEN, unsigned int TP_UPSHIFT_CT>
-INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> macSlidingSym1buffIntHb(
+INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> macSlidingSymUCT1buff(
     T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> acc,
     T_buff_1024b<TT_DATA> xbuff,
     unsigned int xstart, // no ystart - API calculates ystart based on Points size
@@ -1382,35 +272,9 @@ INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> macSlidingSym1buffIn
     return retVal;
 }
 
-// template for mulSlidingSym2buffIntHb - uses ::aie::api HLI
+// template for macSlidingSymUCT2buff - uses ::aie::api HLI
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_FIR_LEN, unsigned int TP_UPSHIFT_CT>
-INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> mulSlidingSym2buffIntHb(
-    T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> acc,
-    T_buff_512b<TT_DATA> xbuff,
-    unsigned int xstart,
-    T_buff_512b<TT_DATA> ybuff,
-    unsigned int ystart,
-    T_buff_256b<TT_COEFF> zbuff,
-    unsigned int zstart,
-    unsigned int cfShift) {
-    constexpr unsigned int Lanes = 2 * fnNumSymLanesIntHb<TT_DATA, TT_COEFF>();
-    // adjust Point size to where the center tap is in relation to number of columns in low-level intrinsic
-    constexpr unsigned int Points = 2 * (((TP_FIR_LEN + 1) / 4 - 1) % fnNumSymColsIntHb<TT_DATA, TT_COEFF>() + 1);
-    constexpr unsigned int CoeffStep = 1;
-    constexpr unsigned int DataStep = 1;
-    using acc_type = typename T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT>::v_type;
-    acc_type chess_storage(bm0) tmp;
-
-    T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> retVal;
-    tmp = ::aie::sliding_mul_sym_uct<Lanes, Points, CoeffStep, DataStep>(zbuff.val, zstart, xbuff.val, xstart,
-                                                                         ybuff.val, ystart, cfShift);
-    retVal.val = tmp;
-    return retVal;
-}
-
-// template for macSlidingSym2buffIntHb - uses ::aie::api HLI
-template <typename TT_DATA, typename TT_COEFF, unsigned int TP_FIR_LEN, unsigned int TP_UPSHIFT_CT>
-INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> macSlidingSym2buffIntHb(
+INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> macSlidingSymUCT2buff(
     T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> acc,
     T_buff_512b<TT_DATA> xbuff,
     unsigned int xstart,
@@ -1434,9 +298,9 @@ INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> macSlidingSym2buffIn
     return retVal;
 }
 
-// template for macSlidingSym2buffIntHb - uses ::aie::api HLI
+// template for macSlidingSym2buff - uses ::aie::api HLI
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_FIR_LEN, unsigned int TP_UPSHIFT_CT>
-INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> macSlidingSym2buffIntHb(
+INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> macSlidingSym2buff(
     T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> acc,
     T_buff_512b<TT_DATA> xbuff,
     unsigned int xstart,
@@ -1452,11 +316,22 @@ INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> macSlidingSym2buffIn
     using acc_type = typename T_accSymIntHb<TT_DATA, TT_COEFF, 0>::v_type;
     // acc_type chess_storage(aml0) tmp;  // lower part of bm0, used in UCT
     acc_type tmp; // lower part of bm0, used in UCT
-
-    T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> retVal = acc;
-    tmp = ::aie::sliding_mac_sym<Lanes, Points, CoeffStep, DataStep>(acc.val.template extract<Lanes>(0), zbuff.val,
-                                                                     zstart, xbuff.val, xstart, ybuff.val, ystart);
-    retVal.val = retVal.val.insert(0, tmp);
+    T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> retVal;
+    if
+        constexpr((std::is_same_v<TT_DATA, float> || std::is_same_v<TT_DATA, cfloat>)) {
+            retVal.val =
+                ::aie::sliding_mac<fnNumSymLanesIntHb<TT_DATA, TT_COEFF>(), fnNumSymColsIntHb<TT_DATA, TT_COEFF>()>(
+                    acc.val, zbuff.val, zstart, xbuff.val, xstart);
+            retVal.val =
+                ::aie::sliding_mac<fnNumSymLanesIntHb<TT_DATA, TT_COEFF>(), fnNumSymColsIntHb<TT_DATA, TT_COEFF>()>(
+                    retVal.val, zbuff.val, zstart, ybuff.val, ystart);
+        }
+    else {
+        retVal = acc;
+        tmp = ::aie::sliding_mac_sym<Lanes, Points, CoeffStep, DataStep>(acc.val.template extract<Lanes>(0), zbuff.val,
+                                                                         zstart, xbuff.val, xstart, ybuff.val, ystart);
+        retVal.val = retVal.val.insert(0, tmp);
+    }
     return retVal;
 }
 
@@ -1469,18 +344,41 @@ INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> macSym1buffIntHb(
     unsigned int ystart,
     T_buff_256b<TT_COEFF> zbuff,
     unsigned int zstart) {
+    T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> retVal;
+
     if
         constexpr(TP_UPSHIFT_CT == 0) {
             // Call overloaded function which uses native vectors
-            return macSym1buffIntHb(acc, xbuff.val, xstart, ystart, zbuff.val, zstart);
+            // retVal =  macSym1buffIntHb(acc, xbuff.val, xstart, ystart, zbuff.val, zstart);
+            constexpr unsigned int Lanes = fnNumSymLanesIntHb<TT_DATA, TT_COEFF>();
+            constexpr unsigned int Points = 2 * fnNumSymColsIntHb<TT_DATA, TT_COEFF>();
+            constexpr unsigned int CoeffStep = 1;
+            constexpr unsigned int DataStepX = 1;
+            constexpr unsigned int DataStepY = 1;
+
+            // floats datapath doesn't have a pre-adder, need to issue 2 x non-sym calls.
+            if
+                constexpr((std::is_same_v<TT_DATA, float> || std::is_same_v<TT_DATA, cfloat>)) {
+                    retVal.val = ::aie::sliding_mac<fnNumSymLanesIntHb<TT_DATA, TT_COEFF>(),
+                                                    fnNumSymColsIntHb<TT_DATA, TT_COEFF>()>(acc.val, zbuff.val, zstart,
+                                                                                            xbuff.val, xstart);
+                    retVal.val = ::aie::sliding_mac<fnNumSymLanesIntHb<TT_DATA, TT_COEFF>(),
+                                                    fnNumSymColsIntHb<TT_DATA, TT_COEFF>()>(retVal.val, zbuff.val,
+                                                                                            zstart, xbuff.val, ystart);
+                }
+            else {
+                retVal.val = ::aie::sliding_mac_sym<Lanes, Points, CoeffStep, DataStepX, DataStepY>(
+                    acc.val, zbuff.val, zstart, xbuff.val, xstart, ystart);
+            }
         }
     else {
         // Do nothing, API _uct call already instantiated all the required calls.
-        return acc;
+        retVal = acc;
     }
+    return retVal;
 };
 
-// MAC operation for 2buff arch. Template function which also hides the struct contents.
+// MAC operation for 2buff arch. Calls APIs sliding_mac. Overloaded with extra argument to call UCT
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_FIR_LEN, unsigned int TP_UPSHIFT_CT>
 INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> macSym2buffIntHb(
     T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> acc,
@@ -1490,19 +388,11 @@ INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> macSym2buffIntHb(
     unsigned int ystart,
     T_buff_256b<TT_COEFF> zbuff,
     unsigned int zstart) {
-    if
-        constexpr(TP_UPSHIFT_CT == 0) {
-            // Call overloaded low level function which uses native vectors
-            return macSym2buffIntHb(acc, xbuff.val, xstart, ybuff.val, ystart, zbuff.val, zstart);
-        }
-    else {
-        // Call API _uct .
-        return macSlidingSym2buffIntHb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_UPSHIFT_CT>(acc, xbuff, xstart, ybuff, ystart,
-                                                                                     zbuff, zstart);
-    }
+    return macSlidingSym2buff<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_UPSHIFT_CT>(acc, xbuff, xstart, ybuff, ystart, zbuff,
+                                                                            zstart);
 };
 
-// MAC operation for 2buff arch. Template function which also hides the struct contents.
+// MAC operation for 2buff arch. Calls APIs sliding_mac or sliding_mac_uct. Overloaded with extra argument to call UCT.
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_FIR_LEN, unsigned int TP_UPSHIFT_CT>
 INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> macSym2buffIntHb(
     T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> acc,
@@ -1515,13 +405,13 @@ INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> macSym2buffIntHb(
     unsigned int ctShift) {
     if
         constexpr(TP_UPSHIFT_CT == 0) {
-            // Call overloaded low level function which uses native vectors
-            return macSym2buffIntHb(acc, xbuff.val, xstart, ybuff.val, ystart, zbuff.val, zstart);
+            return macSlidingSym2buff<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_UPSHIFT_CT>(acc, xbuff, xstart, ybuff, ystart,
+                                                                                    zbuff, zstart);
         }
     else {
         // Call API _uct .
-        return macSlidingSym2buffIntHb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_UPSHIFT_CT>(acc, xbuff, xstart, ybuff, ystart,
-                                                                                     zbuff, zstart, ctShift);
+        return macSlidingSymUCT2buff<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_UPSHIFT_CT>(acc, xbuff, xstart, ybuff, ystart,
+                                                                                   zbuff, zstart, ctShift);
     }
 };
 
@@ -1530,54 +420,25 @@ template <typename TT_DATA, typename TT_COEFF, unsigned int TP_UPSHIFT_CT>
 INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> mulCentreTap2buffIntHb(T_buff_512b<TT_DATA> xbuff,
                                                                                    unsigned int xstart,
                                                                                    T_buff_256b<TT_COEFF> zbuff) {
+    unsigned int zstart = 0;
+    T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> retVal;
     if
         constexpr(TP_UPSHIFT_CT == 0) {
             // Call overloaded low level function which uses native vectors
-            return mulCentreTap2buffIntHb(xbuff.val, xstart, zbuff.val);
+            retVal.val = ::aie::sliding_mul<fnNumLanes384<TT_DATA, TT_COEFF>(), fnNumCols384<TT_DATA, TT_COEFF>(), 1, 1,
+                                            1, accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >(
+                zbuff.val, zstart, xbuff.val, xstart);
         }
     else {
-        // Call API  .
-        T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> retVal;
-        return retVal; // return undef vector. Nothing to do here.
+        // return undef vector. Nothing to do here.
     }
-};
 
-// Initial MUL operation for 1buff arch. Take inputIF as an argument to ease overloading.
-template <typename TT_DATA,
-          typename TT_COEFF,
-          unsigned int TP_DUAL_IP,
-          unsigned int TP_FIR_LEN,
-          unsigned int TP_UPSHIFT_CT>
-INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> initMacIntHb(
-    T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> inInterface,
-    T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> acc,
-    T_buff_1024b<TT_DATA> xbuff,
-    unsigned int xstart,
-    unsigned int ystart,
-    T_buff_256b<TT_COEFF> zbuff,
-    unsigned int zstart,
-    unsigned int ctShift) {
-    if
-        constexpr(TP_UPSHIFT_CT == 0) {
-            // Call overloaded low level function which uses native vectors
-            return mulSym1buffIntHb(xbuff.val, xstart, ystart, zbuff.val, zstart);
-            // return macSym1buffIntHb(acc, xbuff, xstart, ystart, zbuff, zstart);
-        }
-    else {
-        // Call API  .
-        return mulSlidingSym1buffIntHb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_UPSHIFT_CT>(acc, xbuff, xstart, zbuff, zstart,
-                                                                                     ctShift);
-    }
+    return retVal;
 };
 
 // Initial MAC operation for 1buff arch. Take inputIF as an argument to ease overloading.
-template <typename TT_DATA,
-          typename TT_COEFF,
-          unsigned int TP_DUAL_IP,
-          unsigned int TP_FIR_LEN,
-          unsigned int TP_UPSHIFT_CT>
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_FIR_LEN, unsigned int TP_UPSHIFT_CT>
 INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> initMacIntHb(
-    T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface,
     T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> acc,
     T_buff_1024b<TT_DATA> xbuff,
     unsigned int xstart,
@@ -1591,9 +452,12 @@ INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> initMacIntHb(
             return macSym1buffIntHb(acc, xbuff, xstart, ystart, zbuff, zstart);
         }
     else {
-        // Call API  .
-        return macSlidingSym1buffIntHb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_UPSHIFT_CT>(acc, xbuff, xstart, zbuff, zstart,
-                                                                                     ctShift);
+        // Call API UCT MACs, API call unrolls all required operations, so subsequent calls to macSym1buffIntHb are not
+        // required.
+        // 1 Buff arch fits all required data in xbuff.
+        // Note. API call to single MAC with a 1buff is not available.
+        return macSlidingSymUCT1buff<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_UPSHIFT_CT>(acc, xbuff, xstart, zbuff, zstart,
+                                                                                   ctShift);
     }
 };
 // MAC operation for Low Polyphase 1buff arch. Template function which also hides the struct contents.
@@ -1601,52 +465,26 @@ template <typename TT_DATA, typename TT_COEFF, unsigned int TP_UPSHIFT_CT>
 INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> mulCentreTap1buffIntHb(T_buff_1024b<TT_DATA> xbuff,
                                                                                    unsigned int xstart,
                                                                                    T_buff_256b<TT_COEFF> zbuff) {
+    unsigned int zstart = 0;
+    T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> retVal;
     if
         constexpr(TP_UPSHIFT_CT == 0) {
             // Call overloaded low level function which uses native vectors
-            return mulCentreTap1buffIntHb(xbuff.val, xstart, zbuff.val);
+            // return mulCentreTap1buffIntHb(xbuff.val, xstart, zbuff.val);
+            retVal.val = ::aie::sliding_mul<fnNumLanes384<TT_DATA, TT_COEFF>(), fnNumCols384<TT_DATA, TT_COEFF>(), 1, 1,
+                                            1, accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >(
+                zbuff.val, zstart, xbuff.val, xstart);
         }
     else {
-        T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> retVal;
-        return retVal; // return undef vector. Nothing to do here.
+        // return undef vector. Nothing to do here.
     }
+
+    return retVal;
 };
 
-// ----------------------------
-// Initial MUL operation for 2buff arch. Take inputIF as an argument to ease overloading.
-template <typename TT_DATA,
-          typename TT_COEFF,
-          unsigned int TP_DUAL_IP,
-          unsigned int TP_FIR_LEN,
-          unsigned int TP_UPSHIFT_CT>
-INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> initMacIntHb(
-    T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> inInterface,
-    T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> acc,
-    T_buff_512b<TT_DATA> xbuff,
-    unsigned int xstart,
-    T_buff_512b<TT_DATA> ybuff,
-    unsigned int ystart,
-    T_buff_256b<TT_COEFF> zbuff,
-    unsigned int zstart,
-    unsigned int ctShift) {
-    if
-        constexpr(TP_UPSHIFT_CT == 0) {
-            // Call overloaded low level function which uses native vectors
-            return mulSym2buffIntHb(xbuff.val, xstart, ybuff.val, ystart, zbuff.val, zstart);
-        }
-    else {
-        return mulSlidingSym2buffIntHb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_UPSHIFT_CT>(acc, xbuff, xstart, ybuff, ystart,
-                                                                                     zbuff, zstart, ctShift);
-    }
-};
 // Initial MAC operation for 2buff arch. Take inputIF as an argument to ease overloading.
-template <typename TT_DATA,
-          typename TT_COEFF,
-          unsigned int TP_DUAL_IP,
-          unsigned int TP_FIR_LEN,
-          unsigned int TP_UPSHIFT_CT>
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_FIR_LEN, unsigned int TP_UPSHIFT_CT>
 INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> initMacIntHb(
-    T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface,
     T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> acc,
     T_buff_512b<TT_DATA> xbuff,
     unsigned int xstart,
@@ -1658,11 +496,12 @@ INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> initMacIntHb(
     if
         constexpr(TP_UPSHIFT_CT == 0) {
             // Call overloaded low level function which uses native vectors
-            return macSym2buffIntHb(acc, xbuff.val, xstart, ybuff.val, ystart, zbuff.val, zstart);
+            return macSlidingSym2buff<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_UPSHIFT_CT>(acc, xbuff, xstart, ybuff, ystart,
+                                                                                    zbuff, zstart);
         }
     else {
-        return macSlidingSym2buffIntHb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_UPSHIFT_CT>(acc, xbuff, xstart, ybuff, ystart,
-                                                                                     zbuff, zstart, ctShift);
+        return macSlidingSymUCT2buff<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_UPSHIFT_CT>(acc, xbuff, xstart, ybuff, ystart,
+                                                                                   zbuff, zstart, ctShift);
     }
 };
 }

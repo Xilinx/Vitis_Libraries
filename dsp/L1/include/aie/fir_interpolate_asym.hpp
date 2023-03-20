@@ -198,6 +198,8 @@ class kernelFilterClass {
     static_assert(TP_NUM_OUTPUTS > 0 && TP_NUM_OUTPUTS <= 2, "ERROR: only single or dual outputs are supported.");
     static_assert(!(std::is_same<TT_DATA, cfloat>::value || std::is_same<TT_DATA, float>::value) || (TP_SHIFT == 0),
                   "ERROR: TP_SHIFT cannot be performed for TT_DATA=cfloat, so must be set to 0");
+    // static_assert(!(std::is_same<TT_DATA,int16>::value && std::is_same<TT_COEFF,int32>::value) , "ERROR: The
+    // combination of TT_DATA and TT_COEFF is currently not supported.");
     // There are additional defensive checks after architectural constants have been calculated.
 
     // The interpolation FIR calculates over multiple phases where such that the total number of lanes is an integer
@@ -207,7 +209,7 @@ class kernelFilterClass {
     static constexpr unsigned int m_kWinAccessByteSize =
         16; // 16 Bytes. The memory data path is min 128-bits wide for vector operations
     static constexpr unsigned int m_kColumns =
-        sizeof(TT_COEFF) == 2 ? 2 : 1; // number of mult-adds per lane for main intrinsic
+        fnNumColsIntAsym<TT_DATA, TT_COEFF>(); // number of mult-adds per lane for main intrinsic
     static constexpr unsigned int m_kLanes = fnNumLanesIntAsym<TT_DATA, TT_COEFF>(); // number of operations in parallel
                                                                                      // of this type combinations that
                                                                                      // the vector processor can do.
@@ -469,7 +471,7 @@ class kernelFilterClass {
 
 //-----------------------------------------------------------------------------------------------------
 // This is the main declaration of the fir_interpolate_asym class, and is also used for the Standalone kernel
-// specialization with no cascade ports, no reload, single output
+// Standalone kernel specialization. Windowed. no cascade ports, no reload, single output
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -542,10 +544,14 @@ class fir_interpolate_asym : public kernelFilterClass<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* __restrict outWindow);
+    void filter(
+        input_circular_buffer<TT_DATA,
+                              extents<inherited_extent>,
+                              margin<fnFirMargin<TP_FIR_LEN / TP_INTERPOLATE_FACTOR, TT_DATA>()> >& __restrict inWindow,
+        output_circular_buffer<TT_DATA>& __restrict outWindow);
 };
 
-// Single kernel specialization. No cascade ports, static coefficients. dual output
+// Single kernel specialization. Windowed. No cascade ports, static coefficients. dual output
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -632,13 +638,16 @@ class fir_interpolate_asym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
-                output_window<TT_DATA>* __restrict outWindow,
-                output_window<TT_DATA>* __restrict outWindow2);
+    void filter(
+        input_circular_buffer<TT_DATA,
+                              extents<inherited_extent>,
+                              margin<fnFirMargin<TP_FIR_LEN / TP_INTERPOLATE_FACTOR, TT_DATA>()> >& __restrict inWindow,
+        output_circular_buffer<TT_DATA>& __restrict outWindow,
+        output_circular_buffer<TT_DATA>& __restrict outWindow2);
 };
 
 //-----------------------------------------------------------------------------------------------------
-// Single kernel specialization. No cascade ports, with reload coefficients, single output
+// Single kernel specialization. Windowed. No cascade ports, with reload coefficients, single output
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -695,7 +704,6 @@ class fir_interpolate_asym<TT_DATA,
                                                                            TP_COEFF_PHASE_OFFSET,
                                                                            TP_COEFF_PHASES,
                                                                            TP_COEFF_PHASES_LEN> {
-   private:
    public:
     // Constructor
     fir_interpolate_asym()
@@ -725,12 +733,15 @@ class fir_interpolate_asym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
-                output_window<TT_DATA>* outWindow,
-                const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
+    void filter(
+        input_circular_buffer<TT_DATA,
+                              extents<inherited_extent>,
+                              margin<fnFirMargin<TP_FIR_LEN / TP_INTERPOLATE_FACTOR, TT_DATA>()> >& __restrict inWindow,
+        output_circular_buffer<TT_DATA>& __restrict outWindow,
+        const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
 };
 
-// Single kernel specialization. No cascade ports, with reload coefficients, dual output
+// Single kernel specialization. No cascade ports, Windowed. with reload coefficients, dual output
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -787,7 +798,6 @@ class fir_interpolate_asym<TT_DATA,
                                                                            TP_COEFF_PHASE_OFFSET,
                                                                            TP_COEFF_PHASES,
                                                                            TP_COEFF_PHASES_LEN> {
-   private:
    public:
     // Constructor
     fir_interpolate_asym()
@@ -817,14 +827,17 @@ class fir_interpolate_asym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
-                output_window<TT_DATA>* outWindow,
-                output_window<TT_DATA>* outWindow2,
-                const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
+    void filter(
+        input_circular_buffer<TT_DATA,
+                              extents<inherited_extent>,
+                              margin<fnFirMargin<TP_FIR_LEN / TP_INTERPOLATE_FACTOR, TT_DATA>()> >& __restrict inWindow,
+        output_circular_buffer<TT_DATA>& __restrict outWindow,
+        output_circular_buffer<TT_DATA>& __restrict outWindow2,
+        const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
 };
 
 //-----------------------------------------------------------------------------------------------------
-// Partially specialized classes for cascaded interface (final kernel in cascade), no reload, single output
+// Partially specialized classes for cascaded interface (final kernel in cascade), Windowed. no reload, single output
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -881,7 +894,6 @@ class fir_interpolate_asym<TT_DATA,
                                                                            TP_COEFF_PHASE_OFFSET,
                                                                            TP_COEFF_PHASES,
                                                                            TP_COEFF_PHASES_LEN> {
-   private:
    public:
     // Constructor
     fir_interpolate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
@@ -911,12 +923,12 @@ class fir_interpolate_asym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
+    void filter(input_async_buffer<TT_DATA, extents<inherited_extent> >& inWindow,
                 input_stream_cacc48* inCascade,
-                output_window<TT_DATA>* __restrict outWindow);
+                output_circular_buffer<TT_DATA>& __restrict outWindow);
 };
 
-// Partially specialized classes for cascaded interface (final kernel in cascade), no reload, dual output
+// Partially specialized classes for cascaded interface (final kernel in cascade), Windowed. no reload, dual output
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -973,7 +985,6 @@ class fir_interpolate_asym<TT_DATA,
                                                                            TP_COEFF_PHASE_OFFSET,
                                                                            TP_COEFF_PHASES,
                                                                            TP_COEFF_PHASES_LEN> {
-   private:
    public:
     // Constructor
     fir_interpolate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
@@ -1003,13 +1014,13 @@ class fir_interpolate_asym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
+    void filter(input_async_buffer<TT_DATA, extents<inherited_extent> >& inWindow,
                 input_stream_cacc48* inCascade,
-                output_window<TT_DATA>* __restrict outWindow,
-                output_window<TT_DATA>* __restrict outWindow2);
+                output_circular_buffer<TT_DATA>& __restrict outWindow,
+                output_circular_buffer<TT_DATA>& __restrict outWindow2);
 };
 
-// Partially specialized classes for cascaded interface (final kernel in cascade), with reload, single output
+// Partially specialized classes for cascaded interface (final kernel in cascade), Windowed. with reload, single output
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -1066,7 +1077,6 @@ class fir_interpolate_asym<TT_DATA,
                                                                            TP_COEFF_PHASE_OFFSET,
                                                                            TP_COEFF_PHASES,
                                                                            TP_COEFF_PHASES_LEN> {
-   private:
    public:
     // Constructor
     fir_interpolate_asym()
@@ -1096,10 +1106,12 @@ class fir_interpolate_asym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow, input_stream_cacc48* inCascade, output_window<TT_DATA>* outWindow);
+    void filter(input_async_buffer<TT_DATA, extents<inherited_extent> >& inWindow,
+                input_stream_cacc48* inCascade,
+                output_circular_buffer<TT_DATA>& __restrict outWindow);
 };
 
-// Partially specialized classes for cascaded interface (final kernel in cascade), with reload, dual output
+// Partially specialized classes for cascaded interface (final kernel in cascade), Windowed. with reload, dual output
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -1156,7 +1168,6 @@ class fir_interpolate_asym<TT_DATA,
                                                                            TP_COEFF_PHASE_OFFSET,
                                                                            TP_COEFF_PHASES,
                                                                            TP_COEFF_PHASES_LEN> {
-   private:
    public:
     // Constructor
     fir_interpolate_asym()
@@ -1186,14 +1197,14 @@ class fir_interpolate_asym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
+    void filter(input_async_buffer<TT_DATA, extents<inherited_extent> >& inWindow,
                 input_stream_cacc48* inCascade,
-                output_window<TT_DATA>* outWindow,
-                output_window<TT_DATA>* outWindow2);
+                output_circular_buffer<TT_DATA>& __restrict outWindow,
+                output_circular_buffer<TT_DATA>& __restrict outWindow2);
 };
 
 //-----------------------------------------------------------------------------------------------------
-// Partially specialized classes for cascaded interface (First kernel in cascade), no reload
+// Partially specialized classes for cascaded interface (First kernel in cascade), Windowed. no reload
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -1251,7 +1262,6 @@ class fir_interpolate_asym<TT_DATA,
                                                                            TP_COEFF_PHASE_OFFSET,
                                                                            TP_COEFF_PHASES,
                                                                            TP_COEFF_PHASES_LEN> {
-   private:
    public:
     // Constructor
     fir_interpolate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
@@ -1281,12 +1291,14 @@ class fir_interpolate_asym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
+    void filter(input_circular_buffer<TT_DATA,
+                                      extents<inherited_extent>,
+                                      margin<fnFirMargin<TP_FIR_LEN / TP_INTERPOLATE_FACTOR, TT_DATA>()> >& inWindow,
                 output_stream_cacc48* outCascade,
-                output_window<TT_DATA>* broadcastWindow);
+                output_async_buffer<TT_DATA>& broadcastWindow);
 };
 
-// Partially specialized classes for cascaded interface (First kernel in cascade), with reload
+// Partially specialized classes for cascaded interface (First kernel in cascade), Windowed. with reload
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -1344,7 +1356,6 @@ class fir_interpolate_asym<TT_DATA,
                                                                            TP_COEFF_PHASE_OFFSET,
                                                                            TP_COEFF_PHASES,
                                                                            TP_COEFF_PHASES_LEN> {
-   private:
    public:
     // Constructor
     fir_interpolate_asym()
@@ -1374,14 +1385,16 @@ class fir_interpolate_asym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
+    void filter(input_circular_buffer<TT_DATA,
+                                      extents<inherited_extent>,
+                                      margin<fnFirMargin<TP_FIR_LEN / TP_INTERPOLATE_FACTOR, TT_DATA>()> >& inWindow,
                 output_stream_cacc48* outCascade,
-                output_window<TT_DATA>* broadcastWindow,
+                output_async_buffer<TT_DATA>& broadcastWindow,
                 const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
 };
 
 //-----------------------------------------------------------------------------------------------------
-// Partially specialized classes for cascaded interface (middle kernels in cascade), no reload
+// Partially specialized classes for cascaded interface (middle kernels in cascade), Windowed. no reload
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -1469,13 +1482,13 @@ class fir_interpolate_asym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
+    void filter(input_async_buffer<TT_DATA>& inWindow,
                 input_stream_cacc48* inCascade,
                 output_stream_cacc48* outCascade,
-                output_window<TT_DATA>* broadcastWindow);
+                output_async_buffer<TT_DATA>& broadcastWindow);
 };
 
-// Partially specialized classes for cascaded interface (middle kernels in cascade), with reload
+// Partially specialized classes for cascaded interface (middle kernels in cascade), Windowed. with reload
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -1533,7 +1546,6 @@ class fir_interpolate_asym<TT_DATA,
                                                                            TP_COEFF_PHASE_OFFSET,
                                                                            TP_COEFF_PHASES,
                                                                            TP_COEFF_PHASES_LEN> {
-   private:
    public:
     // Constructor
     fir_interpolate_asym()
@@ -1563,17 +1575,17 @@ class fir_interpolate_asym<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_interpolate_asym::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
+    void filter(input_async_buffer<TT_DATA>& inWindow,
                 input_stream_cacc48* inCascade,
                 output_stream_cacc48* outCascade,
-                output_window<TT_DATA>* broadcastWindow);
+                output_async_buffer<TT_DATA>& broadcastWindow);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////
 /////////   STREAM                               ///////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 
-// Single kernel specialization. No cascade ports. Static coefficients, single output
+// Single kernel specialization. No cascade ports. Streaming. Static coefficients, single output
 
 template <typename TT_DATA,
           typename TT_COEFF,

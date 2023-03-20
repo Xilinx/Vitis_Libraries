@@ -26,6 +26,8 @@ FFT/iFFT DIT single channel reference model
 #include <adf.h>
 #include <limits>
 
+using namespace adf;
+
 namespace xf {
 namespace dsp {
 namespace aie {
@@ -60,16 +62,26 @@ class fft_ifft_dit_1ch_ref {
                       unsigned int rank,
                       int pptSize,
                       bool inv);
-    void r4StageInt(T_int_data<TT_DATA>* samplesIn,
-                    TT_TWIDDLE* twiddles1,
-                    TT_TWIDDLE* twiddles2,
-                    unsigned int n,
-                    unsigned int r,
-                    unsigned int shift,
-                    unsigned int rank,
-                    T_int_data<TT_DATA>* samplesOut,
-                    int pptSize,
-                    bool inv);
+    void r4StageIntSpoof(T_int_data<TT_DATA>* samplesIn,
+                         TT_TWIDDLE* twiddles1,
+                         TT_TWIDDLE* twiddles2,
+                         unsigned int n,
+                         unsigned int r,
+                         unsigned int shift,
+                         unsigned int rank,
+                         T_int_data<TT_DATA>* samplesOut,
+                         int pptSize,
+                         bool inv);
+    void r4StageIntTrue(T_int_data<TT_DATA>* samplesIn,
+                        TT_TWIDDLE* twiddles1,
+                        TT_TWIDDLE* twiddles2,
+                        unsigned int n,
+                        unsigned int r,
+                        unsigned int shift,
+                        unsigned int rank,
+                        T_int_data<TT_DATA>* samplesOut,
+                        int pptSize,
+                        bool inv);
 
    public:
     // Constructor
@@ -77,8 +89,8 @@ class fft_ifft_dit_1ch_ref {
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fft_ifft_dit_1ch_ref::fft); }
     // FFT
-    void fft(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow);
-    void nonBitAccfft(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow);
+    void fft(input_buffer<TT_DATA>& inWindow, output_buffer<TT_DATA>& outWindow);
+    void nonBitAccfft(input_buffer<TT_DATA>& inWindow, output_buffer<TT_DATA>& outWindow);
 };
 }
 }

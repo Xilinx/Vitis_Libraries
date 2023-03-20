@@ -67,7 +67,7 @@ for {set i 3} { $i < [llength $argv] } { incr i 2 } {
         # Don't put a comma on the last parameter if we still have dummy constructor coeffs/weights to generate
         if { [expr ($i+1)] == [expr [llength $argv]-1] } {
             # FIRs and FFT Window both need a comma
-            if { $libElement eq "fft_ifft_dit_1ch" || $libElement eq "matrix_mult" || $libElement eq "dds_mixer" } {
+            if { $libElement eq "fft_ifft_dit_1ch" || $libElement eq "matrix_mult" || $libElement eq "dds_mixer" || $libElement eq "dds_mixer_lut" } {
                 set isComma ""
             }
         }

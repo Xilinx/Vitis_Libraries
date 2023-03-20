@@ -37,8 +37,11 @@ compilation.
 */
 
 #include <adf.h>
-#include "widget_api_cast_traits.hpp"
 #include <vector>
+
+using namespace adf;
+
+#include "widget_api_cast_traits.hpp"
 
 //#define _DSPLIB_WIDGET_API_CAST_HPP_DEBUG_
 
@@ -155,7 +158,7 @@ class widget_api_cast : public kernelClass<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast::transferData); }
 
     // Main function
-    void transferData(input_window<TT_DATA>* __restrict inWindow, output_window<TT_DATA>* __restrict outWindow0);
+    void transferData(input_buffer<TT_DATA>& __restrict inWindow0, output_buffer<TT_DATA>& __restrict outWindow0);
 };
 
 // Specialization for single window in, dual window out
@@ -171,9 +174,9 @@ class widget_api_cast<TT_DATA, kWindowAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 2, TP
     static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast::transferData); }
 
     // Main function
-    void transferData(input_window<TT_DATA>* __restrict inWindow0,
-                      output_window<TT_DATA>* __restrict outWindow0,
-                      output_window<TT_DATA>* __restrict outWindow1);
+    void transferData(input_buffer<TT_DATA>& __restrict inWindow0,
+                      output_buffer<TT_DATA>& __restrict outWindow0,
+                      output_buffer<TT_DATA>& __restrict outWindow1);
 };
 
 // Specialization for single window in, triple window out
@@ -189,10 +192,10 @@ class widget_api_cast<TT_DATA, kWindowAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 3, TP
     static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast::transferData); }
 
     // Main function
-    void transferData(input_window<TT_DATA>* __restrict inWindow0,
-                      output_window<TT_DATA>* __restrict outWindow0,
-                      output_window<TT_DATA>* __restrict outWindow1,
-                      output_window<TT_DATA>* __restrict outWindow2);
+    void transferData(input_buffer<TT_DATA>& __restrict inWindow0,
+                      output_buffer<TT_DATA>& __restrict outWindow0,
+                      output_buffer<TT_DATA>& __restrict outWindow1,
+                      output_buffer<TT_DATA>& __restrict outWindow2);
 };
 
 // stream to  window, 1 out
@@ -208,7 +211,7 @@ class widget_api_cast<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 1, TP
     static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast::transferData); }
 
     // Main function
-    void transferData(input_stream<TT_DATA>* __restrict inStream0, output_window<TT_DATA>* __restrict outWindow0);
+    void transferData(input_stream<TT_DATA>* __restrict inStream0, output_buffer<TT_DATA>& __restrict outWindow0);
 };
 
 // stream to  window, 2 out
@@ -225,8 +228,8 @@ class widget_api_cast<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 2, TP
 
     // Main function
     void transferData(input_stream<TT_DATA>* __restrict inStream0,
-                      output_window<TT_DATA>* __restrict outWindow0,
-                      output_window<TT_DATA>* __restrict outWindow1);
+                      output_buffer<TT_DATA>& __restrict outWindow0,
+                      output_buffer<TT_DATA>& __restrict outWindow1);
 };
 
 // stream to  window, 3 out
@@ -243,9 +246,9 @@ class widget_api_cast<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 3, TP
 
     // Main function
     void transferData(input_stream<TT_DATA>* __restrict inStream0,
-                      output_window<TT_DATA>* __restrict outWindow0,
-                      output_window<TT_DATA>* __restrict outWindow1,
-                      output_window<TT_DATA>* __restrict outWindow2);
+                      output_buffer<TT_DATA>& __restrict outWindow0,
+                      output_buffer<TT_DATA>& __restrict outWindow1,
+                      output_buffer<TT_DATA>& __restrict outWindow2);
 };
 
 // stream to  window, 4 out
@@ -262,10 +265,10 @@ class widget_api_cast<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 4, TP
 
     // Main function
     void transferData(input_stream<TT_DATA>* __restrict inStream0,
-                      output_window<TT_DATA>* __restrict outWindow0,
-                      output_window<TT_DATA>* __restrict outWindow1,
-                      output_window<TT_DATA>* __restrict outWindow2,
-                      output_window<TT_DATA>* __restrict outWindow3);
+                      output_buffer<TT_DATA>& __restrict outWindow0,
+                      output_buffer<TT_DATA>& __restrict outWindow1,
+                      output_buffer<TT_DATA>& __restrict outWindow2,
+                      output_buffer<TT_DATA>& __restrict outWindow3);
 };
 
 // dual stream input
@@ -284,7 +287,7 @@ class widget_api_cast<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1, TP
     // Main function
     void transferData(input_stream<TT_DATA>* __restrict inStream0,
                       input_stream<TT_DATA>* __restrict inStream1,
-                      output_window<TT_DATA>* __restrict outWindow0);
+                      output_circular_buffer<TT_DATA>& __restrict outWindow0);
 };
 
 // stream to  window, 2 in 2 out
@@ -302,8 +305,8 @@ class widget_api_cast<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 2, TP
     // Main function
     void transferData(input_stream<TT_DATA>* __restrict inStream0,
                       input_stream<TT_DATA>* __restrict inStream1,
-                      output_window<TT_DATA>* __restrict outWindow0,
-                      output_window<TT_DATA>* __restrict outWindow1);
+                      output_buffer<TT_DATA>& __restrict outWindow0,
+                      output_buffer<TT_DATA>& __restrict outWindow1);
 };
 
 // stream to  window, 2 in 3 out
@@ -321,9 +324,9 @@ class widget_api_cast<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 3, TP
     // Main function
     void transferData(input_stream<TT_DATA>* __restrict inStream0,
                       input_stream<TT_DATA>* __restrict inStream1,
-                      output_window<TT_DATA>* __restrict outWindow0,
-                      output_window<TT_DATA>* __restrict outWindow1,
-                      output_window<TT_DATA>* __restrict outWindow2);
+                      output_buffer<TT_DATA>& __restrict outWindow0,
+                      output_buffer<TT_DATA>& __restrict outWindow1,
+                      output_buffer<TT_DATA>& __restrict outWindow2);
 };
 
 // stream to  window, 2 in 4 out
@@ -341,10 +344,10 @@ class widget_api_cast<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 4, TP
     // Main function
     void transferData(input_stream<TT_DATA>* __restrict inStream0,
                       input_stream<TT_DATA>* __restrict inStream1,
-                      output_window<TT_DATA>* __restrict outWindow0,
-                      output_window<TT_DATA>* __restrict outWindow1,
-                      output_window<TT_DATA>* __restrict outWindow2,
-                      output_window<TT_DATA>* __restrict outWindow3);
+                      output_buffer<TT_DATA>& __restrict outWindow0,
+                      output_buffer<TT_DATA>& __restrict outWindow1,
+                      output_buffer<TT_DATA>& __restrict outWindow2,
+                      output_buffer<TT_DATA>& __restrict outWindow3);
 };
 
 // Window to stream 1 to 1
@@ -360,7 +363,7 @@ class widget_api_cast<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 1, TP
     static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast::transferData); }
 
     // Main function
-    void transferData(input_window<TT_DATA>* __restrict inWindow0, output_stream<TT_DATA>* __restrict outStream0);
+    void transferData(input_buffer<TT_DATA>& __restrict inWindow0, output_stream<TT_DATA>* __restrict outStream0);
 };
 
 // Window to stream 1 to 2
@@ -376,7 +379,7 @@ class widget_api_cast<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 2, TP
     static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast::transferData); }
 
     // Main function
-    void transferData(input_window<TT_DATA>* __restrict inWindow0,
+    void transferData(input_buffer<TT_DATA>& __restrict inWindow0,
                       output_stream<TT_DATA>* __restrict outStream0,
                       output_stream<TT_DATA>* __restrict outStream1);
 };

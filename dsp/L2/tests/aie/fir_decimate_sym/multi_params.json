@@ -97,6 +97,32 @@
             "PORT_API":"1",
             "UUT_SSR":"2",
             "INPUT_WINDOW_VSIZE":"3840"
+        },
+        "test_10_fir_9t_sym_3d": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int32",
+            "FIR_LEN":"9",
+            "DECIMATE_FACTOR":"3",
+            "SHIFT":"15",
+            "INPUT_WINDOW_VSIZE":"384"
+        },
+        "test_11_fir_6t_cint16_cint32": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"cint32",
+            "FIR_LEN":"6",
+            "SHIFT":"16",
+            "DECIMATE_FACTOR":"2",
+            "PORT_API":"0",
+            "INPUT_WINDOW_VSIZE":"480"
+        },
+        "test_12_fir_6t_int16_int32": {
+            "DATA_TYPE":"int16",
+            "COEFF_TYPE":"int32",
+            "FIR_LEN":"6",
+            "SHIFT":"16",
+            "DECIMATE_FACTOR":"2",
+            "PORT_API":"0",
+            "INPUT_WINDOW_VSIZE":"480"
         }
     }
 }

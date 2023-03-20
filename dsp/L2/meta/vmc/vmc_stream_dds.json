@@ -3,7 +3,7 @@
   "ip_name": "vmc_stream_dds",
   "block_info": {
     "label": "DDS Stream",
-    "description": ""
+    "description": "Stream-based Direct Digital Synthesizer (DDS) block for AI Engines."
   },
   "parameters": [
     {
@@ -12,7 +12,11 @@
       "description": "The type of individual data samples output of the DDS function",
       "enum": [ "cint16", "cfloat" ],
       "default": "cint16",
-      "type": "typename"
+      "type": "typename",
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"popup"
+      }
     },
     {
       "name": "output_window_size",
@@ -26,6 +30,10 @@
         "file": "vmc_stream_dds.py",
         "function": "vmc_validate_output_window_size",
         "args": ["data_type"]
+      },
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
       }
     },
 	{
@@ -35,7 +43,11 @@
       "default": 1,
       "minimum": 1,
       "maximum": 10,
-      "type": "int"
+      "type": "int",
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
+      }
     },
 
     {
@@ -45,7 +57,11 @@
       "default": 0,
       "minimum": 0,
       "maximum": 2147483648,
-      "type": "uint"
+      "type": "uint",
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
+      }
     },
 	{
 	  "name":   "initial_phase_offset",
@@ -54,23 +70,22 @@
       "default": 0,
       "minimum": 0,
       "maximum": 2147483648,
-      "type": "uint"
-    },
-    {
-	  "name": "output_sampling_rate", 
-      "label": "Target output throughput (MSPS)",
-      "description": "The target output throughput of the function in MSPS",
-      "default": 200,
-      "maximum": 1000,
-      "minimum": 1,
-      "type": "int"
+      "type": "uint",
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
+      }
     },
     {
 	  "name": "vmc_sample_time",
       "label": "Sample time",
       "description": "Sample time for the block output port(s)",
       "default": -1,
-      "type": "double"
+      "type": "double",
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
+      }
     }
 
   ],

@@ -27,6 +27,8 @@ acts as the golden reference to verify the AIE-targetting kernel class.
 #include <limits>
 #include "fir_ref_utils.hpp"
 
+using namespace adf;
+
 namespace xf {
 namespace dsp {
 namespace aie {
@@ -68,7 +70,8 @@ class fir_decimate_hb_ref {
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_hb_ref::filter); }
     // FIR
-    void filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow);
+    void filter(input_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
+                output_buffer<TT_DATA>& outWindow);
 };
 
 // Specialized for reloadable coefficients, single output
@@ -112,8 +115,8 @@ class fir_decimate_hb_ref<TT_DATA,
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_hb_ref::filter); }
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
-                output_window<TT_DATA>* outWindow,
+    void filter(input_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
+                output_buffer<TT_DATA>& outWindow,
                 const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 4 + 1]);
 };
 }

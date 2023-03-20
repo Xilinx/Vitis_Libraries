@@ -3,7 +3,7 @@
   "ip_name": "vmc_fft_window",
   "block_info": {
     "label": "Window Function",
-    "description": ""
+    "description": "Window function block for AI Engines."
   },
   "parameters": [
     {
@@ -12,7 +12,11 @@
       "description": "The type of individual data samples input to and output of the FFT function",
       "enum": [ "cint16", "cint32", "cfloat" ],
       "default": "cint16",
-      "type": "typename"
+      "type": "typename",
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"popup"
+      }
     },
     {
       "name": "coeff_type",
@@ -25,11 +29,32 @@
         "file": "vmc_fft_window.py",
         "function": "vmc_validate_coeff_type",
         "args": [ "data_type" ]
+      },
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"popup"
+      }
+    },
+    {
+      "name": "coeff",
+      "label": "Function coefficients",
+      "description": "The window function coefficients",
+      "element_type": "coeff_type",
+      "default": [ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+      "type": "vector",
+      "validator": {
+        "file": "vmc_fft_window.py",
+        "function": "vmc_validate_coeff",
+        "args": ["point_size","is_dyn_pt_size"]
+      },
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
       }
     },
     {
       "name": "point_size",
-      "label": "Point Size",
+      "label": "FFT/IFFT point size:",
       "description": "The number of coefficients in the FFT window function",
       "default": 32,
       "maximum": 65536,
@@ -39,6 +64,26 @@
         "file": "vmc_fft_window.py",
         "function": "vmc_validate_point_size",
         "args": ["data_type"]
+      },
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
+      }
+    },
+    {
+      "name": "is_dyn_pt_size",
+      "label": "Use dynamic point size",
+      "description": "The selection of static point size or dynamic point size operation",
+      "default": false,
+      "type": "bool",
+      "validator": {
+        "file": "vmc_fft_window.py",
+        "function": "vmc_validate_is_dyn_pt_size",
+        "args": [ "point_size"]
+      },
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"checkbox"
       }
     },
     {
@@ -53,6 +98,10 @@
         "file": "vmc_fft_window.py",
         "function": "vmc_validate_input_window_size",
         "args": [ "point_size" ]
+      },
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
       }
     },
     {
@@ -67,33 +116,14 @@
         "file": "vmc_fft_window.py",
         "function": "vmc_validate_shift_val",
         "args": [ "data_type" ]
-      }
-    },
-    {
-      "name": "is_dyn_pt_size",
-      "label": "Dynamic Point Size",
-      "description": "The selection of static point size or dynamic point size operation",
-      "default": false,
-      "type": "bool",
-      "validator": {
-        "file": "vmc_fft_window.py",
-        "function": "vmc_validate_is_dyn_pt_size",
-        "args": [ "point_size"]
-      }
-    },
-    {
-      "name": "coeff",
-      "label": "Coefficients",
-      "description": "The window function coefficients",
-      "element_type": "coeff_type",
-      "default": [ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
-      "type": "vector",
-      "validator": {
-        "file": "vmc_fft_window.py",
-        "function": "vmc_validate_coeff",
-        "args": ["point_size","is_dyn_pt_size"]
+      },
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
       }
     }
+    
+    
   ],
   "generator": {
     "file": "vmc_fft_window.py",

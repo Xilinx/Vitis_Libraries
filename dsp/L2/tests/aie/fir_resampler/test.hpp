@@ -56,11 +56,14 @@ class test_graph : public graph {
 #else
     static constexpr int DUAL_INPUT_SAMPLES = 0;
 #endif
-    std::array<input_plio, P_SSR*(DUAL_INPUT_SAMPLES + 1)> in;
-    std::array<output_plio, P_SSR * NUM_OUTPUTS> out;
+    static constexpr unsigned int IN_SSR = P_SSR * P_PARA_DECI_POLY;
+    static constexpr unsigned int RTP_SSR = P_SSR * P_PARA_INTERP_POLY;
+    static constexpr unsigned int OUT_SSR = P_SSR * P_PARA_INTERP_POLY;
+    std::array<input_plio, IN_SSR*(DUAL_INPUT_SAMPLES + 1)> in; //
+    std::array<output_plio, OUT_SSR * NUM_OUTPUTS> out;
 
 #if (USE_COEFF_RELOAD == 1) // Reloadable coefficients
-    port_conditional_array<input, USE_COEFF_RELOAD == 1, P_SSR> coeff;
+    port_conditional_array<input, USE_COEFF_RELOAD == 1, RTP_SSR> coeff;
 #endif
 
     COEFF_TYPE m_taps[2][FIR_LEN];
@@ -79,7 +82,10 @@ class test_graph : public graph {
                                                     USE_COEFF_RELOAD,
                                                     NUM_OUTPUTS,
                                                     DUAL_IP,
-                                                    PORT_API>;
+                                                    PORT_API,
+                                                    P_SSR,
+                                                    P_PARA_INTERP_POLY,
+                                                    P_PARA_DECI_POLY>;
     // Constructor
     test_graph() {
         printConfig();
@@ -111,16 +117,10 @@ class test_graph : public graph {
         }
 
 #ifdef USING_UUT
-        static constexpr int kMaxTaps = uut_g<INPUT_SAMPLES>::getMaxTapsPerKernel<PORT_API, DATA_TYPE>();
-        printf("For this config the Maximum Taps Per Kernel is %d\n", kMaxTaps);
         static constexpr int kMinLen = uut_g<INPUT_SAMPLES>::getMinCascLen<FIR_LEN, PORT_API, DATA_TYPE, COEFF_TYPE,
                                                                            INTERPOLATE_FACTOR, DECIMATE_FACTOR>();
         printf("For this config the Minimum CASC_LEN is %d\n", kMinLen);
 #if (PORT_API == 1)
-        static constexpr int kRawOptTaps =
-            uut_g<INPUT_SAMPLES>::getOptTapsPerKernel<DATA_TYPE, COEFF_TYPE, DUAL_IP + 1>();
-        static constexpr int kOptTaps = kRawOptTaps < kMaxTaps ? kRawOptTaps : kMaxTaps;
-        printf("For this config the Optimal Taps (streaming) Per Kernel is %d\n", kOptTaps);
         static constexpr int kOptLen =
             uut_g<INPUT_SAMPLES>::getOptCascLen<FIR_LEN, DATA_TYPE, COEFF_TYPE, PORT_API, NUM_OUTPUTS,
                                                 INTERPOLATE_FACTOR, DECIMATE_FACTOR>();
@@ -157,26 +157,36 @@ class test_graph : public graph {
 #endif
 
         // Make connections
-        createPLIOFileConnections<P_SSR, DUAL_INPUT_SAMPLES>(in, QUOTE(INPUT_FILE), "in");
-        createPLIOFileConnections<P_SSR, (NUM_OUTPUTS - 1)>(out, QUOTE(OUTPUT_FILE), "out");
+        createPLIOFileConnections<IN_SSR, DUAL_INPUT_SAMPLES>(in, QUOTE(INPUT_FILE), "in");
+        createPLIOFileConnections<OUT_SSR, (NUM_OUTPUTS - 1)>(out, QUOTE(OUTPUT_FILE), "out");
 
-        connect<>(in[0].out[0], firGraph.in[0]);
+        for (unsigned int i = 0; i < IN_SSR; ++i) {
+            // Size of window in Bytes.
+            unsigned int plioBaseIdxIn = i * (DUAL_INPUT_SAMPLES + 1);
+
+            connect<>(in[plioBaseIdxIn].out[0], firGraph.in[i]);
 #if (DUAL_IP == 1)
-        connect<>(in[1].out[0],
-                  firGraph.in2[0]); //'dual' streams carry independent data which when combined are one channel
+            connect<>(in[plioBaseIdxIn + 1].out[0], firGraph.in2[i]); // will change when fir adopts array ports
 #endif
-#if (USE_CHAIN == 1 && NUM_OUTPUTS == 1)
+        }
+
+#if (USE_CHAIN == 1 && NUM_OUTPUTS == 1 && OUT_SSR == 1 && USE_COEFF_RELOAD == 0)
         // Chained connections mutually explusive with multiple outputs.
         connect<>(firGraph.out[0], firGraph2.in[0]);
         connect<>(firGraph2.out[0], out[0].in[0]);
 #else
-        connect<>(firGraph.out[0], out[0].in[0]);
+
+        for (unsigned int i = 0; i < OUT_SSR; ++i) {
+            unsigned int plioBaseIdxOut = i * (NUM_OUTPUTS);
+            connect<>(firGraph.out[i], out[plioBaseIdxOut].in[0]);
 #if (NUM_OUTPUTS == 2)
-        connect<>(firGraph.out2[0], out[1].in[0]);
+            connect<>(firGraph.out2[i], out[plioBaseIdxOut + 1].in[0]);
 #endif
+        }
 #endif
+
 #if (USE_COEFF_RELOAD == 1)
-        for (int i = 0; i < P_SSR; i++) {
+        for (int i = 0; i < RTP_SSR; i++) {
             connect<>(coeff[i], firGraph.coeff[i]);
         }
 #endif
@@ -212,6 +222,9 @@ class test_graph : public graph {
 
         if (inputBufferSize > MAX_PING_PONG_SIZE) {
             single_buffer(firGraph.getKernels()[0].in[0]);
+#if (DUAL_IP == 1)
+            single_buffer(firGraph.getKernels()[0].in[1]);
+#endif
         }
         if (outputBufferSize > MAX_PING_PONG_SIZE) {
             single_buffer(firGraph.getKernels()[CASC_LEN - 1].out[0]);

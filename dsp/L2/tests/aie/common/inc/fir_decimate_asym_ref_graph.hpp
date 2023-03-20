@@ -45,27 +45,31 @@ template <typename TT_DATA,
           unsigned int TP_NUM_OUTPUTS = 1,
           unsigned int TP_DUAL_IP = 0,
           unsigned int TP_API = 0,
-          unsigned int TP_SSR = 1>
+          unsigned int TP_SSR = 1,
+          unsigned int TP_PARA_DECI_POLY = 1>
 class fir_decimate_asym_ref_graph : public graph {
    private:
-    static constexpr unsigned int kInterleavePattern = 0;   // 128-bit interleave pattern
-    static constexpr unsigned int kNumFirKernelInputs = 1;  // Widgets are used to
-    static constexpr unsigned int kNumFirKernelOutputs = 1; // 128-bit interleave pattern
+    static constexpr unsigned int kInterleavePattern = 0;              // 128-bit interleave pattern
+    static constexpr unsigned int kNumFirKernelInputs = 1;             // Widgets are used to
+    static constexpr unsigned int kNumFirKernelOutputs = 1;            // 128-bit interleave pattern
+    static constexpr unsigned int IN_SSR = TP_SSR * TP_PARA_DECI_POLY; // 128-bit interleave pattern
    public:
+    template <class dir>
+    using ssr_in_port_array = std::array<port<dir>, IN_SSR>;
     template <class dir>
     using ssr_port_array = std::array<port<dir>, TP_SSR>;
 
-    using dual_ip_port = typename std::conditional_t<(TP_DUAL_IP == DUAL_IP_DUAL), ssr_port_array<input>, no_port>;
+    using dual_ip_port = typename std::conditional_t<(TP_DUAL_IP == DUAL_IP_DUAL), ssr_in_port_array<input>, no_port>;
     using dual_op_port = typename std::conditional_t<(TP_NUM_OUTPUTS == 2), ssr_port_array<output>, no_port>;
     using rtp_port = typename std::conditional_t<(TP_USE_COEFF_RELOAD == 1), port<input>, no_port>;
     using widget_kernel_in = typename std::conditional<(TP_DUAL_IP == 1 && TP_API == 1), kernel, empty>::type;
     using widget_kernel_out = typename std::conditional<(TP_NUM_OUTPUTS == 2), kernel, empty>::type;
 
-    ssr_port_array<input> in;
+    ssr_in_port_array<input> in;
     ssr_port_array<output> out;
     dual_ip_port in2;
     dual_op_port out2;
-    std::array<rtp_port, 1> coeff;
+    std::array<rtp_port, TP_SSR> coeff;
 
     // FIR Kernel
     kernel m_firKernel;
@@ -116,12 +120,17 @@ class fir_decimate_asym_ref_graph : public graph {
                 connect<stream>(in2[0], m_widgetKernelIn.in[1]);
                 connect<window<inputWindowByteSize, fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(
                     m_widgetKernelIn.out[0], m_firKernel.in[0]);
+                connect<>(m_widgetKernelIn.out[0], m_firKernel.in[0]);
+                dimensions(m_widgetKernelIn.out[0]) = {
+                    TP_INPUT_WINDOW_VSIZE}; // Note no accommodation for coeff header - dropped features
+                dimensions(m_firKernel.in[0]) = {
+                    TP_INPUT_WINDOW_VSIZE}; // Note no accommodation for coeff header - dropped features
                 runtime<ratio>(m_widgetKernelIn) = 0.9;
                 source(m_widgetKernelIn) = "widget_api_cast_ref.cpp";
             }
         else {
-            connect<window<inputWindowByteSize, fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(
-                in[0], m_firKernel.in[0]);
+            connect<>(in[0], m_firKernel.in[0]);
+            dimensions(m_firKernel.in[0]) = {TP_INPUT_WINDOW_VSIZE};
         }
 
         if
@@ -133,12 +142,16 @@ class fir_decimate_asym_ref_graph : public graph {
                     widget_api_cast_ref<TT_DATA, USE_WINDOW_API, TP_API, kNumInputs, outputWindowVectorSize,
                                         kNumOutputs, kInterleavePattern> >();
 
-                connect<window<outputWindowByteSize> >(m_firKernel.out[0], m_widgetKernelOut.in[0]);
+                connect<>(m_firKernel.out[0], m_widgetKernelOut.in[0]);
+                dimensions(m_firKernel.out[0]) = {TP_INPUT_WINDOW_VSIZE / TP_DECIMATE_FACTOR};
+                dimensions(m_widgetKernelOut.in[0]) = {TP_INPUT_WINDOW_VSIZE / TP_DECIMATE_FACTOR};
 
                 if
                     constexpr(TP_API == USE_WINDOW_API) {
-                        connect<window<outputWindowByteSize> >(m_widgetKernelOut.out[0], out[0]);
-                        connect<window<outputWindowByteSize> >(m_widgetKernelOut.out[1], out2[0]);
+                        connect<>(m_widgetKernelOut.out[0], out[0]);
+                        connect<>(m_widgetKernelOut.out[1], out2[0]);
+                        dimensions(m_widgetKernelOut.out[0]) = {TP_INPUT_WINDOW_VSIZE / TP_DECIMATE_FACTOR};
+                        dimensions(m_widgetKernelOut.out[1]) = {TP_INPUT_WINDOW_VSIZE / TP_DECIMATE_FACTOR};
                     }
                 else {
                     connect<stream>(m_widgetKernelOut.out[0], out[0]);
@@ -149,7 +162,8 @@ class fir_decimate_asym_ref_graph : public graph {
                 runtime<ratio>(m_widgetKernelOut) = 0.9;
             }
         else {
-            connect<window<outputWindowByteSize> >(m_firKernel.out[0], out[0]);
+            connect<>(m_firKernel.out[0], out[0]);
+            dimensions(m_firKernel.out[0]) = {TP_INPUT_WINDOW_VSIZE / TP_DECIMATE_FACTOR};
         }
 
         if

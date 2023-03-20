@@ -154,7 +154,10 @@ class widget_api_cast_graph : public graph {
         // make connections
         if (TP_IN_API == kWindowAPI) {
             for (int i = 0; i < TP_NUM_INPUTS; i++) {
-                connect<window<TP_WINDOW_VSIZE * sizeof(TT_DATA) + TP_HEADER_BYTES> >(in[i], m_kernel.in[i]);
+                //                connect<window<TP_WINDOW_VSIZE*sizeof(TT_DATA)+TP_HEADER_BYTES>>(in[i],
+                //                m_kernel.in[i]);
+                connect(in[i], m_kernel.in[i]);
+                dimensions(m_kernel.in[i]) = {TP_WINDOW_VSIZE + TP_HEADER_BYTES / sizeof(TT_DATA)};
             }
         } else if (TP_IN_API == kStreamAPI) {
             for (int i = 0; i < TP_NUM_INPUTS; i++) {
@@ -163,7 +166,10 @@ class widget_api_cast_graph : public graph {
         }
         if (TP_OUT_API == kWindowAPI) {
             for (int i = 0; i < TP_NUM_OUTPUT_CLONES; i++) {
-                connect<window<TP_WINDOW_VSIZE * sizeof(TT_DATA) + TP_HEADER_BYTES> >(m_kernel.out[i], out[i]);
+                //                connect<window<TP_WINDOW_VSIZE*sizeof(TT_DATA)+TP_HEADER_BYTES>>(m_kernel.out[i],
+                //                out[i]);
+                connect(m_kernel.out[i], out[i]);
+                dimensions(m_kernel.out[i]) = {TP_WINDOW_VSIZE + TP_HEADER_BYTES / sizeof(TT_DATA)};
             }
         } else if (TP_OUT_API == kStreamAPI) {
             for (int i = 0; i < TP_NUM_OUTPUT_CLONES; i++) {

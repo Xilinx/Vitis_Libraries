@@ -36,13 +36,9 @@ def vmc_validate_input_window_size(args):
     return fn_validate_window_size(point_size, input_window_size, dyn_point_size)
 
 def vmc_validate_casc_length(args):
-    use_casc_length = args["use_casc_length"]
     data_type = args["data_type"]
     point_size = args["point_size"]
     casc_length = args["casc_length"]
-    if not use_casc_length:
-      return {"is_valid": True}
-
     return fn_validate_casc_len(data_type, point_size, casc_length)
 
 def vmc_validate_ssr(args):

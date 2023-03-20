@@ -40,9 +40,7 @@
             "launch_cmd": [
                 "mkdir -p logs",
                 "perl LIB_DIR/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./aiesimulator_output/data/uut_output.txt --type $(DATA_TYPE) --ssr $(NUM_OUTPUT_CLONES) --zip --dual 0 -k 0 -w $(WINDOW_VSIZE)",
-                "perl LIB_DIR/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./x86simulator_output/data/ref_output.txt --type $(DATA_TYPE) --ssr $(NUM_OUTPUT_CLONES) --zip --dual 0 -k 0 -w $(WINDOW_VSIZE)",
                 "grep -ve '[XT]' ./aiesimulator_output/data/uut_output.txt > ./logs/uut_output.txt",
-                "grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./logs/ref_output.txt",
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE)",
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) DATA_TYPE $(DATA_TYPE) IN_API $(IN_API) OUT_API $(OUT_API) NUM_INPUTS $(NUM_INPUTS) WINDOW_VSIZE $(WINDOW_VSIZE) NUM_OUTPUT_CLONES $(NUM_OUTPUT_CLONES) PATTERN $(PATTERN)",
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/get_stats.tcl $(WINDOW_VSIZE) 1 $(STATUS_FILE) ./aiesimulator_output transferData $(NITER_UUT)",
@@ -54,12 +52,13 @@
         {
             "target": "x86sim",
             "launch_cmd": [
-                "$(if $(filter-out REF,$(TAG)), mkdir -p logs)",
+                "mkdir -p logs",
                 "$(if $(filter-out REF,$(TAG)), perl LIB_DIR/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./x86simulator_output/data/uut_output.txt --type $(DATA_TYPE) --ssr $(NUM_OUTPUT_CLONES) --zip --dual 0 -k 0 -w $(WINDOW_VSIZE))",
-                "$(if $(filter-out REF,$(TAG)), perl LIB_DIR/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./x86simulator_output/data/ref_output.txt --type $(DATA_TYPE) --ssr $(NUM_OUTPUT_CLONES) --zip --dual 0 -k 0 -w $(WINDOW_VSIZE))",
+                "$(if $(filter REF,$(TAG)), perl LIB_DIR/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./x86simulator_output/data/ref_output.txt --type $(DATA_TYPE) --ssr $(NUM_OUTPUT_CLONES) --zip --dual 0 -k 0 -w $(WINDOW_VSIZE))",
                 "$(if $(filter-out REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/uut_output.txt > ./logs/uut_output.txt)",
-                "$(if $(filter-out REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./logs/ref_output.txt)",
+                "$(if $(filter REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./logs/ref_output.txt)",
                 "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE))",
+                "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP))",
                 "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./)"
             ]
         }

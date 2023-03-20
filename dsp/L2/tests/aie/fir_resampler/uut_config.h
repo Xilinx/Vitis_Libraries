@@ -80,8 +80,12 @@
 // Force reference model to ignore SSR and only use array length 1
 #ifdef USING_UUT
 #define P_SSR UUT_SSR
+#define P_PARA_INTERP_POLY UUT_PARA_INTERP_POLY
+#define P_PARA_DECI_POLY UUT_PARA_DECI_POLY
 #else
 #define P_SSR 1
+#define P_PARA_INTERP_POLY 1
+#define P_PARA_DECI_POLY 1
 #endif
 
 #ifndef USING_UUT

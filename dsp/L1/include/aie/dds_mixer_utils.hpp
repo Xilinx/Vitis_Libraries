@@ -67,6 +67,57 @@ void INLINE_DECL T_IFbase<TT_DATA, PortType>::port_writeincr(PortType* out, OutD
             return writeincr(out, data);
         }
 }
+
+template <unsigned int numTables, unsigned int tableRes, unsigned int lutMask, unsigned int numLanes, typename TT_DATA>
+auto INLINE_DECL computeDDSOut(unsigned int m_phaseIndex, cint32** sincosLUT) {
+    ::aie::detail::accum< ::aie::detail::AccumClass::CInt, 64, 4> ddsOutLUT;
+    ::aie::vector<cint32, 4> sincosVal[numTables];
+#pragma unroll numTables
+    for (int i = 0; i < numTables; i++) {
+        sincosVal[i][0] = sincosLUT[i][(m_phaseIndex >> (32 - 10 * (i + 1))) & 0x000003FF];
+    }
+    if
+        constexpr(numTables == 1) {
+            ddsOutLUT.from_vector(sincosVal[0], 0);
+            return ddsOutLUT;
+        }
+    else if
+        constexpr(numTables == 2) { return ::aie::mul(sincosVal[0], sincosVal[1]); }
+    else if
+        constexpr(numTables == 3) {
+            ::aie::detail::accum< ::aie::detail::AccumClass::CInt, 64, 4> ddsAccInter;
+            ddsAccInter = ::aie::mul(sincosVal[0], sincosVal[1]);
+            ddsOutLUT = ::aie::mul(sincosVal[2], ddsAccInter.template to_vector<TT_DATA>(31));
+            return ddsOutLUT;
+        }
+};
+
+#
+template <unsigned int numTables, unsigned int tableRes, unsigned int lutMask, unsigned int numLanes, typename TT_DATA>
+auto INLINE_DECL computeDDSOutFloat(unsigned int m_phaseIndex, cfloat** sincosLUT) {
+#if __SUPPORTS_CFLOAT__ == 1
+    ::aie::vector<cfloat, 4> ddsOutLUT;
+    ::aie::vector<cfloat, 4> sincosVal[numTables];
+#pragma unroll numTables
+    for (int i = 0; i < numTables; i++) {
+        sincosVal[i][0] = sincosLUT[i][(m_phaseIndex >> (32 - 10 * (i + 1))) & 0x000003FF];
+    }
+    if
+        constexpr(numTables == 1) { return sincosVal[0].get(0); }
+    else if
+        constexpr(numTables == 2) {
+            ddsOutLUT = ::aie::mul(sincosVal[0], sincosVal[1]);
+            return ddsOutLUT.get(0);
+        }
+    else if
+        constexpr(numTables == 3) {
+            ::aie::vector<cfloat, 4> ddsAccInter;
+            ddsAccInter = ::aie::mul(sincosVal[0], sincosVal[1]);
+            ddsOutLUT = ::aie::mul(sincosVal[2], ddsAccInter);
+            return ddsOutLUT.get(0);
+        }
+#endif
+};
 }
 }
 }

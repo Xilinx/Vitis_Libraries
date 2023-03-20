@@ -1,3 +1,4 @@
+from vmc_fft_common import *
 
 #### VMC graph generator ####
 def vmc_generate_graph(name, args):
@@ -12,7 +13,7 @@ def vmc_generate_graph(name, args):
     tmpargs["TP_DYN_PT_SIZE"] = 0
     tmpargs["TP_API"] = 1
     ssr = args["ssr"]
-    parallel_power = int(math.log2(2))
+    parallel_power = int(math.log2(ssr)) - 1
     tmpargs["TP_PARALLEL_POWER"] = parallel_power
     tmpargs["TP_FFT_NIFFT"] = 1
 

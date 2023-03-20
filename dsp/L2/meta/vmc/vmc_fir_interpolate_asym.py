@@ -31,7 +31,6 @@ def vmc_validate_input_window_size(args):
 	return fn_validate_input_window_size(data_type, coef_type, fir_length, interpolate_factor, input_window_size, api, ssr)
 
 def vmc_validate_casc_length(args):
-    use_casc_length = args["use_casc_length"]
     use_coeff_reload = args["use_coeff_reload"]
     fir_length = args["fir_length"]
     casc_length = args["casc_length"]
@@ -48,7 +47,6 @@ def vmc_validate_coeff(args):
 	coeff = args["coeff"]
 	data_type = args["data_type"]
 	casc_length = args["casc_length"]
-	use_casc_length = args["use_casc_length"]
 	interpolate_factor = args["interpolate_factor"]
 	ssr = 1
 	api = 0
@@ -61,9 +59,7 @@ def vmc_validate_coeff(args):
 		else:
 			fir_length = int(len(coeff))
 	#TODO: Talk to DSP Lib team about separating casc length from fir_length API
-	if use_casc_length:
-		return fn_validate_fir_len(data_type, coef_type, fir_length, interpolate_factor, casc_length, ssr, api, use_coeff_reload, dual_ip )
-	return {"is_valid": True}
+	return fn_validate_fir_len(data_type, coef_type, fir_length, interpolate_factor, casc_length, ssr, api, use_coeff_reload, dual_ip )
 
 def vmc_validate_shift_val(args):
 	data_type = args["data_type"]
@@ -73,27 +69,30 @@ def vmc_validate_shift_val(args):
 
 #### VMC graph generator ####
 def vmc_generate_graph(name, args):
-    tmpargs = {}
-    tmpargs["TT_DATA"] = args["data_type"]
-    tmpargs["TT_COEF"] = args["coef_type"]
-    tmpargs["TP_FIR_LEN"] = args["fir_length"]
-    tmpargs["TP_SHIFT"] = args["shift_val"]
-    tmpargs["TP_RND"] = args["rnd_mode"]
-    tmpargs["TP_INPUT_WINDOW_VSIZE"] = args["input_window_size"]
-    tmpargs["TP_INTERPOLATE_FACTOR"] = args["interpolate_factor"]
-    use_casc_length = args["use_casc_length"]
-    if use_casc_length:
-      casc_length = args["casc_length"]
-    else:
-      #TODO: call to partitioner to determine cascade length
-      casc_length = 1
-
-    tmpargs["TP_CASC_LEN"] = casc_length
-    tmpargs["TP_USE_COEF_RELOAD"] = 1 if args["use_coeff_reload"] else 0
-    tmpargs["TP_NUM_OUTPUTS"] = 1
-    tmpargs["TP_DUAL_IP"] = 0
-    tmpargs["TP_API"] = 0
-    tmpargs["TP_SSR"] = 1
-    tmpargs["coeff"] = args["coeff"]
+	tmpargs = {}
+	tmpargs["TT_DATA"] = args["data_type"]
+	use_coeff_reload = args["use_coeff_reload"]
+	coef_type = args["coef_type"]
+	coeff = args["coeff"]
+	if use_coeff_reload:
+		fir_length = args["fir_length"]
+	else:
+		if fn_is_complex(coef_type):
+			fir_length = int(len(coeff)/2)
+		else:
+			fir_length = int(len(coeff))
+	tmpargs["TT_COEF"] = coef_type
+	tmpargs["TP_FIR_LEN"] = fir_length
+	tmpargs["TP_SHIFT"] = args["shift_val"]
+	tmpargs["TP_RND"] = args["rnd_mode"]
+	tmpargs["TP_INPUT_WINDOW_VSIZE"] = args["input_window_size"]
+	tmpargs["TP_INTERPOLATE_FACTOR"] = args["interpolate_factor"]
+	tmpargs["TP_CASC_LEN"] = args["casc_length"]
+	tmpargs["TP_USE_COEF_RELOAD"] = 1 if args["use_coeff_reload"] else 0
+	tmpargs["TP_NUM_OUTPUTS"] = 1
+	tmpargs["TP_DUAL_IP"] = 0
+	tmpargs["TP_API"] = 0
+	tmpargs["TP_SSR"] = 1
+	tmpargs["coeff"] = args["coeff"]
    
-    return generate_graph(name, tmpargs)
+	return generate_graph(name, tmpargs)

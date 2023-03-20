@@ -70,7 +70,7 @@ def vmc_generate_graph(name, args):
     tmpargs = {}
     tmpargs["TT_DATA"] = args["data_type"]
     tmpargs["TT_COEF"] = args["coef_type"]
-    tmpargs["TP_FIR_LEN"] = args["fir_length"]
+    tmpargs["TP_FIR_LEN"] = fn_get_fir_length_hb(args)
     tmpargs["TP_SHIFT"] = args["shift_val"]
     tmpargs["TP_RND"] = args["rnd_mode"]
     tmpargs["TP_INPUT_WINDOW_VSIZE"] = args["input_window_size"]
@@ -82,5 +82,7 @@ def vmc_generate_graph(name, args):
     tmpargs["TP_API"] = 1
     tmpargs["TP_SSR"] = args["ssr"]
     tmpargs["coeff"] = args["coeff"]
+    tmpargs["TP_UPSHIFT_CT"] = args["upshift_ct"]
+    tmpargs["TP_PARA_INTERP_POLY"] = args["interp_poly"]
    
     return generate_graph(name, tmpargs)

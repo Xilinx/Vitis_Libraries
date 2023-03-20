@@ -1,0 +1,15 @@
+{
+    "spec": "vmc_stream_ifft.json",
+    "outdir": "./xmc_aie_lib/IFFT_Stream_65a9f111",
+    "parameters": {
+        "data_type": "cint16",
+        "point_size": 64,
+        "input_window_size": 64,
+        "shift_val": 0,
+        "ssr": 2,
+        "input_sampling_rate": 200,
+        "use_casc_length": false,
+        "casc_length": 1
+    },
+    "updated_parameter": ""
+}

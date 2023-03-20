@@ -125,15 +125,16 @@ class fir_sr_asym_ref_graph : public graph {
                     widget_api_cast_ref<TT_DATA, 1, 0, 2, inputWindowVectorSize, 1, kInterleavePattern> >();
                 connect<stream>(in[0], m_widgetKernelIn.in[0]);
                 connect<stream>(in2[0], m_widgetKernelIn.in[1]);
-                connect<window<inputWindowByteSize, fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(
-                    m_widgetKernelIn.out[0], m_firKernel.in[0]);
+                connect<>(m_widgetKernelIn.out[0], m_firKernel.in[0]);
+                dimensions(m_widgetKernelIn.out[0]) = {inputWindowVectorSize};
+                dimensions(m_firKernel.in[0]) = {inputWindowVectorSize};
                 runtime<ratio>(m_widgetKernelIn) = 0.4;
                 // Source files
                 source(m_widgetKernelIn) = "widget_api_cast_ref.cpp";
             }
         else {
-            connect<window<inputWindowByteSize, fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(
-                in[0], m_firKernel.in[0]);
+            connect<>(in[0], m_firKernel.in[0]);
+            dimensions(m_firKernel.in[0]) = {inputWindowVectorSize};
         }
 
         // Make output connections
@@ -145,11 +146,15 @@ class fir_sr_asym_ref_graph : public graph {
                 m_widgetKernelOut =
                     kernel::create_object<widget_api_cast_ref<TT_DATA, USE_WINDOW_API, TP_API, kNumInputs,
                                                               TP_INPUT_WINDOW_VSIZE, kNumOutputs, 0> >();
-                connect<window<outputWindowByteSize> >(m_firKernel.out[0], m_widgetKernelOut.in[0]);
+                connect<>(m_firKernel.out[0], m_widgetKernelOut.in[0]);
+                dimensions(m_firKernel.out[0]) = {TP_INPUT_WINDOW_VSIZE};
+                dimensions(m_widgetKernelOut.in[0]) = {TP_INPUT_WINDOW_VSIZE};
                 if
                     constexpr(TP_API == USE_WINDOW_API) {
-                        connect<window<outputWindowByteSize> >(m_widgetKernelOut.out[0], out[0]);
-                        connect<window<outputWindowByteSize> >(m_widgetKernelOut.out[1], out2[0]);
+                        connect<>(m_widgetKernelOut.out[0], out[0]);
+                        dimensions(m_widgetKernelOut.out[0]) = {TP_INPUT_WINDOW_VSIZE};
+                        connect<>(m_widgetKernelOut.out[1], out2[0]);
+                        dimensions(m_widgetKernelOut.out[1]) = {TP_INPUT_WINDOW_VSIZE};
                     }
                 else {
                     connect<stream>(m_widgetKernelOut.out[0], out[0]);
@@ -159,7 +164,8 @@ class fir_sr_asym_ref_graph : public graph {
                 runtime<ratio>(m_widgetKernelOut) = 0.9;
             }
         else {
-            connect<window<outputWindowByteSize> >(m_firKernel.out[0], out[0]);
+            connect<>(m_firKernel.out[0], out[0]);
+            dimensions(m_firKernel.out[0]) = {TP_INPUT_WINDOW_VSIZE};
         }
         // make RTP connection
         if

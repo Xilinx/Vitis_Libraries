@@ -241,8 +241,8 @@ using outType_t = typename outType<T_D_A, T_D_B>::type;
 
 template <bool T_CASC_IN, typename T_D_A, typename T_D_B>
 struct T_inputIF {
-    input_window<T_D_A>* __restrict inWindowA;
-    input_window<T_D_B>* __restrict inWindowB;
+    void* __restrict inWindowA;
+    void* __restrict inWindowB;
     typename std::conditional<T_CASC_IN == CASC_IN_FALSE, no_port, input_stream<accType_t<T_D_A, T_D_B> > >::type*
         inCascade;
 };
@@ -251,7 +251,7 @@ struct T_inputIF {
 template <bool T_CASC_OUT, typename T_D_A, typename T_D_B>
 struct T_outputIF {
     typename std::conditional<T_CASC_OUT == CASC_OUT_FALSE,
-                              output_window<outType_t<T_D_A, T_D_B> >,
+                              outType_t<T_D_A, T_D_B>,
                               output_stream<accType_t<T_D_A, T_D_B> > >::type* __restrict outWindow;
 };
 
@@ -319,19 +319,6 @@ class kernelMatMultClass {
     using m_tXbuff = TT_DATA_A;
 
    private:
-    // 2020.2 Specific Constraints
-    // cint16 type only
-    // static_assert( (
-    //                std::is_same<TT_DATA_A, cint16>::value &&
-    //                std::is_same<TT_DATA_B, cint16>::value ),
-    //                "ERROR: type support is currently limited to cint16. ");
-    // Num Accs
-    // static_assert(TP_DIM_A%8 == 0 ,"ERROR: TP_DIM_A is currently limited to increments with steps of 8. ");
-    // LoadSizeLaneBuffer
-    // static_assert(TP_DIM_AB%4 == 0 ,"ERROR: TP_DIM_AB is currently limited to increments with steps of 4. ");
-    // Num Lanes
-    // static_assert(TP_DIM_B%4 == 0 ,"ERROR: TP_DIM_B is currently limited to increments with steps of 4. ");
-
     static_assert((((TP_CASC_LEN == 1) && (TP_KERNEL_POSITION == 0)) &&
                    ((TP_DIM_A_RANGE == TP_DIM_A) && (TP_DIM_B_RANGE == TP_DIM_B) && (TP_DIM_AB_RANGE == TP_DIM_AB))),
                   "ERROR: Cascading/Tiling is not currently available. ");
@@ -455,6 +442,7 @@ class kernelMatMultClass {
     static constexpr tilingStruct tilingScheme = getTilingScheme();
     static_assert(tilingSchemeMultiples<tilingScheme.Atile, tilingScheme.ABtile, tilingScheme.Btile>(),
                   "Error: Dimensions are not multiples of tiling scheme.");
+
     // Constructor
     kernelMatMultClass(){};
 
@@ -509,7 +497,7 @@ class matrix_mult : public kernelMatMultClass<TT_DATA_A,
                                               TP_CASC_LEN> {
    private:
    public:
-    // Constructor calls base class constructor
+    // Constructor calls base class constructor (neither of which have anything to do)
     matrix_mult()
         : kernelMatMultClass<TT_DATA_A,
                              TT_DATA_B,
@@ -535,9 +523,9 @@ class matrix_mult : public kernelMatMultClass<TT_DATA_A,
     static void registerKernelClass() { REGISTER_FUNCTION(matrix_mult::matMult); }
 
     // FIR
-    void matMult(input_window<TT_DATA_A>* inWindowA,
-                 input_window<TT_DATA_B>* inWindowB,
-                 output_window<outType_t<TT_DATA_A, TT_DATA_B> >* __restrict outWindow);
+    void matMult(input_buffer<TT_DATA_A>& __restrict inWindowA,
+                 input_buffer<TT_DATA_B>& __restrict inWindowB,
+                 output_buffer<outType_t<TT_DATA_A, TT_DATA_B> >& __restrict outWindow);
 };
 
 //-----------------------------------------------------------------------------------------------------
@@ -598,7 +586,7 @@ class matrix_mult<TT_DATA_A,
                                                            TP_CASC_LEN> {
    private:
    public:
-    // Constructor
+    // Constructor (does nothing and neither does the base class, but this is left as a placeholder)
     matrix_mult()
         : kernelMatMultClass<TT_DATA_A,
                              TT_DATA_B,
@@ -624,10 +612,10 @@ class matrix_mult<TT_DATA_A,
     static void registerKernelClass() { REGISTER_FUNCTION(matrix_mult::matMult); }
 
     // FIR
-    void matMult(input_window<TT_DATA_A>* inWindowA,
-                 input_window<TT_DATA_B>* inWindowB,
+    void matMult(input_buffer<TT_DATA_A>& __restrict inWindowA,
+                 input_buffer<TT_DATA_B>& __restrict inWindowB,
                  input_stream<accType_t<TT_DATA_A, TT_DATA_B> >* inCascade,
-                 output_window<outType_t<TT_DATA_A, TT_DATA_B> >* __restrict outWindow);
+                 output_buffer<outType_t<TT_DATA_A, TT_DATA_B> >& __restrict outWindow);
 };
 
 //-----------------------------------------------------------------------------------------------------
@@ -714,8 +702,8 @@ class matrix_mult<TT_DATA_A,
     static void registerKernelClass() { REGISTER_FUNCTION(matrix_mult::matMult); }
 
     // FIR
-    void matMult(input_window<TT_DATA_A>* inWindowA,
-                 input_window<TT_DATA_B>* inWindowB,
+    void matMult(input_buffer<TT_DATA_A>& __restrict inWindowA,
+                 input_buffer<TT_DATA_B>& __restrict inWindowB,
                  output_stream<accType_t<TT_DATA_A, TT_DATA_B> >* outCascade);
 };
 
@@ -803,8 +791,8 @@ class matrix_mult<TT_DATA_A,
     static void registerKernelClass() { REGISTER_FUNCTION(matrix_mult::matMult); }
 
     // FIR
-    void matMult(input_window<TT_DATA_A>* inWindowA,
-                 input_window<TT_DATA_B>* inWindowB,
+    void matMult(input_buffer<TT_DATA_A>& __restrict inWindowA,
+                 input_buffer<TT_DATA_B>& __restrict inWindowB,
                  input_stream<accType_t<TT_DATA_A, TT_DATA_B> >* inCascade,
                  output_stream<accType_t<TT_DATA_A, TT_DATA_B> >* outCascade);
 };

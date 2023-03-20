@@ -27,6 +27,8 @@ FFT/iFFT DIT single channel reference model
 #include <adf.h>
 #include <limits>
 
+using namespace adf;
+
 namespace xf {
 namespace dsp {
 namespace aie {
@@ -102,7 +104,7 @@ class fft_r2comb_ref {
         TT_DATA* samplesA, TT_DATA* samplesB, TT_TWIDDLE* twiddles, int pptSize /*used for dyn pt size*/, bool inv);
     void r2StageFloat(
         TT_DATA* samplesA, TT_DATA* samplesB, TT_TWIDDLE* twiddles, int pptSize /*used for dyn pt size*/, bool inv);
-    void fft_r2comb_ref_main(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow);
+    void fft_r2comb_ref_main(input_buffer<TT_DATA>& inWindow, output_buffer<TT_DATA>& outWindow);
 };
 }
 }

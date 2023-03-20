@@ -15,6 +15,13 @@
 /*
 FFT Window reference model
 */
+#include "device_defs.h"
+#if __SUPPORTS_CFLOAT__ == 0
+typedef struct {
+    float real;
+    float imag;
+} cfloat;
+#endif
 
 #include "fft_window_ref.hpp"
 //#include "fir_ref_utils.hpp"
@@ -124,7 +131,7 @@ template <typename TT_DATA,
           unsigned int TP_SSR,
           unsigned int TP_DYN_PT_SIZE>
 void fft_window_ref<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, TP_API, TP_SSR, TP_DYN_PT_SIZE>::
-    fft_window_main(input_window<TT_DATA>* inWindow0, output_window<TT_DATA>* outWindow0) {
+    fft_window_main(input_buffer<TT_DATA>& inWindow0, output_buffer<TT_DATA>& outWindow0) {
     TT_DATA d_in;
     TT_DATA d_out;
     TT_COEFF* coeff_base = &this->weights[0];
@@ -132,6 +139,8 @@ void fft_window_ref<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT,
         TP_POINT_SIZE; // default to static point size value. May be overwritten if dynamic point size selected.
     int16 tableSelect = 0;
     TT_COEFF coeff;
+    TT_DATA* inPtr = (TT_DATA*)inWindow0.data();
+    TT_DATA* outPtr = (TT_DATA*)outWindow0.data();
 
     if
         constexpr(TP_DYN_PT_SIZE == 1) {
@@ -140,42 +149,51 @@ void fft_window_ref<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT,
             constexpr unsigned int kMinPtSizePwr = 4;  // smallest is 16 = 1<<4;
             constexpr unsigned int kHeaderSize =
                 32 / (sizeof(TT_DATA)); // dynamic point size header size (256bits or 32 bytes) in terms of samples
-            TT_DATA* headerPtr;
             TT_DATA header;
             int16 ptSizePwr; // default to static point size value. May be overwritten if dynamic point size selected.
 
-            headerPtr = (TT_DATA*)inWindow0->ptr;
-            header = *headerPtr++; // saved for later when output to outWindow
-            window_writeincr(outWindow0, header);
-            header = *headerPtr++; // saved for later when output to outWindow
-            window_writeincr(outWindow0, header);
+            // headerPtr = (TT_DATA*)inWindow0->ptr;
+            header = *inPtr++; // saved for later when output to outWindow
+            // window_writeincr(outWindow0, header);
+            *outPtr++ = header;
+            header = *inPtr++; // saved for later when output to outWindow
+            // window_writeincr(outWindow0, header);
+            *outPtr++ = header;
             ptSizePwr = (int32)header.real - kLogSSR; // Modified for case where FFT is a subframe processor. Then the
                                                       // header refers to the overall point size.
             ptSize = ((unsigned int)1) << ptSizePwr;
             tableSelect = (kPtSizePwr - ptSizePwr);
             coeff_base = &this->weights[this->tableStarts[tableSelect]];
             for (int i = 2; i < kHeaderSize - 1; i++) {
-                window_writeincr(outWindow0, blankVector<TT_DATA>());
+                // window_writeincr(outWindow0, blankVector<TT_DATA>());
+                *outPtr++ = blankVector<TT_DATA>();
             }
             if ((ptSizePwr >= kMinPtSizePwr) && (ptSizePwr <= kMaxPtSizePwr)) {
-                window_writeincr(outWindow0, blankVector<TT_DATA>()); // Status word. 0 indicated all ok.
+                // window_writeincr(outWindow0, blankVector<TT_DATA>()); //Status word. 0 indicated all ok.
+                *outPtr++ = blankVector<TT_DATA>();
             } else {
-                window_writeincr(outWindow0, unitVector<TT_DATA>()); // Status word. 0 indicated all ok.
+                // window_writeincr(outWindow0, unitVector<TT_DATA>()); //Status word. 0 indicated all ok.
+                *outPtr++ = unitVector<TT_DATA>();
             }
-            window_incr(inWindow0, kHeaderSize);
+            inPtr += kHeaderSize - 2; // two reads already;
+            // window_incr(inWindow0,kHeaderSize);
         }
 
     for (int frame = 0; frame < TP_WINDOW_VSIZE / TP_POINT_SIZE; frame++) {
         for (unsigned int i = 0; i < ptSize; i++) {
-            d_in = window_readincr(inWindow0); // read input data
+            // d_in = window_readincr(inWindow0);  //read input data
+            d_in = *inPtr++;
             coeff = coeff_base[i];
             d_out = scalar_mult<TT_DATA, TT_COEFF>(d_in, coeff, TP_SHIFT);
-            window_writeincr(outWindow0, d_out);
+            // window_writeincr(outWindow0, d_out) ;
+            *outPtr++ = d_out;
         }
         for (unsigned int i = ptSize; i < TP_POINT_SIZE; i++) {
-            d_in = window_readincr(inWindow0);                    // read input data just to flush out unused samples
-            window_writeincr(outWindow0, blankVector<TT_DATA>()); // but write out zeros so that detritus is overwritten
-                                                                  // (else verification is hard)
+            // d_in = window_readincr(inWindow0);  //read input data just to flush out unused samples
+            d_in = *inPtr++;
+            // window_writeincr(outWindow0, blankVector<TT_DATA>()) ;//but write out zeros so that detritus is
+            // overwritten (else verification is hard)
+            *outPtr++ = blankVector<TT_DATA>();
         }
     }
 };

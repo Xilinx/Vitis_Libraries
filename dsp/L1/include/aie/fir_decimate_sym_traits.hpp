@@ -105,6 +105,10 @@ INLINE_DECL constexpr unsigned int fnMaxDecimateFactor() {
     return 3; //
 };
 template <>
+INLINE_DECL constexpr unsigned int fnMaxDecimateFactor<int16, int32>() {
+    return 2;
+};
+template <>
 INLINE_DECL constexpr unsigned int fnMaxDecimateFactor<cint32, cint16>() {
     return 2;
 };
@@ -136,6 +140,18 @@ INLINE_DECL constexpr unsigned int fnLoadSizeDecSym<cint16, int16, kArch2BuffLow
 }; // 256 - DF2, 128 DF3
 template <>
 INLINE_DECL constexpr unsigned int fnLoadSizeDecSym<cint16, cint16, kArch2BuffLowDFBasic>() {
+    return 128;
+}; // 256 - DF2, 128 DF3
+template <>
+INLINE_DECL constexpr unsigned int fnLoadSizeDecSym<cint16, int32, kArch2BuffLowDFBasic>() {
+    return 128;
+}; // 256 - DF2, 128 DF3
+template <>
+INLINE_DECL constexpr unsigned int fnLoadSizeDecSym<cint16, cint32, kArch2BuffLowDFBasic>() {
+    return 128;
+}; // 256 - DF2, 128 DF3
+template <>
+INLINE_DECL constexpr unsigned int fnLoadSizeDecSym<int16, int32, kArch2BuffLowDFBasic>() {
     return 128;
 }; // 256 - DF2, 128 DF3
 template <>

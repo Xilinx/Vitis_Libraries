@@ -35,7 +35,8 @@
         },
         {
             "name": "aiesim-launch",
-            "target": "aiesim"
+            "target": "aiesim",
+            "sim_options": "--graph-latency"
         },
         {
             "name": "x86sim-launch",
@@ -94,7 +95,8 @@
                 "./"
             ],
             "clflags": [
-                "--dataflow  -Xpreproc=\"-DUUT_GRAPH=fir_decimate_asym_graph -DOUTPUT_FILE=data/uut_output.txt -DINPUT_FILE=data/input.txt  -DUSING_UUT=1 \""
+                "--dataflow",
+                "-Xpreproc=\"-DUUT_GRAPH=fir_decimate_asym_graph -DOUTPUT_FILE=data/uut_output.txt -DINPUT_FILE=data/input.txt  -DUSING_UUT=1 \""
             ]
         }
     },

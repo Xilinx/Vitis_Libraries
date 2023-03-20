@@ -39,11 +39,13 @@ template <typename TT_COEFF, unsigned int TP_FIR_LEN>
 INLINE_DECL void bufferReload(const TT_COEFF (&inTaps)[TP_FIR_LEN],
                               TT_COEFF (&cascTaps)[TP_FIR_LEN],
                               TT_COEFF (&outTaps)[TP_FIR_LEN]) {
-    T_buff_128b<TT_COEFF>* inTapsPtr = (T_buff_128b<TT_COEFF>*)inTaps;
-    T_buff_128b<TT_COEFF>* __restrict cascTapsPtr = (T_buff_128b<TT_COEFF>*)cascTaps;
-    T_buff_128b<TT_COEFF>* __restrict outTapsPtr = (T_buff_128b<TT_COEFF>*)outTaps;
-    T_buff_128b<TT_COEFF> c_xbuff;
     const int samplesPer256Buff = 128 / 8 / sizeof(TT_COEFF);
+    ::aie::vector<TT_COEFF, samplesPer256Buff>* inTapsPtr = (::aie::vector<TT_COEFF, samplesPer256Buff>*)inTaps;
+    ::aie::vector<TT_COEFF, samplesPer256Buff>* __restrict cascTapsPtr =
+        (::aie::vector<TT_COEFF, samplesPer256Buff>*)cascTaps;
+    ::aie::vector<TT_COEFF, samplesPer256Buff>* __restrict outTapsPtr =
+        (::aie::vector<TT_COEFF, samplesPer256Buff>*)outTaps;
+    ::aie::vector<TT_COEFF, samplesPer256Buff> c_xbuff;
 
     for (int i = 0; i < TRUNC(TP_FIR_LEN, samplesPer256Buff); i += samplesPer256Buff) {
         // copy 256 vector at a time
@@ -69,10 +71,11 @@ INLINE_DECL void bufferReload(const TT_COEFF (&inTaps)[TP_FIR_LEN],
 // To optimize performance, 256-bit vectors are copied, so storage element must be padded to 256-bits.
 template <typename TT_COEFF, unsigned int TP_FIR_LEN>
 INLINE_DECL void bufferReload(const TT_COEFF (&inTaps)[TP_FIR_LEN], TT_COEFF* outTaps) {
-    T_buff_256b<TT_COEFF>* inTapsPtr = (T_buff_256b<TT_COEFF>*)inTaps;
-    T_buff_256b<TT_COEFF>* __restrict outTapsPtr = (T_buff_256b<TT_COEFF>*)outTaps;
-    T_buff_256b<TT_COEFF> buff256;
     const int samplesPer256Buff = 256 / 8 / sizeof(TT_COEFF);
+    ::aie::vector<TT_COEFF, samplesPer256Buff>* inTapsPtr = (::aie::vector<TT_COEFF, samplesPer256Buff>*)inTaps;
+    ::aie::vector<TT_COEFF, samplesPer256Buff>* __restrict outTapsPtr =
+        (::aie::vector<TT_COEFF, samplesPer256Buff>*)outTaps;
+    ::aie::vector<TT_COEFF, samplesPer256Buff> buff256;
 
     for (int i = 0; i < CEIL(TP_FIR_LEN, samplesPer256Buff); i += samplesPer256Buff) {
         // copy 256-bit vector at a time
@@ -90,17 +93,16 @@ template <typename TT_COEFF, unsigned int TP_FIR_LEN>
 INLINE_DECL void bufferReload(const TT_COEFF (&inTaps)[TP_FIR_LEN],
                               TT_COEFF* outTaps,
                               output_stream_cacc48* outCascade) {
-    T_buff_256b<int>* inTapsPtr = (T_buff_256b<int>*)inTaps;
-    T_buff_256b<int>* __restrict outTapsPtr = (T_buff_256b<int>*)outTaps;
-    T_buff_256b<int> buff256;
-    const int samplesPer256Buff = 256 / 8 / sizeof(TT_COEFF);
+    const int samplesPerBuffWrite = MCD_SIZE / 8 / sizeof(TT_COEFF);
+    ::aie::vector<TT_COEFF, samplesPerBuffWrite>* inTapsPtr = (::aie::vector<TT_COEFF, samplesPerBuffWrite>*)inTaps;
+    ::aie::vector<TT_COEFF, samplesPerBuffWrite>* __restrict outTapsPtr =
+        (::aie::vector<TT_COEFF, samplesPerBuffWrite>*)outTaps;
+    ::aie::vector<TT_COEFF, samplesPerBuffWrite> buffWrite;
 
-    for (int i = 0; i < CEIL(TP_FIR_LEN, samplesPer256Buff); i += samplesPer256Buff) {
-        // copy 256-bit vector at a time
-        buff256 = *inTapsPtr++;
-
-        *outTapsPtr++ = buff256;
-        put_mcd(buff256.val);
+    for (int i = 0; i < CEIL(TP_FIR_LEN, samplesPerBuffWrite); i += samplesPerBuffWrite) {
+        buffWrite = *inTapsPtr++;
+        *outTapsPtr++ = buffWrite;
+        put_mcd(buffWrite);
     }
     // make sure memory is not accessed too early by adding a fence
     chess_memory_fence();
@@ -111,15 +113,19 @@ INLINE_DECL void bufferReload(const TT_COEFF (&inTaps)[TP_FIR_LEN],
 // To optimize performance, 256-bit vectors are copied, so storage element must be padded to 256-bits.
 template <typename TT_COEFF, unsigned int TP_FIR_LEN>
 INLINE_DECL void bufferReload(input_stream_cacc48* inCascade, TT_COEFF* outTaps, output_stream_cacc48* outCascade) {
-    T_buff_256b<int32>* __restrict outTapsPtr = (T_buff_256b<int32>*)outTaps;
-    T_buff_256b<int32> buff256; //
-    const int samplesPer256Buff = 256 / 8 / sizeof(TT_COEFF);
-
-    for (int i = 0; i < CEIL(TP_FIR_LEN, samplesPer256Buff); i += samplesPer256Buff) {
-        // copy 256-bit vector from input cascade to memory location and output cascade
-        buff256.val = get_scd_v8int32(); // int32
-        *outTapsPtr++ = buff256;
-        put_mcd(buff256.val);
+    ::aie::vector<int32, MCD_SIZE / 8 / 4>* __restrict outTapsPtr = (::aie::vector<int32, MCD_SIZE / 8 / 4>*)outTaps;
+    ::aie::vector<int32, MCD_SIZE / 8 / 4> readBuff; //
+    const int samplesPerReadBuff = MCD_SIZE / 8 / sizeof(TT_COEFF);
+    // output_stream<cacc64>*
+    for (int i = 0; i < CEIL(TP_FIR_LEN, samplesPerReadBuff); i += samplesPerReadBuff) {
+// copy 512-bit vector from input cascade to memory location and output cascade
+#if MCD_SIZE == 256
+        readBuff = get_scd_v8int32(); // int32
+#else
+        readBuff = get_scd_v16int32(); // int32
+#endif
+        *outTapsPtr++ = readBuff;
+        put_mcd(readBuff);
     }
     // make sure memory is not accessed too early by adding a fence
     chess_memory_fence();
@@ -129,14 +135,19 @@ INLINE_DECL void bufferReload(input_stream_cacc48* inCascade, TT_COEFF* outTaps,
 // To optimize performance, 256-bit vectors are copied, so storage element must be padded to 256-bits.
 template <typename TT_COEFF, unsigned int TP_FIR_LEN>
 INLINE_DECL void bufferReload(input_stream_cacc48* inCascade, TT_COEFF* outTaps) {
-    T_buff_256b<int32>* __restrict outTapsPtr = (T_buff_256b<int32>*)outTaps;
-    T_buff_256b<int32> buff256; //
-    const int samplesPer256Buff = 256 / 8 / sizeof(TT_COEFF);
+    const int samplesPerBuffRead = SCD_SIZE / 8 / sizeof(TT_COEFF);
+    const int intsPerBuffRead = SCD_SIZE / 8 / sizeof(int32);
+    ::aie::vector<int32, intsPerBuffRead>* __restrict outTapsPtr = (::aie::vector<int32, intsPerBuffRead>*)outTaps;
+    ::aie::vector<int32, intsPerBuffRead> readBuff; //
 
-    for (int i = 0; i < CEIL(TP_FIR_LEN, samplesPer256Buff); i += samplesPer256Buff) {
-        // copy from input cascade to memory location
-        buff256.val = get_scd_v8int32(); // int32
-        *outTapsPtr++ = buff256;
+    for (int i = 0; i < CEIL(TP_FIR_LEN, samplesPerBuffRead); i += samplesPerBuffRead) {
+// copy from input cascade to memory location
+#if SCD_SIZE == 256
+        readBuff = get_scd_v8int32(); // int32
+#else
+        readBuff = get_scd_v16int32();
+#endif // SCD_SIZE
+        *outTapsPtr++ = readBuff;
     }
     // make sure memory is not accessed too early by adding a fence
     chess_memory_fence();
@@ -160,7 +171,7 @@ INLINE_DECL void bufferReload(const TT_COEFF (&inTaps)[TP_FIR_LEN],
 
 // Wrapper. Overloaded with IO interface.
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_FIR_LEN, unsigned int TP_DUAL_IP = 0>
-INLINE_DECL void bufferReload(T_inputIF<CASC_OUT_TRUE, TT_DATA, TP_DUAL_IP> inInterface,
+INLINE_DECL void bufferReload(T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface,
                               TT_COEFF* outTaps,
                               T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface) {
     bufferReload<TT_COEFF, TP_FIR_LEN>(inInterface.inCascade, outTaps, outInterface.outCascade);
@@ -168,7 +179,7 @@ INLINE_DECL void bufferReload(T_inputIF<CASC_OUT_TRUE, TT_DATA, TP_DUAL_IP> inIn
 
 // Wrapper. Overloaded with IO interface.
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_FIR_LEN, unsigned int TP_DUAL_IP = 0>
-INLINE_DECL void bufferReload(T_inputIF<CASC_OUT_TRUE, TT_DATA, TP_DUAL_IP> inInterface,
+INLINE_DECL void bufferReload(T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface,
                               TT_COEFF* outTaps,
                               T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface) {
     bufferReload<TT_COEFF, TP_FIR_LEN>(inInterface.inCascade, outTaps);
@@ -176,7 +187,7 @@ INLINE_DECL void bufferReload(T_inputIF<CASC_OUT_TRUE, TT_DATA, TP_DUAL_IP> inIn
 
 // Wrapper. Overloaded with IO interface.
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_FIR_LEN, unsigned int TP_DUAL_IP = 0>
-INLINE_DECL void bufferReload(T_inputIF<CASC_OUT_TRUE, TT_DATA, TP_DUAL_IP> inInterface, TT_COEFF* outTaps) {
+INLINE_DECL void bufferReload(T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface, TT_COEFF* outTaps) {
     bufferReload<TT_COEFF, TP_FIR_LEN>(inInterface.in, outTaps);
 }
 
@@ -189,21 +200,23 @@ INLINE_DECL void sendRtpTrigger(bool updateRtp, T_outputIF<CASC_OUT_FALSE, TT_DA
 // sendRtpTrigger - send a vector over cascade. Non-zero when argument it set to true.
 template <typename TT_DATA>
 INLINE_DECL void sendRtpTrigger(bool updateRtp, T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface) {
-    T_buff_256b<int32> buff = null_buff_256b<int32>();
+    ::aie::vector<int32, MCD_SIZE / 8 / 4> buff = ::aie::zeros<int32, MCD_SIZE / 8 / 4>();
     if (updateRtp) {
-        chess_memory_fence(); // Make sure buffer update is not pipelined before receiving updateRtp information
-        buff.val = upd_elem(buff.val, 0, 1); // set element 0 to 1.
+        chess_memory_fence();        // Make sure buffer update is not pipelined before receiving updateRtp information
+        buff = upd_elem(buff, 0, 1); // set element 0 to 1.
     }
-
-    put_mcd(buff.val);
+    put_mcd(buff);
 }
 
 INLINE_DECL bool getRtpTrigger() {
-    T_buff_512b<int32> buff = null_buff_512b<int32>();
-    T_buff_512b<int32> nullBuff = null_buff_512b<int32>();
-    buff.val = upd_w(null_buff_512b<int32>().val, 0, get_scd_v8int32());
-    bool ret = ne16(buff.val, nullBuff.val);
-    // return true when buffers not equal;
+    ::aie::vector<int32, 512 / 8 / 4> buff = ::aie::zeros<int32, 512 / 8 / 4>();
+    ::aie::vector<int32, 512 / 8 / 4> nullBuff = ::aie::zeros<int32, 512 / 8 / 4>();
+#ifdef __SUPPORTS_PUT_MCD__
+    buff = upd_w(::aie::zeros<int32, 512 / 8 / 4>(), 0, get_scd_v8int32());
+#else
+    buff = get_scd_v16int32();
+#endif
+    bool ret = ::aie::not_equal(buff, nullBuff);
     return ret;
 }
 
@@ -218,49 +231,47 @@ INLINE_DECL constexpr unsigned int getCompMask(const unsigned int size) {
 }
 
 // Not equal
-template <typename TT_DATA>
-INLINE_DECL int nEq(T_buff_512b<TT_DATA> xbuff, T_buff_512b<TT_DATA> ybuff, unsigned int mask) {
-    // cast as int16 and comare as int16s
-    T_buff_512b<int16> xbuffInt;
-    T_buff_512b<int16> ybuffInt;
-
-    xbuffInt.val = as_v32int16(xbuff.val);
-    ybuffInt.val = as_v32int16(ybuff.val);
-
-    unsigned int ret = mask & ne32(xbuffInt.val, ybuffInt.val);
+template <typename TT_DATA, unsigned int buffSize, unsigned int maskElems>
+INLINE_DECL int nEq(::aie::vector<TT_DATA, buffSize / 8 / sizeof(TT_DATA)> xbuff,
+                    ::aie::vector<TT_DATA, buffSize / 8 / sizeof(TT_DATA)> ybuff,
+                    ::aie::detail::mask<maskElems> compMask) {
+    ::aie::detail::mask resNeq = ::aie::neq(xbuff, ybuff);
+    ::aie::detail::mask retComp = compMask & ::aie::neq(xbuff, ybuff);
+    unsigned int ret = retComp.to_uint32();
     return ret;
 }
-template <>
-INLINE_DECL int nEq(T_buff_512b<int16> xbuff, T_buff_512b<int16> ybuff, unsigned int mask) {
-    unsigned int ret = mask & ne32(xbuff.val, ybuff.val);
-    return ret;
-}
+
 // RTP comparison. Compares in 512-bit chunks
 template <typename TT_COEFF, unsigned int TP_FIR_LEN>
 INLINE_DECL bool rtpCompare(const TT_COEFF (&inTaps)[TP_FIR_LEN], TT_COEFF* oldTaps) {
-    T_buff_512b<TT_COEFF>* internalTapsRaw = (T_buff_512b<TT_COEFF>*)inTaps;
-    T_buff_512b<TT_COEFF>* __restrict comp_ybuff = (T_buff_512b<TT_COEFF>*)oldTaps;
+    constexpr int buffSize = 512;
+    ::aie::vector<TT_COEFF, buffSize / 8 / sizeof(TT_COEFF)>* internalTapsRaw =
+        (::aie::vector<TT_COEFF, buffSize / 8 / sizeof(TT_COEFF)>*)inTaps;
+    ::aie::vector<TT_COEFF, buffSize / 8 / sizeof(TT_COEFF)>* __restrict comp_ybuff =
+        (::aie::vector<TT_COEFF, buffSize / 8 / sizeof(TT_COEFF)>*)oldTaps;
 
-    T_buff_512b<TT_COEFF> c_xbuff = null_buff_512b<TT_COEFF>();
-    T_buff_512b<TT_COEFF> c_ybuff = null_buff_512b<TT_COEFF>();
+    ::aie::vector<TT_COEFF, buffSize / 8 / sizeof(TT_COEFF)> c_xbuff =
+        ::aie::zeros<TT_COEFF, buffSize / 8 / sizeof(TT_COEFF)>();
+    ::aie::vector<TT_COEFF, buffSize / 8 / sizeof(TT_COEFF)> c_ybuff =
+        ::aie::zeros<TT_COEFF, buffSize / 8 / sizeof(TT_COEFF)>();
 
     int coeffnEq = false; //
-    static constexpr unsigned int samplesPer256Buff = 512 / 8 / sizeof(TT_COEFF);
-    static constexpr unsigned int firLenRemInt16 = (TP_FIR_LEN % samplesPer256Buff) * sizeof(TT_COEFF) / sizeof(int16);
-    static constexpr unsigned int fullMask = 0xFFFFFFFF;
-    static constexpr unsigned int mask = getCompMask(firLenRemInt16);
+    static constexpr unsigned int samplesPerBuff = buffSize / 8 / sizeof(TT_COEFF);
+    static constexpr unsigned int firLenRemInt16 = (TP_FIR_LEN % samplesPerBuff) * sizeof(TT_COEFF) / sizeof(int16);
+    ::aie::detail::mask fullMask = ::aie::detail::mask<samplesPerBuff>(true);
+    ::aie::detail::mask compMask = ::aie::detail::mask<samplesPerBuff>::from_uint32(getCompMask(firLenRemInt16));
 
-    // #pragma unroll (TP_FIR_LEN/samplesPer256Buff)
-    for (int i = 0; i < TP_FIR_LEN; i += samplesPer256Buff)
-        chess_prepare_for_pipelining chess_loop_range(TP_FIR_LEN / samplesPer256Buff, ) {
+    // #pragma unroll (TP_FIR_LEN/samplesPer512Buff)
+    for (int i = 0; i < TP_FIR_LEN; i += samplesPerBuff)
+        chess_prepare_for_pipelining chess_loop_range(TP_FIR_LEN / samplesPerBuff, ) {
             c_xbuff = *internalTapsRaw++;
             c_ybuff = *comp_ybuff++;
 
             // Offsets are different on final iteration
-            if (i == TRUNC(TP_FIR_LEN, samplesPer256Buff)) {
-                coeffnEq |= nEq(c_xbuff, c_ybuff, mask);
+            if (i == TRUNC(TP_FIR_LEN, samplesPerBuff)) {
+                coeffnEq = nEq<TT_COEFF, buffSize, samplesPerBuff>(c_xbuff, c_ybuff, compMask);
             } else {
-                coeffnEq |= nEq(c_xbuff, c_ybuff, fullMask);
+                coeffnEq = nEq<TT_COEFF, buffSize, samplesPerBuff>(c_xbuff, c_ybuff, fullMask);
             }
             if (coeffnEq) { // Coefficients have changed
                 break;
@@ -273,19 +284,16 @@ INLINE_DECL bool rtpCompare(const TT_COEFF (&inTaps)[TP_FIR_LEN], TT_COEFF* oldT
 //
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_FIR_LEN_SSR, unsigned int TP_DUAL_IP, bool TP_CASC_IN>
 NOINLINE_DECL void bufferReloadSSR(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface, TT_COEFF* taps) {
-    T_buff_256b<TT_DATA> buff;
-    T_buff_256b<TT_COEFF> coeffBuff;
-    T_buff_256b<TT_COEFF>* __restrict outTapsPtr = (T_buff_256b<TT_COEFF>*)taps;
     const int dataSamplesPer256Buff = 256 / 8 / sizeof(TT_DATA);
     const int coeffSamplesPer256Buff = 256 / 8 / sizeof(TT_COEFF);
+    ::aie::vector<TT_DATA, dataSamplesPer256Buff> buff;
+    ::aie::vector<TT_COEFF, coeffSamplesPer256Buff> coeffBuff;
+    ::aie::vector<TT_COEFF, coeffSamplesPer256Buff>* __restrict outTapsPtr =
+        (::aie::vector<TT_COEFF, coeffSamplesPer256Buff>*)taps;
 
     for (int i = 0; i < CEIL(TP_FIR_LEN_SSR, coeffSamplesPer256Buff); i += coeffSamplesPer256Buff) {
-        // copy 256-bit vector from input stream to memory location and output cascade
-        // implement a vector based version of firReload.
         readStream256(buff, 0, inInterface);
-        // coeffBuff.val = buff.val.template cast_to<TT_COEFF>();
-        // *outTapsPtr++ = coeffBuff;
-        outTapsPtr->val = buff.val.template cast_to<TT_COEFF>();
+        *outTapsPtr = buff.template cast_to<TT_COEFF>();
         outTapsPtr++;
     }
 }
@@ -299,15 +307,15 @@ template <unsigned int TP_API,
 INLINE_DECL bool checkHeaderForUpdate(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface) {
     bool updateNotRequired = false;
     bool ret;
-    T_buff_256b<TT_DATA> buff = null_buff_256b<TT_DATA>();
-    T_buff_256b<TT_DATA> nullBuff = null_buff_256b<TT_DATA>();
-    T_buff_256b<int32> headerConfig;
+    const int dataSamplesPer256Buff = 256 / 8 / sizeof(TT_DATA);
+    ::aie::vector<TT_DATA, dataSamplesPer256Buff> buff = ::aie::zeros<TT_DATA, 256 / 8 / sizeof(TT_DATA)>();
+    ::aie::vector<TT_DATA, dataSamplesPer256Buff> nullBuff = ::aie::zeros<TT_DATA, 256 / 8 / sizeof(TT_DATA)>();
+    ::aie::vector<int32, 256 / 8 / 4> headerConfig;
     if
         constexpr(TP_API == USE_STREAM_API && TP_USE_COEFF_RELOAD == 2) {
             readStream256(buff, 0, inInterface);
             // at this point, just check if non-zero.
-            // ret = ne16(buff.val, nullBuff.val);
-            ret = ::aie::not_equal(buff.val, nullBuff.val);
+            ret = ::aie::not_equal(buff, nullBuff);
         }
     else {
         ret = updateNotRequired;

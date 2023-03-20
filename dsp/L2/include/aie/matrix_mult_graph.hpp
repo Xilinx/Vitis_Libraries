@@ -28,7 +28,6 @@
 #include "matrix_mult.hpp"
 #include "matrix_mult_untiler.hpp"
 #include "matrix_mult_tiler.hpp"
-#include "matrix_mult_tile_widget.hpp"
 
 namespace xf {
 namespace dsp {
@@ -258,16 +257,6 @@ class matrix_mult_graph : public graph {
     static constexpr bool isRedundantTilerOut =
         ((dimBPerKernel <= tilingScheme.Btile) && (TP_DIM_OUT_LEADING == ROW_MAJOR));
 
-    using TileAConditional = ConditionalWidget<isRedundantTilerA ? 0 : TP_ADD_TILING_A,
-                                               (TP_INPUT_WINDOW_VSIZE_A / TP_CASC_LEN) * sizeof(TT_DATA_A),
-                                               TilerClassA>;
-    using TileBConditional = ConditionalWidget<isRedundantTilerB ? 0 : TP_ADD_TILING_B,
-                                               (TP_INPUT_WINDOW_VSIZE_B / TP_CASC_LEN) * sizeof(TT_DATA_B),
-                                               TilerClassB>;
-    using DetileOutConditional =
-        ConditionalWidget<isRedundantTilerOut ? 0 : TP_ADD_DETILING_OUT,
-                          dimAPerKernel * dimBPerKernel * sizeof(outType_t<TT_DATA_A, TT_DATA_B>),
-                          DetilerClassOut>;
     /**
      * @brief This is the constructor function for the Matric Multiply graph.
      **/
@@ -307,8 +296,33 @@ class matrix_mult_graph : public graph {
             }
             // TODO, different window sizes for end kernel if the window size doesn't evenly split by CASC_LEN.
 
-            tilerA[i] = TileAConditional::create(inA[i], m_MatmultKernels[i].in[0]);
-            tilerB[i] = TileBConditional::create(inB[i], m_MatmultKernels[i].in[1]);
+            if
+                constexpr(!isRedundantTilerA && TP_ADD_TILING_A) {
+                    tilerA[i] = kernel::create_object<TilerClassA>();
+                    connect<>(inA[i], tilerA[i].in[0]);
+                    dimensions(tilerA[i].in[0]) = {TP_INPUT_WINDOW_VSIZE_A / TP_CASC_LEN};
+                    connect<>(tilerA[i].out[0], m_MatmultKernels[i].in[0]);
+                    dimensions(tilerA[i].out[0]) = {TP_INPUT_WINDOW_VSIZE_A / TP_CASC_LEN};
+                    dimensions(m_MatmultKernels[i].in[0]) = {TP_INPUT_WINDOW_VSIZE_A / TP_CASC_LEN};
+                }
+            else {
+                connect<>(inA[i], m_MatmultKernels[i].in[0]);
+                dimensions(m_MatmultKernels[i].in[0]) = {TP_INPUT_WINDOW_VSIZE_A / TP_CASC_LEN};
+            }
+
+            if
+                constexpr(!isRedundantTilerB && TP_ADD_TILING_B) {
+                    tilerB[i] = kernel::create_object<TilerClassB>();
+                    connect<>(inB[i], tilerB[i].in[0]);
+                    dimensions(tilerB[i].in[0]) = {TP_INPUT_WINDOW_VSIZE_B / TP_CASC_LEN};
+                    connect<>(tilerB[i].out[0], m_MatmultKernels[i].in[1]);
+                    dimensions(tilerB[i].out[0]) = {TP_INPUT_WINDOW_VSIZE_B / TP_CASC_LEN};
+                    dimensions(m_MatmultKernels[i].in[1]) = {TP_INPUT_WINDOW_VSIZE_B / TP_CASC_LEN};
+                }
+            else {
+                connect<>(inB[i], m_MatmultKernels[i].in[1]);
+                dimensions(m_MatmultKernels[i].in[1]) = {TP_INPUT_WINDOW_VSIZE_B / TP_CASC_LEN};
+            }
             // Specify mapping constraints - Can be overriden in parent graph.
             runtime<ratio>(m_MatmultKernels[i]) = 0.8;
             runtime<ratio>(tilerA[i]) = 0.4;
@@ -319,7 +333,19 @@ class matrix_mult_graph : public graph {
             source(tilerB[i]) = "matrix_mult_tiler.cpp";
         }
 
-        untiler = DetileOutConditional::create(m_MatmultKernels[(TP_CASC_LEN - 1)].out[0], out);
+        if
+            constexpr(!isRedundantTilerOut && TP_ADD_DETILING_OUT) {
+                untiler = kernel::create_object<DetilerClassOut>();
+                connect<>(m_MatmultKernels[(TP_CASC_LEN - 1)].out[0], untiler.in[0]);
+                dimensions(m_MatmultKernels[(TP_CASC_LEN - 1)].out[0]) = {dimAPerKernel * dimBPerKernel};
+                dimensions(untiler.in[0]) = {dimAPerKernel * dimBPerKernel};
+                connect<>(untiler.out[0], out);
+                dimensions(untiler.out[0]) = {dimAPerKernel * dimBPerKernel};
+            }
+        else {
+            connect<>(m_MatmultKernels[(TP_CASC_LEN - 1)].out[0], out);
+            dimensions(m_MatmultKernels[(TP_CASC_LEN - 1)].out[0]) = {dimAPerKernel * dimBPerKernel};
+        }
         runtime<ratio>(untiler) = 0.4;
         source(untiler) = "matrix_mult_untiler.cpp";
     }

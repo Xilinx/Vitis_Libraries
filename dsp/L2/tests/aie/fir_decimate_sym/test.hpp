@@ -173,6 +173,9 @@ class test_graph : public graph {
         const int bufferSize = ((FIR_LEN + INPUT_SAMPLES) * sizeof(DATA_TYPE));
         if (bufferSize > MAX_PING_PONG_SIZE) {
             single_buffer(firGraph.getKernels()->in[0]);
+            if (DUAL_IP == 1) {
+                single_buffer(firGraph.getKernels()->in[1]);
+            }
         } else {
             // use default ping-pong buffer, unless requested buffer exceeds memory module size
             static_assert(bufferSize < MEMORY_MODULE_SIZE,

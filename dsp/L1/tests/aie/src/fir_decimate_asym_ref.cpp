@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "aie_api/aie_adf.hpp"
 #include "fir_decimate_asym_ref.hpp"
 #include "fir_ref_utils.hpp"
 #include "fir_ref_coeff_header.hpp"
@@ -35,33 +36,37 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE>
-void filter_ref(input_window<TT_DATA>* inWindow,
-                output_window<TT_DATA>* outWindow,
-                const TT_COEFF (&taps)[TP_FIR_LEN]) {
+void filter_ref(
+    input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
+    output_circular_buffer<TT_DATA>& outWindow,
+    const TT_COEFF (&taps)[TP_FIR_LEN]) {
     const unsigned int shift = TP_SHIFT;
     T_accRef<TT_DATA> accum;
     TT_DATA d_in[TP_FIR_LEN];
     TT_DATA accumSrs;
 
+    auto inItr = ::aie::begin_random_circular(inWindow);
+    auto outItr = ::aie::begin_random_circular(outWindow);
+
     const unsigned int kFirMarginOffset = fnFirMargin<TP_FIR_LEN, TT_DATA>() - TP_FIR_LEN + 1; // FIR Margin Offset.
-    window_incr(inWindow, kFirMarginOffset);                                                   // read input data
+    inItr += kFirMarginOffset;
 
     for (unsigned int i = 0; i < TP_INPUT_WINDOW_VSIZE / TP_DECIMATE_FACTOR; i++) {
         accum = null_accRef<TT_DATA>(); // reset accumulator at the start of the mult-add for each output sample
         // Accumulation
         for (unsigned int j = 0; j < TP_FIR_LEN; j++) {
-            d_in[j] = window_readincr(inWindow); // read input data
+            d_in[j] = *inItr++; // read input data
 
             // Note the coefficient index reversal. See note in constructor.
             multiplyAcc<TT_DATA, TT_COEFF>(accum, d_in[j], taps[TP_FIR_LEN - 1 - j]);
         }
         // Revert data pointer for next sample
-        window_decr(inWindow, TP_FIR_LEN - TP_DECIMATE_FACTOR);
+        inItr -= TP_FIR_LEN - TP_DECIMATE_FACTOR;
 
         roundAcc(TP_RND, shift, accum);
         saturateAcc(accum);
         accumSrs = castAcc(accum);
-        window_writeincr((output_window<TT_DATA>*)outWindow, accumSrs);
+        *outItr++ = accumSrs;
     }
 };
 
@@ -87,9 +92,12 @@ void fir_decimate_asym_ref<TT_DATA,
                            TP_USE_COEFF_RELOAD,
                            TP_NUM_OUTPUTS,
                            TP_DUAL_IP,
-                           TP_API>::filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow) {
-    firHeaderReload<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_USE_COEFF_RELOAD>(inWindow,
-                                                                                               m_internalTaps);
+                           TP_API>::filter(input_circular_buffer<TT_DATA,
+                                                                 extents<inherited_extent>,
+                                                                 margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
+                                           output_circular_buffer<TT_DATA>& outWindow) {
+    //    firHeaderReload<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_USE_COEFF_RELOAD>(inWindow,
+    //    m_internalTaps); //header of coeffs feature is no longer supported
     filter_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE>(
         inWindow, outWindow, m_internalTaps);
 };
@@ -116,9 +124,11 @@ void fir_decimate_asym_ref<TT_DATA,
                            TP_USE_COEFF_RELOAD,
                            TP_NUM_OUTPUTS,
                            TP_DUAL_IP,
-                           TP_API>::filterRtp(input_window<TT_DATA>* inWindow,
-                                              output_window<TT_DATA>* outWindow,
-                                              const TT_COEFF (&inTaps)[TP_FIR_LEN]) {
+                           TP_API>::
+    filterRtp(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
+                  inWindow,
+              output_circular_buffer<TT_DATA>& outWindow,
+              const TT_COEFF (&inTaps)[TP_FIR_LEN]) {
     // Coefficient reload
     for (int i = 0; i < TP_FIR_LEN; i++) {
         m_internalTaps[i] = inTaps[i];

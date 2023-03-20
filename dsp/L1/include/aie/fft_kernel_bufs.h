@@ -37,7 +37,9 @@ alignas(32) thread_local cint32_t fft_2048_tmp1[FFT2048_SIZE];
 alignas(32) thread_local cint32_t fft_2048_tmp2[FFT2048_SIZE];
 alignas(32) thread_local cint32_t fft_4096_tmp1[FFT4096_SIZE];
 alignas(32) thread_local cint32_t fft_4096_tmp2[FFT4096_SIZE];
+
 #else
+
 alignas(32) cint32_t fft_16_tmp1[FFT16_SIZE];
 alignas(32) cint32_t fft_16_tmp2[FFT16_SIZE];
 alignas(32) cint32_t fft_32_tmp1[FFT32_SIZE];
@@ -56,6 +58,7 @@ alignas(32) cint32_t fft_2048_tmp1[FFT2048_SIZE];
 alignas(32) cint32_t fft_2048_tmp2[FFT2048_SIZE];
 alignas(32) cint32_t fft_4096_tmp1[FFT4096_SIZE];
 alignas(32) cint32_t fft_4096_tmp2[FFT4096_SIZE];
+
 #endif
 
 /* Twiddles come from the files fft_twiddle_lut_dit*.h

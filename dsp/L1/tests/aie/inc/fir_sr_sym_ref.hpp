@@ -25,6 +25,9 @@ acts as the golden reference to verify the AIE-targetting kernel class.
 
 #include <adf.h>
 #include <limits>
+#include "fir_ref_utils.hpp"
+
+using namespace adf;
 
 namespace xf {
 namespace dsp {
@@ -61,7 +64,9 @@ class fir_sr_sym_ref {
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym_ref::filter); }
     // FIR
-    void filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow);
+    void filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
+                    inWindow,
+                output_circular_buffer<TT_DATA>& outWindow);
 };
 
 //-----------------------------------------------------------------------------------------------------
@@ -104,8 +109,9 @@ class fir_sr_sym_ref<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym_ref::filter); }
 
     // FIR
-    void filter(input_window<TT_DATA>* inWindow,
-                output_window<TT_DATA>* outWindow,
+    void filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
+                    inWindow,
+                output_circular_buffer<TT_DATA>& outWindow,
                 const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 2]);
 };
 }

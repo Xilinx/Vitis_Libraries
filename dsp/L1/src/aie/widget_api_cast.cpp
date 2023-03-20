@@ -54,15 +54,22 @@ INLINE_DECL void kernelClass<TT_DATA,
                              TP_PATTERN,
                              TP_HEADER_BYTES>::kernelClassMain(T_inputIF<TT_DATA, TP_IN_API> inInterface,
                                                                T_outputIF<TT_DATA, TP_OUT_API> outInterface) {
-    T_buff_256b<TT_DATA> readVal;
-    constexpr int kLsize = (TP_WINDOW_VSIZE * sizeof(TT_DATA) + TP_HEADER_BYTES) / 32;
+    constexpr int kVectSize = 256 / 8 / sizeof(TT_DATA);
+    using t256VectorType = ::aie::vector<TT_DATA, kVectSize>;
+    t256VectorType readVal;
+    constexpr int kLsize = (TP_WINDOW_VSIZE + TP_HEADER_BYTES / sizeof(TT_DATA)) / kVectSize;
+    t256VectorType* inPtr = (t256VectorType*)inInterface.inWindow0;
+    t256VectorType* outPtr0 = (t256VectorType*)outInterface.outWindow0;
+    t256VectorType* outPtr1 = (TP_NUM_OUTPUT_CLONES >= 2) ? (t256VectorType*)outInterface.outWindow1 : 0;
+    t256VectorType* outPtr2 = (TP_NUM_OUTPUT_CLONES >= 2) ? (t256VectorType*)outInterface.outWindow2 : 0;
+
     for (int i = 0; i < kLsize; i++) chess_prepare_for_pipelining chess_loop_range(kLsize, ) {
-            readVal = window_readincr_256b(inInterface.inWindow0);
-            window_writeincr(outInterface.outWindow0, readVal.val);
+            readVal = *inPtr++;
+            *outPtr0++ = readVal;
             if
-                constexpr(TP_NUM_OUTPUT_CLONES >= 2) window_writeincr(outInterface.outWindow1, readVal.val);
+                constexpr(TP_NUM_OUTPUT_CLONES >= 2)* outPtr1++ = readVal;
             if
-                constexpr(TP_NUM_OUTPUT_CLONES >= 3) window_writeincr(outInterface.outWindow2, readVal.val);
+                constexpr(TP_NUM_OUTPUT_CLONES >= 3)* outPtr2++ = readVal;
         }
 };
 
@@ -82,11 +89,21 @@ INLINE_DECL void kernelClass<TT_DATA,
                              TP_PATTERN,
                              TP_HEADER_BYTES>::kernelClassMain(T_inputIF<TT_DATA, kStreamAPI> inInterface,
                                                                T_outputIF<TT_DATA, kWindowAPI> outInterface) {
-    T_buff_128b<TT_DATA> readVal1;
-    T_buff_128b<TT_DATA> readVal2;
-    T_buff_256b<TT_DATA> writeVal;
-    using in128VectorType = ::aie::vector<TT_DATA, 128 / 8 / sizeof(TT_DATA)>;
-    ::std::pair<in128VectorType, in128VectorType> inIntlv;
+    constexpr int kVectSize = 128 / 8 / sizeof(TT_DATA);
+    using t128VectorType = ::aie::vector<TT_DATA, kVectSize>;
+    using t256VectorType = ::aie::vector<TT_DATA, kVectSize * 2>;
+    t128VectorType readVal1;
+    t128VectorType readVal2;
+    t256VectorType writeVal;
+    t128VectorType* out128Ptr0 = (t128VectorType*)outInterface.outWindow0;
+    t128VectorType* out128Ptr1 = TP_NUM_OUTPUT_CLONES >= 2 ? (t128VectorType*)outInterface.outWindow1 : 0;
+    t128VectorType* out128Ptr2 = TP_NUM_OUTPUT_CLONES >= 3 ? (t128VectorType*)outInterface.outWindow2 : 0;
+    t128VectorType* out128Ptr3 = TP_NUM_OUTPUT_CLONES >= 4 ? (t128VectorType*)outInterface.outWindow3 : 0;
+    t256VectorType* outPtr0 = (t256VectorType*)outInterface.outWindow0;
+    t256VectorType* outPtr1 = TP_NUM_OUTPUT_CLONES >= 2 ? (t256VectorType*)outInterface.outWindow1 : 0;
+    t256VectorType* outPtr2 = TP_NUM_OUTPUT_CLONES >= 3 ? (t256VectorType*)outInterface.outWindow2 : 0;
+    t256VectorType* outPtr3 = TP_NUM_OUTPUT_CLONES >= 4 ? (t256VectorType*)outInterface.outWindow3 : 0;
+    ::std::pair<t128VectorType, t128VectorType> inIntlv;
     constexpr unsigned int kRepeat = 4;
     constexpr unsigned int kDataReadSize = TP_NUM_INPUTS == 1 ? 16 : 32;
     constexpr int kLsize = (TP_WINDOW_VSIZE * sizeof(TT_DATA)) / (kDataReadSize * kRepeat);
@@ -96,22 +113,21 @@ INLINE_DECL void kernelClass<TT_DATA,
     if
         constexpr(TP_HEADER_BYTES > 0) {
             for (int i = 0; i < TP_HEADER_BYTES / 16; i++) // 16? 8ytes in 128bits.
-            //      chess_prepare_for_pipelining
-            // chess_loop_range(TP_HEADER_BYTES/16,)
-            {
-                readVal1 = stream_readincr_128b(inInterface.inStream0, 0);
-                if
-                    constexpr(TP_NUM_INPUTS == 2) {
-                        readVal2 = stream_readincr_128b(inInterface.inStream1, 1); // read, but ignored
-                    }
-                window_writeincr(outInterface.outWindow0, readVal1.val);
-                if
-                    constexpr(TP_NUM_OUTPUT_CLONES >= 2) window_writeincr(outInterface.outWindow1, readVal1.val);
-                if
-                    constexpr(TP_NUM_OUTPUT_CLONES >= 3) window_writeincr(outInterface.outWindow2, readVal1.val);
-                if
-                    constexpr(TP_NUM_OUTPUT_CLONES >= 4) window_writeincr(outInterface.outWindow3, readVal1.val);
-            }
+                chess_prepare_for_pipelining chess_loop_range(TP_HEADER_BYTES / 16, ) {
+                    readVal1 = readincr_v<kVectSize, aie_stream_resource_in::a>(inInterface.inStream0);
+                    if
+                        constexpr(TP_NUM_INPUTS == 2) {
+                            readVal2 = readincr_v<kVectSize, aie_stream_resource_in::b>(
+                                inInterface.inStream1); // read, but ignored
+                        }
+                    *out128Ptr0++ = readVal1;
+                    if
+                        constexpr(TP_NUM_OUTPUT_CLONES >= 2)* out128Ptr1++ = readVal1;
+                    if
+                        constexpr(TP_NUM_OUTPUT_CLONES >= 3)* out128Ptr2++ = readVal1;
+                    if
+                        constexpr(TP_NUM_OUTPUT_CLONES >= 4)* out128Ptr3++ = readVal1;
+                }
         }
 
     if
@@ -119,29 +135,26 @@ INLINE_DECL void kernelClass<TT_DATA,
             for (int i = 0; i < kLsize; i++) chess_prepare_for_pipelining chess_loop_range(kLsize, ) {
 #pragma unroll(kRepeat)
                     for (int j = 0; j < kRepeat; j++) {
-                        readVal1 = stream_readincr_128b(inInterface.inStream0, 0);
-                        window_writeincr(outInterface.outWindow0, readVal1.val);
+                        readVal1 = readincr_v<kVectSize, aie_stream_resource_in::a>(inInterface.inStream0);
+                        *out128Ptr0++ = readVal1;
                         if
-                            constexpr(TP_NUM_OUTPUT_CLONES >= 2)
-                                window_writeincr(outInterface.outWindow1, readVal1.val);
+                            constexpr(TP_NUM_OUTPUT_CLONES >= 2)* out128Ptr1++ = readVal1;
                         if
-                            constexpr(TP_NUM_OUTPUT_CLONES >= 3)
-                                window_writeincr(outInterface.outWindow2, readVal1.val);
+                            constexpr(TP_NUM_OUTPUT_CLONES >= 3)* out128Ptr2++ = readVal1;
                         if
-                            constexpr(TP_NUM_OUTPUT_CLONES >= 4)
-                                window_writeincr(outInterface.outWindow3, readVal1.val);
+                            constexpr(TP_NUM_OUTPUT_CLONES >= 4)* out128Ptr3++ = readVal1;
                     }
                 }
 #pragma unroll(GUARD_ZERO(kLsizeRem))
             for (int j = 0; j < kLsizeRem; j++) {
-                readVal1 = stream_readincr_128b(inInterface.inStream0, 0);
-                window_writeincr(outInterface.outWindow0, readVal1.val);
+                readVal1 = readincr_v<kVectSize, aie_stream_resource_in::a>(inInterface.inStream0);
+                *out128Ptr0++ = readVal1;
                 if
-                    constexpr(TP_NUM_OUTPUT_CLONES >= 2) window_writeincr(outInterface.outWindow1, readVal1.val);
+                    constexpr(TP_NUM_OUTPUT_CLONES >= 2)* out128Ptr1++ = readVal1;
                 if
-                    constexpr(TP_NUM_OUTPUT_CLONES >= 3) window_writeincr(outInterface.outWindow2, readVal1.val);
+                    constexpr(TP_NUM_OUTPUT_CLONES >= 3)* out128Ptr2++ = readVal1;
                 if
-                    constexpr(TP_NUM_OUTPUT_CLONES >= 4) window_writeincr(outInterface.outWindow3, readVal1.val);
+                    constexpr(TP_NUM_OUTPUT_CLONES >= 4)* out128Ptr3++ = readVal1;
             }
         }
     else { // TP_NUM_INPUTS==2
@@ -150,35 +163,32 @@ INLINE_DECL void kernelClass<TT_DATA,
                 for (int i = 0; i < kLsize; i++) chess_prepare_for_pipelining chess_loop_range(kLsize, ) {
 #pragma unroll(kRepeat)
                         for (int j = 0; j < kRepeat; j++) {
-                            readVal1 = stream_readincr_128b(inInterface.inStream0, 0);
-                            readVal2 = stream_readincr_128b(inInterface.inStream1, 1);
-                            writeVal.val.insert(0, readVal1.val);
-                            writeVal.val.insert(1, readVal2.val);
-                            window_writeincr(outInterface.outWindow0, writeVal.val);
+                            readVal1 = readincr_v<kVectSize, aie_stream_resource_in::a>(inInterface.inStream0);
+                            readVal2 = readincr_v<kVectSize, aie_stream_resource_in::b>(inInterface.inStream1);
+                            writeVal.insert(0, readVal1);
+                            writeVal.insert(1, readVal2);
+                            *outPtr0++ = writeVal;
                             if
-                                constexpr(TP_NUM_OUTPUT_CLONES >= 2)
-                                    window_writeincr(outInterface.outWindow1, writeVal.val);
+                                constexpr(TP_NUM_OUTPUT_CLONES >= 2)* outPtr1++ = writeVal;
                             if
-                                constexpr(TP_NUM_OUTPUT_CLONES >= 3)
-                                    window_writeincr(outInterface.outWindow2, writeVal.val);
+                                constexpr(TP_NUM_OUTPUT_CLONES >= 3)* outPtr2++ = writeVal;
                             if
-                                constexpr(TP_NUM_OUTPUT_CLONES >= 4)
-                                    window_writeincr(outInterface.outWindow3, writeVal.val);
+                                constexpr(TP_NUM_OUTPUT_CLONES >= 4)* outPtr3++ = writeVal;
                         }
                     }
 #pragma unroll(GUARD_ZERO(kLsizeRem))
                 for (int j = 0; j < kLsizeRem; j++) {
-                    readVal1 = stream_readincr_128b(inInterface.inStream0, 0);
-                    readVal2 = stream_readincr_128b(inInterface.inStream1, 1);
-                    writeVal.val.insert(0, readVal1.val);
-                    writeVal.val.insert(1, readVal2.val);
-                    window_writeincr(outInterface.outWindow0, writeVal.val);
+                    readVal1 = readincr_v<kVectSize, aie_stream_resource_in::a>(inInterface.inStream0);
+                    readVal2 = readincr_v<kVectSize, aie_stream_resource_in::b>(inInterface.inStream1);
+                    writeVal.insert(0, readVal1);
+                    writeVal.insert(1, readVal2);
+                    *outPtr0++ = writeVal;
                     if
-                        constexpr(TP_NUM_OUTPUT_CLONES >= 2) window_writeincr(outInterface.outWindow1, writeVal.val);
+                        constexpr(TP_NUM_OUTPUT_CLONES >= 2)* outPtr1++ = writeVal;
                     if
-                        constexpr(TP_NUM_OUTPUT_CLONES >= 3) window_writeincr(outInterface.outWindow2, writeVal.val);
+                        constexpr(TP_NUM_OUTPUT_CLONES >= 3)* outPtr2++ = writeVal;
                     if
-                        constexpr(TP_NUM_OUTPUT_CLONES >= 4) window_writeincr(outInterface.outWindow3, writeVal.val);
+                        constexpr(TP_NUM_OUTPUT_CLONES >= 4)* outPtr3++ = writeVal;
                 }
             }
         else if
@@ -186,81 +196,76 @@ INLINE_DECL void kernelClass<TT_DATA,
                 for (int i = 0; i < kLsize; i++) chess_prepare_for_pipelining chess_loop_range(kLsize, ) {
 #pragma unroll(kRepeat)
                         for (int j = 0; j < kRepeat; j++) {
-                            readVal1 = stream_readincr_128b(inInterface.inStream0, 0);
-                            readVal2 = stream_readincr_128b(inInterface.inStream1, 1);
-                            inIntlv =
-                                ::aie::interleave_zip(readVal1.val, readVal2.val,
-                                                      1); // convert to complex by interleaving zeros for imag parts
-                            writeVal.val =
-                                ::aie::concat<in128VectorType, in128VectorType>(inIntlv.first, inIntlv.second);
-                            window_writeincr(outInterface.outWindow0, writeVal.val);
+                            readVal1 = readincr_v<kVectSize, aie_stream_resource_in::a>(inInterface.inStream0);
+                            readVal2 = readincr_v<kVectSize, aie_stream_resource_in::b>(inInterface.inStream1);
+                            inIntlv = ::aie::interleave_zip(
+                                readVal1, readVal2, 1); // convert to complex by interleaving zeros for imag parts
+                            writeVal = ::aie::concat<t128VectorType, t128VectorType>(inIntlv.first, inIntlv.second);
+                            *outPtr0++ = writeVal;
                             if
-                                constexpr(TP_NUM_OUTPUT_CLONES >= 2)
-                                    window_writeincr(outInterface.outWindow1, writeVal.val);
+                                constexpr(TP_NUM_OUTPUT_CLONES >= 2)* outPtr1++ = writeVal;
                             if
-                                constexpr(TP_NUM_OUTPUT_CLONES >= 3)
-                                    window_writeincr(outInterface.outWindow2, writeVal.val);
+                                constexpr(TP_NUM_OUTPUT_CLONES >= 3)* outPtr2++ = writeVal;
                             if
-                                constexpr(TP_NUM_OUTPUT_CLONES >= 4)
-                                    window_writeincr(outInterface.outWindow3, writeVal.val);
+                                constexpr(TP_NUM_OUTPUT_CLONES >= 4)* outPtr3++ = writeVal;
                         }
                     }
 #pragma unroll(GUARD_ZERO(kLsizeRem))
                 for (int j = 0; j < kLsizeRem; j++) {
-                    readVal1 = stream_readincr_128b(inInterface.inStream0, 0);
-                    readVal2 = stream_readincr_128b(inInterface.inStream1, 1);
-                    inIntlv = ::aie::interleave_zip(readVal1.val, readVal2.val,
+                    readVal1 = readincr_v<kVectSize, aie_stream_resource_in::a>(inInterface.inStream0);
+                    readVal2 = readincr_v<kVectSize, aie_stream_resource_in::b>(inInterface.inStream1);
+                    inIntlv = ::aie::interleave_zip(readVal1, readVal2,
                                                     1); // convert to complex by interleaving zeros for imag parts
-                    writeVal.val = ::aie::concat<in128VectorType, in128VectorType>(inIntlv.first, inIntlv.second);
-                    window_writeincr(outInterface.outWindow0, writeVal.val);
+                    writeVal = ::aie::concat<t128VectorType, t128VectorType>(inIntlv.first, inIntlv.second);
+                    *outPtr0++ = writeVal;
                     if
-                        constexpr(TP_NUM_OUTPUT_CLONES >= 2) window_writeincr(outInterface.outWindow1, writeVal.val);
+                        constexpr(TP_NUM_OUTPUT_CLONES >= 2)* outPtr1++ = writeVal;
                     if
-                        constexpr(TP_NUM_OUTPUT_CLONES >= 3) window_writeincr(outInterface.outWindow2, writeVal.val);
+                        constexpr(TP_NUM_OUTPUT_CLONES >= 3)* outPtr2++ = writeVal;
                     if
-                        constexpr(TP_NUM_OUTPUT_CLONES >= 4) window_writeincr(outInterface.outWindow3, writeVal.val);
+                        constexpr(TP_NUM_OUTPUT_CLONES >= 4)* outPtr3++ = writeVal;
                 }
             }
         else if
             constexpr(TP_PATTERN == kSplit) { // merge, in this case
                 constexpr int kSamplesIn128b = 128 / (8 * sizeof(TT_DATA));
-                in128VectorType* lowerPtr[TP_NUM_OUTPUT_CLONES];
-                in128VectorType* upperPtr[TP_NUM_OUTPUT_CLONES];
-                lowerPtr[0] = (in128VectorType*)outInterface.outWindow0->ptr;
-                upperPtr[0] = (in128VectorType*)(lowerPtr[0] + TP_WINDOW_VSIZE / (2 * kSamplesIn128b));
+                t128VectorType* lowerPtr[TP_NUM_OUTPUT_CLONES];
+                t128VectorType* upperPtr[TP_NUM_OUTPUT_CLONES];
+                lowerPtr[0] = (t128VectorType*)outPtr0;
+                upperPtr[0] = (t128VectorType*)(lowerPtr[0] + TP_WINDOW_VSIZE / (2 * kSamplesIn128b));
                 if
                     constexpr(TP_NUM_OUTPUT_CLONES >= 2) {
-                        lowerPtr[1] = (in128VectorType*)outInterface.outWindow1->ptr;
-                        upperPtr[1] = (in128VectorType*)(lowerPtr[1] + TP_WINDOW_VSIZE / (2 * kSamplesIn128b));
+                        lowerPtr[1] = (t128VectorType*)outPtr1;
+                        upperPtr[1] = (t128VectorType*)(lowerPtr[1] + TP_WINDOW_VSIZE / (2 * kSamplesIn128b));
                     }
                 if
                     constexpr(TP_NUM_OUTPUT_CLONES >= 3) {
-                        lowerPtr[2] = (in128VectorType*)outInterface.outWindow2->ptr;
-                        upperPtr[2] = (in128VectorType*)(lowerPtr[2] + TP_WINDOW_VSIZE / (2 * kSamplesIn128b));
+                        lowerPtr[2] = (t128VectorType*)outPtr2;
+                        upperPtr[2] = (t128VectorType*)(lowerPtr[2] + TP_WINDOW_VSIZE / (2 * kSamplesIn128b));
                     }
                 if
                     constexpr(TP_NUM_OUTPUT_CLONES >= 4) {
-                        lowerPtr[3] = (in128VectorType*)outInterface.outWindow3->ptr;
-                        upperPtr[3] = (in128VectorType*)(lowerPtr[3] + TP_WINDOW_VSIZE / (2 * kSamplesIn128b));
+                        lowerPtr[3] = (t128VectorType*)outPtr3;
+                        upperPtr[3] = (t128VectorType*)(lowerPtr[3] + TP_WINDOW_VSIZE / (2 * kSamplesIn128b));
                     }
                 for (int i = 0; i < kLsize; i++) chess_prepare_for_pipelining chess_loop_range(kLsize, ) {
 #pragma unroll(kRepeat)
                         for (int j = 0; j < kRepeat; j++) {
-                            readVal1 = stream_readincr_128b(inInterface.inStream0, 0);
-                            readVal2 = stream_readincr_128b(inInterface.inStream1, 1);
+                            readVal1 = readincr_v<kVectSize, aie_stream_resource_in::a>(inInterface.inStream0);
+                            readVal2 = readincr_v<kVectSize, aie_stream_resource_in::b>(inInterface.inStream1);
                             for (int k = 0; k < TP_NUM_OUTPUT_CLONES; k++) {
-                                *lowerPtr[k]++ = readVal1.val;
-                                *upperPtr[k]++ = readVal2.val;
+                                *lowerPtr[k]++ = readVal1;
+                                *upperPtr[k]++ = readVal2;
                             }
                         }
                     }
 #pragma unroll(GUARD_ZERO(kLsizeRem))
                 for (int j = 0; j < kLsizeRem; j++) {
-                    readVal1 = stream_readincr_128b(inInterface.inStream0, 0);
-                    readVal2 = stream_readincr_128b(inInterface.inStream1, 1);
+                    readVal1 = readincr_v<kVectSize, aie_stream_resource_in::a>(inInterface.inStream0);
+                    readVal2 = readincr_v<kVectSize, aie_stream_resource_in::b>(inInterface.inStream1);
                     for (int k = 0; k < TP_NUM_OUTPUT_CLONES; k++) {
-                        *lowerPtr[k]++ = readVal1.val;
-                        *upperPtr[k]++ = readVal2.val;
+                        *lowerPtr[k]++ = readVal1;
+                        *upperPtr[k]++ = readVal2;
                     }
                 }
             }
@@ -276,34 +281,38 @@ template <typename TT_DATA,
 INLINE_DECL void
 kernelClass<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, TP_NUM_OUTPUT_CLONES, TP_PATTERN, TP_HEADER_BYTES>::
     kernelClassMain(T_inputIF<TT_DATA, kWindowAPI> inInterface, T_outputIF<TT_DATA, kStreamAPI> outInterface) {
-    T_buff_128b<TT_DATA> read128Val;
-    T_buff_256b<TT_DATA> read256Val;
-    T_buff_128b<TT_DATA> writeVal;
-    using out256VectorType = ::aie::vector<TT_DATA, 256 / 8 / sizeof(TT_DATA)>;
-    using out128VectorType = ::aie::vector<TT_DATA, 128 / 8 / sizeof(TT_DATA)>;
-    T_buff_128b<TT_DATA> out128a, out128b;
-    out128VectorType* rdptr0;
-    out128VectorType* rdptr1;
-    constexpr unsigned int kSamplesIn128b = 16 / sizeof(TT_DATA);
+    constexpr int kSamplesIn128b = 16 / sizeof(TT_DATA);
+    using t256VectorType = ::aie::vector<TT_DATA, kSamplesIn128b * 2>;
+    using t128VectorType = ::aie::vector<TT_DATA, kSamplesIn128b>;
+    t128VectorType read128Val;
+    t256VectorType read256Val;
+    t128VectorType writeVal;
+    t128VectorType out128a, out128b;
+    t128VectorType* rdptr0 = (t128VectorType*)inInterface.inWindow0;
+    t128VectorType* rdptr1;
+    t256VectorType* rd256ptr;
 
     // handle header bytes
     if
         constexpr(TP_HEADER_BYTES > 0) {
             for (int i = 0; i < TP_HEADER_BYTES / 16; i++)
                 chess_prepare_for_pipelining chess_loop_range(TP_HEADER_BYTES / 16, ) {
-                    read128Val = window_readincr_128b(inInterface.inWindow0);
-                    stream_writeincr_128b(outInterface.outStream0, read128Val);
+                    read128Val = *rdptr0++;
+                    writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outInterface.outStream0, read128Val);
                     if
-                        constexpr(TP_NUM_OUTPUT_CLONES == 2) stream_writeincr_128b(outInterface.outStream1, read128Val);
+                        constexpr(TP_NUM_OUTPUT_CLONES == 2)
+                            writeincr<aie_stream_resource_out::b, TT_DATA, kSamplesIn128b>(outInterface.outStream1,
+                                                                                           read128Val);
                 }
         }
+    rd256ptr = (t256VectorType*)rdptr0;
 
     if
         constexpr(TP_NUM_OUTPUT_CLONES == 1) {
             constexpr int kLsize = TP_WINDOW_VSIZE / kSamplesIn128b;
             for (int i = 0; i < kLsize; i++) chess_prepare_for_pipelining chess_loop_range(kLsize, ) {
-                    read128Val = window_readincr_128b(inInterface.inWindow0);
-                    stream_writeincr_128b(outInterface.outStream0, read128Val);
+                    read128Val = *rdptr0++;
+                    writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outInterface.outStream0, read128Val);
                 }
         }
     else { // TP_NUM_OUTPUT_CLONES==2
@@ -311,39 +320,45 @@ kernelClass<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, TP_NUM_OUTPUT_C
             constexpr(TP_PATTERN == 0) {
                 constexpr int kLsize = TP_WINDOW_VSIZE / (kSamplesIn128b * 2);
                 for (int i = 0; i < kLsize; i++) chess_prepare_for_pipelining chess_loop_range(kLsize, ) {
-                        read256Val = window_readincr_256b(inInterface.inWindow0);
-                        writeVal.val = read256Val.val.template extract<kSamplesIn128b>(0);
-                        stream_writeincr_128b(outInterface.outStream0, writeVal, 0);
-                        writeVal.val = read256Val.val.template extract<kSamplesIn128b>(1);
-                        stream_writeincr_128b(outInterface.outStream1, writeVal, 1);
+                        read256Val = *rd256ptr++;
+                        writeVal = read256Val.template extract<kSamplesIn128b>(0);
+                        writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outInterface.outStream0,
+                                                                                       writeVal);
+                        writeVal = read256Val.template extract<kSamplesIn128b>(1);
+                        writeincr<aie_stream_resource_out::b, TT_DATA, kSamplesIn128b>(outInterface.outStream1,
+                                                                                       writeVal);
                     }
                 if (TP_WINDOW_VSIZE / kSamplesIn128b % 2 == 1) { // odd number of 128b chunks
-                    read256Val = window_readincr_256b(inInterface.inWindow0);
-                    writeVal.val = read256Val.val.template extract<kSamplesIn128b>(0);
-                    stream_writeincr_128b(outInterface.outStream0, writeVal, 0);
+                    read256Val = *rd256ptr++;
+                    writeVal = read256Val.template extract<kSamplesIn128b>(0);
+                    writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outInterface.outStream0, writeVal);
                 }
             }
         else if
             constexpr(TP_PATTERN == kSampleIntlv) {
                 constexpr int kLsize = TP_WINDOW_VSIZE * sizeof(TT_DATA) / (256 / 8);
                 for (int k = 0; k < kLsize; k++) chess_prepare_for_pipelining chess_loop_range(kLsize, ) {
-                        read256Val = window_readincr_256b(inInterface.inWindow0);
-                        out128a.val = ::aie::filter_even<out256VectorType>(read256Val.val);
-                        out128b.val = ::aie::filter_odd<out256VectorType>(read256Val.val);
-                        stream_writeincr_128b(outInterface.outStream0, out128a, 0);
-                        stream_writeincr_128b(outInterface.outStream1, out128b, 1);
+                        read256Val = *rd256ptr++;
+                        out128a = ::aie::filter_even<t256VectorType>(read256Val);
+                        out128b = ::aie::filter_odd<t256VectorType>(read256Val);
+                        writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outInterface.outStream0,
+                                                                                       out128a);
+                        writeincr<aie_stream_resource_out::b, TT_DATA, kSamplesIn128b>(outInterface.outStream1,
+                                                                                       out128b);
                     }
             }
         else if
             constexpr(TP_PATTERN == kSplit) {
                 constexpr int kLsize = TP_WINDOW_VSIZE * sizeof(TT_DATA) / (128 / 8) / 2;
-                rdptr0 = (out128VectorType*)inInterface.inWindow0->ptr;
+                // rdptr0 = (out128VectorType*)inInterface.inWindow0->ptr; set at head of function
                 rdptr1 = rdptr0 + kLsize; // advance by half the window.
                 for (int i = 0; i < kLsize; i++) chess_prepare_for_pipelining chess_loop_range(kLsize, ) {
-                        read128Val.val = *rdptr0++; // = window_readincr_128b(inInterface.inWindow0);
-                        stream_writeincr_128b(outInterface.outStream0, read128Val, 0);
-                        read128Val.val = *rdptr1++; // = window_readincr_128b(inInterface.inWindow0);
-                        stream_writeincr_128b(outInterface.outStream1, read128Val, 1);
+                        read128Val = *rdptr0++; // = window_readincr_128b(inInterface.inWindow0);
+                        writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outInterface.outStream0,
+                                                                                       read128Val);
+                        read128Val = *rdptr1++; // = window_readincr_128b(inInterface.inWindow0);
+                        writeincr<aie_stream_resource_out::b, TT_DATA, kSamplesIn128b>(outInterface.outStream1,
+                                                                                       read128Val);
                     }
             }
     }
@@ -367,11 +382,11 @@ NOINLINE_DECL void widget_api_cast<TT_DATA,
                                    TP_NUM_OUTPUT_CLONES,
                                    TP_PATTERN,
                                    TP_HEADER_BYTES>::transferData // transferData is QoR hook
-    (input_window<TT_DATA>* __restrict inWindow0, output_window<TT_DATA>* __restrict outWindow0) {
+    (input_buffer<TT_DATA>& __restrict inWindow0, output_buffer<TT_DATA>& __restrict outWindow0) {
     T_inputIF<TT_DATA, TP_IN_API> inInterface;
     T_outputIF<TT_DATA, TP_OUT_API> outInterface;
-    inInterface.inWindow0 = inWindow0;
-    outInterface.outWindow0 = outWindow0;
+    inInterface.inWindow0 = (void*)inWindow0.data();
+    outInterface.outWindow0 = (void*)outWindow0.data();
     this->kernelClassMain(inInterface, outInterface);
 };
 
@@ -379,15 +394,15 @@ NOINLINE_DECL void widget_api_cast<TT_DATA,
 template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
 NOINLINE_DECL void
 widget_api_cast<TT_DATA, kWindowAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN, TP_HEADER_BYTES>::transferData(
-    input_window<TT_DATA>* __restrict inWindow0,
-    output_window<TT_DATA>* __restrict outWindow0,
-    output_window<TT_DATA>* __restrict outWindow1) {
+    input_buffer<TT_DATA>& __restrict inWindow0,
+    output_buffer<TT_DATA>& __restrict outWindow0,
+    output_buffer<TT_DATA>& __restrict outWindow1) {
     constexpr unsigned int TP_NUM_OUTPUTS = 3;
     T_inputIF<TT_DATA, kWindowAPI> inInterface;
     T_outputIF<TT_DATA, kWindowAPI> outInterface;
-    inInterface.inWindow0 = inWindow0;
-    outInterface.outWindow0 = outWindow0;
-    outInterface.outWindow1 = outWindow1;
+    inInterface.inWindow0 = (void*)inWindow0.data();
+    outInterface.outWindow0 = (void*)outWindow0.data();
+    outInterface.outWindow1 = (void*)outWindow1.data();
     this->kernelClassMain(inInterface, outInterface);
 };
 
@@ -395,17 +410,17 @@ widget_api_cast<TT_DATA, kWindowAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTE
 template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
 NOINLINE_DECL void
 widget_api_cast<TT_DATA, kWindowAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 3, TP_PATTERN, TP_HEADER_BYTES>::transferData(
-    input_window<TT_DATA>* __restrict inWindow0,
-    output_window<TT_DATA>* __restrict outWindow0,
-    output_window<TT_DATA>* __restrict outWindow1,
-    output_window<TT_DATA>* __restrict outWindow2) {
+    input_buffer<TT_DATA>& __restrict inWindow0,
+    output_buffer<TT_DATA>& __restrict outWindow0,
+    output_buffer<TT_DATA>& __restrict outWindow1,
+    output_buffer<TT_DATA>& __restrict outWindow2) {
     constexpr unsigned int TP_NUM_OUTPUTS = 3;
     T_inputIF<TT_DATA, kWindowAPI> inInterface;
     T_outputIF<TT_DATA, kWindowAPI> outInterface;
-    inInterface.inWindow0 = inWindow0;
-    outInterface.outWindow0 = outWindow0;
-    outInterface.outWindow1 = outWindow1;
-    outInterface.outWindow2 = outWindow2;
+    inInterface.inWindow0 = (void*)inWindow0.data();
+    outInterface.outWindow0 = (void*)outWindow0.data();
+    outInterface.outWindow1 = (void*)outWindow1.data();
+    outInterface.outWindow2 = (void*)outWindow2.data();
     this->kernelClassMain(inInterface, outInterface);
 };
 
@@ -413,12 +428,12 @@ widget_api_cast<TT_DATA, kWindowAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 3, TP_PATTE
 template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
 NOINLINE_DECL void
 widget_api_cast<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>::transferData(
-    input_stream<TT_DATA>* __restrict inStream0, output_window<TT_DATA>* __restrict outWindow0) {
+    input_stream<TT_DATA>* __restrict inStream0, output_buffer<TT_DATA>& __restrict outWindow0) {
     constexpr unsigned int TP_NUM_OUTPUTS = 1;
     T_inputIF<TT_DATA, kStreamAPI> inInterface;
     T_outputIF<TT_DATA, kWindowAPI> outInterface;
     inInterface.inStream0 = inStream0;
-    outInterface.outWindow0 = outWindow0;
+    outInterface.outWindow0 = (void*)outWindow0.data();
     this->kernelClassMain(inInterface, outInterface);
 };
 
@@ -427,14 +442,14 @@ template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTER
 NOINLINE_DECL void
 widget_api_cast<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN, TP_HEADER_BYTES>::transferData(
     input_stream<TT_DATA>* __restrict inStream0,
-    output_window<TT_DATA>* __restrict outWindow0,
-    output_window<TT_DATA>* __restrict outWindow1) {
+    output_buffer<TT_DATA>& __restrict outWindow0,
+    output_buffer<TT_DATA>& __restrict outWindow1) {
     constexpr unsigned int TP_NUM_OUTPUTS = 2;
     T_inputIF<TT_DATA, kStreamAPI> inInterface;
     T_outputIF<TT_DATA, kWindowAPI> outInterface;
     inInterface.inStream0 = inStream0;
-    outInterface.outWindow0 = outWindow0;
-    outInterface.outWindow1 = outWindow1;
+    outInterface.outWindow0 = (void*)outWindow0.data();
+    outInterface.outWindow1 = (void*)outWindow1.data();
     this->kernelClassMain(inInterface, outInterface);
 };
 
@@ -443,16 +458,16 @@ template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTER
 NOINLINE_DECL void
 widget_api_cast<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 3, TP_PATTERN, TP_HEADER_BYTES>::transferData(
     input_stream<TT_DATA>* __restrict inStream0,
-    output_window<TT_DATA>* __restrict outWindow0,
-    output_window<TT_DATA>* __restrict outWindow1,
-    output_window<TT_DATA>* __restrict outWindow2) {
+    output_buffer<TT_DATA>& __restrict outWindow0,
+    output_buffer<TT_DATA>& __restrict outWindow1,
+    output_buffer<TT_DATA>& __restrict outWindow2) {
     constexpr unsigned int TP_NUM_OUTPUTS = 3;
     T_inputIF<TT_DATA, kStreamAPI> inInterface;
     T_outputIF<TT_DATA, kWindowAPI> outInterface;
     inInterface.inStream0 = inStream0;
-    outInterface.outWindow0 = outWindow0;
-    outInterface.outWindow1 = outWindow1;
-    outInterface.outWindow2 = outWindow2;
+    outInterface.outWindow0 = (void*)outWindow0.data();
+    outInterface.outWindow1 = (void*)outWindow1.data();
+    outInterface.outWindow2 = (void*)outWindow2.data();
     this->kernelClassMain(inInterface, outInterface);
 };
 
@@ -461,18 +476,18 @@ template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTER
 NOINLINE_DECL void
 widget_api_cast<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 4, TP_PATTERN, TP_HEADER_BYTES>::transferData(
     input_stream<TT_DATA>* __restrict inStream0,
-    output_window<TT_DATA>* __restrict outWindow0,
-    output_window<TT_DATA>* __restrict outWindow1,
-    output_window<TT_DATA>* __restrict outWindow2,
-    output_window<TT_DATA>* __restrict outWindow3) {
+    output_buffer<TT_DATA>& __restrict outWindow0,
+    output_buffer<TT_DATA>& __restrict outWindow1,
+    output_buffer<TT_DATA>& __restrict outWindow2,
+    output_buffer<TT_DATA>& __restrict outWindow3) {
     constexpr unsigned int TP_NUM_OUTPUTS = 4;
     T_inputIF<TT_DATA, kStreamAPI> inInterface;
     T_outputIF<TT_DATA, kWindowAPI> outInterface;
     inInterface.inStream0 = inStream0;
-    outInterface.outWindow0 = outWindow0;
-    outInterface.outWindow1 = outWindow1;
-    outInterface.outWindow2 = outWindow2;
-    outInterface.outWindow3 = outWindow3;
+    outInterface.outWindow0 = (void*)outWindow0.data();
+    outInterface.outWindow1 = (void*)outWindow1.data();
+    outInterface.outWindow2 = (void*)outWindow2.data();
+    outInterface.outWindow3 = (void*)outWindow3.data();
     this->kernelClassMain(inInterface, outInterface);
 };
 
@@ -483,13 +498,13 @@ NOINLINE_DECL void
 widget_api_cast<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>::transferData(
     input_stream<TT_DATA>* __restrict inStream0,
     input_stream<TT_DATA>* __restrict inStream1,
-    output_window<TT_DATA>* __restrict outWindow0) {
+    output_circular_buffer<TT_DATA>& __restrict outWindow0) {
     constexpr unsigned int TP_NUM_OUTPUTS = 1;
     T_inputIF<TT_DATA, kStreamAPI> inInterface;
     T_outputIF<TT_DATA, kWindowAPI> outInterface;
     inInterface.inStream0 = inStream0;
     inInterface.inStream1 = inStream1;
-    outInterface.outWindow0 = outWindow0;
+    outInterface.outWindow0 = (void*)outWindow0.data();
     this->kernelClassMain(inInterface, outInterface);
 };
 
@@ -499,15 +514,15 @@ NOINLINE_DECL void
 widget_api_cast<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 2, TP_PATTERN, TP_HEADER_BYTES>::transferData(
     input_stream<TT_DATA>* __restrict inStream0,
     input_stream<TT_DATA>* __restrict inStream1,
-    output_window<TT_DATA>* __restrict outWindow0,
-    output_window<TT_DATA>* __restrict outWindow1) {
+    output_buffer<TT_DATA>& __restrict outWindow0,
+    output_buffer<TT_DATA>& __restrict outWindow1) {
     constexpr unsigned int TP_NUM_OUTPUTS = 2;
     T_inputIF<TT_DATA, kStreamAPI> inInterface;
     T_outputIF<TT_DATA, kWindowAPI> outInterface;
     inInterface.inStream0 = inStream0;
     inInterface.inStream1 = inStream1;
-    outInterface.outWindow0 = outWindow0;
-    outInterface.outWindow1 = outWindow1;
+    outInterface.outWindow0 = (void*)outWindow0.data();
+    outInterface.outWindow1 = (void*)outWindow1.data();
     this->kernelClassMain(inInterface, outInterface);
 };
 
@@ -517,17 +532,17 @@ NOINLINE_DECL void
 widget_api_cast<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 3, TP_PATTERN, TP_HEADER_BYTES>::transferData(
     input_stream<TT_DATA>* __restrict inStream0,
     input_stream<TT_DATA>* __restrict inStream1,
-    output_window<TT_DATA>* __restrict outWindow0,
-    output_window<TT_DATA>* __restrict outWindow1,
-    output_window<TT_DATA>* __restrict outWindow2) {
+    output_buffer<TT_DATA>& __restrict outWindow0,
+    output_buffer<TT_DATA>& __restrict outWindow1,
+    output_buffer<TT_DATA>& __restrict outWindow2) {
     constexpr unsigned int TP_NUM_OUTPUTS = 3;
     T_inputIF<TT_DATA, kStreamAPI> inInterface;
     T_outputIF<TT_DATA, kWindowAPI> outInterface;
     inInterface.inStream0 = inStream0;
     inInterface.inStream1 = inStream1;
-    outInterface.outWindow0 = outWindow0;
-    outInterface.outWindow1 = outWindow1;
-    outInterface.outWindow2 = outWindow2;
+    outInterface.outWindow0 = (void*)outWindow0.data();
+    outInterface.outWindow1 = (void*)outWindow1.data();
+    outInterface.outWindow2 = (void*)outWindow2.data();
     this->kernelClassMain(inInterface, outInterface);
 };
 
@@ -537,19 +552,19 @@ NOINLINE_DECL void
 widget_api_cast<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 4, TP_PATTERN, TP_HEADER_BYTES>::transferData(
     input_stream<TT_DATA>* __restrict inStream0,
     input_stream<TT_DATA>* __restrict inStream1,
-    output_window<TT_DATA>* __restrict outWindow0,
-    output_window<TT_DATA>* __restrict outWindow1,
-    output_window<TT_DATA>* __restrict outWindow2,
-    output_window<TT_DATA>* __restrict outWindow3) {
+    output_buffer<TT_DATA>& __restrict outWindow0,
+    output_buffer<TT_DATA>& __restrict outWindow1,
+    output_buffer<TT_DATA>& __restrict outWindow2,
+    output_buffer<TT_DATA>& __restrict outWindow3) {
     constexpr unsigned int TP_NUM_OUTPUTS = 4;
     T_inputIF<TT_DATA, kStreamAPI> inInterface;
     T_outputIF<TT_DATA, kWindowAPI> outInterface;
     inInterface.inStream0 = inStream0;
     inInterface.inStream1 = inStream1;
-    outInterface.outWindow0 = outWindow0;
-    outInterface.outWindow1 = outWindow1;
-    outInterface.outWindow2 = outWindow2;
-    outInterface.outWindow3 = outWindow3;
+    outInterface.outWindow0 = (void*)outWindow0.data();
+    outInterface.outWindow1 = (void*)outWindow1.data();
+    outInterface.outWindow2 = (void*)outWindow2.data();
+    outInterface.outWindow3 = (void*)outWindow3.data();
     this->kernelClassMain(inInterface, outInterface);
 };
 
@@ -558,10 +573,10 @@ widget_api_cast<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 4, TP_PATTE
 template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
 NOINLINE_DECL void
 widget_api_cast<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>::transferData(
-    input_window<TT_DATA>* __restrict inWindow0, output_stream<TT_DATA>* __restrict outStream0) {
+    input_buffer<TT_DATA>& __restrict inWindow0, output_stream<TT_DATA>* __restrict outStream0) {
     T_inputIF<TT_DATA, kWindowAPI> inInterface;
     T_outputIF<TT_DATA, kStreamAPI> outInterface;
-    inInterface.inWindow0 = inWindow0;
+    inInterface.inWindow0 = (void*)inWindow0.data();
     outInterface.outStream0 = outStream0;
     this->kernelClassMain(inInterface, outInterface);
 };
@@ -570,12 +585,12 @@ widget_api_cast<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 1, TP_PATTE
 template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
 NOINLINE_DECL void
 widget_api_cast<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN, TP_HEADER_BYTES>::transferData(
-    input_window<TT_DATA>* __restrict inWindow0,
+    input_buffer<TT_DATA>& __restrict inWindow0,
     output_stream<TT_DATA>* __restrict outStream0,
     output_stream<TT_DATA>* __restrict outStream1) {
     T_inputIF<TT_DATA, kWindowAPI> inInterface;
     T_outputIF<TT_DATA, kStreamAPI> outInterface;
-    inInterface.inWindow0 = inWindow0;
+    inInterface.inWindow0 = (void*)inWindow0.data();
     outInterface.outStream0 = outStream0;
     outInterface.outStream1 = outStream1;
     this->kernelClassMain(inInterface, outInterface);

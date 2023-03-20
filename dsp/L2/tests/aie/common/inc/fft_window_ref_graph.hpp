@@ -83,8 +83,12 @@ class fft_window_ref_graph : public graph {
 
             // make connections
             if (TP_API == 0) {
-                connect<window<kWindowVsize * sizeof(TT_DATA) + kHeaderBytes> >(in[i], m_kernels[i].in[0]);
-                connect<window<kWindowVsize * sizeof(TT_DATA) + kHeaderBytes> >(m_kernels[i].out[0], out[i]);
+                // connect<window<kWindowVsize*sizeof(TT_DATA) + kHeaderBytes>>(in[i], m_kernels[i].in[0]);
+                connect(in[i], m_kernels[i].in[0]);
+                dimensions(m_kernels[i].in[0]) = {kWindowVsize + kHeaderBytes / sizeof(TT_DATA)};
+                // connect<window<kWindowVsize*sizeof(TT_DATA) + kHeaderBytes>>(m_kernels[i].out[0], out[i]);
+                connect(m_kernels[i].out[0], out[i]);
+                dimensions(m_kernels[i].out[0]) = {kWindowVsize + kHeaderBytes / sizeof(TT_DATA)};
             } else {
                 connect<stream>(in[i * 2], m_kernels[i].in[0]);
                 connect<stream>(in[i * 2 + 1], m_kernels[i].in[1]);

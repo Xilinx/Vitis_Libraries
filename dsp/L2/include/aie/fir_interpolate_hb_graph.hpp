@@ -312,32 +312,44 @@ class fir_interpolate_hb_graph : public graph {
         // make input connections
         if
             constexpr(TP_API == USE_WINDOW_API) {
-                connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA),
-                               fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>() * sizeof(TT_DATA)> >(
-                    in[0], m_firKernels[0].in[0]);
+                // connect<window<TP_INPUT_WINDOW_VSIZE*sizeof(TT_DATA),
+                // fnFirMargin<TP_FIR_LEN/kInterpolateFactor,TT_DATA>()*sizeof(TT_DATA)>>(in[0], m_firKernels[0].in[0]);
+                connect<>(in[0], m_firKernels[0].in[0]);
+                dimensions(m_firKernels[0].in[0]) = {TP_INPUT_WINDOW_VSIZE};
                 for (int i = 1; i < TP_CASC_LEN; i++) {
                     single_buffer(m_firKernels[i].in[0]);
-                    connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) +
-                                   fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>() * sizeof(TT_DATA)> >(
-                        async(m_firKernels[i - 1].out[1]), async(m_firKernels[i].in[0]));
+                    // connect<window<TP_INPUT_WINDOW_VSIZE*sizeof(TT_DATA) +
+                    // fnFirMargin<TP_FIR_LEN/kInterpolateFactor,TT_DATA>()*sizeof(TT_DATA)>>(async(m_firKernels[i-1].out[1]),
+                    // async(m_firKernels[i].in[0]));
+                    connect<>(m_firKernels[i - 1].out[1], m_firKernels[i].in[0]);
+                    dimensions(m_firKernels[i - 1].out[1]) = {TP_INPUT_WINDOW_VSIZE +
+                                                              fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()};
+                    dimensions(m_firKernels[i].in[0]) = {TP_INPUT_WINDOW_VSIZE +
+                                                         fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()};
                 }
                 if
                     constexpr(TP_DUAL_IP == DUAL_IP_DUAL) {
-                        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA),
-                                       fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>() * sizeof(TT_DATA)> >(
-                            in2[0], m_firKernels[0].in[1]);
+                        // connect<window<TP_INPUT_WINDOW_VSIZE*sizeof(TT_DATA),
+                        // fnFirMargin<TP_FIR_LEN/kInterpolateFactor,TT_DATA>()*sizeof(TT_DATA)>>(in2[0],
+                        // m_firKernels[0].in[1]);
+                        connect<>(in2[0], m_firKernels[0].in[1]);
+                        dimensions(m_firKernels[0].in[1]) = {TP_INPUT_WINDOW_VSIZE};
                     }
             }
         else {
             if
                 constexpr(TP_DUAL_IP == DUAL_IP_SINGLE) {
-                    connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA),
-                                   fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>() * sizeof(TT_DATA)> >(
-                        in[0], m_firKernels[0].in[0]);
+                    // connect<window<TP_INPUT_WINDOW_VSIZE*sizeof(TT_DATA),
+                    // fnFirMargin<TP_FIR_LEN/kInterpolateFactor,TT_DATA>()*sizeof(TT_DATA)>>(in[0],
+                    // m_firKernels[0].in[0]);
+                    connect<>(in[0], m_firKernels[0].in[0]);
+                    dimensions(m_firKernels[0].in[0]) = {TP_INPUT_WINDOW_VSIZE};
                     for (int i = 1; i < TP_CASC_LEN; i++) {
-                        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA),
-                                       fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>() * sizeof(TT_DATA)> >(
-                            in[0], m_firKernels[i].in[0]);
+                        // connect<window<TP_INPUT_WINDOW_VSIZE*sizeof(TT_DATA),
+                        // fnFirMargin<TP_FIR_LEN/kInterpolateFactor,TT_DATA>()*sizeof(TT_DATA)>>(in[0],
+                        // m_firKernels[i].in[0]);
+                        connect<>(in[0], m_firKernels[i].in[0]);
+                        dimensions(m_firKernels[i].in[0]) = {TP_INPUT_WINDOW_VSIZE};
                     }
                 }
             else if
@@ -347,18 +359,26 @@ class fir_interpolate_hb_graph : public graph {
                         widget_api_cast<TT_DATA, USE_STREAM_API, USE_WINDOW_API, 2, TP_INPUT_WINDOW_VSIZE, 1, 0> >();
                     connect<stream>(in[0], m_inWidgetKernel.in[0]);
                     connect<stream>(in2[0], m_inWidgetKernel.in[1]);
-                    connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA),
-                                   fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>() * sizeof(TT_DATA)> >(
-                        m_inWidgetKernel.out[0], m_firKernels[0].in[0]);
+                    // connect<window<TP_INPUT_WINDOW_VSIZE*sizeof(TT_DATA),
+                    // fnFirMargin<TP_FIR_LEN/kInterpolateFactor,TT_DATA>()*sizeof(TT_DATA) >>( m_inWidgetKernel.out[0],
+                    // m_firKernels[0].in[0] );
+                    connect<>(m_inWidgetKernel.out[0], m_firKernels[0].in[0]);
+                    dimensions(m_inWidgetKernel.out[0]) = {TP_INPUT_WINDOW_VSIZE};
+                    dimensions(m_firKernels[0].in[0]) = {TP_INPUT_WINDOW_VSIZE};
                     source(m_inWidgetKernel) = "widget_api_cast.cpp";
                     headers(m_inWidgetKernel) = {"widget_api_cast.hpp"};
                     runtime<ratio>(m_inWidgetKernel) = 0.8;
 
                     for (int i = 1; i < TP_CASC_LEN; i++) {
                         single_buffer(m_firKernels[i].in[0]);
-                        connect<window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA) +
-                                       fnFirMargin<TP_FIR_LEN, TT_DATA>() * sizeof(TT_DATA)> >(
-                            async(m_firKernels[i - 1].out[1]), async(m_firKernels[i].in[0]));
+                        // connect<window<TP_INPUT_WINDOW_VSIZE*sizeof(TT_DATA) +
+                        // fnFirMargin<TP_FIR_LEN,TT_DATA>()*sizeof(TT_DATA)>>(async(m_firKernels[i-1].out[1]),
+                        // async(m_firKernels[i].in[0]));
+                        connect<>(m_firKernels[i - 1].out[1], m_firKernels[i].in[0]);
+                        dimensions(m_firKernels[i - 1].out[1]) = {TP_INPUT_WINDOW_VSIZE +
+                                                                  fnFirMargin<TP_FIR_LEN, TT_DATA>()};
+                        dimensions(m_firKernels[i].in[0]) = {TP_INPUT_WINDOW_VSIZE +
+                                                             fnFirMargin<TP_FIR_LEN, TT_DATA>()};
                     }
                 }
         }
@@ -373,8 +393,10 @@ class fir_interpolate_hb_graph : public graph {
         }
         // make output connections
         if (TP_API == 0) {
-            connect<window<kInterpolateFactor * TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA)> >(
-                m_firKernels[TP_CASC_LEN - 1].out[0], out[0]);
+            // connect<window<kInterpolateFactor*TP_INPUT_WINDOW_VSIZE*sizeof(TT_DATA)>>(m_firKernels[TP_CASC_LEN-1].out[0],
+            // out[0]);
+            connect<>(m_firKernels[TP_CASC_LEN - 1].out[0], out[0]);
+            dimensions(m_firKernels[TP_CASC_LEN - 1].out[0]) = {kInterpolateFactor * TP_INPUT_WINDOW_VSIZE};
         } else {
             connect<stream>(m_firKernels[TP_CASC_LEN - 1].out[0], out[0]);
         }
@@ -383,8 +405,10 @@ class fir_interpolate_hb_graph : public graph {
             constexpr(TP_NUM_OUTPUTS == 2) {
                 if
                     constexpr(TP_API == USE_WINDOW_API) {
-                        connect<window<kInterpolateFactor * TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA)> >(
-                            m_firKernels[TP_CASC_LEN - 1].out[1], out2[0]);
+                        // connect<window<kInterpolateFactor*TP_INPUT_WINDOW_VSIZE*sizeof(TT_DATA)>>(m_firKernels[TP_CASC_LEN-1].out[1],
+                        // out2[0]);
+                        connect<>(m_firKernels[TP_CASC_LEN - 1].out[1], out2[0]);
+                        dimensions(m_firKernels[TP_CASC_LEN - 1].out[1]) = {kInterpolateFactor * TP_INPUT_WINDOW_VSIZE};
                     }
                 else {
                     connect<stream>(m_firKernels[TP_CASC_LEN - 1].out[1], out2[0]);

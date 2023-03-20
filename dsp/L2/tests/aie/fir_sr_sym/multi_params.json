@@ -151,6 +151,51 @@
             "INPUT_WINDOW_VSIZE":"38400",
             "USE_COEFF_RELOAD":"1",
             "UUT_SSR":"3"
+        },
+        "test_16_fir_48t_int16_int32_stream": {
+            "DATA_TYPE":"int16",
+            "COEFF_TYPE":"int32",
+            "FIR_LEN":"48",
+            "SHIFT":"16",
+            "CASC_LEN":"3",
+            "PORT_API":"1",
+            "INPUT_WINDOW_VSIZE":"2560"
+        },
+        "test_17_fir_32t_cint16_int32_stream": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int32",
+            "FIR_LEN":"32",
+            "SHIFT":"16",
+            "CASC_LEN":"3",
+            "PORT_API":"1",
+            "INPUT_WINDOW_VSIZE":"2560"
+        },
+        "test_18_fir_32t_cint16_cint32_stream": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"cint32",
+            "FIR_LEN":"32",
+            "SHIFT":"16",
+            "CASC_LEN":"3",
+            "PORT_API":"1",
+            "INPUT_WINDOW_VSIZE":"2560"
+        },
+        "test_18_fir_16t_float": {
+            "DATA_TYPE":"float",
+            "COEFF_TYPE":"float",
+            "FIR_LEN":"16",
+            "SHIFT":"0",
+            "CASC_LEN":"1",
+            "PORT_API":"0",
+            "INPUT_WINDOW_VSIZE":"2560"
+        },
+        "test_19_fir_16t_cfloat": {
+            "DATA_TYPE":"cfloat",
+            "COEFF_TYPE":"float",
+            "FIR_LEN":"16",
+            "SHIFT":"0",
+            "CASC_LEN":"1",
+            "PORT_API":"0",
+            "INPUT_WINDOW_VSIZE":"1280"
         }
     }
 }

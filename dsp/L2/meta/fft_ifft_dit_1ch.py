@@ -182,8 +182,9 @@ def validate_TP_WINDOW_VSIZE(args):
 
 
 def fn_validate_parallel_power(TP_API, TP_PARALLEL_POWER):
-  if (TP_API == 0 and TP_PARALLEL_POWER >=1 ):
-    return isError("Only stream interface is supported for parallel FFT.")
+#as of 23.1, iobuffer (window) API is supported with TP_PARALLEL_POWER>=1
+#  if (TP_API == 0 and TP_PARALLEL_POWER >=1 ):
+#    return isError("Only stream interface is supported for parallel FFT.")
   return isValid
 
 def validate_TP_PARALLEL_POWER(args):

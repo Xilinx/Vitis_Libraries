@@ -38,7 +38,18 @@ included in aie graph level compilation.
 #include <adf.h>
 #include <vector>
 
+using namespace adf;
+
+#include "device_defs.h"
 #include "fft_ifft_dit_1ch_traits.hpp"
+#include "widget_api_cast_traits.hpp"
+
+#ifndef __SUPPORTS_ACC64__
+using output_stream_cacc64 = output_stream_cacc80;
+using input_stream_cacc64 = input_stream_cacc80;
+#endif //__SUPPORTS_ACC64__
+
+using namespace xf::dsp::aie::widget::api_cast; // for API definitions like kStreamAPI
 
 #ifndef _DSPLIB_FFT_R2COMB_HPP_DEBUG_
 //#define _DSPLIB_FFT_R2COMB_HPP_DEBUG_
@@ -50,8 +61,9 @@ namespace aie {
 namespace fft {
 namespace r2comb {
 
-//-----------------------------------------------------------------------------------------------------
-
+// helper (base) class for fft_r2comb. This holds the computation which is performed oblivious to the form of interface,
+// so need not be specialized
+// according to interface
 template <typename TT_DATA,
           typename TT_TWIDDLE,
           unsigned int TP_POINT_SIZE,
@@ -62,15 +74,537 @@ template <typename TT_DATA,
           unsigned int TP_PARALLEL_POWER,
           unsigned int TP_INDEX,
           unsigned int TP_ORIG_PAR_POWER>
-class fft_r2comb {
+class fft_r2comb_r2stage {
    public:
+    fft_r2comb_r2stage() {}
+
+    void calcR2Comb(TT_DATA* inBuff, TT_DATA* outBuff);
+};
+
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PARALLEL_POWER,
+          unsigned int TP_INDEX,
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_API_IN,
+          unsigned int TP_API_OUT>
+class fft_r2comb : public fft_r2comb_r2stage<TT_DATA,
+                                             TT_TWIDDLE,
+                                             TP_POINT_SIZE,
+                                             TP_FFT_NIFFT,
+                                             TP_SHIFT,
+                                             TP_DYN_PT_SIZE,
+                                             TP_WINDOW_VSIZE,
+                                             TP_PARALLEL_POWER,
+                                             TP_INDEX,
+                                             TP_ORIG_PAR_POWER> {
+   public:
+    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA);
+    TT_DATA (&inBuff)[kBufferSize];
+    TT_DATA (&outBuff)[kBufferSize];
+
     // Constructor
-    fft_r2comb() {} // Constructor
+    fft_r2comb(TT_DATA (&myInBuff)[kBufferSize], TT_DATA (&myOutBuff)[kBufferSize])
+        : inBuff(myInBuff), outBuff(myOutBuff) {}
 
     // Register Kernel Class
-    static void registerKernelClass() { REGISTER_FUNCTION(fft_r2comb::fft_r2comb_main); }
-    // FFT
-    void fft_r2comb_main(input_window<TT_DATA>* __restrict inWindow, output_window<TT_DATA>* __restrict outWindow);
+    static void registerKernelClass() {
+        REGISTER_FUNCTION(fft_r2comb::fft_r2comb_main);
+        REGISTER_PARAMETER(inBuff);
+        REGISTER_PARAMETER(outBuff);
+    }
+
+    // r2comb main
+    void fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
+                         input_stream<TT_DATA>* __restrict inStream1,
+                         output_stream<TT_DATA>* __restrict outStream0,
+                         output_stream<TT_DATA>* __restrict outStream1);
+};
+
+// Specialization for Cascade/Stream in, single Stream
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PARALLEL_POWER,
+          unsigned int TP_INDEX,
+          unsigned int TP_ORIG_PAR_POWER>
+class fft_r2comb<TT_DATA,
+                 TT_TWIDDLE,
+                 TP_POINT_SIZE,
+                 TP_FFT_NIFFT,
+                 TP_SHIFT,
+                 TP_DYN_PT_SIZE,
+                 TP_WINDOW_VSIZE,
+                 TP_PARALLEL_POWER,
+                 TP_INDEX,
+                 TP_ORIG_PAR_POWER,
+                 kCascStreamAPI,
+                 kStreamAPI> : public fft_r2comb_r2stage<TT_DATA,
+                                                         TT_TWIDDLE,
+                                                         TP_POINT_SIZE,
+                                                         TP_FFT_NIFFT,
+                                                         TP_SHIFT,
+                                                         TP_DYN_PT_SIZE,
+                                                         TP_WINDOW_VSIZE,
+                                                         TP_PARALLEL_POWER,
+                                                         TP_INDEX,
+                                                         TP_ORIG_PAR_POWER> {
+   public:
+    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA);
+    TT_DATA (&inBuff)[kBufferSize];
+    TT_DATA (&outBuff)[kBufferSize];
+
+    // Constructor
+    fft_r2comb(TT_DATA (&myInBuff)[kBufferSize], TT_DATA (&myOutBuff)[kBufferSize])
+        : inBuff(myInBuff), outBuff(myOutBuff) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() {
+        REGISTER_FUNCTION(fft_r2comb::fft_r2comb_main);
+        REGISTER_PARAMETER(inBuff);
+        REGISTER_PARAMETER(outBuff);
+    }
+
+    // r2comb main
+    void fft_r2comb_main(input_stream_cacc64* __restrict inStream0, // Cascade
+                         input_stream<TT_DATA>* __restrict inStream1,
+                         output_stream<TT_DATA>* __restrict outStream0);
+};
+
+// Specialization for Cascade/Stream in, Cascade/Stream out
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PARALLEL_POWER,
+          unsigned int TP_INDEX,
+          unsigned int TP_ORIG_PAR_POWER>
+class fft_r2comb<TT_DATA,
+                 TT_TWIDDLE,
+                 TP_POINT_SIZE,
+                 TP_FFT_NIFFT,
+                 TP_SHIFT,
+                 TP_DYN_PT_SIZE,
+                 TP_WINDOW_VSIZE,
+                 TP_PARALLEL_POWER,
+                 TP_INDEX,
+                 TP_ORIG_PAR_POWER,
+                 kCascStreamAPI,
+                 kCascStreamAPI> : public fft_r2comb_r2stage<TT_DATA,
+                                                             TT_TWIDDLE,
+                                                             TP_POINT_SIZE,
+                                                             TP_FFT_NIFFT,
+                                                             TP_SHIFT,
+                                                             TP_DYN_PT_SIZE,
+                                                             TP_WINDOW_VSIZE,
+                                                             TP_PARALLEL_POWER,
+                                                             TP_INDEX,
+                                                             TP_ORIG_PAR_POWER> {
+   public:
+    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA);
+    TT_DATA (&inBuff)[kBufferSize];
+    TT_DATA (&outBuff)[kBufferSize];
+
+    // Constructor
+    fft_r2comb(TT_DATA (&myInBuff)[kBufferSize], TT_DATA (&myOutBuff)[kBufferSize])
+        : inBuff(myInBuff), outBuff(myOutBuff) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() {
+        REGISTER_FUNCTION(fft_r2comb::fft_r2comb_main);
+        REGISTER_PARAMETER(inBuff);
+        REGISTER_PARAMETER(outBuff);
+    }
+
+    // r2comb main
+    void fft_r2comb_main(input_stream_cacc64* __restrict inStream0, // Cascade
+                         input_stream<TT_DATA>* __restrict inStream1,
+                         output_stream_cacc64* __restrict outStream0, // Cascade
+                         output_stream<TT_DATA>* __restrict outStream1);
+};
+
+// Specialization for Cascade/Stream in, Stream/Cascade out
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PARALLEL_POWER,
+          unsigned int TP_INDEX,
+          unsigned int TP_ORIG_PAR_POWER>
+class fft_r2comb<TT_DATA,
+                 TT_TWIDDLE,
+                 TP_POINT_SIZE,
+                 TP_FFT_NIFFT,
+                 TP_SHIFT,
+                 TP_DYN_PT_SIZE,
+                 TP_WINDOW_VSIZE,
+                 TP_PARALLEL_POWER,
+                 TP_INDEX,
+                 TP_ORIG_PAR_POWER,
+                 kCascStreamAPI,
+                 kStreamCascAPI> : public fft_r2comb_r2stage<TT_DATA,
+                                                             TT_TWIDDLE,
+                                                             TP_POINT_SIZE,
+                                                             TP_FFT_NIFFT,
+                                                             TP_SHIFT,
+                                                             TP_DYN_PT_SIZE,
+                                                             TP_WINDOW_VSIZE,
+                                                             TP_PARALLEL_POWER,
+                                                             TP_INDEX,
+                                                             TP_ORIG_PAR_POWER> {
+   public:
+    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA);
+    TT_DATA (&inBuff)[kBufferSize];
+    TT_DATA (&outBuff)[kBufferSize];
+
+    // Constructor
+    fft_r2comb(TT_DATA (&myInBuff)[kBufferSize], TT_DATA (&myOutBuff)[kBufferSize])
+        : inBuff(myInBuff), outBuff(myOutBuff) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() {
+        REGISTER_FUNCTION(fft_r2comb::fft_r2comb_main);
+        REGISTER_PARAMETER(inBuff);
+        REGISTER_PARAMETER(outBuff);
+    }
+
+    // r2comb main
+    void fft_r2comb_main(input_stream_cacc64* __restrict inStream0, // Cascade
+                         input_stream<TT_DATA>* __restrict inStream1,
+                         output_stream<TT_DATA>* __restrict outStream0,
+                         output_stream_cacc64* __restrict outStream1); // Cascade
+};
+
+// Specialization for Stream/Cascade in, single Stream out
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PARALLEL_POWER,
+          unsigned int TP_INDEX,
+          unsigned int TP_ORIG_PAR_POWER>
+class fft_r2comb<TT_DATA,
+                 TT_TWIDDLE,
+                 TP_POINT_SIZE,
+                 TP_FFT_NIFFT,
+                 TP_SHIFT,
+                 TP_DYN_PT_SIZE,
+                 TP_WINDOW_VSIZE,
+                 TP_PARALLEL_POWER,
+                 TP_INDEX,
+                 TP_ORIG_PAR_POWER,
+                 kStreamCascAPI,
+                 kStreamAPI> : public fft_r2comb_r2stage<TT_DATA,
+                                                         TT_TWIDDLE,
+                                                         TP_POINT_SIZE,
+                                                         TP_FFT_NIFFT,
+                                                         TP_SHIFT,
+                                                         TP_DYN_PT_SIZE,
+                                                         TP_WINDOW_VSIZE,
+                                                         TP_PARALLEL_POWER,
+                                                         TP_INDEX,
+                                                         TP_ORIG_PAR_POWER> {
+   public:
+    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA);
+    TT_DATA (&inBuff)[kBufferSize];
+    TT_DATA (&outBuff)[kBufferSize];
+
+    // Constructor
+    fft_r2comb(TT_DATA (&myInBuff)[kBufferSize], TT_DATA (&myOutBuff)[kBufferSize])
+        : inBuff(myInBuff), outBuff(myOutBuff) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() {
+        REGISTER_FUNCTION(fft_r2comb::fft_r2comb_main);
+        REGISTER_PARAMETER(inBuff);
+        REGISTER_PARAMETER(outBuff);
+    }
+
+    // r2comb main
+    void fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
+                         input_stream_cacc64* __restrict inStream1, // Cascade
+                         output_stream<TT_DATA>* __restrict outStream0);
+};
+
+// Specialization for Stream/Cascade in, Cascade/Stream out
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PARALLEL_POWER,
+          unsigned int TP_INDEX,
+          unsigned int TP_ORIG_PAR_POWER>
+class fft_r2comb<TT_DATA,
+                 TT_TWIDDLE,
+                 TP_POINT_SIZE,
+                 TP_FFT_NIFFT,
+                 TP_SHIFT,
+                 TP_DYN_PT_SIZE,
+                 TP_WINDOW_VSIZE,
+                 TP_PARALLEL_POWER,
+                 TP_INDEX,
+                 TP_ORIG_PAR_POWER,
+                 kStreamCascAPI,
+                 kCascStreamAPI> : public fft_r2comb_r2stage<TT_DATA,
+                                                             TT_TWIDDLE,
+                                                             TP_POINT_SIZE,
+                                                             TP_FFT_NIFFT,
+                                                             TP_SHIFT,
+                                                             TP_DYN_PT_SIZE,
+                                                             TP_WINDOW_VSIZE,
+                                                             TP_PARALLEL_POWER,
+                                                             TP_INDEX,
+                                                             TP_ORIG_PAR_POWER> {
+   public:
+    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA);
+    TT_DATA (&inBuff)[kBufferSize];
+    TT_DATA (&outBuff)[kBufferSize];
+
+    // Constructor
+    fft_r2comb(TT_DATA (&myInBuff)[kBufferSize], TT_DATA (&myOutBuff)[kBufferSize])
+        : inBuff(myInBuff), outBuff(myOutBuff) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() {
+        REGISTER_FUNCTION(fft_r2comb::fft_r2comb_main);
+        REGISTER_PARAMETER(inBuff);
+        REGISTER_PARAMETER(outBuff);
+    }
+
+    // r2comb main
+    void fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
+                         input_stream_cacc64* __restrict inStream1,   // Cascade
+                         output_stream_cacc64* __restrict outStream0, // Cascade
+                         output_stream<TT_DATA>* __restrict outStream1);
+};
+
+// Specialization for Stream/Cascade in, StreamCascade out
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PARALLEL_POWER,
+          unsigned int TP_INDEX,
+          unsigned int TP_ORIG_PAR_POWER>
+class fft_r2comb<TT_DATA,
+                 TT_TWIDDLE,
+                 TP_POINT_SIZE,
+                 TP_FFT_NIFFT,
+                 TP_SHIFT,
+                 TP_DYN_PT_SIZE,
+                 TP_WINDOW_VSIZE,
+                 TP_PARALLEL_POWER,
+                 TP_INDEX,
+                 TP_ORIG_PAR_POWER,
+                 kStreamCascAPI,
+                 kStreamCascAPI> : public fft_r2comb_r2stage<TT_DATA,
+                                                             TT_TWIDDLE,
+                                                             TP_POINT_SIZE,
+                                                             TP_FFT_NIFFT,
+                                                             TP_SHIFT,
+                                                             TP_DYN_PT_SIZE,
+                                                             TP_WINDOW_VSIZE,
+                                                             TP_PARALLEL_POWER,
+                                                             TP_INDEX,
+                                                             TP_ORIG_PAR_POWER> {
+   public:
+    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA);
+    TT_DATA (&inBuff)[kBufferSize];
+    TT_DATA (&outBuff)[kBufferSize];
+
+    // Constructor
+    fft_r2comb(TT_DATA (&myInBuff)[kBufferSize], TT_DATA (&myOutBuff)[kBufferSize])
+        : inBuff(myInBuff), outBuff(myOutBuff) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() {
+        REGISTER_FUNCTION(fft_r2comb::fft_r2comb_main);
+        REGISTER_PARAMETER(inBuff);
+        REGISTER_PARAMETER(outBuff);
+    }
+
+    // r2comb main
+    void fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
+                         input_stream_cacc64* __restrict inStream1, // Cascade
+                         output_stream<TT_DATA>* __restrict outStream0,
+                         output_stream_cacc64* __restrict outStream1); // Cascade
+};
+
+// Specialization for Streams in, single Window out
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PARALLEL_POWER,
+          unsigned int TP_INDEX,
+          unsigned int TP_ORIG_PAR_POWER>
+class fft_r2comb<TT_DATA,
+                 TT_TWIDDLE,
+                 TP_POINT_SIZE,
+                 TP_FFT_NIFFT,
+                 TP_SHIFT,
+                 TP_DYN_PT_SIZE,
+                 TP_WINDOW_VSIZE,
+                 TP_PARALLEL_POWER,
+                 TP_INDEX,
+                 TP_ORIG_PAR_POWER,
+                 kStreamAPI,
+                 kWindowAPI> : public fft_r2comb_r2stage<TT_DATA,
+                                                         TT_TWIDDLE,
+                                                         TP_POINT_SIZE,
+                                                         TP_FFT_NIFFT,
+                                                         TP_SHIFT,
+                                                         TP_DYN_PT_SIZE,
+                                                         TP_WINDOW_VSIZE,
+                                                         TP_PARALLEL_POWER,
+                                                         TP_INDEX,
+                                                         TP_ORIG_PAR_POWER> {
+   public:
+    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA);
+    TT_DATA (&inBuff)[kBufferSize];
+
+    // Constructor
+    fft_r2comb(TT_DATA (&myInBuff)[kBufferSize]) : inBuff(myInBuff) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() {
+        REGISTER_FUNCTION(fft_r2comb::fft_r2comb_main);
+        REGISTER_PARAMETER(inBuff);
+    }
+
+    // r2comb main
+    void fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
+                         input_stream<TT_DATA>* __restrict inStream1,
+                         output_buffer<TT_DATA>& __restrict outWindow0);
+};
+
+// Specialization for Cascade/Stream in, single Window out
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PARALLEL_POWER,
+          unsigned int TP_INDEX,
+          unsigned int TP_ORIG_PAR_POWER>
+class fft_r2comb<TT_DATA,
+                 TT_TWIDDLE,
+                 TP_POINT_SIZE,
+                 TP_FFT_NIFFT,
+                 TP_SHIFT,
+                 TP_DYN_PT_SIZE,
+                 TP_WINDOW_VSIZE,
+                 TP_PARALLEL_POWER,
+                 TP_INDEX,
+                 TP_ORIG_PAR_POWER,
+                 kCascStreamAPI,
+                 kWindowAPI> : public fft_r2comb_r2stage<TT_DATA,
+                                                         TT_TWIDDLE,
+                                                         TP_POINT_SIZE,
+                                                         TP_FFT_NIFFT,
+                                                         TP_SHIFT,
+                                                         TP_DYN_PT_SIZE,
+                                                         TP_WINDOW_VSIZE,
+                                                         TP_PARALLEL_POWER,
+                                                         TP_INDEX,
+                                                         TP_ORIG_PAR_POWER> {
+   public:
+    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA);
+    TT_DATA (&inBuff)[kBufferSize];
+
+    // Constructor
+    fft_r2comb(TT_DATA (&myInBuff)[kBufferSize]) : inBuff(myInBuff) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() {
+        REGISTER_FUNCTION(fft_r2comb::fft_r2comb_main);
+        REGISTER_PARAMETER(inBuff);
+    }
+
+    // r2comb main
+    void fft_r2comb_main(input_stream_cacc64* __restrict inStream0, // Cascade
+                         input_stream<TT_DATA>* __restrict inStream1,
+                         output_buffer<TT_DATA>& __restrict outWindow0);
+};
+
+// Specialization for Stream/Cascade in, single Window out
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PARALLEL_POWER,
+          unsigned int TP_INDEX,
+          unsigned int TP_ORIG_PAR_POWER>
+class fft_r2comb<TT_DATA,
+                 TT_TWIDDLE,
+                 TP_POINT_SIZE,
+                 TP_FFT_NIFFT,
+                 TP_SHIFT,
+                 TP_DYN_PT_SIZE,
+                 TP_WINDOW_VSIZE,
+                 TP_PARALLEL_POWER,
+                 TP_INDEX,
+                 TP_ORIG_PAR_POWER,
+                 kStreamCascAPI,
+                 kWindowAPI> : public fft_r2comb_r2stage<TT_DATA,
+                                                         TT_TWIDDLE,
+                                                         TP_POINT_SIZE,
+                                                         TP_FFT_NIFFT,
+                                                         TP_SHIFT,
+                                                         TP_DYN_PT_SIZE,
+                                                         TP_WINDOW_VSIZE,
+                                                         TP_PARALLEL_POWER,
+                                                         TP_INDEX,
+                                                         TP_ORIG_PAR_POWER> {
+   public:
+    static constexpr int kBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA);
+    TT_DATA (&inBuff)[kBufferSize];
+
+    // Constructor
+    fft_r2comb(TT_DATA (&myInBuff)[kBufferSize]) : inBuff(myInBuff) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() {
+        REGISTER_FUNCTION(fft_r2comb::fft_r2comb_main);
+        REGISTER_PARAMETER(inBuff);
+    }
+
+    // r2comb main
+    void fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
+                         input_stream_cacc64* __restrict inStream1, // Cascade
+                         output_buffer<TT_DATA>& __restrict outWindow0);
 };
 }
 }

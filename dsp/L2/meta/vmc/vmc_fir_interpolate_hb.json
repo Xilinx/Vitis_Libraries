@@ -3,7 +3,7 @@
   "ip_name": "vmc_fir_interpolate_hb",
   "block_info": {
     "label": "FIR Halfband Interpolator",
-    "description": ""
+    "description": "FIR Halfband Interpolator block for AI Engines. For a filter length of 'N', specify filter coefficients as a vector of '(N+1)/4+1' elements."
   },
   "parameters": [
     {
@@ -12,7 +12,11 @@
       "description": "The type of individual data samples input to and output of the filter function",
       "enum": [ "int16", "cint16", "int32", "cint32", "float", "cfloat" ],
       "default": "cint16",
-      "type": "typename"
+      "type": "typename",
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"popup"
+      }
     },
     {
       "name": "coef_type",
@@ -25,6 +29,10 @@
         "file": "vmc_fir_interpolate_hb.py",
         "function": "vmc_validate_coef_type",
         "args": ["data_type"]
+      },
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"popup"
       }
     },
     {
@@ -32,27 +40,12 @@
       "label": "Use runtime coefficient reloading",
       "description": "Allows the user to select of runtime coefficient reloading",
       "default": false,
-      "type": "bool"
-    },
-    {
-      "name": "fir_length",
-      "label": "fir filter length",
-      "description": "Specify fir length for coefficient reloading",
-      "default": 31,
-      "minimum": 4,
-      "maximum": 8192,
-      "type": "int"
-    },
-    {
-      "name": "upshift_ct",
-      "label": "Upshift unit center tap",
-      "description": "Upshift unit center tap, uses provided center tap's value to upshift data sample",
-      "default":0,
-      "type": "int",
-      "validator": {
-        "file": "vmc_fir_interpolate_hb.py",
-        "function": "vmc_validate_upshift_ct",
-        "args": ["data_type"]
+      "type": "bool",
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"checkbox",
+            "disable":"coeff",
+            "enable":"fir_length"
       }
     },
     {
@@ -65,7 +58,24 @@
       "validator": {
         "file": "vmc_fir_interpolate_hb.py",
         "function": "vmc_validate_coeff",
-        "args": ["use_coeff_reload", "coef_type" ,"fir_length", "data_type", "casc_length", "use_casc_length"]
+        "args": ["use_coeff_reload", "coef_type" ,"fir_length", "data_type", "casc_length"]
+      },
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
+      }
+    },
+    {
+      "name": "fir_length",
+      "label": "fir filter length",
+      "description": "Specify fir length for coefficient reloading",
+      "default": 31,
+      "minimum": 4,
+      "maximum": 8192,
+      "type": "int",
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
       }
     },
     {
@@ -80,36 +90,10 @@
         "file": "vmc_fir_interpolate_hb.py",
         "function": "vmc_validate_input_window_size",
         "args": ["data_type", "coef_type", "use_coeff_reload", "coeff", "fir_length"]
-      }
-    },
-    {
-      "name": "input_sampling_rate",
-      "label": "Target input throughput (MSPS)",
-      "description": "The target input throughput of the filter function in MSPS",
-      "default": 200,
-      "maximum": 1000,
-      "minimum": 1,
-      "type": "int"
-    },
-    {
-      "name": "use_casc_length",
-      "label": "Specify cascade length",
-      "description": "Allows the user to specify length of the cascaded kernels",
-      "default": false,
-      "type": "bool"
-    },
-    {
-      "name": "casc_length",
-      "label": "Number of cascade stages",
-      "description": "The length of cascaded kernels",
-      "default": 1,
-      "type": "int",
-      "maximum": 40,
-      "minimum": 1,
-      "validator": {
-        "file": "vmc_fir_interpolate_hb.py",
-        "function": "vmc_validate_casc_length",
-        "args": ["use_coeff_reload", "use_casc_length", "fir_length"]
+      },
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
       }
     },
     {
@@ -124,6 +108,10 @@
         "file": "vmc_fir_interpolate_hb.py",
         "function": "vmc_validate_shift_val",
         "args": ["data_type"]
+      },
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
       }
     },
     {
@@ -133,7 +121,45 @@
       "enum": [0, 1, 2, 3, 4, 5, 6, 7],
       "enum_str": ["Floor", "Ceiling", "Round to positive infinity", "Round to negative infinity", "Round symmetrical to infinity", "Round symmetrical to zero", "Round convergent to even", "Round convergent to odd"],
       "default": 2,
-      "type": "int"
+      "type": "int",
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"popup"
+      }
+    },
+    {
+      "name": "upshift_ct",
+      "label": "Upshift unit center tap",
+      "description": "Upshift unit center tap, uses provided center tap's value to upshift data sample",
+      "default":0,
+      "type": "int",
+      "validator": {
+        "file": "vmc_fir_interpolate_hb.py",
+        "function": "vmc_validate_upshift_ct",
+        "args": ["data_type"]
+      },
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
+      }
+    },
+    {
+      "name": "casc_length",
+      "label": "Number of cascade stages",
+      "description": "The length of cascaded kernels",
+      "default": 1,
+      "type": "int",
+      "maximum": 40,
+      "minimum": 1,
+      "validator": {
+        "file": "vmc_fir_interpolate_hb.py",
+        "function": "vmc_validate_casc_length",
+        "args": ["use_coeff_reload", "fir_length"]
+      },
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
+      }
     }
   ],
   "generator": {

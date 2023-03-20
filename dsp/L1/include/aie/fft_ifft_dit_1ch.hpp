@@ -34,13 +34,23 @@ included in aie graph level compilation.
 */
 
 #include <adf.h>
+using namespace adf;
 #include <vector>
 
+#include "device_defs.h"
 #include "fft_ifft_dit_1ch_traits.hpp"
+#include "widget_api_cast.hpp" //for API definitions
+
+#ifndef __SUPPORTS_ACC64__
+using output_stream_cacc64 = output_stream_cacc80;
+using input_stream_cacc64 = input_stream_cacc80;
+#endif //__SUPPORTS_ACC64__
 
 #ifndef _DSPLIB_FFT_IFFT_DIT_1CH_HPP_DEBUG_
 //#define _DSPLIB_FFT_IFFT_DIT_1CH_HPP_DEBUG_
 #endif //_DSPLIB_FFT_IFFT_DIT_1CH_HPP_DEBUG_
+
+using namespace xf::dsp::aie::widget::api_cast;
 
 namespace xf {
 namespace dsp {
@@ -93,8 +103,8 @@ class stockhamStages {
     void stagePreamble(TT_TWIDDLE** tw_table,
                        TT_INTERNAL_DATA* tmp1_buf,
                        TT_INTERNAL_DATA* tmp2_buf,
-                       input_window<TT_DATA>* __restrict inputx,
-                       output_window<TT_OUT_DATA>* __restrict outputy);
+                       TT_DATA* __restrict inptr,
+                       TT_OUT_DATA* __restrict outptr);
 };
 
 template <typename TT_DATA = cint16,
@@ -115,7 +125,7 @@ class kernelFFTClass {
     kernelFFTClass() {}
 
     // FFT
-    void kernelFFT(input_window<TT_DATA>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
+    void kernelFFT(TT_DATA* __restrict inptr, TT_OUT_DATA* __restrict outptr);
 };
 
 //-------------------------------
@@ -156,7 +166,7 @@ class kernelFFTClass<TT_DATA,
                    TP_WINDOW_VSIZE,
                    TP_ORIG_PAR_POWER>
         stages;
-    void kernelFFT(input_window<TT_DATA>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
+    void kernelFFT(TT_DATA* __restrict inptr, TT_OUT_DATA* __restrict outptr);
 };
 template <typename TT_DATA,
           typename TT_OUT_DATA,
@@ -194,7 +204,7 @@ class kernelFFTClass<TT_DATA,
                    TP_WINDOW_VSIZE,
                    TP_ORIG_PAR_POWER>
         stages;
-    void kernelFFT(input_window<TT_DATA>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
+    void kernelFFT(TT_DATA* __restrict inptr, TT_OUT_DATA* __restrict outptr);
 };
 template <typename TT_DATA,
           typename TT_OUT_DATA,
@@ -232,7 +242,7 @@ class kernelFFTClass<TT_DATA,
                    TP_WINDOW_VSIZE,
                    TP_ORIG_PAR_POWER>
         stages;
-    void kernelFFT(input_window<TT_DATA>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
+    void kernelFFT(TT_DATA* __restrict inptr, TT_OUT_DATA* __restrict outptr);
 };
 template <typename TT_DATA,
           typename TT_OUT_DATA,
@@ -270,7 +280,7 @@ class kernelFFTClass<TT_DATA,
                    TP_WINDOW_VSIZE,
                    TP_ORIG_PAR_POWER>
         stages;
-    void kernelFFT(input_window<TT_DATA>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
+    void kernelFFT(TT_DATA* __restrict inptr, TT_OUT_DATA* __restrict outptr);
 };
 template <typename TT_DATA,
           typename TT_OUT_DATA,
@@ -308,7 +318,7 @@ class kernelFFTClass<TT_DATA,
                    TP_WINDOW_VSIZE,
                    TP_ORIG_PAR_POWER>
         stages;
-    void kernelFFT(input_window<TT_DATA>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
+    void kernelFFT(TT_DATA* __restrict inptr, TT_OUT_DATA* __restrict outptr);
 };
 template <typename TT_DATA,
           typename TT_OUT_DATA,
@@ -346,7 +356,7 @@ class kernelFFTClass<TT_DATA,
                    TP_WINDOW_VSIZE,
                    TP_ORIG_PAR_POWER>
         stages;
-    void kernelFFT(input_window<TT_DATA>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
+    void kernelFFT(TT_DATA* __restrict inptr, TT_OUT_DATA* __restrict outptr);
 };
 template <typename TT_DATA,
           typename TT_OUT_DATA,
@@ -385,7 +395,7 @@ class kernelFFTClass<TT_DATA,
                    TP_ORIG_PAR_POWER>
         stages;
 
-    void kernelFFT(input_window<TT_DATA>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
+    void kernelFFT(TT_DATA* __restrict inptr, TT_OUT_DATA* __restrict outptr);
 };
 template <typename TT_DATA,
           typename TT_OUT_DATA,
@@ -423,7 +433,7 @@ class kernelFFTClass<TT_DATA,
                    TP_WINDOW_VSIZE,
                    TP_ORIG_PAR_POWER>
         stages;
-    void kernelFFT(input_window<TT_DATA>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
+    void kernelFFT(TT_DATA* __restrict inptr, TT_OUT_DATA* __restrict outptr);
 };
 
 template <typename TT_DATA,
@@ -462,7 +472,7 @@ class kernelFFTClass<TT_DATA,
                    TP_WINDOW_VSIZE,
                    TP_ORIG_PAR_POWER>
         stages;
-    void kernelFFT(input_window<TT_DATA>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
+    void kernelFFT(TT_DATA* __restrict inptr, TT_OUT_DATA* __restrict outptr);
 };
 
 // Specialisation for the first kernel with cint16 input. This is the case which requires an explicit extra buffer tmp2
@@ -502,7 +512,7 @@ class kernelFFTClass<cint16,
                    TP_ORIG_PAR_POWER>
         stages;
 
-    void kernelFFT(input_window<cint16>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
+    void kernelFFT(cint16* inptr, TT_OUT_DATA* __restrict outptr);
 };
 template <typename TT_OUT_DATA,
           unsigned int TP_FFT_NIFFT,
@@ -539,7 +549,7 @@ class kernelFFTClass<cint16,
                    TP_ORIG_PAR_POWER>
         stages;
 
-    void kernelFFT(input_window<cint16>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
+    void kernelFFT(cint16* inptr, TT_OUT_DATA* __restrict outptr);
 };
 template <typename TT_OUT_DATA,
           unsigned int TP_FFT_NIFFT,
@@ -576,7 +586,7 @@ class kernelFFTClass<cint16,
                    TP_ORIG_PAR_POWER>
         stages;
 
-    void kernelFFT(input_window<cint16>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
+    void kernelFFT(cint16* inptr, TT_OUT_DATA* __restrict outptr);
 };
 template <typename TT_OUT_DATA,
           unsigned int TP_FFT_NIFFT,
@@ -613,7 +623,7 @@ class kernelFFTClass<cint16,
                    TP_ORIG_PAR_POWER>
         stages;
 
-    void kernelFFT(input_window<cint16>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
+    void kernelFFT(cint16* inptr, TT_OUT_DATA* __restrict outptr);
 };
 template <typename TT_OUT_DATA,
           unsigned int TP_FFT_NIFFT,
@@ -650,7 +660,7 @@ class kernelFFTClass<cint16,
                    TP_ORIG_PAR_POWER>
         stages;
 
-    void kernelFFT(input_window<cint16>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
+    void kernelFFT(cint16* inptr, TT_OUT_DATA* __restrict outptr);
 };
 template <typename TT_OUT_DATA,
           unsigned int TP_FFT_NIFFT,
@@ -687,7 +697,7 @@ class kernelFFTClass<cint16,
                    TP_ORIG_PAR_POWER>
         stages;
 
-    void kernelFFT(input_window<cint16>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
+    void kernelFFT(cint16* inptr, TT_OUT_DATA* __restrict outptr);
 };
 template <typename TT_OUT_DATA,
           unsigned int TP_FFT_NIFFT,
@@ -724,7 +734,7 @@ class kernelFFTClass<cint16,
                    TP_ORIG_PAR_POWER>
         stages;
 
-    void kernelFFT(input_window<cint16>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
+    void kernelFFT(cint16* inptr, TT_OUT_DATA* __restrict outptr);
 };
 template <typename TT_OUT_DATA,
           unsigned int TP_FFT_NIFFT,
@@ -761,7 +771,7 @@ class kernelFFTClass<cint16,
                    TP_ORIG_PAR_POWER>
         stages;
 
-    void kernelFFT(input_window<cint16>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
+    void kernelFFT(cint16* inptr, TT_OUT_DATA* __restrict outptr);
 };
 
 template <typename TT_OUT_DATA,
@@ -799,11 +809,11 @@ class kernelFFTClass<cint16,
                    TP_ORIG_PAR_POWER>
         stages;
 
-    void kernelFFT(input_window<cint16>* __restrict inputx, output_window<TT_OUT_DATA>* __restrict outputy);
+    void kernelFFT(cint16* inptr, TT_OUT_DATA* __restrict outptr);
 };
 
 //-----------------------------------------------------------------------------------------------------
-// Top level single kernel specialization.
+// base class to hold legality checking for top FFT kernel class.
 template <typename TT_DATA, // input
           typename TT_OUT_DATA,
           typename TT_TWIDDLE,
@@ -815,8 +825,8 @@ template <typename TT_DATA, // input
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE = TP_POINT_SIZE,
           unsigned int TP_ORIG_PAR_POWER = 0>
-class fft_ifft_dit_1ch {
-   private:
+class fft_ifft_dit_1ch_legality {
+   public:
     // Parameter value defensive and legality checks
     static_assert(fnCheckDataType<TT_DATA>(), "ERROR: TT_IN_DATA is not a supported type");
     static_assert(fnCheckDataType<TT_OUT_DATA>(), "ERROR: TT_OUT_DATA is not a supported type");
@@ -833,7 +843,35 @@ class fft_ifft_dit_1ch {
     static_assert(TP_WINDOW_VSIZE / TP_POINT_SIZE >= 1, "ERROR: TP_WINDOW_SIZE must be a multiple of TP_POINT_SIZE");
     static_assert((TP_DYN_PT_SIZE == 0) || (TP_POINT_SIZE != 16),
                   "ERROR: Dynamic point size is not supported for only one legal size (16)");
+};
 
+//-----------------------------------------------------------------------------------------------------
+// Top level single kernel specialization. Also specialization for window in, window out
+template <typename TT_DATA, // input
+          typename TT_OUT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_START_RANK,
+          unsigned int TP_END_RANK,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE = TP_POINT_SIZE,
+          unsigned int TP_IN_API = 0,
+          unsigned int TP_OUT_API = 0,
+          unsigned int TP_ORIG_PAR_POWER = 0>
+class fft_ifft_dit_1ch : public fft_ifft_dit_1ch_legality<TT_DATA,
+                                                          TT_OUT_DATA,
+                                                          TT_TWIDDLE,
+                                                          TP_POINT_SIZE,
+                                                          TP_FFT_NIFFT,
+                                                          TP_SHIFT,
+                                                          TP_START_RANK,
+                                                          TP_END_RANK,
+                                                          TP_DYN_PT_SIZE,
+                                                          TP_WINDOW_VSIZE,
+                                                          TP_ORIG_PAR_POWER> {
+   private:
     kernelFFTClass<TT_DATA,
                    TT_OUT_DATA,
                    TT_TWIDDLE,
@@ -848,13 +886,492 @@ class fft_ifft_dit_1ch {
         m_fftKernel; // Kernel for FFT
 
    public:
-    // Constructor
     fft_ifft_dit_1ch() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fft_ifft_dit_1ch::fftMain); }
-    // FFT
-    void fftMain(input_window<TT_DATA>* __restrict inWindow, output_window<TT_OUT_DATA>* __restrict outWindow);
+    void fftMain(input_buffer<TT_DATA>& __restrict inWindow, output_buffer<TT_OUT_DATA>& __restrict outWindow);
+};
+
+// specialization of top level for streams in, window out
+template <typename TT_DATA, // input
+          typename TT_OUT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_START_RANK,
+          unsigned int TP_END_RANK,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
+class fft_ifft_dit_1ch<TT_DATA,
+                       TT_OUT_DATA,
+                       TT_TWIDDLE,
+                       TP_POINT_SIZE,
+                       TP_FFT_NIFFT,
+                       TP_SHIFT,
+                       TP_START_RANK,
+                       TP_END_RANK,
+                       TP_DYN_PT_SIZE,
+                       TP_WINDOW_VSIZE,
+                       kStreamAPI,
+                       kWindowAPI,
+                       TP_ORIG_PAR_POWER> : public fft_ifft_dit_1ch_legality<TT_DATA,
+                                                                             TT_OUT_DATA,
+                                                                             TT_TWIDDLE,
+                                                                             TP_POINT_SIZE,
+                                                                             TP_FFT_NIFFT,
+                                                                             TP_SHIFT,
+                                                                             TP_START_RANK,
+                                                                             TP_END_RANK,
+                                                                             TP_DYN_PT_SIZE,
+                                                                             TP_WINDOW_VSIZE,
+                                                                             TP_ORIG_PAR_POWER> {
+   private:
+    kernelFFTClass<TT_DATA,
+                   TT_OUT_DATA,
+                   TT_TWIDDLE,
+                   TP_POINT_SIZE,
+                   TP_FFT_NIFFT,
+                   TP_SHIFT,
+                   TP_START_RANK,
+                   TP_END_RANK,
+                   TP_DYN_PT_SIZE,
+                   TP_WINDOW_VSIZE,
+                   TP_ORIG_PAR_POWER>
+        m_fftKernel; // Kernel for FFT
+
+    static constexpr int kInBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA);
+
+   public:
+    TT_DATA (&inBuff)[kInBufferSize];
+
+    fft_ifft_dit_1ch(TT_DATA (&myInBuff)[kInBufferSize]) : inBuff(myInBuff) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() {
+        REGISTER_FUNCTION(fft_ifft_dit_1ch::fftMain);
+        REGISTER_PARAMETER(inBuff);
+    }
+#if __STREAMS_PER_TILE__ == 2
+    void fftMain(input_stream<TT_DATA>* __restrict inStream0,
+                 input_stream<TT_DATA>* __restrict inStream1,
+                 output_buffer<TT_OUT_DATA>& __restrict outWindow);
+#else
+    void fftMain(input_stream<TT_DATA>* __restrict inStream0, output_buffer<TT_OUT_DATA>& __restrict outWindow);
+#endif
+};
+
+// specialization of top level for window in, streams out
+template <typename TT_DATA, // input
+          typename TT_OUT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_START_RANK,
+          unsigned int TP_END_RANK,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
+class fft_ifft_dit_1ch<TT_DATA,
+                       TT_OUT_DATA,
+                       TT_TWIDDLE,
+                       TP_POINT_SIZE,
+                       TP_FFT_NIFFT,
+                       TP_SHIFT,
+                       TP_START_RANK,
+                       TP_END_RANK,
+                       TP_DYN_PT_SIZE,
+                       TP_WINDOW_VSIZE,
+                       kWindowAPI,
+                       kStreamAPI,
+                       TP_ORIG_PAR_POWER> : public fft_ifft_dit_1ch_legality<TT_DATA,
+                                                                             TT_OUT_DATA,
+                                                                             TT_TWIDDLE,
+                                                                             TP_POINT_SIZE,
+                                                                             TP_FFT_NIFFT,
+                                                                             TP_SHIFT,
+                                                                             TP_START_RANK,
+                                                                             TP_END_RANK,
+                                                                             TP_DYN_PT_SIZE,
+                                                                             TP_WINDOW_VSIZE,
+                                                                             TP_ORIG_PAR_POWER> {
+   private:
+    kernelFFTClass<TT_DATA,
+                   TT_OUT_DATA,
+                   TT_TWIDDLE,
+                   TP_POINT_SIZE,
+                   TP_FFT_NIFFT,
+                   TP_SHIFT,
+                   TP_START_RANK,
+                   TP_END_RANK,
+                   TP_DYN_PT_SIZE,
+                   TP_WINDOW_VSIZE,
+                   TP_ORIG_PAR_POWER>
+        m_fftKernel; // Kernel for FFT
+    static constexpr int kInBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_OUT_DATA);
+
+   public:
+    TT_OUT_DATA (&outBuff)[kInBufferSize]; // Note the type. Downsizing occurs before the conversion to streams
+
+    fft_ifft_dit_1ch(TT_OUT_DATA (&myOutBuff)[kInBufferSize]) : outBuff(myOutBuff) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() {
+        REGISTER_FUNCTION(fft_ifft_dit_1ch::fftMain);
+        REGISTER_PARAMETER(outBuff);
+    }
+#if __STREAMS_PER_TILE__ == 2
+    void fftMain(input_buffer<TT_DATA>& __restrict inWindow,
+                 output_stream<TT_OUT_DATA>* __restrict inStream0,
+                 output_stream<TT_OUT_DATA>* __restrict inStream1);
+#else
+    void fftMain(input_buffer<TT_DATA>& __restrict inWindow, output_stream<TT_OUT_DATA>* __restrict inStream0);
+#endif
+};
+
+// specialization of top level for streams in, streams out
+template <typename TT_DATA, // input
+          typename TT_OUT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_START_RANK,
+          unsigned int TP_END_RANK,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
+class fft_ifft_dit_1ch<TT_DATA,
+                       TT_OUT_DATA,
+                       TT_TWIDDLE,
+                       TP_POINT_SIZE,
+                       TP_FFT_NIFFT,
+                       TP_SHIFT,
+                       TP_START_RANK,
+                       TP_END_RANK,
+                       TP_DYN_PT_SIZE,
+                       TP_WINDOW_VSIZE,
+                       kStreamAPI,
+                       kStreamAPI,
+                       TP_ORIG_PAR_POWER> : public fft_ifft_dit_1ch_legality<TT_DATA,
+                                                                             TT_OUT_DATA,
+                                                                             TT_TWIDDLE,
+                                                                             TP_POINT_SIZE,
+                                                                             TP_FFT_NIFFT,
+                                                                             TP_SHIFT,
+                                                                             TP_START_RANK,
+                                                                             TP_END_RANK,
+                                                                             TP_DYN_PT_SIZE,
+                                                                             TP_WINDOW_VSIZE,
+                                                                             TP_ORIG_PAR_POWER> {
+   private:
+    kernelFFTClass<TT_DATA,
+                   TT_OUT_DATA,
+                   TT_TWIDDLE,
+                   TP_POINT_SIZE,
+                   TP_FFT_NIFFT,
+                   TP_SHIFT,
+                   TP_START_RANK,
+                   TP_END_RANK,
+                   TP_DYN_PT_SIZE,
+                   TP_WINDOW_VSIZE,
+                   TP_ORIG_PAR_POWER>
+        m_fftKernel; // Kernel for FFT
+
+   public:
+    static constexpr int kInBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA);
+    static constexpr int kOutBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_OUT_DATA);
+    TT_DATA (&inBuff)[kInBufferSize];
+    TT_OUT_DATA (&outBuff)[kOutBufferSize];
+
+    fft_ifft_dit_1ch(TT_DATA (&myInBuff)[kInBufferSize], TT_OUT_DATA (&myOutBuff)[kOutBufferSize])
+        : inBuff(myInBuff), outBuff(myOutBuff) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() {
+        REGISTER_FUNCTION(fft_ifft_dit_1ch::fftMain);
+        REGISTER_PARAMETER(inBuff);
+        REGISTER_PARAMETER(outBuff);
+    }
+#if __STREAMS_PER_TILE__ == 2
+    void fftMain(input_stream<TT_DATA>* __restrict inStream0,
+                 input_stream<TT_DATA>* __restrict inStream1,
+                 output_stream<TT_OUT_DATA>* __restrict outStream0,
+                 output_stream<TT_OUT_DATA>* __restrict outStream1);
+#else
+    void fftMain(input_stream<TT_DATA>* __restrict inStream0, output_stream<TT_OUT_DATA>* __restrict outStream0);
+#endif
+};
+
+// specialization of top level for streams in, casc/streams out
+template <typename TT_DATA, // input
+          typename TT_OUT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_START_RANK,
+          unsigned int TP_END_RANK,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
+class fft_ifft_dit_1ch<TT_DATA,
+                       TT_OUT_DATA,
+                       TT_TWIDDLE,
+                       TP_POINT_SIZE,
+                       TP_FFT_NIFFT,
+                       TP_SHIFT,
+                       TP_START_RANK,
+                       TP_END_RANK,
+                       TP_DYN_PT_SIZE,
+                       TP_WINDOW_VSIZE,
+                       kStreamAPI,
+                       kCascStreamAPI,
+                       TP_ORIG_PAR_POWER> : public fft_ifft_dit_1ch_legality<TT_DATA,
+                                                                             TT_OUT_DATA,
+                                                                             TT_TWIDDLE,
+                                                                             TP_POINT_SIZE,
+                                                                             TP_FFT_NIFFT,
+                                                                             TP_SHIFT,
+                                                                             TP_START_RANK,
+                                                                             TP_END_RANK,
+                                                                             TP_DYN_PT_SIZE,
+                                                                             TP_WINDOW_VSIZE,
+                                                                             TP_ORIG_PAR_POWER> {
+   private:
+    kernelFFTClass<TT_DATA,
+                   TT_OUT_DATA,
+                   TT_TWIDDLE,
+                   TP_POINT_SIZE,
+                   TP_FFT_NIFFT,
+                   TP_SHIFT,
+                   TP_START_RANK,
+                   TP_END_RANK,
+                   TP_DYN_PT_SIZE,
+                   TP_WINDOW_VSIZE,
+                   TP_ORIG_PAR_POWER>
+        m_fftKernel; // Kernel for FFT
+
+   public:
+    static constexpr int kInBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA);
+    static constexpr int kOutBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_OUT_DATA);
+    TT_DATA (&inBuff)[kInBufferSize];
+    TT_OUT_DATA (&outBuff)[kOutBufferSize];
+
+    fft_ifft_dit_1ch(TT_DATA (&myInBuff)[kInBufferSize], TT_OUT_DATA (&myOutBuff)[kOutBufferSize])
+        : inBuff(myInBuff), outBuff(myOutBuff) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() {
+        REGISTER_FUNCTION(fft_ifft_dit_1ch::fftMain);
+        REGISTER_PARAMETER(inBuff);
+        REGISTER_PARAMETER(outBuff);
+    }
+    void fftMain(input_stream<TT_DATA>* __restrict inStream0,
+                 output_stream_cacc64* __restrict outStream0, // Cascade
+                 output_stream<TT_OUT_DATA>* __restrict outStream1);
+};
+
+// specialization of top level for iobuffer, casc/streams out
+template <typename TT_DATA, // input
+          typename TT_OUT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_START_RANK,
+          unsigned int TP_END_RANK,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
+class fft_ifft_dit_1ch<TT_DATA,
+                       TT_OUT_DATA,
+                       TT_TWIDDLE,
+                       TP_POINT_SIZE,
+                       TP_FFT_NIFFT,
+                       TP_SHIFT,
+                       TP_START_RANK,
+                       TP_END_RANK,
+                       TP_DYN_PT_SIZE,
+                       TP_WINDOW_VSIZE,
+                       kWindowAPI,
+                       kCascStreamAPI,
+                       TP_ORIG_PAR_POWER> : public fft_ifft_dit_1ch_legality<TT_DATA,
+                                                                             TT_OUT_DATA,
+                                                                             TT_TWIDDLE,
+                                                                             TP_POINT_SIZE,
+                                                                             TP_FFT_NIFFT,
+                                                                             TP_SHIFT,
+                                                                             TP_START_RANK,
+                                                                             TP_END_RANK,
+                                                                             TP_DYN_PT_SIZE,
+                                                                             TP_WINDOW_VSIZE,
+                                                                             TP_ORIG_PAR_POWER> {
+   private:
+    kernelFFTClass<TT_DATA,
+                   TT_OUT_DATA,
+                   TT_TWIDDLE,
+                   TP_POINT_SIZE,
+                   TP_FFT_NIFFT,
+                   TP_SHIFT,
+                   TP_START_RANK,
+                   TP_END_RANK,
+                   TP_DYN_PT_SIZE,
+                   TP_WINDOW_VSIZE,
+                   TP_ORIG_PAR_POWER>
+        m_fftKernel; // Kernel for FFT
+
+   public:
+    static constexpr int kOutBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_OUT_DATA);
+    TT_OUT_DATA (&outBuff)[kOutBufferSize];
+
+    fft_ifft_dit_1ch(TT_OUT_DATA (&myOutBuff)[kOutBufferSize]) : outBuff(myOutBuff) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() {
+        REGISTER_FUNCTION(fft_ifft_dit_1ch::fftMain);
+        REGISTER_PARAMETER(outBuff);
+    }
+    void fftMain(input_buffer<TT_DATA>& __restrict inWindow0,
+                 output_stream_cacc64* __restrict outStream0, // Cascade
+                 output_stream<TT_OUT_DATA>* __restrict outStream1);
+};
+
+// specialization of top level for single stream in, stream/cascade out
+template <typename TT_DATA, // input
+          typename TT_OUT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_START_RANK,
+          unsigned int TP_END_RANK,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
+class fft_ifft_dit_1ch<TT_DATA,
+                       TT_OUT_DATA,
+                       TT_TWIDDLE,
+                       TP_POINT_SIZE,
+                       TP_FFT_NIFFT,
+                       TP_SHIFT,
+                       TP_START_RANK,
+                       TP_END_RANK,
+                       TP_DYN_PT_SIZE,
+                       TP_WINDOW_VSIZE,
+                       kStreamAPI,
+                       kStreamCascAPI,
+                       TP_ORIG_PAR_POWER> : public fft_ifft_dit_1ch_legality<TT_DATA,
+                                                                             TT_OUT_DATA,
+                                                                             TT_TWIDDLE,
+                                                                             TP_POINT_SIZE,
+                                                                             TP_FFT_NIFFT,
+                                                                             TP_SHIFT,
+                                                                             TP_START_RANK,
+                                                                             TP_END_RANK,
+                                                                             TP_DYN_PT_SIZE,
+                                                                             TP_WINDOW_VSIZE,
+                                                                             TP_ORIG_PAR_POWER> {
+   private:
+    kernelFFTClass<TT_DATA,
+                   TT_OUT_DATA,
+                   TT_TWIDDLE,
+                   TP_POINT_SIZE,
+                   TP_FFT_NIFFT,
+                   TP_SHIFT,
+                   TP_START_RANK,
+                   TP_END_RANK,
+                   TP_DYN_PT_SIZE,
+                   TP_WINDOW_VSIZE,
+                   TP_ORIG_PAR_POWER>
+        m_fftKernel; // Kernel for FFT
+
+   public:
+    static constexpr int kInBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA);
+    static constexpr int kOutBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_OUT_DATA);
+    TT_DATA (&inBuff)[kInBufferSize];
+    TT_OUT_DATA (&outBuff)[kOutBufferSize];
+
+    fft_ifft_dit_1ch(TT_DATA (&myInBuff)[kInBufferSize], TT_OUT_DATA (&myOutBuff)[kOutBufferSize])
+        : inBuff(myInBuff), outBuff(myOutBuff) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() {
+        REGISTER_FUNCTION(fft_ifft_dit_1ch::fftMain);
+        REGISTER_PARAMETER(inBuff);
+        REGISTER_PARAMETER(outBuff);
+    }
+    void fftMain(input_stream<TT_DATA>* __restrict inStream0,
+                 output_stream<TT_OUT_DATA>* __restrict outStream0,
+                 output_stream_cacc64* __restrict outStream1); // Cascade
+};
+
+// specialization of top level for iobuffer in, stream/cascade out
+template <typename TT_DATA, // input
+          typename TT_OUT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_START_RANK,
+          unsigned int TP_END_RANK,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
+class fft_ifft_dit_1ch<TT_DATA,
+                       TT_OUT_DATA,
+                       TT_TWIDDLE,
+                       TP_POINT_SIZE,
+                       TP_FFT_NIFFT,
+                       TP_SHIFT,
+                       TP_START_RANK,
+                       TP_END_RANK,
+                       TP_DYN_PT_SIZE,
+                       TP_WINDOW_VSIZE,
+                       kWindowAPI,
+                       kStreamCascAPI,
+                       TP_ORIG_PAR_POWER> : public fft_ifft_dit_1ch_legality<TT_DATA,
+                                                                             TT_OUT_DATA,
+                                                                             TT_TWIDDLE,
+                                                                             TP_POINT_SIZE,
+                                                                             TP_FFT_NIFFT,
+                                                                             TP_SHIFT,
+                                                                             TP_START_RANK,
+                                                                             TP_END_RANK,
+                                                                             TP_DYN_PT_SIZE,
+                                                                             TP_WINDOW_VSIZE,
+                                                                             TP_ORIG_PAR_POWER> {
+   private:
+    kernelFFTClass<TT_DATA,
+                   TT_OUT_DATA,
+                   TT_TWIDDLE,
+                   TP_POINT_SIZE,
+                   TP_FFT_NIFFT,
+                   TP_SHIFT,
+                   TP_START_RANK,
+                   TP_END_RANK,
+                   TP_DYN_PT_SIZE,
+                   TP_WINDOW_VSIZE,
+                   TP_ORIG_PAR_POWER>
+        m_fftKernel; // Kernel for FFT
+
+   public:
+    static constexpr int kOutBufferSize = TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_OUT_DATA);
+    TT_OUT_DATA (&outBuff)[kOutBufferSize];
+
+    fft_ifft_dit_1ch(TT_OUT_DATA (&myOutBuff)[kOutBufferSize]) : outBuff(myOutBuff) {}
+
+    // Register Kernel Class
+    static void registerKernelClass() {
+        REGISTER_FUNCTION(fft_ifft_dit_1ch::fftMain);
+        REGISTER_PARAMETER(outBuff);
+    }
+    void fftMain(input_buffer<TT_DATA>& __restrict inWindow0,
+                 output_stream<TT_OUT_DATA>* __restrict outStream0,
+                 output_stream_cacc64* __restrict outStream1); // Cascade
 };
 }
 }

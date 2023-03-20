@@ -29,6 +29,8 @@
 #include <limits>
 #include "fir_ref_utils.hpp"
 
+using namespace adf;
+
 namespace xf {
 namespace dsp {
 namespace aie {
@@ -69,9 +71,14 @@ class fir_interpolate_asym_ref {
         }
     }
     // FIR
-    void filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow);
-    void filterRtp(input_window<TT_DATA>* inWindow,
-                   output_window<TT_DATA>* outWindow,
+    void filter(input_circular_buffer<TT_DATA,
+                                      extents<inherited_extent>,
+                                      margin<fnFirMargin<TP_FIR_LEN / TP_INTERPOLATE_FACTOR, TT_DATA>()> >& inWindow,
+                output_circular_buffer<TT_DATA>& outWindow);
+    void filterRtp(input_circular_buffer<TT_DATA,
+                                         extents<inherited_extent>,
+                                         margin<fnFirMargin<TP_FIR_LEN / TP_INTERPOLATE_FACTOR, TT_DATA>()> >& inWindow,
+                   output_circular_buffer<TT_DATA>& outWindow,
                    const TT_COEFF (&inTaps)[TP_FIR_LEN]);
 
    private:

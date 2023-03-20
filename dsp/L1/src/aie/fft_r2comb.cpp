@@ -108,7 +108,170 @@ fnGetR2CombTwTable() // admittedly ugly way of saying twiddle table is 2x for dy
     return twiddles;
 };
 
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PARALLEL_POWER,
+          unsigned int TP_INDEX,
+          unsigned int TP_ORIG_PAR_POWER>
+INLINE_DECL void fft_r2comb_r2stage<TT_DATA,
+                                    TT_TWIDDLE,
+                                    TP_POINT_SIZE,
+                                    TP_FFT_NIFFT,
+                                    TP_SHIFT,
+                                    TP_DYN_PT_SIZE,
+                                    TP_WINDOW_VSIZE,
+                                    TP_PARALLEL_POWER,
+                                    TP_INDEX,
+                                    TP_ORIG_PAR_POWER>::calcR2Comb(TT_DATA* inBuff, TT_DATA* outBuff) {
+    static constexpr int kTableFactor = (TP_DYN_PT_SIZE == 1) ? 1 : 2; // for dynamic point size, the max point size
+                                                                       // table is not alone. We need 1/2, 1/4, etc,
+                                                                       // hence twice the storage
+    alignas(32) static constexpr std::array<TT_TWIDDLE, ((TP_POINT_SIZE / kTableFactor) >> TP_PARALLEL_POWER)>
+        twiddles = fnGetR2CombTwTable<TT_TWIDDLE, TP_INDEX, TP_POINT_SIZE, TP_PARALLEL_POWER, TP_DYN_PT_SIZE>();
+    static constexpr std::array<int, 12> twiddleStarts = fnGetR2TwStarts<(TP_POINT_SIZE >> (TP_PARALLEL_POWER + 1))>();
+
+    using t256VectorType = ::aie::vector<TT_DATA, 256 / 8 / sizeof(TT_DATA)>;
+
+    bool inv;
+    TT_DATA* xbuff = (TT_DATA*)&inBuff[0];  // sample-wise pointer
+    TT_DATA* ybuff = (TT_DATA*)&outBuff[0]; // sample-wise pointer
+
+    if
+        constexpr(TP_DYN_PT_SIZE == 1) {
+            static constexpr unsigned int kSamplesInHeader = 256 / 8 / sizeof(TT_DATA);
+            static constexpr unsigned int kPtSizePwr = fnPointSizePower<TP_POINT_SIZE>();
+            static constexpr unsigned int kminPtSizePwr = 4;
+            static constexpr unsigned int kBlankVsize = 256 / 8 / sizeof(TT_DATA);
+            t256VectorType header;
+            TT_DATA headerVal;
+            t256VectorType blankOp;
+            t256VectorType* inPtr = (t256VectorType*)&inBuff[0];   // vector-wise pointer
+            t256VectorType* outPtr = (t256VectorType*)&outBuff[0]; // vector-wise pointer
+            int ptSizePwr;
+            int ptSize;
+
+            blankOp = ::aie::zeros<TT_DATA, kSamplesInHeader>();
+            header = *inPtr++;
+            // read in direction field
+            headerVal = header.get(0);
+            inv = headerVal.real == 0 ? true : false;
+            // read in number of radix2 ranks field
+            headerVal = header.get(1);
+            // ptrSizePwr is the point size for this kernel, but the header describes the point size for the graph,
+            // hence
+            // the kernel needs to know how many levels of divide by two recursion it is down.
+            ptSizePwr = (int)headerVal.real - (TP_ORIG_PAR_POWER - TP_PARALLEL_POWER);
+            ptSize = (1 << ptSizePwr);
+            // read in the incoming status field (1 = error, 0 = ok)
+            headerVal = header.get(std::is_same<TT_DATA, cint16>::value ? 7 : 3);
+
+            //    if (headerVal.real == 0 && ptSizePwr >= kminPtSizePwr && ptSizePwr <= kPtSizePwr) { //ie legal request
+            if (headerVal.real ==
+                0) { // the FFT subframe has already checked pointsize legality, so just use the status field.
+                *outPtr++ = header;            // write header to output buffer
+                xbuff += 32 / sizeof(TT_DATA); // move past header
+                ybuff += 32 / sizeof(TT_DATA); // move past header
+
+                int n = (ptSize >> TP_PARALLEL_POWER);
+                unsigned shift = TP_SHIFT + 15;
+                int tw_base = kPtSizePwr - ptSizePwr;
+
+                for (int i = 0; i < TP_WINDOW_VSIZE;
+                     i += (TP_POINT_SIZE >> TP_PARALLEL_POWER)) { // loop for multiple frames in window
+                    r2comb_dit<TT_DATA, TT_TWIDDLE>(xbuff + i, (TT_TWIDDLE*)(&twiddles[twiddleStarts[tw_base]]), n,
+                                                    0 /* r  */, TP_SHIFT + 15, ybuff + i, inv);
+
+                    // blank the remainder of the frame holder
+                    using write_type = ::aie::vector<TT_DATA, kBlankVsize>;
+                    write_type* blankDataPtr =
+                        (write_type*)(ybuff + n); // addition is in TT_DATA currency, then cast to 128b
+                    for (int i = n; i < (TP_POINT_SIZE >> TP_PARALLEL_POWER); i += kBlankVsize) {
+                        *blankDataPtr++ = ::aie::zeros<TT_DATA, kBlankVsize>();
+                    }
+                }
+
+            } else { // illegal framesize or invalid incoming
+                header.set(unitVector<TT_DATA>(), std::is_same<TT_DATA, cint16>::value
+                                                      ? 7
+                                                      : 3); // set the invalid flag in the status location.
+                *outPtr++ = header;
+                // write out blank window
+
+                TT_DATA* ybuff = (TT_DATA*)&outBuff[0];
+                using write_type = ::aie::vector<TT_DATA, kBlankVsize>;
+                write_type* blankDataPtr = (write_type*)(ybuff); // addition is in TT_DATA currency, then cast to 128b
+                for (int i = 0; i < TP_WINDOW_VSIZE / kBlankVsize; i++) {
+                    *blankDataPtr++ = ::aie::zeros<TT_DATA, kBlankVsize>();
+                }
+            } // end of dynamic handling.
+        }
+    else { // Static point size case
+
+        if
+            constexpr(TP_FFT_NIFFT == 1) { inv = false; }
+        else {
+            inv = true;
+        }
+        // perform the R2 stage here.
+        //    TT_DATA* xbuff = (TT_DATA*)inWindow.data();
+        //    TT_DATA* ybuff = (TT_DATA*)outWindow.data();
+        TT_DATA* xbuff = (TT_DATA*)&inBuff[0];
+        TT_DATA* ybuff = (TT_DATA*)&outBuff[0];
+        constexpr int n = (TP_POINT_SIZE >> TP_PARALLEL_POWER);
+        unsigned shift = TP_SHIFT + 15;
+
+        for (int i = 0; i < TP_WINDOW_VSIZE; i += n) {
+            r2comb_dit<TT_DATA, TT_TWIDDLE>(xbuff + i, (TT_TWIDDLE*)(&twiddles[0]), n, 0 /* r  */, TP_SHIFT + 15,
+                                            ybuff + i, inv);
+        }
+    }
+}
+
 //-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PARALLEL_POWER,
+          unsigned int TP_INDEX,
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_API_IN,
+          unsigned int TP_API_OUT>
+NOINLINE_DECL void fft_r2comb<TT_DATA,
+                              TT_TWIDDLE,
+                              TP_POINT_SIZE,
+                              TP_FFT_NIFFT,
+                              TP_SHIFT,
+                              TP_DYN_PT_SIZE,
+                              TP_WINDOW_VSIZE,
+                              TP_PARALLEL_POWER,
+                              TP_INDEX,
+                              TP_ORIG_PAR_POWER,
+                              TP_API_IN,
+                              TP_API_OUT>::fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
+                                                           input_stream<TT_DATA>* __restrict inStream1,
+                                                           output_stream<TT_DATA>* __restrict outStream0,
+                                                           output_stream<TT_DATA>* __restrict outStream1) {
+    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
+    set_sat();            // do saturate.
+
+    // TP_POINT_SIZE and PARALLEL_POWER go down by a power of 2 at each level of recursive hierarchy
+    readStreamIn<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(inStream0, inStream1, inBuff);
+    chess_memory_fence();
+    this->calcR2Comb(inBuff, outBuff);
+    chess_memory_fence();
+    writeStreamOut<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(outStream0, outStream1, outBuff);
+};
+
+// Specialization for Cascade/Stream in, single Stream out
 template <typename TT_DATA,
           typename TT_TWIDDLE,
           unsigned int TP_POINT_SIZE,
@@ -128,95 +291,311 @@ NOINLINE_DECL void fft_r2comb<TT_DATA,
                               TP_WINDOW_VSIZE,
                               TP_PARALLEL_POWER,
                               TP_INDEX,
-                              TP_ORIG_PAR_POWER>::fft_r2comb_main(input_window<TT_DATA>* __restrict inWindow,
-                                                                  output_window<TT_DATA>* __restrict outWindow) {
-    static constexpr int kTableFactor = (TP_DYN_PT_SIZE == 1) ? 1 : 2; // for dynamic point size, the max point size
-                                                                       // table is not alone. We need 1/2, 1/4, etc,
-                                                                       // hence twice the storage
-    alignas(32) static constexpr std::array<TT_TWIDDLE, ((TP_POINT_SIZE / kTableFactor) >> TP_PARALLEL_POWER)>
-        twiddles = fnGetR2CombTwTable<TT_TWIDDLE, TP_INDEX, TP_POINT_SIZE, TP_PARALLEL_POWER, TP_DYN_PT_SIZE>();
-    static constexpr std::array<int, 12> twiddleStarts = fnGetR2TwStarts<(TP_POINT_SIZE >> (TP_PARALLEL_POWER + 1))>();
-
+                              TP_ORIG_PAR_POWER,
+                              kCascStreamAPI,
+                              kStreamAPI>::fft_r2comb_main(input_stream_cacc64* __restrict inStream0, // cascade
+                                                           input_stream<TT_DATA>* __restrict inStream1,
+                                                           output_stream<TT_DATA>* __restrict outStream0) {
     set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
     set_sat();            // do saturate.
 
-    bool inv;
+    // TP_POINT_SIZE and PARALLEL_POWER go down by a power of 2 at each level of recursive hierarchy
+    readCascStreamIn<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(inStream0, inStream1, inBuff);
+    chess_memory_fence();
+    this->calcR2Comb(inBuff, outBuff);
+    chess_memory_fence();
+    writeStreamOut<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(outStream0, outBuff);
+};
 
-    if
-        constexpr(TP_DYN_PT_SIZE == 1) {
-            static constexpr unsigned int kPtSizePwr = fnPointSizePower<TP_POINT_SIZE>();
-            static constexpr unsigned int kminPtSizePwr = 4;
-            T_buff_256b<TT_DATA> header;
-            TT_DATA headerVal;
-            T_buff_256b<TT_DATA> blankOp;
-            int ptSizePwr;
-            int ptSize;
+// Specialization for Cascade/Stream in, Cascade/Stream out
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PARALLEL_POWER,
+          unsigned int TP_INDEX,
+          unsigned int TP_ORIG_PAR_POWER>
+NOINLINE_DECL void fft_r2comb<TT_DATA,
+                              TT_TWIDDLE,
+                              TP_POINT_SIZE,
+                              TP_FFT_NIFFT,
+                              TP_SHIFT,
+                              TP_DYN_PT_SIZE,
+                              TP_WINDOW_VSIZE,
+                              TP_PARALLEL_POWER,
+                              TP_INDEX,
+                              TP_ORIG_PAR_POWER,
+                              kCascStreamAPI,
+                              kCascStreamAPI>::fft_r2comb_main(input_stream_cacc64* __restrict inStream0, // cascade
+                                                               input_stream<TT_DATA>* __restrict inStream1,
+                                                               output_stream_cacc64* __restrict outStream0, // cascade
+                                                               output_stream<TT_DATA>* __restrict outStream1) {
+    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
+    set_sat();            // do saturate.
 
-            blankOp.val = ::aie::zeros<TT_DATA, 32 / sizeof(TT_DATA)>();
-            header = window_readincr_256b(inWindow);
-            headerVal = header.val.get(0);
-            inv = headerVal.real == 0 ? true : false;
-            headerVal = header.val.get(1);
-            ptSizePwr = (int)headerVal.real - (TP_ORIG_PAR_POWER - TP_PARALLEL_POWER);
-            ptSize = (1 << ptSizePwr);
+    // TP_POINT_SIZE and PARALLEL_POWER go down by a power of 2 at each level of recursive hierarchy
+    readCascStreamIn<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(inStream0, inStream1, inBuff);
+    chess_memory_fence();
+    this->calcR2Comb(inBuff, outBuff);
+    chess_memory_fence();
+    writeCascStreamOut<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(outStream0, outStream1, outBuff);
+};
 
-            headerVal = header.val.get(std::is_same<TT_DATA, cint16>::value ? 7 : 3);
+// Specialization for Cascade/Stream in, Stream/Cascade out
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PARALLEL_POWER,
+          unsigned int TP_INDEX,
+          unsigned int TP_ORIG_PAR_POWER>
+NOINLINE_DECL void fft_r2comb<TT_DATA,
+                              TT_TWIDDLE,
+                              TP_POINT_SIZE,
+                              TP_FFT_NIFFT,
+                              TP_SHIFT,
+                              TP_DYN_PT_SIZE,
+                              TP_WINDOW_VSIZE,
+                              TP_PARALLEL_POWER,
+                              TP_INDEX,
+                              TP_ORIG_PAR_POWER,
+                              kCascStreamAPI,
+                              kStreamCascAPI>::fft_r2comb_main(input_stream_cacc64* __restrict inStream0, // cascade
+                                                               input_stream<TT_DATA>* __restrict inStream1,
+                                                               output_stream<TT_DATA>* __restrict outStream0,
+                                                               output_stream_cacc64* __restrict outStream1 // cascade
+                                                               ) {
+    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
+    set_sat();            // do saturate.
 
-            if (headerVal.real == 0 && ptSizePwr >= kminPtSizePwr) {
-                window_writeincr(outWindow, header.val);
-                // perform the R2 stage here.
-                TT_DATA* xbuff = (TT_DATA*)inWindow->ptr;
-                TT_DATA* ybuff = (TT_DATA*)outWindow->ptr;
-                int n = (ptSize >> TP_PARALLEL_POWER);
-                unsigned shift = TP_SHIFT + 15;
-                int tw_base = kPtSizePwr - ptSizePwr;
+    // TP_POINT_SIZE and PARALLEL_POWER go down by a power of 2 at each level of recursive hierarchy
+    readCascStreamIn<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(inStream0, inStream1, inBuff);
+    chess_memory_fence();
+    this->calcR2Comb(inBuff, outBuff);
+    chess_memory_fence();
+    writeStreamCascOut<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(outStream0, outStream1, outBuff);
+};
 
-                for (int i = 0; i < TP_WINDOW_VSIZE; i += (TP_POINT_SIZE >> TP_PARALLEL_POWER)) {
-                    r2comb_dit<TT_DATA, TT_TWIDDLE>(xbuff + i, (TT_TWIDDLE*)(&twiddles[twiddleStarts[tw_base]]), n,
-                                                    0 /* r  */, TP_SHIFT + 15, ybuff + i, inv);
+// Specialization for Stream/Cascade in, single Stream out
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PARALLEL_POWER,
+          unsigned int TP_INDEX,
+          unsigned int TP_ORIG_PAR_POWER>
+NOINLINE_DECL void fft_r2comb<TT_DATA,
+                              TT_TWIDDLE,
+                              TP_POINT_SIZE,
+                              TP_FFT_NIFFT,
+                              TP_SHIFT,
+                              TP_DYN_PT_SIZE,
+                              TP_WINDOW_VSIZE,
+                              TP_PARALLEL_POWER,
+                              TP_INDEX,
+                              TP_ORIG_PAR_POWER,
+                              kStreamCascAPI,
+                              kStreamAPI>::fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
+                                                           input_stream_cacc64* __restrict inStream1, // cascade
+                                                           output_stream<TT_DATA>* __restrict outStream0) {
+    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
+    set_sat();            // do saturate.
 
-                    // blank the remainder of the frame holder
-                    using write_type = ::aie::vector<TT_DATA, 128 / 8 / sizeof(TT_DATA)>;
-                    write_type* blankDataPtr =
-                        (write_type*)(ybuff + n); // addition is in TT_DATA currency, then cast to 128b
-                    for (int i = n; i < (TP_POINT_SIZE >> TP_PARALLEL_POWER); i += (16 / sizeof(TT_DATA))) {
-                        *blankDataPtr++ = ::aie::zeros<TT_DATA, 16 / sizeof(TT_DATA)>();
-                    }
-                }
+    // TP_POINT_SIZE and PARALLEL_POWER go down by a power of 2 at each level of recursive hierarchy
+    readStreamCascIn<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(inStream0, inStream1, inBuff);
+    chess_memory_fence();
+    this->calcR2Comb(inBuff, outBuff);
+    chess_memory_fence();
+    writeStreamOut<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(outStream0, outBuff);
+};
 
-            } else { // illegal framesize or invalid incoming
-                header.val.set(unitVector<TT_DATA>(), std::is_same<TT_DATA, cint16>::value
-                                                          ? 7
-                                                          : 3); // set the invalid flag in the status location.
-                window_writeincr(outWindow, header.val);
-                // write out blank window
+// Specialization for Stream/Cascade in, Cascade/Stream out
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PARALLEL_POWER,
+          unsigned int TP_INDEX,
+          unsigned int TP_ORIG_PAR_POWER>
+NOINLINE_DECL void fft_r2comb<TT_DATA,
+                              TT_TWIDDLE,
+                              TP_POINT_SIZE,
+                              TP_FFT_NIFFT,
+                              TP_SHIFT,
+                              TP_DYN_PT_SIZE,
+                              TP_WINDOW_VSIZE,
+                              TP_PARALLEL_POWER,
+                              TP_INDEX,
+                              TP_ORIG_PAR_POWER,
+                              kStreamCascAPI,
+                              kCascStreamAPI>::fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
+                                                               input_stream_cacc64* __restrict inStream1,   // cascade
+                                                               output_stream_cacc64* __restrict outStream0, // cascade
+                                                               output_stream<TT_DATA>* __restrict outStream1) {
+    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
+    set_sat();            // do saturate.
 
-                TT_DATA* ybuff = (TT_DATA*)outWindow->ptr;
-                using write_type = ::aie::vector<TT_DATA, 128 / 8 / sizeof(TT_DATA)>;
-                write_type* blankDataPtr = (write_type*)(ybuff); // addition is in TT_DATA currency, then cast to 128b
-                for (int i = 0; i < TP_WINDOW_VSIZE / (16 / sizeof(TT_DATA)); i++) {
-                    *blankDataPtr++ = ::aie::zeros<TT_DATA, 16 / sizeof(TT_DATA)>();
-                }
-            }
-        }
-    else { // Static point size case
+    // TP_POINT_SIZE and PARALLEL_POWER go down by a power of 2 at each level of recursive hierarchy
+    readStreamCascIn<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(inStream0, inStream1, inBuff);
+    chess_memory_fence();
+    this->calcR2Comb(inBuff, outBuff);
+    chess_memory_fence();
+    writeCascStreamOut<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(outStream0, outStream1, outBuff);
+};
 
-        if
-            constexpr(TP_FFT_NIFFT == 1) { inv = false; }
-        else {
-            inv = true;
-        }
-        // perform the R2 stage here.
-        TT_DATA* xbuff = (TT_DATA*)inWindow->ptr;
-        TT_DATA* ybuff = (TT_DATA*)outWindow->ptr;
-        constexpr int n = (TP_POINT_SIZE >> TP_PARALLEL_POWER);
-        unsigned shift = TP_SHIFT + 15;
+// Specialization for Stream/Cascade in, Stream/Cascade out
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PARALLEL_POWER,
+          unsigned int TP_INDEX,
+          unsigned int TP_ORIG_PAR_POWER>
+NOINLINE_DECL void fft_r2comb<TT_DATA,
+                              TT_TWIDDLE,
+                              TP_POINT_SIZE,
+                              TP_FFT_NIFFT,
+                              TP_SHIFT,
+                              TP_DYN_PT_SIZE,
+                              TP_WINDOW_VSIZE,
+                              TP_PARALLEL_POWER,
+                              TP_INDEX,
+                              TP_ORIG_PAR_POWER,
+                              kStreamCascAPI,
+                              kStreamCascAPI>::fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
+                                                               input_stream_cacc64* __restrict inStream1, // cascade
+                                                               output_stream<TT_DATA>* __restrict outStream0,
+                                                               output_stream_cacc64* __restrict outStream1 // cascade
+                                                               ) {
+    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
+    set_sat();            // do saturate.
 
-        for (int i = 0; i < TP_WINDOW_VSIZE; i += n) {
-            r2comb_dit<TT_DATA, TT_TWIDDLE>(xbuff + i, (TT_TWIDDLE*)(&twiddles[0]), n, 0 /* r  */, TP_SHIFT + 15,
-                                            ybuff + i, inv);
-        }
-    }
+    // TP_POINT_SIZE and PARALLEL_POWER go down by a power of 2 at each level of recursive hierarchy
+    readStreamCascIn<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(inStream0, inStream1, inBuff);
+    chess_memory_fence();
+    this->calcR2Comb(inBuff, outBuff);
+    chess_memory_fence();
+    writeStreamCascOut<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(outStream0, outStream1, outBuff);
+};
+
+// Specialization for Streams in, single Window out
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PARALLEL_POWER,
+          unsigned int TP_INDEX,
+          unsigned int TP_ORIG_PAR_POWER>
+NOINLINE_DECL void fft_r2comb<TT_DATA,
+                              TT_TWIDDLE,
+                              TP_POINT_SIZE,
+                              TP_FFT_NIFFT,
+                              TP_SHIFT,
+                              TP_DYN_PT_SIZE,
+                              TP_WINDOW_VSIZE,
+                              TP_PARALLEL_POWER,
+                              TP_INDEX,
+                              TP_ORIG_PAR_POWER,
+                              kStreamAPI,
+                              kWindowAPI>::fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
+                                                           input_stream<TT_DATA>* __restrict inStream1,
+                                                           output_buffer<TT_DATA>& __restrict outWindow0) {
+    TT_DATA* outPtr = outWindow0.data();
+    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
+    set_sat();            // do saturate.
+
+    // TP_POINT_SIZE and PARALLEL_POWER go down by a power of 2 at each level of recursive hierarchy
+    readStreamIn<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(inStream0, inStream1, inBuff);
+    chess_memory_fence();
+    this->calcR2Comb(inBuff, outPtr);
+};
+
+// Specialization for Casc/Stream in, single Window out
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PARALLEL_POWER,
+          unsigned int TP_INDEX,
+          unsigned int TP_ORIG_PAR_POWER>
+NOINLINE_DECL void fft_r2comb<TT_DATA,
+                              TT_TWIDDLE,
+                              TP_POINT_SIZE,
+                              TP_FFT_NIFFT,
+                              TP_SHIFT,
+                              TP_DYN_PT_SIZE,
+                              TP_WINDOW_VSIZE,
+                              TP_PARALLEL_POWER,
+                              TP_INDEX,
+                              TP_ORIG_PAR_POWER,
+                              kCascStreamAPI,
+                              kWindowAPI>::fft_r2comb_main(input_stream_cacc64* __restrict inStream0,
+                                                           input_stream<TT_DATA>* __restrict inStream1,
+                                                           output_buffer<TT_DATA>& __restrict outWindow0) {
+    TT_DATA* outPtr = outWindow0.data();
+    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
+    set_sat();            // do saturate.
+
+    // TP_POINT_SIZE and PARALLEL_POWER go down by a power of 2 at each level of recursive hierarchy
+    readCascStreamIn<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(inStream0, inStream1, inBuff);
+    chess_memory_fence();
+    this->calcR2Comb(inBuff, outPtr);
+};
+
+// Specialization for Stream/Casc in, single Window out
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PARALLEL_POWER,
+          unsigned int TP_INDEX,
+          unsigned int TP_ORIG_PAR_POWER>
+NOINLINE_DECL void fft_r2comb<TT_DATA,
+                              TT_TWIDDLE,
+                              TP_POINT_SIZE,
+                              TP_FFT_NIFFT,
+                              TP_SHIFT,
+                              TP_DYN_PT_SIZE,
+                              TP_WINDOW_VSIZE,
+                              TP_PARALLEL_POWER,
+                              TP_INDEX,
+                              TP_ORIG_PAR_POWER,
+                              kStreamCascAPI,
+                              kWindowAPI>::fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
+                                                           input_stream_cacc64* __restrict inStream1,
+                                                           output_buffer<TT_DATA>& __restrict outWindow0) {
+    TT_DATA* outPtr = outWindow0.data();
+    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
+    set_sat();            // do saturate.
+
+    // TP_POINT_SIZE and PARALLEL_POWER go down by a power of 2 at each level of recursive hierarchy
+    readStreamCascIn<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(inStream0, inStream1, inBuff);
+    chess_memory_fence();
+    this->calcR2Comb(inBuff, outPtr);
 };
 }
 }

@@ -35,10 +35,10 @@ namespace decimate_hb {
     and therefore must be suitable for the aie compiler graph-level compilation.
 */
 enum eArchType {
-    kArch1Buff, // Forward and reverse data can fit into one 1024b register
-    kArch2Buff, // 2 registers required for forward and reverse data respectively
-    kArchZigZag // Performance optimized version of 2 buff.
-
+    kArch1Buff,  // Forward and reverse data can fit into one 1024b register
+    kArch2Buff,  // 2 registers required for forward and reverse data respectively
+    kArchZigZag, // Performance optimized version of 2 buff.
+    unknown
 };
 
 // Global constants,
@@ -76,7 +76,19 @@ INLINE_DECL constexpr unsigned int fnLoadSize<int16, int16, kArch2Buff>() {
     return 128;
 };
 template <>
+INLINE_DECL constexpr unsigned int fnLoadSize<int16, int32, kArch2Buff>() {
+    return 128;
+};
+template <>
 INLINE_DECL constexpr unsigned int fnLoadSize<cint16, cint16, kArch2Buff>() {
+    return 128;
+};
+template <>
+INLINE_DECL constexpr unsigned int fnLoadSize<cint16, int32, kArch2Buff>() {
+    return 128;
+};
+template <>
+INLINE_DECL constexpr unsigned int fnLoadSize<cint16, cint32, kArch2Buff>() {
     return 128;
 };
 template <>
@@ -106,11 +118,23 @@ INLINE_DECL constexpr unsigned int fnXBuffBSize<int16, int16, kArch2Buff>() {
     return kBuffSize64Byte;
 };
 template <>
+INLINE_DECL constexpr unsigned int fnXBuffBSize<int16, int32, kArch2Buff>() {
+    return kBuffSize64Byte;
+};
+template <>
 INLINE_DECL constexpr unsigned int fnXBuffBSize<cint16, int16, kArch2Buff>() {
     return kBuffSize64Byte;
 };
 template <>
 INLINE_DECL constexpr unsigned int fnXBuffBSize<cint16, cint16, kArch2Buff>() {
+    return kBuffSize64Byte;
+};
+template <>
+INLINE_DECL constexpr unsigned int fnXBuffBSize<cint16, int32, kArch2Buff>() {
+    return kBuffSize64Byte;
+};
+template <>
+INLINE_DECL constexpr unsigned int fnXBuffBSize<cint16, cint32, kArch2Buff>() {
     return kBuffSize64Byte;
 };
 template <>
@@ -131,13 +155,13 @@ INLINE_DECL constexpr unsigned int fnXBuffBSize<cint32, cint32, kArch2Buff>() {
 };
 
 // Function to return the number of lanes in the each call to mul/mac, not the number of lanes in the instrinsic
-template <typename TT_DATA, typename TT_COEFF, eArchType TP_ARCH>
+template <typename TT_DATA, typename TT_COEFF, eArchType TP_ARCH = unknown>
 INLINE_DECL constexpr unsigned int fnNumOpLanesDecHb() {
     return fnNumLanes384<TT_DATA, TT_COEFF>();
 };
 
 // Function to return the number of columns for a type combo
-template <typename TT_DATA, typename TT_COEFF, eArchType TP_ARCH>
+template <typename TT_DATA, typename TT_COEFF, eArchType TP_ARCH = unknown>
 INLINE_DECL constexpr unsigned int fnNumColumnsDecHb() {
     return fnNumCols384<TT_DATA, TT_COEFF>();
 };
@@ -159,6 +183,14 @@ INLINE_DECL constexpr unsigned int fnNumPassesDecHb<cint16, cint16>() {
     return 2;
 };
 template <>
+INLINE_DECL constexpr unsigned int fnNumPassesDecHb<cint16, int32>() {
+    return 2;
+};
+template <>
+INLINE_DECL constexpr unsigned int fnNumPassesDecHb<cint16, cint32>() {
+    return 2;
+};
+template <>
 INLINE_DECL constexpr unsigned int fnNumPassesDecHb<int32, int32>() {
     return 2;
 };
@@ -177,7 +209,8 @@ INLINE_DECL constexpr unsigned int fnDataLoadsInReg() {
 template <>
 INLINE_DECL constexpr unsigned int fnDataLoadsInReg<cint16, int16, kArch2Buff>() {
     return 2;
-};
+}; // iobuffer adoption - dual streams out failed because repeat factor was 1, so outputs only went to one phase
+   // (stream). xbuff=1024 and reads are 256, for this data type
 
 // ZigZag only developed for one type right now.
 template <typename TT_DATA, typename TT_COEFF>

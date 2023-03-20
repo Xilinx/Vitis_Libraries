@@ -28,7 +28,7 @@
 #include "fir_interpolate_asym.hpp"
 #include "fir_common_traits.hpp"
 #include "fir_decomposer_utils.hpp"
-// C++17 allows us to do namespace xf::dsp::aie::fir::interpolate_asym { }
+
 namespace xf {
 namespace dsp {
 namespace aie {
@@ -179,7 +179,8 @@ class fir_interpolate_asym_graph : public graph {
 
     // Limit FIR length for reloadable coeffs. Reloadable coeffs need a storage space that contibutes to system memory
     // exceeding Memory Module size.
-    static_assert(TP_USE_COEFF_RELOAD == 0 || TP_FIR_LEN / TP_SSR <= kMaxTapsPerKernel,
+    static_assert(TP_USE_COEFF_RELOAD == 0 ||
+                      CEIL(TP_FIR_LEN, (TP_SSR * TP_CASC_LEN)) / TP_SSR / TP_CASC_LEN <= kMaxTapsPerKernel,
                   "ERROR: Exceeded maximum supported FIR length with reloadable coefficients. Please limit the FIR "
                   "length or disable coefficient reload.");
 
@@ -204,8 +205,8 @@ class fir_interpolate_asym_graph : public graph {
                   "the next higher value "
                   "to get as high a performance");
 
-    static_assert(TP_PARA_INTERP_POLY == 1 || TP_USE_COEFF_RELOAD == 0,
-                  "ERROR: Reloadable coefficients not supported with multiple parallel interpolation polyphases.");
+    // static_assert(TP_PARA_INTERP_POLY == 1 || TP_USE_COEFF_RELOAD == 0,
+    //               "ERROR: Reloadable coefficients not supported with multiple parallel interpolation polyphases.");
 
     using casc_net_array = std::array<connect<stream, stream>*, TP_CASC_LEN>;
     using ssr_net_array = std::array<std::array<casc_net_array, TP_SSR>, TP_SSR>;
@@ -512,10 +513,6 @@ class fir_interpolate_asym_graph : public graph {
         return xf::dsp::aie::getOptCascLen<kMaxTaps, kRawOptTaps, tapsPerSSR>();
     };
 };
-
-/**
-  * @endcond
-  */
 }
 }
 }

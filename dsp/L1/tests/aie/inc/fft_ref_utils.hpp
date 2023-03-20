@@ -279,7 +279,17 @@ inline constexpr unsigned int fnGetPointSizePower() {
                                              ? 9
                                              : TP_POINT_SIZE == 1024
                                                    ? 10
-                                                   : TP_POINT_SIZE == 2048 ? 11 : TP_POINT_SIZE == 4096 ? 12 : 0;
+                                                   : TP_POINT_SIZE == 2048
+                                                         ? 11
+                                                         : TP_POINT_SIZE == 4096
+                                                               ? 12
+                                                               : TP_POINT_SIZE == 8192
+                                                                     ? 13
+                                                                     : TP_POINT_SIZE == 16384
+                                                                           ? 14
+                                                                           : TP_POINT_SIZE == 32768
+                                                                                 ? 15
+                                                                                 : TP_POINT_SIZE == 65536 ? 16 : 0;
 }
 
 template <typename TT_TWIDDLE>
@@ -447,9 +457,9 @@ inline int16 castOutput<int16>(T_int_data<int16> sampleIn, const unsigned shift)
     // rounding is performed in the radix stages
     // retVal = (sampleIn.real + (1 << (shift-1))) >> shift;
     retVal = sampleIn.real;
-    if (retVal >= C_PMAX16) {
+    if (sampleIn.real >= C_PMAX16) {
         retVal = C_PMAX16;
-    } else if (retVal < C_NMAX16) {
+    } else if (sampleIn.real < C_NMAX16) {
         retVal = C_NMAX16;
     }
     return retVal;
@@ -477,9 +487,9 @@ inline int32 castOutput<int32>(T_int_data<int32> sampleIn, const unsigned shift)
     int32 retVal;
     // rounding is performed in the radix stages
     retVal = sampleIn.real;
-    if (retVal >= C_PMAX32) {
+    if (sampleIn.real >= C_PMAX32) {
         retVal = C_PMAX32;
-    } else if (retVal < C_NMAX32) {
+    } else if (sampleIn.real < C_NMAX32) {
         retVal = C_NMAX32;
     }
     return retVal;
@@ -490,14 +500,14 @@ inline cint32 castOutput<cint32>(T_int_data<cint32> sampleIn, const unsigned shi
     // rounding is performed in the radix stages
     retVal.real = sampleIn.real;
     retVal.imag = sampleIn.imag;
-    if (retVal.real >= C_PMAX32) {
+    if (sampleIn.real >= C_PMAX32) {
         retVal.real = C_PMAX32;
-    } else if (retVal.real < C_NMAX32) {
+    } else if (sampleIn.real < C_NMAX32) {
         retVal.real = C_NMAX32;
     }
-    if (retVal.imag >= C_PMAX32) {
+    if (sampleIn.imag >= C_PMAX32) {
         retVal.imag = C_PMAX32;
-    } else if (retVal.imag < C_NMAX32) {
+    } else if (sampleIn.imag < C_NMAX32) {
         retVal.imag = C_NMAX32;
     }
     return retVal;

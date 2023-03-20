@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "aie_api/aie_adf.hpp"
 #include "fir_decimate_sym_ref.hpp"
 #include "fir_ref_utils.hpp"
 
@@ -45,11 +46,17 @@ void fir_decimate_sym_ref<TT_DATA,
                           TP_INPUT_WINDOW_VSIZE,
                           TP_USE_COEFF_RELOAD,
                           TP_NUM_OUTPUTS,
-                          TP_API>::filter(input_window<TT_DATA>* inWindow, output_window<TT_DATA>* outWindow) {
+                          TP_API>::filter(input_circular_buffer<TT_DATA,
+                                                                extents<inherited_extent>,
+                                                                margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
+                                          output_circular_buffer<TT_DATA>& outWindow) {
     const unsigned int shift = TP_SHIFT;
     T_accRef<TT_DATA> accum;
     TT_DATA d_in[TP_FIR_LEN];
     TT_DATA accumSrs;
+
+    auto inItr = ::aie::begin_random_circular(inWindow);
+    auto outItr = ::aie::begin_random_circular(outWindow);
 
     printf("Ref model params:\n");
     printf("TP_FIR_LEN = %d\n", TP_FIR_LEN);
@@ -58,13 +65,13 @@ void fir_decimate_sym_ref<TT_DATA,
     printf("TP_RND = %d\n", TP_RND);
     printf("TP_WINDOW_SIZE = %d\n", TP_INPUT_WINDOW_VSIZE);
     const unsigned int kFirMarginOffset = fnFirMargin<TP_FIR_LEN, TT_DATA>() - TP_FIR_LEN + 1; // FIR Margin Offset.
-    window_incr(inWindow, kFirMarginOffset);                                                   // read input data
+    inItr += kFirMarginOffset;
 
     for (unsigned int i = 0; i < TP_INPUT_WINDOW_VSIZE / TP_DECIMATE_FACTOR; i++) {
         accum = null_accRef<TT_DATA>(); // reset accumulator at the start of the mult-add for each output sample
         // Accumulation
         for (unsigned int j = 0; j < TP_FIR_LEN; j++) {
-            d_in[j] = window_readincr(inWindow); // read input data
+            d_in[j] = *inItr++;
         }
         for (unsigned int j = 0; j < (TP_FIR_LEN + 1) / 2; j++) {
             // Note the coefficient index reversal. See note in constructor.
@@ -75,12 +82,12 @@ void fir_decimate_sym_ref<TT_DATA,
             }
         }
         // Revert data pointer for next sample
-        window_decr(inWindow, TP_FIR_LEN - TP_DECIMATE_FACTOR);
+        inItr -= TP_FIR_LEN - TP_DECIMATE_FACTOR;
 
         roundAcc(TP_RND, shift, accum);
         saturateAcc(accum);
         accumSrs = castAcc(accum);
-        window_writeincr((output_window<TT_DATA>*)outWindow, accumSrs);
+        *outItr++ = accumSrs;
     }
 };
 
@@ -104,8 +111,10 @@ void fir_decimate_sym_ref<TT_DATA,
                           TP_INPUT_WINDOW_VSIZE,
                           USE_COEFF_RELOAD_TRUE,
                           TP_NUM_OUTPUTS,
-                          TP_API>::filter(input_window<TT_DATA>* inWindow,
-                                          output_window<TT_DATA>* outWindow,
+                          TP_API>::filter(input_circular_buffer<TT_DATA,
+                                                                extents<inherited_extent>,
+                                                                margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
+                                          output_circular_buffer<TT_DATA>& outWindow,
                                           const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 2]) {
     for (int i = 0; i < (TP_FIR_LEN + 1) / 2; i++) {
         m_internalTaps[i] = inTaps[i];
@@ -117,6 +126,9 @@ void fir_decimate_sym_ref<TT_DATA,
     TT_DATA d_in[TP_FIR_LEN];
     TT_DATA accumSrs;
 
+    auto inItr = ::aie::begin_random_circular(inWindow);
+    auto outItr = ::aie::begin_random_circular(outWindow);
+
     printf("Ref model params:\n");
     printf("TP_FIR_LEN = %d\n", TP_FIR_LEN);
     printf("TP_DECIMATE_FACTOR = %d\n", TP_DECIMATE_FACTOR);
@@ -124,13 +136,13 @@ void fir_decimate_sym_ref<TT_DATA,
     printf("TP_RND = %d\n", TP_RND);
     printf("TP_WINDOW_SIZE = %d\n", TP_INPUT_WINDOW_VSIZE);
     const unsigned int kFirMarginOffset = fnFirMargin<TP_FIR_LEN, TT_DATA>() - TP_FIR_LEN + 1; // FIR Margin Offset.
-    window_incr(inWindow, kFirMarginOffset);                                                   // read input data
+    inItr += kFirMarginOffset;
 
     for (unsigned int i = 0; i < TP_INPUT_WINDOW_VSIZE / TP_DECIMATE_FACTOR; i++) {
         accum = null_accRef<TT_DATA>(); // reset accumulator at the start of the mult-add for each output sample
         // Accumulation
         for (unsigned int j = 0; j < TP_FIR_LEN; j++) {
-            d_in[j] = window_readincr(inWindow); // read input data
+            d_in[j] = *inItr++; // read input data
         }
         for (unsigned int j = 0; j < (TP_FIR_LEN + 1) / 2; j++) {
             // Note the coefficient index reversal. See note in constructor.
@@ -141,12 +153,12 @@ void fir_decimate_sym_ref<TT_DATA,
             }
         }
         // Revert data pointer for next sample
-        window_decr(inWindow, TP_FIR_LEN - TP_DECIMATE_FACTOR);
+        inItr -= TP_FIR_LEN - TP_DECIMATE_FACTOR;
 
         roundAcc(TP_RND, shift, accum);
         saturateAcc(accum);
         accumSrs = castAcc(accum);
-        window_writeincr((output_window<TT_DATA>*)outWindow, accumSrs);
+        *outItr++ = accumSrs;
     }
 };
 }
