@@ -141,7 +141,7 @@ endif
 #Check OS and setting env for xrt c++ api
 OSDIST = $(shell lsb_release -i |awk -F: '{print tolower($$2)}' | tr -d ' \t' )
 OSREL = $(shell lsb_release -r |awk -F: '{print tolower($$2)}' |tr -d ' \t')
-
+SYS_COMP_LIB := $(XILINX_VITIS)/system_compiler/lib/x86
 # for centos and redhat
 ifneq ($(findstring centos,$(OSDIST)),)
 ifeq (7,$(shell echo $(OSREL) | awk -F. '{print tolower($$1)}' ))
