@@ -18,16 +18,16 @@
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make all TARGET=<x86sim/aiesim/> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make run TARGET=<x86sim/aiesim/> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) ""
-	$(ECHO) "  make xclbin TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make xclbin TARGET=<x86sim/aiesim/> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to build xclbin application."
 	$(ECHO) ""
-	$(ECHO) "  make host TARGET=<hw/hw_emu/sw_emu/>"
+	$(ECHO) "  make host TARGET=<x86sim/aiesim/>"
 	$(ECHO) "      Command to build host application."
 	$(ECHO) ""
 	$(ECHO) "  NOTE: For embedded devices, e.g. zcu102/zcu104/vck190, HOST_ARCH is either aarch32 or aarch64."
@@ -35,7 +35,7 @@ help::
 	$(ECHO) "        Run the sdk.sh script from the common-image directory to install sysroot using the command : ./sdk.sh -y -d ./ -p "
 	$(ECHO) "        Unzip the rootfs file : gunzip ./rootfs.ext4.gz"
 	$(ECHO) "        export SYSROOT=< path-to-platform-sysroot >"
-	$(ECHO) "      b.User could also define SYSROOT, K_IMAGE and ROOTFS by themselves: "
+	$(ECHO) "      b. User could also define SYSROOT, K_IMAGE and ROOTFS by themselves: "
 	$(ECHO) "        export SYSROOT=< path-to-platform-sysroot >"
 	$(ECHO) "        export K_IMAGE=< path-to-Image-files >"
 	$(ECHO) "        export ROOTFS=< path-to-rootfs >"
@@ -43,7 +43,7 @@ help::
 	$(ECHO) "  make clean "
 	$(ECHO) "      Command to remove the generated non-hardware files."
 	$(ECHO) ""
-	$(ECHO) "  make cleanall TARGET=<hw/hw_emu/sw_emu/>"
+	$(ECHO) "  make cleanall"
 	$(ECHO) "      Command to remove all the generated files."
 	$(ECHO) ""
 
@@ -55,20 +55,20 @@ CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 XFLIB_DIR = $(XF_PROJ_ROOT)
 
 # setting devault value
-TARGET ?= sw_emu
-HOST_ARCH ?= x86
+TARGET ?= aiesim
+HOST_ARCH ?= aarch64
 
 #setting PLATFORM
 ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := xilinx_u50_gen3x16_xdma_5_202210_1
+PLATFORM := xilinx_vck190_base_202220_1
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST +=  u50 u250 u200 aws-vu9p-f1 vck190
-PLATFORM_BLOCKLIST +=  zc
+PLATFORM_ALLOWLIST +=  vck190
+PLATFORM_BLOCKLIST += 
 
 include ./utils.mk
 TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)
@@ -101,6 +101,41 @@ endif
 CXXFLAGS += $(EXTRA_CXXFLAGS)
 VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 
+# aie template
+XILINX_VITIS_AIETOOLS ?=
+XILINX_VITIS_AIELIBS ?=
+ifneq ($(wildcard $(XILINX_VITIS)/aietools/.*),)
+XILINX_VITIS_AIETOOLS := $(XILINX_VITIS)/aietools
+ifeq ($(HOST_ARCH), x86)
+XILINX_VITIS_AIELIBS := -L$(XILINX_VITIS_AIETOOLS)/lib/lnx64.o -ladf_api_xrt
+else
+XILINX_VITIS_AIELIBS := -L$(XILINX_VITIS_AIETOOLS)/lib/aarch64.o -ladf_api_xrt
+endif
+else
+XILINX_VITIS_AIETOOLS := $(XILINX_VITIS)/cardano
+XILINX_VITIS_AIELIBS:= -lcardano_api_xrt -lxaiengine -lxrt_core
+endif
+CXXFLAGS += -I$(XILINX_VITIS_AIETOOLS)/include
+LDFLAGS += $(XILINX_VITIS_AIELIBS)
+# Setting customized_params in aiecompiler
+
+############################ setting AIE Compiler ###########################
+ifneq ($(filter aiesim hw_emu hw, $(TARGET)),)
+AIETARGET := hw
+else
+AIETARGET := x86sim
+endif
+AIE_CXXFLAGS += --target=$(AIETARGET) --platform=$(XPLATFORM) --pl-freq=250 
+AIE_CXXFLAGS += -I $(XILINX_VITIS_AIETOOLS)/include
+AIE_CONTAINER = $(TEMP_DIR)/libadf.a
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L2/include
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/src
+#AIE_CXXFLAGS += --log-level=5
+$(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp: $(AIE_CONTAINER)
+
+EXE_FILE_DEPS += $(AIE_CONTAINER)
+BINARY_CONTAINERS_DEPS += $(AIE_CONTAINER)
 ########################## Setting up Host Variables ##########################
 ifeq ($(TARGET),sw_emu)
 CXXFLAGS += -D SW_EMU_TEST
@@ -110,101 +145,68 @@ CXXFLAGS += -D HW_EMU_TEST
 endif
 
 #Inclue Required Host Source Files
-ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
-HOST_SRCS += $(CUR_DIR)/test_polinearsolver.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -D USE_DDR
-CXXFLAGS +=  -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/MatrixGen -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2
-CXXFLAGS += -O3 
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
-HOST_SRCS += $(CUR_DIR)/test_polinearsolver.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -D USE_DDR
-CXXFLAGS +=  -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/MatrixGen -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2
-CXXFLAGS += -O3 
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
-HOST_SRCS += $(CUR_DIR)/test_polinearsolver.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -D USE_HBM
-CXXFLAGS +=  -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/MatrixGen -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2
-CXXFLAGS += -O3 
-else 
 ifeq ($(ps_on_x86), on)
-HOST_SRCS += $(CUR_DIR)/test_polinearsolver.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/MatrixGen -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2
-CXXFLAGS += -O3 
+HOST_SRCS += $(CUR_DIR)//ps/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
+CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(CUR_DIR) -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2
+CXXFLAGS += --sysroot=$(SYSROOT)
+LDFLAGS +=  -L $(SYSROOT)/usr/lib/
+LDFLAGS += --sysroot=$(SYSROOT)
 else
-HOST_SRCS += $(CUR_DIR)/test_polinearsolver.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/MatrixGen -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2
-CXXFLAGS += -O3 
+HOST_SRCS += $(CUR_DIR)//ps/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
+CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(CUR_DIR) -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2
+CXXFLAGS += --sysroot=$(SYSROOT)
+LDFLAGS +=  -L $(SYSROOT)/usr/lib/
+LDFLAGS += --sysroot=$(SYSROOT)
 endif
-endif
+
 # workaround for opencv
 ifeq (,$(findstring opencv,$(CXXFLAGS)))
 CXXFLAGS += $(XRT_CXXFLAGS)
 endif
 
-EXE_NAME := test_polinearsolver.exe
+EXE_NAME := host.elf
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 EXE_FILE_DEPS := $(HOST_SRCS) $(EXE_FILE_DEPS)
 
-HOST_ARGS :=  -xclbin $(BUILD_DIR)/kernel_polinearsolver.xclbin
-ifneq ($(HOST_ARCH), x86)
-PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
-endif
-
 ########################## Kernel compiler global settings ##########################
-ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
-VPP_FLAGS +=   --config $(CUR_DIR)/conn_u250.cfg
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include
-
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
-VPP_FLAGS +=   --config $(CUR_DIR)/conn_u200.cfg
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include
-
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
-VPP_FLAGS +=   --config $(CUR_DIR)/conn_u50.cfg
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include
+ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
+VPP_FLAGS +=   
+VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include
+VPP_LDFLAGS +=   --config $(CUR_DIR)/system.cfg
 
 else 
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include
+VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include
 
 endif
 
 ######################### binary container global settings ##########################
-ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
-VPP_FLAGS_kernel_polinearsolver_0 +=  -D KERNEL_NAME=kernel_polinearsolver_0
-VPP_FLAGS_kernel_polinearsolver_0 += --hls.clock 200000000:kernel_polinearsolver_0
-ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_kernel_polinearsolver += --clock.defaultFreqHz 200000000
-else
-VPP_LDFLAGS_kernel_polinearsolver += --kernel_frequency 200
-endif
+VPP_FLAGS_data_mover +=  
+VPP_FLAGS_data_mover += --hls.clock 250000000:data_mover
 
-else 
-VPP_FLAGS_kernel_polinearsolver_0 +=  -D KERNEL_NAME=kernel_polinearsolver_0
-VPP_FLAGS_kernel_polinearsolver_0 += --hls.clock 200000000:kernel_polinearsolver_0
-ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_kernel_polinearsolver += --clock.defaultFreqHz 200000000
-else
-VPP_LDFLAGS_kernel_polinearsolver += --kernel_frequency 200
-endif
-
-endif
 ifneq ($(SD_CARD_NEEDED), on)
-BINARY_CONTAINERS += $(BUILD_DIR)/kernel_polinearsolver.xclbin
+BINARY_CONTAINERS += $(BUILD_DIR)/kernel.xclbin
 else
-BINARY_CONTAINERS += $(BUILD_DIR)/kernel_polinearsolver_pkg.$(LINK_TARGET_FMT)
-BINARY_CONTAINERS_PKG += $(BUILD_DIR)/kernel_polinearsolver.xclbin
+BINARY_CONTAINERS += $(BUILD_DIR)/kernel_pkg.$(LINK_TARGET_FMT)
+BINARY_CONTAINERS_PKG += $(BUILD_DIR)/kernel.xclbin
 endif
 
 # ################ Setting Rules for Binary Containers (Building Kernels) ################
-$(TEMP_DIR)/kernel_polinearsolver_0.xo: $(CUR_DIR)/kernel_polinearsolver.cpp 
-	$(ECHO) "Compiling Kernel: kernel_polinearsolver_0"
+$(TEMP_DIR)/data_mover.xo: $(CUR_DIR)//pl/pl_mm2s.cpp 
+	$(ECHO) "Compiling Kernel: data_mover"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_kernel_polinearsolver_0) $(VPP_FLAGS) -k kernel_polinearsolver_0 -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
-BINARY_CONTAINER_kernel_polinearsolver_OBJS += $(TEMP_DIR)/kernel_polinearsolver_0.xo
-BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_kernel_polinearsolver_OBJS)
+	$(VPP) -c $(VPP_FLAGS_data_mover) $(VPP_FLAGS) -k data_mover -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+BINARY_CONTAINER_kernel_OBJS += $(TEMP_DIR)/data_mover.xo
+BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_kernel_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	mkdir -p $(BUILD_DIR)
-	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/kernel_polinearsolver $(VPP_LDFLAGS)  $(VPP_LDFLAGS_kernel_polinearsolver) $(AIE_LDFLAGS)   -o $@ $^
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/kernel $(VPP_LDFLAGS)  $(VPP_LDFLAGS_kernel) $(AIE_LDFLAGS)   -o $@ $^
+
+############################## Setting Rules for AIE (Building Kernels) ##################
+$(AIE_CONTAINER): $(CUR_DIR)//aie/platform.cpp $(XFLIB_DIR)/L1/src/aie/cholesky_complex_decomposition.cpp  
+	$(ECHO) "Compiling: libadf.a"
+	mkdir -p $(dir $@)
+	$(AIECXX) $(AIE_CXXFLAGS) $^
+	mv ./libadf.a $(AIE_CONTAINER)
 
 ############################## Setting Rules for Host (Building Host Executable) ##############################
 $(EXE_FILE): $(EXE_FILE_DEPS)
@@ -237,8 +239,8 @@ endif
 	@echo 'fi' >> $(RUN_SCRIPT)
 	@echo 'echo "INFO: Embedded host run completed."' >> $(RUN_SCRIPT)
 	@echo 'exit $$return_code' >> $(RUN_SCRIPT)
-DATA_FILE := $(custom_data_file)
-DATA_DIR := $(custom_data_dir)
+DATA_FILE := 
+DATA_DIR := $(CUR_DIR)//data 
 SD_FILES += $(RUN_SCRIPT)
 SD_FILES += $(EXE_FILE)
 SD_FILES += $(EMCONFIG)
@@ -256,7 +258,7 @@ $(SD_CARD): host xclbin $(RUN_SCRIPT) $(EMCONFIG) check_kimage check_rootfs
 # 1. DFX HW Flow
 ifeq ($(dfx_hw), on)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p $(PACKAGE_FILES) $(VPP_PACKAGE) -o $(BINARY_CONTAINERS_PKG)
-	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX) --package.sd_file $(BINARY_CONTAINERS_PKG)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -p --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE) --package.boot_mode sd  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX) --package.sd_file $(BINARY_CONTAINERS_PKG)
 	@echo "### ***** sd_card generation done! ***** ###"
 endif
 # 2. PS_ON_X86 - From 2022.2, Target:sw_emu
@@ -267,7 +269,7 @@ endif
 #3. General Embeded flow
 ifeq ($(dfx_hw), off)
 ifeq ($(ps_on_x86), off)
-	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
+	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE) --package.boot_mode sd  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 	@echo "### ***** sd_card generation done! ***** ###"
 endif
 endif
@@ -276,8 +278,12 @@ endif
 sd_card: $(SD_CARD)
 endif
 ############################## Setting Essential Checks and Building Rules ##############################
+ifneq (,$(filter x86sim aiesim, $(TARGET)))
+RUN_DEPS += $(AIE_CONTAINER)
+else
 RUN_DEPS += host xclbin $(EMCONFIG)
 RUN_DEPS += $(SD_CARD)
+endif
 
 .PHONY: mkflag all run
 mkflag:
@@ -288,6 +294,16 @@ mkflag:
 all: check_device check_vpp check_platform mkflag $(RUN_DEPS)
 
 run: all
+#x86sim
+ifeq ($(TARGET), x86sim)
+	$(X86SIMULATOR) --pkg-dir=./Work --input-dir=$(CUR_DIR) --output-dir=$(CUR_DIR) #--trace --dump
+	
+endif
+#aiesim
+ifeq ($(TARGET), aiesim)
+	$(AIESIMULATOR) --pkg-dir=./Work --profile --input-dir=$(CUR_DIR) --output-dir=$(CUR_DIR) #--enable-memory-check
+	
+endif
 #hw_emu
 ifneq (,$(filter hw_emu, $(TARGET)))
 ifeq ($(HOST_ARCH), x86)
@@ -317,7 +333,7 @@ endif
 #hw
 ifeq ($(TARGET), hw)
 ifneq (,$(findstring aws-vu9p-f1, $(PLATFORM_NAME)))
-ifeq (,$(wildcard $(BUILD_DIR)/kernel_polinearsolver.awsxclbin))
+ifeq (,$(wildcard $(BUILD_DIR)/kernel.awsxclbin))
 	$(ECHO) "This makefile does not directly support converting .xclbin to .awsxclbin, please refer https://github.com/aws/aws-fpga/blob/master/Vitis/README.md for next operations"
 else
 	$(ECHO) "Running HW using generated .awsxclbin"
@@ -356,15 +372,15 @@ endif
 ############################## Cleaning Rules ##############################
 cleanh:
 	-$(RMDIR) $(EXE_FILE) vitis_* TempConfig system_estimate.xtxt *.rpt .run/
-	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb sample_link.ini sample_compile.ini obj*  bin* *.csv *.jpg *.jpeg *.png *.db
+	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb sample_link.ini sample_compile.ini obj*  bin* *.csv *.jpg *.jpeg *.png
 
 cleank:
 	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl*start_simulation. sh *.xclbin
-	-$(RMDIR) _x_temp.* _x*
+	-$(RMDIR) _x_temp.*
 
 cleanall: cleanh cleank
-	-$(RMDIR) $(BUILD_DIR)  emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
-	-$(RMDIR)  $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
+	-$(RMDIR) $(BUILD_DIR) sd_card* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
+	-$(RMDIR) $(AIE_CONTAINER) aiesimulator_output .AIE_SIM_CMD_LINE_OPTIONS $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
 	-$(RMDIR) 
 
 clean: cleanh
