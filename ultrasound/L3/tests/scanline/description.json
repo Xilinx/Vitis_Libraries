@@ -1,0 +1,318 @@
+{
+    "name": "Scanline Test",
+    "description": "scanline example",
+    "flow": "versal",
+    "platform_allowlist": [
+        "vck190"
+    ],
+    "platform_blocklist": [],
+    "platform_properties": {
+        "vck190": {
+            "v++": {
+                "compiler": {
+                    "clflags": [
+                        ""
+                    ]
+                },
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/system.cfg"
+                    ]
+                },
+                "package": {
+                    "clflags": [
+                        "--package.defer_aie_run"
+                    ]
+                }
+            }
+        }
+    },
+    "gui": false,
+    "data": [
+        "PROJECT/data"
+    ],
+    "launch": [
+        {
+            "cmd_args": "-xclbin scanline.xclbin -data data/",
+            "name": "generic launch for all flows"
+        },
+        {
+            "cmd_args": "-xclbin BUILD/scanline.xclbin -data data/",
+            "target": "sw_emu",
+            "name": "sw_emu launch"
+        }
+    ],
+    "host": {
+        "host_exe": "host.exe",
+        "compiler": {
+            "sources": [
+                "LIB_DIR/L3/tests/scanline/PS_host/host.cpp",
+                "./Work/ps/c_rts/aie_control_xrt.cpp"
+            ],
+            "includepaths": [
+                "LIB_DIR/L1/include",
+                "LIB_DIR/L2/include",
+                "LIB_DIR/L3/include",
+                "LIB_DIR/L3/tests/scanline/aie_graph"
+            ],
+            "options": [
+                "-include LIB_DIR/L1/include/kernels.hpp"
+            ],
+            "symbols": [
+                "__PS_ENABLE_AIE__"
+            ]
+        }
+    },
+    "aiecompiler": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L1/include/",
+                "LIB_DIR/L2/include/"
+            ]
+        }
+    },
+    "aiecontainers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/aie_graph/graph.cpp",
+                    "pl-freq": 100,
+                    "workdir": "./Work",
+                    "name": "libadf.a"
+                }
+            ]
+        }
+    ],
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/mm2s1.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s1"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/mm2s2.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s2"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/mm2s3.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s3"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/mm2s4.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s4"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/mm2s5.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s5"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/mm2s6.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s6"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/mm2s7.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s7"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/mm2s8.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s8"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/mm2s9.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s9"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/mm2s10.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s10"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/mm2s11.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s11"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/mm2s12.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s12"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/mm2s13.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s13"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/mm2s14.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s14"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/mm2s15.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s15"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/mm2s16.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s16"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/mm2s17.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s17"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/mm2s18.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s18"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/mm2s19.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s19"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/mm2s20.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s20"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/mm2s21.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s21"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/mm2s22.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s22"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/mm2s23.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s23"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/mm2s24.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s24"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/mm2s25.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s25"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/mm2s26.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s26"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/mm2s27.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s27"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/mm2s28.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s28"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/s2mm1.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "s2mm1"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/s2mm2.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "s2mm2"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/s2mm3.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "s2mm3"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/s2mm4.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "s2mm4"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/s2mm5.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "s2mm5"
+                },
+                {
+                    "location": "LIB_DIR/L3/tests/scanline/PL_kernels/s2mm6.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "s2mm6"
+                }
+            ],
+            "name": "scanline"
+        }
+    ],
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": 65536,
+                "max_time_min": 450
+            }
+        ],
+        "targets": [
+            "vitis_aie_sim",
+            "vitis_aie_x86sim",
+            "vitis_sw_emu",
+            "vitis_hw_emu",
+            "vitis_hw_build"
+        ],
+        "category": "canary"
+    }
+}

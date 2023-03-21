@@ -1,0 +1,60 @@
+{
+    "name": "L1 sum_axis_1 Test",
+    "description": "sum_axis_1 Test",
+    "flow": "versal",
+    "platform_allowlist": [
+        "vck190"
+    ],
+    "platform_blocklist": [],
+    "platform_properties": {
+        "vck190": {
+            "v++": {
+                "compiler": {
+                    "clflags": [
+                        ""
+                    ]
+                }
+            }
+        }
+    },
+    "data": [
+        "LIB_DIR/L2/tests/sum_axis_1/data"
+    ],
+    "aiecompiler": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L1/include/"
+            ]
+        }
+    },
+    "aiecontainers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/L2/tests/sum_axis_1/test.cpp",
+                    "pl-freq": 100,
+                    "workdir": "./Work",
+                    "name": "libadf.a"
+                }
+            ]
+        }
+    ],
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": 32768,
+                "max_time_min": 300
+            }
+        ],
+        "targets": [
+            "vitis_aie_sim",
+            "vitis_aie_x86sim"
+        ],
+        "category": "canary"
+    }
+}

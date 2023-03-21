@@ -1,0 +1,149 @@
+{
+    "name": "L2 samples Test",
+    "description": "samples Test",
+    "flow": "versal",
+    "platform_allowlist": [
+        "vck190"
+    ],
+    "platform_blocklist": [],
+    "platform_properties": {
+        "vck190": {
+            "v++": {
+                "compiler": {
+                    "clflags": [
+                        ""
+                    ]
+                },
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/system.cfg"
+                    ]
+                },
+                "package": {
+                    "clflags": [
+                        "--package.defer_aie_run"
+                    ]
+                }
+            }
+        }
+    },
+    "gui": false,
+    "data": [
+        "PROJECT/data"
+    ],
+    "launch": [
+        {
+            "cmd_args": "-xclbin samples.xclbin -data data/",
+            "name": "generic launch for all flows"
+        },
+        {
+            "cmd_args": "-xclbin BUILD/samples.xclbin -data data/",
+            "target": "sw_emu",
+            "name": "sw_emu launch"
+        }
+    ],
+    "host": {
+        "host_exe": "host.exe",
+        "compiler": {
+            "sources": [
+                "LIB_DIR/L2/tests/samples/PS_host/host.cpp",
+                "./Work/ps/c_rts/aie_control_xrt.cpp"
+            ],
+            "includepaths": [
+                "LIB_DIR/L1/include",
+                "LIB_DIR/L2/include",
+                "LIB_DIR/L2/tests/samples/aie_graph"
+            ],
+            "options": [
+                "-include LIB_DIR/L1/include/kernels.hpp"
+            ],
+            "symbols": [
+                "__PS_ENABLE_AIE__"
+            ]
+        }
+    },
+    "aiecompiler": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L1/include/",
+                "LIB_DIR/L2/include/"
+            ]
+        }
+    },
+    "aiecontainers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/L2/tests/samples/aie_graph/graph.cpp",
+                    "pl-freq": 100,
+                    "workdir": "./Work",
+                    "name": "libadf.a"
+                }
+            ]
+        }
+    ],
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/L2/tests/samples/PL_kernels/mm2s1.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s1"
+                },
+                {
+                    "location": "LIB_DIR/L2/tests/samples/PL_kernels/mm2s2.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s2"
+                },
+                {
+                    "location": "LIB_DIR/L2/tests/samples/PL_kernels/mm2s3.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s3"
+                },
+                {
+                    "location": "LIB_DIR/L2/tests/samples/PL_kernels/mm2s4.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "mm2s4"
+                },
+                {
+                    "location": "LIB_DIR/L2/tests/samples/PL_kernels/s2mm1.cpp",
+                    "frequency": 100.0,
+                    "clflags": " ",
+                    "name": "s2mm1"
+                }
+            ],
+            "name": "samples"
+        }
+    ],
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": {
+                    "vitis_aie_sim": 32768,
+		    "vitis_aie_x86sim": 32768,
+		    "vitis_sw_emu": 32768,
+		    "vitis_hw_emu": 32768,
+		    "vitis_hw_build": 40960
+		},
+                "max_time_min": 300
+            }
+        ],
+        "targets": [
+            "vitis_aie_sim",
+            "vitis_aie_x86sim",
+            "vitis_sw_emu",
+            "vitis_hw_emu",
+            "vitis_hw_build"
+        ],
+        "category": "canary"
+    }
+}
