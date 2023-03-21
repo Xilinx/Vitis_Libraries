@@ -38,6 +38,7 @@ XFLIB_DIR = $(XF_PROJ_ROOT)
 BUILD_DIR := $(CUR_DIR)/build
 
 # ###################### Setting up default value of HOST_ARCH ####################### 
+TARGET ?= sw_emu
 HOST_ARCH ?= x86
 
 ARROW_PATH := $(CUR_DIR)/ext/arrow
@@ -70,18 +71,27 @@ LIBRARY_PATH = $(PYTHON_PATH)/lib:$(ARROW_PATH)/cpp/release/release:$(BUILD_DIR)
 PYPATH = $(BUILD_DIR):$(XF_PROJ_ROOT)/L3/src/sw/geospatial:$(CUR_DIR)/build:$(PYTHONPATH)
 
 SO_FILE := $(BUILD_DIR)/_containsModule.so
+EXE_NAME := $(SO_FILE)
+all: $(EXE_NAME)
 
 PY_ARGS := $(CUR_DIR)/data/points.csv $(CUR_DIR)/data/zones.txt $(CUR_DIR)/data/golden.txt
 HOST_ARGS := -point $(CUR_DIR)/data/points.csv -polygon $(CUR_DIR)/data/zones.txt
 
+# Dummy Vitis settings to pass Makefile checks
+VPP_FLAGS ?=
+VPP_LDFLAGS ?=
+
 # ######################### Setting Targets of Makefile ################################
-.PHONY: run pre_build
+.PHONY: run pre_build all
 
 CXX_PATH := $(patsubst %/,%,$(dir $(CXX)))
+CMAKE_PATHS := $(sort $(wildcard $(XILINX_VITIS)/tps/lnx64/cmake-3.2*.*))
+CMAKE_PATH := $(word $(words $(CMAKE_PATHS)),$(CMAKE_PATHS))
+
 pre_build:
 	mkdir -p $(CUR_DIR)/ext
 	make -C $(XF_PROJ_ROOT)/ext/swig DEST_DIR=$(CUR_DIR)/ext
-	PATH=$(XILINX_VITIS)/tps/lnx64/cmake-3.21.4/bin:${PATH} && make -C $(XF_PROJ_ROOT)/ext/arrow DEST_DIR=$(CUR_DIR)/ext COMPILER_PATH=$(CXX_PATH)
+	PATH=$(CMAKE_PATH)/bin:${PATH} && make -C $(XF_PROJ_ROOT)/ext/arrow DEST_DIR=$(CUR_DIR)/ext COMPILER_PATH=$(CXX_PATH)
 
 NUMPY_SRC := $(CUR_DIR)/host/numpy.i
 

@@ -3,7 +3,7 @@
     "name": "Xilinx Two Gram Predicate Test",
     "description": "2-Gram Predicate based on inverted index",
     "flow": "vitis",
-    "platform_type": "",
+    "platform_type": "pcie",
     "platform_allowlist": [
         "u50",
         "u200",

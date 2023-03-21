@@ -3,7 +3,7 @@
     "name": "Xilinx Kmeans Training",
     "description": "",
     "flow": "vitis",
-    "platform_type": "",
+    "platform_type": "pcie",
     "platform_allowlist": [
         "u250",
         "u50",

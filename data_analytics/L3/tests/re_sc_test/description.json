@@ -3,7 +3,7 @@
     "name": "Xilinx Regex L3 SC",
     "description": "",
     "flow": "vitis",
-    "platform_type": "",
+    "platform_type": "pcie",
     "platform_allowlist": [
         "u50"
     ],

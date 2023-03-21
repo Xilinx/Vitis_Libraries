@@ -2,7 +2,7 @@
     "name": "Xilinx Anti-Money-Laundering L3 API Demo", 
     "description": "Xilinx Anti-Money-Laundering L3 API Demo", 
     "flow": "vitis", 
-    "platform_type": "", 
+    "platform_type": "pcie", 
     "platform_allowlist": [
         "u200", 
         "u250", 

@@ -3,7 +3,7 @@
     "name": "Xilinx Geo IP Test",
     "description": "Geo information look up with IP",
     "flow": "vitis",
-    "platform_type": "",
+    "platform_type": "pcie",
     "platform_allowlist": [
         "u50",
         "u200",
