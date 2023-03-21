@@ -16,6 +16,7 @@
 #include "token.hpp"
 #include "xf_blas.hpp"
 #include "signal.hpp"
+#include "etc/autopilot_ssdm_op.h"
 
 #ifndef XF_HPC_CG_UPDATE_PK_HPP
 #define XF_HPC_CG_UPDATE_PK_HPP

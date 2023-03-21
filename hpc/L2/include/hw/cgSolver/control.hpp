@@ -22,7 +22,7 @@
 #include "token.hpp"
 #include "cgInstr.hpp"
 #include "timer.hpp"
-#include "ap_utils.h"
+#include "etc/autopilot_ssdm_op.h"
 
 namespace xf {
 namespace hpc {

@@ -18,7 +18,6 @@
 #define XF_HPC_SIGNAL_HPP
 
 #include <cstdint>
-#include "ap_utils.h"
 using namespace std;
 
 namespace xf {

@@ -19,7 +19,6 @@
 
 #include "hls_stream.h"
 #include "signal.hpp"
-#include "ap_utils.h"
 using namespace std;
 
 namespace xf {
