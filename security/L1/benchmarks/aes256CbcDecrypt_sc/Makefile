@@ -86,7 +86,7 @@ CXXFLAGS += -DXILINX_SC_PFM_EXT=$(XILINX_SC_PFM_EXT)
 endif
 ifeq ($(HOST_ARCH), x86)
 CXXFLAGS += -I $(XILINX_VITIS)/system_compiler/include -I $(XILINX_HLS)/include 
-LDFLAGS += -L$(XILINX_XRT)/lib -L$(XILINX_VITIS)/system_compiler/lib/x86 -lvpp_acc -l$(LIB_XRT) -lxrt_coreutil  -Wl,-rpath=$(XILINX_VITIS)/system_compiler/lib/x86:$(XILINX_XRT)/lib:$(GCC_HOME)/lib64  -Wl,--enable-new-dtags -lpthread 
+LDFLAGS += -L$(XILINX_XRT)/lib -L$(SYS_COMP_LIB) -lvpp_acc -l$(LIB_XRT) -lxrt_coreutil  -Wl,-rpath=$(SYS_COMP_LIB):$(XILINX_XRT)/lib:$(GCC_HOME)/lib64  -Wl,--enable-new-dtags -lpthread 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --temp_dir $(TEMP_DIR) --save-temps -g -I $(XILINX_VITIS)/system_compiler/include 
 VPP_LDFLAGS += --optimize 2 -R 2 
 else ifeq ($(HOST_ARCH), aarch64)
@@ -95,6 +95,8 @@ LDFLAGS +=
 VPP_FLAGS += 
 VPP_LDFLAGS += 
 endif
+CXXFLAGS += $(XRT_CXXFLAGS)
+VPP_FLAGS += $(XRT_CXXFLAGS)
 CXXFLAGS += $(EXTRA_CXXFLAGS)
 VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 
