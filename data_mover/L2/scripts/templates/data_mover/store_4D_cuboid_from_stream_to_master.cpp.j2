@@ -1,0 +1,43 @@
+/*
+ * Copyright 2020 Xilinx, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <stdint.h>
+#include "xf_data_mover/pl_data_mover.hpp"
+
+extern "C" void {{ k["name"] }}({% for m in k["map"] %}
+    // {{ loop.index0 }}
+    hls::burst_maxi<ap_uint<64> > {{ m["in_port"]["descriptors"] }},
+    hls::stream<ap_axiu<{{ m["in_port"]["width"] }}, 0, 0, 0> >& {{ m["in_port"]["stream"] }},
+    hls::burst_maxi<ap_uint<{{ m["in_port"]["width"] }}> > {{ m["out_port"]["buffer"] }}{{ ',' if loop.index0 != (k["map"] | length) - 1 else '' }}
+{% endfor %}
+    ) {
+    ; // clang-format off{% for m in k["map"] %}
+#pragma HLS interface m_axi offset=slave bundle=gmem0{{ loop.index0 }} port={{ m["in_port"]["descriptors"] }} \
+    max_read_burst_length={{ m["out_port"]["burst_len"] }} num_read_outstanding={{ m["out_port"]["outstanding"] }} latency={{ m["out_port"]["latency"] }} depth = 4096
+#pragma HLS interface m_axi offset=slave bundle=gmem1{{ loop.index0 }} port={{ m["out_port"]["buffer"] }} \
+    max_read_burst_length={{ m["out_port"]["burst_len"] }} num_read_outstanding={{ m["out_port"]["outstanding"] }} latency={{ m["out_port"]["latency"] }} depth = 4096
+#pragma HLS interface s_axilite bundle=control port={{ m["in_port"]["descriptors"] }}
+#pragma HLS interface s_axilite bundle=control port={{ m["out_port"]["buffer"] }}
+#pragma HLS interface axis port={{ m["in_port"]["stream"] }}
+{% endfor %}
+#pragma HLS interface s_axilite bundle=control port=return
+    ; // clang-format on
+
+#pragma HLS dataflow
+{% for m in k["map"] %}
+    xf::data_mover::write4D<{{ m["in_port"]["width"] }}, {{ m["out_port"]["latency"] }}, {{ m["out_port"]["outstanding"] }}, {{ m["out_port"]["burst_len"] }}>({{ m["in_port"]["descriptors"] }}, {{ m["in_port"]["stream"] }}, {{ m["out_port"]["buffer"] }});{% endfor %}
+}
+{# vim: set filetype=cpp : #}
