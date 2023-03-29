@@ -50,7 +50,7 @@ The flow is launched from the shell by calling ``make`` with variables set as in
    export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
    cd L1/tests/specific_algorithm/
    # Only run C++ simulation on U250 card
-   make run CSIM=1 CSYNTH=0 COSIM=0 VIVADO_SYN=0 VIVADO_IMPL=0 DEVICE=xilinx_u250_gen3x16_xdma_4_1_202210_1
+   make run CSIM=1 CSYNTH=0 COSIM=0 VIVADO_SYN=0 VIVADO_IMPL=0 PLATFORM=xilinx_u250_gen3x16_xdma_4_1_202210_1
 
 
 As well as verifying functional correctness, the reports generated from this flow give an indication of logic utilization,

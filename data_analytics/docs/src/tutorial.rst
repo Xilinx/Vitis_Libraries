@@ -82,7 +82,7 @@ Command to Run L3 cases
     cd L3/tests/vitis_case_folder
     
     # build and run one of the following using u200 platform
-    make run TARGET=sw_emu DEVICE=/path/to/xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
+    make run TARGET=sw_emu PLATFORM=/path/to/xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
     
     # delete generated files
     make cleanall
@@ -117,7 +117,7 @@ Command to Run L2 cases
     cd L2/tests/vitis_case_folder
     
     # build and run one of the following using u200 platform
-    make run TARGET=sw_emu DEVICE=/path/to/xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
+    make run TARGET=sw_emu PLATFORM=/path/to/xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
     
     # delete generated files
     make cleanall
@@ -153,7 +153,7 @@ Command to Run L1 cases
     cd L1/tests/hls_case_folder
     
     make run CSIM=1 CSYNTH=0 COSIM=0 VIVADO_SYN=0 VIVADO_IMPL=0 \
-        DEVICE=/path/to/xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
+        PLATFORM=/path/to/xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
 
 Test control variables are:
 

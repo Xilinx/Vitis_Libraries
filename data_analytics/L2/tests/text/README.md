@@ -10,7 +10,7 @@ To run the test, execute the following command:
 source <install path>/Vitis/2019.2/settings64.sh
 source /opt/xilinx/xrt/setup.sh
 export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
-make run TARGET=sw_emu DEVICE=xilinx_u250_xdma_201830_2
+make run TARGET=sw_emu PLATFORM=xilinx_u250_xdma_201830_2
 ```
 
 `TARGET` can also be `hw_emu` or `hw`.

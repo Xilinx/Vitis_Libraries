@@ -27,7 +27,7 @@ Call the Makefile. For example:
 
 ```
     export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
-    make run TARGET=hw DEVICE=xilinx_u200_xdma_201830_2
+    make run TARGET=hw PLATFORM=xilinx_u200_xdma_201830_2
 ```
 
 The Makefile supports software emulation, hardware emulation and hardware targets ('sw_emu', 'hw_emu' and 'hw', respectively).

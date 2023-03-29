@@ -79,7 +79,7 @@ The `PLATFORM_REPO_PATHS` environment variable points to directories containing 
 cd L1/tests/hls_case_folder/
 
 make run CSIM=1 CSYNTH=0 COSIM=0 VIVADO_SYN=0 VIVADO_IMPL=0 \
-    DEVICE=/path/to/xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
+    PLATFORM=/path/to/xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
 ```
 
 Test control variables are:
@@ -98,7 +98,7 @@ For all these variables, setting to `1` indicates execution while `0` for skippi
 cd L2/tests/vitis_case_folder
 
 # build and run one of the following using U200 platform
-make run TARGET=sw_emu DEVICE=/path/to/xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
+make run TARGET=sw_emu PLATFORM=/path/to/xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
 
 # delete generated files
 make cleanall

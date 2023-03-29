@@ -57,7 +57,7 @@ Run the following make command to build your XCLBIN and host binary targeting a 
 
 .. code-block:: bash
 
-   make run TARGET=hw DEVICE=xilinx_u250_gen3x16_xdma_3_1_202020_1  
+   make run TARGET=hw PLATFORM=xilinx_u250_gen3x16_xdma_3_1_202020_1  
 
 * **Run kernel(Step 3)**
 
