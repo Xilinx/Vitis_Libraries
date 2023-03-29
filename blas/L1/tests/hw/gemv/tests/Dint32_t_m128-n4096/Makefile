@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Xilinx, Inc.
+# Copyright 2019-2020 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
-XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%L1/tests/*}')
+XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L1/*}')
 
 # MK_INC_BEGIN hls_common.mk
 
@@ -26,13 +26,13 @@ help::
 	@echo ""
 	@echo "Makefile Usage:"
 	@echo ""
-	@echo "  make run CSIM=1 CSYNTH=1 COSIM=1 DEVICE=<FPGA platform> PLATFORM_REPO_PATHS=<path to platform directories>"
+	@echo "  make run CSIM=1 CSYNTH=1 COSIM=1 PLATFORM=<FPGA platform> PLATFORM_REPO_PATHS=<path to platform directories>"
 	@echo "      Command to run the selected tasks for specified device."
 	@echo ""
 	@echo "      Valid tasks are CSIM, CSYNTH, COSIM, VIVADO_SYN, VIVADO_IMPL"
 	@echo ""
-	@echo "      DEVICE is case-insensitive and support awk regex."
-	@echo "      For example, \`make run DEVICE='u200.*xdma' COSIM=1\`"
+	@echo "      PLATFORM is case-insensitive and support awk regex."
+	@echo "      For example, \`make run PLATFORM='u200.*xdma' COSIM=1\`"
 	@echo "      It can also be an absolute path to platform file."
 	@echo ""
 	@echo "      PLATFORM_REPO_PATHS variable is used to specify the paths in which the platform files will be"
@@ -41,7 +41,7 @@ help::
 	@echo "  make run CSIM=1 CSYNTH=1 COSIM=1 XPART=<FPGA part name>"
 	@echo "      Alternatively, the FPGA part can be speficied via XPART."
 	@echo "      For example, \`make run XPART='xcu200-fsgd2104-2-e' COSIM=1\`"
-	@echo "      When XPART is set, DEVICE will be ignored."
+	@echo "      When XPART is set, PLATFORM will be ignored."
 	@echo ""
 	@echo "  make clean "
 	@echo "      Command to remove the generated files."
@@ -50,13 +50,6 @@ help::
 # MK_INC_END hls_common.mk
 
 # MK_INC_BEGIN vivado.mk
-
-TOOL_VERSION ?= 2020.1
-
-ifeq (,$(XILINX_VIVADO))
-XILINX_VIVADO = /opt/xilinx/Vivado/$(TOOL_VERSION)
-endif
-export XILINX_VIVADO
 
 .PHONY: check_vivado
 check_vivado:
@@ -72,32 +65,20 @@ DEVICE ?= u280
 
 # MK_INC_BEGIN vitis_set_part.mk
 
-.PHONY: check_part
-
-ifeq (,$(XPART))
 # MK_INC_BEGIN vitis.mk
 
-TOOL_VERSION ?= 2019.2
-
-ifeq (,$(XILINX_VITIS))
-XILINX_VITIS = /opt/xilinx/Vitis/$(TOOL_VERSION)
-endif
-export XILINX_VITIS
 .PHONY: check_vpp
 check_vpp:
 ifeq (,$(wildcard $(XILINX_VITIS)/bin/v++))
 	@echo "Cannot locate Vitis installation. Please set XILINX_VITIS variable." && false
 endif
 
-ifeq (,$(XILINX_XRT))
-XILINX_XRT = /opt/xilinx/xrt
-endif
-export XILINX_XRT
 .PHONY: check_xrt
 check_xrt:
 ifeq (,$(wildcard $(XILINX_XRT)/lib/libxilinxopencl.so))
 	@echo "Cannot locate XRT installation. Please set XILINX_XRT variable." && false
 endif
+
 
 export PATH := $(XILINX_VITIS)/bin:$(XILINX_XRT)/bin:$(PATH)
 
@@ -111,14 +92,18 @@ export LD_LIBRARY_PATH := $(shell $(XILINX_VITIS)/bin/ldlibpath.sh $(XILINX_VITI
 endif
 
 # MK_INC_END vitis.mk
+
+.PHONY: check_part
+
+ifeq (,$(XPART))
 # MK_INC_BEGIN vitis_set_platform.mk
 
-ifneq (,$(wildcard $(DEVICE)))
-# Use DEVICE as a file path
-XPLATFORM := $(DEVICE)
+ifneq (,$(wildcard $(PLATFORM)))
+# Use PLATFORM as a file path
+XPLATFORM := $(PLATFORM)
 else
-# Use DEVICE as a file name pattern
-DEVICE_L := $(shell echo $(DEVICE) | tr A-Z a-z)
+# Use PLATFORM as a file name pattern
+DEVICE_L := $(shell echo $(PLATFORM) | tr A-Z a-z)
 # 1. search paths specified by variable
 ifneq (,$(PLATFORM_REPO_PATHS))
 # 1.1 as exact name
@@ -152,15 +137,15 @@ endif # 3
 endif
 
 define MSG_PLATFORM
-No platform matched pattern '$(DEVICE)'.
+No platform matched pattern '$(PLATFORM)'.
 Available platforms are: $(XPLATFORMS)
-To add more platform directories, set the PLATFORM_REPO_PATHS variable.
+To add more platform directories, set the PLATFORM_REPO_PATHS variable or point PLATFORM variable to the full path of platform .xpfm file.
 endef
 export MSG_PLATFORM
 
 define MSG_DEVICE
 More than one platform matched: $(XPLATFORM)
-Please set DEVICE variable more accurately to select only one platform file. For example: DEVICE='u200.*xdma'
+Please set PLATFORM variable more accurately to select only one platform file, or set PLATFORM variable to the full path of the platform .xpfm file.
 endef
 export MSG_DEVICE
 
@@ -194,6 +179,13 @@ endif # XPART
 # MK_INC_END vitis_set_part.mk
 
 # MK_INC_BEGIN hls_test_rules.mk
+#
+
+gen_instances: $(INSTANCE_FILES)
+	@echo "Nothing to generate."
+
+valid_params:
+	@echo "Nothing to validate."
 
 
 .PHONY: run setup runhls clean cleanall check
@@ -232,7 +224,7 @@ endif
 data:
 	@true
 
-run: data setup runhls
+run: gen_instances data setup runhls
 
 setup: | check_part
 	@rm -f ./settings.tcl
@@ -255,7 +247,7 @@ runhls: data setup | check_vivado check_vpp
 	$(HLS) -f run_hls.tcl;
 
 clean:
-	rm -rf settings.tcl *_hls.log gemv_Dint32_t_m128-n4096_test.prj
+	rm -rf settings.tcl *_hls.log gemv_Dint32_t_m128-n4096_test.prj $(INSTANCE_FILES)
 
 # Used by Jenkins test
 cleanall: clean

@@ -83,7 +83,7 @@ Run Makefile command. For example:
 
 .. code-block:: bash 
 
-    make run TARGET=hw PLATFORM_REPO_PATHS=/opt/xilinx/platforms DEVICE=xilinx_u250_xdma_201830_2
+    make run TARGET=hw PLATFORM_REPO_PATHS=/opt/xilinx/platforms PLATFORM=xilinx_u250_xdma_201830_2
 
     
 The Makefile supports various build target including software emulation, hw emulation and hardware (sw_emu, hw_emu, hw)

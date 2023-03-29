@@ -97,7 +97,7 @@ Test control variables are:
 cd L2/tests/vitis_case_folder
 
 # build and run one of the following using U280 platform
-make run TARGET=sw_emu DEVICE=/path/to/xilinx_u250_gen3x16_xdma_3_1_202020_1.xpfm
+make run TARGET=sw_emu PLATFORM=/path/to/xilinx_u250_gen3x16_xdma_3_1_202020_1.xpfm
 
 # delete generated files
 make cleanall
@@ -109,7 +109,7 @@ make cleanall
 cd L3/tests/vitis_case_folder
 
 # build and run one of the following using U280 platform
-make run TARGET=hw_emu DEVICE=/path/to/xilinx_u250_gen3x16_xdma_3_1_202020_1.xpfm
+make run TARGET=hw_emu PLATFORM=/path/to/xilinx_u250_gen3x16_xdma_3_1_202020_1.xpfm
 
 # delete generated files
 make cleanall

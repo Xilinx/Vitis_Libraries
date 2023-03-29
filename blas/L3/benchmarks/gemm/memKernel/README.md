@@ -19,7 +19,7 @@ The steps for library download and environment setup can be found in [here](http
 Run the following make command to build your XCLBIN and host binary targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
 
 ```
-    make run TARGET=hw PLATFORM_REPO_PATHS=/opt/xilinx/platforms DEVICE=xilinx_u250_xdma_201830_2
+    make run TARGET=hw PLATFORM_REPO_PATHS=/opt/xilinx/platforms PLATFORM=xilinx_u250_xdma_201830_2
 ```
 
 * **Run kernel(Step 3)**

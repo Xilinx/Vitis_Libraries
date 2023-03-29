@@ -52,7 +52,7 @@ Run the following make command to build your XCLBIN and host binary targeting a 
 
 .. code-block:: bash 
 
-    make run TARGET=hw PLATFORM_REPO_PATHS=/opt/xilinx/platforms DEVICE=xilinx_u250_xdma_201830_2
+    make run TARGET=hw PLATFORM_REPO_PATHS=/opt/xilinx/platforms PLATFORM=xilinx_u250_xdma_201830_2
 
 1.1.3 Run kernel(Step 3)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -160,7 +160,7 @@ Run the following make command to build your XCLBIN and host binary targeting a 
 
 .. code-block:: bash 
 
-    make run TARGET=hw PLATFORM_REPO_PATHS=/opt/xilinx/platforms DEVICE=xilinx_u250_gen3x16_xdma_3_1_202020_1
+    make run TARGET=hw PLATFORM_REPO_PATHS=/opt/xilinx/platforms PLATFORM=xilinx_u250_gen3x16_xdma_3_1_202020_1
 
 
 2.1.3 Run kernel(Step 3)
