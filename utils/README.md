@@ -56,8 +56,8 @@ source /opt/xilinx/Vitis/2022.2/settings64.sh
 export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 ```
 
-Setting the `PLATFORM_REPO_PATHS` to installation folder of platform files can enable makefiles in this library to use the `DEVICE` variable as a pattern.
-Otherwise, full path to .xpfm file needs to be provided through the `DEVICE` variable.
+Setting the `PLATFORM_REPO_PATHS` to installation folder of platform files can enable makefiles in this library to use the `PLATFORM` variable as a pattern.
+Otherwise, full path to .xpfm file needs to be provided through the `PLATFORM` variable.
 
 ### Running HLS cases
 
@@ -81,7 +81,7 @@ The flow is launched from the shell by calling `make` with variables set as in t
 ```console
 cd L1/tests/specific_algorithm/
 make run CSIM=1 CSYNTH=0 COSIM=0 VIVADO_SYN=0 VIVADO_IMPL=0 \
-         DEVICE=/path/to/xilinx_u200_xdma_201830_2.xpfm
+         PLATFORM=/path/to/xilinx_u200_xdma_201830_2.xpfm
 ```
 
 To enable more than C++ simulation, just switch other steps to `1` in `make` command line.
