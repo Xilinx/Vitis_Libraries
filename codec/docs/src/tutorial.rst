@@ -71,7 +71,7 @@ Setup Environment
    source <Vitis_install_path>/Vitis/2022.1/settings64.sh
    source <install_path_xrt>/xrt/setup.sh
    export PLATFORM_REPO_PATHS=<install_path_platforms>
-   export DEVICE=xilinx_u200_gen3x16_xdma_2_202110_1
+   export PLATFORM=xilinx_u200_gen3x16_xdma_2_202110_1
    export TARGET=sw_emu
 
 Note: The TARGET environment variable can be set as sw_emu, hw_emu and hw according to which emulation mode is expected to run.
@@ -163,11 +163,11 @@ In Vitis libraries, all L1 flows are controlled by a tcl file named ``run_hls.tc
 
    cd L1/tests/jpegdec
 
-   make run DEVICE=xilinx_u200_gen3x16_xdma_2_202110_1.xpfm CSIM=1
+   make run PLATFORM=xilinx_u200_gen3x16_xdma_2_202110_1.xpfm CSIM=1
 
-   # DEVICE is case-insensitive and support awk regex.  
+   # PLATFORM is case-insensitive and support awk regex.  
 
-   # Alternatively, the FPGA part can be speficied via XPART. When XPART is set, DEVICE will be ignored.
+   # Alternatively, the FPGA part can be speficied via XPART. When XPART is set, PLATFORM will be ignored.
 
    make run XPART=xcu200-fsgd2104-2-e CSIM=1
 
@@ -235,11 +235,11 @@ In order to facilitate user observation, the key module prints out the last thre
 
 .. code-block:: shell
 
-   make run DEVICE=xilinx_u200_gen3x16_xdma_2_202110_1.xpfm CSYNTH=1
+   make run PLATFORM=xilinx_u200_gen3x16_xdma_2_202110_1.xpfm CSYNTH=1
 
-   # DEVICE is case-insensitive and support awk regex.  
+   # PLATFORM is case-insensitive and support awk regex.  
 
-   # Alternatively, the FPGA part can be speficied via XPART. When XPART is set, DEVICE will be ignored.
+   # Alternatively, the FPGA part can be speficied via XPART. When XPART is set, PLATFORM will be ignored.
 
    make run XPART=xcu200-fsgd2104-2-e CSYNTH=1
 
@@ -328,11 +328,11 @@ Comparing the two above, it can be seen that the timing is not satisfied because
 
 .. code-block:: shell
 
-    make run DEVICE=xilinx_u200_gen3x16_xdma_2_202110_1.xpfm COSIM=1
+    make run PLATFORM=xilinx_u200_gen3x16_xdma_2_202110_1.xpfm COSIM=1
 
-    # DEVICE is case-insensitive and support awk regex.  
+    # PLATFORM is case-insensitive and support awk regex.  
 
-    # Alternatively, the FPGA part can be speficied via XPART. When XPART is set, DEVICE will be ignored.
+    # Alternatively, the FPGA part can be speficied via XPART. When XPART is set, PLATFORM will be ignored.
 
     make run XPART=xcu200-fsgd2104-2-e COSIM=1
 
@@ -393,11 +393,11 @@ In this step, the HLS tool will run CSYNTH, VIVADO_SYN and VIVADO_IMPL flow to g
 
 .. code-block:: shell
 
-   make run DEVICE=xilinx_u200_gen3x16_xdma_2_202110_1.xpfm VIVADO_IMPL=1
+   make run PLATFORM=xilinx_u200_gen3x16_xdma_2_202110_1.xpfm VIVADO_IMPL=1
 
-   # DEVICE is case-insensitive and support awk regex.  
+   # PLATFORM is case-insensitive and support awk regex.  
 
-   # Alternatively, the FPGA part can be speficied via XPART. When XPART is set, DEVICE will be ignored.
+   # Alternatively, the FPGA part can be speficied via XPART. When XPART is set, PLATFORM will be ignored.
 
    make run XPART=xcu200-fsgd2104-2-e VIVADO_IMPL=1
 
@@ -490,7 +490,7 @@ Setup environment
    cd L2/demos/jpegDec
 
    # build and run one of the following using U200 platform
-   make run TARGET=sw_emu DEVICE=xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
+   make run TARGET=sw_emu PLATFORM=xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
 
    # delete generated files
    make cleanall
@@ -509,7 +509,7 @@ Besides ``run``, the Vitis case makefile also allows ``host`` and ``xclbin`` as 
 .. code-block:: shell
 
    # build and run JPEG Decoder using U200 platform
-   make run TARGET=sw_emu DEVICE=xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
+   make run TARGET=sw_emu PLATFORM=xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
 
 Example output:
 
@@ -565,7 +565,7 @@ Example output:
 .. code-block:: shell
 
    # build and run JPEG Decoder using U200 platform
-   make run TARGET=hw_emu DEVICE=xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
+   make run TARGET=hw_emu PLATFORM=xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
 
 Now the test bench will run the case 10 times to calculate an average speed of the kernel
 
@@ -633,7 +633,7 @@ Now the test bench will run the case 10 times to calculate an average speed of t
 .. code-block:: shell
 
    # build and run JPEG Decoder using U200 platform
-   make run TARGET=hw DEVICE=xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
+   make run TARGET=hw PLATFORM=xilinx_u200_gen3x16_xdma_2_202110_1.xpfm
 
 Building xclbin will take about 4 hours, take a coffee break.
 
@@ -712,7 +712,7 @@ Webp can be divided into two serial modules, one is for prediction and probabili
 .. code-block:: shell
 
    cd L2/demos/webpEnc
-   make run TARGET=sw_emu DEVICE=xilinx_u200_gen3x16_xdma_2_202110_1
+   make run TARGET=sw_emu PLATFORM=xilinx_u200_gen3x16_xdma_2_202110_1
 
 (4) Hardware Emulation
 """""""""""""""""""""""""
@@ -720,7 +720,7 @@ Webp can be divided into two serial modules, one is for prediction and probabili
 .. code-block:: shell
 
    cd L2/demos/webpEnc
-   make run TARGET=hw_emu DEVICE=xilinx_u200_gen3x16_xdma_2_202110_1
+   make run TARGET=hw_emu PLATFORM=xilinx_u200_gen3x16_xdma_2_202110_1
 
 report path: reports/_x.hw_emu.xilinx_u200_gen3x16_xdma_2_202110_1/webp_IntraPredLoop2_NoOut_1/hls_reports/webp_IntraPredLoop2_NoOut_1_csynth.rpt
 
@@ -780,7 +780,7 @@ report path: reports/_x.hw.xilinx_u200_gen3x16_xdma_2_202110_1/webp_2_Arithmetic
 .. code-block:: shell
 
    cd L2/demos/webpEnc
-   make run TARGET=hw DEVICE=xilinx_u200_gen3x16_xdma_2_202110_1
+   make run TARGET=hw PLATFORM=xilinx_u200_gen3x16_xdma_2_202110_1
 
 report path: _x_temp.hw.xilinx_u200_gen3x16_xdma_2_202110_1/link/vivado/vpl/prj/prj.runs/impl_1/kernel_util_routed.rpt
 

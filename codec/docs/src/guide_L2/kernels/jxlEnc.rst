@@ -68,7 +68,7 @@ To get the benchmark results, please run the following command.
 
     PATH_TO_BUILD/host.exe --xclbin PATH_TO_BUILD/jxlEnc.xclbin PNGFilePath JXLFilePath
 
-Note: "PATH_TO_BUILD" is decided by your chosen "DEVICE=" when running hw build, Default arguments are set in Makefile.   
+Note: "PATH_TO_BUILD" is decided by your chosen "PLATFORM=" when running hw build, Default arguments are set in Makefile.   
 
 JXL Encoder Input Arguments:
 

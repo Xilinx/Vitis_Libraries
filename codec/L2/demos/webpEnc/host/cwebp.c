@@ -55,6 +55,14 @@ extern void* VP8GetCPUInfo; // opaque forward declaration.
 #endif
 #endif // WEBP_DLL
 
+#define goto_Error                                                                                     \
+    using namespace xf::common::utils_sw;                                                              \
+    Logger logger(std::cout, std::cerr);                                                               \
+    WebPMemoryWriterClear(&memory_writer);                                                             \
+    MetadataFree(&metadata);                                                                           \
+    return_value = 1;                                                                                  \
+    return_value ? logger.error(Logger::Message::TEST_FAIL) : logger.info(Logger::Message::TEST_PASS); \
+    return return_value;
 //------------------------------------------------------------------------------
 
 static int verbose = 0;
@@ -861,7 +869,7 @@ int main(int argc, const char* argv[]) {
                 config.alpha_filtering = 2;
             } else {
                 fprintf(stderr, "Error! Unrecognized alpha filter: %s\n", argv[c]);
-                goto Error;
+                goto_Error;
             }
         } else if (!strcmp(argv[c], "-noalpha")) {
             keep_alpha = 0;
@@ -885,7 +893,7 @@ int main(int argc, const char* argv[]) {
                 config.image_hint = WEBP_HINT_GRAPH;
             } else {
                 fprintf(stderr, "Error! Unrecognized image hint: %s\n", argv[c]);
-                goto Error;
+                goto_Error;
             }
         } else if (!strcmp(argv[c], "-size") && c < argc - 1) {
             config.target_size = ExUtilGetInt(argv[++c], 0, &parse_error);
@@ -959,11 +967,11 @@ int main(int argc, const char* argv[]) {
                 preset = WEBP_PRESET_TEXT;
             } else {
                 fprintf(stderr, "Error! Unrecognized preset: %s\n", argv[c]);
-                goto Error;
+                goto_Error;
             }
             if (!WebPConfigPreset(&config, preset, config.quality)) {
                 fprintf(stderr, "Error! Could initialize configuration with preset.\n");
-                goto Error;
+                goto_Error;
             }
         } else if (!strcmp(argv[c], "-metadata") && c < argc - 1) {
             static const struct {
@@ -1030,7 +1038,7 @@ int main(int argc, const char* argv[]) {
     if (in_file == NULL) {
         fprintf(stderr, "No input file specified!\n");
         HelpShort();
-        goto Error;
+        goto_Error;
     }
 
     picture = new WebPPicture[Numpic];
@@ -1070,7 +1078,7 @@ int main(int argc, const char* argv[]) {
     if (use_lossless_preset == 1) {
         if (!WebPConfigLosslessPreset(&config, lossless_preset)) {
             fprintf(stderr, "Invalid lossless preset (-z %d)\n", lossless_preset);
-            goto Error;
+            goto_Error;
         }
     }
 
@@ -1091,7 +1099,7 @@ int main(int argc, const char* argv[]) {
 
     if (!WebPValidateConfig(&config)) {
         fprintf(stderr, "Error! Invalid configuration.\n");
-        goto Error;
+        goto_Error;
     }
 
     // Read the input. We need to decide if we prefer ARGB or YUVA
@@ -1109,7 +1117,7 @@ int main(int argc, const char* argv[]) {
         int ok = ReadPicture(PicPoolList[i].c_str(), &picture[i], keep_alpha, (keep_metadata == 0) ? NULL : &metadata);
         if (!ok) {
             fprintf(stderr, "Error! Cannot read input picture file '%s'\n", in_file);
-            goto Error;
+            goto_Error;
         }
 
         picture[i].progress_hook = (show_progress && !quiet) ? ProgressReport : NULL;
@@ -1220,7 +1228,7 @@ int main(int argc, const char* argv[]) {
         kernel_status = CreateKernel(xclbinpath); // create_kernel.c
         if (kernel_status) {
             fprintf(stderr, "Create kernel1 failed!\n");
-            goto Error;
+            goto_Error;
         }
     }
 
@@ -1229,7 +1237,7 @@ int main(int argc, const char* argv[]) {
         kernel_status = CreateDeviceBuffers(Numbatch);
         if (kernel_status) {
             fprintf(stderr, "Create buffers failed!\n");
-            goto Error;
+            goto_Error;
         }
     }
 

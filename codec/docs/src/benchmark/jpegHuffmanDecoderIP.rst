@@ -38,7 +38,7 @@ Run the following make command to build your IP targeting a specific device. Ple
 
 .. code-block:: bash
 
-   make run DEVICE=xilinx_u50_gen3x16_xdma_201920_3 VIVADO_IMPL=1
+   make run PLATFORM=xilinx_u50_gen3x16_xdma_201920_3 VIVADO_IMPL=1
 
    Usage: host.exe -[-xclbin -JPEGFile]
           -JPEGFile:  the path point to input *.jpg
