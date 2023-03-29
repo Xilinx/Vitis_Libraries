@@ -216,7 +216,7 @@ It will use AXI-M port ``dout_0`` for output. Both AXI-M ports have "latency", "
    source /opt/xilinx/Vitis/2022.2/settings64.sh
    source /opt/xilinx/xrt/setup.sh
    export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
-   make run TARGET=hw DEVICE=${PLATFORM_REPO_PATHS}/xilinx_vck190_base_202210_1/xilinx_vck190_base_202210_1.xpfm
+   make run TARGET=hw PLATFORM=${PLATFORM_REPO_PATHS}/xilinx_vck190_base_202210_1/xilinx_vck190_base_202210_1.xpfm
 
 Run Time Configuration
 -----------------------
@@ -438,7 +438,7 @@ Kindly refer to ``L2/tests/datamover`` for JSON format of all 9 types of kernels
    source /opt/xilinx/Vitis/2022.2/settings64.sh
    source /opt/xilinx/xrt/setup.sh
    export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
-   make run TARGET=hw DEVICE=${PLATFORM_REPO_PATHS}/xilinx_vck190_base_202210_1/xilinx_vck190_base_202210_1.xpfm
+   make run TARGET=hw PLATFORM=${PLATFORM_REPO_PATHS}/xilinx_vck190_base_202210_1/xilinx_vck190_base_202210_1.xpfm
 
 .. ATTENTION::
    * Only HW_EMU and HW run available

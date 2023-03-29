@@ -46,8 +46,8 @@ For ``csh`` users, please look for corresponding scripts with ``.csh`` suffix an
 accordingly.
 
 Setting `PLATFORM_REPO_PATHS` to the installation folder of platform files can enable makefiles
-in this library to use `DEVICE` variable as a pattern.
-Otherwise, full path to .xpfm file needs to be provided via `DEVICE` variable.
+in this library to use `PLATFORM` variable as a pattern.
+Otherwise, full path to .xpfm file needs to be provided via `PLATFORM` variable.
 
 HLS Cases Command Line Flow
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -57,7 +57,7 @@ HLS Cases Command Line Flow
     cd L1/tests/hls_case_folder
     
     make run CSIM=1 CSYNTH=0 COSIM=0 VIVADO_SYN=0 VIVADO_IMPL=0 \
-        DEVICE=/path/to/xilinx_u280_xdma_201920_3.xpfm
+        PLATFORM=/path/to/xilinx_u280_xdma_201920_3.xpfm
 
 Test control variables are:
 

@@ -56,7 +56,7 @@ Command to Run cases
     cd L1/tests/hls_case_folder
     
     make run CSIM=1 CSYNTH=0 COSIM=0 VIVADO_SYN=0 VIVADO_IMPL=0 \
-        DEVICE=/path/to/xilinx_u280_xdma_201920_3.xpfm
+        PLATFORM=/path/to/xilinx_u280_xdma_201920_3.xpfm
 
 Test control variables are:
 
@@ -93,7 +93,7 @@ Command to Run L2 cases
     cd L2/tests/vitis_case_folder
     
     # build and run one of the following using target device's platform
-    make run TARGET=sw_emu DEVICE=/path/to/target_device.xpfm
+    make run TARGET=sw_emu PLATFORM=/path/to/target_device.xpfm
     
     # delete generated files
     make cleanall
