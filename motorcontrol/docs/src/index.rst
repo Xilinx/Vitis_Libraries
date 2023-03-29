@@ -22,13 +22,14 @@
 Vitis Motor Control Library
 =============================
 
-Motor Control Library is an open-sourced library written in C/C++ for accelerating Motor control. It now covers a level of acceleration: the module level(L1). Currently 4 kinds of algorithms are accelerated, including FOC, SVPWM__DUTY, PWM_GEN and QEI:
+Motor Control Library is an open-sourced library written in C/C++ for accelerating Motor control. It now covers a level of acceleration: the module level(L1). Currently 5 kinds of algorithms are accelerated, including FOC, SVPWM__DUTY, PWM_GEN, QEI and FOC_sensorless:
 
 
 - FOC: 1 L1 API is provided for sensor based field-orientated control (FOC), Argument reg and status reg to help to control the system.
 - SVPWM_DUTY: 1 L1 API is provided for Space Vector Pulse Width Modulation (SVPWM), Argument reg and status reg to help to control the system.
 - PWM_GEN: 1 L1 API is provided for Space Vector Pulse Width Modulation (SVPWM), Argument reg and status reg to help to control the system.
 - QEI: 1 L1 API is provided for quadrature encoder interface(QEI), Argument reg and status reg to help to control the system.
+- FOC_sensorless: 1 L1 API is provided for sensorless field-orientated control (FOC),  Argument reg and status reg to help to control the system.
 
 
 .. toctree::

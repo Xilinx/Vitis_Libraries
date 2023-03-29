@@ -84,19 +84,19 @@ Get knowledge about virtual motor model
    A simplified physical motor model can be represented as follows:
 .. image:: /images/tutorial_motor1.png
    :alt: motor1
-   :scale: 100%
+   :scale: 70%
    :align: center
 
 .. image:: /images/tutorial_motor2.png
    :alt: motor2
-   :scale: 100%
+   :scale: 70%
    :align: center
 
 The corresponding matrix representation is shown below:
 
 .. image:: /images/tutorial_equation.png
    :alt: equation
-   :scale: 100%
+   :scale: 70%
    :align: center
 
 KD240 Accessory Kit Motor Model Parameters
@@ -250,7 +250,7 @@ waveform explanation and check
 
 .. image:: /images/tutorial_sensor_csim.png
    :alt: sensor_csim
-   :scale: 100%
+   :scale: 70%
    :align: center
 
 COSIM verification
@@ -270,14 +270,14 @@ waveform explanation
 
 .. image:: /images/tutorial_sensor_cosim1.png
    :alt: sensor_cosim1
-   :scale: 100%
+   :scale: 70%
    :align: center
 
-hls_foc_periodic_top_ap_fixed (ap_fixed version ) cosim with C model motor in mode MOD_SPEED_WITH_TORQUE , "w" of motor is almost stable on 0bbc
+hls_foc_periodic_top_ap_fixed (ap_fixed version) cosim with C model motor in mode MOD_SPEED_WITH_TORQUE , "w" of motor is almost stable on 0bbc
 
 .. image:: /images/tutorial_sensor_cosim2.png
    :alt: sensor_cosim2
-   :scale: 100%
+   :scale: 70%
    :align: center
 
 export IP
@@ -538,7 +538,7 @@ waveform explanation and check
 
 .. image:: /images/tutorial_sensorless_csim.png
    :alt: sensorless_csim
-   :scale: 100%
+   :scale: 70%
    :align: center
 
 COSIM verification 
@@ -558,7 +558,7 @@ align with 8 modes
 
 .. image:: /images/tutorial_sensorless_cosim.png
    :alt: sensorless_cosim
-   :scale: 100%
+   :scale: 70%
    :align: center
 
 export IP
@@ -734,7 +734,7 @@ stdout explanation
 
 .. image:: /images/tutorial_svpwm_duty_stdout.png
    :alt: svpwm_duty_stdout
-   :scale: 100%
+   :scale: 70%
    :align: center
 
 The stdout has shown the AXI-lite signal and inner status monitoring parameters.
@@ -758,14 +758,14 @@ phase_shift_mode = MODE_PWM_PHASE_SHIFT::SHIFT_ZERO
 
 .. image:: /images/tutorial_svpwm_duty_csim_shiftzero.png
    :alt: svpwm_duty_csim_shiftzero
-   :scale: 100%
+   :scale: 70%
    :align: center
 
 phase_shift_mode = MODE_PWM_PHASE_SHIFT::SHIFT_120
 
 .. image:: /images/tutorial_svpwm_duty_csim_shift120.png
    :alt: svpwm_duty_csim_shift120
-   :scale: 100%
+   :scale: 70%
    :align: center
 
 COSIM verification
@@ -782,7 +782,7 @@ Verify latency from input to output.
 
 .. image:: /images/tutorial_svpwm_duty_cosim1.png
    :alt: svpwm_duty_cosim1
-   :scale: 100%
+   :scale: 70%
    :align: center
 
 According to waveform, the measured latency is 504.750ns from sampling commands to outputting ratios (50 cycles)
@@ -791,7 +791,7 @@ Verify latency of pwm_cycle
 
 .. image:: /images/tutorial_svpwm_duty_cosim2.png
    :alt: svpwm_duty_cosim2
-   :scale: 100%
+   :scale: 70%
    :align: center
 
 ii-sample's impact
@@ -819,7 +819,7 @@ The fifo depth is 4 and each iteration latency is 93 clock cycles.  Each output 
 
 .. image:: /images/tutorial_svpwm_duty_cosim_iisample1.png
    :alt: svpwm_duty_cosim_iisample1
-   :scale: 100%
+   :scale: 70%
    :align: center
 
 ii-sample= 50
@@ -828,14 +828,14 @@ The fifo depth is 4 and each iteration latency is 93 clock cycles. When ii-sampl
 
 .. image:: /images/tutorial_svpwm_duty_cosim_iisample50.png
    :alt: svpwm_duty_cosim_iisample50
-   :scale: 100%
+   :scale: 70%
    :align: center
 
 ii-sample= 1000 (Default)
 
 .. image:: /images/tutorial_svpwm_duty_cosim_iisample1000.png
    :alt: svpwm_duty_cosim_iisample1000
-   :scale: 100%
+   :scale: 70%
    :align: center
 
 export IP
@@ -907,7 +907,7 @@ stdout explanation
 
 .. image:: /images/tutorial_pwm_gen_stdout.png
    :alt: pwm_gen_stdout
-   :scale: 100%
+   :scale: 70%
    :align: center
 
 The stdout shown above depicts the following info:
@@ -932,7 +932,7 @@ flow
 
 .. image:: /images/tutorial_pwm_gen_cosim1.png
    :alt: pwm_gen_cosim1
-   :scale: 100%
+   :scale: 70%
    :align: center
 
 -ii = 2000
@@ -941,7 +941,7 @@ the hls_pwm_gen read once at the beginning, so produce the exact waveform as [-i
 
 .. image:: /images/tutorial_pwm_gen_cosim2.png
    :alt: pwm_gen_cosim2
-   :scale: 100%
+   :scale: 70%
    :align: center
 
 export IP
@@ -1012,7 +1012,7 @@ stdout explanation
 
 .. image:: /images/tutorial_qei_stdout.png
    :alt: qei_stdout
-   :scale: 100%
+   :scale: 70%
    :align: center
 
 * The title of "Generating Input" shows the setting for input args
@@ -1047,7 +1047,7 @@ waveform explanation
 
 .. image:: /images/tutorial_qei_cosim.png
    :alt: qei_cosim
-   :scale: 100%
+   :scale: 70%
    :align: center
 
 First, we can check if the input signals including A, B, I are valid, and they should be same to the waveform above like high and low level interaction. Moreover, the output of qei_err_TDATA indicates whether the input signal is valid, just 0 represents valid input and 3 represents invalid input.

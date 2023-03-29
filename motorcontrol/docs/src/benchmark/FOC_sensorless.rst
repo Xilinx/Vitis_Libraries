@@ -160,18 +160,17 @@ Note: Test summary all the result of 8 modes on the file flow.
    SIM_FOC_M:  ------ Summary for Model-based simulation -----------------------------------------------------------
    SIM_FOC_M:  Kernel sampling mode           : one calling one sample 
    SIM_FOC_M:  Simulation resolution          : 0.000100 (ms)
-   SIM_FOC_M:  Simulation total time          : 270.000000 (ms)
+   SIM_FOC_M:  Simulation total time          : 240.000000 (ms)
    SIM_FOC_M:  Inteval for printing wave data : 300
-   SIM_FOC_M:  Wave data for all 4 phases test: sim_foc_ModelFoc.log 
+   SIM_FOC_M:  Wave data for all 9 phases test: sim_foc_ModelFoc.log 
    SIM_FOC_M:  Phase-1 generated files        : sim_torqueWithoutSpeed<.para.foc> <.in.foc> <.out.foc> 
    SIM_FOC_M:  Phase-2 generated files        : sim_rpm10k<.para.foc> <.in.foc> <.out.foc> 
    SIM_FOC_M:  Phase-3 generated files        : sim_rpm16k<.para.foc> <.in.foc> <.out.foc> 
    SIM_FOC_M:  Phase-4 generated files        : sim_rpm16k_weak<.para.foc> <.in.foc> <.out.foc> 
    SIM_FOC_M:  Phase-5 generated files        : sim_manualTorqueFlux<.para.foc> <.in.foc> <.out.foc> 
    SIM_FOC_M:  Phase-6 generated files        : sim_manualTorque<.para.foc> <.in.foc> <.out.foc> 
-   SIM_FOC_M:  Phase-7 generated files        : sim_manualTorqueFluxFixedSpeed<.para.foc> <.in.foc> <.out.foc> 
-   SIM_FOC_M:  Phase-8 generated files        : sim_manualFlux<.para.foc> <.in.foc> <.out.foc> 
-   SIM_FOC_M:  Phase-9 generated files        : sim_stop<.para.foc> <.in.foc> <.out.foc> 
+   SIM_FOC_M:  Phase-7 generated files        : sim_manualFlux<.para.foc> <.in.foc> <.out.foc> 
+   SIM_FOC_M:  Phase-8 generated files        : sim_stop<.para.foc> <.in.foc> <.out.foc> 
    SIM_FOC_F:  ------ Summary for File-based simulation based on Model-based outputs -------------------------------
    SIM_FOC_F:  Kernel sampling mode           : one calling multi-sample 
    SIM_FOC_F:  Phase-1: 0.000(ms) ~ 30.000(ms)	 Mode: MOD_TORQUE_WITHOUT_SPEED           RPM: 10000	 Sampling II: Depending on II after synthesis	 Over threshold(1.20V): 0 
@@ -180,9 +179,8 @@ Note: Test summary all the result of 8 modes on the file flow.
    SIM_FOC_F:  Phase-4: 90.000(ms) ~ 120.000(ms)	 Mode: MOD_FLUX                           RPM: 16000	 Sampling II: Depending on II after synthesis	 Over threshold(1.20V): 0 
    SIM_FOC_F:  Phase-5: 120.000(ms) ~ 150.000(ms)	 Mode: MOD_MANUAL_TORQUE_FLUX             RPM: 16000	 Sampling II: Depending on II after synthesis	 Over threshold(1.20V): 0 
    SIM_FOC_F:  Phase-6: 150.000(ms) ~ 180.000(ms)	 Mode: MOD_MANUAL_TORQUE                  RPM: 16000	 Sampling II: Depending on II after synthesis	 Over threshold(1.20V): 0 
-   SIM_FOC_F:  Phase-7: 180.000(ms) ~ 210.000(ms)	 Mode: MOD_MANUAL_TORQUE_FLUX_FIXED_SPEED RPM: 16000	 Sampling II: Depending on II after synthesis	 Over threshold(1.20V): 0 
-   SIM_FOC_F:  Phase-8: 210.000(ms) ~ 240.000(ms)	 Mode: MOD_MANUAL_FLUX                    RPM: 16000	 Sampling II: Depending on II after synthesis	 Over threshold(1.20V): 0 
-   SIM_FOC_F:  Phase-9: 240.000(ms) ~ 270.000(ms)	 Mode: MOD_STOPPED                        RPM: 16000	 Sampling II: Depending on II after synthesis	 Over threshold(1.20V): 0 
+   SIM_FOC_F:  Phase-7: 180.000(ms) ~ 210.000(ms)	 Mode: MOD_MANUAL_FLUX                    RPM: 16000	 Sampling II: Depending on II after synthesis	 Over threshold(1.20V): 0 
+   SIM_FOC_F:  Phase-8: 210.000(ms) ~ 240.000(ms)	 Mode: MOD_STOPPED                        RPM: 16000	 Sampling II: Depending on II after synthesis	 Over threshold(1.20V): 0 
    SIM_FOC_F:********************************************************************************************************************************
 
 
@@ -211,7 +209,7 @@ Different tool versions may result slightly different resource.
     +----------------+----------+----------+----------+----------+---------+-----------------+
     |        IP      |   BRAM   |   URAM   |    DSP   |    FF    |   LUT   | Frequency(MHz)  |
     +----------------+----------+----------+----------+----------+---------+-----------------+
-    | FOC_sensorless |     4    |     0    |    100   |   5655   |   6569  |       300       |
+    | FOC_sensorless |     4    |     0    |    68    |   5358   |   5798  |       300       |
     +----------------+----------+----------+----------+----------+---------+-----------------+
 
 Table 4 : IP profiling of Sensorless field-orientated control

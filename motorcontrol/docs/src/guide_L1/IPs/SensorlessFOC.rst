@@ -43,17 +43,15 @@ Table 1 : Sensorless FOC Features
     +-----------------------+-----------------------------------------------------------------------+
     | hls_foc_strm_ap_fixed |                               Status                                  |
     +=======================+=======================================================================+
-    |       Input           |  3-phase currents non-block synchronous input                         |
-    |                       |  Angle and speed synchronous input by a 32bit buffer                  |
-    |                       |  RPM: buffer[15:0], revolution per minute                             |
-    |                       |  Angle: buffer[32:16], theta_m mormalize to [0, CPR]                  |
+    |       Input           |  3-phase currents block synchronous input                             |
+    |                       |  3-phase voltages block synchronous input                             |
     +-----------------------+-----------------------------------------------------------------------+
     |      Output           |  3-phase voltages non-block synchronous output                        |
     +-----------------------+-----------------------------------------------------------------------+  
     |  configurable         |  modes, pid args, manual args...                                      |
     |  &mintorable info     |  pid intermediate results, details check the interface table          |
     +-----------------------+-----------------------------------------------------------------------+
-    |    performance        |  Main clk 100Mhz, max throughput 13M/s                                |
+    |    performance        |  Main clk 100Mhz, max throughput 1M/s                                 |
     |                       |                                                                       |
     +-----------------------+-----------------------------------------------------------------------+
 

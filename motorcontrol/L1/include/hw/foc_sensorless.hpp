@@ -37,10 +37,13 @@ namespace motorcontrol {
  * @param  Ia			    Input Phase A current
  * @param  Ib			    Input Phase B current
  * @param  Ic			    Input Phase C current
- * @param  FOC_RPM_THETA_m  Input THETA_m in [31:16] and RPM in [15:0] 
+ * @param  Va_smo			Input Phase A voltage
+ * @param  Vb_smo			Input Phase B voltage
+ * @param  Vc_smo			Input Phase C voltage
  * @param  Va_cmd 			Output Va
  * @param  Vb_cmd 			Output Vb
  * @param  Vc_cmd 			Output Vc
+ * @param  ppr_args         input number of pole pairs per phase of the motor; full sinus periods per revolution.
  * @param  control_mode_args            Input control mode of foc, enum FOC_Mode. Read every latency cycles of LOOP_FOC
  * @param  control_fixperiod_args       input control_fixperiod. Read every latency cycles of LOOP_FOC
  * @param  flux_sp_args     Input Args setting point for PID control of Flux
@@ -91,7 +94,7 @@ void hls_foc_strm_ap_fixed_sensorless(
     hls::stream<T_IO>& Va_smo,
     hls::stream<T_IO>& Vb_smo,
     hls::stream<T_IO>& Vc_smo,
-    hls::stream<T_RPM_THETA_FOC>& FOC_RPM_THETA_m, // RPM & Theta_m
+    // hls::stream<T_RPM_THETA_FOC>& FOC_RPM_THETA_m, // RPM & Theta_m
     // Output
     hls::stream<T_IO>& Va_cmd,
     hls::stream<T_IO>& Vb_cmd,
@@ -149,7 +152,7 @@ LOOP_FOC_STRM:
 #pragma HLS PIPELINE off
         bool Filebased_flag = (control_mode_args & 0x40000000) != 0;
         int control_mode = control_mode_args & 0x0000FFFF;
-        static int FOC_RPM_THETA_m_in; // = FOC_RPM_THETA_m.read();
+        // static int FOC_RPM_THETA_m_in; // = FOC_RPM_THETA_m.read();
         static T_IO Ia_in;
         static T_IO Ib_in;
         static T_IO Ic_in;
@@ -177,10 +180,13 @@ LOOP_FOC_STRM:
                 Vc_in = Vc_smo.read();
             }
         }
-        if (!FOC_RPM_THETA_m.empty()) FOC_RPM_THETA_m_in = FOC_RPM_THETA_m.read();
+        // if (!FOC_RPM_THETA_m.empty()) FOC_RPM_THETA_m_in = FOC_RPM_THETA_m.read();
 
-        short RPM_in = (FOC_RPM_THETA_m_in & 0x0000FFFF);
-        short Angle_in = (FOC_RPM_THETA_m_in & 0xFFFF0000) >> 16;
+        // short RPM_in = (FOC_RPM_THETA_m_in & 0x0000FFFF);
+        // short Angle_in = (FOC_RPM_THETA_m_in & 0xFFFF0000) >> 16;
+
+        short RPM_in = 0;
+        short Angle_in = 0;
 
         T_IO Va_out, Vb_out, Vc_out;
         // reserved word
@@ -228,7 +234,7 @@ void hls_foc_strm_int_sensorless(
     hls::stream<int>& Va_smo,
     hls::stream<int>& Vb_smo,
     hls::stream<int>& Vc_smo,
-    hls::stream<T_RPM_THETA_FOC>& FOC_RPM_THETA_m, // RPM & Theta_m
+    // hls::stream<T_RPM_THETA_FOC>& FOC_RPM_THETA_m, // RPM & Theta_m
     // Output
     hls::stream<int>& Va_cmd,
     hls::stream<int>& Vb_cmd,
@@ -283,7 +289,7 @@ void hls_foc_strm_int_sensorless(
 LOOP_FOC_STRM:
     for (long i = 0; i < trip_cnt; i++) {
 #pragma HLS pipeline II = 1
-        static int FOC_RPM_THETA_m_in;
+        // static int FOC_RPM_THETA_m_in;
         static int Ia_in0;
         static int Ib_in0;
         static int Ic_in0;
@@ -315,10 +321,13 @@ LOOP_FOC_STRM:
         Vb_in(31, 0) = Vb_in0;
         Vc_in(31, 0) = Vc_in0;
 
-        if (!FOC_RPM_THETA_m.empty()) FOC_RPM_THETA_m_in = FOC_RPM_THETA_m.read();
+        // if (!FOC_RPM_THETA_m.empty()) FOC_RPM_THETA_m_in = FOC_RPM_THETA_m.read();
 
-        short RPM_in = (FOC_RPM_THETA_m_in & 0x0000FFFF);
-        short Angle_in = (FOC_RPM_THETA_m_in & 0xFFFF0000) >> 16;
+        // short RPM_in = (FOC_RPM_THETA_m_in & 0x0000FFFF);
+        // short Angle_in = (FOC_RPM_THETA_m_in & 0xFFFF0000) >> 16;
+        short RPM_in = 0;
+        short Angle_in = 0;
+
         typedef ap_fixed<W, I> T_M;
         T_M Va_out, Vb_out, Vc_out;
 

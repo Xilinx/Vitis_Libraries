@@ -42,7 +42,7 @@ void hls_foc_periodic_ap_fixed(
     hls::stream<t_glb_foc2pwm>& Va_smo,
     hls::stream<t_glb_foc2pwm>& Vb_smo,
     hls::stream<t_glb_foc2pwm>& Vc_smo,
-    hls::stream<t_glb_speed_theta>& SPEED_THETA_m, // RPM & Theta_m
+    // hls::stream<t_glb_speed_theta>& SPEED_THETA_m, // RPM & Theta_m
     // Output
     hls::stream<t_glb_foc2pwm>& Va_cmd,
     hls::stream<t_glb_foc2pwm>& Vb_cmd,
@@ -98,7 +98,7 @@ void hls_foc_oneSample_ap_fixed(
     hls::stream<t_glb_foc2pwm>& Va_smo,
     hls::stream<t_glb_foc2pwm>& Vb_smo,
     hls::stream<t_glb_foc2pwm>& Vc_smo,
-    hls::stream<t_glb_speed_theta>& SPEED_THETA_m, // RPM & Theta_m
+    // hls::stream<t_glb_speed_theta>& SPEED_THETA_m, // RPM & Theta_m
     // Output
     hls::stream<t_glb_foc2pwm>& Va_cmd,
     hls::stream<t_glb_foc2pwm>& Vb_cmd,

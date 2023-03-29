@@ -43,7 +43,7 @@ void call_foc_strm(bool usePeriodic,
                    hls::stream<t_glb_foc2pwm>& strm_va,
                    hls::stream<t_glb_foc2pwm>& strm_vb,
                    hls::stream<t_glb_foc2pwm>& strm_vc,
-                   hls::stream<t_glb_speed_theta>& strm_speed_theta_m, // RPM & Theta_m
+                   // hls::stream<t_glb_speed_theta>& strm_speed_theta_m, // RPM & Theta_m
                    // Output
                    hls::stream<t_glb_foc2pwm>& Va_cmd,
                    hls::stream<t_glb_foc2pwm>& Vb_cmd,
@@ -54,7 +54,7 @@ void call_foc_strm(bool usePeriodic,
             hls_foc_periodic_ap_fixed(//<COMM_MACRO_CPR, t_glb_foc2pwm,  MAX_VAL_PWM, PWM_AP_FIXED_PARA_W2, PWM_AP_FIXED_PARA_I2, t_glb_speed_theta>(//foc_strm_driven_ap_fixed //hls_foc_dataflow_ap_fixed//foc_core_ap_fixed
                 strm_ia, strm_ib, strm_ic,
                 strm_va, strm_vb, strm_vc,
-                strm_speed_theta_m,
+                // strm_speed_theta_m,
                 Va_cmd, Vb_cmd, Vc_cmd,
                 (volatile int&)AxiPara.ppr_args,
                 (volatile int&)AxiPara.control_mode_args,
@@ -101,7 +101,7 @@ void call_foc_strm(bool usePeriodic,
             hls_foc_oneSample_ap_fixed(
                 strm_ia, strm_ib, strm_ic,
                 strm_va, strm_vb, strm_vc,
-                strm_speed_theta_m,
+                // strm_speed_theta_m,
                 Va_cmd, Vb_cmd, Vc_cmd,
                 (volatile int&)AxiPara.ppr_args,
                 (volatile int&)AxiPara.control_mode_args,
@@ -173,19 +173,18 @@ int call_foc_scalar(bool usePeriodic,
     hls::stream<t_glb_foc2pwm> strm_va;
     hls::stream<t_glb_foc2pwm> strm_vb;
     hls::stream<t_glb_foc2pwm> strm_vc;
-    hls::stream<t_glb_speed_theta> strm_speed_theta_m;
+    // hls::stream<t_glb_speed_theta> strm_speed_theta_m;
     strm_ia << iaf;
     strm_ib << ibf;
     strm_ic << icf;
-    strm_speed_theta_m << speed_theta_m;
+    // strm_speed_theta_m << speed_theta_m;
     strm_va << va_smo;
     strm_vb << vb_smo;
     strm_vc << vc_smo;
     hls::stream<t_glb_foc2pwm> Va_cmd;
     hls::stream<t_glb_foc2pwm> Vb_cmd;
     hls::stream<t_glb_foc2pwm> Vc_cmd;
-    call_foc_strm(usePeriodic, strm_ia, strm_ib, strm_ic, strm_va, strm_vb, strm_vc, strm_speed_theta_m, Va_cmd, Vb_cmd,
-                  Vc_cmd, AxiPara);
+    call_foc_strm(usePeriodic, strm_ia, strm_ib, strm_ic, strm_va, strm_vb, strm_vc, Va_cmd, Vb_cmd, Vc_cmd, AxiPara);
     vaf = Va_cmd.read();
     vbf = Vb_cmd.read();
     vcf = Vc_cmd.read();
@@ -316,25 +315,25 @@ int FileBasedSim(
     hls::stream<t_glb_foc2pwm> strm_va;
     hls::stream<t_glb_foc2pwm> strm_vb;
     hls::stream<t_glb_foc2pwm> strm_vc;
-    hls::stream<t_glb_speed_theta> strm_speed_theta_m;
+    // hls::stream<t_glb_speed_theta> strm_speed_theta_m;
     hls::stream<t_glb_foc2pwm> Va_cmd;
     hls::stream<t_glb_foc2pwm> Vb_cmd;
     hls::stream<t_glb_foc2pwm> Vc_cmd;
 
-    int cnt_sim_in = getInputFromFile(fname_FocPara, AxiPara, fname_FocIn, strm_ia, strm_ib, strm_ic, strm_va, strm_vb,
-                                      strm_vc, strm_speed_theta_m);
+    int cnt_sim_in =
+        getInputFromFile(fname_FocPara, AxiPara, fname_FocIn, strm_ia, strm_ib, strm_ic, strm_va, strm_vb, strm_vc);
     // cnt_sim_in++; // to compensate error in getInputFromFile
 
     AxiPara.trip_cnt = cnt_sim_in;
     AxiPara.control_mode_args += 0x40000000;
     // bool usePeriodic = false;
     if (usePeriodic)
-        call_foc_strm(usePeriodic, strm_ia, strm_ib, strm_ic, strm_va, strm_vb, strm_vc, strm_speed_theta_m, Va_cmd,
-                      Vb_cmd, Vc_cmd, AxiPara);
+        call_foc_strm(usePeriodic, strm_ia, strm_ib, strm_ic, strm_va, strm_vb, strm_vc, Va_cmd, Vb_cmd, Vc_cmd,
+                      AxiPara);
     else
         for (int i = 0; i < cnt_sim_in; i++)
-            call_foc_strm(usePeriodic, strm_ia, strm_ib, strm_ic, strm_va, strm_vb, strm_vc, strm_speed_theta_m, Va_cmd,
-                          Vb_cmd, Vc_cmd, AxiPara);
+            call_foc_strm(usePeriodic, strm_ia, strm_ib, strm_ic, strm_va, strm_vb, strm_vc, Va_cmd, Vb_cmd, Vc_cmd,
+                          AxiPara);
     AxiPara.control_mode_args -= 0x40000000;
     // clang-format off
     printf("SIM_FOC_F:********************************************************************************************************************************\n");

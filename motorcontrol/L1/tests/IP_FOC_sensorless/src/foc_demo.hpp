@@ -580,7 +580,7 @@ void printFocOutput(FILE* fp, T_afx vaf, T_afx vbf, T_afx vcf) {
     fprintf(fp, "\t%d\n", tmp);
 }
 
-template <class T0_afx, class T1_afx, class T2>
+template <class T0_afx, class T1_afx>
 int getInputFromFile(const char* fname_para,
                      FocAxiParameters<T0_afx>& AxiPara,
                      const char* fname_in,
@@ -589,8 +589,7 @@ int getInputFromFile(const char* fname_para,
                      hls::stream<T1_afx>& strm_c,
                      hls::stream<T1_afx>& strm_va,
                      hls::stream<T1_afx>& strm_vb,
-                     hls::stream<T1_afx>& strm_vc,
-                     hls::stream<T2>& strm_speed_theta_m) { // return number of loading
+                     hls::stream<T1_afx>& strm_vc) { // return number of loading
     int ret = 0;
     assert(fname_para);
     AxiPara.fscanParameters(fname_para);
@@ -639,7 +638,7 @@ int getInputFromFile(const char* fname_para,
         strm_va.write(a2_smo);
         strm_vb.write(b2_smo);
         strm_vc.write(c2_smo);
-        strm_speed_theta_m.write(d);
+        // strm_speed_theta_m.write(d);
         ret++;
         float a3, b3, c3;
         a3 = a2;

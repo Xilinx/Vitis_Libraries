@@ -938,6 +938,7 @@ void foc_core_ap_fixed(
  * @param  Va_cmd 			Output Va
  * @param  Vb_cmd 			Output Vb
  * @param  Vc_cmd 			Output Vc
+ * @param  ppr_args         input number of pole pairs per phase of the motor; full sinus periods per revolution.
  * @param  control_mode_args            Input control mode of foc, enum FOC_Mode. Read every latency cycles of LOOP_FOC
  * @param  control_fixperiod_args       input control_fixperiod. Read every latency cycles of LOOP_FOC
  * @param  flux_sp_args     Input Args setting point for PID control of Flux
