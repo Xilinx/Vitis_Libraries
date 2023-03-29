@@ -52,7 +52,7 @@ Run the following make command to build your XCLBIN and host binary targeting a 
 
    source /opt/xilinx/Vitis/2021.1/settings64.sh
    source /opt/xilinx/xrt/setenv.sh
-   export DEVICE=/opt/xilinx/platforms/xilinx_u250_xdma_201830_2/xilinx_u250_xdma_201830_2.xpfm
+   export PLATFORM=/opt/xilinx/platforms/xilinx_u250_xdma_201830_2/xilinx_u250_xdma_201830_2.xpfm
    export TARGET=hw
    make run 
 

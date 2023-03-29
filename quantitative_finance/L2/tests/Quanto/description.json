@@ -3,7 +3,8 @@
     "description": [
         "L2 Quanto Options Model"
     ], 
-    "flow": "vitis", 
+    "flow": "vitis",
+    "gui": false,
     "platform_type": "pcie", 
     "platform_allowlist": [
         "u250", 

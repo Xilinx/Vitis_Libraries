@@ -29,9 +29,9 @@ Call the makefile:
 The Makefile is set up to generate a 'float' FPGA solution
 To build a 'double' FPGA, edit Makefile and edit DT=double
 
-            make all TARGET=hw DEVICE=xilinx_u200_xdma_201830_1
+            make all TARGET=hw PLATFORM=xilinx_u200_xdma_201830_1
                 Generates the hcf_host application and the FPGA xclbin file to run on a xilinx_u200_xdma_201830_2 
-            make all TARGET=sw_emu DEVICE=xilinx_u200_xdma_201830_1
+            make all TARGET=sw_emu PLATFORM=xilinx_u200_xdma_201830_1
                 Generates the hcf_host application to run a sofware simulation of the FPGA
 
 

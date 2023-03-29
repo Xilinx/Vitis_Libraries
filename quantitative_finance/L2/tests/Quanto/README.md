@@ -22,7 +22,7 @@ Setup the build environment using the Vitis and XRT scripts:
 ### Step 2 :
 Call the Makefile passing in the intended target and device. The Makefile supports software emulation, hardware emulation and hardware targets ('sw_emu', 'hw_emu' and 'hw', respectively). For example to build and run the test application:
 
-            make run TARGET=sw_emu DEVICE=xilinx_u250_xdma_201830_2
+            make run TARGET=sw_emu PLATFORM=xilinx_u250_xdma_201830_2
 
 For all Makefile targets, the host application and xclbin are delivered to named folders depending on the target and part selected.  For example, the command above will produce:
 

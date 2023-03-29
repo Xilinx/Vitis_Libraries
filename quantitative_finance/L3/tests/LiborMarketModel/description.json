@@ -4,6 +4,7 @@
         "Libor Market Model With Cap Pricing using the L3 framework"
     ],
     "flow": "vitis",
+    "gui": false,
     "platform_type": "pcie",
     "platform_allowlist": [
         "u250",

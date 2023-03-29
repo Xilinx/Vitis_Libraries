@@ -167,7 +167,7 @@ VPP_FLAGS_HWA_k2 += --hls.clock 300000000:HWA_k2
 ifneq ($(HOST_ARCH_temp), x86)
 VPP_LDFLAGS_hwa_engine += --clock.defaultFreqHz 300000000
 else
-VPP_LDFLAGS_hwa_engine += --kernel_frequency 300
+VPP_LDFLAGS_hwa_engine += --kernel_frequency 250
 endif
 
 ifneq ($(SD_CARD_NEEDED), on)

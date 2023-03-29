@@ -95,7 +95,7 @@
                     "name": "HWA_k2"
                 }
             ],
-            "frequency": 300.0,
+            "frequency": 250.0,
             "name": "hwa_engine"
         }
     ],

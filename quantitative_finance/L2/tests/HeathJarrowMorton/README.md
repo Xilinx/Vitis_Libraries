@@ -23,7 +23,7 @@ Setup the build environment using the Vitis and XRT scripts:
 ### Step 2 :
 Call the Makefile passing in the intended target and platform (.xpfm). For example:
 
-            make all TARGET=sw_emu DEVICE=xilinx_u250_xdma_201830_2
+            make all TARGET=sw_emu PLATFORM=xilinx_u250_xdma_201830_2
 
  The Makefile supports software emulation, hardware emulation and hardware targets ('sw_emu', 'hw_emu' and 'hw', respectively). The host application (hjm_test) is written to the root of this demo folder, and the xclbin is delivered into the xclbin* folder with a name identifying the card and target.  For example the U200 software emulation build produces:
 

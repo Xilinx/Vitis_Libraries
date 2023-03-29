@@ -42,7 +42,7 @@ To build a 'double' FPGA, edit Makefile and edit DT=double
             make all TARGET=hw
                 Generates the m76_demo application and the FPGA xclbin file to run on a xilinx_u200_xdma_201830_2 (default)
 
-            make all TARGET=hw DEVICE=xilinx_u250_xdma_201830_1
+            make all TARGET=hw PLATFORM=xilinx_u250_xdma_201830_1
                 Generates the m76_demo application and the FPGA xclbin file to run on a xilinx_u250_xdma_201830_1 card
 
             make all TARGET=sw_emu

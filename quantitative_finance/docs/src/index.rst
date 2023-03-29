@@ -422,7 +422,7 @@ A Makefile is used to drive this flow with available steps including `CSIM` (hig
     # entering specific unit test project
     cd L1/tests/specific_algorithm/
     # Only run C++ simulation on U250
-    make run CSIM=1 CSYNTH=0 COSIM=0 VIVADO_SYN=0 VIVADO_IMPL=0 DEVICE=u250_xdma_201830_1
+    make run CSIM=1 CSYNTH=0 COSIM=0 VIVADO_SYN=0 VIVADO_IMPL=0 PLATFORM=u250_xdma_201830_1
 
 As well as verifying functional correctness, the reports generated from this flow give an indication of logic utilization, timing performance, latency and throughput. The output files of interest can be located at the location examples as below where the file names are correlated with the source code. i.e. the callable functions within the design under test.::
 
@@ -443,19 +443,19 @@ The available flow for L2 based around the Vitis tool facilitates the generation
     # build and run one of the following using U250 platform
 
     #  * software emulation
-    make run TARGET=sw_emu DEVICE=u250_xdma_201830_1
+    make run TARGET=sw_emu PLATFORM=u250_xdma_201830_1
     #  * hardware emulation
-    make run TARGET=hw_emu DEVICE=u250_xdma_201830_1
+    make run TARGET=hw_emu PLATFORM=u250_xdma_201830_1
     #  * actual deployment on physical platform
-    make run TARET=hw DEVICE=u250_xdma_201830_1
+    make run TARET=hw PLATFORM=u250_xdma_201830_1
 
     # delete all xclbin and host binary
     make cleanall
 
 The outputs of this flow are packaged kernel binaries (xclbin files) that can be downloaded to the FPGA platform and host executables to configure and co-ordinate data transfers. The output files of interest can be located at the locations examples as below where the file names are correlated with the source code.::
 
-    Host Executable: L2/tests/GarmanKohlhagenEngine/bin_#DEVICE/gk_test.exe
-    Kernel Packaged Binary: L2/tests/GarmanKohlhagenEngine/xclbin_#DEVICE_#TARGET/gk_kernel.xclbin #ARGS
+    Host Executable: L2/tests/GarmanKohlhagenEngine/bin_#PLATFORM/gk_test.exe
+    Kernel Packaged Binary: L2/tests/GarmanKohlhagenEngine/xclbin_#PLATFORM_#TARGET/gk_kernel.xclbin #ARGS
 
 This flow can be used to verify functional correctness in hardware and enable real world performance to be measured.
 

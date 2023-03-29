@@ -3,7 +3,8 @@
     "description": [
         "L2 Garman Kohlhagen Model"
     ], 
-    "flow": "vitis", 
+    "flow": "vitis",
+    "gui": false,
     "platform_type": "pcie", 
     "platform_allowlist": [
         "u250", 

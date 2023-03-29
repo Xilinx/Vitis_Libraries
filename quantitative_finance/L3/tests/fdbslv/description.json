@@ -4,6 +4,7 @@
         "Finite Difference Black Scholes Local Volatility Model using L3 framework"
     ],
     "flow": "vitis",
+    "gui": false,
     "platform_type": "pcie",
     "platform_allowlist": [
         "u250",

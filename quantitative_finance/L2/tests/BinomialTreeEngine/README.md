@@ -20,11 +20,11 @@ Setup the build environment using the Vitis and XRT scripts:
 ### Step 2 :
 Call the Makefile. For example:
 
-	make run TARGET=sw_emu DEVICES=xilinx_u200_xdma_201830_2 DT=double PE=1
+	make run TARGET=sw_emu PLATFORMS=xilinx_u200_xdma_201830_2 DT=double PE=1
 
-	make run TARGET=hw_emu DEVICES=xilinx_u200_xdma_201830_2 DT=double PE=1
+	make run TARGET=hw_emu PLATFORMS=xilinx_u200_xdma_201830_2 DT=double PE=1
 
-	make all TARGET=hw DEVICES=xilinx_u200_xdma_201830_2 DT=double PE=1
+	make all TARGET=hw PLATFORMS=xilinx_u200_xdma_201830_2 DT=double PE=1
         
 
 The Makefile supports software emulation, hardware emulation and hardware targets ('sw_emu', 'hw_emu' and 'hw', respectively).  Additionally, several parameters are used to configure the host and/or kernel build. Most have restricted acceptable values and several must be consistent with others for the build to succeed.

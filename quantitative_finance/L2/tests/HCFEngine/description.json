@@ -2,6 +2,7 @@
     "name": "Xilinx Heston Closed Form Engine",
     "description": "L2 Heston Closed Form Solution",
     "flow": "vitis",
+    "gui": false,
     "platform_type": "pcie",
     "platform_allowlist": [
         "u250",
