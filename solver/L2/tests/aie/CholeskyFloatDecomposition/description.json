@@ -1,0 +1,128 @@
+{
+    "name": "Cholesky Float on AIE",
+        "description": "Cholesky Float on AIE",
+        "flow": "versal",
+        "platform_allowlist": [
+            "vck190"
+        ],
+        "data": [
+            "./data"
+        ],
+        "platform_blocklist": [],
+        "platform_properties": {
+            "vck190": {
+                "v++": {
+                    "compiler": {
+                        "clflags": []
+                    },
+                    "linker": {
+                        "ldclflags": [
+                            "--config PROJECT/system.cfg"
+                        ]
+                    },
+                    "package": {
+                        "clflags": [
+                            "--package.defer_aie_run"
+                        ]
+                    }
+                }
+            }
+        },
+        "launch": [
+        {
+            "name": "aiesim-launch",
+            "target": "aiesim"
+        },
+        {
+            "name": "x86sim-launch",
+            "target": "x86sim"
+        }
+        ],
+            "host": {
+                "host_exe": "host.elf",
+                "compiler": {
+                    "sources": [
+                        "PROJECT/ps/host.cpp",
+                    "./Work/ps/c_rts/aie_control_xrt.cpp"
+                    ],
+                    "includepaths": [
+                        "$(SYSROOT)/usr/include/xrt/",
+                "LIB_DIR/L2/include",
+                "LIB_DIR/L1/include",
+                "LIB_DIR/L1/src",
+                "./"
+                    ],
+                    "options": "--sysroot=$(SYSROOT)"
+                },
+                "linker": {
+                    "librarypaths": [
+                        "$(SYSROOT)/usr/lib/"
+                    ],
+                    "options": "--sysroot=$(SYSROOT)"
+                }
+            },
+            "v++": {
+                "compiler": {
+                    "includepaths": []
+                }
+            },
+            "aiecompiler": {
+                "compiler": {
+                    "includepaths": [
+                        "LIB_DIR/L1/include",
+                    "LIB_DIR/L2/include",
+                    "LIB_DIR/L1/src"
+                    ]
+                }
+            },
+            "aiecontainers": [
+            {
+                "accelerators": [
+                {
+                    "location": "PROJECT/aie/platform.cpp",
+                    "files": ["LIB_DIR/L1/src/aie/cholesky_float_decomposition.cpp"],
+                    "pl-freq": 1000,
+                    "workdir": "./Work",
+                    "name": "libadf.a"
+                }
+                ]
+            }
+            ],
+                "containers": [
+                {
+                    "accelerators": [
+                    {
+                        "location": "PROJECT/pl/pl_mm2s.cpp",
+                        "frequency": 250.0,
+                        "clflags": " ",
+                        "name": "data_mover"
+                    }
+                    ],
+                        "name": "kernel"
+                }
+                ],
+                    "testinfo": {
+                        "disable": false,
+                        "jobs": [
+                        {
+                            "index": 0,
+                            "dependency": [],
+                            "env": "",
+                            "cmd": "",
+                            "max_memory_MB": 40960,
+                            "max_time_min": {
+                                "vitis_aie_sim": 480,
+                                "vitis_aie_x86sim": 200,
+                                "vitis_hw_build": 470,
+                                "vitis_hw_emu": 200,
+                                "vitis_hw_run": 30
+                            }
+                        }
+                        ],
+                            "targets": [
+                                "vitis_aie_sim",
+                            "vitis_aie_x86sim"
+                            ],
+                            "category": "canary"
+                    }
+}

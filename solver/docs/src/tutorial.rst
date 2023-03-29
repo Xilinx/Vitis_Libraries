@@ -62,7 +62,7 @@ Command to Run L2 cases
     cd L2/tests/vitis_case_folder
     
     # build and run one of the following using your card's platform
-    make run TARGET=sw_emu DEVICE=/path/to/<your_card_platform>
+    make run TARGET=sw_emu PLATFORM=/path/to/<your_card_platform>
     
     # delete generated files
     make cleanall
@@ -98,7 +98,7 @@ Command to Run L1 cases
     cd L1/tests/hls_case_folder
     
     make run CSIM=1 CSYNTH=0 COSIM=0 VIVADO_SYN=0 VIVADO_IMPL=0 \
-        DEVICE=/path/to/<your_card_platform>
+        PLATFORM=/path/to/<your_card_platform>
 
 Test control variables are:
 
