@@ -20,10 +20,10 @@
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
+	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to generate the design for specified Target and Device."
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform>"
+	$(ECHO) "  make run TARGET=<sw_emu/hw_emu/hw> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) ""
 	$(ECHO) "  make clean "
@@ -98,14 +98,14 @@ ifeq ($(filter $(ZLIBVER), zlib zlib-1.2.7 zlib-1.2.11),)
 endif 
 
 # Target device
-DEVICE ?= xilinx_u200_xdma_201920_1
+PLATFORM ?= xilinx_u200_xdma_201920_1
 
-ifneq (,$(wildcard $(DEVICE)))
-  # Use DEVICE as a file path
-  XPLATFORM := $(DEVICE)
+ifneq (,$(wildcard $(PLATFORM)))
+  # Use PLATFORM as a file path
+  XPLATFORM := $(PLATFORM)
 else
-  # Use DEVICE as a file name pattern
-  DEVICE_L := $(shell echo $(DEVICE) | tr A-Z a-z)
+  # Use PLATFORM as a file name pattern
+  DEVICE_L := $(shell echo $(PLATFORM) | tr A-Z a-z)
   # Match the name
 ifneq (,$(PLATFORM_REPO_PATHS))
   XPLATFORMS := $(foreach p, $(subst :, ,$(PLATFORM_REPO_PATHS)), $(wildcard $(p)/*/*.xpfm))
@@ -122,7 +122,7 @@ endif
 endif
 
 define MSG_PLATFORM
-No platform matched pattern '$(DEVICE)'.
+No platform matched pattern '$(PLATFORM)'.
 Available platforms are: $(XPLATFORMS)
 To add more platform directories, set the PLATFORM_REPO_PATHS variable.
 endef
@@ -130,7 +130,7 @@ export MSG_PLATFORM
 
 define MSG_DEVICE
 More than one platform matched: $(XPLATFORM)
-Please set DEVICE variable more accurately to select only one platform file. For example: DEVICE='u200.*xdma'
+Please set PLATFORM variable more accurately to select only one platform file. For example: PLATFORM='u200.*xdma'
 endef
 export MSG_DEVICE
 

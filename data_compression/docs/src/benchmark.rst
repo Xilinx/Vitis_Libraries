@@ -115,11 +115,11 @@ Execute the following commands to compile and test run the applications.
    hw: run on actual hardware
 
 By default, the target device is set as Alveo U200. In order to target a different
-device, use the  ``DEVICE`` argument. For example:
+device, use the  ``PLATFORM`` argument. For example:
 
 .. code-block:: bash
 
-    make run TARGET=hw DEVICE=<new_device.xpfm>
+    make run TARGET=hw PLATFORM=<new_device.xpfm>
 
 .. NOTE::
    Build instructions explained in this section are common for all the

@@ -57,11 +57,11 @@ Variable ``TARGET`` can take the following values:
   - **hw**  : run on actual hardware
 
 By default, the target device is set as Alveo U200. In order to target a different
-device, use the  ``DEVICE`` argument. For example:
+device, use the  ``PLATFORM`` argument. For example:
 
 .. code-block:: bash
 
-    make run TARGET=sw_emu DEVICE=<new_device.xpfm>
+    make run TARGET=sw_emu PLATFORM=<new_device.xpfm>
 
 .. note::
    Build instructions explained in this section are common for all the

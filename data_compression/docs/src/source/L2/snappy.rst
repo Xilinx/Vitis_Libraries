@@ -68,7 +68,7 @@ Emulation flows
 
 ::
 
-     make run TARGET=<sw_emu/hw_emu> DEVICE=xilinx_u200_xdma_201830_2
+     make run TARGET=<sw_emu/hw_emu> PLATFORM=xilinx_u200_xdma_201830_2
      
      Note: This command compiles for targeted emulation mode and executes the
            application.
@@ -78,7 +78,7 @@ Hardware
 
 ::
 
-     make all TARGET=hw DEVICE=xilinx_u200_xdma_201830_2
+     make all TARGET=hw PLATFORM=xilinx_u200_xdma_201830_2
 
      Note: This command compiles for hardware execution. It generates kernel binary ".xclbin" file. 
            This file is placed in ./build/xclbin*/ directory under Snappy folder.
