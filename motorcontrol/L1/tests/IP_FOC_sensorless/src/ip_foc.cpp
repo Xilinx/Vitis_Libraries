@@ -22,6 +22,9 @@ void hls_foc_periodic_ap_fixed(
     hls::stream<t_glb_foc2pwm>& Ia,
     hls::stream<t_glb_foc2pwm>& Ib,
     hls::stream<t_glb_foc2pwm>& Ic,
+    hls::stream<t_glb_foc2pwm>& Va_smo,
+    hls::stream<t_glb_foc2pwm>& Vb_smo,
+    hls::stream<t_glb_foc2pwm>& Vc_smo,
     hls::stream<t_glb_speed_theta>& SPEED_THETA_m, // RPM & Theta_m
     // Output
     hls::stream<t_glb_foc2pwm>& Va_cmd,
@@ -75,6 +78,9 @@ void hls_foc_periodic_ap_fixed(
     #pragma HLS interface axis port = Va_cmd
     #pragma HLS interface axis port = Vb_cmd
     #pragma HLS interface axis port = Vc_cmd
+    #pragma HLS interface axis port = Va_smo
+    #pragma HLS interface axis port = Vb_smo
+    #pragma HLS interface axis port = Vc_smo
 
     #pragma HLS interface s_axilite port = ppr_args bundle = foc_args
     #pragma HLS interface s_axilite port = control_mode_args bundle = foc_args
@@ -116,53 +122,13 @@ void hls_foc_periodic_ap_fixed(
     #pragma HLS interface s_axilite port = Ibeta_stts      bundle = foc_args
     #pragma HLS interface s_axilite port = Ihomopolar_stts bundle = foc_args
 
-    // #pragma HLS interface ap_none port = ppr_args
-    // #pragma HLS interface ap_none port = control_mode_args
-    // #pragma HLS interface ap_none port = control_fixperiod_args
-    // #pragma HLS interface ap_none port = flux_sp_args
-    // #pragma HLS interface ap_none port = flux_kp_args
-    // #pragma HLS interface ap_none port = flux_ki_args
-    // #pragma HLS interface ap_none port = flux_kd_args
-    // #pragma HLS interface ap_none port = torque_sp_args
-    // #pragma HLS interface ap_none port = torque_kp_args
-    // #pragma HLS interface ap_none port = torque_ki_args
-    // #pragma HLS interface ap_none port = torque_kd_args
-    // #pragma HLS interface ap_none port = speed_sp_args
-    // #pragma HLS interface ap_none port = speed_kp_args
-    // #pragma HLS interface ap_none port = speed_ki_args
-    // #pragma HLS interface ap_none port = speed_kd_args
-    // #pragma HLS interface ap_none port = angle_sh_args
-    // #pragma HLS interface ap_none port = vd_args
-    // #pragma HLS interface ap_none port = vq_args
-    // #pragma HLS interface ap_none port = fw_kp_args
-    // #pragma HLS interface ap_none port = fw_ki_args
-    // #pragma HLS interface ap_none port = id_stts
-    // #pragma HLS interface ap_none port = flux_acc_stts
-    // #pragma HLS interface ap_none port = flux_err_stts
-    // #pragma HLS interface ap_none port = flux_out_stts
-    // #pragma HLS interface ap_none port = iq_stts
-    // #pragma HLS interface ap_none port = torque_acc_stts
-    // #pragma HLS interface ap_none port = torque_err_stts
-    // #pragma HLS interface ap_none port = torque_out_stts
-    // #pragma HLS interface ap_none port = speed_stts
-    // #pragma HLS interface ap_none port = speed_acc_stts
-    // #pragma HLS interface ap_none port = speed_err_stts
-    // #pragma HLS interface ap_none port = speed_out_stts
-    // #pragma HLS interface ap_none port = angle_stts
-    // #pragma HLS interface ap_none port = Va_cmd_stts
-    // #pragma HLS interface ap_none port = Vb_cmd_stts
-    // #pragma HLS interface ap_none port = Vc_cmd_stts
-    // #pragma HLS interface ap_none port = Ialpha_stts
-    // #pragma HLS interface ap_none port = Ibeta_stts
-    // #pragma HLS interface ap_none port = Ihomopolar_stts
-
     #pragma HLS interface s_axilite port = return bundle = foc_args
     long trip_cnt = 0x7fffffffffffffffL;
 #ifdef SIM_FINITE
     trip_cnt = TESTNUMBER;
 #endif
         xf::motorcontrol::hls_foc_strm_ap_fixed_sensorless<COMM_MACRO_CPR, t_glb_foc2pwm,  MAX_VAL_PWM, COMM_W, COMM_I, t_glb_speed_theta>(
-            Ia, Ib, Ic, SPEED_THETA_m, Va_cmd, Vb_cmd, Vc_cmd, ppr_args, control_mode_args,
+            Ia, Ib, Ic, Va_smo, Vb_smo, Vc_smo, SPEED_THETA_m, Va_cmd, Vb_cmd, Vc_cmd, ppr_args, control_mode_args,
             control_fixperiod_args, flux_sp_args, flux_kp_args, flux_ki_args, flux_kd_args, torque_sp_args, torque_kp_args,
             torque_ki_args, torque_kd_args, speed_sp_args, speed_kp_args, speed_ki_args, speed_kd_args, angle_sh_args, vd_args,
             vq_args, fw_kp_args, fw_ki_args,
@@ -178,6 +144,9 @@ void hls_foc_periodic_int(
     hls::stream<int>& Ia,
     hls::stream<int>& Ib,
     hls::stream<int>& Ic,
+    hls::stream<int>& Va_smo,
+    hls::stream<int>& Vb_smo,
+    hls::stream<int>& Vc_smo,
     hls::stream<t_glb_speed_theta>& SPEED_THETA_m, // RPM & Theta_m
     // Output
     hls::stream<int>& Va_cmd,
@@ -231,6 +200,9 @@ void hls_foc_periodic_int(
 #pragma HLS interface axis port = Va_cmd
 #pragma HLS interface axis port = Vb_cmd
 #pragma HLS interface axis port = Vc_cmd
+#pragma HLS interface axis port = Va_smo
+#pragma HLS interface axis port = Vb_smo
+#pragma HLS interface axis port = Vc_smo
 
 #pragma HLS interface s_axilite port = ppr_args bundle = foc_args
 #pragma HLS interface s_axilite port = control_mode_args bundle = foc_args
@@ -273,46 +245,6 @@ void hls_foc_periodic_int(
 #pragma HLS interface s_axilite port = Ibeta_stts bundle = foc_args
 #pragma HLS interface s_axilite port = Ihomopolar_stts bundle = foc_args
 
-// #pragma HLS interface ap_none port = ppr_args
-// #pragma HLS interface ap_none port = control_mode_args
-// #pragma HLS interface ap_none port = control_fixperiod_args
-// #pragma HLS interface ap_none port = flux_sp_args
-// #pragma HLS interface ap_none port = flux_kp_args
-// #pragma HLS interface ap_none port = flux_ki_args
-// #pragma HLS interface ap_none port = flux_kd_args
-// #pragma HLS interface ap_none port = torque_sp_args
-// #pragma HLS interface ap_none port = torque_kp_args
-// #pragma HLS interface ap_none port = torque_ki_args
-// #pragma HLS interface ap_none port = torque_kd_args
-// #pragma HLS interface ap_none port = speed_sp_args
-// #pragma HLS interface ap_none port = speed_kp_args
-// #pragma HLS interface ap_none port = speed_ki_args
-// #pragma HLS interface ap_none port = speed_kd_args
-// #pragma HLS interface ap_none port = angle_sh_args
-// #pragma HLS interface ap_none port = vd_args
-// #pragma HLS interface ap_none port = vq_args
-// #pragma HLS interface ap_none port = fw_kp_args
-// #pragma HLS interface ap_none port = fw_ki_args
-// #pragma HLS interface ap_none port = id_stts
-// #pragma HLS interface ap_none port = flux_acc_stts
-// #pragma HLS interface ap_none port = flux_err_stts
-// #pragma HLS interface ap_none port = flux_out_stts
-// #pragma HLS interface ap_none port = iq_stts
-// #pragma HLS interface ap_none port = torque_acc_stts
-// #pragma HLS interface ap_none port = torque_err_stts
-// #pragma HLS interface ap_none port = torque_out_stts
-// #pragma HLS interface ap_none port = speed_stts
-// #pragma HLS interface ap_none port = speed_acc_stts
-// #pragma HLS interface ap_none port = speed_err_stts
-// #pragma HLS interface ap_none port = speed_out_stts
-// #pragma HLS interface ap_none port = angle_stts
-// #pragma HLS interface ap_none port = Va_cmd_stts
-// #pragma HLS interface ap_none port = Vb_cmd_stts
-// #pragma HLS interface ap_none port = Vc_cmd_stts
-// #pragma HLS interface ap_none port = Ialpha_stts
-// #pragma HLS interface ap_none port = Ibeta_stts
-// #pragma HLS interface ap_none port = Ihomopolar_stts
-
 #pragma HLS interface s_axilite port = return bundle = foc_args
 
     long trip_cnt = 0x7fffffffffffffffL;
@@ -320,10 +252,10 @@ void hls_foc_periodic_int(
     trip_cnt = TESTNUMBER;
 #endif
     xf::motorcontrol::hls_foc_strm_int_sensorless<COMM_MACRO_CPR, MAX_VAL_PWM, COMM_W, COMM_I, t_glb_speed_theta>(
-        Ia, Ib, Ic, SPEED_THETA_m, Va_cmd, Vb_cmd, Vc_cmd, ppr_args, control_mode_args, control_fixperiod_args,
-        flux_sp_args, flux_kp_args, flux_ki_args, flux_kd_args, torque_sp_args, torque_kp_args, torque_ki_args,
-        torque_kd_args, speed_sp_args, speed_kp_args, speed_ki_args, speed_kd_args, angle_sh_args, vd_args, vq_args,
-        fw_kp_args, fw_ki_args,
+        Ia, Ib, Ic, Va_smo, Vb_smo, Vc_smo, SPEED_THETA_m, Va_cmd, Vb_cmd, Vc_cmd, ppr_args, control_mode_args,
+        control_fixperiod_args, flux_sp_args, flux_kp_args, flux_ki_args, flux_kd_args, torque_sp_args, torque_kp_args,
+        torque_ki_args, torque_kd_args, speed_sp_args, speed_kp_args, speed_ki_args, speed_kd_args, angle_sh_args,
+        vd_args, vq_args, fw_kp_args, fw_ki_args,
         //
         id_stts, flux_acc_stts, flux_err_stts, flux_out_stts, iq_stts, torque_acc_stts, torque_err_stts,
         torque_out_stts, speed_stts, speed_acc_stts, speed_err_stts, speed_out_stts, angle_stts, Va_cmd_stts,
@@ -336,6 +268,9 @@ void hls_foc_oneSample_ap_fixed(
     hls::stream<t_glb_foc2pwm>& Ia,
     hls::stream<t_glb_foc2pwm>& Ib,
     hls::stream<t_glb_foc2pwm>& Ic,
+    hls::stream<t_glb_foc2pwm>& Va_smo,
+    hls::stream<t_glb_foc2pwm>& Vb_smo,
+    hls::stream<t_glb_foc2pwm>& Vc_smo,
     hls::stream<t_glb_speed_theta>& SPEED_THETA_m, // RPM & Theta_m
     // Output
     hls::stream<t_glb_foc2pwm>& Va_cmd,
@@ -389,6 +324,9 @@ void hls_foc_oneSample_ap_fixed(
 #pragma HLS interface axis port = Va_cmd
 #pragma HLS interface axis port = Vb_cmd
 #pragma HLS interface axis port = Vc_cmd
+#pragma HLS interface axis port = Va_smo
+#pragma HLS interface axis port = Vb_smo
+#pragma HLS interface axis port = Vc_smo
 
 #pragma HLS interface s_axilite port = ppr_args bundle = foc_args
 #pragma HLS interface s_axilite port = control_mode_args bundle = foc_args
@@ -430,54 +368,14 @@ void hls_foc_oneSample_ap_fixed(
 #pragma HLS interface s_axilite port = Ibeta_stts bundle = foc_args
 #pragma HLS interface s_axilite port = Ihomopolar_stts bundle = foc_args
 
-// #pragma HLS interface ap_none port = ppr_args
-// #pragma HLS interface ap_none port = control_mode_args
-// #pragma HLS interface ap_none port = control_fixperiod_args
-// #pragma HLS interface ap_none port = flux_sp_args
-// #pragma HLS interface ap_none port = flux_kp_args
-// #pragma HLS interface ap_none port = flux_ki_args
-// #pragma HLS interface ap_none port = flux_kd_args
-// #pragma HLS interface ap_none port = torque_sp_args
-// #pragma HLS interface ap_none port = torque_kp_args
-// #pragma HLS interface ap_none port = torque_ki_args
-// #pragma HLS interface ap_none port = torque_kd_args
-// #pragma HLS interface ap_none port = speed_sp_args
-// #pragma HLS interface ap_none port = speed_kp_args
-// #pragma HLS interface ap_none port = speed_ki_args
-// #pragma HLS interface ap_none port = speed_kd_args
-// #pragma HLS interface ap_none port = angle_sh_args
-// #pragma HLS interface ap_none port = vd_args
-// #pragma HLS interface ap_none port = vq_args
-// #pragma HLS interface ap_none port = fw_kp_args
-// #pragma HLS interface ap_none port = fw_ki_args
-// #pragma HLS interface ap_none port = id_stts
-// #pragma HLS interface ap_none port = flux_acc_stts
-// #pragma HLS interface ap_none port = flux_err_stts
-// #pragma HLS interface ap_none port = flux_out_stts
-// #pragma HLS interface ap_none port = iq_stts
-// #pragma HLS interface ap_none port = torque_acc_stts
-// #pragma HLS interface ap_none port = torque_err_stts
-// #pragma HLS interface ap_none port = torque_out_stts
-// #pragma HLS interface ap_none port = speed_stts
-// #pragma HLS interface ap_none port = speed_acc_stts
-// #pragma HLS interface ap_none port = speed_err_stts
-// #pragma HLS interface ap_none port = speed_out_stts
-// #pragma HLS interface ap_none port = angle_stts
-// #pragma HLS interface ap_none port = Va_cmd_stts
-// #pragma HLS interface ap_none port = Vb_cmd_stts
-// #pragma HLS interface ap_none port = Vc_cmd_stts
-// #pragma HLS interface ap_none port = Ialpha_stts
-// #pragma HLS interface ap_none port = Ibeta_stts
-// #pragma HLS interface ap_none port = Ihomopolar_stts
-
 #pragma HLS interface s_axilite port = return bundle = foc_args
     long trip_cnt = 1;
     xf::motorcontrol::hls_foc_strm_ap_fixed_sensorless<COMM_MACRO_CPR, t_glb_foc2pwm, MAX_VAL_PWM, PWM_AP_FIXED_PARA_W2,
                                                        PWM_AP_FIXED_PARA_I2, t_glb_speed_theta>(
-        Ia, Ib, Ic, SPEED_THETA_m, Va_cmd, Vb_cmd, Vc_cmd, ppr_args, control_mode_args, control_fixperiod_args,
-        flux_sp_args, flux_kp_args, flux_ki_args, flux_kd_args, torque_sp_args, torque_kp_args, torque_ki_args,
-        torque_kd_args, speed_sp_args, speed_kp_args, speed_ki_args, speed_kd_args, angle_sh_args, vd_args, vq_args,
-        fw_kp_args, fw_ki_args,
+        Ia, Ib, Ic, Va_smo, Vb_smo, Vc_smo, SPEED_THETA_m, Va_cmd, Vb_cmd, Vc_cmd, ppr_args, control_mode_args,
+        control_fixperiod_args, flux_sp_args, flux_kp_args, flux_ki_args, flux_kd_args, torque_sp_args, torque_kp_args,
+        torque_ki_args, torque_kd_args, speed_sp_args, speed_kp_args, speed_ki_args, speed_kd_args, angle_sh_args,
+        vd_args, vq_args, fw_kp_args, fw_ki_args,
         //
         id_stts, flux_acc_stts, flux_err_stts, flux_out_stts, iq_stts, torque_acc_stts, torque_err_stts,
         torque_out_stts, speed_stts, speed_acc_stts, speed_err_stts, speed_out_stts, angle_stts, Va_cmd_stts,

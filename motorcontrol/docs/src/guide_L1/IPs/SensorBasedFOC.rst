@@ -53,7 +53,7 @@ Table 1 : Sensor based FOC Features
     |  configurable         |  modes, pid args, manual args...                                      |
     |  &mintorable info     |  pid intermediate results, details check the interface table          |
     +-----------------------+-----------------------------------------------------------------------+
-    |    performance        |  Main clk 100Mhz, max throughput 13M/s                                |
+    |    performance        |  Main clk 100Mhz, max throughput 20M/s                                |
     |                       |                                                                       |
     +-----------------------+-----------------------------------------------------------------------+
 

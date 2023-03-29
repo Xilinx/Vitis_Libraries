@@ -20,7 +20,8 @@
 unsigned int qei_inverse_new(hls::stream<ap_uint<1> >& A,
                              hls::stream<ap_uint<1> >& B,
                              hls::stream<ap_uint<1> >& I,
-                             int dir,
+                             Dirction_QEI dir,
+                             Encoding_Mode mode,
                              float& angle_start,
                              float angle_run,
                              int rpm,
@@ -40,7 +41,9 @@ unsigned int qei_inverse_new(hls::stream<ap_uint<1> >& A,
             bool v_I = (start_off == cpr - 1);
             bool v_A = 0;
             bool v_B = 0;
-            if (dir == 0) {
+            if ((dir == clockwise_n && mode == A_Leading_B) || (dir == clockwise_p && mode == B_Leading_A)) {
+                // v_A:00110011
+                // v_B:01100110
                 if (phase90 == 1) {
                     v_A = 0;
                     v_B = 1;
@@ -52,6 +55,8 @@ unsigned int qei_inverse_new(hls::stream<ap_uint<1> >& A,
                     v_B = 0;
                 }
             } else {
+                // v_A:01100110
+                // v_B:00110011
                 if (phase90 == 1) {
                     v_A = 1;
                     v_B = 0;
@@ -104,9 +109,10 @@ void Setting_3(hls::stream<ap_uint<1> >& strm_in_qei_A,
     // test_PPR_ = 500; // pulses per revolution
     int test_CPR_ = 1000; //(test_PPR_ * Encoding_Type::X4);
     int test_CLK_FQ_ = 100 * 1000 * 1000;
-    qei_args.qei_args_cpr = test_CPR_;                   // test_CPR_; //testing range-checking
-    qei_args.qei_args_cnt_trip = TESTNUMBER;             // test_NUM;  //testing range-checking
-    qei_args.qei_args_ctrl = Encoding_Mode::A_Leading_B; // A leading B
+    qei_args.qei_args_cpr = test_CPR_;       // test_CPR_; //testing range-checking
+    qei_args.qei_args_cnt_trip = TESTNUMBER; // test_NUM;  //testing range-checking
+    Encoding_Mode mode = Encoding_Mode::B_Leading_A;
+    qei_args.qei_args_ctrl = mode; // B leading A
 
     unsigned int total = 0;
     for (int i = 0; i < 1000; i++) {
@@ -128,13 +134,20 @@ void Setting_3(hls::stream<ap_uint<1> >& strm_in_qei_A,
         total++;
     }
     float start = 355;
-    total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, 1, start, 60, 3000, test_CPR_, test_CLK_FQ_);
-    total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, 0, start, 10, 1000, test_CPR_, test_CLK_FQ_);
-    total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, 0, start, 20, 2000, test_CPR_, test_CLK_FQ_);
-    total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, 0, start, 20, 5000, test_CPR_, test_CLK_FQ_);
-    total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, 1, start, 2, 100, test_CPR_, test_CLK_FQ_);
-    total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, 1, start, 3, 300, test_CPR_, test_CLK_FQ_);
-    total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, 1, start, 5, 500, test_CPR_, test_CLK_FQ_);
+    total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, clockwise_p, mode, start, 60, 3000, test_CPR_,
+                             test_CLK_FQ_);
+    total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, clockwise_n, mode, start, 10, 1000, test_CPR_,
+                             test_CLK_FQ_);
+    total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, clockwise_n, mode, start, 20, 2000, test_CPR_,
+                             test_CLK_FQ_);
+    total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, clockwise_n, mode, start, 20, 5000, test_CPR_,
+                             test_CLK_FQ_);
+    total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, clockwise_p, mode, start, 2, 100, test_CPR_,
+                             test_CLK_FQ_);
+    total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, clockwise_p, mode, start, 3, 300, test_CPR_,
+                             test_CLK_FQ_);
+    total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, clockwise_p, mode, start, 5, 500, test_CPR_,
+                             test_CLK_FQ_);
     assert(TESTNUMBER > total);
     printf("QEI_GEN total writing =%ld < %d\n", total, TESTNUMBER);
 }
@@ -170,7 +183,8 @@ void Setting_4(hls::stream<ap_uint<1> >& strm_in_qei_A,
         total++;
     }
     float start = 0;
-    total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, 1, start, 360, 3000, test_CPR_, test_CLK_FQ_);
+    total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, clockwise_p, A_Leading_B, start, 360, 3000,
+                             test_CPR_, test_CLK_FQ_);
     assert(TESTNUMBER > total);
     printf("QEI_GEN total writing =%ld < %d\n", total, TESTNUMBER);
 }

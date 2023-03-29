@@ -427,7 +427,7 @@ int main(int argc, char** argv) {
     ModelBasedSim(usePeriodic1, motor, AxiPara, t_cur, dt_sim, nStep_sim_rpm10k, inteval_print, fp_ModelFoc,
                   fname_prefix_rpm10k);
 
-    AxiPara.speed_sp_args = 16000;
+    AxiPara.speed_sp_args = -16000;
     ModelBasedSim(usePeriodic1, motor, AxiPara, t_cur, dt_sim, nStep_sim_rpm16k, inteval_print, fp_ModelFoc,
                   fname_prefix_rpm16k);
 

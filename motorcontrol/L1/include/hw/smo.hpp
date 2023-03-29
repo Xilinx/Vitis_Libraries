@@ -53,39 +53,6 @@ void Control_foc_ap_fixed(T_IO& Vd,
  * @tparam T_MID	    Type of the data in the middle of calculation. ex. int_32t or ap_int<32> is enough for
  * Q16.16
  */
-template <class T_V, class T_I, class T_MID, class T_ANGLE, class T_RPM>
-class SMO_Observer {
-   public:
-    T_I Ialpha_est;
-    T_I Ibeta_est;
-    T_V bemf_alpha;
-    T_V bemf_beta;
-    T_ANGLE Theta_est;
-    T_RPM rpm_est;
-    SMO_Observer() { Ialpha_est = Ibeta_est = 0; }
-    void EstimatingCurrent(T_V Valpha, T_V Vbeta, T_I Ialpha, T_I Ibeta) {}
-
-    void updatingBEMF() {}
-
-    T_ANGLE updatingTheta() { return Theta_est; }
-
-    T_RPM updatingRPM() { return rpm_est; }
-};
-template <class T_V, class T_I, class T_MID, class T_ANGLE, class T_RPM>
-void smo_control_T(SMO_Observer<T_V, T_I, T_MID, T_ANGLE, T_RPM>& smoer,
-                   T_V Valpha,
-                   T_V Vbeta,
-                   T_I Ialpha,
-                   T_I Ibeta,
-                   T_ANGLE& angle_o,
-                   T_RPM& rpm_o
-
-                   ) {
-    smoer.EstimatingCurrent();
-    smoer.updatingBEMF();
-    angle_o = smoer.updatingTheta();
-    rpm_o = smoer.updatingRPM();
-};
 
 template <class T_IO, class T_ACC, class T_ERR, class T_PID>
 void PID_Control_ap_fixed_smo(T_IO& Res_out,
@@ -135,125 +102,6 @@ void PID_Control_ap_fixed_smo(T_IO& Res_out,
 }
 
 template <int VALUE_CPR, class T_IO, int MAX_IO>
-void smo_ap_fixed(
-    // Input
-    T_IO Ia,
-    T_IO Ib,
-    T_IO Ic,
-    T_IO Va,
-    T_IO Vb,
-    T_IO Vc,
-    // Output
-    short& RPM,
-    short& Angle
-
-    ) {
-    const int W_pid = 32;
-    const int W_sin = 16;
-
-    typedef ap_fixed<40, 18, AP_RND, AP_WRAP> t_mid2; //
-    typedef ap_fixed<W_sin, 1, AP_TRN, AP_WRAP> t_sincos;
-    typedef ap_fixed<W_pid, 16, AP_TRN, AP_WRAP> t_pid;   // just a coefficients
-    typedef ap_fixed<32, 1, AP_TRN, AP_SAT> t_motor_para; //
-    typedef ap_fixed<32, 5, AP_TRN, AP_SAT> t_angle;      //
-
-    static t_mid2 ialpha_est = 0;
-    static t_mid2 ibeta_est = 0;
-    static t_angle angle_e_est = 0;
-    static t_glb_q15q16 w_e_est = 0; //
-
-    const short N = COMM_MACRO_PPR;                     //	Number of pole pairs
-    const t_motor_para Ld = COMM_MOTOR_PARA_LD;         //	stator d-axis inductance
-    const t_motor_para Lq = COMM_MOTOR_PARA_LD;         //	stator q-axis inductance
-    const t_glb_q15q16 Rs = COMM_MOTOR_PARA_RS;         //	resistance
-    const t_motor_para fai_m = COMM_MOTOR_PARA_FAI_M;   //	permanent magnet flux linkage
-    const t_motor_para dt_sim = COMM_MOTOR_PARA_DT_SIM; //	minmal time step for simulation
-    const t_angle PI = 3.1415926535;                    //
-    // const int table_length = 65536;
-    const int table_length = VALUE_CPR / N;
-
-    // if (angle_e_est > 2 * PI) angle_e_est = angle_e_est - 2 * PI;
-    int Theta = (int)(angle_e_est / 2 / PI * table_length);    // Apply angle correction
-    Theta = (Theta < 0) ? (int)(Theta + table_length) : Theta; // Correct negative angle
-    Theta = (Theta >= table_length) ? (int)(Theta - table_length) : Theta;
-
-    int Theta2 = Theta + 1;
-    if (Theta2 == table_length) Theta2 = 0;
-
-    // clang-format off
-    T_IO Ialpha, Ibeta, Ihomopolar; // no promotion
-    Clarke_Direct_3p_ap_fixed(
-        Ialpha, 
-        Ibeta, 
-        Ihomopolar, 
-        Ia, 
-        Ib, 
-        Ic);
-
-    T_IO Ualpha, Ubeta, Uhomopolar; // no promotion
-    Clarke_Direct_3p_ap_fixed(
-        Ualpha, 
-        Ubeta, 
-        Uhomopolar, 
-        Va, 
-        Vb, 
-        Vc);
-    // clang-format on
-
-    t_glb_q15q16 k = 100;             ////
-    t_glb_q15q16 h = 2 * MAX_VAL_PWM; // enough bandwidth for field weakening
-    t_mid2 valpha = k * (ialpha_est - Ialpha);
-    t_mid2 vbeta = k * (ibeta_est - Ibeta);
-    valpha = Clip_AP<t_mid2>(valpha, (0 - h), h);
-    vbeta = Clip_AP<t_mid2>(vbeta, (0 - h), h);
-
-    // t_sincos cos_theta; cos_theta(15, 0) = (t_sincos)cos((double)(angle_e_est));//cos_table[Theta];//
-    // t_sincos sin_theta; sin_theta(15, 0) = (t_sincos)sin((double)(angle_e_est));//sin_table[Theta];//
-    // t_sincos cos_theta; cos_theta(15, 0) = cos_table[Theta];//(t_sincos)cos((double)(angle_e_est));//
-    // t_sincos sin_theta; sin_theta(15, 0) = sin_table[Theta];//(t_sincos)sin((double)(angle_e_est));//
-    short k_cos = cos_table[Theta2] - cos_table[Theta];
-    short k_sin = sin_table[Theta2] - sin_table[Theta];
-    t_angle delta_theta = angle_e_est / 2 / PI * table_length - Theta;
-    t_sincos cos_theta;
-    cos_theta(15, 0) = cos_table[Theta] + (short)(k_cos * delta_theta);
-    t_sincos sin_theta;
-    sin_theta(15, 0) = sin_table[Theta] + (short)(k_sin * delta_theta);
-
-    t_mid2 Ea_cos = valpha * cos_theta;
-    t_mid2 Eb_sin = vbeta * sin_theta;
-
-    static t_mid2 Speed_GiE_prev = 0;
-    static t_mid2 Speed_Err_prev = 0;
-    t_mid2 Speed_pid_dout;
-    t_mid2 kp = 30000;
-    t_mid2 ki = 0;
-    // clang-format off
-    PID_Control_ap_fixed_smo<t_mid2, t_mid2, t_mid2, t_mid2>(
-        Speed_pid_dout, 
-        Speed_GiE_prev, 
-        Speed_Err_prev,
-        Eb_sin,     // data in
-        0 - Ea_cos, // sp
-        kp, 
-        ki, 
-        0, 
-        false);
-    // clang-format on
-
-    t_mid2 dialpha_est_div_dt = (-Rs * ialpha_est - w_e_est * (Ld - Lq) * ibeta_est + Ualpha - valpha) / Ld;
-    t_mid2 dibeta_est_div_dt = (w_e_est * (Ld - Lq) * ialpha_est - Rs * ibeta_est + Ubeta - vbeta) / Ld;
-
-    ialpha_est = ialpha_est + dt_sim * dialpha_est_div_dt;
-    ibeta_est = ibeta_est + dt_sim * dibeta_est_div_dt;
-    angle_e_est = angle_e_est + dt_sim * w_e_est;
-    if (angle_e_est > 2 * PI) angle_e_est = angle_e_est - 2 * PI;
-    w_e_est = Speed_pid_dout;
-
-    RPM = (short)(Speed_pid_dout / 2 / PI * 60 / N);
-    Angle = (short)(angle_e_est / 2 / PI * VALUE_CPR / N);
-}
-
-template <int VALUE_CPR, class T_IO, int MAX_IO>
 void smo_in_foc_ap_fixed(
     // Input
     T_IO Ialpha,
@@ -289,6 +137,9 @@ void smo_in_foc_ap_fixed(
     static t_angle angle_e_est = 0;
     static t_glb_q15q16 w_e_est = 0;
 
+    static t_speedI Speed_GiE_prev = 0;
+    static t_speedE Speed_Err_prev = 0;
+
     // const short N = COMM_MACRO_PPR;                     //	Number of pole pairs
     const t_motor_para Ld = COMM_MOTOR_PARA_LD;         //	stator d-axis inductance
     const t_motor_para Lq = COMM_MOTOR_PARA_LD;         //	stator q-axis inductance
@@ -303,13 +154,16 @@ void smo_in_foc_ap_fixed(
     const t_glb_q15q16 const_angle = table_length / (double)PI_2;
 
     static short Theta_pre = 0;
-    if (Va == 0 && Vb == 0 && Vc == 0) {
-        ialpha_est = 0;
-        ibeta_est = 0;
-        Theta_pre = 0;
-        angle_e_est = 0;
-        w_e_est = 0;
-    }
+
+    // if (Ialpha==0&&Ibeta==0){
+    //     ialpha_est = 0;
+    //     ibeta_est = 0;
+    //     angle_e_est = 0;
+    //     w_e_est = 0;
+    //     Theta_pre = 0;
+    //     Speed_GiE_prev = 0;
+    //     Speed_Err_prev = 0;
+    // }
 
     short Theta = Theta_pre; // (short)(angle_e_est/2/PI*table_length);              // Apply angle correction
     Theta = (Theta < 0) ? (short)(Theta + table_length) : Theta; // Correct negative angle
@@ -360,8 +214,6 @@ void smo_in_foc_ap_fixed(
     t_speed Ea_cos = valpha * cos_theta;
     t_speed Eb_sin = vbeta * sin_theta;
 
-    static t_speedI Speed_GiE_prev = 0;
-    static t_speedE Speed_Err_prev = 0;
     t_speed Speed_pid_dout;
     t_pid kp = 40000;
     t_pid ki = 0;
@@ -400,9 +252,13 @@ void smo_in_foc_ap_fixed(
 template <int VALUE_CPR, class T_IO, int MAX_IO, int W, int I>
 void foc_core_ap_fixed_sensorless(
     // Input
-    T_IO Ia,            // Phase A current
-    T_IO Ib,            // Phase B current
-    T_IO Ic,            // Phase B current
+    T_IO Ia, // Phase A current
+    T_IO Ib, // Phase B current
+    T_IO Ic, // Phase c current
+    // Input voltage for SMO
+    T_IO Va,            // Phase A voltage
+    T_IO Vb,            // Phase B voltage
+    T_IO Vc,            // Phase c voltage
     short RPM_sensor,   // RPM
     short Angle_sensor, // Encoder count
     // Output for GPIO
@@ -479,7 +335,7 @@ void foc_core_ap_fixed_sensorless(
     const int I_RPME = I_RPM + 1;
     const int W_RPMI = W_RPM + 10;
     const int I_RPMI = I_RPM + 10;
-    typedef ap_fixed<W_RPM, I_RPM, AP_TRN, AP_WRAP> t_RPM;
+    typedef ap_fixed<W_RPM, I_RPM, AP_TRN, AP_SAT> t_RPM;
     typedef ap_fixed<W_RPME, I_RPME, AP_TRN, AP_SAT> t_RPME;
     typedef ap_fixed<W_RPMI, I_RPMI, AP_TRN, AP_SAT> t_RPMI;
 
@@ -603,7 +459,7 @@ void foc_core_ap_fixed_sensorless(
 
     // SMO module---------------------------------------------------------------
     short RPM_sensorless, Angle_sensorless;
-    static T_IO Va = 0, Vb = 0, Vc = 0;
+    // static T_IO Va = 0, Vb = 0, Vc = 0;
     smo_in_foc_ap_fixed<VALUE_CPR, T_IO, MAX_IO>(
         // Input
         Ialpha,
@@ -862,9 +718,9 @@ void foc_core_ap_fixed_sensorless(
     Vb_cmd = Clip_AP<T_IO>(Vb_iclk, (T_IO)(0 - MAX_IO), (T_IO)MAX_IO);
     Vc_cmd = Clip_AP<T_IO>(Vc_iclk, (T_IO)(0 - MAX_IO), (T_IO)MAX_IO);
 
-    Va = Va_cmd;
-    Vb = Vb_cmd;
-    Vc = Vc_cmd;
+    // Va = Va_cmd;
+    // Vb = Vb_cmd;
+    // Vc = Vc_cmd;
 
     t_glb_q15q16 apx_id_stts = Id;
     t_glb_q15q16 apx_iq_stts = Iq;

@@ -26,8 +26,8 @@
 // Argument
 //--------------------------------------------------------------------------
 
-enum Encoding_Mode { A_Leading_B = 0, B_Leading_A };
-
+enum Encoding_Mode { B_Leading_A = 0, A_Leading_B };
+enum Dirction_QEI { clockwise_n = 0, clockwise_p };
 struct AxiParameters_QEI { //
     int qei_args_cpr;
     int qei_args_ctrl;
@@ -243,9 +243,8 @@ static bool isRaising(int idx, QEI_EdgeInfo edges_cur) {
  * between the two pulses.
  * @param pre The previous status of pulse
  * @param cur The current status of pulse
- * @param mode The mode represents encoding mode, A leading B is represented by 0 and B leading A is represented by 1.
- * @param dir The direction of current pulse, clockwise is represented by 1 and counterclockwise is represented by 0 in
- * Channel A leading Channel B. Another mode is the oppsite.
+ * @param mode The mode represents encoding mode, B leading A is represented by 0 and A leading B is represented by 1.
+ * @param dir The direction of current pulse, clockwise is represented by 1 and counterclockwise is represented by 0.
  * @param ii_cycles The number of cycles between previous pulse and current pulse
  */
 static void processABedges(QEI_EdgeInfo pre, QEI_EdgeInfo cur, ap_uint<1>& mode, bool& dir, unsigned int& ii_cycles) {
@@ -329,6 +328,7 @@ void calcCounter(hls::stream<QEI_EdgeInfo>& strm_cntEdge,
     bool dir = true; // clockwise
     ap_uint<32> ctrl = axi_qei_ctrl;
     ap_uint<1> mode = (ctrl > (ap_uint<32>)0);
+    mode = mode ^ 1; // inversing the behavior for default setting of  axi_qei_ctrl '0' means B leading A
 //#define DBG_CHIPSCOPE
 #ifdef DBG_CHIPSCOPE
     unsigned short freqA = 0;

@@ -33,7 +33,7 @@
 #define COMM_MACRO_PPR (2)
 
 // Number of sin-cos table for 2*pi.
-#define COMM_MACRO_TLB_LENTH (500)
+#define COMM_MACRO_TLB_LENTH (1000)
 //
 #define COMM_CLOCK_FREQ (100000000)
 

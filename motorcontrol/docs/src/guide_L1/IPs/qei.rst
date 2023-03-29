@@ -39,7 +39,7 @@ As it is shown in the aboved pictures, the whole QEI have 3 functions and datafl
 
 * catchingEdge: This module captures valid signal by catching on the rising and falling edges of the pulse train. We can mark the state and type of the pulse and filter out invalid signals.
 
-* calcCounter: This module calculates edges feature by counting the leading and trailing edges, the counter monitors the transition in its relationship to the state of the opposite channel, and can generate reliable position and speed. The user can initialize the variable mode, and it represents encoding mode, A leading B is represented by 0 and B leading A is represented by 1. The direction of system, clockwise is represented by 1 and counterclockwise is represented by 0 in Channel A leading Channel B.
+* calcCounter: This module calculates edges feature by counting the leading and trailing edges, the counter monitors the transition in its relationship to the state of the opposite channel, and can generate reliable position and speed. The user can initialize the variable mode, and it represents encoding mode, B leading A is represented by 0 and A leading B is represented by 1. The direction of system, clockwise is represented by 1 and counterclockwise is represented by 0 both two encoding mode.
 
 Profiling 
 ============

@@ -88,6 +88,9 @@ void hls_foc_strm_ap_fixed_sensorless(
     hls::stream<T_IO>& Ia,
     hls::stream<T_IO>& Ib,
     hls::stream<T_IO>& Ic,
+    hls::stream<T_IO>& Va_smo,
+    hls::stream<T_IO>& Vb_smo,
+    hls::stream<T_IO>& Vc_smo,
     hls::stream<T_RPM_THETA_FOC>& FOC_RPM_THETA_m, // RPM & Theta_m
     // Output
     hls::stream<T_IO>& Va_cmd,
@@ -140,27 +143,38 @@ void hls_foc_strm_ap_fixed_sensorless(
     const T_IO RPM_factor = 60.0 / 2 / 3.1415926535;
     T_IO speed_to_RPM = RPM_factor / (T_IO)ppr_args;
     T_IO RPM_to_speed = (T_IO)ppr_args / RPM_factor;
-    bool Filebased_flag = (control_mode_args & 0x40000000) != 0;
 LOOP_FOC_STRM:
     for (long i = 0; i < trip_cnt; i++) {
 //#pragma HLS pipeline II = 1
 #pragma HLS PIPELINE off
-        control_mode_args &= 0xBFFFFFFF;
+        bool Filebased_flag = (control_mode_args & 0x40000000) != 0;
+        int control_mode = control_mode_args & 0x0000FFFF;
         static int FOC_RPM_THETA_m_in; // = FOC_RPM_THETA_m.read();
         static T_IO Ia_in;
         static T_IO Ib_in;
         static T_IO Ic_in;
+        static T_IO Va_in;
+        static T_IO Vb_in;
+        static T_IO Vc_in;
         if (Filebased_flag) {
             if (!Ia.empty()) {
                 Ia_in = Ia.read();
                 Ib_in = Ib.read();
                 Ic_in = Ic.read();
+
+                Va_in = Va_smo.read();
+                Vb_in = Vb_smo.read();
+                Vc_in = Vc_smo.read();
             }
         } else {
-            while (!Ia.empty()) {
+            while (!Ia.empty()) { // hardware on board
                 Ia_in = Ia.read();
                 Ib_in = Ib.read();
                 Ic_in = Ic.read();
+
+                Va_in = Va_smo.read();
+                Vb_in = Vb_smo.read();
+                Vc_in = Vc_smo.read();
             }
         }
         if (!FOC_RPM_THETA_m.empty()) FOC_RPM_THETA_m_in = FOC_RPM_THETA_m.read();
@@ -177,11 +191,11 @@ LOOP_FOC_STRM:
 
         // details::foc_core_ap_fixed<VALUE_CPR, T_IO, MAX_IO , W, I>(
         foc_core_ap_fixed_sensorless<VALUE_CPR, T_IO, MAX_IO, W, I>(
-            Ia_in, Ib_in, Ic_in, RPM_in, Angle_in, Va_out, Vb_out, Vc_out, tab_map_factor, cpr_div_ppr, speed_to_RPM,
-            RPM_to_speed, control_mode_args, control_fixperiod_args, flux_sp_args, flux_kp_args, flux_ki_args,
-            flux_kd_args, torque_sp_args, torque_kp_args, torque_ki_args, torque_kd_args, speed_sp_args, speed_kp_args,
-            speed_ki_args, speed_kd_args, angle_sh_args, vd_args, vq_args, trigger_args, control2_args, fw_kp_args,
-            fw_ki_args,
+            Ia_in, Ib_in, Ic_in, Va_in, Vb_in, Vc_in, RPM_in, Angle_in, Va_out, Vb_out, Vc_out, tab_map_factor,
+            cpr_div_ppr, speed_to_RPM, RPM_to_speed, control_mode, control_fixperiod_args, flux_sp_args, flux_kp_args,
+            flux_ki_args, flux_kd_args, torque_sp_args, torque_kp_args, torque_ki_args, torque_kd_args, speed_sp_args,
+            speed_kp_args, speed_ki_args, speed_kd_args, angle_sh_args, vd_args, vq_args, trigger_args, control2_args,
+            fw_kp_args, fw_ki_args,
             //
             id_stts, flux_acc_stts, flux_err_stts, flux_out_stts, iq_stts, torque_acc_stts, torque_err_stts,
             torque_out_stts, speed_stts, speed_acc_stts, speed_err_stts, speed_out_stts, angle_stts, Ialpha_stts,
@@ -211,6 +225,9 @@ void hls_foc_strm_int_sensorless(
     hls::stream<int>& Ia,
     hls::stream<int>& Ib,
     hls::stream<int>& Ic,
+    hls::stream<int>& Va_smo,
+    hls::stream<int>& Vb_smo,
+    hls::stream<int>& Vc_smo,
     hls::stream<T_RPM_THETA_FOC>& FOC_RPM_THETA_m, // RPM & Theta_m
     // Output
     hls::stream<int>& Va_cmd,
@@ -270,18 +287,33 @@ LOOP_FOC_STRM:
         static int Ia_in0;
         static int Ib_in0;
         static int Ic_in0;
+        static int Va_in0;
+        static int Vb_in0;
+        static int Vc_in0;
         if (!Ia.empty()) {
             Ia_in0 = Ia.read();
             Ib_in0 = Ib.read();
             Ic_in0 = Ic.read();
+
+            Va_in0 = Va_smo.read();
+            Vb_in0 = Vb_smo.read();
+            Vc_in0 = Vc_smo.read();
         }
         t_glb_q15q16 Ia_in;
         t_glb_q15q16 Ib_in;
         t_glb_q15q16 Ic_in;
 
+        t_glb_q15q16 Va_in;
+        t_glb_q15q16 Vb_in;
+        t_glb_q15q16 Vc_in;
+
         Ia_in(31, 0) = Ia_in0;
         Ib_in(31, 0) = Ib_in0;
         Ic_in(31, 0) = Ic_in0;
+
+        Va_in(31, 0) = Va_in0;
+        Vb_in(31, 0) = Vb_in0;
+        Vc_in(31, 0) = Vc_in0;
 
         if (!FOC_RPM_THETA_m.empty()) FOC_RPM_THETA_m_in = FOC_RPM_THETA_m.read();
 
@@ -297,11 +329,11 @@ LOOP_FOC_STRM:
         int control2_args = 0;
 
         foc_core_ap_fixed_sensorless<VALUE_CPR, T_M, MAX_IO, W, I>(
-            (T_M)Ia_in, (T_M)Ib_in, (T_M)Ic_in, RPM_in, Angle_in, Va_out, Vb_out, Vc_out, tab_map_factor, cpr_div_ppr,
-            (T_M)speed_to_RPM, (T_M)RPM_to_speed, control_mode_args, control_fixperiod_args, flux_sp_args, flux_kp_args,
-            flux_ki_args, flux_kd_args, torque_sp_args, torque_kp_args, torque_ki_args, torque_kd_args, speed_sp_args,
-            speed_kp_args, speed_ki_args, speed_kd_args, angle_sh_args, vd_args, vq_args, trigger_args, control2_args,
-            fw_kp_args, fw_ki_args,
+            (T_M)Ia_in, (T_M)Ib_in, (T_M)Ic_in, (T_M)Va_in, (T_M)Vb_in, (T_M)Vc_in, RPM_in, Angle_in, Va_out, Vb_out,
+            Vc_out, tab_map_factor, cpr_div_ppr, (T_M)speed_to_RPM, (T_M)RPM_to_speed, control_mode_args,
+            control_fixperiod_args, flux_sp_args, flux_kp_args, flux_ki_args, flux_kd_args, torque_sp_args,
+            torque_kp_args, torque_ki_args, torque_kd_args, speed_sp_args, speed_kp_args, speed_ki_args, speed_kd_args,
+            angle_sh_args, vd_args, vq_args, trigger_args, control2_args, fw_kp_args, fw_ki_args,
             //
             id_stts, flux_acc_stts, flux_err_stts, flux_out_stts, iq_stts, torque_acc_stts, torque_err_stts,
             torque_out_stts, speed_stts, speed_acc_stts, speed_err_stts, speed_out_stts, angle_stts, Ialpha_stts,

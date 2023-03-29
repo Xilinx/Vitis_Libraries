@@ -542,17 +542,27 @@ struct FocAxiParameters {
 };
 
 template <class T_afx, class T>
-void printFocInput(FILE* fp, T_afx iaf, T_afx ibf, T_afx icf, T i_speed_theta_m) {
+void printFocInput(
+    FILE* fp, T_afx iaf, T_afx ibf, T_afx icf, T_afx vaf_smo, T_afx vbf_smo, T_afx vcf_smo, T i_speed_theta_m) {
     fprintf(fp, "\t %5.6f", iaf.to_float());
     fprintf(fp, "\t %5.6f", ibf.to_float());
     fprintf(fp, "\t %5.6f", icf.to_float());
     fprintf(fp, "\t%d", i_speed_theta_m);
+    fprintf(fp, "\t %5.6f", vaf_smo.to_float());
+    fprintf(fp, "\t %5.6f", vbf_smo.to_float());
+    fprintf(fp, "\t %5.6f", vcf_smo.to_float());
     int tmp;
     tmp = iaf.range(iaf.length() - 1, 0);
     fprintf(fp, "\t%d", tmp);
     tmp = ibf.range(ibf.length() - 1, 0);
     fprintf(fp, "\t%d", tmp);
     tmp = icf.range(icf.length() - 1, 0);
+    fprintf(fp, "\t%d", tmp);
+    tmp = vaf_smo.range(vaf_smo.length() - 1, 0);
+    fprintf(fp, "\t%d", tmp);
+    tmp = vbf_smo.range(vbf_smo.length() - 1, 0);
+    fprintf(fp, "\t%d", tmp);
+    tmp = vcf_smo.range(vcf_smo.length() - 1, 0);
     fprintf(fp, "\t%d\n", tmp);
 }
 
@@ -577,6 +587,9 @@ int getInputFromFile(const char* fname_para,
                      hls::stream<T1_afx>& strm_a,
                      hls::stream<T1_afx>& strm_b,
                      hls::stream<T1_afx>& strm_c,
+                     hls::stream<T1_afx>& strm_va,
+                     hls::stream<T1_afx>& strm_vb,
+                     hls::stream<T1_afx>& strm_vc,
                      hls::stream<T2>& strm_speed_theta_m) { // return number of loading
     int ret = 0;
     assert(fname_para);
@@ -593,23 +606,39 @@ int getInputFromFile(const char* fname_para,
     do {
         std::stringstream istr(line);
         float a, b, c;
+        float a_smo, b_smo, c_smo;
         int a1, b1, c1;
+        int a1_smo, b1_smo, c1_smo;
         T1_afx a2, b2, c2;
+        T1_afx a2_smo, b2_smo, c2_smo;
         const int w_t1 = a2.length();
+        const int w_t2 = a2_smo.length();
         int d;
         istr >> a;
         istr >> b;
         istr >> c;
         istr >> d;
+        istr >> a_smo;
+        istr >> b_smo;
+        istr >> c_smo;
         istr >> a1;
         istr >> b1;
         istr >> c1;
+        istr >> a1_smo;
+        istr >> b1_smo;
+        istr >> c1_smo;
         a2(w_t1 - 1, 0) = a1;
         b2(w_t1 - 1, 0) = b1;
         c2(w_t1 - 1, 0) = c1;
+        a2_smo(w_t2 - 1, 0) = a1_smo;
+        b2_smo(w_t2 - 1, 0) = b1_smo;
+        c2_smo(w_t2 - 1, 0) = c1_smo;
         strm_a.write(a2);
         strm_b.write(b2);
         strm_c.write(c2);
+        strm_va.write(a2_smo);
+        strm_vb.write(b2_smo);
+        strm_vc.write(c2_smo);
         strm_speed_theta_m.write(d);
         ret++;
         float a3, b3, c3;
@@ -639,7 +668,7 @@ static int checkError(float data_in,
 
     if (err_abs < threshold) return 0;
     printf(
-        " ERROR over limitation(%3.3f) for channel %s at step=%d\t: data =  %5.3f\t, reference = %5.6f err = %5.6f "
+        " Warning over limitation(%3.3f) for channel %s at step=%d\t: data =  %5.3f\t, reference = %5.6f err = %5.6f "
         "err_all = %5.6f mean(err_abs_all) = %5.6f err_max = %5.6f err_min = %5.6f\n",
         threshold, strm_chnl, step, data_in, data_ref, err, err_all, err_all_abs / (step + 1), err_max, err_min);
     return 1;

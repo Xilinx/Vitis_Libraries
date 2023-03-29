@@ -75,7 +75,7 @@ Note: The current test is a hybrid test of the 8 modes run serially. Each mode's
 
    * title of "simulation parameters" shows the setting for simulation. The first 3000 test steps use MOD_SPEED_WITH_TORQUE, Speed setpoint is 10000, as we could check the "motor parameter" motor.w=1030.652 (rad/s) is near the setting rpm 10000. (RPM = motor.w * 60 / (2 * pi) ).
 
-   * title of "log files" shows the log files generate for this 3000 steps. They will be used as input and golden files for the file flow test, which better simulate the actual running. Then still apply MOD_SPEED_WITH_TORQUE for the next 3000 steps, Speed setpoint is 16000.
+   * title of "log files" shows the log files generate for this 3000 steps. They will be used as input and golden files for the file flow test, which better simulate the actual running. Then still apply MOD_SPEED_WITH_TORQUE for the next 3000 steps, Speed setpoint is -16000. That will run to another direction.
 
 Now we firstly run Model Based Sim to get the input and output of FOC with Motor module, and save them to files. This sim will restart the FOC ip for every input.
 
@@ -114,6 +114,22 @@ Table 2 : Derived Motor Configuration
    :align: center
 
 * Important: Change the sine and cosine tables in the file foc.h accordingly when changing this CPR(COMM_MACRO_CPR) in the commen.hpp .
+
+Static Parameter of FOC in simulation
+
+.. image:: /images/Static_parameter_foc.png
+   :alt: Static Parameter of IP
+   :width: 70%
+   :align: center
+
+AXI-lite Parameter of FOC setting in simulation
+
+.. image:: /images/AXI_LITE_parameter_FOC.png
+   :alt: AXI-lite Parameter of IP
+   :width: 70%
+   :align: center
+
+Other AXI-lite Parameter is all zero in the start of simulation.
 
 File Based Simulation of FOC IP's result is shown blow.
 
@@ -157,12 +173,15 @@ After the conversion,
 
 When clk equal 100M, Fixperiod_args is 1, Theriotical RPM will be 600000.
 
-When clk equal 100M, Fixperiod_args is 4000, Theriotical RPM will be 300.
+When clk equal 100M, Fixperiod_args is 3999, Theriotical RPM will be 300.
+
+(II = 5, interval cycle = (FixedPeriod+1)*II), RPM = 60/(interval cycle/freq*CPR))
 
 Note: Test summary all the result of 8 modes on the file flow.
 
 .. code-block:: bash
    
+
    SIM_FOC********************************************************** TEST SUMMARY ***********************************************************
    SIM_FOC_M:  ------ Summary for Model-based simulation -----------------------------------------------------------
    SIM_FOC_M:  Kernel sampling mode           : one calling one sample
@@ -183,14 +202,15 @@ Note: Test summary all the result of 8 modes on the file flow.
    SIM_FOC_F:  Kernel sampling mode           : one calling multi-sample
    SIM_FOC_F:  Phase-1: 0.000(ms) ~ 30.000(ms)      Mode: MOD_TORQUE_WITHOUT_SPEED           RPM: 10000     Sampling II: Depending on II after synthesis    Over threshold(1.20V): 0
    SIM_FOC_F:  Phase-2: 30.000(ms) ~ 60.000(ms)     Mode: MOD_SPEED_WITH_TORQUE              RPM: 10000     Sampling II: Depending on II after synthesis    Over threshold(1.20V): 0
-   SIM_FOC_F:  Phase-3: 60.000(ms) ~ 90.000(ms)     Mode: MOD_SPEED_WITH_TORQUE              RPM: 16000     Sampling II: Depending on II after synthesis    Over threshold(1.20V): 0
-   SIM_FOC_F:  Phase-4: 90.000(ms) ~ 120.000(ms)    Mode: MOD_FLUX                           RPM: 16000     Sampling II: Depending on II after synthesis    Over threshold(1.20V): 0
-   SIM_FOC_F:  Phase-5: 120.000(ms) ~ 150.000(ms)   Mode: MOD_MANUAL_TORQUE_FLUX             RPM: 16000     Sampling II: Depending on II after synthesis    Over threshold(1.20V): 0
-   SIM_FOC_F:  Phase-6: 150.000(ms) ~ 180.000(ms)   Mode: MOD_MANUAL_TORQUE                  RPM: 16000     Sampling II: Depending on II after synthesis    Over threshold(1.20V): 0
-   SIM_FOC_F:  Phase-7: 180.000(ms) ~ 210.000(ms)   Mode: MOD_MANUAL_FLUX                    RPM: 16000     Sampling II: Depending on II after synthesis    Over threshold(1.20V): 0
-   SIM_FOC_F:  Phase-8: 210.000(ms) ~ 240.000(ms)   Mode: MOD_STOPPED                        RPM: 16000     Sampling II: Depending on II after synthesis    Over threshold(1.20V): 0
-   SIM_FOC_F:  Phase-9: 240.000(ms) ~ 270.000(ms)   Mode: MOD_MANUAL_TORQUE_FLUX_FIXED_SPEED RPM: 16000     Sampling II: Depending on II after synthesis    Over threshold(1.20V).
+   SIM_FOC_F:  Phase-3: 60.000(ms) ~ 90.000(ms)     Mode: MOD_SPEED_WITH_TORQUE              RPM: -16000    Sampling II: Depending on II after synthesis    Over threshold(1.20V): 0
+   SIM_FOC_F:  Phase-4: 90.000(ms) ~ 120.000(ms)    Mode: MOD_FLUX                           RPM: -16000    Sampling II: Depending on II after synthesis    Over threshold(1.20V): 0
+   SIM_FOC_F:  Phase-5: 120.000(ms) ~ 150.000(ms)   Mode: MOD_MANUAL_TORQUE_FLUX             RPM: -16000    Sampling II: Depending on II after synthesis    Over threshold(1.20V): 0
+   SIM_FOC_F:  Phase-6: 150.000(ms) ~ 180.000(ms)   Mode: MOD_MANUAL_TORQUE                  RPM: -16000    Sampling II: Depending on II after synthesis    Over threshold(1.20V): 0
+   SIM_FOC_F:  Phase-7: 180.000(ms) ~ 210.000(ms)   Mode: MOD_MANUAL_FLUX                    RPM: -16000    Sampling II: Depending on II after synthesis    Over threshold(1.20V): 0
+   SIM_FOC_F:  Phase-8: 210.000(ms) ~ 240.000(ms)   Mode: MOD_STOPPED                        RPM: -16000    Sampling II: Depending on II after synthesis    Over threshold(1.20V): 0
+   SIM_FOC_F:  Phase-9: 240.000(ms) ~ 270.000(ms)   Mode: MOD_MANUAL_TORQUE_FLUX_FIXED_SPEED RPM: -16000    Sampling II: Depending on II after synthesis    Over threshold(1.20V).
    SIM_FOC_F:********************************************************************************************************************************
+
 
 
 
@@ -209,7 +229,7 @@ Profiling
 
 The hardware resource utilizations are listed in the following table.
 Different tool versions may result slightly different resource.
-The max throughput is 13M/s by 22.2, and is 20M/s by 23.1 .
+The max throughput is 20M/s by 22.2 and 23.1 .
 
 * Important: Change the sine and cosine tables in the file foc.h accordingly when changing this CPR(COMM_MACRO_CPR) in the commen.hpp .
 
@@ -220,7 +240,7 @@ The max throughput is 13M/s by 22.2, and is 20M/s by 23.1 .
     +------------+----------+----------+----------+----------+---------+-----------------+
     |     IP     |   BRAM   |   URAM   |    DSP   |    FF    |   LUT   | Frequency(MHz)  |
     +------------+----------+----------+----------+----------+---------+-----------------+
-    | FOC_sensor |     2    |     0    |     54   |   5571   |   5248  |       300       |
+    | FOC_sensor |     2    |     0    |     67   |   5019   |   5179  |       300       |
     +------------+----------+----------+----------+----------+---------+-----------------+
 
 Table 4 : IP profiling of Sensor based field-orientated control
