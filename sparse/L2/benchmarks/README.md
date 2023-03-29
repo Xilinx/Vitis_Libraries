@@ -70,8 +70,8 @@ Setup hardware build and run envrionment using the Vitis and XRT scripts:
 Run Makefile command. For example:
 
 ```
-    make build TARGET=hw PLATFORM_REPO_PATHS=/opt/xilinx/platforms DEVICE=xilinx_u280_xdma_201920_3
-    make host TARGET=hw PLATFORM_REPO_PATHS=/opt/xilinx/platforms DEVICE=xilinx_u280_xdma_201920_3
+    make build TARGET=hw PLATFORM_REPO_PATHS=/opt/xilinx/platforms PLATFORM=xilinx_u280_xdma_201920_3
+    make host TARGET=hw PLATFORM_REPO_PATHS=/opt/xilinx/platforms PLATFORM=xilinx_u280_xdma_201920_3
 ```
 
 The Makefile supports various build target including hw emulation and hardware (hw_emu, hw)

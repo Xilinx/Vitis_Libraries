@@ -19,8 +19,8 @@ The steps for library download and environment setup can be found in [here](http
 Run the following make commands to build your XCLBIN and host binary targeting Alveo U280. Please note that the hardware building process will take a long time. It can be 8-10 hours.
 
 ```
-    make build TARGET=hw PLATFORM_REPO_PATHS=/opt/xilinx/platforms DEVICE=xilinx_u280_xdma_201920_3
-    make host TARGET=hw PLATFORM_REPO_PATHS=/opt/xilinx/platforms DEVICE=xilinx_u280_xdma_201920_3
+    make build TARGET=hw PLATFORM_REPO_PATHS=/opt/xilinx/platforms PLATFORM=xilinx_u280_xdma_201920_3
+    make host TARGET=hw PLATFORM_REPO_PATHS=/opt/xilinx/platforms PLATFORM=xilinx_u280_xdma_201920_3
 ```
 
 * **Run benchmark(Step 3)**

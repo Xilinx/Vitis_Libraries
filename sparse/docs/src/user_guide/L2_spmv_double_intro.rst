@@ -69,11 +69,11 @@ To build and test the design on Linux platform, please make sure your **XILINX_V
 .. code-block:: bash
 
    make cleanall
-   make run PLATFORM_REPO_PATHS=$XILINX_VITIS/platforms  DEVICE=xilinx_u280_xdma_201920_3  TARGET=hw_emu
+   make run PLATFORM_REPO_PATHS=$XILINX_VITIS/platforms  PLATFORM=xilinx_u280_xdma_201920_3  TARGET=hw_emu
 
 * To build and launch the hardware accelerator on the Alveo U280, please enter following commands. Please replace the **$XILINX_VITIS** with your Vitis 2022.2 installation location.
 
 .. code-block:: bash
 
    make cleanall
-   make run PLATFORM_REPO_PATHS=$XILINX_VITIS/platforms  DEVICE=xilinx_u280_xdma_201920_3  TARGET=hw
+   make run PLATFORM_REPO_PATHS=$XILINX_VITIS/platforms  PLATFORM=xilinx_u280_xdma_201920_3  TARGET=hw

@@ -92,8 +92,8 @@ Run the following make command to build your XCLBIN and host binary targeting a 
 
 .. code-block:: bash
 
-   make build TARGET=hw PLATFORM_REPO_PATHS=/opt/xilinx/platforms DEVICE=xilinx_u280_xdma_291020_3
-   make host TARGET=hw PLATFORM_REPO_PATHS=/opt/xilinx/platforms DEVICE=xilinx_u280_xdma_291020_3
+   make build TARGET=hw PLATFORM_REPO_PATHS=/opt/xilinx/platforms PLATFORM=xilinx_u280_xdma_291020_3
+   make host TARGET=hw PLATFORM_REPO_PATHS=/opt/xilinx/platforms PLATFORM=xilinx_u280_xdma_291020_3
 
 * **Generate inputs(Step 3)**
 
