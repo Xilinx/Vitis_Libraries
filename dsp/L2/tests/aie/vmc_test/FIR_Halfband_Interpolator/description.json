@@ -58,7 +58,7 @@
         "customized_params": {
                 "params": "--dataflow -Xchess=llvm.xargs=-std=c++2a -Xx86sim=-client=vmc -v -output=graph",
                 "default": {
-                    "GRAPHNAME": "FIR_Halfband_Interpolator_dc1b2b6f",
+                    "GRAPHNAME": "FIR_Halfband_Interpolator_b0b0c22a",
                     "VMC_GRAPHDIR": "xmc_aie_lib/$(GRAPHNAME)",
                     "VMC_KERNEL": "vmc_fir_interpolate_hb"
                 }

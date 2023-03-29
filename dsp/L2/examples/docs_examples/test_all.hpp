@@ -21,6 +21,7 @@
 #include "test_widget_api_cast.hpp"
 #include "test_widg_r2c.hpp"
 #include "test_fft_window.hpp"
+#include "test_dds_lut.hpp"
 
 using namespace adf;
 #define NUM_IP_FIR 1
@@ -33,6 +34,8 @@ using namespace adf;
 #define NUM_IP_WIDG_R2C 1
 #define NUM_OP_WIDG_R2C 1
 #define NUM_IP_FFTW 1
+#define NUM_IP_DDS_LUT 1
+#define NUM_OP_DDS_LUT 1
 
 template <unsigned int elem_start, unsigned int num_ports, unsigned int NUM_IP_ALL, typename plioType>
 void createPLIOFileConnections(std::array<plioType, NUM_IP_ALL>& plioPorts,
@@ -51,10 +54,10 @@ namespace all_example {
 
 class test_example : public graph {
    public:
-    static constexpr unsigned int NUM_IP_ALL =
-        NUM_IP_FIR + NUM_IP_DDS + NUM_IP_FFT + NUM_IP_MM + NUM_IP_WIDG_API + NUM_IP_WIDG_R2C + NUM_IP_FFTW;
-    static constexpr unsigned int NUM_OP_ALL =
-        NUM_IP_FIR + NUM_IP_DDS + NUM_IP_FFT + NUM_OP_MM + NUM_OP_WIDG_API + NUM_OP_WIDG_R2C + NUM_IP_FFTW;
+    static constexpr unsigned int NUM_IP_ALL = NUM_IP_FIR + NUM_IP_DDS + NUM_IP_FFT + NUM_IP_MM + NUM_IP_WIDG_API +
+                                               NUM_IP_WIDG_R2C + NUM_IP_FFTW + NUM_IP_DDS_LUT;
+    static constexpr unsigned int NUM_OP_ALL = NUM_IP_FIR + NUM_IP_DDS + NUM_IP_FFT + NUM_OP_MM + NUM_OP_WIDG_API +
+                                               NUM_OP_WIDG_R2C + NUM_IP_FFTW + NUM_OP_DDS_LUT;
 
     std::array<input_plio, NUM_IP_ALL> in;
     std::array<output_plio, NUM_OP_ALL> out;
@@ -66,6 +69,7 @@ class test_example : public graph {
     widg1_example::test_widg_api uut_widg_api;
     widgr2c_example::test_widg_r2c uut_widg_r2c;
     fft_win_example::test_fftw uut_fftw;
+    dds_lut_example::test_dds_lut uut_dds_lut;
 
     test_example() {
         // create input file connections - first template argument indicates first index of plio port for this library
@@ -77,6 +81,7 @@ class test_example : public graph {
         createPLIOFileConnections<8, NUM_IP_WIDG_API, NUM_IP_ALL>(in, "input", "w_api", "in");
         createPLIOFileConnections<10, NUM_IP_WIDG_R2C, NUM_IP_ALL>(in, "input", "w_r2c", "in");
         createPLIOFileConnections<11, NUM_IP_FFTW, NUM_IP_ALL>(in, "input", "fftw", "in");
+        createPLIOFileConnections<12, NUM_IP_DDS_LUT, NUM_IP_ALL>(in, "input", "ddslut", "in");
 
         // create output file connections
         createPLIOFileConnections<0, NUM_IP_DDS, NUM_OP_ALL>(out, "output", "dds", "out");
@@ -86,6 +91,7 @@ class test_example : public graph {
         createPLIOFileConnections<7, NUM_OP_WIDG_API, NUM_OP_ALL>(out, "output", "w_api", "out");
         createPLIOFileConnections<8, NUM_OP_WIDG_R2C, NUM_OP_ALL>(out, "output", "w_r2c", "out");
         createPLIOFileConnections<9, NUM_IP_FFTW, NUM_OP_ALL>(out, "output", "fftw", "out");
+        createPLIOFileConnections<10, NUM_OP_DDS_LUT, NUM_OP_ALL>(out, "output", "ddslut", "out");
 
         // wire up dds testbench
         connect<>(in[0].out[0], uut_dds.in);
@@ -118,6 +124,10 @@ class test_example : public graph {
         // wire up fft window
         connect<>(uut_fftw.out, out[9].in[0]);
         connect<>(in[11].out[0], uut_fftw.in);
+
+        // wire up dds lut
+        connect<>(uut_dds_lut.out, out[10].in[0]);
+        connect<>(in[12].out[0], uut_dds_lut.in);
     };
 };
 };

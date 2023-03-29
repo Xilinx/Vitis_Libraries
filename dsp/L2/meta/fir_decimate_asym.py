@@ -68,7 +68,7 @@ def fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_DECIMATE_FACT
   # This load might load enough samples of X operations, but we can map out that we will need 3 additional 256b loads to wrap round our 1024b buffer
   # Given that we know there will be 3 additional loads, we need to work out how many output vector chunks that covers.
   # 8 seems to work for all current decimation values and lanes across data types..
-  streamRptFactor = 8;
+  streamRptFactor = 8
 
   # decimator uses 384b accs, but also checks for multiple of decimate factor. When using streams, also takes into account the stream repeat factor.
   windowSizeMultiplier = (fn_decimate_asym_lanes(TT_DATA, TT_COEF)*TP_DECIMATE_FACTOR) if TP_API == 0 else (fn_decimate_asym_lanes(TT_DATA, TT_COEF)*TP_DECIMATE_FACTOR*streamRptFactor)
@@ -137,7 +137,7 @@ def fn_data_needed_within_buffer_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN,
 def fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD):
     minLenCheck =  fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR)
     # apprently this is what the graph does, but i think we should be taking into account the rate change factors here.
-    maxLenCheck = fn_max_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR, 1)
+    maxLenCheck = fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR, TP_API, 1)
 
     dataNeededCheck = fn_data_needed_within_buffer_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN,TP_API, TP_SSR, TP_DECIMATE_FACTOR )
     firMultipleCheck = fn_multiple_decimation(TP_FIR_LEN,TP_DECIMATE_FACTOR, TP_CASC_LEN)
@@ -394,9 +394,9 @@ def generate_graph(graphname, args):
   dual_ip_declare_str = f"std::array<adf::port<input>, TP_SSR*TP_PARA_DECI_POLY> in2;" if TP_DUAL_IP == 1 else "// No dual input"
   dual_ip_connect_str = f"adf::connect<> net_in2(in2[inPortIdx], filter.in2[inPortIdx]);" if TP_DUAL_IP == 1 else "// No dual input"
   coeff_ip_declare_str = f"ssr_port_array<input> coeff;" if TP_USE_COEF_RELOAD == 1 else "//No coeff port"
-  coeff_ip_connect_str = f"adf::connect<> net_coeff(coeff[i], filter.coeff[i]);" if TP_USE_COEF_RELOAD == 1 else "//No coeff port"
+  coeff_ip_connect_str = f"adf::connect<> net_coeff(coeff[outPortIdx], filter.coeff[outPortIdx]);" if TP_USE_COEF_RELOAD == 1 else "//No coeff port"
   dual_op_declare_str = f"ssr_port_array<output> out2;" if TP_NUM_OUTPUTS == 2 else "// No dual output"
-  dual_op_connect_str = f"adf::connect<> net_out2(filter.out2[i], out2[i]);" if TP_NUM_OUTPUTS == 2 else "// No dual output"
+  dual_op_connect_str = f"adf::connect<> net_out2(filter.out2[outPortIdx], out2[outPortIdx]);" if TP_NUM_OUTPUTS == 2 else "// No dual output"
   # Use formatted multi-line string to avoid a lot of \n and \t
   code  = (
 f"""

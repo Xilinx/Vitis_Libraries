@@ -37,7 +37,7 @@ Fourier Transform (FFT) algorithm for acceleration on Xilinx |reg| FPGAs. The li
 to provide three types of implementations, namely L1 PL primitives, L2 PL kernels, and L3 software APIs.
 Those implementations are organized in hardware (hw) sub-directories of the corresponding L1, L2, and L3.
 
-The L1 PL primitives can be leveraged by developers working on harware design
+The L1 PL primitives can be leveraged by developers working on hardware design
 implementation or designing hardware kernels for acceleration. They are particularly
 suitable for hardware designers. The L2 PL kernels are HLS-based predesigned kernels
 that can be directly used for FPGA acceleration of different applications on integration with
@@ -46,7 +46,7 @@ allow software developers to offload FFT calculation to FPGAs for acceleration. 
 an FPGA can perform the FFT computation, the FPGA needs to be configured with a particular image
 called an overlay.
 
-Vitis |trade| PL DSP Library provides a fully synthesizable PL based Super Sample data Rate (SSR) FFT, as well as a 2-Dimensional FFT version. For detailed documentation, plese refer to: :ref:`L1_1DFFT_OVERVIEW` and  :ref:`L1_2DFFT_OVERVIEW`.
+Vitis |trade| PL DSP Library provides a fully synthesizable PL based Super Sample data Rate (SSR) FFT, as well as a 2-Dimensional FFT version. For detailed documentation, please refer to: :ref:`L1_1DFFT_OVERVIEW` and  :ref:`L1_2DFFT_OVERVIEW`.
 
 
 .. _INTRODUCTION_AIE:
@@ -69,7 +69,7 @@ though at present there are no L3 software APIs and the recommended entry point 
 
 Please refer to :ref:`INTRODUCTION` for more information.
 
-Vitis |trade| AIE DSP Library provides a SSR FFT implementation targeting AIE, as well as various SSR Finite Impulse Response (FIR) filters, SSR Direct Digital Synthesis (DDS), General Matrix Multiply (GeMM) impementation. For a full list of available DSP functions, please refer to :ref:`DSP_LIB_FUNC`.
+Vitis |trade| AIE DSP Library provides a SSR FFT implementation targeting AIE, as well as various SSR Finite Impulse Response (FIR) filters, SSR Direct Digital Synthesis (DDS), General Matrix Multiply (GeMM) implementation. For a full list of available DSP functions, please refer to :ref:`DSP_LIB_FUNC`.
 
 
 .. toctree::
@@ -97,7 +97,6 @@ Vitis |trade| AIE DSP Library provides a SSR FFT implementation targeting AIE, a
 
 .. toctree::
    :caption: API Reference
-   :maxdepth: 4
 
    API Reference Overview <user_guide/L2/api-reference.rst>
    DDS Mixer <rst/group_dds_graph.rst>

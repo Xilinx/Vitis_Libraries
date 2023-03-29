@@ -99,10 +99,16 @@ It is also possible to randomly generate coefficient and input data, or to gener
 .. code-block::
 
       make run STIM_TYPE=4.
+      
+Troubleshooting Compilation
+---------------------------
+The Makefiles supplied with the library allow each library unit to be compiled and simulated in isolation. When the library unit is instanced within your design, compilation may fail. This may be because compilation of your system may need arguments not present in your system. The following are possible compile-time errors and suggested remedies for each.
+
+Stack size error. Search the Makefile provided for STACK_SIZE. This has a suggested formula for the library unit.
+Other errors. Search the Makefile provided for UUT_TARGET_COMPILE_ARGS. For each library element there may be compile arguments used to avoid errors or to improve performance, e.g. specifying memories to be on separate banks to avoid wait states. These arguments will likely change with each release as the compile tool changes with each release.
 
 L2 Library Element Unit Test
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+----------------------------
 Each library element category comes supplied with a test harness which is an example of how to use the library element subgraph in the context of a super-graph. These test harnesses (graphs) can be found in the `L2/tests/aie/<library_element>/test.hpp` and `L2/tests/aie/<library_element>/test.cpp` file.
 
 Although it is recommended that only L2 (graphs) library elements are instantiated directly in user code, the kernels underlying the graphs can be found in the `L1/include/aie/<library_element>.hpp` and the `L1/src/aie/<library_element>.cpp` files.
@@ -112,7 +118,7 @@ An example of how a library element may be configured by a parent graph is provi
 .. _CONFIGURATION_PARAMETERS:
 
 L2 Library Element Configuration Parameters
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------------------
 
 .. _CONFIGURATION_PARAMETERS_DDS_MIXER:
 

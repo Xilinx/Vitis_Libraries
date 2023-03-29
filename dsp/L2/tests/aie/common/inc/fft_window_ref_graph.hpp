@@ -22,6 +22,7 @@ This file holds the definition of the Widget Real2complex Reference model graph.
 #include <adf.h>
 #include <vector>
 #include <array>
+#include <adf/arch/aie_arch_properties.hpp>
 #include "fft_window_ref.hpp"
 #include "fft_ref_utils.hpp"
 
@@ -44,7 +45,8 @@ class fft_window_ref_graph : public graph {
    public:
     static constexpr int kPtSize = TP_POINT_SIZE / TP_SSR;
     static constexpr int kWindowVsize = TP_WINDOW_VSIZE / TP_SSR;
-    static constexpr int kAPIFactor = TP_API == 0 ? 1 : 2;
+    static constexpr int kStreamsPerTile = get_input_streams_core_module(); // a device trait
+    static constexpr int kAPIFactor = TP_API == 0 ? 1 : kStreamsPerTile;
     static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
 
     port<input> in[kAPIFactor * TP_SSR];
@@ -83,17 +85,15 @@ class fft_window_ref_graph : public graph {
 
             // make connections
             if (TP_API == 0) {
-                // connect<window<kWindowVsize*sizeof(TT_DATA) + kHeaderBytes>>(in[i], m_kernels[i].in[0]);
                 connect(in[i], m_kernels[i].in[0]);
                 dimensions(m_kernels[i].in[0]) = {kWindowVsize + kHeaderBytes / sizeof(TT_DATA)};
-                // connect<window<kWindowVsize*sizeof(TT_DATA) + kHeaderBytes>>(m_kernels[i].out[0], out[i]);
                 connect(m_kernels[i].out[0], out[i]);
                 dimensions(m_kernels[i].out[0]) = {kWindowVsize + kHeaderBytes / sizeof(TT_DATA)};
             } else {
-                connect<stream>(in[i * 2], m_kernels[i].in[0]);
-                connect<stream>(in[i * 2 + 1], m_kernels[i].in[1]);
-                connect<stream>(m_kernels[i].out[0], out[i * 2]);
-                connect<stream>(m_kernels[i].out[1], out[i * 2 + 1]);
+                for (int k = 0; k < kStreamsPerTile; k++) {
+                    connect<stream>(in[i * kStreamsPerTile + k], m_kernels[i].in[k]);
+                    connect<stream>(m_kernels[i].out[k], out[i * kStreamsPerTile + k]);
+                }
             }
         }
     };

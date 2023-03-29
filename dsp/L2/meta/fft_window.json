@@ -130,6 +130,13 @@
       }
     },
     {
+      "name": "AIE_VARIANT",
+      "type": "uint",
+      "description": "specifies the device type",
+      "maximum": 2, 
+      "minimum": 1
+    }, 
+    {
       "name": "weights",
       "description": "The window coefficients.",
       "element_type": "TT_COEFF",

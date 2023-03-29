@@ -1,6 +1,6 @@
 {
     "spec": "vmc_fir_resampler.json",
-    "outdir": "./xmc_aie_lib/FIR_Resampler_Filter_a25505e7",
+    "outdir": "./xmc_aie_lib/FIR_Resampler_Filter_4dcd5a5d",
     "parameters": {
         "data_type": "cint16",
         "coef_type": "int16",
@@ -35,9 +35,11 @@
             0,
             0,
             0,
+            0,
+            0,
             0
         ],
-        "fir_length": 30,
+        "fir_length": 32,
         "interpolate_factor": 3,
         "decimate_factor": 2,
         "input_window_size": 256,

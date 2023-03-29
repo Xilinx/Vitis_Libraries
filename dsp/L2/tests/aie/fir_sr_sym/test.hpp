@@ -175,12 +175,12 @@ class test_graph : public graph {
         const int bufferSize = (PORT_API == 1 ? 0 : (FIR_LEN + INPUT_SAMPLES) * sizeof(DATA_TYPE));
         if (bufferSize > MAX_PING_PONG_SIZE) {
             single_buffer(firGraph.getKernels()->in[0]);
-            single_buffer(firGraph.getKernels()->out[0]);
+            single_buffer(firGraph.getKernels()[CASC_LEN - 1].out[0]);
             if (DUAL_IP == 1) {
                 single_buffer(firGraph.getKernels()->in[1]);
             }
             if (NUM_OUTPUTS == 2) {
-                single_buffer(firGraph.getKernels()->out[1]);
+                single_buffer(firGraph.getKernels()[CASC_LEN - 1].out[1]);
             }
 
         } else {

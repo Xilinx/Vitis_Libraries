@@ -368,8 +368,8 @@ INLINE_DECL void kernelFilterClass<TT_DATA,
             // Initial multiply
             accHighPolyphase = readCascade<TT_DATA, TT_COEFF, TP_DUAL_IP>(inInterface, accHighPolyphase);
 
-            accHighPolyphase = initMacIntHb<TT_DATA, TT_COEFF, TP_FIR_RANGE_LEN>(accHighPolyphase, xbuff, xstart, ybuff,
-                                                                                 ystart, coe0, coeffstart, m_ctShift);
+            accHighPolyphase = initMacIntHb<TT_DATA, TT_COEFF, TP_FIR_RANGE_LEN>(
+                inInterface, accHighPolyphase, xbuff, xstart, ybuff, ystart, coe0, coeffstart, m_ctShift);
 
 // In the operations loop, x and y buffs load at different times because y can start mid-splice.
 #pragma unroll(GUARD_ZERO((m_kNumOps - 1)))
@@ -570,7 +570,7 @@ INLINE_DECL void kernelFilterClass<TT_DATA,
                 accHighPolyphase = readCascade<TT_DATA, TT_COEFF, TP_DUAL_IP>(inInterface, accHighPolyphase);
 
                 accHighPolyphase = initMacIntHb<TT_DATA, TT_COEFF, TP_FIR_RANGE_LEN>(
-                    accHighPolyphase, sbuff, xstart, ystart, coe0, coeffstart, m_ctShift);
+                    inInterface, accHighPolyphase, sbuff, xstart, ystart, coe0, coeffstart, m_ctShift);
 
 #pragma unroll(GUARD_ZERO((m_kNumOps - 1)))
                 for (int op = 1; op < m_kNumOps; ++op) {
@@ -627,8 +627,8 @@ INLINE_DECL void kernelFilterClass<TT_DATA,
         coeffstart = 0;
         accHighPolyphase = readCascade<TT_DATA, TT_COEFF, TP_DUAL_IP>(inInterface, accHighPolyphase);
 
-        accHighPolyphase = initMacIntHb<TT_DATA, TT_COEFF, TP_FIR_RANGE_LEN>(accHighPolyphase, sbuff, xstart, ystart,
-                                                                             coe0, coeffstart, m_ctShift);
+        accHighPolyphase = initMacIntHb<TT_DATA, TT_COEFF, TP_FIR_RANGE_LEN>(
+            inInterface, accHighPolyphase, sbuff, xstart, ystart, coe0, coeffstart, m_ctShift);
 
 #pragma unroll(GUARD_ZERO((m_kNumOps - 1)))
         for (int op = 1; op < m_kNumOps; ++op) {
@@ -838,7 +838,7 @@ INLINE_DECL void kernelFilterClass<TT_DATA,
 
                 // Initial multiply
                 accHighPolyphase = initMacIntHb<TT_DATA, TT_COEFF, TP_FIR_RANGE_LEN>(
-                    accHighPolyphase, xbuff, xstart, ybuff, ystart, coe0, coeffstart, m_ctShift);
+                    inInterface, accHighPolyphase, xbuff, xstart, ybuff, ystart, coe0, coeffstart, m_ctShift);
 
 // In the operations loop, x and y buffs load at different times because y can start mid-splice.
 #pragma unroll(GUARD_ZERO((m_kNumOps - 1)))
@@ -946,7 +946,7 @@ INLINE_DECL void kernelFilterClass<TT_DATA,
                 // Initial multiply in reverse direction.
                 // In UCT mode, do UCT first, while center tap data is loaded in buffs.
                 accHighPolyphase = initMacIntHb<TT_DATA, TT_COEFF, TP_FIR_RANGE_LEN>(
-                    accHighPolyphase, xbuff, xstart, ybuff, ystart, coe0, coeffstart, m_ctShift);
+                    inInterface, accHighPolyphase, xbuff, xstart, ybuff, ystart, coe0, coeffstart, m_ctShift);
 
 // In the operations loop, x and y buffs load at different times because y can start mid-splice.
 #pragma unroll(GUARD_ZERO((m_kNumOps - 1)))

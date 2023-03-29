@@ -40,7 +40,7 @@
       "label": "Function coefficients",
       "description": "The window function coefficients",
       "element_type": "coeff_type",
-      "default": [ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+      "default": "[1, zeros(1,63)]",
       "type": "vector",
       "validator": {
         "file": "vmc_fft_window.py",
@@ -56,7 +56,7 @@
       "name": "point_size",
       "label": "FFT/IFFT point size:",
       "description": "The number of coefficients in the FFT window function",
-      "default": 32,
+      "default": 64,
       "maximum": 65536,
       "minimum": 16,
       "type": "int",

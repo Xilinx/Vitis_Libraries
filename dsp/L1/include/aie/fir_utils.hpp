@@ -310,7 +310,6 @@ template <>
 INLINE_DECL constexpr unsigned int fnNumLanes<float, float>() {
     return 8;
 };
-#if __SUPPORTS_CFLOAT__ == 1
 template <>
 INLINE_DECL constexpr unsigned int fnNumLanes<cfloat, float>() {
     return 4;
@@ -319,7 +318,6 @@ template <>
 INLINE_DECL constexpr unsigned int fnNumLanes<cfloat, cfloat>() {
     return 4;
 };
-#endif
 
 // function to return the number of 384-bit acc's lanes for a type combo
 // 80-bit accs (for 32-bit input types) are always 768-bit, apart from cint32/cint32 which offers a short, 384-bit acc
@@ -379,7 +377,6 @@ template <>
 INLINE_DECL constexpr unsigned int fnNumLanes384<float, float>() {
     return 8;
 };
-#if __SUPPORTS_CFLOAT__ == 1
 template <>
 INLINE_DECL constexpr unsigned int fnNumLanes384<cfloat, float>() {
     return 4;
@@ -388,7 +385,6 @@ template <>
 INLINE_DECL constexpr unsigned int fnNumLanes384<cfloat, cfloat>() {
     return 4;
 };
-#endif
 
 #if __SUPPORTS_CFLOAT__ == 1
 // function to return the number of columns for a tall-narrow atomic intrinsic for a type combo
@@ -523,7 +519,6 @@ template <>
 INLINE_DECL constexpr unsigned int fnStreamReadWidth<float, float>() {
     return 256;
 };
-#if __SUPPORTS_CFLOAT__ == 1
 template <>
 INLINE_DECL constexpr unsigned int fnStreamReadWidth<cfloat, float>() {
     return 256;
@@ -532,7 +527,7 @@ template <>
 INLINE_DECL constexpr unsigned int fnStreamReadWidth<cfloat, cfloat>() {
     return 256;
 };
-#endif
+
 namespace fir {
 
 enum eFIRVariant {

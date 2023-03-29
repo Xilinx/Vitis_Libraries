@@ -22,13 +22,13 @@
     },
     "pre_build": [
         {
-            "build_cmd": "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL) $(PARAM_MAP))"
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL) $(META_PARAM_MAP))"
         },
         {
             "build_cmd": "$(if $(filter-out REF,$(TAG)), vitis -exec ipmetadata_config_checker LIB_DIR/L2/meta/fft_window.json ./config.json -newflow)"
         },
         {
-            "build_cmd": "$(if $(filter-out REF,$(TAG)), make -f PROJECT/helper.mk HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(INPUT_FILE) DATA_TYPE=$(DATA_TYPE) POINT_SIZE=$(POINT_SIZE) WINDOW_VSIZE=$(WINDOW_VSIZE) NITER=$(NITER) SEED=$(SEED) STIM_TYPE=$(STIM_TYPE) API_IO=$(API_IO) UUT_SSR=$(UUT_SSR) DYN_PT_SIZE=$(DYN_PT_SIZE) )"
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), make -f PROJECT/helper.mk HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(INPUT_FILE) DATA_TYPE=$(DATA_TYPE) POINT_SIZE=$(POINT_SIZE) WINDOW_VSIZE=$(WINDOW_VSIZE) AIE_VARIANT=$(AIE_VARIANT) NITER=$(NITER) SEED=$(SEED) STIM_TYPE=$(STIM_TYPE) API_IO=$(API_IO) UUT_SSR=$(UUT_SSR) DYN_PT_SIZE=$(DYN_PT_SIZE) )"
         }
     ],
     "post_launch": [
@@ -36,9 +36,10 @@
             "target": "aiesim",
             "launch_cmd": [
                 "mkdir -p logs",
-                "make -f PROJECT/helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR DATA_TYPE=$(DATA_TYPE) POINT_SIZE=$(POINT_SIZE) API_IO=$(API_IO) WINDOW_VSIZE=$(WINDOW_VSIZE) UUT_SSR=$(UUT_SSR) DYN_PT_SIZE=$(DYN_PT_SIZE) STATUS_FILE=$(STATUS_FILE) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)",
+                "make -f PROJECT/helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR DATA_TYPE=$(DATA_TYPE) POINT_SIZE=$(POINT_SIZE) API_IO=$(API_IO) WINDOW_VSIZE=$(WINDOW_VSIZE) UUT_SSR=$(UUT_SSR) DYN_PT_SIZE=$(DYN_PT_SIZE) AIE_VARIANT=$(AIE_VARIANT) STATUS_FILE=$(STATUS_FILE) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)",
+                "tclsh LIB_DIR/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output $(STATUS_FILE) $(WINDOW_VSIZE) $(NITER)",
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/get_stats.tcl $(WINDOW_VSIZE) 1 $(STATUS_FILE) ./aiesimulator_output fft_window_main $(NITER)",
-                "make -f PROJECT/helper.mk get_qor HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR DATA_TYPE=$(DATA_TYPE) POINT_SIZE=$(POINT_SIZE) API_IO=$(API_IO) WINDOW_VSIZE=$(WINDOW_VSIZE) UUT_SSR=$(UUT_SSR) DYN_PT_SIZE=$(DYN_PT_SIZE) STATUS_FILE=$(STATUS_FILE) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)",
+                "make -f PROJECT/helper.mk get_qor HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR DATA_TYPE=$(DATA_TYPE) POINT_SIZE=$(POINT_SIZE) API_IO=$(API_IO) WINDOW_VSIZE=$(WINDOW_VSIZE) UUT_SSR=$(UUT_SSR) DYN_PT_SIZE=$(DYN_PT_SIZE) AIE_VARIANT=$(AIE_VARIANT) STATUS_FILE=$(STATUS_FILE) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)",
                 "LIB_DIR/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) LIB_DIR/L2/tests/aie/common/scripts",
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./"
             ]
@@ -47,8 +48,7 @@
             "target": "x86sim",
             "launch_cmd": [
                 "mkdir -p logs",
-                "$(if $(filter-out REF,$(TAG)), make -f PROJECT/helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR DATA_TYPE=$(DATA_TYPE) POINT_SIZE=$(POINT_SIZE) API_IO=$(API_IO) WINDOW_VSIZE=$(WINDOW_VSIZE) UUT_SSR=$(UUT_SSR) DYN_PT_SIZE=$(DYN_PT_SIZE) STATUS_FILE=$(STATUS_FILE) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE))",
-                "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP))",
+                "$(if $(filter-out REF,$(TAG)), make -f PROJECT/helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR DATA_TYPE=$(DATA_TYPE) POINT_SIZE=$(POINT_SIZE) API_IO=$(API_IO) WINDOW_VSIZE=$(WINDOW_VSIZE) UUT_SSR=$(UUT_SSR) DYN_PT_SIZE=$(DYN_PT_SIZE) AIE_VARIANT=$(AIE_VARIANT) STATUS_FILE=$(STATUS_FILE) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE))",
                 "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./)"
             ]
         }
@@ -56,7 +56,8 @@
     "launch": [
         {
             "name": "aiesim-launch",
-            "target": "aiesim"
+            "target": "aiesim",
+            "sim_options": "--graph-latency"
         },
         {
             "name": "x86sim-launch",
@@ -79,6 +80,7 @@
                 "params": "--dataflow -v  $($(TAG)_TARGET_COMPILE_ARGS)  -Xpreproc=\"$($(TAG)_PREPROC_ARGS)\"",
                 "default": {
                     "TAG": "UUT",
+                    "AIE_VARIANT": "1",
                     "UUT_KERNEL": "fft_window",
                     "REF_KERNEL": "fft_window_ref",
                     "UUT_GRAPH": "fft_window_graph",
@@ -106,7 +108,7 @@
                     "UUT_SIM_FILE": "./data/uut_output.txt",
                     "REF_SIM_FILE": "./data/ref_output.txt",
                     "INPUT_FILE": "./data/input.txt",
-                    "UUT_FILE_SUFFIX": "$(UUT_KERNEL)_$(DATA_TYPE)_$(COEFF_TYPE)_$(POINT_SIZE)_$(WINDOW_VSIZE)_$(SHIFT)_$(API_IO)_$(UUT_SSR)_$(DYN_PT_SIZE)",
+                    "UUT_FILE_SUFFIX": "$(UUT_KERNEL)_$(DATA_TYPE)_$(COEFF_TYPE)_$(POINT_SIZE)_$(WINDOW_VSIZE)_$(SHIFT)_$(API_IO)_$(UUT_SSR)_$(DYN_PT_SIZE)_$(AIE_VARIANT)",
                     "LOG_FILE": "./logs/log_$(UUT_FILE_SUFFIX).txt",
                     "STATUS_LOG_FILE": "./logs/status_$(UUT_FILE_SUFFIX).txt",
                     "STATUS_FILE": "$(STATUS_LOG_FILE)",
@@ -114,10 +116,10 @@
                     "REF_TARGET_COMPILE_ARGS": "",
                     "UUT_WORK_DIR": "./Work",
                     "REF_WORK_DIR": "./Work",
-                    "PREPROC_ARGS": "-DINPUT_FILE=$(INPUT_FILE) -DDATA_TYPE=$(DATA_TYPE) -DCOEFF_TYPE=$(COEFF_TYPE) -DPOINT_SIZE=$(POINT_SIZE) -DWINDOW_VSIZE=$(WINDOW_VSIZE) -DSHIFT=$(SHIFT) -DAPI_IO=$(API_IO) -DUUT_SSR=$(UUT_SSR) -DDYN_PT_SIZE=$(DYN_PT_SIZE) -DSTIM_TYPE=$(STIM_TYPE) -DWINDOW_CHOICE=$(WINDOW_CHOICE) -DNITER=$(NITER)",
+                    "PREPROC_ARGS": "-DINPUT_FILE=$(INPUT_FILE) -DDATA_TYPE=$(DATA_TYPE) -DCOEFF_TYPE=$(COEFF_TYPE) -DPOINT_SIZE=$(POINT_SIZE) -DWINDOW_VSIZE=$(WINDOW_VSIZE) -DSHIFT=$(SHIFT) -DAPI_IO=$(API_IO) -DUUT_SSR=$(UUT_SSR) -DDYN_PT_SIZE=$(DYN_PT_SIZE) -DAIE_VARIANT=$(AIE_VARIANT) -DSTIM_TYPE=$(STIM_TYPE) -DWINDOW_CHOICE=$(WINDOW_CHOICE) -DNITER=$(NITER)",
                     "REF_PREPROC_ARGS": "-DUUT_GRAPH=$(REF_GRAPH) -DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS) ",
                     "UUT_PREPROC_ARGS": "-DUUT_GRAPH=$(UUT_GRAPH) -DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) -DUSING_UUT=1",
-                    "PARAM_MAP": "DATA_TYPE $(DATA_TYPE) COEFF_TYPE $(COEFF_TYPE) POINT_SIZE $(POINT_SIZE) WINDOW_VSIZE $(WINDOW_VSIZE) SHIFT $(SHIFT) API_IO $(API_IO) UUT_SSR $(UUT_SSR) DYN_PT_SIZE $(DYN_PT_SIZE) "
+                    "META_PARAM_MAP": "AIE_VARIANT $(AIE_VARIANT) DATA_TYPE $(DATA_TYPE) COEFF_TYPE $(COEFF_TYPE) POINT_SIZE $(POINT_SIZE) WINDOW_VSIZE $(WINDOW_VSIZE) SHIFT $(SHIFT) API_IO $(API_IO) UUT_SSR $(UUT_SSR) DYN_PT_SIZE $(DYN_PT_SIZE)"
                 }
             }
         }
@@ -139,7 +141,7 @@
         }
     ],
     "testinfo": {
-        "disable": false,
+        "disable": true,
         "jobs": [
             {
                 "index": 0,

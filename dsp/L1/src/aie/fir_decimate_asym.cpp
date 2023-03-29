@@ -422,6 +422,9 @@ void kernelFilterClass<TT_DATA,
                 acc = macDecAsym<TT_DATA, TT_COEFF, m_kDFX, TP_DECIMATE_FACTOR>(
                     acc, sbuff, xstart, coe0, (op % m_kCoeffRegVsize), m_kDecimateOffsets, xstartUpper);
             }
+            if (m_kDFX == kHighDF) {
+                chess_separator_scheduler();
+            }
 
             // Go back by the number of input samples loaded minus  (i.e forward) by the number of samples consumed
             inItr -= (initNumDataLoads * m_kInitLoadVsize + m_kDataLoadVsize * numDataLoads -

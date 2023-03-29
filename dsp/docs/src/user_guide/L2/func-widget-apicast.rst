@@ -20,7 +20,7 @@
 Widget API Cast
 ===============
 
-The DSPLib contains a Widget API Cast solution, which provides flexibilty when connecting other kernels. This component is able to change the stream interface to window interface and vice-versa. It may be configured to read two input stream interfaces and interleave data onto an output window interface. In addition, multiple copies of output window may be configured to allow extra flexibility when connecting to further kernels.
+The DSPLib contains a Widget API Cast solution, which provides flexibility when connecting other kernels. This component is able to change from the stream interface to window interface and vice-versa. It may be configured to read two input stream interfaces and interleave data onto an output window interface. In addition, multiple copies of output window may be configured to allow extra flexibility when connecting to further kernels.
 
 ~~~~~~~~~~~
 Entry Point
@@ -60,7 +60,7 @@ To see details on the ports for the Widget API Cast, see :ref:`API_REFERENCE`.
 Design Notes
 ~~~~~~~~~~~~
 
-The widget_api_cast library element serves multiple purposes. Firstly, it can convert from window to stream or vice versa. Secondly, it can perform limited broadcast of windows. Thirdly it can perform various patterns of interlace when there are 2 streams in or out.
+The widget_api_cast library element serves multiple purposes. Firstly, it can convert from window to stream or vice versa. Secondly, it can perform limited broadcast of windows. Thirdly it can perform various patterns of interlace when there are two streams in or out.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Code Example including constraints

@@ -1,9 +1,0 @@
-digraph G {
-data_type -> shift_val;
-point_size -> input_window_size;
-point_size -> is_dyn_pt_size;
-data_type -> point_size;
-data_type -> coeff_type;
-point_size -> coeff;
-is_dyn_pt_size -> coeff;
-}

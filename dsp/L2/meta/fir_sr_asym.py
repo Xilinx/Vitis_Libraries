@@ -50,8 +50,13 @@ def fnNumColsStream( T_D, T_C):
 
 
 def fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1):
+    # CAUTION: this constant overlaps many factors. The main need is a "strobe" concept that means we unroll until xbuff is back to starting conditions.
+    streamRptFactor = 4;
 
-    checkMultipleLanes =  fn_windowsize_multiple_lanes(TT_DATA, TT_COEF, TP_INPUT_WINDOW_VSIZE, TP_API)
+    # Need to take unrolloing into account
+    windowSizeMultiplier = (fnNumLanes(TT_DATA, TT_COEF, TP_API)) if TP_API == 0 else (fnNumLanes(TT_DATA, TT_COEF, TP_API)*streamRptFactor)
+
+    checkMultipleLanes =  fn_windowsize_multiple_lanes(TT_DATA, TT_COEF, TP_INPUT_WINDOW_VSIZE, TP_API, numLanes=windowSizeMultiplier)
     checkMaxBuffer = fn_max_windowsize_for_buffer(TT_DATA, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR)
     # Input samples are round-robin split to each SSR input paths, so total frame size must be divisable by SSR factor.
     checkIfDivisableBySSR = fn_windowsize_divisible_by_ssr(TP_INPUT_WINDOW_VSIZE, TP_SSR)
@@ -163,7 +168,7 @@ def fn_data_needed_within_buffer_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN,
       m_kInitDataNeeded = fn_get_data_needed(TT_DATA, TT_COEF, TP_FIR_LEN // TP_SSR, TP_CASC_LEN, TP_KERNEL_POSITION, TP_SSR, TP_API)
       if (m_kInitDataNeeded > m_kSamplesInBuff) :
         return isError(
-          f"Kernel[{TP_KERNEL_POSITION}] requires too much data ({m_kInitDataNeeded} samples) "\
+          f"Kernel[{TP_KERNEL_POSITION}] requires more data ({m_kInitDataNeeded} samples) "\
             f"to fit in a single buffer ({m_kSamplesInBuff} samples), due to the fir length per kernel- "\
             f"influenced by fir length ({TP_FIR_LEN}), SSR ({TP_SSR}), cascade length ({TP_CASC_LEN}) and numLanes ({fnNumLanes(TT_DATA, TT_COEF, TP_API)}).\n"
         )
@@ -177,7 +182,7 @@ def fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_AP
 
     minLenCheck =  fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR)
 
-    maxLenCheck = fn_max_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR, 1) # last param refers to symmetry factor
+    maxLenCheck = fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR, TP_API, 1) # last param refers to symmetry factor
 
     dataNeededCheck = fn_data_needed_within_buffer_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN,TP_API, TP_SSR )
 

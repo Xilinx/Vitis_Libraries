@@ -1,0 +1,19 @@
+{
+  "spec": "fir_sr_sym.json",
+  "outdir": "./fir_sr_sym_generated_graph",
+  "parameters":{
+    "TT_DATA": "cint32",
+    "TT_COEF": "int32",
+    "TP_FIR_LEN": 32,
+    "TP_SHIFT": 20,
+    "TP_RND": 0,
+    "TP_INPUT_WINDOW_VSIZE": 256,
+    "TP_CASC_LEN": 1,
+    "TP_USE_COEF_RELOAD": 0,
+    "TP_NUM_OUTPUTS": 1,
+    "TP_API": 1,
+    "TP_DUAL_IP": 0,
+    "TP_SSR": 2,
+    "coeff": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31]
+  }
+}

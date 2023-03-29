@@ -67,7 +67,7 @@
     },
     {
       "name": "fir_length",
-      "label": "fir filter length",
+      "label": "Filter length",
       "description": "Specify fir length for coefficient reloading",
       "default": 31,
       "minimum": 4,

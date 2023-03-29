@@ -10,14 +10,14 @@
         "test_1_dds_mixer_lut_aie2": {
             "DATA_TYPE":"cint16",
             "MIXER_MODE":"1",
-            "WINDOW_VSIZE":"256",
+            "WINDOW_VSIZE":"768",
             "P_API":"1",
             "UUT_SSR":"3"
         },
         "test_3_dds_mixer_lut_aie2": {
             "DATA_TYPE":"cint32",
             "MIXER_MODE":"1",
-            "WINDOW_VSIZE":"256",
+            "WINDOW_VSIZE":"1024",
             "P_API":"1",
             "UUT_SSR":"4"
         },

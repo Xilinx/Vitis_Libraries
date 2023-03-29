@@ -18,17 +18,12 @@ DDS reference model
 #include "device_defs.h"
 #include "dds_mixer_ref.hpp"
 #include "fir_ref_utils.hpp"
-//#include "coarse_sincos.h"
-//#include "fine_sincos.h"
-//#include "dds_luts.h"
 // for base sin/cos lookup
 #include "aie_api/aie_adf.hpp"
 
-//#include "debug_utils.h"
 #include <math.h>
 #include <string>
 
-#define _DSPLIB_DDS_MIXER_HPP_DEBUG_
 namespace xf {
 namespace dsp {
 namespace aie {
@@ -66,13 +61,10 @@ inline cint32 saturate<cint32, cint64>(cint64 d_in) {
 
 template <typename T_A>
 inline void roundAccDDS(int shift, T_A& accum) {
-#if __SUPPORTS_CFLOAT__ == 1
-    using T_DUMMY_TYPE = cfloat;
-#else
-    using T_DUMMY_TYPE = cint16;
-#endif
     if
-        constexpr(std::is_same<T_A, T_DUMMY_TYPE>::value) {}
+        constexpr(std::is_same<T_A, cfloat>::value) {
+            // no rounding applied to float types
+        }
     else {
         accum.real = rounding(rnd_sym_inf, shift, accum.real);
         accum.imag = rounding(rnd_sym_inf, shift, accum.imag);
@@ -88,7 +80,6 @@ inline cint64 downshift<cint64>(cint64 d_in, int shift) {
     retVal.imag = d_in.imag >> shift;
     return retVal;
 }
-#if __SUPPORTS_CFLOAT__ == 1
 template <>
 inline cfloat saturate<cfloat, cfloat>(cfloat d_in) {
     return d_in;
@@ -100,7 +91,6 @@ inline cfloat downshift<cfloat>(cfloat d_in, int shift) {
     retVal.imag = d_in.imag / (float)(1 << shift);
     return retVal;
 }
-#endif
 
 template <typename TT_RET_DATA, int conj, typename TT_DATA1, typename TT_DATA2>
 inline TT_RET_DATA cmplxMult(TT_DATA1 d_in, TT_DATA2 d_in2, int ddsShift) {
@@ -165,7 +155,6 @@ void validate_ref_data(TT_VAL_DATA validationVal, TT_ACT_DATA actVal, float tol,
     }
 }
 
-#if __SUPPORTS_CFLOAT__ == 1
 template <>
 inline cfloat cmplxMult<cfloat, 0, cfloat, cfloat>(cfloat d_in, cfloat ddsOut, int ddsShift) {
     cfloat retVal;
@@ -181,7 +170,6 @@ inline cfloat cmplxMult<cfloat, 1, cfloat, cfloat>(cfloat d_in, cfloat ddsOut, i
     retVal.imag += ((d_in.imag * ddsOut.real) - (d_in.real * ddsOut.imag));
     return retVal;
 }
-#endif
 //-------------------------------------------------------------------
 // Utility functions
 
@@ -218,7 +206,6 @@ T_ACC_TYPE ddsMixerHelper<T_ACC_TYPE, T_DDS_TYPE, TP_NUM_LANES, TP_SC_MODE, TP_N
     ddsint32.imag = floor(scaleDds * sin_out + rndConst); // TODO- floor? not rnd?
     validationVal.real = ddsint32.real == scaleDds ? (scaleDds - 1) : ddsint32.real;
     validationVal.imag = ddsint32.imag == scaleDds ? (scaleDds - 1) : ddsint32.imag;
-#if __SUPPORTS_CFLOAT__ == 1
     if
         constexpr(std::is_same<T_ACC_TYPE, cfloat>()) {
             retVal.real = (float)retValraw.real / (float)(1 << 15);
@@ -226,7 +213,6 @@ T_ACC_TYPE ddsMixerHelper<T_ACC_TYPE, T_DDS_TYPE, TP_NUM_LANES, TP_SC_MODE, TP_N
             validationVal.real = (float)ddsint32.real / (float)(1 << 15);
             validationVal.imag = (float)ddsint32.imag / (float)(1 << 15);
         }
-#endif
 
     validate_ref_data(validationVal, retVal, 3.0, "phaseToCartesian");
 
@@ -241,13 +227,8 @@ template <typename T_ACC_TYPE,
 T_ACC_TYPE
 ddsMixerHelper<T_ACC_TYPE, T_DDS_TYPE, TP_NUM_LANES, USE_LUT_SINCOS, TP_NUM_LUTS, T_LUT_DTYPE>::phaseToCartesian(
     uint32 phaseAcc) {
-#if __SUPPORTS_CFLOAT__ == 1
-    using T_DUMMY_TYPE = cfloat;
-#else
-    using T_DUMMY_TYPE = cint16;
-#endif
     if
-        constexpr(std::is_same<T_ACC_TYPE, T_DUMMY_TYPE>::value) {
+        constexpr(std::is_same<T_ACC_TYPE, cfloat>::value) {
             T_ACC_TYPE retVal;
             T_DDS_TYPE validationVal;
             constexpr float rndConst = 0.5;
@@ -371,31 +352,12 @@ void ddsMixerHelper<T_ACC_TYPE, T_DDS_TYPE, TP_NUM_LANES, USE_LUT_SINCOS, TP_NUM
     unsigned int phaseInc, T_LUT_DTYPE (&phRotSml)[TP_NUM_LANES], T_LUT_DTYPE (&phRotBig)[TP_NUM_LANES]) {
     for (int i = 0; i < TP_NUM_LANES; i++) {
         T_ACC_TYPE phRotRaw;
-        printf("populating vectors %d\n", i);
         phRotRaw = phaseToCartesian(phaseInc * i);
         phRotSml[i].real = phRotRaw.real;
         phRotSml[i].imag = phRotRaw.imag;
         phRotRaw = phaseToCartesian(phaseInc * TP_NUM_LANES * i);
         phRotBig[i].real = phRotRaw.real;
         phRotBig[i].imag = phRotRaw.imag;
-#if __SUPPORTS_CFLOAT__ == 1
-        using T_DUMMY_TYPE = cfloat;
-#else
-        using T_DUMMY_TYPE = cint16;
-#endif
-        if
-            constexpr(std::is_same<T_ACC_TYPE, T_DUMMY_TYPE>::value) {
-                for (int i = 0; i < TP_NUM_LANES; i++) {
-                    printf("small fan[%d] = {%0.9f, %0.9f} big fan[%d] = {%0.9f, %0.9f}\n", i, phRotSml[i].real,
-                           phRotSml[i].imag, i, phRotBig[i].real, phRotBig[i].imag);
-                }
-            }
-        else {
-            for (int i = 0; i < TP_NUM_LANES; i++) {
-                printf("small fan[%d] = {%d, %d} big fan[%d] = {%d, %d}\n", i, phRotSml[i].real, phRotSml[i].imag, i,
-                       phRotBig[i].real, phRotBig[i].imag);
-            }
-        }
     }
 }
 //-------------------------------------------------------------------
@@ -498,7 +460,6 @@ void dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_SC_MODE, TP
             phRot.real = phRotref[k].real;
             phRot.imag = phRotref[k].imag;
             ddsOutRaw = cmplxMult<T_ACC_TYPE, 0, T_ACC_TYPE, T_ACC_TYPE>(ddsOutPrime, phRot, 0);
-            printf("ddsOutRaw {%0.9f, %0.9f}\n", ddsOutRaw.real, ddsOutRaw.imag);
             ddsOutRawConj.real = ddsOutRaw.real;
             ddsOutRawConj.imag = -ddsOutRaw.imag;
             ddsOut = downshift(ddsOutRaw, ddsShift);
@@ -509,13 +470,9 @@ void dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_SC_MODE, TP
             d_in64.real = d_in.real;
             d_in64.imag = d_in.imag;
             ddsMixerOut = cmplxMult<T_ACC_TYPE, 0, T_ACC_TYPE, T_ACC_TYPE>(d_in64, ddsOut, 0);
-            printf("ddsOutRaw {%0.9f, %0.9f}\t d_in64 {%0.9f, %0.9f}\t ddsOut {%0.9f, %0.9f}\n", ddsOutRaw.real,
-                   ddsOutRaw.imag, d_in64.real, d_in64.imag, ddsOut.real, ddsOut.imag);
             d_in64.real = d_in2.real;
             d_in64.imag = d_in2.imag;
             ddsMixerOut2 = cmplxMult<T_ACC_TYPE, 0, T_ACC_TYPE, T_ACC_TYPE>(d_in64, ddsOutConj, 0);
-            printf("ddsOutRaw {%0.9f, %0.9f}\t d_in64 {%0.9f, %0.9f}\t ddsOutConj {%0.9f, %0.9f}\n", ddsOutRaw.real,
-                   ddsOutRaw.imag, d_in64.real, d_in64.imag, ddsOutConj.real, ddsOutConj.imag);
             ddsMixerOutAcc.real = (ddsMixerOut.real + ddsMixerOut2.real);
             ddsMixerOutAcc.imag = (ddsMixerOut.imag + ddsMixerOut2.imag);
             mixerOutRaw = downshift(ddsMixerOutAcc, mixerShift);
@@ -572,7 +529,6 @@ void dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, USE_LUT_SINCOS
                 roundAccDDS(ddsShift, ddsOut);
                 ddsOut = cmplxMult<T_ACC_TYPE, 0, T_ACC_TYPE, t_lutDataType>(ddsOut, phRotS, 0);
                 roundAccDDS(ddsShift, ddsOut);
-                printf("lut out value after shift {%d, %d}\n", ddsOut.real, ddsOut.imag);
                 ddsOutConj.real = ddsOut.real;
                 ddsOutConj.imag = -ddsOut.imag;
                 validate_ref_data(ddsOutValidation, ddsOut, errTol, "mode 2");
@@ -581,16 +537,12 @@ void dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, USE_LUT_SINCOS
                 d_in64.real = d_in.real;
                 d_in64.imag = d_in.imag;
                 ddsMixerOut = cmplxMult<T_ACC_TYPE, 0, T_ACC_TYPE, T_ACC_TYPE>(d_in64, ddsOut, 0);
-                printf("first mixer out {%d, %d}\n", ddsMixerOut.real, ddsMixerOut.imag);
                 d_in64.real = d_in2.real;
                 d_in64.imag = d_in2.imag;
                 ddsMixerOut2 = cmplxMult<T_ACC_TYPE, 0, T_ACC_TYPE, T_ACC_TYPE>(d_in64, ddsOutConj, 0);
-                printf("second mixer out {%d, %d}\n", ddsMixerOut2.real, ddsMixerOut2.imag);
                 ddsMixerOutAcc.real = (ddsMixerOut.real + ddsMixerOut2.real);
                 ddsMixerOutAcc.imag = (ddsMixerOut.imag + ddsMixerOut2.imag);
-                printf("final mixer out before rnd {%d, %d}\n", ddsMixerOutAcc.real, ddsMixerOutAcc.imag);
                 roundAccDDS(mixerShift, ddsMixerOutAcc);
-                printf("final mixer out after rnd {%d, %d}\n", ddsMixerOutAcc.real, ddsMixerOutAcc.imag);
                 mixerOut = saturate<TT_DATA, T_ACC_TYPE>(ddsMixerOutAcc);
                 *outPtr++ = mixerOut;
                 m_phaseAccum = m_phaseAccum + (m_samplePhaseInc);
@@ -617,14 +569,11 @@ void dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_1, USE_INBUILT_SIN
     TT_DATA* outPtr = outWindow.data();
     for (unsigned int i = 0; i < TP_INPUT_WINDOW_VSIZE / kNumLanes; i++) {
         ddsOutPrime = ddsFuncs.phaseToCartesian(m_phaseAccum);
-        printf("ddsOutPrime {%d, %d}\n", ddsOutPrime.real, ddsOutPrime.imag);
         for (int k = 0; k < kNumLanes; k++) {
             ddsOutValidation = ddsFuncs.phaseToCartesian(m_phaseAccum);
-            printf("ddsOutValidation {%d, %d}\n", ddsOutValidation.real, ddsOutValidation.imag);
             phRot.real = phRotref[k].real;
             phRot.imag = phRotref[k].imag;
             ddsOut = cmplxMult<T_ACC_TYPE, 0, T_ACC_TYPE, T_ACC_TYPE>(ddsOutPrime, phRot, ddsShift);
-            printf("ddsOut {%d, %d}\n", ddsOut.real, ddsOut.imag);
             validate_ref_data(ddsOutValidation, ddsOut, 2.0, "mode 1");
             m_phaseAccum = m_phaseAccum + (m_samplePhaseInc); // accumulate phase over multiple input windows of data
             d_in = *inPtr++;
@@ -666,29 +615,21 @@ void dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_1, USE_LUT_SINCOS,
     t_lutDataType phRotB;
     for (unsigned int i = 0; i < TP_INPUT_WINDOW_VSIZE / (kNumLanes * kNumLanes); i++) {
         ddsOutPrime = ddsFuncs.phaseToCartesian(m_phaseAccum);
-        printf("ddsOutPrime {%ld, %ld}\n", ddsOutPrime.real, ddsOutPrime.imag);
         for (int cyc = 0; cyc < kNumLanes; cyc++) { // the big phase rotator stores rotations for every lane-th sample.
             phRotB = phRotBig[cyc];
             for (int l = 0; l < kNumLanes; l++) {
                 phRotS = phRotSml[l];
                 ddsOutValidation = ddsFuncs.phaseToCartesian(m_phaseAccum);
                 ddsOut = cmplxMult<T_ACC_TYPE, 0, T_ACC_TYPE, t_lutDataType>(ddsOutPrime, phRotB, 0);
-                printf("mul1 before shift {%ld, %ld}\t", ddsOut.real, ddsOut.imag);
                 roundAccDDS(ddsShift, ddsOut);
-                printf("mul1 after shift {%ld, %ld}\t", ddsOut.real, ddsOut.imag);
                 ddsOut = cmplxMult<T_ACC_TYPE, 0, T_ACC_TYPE, t_lutDataType>(ddsOut, phRotS, 0);
-                printf("mul2 before shift {%ld, %ld}\t", ddsOut.real, ddsOut.imag);
                 roundAccDDS(ddsShift, ddsOut);
-                printf("mul2 after shift {%ld, %ld}\n", ddsOut.real, ddsOut.imag);
                 validate_ref_data(ddsOutValidation, ddsOut, errTol, "mode 1");
                 d_in = *inPtr++;
                 d_in64.real = d_in.real;
                 d_in64.imag = d_in.imag;
-                printf("d_in {%ld, %ld} ddsOut {%ld, %ld}\n", d_in.real, d_in.imag, ddsOut.real, ddsOut.imag);
                 ddsMixerOutraw = cmplxMult<T_ACC_TYPE, 0, T_ACC_TYPE, T_ACC_TYPE>(d_in64, ddsOut, 0);
-                printf("beforeshift {%ld, %ld}\n", ddsMixerOutraw.real, ddsMixerOutraw.imag);
                 roundAccDDS(ddsShift, ddsMixerOutraw);
-                printf("after shift {%ld, %ld}\n", ddsMixerOutraw.real, ddsMixerOutraw.imag);
                 ddsMixerOut = saturate<TT_DATA, T_ACC_TYPE>(ddsMixerOutraw);
                 m_phaseAccum = m_phaseAccum + (m_samplePhaseInc);
                 *outPtr++ = ddsMixerOut;
@@ -749,20 +690,15 @@ void dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_0, USE_LUT_SINCOS,
     TT_DATA* outPtr = outWindow.data();
     for (unsigned int i = 0; i < TP_INPUT_WINDOW_VSIZE / (kNumLanes * kNumLanes); i++) {
         ddsOutPrime = ddsFuncs.phaseToCartesian(m_phaseAccum);
-        printf("ddsOutPrime {%ld, %ld}\n", ddsOutPrime.real, ddsOutPrime.imag);
         for (int cyc = 0; cyc < kNumLanes; cyc++) { // the big phase rotator stores rotations for every lane-th sample.
             phRotB = phRotBig[cyc];
             for (int l = 0; l < kNumLanes; l++) {
                 phRotS = phRotSml[l];
                 ddsOutValidation = ddsFuncs.phaseToCartesian(m_phaseAccum);
                 ddsOutRaw = cmplxMult<T_ACC_TYPE, 0, T_ACC_TYPE, t_lutDataType>(ddsOutPrime, phRotB, 0);
-                printf("mul1 before shift {%d, %d} phRotb %d\t", ddsOutRaw.real, ddsOutRaw.imag, phRotB);
                 roundAccDDS(ddsShift, ddsOutRaw);
-                printf("mul1 after shift {%d, %d}\n", ddsOutRaw.real, ddsOutRaw.imag);
                 ddsOutRaw = cmplxMult<T_ACC_TYPE, 0, T_ACC_TYPE, t_lutDataType>(ddsOutRaw, phRotS, 0);
-                printf("mul2 before shift {%d, %d} phRotS %d\t", ddsOutRaw.real, ddsOutRaw.imag, phRotS);
                 roundAccDDS(ddsShift, ddsOutRaw);
-                printf("mul2 after shift {%d, %d}\n", ddsOutRaw.real, ddsOutRaw.imag);
                 // validate dds output before continuing using bit-accurate output
                 validate_ref_data(ddsOutValidation, ddsOutRaw, errTol, "mode 0");
                 // update phase_accum for next sample

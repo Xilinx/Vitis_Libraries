@@ -53,7 +53,7 @@
       "label": "Filter coefficients",
       "description": "The FIR filter tap coefficients.",
       "element_type": "coef_type",
-      "default": [ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+      "default": "[1, zeros(1,31)]",
       "type": "vector",
       "validator": {
         "file": "vmc_fir_interpolate_asym.py",
@@ -67,7 +67,7 @@
     },
     {
       "name": "fir_length",
-      "label": "fir filter length",
+      "label": "Filter length",
       "description": "Specify fir length for coefficient reloading",
       "default": 32,
       "minimum": 4,

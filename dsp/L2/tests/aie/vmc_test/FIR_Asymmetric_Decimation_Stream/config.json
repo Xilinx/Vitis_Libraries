@@ -1,6 +1,6 @@
 {
     "spec": "vmc_stream_fir_decimate_asym.json",
-    "outdir": "./xmc_aie_lib/FIR_Asymmetric_Decimation_Stream_69efc2ec",
+    "outdir": "./xmc_aie_lib/FIR_Asymmetric_Decimation_Stream_b8f1a25e",
     "parameters": {
         "data_type": "cint16",
         "coef_type": "int16",
@@ -31,14 +31,21 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0
         ],
-        "fir_length": 26,
+        "fir_length": 32,
         "decimate_factor": 2,
         "input_window_size": 256,
         "shift_val": 0,
         "rnd_mode": 2,
         "ssr": 1,
+        "deci_poly": 1,
         "casc_length": 2
     },
     "updated_parameter": ""

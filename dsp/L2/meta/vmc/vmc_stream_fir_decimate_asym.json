@@ -53,12 +53,12 @@
       "label": "Filter coefficients",
       "description": "The FIR filter tap coefficients.",
       "element_type": "coef_type",
-      "default": [ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+      "default": "[1, zeros(1, 25)]",
       "type": "vector",
       "validator": {
         "file": "vmc_stream_fir_decimate_asym.py",
         "function": "vmc_validate_coeff",
-        "args": ["use_coeff_reload", "coef_type" ,"fir_length", "data_type", "casc_length", "decimate_factor", "ssr"]
+        "args": ["use_coeff_reload", "coef_type" ,"fir_length", "data_type", "casc_length", "decimate_factor", "ssr", "deci_poly"]
       },
       "blockgui":{
             "tablabel": "Main",
@@ -67,9 +67,9 @@
     },
     {
       "name": "fir_length",
-      "label": "fir filter length",
+      "label": "Filter length",
       "description": "Specify fir length for coefficient reloading",
-      "default": 32,
+      "default": 26,
       "minimum": 4,
       "maximum": 8192,
       "type": "int",
@@ -107,7 +107,7 @@
       "validator": {
         "file": "vmc_stream_fir_decimate_asym.py",
         "function": "vmc_validate_input_window_size",
-        "args": ["data_type", "coef_type", "use_coeff_reload", "coeff", "fir_length", "decimate_factor", "ssr"]
+        "args": ["data_type", "coef_type", "use_coeff_reload", "coeff", "fir_length", "decimate_factor", "ssr", "deci_poly"]
       },
       "blockgui":{
             "tablabel": "Main",
@@ -152,6 +152,18 @@
       "default": 1,
       "minimum": 1,
       "type": "int",
+      "blockgui":{
+            "tablabel": "Main",
+            "parameterType":"edit"
+      }
+    },
+    {
+      "name": "deci_poly",
+      "label": "Decimate polyphase",
+      "description": "The number of parallel polyphases to combine.",
+      "default": 1,
+      "type": "int",
+      "minimum": 1,
       "blockgui":{
             "tablabel": "Main",
             "parameterType":"edit"

@@ -40,6 +40,7 @@ compilation.
 #include <vector>
 #include <array>
 #include <adf.h>
+#include "device_defs.h"
 
 using namespace adf;
 
@@ -138,7 +139,9 @@ class fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1,
         }
     }
 
-    // Main function
+// Main function
+// These could be claused out according to __STREAMS_PER_TILE__, but the overload is unambiguous.
+#if __STREAMS_PER_TILE__ == 2
     void fft_window_main(input_stream<TT_DATA>* __restrict inStream0,
                          input_stream<TT_DATA>* __restrict inStream1,
                          output_stream<TT_DATA>* __restrict outStream0,
@@ -147,6 +150,11 @@ class fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1,
                              input_stream<TT_DATA>* __restrict inStream1,
                              output_stream<TT_DATA>* __restrict outStream0,
                              output_stream<TT_DATA>* __restrict outStream1);
+#else
+    void fft_window_main(input_stream<TT_DATA>* __restrict inStream0, output_stream<TT_DATA>* __restrict outStream0);
+    void fft_window_main_dyn(input_stream<TT_DATA>* __restrict inStream0,
+                             output_stream<TT_DATA>* __restrict outStream0);
+#endif // __STREAMS_PER_TILE__ == 2
 };
 }
 }

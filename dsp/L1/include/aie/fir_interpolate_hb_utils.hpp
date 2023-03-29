@@ -198,7 +198,7 @@ INLINE_DECL void writeOutputIntHb(T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterfa
                                   const int shift,
                                   auto& outItr) {
     using acc_type = typename T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT>::v_type;
-    acc_type chess_storage(bm0) tmp;
+    acc_type tmp;
     tmp = accHigh.val;
     T_outValIntHb<TT_DATA, TT_COEFF> outVal;
     outVal.val = tmp.template to_vector_zip<TT_DATA>(shift);
@@ -249,6 +249,29 @@ INLINE_DECL void writeOutputSel(T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface
 // #define _DSPLIB_FIR_SR_SYM_DEBUG_ 1
 #endif
 
+// template for mulSlidingSym1buffUCT - uses ::aie::api HLI
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_FIR_LEN, unsigned int TP_UPSHIFT_CT>
+INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> mulSlidingSym1buffUCT(
+    T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> acc,
+    T_buff_1024b<TT_DATA> xbuff,
+    unsigned int xstart, // no ystart - API calculates ystart based on Points size
+    T_buff_256b<TT_COEFF> zbuff,
+    unsigned int zstart,
+    unsigned int cfShift) {
+    constexpr unsigned int Lanes = 2 * fnNumSymLanesIntHb<TT_DATA, TT_COEFF>();
+    constexpr unsigned int Points = (TP_FIR_LEN + 1) / 2;
+    constexpr unsigned int CoeffStep = 1;
+    constexpr unsigned int DataStep = 1;
+    using acc_type = typename T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT>::v_type;
+    acc_type chess_storage(bm0) tmp;
+
+    // #define _DSPLIB_FIR_INT_HB_UTILS_DEBUG_
+
+    T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> retVal;
+    tmp = ::aie::sliding_mul_sym_uct<Lanes, Points, CoeffStep, DataStep>(zbuff.val, zstart, xbuff.val, xstart, cfShift);
+    retVal.val = tmp;
+    return retVal;
+}
 // template for macSlidingSymUCT1buff - uses ::aie::api HLI
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_FIR_LEN, unsigned int TP_UPSHIFT_CT>
 INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> macSlidingSymUCT1buff(
@@ -263,7 +286,7 @@ INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> macSlidingSymUCT1buf
     constexpr unsigned int CoeffStep = 1;
     constexpr unsigned int DataStep = 1;
     using acc_type = typename T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT>::v_type;
-    acc_type chess_storage(bm0) tmp;
+    acc_type tmp;
 
     T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> retVal;
     tmp = ::aie::sliding_mac_sym_uct<Lanes, Points, CoeffStep, DataStep>(acc.val, zbuff.val, zstart, xbuff.val, xstart,
@@ -272,6 +295,31 @@ INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> macSlidingSymUCT1buf
     return retVal;
 }
 
+// template for mulSlidingSymUCT2buff - uses ::aie::api HLI
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_FIR_LEN, unsigned int TP_UPSHIFT_CT>
+INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> mulSlidingSymUCT2buff(
+    T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> acc,
+    T_buff_512b<TT_DATA> xbuff,
+    unsigned int xstart,
+    T_buff_512b<TT_DATA> ybuff,
+    unsigned int ystart,
+    T_buff_256b<TT_COEFF> zbuff,
+    unsigned int zstart,
+    unsigned int cfShift) {
+    constexpr unsigned int Lanes = 2 * fnNumSymLanesIntHb<TT_DATA, TT_COEFF>();
+    // adjust Point size to where the center tap is in relation to number of columns in low-level intrinsic
+    constexpr unsigned int Points = 2 * (((TP_FIR_LEN + 1) / 4 - 1) % fnNumSymColsIntHb<TT_DATA, TT_COEFF>() + 1);
+    constexpr unsigned int CoeffStep = 1;
+    constexpr unsigned int DataStep = 1;
+    using acc_type = typename T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT>::v_type;
+    acc_type tmp;
+
+    T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> retVal;
+    tmp = ::aie::sliding_mul_sym_uct<Lanes, Points, CoeffStep, DataStep>(zbuff.val, zstart, xbuff.val, xstart,
+                                                                         ybuff.val, ystart, cfShift);
+    retVal.val = tmp;
+    return retVal;
+}
 // template for macSlidingSymUCT2buff - uses ::aie::api HLI
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_FIR_LEN, unsigned int TP_UPSHIFT_CT>
 INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> macSlidingSymUCT2buff(
@@ -289,7 +337,7 @@ INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> macSlidingSymUCT2buf
     constexpr unsigned int CoeffStep = 1;
     constexpr unsigned int DataStep = 1;
     using acc_type = typename T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT>::v_type;
-    acc_type chess_storage(bm0) tmp;
+    acc_type tmp;
 
     T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> retVal;
     tmp = ::aie::sliding_mac_sym_uct<Lanes, Points, CoeffStep, DataStep>(acc.val, zbuff.val, zstart, xbuff.val, xstart,
@@ -335,6 +383,97 @@ INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> macSlidingSym2buff(
     return retVal;
 }
 
+// template for mulSlidingSym2buff - uses ::aie::api HLI
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_FIR_LEN, unsigned int TP_UPSHIFT_CT>
+INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> mulSlidingSym2buff(
+    T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> acc,
+    T_buff_512b<TT_DATA> xbuff,
+    unsigned int xstart,
+    T_buff_512b<TT_DATA> ybuff,
+    unsigned int ystart,
+    T_buff_256b<TT_COEFF> zbuff,
+    unsigned int zstart) {
+    constexpr unsigned int Lanes = fnNumSymLanesIntHb<TT_DATA, TT_COEFF>();
+    // adjust Point size to where the center tap is in relation to number of columns in low-level intrinsic
+    constexpr unsigned int Points = 2 * (((TP_FIR_LEN + 1) / 4 - 1) % fnNumSymColsIntHb<TT_DATA, TT_COEFF>() + 1);
+    constexpr unsigned int CoeffStep = 1;
+    constexpr unsigned int DataStep = 1;
+    constexpr unsigned int DataStepX = 1;
+    constexpr unsigned int DataStepY = 1;
+    using acc_type = typename T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT>::v_type;
+    // acc_type chess_storage(aml0) tmp;  // lower part of bm0, used in UCT
+    acc_type tmp; // lower part of bm0, used in UCT
+    T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> retVal;
+    if
+        constexpr((std::is_same_v<TT_DATA, float> || std::is_same_v<TT_DATA, cfloat>)) {
+            retVal.val =
+                ::aie::sliding_mul<fnNumSymLanesIntHb<TT_DATA, TT_COEFF>(), fnNumSymColsIntHb<TT_DATA, TT_COEFF>()>(
+                    zbuff.val, zstart, xbuff.val, xstart);
+            retVal.val =
+                ::aie::sliding_mac<fnNumSymLanesIntHb<TT_DATA, TT_COEFF>(), fnNumSymColsIntHb<TT_DATA, TT_COEFF>()>(
+                    retVal.val, zbuff.val, zstart, ybuff.val, ystart);
+        }
+    else {
+        // tmp = ::aie::sliding_mul_sym_ops<Lanes,
+        //                         Points,
+        //                         CoeffStep, DataStepX, DataStepY,
+        //                         TT_COEFF, TT_DATA,
+        //                         accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>
+        //                         >::mul_sym
+        //             (zbuff.val, zstart, xbuff.val, xstart, ybuff.val, ystart);
+
+        tmp = ::aie::sliding_mul_sym<Lanes, Points, CoeffStep, DataStep>(zbuff.val, zstart, xbuff.val, xstart,
+                                                                         ybuff.val, ystart);
+        retVal.val = retVal.val.insert(0, tmp);
+    }
+    return retVal;
+}
+
+// MAC operation for 1buff arch. Template function which also hides the struct contents.
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_UPSHIFT_CT = 0>
+INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> mulSym1buffIntHb(
+    T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> acc,
+    T_buff_1024b<TT_DATA> xbuff,
+    unsigned int xstart,
+    unsigned int ystart,
+    T_buff_256b<TT_COEFF> zbuff,
+    unsigned int zstart) {
+    T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> retVal;
+
+    if
+        constexpr(TP_UPSHIFT_CT == 0) {
+            // Call overloaded function which uses native vectors
+            constexpr unsigned int Lanes = fnNumSymLanesIntHb<TT_DATA, TT_COEFF>();
+            constexpr unsigned int Points = 2 * fnNumSymColsIntHb<TT_DATA, TT_COEFF>();
+            constexpr unsigned int CoeffStep = 1;
+            constexpr unsigned int DataStepX = 1;
+            constexpr unsigned int DataStepY = 1;
+
+            // floats datapath doesn't have a pre-adder, need to issue 2 x non-sym calls.
+            if
+                constexpr((std::is_same_v<TT_DATA, float> || std::is_same_v<TT_DATA, cfloat>)) {
+                    retVal.val = ::aie::sliding_mul<fnNumSymLanesIntHb<TT_DATA, TT_COEFF>(),
+                                                    fnNumSymColsIntHb<TT_DATA, TT_COEFF>()>(zbuff.val, zstart,
+                                                                                            xbuff.val, xstart);
+                    retVal.val = ::aie::sliding_mac<fnNumSymLanesIntHb<TT_DATA, TT_COEFF>(),
+                                                    fnNumSymColsIntHb<TT_DATA, TT_COEFF>()>(retVal.val, zbuff.val,
+                                                                                            zstart, xbuff.val, ystart);
+                }
+            else {
+                retVal.val = ::aie::sliding_mul_sym_ops<
+                    Lanes, Points, CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
+                    accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >::mul_sym(zbuff.val, zstart,
+                                                                                                    xbuff.val, xstart,
+                                                                                                    ystart);
+            }
+        }
+    else {
+        // Do nothing, API _uct call already instantiated all the required calls.
+        retVal = acc;
+    }
+    return retVal;
+};
+
 // MAC operation for 1buff arch. Template function which also hides the struct contents.
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_UPSHIFT_CT = 0>
 INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> macSym1buffIntHb(
@@ -349,7 +488,6 @@ INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> macSym1buffIntHb(
     if
         constexpr(TP_UPSHIFT_CT == 0) {
             // Call overloaded function which uses native vectors
-            // retVal =  macSym1buffIntHb(acc, xbuff.val, xstart, ystart, zbuff.val, zstart);
             constexpr unsigned int Lanes = fnNumSymLanesIntHb<TT_DATA, TT_COEFF>();
             constexpr unsigned int Points = 2 * fnNumSymColsIntHb<TT_DATA, TT_COEFF>();
             constexpr unsigned int CoeffStep = 1;
@@ -378,7 +516,7 @@ INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> macSym1buffIntHb(
     return retVal;
 };
 
-// MAC operation for 2buff arch. Calls APIs sliding_mac. Overloaded with extra argument to call UCT
+// MAC operation for 2buff arch. Calls APIs sliding_mac.
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_FIR_LEN, unsigned int TP_UPSHIFT_CT>
 INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> macSym2buffIntHb(
     T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> acc,
@@ -436,9 +574,40 @@ INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> mulCentreTap2buffInt
     return retVal;
 };
 
-// Initial MAC operation for 1buff arch. Take inputIF as an argument to ease overloading.
-template <typename TT_DATA, typename TT_COEFF, unsigned int TP_FIR_LEN, unsigned int TP_UPSHIFT_CT>
+// Initial MUL operation for 1buff arch. Take inputIF as an argument to ease overloading.
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_DUAL_IP>
 INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> initMacIntHb(
+    T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> inInterface,
+    T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> acc,
+    T_buff_1024b<TT_DATA> xbuff,
+    unsigned int xstart,
+    unsigned int ystart,
+    T_buff_256b<TT_COEFF> zbuff,
+    unsigned int zstart,
+    unsigned int ctShift) {
+    if
+        constexpr(TP_UPSHIFT_CT == 0) {
+            // Call overloaded low level function which uses native vectors
+            return mulSym1buffIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT>(acc, xbuff, xstart, ystart, zbuff, zstart);
+        }
+    else {
+        // Call API  .
+        return mulSlidingSym1buffUCT<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_UPSHIFT_CT>(acc, xbuff, xstart, zbuff, zstart,
+                                                                                   ctShift);
+    }
+};
+// Initial MAC operation for 1buff arch. Take inputIF as an argument to ease overloading.
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_DUAL_IP>
+INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> initMacIntHb(
+    T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface,
     T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> acc,
     T_buff_1024b<TT_DATA> xbuff,
     unsigned int xstart,
@@ -460,7 +629,7 @@ INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> initMacIntHb(
                                                                                    ctShift);
     }
 };
-// MAC operation for Low Polyphase 1buff arch. Template function which also hides the struct contents.
+
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_UPSHIFT_CT>
 INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> mulCentreTap1buffIntHb(T_buff_1024b<TT_DATA> xbuff,
                                                                                    unsigned int xstart,
@@ -483,8 +652,40 @@ INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> mulCentreTap1buffInt
 };
 
 // Initial MAC operation for 2buff arch. Take inputIF as an argument to ease overloading.
-template <typename TT_DATA, typename TT_COEFF, unsigned int TP_FIR_LEN, unsigned int TP_UPSHIFT_CT>
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_DUAL_IP>
 INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> initMacIntHb(
+    T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> inInterface,
+    T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> acc,
+    T_buff_512b<TT_DATA> xbuff,
+    unsigned int xstart,
+    T_buff_512b<TT_DATA> ybuff,
+    unsigned int ystart,
+    T_buff_256b<TT_COEFF> zbuff,
+    unsigned int zstart,
+    unsigned int ctShift) {
+    if
+        constexpr(TP_UPSHIFT_CT == 0) {
+            // Call overloaded low level function which uses native vectors
+            return macSlidingSym2buff<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_UPSHIFT_CT>(acc, xbuff, xstart, ybuff, ystart,
+                                                                                    zbuff, zstart);
+        }
+    else {
+        return mulSlidingSymUCT2buff<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_UPSHIFT_CT>(acc, xbuff, xstart, ybuff, ystart,
+                                                                                   zbuff, zstart, ctShift);
+    }
+};
+// Initial MAC operation for 2buff arch. Take inputIF as an argument to ease overloading.
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_DUAL_IP>
+INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> initMacIntHb(
+    T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface,
     T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> acc,
     T_buff_512b<TT_DATA> xbuff,
     unsigned int xstart,

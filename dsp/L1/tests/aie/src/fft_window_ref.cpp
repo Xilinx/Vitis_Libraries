@@ -16,13 +16,6 @@
 FFT Window reference model
 */
 #include "device_defs.h"
-#if __SUPPORTS_CFLOAT__ == 0
-typedef struct {
-    float real;
-    float imag;
-} cfloat;
-#endif
-
 #include "fft_window_ref.hpp"
 //#include "fir_ref_utils.hpp"
 #include "fft_ref_utils.hpp"
@@ -198,7 +191,8 @@ void fft_window_ref<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT,
     }
 };
 
-// Streaming specialization
+#if __STREAMS_PER_TILE__ == 2
+// Streaming specialization (2 streams)
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_POINT_SIZE,
@@ -283,6 +277,88 @@ void fft_window_ref<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT,
         }
     }
 };
+#endif // __STREAMS_PER_TILE__ == 2
+
+#if __STREAMS_PER_TILE__ == 1
+// Streaming specialization (1 stream)
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_SHIFT,
+          unsigned int TP_SSR,
+          unsigned int TP_DYN_PT_SIZE>
+void fft_window_ref<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SSR, TP_DYN_PT_SIZE>::
+    fft_window_main(input_stream<TT_DATA>* inStream0, output_stream<TT_DATA>* outStream0) {
+    TT_DATA d_in0;
+    TT_DATA d_out0;
+    TT_DATA d_in1;
+    TT_DATA d_out1;
+
+    TT_COEFF* coeff_base = &this->weights[0];
+    unsigned int ptSize =
+        TP_POINT_SIZE; // default to static point size value. May be overwritten if dynamic point size selected.
+    int16 tableSelect = 0;
+    TT_COEFF coeff0, coeff1;
+
+    if
+        constexpr(TP_DYN_PT_SIZE == 1) {
+            constexpr unsigned int kPtSizePwr = fnGetPointSizePower<TP_POINT_SIZE>();
+            constexpr unsigned int kMaxPtSizePwr = 16; // largest is 64k = 1<<16;
+            constexpr unsigned int kMinPtSizePwr = 4;  // smallest is 16 = 1<<4;
+            constexpr unsigned int kHeaderSize =
+                32 / (sizeof(TT_DATA)); // dynamic point size header size (256bits or 32 bytes) in terms of samples
+            TT_DATA* headerPtr;
+            TT_DATA header;
+            int16 ptSizePwr; // default to static point size value. May be overwritten if dynamic point size selected.
+
+            // first field is direction - irrelevant to fft_window, so ignore.
+            writeincr(outStream0, readincr(inStream0));
+
+            // second field is point size power, but only need to read it from one port. Just pass through the other.
+            d_in0 = readincr(inStream0);
+            writeincr(outStream0, d_in0);
+            ptSizePwr = (int32)d_in0.real - kLogSSR;
+            ptSize = ((unsigned int)1) << ptSizePwr;
+            tableSelect = kPtSizePwr - ptSizePwr;
+            coeff_base = &this->weights[this->tableStarts[tableSelect]];
+
+            // copy the rest of the header to output streams
+            for (int i = 2; i < kHeaderSize - 1; i++) {
+                writeincr(outStream0, readincr(inStream0));
+            }
+            d_in0 = readincr(inStream0); // read input data status field
+            //...but set the status accordingly
+            if ((ptSizePwr >= kMinPtSizePwr) && (ptSizePwr <= kMaxPtSizePwr)) {
+                writeincr(outStream0, blankVector<TT_DATA>()); // Status word. 0 indicated all ok.
+            } else {
+                writeincr(outStream0, unitVector<TT_DATA>()); // Status word. 0 indicated all ok.
+            }
+        }
+
+    // This code is cloned from the case with 2 streams, with a minimal mod for single stream.
+    // It could be rewritten for single stream operation.
+    for (int frame = 0; frame < TP_WINDOW_VSIZE / TP_POINT_SIZE; frame++) {
+        for (unsigned int i = 0; i < ptSize / 2; i++) { // /2 because there are 2 streams
+            d_in0 = readincr(inStream0);                // read input data
+            d_in1 = readincr(inStream0);                // read input data
+            coeff0 = coeff_base[i * 2];
+            coeff1 = coeff_base[(i * 2 + 1)];
+            d_out0 = scalar_mult<TT_DATA, TT_COEFF>(d_in0, coeff0, TP_SHIFT);
+            d_out1 = scalar_mult<TT_DATA, TT_COEFF>(d_in1, coeff1, TP_SHIFT);
+            writeincr(outStream0, d_out0);
+            writeincr(outStream0, d_out1);
+        }
+        for (unsigned int i = ptSize / 2; i < TP_POINT_SIZE / 2; i++) { // /2 because there are 2 streams
+            d_in0 = readincr(inStream0);                                // read input data
+            d_in1 = readincr(inStream0);                                // read input data
+
+            writeincr(outStream0, blankVector<TT_DATA>());
+            writeincr(outStream0, blankVector<TT_DATA>());
+        }
+    }
+};
+#endif // __STREAMS_PER_TILE__ == 1
 }
 }
 }

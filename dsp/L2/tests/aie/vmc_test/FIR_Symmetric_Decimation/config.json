@@ -1,6 +1,6 @@
 {
     "spec": "vmc_fir_decimate_sym.json",
-    "outdir": "./xmc_aie_lib/FIR_Symmetric_Decimation_19b0650c",
+    "outdir": "./xmc_aie_lib/FIR_Symmetric_Decimation_22fc2cad",
     "parameters": {
         "data_type": "cint16",
         "coef_type": "int16",
@@ -28,8 +28,6 @@
         "input_window_size": 256,
         "shift_val": 0,
         "rnd_mode": 2,
-        "input_sampling_rate": 200,
-        "use_casc_length": false,
         "casc_length": 1
     },
     "updated_parameter": ""

@@ -87,10 +87,8 @@ class dds_mixer_graph : public graph {
    public:
     static_assert(TP_SSR > 0, "ERROR: Invalid SSR value, must be a value greater than 0.\n");
     // type alias to determine if port type is window or stream
-    using inPortType = typename std::
-        conditional<(TP_API == IO_API::WINDOW), window<TP_INPUT_WINDOW_VSIZE * sizeof(TT_DATA)>, stream>::type;
-    // outPortType is the same as inPortType - may not always be true - future compatible with seperate alias
-    using outPortType = inPortType;
+    static_assert(TP_INPUT_WINDOW_VSIZE % TP_SSR == 0,
+                  "ERROR: Unsupported frame size. TP_INPUT_WINDOW_VSIZE must be divisible by TP_SSR");
 
     template <typename direction>
     using portArray = std::array<port<direction>, TP_SSR>;
@@ -118,7 +116,8 @@ class dds_mixer_graph : public graph {
     **/
     kernel* getKernels() { return m_ddsKernel; };
 
-    using kernelClass = dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_INBUILT_SINCOS>;
+    static constexpr unsigned int KINPUT_WINDOW_VSIZE = TP_INPUT_WINDOW_VSIZE / TP_SSR;
+    using kernelClass = dds_mixer<TT_DATA, KINPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_INBUILT_SINCOS>;
 
     /**
      * @brief This is the constructor function for the dds_mixer graph.
@@ -136,7 +135,7 @@ class dds_mixer_graph : public graph {
                     if
                         constexpr(TP_API == 0) {
                             connect<>(in1[ssrIdx], m_ddsKernel[ssrIdx].in[0]);
-                            dimensions(m_ddsKernel[ssrIdx].in[0]) = {TP_INPUT_WINDOW_VSIZE};
+                            dimensions(m_ddsKernel[ssrIdx].in[0]) = {KINPUT_WINDOW_VSIZE};
                         }
                     else {
                         connect<stream>(in1[ssrIdx], m_ddsKernel[ssrIdx].in[0]);
@@ -147,7 +146,7 @@ class dds_mixer_graph : public graph {
                     if
                         constexpr(TP_API == 0) {
                             connect<>(in2[ssrIdx], m_ddsKernel[ssrIdx].in[1]);
-                            dimensions(m_ddsKernel[ssrIdx].in[1]) = {TP_INPUT_WINDOW_VSIZE};
+                            dimensions(m_ddsKernel[ssrIdx].in[1]) = {KINPUT_WINDOW_VSIZE};
                         }
                     else {
                         connect<stream>(in2[ssrIdx], m_ddsKernel[ssrIdx].in[1]);
@@ -157,7 +156,7 @@ class dds_mixer_graph : public graph {
             if
                 constexpr(TP_API == 0) {
                     connect<>(m_ddsKernel[ssrIdx].out[0], out[ssrIdx]);
-                    dimensions(m_ddsKernel[ssrIdx].out[0]) = {TP_INPUT_WINDOW_VSIZE};
+                    dimensions(m_ddsKernel[ssrIdx].out[0]) = {KINPUT_WINDOW_VSIZE};
                 }
             else {
                 connect<stream>(m_ddsKernel[ssrIdx].out[0], out[ssrIdx]);

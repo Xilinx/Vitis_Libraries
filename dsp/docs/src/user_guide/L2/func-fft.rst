@@ -49,7 +49,7 @@ To see details on the template parameters for the FFT, see :ref:`API_REFERENCE`.
 
 For guidance on configuration with some example scenarios, see :ref:`Configuration Notes`
 
-See also :ref:`Parameter Legality Notes` regarding legality checking of parameters.
+See also :ref:`PARAMETER_LEGALITY_NOTES` regarding legality checking of parameters.
 
 ~~~~~~~~~~~~~~~~
 Access functions
@@ -70,7 +70,7 @@ Design Notes
 Dynamic Point Size
 ------------------
 
-The FFT supports dynamic (run-time controlled) point sizes. This feature is available when the template parameter TP_DYN_PT_SIZE is set. When set to 0 (static point size) all data will be expected in frames of TP_POINT_SIZE data samples, though multiple frames may be input together using TP_WINDOW_VSIZE. When set to 1 (dynamic point size) each _window_ must be preceeded by a 256bit header to describe the run-time parameters of that window. Note that TP_WINDOW_VSIZE described the number of samples in a window so does not include this header. The format of the header is described in Table 5. When TP_DYN_PT_SIZE =1 TP_POINT_SIZE describes the maximum point size which may be input.
+The FFT supports dynamic (run-time controlled) point sizes. This feature is available when the template parameter TP_DYN_PT_SIZE is set. When set to 0 (static point size) all data will be expected in frames of TP_POINT_SIZE data samples, though multiple frames may be input together using TP_WINDOW_VSIZE. When set to 1 (dynamic point size) each window must be preceded by a 256-bit header to describe the run-time parameters of that window. Note that TP_WINDOW_VSIZE described the number of samples in a window so does not include this header. The format of the header is described in Table 5. When TP_DYN_PT_SIZE =1, TP_POINT_SIZE describes the maximum point size which may be input.
 
 .. _FFT_IFFT_HEADER_FORMAT:
 
@@ -91,12 +91,12 @@ The FFT supports dynamic (run-time controlled) point sizes. This feature is avai
    | Reserved                      | 2                    | reserved                                                                        |
    +-------------------------------+----------------------+---------------------------------------------------------------------------------+
    |                               | 3 (cint32 or cfloat) |                                                                                 |
-   | Status (output only)          | 7 (cint16)           |                                 |
-   |                               |   (real part)        | 0 = legal point size, 1 = illegal point size                                    |
+   | Status (output only)          | 7 (cint16)           |                                                                                 |
+   |                               | (real part)          | 0 = legal point size, 1 = illegal point size                                    |
    +-------------------------------+----------------------+---------------------------------------------------------------------------------+
 
 The locations are set to suit TT_DATA type. That is, for TT_DATA=cint16, direction is described in the first cint16 (real part) of the 256 bit header and point size is described in the real part of the second cint16 value.
-Similarly, for TT_DATA=cint32, the real part of the first cint32 value in the header holds the direction field and the second cint32 value’s real part holds the Point size (radix2) field.
+Similarly, for TT_DATA=cint32, the real part of the first cint32 value in the header holds the direction field and the real part of the second cint32 value holds the Point size (radix2) field.
 
 Note that for TT_DATA=cfloat, the values in the header are expected as cfloat and are value-cast (not reinterpret-cast) to integers internally. The output window also has a header. This is copied from the input header except for the status field, which is inserted. The status field is ignored on input. If an illegal point size is entered, the output header will have this field set to a non-zero value and the remainder of the output window is undefined.
 
@@ -208,7 +208,7 @@ This section is intended to provide guidance for the user on how best to configu
 Configuration for performance vs resource
 -----------------------------------------
 Simple configurations of the FFT use a single kernel. Multiple kernels will be used when either TP_PARALLEL_POWER > 0 or TP_CASC_LEN > 1. Both of these parameters exist to allow higher throughput, though TP_PARALLEL_POWER also allows larger point sizes that can be implemented in a single kernel.
-If higher throughput is required than can be achieved with a single kernel then TP_CASC_LEN should be increased in preference to TP_PARALLEL_POWER. This is because resource (number of kernels) will match TP_CASC_LEN, whereas for TP_PARALLEL_POWER, resource increases quadratically.
+If a higher throughput is required than what can be achieved with a single kernel then TP_CASC_LEN should be increased in preference to TP_PARALLEL_POWER. This is because resource (number of kernels) will match TP_CASC_LEN, whereas for TP_PARALLEL_POWER, resource increases quadratically.
 It is recommended that TP_PARALLEL_POWER is only increased after TP_CASC_LEN has been increased, but where throughput still needs to be increased.
 Of course, TP_PARALLEL_POWER may be required if the point size required is greater than a single kernel can be achieved. In this case, to keep resource minimised, increase TP_PARALLEL_POWER as required to support the point size in question, then increase TP_CASC_LEN to achieve the required throughput, before again increasing TP_PARALLEL_POWER if higher throughput is still required.
 The maximum point size supported by a single kernel may be increased by use of the single_kernel constraint. This only applies when TP_API=0 (windows) as the streaming implementation always uses single buffering.
@@ -216,13 +216,15 @@ The maximum point size supported by a single kernel may be increased by use of t
 Scenarios
 ---------
 
-Scenario 1: 512 point forward FFT with cint16 data requres >500 Msamples/sec with a window interface and minimal latency. With TP_CASC_LEN=1 and TP_PARALLEL_POWER=0 this is seen to achieve approx 419Msa/sec. With TP_CASC_LEN=2 this increases to 590Msa/s. The configuration will be as follows:
+Scenario 1: 512 point forward FFT with cint16 data requires >500 MSamples/sec with a window interface and minimal latency. With TP_CASC_LEN=1 and TP_PARALLEL_POWER=0 this is seen to achieve approx 419Msa/sec. With TP_CASC_LEN=2 this increases to 590Msa/s. The configuration will be as follows:
 xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph<cint16, cint16, 512, 1, 9, 2, 0, 512, 0, 0> myFFT;
 Notes: TP_SHIFT is set to 9 for nominal 1/N scaling. TP_WINDOW_VSIZE has been set to TP_POINT_SIZE to minimize latency.
 
 Scenario 2: 4096 point inverse FFT with cint32 data is required with 100Msa/sec. This cannot be accommodated in a single kernel due to memory limits. These memory limits apply to cascaded implementations too, so the recommended configuration is as follows:
 xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph<cint32, cint16, 4096, 0, 12, 1, 0, 4096, 1, 1> myFFT;
 Notes: TP_SHIFT is set to 12 for nominal 1/N scaling. TP_WINDOW_VSIZE has been set to TP_POINT_SIZE as to attempt any multiple of TP_POINT_SIZE would exceed memory limits.
+
+.. _PARAMETER_LEGALITY_NOTES:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 Parameter Legality Notes
@@ -239,19 +241,20 @@ The largest point size which can be supported in a single kernel is limited by d
 .. table:: Maximum Point Size in a single kernel
    :align: center
 
-   +-------------------+------------------+------------------+
-   | TP_DATA_TYPE      | API_IO           | Max Point size   |
-   +===================+==================+==================+
-   |     cint16        |  0 (iobuffer)    |  2048            |
-   +-------------------+------------------+------------------+
-   |     cint16        |  1 (streams)     |  4096            |
-   +-------------------+------------------+------------------+
-   |  cint32 or cfloat |  0 (iobuffer)    |  1024            |
-   +-------------------+------------------+------------------+
-   |  cint32 or cfloat |  1 (streams)     |  2048            |
-   +-------------------+------------------+------------------+
+   +-------------------+-------------------------+-----------------------+
+   | TP_DATA_TYPE      | Max Point Size                                  |
+   |                   +-------------------------+-----------------------+
+   |                   | TP_API=0 (iobuffer I/O) | TP_API=1 (stream I/O) |
+   +===================+=========================+=======================+
+   |    cint16         |       2048              |        4096           |
+   +-------------------+-------------------------+-----------------------+
+   |    cint32         |       2048              |        4096           |
+   +-------------------+-------------------------+-----------------------+
+   |    cfloat         |       2048              |        2048           |
+   +-------------------+-------------------------+-----------------------+
 
-The maximum point size supported per kernel puts a practical limit on the maximum point size supported when using TP_PARALLEL_POWER>1. This is because the largest devices available currently support a maximum TP_PARALLEL_POWER of 4. Essentially, the largest possible FFT can be found by multiplying the values in the table by 2^4. E.g. the largest practical FFT with stream IO and cint32 data is 2048 << 4 = 32768.
+
+The maximum point size supported per kernel puts a practical limit on the maximum point size supported when using TP_PARALLEL_POWER>1. This is because the largest devices available currently support a maximum TP_PARALLEL_POWER of 4. .The largest possible FFT can be found by multiplying the values in the table by 2^4. E.g. the largest practical FFT with stream IO and cint16 data is 4096 << 4 = 65536. However, the extensive use of neighboring tile RAM makes placement a challenge the the mapper, so 32768 may be a practical upper limit for cint32.
 
 
 .. |image1| image:: ./media/image1.png

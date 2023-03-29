@@ -112,6 +112,7 @@ fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SS
     int tableStartsIdx = 0;
     int vecInPtSize = kVecInFrame;
     tally_t tally;
+#if __STREAMS_PER_TILE__ == 2
     for (int ptSizePwr = kPtSizePwr; ptSizePwr >= (TP_DYN_PT_SIZE == 0 ? kPtSizePwr : kMinPtSizePwr); ptSizePwr--) {
         tableStarts[tableStartsIdx++] = tableBase;
         for (int vect = 0; vect < vecInPtSize; vect++) {
@@ -125,6 +126,21 @@ fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SS
         tableBase += (1 << ptSizePwr);
         vecInPtSize = vecInPtSize >> 1;
     }
+#else
+    // copy the primary table raw/
+    memcpy(weights, &kernel_weights[0], TP_POINT_SIZE * (1 + TP_DYN_PT_SIZE) * sizeof(TT_COEFF));
+    tableStarts[0] = 0;
+    if
+        constexpr(TP_DYN_PT_SIZE == 1) {
+            int index = 1;
+            int start = 0;
+            for (int pt = TP_POINT_SIZE; pt >= 16; pt = pt >> 1) {
+                start += pt;
+                tableStarts[index++] = start;
+            }
+        }
+
+#endif
 };
 
 // Base specialization, used for static size window API configurations
@@ -256,7 +272,8 @@ fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, TP_API, 
     }
 };
 
-// Specialization, for stream API configurations
+#if __STREAMS_PER_TILE__ == 2
+// Specialization, for stream API configurations (2 streams per tile).
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_POINT_SIZE,
@@ -308,8 +325,10 @@ fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SS
             }
         }
 };
+#endif // __STREAMS_PER_TILE__ == 2
 
-// Specialization, for dynamic size stream API configurations
+#if __STREAMS_PER_TILE__ == 2
+// Specialization, for dynamic size stream API configurations (2 streams per tile).
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_POINT_SIZE,
@@ -407,6 +426,164 @@ fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SS
         }
     }
 };
+#endif // __STREAMS_PER_TILE__ == 2
+
+#if __STREAMS_PER_TILE__ == 1
+// Specialization, for stream API configurations (1 stream per tile).
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_SHIFT,
+          unsigned int TP_SSR,
+          unsigned int TP_DYN_PT_SIZE>
+NOINLINE_DECL void
+fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SSR, TP_DYN_PT_SIZE>::fft_window_main(
+    input_stream<TT_DATA>* __restrict inStream0, output_stream<TT_DATA>* __restrict outStream0) {
+    using dataVect_t = ::aie::vector<TT_DATA, kSamplesInVect>;
+    using coeffVect_t = ::aie::vector<TT_COEFF, kSamplesInVect>;
+    using accVect_t = ::aie::detail::accum<fnAccClass<TT_DATA>(),          // int, cint, FP or CFP
+                                           fnAccSize<TT_DATA, TT_COEFF>(), // acc80 or acc48
+                                           kSamplesInVect>;
+    constexpr int kSamplesIn128b = 128 / 8 / sizeof(TT_DATA);
+    using t128VectorType = ::aie::vector<TT_DATA, kSamplesIn128b>;
+
+    dataVect_t dataVect;
+    t128VectorType strm0data, strm1data;
+    t128VectorType out0data, out1data;
+    coeffVect_t* coeffVectPtr;
+    coeffVect_t coeffVect;
+    accVect_t acc;
+    dataVect_t outVect;
+
+    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
+    set_sat();            // do saturate.
+
+    for (int frame = 0; frame < TP_WINDOW_VSIZE / TP_POINT_SIZE; frame++)
+        chess_prepare_for_pipelining chess_loop_range(TP_WINDOW_VSIZE / TP_POINT_SIZE, ) {
+            coeffVectPtr = (coeffVect_t*)(&this->weights[0]);
+            //    #pragma unroll (kVecInFrame)
+            for (int vect = 0; vect < kVecInFrame; vect++)
+            // chess_prepare_for_pipelining
+            // chess_loop_range(kVecInFrame,)
+            {
+                strm0data = readincr_v<kSamplesInVect / 2>(inStream0); // 0? refers to physical stream number on tile.
+                strm1data = readincr_v<kSamplesInVect / 2>(inStream0); // 0? refers to physical stream number on tile.
+                dataVect.insert(0, strm0data);
+                dataVect.insert(1, strm1data);
+                coeffVect = *coeffVectPtr++;
+                acc = ::aie::mul(dataVect, coeffVect);
+                outVect = acc.template to_vector<TT_DATA>(TP_SHIFT);
+                out0data = outVect.template extract<kSamplesInVect / 2>(0);
+                out1data = outVect.template extract<kSamplesInVect / 2>(1);
+                writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesInVect / 2>(outStream0, out0data);
+                writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesInVect / 2>(outStream0, out1data);
+            }
+        }
+};
+#endif // __STREAMS_PER_TILE__ == 1
+
+#if __STREAMS_PER_TILE__ == 1
+// Specialization, for dynamic size stream API configurations (1 stream per tile).
+// Note that this is cloned from the 2 stream case, and to keep edits to a minimum loop sizes are
+// kept, simply duplicating reads and writes which would have gone to the second stream to another
+// read or write of the first stream.
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_SHIFT,
+          unsigned int TP_SSR,
+          unsigned int TP_DYN_PT_SIZE>
+NOINLINE_DECL void
+fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SSR, TP_DYN_PT_SIZE>::fft_window_main_dyn(
+    input_stream<TT_DATA>* __restrict inStream0, output_stream<TT_DATA>* __restrict outStream0) {
+    using dataVect_t = ::aie::vector<TT_DATA, kSamplesInVect>;
+    using coeffVect_t = ::aie::vector<TT_COEFF, kSamplesInVect>;
+    using accVect_t = ::aie::detail::accum<fnAccClass<TT_DATA>(),          // int, cint, FP or CFP
+                                           fnAccSize<TT_DATA, TT_COEFF>(), // acc80 or acc48
+                                           kSamplesInVect>;
+    constexpr int kSamplesIn128b = 128 / 8 / sizeof(TT_DATA);
+    using t128VectorType = ::aie::vector<TT_DATA, kSamplesIn128b>;
+
+    dataVect_t dataVect;
+    t128VectorType strm0data, strm1data;
+    t128VectorType out0data, out1data;
+    coeffVect_t* coeffVectPtr;
+    coeffVect_t coeffVect;
+    accVect_t acc;
+    dataVect_t outVect;
+    int ptSizePwr;
+    int ptSize;
+    int tableBase;
+    unsigned int vecInFrame;
+    t128VectorType header;
+    TT_DATA headerVal;
+    t128VectorType blankData;
+
+    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
+    set_sat();            // do saturate.
+
+    blankData = ::aie::zeros<TT_DATA, 16 / sizeof(TT_DATA)>();
+    header = readincr_v<kSamplesInVect / 2>(inStream0); // 0? refers to physical stream number on tile.
+    writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesInVect / 2>(outStream0, header);
+    headerVal = header.get(1);
+    ptSizePwr = (int)headerVal.real - kLogSSR;
+    ptSize = (1 << ptSizePwr);
+    tableBase = tableStarts[kPtSizePwr - ptSizePwr];
+    header = readincr_v<kSamplesInVect / 2>(inStream0); // 0? refers to physical stream number on tile.
+
+    if (ptSizePwr >= kMinPtSizePwr && ptSizePwr <= kMaxPtSizePwr) {
+        writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesInVect / 2>(outStream0, header);
+        vecInFrame = ptSize >> kLogSamplesInVect;
+        for (int frame = 0; frame < TP_WINDOW_VSIZE / TP_POINT_SIZE; frame++)
+            chess_prepare_for_pipelining chess_loop_range(TP_WINDOW_VSIZE / TP_POINT_SIZE, ) {
+                coeffVectPtr = (coeffVect_t*)(&this->weights[tableBase]);
+                //    #pragma unroll (kVecInFrame)
+                for (int vect = 0; vect < vecInFrame; vect++)
+                // chess_prepare_for_pipelining
+                // chess_loop_range(kVecInFrame,)
+                {
+                    strm0data =
+                        readincr_v<kSamplesInVect / 2>(inStream0); // 0? refers to physical stream number on tile.
+                    strm1data =
+                        readincr_v<kSamplesInVect / 2>(inStream0); // 0? refers to physical stream number on tile.
+                    dataVect.insert(0, strm0data);
+                    dataVect.insert(1, strm1data);
+                    coeffVect = *coeffVectPtr++;
+                    acc = ::aie::mul(dataVect, coeffVect);
+                    outVect = acc.template to_vector<TT_DATA>(TP_SHIFT);
+                    out0data = outVect.template extract<kSamplesInVect / 2>(0);
+                    out1data = outVect.template extract<kSamplesInVect / 2>(1);
+                    writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesInVect / 2>(outStream0, out0data);
+                    writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesInVect / 2>(outStream0, out1data);
+                }
+                for (int vect = vecInFrame; vect < kVecInFrame; vect++) // fill in remainder of frame holder with blanks
+                // chess_prepare_for_pipelining
+                // chess_loop_range(kVecInFrame,)
+                {
+                    // read in and discard, while writing blanks.
+                    strm0data =
+                        readincr_v<kSamplesInVect / 2>(inStream0); // 0? refers to physical stream number on tile.
+                    strm1data =
+                        readincr_v<kSamplesInVect / 2>(inStream0); // 0? refers to physical stream number on tile.
+                    writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesInVect / 2>(outStream0, blankData);
+                    writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesInVect / 2>(outStream0, blankData);
+                }
+            }
+    } else {
+        // indicate that the frame is invalid by setting the flag in the status field of the header.
+        header.set(unitVector<TT_DATA>(),
+                   std::is_same<TT_DATA, cint16>::value ? 3 : 1); // set the invalid flag in the status location.
+        writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesInVect / 2>(outStream0, header);
+
+        // write out blank window
+        for (int i = 0; i < TP_WINDOW_VSIZE / (16 / sizeof(TT_DATA)); i++) {
+            writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesInVect / 2>(outStream0, blankData);
+        }
+    }
+};
+#endif // __STREAMS_PER_TILE__ == 1
 }
 }
 }

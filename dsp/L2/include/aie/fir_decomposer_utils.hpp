@@ -31,8 +31,6 @@ namespace fir {
 namespace decomposer {
 template <typename params>
 struct decomposed_params : params {
-    // static_assert(params::BTP_INTERPOLATE_FACTOR % params::BTP_PARA_INTERP_POLY == 0 &&
-    // params::BTP_INTERPOLATE_FACTOR >= params::BTP_PARA_INTERP_POLY, "Error");
     static constexpr unsigned int BTP_INTERPOLATE_FACTOR =
         params::BTP_INTERPOLATE_FACTOR / params::BTP_PARA_INTERP_POLY;
     static constexpr unsigned int BTP_DECIMATE_FACTOR = params::BTP_DECIMATE_FACTOR / params::BTP_PARA_DECI_POLY;
@@ -123,16 +121,12 @@ class polyphase_decomposer {
         coeff_vector interp_taps;
         for (unsigned int i = (polyInterpIdx * TP_DECIMATE_FACTOR) % TP_INTERPOLATE_FACTOR; i < taps.size();
              i += TP_PARA_INTERP_POLY) {
-            // printf("segment_taps_array_for_polyphase[%d,%d]: taps[%d] = %d\n", polyInterpIdx, polyDeciIdx, i,
-            // taps[i]);
             interp_taps.push_back(taps[i]);
         }
 
         // Then split the given interp polyphase over decimator phases / decimator moments
         coeff_vector ret_taps;
         for (unsigned int i = polyDeciIdx; i < interp_taps.size(); i += TP_PARA_DECI_POLY) {
-            // printf("segment_taps_array_for_polyphase[%d,%d]: interp_taps[%d] = %d \n", polyInterpIdx, polyDeciIdx, i,
-            // interp_taps[i]);
             ret_taps.push_back(interp_taps[i]);
         }
 
@@ -213,10 +207,6 @@ class polyphase_decomposer {
     static_assert(p::BTP_FIR_LEN % TP_PARA_DECI_POLY == 0,
                   "TP_FIR_LEN must be a mutliple of TP_PARA_DECI_POLY. Pad coefficients to nearest multiple.");
 
-    // // this constraint doesn't exist for INTERP_POLY, since input window is just broadcast and not split.
-    // static_assert(p::BTP_INPUT_WINDOW_VSIZE % TP_PARA_DECI_POLY == 0,
-    //               "TP_INPUT_WINDOW_VSIZE must be a multiple of TP_PARA_DECI_POLY");
-
     // Flattened order with deciPoly being the inner dim - arbitrary choice,
     // hopefully consitent with other ports and net definitions
     static unsigned int getKernelIdx(unsigned int interpPolyIdx, unsigned int deciPolyIdx = 0) {
@@ -228,18 +218,8 @@ class polyphase_decomposer {
     static void create_and_recurse(kernel (&firKernels)[n_kernels], const coeff_vector& taps) {
         unsigned int kernelIndex = getKernelIdx(interpPolyIdx, deciPolyIdx);
         auto tapsForPolyphase = segment_taps_array_for_polyphase(taps, interpPolyIdx, deciPolyIdx);
-        for (unsigned int i = 0; i < taps.size(); i++) {
-            // printf("polyphase_decomposer::create_and_recurse: taps[%d] = %d \n", i, taps[i]);
-        }
-        for (unsigned int i = 0; i < tapsForPolyphase.size(); i++) {
-            // printf("polyphase_decomposer::create_and_recurse: tapsForPolyphase[%d] = %d \n", i, tapsForPolyphase[i]);
-        }
-        // printf("polyphase_decomposer::create_and_recurse: kernelIndex, interpPolyIdx, deciPolyIdx = %d, %d, %d\n",
-        // kernelIndex, interpPolyIdx, deciPolyIdx);
 
         if (deciPolyIdx == 0) {
-            // printf("AM I first kernel???");
-            // printParams<initDeciParams<interpPolyIdx, deciPolyIdx>>();
             // populates kernel array with kernel objects
             ssrKickOffInit<interpPolyIdx, deciPolyIdx>::create_and_recurse(
                 reinterpret_cast<kernel(&)[n_ssr_kernels]>(firKernels[kernelIndex]), tapsForPolyphase);
@@ -270,7 +250,6 @@ class polyphase_decomposer {
             constexpr unsigned int nextDeciPolyIdx = deciPolyIdx == 0 ? TP_PARA_DECI_POLY - 1 : deciPolyIdx - 1;
             create_and_recurse<nextInterpPolyIdx, nextDeciPolyIdx>(firKernels, taps);
         }
-        // printf("polyphase_decomposer::create_and_recurse done.\n");
     }
 
     // static coeffs
@@ -278,8 +257,6 @@ class polyphase_decomposer {
     static void create_and_recurse(kernel (&firKernels)[n_kernels]) {
         unsigned int kernelIndex = getKernelIdx(interpPolyIdx, deciPolyIdx);
 
-        // printf("polyphase_decomposer::create_and_recurse: kernelIndex, interpPolyIdx, deciPolyIdx = %d, %d, %d\n",
-        // kernelIndex, interpPolyIdx, deciPolyIdx);
         if (deciPolyIdx == 0) {
             // populates kernel array with kernel objects
             ssrKickOffInit<interpPolyIdx, deciPolyIdx>::create_and_recurse(
@@ -322,11 +299,6 @@ class polyphase_decomposer {
         interp_poly_array<deci_poly_array<ssr_array<in2_vtype> > > in2_ssr,
         interp_poly_array<deci_poly_array<ssr_array<port<output> > > > out_deci_intermediate,
         interp_poly_array<deci_poly_array<ssr_array<port<input> > > > casc_in_deci_intermediate,
-        // port<input>* in,
-        // in2_type(&in2),
-        // port<output>* out,
-        // out2_type(&out2),
-        // coeff_type coeff,
         polyphase_net_array& net,
         polyphase_net_array& net2,
         cond_casc_in_type(&casc_in)) {
@@ -386,22 +358,17 @@ class polyphase_decomposer {
             constexpr unsigned int nextDeciPolyIdx = deciPolyIdx == 0 ? TP_PARA_DECI_POLY - 1 : deciPolyIdx - 1;
             create_connections_and_recurse<nextInterpPolyIdx, nextDeciPolyIdx>(
                 firKernels, decomposed_coeff, out_ssr, out2_ssr, in_ssr, in2_ssr, out_deci_intermediate,
-                casc_in_deci_intermediate,
-                // in, in2, out, out2, coeff,
-                net, net2, casc_in);
+                casc_in_deci_intermediate, net, net2, casc_in);
         }
     }
 
    public:
     // static coeffs
     static void create(kernel (&firKernels)[n_kernels], const coeff_vector& taps) {
-        // call ssr kernels multiple times.
-        // printParams<params>();
         create_and_recurse<TP_PARA_INTERP_POLY - 1, TP_PARA_DECI_POLY - 1>(firKernels, taps);
     }
     // reloadable coeffs
     static void create(kernel (&firKernels)[n_kernels]) {
-        // printParams<params>();
         create_and_recurse<TP_PARA_INTERP_POLY - 1, TP_PARA_DECI_POLY - 1>(firKernels);
     }
 
@@ -428,14 +395,6 @@ class polyphase_decomposer {
             casc_in_deci_intermediate, net, net2, casc_in);
 
         for (unsigned int interpPolyIdx = 0; interpPolyIdx < TP_PARA_INTERP_POLY; interpPolyIdx++) {
-            // dec_coeff_type decomposed_coeff;
-            // cascade input connections into decimator polyphases, always port<input>
-            // std::conditional_t< (TP_PARA_DECI_POLY > 1), std::array<ssr_array<port<input>>, TP_PARA_DECI_POLY-1>,
-            // std::array<ssr_array<no_port>, TP_PARA_DECI_POLY-1>> casc_in_deci_intermediate;
-
-            // cascade output connections between decimator polyphases.
-            // deci_poly_array<ssr_array<port<output> > > out_deci_intermediate;
-
             for (unsigned int deciPolyIdx = 0; deciPolyIdx < TP_PARA_DECI_POLY; deciPolyIdx++) {
                 // unsigned int kernelIndex = getKernelIdx(interpPolyIdx, deciPolyIdx);
                 // Connect different polyphase inputs to each decimator polyphase branch
@@ -446,10 +405,6 @@ class polyphase_decomposer {
                                                   (TP_PARA_DECI_POLY - deciPolyIdx +
                                                    ((interpPolyIdx * TP_DECIMATE_FACTOR) / TP_INTERPOLATE_FACTOR)) %
                                                       TP_PARA_DECI_POLY;
-                    // printf("create_connections: interpPolyIdx, deciPolyIdx, ssrIdx [%d, %d, %d]: inputDataIndex =
-                    // %d\n",
-                    //        interpPolyIdx, deciPolyIdx, ssrIdx, inputDataIndex);
-
                     connect<>(in[inputDataIndex], in_ssr[interpPolyIdx][deciPolyIdx][ssrIdx]);
                     if
                         constexpr(params::BTP_DUAL_IP == 1) {

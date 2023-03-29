@@ -115,7 +115,14 @@
         "function" : "validate_TP_PARALLEL_POWER",
         "args": ["TP_API"]
       }
-    }
+    },
+    {
+      "name": "AIE_VARIANT",
+      "type": "uint",
+      "description": "specifies the device type",
+      "maximum": 2, 
+      "minimum": 1
+    } 
   ],
   "ports": {
     "file": "fft_ifft_dit_1ch.py",

@@ -1,6 +1,6 @@
 {
     "spec": "vmc_fir_interpolate_hb.json",
-    "outdir": "./xmc_aie_lib/FIR_Halfband_Interpolator_dc1b2b6f",
+    "outdir": "./xmc_aie_lib/FIR_Halfband_Interpolator_b0b0c22a",
     "parameters": {
         "data_type": "cint16",
         "coef_type": "int16",
@@ -21,8 +21,6 @@
         "shift_val": 0,
         "rnd_mode": 2,
         "upshift_ct": 0,
-        "input_sampling_rate": 200,
-        "use_casc_length": false,
         "casc_length": 1
     },
     "updated_parameter": ""

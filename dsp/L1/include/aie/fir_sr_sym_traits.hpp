@@ -40,7 +40,7 @@ namespace fir {
 namespace sr_sym {
 // Global constants,
 static constexpr unsigned int kSymmetryFactor = 2;
-static constexpr unsigned int kMaxColumns = 2;
+static constexpr unsigned int kMaxColumns = 4;
 static constexpr unsigned int kFirRangeRound =
     kSymmetryFactor * kMaxColumns;            // Round cascaded FIR SYM kernels to multiples of 8,
 static constexpr unsigned int kUpdWSize = 32; // Upd_w size in Bytes (256bit) - const for all data/coeff types

@@ -18,14 +18,6 @@
 #include <stdlib.h>
 
 #include "device_defs.h"
-
-#if __SUPPORTS_CFLOAT__ == 0
-typedef struct {
-    float real;
-    float imag;
-} cfloat;
-#endif //__SUPPORTS_CFLOAT__ == 0
-
 #include "fft_r2comb_ref.hpp"
 
 #ifndef _DSPLIB_FFT_R2_COMB_REF_DEBUG_

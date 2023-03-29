@@ -1,0 +1,168 @@
+{
+    "name": "Xilinx DSPLIB fft_window_aie2",
+    "description": "",
+    "gui": false,
+    "flow": "versal",
+    "platform_allowlist": [
+        "vek280"
+    ],
+    "platform_properties": {
+        "vek280": {
+            "v++": {
+                "compiler": {
+                    "clflags": []
+                },
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/system.cfg"
+                    ]
+                }
+            }
+        }
+    },
+    "pre_build": [
+        {
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL) $(META_PARAM_MAP))"
+        },
+        {
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), vitis -exec ipmetadata_config_checker LIB_DIR/L2/meta/fft_window.json ./config.json -newflow)"
+        },
+        {
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), make -f PROJECT/helper.mk HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(INPUT_FILE) DATA_TYPE=$(DATA_TYPE) POINT_SIZE=$(POINT_SIZE) WINDOW_VSIZE=$(WINDOW_VSIZE) NITER=$(NITER) SEED=$(SEED) STIM_TYPE=$(STIM_TYPE) API_IO=$(API_IO) UUT_SSR=$(UUT_SSR) DYN_PT_SIZE=$(DYN_PT_SIZE) AIE_VARIANT=$(AIE_VARIANT) )"
+        }
+    ],
+    "post_launch": [
+        {
+            "target": "aiesim",
+            "launch_cmd": [
+                "mkdir -p logs",
+                "make -f PROJECT/helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR DATA_TYPE=$(DATA_TYPE) POINT_SIZE=$(POINT_SIZE) API_IO=$(API_IO) WINDOW_VSIZE=$(WINDOW_VSIZE) UUT_SSR=$(UUT_SSR) DYN_PT_SIZE=$(DYN_PT_SIZE) AIE_VARIANT=$(AIE_VARIANT) STATUS_FILE=$(STATUS_FILE) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)",
+                "tclsh LIB_DIR/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output $(STATUS_FILE) $(WINDOW_VSIZE) $(NITER)",
+                "tclsh LIB_DIR/L2/tests/aie/common/scripts/get_stats.tcl $(WINDOW_VSIZE) 1 $(STATUS_FILE) ./aiesimulator_output fft_window_main $(NITER)",
+                "make -f PROJECT/helper.mk get_qor HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR DATA_TYPE=$(DATA_TYPE) POINT_SIZE=$(POINT_SIZE) API_IO=$(API_IO) WINDOW_VSIZE=$(WINDOW_VSIZE) UUT_SSR=$(UUT_SSR) DYN_PT_SIZE=$(DYN_PT_SIZE) AIE_VARIANT=$(AIE_VARIANT) STATUS_FILE=$(STATUS_FILE) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)",
+                "LIB_DIR/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) LIB_DIR/L2/tests/aie/common/scripts",
+                "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./"
+            ]
+        },
+        {
+            "target": "x86sim",
+            "launch_cmd": [
+                "mkdir -p logs",
+                "$(if $(filter-out REF,$(TAG)), make -f PROJECT/helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR DATA_TYPE=$(DATA_TYPE) POINT_SIZE=$(POINT_SIZE) API_IO=$(API_IO) WINDOW_VSIZE=$(WINDOW_VSIZE) UUT_SSR=$(UUT_SSR) DYN_PT_SIZE=$(DYN_PT_SIZE) AIE_VARIANT=$(AIE_VARIANT) STATUS_FILE=$(STATUS_FILE) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE))",
+                "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./)"
+            ]
+        }
+    ],
+    "launch": [
+        {
+            "name": "aiesim-launch",
+            "target": "aiesim",
+            "sim_options": "--graph-latency"
+        },
+        {
+            "name": "x86sim-launch",
+            "target": "x86sim",
+            "sim_options": ""
+        }
+    ],
+    "aiecompiler": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L1/include/aie",
+                "LIB_DIR/L1/src/aie",
+                "LIB_DIR/L1/tests/aie/inc",
+                "LIB_DIR/L1/tests/aie/src",
+                "LIB_DIR/L2/include/aie",
+                "LIB_DIR/L2/tests/aie/common/inc",
+                "./"
+            ],
+            "customized_params": {
+                "params": "--dataflow -v  $($(TAG)_TARGET_COMPILE_ARGS)  -Xpreproc=\"$($(TAG)_PREPROC_ARGS)\"",
+                "default": {
+                    "TAG": "UUT",
+                    "AIE_VARIANT": "2",
+                    "UUT_KERNEL": "fft_window",
+                    "REF_KERNEL": "fft_window_ref",
+                    "UUT_GRAPH": "fft_window_graph",
+                    "REF_GRAPH": "fft_window_ref_graph",
+                    "NITER": "4",
+                    "DATA_TYPE": "cint16",
+                    "COEFF_TYPE": "int16",
+                    "POINT_SIZE": "64",
+                    "WINDOW_VSIZE": "$(POINT_SIZE)",
+                    "LOG_WINDOW_VSIZE": "6",
+                    "SHIFT": "14",
+                    "API_IO": "0",
+                    "UUT_SSR": "1",
+                    "DYN_PT_SIZE": "0",
+                    "NUM_PORTS": "1",
+                    "DYN_PT_HEADER_SIZE": "0",
+                    "DIFF_TOLERANCE": "0",
+                    "CC_TOLERANCE": "0",
+                    "SEED": "1",
+                    "STIM_TYPE": "0",
+                    "WINDOW_CHOICE": "0",
+                    "WEIGHTS": "10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000",
+                    "COEFF_SIZE": "$$(( 4   ))",
+                    "STACKSIZE_VAL": "$$(( $(COEFF_SIZE) * $(POINT_SIZE) + 2048))",
+                    "UUT_SIM_FILE": "./data/uut_output.txt",
+                    "REF_SIM_FILE": "./data/ref_output.txt",
+                    "INPUT_FILE": "./data/input.txt",
+                    "UUT_FILE_SUFFIX": "$(UUT_KERNEL)_$(DATA_TYPE)_$(COEFF_TYPE)_$(POINT_SIZE)_$(WINDOW_VSIZE)_$(SHIFT)_$(API_IO)_$(UUT_SSR)_$(DYN_PT_SIZE)_$(AIE_VARIANT)",
+                    "LOG_FILE": "./logs/log_$(UUT_FILE_SUFFIX).txt",
+                    "STATUS_LOG_FILE": "./logs/status_$(UUT_FILE_SUFFIX).txt",
+                    "STATUS_FILE": "$(STATUS_LOG_FILE)",
+                    "UUT_TARGET_COMPILE_ARGS": "-Xchess=llvm.xargs=\"-std=c++2a\" -Xchess=main:backend.mist2.xargs=\"+NOdra\" -Xchess=main:backend.mist2.pnll=\"off\" -stacksize=$(STACKSIZE_VAL)",
+                    "REF_TARGET_COMPILE_ARGS": "",
+                    "UUT_WORK_DIR": "./Work",
+                    "REF_WORK_DIR": "./Work",
+                    "PREPROC_ARGS": "-DINPUT_FILE=$(INPUT_FILE) -DDATA_TYPE=$(DATA_TYPE) -DCOEFF_TYPE=$(COEFF_TYPE) -DPOINT_SIZE=$(POINT_SIZE) -DWINDOW_VSIZE=$(WINDOW_VSIZE) -DSHIFT=$(SHIFT) -DAPI_IO=$(API_IO) -DUUT_SSR=$(UUT_SSR) -DDYN_PT_SIZE=$(DYN_PT_SIZE) -DAIE_VARIANT=$(AIE_VARIANT) -DSTIM_TYPE=$(STIM_TYPE) -DWINDOW_CHOICE=$(WINDOW_CHOICE) -DNITER=$(NITER)",
+                    "REF_PREPROC_ARGS": "-DUUT_GRAPH=$(REF_GRAPH) -DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS) ",
+                    "UUT_PREPROC_ARGS": "-DUUT_GRAPH=$(UUT_GRAPH) -DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) -DUSING_UUT=1",
+                    "META_PARAM_MAP": "AIE_VARIANT $(AIE_VARIANT) DATA_TYPE $(DATA_TYPE) COEFF_TYPE $(COEFF_TYPE) POINT_SIZE $(POINT_SIZE) WINDOW_VSIZE $(WINDOW_VSIZE) SHIFT $(SHIFT) API_IO $(API_IO) UUT_SSR $(UUT_SSR) DYN_PT_SIZE $(DYN_PT_SIZE)"
+                }
+            }
+        }
+    },
+    "aiecontainers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/L2/tests/aie/fft_window_aie2/test.cpp",
+                    "files": [
+                        "LIB_DIR/L1/src/aie/fft_window.cpp"
+                    ],
+                    "pl-freq": 1000,
+                    "workdir": "./Work",
+                    "options": "",
+                    "name": "libadf.a"
+                }
+            ]
+        }
+    ],
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": {
+                    "vitis_aie_x86sim": 32768,
+                    "vitis_aie_sim": 40960
+                },
+                "max_time_min": {
+                    "vitis_aie_x86sim": 60,
+                    "vitis_aie_sim": 200
+                }
+            }
+        ],
+        "customized_params": "multi_params.json",
+        "targets": [
+            "vitis_aie_sim",
+            "vitis_aie_x86sim"
+        ],
+        "category": "canary"
+    }
+}

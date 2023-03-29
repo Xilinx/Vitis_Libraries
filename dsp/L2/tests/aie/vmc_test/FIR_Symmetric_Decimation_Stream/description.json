@@ -58,7 +58,7 @@
         "customized_params": {
                 "params": "--dataflow -Xchess=llvm.xargs=-std=c++2a -Xx86sim=-client=vmc -v -output=graph",
                 "default": {
-                    "GRAPHNAME": "FIR_Symmetric_Decimation_Stream_aa07f2c5",
+                    "GRAPHNAME": "FIR_Symmetric_Decimation_Stream_f35c38de",
                     "VMC_GRAPHDIR": "xmc_aie_lib/$(GRAPHNAME)",
                     "VMC_KERNEL": "vmc_stream_fir_decimate_sym"
                 }

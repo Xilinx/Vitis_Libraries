@@ -38,7 +38,7 @@ The graph entry point is the following:
 Supported Types
 ~~~~~~~~~~~~~~~
 
-The data type to the FFT window is controlled by the template parameter TT_DATA. This may take one of 3 choices: cint16, cint32 or cfloat. This selection applies to both input data and output data.
+The data type to the FFT window is controlled by the template parameter TT_DATA. This may take one of 3 choices: cint16, cint32 or cfloat (AIE only, not AIE-ML). This selection applies to both input data and output data.
 The template parameter TT_COEFF may take one of three values, int16, int32 or cfloat, but currently this value is forced by the choice of TT_DATA, so TT_COEFF must be set to int16 for TT_DATA = cint16 or int32 for TT_DATA=cint32 or float for TT_DATA=cfloat.
 
 ~~~~~~~~~~~~~~~~~~~
@@ -69,7 +69,7 @@ The FFT Window performs a sample by sample scaling of data prior to entry to an 
 Dynamic Point Size
 ------------------
 
-The FFT Window supports dynamic (run-time controlled) point sizes. This feature is available when the template parameter TP_DYN_PT_SIZE is set to 1. When set to 0 (static point size) all data will be expected in frames of TP_POINT_SIZE data samples, though multiple frames may be input together using TP_WINDOW_VSIZE which is an integer multiple of TP_POINT_SIZE. When set to 1 (dynamic point size) each _window_ must be preceeded by a 256bit header to describe the run-time parameters of that window. Note that TP_WINDOW_VSIZE described the number of samples in a window so does not include this header. The format of the header is described in Table 5. When TP_DYN_PT_SIZE = 1 TP_POINT_SIZE describes the maximum point size which may be input.
+The FFT Window supports dynamic (run-time controlled) point sizes. This feature is available when the template parameter TP_DYN_PT_SIZE is set to 1. When set to 0 (static point size) all data will be expected in frames of TP_POINT_SIZE data samples, though multiple frames may be input together using TP_WINDOW_VSIZE which is an integer multiple of TP_POINT_SIZE. When set to 1 (dynamic point size) each _window_ must be preceded by a 256bit header to describe the run-time parameters of that window. Note that TP_WINDOW_VSIZE described the number of samples in a window so does not include this header. The format of the header is described in Table 5. When TP_DYN_PT_SIZE = 1, TP_POINT_SIZE describes the maximum point size which may be input.
 
 .. _FFT_Window_HEADER_FORMAT:
 
@@ -96,7 +96,7 @@ The FFT Window supports dynamic (run-time controlled) point sizes. This feature 
    +-------------------------------+----------------------+---------------------------------------------------------------------------------+
 
 The locations are set to suit TT_DATA type. That is, for TT_DATA=cint16, direction is described in the first cint16 (real part) of the 256 bit header and point size is described in the real part of the second cint16 value.
-Similarly, for TT_DATA=cint32, the real part of the first cint32 value in the header holds the direction field and the second cint32 value’s real part holds the Point size (radix2) field.
+Similarly, for TT_DATA=cint32, the real part of the first cint32 value in the header holds the direction field and the real part of second cint32 value holds the Point size (radix2) field.
 
 Note that for TT_DATA=cfloat, the values in the header are expected as cfloat and are value-cast (not reinterpret-cast) to integers internally. The output window also has a header. This is copied from the input header except for the status field, which is inserted. The status field is ignored on input. If an illegal point size is entered, the output header will have this field set to a non-zero value and the remainder of the output window is undefined.
 
@@ -132,7 +132,7 @@ Constraints
 The FFT window does not contain any constraints. It is a single kernel design except when TP_SSR>1 in which case the port connections force placement of the tiles on separate tiles.
 
 Code Example
------------
+------------
 .. literalinclude:: ../../../../L2/examples/docs_examples/test_fft_window.hpp
     :language: cpp
     :lines: 15-

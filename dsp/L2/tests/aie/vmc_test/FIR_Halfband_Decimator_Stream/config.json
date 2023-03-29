@@ -1,6 +1,6 @@
 {
     "spec": "vmc_stream_fir_decimate_hb.json",
-    "outdir": "./xmc_aie_lib/FIR_Halfband_Decimator_Stream_aaca7891",
+    "outdir": "./xmc_aie_lib/FIR_Halfband_Decimator_Stream_5659b522",
     "parameters": {
         "data_type": "cint16",
         "coef_type": "int16",

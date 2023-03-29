@@ -97,6 +97,7 @@ def vmc_generate_graph(name, args):
 	tmpargs["TP_DUAL_IP"] = 0
 	tmpargs["TP_API"] = 0
 	tmpargs["TP_SSR"] = 1
+	tmpargs["TP_PARA_DECI_POLY"] = 1
 	tmpargs["coeff"] = args["coeff"]
 	
 	return generate_graph(name, tmpargs)

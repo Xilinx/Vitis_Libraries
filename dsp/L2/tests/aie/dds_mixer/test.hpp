@@ -68,6 +68,7 @@ class test_graph : public graph {
         printf("========================\n");
         printf("Input samples   = %d \n", INPUT_SAMPLES);
         printf("Output samples  = %d \n", OUTPUT_SAMPLES);
+        printf("SFDR            = %d \n", SFDR);
         printf("Data type       = ");
         printf(QUOTE(DATA_TYPE));
         printf("\n");

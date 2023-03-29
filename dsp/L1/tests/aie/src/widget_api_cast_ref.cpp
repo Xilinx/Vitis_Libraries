@@ -106,6 +106,21 @@ void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 1,
     }
 };
 
+// Widget API Cast - 1 stream input 1 window output int16
+template <unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+void widget_api_cast_ref<int16, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>::
+    transferData(input_stream<int16>* inStream0, output_buffer<int16>& outWindow0) {
+    cint16 d_in;
+    cint16* outPtr0 = (cint16*)outWindow0.data();
+
+    // stream reads are 32b which is 2x int16, so cint16 is used in place of TT_DATA.
+    for (unsigned int i = 0; i < (TP_WINDOW_VSIZE + TP_HEADER_BYTES / sizeof(int16)) / 2;
+         i++) {                                            // /2? see comment above
+        d_in = readincr((input_stream<cint16>*)inStream0); // read input data
+        *outPtr0++ = d_in;
+    }
+};
+
 // Widget API Cast - 1 stream input 2 window output
 template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
 void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN, TP_HEADER_BYTES>::
@@ -118,6 +133,22 @@ void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 2,
 
     for (unsigned int i = 0; i < TP_WINDOW_VSIZE + TP_HEADER_BYTES / sizeof(TT_DATA); i++) {
         d_in = readincr(inStream0); // read input data
+        *outPtr0++ = d_in;
+        *outPtr1++ = d_in;
+    }
+};
+
+// Widget API Cast - 1 stream input 2 window output int16
+template <unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+void widget_api_cast_ref<int16, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN, TP_HEADER_BYTES>::
+    transferData(input_stream<int16>* inStream0, output_buffer<int16>& outWindow0, output_buffer<int16>& outWindow1) {
+    cint16 d_in;
+    cint16* outPtr0 = (cint16*)outWindow0.data();
+    cint16* outPtr1 = (cint16*)outWindow1.data();
+
+    // stream reads are 32b which is 2x int16, so cint16 is used in place of TT_DATA.
+    for (unsigned int i = 0; i < (TP_WINDOW_VSIZE + TP_HEADER_BYTES / sizeof(int16)) / 2; i++) {
+        d_in = readincr((input_stream<cint16>*)inStream0); // read input data
         *outPtr0++ = d_in;
         *outPtr1++ = d_in;
     }
@@ -143,6 +174,27 @@ void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 3,
     }
 };
 
+// Widget API Cast - 1 stream input 3 window output int16
+template <unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+void widget_api_cast_ref<int16, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 3, TP_PATTERN, TP_HEADER_BYTES>::
+    transferData(input_stream<int16>* inStream0,
+                 output_buffer<int16>& outWindow0,
+                 output_buffer<int16>& outWindow1,
+                 output_buffer<int16>& outWindow2) {
+    cint16 d_in;
+    cint16* outPtr0 = (cint16*)outWindow0.data();
+    cint16* outPtr1 = (cint16*)outWindow1.data();
+    cint16* outPtr2 = (cint16*)outWindow2.data();
+
+    // stream reads are 32b which is 2x int16, so cint16 is used in place of TT_DATA.
+    for (unsigned int i = 0; i < (TP_WINDOW_VSIZE + TP_HEADER_BYTES / sizeof(int16)) / 2; i++) {
+        d_in = readincr((input_stream<cint16>*)inStream0); // read input data
+        *outPtr0++ = d_in;
+        *outPtr1++ = d_in;
+        *outPtr2++ = d_in;
+    }
+};
+
 // Widget API Cast - 1 stream input 4 window output
 template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
 void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 4, TP_PATTERN, TP_HEADER_BYTES>::
@@ -159,6 +211,29 @@ void widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 4,
 
     for (unsigned int i = 0; i < TP_WINDOW_VSIZE + TP_HEADER_BYTES / sizeof(TT_DATA); i++) {
         d_in = readincr(inStream0); // read input data
+        *outPtr0++ = d_in;
+        *outPtr1++ = d_in;
+        *outPtr2++ = d_in;
+        *outPtr3++ = d_in;
+    }
+};
+
+// Widget API Cast - 1 stream input 4 window output int16
+template <unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+void widget_api_cast_ref<int16, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 4, TP_PATTERN, TP_HEADER_BYTES>::
+    transferData(input_stream<int16>* inStream0,
+                 output_buffer<int16>& outWindow0,
+                 output_buffer<int16>& outWindow1,
+                 output_buffer<int16>& outWindow2,
+                 output_buffer<int16>& outWindow3) {
+    cint16 d_in;
+    cint16* outPtr0 = (cint16*)outWindow0.data();
+    cint16* outPtr1 = (cint16*)outWindow1.data();
+    cint16* outPtr2 = (cint16*)outWindow2.data();
+    cint16* outPtr3 = (cint16*)outWindow3.data();
+
+    for (unsigned int i = 0; i < (TP_WINDOW_VSIZE + TP_HEADER_BYTES / sizeof(int16)) / 2; i++) {
+        d_in = readincr((input_stream<cint16>*)inStream0); // read input data
         *outPtr0++ = d_in;
         *outPtr1++ = d_in;
         *outPtr2++ = d_in;
@@ -498,6 +573,19 @@ void widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 1,
     for (unsigned int i = 0; i < TP_WINDOW_VSIZE + TP_HEADER_BYTES / sizeof(TT_DATA); i++) {
         d_in = *inPtr++; // read input data
         writeincr(outStream0, d_in);
+    }
+};
+
+// Widget API Cast - window to stream, 1 to 1 int16
+template <unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+void widget_api_cast_ref<int16, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>::
+    transferData(input_buffer<int16>& inWindow0, output_stream<int16>* outStream0) {
+    cint16 d_in;
+    cint16* inPtr = (cint16*)inWindow0.data();
+
+    for (unsigned int i = 0; i < (TP_WINDOW_VSIZE + TP_HEADER_BYTES / sizeof(int16)) / 2; i++) {
+        d_in = *inPtr++; // read input data
+        writeincr((output_stream<cint16>*)outStream0, d_in);
     }
 };
 

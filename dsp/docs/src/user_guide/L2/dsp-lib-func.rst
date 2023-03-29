@@ -25,7 +25,7 @@ DSP Library Functions
 | The user entry point for each function in this library is a graph (L2 level).
 | Each entry point graph class will contain one or more L1 level kernels and may contain one or more graph objects. Direct use of kernel classes (L1 level) or any other graph class not identified as an entry point is not recommended as this may bypass legality checking.
 
-The DSPLib consists the following DSP elements:
+The DSPLib consists of the following DSP elements:
 
 .. toctree::
    :maxdepth: 2

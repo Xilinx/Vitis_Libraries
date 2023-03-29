@@ -22,7 +22,6 @@ functions for use by the reference model classes.
 */
 
 #include "device_defs.h"
-
 // Rounding modes
 #ifndef rnd_floor
 #define rnd_floor 0
@@ -48,7 +47,12 @@ functions for use by the reference model classes.
 #ifndef rnd_conv_odd
 #define rnd_conv_odd 7
 #endif
-
+#ifndef rnd_sym_floor
+#define rnd_sym_floor 8
+#endif
+#ifndef rnd_sym_ceil
+#define rnd_sym_ceil 9
+#endif
 #define CASC_IN_TRUE true
 #define CASC_IN_FALSE false
 #define CASC_OUT_TRUE true
@@ -166,6 +170,7 @@ inline T_accRef<cfloat> null_accRef() {
 #endif
 
 // Rounding and shift function
+// this function depends on the rounding mode macros to be set correctly in the tools
 inline int64_t rounding(int rndMode, int shift, int64_t accum) {
     int64_t round_const = shift == 0 ? 0 : ((int64_t)1 << (shift - 1)) - 1; // 0.0111...
     // Rounding
@@ -206,6 +211,20 @@ inline int64_t rounding(int rndMode, int shift, int64_t accum) {
                 break;
             case rnd_conv_odd:
                 if (((accum >> shift) & 1) == 1) { // odd
+                    accum += round_const;
+                } else {
+                    accum += round_const + 1;
+                }
+                break;
+            case rnd_sym_floor:
+                if (accum < 0) {
+                    accum += ((1 << shift) - 1);
+                } else {
+                    break;
+                }
+                break;
+            case rnd_sym_ceil:
+                if (accum < 0) {
                     accum += round_const;
                 } else {
                     accum += round_const + 1;

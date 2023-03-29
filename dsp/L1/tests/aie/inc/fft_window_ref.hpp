@@ -22,6 +22,7 @@ FFT Window reference model
 #include <adf.h>
 #include <limits>
 #include <array>
+#include "device_defs.h"
 #include "fft_ref_utils.hpp"
 
 using namespace adf;
@@ -145,11 +146,15 @@ class fft_window_ref<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fft_window_ref::fft_window_main); }
-    // FIR
+// kernel main entry function
+#if __STREAMS_PER_TILE__ == 2
     void fft_window_main(input_stream<TT_DATA>* inStream0,
                          input_stream<TT_DATA>* inStream1,
                          output_stream<TT_DATA>* outStream0,
                          output_stream<TT_DATA>* outStream1);
+#else
+    void fft_window_main(input_stream<TT_DATA>* inStream0, output_stream<TT_DATA>* outStream0);
+#endif // __STREAMS_PER_TILE__ == 2
 };
 }
 }

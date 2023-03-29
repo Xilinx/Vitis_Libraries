@@ -24,6 +24,7 @@ proc get_param_map {libElement} {
             "API_IO" "TP_API"
             "UUT_SSR" "TP_SSR"
             "DYN_PT_SIZE" "TP_DYN_PT_SIZE"
+            "AIE_VARIANT" "AIE_VARIANT"
         }
     } else {
         # Everything else can be shoved in one big map

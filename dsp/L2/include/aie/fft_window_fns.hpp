@@ -40,12 +40,10 @@ namespace windowfn {
 /**
  * @ingroup fft_window_utils
  * @brief getHammingWindow is utility to create Hamming window.
- * @tparam TT_COEFF describes the type of weights in the FFT window.
+ * @tparam T_C describes the type of weights in the FFT window.
  * @param[out] weights a pointer to the area where Window will be created
  * @param[in] pointSize size of the window to create
- *
  */
-
 template <typename T_C>
 void getHammingWindow(T_C* weights, const unsigned int pointSize) {
     float temp;
@@ -88,10 +86,9 @@ void getHammingWindow<float>(float* weights, const unsigned int pointSize) {
 /**
  * @ingroup fft_window_utils
  * @brief getHannWindow is utility to create Hann window.
- * @tparam TT_COEFF describes the type of weights in the FFT window.
+ * @tparam T_C describes the type of weights in the FFT window.
  * @param[out] weights a pointer to the area where Window will be created
  * @param[in] pointSize size of the window to create
- *
  */
 template <typename T_C>
 void getHannWindow(T_C* weights, const unsigned int pointSize) {
@@ -135,10 +132,9 @@ void getHannWindow<float>(float* weights, const unsigned int pointSize) {
 /**
  * @ingroup fft_window_utils
  * @brief getBlackmanWindow is utility to create Hamming window.
- * @tparam TT_COEFF describes the type of weights in the FFT window.
+ * @tparam T_C describes the type of weights in the FFT window.
  * @param[out] weights a pointer to the area where Window will be created
  * @param[in] pointSize size of the window to create
- *
  */
 template <typename T_C>
 void getBlackmanWindow(T_C* weights, const unsigned int pointSize) {
@@ -197,10 +193,9 @@ float fn_io(float x) {
 /**
  * @ingroup fft_window_utils
  * @brief geKeiserWindow is utility to create Hamming window.
- * @tparam TT_COEFF describes the type of weights in the FFT window.
+ * @tparam T_C describes the type of weights in the FFT window.
  * @param[out] weights a pointer to the area where Window will be created
  * @param[in] pointSize size of the window to create
- *
  */
 template <typename T_C>
 void getKaiserWindow(T_C* weights, const unsigned int pointSize, const float alpha = 1.27) {

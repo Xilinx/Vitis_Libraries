@@ -23,6 +23,7 @@ Coding conventions
 
 #pragma once
 #include <adf.h>
+#include "device_defs.h"
 
 #define __AIE_API_USE_NATIVE_1024B_VECTOR__
 #include "aie_api/aie_adf.hpp"
@@ -124,6 +125,7 @@ INLINE_DECL void kernelClass<cint32, int32, TP_WINDOW_VSIZE>::kernelClassMain(co
         }
 };
 
+#if __SUPPORTS_CFLOAT__ == 1
 template <unsigned int TP_WINDOW_VSIZE>
 INLINE_DECL void kernelClass<cfloat, float, TP_WINDOW_VSIZE>::kernelClassMain(const cfloat* __restrict inBuff,
                                                                               float* __restrict outBuff) {
@@ -150,6 +152,7 @@ INLINE_DECL void kernelClass<cfloat, float, TP_WINDOW_VSIZE>::kernelClassMain(co
             *outPtr++ = outReal;
         }
 };
+#endif //__SUPPORTS_CFLOAT == 1
 
 //-------------------------------------------------------------------------------------------------------
 // This is the base specialization of the main class for when there is

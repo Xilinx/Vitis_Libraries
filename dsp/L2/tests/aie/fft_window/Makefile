@@ -118,6 +118,7 @@ AIE_PKG_DIR ?= Work
 
 # Setting customized_params in aiecompiler
 TAG ?= UUT
+AIE_VARIANT ?= 1
 UUT_KERNEL ?= fft_window
 REF_KERNEL ?= fft_window_ref
 UUT_GRAPH ?= fft_window_graph
@@ -145,7 +146,7 @@ STACKSIZE_VAL ?= $$(( $(COEFF_SIZE) * $(POINT_SIZE) + 2048))
 UUT_SIM_FILE ?= ./data/uut_output.txt
 REF_SIM_FILE ?= ./data/ref_output.txt
 INPUT_FILE ?= ./data/input.txt
-UUT_FILE_SUFFIX ?= $(UUT_KERNEL)_$(DATA_TYPE)_$(COEFF_TYPE)_$(POINT_SIZE)_$(WINDOW_VSIZE)_$(SHIFT)_$(API_IO)_$(UUT_SSR)_$(DYN_PT_SIZE)
+UUT_FILE_SUFFIX ?= $(UUT_KERNEL)_$(DATA_TYPE)_$(COEFF_TYPE)_$(POINT_SIZE)_$(WINDOW_VSIZE)_$(SHIFT)_$(API_IO)_$(UUT_SSR)_$(DYN_PT_SIZE)_$(AIE_VARIANT)
 LOG_FILE ?= ./logs/log_$(UUT_FILE_SUFFIX).txt
 STATUS_LOG_FILE ?= ./logs/status_$(UUT_FILE_SUFFIX).txt
 STATUS_FILE ?= $(STATUS_LOG_FILE)
@@ -153,10 +154,10 @@ UUT_TARGET_COMPILE_ARGS ?= -Xchess=llvm.xargs="-std=c++2a" -Xchess=main:backend.
 REF_TARGET_COMPILE_ARGS ?= 
 UUT_WORK_DIR ?= ./Work
 REF_WORK_DIR ?= ./Work
-PREPROC_ARGS ?= -DINPUT_FILE=$(INPUT_FILE) -DDATA_TYPE=$(DATA_TYPE) -DCOEFF_TYPE=$(COEFF_TYPE) -DPOINT_SIZE=$(POINT_SIZE) -DWINDOW_VSIZE=$(WINDOW_VSIZE) -DSHIFT=$(SHIFT) -DAPI_IO=$(API_IO) -DUUT_SSR=$(UUT_SSR) -DDYN_PT_SIZE=$(DYN_PT_SIZE) -DSTIM_TYPE=$(STIM_TYPE) -DWINDOW_CHOICE=$(WINDOW_CHOICE) -DNITER=$(NITER)
+PREPROC_ARGS ?= -DINPUT_FILE=$(INPUT_FILE) -DDATA_TYPE=$(DATA_TYPE) -DCOEFF_TYPE=$(COEFF_TYPE) -DPOINT_SIZE=$(POINT_SIZE) -DWINDOW_VSIZE=$(WINDOW_VSIZE) -DSHIFT=$(SHIFT) -DAPI_IO=$(API_IO) -DUUT_SSR=$(UUT_SSR) -DDYN_PT_SIZE=$(DYN_PT_SIZE) -DAIE_VARIANT=$(AIE_VARIANT) -DSTIM_TYPE=$(STIM_TYPE) -DWINDOW_CHOICE=$(WINDOW_CHOICE) -DNITER=$(NITER)
 REF_PREPROC_ARGS ?= -DUUT_GRAPH=$(REF_GRAPH) -DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS) 
 UUT_PREPROC_ARGS ?= -DUUT_GRAPH=$(UUT_GRAPH) -DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) -DUSING_UUT=1
-PARAM_MAP ?= DATA_TYPE $(DATA_TYPE) COEFF_TYPE $(COEFF_TYPE) POINT_SIZE $(POINT_SIZE) WINDOW_VSIZE $(WINDOW_VSIZE) SHIFT $(SHIFT) API_IO $(API_IO) UUT_SSR $(UUT_SSR) DYN_PT_SIZE $(DYN_PT_SIZE) 
+META_PARAM_MAP ?= AIE_VARIANT $(AIE_VARIANT) DATA_TYPE $(DATA_TYPE) COEFF_TYPE $(COEFF_TYPE) POINT_SIZE $(POINT_SIZE) WINDOW_VSIZE $(WINDOW_VSIZE) SHIFT $(SHIFT) API_IO $(API_IO) UUT_SSR $(UUT_SSR) DYN_PT_SIZE $(DYN_PT_SIZE)
 
 ############################ setting AIE Compiler ###########################
 ifneq ($(filter aiesim hw_emu hw, $(TARGET)),)
@@ -317,17 +318,17 @@ run: all
 ifeq ($(TARGET), x86sim)
 	$(X86SIMULATOR) --pkg-dir=$(AIE_PKG_DIR) 
 	mkdir -p logs
-	$(if $(filter-out REF,$(TAG)), make -f $(CUR_DIR)/helper.mk get_status HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) DATA_TYPE=$(DATA_TYPE) POINT_SIZE=$(POINT_SIZE) API_IO=$(API_IO) WINDOW_VSIZE=$(WINDOW_VSIZE) UUT_SSR=$(UUT_SSR) DYN_PT_SIZE=$(DYN_PT_SIZE) STATUS_FILE=$(STATUS_FILE) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE))
-	$(if $(filter-out REF,$(TAG)), tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP))
+	$(if $(filter-out REF,$(TAG)), make -f $(CUR_DIR)/helper.mk get_status HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) DATA_TYPE=$(DATA_TYPE) POINT_SIZE=$(POINT_SIZE) API_IO=$(API_IO) WINDOW_VSIZE=$(WINDOW_VSIZE) UUT_SSR=$(UUT_SSR) DYN_PT_SIZE=$(DYN_PT_SIZE) AIE_VARIANT=$(AIE_VARIANT) STATUS_FILE=$(STATUS_FILE) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE))
 	$(if $(filter-out REF,$(TAG)), tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/diff_exit.tcl ./)
 endif
 #aiesim
 ifeq ($(TARGET), aiesim)
-	$(AIESIMULATOR) --pkg-dir=$(AIE_PKG_DIR) --profile  $(AIESIMFLAGS)
+	$(AIESIMULATOR) --pkg-dir=$(AIE_PKG_DIR) --profile --graph-latency $(AIESIMFLAGS)
 	mkdir -p logs
-	make -f $(CUR_DIR)/helper.mk get_status HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) DATA_TYPE=$(DATA_TYPE) POINT_SIZE=$(POINT_SIZE) API_IO=$(API_IO) WINDOW_VSIZE=$(WINDOW_VSIZE) UUT_SSR=$(UUT_SSR) DYN_PT_SIZE=$(DYN_PT_SIZE) STATUS_FILE=$(STATUS_FILE) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)
+	make -f $(CUR_DIR)/helper.mk get_status HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) DATA_TYPE=$(DATA_TYPE) POINT_SIZE=$(POINT_SIZE) API_IO=$(API_IO) WINDOW_VSIZE=$(WINDOW_VSIZE) UUT_SSR=$(UUT_SSR) DYN_PT_SIZE=$(DYN_PT_SIZE) AIE_VARIANT=$(AIE_VARIANT) STATUS_FILE=$(STATUS_FILE) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)
+	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output $(STATUS_FILE) $(WINDOW_VSIZE) $(NITER)
 	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(WINDOW_VSIZE) 1 $(STATUS_FILE) ./aiesimulator_output fft_window_main $(NITER)
-	make -f $(CUR_DIR)/helper.mk get_qor HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) DATA_TYPE=$(DATA_TYPE) POINT_SIZE=$(POINT_SIZE) API_IO=$(API_IO) WINDOW_VSIZE=$(WINDOW_VSIZE) UUT_SSR=$(UUT_SSR) DYN_PT_SIZE=$(DYN_PT_SIZE) STATUS_FILE=$(STATUS_FILE) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)
+	make -f $(CUR_DIR)/helper.mk get_qor HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) DATA_TYPE=$(DATA_TYPE) POINT_SIZE=$(POINT_SIZE) API_IO=$(API_IO) WINDOW_VSIZE=$(WINDOW_VSIZE) UUT_SSR=$(UUT_SSR) DYN_PT_SIZE=$(DYN_PT_SIZE) AIE_VARIANT=$(AIE_VARIANT) STATUS_FILE=$(STATUS_FILE) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)
 	$(XFLIB_DIR)/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) $(XFLIB_DIR)/L2/tests/aie/common/scripts
 	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/diff_exit.tcl ./
 endif
@@ -346,8 +347,8 @@ endif
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_stdout.log
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_stdout.log || exit 1
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
 	
 endif
 endif
@@ -359,8 +360,8 @@ ifeq ($(HOST_ARCH), x86)
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_stdout.log
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_stdout.log || exit 1
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
 	
 endif
 endif
@@ -378,9 +379,9 @@ endif
 ############################## Setting Targets ##############################
 .PHONY: pre_build
 pre_build:
-	$(if $(filter-out REF,$(TAG)), tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL) $(PARAM_MAP))
+	$(if $(filter-out REF,$(TAG)), tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL) $(META_PARAM_MAP))
 	$(if $(filter-out REF,$(TAG)), vitis -exec ipmetadata_config_checker $(XFLIB_DIR)/L2/meta/fft_window.json ./config.json -newflow)
-	$(if $(filter-out REF,$(TAG)), make -f $(CUR_DIR)/helper.mk HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) INPUT_FILE=$(INPUT_FILE) DATA_TYPE=$(DATA_TYPE) POINT_SIZE=$(POINT_SIZE) WINDOW_VSIZE=$(WINDOW_VSIZE) NITER=$(NITER) SEED=$(SEED) STIM_TYPE=$(STIM_TYPE) API_IO=$(API_IO) UUT_SSR=$(UUT_SSR) DYN_PT_SIZE=$(DYN_PT_SIZE) )
+	$(if $(filter-out REF,$(TAG)), make -f $(CUR_DIR)/helper.mk HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) INPUT_FILE=$(INPUT_FILE) DATA_TYPE=$(DATA_TYPE) POINT_SIZE=$(POINT_SIZE) WINDOW_VSIZE=$(WINDOW_VSIZE) AIE_VARIANT=$(AIE_VARIANT) NITER=$(NITER) SEED=$(SEED) STIM_TYPE=$(STIM_TYPE) API_IO=$(API_IO) UUT_SSR=$(UUT_SSR) DYN_PT_SIZE=$(DYN_PT_SIZE) )
 
 .PHONY: clean cleanall emconfig gen_instances valid_params
 emconfig: $(EMCONFIG)

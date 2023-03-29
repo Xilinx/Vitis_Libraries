@@ -26,10 +26,6 @@ Coding conventions
 #define __AIE_API_USE_NATIVE_1024B_VECTOR__
 #include "aie_api/aie_adf.hpp"
 
-#ifdef __X86SIM__
-//  #define _DSPLIB_FIR_SR_SYM_HPP_DEBUG_
-#endif // __X86SIM__
-
 #include <adf.h>
 #include "fir_sr_sym.hpp"
 #include "kernel_api_utils.hpp"
@@ -222,10 +218,6 @@ kernelFilterClass<TT_DATA,
                   TP_API,
                   TP_MODIFY_MARGIN_OFFSET>::filterSelectArch(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                                                              T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
-    // windowAcquire(inInterface); //No need to acquire because input is either sync, or async, but guaranteed in place
-    // because of sync with cascade port.
-    // chess_memory_fence();
-
     // Two possible architectures depending on size of data/coef types & fir_len
     // Using a single data buffer for x and y (forward & reverse) or seperate
     if
@@ -312,8 +304,6 @@ kernelFilterClass<TT_DATA,
 
 #pragma unroll(m_kInitialLoads - 1)
     for (int initLoads = 0; initLoads < m_kInitialLoads - 1; ++initLoads) {
-        //            readDataS = window_readincr_256b<TT_DATA>(inWindow);
-        //            sbuff.val = upd_w(sbuff.val, initLoads % m_kDataLoadsInReg, readDataS.val);
         upd_win_incr_256b<TT_DATA>(sbuff, initLoads, inItr);
     }
     coeff = ((T_buff_256b<TT_COEFF>*)m_internalTaps);
@@ -363,6 +353,7 @@ kernelFilterClass<TT_DATA,
                     int yoffset = ystart - (op % m_kDataRegVsize);
                     acc = macSrSym(acc, sbuff, xoffset, yoffset, coe0, (op % m_kCoeffRegVsize));
                 }
+
                 if (TP_FIR_RANGE_LEN % (kSymmetryFactor * m_kColumns) != 0) {
                     if (m_kFirLenCeilCols != 0 && m_kFirLenCeilCols % m_kCoeffRegVsize == 0) {
                         coe0 = *coeff++;
@@ -370,8 +361,8 @@ kernelFilterClass<TT_DATA,
                 }
                 int xoffset = (dataLoadPhase * m_kVOutSize + m_kFirLenCeilCols + m_kSBuffXOffset);
                 // Center tap vector operation.
-                acc = macSrSymCT<TT_DATA, TT_COEFF, TP_FIR_LEN>(acc, sbuff, xoffset, coe0,
-                                                                m_kFirLenCeilCols % m_kCoeffRegVsize);
+                acc = macSrSymCT<TT_DATA, TT_COEFF, TP_FIR_RANGE_LEN % (kSymmetryFactor * m_kColumns)>(
+                    acc, sbuff, xoffset, coe0, m_kFirLenCeilCols % m_kCoeffRegVsize);
 
                 // Write cascade. Do nothing if cascade not present.
                 writeCascade<TT_DATA, TT_COEFF>(outInterface, acc);
@@ -468,10 +459,6 @@ kernelFilterClass<TT_DATA,
     constexpr bool hasOutWindow = (TP_API == 0 && TP_KERNEL_POSITION == TP_CASC_LEN - 1);
     constexpr bool hasOutWindow2 = (TP_NUM_OUTPUTS == 2 && TP_API == 0 && TP_KERNEL_POSITION == TP_CASC_LEN - 1);
     auto outItr = cond_begin_vector_random_or_scalar_circular<hasOutWindow, m_kVOutSize>(*outInterface.outWindow);
-    //(TP_NUM_OUTPUTS==2 && TP_API==0 && TP_KERNEL_POSITION == TP_CASC_LEN-1) ?
-    //::aie::begin_vector_random_circular<m_kVOutSize>(*(outInterface.outWindow)) :
-    //::aie::vector_random_circular_iterator<(output_circular_buffer<cint16>*), 1, 1024>(nullptr);
-    // auto outItr2  = (TP_NUM_OUTPUTS==2 && TP_API==0 && TP_KERNEL_POSITION == TP_CASC_LEN-1) ?
     auto outItr2 = cond_begin_vector_random_or_scalar_circular<hasOutWindow2, m_kVOutSize>(*(outInterface.outWindow));
 
     // Move data pointer away from data consumed by previous cascades

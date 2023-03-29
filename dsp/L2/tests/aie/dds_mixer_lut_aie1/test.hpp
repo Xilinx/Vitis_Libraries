@@ -66,12 +66,18 @@ class test_graph : public graph {
         printf(QUOTE(UUT_GRAPH));
         printf("\n");
         printf("========================\n");
-        printf("Input samples   = %d \n", INPUT_SAMPLES);
-        printf("Output samples  = %d \n", OUTPUT_SAMPLES);
-        printf("SFDR            = %d \n", SFDR);
-        printf("Data type       = ");
+        if (MIXER_MODE != 0) {
+            printf("Input samples      = %d \n", INPUT_SAMPLES);
+        }
+        printf("Output samples     = %d \n", OUTPUT_SAMPLES);
+        printf("Data type          = ");
         printf(QUOTE(DATA_TYPE));
         printf("\n");
+        printf("MIXER_MODE         = %d \n", MIXER_MODE);
+        printf("SFDR               = %d \n", SFDR);
+        printf("P_API              = %d \n", P_API);
+        printf("INPUT_WINDOW_VSIZE = %d \n", INPUT_WINDOW_VSIZE);
+        printf("P_SSR              = %d \n", P_SSR);
 
         printf("Mixer Mode      = %d \n", MIXER_MODE);
         if (MIXER_MODE == 0) printf(" ( DDS Only Mode ) \n");

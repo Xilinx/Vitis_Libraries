@@ -20,6 +20,7 @@ def vmc_validate_input_window_size(args):
 	decimate_factor = args["decimate_factor"]
 	api = 1
 	ssr = args["ssr"]
+	deci_poly = args["deci_poly"]
 	if use_coeff_reload:
 		fir_length = args["fir_length"]
 	else:
@@ -48,6 +49,7 @@ def vmc_validate_coeff(args):
 	casc_length = args["casc_length"]
 	decimate_factor = args["decimate_factor"]
 	ssr = args["ssr"]
+	deci_poly = args["deci_poly"]
 	api = 1
 	if use_coeff_reload:
 		fir_length = args["fir_length"]
@@ -99,5 +101,6 @@ def vmc_generate_graph(name, args):
 	tmpargs["TP_API"] = 1
 	tmpargs["TP_SSR"] = args["ssr"]
 	tmpargs["coeff"] = args["coeff"]
+	tmpargs["TP_PARA_DECI_POLY"] = args["deci_poly"]
 	   
 	return generate_graph(name, tmpargs)

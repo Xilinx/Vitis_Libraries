@@ -58,7 +58,7 @@
         "customized_params": {
                 "params": "--dataflow -Xchess=llvm.xargs=-std=c++2a -Xx86sim=-client=vmc -v -output=graph",
                 "default": {
-                    "GRAPHNAME": "FFT_Dynamic_Point_bd8c8330",
+                    "GRAPHNAME": "FFT_Dynamic_Point_f369cd05",
                     "VMC_GRAPHDIR": "xmc_aie_lib/$(GRAPHNAME)",
                     "VMC_KERNEL": "vmc_dyn_pt_fft"
                 }

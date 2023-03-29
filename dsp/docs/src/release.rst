@@ -22,6 +22,28 @@ Release Note
    :hidden:
    :maxdepth: 1
 
+2023.1
+------
+
+The below features have been added to the library in this release.
+
+*  **DDS Mixer LUT** - new library element
+
++---------------------------------------+-----------------------------------------------------------------------------+
+| **Function**                          | **Namespace and class name**                                                |
++=======================================+=============================================================================+
+| DDS Mixer LUT                         |  xf::dsp::aie::mixer::dds_mixer::dds_mixer_lut_graph                        |
++---------------------------------------+-----------------------------------------------------------------------------+
+
+This element adds a second implementation of a DDS/Mixer that provides higher SFDR figures than the existing DDS/Mixer solution.
+
+* **DDS Mixer** 
+
+Additional restriction to template parameter that defines the number of samples processed per iteration.
+The TP_INPUT_WINDOW_VSIZE template parameter has the added restriction that it needs to be divisible by TP_SSR. Until 2022.2 this parameter was used
+to refer the number of samples output/processed per iteration by a single kernel which is also a single SSR unit. 
+This has now been updated to refer to the number of samples output/processed by the entire graph.
+
 2022.2
 ------
 

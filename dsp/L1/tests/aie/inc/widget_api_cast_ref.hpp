@@ -111,6 +111,21 @@ class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 1
     void transferData(input_stream<TT_DATA>* inStream0, output_buffer<TT_DATA>& outWindow0);
 };
 
+// stream to window, 1 to 1 int16
+template <unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+class widget_api_cast_ref<int16, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES> {
+   private:
+    typedef int16 TT_DATA;
+
+   public:
+    int kIndex;
+    widget_api_cast_ref(int idx) { kIndex = idx; }
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast_ref::transferData); }
+    void transferData(input_stream<TT_DATA>* inStream0, output_buffer<TT_DATA>& outWindow0);
+};
+
 // stream to window, 1 to 2
 template <typename TT_DATA, // type of data input and output
           unsigned int TP_WINDOW_VSIZE,
@@ -129,6 +144,23 @@ class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 2
                       output_buffer<TT_DATA>& outWindow1);
 };
 
+// stream to window, 1 to 2 int16
+template <unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+class widget_api_cast_ref<int16, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN, TP_HEADER_BYTES> {
+   private:
+    typedef int16 TT_DATA;
+
+   public:
+    int kIndex;
+    widget_api_cast_ref(int idx) { kIndex = idx; }
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast_ref::transferData); }
+    void transferData(input_stream<TT_DATA>* inStream0,
+                      output_buffer<TT_DATA>& outWindow0,
+                      output_buffer<TT_DATA>& outWindow1);
+};
+
 // stream to window, 1 to 3
 template <typename TT_DATA, // type of data input and output
           unsigned int TP_WINDOW_VSIZE,
@@ -136,6 +168,24 @@ template <typename TT_DATA, // type of data input and output
           unsigned int TP_HEADER_BYTES>
 class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 3, TP_PATTERN, TP_HEADER_BYTES> {
    private:
+   public:
+    int kIndex;
+    widget_api_cast_ref(int idx) { kIndex = idx; }
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast_ref::transferData); }
+    void transferData(input_stream<TT_DATA>* inStream0,
+                      output_buffer<TT_DATA>& outWindow0,
+                      output_buffer<TT_DATA>& outWindow1,
+                      output_buffer<TT_DATA>& outWindow2);
+};
+
+// stream to window, 1 to 3 int16
+template <unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+class widget_api_cast_ref<int16, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 3, TP_PATTERN, TP_HEADER_BYTES> {
+   private:
+    typedef int16 TT_DATA;
+
    public:
     int kIndex;
     widget_api_cast_ref(int idx) { kIndex = idx; }
@@ -169,6 +219,26 @@ class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 4
                       output_buffer<TT_DATA>& outWindow3);
 };
 
+// stream to window, 1 to 4 int16
+template <unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+class widget_api_cast_ref<int16, kStreamAPI, kWindowAPI, 1, TP_WINDOW_VSIZE, 4, TP_PATTERN, TP_HEADER_BYTES> {
+   private:
+    typedef int16 TT_DATA;
+
+   public:
+    int kIndex;
+    widget_api_cast_ref(int idx) { kIndex = idx; }
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast_ref::transferData); }
+
+    void transferData(input_stream<TT_DATA>* inStream0,
+                      output_buffer<TT_DATA>& outWindow0,
+                      output_buffer<TT_DATA>& outWindow1,
+                      output_buffer<TT_DATA>& outWindow2,
+                      output_buffer<TT_DATA>& outWindow3);
+};
+
 // Dual stream in
 // stream to window, 2 to 1
 template <typename TT_DATA, // type of data input and output
@@ -178,6 +248,8 @@ template <typename TT_DATA, // type of data input and output
 class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES> {
    private:
    public:
+    static_assert(!std::is_same<TT_DATA, int16>::value,
+                  "ERROR: int16 is not supported for multiple stream to multiple window operation");
     int kIndex;
     widget_api_cast_ref(int idx) { kIndex = idx; }
 
@@ -196,6 +268,8 @@ template <typename TT_DATA, // type of data input and output
 class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 2, TP_PATTERN, TP_HEADER_BYTES> {
    private:
    public:
+    static_assert(!std::is_same<TT_DATA, int16>::value,
+                  "ERROR: int16 is not supported for multiple stream to multiple window operation");
     int kIndex;
     widget_api_cast_ref(int idx) { kIndex = idx; }
 
@@ -215,6 +289,8 @@ template <typename TT_DATA, // type of data input and output
 class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 3, TP_PATTERN, TP_HEADER_BYTES> {
    private:
    public:
+    static_assert(!std::is_same<TT_DATA, int16>::value,
+                  "ERROR: int16 is not supported for multiple stream to multiple window operation");
     int kIndex;
     widget_api_cast_ref(int idx) { kIndex = idx; }
 
@@ -235,6 +311,8 @@ template <typename TT_DATA, // type of data input and output
 class widget_api_cast_ref<TT_DATA, kStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 4, TP_PATTERN, TP_HEADER_BYTES> {
    private:
    public:
+    static_assert(!std::is_same<TT_DATA, int16>::value,
+                  "ERROR: int16 is not supported for multiple stream to multiple window operation");
     int kIndex;
     widget_api_cast_ref(int idx) { kIndex = idx; }
 
@@ -265,6 +343,22 @@ class widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 1
     void transferData(input_buffer<TT_DATA>& inWindow0, output_stream<TT_DATA>* outStream0);
 };
 
+// Window to stream
+// window to stream, 1 to 1 int16
+template <unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+class widget_api_cast_ref<int16, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES> {
+   private:
+    typedef int16 TT_DATA;
+
+   public:
+    int kIndex;
+    widget_api_cast_ref(int idx) { kIndex = idx; }
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast_ref::transferData); }
+    void transferData(input_buffer<TT_DATA>& inWindow0, output_stream<TT_DATA>* outStream0);
+};
+
 // window to stream, 1 to 2
 template <typename TT_DATA, // type of data input and output
           unsigned int TP_WINDOW_VSIZE,
@@ -273,6 +367,8 @@ template <typename TT_DATA, // type of data input and output
 class widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN, TP_HEADER_BYTES> {
    private:
    public:
+    static_assert(!std::is_same<TT_DATA, int16>::value,
+                  "ERROR: int16 is not supported for window to multiple stream operation");
     int kIndex;
     widget_api_cast_ref(int idx) { kIndex = idx; }
 
@@ -304,6 +400,9 @@ class widget_api_cast_ref<TT_DATA, kCascStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZ
                       output_buffer<TT_DATA>& outWindow0);
 };
 #endif //__SUPPORTS_ACC64__
+
+// There is no need to specialize the casc/stream combination functions for int16
+// because this is only intended for the FFT, which only ever uses complex data for these functions.
 
 #ifdef __SUPPORTS_ACC64__
 // Stream/casc to window, 2 to 1

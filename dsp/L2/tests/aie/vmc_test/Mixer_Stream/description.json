@@ -58,7 +58,7 @@
         "customized_params": {
                 "params": "--dataflow -Xchess=llvm.xargs=-std=c++2a -Xx86sim=-client=vmc -v -output=graph",
                 "default": {
-                    "GRAPHNAME": "Mixer_Stream_7ead23e4",
+                    "GRAPHNAME": "Mixer_Stream_3de4443e",
                     "VMC_GRAPHDIR": "xmc_aie_lib/$(GRAPHNAME)",
                     "VMC_KERNEL": "vmc_stream_mixer"
                 }

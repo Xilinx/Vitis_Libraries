@@ -52,12 +52,14 @@
 
 #else
 #define __SUPPORTS_CFLOAT__ 0
-#warning AIE Architecture does not supports cfloats
+// #warning AIE Architecture does not supports cfloats
 #endif
 
-//#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22) || (__AIEARCH__ == 0)
-//#define __SUPPORTS_CFLOAT__  0
-//#endif
+#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#define __HAS_SYM_PREADD__ 1
+#else
+#define __HAS_SYM_PREADD__ 0
+#endif
 
 //----------------------------------
 // Accumulator widths

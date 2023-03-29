@@ -47,6 +47,33 @@ namespace dsp {
 namespace aie {
 namespace fft {
 namespace dit_1ch {
+
+/**
+ * @defgroup fft_graphs FFT Graph
+ *
+ * The FFT graph is offered as a template class that is available with 2 template specializations,
+ * that offer varied features and interfaces:
+ * - window interface (TP_API == 0) or
+ * - stream interface (TP_API == 1).
+ *
+ */
+
+/**
+ *
+ * @brief Defines Window/IO Buffer API
+ *
+ * @ingroup fft_graphs
+ */
+static constexpr unsigned int kWindowAPI = 0;
+
+/**
+ *
+ * @brief Defines Stream Buffer API
+ *
+ * @ingroup fft_graphs
+ */
+static constexpr unsigned int kStreamAPI = 1;
+
 /**
  * @cond NOCOMMENTS
  */
@@ -1095,16 +1122,6 @@ class fft_ifft_dit_1ch_mono_graph<cint16,
   * @endcond
   */
 
-/**
- * @defgroup fft_graphs FFT Graph
- *
- * The FFT graph is offered as a template class that is available with 2 template specializations,
- * that offer varied features and interfaces:
- * - window interface (TP_API == 0) or
- * - stream interface (TP_API == 1).
- *
- */
-
 //--------------------------------------------------------------------------------------------------
 // fft_dit_1ch template
 //--------------------------------------------------------------------------------------------------
@@ -1204,6 +1221,13 @@ class fft_ifft_dit_1ch_graph : public graph {
     // more, as of 23.1
     static_assert(TP_PARALLEL_POWER >= 1 && TP_PARALLEL_POWER < 9,
                   "Error: TP_PARALLEL_POWER is out of supported range");
+    static_assert((std::is_same<TT_DATA, cint16>::value) || (std::is_same<TT_DATA, cint32>::value)
+#if __SUPPORTS_CFLOAT__ == 1
+                      ||
+                      (std::is_same<TT_DATA, cfloat>::value)
+#endif //__SUPPORTS_CFLOAT__ == 0
+                      ,
+                  "ERROR: TT_DATA is not supported");
 
     static constexpr int kParallel_factor = 1 << TP_PARALLEL_POWER;
     static constexpr int kWindowSize = TP_WINDOW_VSIZE >> TP_PARALLEL_POWER;
@@ -1389,7 +1413,7 @@ class fft_ifft_dit_1ch_graph : public graph {
  *
  * @brief fft_dit_1ch template specialization for single (monolithic) FFT, window API
  *
- * Window interface FFT graph is offered with a single input windowed, ping-pong buffer.
+ * Window interface (kWindowAPI = 0) FFT graph is offered with a single input windowed, ping-pong buffer.
  * Window interface FFT implementation does not support parallel computation (TP_PARALLEL_POWER = 0 only).
  * However, dynamic point size is available (TP_DYN_PT_SIZE = 1), which allows a window buffer size to be an integer
  * multiple of the FFT's point size ( TP_WINDOW_VSIZE = N * TP_POINT_SIZE).
@@ -1478,7 +1502,7 @@ class fft_ifft_dit_1ch_graph<TT_DATA,
 /**
  * @ingroup fft_graphs
  *
- * @brief fft_dit_1ch template specialization for single FFT, stream API.
+ * @brief fft_dit_1ch template specialization for single FFT, stream API (kStreamAPI = 0).
  * This FFT block is the last call (specialization TP_PARALLEL_POWER = 0 )
  * of a recursive SSR FFT call, i.e.
  * this is the last subframe processor called when TP_PARALLEL_POWER >= 1.

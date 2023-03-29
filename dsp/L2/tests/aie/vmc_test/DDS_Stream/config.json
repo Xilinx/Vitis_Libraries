@@ -1,13 +1,13 @@
 {
     "spec": "vmc_stream_dds.json",
-    "outdir": "./xmc_aie_lib/DDS_Stream_e0ab3db4",
+    "outdir": "./xmc_aie_lib/DDS_Stream_8a47b862",
     "parameters": {
         "data_type": "cint16",
         "output_window_size": 32,
         "ssr": 1,
         "phase_increment": 0,
         "initial_phase_offset": 0,
-        "output_sampling_rate": 200
+        "vmc_sample_time": -1.0
     },
     "updated_parameter": ""
 }

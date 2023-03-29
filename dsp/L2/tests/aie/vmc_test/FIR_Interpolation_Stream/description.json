@@ -58,7 +58,7 @@
         "customized_params": {
                 "params": "--dataflow -Xchess=llvm.xargs=-std=c++2a -Xx86sim=-client=vmc -v -output=graph",
                 "default": {
-                    "GRAPHNAME": "FIR_Interpolation_Stream_ad15382b",
+                    "GRAPHNAME": "FIR_Interpolation_Stream_7498103a",
                     "VMC_GRAPHDIR": "xmc_aie_lib/$(GRAPHNAME)",
                     "VMC_KERNEL": "vmc_stream_fir_interpolate_asym"
                 }

@@ -57,7 +57,7 @@
       "validator": {
         "file": "fir_sr_sym.py",
         "function": "validate_TP_FIR_LEN",
-        "args": ["TT_DATA", "TT_COEF", "TP_CASC_LEN", "TP_API", "TP_USE_COEF_RELOAD", "TP_SSR"]
+        "args": ["TT_DATA", "TT_COEF", "TP_CASC_LEN", "TP_API", "TP_USE_COEF_RELOAD", "TP_SSR", "AIE_VARIANT"]
       }
     },
     {
@@ -145,6 +145,13 @@
         "function": "validate_TP_SSR",
         "args": ["TP_API"]
       }
+    },
+    {
+      "name": "AIE_VARIANT",
+      "type": "uint",
+      "description": "specifies the device type",
+      "maximum": 2, 
+      "minimum": 1
     },
     {                      
       "name": "coeff",

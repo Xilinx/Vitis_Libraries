@@ -187,19 +187,22 @@ def fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR=1, TP_Rnd=1):
   return isValid
 
 
-def fn_max_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR=1, symFactor = 1):
-  # todo - it would be good to add a comment explaining this limit.
-  # IIRC, it's because we fully unroll the ops loop, and then run out of program memory
-  # but it also seems like there's a different reason for coefReload.
-  firLengthMax = 1024
+def fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR=1, TP_API=0, symFactor = 1):
+  if TP_API == 0:
+    # Coeff array needs storage on heap and unrolled MAC operation inflate Program Memory.
+    firLengthMax = 256 * symFactor
+  else:
+    # Data samples must fit into 1024-bit (128 Byte) vector register
+    firLengthMax = 128  * symFactor / fn_size_by_byte(TT_DATA)
+
+  # Coeff array gets divided up in SSR mode, where each SSR phase gets a fraction of the array.
   if TP_USE_COEF_RELOAD == 1:
-    if TP_FIR_LEN <= firLengthMax: # might need to revisit for reload on SSR
+    if TP_FIR_LEN / (TP_SSR) <= firLengthMax:
       vld = True
     else:
       vld = False
   else:
-    # This might not be accurate due to fir_range_len.
-    firLengthMax = 256 * symFactor
+    # For static coeffs, each kernel in a cascaded design only stores the part that it operates on.
     if TP_FIR_LEN / (TP_CASC_LEN * TP_SSR) <= firLengthMax:
       vld = True
     else:

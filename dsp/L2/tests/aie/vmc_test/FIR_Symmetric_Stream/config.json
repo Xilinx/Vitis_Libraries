@@ -1,6 +1,6 @@
 {
     "spec": "vmc_stream_fir_sr_sym.json",
-    "outdir": "./xmc_aie_lib/FIR_Symmetric_Stream_ba71117a",
+    "outdir": "./xmc_aie_lib/FIR_Symmetric_Stream_801ef6d0",
     "parameters": {
         "data_type": "cint16",
         "coef_type": "int16",

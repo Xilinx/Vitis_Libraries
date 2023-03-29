@@ -133,7 +133,7 @@ AIE_PKG_DIR = $(AIE_WORK_DIR)
 
 AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L1/tests/aie/inc -I $(XFLIB_DIR)/L1/tests/aie/src -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L2/tests/aie/common/inc -I $(CUR_DIR)
 
-AIE_CXXFLAGS +=  $(CUR_DIR)/--dataflow  $(CUR_DIR)/-Xchess=llvm.xargs=-std=c++2a -Xchess=main:backend.mist2.xargs=+NOdra  -Xchess=main:backend.mist2.pnll=off --test-iterations=16 -Xpreproc="-DUUT_GRAPH=matrix_mult_graph -DOUTPUT_FILE=./data/uut_output.txt -DINPUT_FILE_A=./data/inputA.txt -DINPUT_FILE_B=./data/inputB.txt -DT_DATA_A=cint16 -DT_DATA_B=cint16 -DP_DIM_A=16 -DP_DIM_AB=16 -DP_DIM_B=16 -DP_SHIFT=20 -DP_ROUND_MODE=0 -DP_DIM_A_LEADING=0 -DP_DIM_B_LEADING=1 -DP_DIM_OUT_LEADING=0 -DP_ADD_TILING_A=1 -DP_ADD_TILING_B=1 -DP_ADD_DETILING_OUT=1 -DP_INPUT_WINDOW_VSIZE_A=256 -DP_INPUT_WINDOW_VSIZE_B=256 -DP_CASC_LEN=1 -DSTIM_TYPE_A=0 -DSTIM_TYPE_B=0 -DNITER=16 -DUSING_UUT=1 -DUSING_PL_MOVER=1"
+AIE_CXXFLAGS +=  --dataflow  -Xpreproc="-DUUT_GRAPH=matrix_mult_graph -DOUTPUT_FILE=./data/uut_output.txt -DINPUT_FILE_A=./data/inputA.txt -DINPUT_FILE_B=./data/inputB.txt -DT_DATA_A=cint16 -DT_DATA_B=cint16 -DP_DIM_A=16 -DP_DIM_AB=16 -DP_DIM_B=16 -DP_SHIFT=20 -DP_ROUND_MODE=0 -DP_DIM_A_LEADING=0 -DP_DIM_B_LEADING=1 -DP_DIM_OUT_LEADING=0 -DP_ADD_TILING_A=1 -DP_ADD_TILING_B=1 -DP_ADD_DETILING_OUT=1 -DP_INPUT_WINDOW_VSIZE_A=256 -DP_INPUT_WINDOW_VSIZE_B=256 -DP_CASC_LEN=1 -DSTIM_TYPE_A=0 -DSTIM_TYPE_B=0 -DNITER=16 -DUSING_UUT=1 -DUSING_PL_MOVER=1"
 
 $(AIE_WORK_DIR)/ps/c_rts/aie_control_xrt.cpp: $(AIE_CONTAINER)
 
@@ -145,16 +145,16 @@ AIESIMFLAGS += $(EXTRA_AIESIMFLAGS)
 
 #Inclue Required Host Source Files
 ifeq ($(ps_on_x86), on)
-HOST_SRCS += $(CUR_DIR)//host.cpp $(CUR_DIR)//gui_hack/aie_control_xrt.cpp 
+HOST_SRCS += host.cpp gui_hack/aie_control_xrt.cpp 
 CXXFLAGS +=  -D __PS_ENABLE_AIE__ -D USING_PL_MOVER=1 -D USING_UUT=1
-CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L2/tests/aie/common/inc -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/tests/aie/inc -I $(XFLIB_DIR)/L1/tests/aie/src -I $(CUR_DIR)/ -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L1/include/hw
+CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L2/tests/aie/common/inc -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/tests/aie/inc -I $(XFLIB_DIR)/L1/tests/aie/src -I PROJECT -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L1/include/hw
 CXXFLAGS += --sysroot=$(SYSROOT)
 LDFLAGS +=  -L $(SYSROOT)/usr/lib/
 LDFLAGS += --sysroot=$(SYSROOT)
 else
-HOST_SRCS += $(CUR_DIR)//host.cpp $(CUR_DIR)//gui_hack/aie_control_xrt.cpp 
+HOST_SRCS += host.cpp gui_hack/aie_control_xrt.cpp 
 CXXFLAGS +=  -D __PS_ENABLE_AIE__ -D USING_PL_MOVER=1 -D USING_UUT=1
-CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L2/tests/aie/common/inc -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/tests/aie/inc -I $(XFLIB_DIR)/L1/tests/aie/src -I $(CUR_DIR)/ -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L1/include/hw
+CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L2/tests/aie/common/inc -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/tests/aie/inc -I $(XFLIB_DIR)/L1/tests/aie/src -I PROJECT -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L1/include/hw
 CXXFLAGS += --sysroot=$(SYSROOT)
 LDFLAGS +=  -L $(SYSROOT)/usr/lib/
 LDFLAGS += --sysroot=$(SYSROOT)
@@ -171,12 +171,12 @@ EXE_FILE_DEPS := $(HOST_SRCS) $(INSTANCE_FILES)  $(EXE_FILE_DEPS)
 
 ########################## Kernel compiler global settings ##########################
 ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
-VPP_FLAGS +=  -I $(XFLIB_DIR)/../utils/L1/include/hw -I $(XFLIB_DIR)/../utils/L2/src/sw/datamvoer -I $(CUR_DIR)//kernel -I $(CUR_DIR)/ -I $(XFLIB_DIR)/L1/include/hw
+VPP_FLAGS +=  -I $(XFLIB_DIR)/../utils/L1/include/hw -I $(XFLIB_DIR)/../utils/L2/src/sw/datamvoer -I kernel -I PROJECT -I $(XFLIB_DIR)/L1/include/hw
 VPP_LDFLAGS +=   --config $(CUR_DIR)/system.cfg
 VPP_PACKAGE +=   --package.defer_aie_run
 
 else 
-VPP_FLAGS +=  -I $(XFLIB_DIR)/../utils/L1/include/hw -I $(XFLIB_DIR)/../utils/L2/src/sw/datamvoer -I $(CUR_DIR)//kernel -I $(CUR_DIR)/ -I $(XFLIB_DIR)/L1/include/hw
+VPP_FLAGS +=  -I $(XFLIB_DIR)/../utils/L1/include/hw -I $(XFLIB_DIR)/../utils/L2/src/sw/datamvoer -I kernel -I PROJECT -I $(XFLIB_DIR)/L1/include/hw
 
 endif
 
@@ -214,7 +214,7 @@ $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/kernel $(VPP_LDFLAGS)  $(VPP_LDFLAGS_kernel) $(AIE_LDFLAGS)   -o $@ $^
 
 ############################## Setting Rules for AIE (Building Kernels) ##################
-$(AIE_CONTAINER): $(CUR_DIR)//test.cpp $(XFLIB_DIR)/L1/src/aie/matrix_mult_untiler.cpp $(XFLIB_DIR)/L1/src/aie/matrix_mult_tiler.cpp $(XFLIB_DIR)/L1/src/aie/matrix_mult.cpp   
+$(AIE_CONTAINER): test.cpp $(XFLIB_DIR)/L1/src/aie/matrix_mult_untiler.cpp $(XFLIB_DIR)/L1/src/aie/matrix_mult_tiler.cpp $(XFLIB_DIR)/L1/src/aie/matrix_mult.cpp   
 	$(ECHO) "Compiling: libadf.a"
 	mkdir -p $(dir $@)
 	$(AIECXX) $(AIE_CXXFLAGS) $^
@@ -252,7 +252,7 @@ endif
 	@echo 'echo "INFO: Embedded host run completed."' >> $(RUN_SCRIPT)
 	@echo 'exit $$return_code' >> $(RUN_SCRIPT)
 DATA_FILE := $(custom_data_file)
-DATA_DIR := $(CUR_DIR)//data/ $(custom_data_dir)
+DATA_DIR := data/ $(custom_data_dir)
 SD_FILES += $(RUN_SCRIPT)
 SD_FILES += $(EXE_FILE)
 SD_FILES += $(EMCONFIG)
@@ -339,8 +339,8 @@ endif
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_stdout.log
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_stdout.log || exit 1
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
 	
 endif
 endif
@@ -352,8 +352,8 @@ ifeq ($(HOST_ARCH), x86)
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_stdout.log
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_stdout.log || exit 1
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
 	
 endif
 endif

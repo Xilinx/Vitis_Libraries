@@ -55,7 +55,6 @@ enum IO_API { WINDOW = 0, STREAM };
  *         taps. \n It must be one of the same set of types listed for TT_DATA
  *         and must also satisfy the following rules:
  *         - Complex types are only supported when TT_DATA is also complex.
- *         - 32 bit types are only supported when TT_DATA is also a 32 bit type,
  *         - TT_COEFF must be an integer type if TT_DATA is an integer type
  *         - TT_COEFF must be a float type if TT_DATA is a float type.
  * @tparam TP_FIR_LEN is an unsigned integer which describes the number of taps
@@ -97,13 +96,13 @@ enum IO_API { WINDOW = 0, STREAM };
  *         Note: Margin size should not be included in TP_INPUT_WINDOW_VSIZE.
  * @tparam TP_CASC_LEN describes the number of AIE processors to split the operation
  *         over. \n This allows resource to be traded for higher performance.
- *         TP_CASC_LEN must be in the range 1 (default) to 9.
+ *         TP_CASC_LEN must be in the range 1 (default) to 40.
  * @tparam TP_USE_COEFF_RELOAD allows the user to select if runtime coefficient
  *         reloading should be used. \n When defining the parameter:
  *         - 0 = static coefficients, defined in filter constructor,
  *         - 1 = reloadable coefficients, passed as argument to runtime function. \n
  *
- *         Note: when used, optional port: ``` port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), TP_SSR> coeff;
+ *         Note: when used, async port: ``` port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), TP_SSR> coeff;
  *``` will be added to the FIR. \n
  *         Note: the size of the port array is equal to the total number of output paths  (TP_SSR).  \n
  *         Each port should contain the same taps array content, i.e. each additional port must be a duplicate of the
@@ -129,7 +128,28 @@ enum IO_API { WINDOW = 0, STREAM };
  *         - samples 4-7 to be sent over stream1 for cint16 data type. \n
  * @tparam TP_API specifies if the input/output interface should be window-based or stream-based.  \n
  *         The values supported are 0 (window API) or 1 (stream API).
- **/
+  * @tparam TP_SSR specifies the number of parallel input paths where samples are interleaved between paths,
+ giving an overall higher throughput.   \n
+ *         An SSR of 1 means just one input path, and is the backwards compatible option.
+ * @tparam TP_PARA_INTERP_POLY sets the number of interpolator polyphases over which the coefficients will be split to
+ enable parallel computation of the outputs. \n
+ *         The polyphases are executed parallelly, output data is produced by each polyphase directly. \n
+ *         TP_PARA_INTERP_POLY does not affect the number of input data paths. \n
+ *         There will be TP_SSR input phases irrespective of the value of TP_PARA_INTERP_POLY. \n
+ *         TP_PARA_INTERP_POLY = TP_INTERPOLATE_FACTOR will result in an interpolate factor of polyphases,
+ * where each polyphase is a single rate filters. \n
+ *          TP_PARA_INTERP_POLY < TP_INTERPOLATE_FACTOR will result in the kernels in the polyphase branches operating
+ *          as interpolators. \n
+ *         The number of AIEs used is given by TP_PARA_INTERP_POLY * TP_SSR^2 * TP_CASC_LEN. \n
+ *
+  * @tparam TP_PARA_DECI_POLY specifies the number of decimator polyphases that will be split up
+ * and executed in a series of pipelined cascade stages, resulting in additional input paths. \n
+ *         A TP_PARA_DECI_POLY of 1 means just one input leg, and is the backwards compatible option. \n
+ *         TP_PARA_DECI_POLY = TP_DECIMATE_FACTOR will result in an decimate factor of polyphases,
+ * operating as independant single rate filters connected by cascades. *
+ *         The number of AIEs used is given by TP_PARA_DECI_POLY * TP_SSR^2 * TP_CASC_LEN. \n
+ *
+**/
 
 template <typename TT_DATA,
           typename TT_COEFF,
@@ -388,7 +408,7 @@ class fir_resampler_graph : public graph {
     port_conditional_array<input, (TP_DUAL_IP == 1), IN_SSR> in2;
 
     /**
-     * The conditional array of input ports  used to pass run-time programmable (RTP) coeficients.
+     * The conditional array of input async ports used to pass run-time programmable (RTP) coeficients.
      * This port_conditional_array is (generated when TP_USE_COEFF_RELOAD == 1) an array of input ports, which size is
      *defined by TP_SSR.
      * Each port in the array holds a duplicate of the coefficient array, required to connect to each SSR input path.

@@ -56,6 +56,7 @@ if { [llength $argv] > 5 } {
 # -----------------------------------
 set filterFunctionName $funcName
 set fileNames [glob -directory $fileDir -- "profile_funct_*.xml"]
+set fileSimSummary [glob -directory $fileDir -- "*_summary"]
 # Strings to helps extract cycle counts
 set strLvl1  "    <function>"
 set strLvl2  "        <function_name>$filterFunctionName"
@@ -72,6 +73,8 @@ set cycleCountTotal {}
 set cycleCountMin {}
 set cycleCountMax {}
 set cycleCountAvg {}
+# AIE Frequency in MHz
+set aieFrequency 1000
 
 # -----------------------
 # --- Parse XML Files ---
@@ -88,7 +91,6 @@ foreach fileName  $fileNames {
                     incr lineNo
                     set strLine [string range $line 0 42]
                     if {![string compare $strLine $strLvl3]} {
-                        puts "Function time match. File: $fileName. Line: $lineNo"
                         gets $inFile line
                         set mainCycleCountTotal    [lindex [split [lindex [split $line ">"] 1] "<"] 0]
                         # Average out over number of iterations:
@@ -99,12 +101,10 @@ foreach fileName  $fileNames {
             }
             set strLine [string range $line 0 [string length $strLvl2]-1]
             if {![string compare $strLine $strLvl2] } {
-                puts "Function name match. File: $fileName. Line: $lineNo. "
                 while {[gets $inFile line] != -1} {
                     incr lineNo
                     set strLine [string range $line 0 42]
                     if {![string compare $strLine $strLvl3]} {
-                        puts "Function time match. File: $fileName. Line: $lineNo"
                         gets $inFile line
                         lappend cycleCountTotal    [lindex [split [lindex [split $line ">"] 1] "<"] 0]
                         gets $inFile line
@@ -120,7 +120,24 @@ foreach fileName  $fileNames {
                 break
             }
         }
-        puts "End of file reached. File: $fileName. "
+    }
+}
+close $inFile
+
+# --------------------------------
+# --- Parse Simulation Summary ---
+# --- to get AIE Frequency     ---
+# --------------------------------
+foreach simSummary  $fileSimSummary {
+    set lineNo 0
+    set inFile [open $simSummary r]
+    while {[gets $inFile line] != -1} {
+        incr lineNo
+        if {[string first "frequency" $line ] != -1 } {
+            # extract from simulation summary
+            set aieFrequency [lindex [split [lindex [split $line ":"] 1] ","] 0]
+            break
+        }
     }
 }
 close $inFile
@@ -143,8 +160,8 @@ if {[llength $cycleCountAvg] == 0} {
 # ------------------------------------------
 for {set x 0} {$x < $cascLen} {incr x} {
     # Actual average throughput in MSa per second
-    lappend throughputCycleCount  [expr {1000 * $windowSize / [lindex $cycleCountAvg $x]}]
-    lappend throughputIIAvg  [expr {1000 * $windowSize / [lindex $initiationIntervalAprx $x]}]
+    lappend throughputCycleCount  [expr {$aieFrequency * $windowSize / [lindex $cycleCountAvg $x]}]
+    lappend throughputIIAvg  [expr {$aieFrequency * $windowSize / [lindex $initiationIntervalAprx $x]}]
 }
 
 # -----------------------------------------

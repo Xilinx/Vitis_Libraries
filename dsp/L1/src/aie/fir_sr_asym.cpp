@@ -611,10 +611,8 @@ kernelFilterClass<TT_DATA,
                     }
                     acc =
                         macSrAsym(acc, sbuff, strobe * m_kVOutSize + (op + dataOffset), coe0, (op % m_kCoeffRegVsize));
-                    // acc = macSrAsym(acc, sbuff, strobe*m_kVOutSize + (op + dataOffset),
-                    // op>=3*m_kCoeffRegVsize?coe3:op >= 2*m_kCoeffRegVsize?coe2:op >= m_kCoeffRegVsize?coe1:coe0, (op %
-                    // m_kCoeffRegVsize) );
                 }
+
                 // Write cascade. Do nothing if cascade not present.
                 writeCascade<TT_DATA, TT_COEFF>(outInterface, acc);
                 outVal = shiftAndSaturate(acc, TP_SHIFT);

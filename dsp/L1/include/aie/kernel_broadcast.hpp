@@ -29,7 +29,6 @@
 #include <stdio.h>
 #include <adf.h>
 #include "fir_utils.hpp"
-
 namespace xf {
 namespace dsp {
 namespace aie {
@@ -39,39 +38,68 @@ namespace fir {
 template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE>
 INLINE_DECL void windowBroadcast(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<16> >* inWindow,
                                  output_stream_cacc48* outCascade) {
-    //#define _DEBUG_
     const int samplesPerBuffWrite = MCD_SIZE / 8 / sizeof(TT_DATA);
+    const int _32bsamplesInUnitWrite = 256 / 8 / sizeof(int32);
+    const int samplesInUnitWrite = 256 / 8 / sizeof(TT_DATA);
     const int writesPerLoop = MCD_SIZE / 8 / sizeof(int32);
+    const int loopCount = TP_INPUT_WINDOW_VSIZE / samplesPerBuffWrite;
     using buff_type = typename ::aie::vector<int32, writesPerLoop>;
     buff_type writeBuff;
     buff_type* buff_ptr;
     auto inItr = ::aie::begin_random_circular(*(inWindow));
-    static_assert(TP_INPUT_WINDOW_VSIZE % samplesPerBuffWrite == 0,
-                  "Error: Window size must be a multiple of 256-bits");
+    static_assert(TP_INPUT_WINDOW_VSIZE % samplesInUnitWrite == 0, "Error: Window size must be a multiple of 256-bits");
 
-    for (int i = 0; i < TP_INPUT_WINDOW_VSIZE; i += samplesPerBuffWrite) {
-        // copy 256-bit vector at a time
+    for (int i = 0; i < loopCount; i++) {
         buff_ptr = (buff_type*)&*inItr;
         writeBuff = *buff_ptr;
         inItr += samplesPerBuffWrite;
         put_mcd(writeBuff);
     }
+    if
+        constexpr(TP_INPUT_WINDOW_VSIZE > loopCount * samplesPerBuffWrite) // for AIE2 cases when window size is not a
+                                                                           // multiple of the basic unit of cascade
+                                                                           // read/write sizes (512 bits)
+        {
+            using unit_buff_type = typename ::aie::vector<int32, _32bsamplesInUnitWrite>;
+            unit_buff_type unitWrBuff;
+            unit_buff_type* unit_buff_ptr;
+            unit_buff_ptr = (unit_buff_type*)&*inItr;
+            writeBuff.insert(0, *unit_buff_ptr);
+            inItr += _32bsamplesInUnitWrite;
+            put_mcd(writeBuff);
+        }
 }
 
 template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE>
 INLINE_DECL void windowBroadcast(input_async_buffer<TT_DATA>* inWindow, output_stream_cacc48* outCascade) {
-    const int writesPerLoop = MCD_SIZE / 8 / sizeof(TT_DATA);
-    const int samplesPerBuffWrite = MCD_SIZE / 8 / sizeof(int32);
-    using buff_type = typename ::aie::vector<int32, samplesPerBuffWrite>;
+    const int _32bsamplesInUnitWrite = 256 / 8 / sizeof(int32);
+    const int samplesInUnitWrite = 256 / 8 / sizeof(TT_DATA);
+    const int writesPerLoop = MCD_SIZE / 8 / sizeof(int32);
+    const int samplesPerBuffWrite = MCD_SIZE / 8 / sizeof(TT_DATA);
+    const int loopCount = TP_INPUT_WINDOW_VSIZE / samplesPerBuffWrite;
+    using buff_type = typename ::aie::vector<int32, writesPerLoop>;
     buff_type writeBuff;
     buff_type* inItr = (buff_type*)inWindow->data();
 
-    static_assert(TP_INPUT_WINDOW_VSIZE % writesPerLoop == 0, "Error: Window size must be a multiple of 256-bits");
-    for (int i = 0; i < TP_INPUT_WINDOW_VSIZE; i += writesPerLoop) {
-        // copy 256-bit vector at a time
+    static_assert(TP_INPUT_WINDOW_VSIZE % samplesInUnitWrite == 0, "Error: Window size must be a multiple of 256-bits");
+    for (int i = 0; i < loopCount; i++) {
+        // copy 256/512-bit vector at a time
         writeBuff = *inItr++;
         put_mcd(writeBuff);
     }
+    if
+        constexpr(TP_INPUT_WINDOW_VSIZE > loopCount * samplesPerBuffWrite) // for AIE2 cases when window size is not a
+                                                                           // multiple of the basic unit of cascade
+                                                                           // read/write sizes (512 bits)
+        {
+            using unit_buff_type = typename ::aie::vector<int32, _32bsamplesInUnitWrite>;
+            unit_buff_type unitWrBuff;
+            unit_buff_type* unit_buff_ptr;
+            unit_buff_ptr = (unit_buff_type*)&*inItr;
+            writeBuff.insert(0, *unit_buff_ptr);
+            inItr += _32bsamplesInUnitWrite;
+            put_mcd(writeBuff);
+        }
 }
 
 // To optimize performance, 256-bit vectors are copied, so storage element must be padded to 256-bits.
@@ -79,14 +107,17 @@ template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE>
 INLINE_DECL void windowBroadcast(input_stream_cacc48* inCascade,
                                  output_stream_cacc48* outCascade,
                                  input_async_buffer<TT_DATA>* outWindow) {
-    const int samplesPerLoop = SCD_SIZE / 8 / sizeof(TT_DATA);
-    const int samplesPerBuffWrite = SCD_SIZE / 8 / sizeof(int32);
-    using buff_type = typename ::aie::vector<int32, samplesPerBuffWrite>;
+    const int samplesPerLoop = MCD_SIZE / 8 / sizeof(int32);
+    const int samplesPerBuffWrite = MCD_SIZE / 8 / sizeof(TT_DATA);
+    const int _32bsamplesInUnitWrite = 256 / 8 / sizeof(int32);
+    const int samplesInUnitWrite = 256 / 8 / sizeof(TT_DATA);
+    const int loopCount = TP_INPUT_WINDOW_VSIZE / samplesPerBuffWrite;
+    using buff_type = typename ::aie::vector<int32, samplesPerLoop>;
     buff_type rwBuff;
     buff_type* outItr = (buff_type*)outWindow->data();
-    static_assert(TP_INPUT_WINDOW_VSIZE % samplesPerLoop == 0, "Error: Window size must be a multiple of 256-bits");
+    static_assert(TP_INPUT_WINDOW_VSIZE % samplesInUnitWrite == 0, "Error: Window size must be a multiple of 256-bits");
 
-    for (int i = 0; i < TP_INPUT_WINDOW_VSIZE; i += samplesPerLoop) {
+    for (int i = 0; i < loopCount; i++) {
 // copy 256-bit vector at a time
 #if SCD_SIZE == 256
         rwBuff = get_scd_v8int32(); // int32
@@ -96,19 +127,36 @@ INLINE_DECL void windowBroadcast(input_stream_cacc48* inCascade,
         put_mcd(rwBuff);
         *outItr++ = rwBuff;
     }
+    if
+        constexpr(TP_INPUT_WINDOW_VSIZE > loopCount * samplesPerBuffWrite) // for AIE2 cases when window size is not a
+                                                                           // multiple of the basic unit of cascade
+                                                                           // read/write sizes (512 bits)
+        {
+#if SCD_SIZE == 512
+            rwBuff = get_scd_v16int32();
+#endif
+            put_mcd(rwBuff);
+            using unit_buff_type = typename ::aie::vector<int32, _32bsamplesInUnitWrite>;
+            unit_buff_type* unit_buff_ptr;
+            unit_buff_ptr = (unit_buff_type*)&*outItr;
+            *unit_buff_ptr++ = rwBuff.template extract<_32bsamplesInUnitWrite>(0);
+        }
 }
 
 // To optimize performance, 256-bit vectors are copied, so storage element must be padded to 256-bits.
 template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE>
 INLINE_DECL void windowBroadcast(input_stream_cacc48* inCascade, input_async_buffer<TT_DATA>* outWindow) {
-    const int samplesPerBuffRead = SCD_SIZE / 8 / sizeof(TT_DATA);
-    const int _32bSamplesPerBuffRead = SCD_SIZE / 8 / sizeof(int32);
+    const int _32bsamplesInUnitRead = 256 / 8 / sizeof(int32);
+    const int samplesInUnitRead = 256 / 8 / sizeof(TT_DATA);
+    const int samplesPerBuffRead = MCD_SIZE / 8 / sizeof(TT_DATA);
+    const int _32bSamplesPerBuffRead = MCD_SIZE / 8 / sizeof(int32);
+    const int loopCount = TP_INPUT_WINDOW_VSIZE / samplesPerBuffRead;
     using buff_type = typename ::aie::vector<int32, _32bSamplesPerBuffRead>;
     buff_type readBuff;
     buff_type* outItr = (buff_type*)outWindow->data();
-    static_assert(TP_INPUT_WINDOW_VSIZE % samplesPerBuffRead == 0, "Error: Window size must be a multiple of 256-bits");
+    static_assert(TP_INPUT_WINDOW_VSIZE % samplesInUnitRead == 0, "Error: Window size must be a multiple of 256-bits");
 
-    for (int i = 0; i < TP_INPUT_WINDOW_VSIZE; i += samplesPerBuffRead) {
+    for (int i = 0; i < loopCount; i++) {
 // copy 256-bit vector at a time
 #if MCD_SIZE == 256
         readBuff = get_scd_v8int32();
@@ -117,6 +165,21 @@ INLINE_DECL void windowBroadcast(input_stream_cacc48* inCascade, input_async_buf
 #endif
         *outItr++ = readBuff;
     }
+    if
+        constexpr(TP_INPUT_WINDOW_VSIZE > loopCount * samplesPerBuffRead) // for AIE2 cases when window size is not a
+                                                                          // multiple of the basic unit of cascade
+                                                                          // read/write sizes (512 bits)
+        {
+#if SCD_SIZE == 512
+            readBuff = get_scd_v16int32();
+#endif
+            using unit_buff_type = typename ::aie::vector<int32, samplesInUnitRead>;
+            unit_buff_type subBuff;
+            unit_buff_type* unit_buff_ptr;
+            unit_buff_ptr = (unit_buff_type*)&*outItr;
+            subBuff = readBuff.template extract<samplesInUnitRead>(0);
+            *unit_buff_ptr = subBuff;
+        }
 }
 
 template <typename TT_DATA, unsigned int TP_DUAL_IP = 0, unsigned int TP_API = 0>

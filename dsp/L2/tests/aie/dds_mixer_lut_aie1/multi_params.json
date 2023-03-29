@@ -10,21 +10,21 @@
         "test_1_dds_mixer_lut_aie1": {
             "DATA_TYPE":"cint16",
             "MIXER_MODE":"1",
-            "WINDOW_VSIZE":"256",
+            "WINDOW_VSIZE":"768",
             "P_API":"1",
             "UUT_SSR":"3"
         },
         "test_2_dds_mixer_lut_aie1": {
             "DATA_TYPE":"cint16",
             "MIXER_MODE":"2",
-            "WINDOW_VSIZE":"320",
+            "WINDOW_VSIZE":"4800",
             "P_API":"0",
             "UUT_SSR":"15"
         },
         "test_3_dds_mixer_lut_aie1": {
             "DATA_TYPE":"cint16",
             "MIXER_MODE":"2",
-            "WINDOW_VSIZE":"320",
+            "WINDOW_VSIZE":"5120",
             "P_API":"1",
             "UUT_SSR":"16",
             "DDS_PHASE_INC": "1797958314",

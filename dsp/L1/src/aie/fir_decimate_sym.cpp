@@ -457,9 +457,6 @@ kernelFilterClass<TT_DATA,
     // otherwise the first time round the strobe loop will differ from subsequent rounds and the loop will not unroll as
     // desired.
     static constexpr unsigned int m_kLoadSize = fnLoadSizeDecSym<TT_DATA, TT_COEFF, m_kArch>();
-    static constexpr unsigned int m_kRepeatFactor =
-        TP_DECIMATE_FACTOR % 2 == 0 ? m_kDataLoadsInReg
-                                    : m_kSamplesInDataBuff / m_kVOutSize; // only FACTORS of 2 or 3 supported
     static constexpr unsigned int m_kInitDataNeeded =
         m_kDataBuffXOffset + TP_FIR_LEN - 2 * m_kFirRangeOffset + TP_DECIMATE_FACTOR * (m_kLanes - 1);
     static constexpr unsigned int m_kInitialLoads1Buff =

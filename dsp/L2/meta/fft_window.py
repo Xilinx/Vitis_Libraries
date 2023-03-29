@@ -82,7 +82,7 @@ def fn_validate_weights(TP_POINT_SIZE, TP_DYN_PT_SIZE, weights_list):
       return isError(f"Specified coefficient list is not equal to Point size({TP_POINT_SIZE})")
   else:
     if (len(weights_list) < TP_POINT_SIZE or len(weights_list) > TP_POINT_SIZE*2):
-      return isError(f"The coefficient list array {len(weights_list)} must specify the weights for the maximum point size and all smaller point sizes, so must be in the range TP_POINT_SIZE + TP_POINT_SIZE/2 to 2*TP_POINT_SIZE, where TP_POINT_SIZE = {TP_POINT_SIZE}")
+      return isError(f"The coefficient list array {len(weights_list)} must specify the weights for the maximum point size and all smaller point sizes, so must be in the range Point size + Point size/2 to 2*Point size, where Point size = {TP_POINT_SIZE}")
   return isValid
 
 #### validation APIs ####

@@ -1,6 +1,6 @@
 {
     "spec": "vmc_stream_fir_decimate_sym.json",
-    "outdir": "./xmc_aie_lib/FIR_Symmetric_Decimation_Stream_aa07f2c5",
+    "outdir": "./xmc_aie_lib/FIR_Symmetric_Decimation_Stream_f35c38de",
     "parameters": {
         "data_type": "cint16",
         "coef_type": "int16",

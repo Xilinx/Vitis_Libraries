@@ -147,10 +147,12 @@ def fn_validate_casc_len(TT_DATA, TP_POINT_SIZE, TP_CASC_LEN):
   log2PointSize = fn_log2(TP_POINT_SIZE)
   # equation for integer ffts is complicated by the fact that odd power of 2 point sizes start with a radix 2 stage
   TP_END_RANK = CEIL(log2PointSize, 2) if TT_DATA != "cfloat" else log2PointSize
+  # Integer implementation uses Radix4, while cfloat uses a Radix2.
+  maxCascLen = ((TP_END_RANK) / 2) if TT_DATA != "cfloat" else TP_END_RANK
 
   checkCascLenIsNotGreaterThanRanks = (
-    isValid if (TP_CASC_LEN <= TP_END_RANK) else
-    isError(f"Cascade length is greater than ({TP_END_RANK})")
+    isValid if (TP_CASC_LEN <= maxCascLen)  else
+    isError(f"Cascade length is greater than maximum supported value for requested point size ({maxCascLen}).")
   )
 
   return checkCascLenIsNotGreaterThanRanks

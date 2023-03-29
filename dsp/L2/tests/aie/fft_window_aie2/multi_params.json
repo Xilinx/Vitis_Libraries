@@ -1,0 +1,70 @@
+{
+    "daily": {
+        "test_0_fft_window_aie2": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int16",
+            "POINT_SIZE":"128",
+            "WINDOW_VSIZE":"128",
+            "SHIFT":"14",
+            "API_IO":"0",
+            "UUT_SSR":"1",
+            "STIM_TYPE":"0",
+            "WINDOW_CHOICE":"0"
+        },
+        "test_1_fft_window_aie2": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int16",
+            "POINT_SIZE":"64",
+            "WINDOW_VSIZE":"128",
+            "SHIFT":"14",
+            "API_IO":"0",
+            "UUT_SSR":"1",
+            "STIM_TYPE":"0",
+            "WINDOW_CHOICE":"1"
+        },
+        "test_4_fft_window_aie2": {
+            "DATA_TYPE":"cint32",
+            "COEFF_TYPE":"int32",
+            "POINT_SIZE":"32",
+            "WINDOW_VSIZE":"256",
+            "SHIFT":"30",
+            "API_IO":"0",
+            "UUT_SSR":"1",
+            "STIM_TYPE":"0",
+            "WINDOW_CHOICE":"0"
+        },
+        "test_6_fft_window_aie2": {
+            "DATA_TYPE":"cint32",
+            "COEFF_TYPE":"int32",
+            "POINT_SIZE":"32",
+            "WINDOW_VSIZE":"256",
+            "SHIFT":"30",
+            "API_IO":"0",
+            "UUT_SSR":"1",
+            "STIM_TYPE":"0",
+            "WINDOW_CHOICE":"2"
+        },
+        "test_7_fft_window_aie2": {
+            "DATA_TYPE":"cint32",
+            "COEFF_TYPE":"int32",
+            "POINT_SIZE":"256",
+            "WINDOW_VSIZE":"256",
+            "SHIFT":"30",
+            "API_IO":"0",
+            "UUT_SSR":"2",
+            "STIM_TYPE":"0",
+            "WINDOW_CHOICE":"3"
+        },
+        "test_10_fft_window_aie2": {
+            "DATA_TYPE":"cint32",
+            "COEFF_TYPE":"int32",
+            "POINT_SIZE":"256",
+            "WINDOW_VSIZE":"256",
+            "SHIFT":"30",
+            "API_IO":"0",
+            "UUT_SSR":"2",
+            "STIM_TYPE":"0",
+            "WINDOW_CHOICE":"2"
+        }
+    }
+}

@@ -9,7 +9,7 @@ def vmc_generate_graph(name, args):
     tmpargs["TP_SHIFT"] = args["shift_val"]
     tmpargs["TP_WINDOW_VSIZE"] = args["input_window_size"]
     #TODO: call to partitioner to determine cascade length
-    tmpargs["TP_CASC_LEN"] = 1
+    tmpargs["TP_CASC_LEN"] = args["casc_length"]
     tmpargs["TP_DYN_PT_SIZE"] = 0
     tmpargs["TP_API"] = 1
     ssr = args["ssr"]

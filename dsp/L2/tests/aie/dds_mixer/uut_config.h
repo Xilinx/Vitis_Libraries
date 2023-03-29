@@ -41,6 +41,9 @@
 #ifndef INITIAL_DDS_OFFSET
 #define INITIAL_DDS_OFFSET 0
 #endif
+#ifndef SFDR
+#define SFDR 90
+#endif
 
 #ifndef INPUT_FILE
 #define INPUT_FILE "data/input.txt"

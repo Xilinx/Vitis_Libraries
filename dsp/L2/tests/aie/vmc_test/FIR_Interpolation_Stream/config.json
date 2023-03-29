@@ -1,6 +1,6 @@
 {
     "spec": "vmc_stream_fir_interpolate_asym.json",
-    "outdir": "./xmc_aie_lib/FIR_Interpolation_Stream_ad15382b",
+    "outdir": "./xmc_aie_lib/FIR_Interpolation_Stream_7498103a",
     "parameters": {
         "data_type": "cint16",
         "coef_type": "int16",

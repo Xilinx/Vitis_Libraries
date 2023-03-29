@@ -79,6 +79,7 @@
         "test_8_high_DF_cfloat": {
             "DATA_TYPE":"cfloat",
             "COEFF_TYPE":"cfloat",
+            "COEFF_SIZE":"4",
             "FIR_LEN":"30",
             "DECIMATE_FACTOR":"3",
             "SHIFT":"0",

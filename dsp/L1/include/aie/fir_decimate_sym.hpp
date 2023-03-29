@@ -100,6 +100,7 @@ class kernelFilterClass {
     static constexpr unsigned int m_kDataLoadVsize1buff =
         fnLoadSizeDecSym<TT_DATA, TT_COEFF, kArch1BuffLowDFBasic>() /
         (sizeof(TT_DATA) * 8); // numerator is bits, sizeof is bytes, hence 8
+    static constexpr unsigned int m_kVOutSize = fnVOutSizeDecSym<TT_DATA, TT_COEFF>(); // Output vector size.
     static constexpr unsigned int m_kSamplesInDataBuff1buff = kBuffSize128Byte / sizeof(TT_DATA);
     static constexpr unsigned int m_kCoeffRegVsize = kBuffSize32Byte / sizeof(TT_COEFF);
     static constexpr unsigned int m_kFirRangeOffset =
@@ -125,10 +126,13 @@ class kernelFilterClass {
                 ((m_kArchFirLen + 1) / 2 <= m_kCoeffRegVsize)
             ? SUPPORTED
             : NOT_SUPPORTED;
+    static constexpr unsigned int m_kRepeatFactor =
+        TP_DECIMATE_FACTOR % 2 == 0 ? m_kDataLoadVsize1buff
+                                    : m_kSamplesInDataBuff1buff / m_kVOutSize; // only FACTORS of 2 or 3 supported
     static constexpr unsigned int m_kUse1incrStrobe =
         (m_kArchFirLen + ((m_kLanes1buff - 1) * TP_DECIMATE_FACTOR) <
          m_kSamplesInDataBuff1buff - m_kDataLoadVsize1buff) &&
-                (TP_INPUT_WINDOW_VSIZE % (m_kLanes1buff * m_kDataLoadsInReg) == 0)
+                (TP_INPUT_WINDOW_VSIZE % (m_kLanes1buff * m_kRepeatFactor * TP_DECIMATE_FACTOR) == 0)
             ? 1
             : 0;
     static constexpr unsigned int m_kArch =
@@ -146,7 +150,6 @@ class kernelFilterClass {
         (sizeof(TT_DATA) * 8); // numerator is bits, sizeof is bytes, hence 8
     static constexpr unsigned int m_kSamplesInDataBuff = m_kDataLoadVsize * m_kDataLoadsInReg;
     static constexpr unsigned int m_kDataRegVsize = m_kDataLoadsInReg * m_kDataLoadVsize;
-    static constexpr unsigned int m_kVOutSize = fnVOutSizeDecSym<TT_DATA, TT_COEFF>(); // Output vector size.
     static constexpr unsigned int m_kLsize =
         fnLsize<TP_INPUT_WINDOW_VSIZE, TP_DECIMATE_FACTOR, m_kVOutSize>(); // loop length, given that <m_kVOutSize>
                                                                            // samples are output per iteration of loop

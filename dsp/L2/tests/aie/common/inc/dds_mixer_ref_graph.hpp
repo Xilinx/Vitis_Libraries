@@ -48,6 +48,7 @@ class dds_mixer_ref_graph : public graph {
     // DDS Kernel
     kernel m_ddsKernel;
 
+    static constexpr unsigned int KINPUT_WINDOW_VSIZE = TP_INPUT_WINDOW_VSIZE / TP_SSR;
     // Constructor
     dds_mixer_ref_graph(uint32_t phaseInc, uint32_t initialPhaseOffset = 0) {
         printf("========================\n");
@@ -58,17 +59,17 @@ class dds_mixer_ref_graph : public graph {
         // IO_API is ignored because it's basically just a implementation detail
         static constexpr unsigned int tp_num_luts = TP_SFDR <= 60 ? 1 : TP_SFDR <= 120 ? 2 : 3;
         m_ddsKernel = kernel::create_object<
-            dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, USE_INBUILT_SINCOS, tp_num_luts> >(
+            dds_mixer_ref<TT_DATA, KINPUT_WINDOW_VSIZE, TP_MIXER_MODE, USE_INBUILT_SINCOS, tp_num_luts> >(
             phaseInc, initialPhaseOffset);
 
         // Make connections
         // Size of window in Bytes.
         connect<>(in1[0], m_ddsKernel.in[0]);
-        dimensions(m_ddsKernel.in[0]) = {TP_INPUT_WINDOW_VSIZE};
+        dimensions(m_ddsKernel.in[0]) = {KINPUT_WINDOW_VSIZE};
         connect<>(in2[0], m_ddsKernel.in[1]);
-        dimensions(m_ddsKernel.in[1]) = {TP_INPUT_WINDOW_VSIZE};
+        dimensions(m_ddsKernel.in[1]) = {KINPUT_WINDOW_VSIZE};
         connect<>(m_ddsKernel.out[0], out[0]);
-        dimensions(m_ddsKernel.out[0]) = {TP_INPUT_WINDOW_VSIZE};
+        dimensions(m_ddsKernel.out[0]) = {KINPUT_WINDOW_VSIZE};
         // Specify mapping constraints
         runtime<ratio>(m_ddsKernel) = 0.4;
 
@@ -92,6 +93,7 @@ class dds_mixer_ref_graph<TT_DATA, TP_INPUT_WINDOW_VSIZE, 1, TP_API, TP_SSR, TP_
     std::array<port<input>, 1> in1;
     std::array<port<output>, 1> out;
 
+    static constexpr unsigned int KINPUT_WINDOW_VSIZE = TP_INPUT_WINDOW_VSIZE / TP_SSR;
     // DDS Kernel
     kernel m_ddsKernel;
 
@@ -105,15 +107,15 @@ class dds_mixer_ref_graph<TT_DATA, TP_INPUT_WINDOW_VSIZE, 1, TP_API, TP_SSR, TP_
         // IO_API is ignored because it's basically just a implementation detail
         static constexpr unsigned int tp_num_luts = TP_SFDR <= 60 ? 1 : TP_SFDR <= 120 ? 2 : 3;
         m_ddsKernel =
-            kernel::create_object<dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, 1, USE_INBUILT_SINCOS, tp_num_luts> >(
+            kernel::create_object<dds_mixer_ref<TT_DATA, KINPUT_WINDOW_VSIZE, 1, USE_INBUILT_SINCOS, tp_num_luts> >(
                 phaseInc, initialPhaseOffset);
 
         // Make connections
         // Size of window in Bytes.
         connect<>(in1[0], m_ddsKernel.in[0]);
-        dimensions(m_ddsKernel.in[0]) = {TP_INPUT_WINDOW_VSIZE};
+        dimensions(m_ddsKernel.in[0]) = {KINPUT_WINDOW_VSIZE};
         connect<>(m_ddsKernel.out[0], out[0]);
-        dimensions(m_ddsKernel.out[0]) = {TP_INPUT_WINDOW_VSIZE};
+        dimensions(m_ddsKernel.out[0]) = {KINPUT_WINDOW_VSIZE};
         // Specify mapping constraints
         runtime<ratio>(m_ddsKernel) = 0.4;
 
@@ -136,6 +138,7 @@ class dds_mixer_ref_graph<TT_DATA, TP_INPUT_WINDOW_VSIZE, 0, TP_API, TP_SSR, TP_
    public:
     std::array<port<output>, 1> out;
 
+    static constexpr unsigned int KINPUT_WINDOW_VSIZE = TP_INPUT_WINDOW_VSIZE / TP_SSR;
     // DDS Kernel
     kernel m_ddsKernel;
 
@@ -149,13 +152,13 @@ class dds_mixer_ref_graph<TT_DATA, TP_INPUT_WINDOW_VSIZE, 0, TP_API, TP_SSR, TP_
         // IO_API is ignored because it's basically just a implementation detail
         static constexpr unsigned int tp_num_luts = TP_SFDR <= 60 ? 1 : TP_SFDR <= 120 ? 2 : 3;
         m_ddsKernel =
-            kernel::create_object<dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, 0, USE_INBUILT_SINCOS, tp_num_luts> >(
+            kernel::create_object<dds_mixer_ref<TT_DATA, KINPUT_WINDOW_VSIZE, 0, USE_INBUILT_SINCOS, tp_num_luts> >(
                 phaseInc, initialPhaseOffset);
 
         // Make connections
         // Size of window in Bytes.
         connect<>(m_ddsKernel.out[0], out[0]);
-        dimensions(m_ddsKernel.out[0]) = {TP_INPUT_WINDOW_VSIZE};
+        dimensions(m_ddsKernel.out[0]) = {KINPUT_WINDOW_VSIZE};
         // Specify mapping constraints
         runtime<ratio>(m_ddsKernel) = 0.4;
 

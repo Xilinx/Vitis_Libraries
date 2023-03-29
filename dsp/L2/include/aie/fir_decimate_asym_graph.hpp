@@ -60,7 +60,6 @@ using namespace adf;
  *         taps. \n It must be one of the same set of types listed for TT_DATA
  *         and must also satisfy the following rules:
  *         - Complex types are only supported when TT_DATA is also complex.
- *         - 32 bit types are only supported when TT_DATA is also a 32 bit type,
  *         - TT_COEFF must be an integer type if TT_DATA is an integer type
  *         - TT_COEFF must be a float type if TT_DATA is a float type.
  *         Note that the combination TT_DATA=int16, TT_COEFF=int16 is not supported
@@ -107,13 +106,13 @@ using namespace adf;
  *         Note: Margin size should not be included in TP_INPUT_WINDOW_VSIZE.
  * @tparam TP_CASC_LEN describes the number of AIE processors to split the operation
  *         over. \n This allows resource to be traded for higher performance.
- *         TP_CASC_LEN must be in the range 1 (default) to 9.
+ *         TP_CASC_LEN must be in the range 1 (default) to 40.
  * @tparam TP_USE_COEFF_RELOAD allows the user to select if runtime coefficient
  *         reloading should be used. \n When defining the parameter:
  *         - 0 = static coefficients, defined in filter constructor,
  *         - 1 = reloadable coefficients, passed as argument to runtime function. \n
  *
- *         Note: when used, optional port: ``` port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), TP_SSR> coeff;
+ *         Note: when used, async port: ``` port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), TP_SSR> coeff;
  *``` will be added to the FIR. \n
  *         Note: the size of the port array is equal to the total number of output paths  (TP_SSR).  \n
  *         Each port should contain the same taps array content, i.e. each additional port must be a duplicate of the
@@ -152,7 +151,7 @@ using namespace adf;
  *          TP_PARA_DECI_POLY < TP_DECIMATE_FACTOR will result in the polyphase branches operating as
  * independant decimators connected by cascades.
  *
- *         The number of AIEs used is given by PARA_DECI_POLY*SSR^2*CASC_LEN. \n
+ *         The number of AIEs used is given by TP_PARA_DECI_POLY * TP_SSR^2 * TP_CASC_LEN. \n
  *
  * @tparam TP_SSR specifies the number of parallel input/output paths where samples are interleaved between paths,
  *         giving an overall higher throughput.   \n
@@ -326,6 +325,12 @@ class fir_decimate_asym_graph : public graph {
         return optTaps;
     };
 
+    /**
+     * The conditional input array data to the function.
+     * This input is (generated when TP_CASC_IN == CASC_IN_TRUE) either a cascade input.
+     **/
+    port_conditional_array<output, (TP_CASC_IN == CASC_IN_TRUE), TP_SSR> casc_in;
+
    public:
     /**
      * Size of the Input port array in SSR operation mode
@@ -365,7 +370,7 @@ class fir_decimate_asym_graph : public graph {
     port_conditional_array<input, (TP_DUAL_IP == 1), IN_SSR> in2;
 
     /**
-     * The conditional array of input ports  used to pass run-time programmable (RTP) coeficients.
+     * The conditional array of input async ports used to pass run-time programmable (RTP) coeficients.
      * This port_conditional_array is (generated when TP_USE_COEFF_RELOAD == 1) an array of input ports, which size is
      *defined by TP_SSR.
      * Each port in the array holds a duplicate of the coefficient array, required to connect to each SSR input path.
@@ -380,11 +385,6 @@ class fir_decimate_asym_graph : public graph {
      **/
     port_conditional_array<output, (TP_NUM_OUTPUTS == 2), TP_SSR> out2;
 
-    /**
-     * The conditional input array data to the function.
-     * This input is (generated when TP_CASC_IN == CASC_IN_TRUE) either a cascade input.
-     **/
-    port_conditional_array<output, (TP_CASC_IN == CASC_IN_TRUE), TP_SSR> casc_in;
     /**
      * Access function to get pointer to kernel (or first kernel in a chained configuration).
      **/

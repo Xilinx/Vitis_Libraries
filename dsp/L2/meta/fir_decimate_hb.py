@@ -64,7 +64,7 @@ def fn_halfband_len(TP_FIR_LEN):
 def fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD, TP_PARA_DECI_POLY):
     minLenCheck =  fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR)
 
-    maxLenCheck = fn_max_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR, 4)
+    maxLenCheck = fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR, TP_API, 4)
     halfbandLenCheck = fn_halfband_len(TP_FIR_LEN)
     dataNeededCheck = isValid
     if TP_PARA_DECI_POLY > 1:

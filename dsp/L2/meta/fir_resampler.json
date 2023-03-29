@@ -114,7 +114,7 @@
       "description": "The length of the cascade chain.",
       "type": "uint",
       "minimum": 1,
-      "maximum": 9
+      "maximum": 40
     },
     {
       "name": "TP_USE_COEF_RELOAD",

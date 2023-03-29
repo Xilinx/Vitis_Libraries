@@ -130,7 +130,7 @@ def fn_max_fir_len_overall(TT_DATA, TT_COEF, TP_FIR_LEN):
 def fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR,TP_DECIMATE_FACTOR, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD):
   minLenCheck =  fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_Rnd=TP_INTERPOLATE_FACTOR)
 
-  maxLenCheck = fn_max_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR, 1)
+  maxLenCheck = fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR, TP_API, 1)
 
   maxLenOverallCheck = fn_max_fir_len_overall(TT_DATA, TT_COEF, TP_FIR_LEN)
 
@@ -181,12 +181,12 @@ def fn_check_repeatFactor(TT_DATA, TT_COEF, TP_INTERPOLATE_FACTOR, TP_DECIMATE_F
 
 # will need to divide window size by SSR once this is incorporated.
 def fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN,TP_INTERPOLATE_FACTOR,TP_DECIMATE_FACTOR, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1):
-  # resampler doesn't actually have this constraint
-  #checkMultipleLanes =  fn_windowsize_multiple_lanes(TT_DATA, TT_COEF, TP_INPUT_WINDOW_VSIZE, TP_API)
   outputWindowSize = (TP_INPUT_WINDOW_VSIZE * TP_INTERPOLATE_FACTOR) // TP_DECIMATE_FACTOR
   checkOutputMultipleLanes =  fn_windowsize_multiple_lanes(TT_DATA, TT_COEF, outputWindowSize, TP_API)
   m_kPolyphaseLaneAlias = getPhaseAlias(TT_DATA, TT_COEF, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_API)
-  multipleToBeChecked = m_kPolyphaseLaneAlias*fnNumLanes(TT_DATA, TT_COEF, TP_API)
+  # Stream repeat factor is set to 16, to allow unrolling and effective pipelining.
+  streamRptFactor = 16
+  multipleToBeChecked = (m_kPolyphaseLaneAlias*fnNumLanes(TT_DATA, TT_COEF, TP_API)) if TP_API == 0 else (m_kPolyphaseLaneAlias*fnNumLanes(TT_DATA, TT_COEF, TP_API) * streamRptFactor)
   checkOutputMultipleLanesAndLaneAlias =  fn_windowsize_multiple_lanes(TT_DATA, TT_COEF, outputWindowSize, TP_API, numLanes=multipleToBeChecked)
 
 

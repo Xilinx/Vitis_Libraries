@@ -1,0 +1,9 @@
+digraph G {
+data_type -> casc_length;
+point_size -> casc_length;
+point_size -> input_window_size;
+data_type -> shift_val;
+point_size -> shift_val;
+data_type -> point_size;
+ssr -> point_size;
+}

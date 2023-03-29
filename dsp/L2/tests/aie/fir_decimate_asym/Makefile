@@ -118,6 +118,7 @@ AIE_PKG_DIR ?= Work
 
 # Setting customized_params in aiecompiler
 TAG ?= UUT
+AIE_VARIANT ?= 1
 UUT_KERNEL ?= fir_decimate_asym
 REF_KERNEL ?= fir_decimate_asym_ref
 UUT_GRAPH ?= fir_decimate_asym_graph
@@ -178,7 +179,7 @@ REF_WORK_DIR ?= ./Work
 PREPROC_ARGS ?=  -DCOEFF_FILE=$(LOC_COEFF_FILE) -DDATA_TYPE=$(DATA_TYPE) -DCOEFF_TYPE=$(COEFF_TYPE) -DFIR_LEN=$(FIR_LEN) -DSHIFT=$(SHIFT) -DROUND_MODE=$(ROUND_MODE) -DCASC_LEN=$(CASC_LEN) -DDUAL_IP=$(DUAL_IP) -DPORT_API=$(PORT_API) -DUSE_COEFF_RELOAD=$(USE_COEFF_RELOAD) -DSTIM_TYPE=$(COEFF_STIM_TYPE) -DINTERPOLATE_FACTOR=$(INTERPOLATE_FACTOR) -DDECIMATE_FACTOR=$(DECIMATE_FACTOR) -DNUM_OUTPUTS=$(NUM_OUTPUTS) -DUUT_SSR=$(UUT_SSR) -DUSE_CHAIN=$(USE_CHAIN) -DUSE_CUSTOM_CONSTRAINT=$(USE_CUSTOM_CONSTRAINT) -DUUT_PARA_DECI_POLY=$(UUT_PARA_DECI_POLY)
 REF_PREPROC_ARGS ?= -DUUT_GRAPH=$(REF_GRAPH) -DINPUT_FILE=$(REF_INPUT_FILE) -DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS)  -DINPUT_WINDOW_VSIZE=$(REF_INPUT_WINDOW_VSIZE) -DNITER=$(NITER_REF)
 UUT_PREPROC_ARGS ?= -DUUT_GRAPH=$(UUT_GRAPH) -DINPUT_FILE=$(LOC_INPUT_FILE) -DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS)  -DINPUT_WINDOW_VSIZE=$(UUT_INPUT_WINDOW_VSIZE) -DNITER=$(NITER_UUT) -DUSING_UUT=1
-PARAM_MAP ?= DATA_TYPE $(DATA_TYPE) COEFF_TYPE $(COEFF_TYPE) FIR_LEN $(FIR_LEN) SHIFT $(SHIFT) ROUND_MODE $(ROUND_MODE) INPUT_WINDOW_VSIZE $(INPUT_WINDOW_VSIZE) CASC_LEN $(CASC_LEN) DECIMATE_FACTOR $(DECIMATE_FACTOR) SYMMETRY_FACTOR $(SYMMETRY_FACTOR) DUAL_IP $(DUAL_IP) PORT_API $(PORT_API) USE_COEFF_RELOAD $(USE_COEFF_RELOAD) NUM_OUTPUTS $(NUM_OUTPUTS) UUT_SSR $(UUT_SSR) UUT_PARA_DECI_POLY $(UUT_PARA_DECI_POLY)
+META_PARAM_MAP ?= DATA_TYPE $(DATA_TYPE) COEFF_TYPE $(COEFF_TYPE) FIR_LEN $(FIR_LEN) SHIFT $(SHIFT) ROUND_MODE $(ROUND_MODE) INPUT_WINDOW_VSIZE $(INPUT_WINDOW_VSIZE) CASC_LEN $(CASC_LEN) DECIMATE_FACTOR $(DECIMATE_FACTOR) SYMMETRY_FACTOR $(SYMMETRY_FACTOR) DUAL_IP $(DUAL_IP) PORT_API $(PORT_API) USE_COEFF_RELOAD $(USE_COEFF_RELOAD) NUM_OUTPUTS $(NUM_OUTPUTS) UUT_SSR $(UUT_SSR) UUT_PARA_DECI_POLY $(UUT_PARA_DECI_POLY)
 SKIP_REF ?= 0
 SKIP_META ?= 0
 
@@ -346,7 +347,7 @@ ifeq ($(TARGET), x86sim)
 	$(if $(filter-out REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/uut_output.txt > ./logs/uut_output.txt)
 	$(if $(filter REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./logs/ref_output.txt)
 	$(if $(filter-out REF,$(TAG)), tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE))
-	$(if $(filter-out REF,$(TAG)), tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP))
+	$(if $(filter-out REF,$(TAG)), tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) AIE_VARIANT $(AIE_VARIANT) $(META_PARAM_MAP))
 	$(if $(filter-out REF,$(TAG)), tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/diff_exit.tcl ./)
 endif
 #aiesim
@@ -356,7 +357,7 @@ ifeq ($(TARGET), aiesim)
 	perl $(XFLIB_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./aiesimulator_output/data/uut_output.txt --type $(DATA_TYPE) --ssr $(UUT_SSR_OUT) --zip --dual $(DUAL_OUTPUT_SAMPLES) -k 0 -w $(SSR_OUTPUT_WINDOW_VSIZE)
 	grep -ve '[XT]' ./aiesimulator_output/data/uut_output.txt > ./logs/uut_output.txt
 	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE)
-	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP)
+	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) AIE_VARIANT $(AIE_VARIANT) $(META_PARAM_MAP)
 	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output $(STATUS_FILE) $(SSR_INPUT_WINDOW_VSIZE) $(NITER_UUT)
 	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(SSR_INPUT_WINDOW_VSIZE) $(CASC_LEN) $(STATUS_FILE) ./aiesimulator_output filter $(NITER_UUT)
 	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_fir_theoretical_min.tcl $(DATA_TYPE) $(COEFF_TYPE) $(FIR_LEN) $(SSR_INPUT_WINDOW_VSIZE) $(CASC_LEN) $(INTERPOLATE_FACTOR) $(DECIMATE_FACTOR) $(SYMMETRY_FACTOR) $(UUT_SSR) $(UUT_PARA_INTERP_POLY) $(UUT_PARA_DECI_POLY) $(STATUS_FILE) $(UUT_KERNEL)
@@ -378,8 +379,8 @@ endif
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_stdout.log
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_stdout.log || exit 1
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
 	
 endif
 endif
@@ -391,8 +392,8 @@ ifeq ($(HOST_ARCH), x86)
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_stdout.log
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_stdout.log || exit 1
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
 	
 endif
 endif
@@ -410,7 +411,7 @@ endif
 ############################## Setting Targets ##############################
 .PHONY: pre_build
 pre_build:
-	$(if $(filter-out REF,$(TAG)), tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL) $(PARAM_MAP))
+	$(if $(filter-out REF,$(TAG)), tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL) $(META_PARAM_MAP))
 	$(if $(filter-out REF,$(TAG)), vitis -exec ipmetadata_config_checker $(XFLIB_DIR)/L2/meta/fir_decimate_asym.json ./config.json -newflow)
 	$(if $(filter-out REF,$(TAG)), tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE) $(SSR_INPUT_WINDOW_VSIZE) $(NITER_UUT) $(DATA_SEED) $(DATA_STIM_TYPE) 0 0 $(DATA_TYPE) $(PORT_API) 1)
 	$(if $(filter-out REF,$(TAG)), perl $(XFLIB_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(LOC_INPUT_FILE) --type $(DATA_TYPE) --ssr $(UUT_SSR_IN) --split --dual $(DUAL_INPUT_SAMPLES) -k 0 -w $(SSR_INPUT_WINDOW_VSIZE) -c $(COEFF_TYPE) -fl $(FIR_LEN))

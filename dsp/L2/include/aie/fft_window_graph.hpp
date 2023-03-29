@@ -26,6 +26,7 @@ the FFT window function library element.
 #include <adf.h>
 #include <vector>
 #include <array>
+#include <adf/arch/aie_arch_properties.hpp>
 #include "graph_utils.hpp"
 #include <tuple>
 
@@ -80,10 +81,15 @@ class fft_window_graph : public graph {
    public:
     static constexpr int kMaxSSR = 16;
     static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
+    static constexpr int kStreamsPerTile = get_input_streams_core_module(); // a device trait
 
     // Defensive configuration legality checks
-    static_assert((std::is_same<TT_DATA, cint16>::value) || (std::is_same<TT_DATA, cint32>::value) ||
-                      (std::is_same<TT_DATA, cfloat>::value),
+    static_assert((std::is_same<TT_DATA, cint16>::value) || (std::is_same<TT_DATA, cint32>::value)
+#if __SUPPORTS_CFLOAT__ == 1
+                      ||
+                      (std::is_same<TT_DATA, cfloat>::value)
+#endif //__SUPPORTS_CFLOAT__ == 0
+                      ,
                   "ERROR: TT_DATA is not supported");
     static_assert((std::is_same<TT_COEFF, int16>::value) || (std::is_same<TT_COEFF, int32>::value) ||
                       (std::is_same<TT_COEFF, float>::value),
@@ -95,19 +101,6 @@ class fft_window_graph : public graph {
                   "ERROR: TP_WINDOW_VSIZE must be an integer multiple of TP_POINT_SIZE");
     static_assert(TP_POINT_SIZE >= kPointSizeMin, "ERROR: TP_POINT_SIZE must be at least 16");
     static_assert(TP_POINT_SIZE <= kPointSizeMax, "ERROR: TP_POINT_SIZE must be at no more than 65536");
-    // static_assert(TP_POINT_SIZE == 65536 ||
-    //              TP_POINT_SIZE == 32768 ||
-    //              TP_POINT_SIZE == 16384 ||
-    //              TP_POINT_SIZE == 8192 ||
-    //              TP_POINT_SIZE == 4096 ||
-    //              TP_POINT_SIZE == 2048 ||
-    //              TP_POINT_SIZE == 1024 ||
-    //              TP_POINT_SIZE == 512 ||
-    //              TP_POINT_SIZE == 256 ||
-    //              TP_POINT_SIZE == 128 ||
-    //              TP_POINT_SIZE == 64 ||
-    //              TP_POINT_SIZE == 32 ||
-    //              TP_POINT_SIZE == 16 , "ERROR: TP_POINT_SIZE is not a supported value (16, 32, 64,... 65536.");
     static_assert(TP_SHIFT >= 0 && TP_SHIFT < 61, "ERROR: TP_SHIFT is out of the supported range (0 to 61)");
     static_assert(TP_SHIFT == 0 || !std::is_same<TT_COEFF, float>::value,
                   "ERROR: TP_SHIFT must be 0 for float operation");
@@ -118,7 +111,8 @@ class fft_window_graph : public graph {
     static_assert(TP_API == 0 || TP_API == 1, "ERROR: TP_API is not a supported value (0 or 1)");
     static_assert(TP_SSR >= 0 && TP_SSR <= kMaxSSR, "ERROR: TP_SSR is not in the supported range of 1 to 16");
 
-    static constexpr int kAPIFactor = TP_API == 0 ? 1 : 2; // 2 ports for stream, 1 for window.
+    static constexpr int kAPIFactor =
+        TP_API == 0 ? 1 : kStreamsPerTile; // 2 ports for stream on AIE1, 1 for window or streams on AIE2.
     static constexpr int kKernelPtSize = TP_POINT_SIZE / TP_SSR;
     static constexpr int kKernelWindowVsize = TP_WINDOW_VSIZE / TP_SSR;
     static_assert(kKernelPtSize <= 4096, "ERROR: TP_POINT_SIZE/TP_SSR must be at no more than 4096");
@@ -167,17 +161,15 @@ class fft_window_graph : public graph {
 
             // make connections
             if (TP_API == 0) {
-                // connect<window<kKernelWindowVsize*sizeof(TT_DATA) + kHeaderBytes>>(in[i], m_kernels[i].in[0]);
                 connect(in[i], m_kernels[i].in[0]);
                 dimensions(m_kernels[i].in[0]) = {kKernelWindowVsize + kHeaderBytes / sizeof(TT_DATA)};
-                // connect<window<kKernelWindowVsize*sizeof(TT_DATA) + kHeaderBytes>>(m_kernels[i].out[0], out[i]);
                 connect(m_kernels[i].out[0], out[i]);
                 dimensions(m_kernels[i].out[0]) = {kKernelWindowVsize + kHeaderBytes / sizeof(TT_DATA)};
             } else {
-                connect<stream>(in[i * 2], m_kernels[i].in[0]);
-                connect<stream>(in[i * 2 + 1], m_kernels[i].in[1]);
-                connect<stream>(m_kernels[i].out[0], out[i * 2]);
-                connect<stream>(m_kernels[i].out[1], out[i * 2 + 1]);
+                for (int k = 0; k < kStreamsPerTile; k++) {
+                    connect<stream>(in[i * kStreamsPerTile + k], m_kernels[i].in[k]);
+                    connect<stream>(m_kernels[i].out[k], out[i * kStreamsPerTile + k]);
+                }
             }
         }
     }; // constructor

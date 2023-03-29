@@ -117,7 +117,7 @@ AIE_WORK_DIR ?= Work
 AIE_PKG_DIR ?= Work
 
 # Setting customized_params in aiecompiler
-GRAPHNAME ?= FIR_Interpolation_Stream_ad15382b
+GRAPHNAME ?= FIR_Interpolation_Stream_7498103a
 VMC_GRAPHDIR ?= xmc_aie_lib/$(GRAPHNAME)
 VMC_KERNEL ?= vmc_stream_fir_interpolate_asym
 
@@ -176,7 +176,7 @@ endif
 ######################### binary container global settings ##########################
 
 ############################## Setting Rules for AIE (Building Kernels) ##################
-$(AIE_CONTAINER): $(CUR_DIR)/$(VMC_GRAPHDIR)/$(GRAPHNAME).cpp $(XFLIB_DIR)/L1/src/aie/fir_interpolate_asym.cpp  | pre_build 
+$(AIE_CONTAINER): $(VMC_GRAPHDIR)/$(GRAPHNAME).cpp $(XFLIB_DIR)/L1/src/aie/fir_interpolate_asym.cpp  | pre_build 
 	$(ECHO) "Compiling: libadf.a"
 	mkdir -p $(dir $@)
 	$(AIECXX) $(AIE_CXXFLAGS) $^
@@ -301,8 +301,8 @@ endif
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_stdout.log
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_stdout.log || exit 1
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
 	
 endif
 endif
@@ -314,8 +314,8 @@ ifeq ($(HOST_ARCH), x86)
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_stdout.log
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_stdout.log || exit 1
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
 	
 endif
 endif

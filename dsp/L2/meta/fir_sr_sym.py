@@ -79,14 +79,14 @@ def fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INPUT_WINDOW_
     return isValid
 
 
-def fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD):
+def fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD, AIE_VARIANT=1):
     minLenCheck =  fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR)
     symFactor   = 1 if (TT_DATA == "cfloat" or TT_DATA == "float") else 2  # guessing this is because the code bloats up very easily for float data types and we hit program memory limitations earlier
-    maxLenCheck = fn_max_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR, symFactor)
+    maxLenCheck = fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR, TP_API, symFactor)
     dataNeededCheck = isValid
-    if TP_SSR > 1:
+    if ((TP_SSR > 1) or (AIE_VARIANT == 2)):
       dataNeededCheck = sr_asym.fn_data_needed_within_buffer_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN,TP_API, TP_SSR )
-    for check in (minLenCheck,maxLenCheck):
+    for check in (minLenCheck,maxLenCheck, dataNeededCheck):
       if check["is_valid"] == False :
         return check
 
@@ -134,8 +134,9 @@ def validate_TP_FIR_LEN(args):
     TP_SSR = args["TP_SSR"]
     TP_API = args["TP_API"]
     TP_USE_COEF_RELOAD = args["TP_USE_COEF_RELOAD"]
+    AIE_VARIANT = args["AIE_VARIANT"]
 
-    return fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD)
+    return fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD, AIE_VARIANT)
 
 def validate_TP_NUM_OUTPUTS(args):
     TP_NUM_OUTPUTS    = args["TP_NUM_OUTPUTS"]

@@ -118,6 +118,7 @@ AIE_PKG_DIR ?= Work
 
 # Setting customized_params in aiecompiler
 TAG ?= UUT
+AIE_VARIANT ?= 1
 UUT_KERNEL ?= dds_mixer
 REF_KERNEL ?= dds_mixer_ref
 UUT_GRAPH ?= dds_mixer_graph
@@ -132,7 +133,7 @@ UUT_SSR ?= 1
 INITIAL_DDS_OFFSET ?= 0
 DDS_PHASE_INC ?= 1797958314
 UUT_WINDOW_VSIZE ?= $(WINDOW_VSIZE)
-UUT_SSR_WINDOW_VSIZE ?= $$(( $(UUT_SSR) * $(UUT_WINDOW_VSIZE)))
+UUT_SSR_WINDOW_VSIZE ?= $(UUT_WINDOW_VSIZE)
 REF_WINDOW_VSIZE ?= $$(( $(UUT_SSR_WINDOW_VSIZE) * $(NITER_UUT) / $(NITER_REF)))
 DATA_TYPE ?= cint16
 DIFF_TOLERANCE ?= 4
@@ -155,7 +156,7 @@ PREPROC_ARGS ?= -DINPUT_FILE=$(LOC_INPUT_FILE) -DINPUT_FILE2=$(LOC_INPUT_FILE2) 
 USING_REF ?= 
 USING_UUT ?= -DUSING_UUT=1
 TAG_PREPROC_ARGS ?= -DUUT_GRAPH=$($(TAG)_GRAPH) -DOUTPUT_FILE=$($(TAG)_SIM_FILE) -DOUTPUT_FILE2=$($(TAG)_SIM_FILE2) $(PREPROC_ARGS) -DINPUT_WINDOW_VSIZE=$($(TAG)_WINDOW_VSIZE) -DNITER=$(NITER_$(TAG)) $(USING_$(TAG))
-PARAM_MAP ?= DATA_TYPE $(DATA_TYPE) MIXER_MODE $(MIXER_MODE) P_API $(P_API) UUT_SSR $(UUT_SSR) DDS_PHASE_INC $(DDS_PHASE_INC) INITIAL_DDS_OFFSET $(INITIAL_DDS_OFFSET) UUT_WINDOW_VSIZE $(UUT_WINDOW_VSIZE)
+META_PARAM_MAP ?= DATA_TYPE $(DATA_TYPE) MIXER_MODE $(MIXER_MODE) P_API $(P_API) UUT_SSR $(UUT_SSR) DDS_PHASE_INC $(DDS_PHASE_INC) INITIAL_DDS_OFFSET $(INITIAL_DDS_OFFSET) UUT_WINDOW_VSIZE $(UUT_WINDOW_VSIZE)
 
 ############################ setting AIE Compiler ###########################
 ifneq ($(filter aiesim hw_emu hw, $(TARGET)),)
@@ -320,17 +321,18 @@ ifeq ($(TARGET), x86sim)
 	$(if $(filter-out REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/uut_output.txt > ./logs/uut_output.txt)
 	$(if $(filter REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./logs/ref_output.txt)
 	$(if $(filter-out REF,$(TAG)), tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE) abs)
-	$(if $(filter-out REF,$(TAG)), tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP))
+	$(if $(filter-out REF,$(TAG)), tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) AIE_VARIANT $(AIE_VARIANT) $(META_PARAM_MAP))
 	$(if $(filter-out REF,$(TAG)), tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/diff_exit.tcl ./)
 endif
 #aiesim
 ifeq ($(TARGET), aiesim)
-	$(AIESIMULATOR) --pkg-dir=$(AIE_PKG_DIR) --profile  $(AIESIMFLAGS)
+	$(AIESIMULATOR) --pkg-dir=$(AIE_PKG_DIR) --profile --graph-latency $(AIESIMFLAGS)
 	mkdir -p logs
 	perl $(XFLIB_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./aiesimulator_output/data/uut_output.txt --type $(DATA_TYPE) --ssr $(UUT_SSR) --zip --dual 0 -k 0 -w $(UUT_SSR_WINDOW_VSIZE)
 	grep -ve '[XT]' ./aiesimulator_output/data/uut_output.txt > ./logs/uut_output.txt
 	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE) abs
-	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP)
+	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) AIE_VARIANT $(AIE_VARIANT) $(META_PARAM_MAP)
+	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output $(STATUS_FILE) $(UUT_SSR_WINDOW_VSIZE) $(NITER_UUT)
 	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(UUT_SSR_WINDOW_VSIZE) 1 $(STATUS_FILE) ./aiesimulator_output dds $(NITER_UUT)
 	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_dds_theoretical_min.tcl $(DATA_TYPE) $(MIXER_MODE) $(UUT_SSR_WINDOW_VSIZE) $(UUT_SSR) $(STATUS_FILE) $(UUT_KERNEL)
 	$(XFLIB_DIR)/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) $(XFLIB_DIR)/L2/tests/aie/common/scripts
@@ -351,8 +353,8 @@ endif
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_stdout.log
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_stdout.log || exit 1
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
 	
 endif
 endif
@@ -364,8 +366,8 @@ ifeq ($(HOST_ARCH), x86)
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_stdout.log
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_stdout.log || exit 1
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
 	
 endif
 endif
@@ -383,7 +385,7 @@ endif
 ############################## Setting Targets ##############################
 .PHONY: pre_build
 pre_build:
-	$(if $(filter-out REF,$(TAG)), tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL) $(PARAM_MAP))
+	$(if $(filter-out REF,$(TAG)), tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL) $(META_PARAM_MAP))
 	$(if $(filter-out REF,$(TAG)), vitis -exec ipmetadata_config_checker $(XFLIB_DIR)/L2/meta/$(UUT_KERNEL).json ./config.json -newflow)
 	$(if $(filter-out REF,$(TAG)), tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE) $(UUT_SSR_WINDOW_VSIZE) $(NITER_UUT) $(DATA_SEED) $(DATA_STIM_TYPE) 0 0 $(DATA_TYPE) 0 1)
 	$(if $(filter-out REF,$(TAG)), tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE2) $(UUT_SSR_WINDOW_VSIZE) $(NITER_UUT) $(DATA_SEED) $(DATA_STIM_TYPE) 0 0 $(DATA_TYPE) 0 1)
