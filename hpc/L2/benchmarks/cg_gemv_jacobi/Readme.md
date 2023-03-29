@@ -15,7 +15,7 @@ Please follow the page [Benchmark Overview](../) to correctly setup the environm
 With the following commands, kernel bitstream `cgSolver.xclbin ` is built under the directory `./build_dir.hw.xilinx_u50_gen3x16_xdma_201920_3`
 
 ```
-$ make build TARGET=hw DEVICE=xilinx_u50_gen3x16_xdma_201920_3
+$ make build TARGET=hw PLATFORM=xilinx_u50_gen3x16_xdma_201920_3
 ```
 
 ### Prepare Data (Step 3)
@@ -32,7 +32,7 @@ Here states the principle of how it works.  With the following commands with giv
 Matrix `A` and vector `b` are used as inputs for the solver, and vector `x` is used as the golden reference. 
 
 ```
-$ make data_gen TARGET=hw DEVICE=xilinx_u50_gen3x16_xdma_201920_3 N=1024
+$ make data_gen TARGET=hw PLATFORM=xilinx_u50_gen3x16_xdma_201920_3 N=1024
 ```
 where `N` is the vector size and must be multiple of 16.
 
@@ -59,7 +59,7 @@ $ xbutil scan
 If you decide to use randomly generated data for benchmark in step 3, you could skip that step and run the following command with given vector size `N`, e.g. 1024 and maximum number of iterations for the solver e.g. 100. 
 
 ```
-$ make run TARGET=hw DEVICE=xilinx_u50_gen3x16_xdma_201920_3 N=1024 maxIter=100 
+$ make run TARGET=hw PLATFORM=xilinx_u50_gen3x16_xdma_201920_3 N=1024 maxIter=100 
 ```
 Here lists the configurable parameters with the `make` command for the benchmark. 
 
@@ -115,5 +115,5 @@ FPGA Hardware Information
 Power data could be obtained by 
 
 ```
-$ xbutil top -d <DEVICE ID>
+$ xbutil top -d <PLATFORM ID>
 ```

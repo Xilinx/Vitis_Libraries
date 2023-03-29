@@ -149,11 +149,11 @@ VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L2/include/hw/ -I $(
 endif
 
 ######################### binary container global settings ##########################
-VPP_FLAGS_rtmforward += --hls.clock 300000000:rtmforward
+VPP_FLAGS_rtmforward += --hls.clock 200000000:rtmforward
 ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_rtmforward += --clock.defaultFreqHz 200000000
+VPP_LDFLAGS_rtmforward += --clock.defaultFreqHz 150000000
 else
-VPP_LDFLAGS_rtmforward += --kernel_frequency 200
+VPP_LDFLAGS_rtmforward += --kernel_frequency 150
 endif
 VPP_LDFLAGS_rtmforward_temp := --config opts.cfg
 VPP_LDFLAGS_rtmforward += $(VPP_LDFLAGS_rtmforward_temp)

@@ -37,7 +37,7 @@ With the following commands, kernel bitstream *cgSolver.xclbin * is built under 
 
 .. code-block:: bash
 
-    $ make build TARGET=hw DEVICE=xilinx_u280_xdma_201920_3
+    $ make build TARGET=hw PLATFORM=xilinx_u280_xdma_201920_3
 
 Prepare Data (Step 3)
 ***********************
@@ -46,7 +46,7 @@ Here is a list of the URLs of **SPD** sparse matrices in the file *test.txt*. Al
 
 .. code-block:: bash
 
-    $ make data_gen TARGET=hw DEVICE=xilinx_u280_xdma_201920_3
+    $ make data_gen TARGET=hw PLATFORM=xilinx_u280_xdma_201920_3
 
 Run on FPGA (Step 4)
 ********************
@@ -67,7 +67,7 @@ With the following command, users could benchmark the CG solver with a given mat
 
 .. code-block:: bash
 
-    $ make run TARGET=hw DEVICE=xilinx_u280_xdma_201920_3 mtxName=ted_B
+    $ make run TARGET=hw PLATFORM=xilinx_u280_xdma_201920_3 mtxName=ted_B
 
 Here lists the configurable parameters with the *make* command for the benchmark. 
 

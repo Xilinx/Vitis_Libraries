@@ -37,7 +37,7 @@ With the following commands, kernel bitstream *cgSolver.xclbin* is built under t
 
 .. code-block:: bash
 
-    $ make build TARGET=hw DEVICE=xilinx_u50_gen3x16_xdma_201920_3
+    $ make build TARGET=hw PLATFORM=xilinx_u50_gen3x16_xdma_201920_3
 
 Prepare Data (Step 3)
 ******************************
@@ -56,7 +56,7 @@ Matrix *A* and vector *b* are used as inputs for the solver, and vector *x* is u
 
 .. code-block:: bash
 
-    $ make data_gen TARGET=hw DEVICE=xilinx_u50_gen3x16_xdma_201920_3 N=1024
+    $ make data_gen TARGET=hw PLATFORM=xilinx_u50_gen3x16_xdma_201920_3 N=1024
 
 where *N* is the vector size and must be multiple of 16.
 
@@ -89,7 +89,7 @@ If you decide to use randomly generated data for benchmark in step 3, you could 
 
 .. code-block:: bash
 
-    $ make run TARGET=hw DEVICE=xilinx_u50_gen3x16_xdma_201920_3 N=1024 maxIter=100 deviceID=0
+    $ make run TARGET=hw PLATFORM=xilinx_u50_gen3x16_xdma_201920_3 N=1024 maxIter=100 deviceID=0
 
 Here lists the configurable parameters with the *make* command for the benchmark. 
 
@@ -181,5 +181,5 @@ Power data could be obtained by
 
 .. code-block:: bash
 
-    $ xbutil top -d <DEVICE ID>
+    $ xbutil top -d <PLATFORM ID>
 

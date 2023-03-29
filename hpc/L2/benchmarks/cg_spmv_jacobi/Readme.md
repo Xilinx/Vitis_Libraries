@@ -13,7 +13,7 @@ Before starting to build the project, follow the page [Benchmark Overview](../) 
 
 With the following commands, kernel bitstream `cgSolver.xclbin ` is built under the directory `./build_dir.hw.xilinx_u280_xdma_201920_3`
 ```
-$ make build TARGET=hw DEVICE=xilinx_u280_xdma_201920_3
+$ make build TARGET=hw PLATFORM=xilinx_u280_xdma_201920_3
 ```
 
 ### Prepare Data
@@ -21,7 +21,7 @@ $ make build TARGET=hw DEVICE=xilinx_u280_xdma_201920_3
 Here is a list of the URLs of **SPD** sparse matrices in the file `test.txt`. All these sparse matrices are from [SuiteSparse Matrix Collection](https://sparse.tamu.edu/). Users could add more links or trim the existing links in the file. With the following command, these matrices listed in the `test.txt` file are download from the given links and then are preprocessed. It may take some time to finish the downloading and preprocessing. 
 
 ```
-$ make data_gen TARGET=hw DEVICE=xilinx_u280_xdma_201920_3
+$ make data_gen TARGET=hw PLATFORM=xilinx_u280_xdma_201920_3
 ```
 
 ### Run on FPGA
@@ -38,7 +38,7 @@ $ xbutil scan
 
 With the following command, users could benchmark the CG solver with a given matrix. 
 ```
-$ make run TARGET=hw DEVICE=xilinx_u280_xdma_201920_3 mtxName=ted_B
+$ make run TARGET=hw PLATFORM=xilinx_u280_xdma_201920_3 mtxName=ted_B
 ```
 Here lists the configurable parameters with the `make` command for the benchmark. 
 

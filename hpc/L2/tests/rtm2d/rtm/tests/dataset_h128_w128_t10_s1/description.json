@@ -81,7 +81,7 @@
         {
             "name": "rtm", 
             "ldclflags": "--config opts.cfg", 
-            "frequency": 300, 
+            "frequency": 250, 
             "accelerators": [
                 {
                     "name": "rtmforward", 
@@ -105,7 +105,7 @@
                 "env": "", 
                 "cmd": "", 
                 "max_memory_MB": {
-                    "vitis_hw_build": 46080, 
+                    "vitis_hw_build": 51200, 
                     "vitis_hw_emu": 28672, 
                     "vitis_sw_emu": 10240, 
                     "vitis_hw_run": 10240

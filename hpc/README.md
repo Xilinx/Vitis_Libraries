@@ -82,7 +82,7 @@ Setup and build envrionment using the Vitis and XRT scripts:
 
 ```console
 cd L1/tests/hls_case_folder
-make run CSIM=1 CSYNTH=1 COSIM=1 DEVICE=<FPGA platform> PLATFORM_REPO_PATHS=<path to platform directories>
+make run CSIM=1 CSYNTH=1 COSIM=1 PLATFORM=<FPGA platform> PLATFORM_REPO_PATHS=<path to platform directories>
 ```
 
 Test control variables are:
@@ -98,7 +98,7 @@ Test control variables are:
 ```console
 cd L2/tests/vitis_case_folder
 
-make run TARGET=<sw_emu/hw_emu/hw> DEVICE=<FPGA platform> PLATFORM_REPO_PATHS=<path to platform directories>
+make run TARGET=<sw_emu/hw_emu/hw> PLATFORM=<FPGA platform> PLATFORM_REPO_PATHS=<path to platform directories>
 
 # delete generated files
 make cleanall
@@ -109,7 +109,7 @@ make cleanall
 ```console
 cd L3/tests/vitis_case_folder
 
-make run TARGET=<hw_emu/hw> DEVICE=<FPGA platform> PLATFORM_REPO_PATHS=<path to platform directories>
+make run TARGET=<hw_emu/hw> PLATFORM=<FPGA platform> PLATFORM_REPO_PATHS=<path to platform directories>
 
 # delete generated files
 make cleanall

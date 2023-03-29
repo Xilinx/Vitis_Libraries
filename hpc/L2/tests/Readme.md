@@ -27,7 +27,7 @@ For large dataset (as large as the Pluto model):
 
 Build bitstream
 ```
-	make build TARGET=hw DEVICE=xilinx_u280_xdma_201920_1
+	make build TARGET=hw PLATFORM=xilinx_u280_xdma_201920_1
 ```
 Shell xilinx_u280_xdma_201920_1 is installed on Nimbix. 
 

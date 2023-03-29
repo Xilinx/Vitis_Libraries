@@ -58,16 +58,16 @@ Makefile usage example:
 
 .. code-block:: bash
 
-    make run CSIM=1 CSYNTH=1 COSIM=1 DEVICE=<FPGA platform> PLATFORM_REPO_PATHS=<path to platform directories>
+    make run CSIM=1 CSYNTH=1 COSIM=1 PLATFORM=<FPGA platform> PLATFORM_REPO_PATHS=<path to platform directories>
 
 Command to run the selected tasks for specified device. Valid tasks are 'CSIM', 'CSYNTH', 'COSIM', 'VIVADO_SYN', 'VIVADO_IMPL'. 
 
 'PLATFORM_REPO_PATHS' variable is used to specify the paths in which the platform files will be searched for.
 
-'DEVICE' is case-insensitive and support awk regex. For example:
+'PLATFORM' is case-insensitive and support awk regex. For example:
 
 .. code-block:: bash
 
-    make run DEVICE='u280.*xdma' COSIM=1
+    make run PLATFORM='u280.*xdma' COSIM=1
 
 It can also be an absolute path to a platform file. 

@@ -142,23 +142,23 @@ VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L2/include/hw/rtm2d/
 
 ######################### binary container global settings ##########################
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u280/'))
-VPP_FLAGS_rtmforward += --hls.clock 300000000:rtmforward
-VPP_FLAGS_rtmbackward += --hls.clock 300000000:rtmbackward
+VPP_FLAGS_rtmforward += --hls.clock 200000000:rtmforward
+VPP_FLAGS_rtmbackward += --hls.clock 200000000:rtmbackward
 ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_rtm += --clock.defaultFreqHz 300000000
+VPP_LDFLAGS_rtm += --clock.defaultFreqHz 200000000
 else
-VPP_LDFLAGS_rtm += --kernel_frequency 300
+VPP_LDFLAGS_rtm += --kernel_frequency 200
 endif
 VPP_LDFLAGS_rtm_temp := --config $(CUR_DIR)/conn_u280.cfg
 VPP_LDFLAGS_rtm += $(VPP_LDFLAGS_rtm_temp)
 
 else 
-VPP_FLAGS_rtmforward += --hls.clock 300000000:rtmforward
-VPP_FLAGS_rtmbackward += --hls.clock 300000000:rtmbackward
+VPP_FLAGS_rtmforward += --hls.clock 200000000:rtmforward
+VPP_FLAGS_rtmbackward += --hls.clock 200000000:rtmbackward
 ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_rtm += --clock.defaultFreqHz 300000000
+VPP_LDFLAGS_rtm += --clock.defaultFreqHz 100000000
 else
-VPP_LDFLAGS_rtm += --kernel_frequency 300
+VPP_LDFLAGS_rtm += --kernel_frequency 200
 endif
 VPP_LDFLAGS_rtm_temp := --config opts.cfg
 VPP_LDFLAGS_rtm += $(VPP_LDFLAGS_rtm_temp)
