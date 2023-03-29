@@ -45,7 +45,7 @@ Setup Environment
    source /opt/xilinx/xrt/setup.sh
    source /opt/xilinx/xrm/setup.sh
    export PLATFORM_REPO_PATHS=<path to platforms>
-   export DEVICE=xilinx_u50_gen3x16_xdma_5_202210_1
+   export PLATFORM=xilinx_u50_gen3x16_xdma_5_202210_1
    export TARGET=sw_emu
 
 Note: The TARGET environment variable can be set as sw_emu, hw_emu and hw according to which Vitis target is expected to run.

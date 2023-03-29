@@ -372,6 +372,8 @@ INIT_TOT:
     }
 }
 
+// we used in 22.1
+/*
 template <typename DWEIGHT, int DWIDTH, int MAXVERTEX, int MAXEDGE>
 void initCid(int numVertex,
              ap_uint<DWIDTH> cidPrev[MAXVERTEX],
@@ -403,6 +405,43 @@ INIT_CID:
 #endif
 #endif
         }
+    }
+}
+*/
+
+// optimazed in 22.2
+template <typename DWEIGHT, int DWIDTH, int MAXVERTEX, int MAXEDGE>
+void initCid(int numVertex,
+             ap_uint<DWIDTH> cidPrev[MAXVERTEX],
+             ap_uint<DWIDTH> cidCurr[MAXVERTEX],
+             ap_uint<DWIDTH> cidSize[MAXVERTEX]) {
+#pragma HLS INLINE off
+
+    const int N_E = DWIDTH / 32;
+    const int loop_size = (numVertex % N_E) == 0 ? numVertex / N_E : numVertex / N_E + 1;
+
+    ap_uint<DWIDTH> axi_cidPrev, axi_cidCurr, axi_cidSize;
+
+INIT_CID:
+    for (int k = 0; k < loop_size; k++) {
+#pragma HLS LOOP_TRIPCOUNT MIN = 1696415 MAX = 1696415
+#pragma HLS PIPELINE II = 2
+        for (int i = 0; i < N_E; i++) {
+#pragma HLS UNROLL
+
+            axi_cidPrev.range(32 * i + 31, 32 * i) = (k * N_E + i);
+            axi_cidCurr.range(32 * i + 31, 32 * i) = (k * N_E + i);
+            axi_cidSize.range(32 * i + 31, 32 * i) = (1);
+
+#ifndef __SYNTHESIS__
+#ifdef DEBUG_INIT_COMM
+            std::cout << "cid_addr=" << k * N_E + i << std::endl;
+#endif
+#endif
+        }
+        cidPrev[k] = axi_cidPrev;
+        cidCurr[k] = axi_cidCurr;
+        cidSize[k] = axi_cidSize;
     }
 }
 

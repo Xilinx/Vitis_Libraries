@@ -81,7 +81,7 @@ There are many testcases provided for L3 APIs. In order to run testacses, please
 
 	cd xf_graph/L3/tests/cosineSimilaritySSDenseInt/
     source /LOCAL PATH to VITIS/settings64.sh
-    export DEVICE=/LOCAL PATH to TARGET DEVICE/DEVICE.xpfm
+    export PLATFORM=/LOCAL PATH to TARGET PLATFORM/PLATFORM.xpfm
 	make run TARGET=sw_emu/hw_emu/hw 
   
 It will automatically build host.exe and xclbin file, then run the testcase of single sourse integer cosine similarity in dense graph. Other testcases could be performed by the same way.

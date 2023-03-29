@@ -48,8 +48,8 @@ Setup the build environment using the Vitis and XRT scripts.
         export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 
 Setting ``PLATFORM_REPO_PATHS`` to the installation folder of platform files can enable makefiles
-in this library to use ``DEVICE`` variable as a pattern.
-Otherwise, full path to .xpfm file needs to be provided via ``DEVICE`` variable.
+in this library to use ``PLATFORM`` variable as a pattern.
+Otherwise, full path to .xpfm file needs to be provided via ``PLATFORM`` variable.
 
 
 .. toctree::
