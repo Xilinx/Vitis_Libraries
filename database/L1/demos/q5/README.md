@@ -37,7 +37,7 @@ order by
 Usage can be queried with `make help`. Basic use is:
 
 ```
-make run TARGET=sw_emu DEVICE=/path/to/xpfm
+make run TARGET=sw_emu PLATFORM=/path/to/xpfm
 ```
 
 Change `sw_emu` to `hw_emu` or `hw` to run RTL simulation or board test correspondingly.
