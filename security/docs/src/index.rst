@@ -284,7 +284,7 @@ A Makefile is used to drive this flow with available steps including `CSIM` (hig
    export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
    cd L1/tests/specific_algorithm/
    # Only run C++ simulation on U250 card
-   make run CSIM=1 CSYNTH=0 COSIM=0 VIVADO_SYN=0 VIVADO_IMPL=0 DEVICE=u250_xdma_201830_1
+   make run CSIM=1 CSYNTH=0 COSIM=0 VIVADO_SYN=0 VIVADO_IMPL=0 PLATFORM=u250_xdma_201830_1
 
 
 As well as verifying functional correctness, the reports generated from this flow give an indication of logic utilization, timing performance, latency and throughput. The output files of interest can be located at the location of the test project where the path name is correlated with the algorithm. i.e. the callable function within the design under test.

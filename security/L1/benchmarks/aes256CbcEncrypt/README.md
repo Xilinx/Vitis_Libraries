@@ -23,7 +23,7 @@ Run the following make command to build your XCLBIN and host binary targeting a 
 ```
    source /opt/xilinx/Vitis/2022.2/settings64.sh
    source /opt/xilinx/xrt/setenv.sh
-   export DEVICE=u50_gen3x16
+   export PLATFORM=u50_gen3x16
    export TARGET=hw
    make run 
 ```
