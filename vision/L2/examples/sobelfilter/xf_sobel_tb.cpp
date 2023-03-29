@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,7 @@
 #include <stdlib.h>
 
 #include "common/xf_headers.hpp"
-#include "xf_sobel_config.h"
-
+#include "xf_sobel_tb_config.h"
 #include "xcl2.hpp"
 
 int main(int argc, char** argv) {
@@ -54,32 +53,18 @@ int main(int argc, char** argv) {
     int delta = 0;
 
 #if (FILTER_WIDTH != 7)
-
     int ddepth = CV_8U;
     typedef unsigned char TYPE; // Should be short int when ddepth is CV_16S
-#if GRAY
-#define PTYPE CV_8UC1 // Should be CV_16S when ddepth is CV_16S
-#else
-#define PTYPE CV_8UC3 // Should be CV_16S when ddepth is CV_16S
-#endif
-#endif
-#if (FILTER_WIDTH == 7)
-
+#elif (FILTER_WIDTH == 7)
     int ddepth = -1;            // CV_32F;	//Should be CV_32F if the output pixel type is XF_32UC1
     typedef unsigned char TYPE; // Should be int when ddepth is CV_32F
-#if GRAY
-#define PTYPE CV_8UC1 // Should be CV_16S when ddepth is CV_16S
-#else
-#define PTYPE CV_8UC3 // Should be CV_16S when ddepth is CV_16S
-#endif
-
 #endif
 
     // create memory for output images
-    hls_grad_x.create(in_img.rows, in_img.cols, PTYPE);
-    hls_grad_y.create(in_img.rows, in_img.cols, PTYPE);
-    diff_grad_x.create(in_img.rows, in_img.cols, PTYPE);
-    diff_grad_y.create(in_img.rows, in_img.cols, PTYPE);
+    hls_grad_x.create(in_img.rows, in_img.cols, CV_IN_TYPE);
+    hls_grad_y.create(in_img.rows, in_img.cols, CV_IN_TYPE);
+    diff_grad_x.create(in_img.rows, in_img.cols, CV_IN_TYPE);
+    diff_grad_y.create(in_img.rows, in_img.cols, CV_IN_TYPE);
 
     cv::Sobel(in_img, c_grad_x_1, ddepth, 1, 0, FILTER_WIDTH, scale, delta, cv::BORDER_CONSTANT);
     cv::Sobel(in_img, c_grad_y_1, ddepth, 0, 1, FILTER_WIDTH, scale, delta, cv::BORDER_CONSTANT);
@@ -99,9 +84,9 @@ int main(int argc, char** argv) {
     cl::Context context(device);
 
     cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPC1) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPC1) << std::endl;
-    std::cout << "NPPC:" << NPC1 << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_sobel");
@@ -111,9 +96,9 @@ int main(int argc, char** argv) {
     cl::Kernel krnl(program, "sobel_accel");
 
     std::vector<cl::Memory> inBufVec, outBufVec1, outBufVec2;
-    cl::Buffer imageToDevice(context, CL_MEM_READ_ONLY, (height * width * CH_TYPE));
-    cl::Buffer imageFromDevice1(context, CL_MEM_WRITE_ONLY, (height * width * CH_TYPE));
-    cl::Buffer imageFromDevice2(context, CL_MEM_WRITE_ONLY, (height * width * CH_TYPE));
+    cl::Buffer imageToDevice(context, CL_MEM_READ_ONLY, (height * width * XF_INPUT_COLOR));
+    cl::Buffer imageFromDevice1(context, CL_MEM_WRITE_ONLY, (height * width * XF_INPUT_COLOR));
+    cl::Buffer imageFromDevice2(context, CL_MEM_WRITE_ONLY, (height * width * XF_INPUT_COLOR));
 
     // Set the kernel arguments
     krnl.setArg(0, imageToDevice);
@@ -122,7 +107,7 @@ int main(int argc, char** argv) {
     krnl.setArg(3, height);
     krnl.setArg(4, width);
 
-    q.enqueueWriteBuffer(imageToDevice, CL_TRUE, 0, (height * width * CH_TYPE), in_img.data);
+    q.enqueueWriteBuffer(imageToDevice, CL_TRUE, 0, (height * width * XF_INPUT_COLOR), in_img.data);
 
     // Profiling Objects
     cl_ulong start = 0;
@@ -143,8 +128,8 @@ int main(int argc, char** argv) {
 
     // q.enqueueMigrateMemObjects(outBufVec1,CL_MIGRATE_MEM_OBJECT_HOST);
     // q.enqueueMigrateMemObjects(outBufVec2,CL_MIGRATE_MEM_OBJECT_HOST);
-    q.enqueueReadBuffer(imageFromDevice1, CL_TRUE, 0, (height * width * CH_TYPE), hls_grad_x.data);
-    q.enqueueReadBuffer(imageFromDevice2, CL_TRUE, 0, (height * width * CH_TYPE), hls_grad_y.data);
+    q.enqueueReadBuffer(imageFromDevice1, CL_TRUE, 0, (height * width * XF_INPUT_COLOR), hls_grad_x.data);
+    q.enqueueReadBuffer(imageFromDevice2, CL_TRUE, 0, (height * width * XF_INPUT_COLOR), hls_grad_y.data);
     q.finish();
 /////////////////////////////////////// end of CL ////////////////////////
 //////////////////  Compute Absolute Difference ////////////////////

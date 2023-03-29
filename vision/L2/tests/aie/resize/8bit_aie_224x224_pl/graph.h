@@ -113,8 +113,11 @@ class resizeGraph : public adf::graph {
         out1 = output_plio::create("DataOut0", adf::plio_128_bits, "data/output.txt");
 
         // create nets to connect kernels and IO ports
-        connect<window<TILE_WINDOW_SIZE_IN> >(in1.out[0], k.in[0]);
-        connect<window<TILE_WINDOW_SIZE_OUT> >(k.out[0], out1.in[0]);
+        connect<>(in1.out[0], k.in[0]);
+        connect<>(k.out[0], out1.in[0]);
+
+        adf::dimensions(k.in[0]) = {ELEM_WITH_METADATA_IN};
+        adf::dimensions(k.out[0]) = {ELEM_WITH_METADATA_OUT};
 
         location<parameter>(k.param[1]) = offset(0);
 

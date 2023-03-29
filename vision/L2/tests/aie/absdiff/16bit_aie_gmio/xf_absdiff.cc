@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include "kernels.h"
 #include "imgproc/xf_absdiff_aie.hpp"
 
-void absdiff(input_window_int16* input1, input_window_int16* input2, output_window_int16* output) {
+void absdiff(adf::input_buffer<int16>& input1, adf::input_buffer<int16>& input2, adf::output_buffer<int16>& output) {
     xf::cv::aie::absdiff_api(input1, input2, output);
 };

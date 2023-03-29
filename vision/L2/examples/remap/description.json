@@ -172,8 +172,7 @@
         }
     ], 
     "data": [
-        "LIB_DIR/data/HD.jpg", 
-        "LIB_DIR/data/128x128.png"
+        "LIB_DIR/data/HD.jpg"
     ], 
     "host": {
         "host_exe": "remap", 
@@ -183,7 +182,7 @@
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-                "LIB_DIR/L2/examples/remap/build"
+                "LIB_DIR/L2/examples/remap/config"
             ], 
             "options": "-O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include"
         }
@@ -192,7 +191,7 @@
         "compiler": {
             "symbols": [], 
             "includepaths": [
-                "LIB_DIR/L2/examples/remap/build"
+                "LIB_DIR/L2/examples/remap/config"
             ], 
             "clflags": []
         }

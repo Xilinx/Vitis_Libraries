@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_tonemapping_config.h"
+#include "xf_tonemapping_tb_config.h"
 #include "xf_opencl_wrap.hpp"
 int main(int argc, char** argv) {
     cv::Mat in_img;
@@ -55,9 +55,9 @@ int main(int argc, char** argv) {
     cv::Mat out_img_tmp(rows, cols, CV_8UC3);
     cv::Mat out_img(rows, cols, CV_8UC3);
 
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPC) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPC) << std::endl;
-    std::cout << "NPPC:" << NPC << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     ////////////Top function call //////////////////
     cl_kernel_wrapper* krnl1 =

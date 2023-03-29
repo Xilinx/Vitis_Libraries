@@ -1,9 +1,9 @@
 /***************************************************************************
-Copyright (c) 2022, Xilinx, Inc.
+Copyright (c) 2023, Xilinx, Inc.
 All rights reserved.
-
+*/
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright 2023 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ All rights reserved.
 #include "hls_stream.h"
 #include "ap_int.h"
 #include "common/xf_common.hpp"
-//#include "common/xf_utility.h"
 #include "ap_axi_sdata.h"
 #include "common/xf_axi_io.hpp"
 #include "xf_config_params.h"
@@ -42,7 +41,6 @@ All rights reserved.
 #include "imgproc/xf_lensshadingcorrection.hpp"
 #include "imgproc/xf_colorcorrectionmatrix.hpp"
 #include "imgproc/xf_black_level.hpp"
-#include "imgproc/xf_aec.hpp"
 #include "imgproc/xf_cvt_color.hpp"
 #include "imgproc/xf_cvt_color_1.hpp"
 #include "imgproc/xf_gammacorrection.hpp"
@@ -51,6 +49,10 @@ All rights reserved.
 #include "imgproc/xf_3dlut.hpp"
 #include "imgproc/xf_hdrmerge.hpp"
 #include "imgproc/xf_extract_eframes.hpp"
+#include "imgproc/xf_hdrdecompand.hpp"
+#include "imgproc/xf_degamma.hpp"
+#include "imgproc/xf_duplicateimage.hpp"
+#include "imgproc/xf_aec.hpp"
 
 #define S_DEPTH 4096
 #define NO_EXPS 2
@@ -65,6 +67,14 @@ All rights reserved.
 #endif
 #if T_16U
 #define W_B_SIZE 65536
+#endif
+
+#if T_8U
+#define AEC_HIST_SIZE 256
+#elif T_10U
+#define AEC_HIST_SIZE 1024
+#else
+#define AEC_HIST_SIZE 4096
 #endif
 
 // --------------------------------------------------------------------
@@ -115,19 +125,5 @@ typedef struct {
     uint16_t height;
     uint16_t bayer_phase;
 } HW_STRUCT_REG;
-
-// Defining mode reg bit position
-enum mode_reg_bit {
-    AWB_EN_LSB = 0,
-    HDR_EN_LSB = 1,
-    RGBIR_EN_LSB = 3,
-    TM_EN_LSB = 4,
-    QnD_EN_LSB = 5,
-    LTM_EN_LSB = 6,
-    GTM_EN_LSB = 7,
-    CCM_EN_LSB = 8,
-    LUT3D_EN_LSB = 9,
-    CSC_EN_LSB = 10
-};
 
 #endif //_XF_ISP_TYPES_H_

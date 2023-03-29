@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "xf_cvt_color_config_gen_vitis.h"
+#include "xf_cvt_color_accel_config.h"
 
 #if RGBA2IYUV
 void cvtcolor_rgba2iyuv(ap_uint<32 * NPC1>* imgInput,

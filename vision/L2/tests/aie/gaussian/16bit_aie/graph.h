@@ -23,6 +23,7 @@
 
 static constexpr int TILE_ELEMENTS = 2048;
 static constexpr int TILE_WINDOW_SIZE = TILE_ELEMENTS * sizeof(int16_t) + xf::cv::aie::METADATA_SIZE;
+static constexpr int ELEM_WITH_METADATA = TILE_ELEMENTS + (xf::cv::aie::METADATA_SIZE / sizeof(int16_t));
 
 using namespace adf;
 
@@ -38,9 +39,13 @@ class gaussianGraph : public graph {
     gaussianGraph() {
         gauss1 = kernel::create(gaussian);
 
-        connect<adf::window<TILE_WINDOW_SIZE> >(in, gauss1.in[0]);
+        adf::connect<>(in, gauss1.in[0]);
+        adf::connect<>(gauss1.out[0], out);
+
+        adf::dimensions(gauss1.in[0]) = {ELEM_WITH_METADATA};
+        adf::dimensions(gauss1.out[0]) = {ELEM_WITH_METADATA};
+
         connect<parameter>(kernelCoefficients, async(gauss1.in[1]));
-        connect<adf::window<TILE_WINDOW_SIZE> >(gauss1.out[0], out);
 
         source(gauss1) = "xf_gaussian.cc";
 

@@ -25,12 +25,11 @@ if {![info exists CLKP]} {
 
 open_project -reset $PROJ
 
-add_files "${XF_PROJ_ROOT}/L1/examples/demosaicing/xf_demosaicing_accel.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/demosaicing/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/demosaicing/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
-add_files -tb "${XF_PROJ_ROOT}/L1/examples/demosaicing/xf_demosaicing_tb.cpp ${XF_PROJ_ROOT}/L1/examples/demosaicing/xf_demosaicing_ref.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/demosaicing/build -I ${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/demosaicing/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+add_files "${XF_PROJ_ROOT}/L1/examples/demosaicing/xf_demosaicing_accel.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/demosaicing/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/demosaicing/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+add_files -tb "${XF_PROJ_ROOT}/L1/examples/demosaicing/xf_demosaicing_tb.cpp ${XF_PROJ_ROOT}/L1/examples/demosaicing/xf_demosaicing_ref.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/demosaicing/config -I ${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/demosaicing/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
 set_top demosaicing_accel
 
 open_solution -reset $SOLN
-
 
 
 

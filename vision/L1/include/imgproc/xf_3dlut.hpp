@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Xilinx, Inc.
+ * Copyright 2023 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -569,5 +569,30 @@ ROW_LOOP:
         }
     }
 }
+//////////
+template <int LUTDIM,
+          int SQLUTDIM,
+          int INTYPE,
+          int OUTTYPE,
+          int ROWS,
+          int COLS,
+          int NPPC = 1,
+          int URAM = 0,
+          int STREAMS = 2,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
+void lut3d_multi(xf::cv::Mat<INTYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN_1>& in_img,
+                 xf::cv::Mat<XF_32FC3, SQLUTDIM, LUTDIM, NPPC, XFCVDEPTH_IN_2>& lut,
+                 xf::cv::Mat<OUTTYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT_1>& out_img,
+                 unsigned short lutdim[STREAMS],
+                 int strm_id) {
+// clang-format off
+#pragma HLS ARRAY_PARTITION variable= lutdim dim=1 complete
+    // clang-format on
+    lut3d<LUTDIM, SQLUTDIM, INTYPE, OUTTYPE, ROWS, COLS, NPPC, URAM, XFCVDEPTH_IN_1, XFCVDEPTH_IN_2, XFCVDEPTH_OUT_1>(
+        in_img, lut, out_img, lutdim[strm_id]);
+}
+///////
 }
 }

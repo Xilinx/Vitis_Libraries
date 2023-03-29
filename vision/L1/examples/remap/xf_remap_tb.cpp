@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_remap_config.h"
+#include "xf_remap_tb_config.h"
 
 #define READ_MAPS_FROM_FILE 0
 
@@ -56,6 +56,7 @@ int main(int argc, char** argv) {
     diff.create(src.rows, src.cols, src.type());
 
 // Initialize the float maps:
+#if BARREL == 0
 #if READ_MAPS_FROM_FILE
     // read the float map data from the file (code could be alternated for reading
     // from image)
@@ -84,17 +85,27 @@ int main(int argc, char** argv) {
         }
     }
 #endif
+#else // For barrel/pin cushion correction, camera matrix and distortion coeff for camera should be provided by user
+    cv::initUndistortRectifyMap(cameraMatrix, distCoeffs, cv::Mat::eye(3, 3, CV_32F), cameraMatrix, src.size(),
+                                CV_32FC1, map_x, map_y);
+#endif
+
+    // XF_WIN_ROWS should be updated with the vakue of num_of_lines by user
+    int num_of_lines;
+    xf::cv::remapPreproc(map_y, num_of_lines);
 
     // Opencv reference:
     std::cout << "INFO: Run reference function in CV." << std::endl;
 #if INTERPOLATION == 0
     cv::remap(src, ocv_remapped, map_x, map_y, cv::INTER_NEAREST, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
+    std::cout << "INFO: Using Nearest-neignbour interpolation." << std::endl;
 #else
     cv::remap(src, ocv_remapped, map_x, map_y, cv::INTER_LINEAR, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
+    std::cout << "INFO: Using Bilinear interpolation." << std::endl;
 #endif
 
-    remap_accel((ap_uint<PTR_IMG_WIDTH>*)src.data, (float*)map_x.data, (float*)map_y.data,
-                (ap_uint<PTR_IMG_WIDTH>*)hls_remapped.data, src.rows, src.cols);
+    remap_accel((ap_uint<INPUT_PTR_WIDTH>*)src.data, (float*)map_x.data, (float*)map_y.data,
+                (ap_uint<OUTPUT_PTR_WIDTH>*)hls_remapped.data, src.rows, src.cols);
 
     // Save the results:
     cv::imwrite("ocv_reference_out.jpg", ocv_remapped); // Opencv Result

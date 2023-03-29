@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,21 +17,13 @@
 #include "common/xf_headers.hpp"
 #include <stdlib.h>
 #include <ap_int.h>
-#include "xf_arithm_config.h"
+#include "xf_arithm_tb_config.h"
 
 int main(int argc, char** argv) {
-#if ARRAY
     if (argc != 3) {
         fprintf(stderr, "Usage: <INPUT IMAGE PATH 1> <INPUT IMAGE PATH 2>\n");
         return EXIT_FAILURE;
     }
-#else
-    if (argc != 2) {
-        fprintf(stderr, "Usage: <INPUT IMAGE PATH 1>\n");
-        return EXIT_FAILURE;
-    }
-
-#endif
     cv::Mat in_img1, in_img2, in_gray1, in_gray2, out_img, ocv_ref, diff;
 
 #if GRAY
@@ -73,7 +65,7 @@ int main(int argc, char** argv) {
     int width = in_gray1.cols;
 
 #if SCALAR
-    unsigned char scalar[XF_CHANNELS(TYPE, NPC1)];
+    unsigned char scalar[XF_CHANNELS(OUT_TYPE, NPPCX)];
 
     for (int i = 0; i < in_gray1.channels(); ++i) {
         scalar[i] = 150;
@@ -85,28 +77,28 @@ int main(int argc, char** argv) {
 #if GRAY
 #if T_16S
     /*  convert to 16S type  */
-    in_gray1.convertTo(in_gray1, CV_16SC1);
-    in_gray2.convertTo(in_gray2, CV_16SC1);
-    out_img.create(in_gray1.rows, in_gray1.cols, CV_16SC1);
-    ocv_ref.create(in_gray2.rows, in_gray1.cols, CV_16SC1);
-    diff.create(in_gray1.rows, in_gray1.cols, CV_16SC1);
+    in_gray1.convertTo(in_gray1, CV_OUT_TYPE);
+    in_gray2.convertTo(in_gray2, CV_OUT_TYPE);
+    out_img.create(in_gray1.rows, in_gray1.cols, CV_OUT_TYPE);
+    ocv_ref.create(in_gray2.rows, in_gray1.cols, CV_OUT_TYPE);
+    diff.create(in_gray1.rows, in_gray1.cols, CV_OUT_TYPE);
 #else
-    out_img.create(in_gray1.rows, in_gray1.cols, CV_8UC1);
-    ocv_ref.create(in_gray2.rows, in_gray1.cols, CV_8UC1);
-    diff.create(in_gray1.rows, in_gray1.cols, CV_8UC1);
+    out_img.create(in_gray1.rows, in_gray1.cols, CV_OUT_TYPE);
+    ocv_ref.create(in_gray2.rows, in_gray1.cols, CV_OUT_TYPE);
+    diff.create(in_gray1.rows, in_gray1.cols, CV_OUT_TYPE);
 #endif
 #else
 #if T_16S
     /*  convert to 16S type  */
-    in_gray1.convertTo(in_gray1, CV_16SC3);
-    in_gray2.convertTo(in_gray2, CV_16SC3);
-    out_img.create(in_gray1.rows, in_gray1.cols, CV_16SC3);
-    ocv_ref.create(in_gray2.rows, in_gray1.cols, CV_16SC3);
-    diff.create(in_gray1.rows, in_gray1.cols, CV_16SC3);
+    in_gray1.convertTo(in_gray1, CV_OUT_TYPE);
+    in_gray2.convertTo(in_gray2, CV_OUT_TYPE);
+    out_img.create(in_gray1.rows, in_gray1.cols, CV_OUT_TYPE);
+    ocv_ref.create(in_gray2.rows, in_gray1.cols, CV_OUT_TYPE);
+    diff.create(in_gray1.rows, in_gray1.cols, CV_OUT_TYPE);
 #else
-    out_img.create(in_gray1.rows, in_gray1.cols, CV_8UC3);
-    ocv_ref.create(in_gray2.rows, in_gray1.cols, CV_8UC3);
-    diff.create(in_gray1.rows, in_gray1.cols, CV_8UC3);
+    out_img.create(in_gray1.rows, in_gray1.cols, CV_OUT_TYPE);
+    ocv_ref.create(in_gray2.rows, in_gray1.cols, CV_OUT_TYPE);
+    diff.create(in_gray1.rows, in_gray1.cols, CV_OUT_TYPE);
 #endif
 #endif
 
@@ -115,16 +107,17 @@ int main(int argc, char** argv) {
 #endif
 
 #if ARRAY
-    arithm_accel((ap_uint<PTR_WIDTH>*)in_gray1.data, (ap_uint<PTR_WIDTH>*)in_gray2.data,
+    arithm_accel((ap_uint<INPUT_PTR_WIDTH>*)in_gray1.data, (ap_uint<INPUT_PTR_WIDTH>*)in_gray2.data,
 #ifdef FUNCT_MULTIPLY
                  scale,
 #endif
-                 (ap_uint<PTR_WIDTH>*)out_img.data, height, width);
+                 (ap_uint<OUTPUT_PTR_WIDTH>*)out_img.data, height, width);
 
     // Write down the kernel result:
     cv::imwrite("hls_out.jpg", out_img);
 #else
-    arithm_accel((ap_uint<PTR_WIDTH>*)in_gray1.data, scalar, (ap_uint<PTR_WIDTH>*)out_img.data, height, width);
+    arithm_accel((ap_uint<INPUT_PTR_WIDTH>*)in_gray1.data, scalar, (ap_uint<OUTPUT_PTR_WIDTH>*)out_img.data, height,
+                 width);
 
 #endif
     printf("cv_referencestarted\n");

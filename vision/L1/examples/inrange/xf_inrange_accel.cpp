@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include "xf_inrange_config.h"
+#include "xf_config_params.h"
 
-static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(IN_TYPE, NPC1)) / 8) / (INPUT_PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(IN_TYPE, NPPCX)) / 8) / (INPUT_PTR_WIDTH / 8);
 
 void inrange_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
                    unsigned char lower_thresh,
@@ -30,8 +30,8 @@ void inrange_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
      #pragma HLS INTERFACE s_axilite  port=return 		      bundle=control
     // clang-format on
 
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> imgInput(height, width);
-    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> imgOutput(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN> imgInput(height, width);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT> imgOutput(height, width);
 
 // clang-format off
 
@@ -42,23 +42,23 @@ void inrange_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
     // clang-format on
 
     // Copy threshold to local memory:
-    unsigned char local_low_thresh[XF_CHANNELS(IN_TYPE, NPC1)];
-    unsigned char local_high_thresh[XF_CHANNELS(IN_TYPE, NPC1)];
+    unsigned char local_low_thresh[XF_CHANNELS(IN_TYPE, NPPCX)];
+    unsigned char local_high_thresh[XF_CHANNELS(IN_TYPE, NPPCX)];
 
-    for (unsigned int i = 0; i < XF_CHANNELS(IN_TYPE, NPC1); ++i) {
+    for (unsigned int i = 0; i < XF_CHANNELS(IN_TYPE, NPPCX); ++i) {
         local_low_thresh[i] = lower_thresh;
         local_high_thresh[i] = upper_thresh;
     }
 
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(img_in, imgInput);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN>(img_in, imgInput);
 
     // Run xfOpenCV kernel:
-    xf::cv::inRange<IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(
+    xf::cv::inRange<IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(
         imgInput, local_low_thresh, local_high_thresh, imgOutput);
 
     // Convert imgOutput xf::cv::Mat object to output array:
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(imgOutput, img_out);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT>(imgOutput, img_out);
 
     return;
 } // End of kernel

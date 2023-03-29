@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-#include "xf_kalmanfilter_config.h"
+#include "xf_kalmanfilter_accel_config.h"
 
 extern "C" {
 
-void kalmanfilter_accel(ap_uint<32>* in_A,
-                        ap_uint<32>* in_B,
-                        ap_uint<32>* in_Uq,
-                        ap_uint<32>* in_Dq,
-                        ap_uint<32>* in_H,
-                        ap_uint<32>* in_X0,
-                        ap_uint<32>* in_U0,
-                        ap_uint<32>* in_D0,
-                        ap_uint<32>* in_R,
-                        ap_uint<32>* in_u,
-                        ap_uint<32>* in_y,
+void kalmanfilter_accel(ap_uint<INPUT_PTR_WIDTH>* in_A,
+                        ap_uint<INPUT_PTR_WIDTH>* in_B,
+                        ap_uint<INPUT_PTR_WIDTH>* in_Uq,
+                        ap_uint<INPUT_PTR_WIDTH>* in_Dq,
+                        ap_uint<INPUT_PTR_WIDTH>* in_H,
+                        ap_uint<INPUT_PTR_WIDTH>* in_X0,
+                        ap_uint<INPUT_PTR_WIDTH>* in_U0,
+                        ap_uint<INPUT_PTR_WIDTH>* in_D0,
+                        ap_uint<INPUT_PTR_WIDTH>* in_R,
+                        ap_uint<INPUT_PTR_WIDTH>* in_u,
+                        ap_uint<INPUT_PTR_WIDTH>* in_y,
                         unsigned char control_flag,
-                        ap_uint<32>* out_X,
-                        ap_uint<32>* out_U,
-                        ap_uint<32>* out_D) {
+                        ap_uint<OUTPUT_PTR_WIDTH>* out_X,
+                        ap_uint<OUTPUT_PTR_WIDTH>* out_U,
+                        ap_uint<OUTPUT_PTR_WIDTH>* out_D) {
 // clang-format off
     #pragma HLS INTERFACE m_axi      port=in_A      offset=slave  bundle=gmem0
     #pragma HLS INTERFACE m_axi      port=in_B      offset=slave  bundle=gmem1
@@ -51,25 +51,25 @@ void kalmanfilter_accel(ap_uint<32>* in_A,
     #pragma HLS INTERFACE s_axilite  port=control_flag 	          
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
+    xf::cv::Mat<IN_TYPE, KF_N, KF_N, NPPCX, XF_CV_DEPTH_A> A_mat(KF_N, KF_N);
+#if KF_C != 0
+    xf::cv::Mat<IN_TYPE, KF_N, KF_C, NPPCX, XF_CV_DEPTH_B> B_mat(KF_N, KF_C);
+#endif
+    xf::cv::Mat<IN_TYPE, KF_N, KF_N, NPPCX, XF_CV_DEPTH_UQ> Uq_mat(KF_N, KF_N);
+    xf::cv::Mat<IN_TYPE, KF_N, 1, NPPCX, XF_CV_DEPTH_DQ> Dq_mat(KF_N, 1);
+    xf::cv::Mat<IN_TYPE, KF_M, KF_N, NPPCX, XF_CV_DEPTH_H> H_mat(KF_M, KF_N);
+    xf::cv::Mat<IN_TYPE, KF_N, 1, NPPCX, XF_CV_DEPTH_X0> X0_mat(KF_N, 1);
+    xf::cv::Mat<IN_TYPE, KF_N, KF_N, NPPCX, XF_CV_DEPTH_U0> U0_mat(KF_N, KF_N);
+    xf::cv::Mat<IN_TYPE, KF_N, 1, NPPCX, XF_CV_DEPTH_D0> D0_mat(KF_N, 1);
+    xf::cv::Mat<IN_TYPE, KF_M, 1, NPPCX, XF_CV_DEPTH_R> R_mat(KF_M, 1);
+#if KF_C != 0
+    xf::cv::Mat<IN_TYPE, KF_C, 1, NPPCX, XF_CV_DEPTH_U> u_mat(KF_C, 1);
+#endif
+    xf::cv::Mat<IN_TYPE, KF_M, 1, NPPCX, XF_CV_DEPTH_Y> y_mat(KF_M, 1);
 
-    xf::cv::Mat<TYPE, KF_N, KF_N, NPC1, XF_CV_DEPTH_A> A_mat(KF_N, KF_N);
-    xf::cv::Mat<TYPE, KF_N, KF_C, NPC1, XF_CV_DEPTH_B> B_mat(KF_N, KF_C);
-    xf::cv::Mat<TYPE, KF_N, KF_N, NPC1, XF_CV_DEPTH_UQ> Uq_mat(KF_N, KF_N);
-    xf::cv::Mat<TYPE, KF_N, 1, NPC1, XF_CV_DEPTH_DQ> Dq_mat(KF_N, 1);
-    xf::cv::Mat<TYPE, KF_M, KF_N, NPC1, XF_CV_DEPTH_H> H_mat(KF_M, KF_N);
-    xf::cv::Mat<TYPE, KF_N, 1, NPC1, XF_CV_DEPTH_X0> X0_mat(KF_N, 1);
-    xf::cv::Mat<TYPE, KF_N, KF_N, NPC1, XF_CV_DEPTH_U0> U0_mat(KF_N, KF_N);
-    xf::cv::Mat<TYPE, KF_N, 1, NPC1, XF_CV_DEPTH_D0> D0_mat(KF_N, 1);
-    xf::cv::Mat<TYPE, KF_M, 1, NPC1, XF_CV_DEPTH_R> R_mat(KF_M, 1);
-    xf::cv::Mat<TYPE, KF_C, 1, NPC1, XF_CV_DEPTH_U> u_mat(KF_C, 1);
-    xf::cv::Mat<TYPE, KF_M, 1, NPC1, XF_CV_DEPTH_Y> y_mat(KF_M, 1);
-
-    xf::cv::Mat<TYPE, KF_N, 1, NPC1, XF_CV_DEPTH_XOUT> Xout_mat(KF_N, 1);
-    xf::cv::Mat<TYPE, KF_N, KF_N, NPC1, XF_CV_DEPTH_UOUT> Uout_mat(KF_N, KF_N);
-    xf::cv::Mat<TYPE, KF_N, 1, NPC1, XF_CV_DEPTH_DOUT> Dout_mat(KF_N, 1);
-
-// clang-format off
-// clang-format on
+    xf::cv::Mat<OUT_TYPE, KF_N, 1, NPPCX, XF_CV_DEPTH_XOUT> Xout_mat(KF_N, 1);
+    xf::cv::Mat<OUT_TYPE, KF_N, KF_N, NPPCX, XF_CV_DEPTH_UOUT> Uout_mat(KF_N, KF_N);
+    xf::cv::Mat<OUT_TYPE, KF_N, 1, NPPCX, XF_CV_DEPTH_DOUT> Dout_mat(KF_N, 1);
 
 // clang-format off
     #pragma HLS DATAFLOW
@@ -80,29 +80,42 @@ void kalmanfilter_accel(ap_uint<32>* in_A,
     xf::cv::accel_utils obj_inu, obj_outU, obj_outD, obj_outX;
 
     // Retrieve xf::cv::Mat objects from img_in data:
-    obj_inA.Array2xfMat<32, TYPE, KF_N, KF_N, NPC1, XF_CV_DEPTH_A>(in_A, A_mat);
-    obj_inUq.Array2xfMat<32, TYPE, KF_N, KF_N, NPC1, XF_CV_DEPTH_UQ>(in_Uq, Uq_mat);
-    obj_inU0.Array2xfMat<32, TYPE, KF_N, KF_N, NPC1, XF_CV_DEPTH_U0>(in_U0, U0_mat);
-    obj_inH.Array2xfMat<32, TYPE, KF_M, KF_N, NPC1, XF_CV_DEPTH_H>(in_H, H_mat);
-    obj_inB.Array2xfMat<32, TYPE, KF_N, KF_C, NPC1, XF_CV_DEPTH_B>(in_B, B_mat);
-    obj_inDq.Array2xfMat<32, TYPE, KF_N, 1, NPC1, XF_CV_DEPTH_DQ>(in_Dq, Dq_mat);
-    obj_inX0.Array2xfMat<32, TYPE, KF_N, 1, NPC1, XF_CV_DEPTH_X0>(in_X0, X0_mat);
-    obj_inD0.Array2xfMat<32, TYPE, KF_N, 1, NPC1, XF_CV_DEPTH_D0>(in_D0, D0_mat);
-    obj_inR.Array2xfMat<32, TYPE, KF_M, 1, NPC1, XF_CV_DEPTH_R>(in_R, R_mat);
-    obj_iny.Array2xfMat<32, TYPE, KF_M, 1, NPC1, XF_CV_DEPTH_Y>(in_y, y_mat);
-    obj_inu.Array2xfMat<32, TYPE, KF_C, 1, NPC1, XF_CV_DEPTH_U>(in_u, u_mat);
+    obj_inA.Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, KF_N, KF_N, NPPCX, XF_CV_DEPTH_A>(in_A, A_mat);
+    obj_inUq.Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, KF_N, KF_N, NPPCX, XF_CV_DEPTH_UQ>(in_Uq, Uq_mat);
+    obj_inU0.Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, KF_N, KF_N, NPPCX, XF_CV_DEPTH_U0>(in_U0, U0_mat);
+    obj_inH.Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, KF_M, KF_N, NPPCX, XF_CV_DEPTH_H>(in_H, H_mat);
+#if KF_C != 0
+    obj_inB.Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, KF_N, KF_C, NPPCX, XF_CV_DEPTH_B>(in_B, B_mat);
+#endif
+    obj_inDq.Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, KF_N, 1, NPPCX, XF_CV_DEPTH_DQ>(in_Dq, Dq_mat);
+    obj_inX0.Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, KF_N, 1, NPPCX, XF_CV_DEPTH_X0>(in_X0, X0_mat);
+    obj_inD0.Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, KF_N, 1, NPPCX, XF_CV_DEPTH_D0>(in_D0, D0_mat);
+    obj_inR.Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, KF_M, 1, NPPCX, XF_CV_DEPTH_R>(in_R, R_mat);
+    obj_iny.Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, KF_M, 1, NPPCX, XF_CV_DEPTH_Y>(in_y, y_mat);
+#if KF_C != 0
+    obj_inu.Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, KF_C, 1, NPPCX, XF_CV_DEPTH_U>(in_u, u_mat);
+#endif
 
+#if KF_C != 0
     // Run xfOpenCV kernel:
-    xf::cv::KalmanFilter<KF_N, KF_M, KF_C, KF_MTU, KF_MMU, XF_USE_URAM, 0, TYPE, NPC1, XF_CV_DEPTH_A, XF_CV_DEPTH_B,
+    xf::cv::KalmanFilter<KF_N, KF_M, KF_C, KF_MTU, KF_MMU, XF_USE_URAM, 0, IN_TYPE, NPPCX, XF_CV_DEPTH_A, XF_CV_DEPTH_B,
                          XF_CV_DEPTH_UQ, XF_CV_DEPTH_DQ, XF_CV_DEPTH_H, XF_CV_DEPTH_X0, XF_CV_DEPTH_U0, XF_CV_DEPTH_D0,
                          XF_CV_DEPTH_R, XF_CV_DEPTH_U, XF_CV_DEPTH_Y, XF_CV_DEPTH_XOUT, XF_CV_DEPTH_UOUT,
                          XF_CV_DEPTH_DOUT>(A_mat, B_mat, Uq_mat, Dq_mat, H_mat, X0_mat, U0_mat, D0_mat, R_mat, u_mat,
                                            y_mat, Xout_mat, Uout_mat, Dout_mat, control_flag);
+#else
+    // Run xfOpenCV kernel:
+    xf::cv::KalmanFilter<KF_N, KF_M, KF_C, KF_MTU, KF_MMU, XF_USE_URAM, 0, IN_TYPE, NPPCX, XF_CV_DEPTH_A, XF_CV_DEPTH_B,
+                         XF_CV_DEPTH_UQ, XF_CV_DEPTH_DQ, XF_CV_DEPTH_H, XF_CV_DEPTH_X0, XF_CV_DEPTH_U0, XF_CV_DEPTH_D0,
+                         XF_CV_DEPTH_R, XF_CV_DEPTH_U, XF_CV_DEPTH_Y, XF_CV_DEPTH_XOUT, XF_CV_DEPTH_UOUT,
+                         XF_CV_DEPTH_DOUT>(A_mat, Uq_mat, Dq_mat, H_mat, X0_mat, U0_mat, D0_mat, R_mat, y_mat, Xout_mat,
+                                           Uout_mat, Dout_mat, control_flag);
 
-    obj_outU.xfMat2Array<32, TYPE, KF_N, KF_N, NPC1, XF_CV_DEPTH_UOUT>(Uout_mat, out_U);
-    obj_outD.xfMat2Array<32, TYPE, KF_N, 1, NPC1, XF_CV_DEPTH_DOUT>(Dout_mat, out_D);
-    obj_outX.xfMat2Array<32, TYPE, KF_N, 1, NPC1, XF_CV_DEPTH_XOUT>(Xout_mat, out_X);
+#endif
 
+    obj_outU.xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, KF_N, KF_N, NPPCX, XF_CV_DEPTH_UOUT>(Uout_mat, out_U);
+    obj_outD.xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, KF_N, 1, NPPCX, XF_CV_DEPTH_DOUT>(Dout_mat, out_D);
+    obj_outX.xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, KF_N, 1, NPPCX, XF_CV_DEPTH_XOUT>(Xout_mat, out_X);
     return;
 } // End of kernel
 

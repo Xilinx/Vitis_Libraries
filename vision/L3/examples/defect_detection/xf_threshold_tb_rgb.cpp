@@ -29,7 +29,8 @@
 #include <time.h>
 #include <vector>
 #include <iostream>
-#include "/proj/xtools/dsv/projects/sdx_libs/cpp_libs/opencv/opencv3/include/opencv2/opencv.hpp"
+
+#include "opencv2/opencv.hpp"
 #include "xf_opencl_wrap.hpp"
 #include "opencv2/features2d.hpp"
 

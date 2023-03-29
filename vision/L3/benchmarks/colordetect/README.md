@@ -23,7 +23,7 @@ hardware accelerated xf::cv::colordetect on FPGA  : 133 images(full-hd)/sec
 
     source < path-to-Vitis-installation-directory >/settings64.sh
 
-    export DEVICE=< path-to-platform-directory >/< platform >.xpfm
+    export PLATFORM=< path-to-platform-directory >/< platform >.xpfm
 
 **For PCIe devices:**
 

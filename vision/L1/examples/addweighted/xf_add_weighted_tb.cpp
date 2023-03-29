@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 #include "common/xf_headers.hpp"
 #include <stdlib.h>
 #include <ap_int.h>
-#include "xf_add_weighted_config.h"
+#include "xf_add_weighted_tb_config.h"
 
 int main(int argc, char** argv) {
     if (argc != 3) {
@@ -47,13 +47,13 @@ int main(int argc, char** argv) {
     int height = in_gray.rows;
     int width = in_gray.cols;
 #if GRAY
-    ocv_ref.create(in_gray.rows, in_gray.cols, CV_8UC1);
-    out_gray.create(in_gray.rows, in_gray.cols, CV_8UC1);
-    diff.create(in_gray.rows, in_gray.cols, CV_8UC1);
+    ocv_ref.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
+    out_gray.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
+    diff.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
 #else
-    ocv_ref.create(in_gray.rows, in_gray.cols, CV_8UC3);
-    out_gray.create(in_gray.rows, in_gray.cols, CV_8UC3);
-    diff.create(in_gray.rows, in_gray.cols, CV_8UC3);
+    ocv_ref.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
+    out_gray.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
+    diff.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
 #endif
     float alpha = 0.2;
     float beta = 0.8;

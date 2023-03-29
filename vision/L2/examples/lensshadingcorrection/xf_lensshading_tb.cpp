@@ -15,7 +15,7 @@
  */
 #include "common/xf_headers.hpp"
 #include "xcl2.hpp"
-#include "xf_lensshading_config.h"
+#include "xf_lensshading_tb_config.h"
 #include <iostream>
 #include <math.h>
 
@@ -210,9 +210,9 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::cout << "INFO: Device found - " << device_name << std::endl;
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPIX) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPIX) << std::endl;
-    std::cout << "NPPC:" << NPIX << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     // Load binary:
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_lensshading");

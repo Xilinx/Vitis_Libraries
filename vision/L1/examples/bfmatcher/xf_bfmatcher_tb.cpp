@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 #include "common/xf_headers.hpp"
 #include "opencv2/features2d.hpp"
 
-#include "xf_bfmatcher_config.h"
+#include "xf_bfmatcher_tb_config.h"
 
 int main(int argc, char** argv) {
     if (argc != 3) {

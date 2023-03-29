@@ -104,7 +104,8 @@ void accumulate(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
     assert(((dst.rows <= ROWS) && (dst.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert(((src1.rows == src2.rows) && (src1.cols == src2.cols)) && "Both input images should have same size");
     assert(((src1.rows == dst.rows) && (src1.cols == dst.cols)) && "Input and output image should be of same size");
-    assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1, XF_NPPC8 ");
+    assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2) || (NPC == XF_NPPC4) || (NPC == XF_NPPC8)) &&
+           "NPC must be XF_NPPC1, XF_NPPC2, XF_NPPC4,XF_NPPC8 ");
 #endif
     uint16_t lwidth = src2.cols >> XF_BITSHIFT(NPC);
 

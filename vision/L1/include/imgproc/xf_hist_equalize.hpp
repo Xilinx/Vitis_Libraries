@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2023 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,40 @@
 #include "common/xf_common.hpp"
 #include "common/xf_utility.hpp"
 #include "imgproc/xf_histogram.hpp"
+
+template <typename T>
+T xf_satcast_aec(int in_val){};
+
+template <>
+inline ap_uint<8> xf_satcast_aec<ap_uint<8> >(int v) {
+    v = (v > 255 ? 255 : v);
+    v = (v < 0 ? 0 : v);
+    return v;
+};
+template <>
+inline ap_uint<10> xf_satcast_aec<ap_uint<10> >(int v) {
+    v = (v > 1023 ? 1023 : v);
+    v = (v < 0 ? 0 : v);
+    return v;
+};
+template <>
+inline ap_uint<12> xf_satcast_aec<ap_uint<12> >(int v) {
+    v = (v > 4095 ? 4095 : v);
+    v = (v < 0 ? 0 : v);
+    return v;
+};
+template <>
+inline ap_uint<14> xf_satcast_aec<ap_uint<14> >(int v) {
+    v = (v > 16384 ? 16384 : v);
+    v = (v < 0 ? 0 : v);
+    return v;
+};
+template <>
+inline ap_uint<16> xf_satcast_aec<ap_uint<16> >(int v) {
+    v = (v > 65535 ? 65535 : v);
+    v = (v < 0 ? 0 : v);
+    return v;
+};
 
 /**
  *  xfEqualize : Computes the histogram and performs
@@ -130,6 +164,140 @@ NORMALISE_ROW_LOOP:
         }
     }
 }
+////16bit support///////////
+
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH,
+          int SRC_TC,
+          int AEC_HISTSIZE>
+void xFEqualize_norm_sin(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src,
+                         uint32_t hist[AEC_HISTSIZE],
+                         xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& dst,
+                         float p,
+                         float inputMin,
+                         float inputMax,
+                         float outputMin,
+                         float outputMax) {
+// clang-format off
+#pragma HLS INLINE OFF
+    // clang-format on
+    short width = dst.cols >> XF_BITSHIFT(NPC);
+    short height = dst.rows;
+    const int STEP = XF_DTPIXELDEPTH(SRC_T, NPC);
+    ap_uint<STEP + 1> bins = AEC_HISTSIZE; // number of bins at each histogram level
+
+    ap_uint<STEP + 1> nElements = AEC_HISTSIZE; // int(pow((float)bins, (float)depth));
+
+    int total = dst.cols * dst.rows;
+    ap_fixed<STEP + 8, STEP + 2> min_vals = inputMin - 0.5f;
+    ap_fixed<STEP + 8, STEP + 2> max_vals = inputMax + 0.5f;
+    ap_fixed<STEP + 8, STEP + 2> minValue = min_vals; //{-0.5, -0.5, -0.5};
+    ap_fixed<STEP + 8, STEP + 2> maxValue = max_vals; //{12287.5, 16383.5, 12287.5};
+    ap_fixed<STEP + 8, 4> s1 = p;
+    ap_fixed<STEP + 8, 4> s2 = p;
+
+    int rval = s1 * total / 100;
+    int rval1 = (100 - s2) * total / 100;
+
+    for (int j = 0; j < 1; ++j)
+    // searching for s1 and s2
+    {
+        ap_uint<STEP + 2> p1 = 0;
+        ap_uint<STEP + 2> p2 = bins - 1;
+        ap_uint<32> n1 = 0;
+        ap_uint<32> n2 = total;
+
+        ap_fixed<STEP + 8, STEP + 2> interval = (max_vals - min_vals) / bins;
+
+        for (int k = 0; k < 1; ++k)
+        // searching for s1 and s2
+        {
+            int value = hist[p1];
+            int value1 = hist[p2];
+
+            while (n1 + hist[p1] < rval && p1 < AEC_HISTSIZE) {
+#pragma HLS PIPELINE
+#pragma HLS LOOP_TRIPCOUNT min = 255 max = 255
+#pragma HLS DEPENDENCE variable = hist array intra false
+#pragma HLS DEPENDENCE variable = minValue intra false
+                n1 += hist[p1++];
+                minValue += interval;
+            }
+            // p1 *= bins;
+
+            while (n2 - hist[p2] > rval1 && p2 != 0) {
+#pragma HLS PIPELINE
+#pragma HLS LOOP_TRIPCOUNT min = 255 max = 255
+#pragma HLS DEPENDENCE variable = hist array intra false
+#pragma HLS DEPENDENCE variable = maxValue intra false
+                n2 -= hist[p2--];
+                maxValue -= interval;
+            }
+        }
+    }
+
+    ap_fixed<STEP + 8, STEP + 2> maxmin_diff;
+    ap_fixed<STEP + 8, STEP + 2> newmax = inputMax;
+    ap_fixed<STEP + 8, STEP + 2> newmin = 0.0f;
+    maxmin_diff = maxValue - minValue;
+    ap_fixed<STEP + 8, STEP + 2> newdiff = newmax - newmin;
+
+    XF_TNAME(SRC_T, NPC) in_buf_n, in_buf_n1, out_buf_n;
+    printf("valuesmin max :%f %f\n", (float)maxValue, (float)minValue);
+
+    int pval = 0, read_index = 0, write_index = 0;
+    ap_uint<13> row, col;
+
+    ap_fixed<STEP + 16, 2> inv_val;
+
+    if (maxmin_diff != 0) inv_val = ((ap_fixed<STEP + 16, 2>)1 / maxmin_diff);
+
+NORMALISE_ROW_LOOP:
+    for (row = 0; row < height; row++) {
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+    // clang-format on
+    NORMALISE_COL_LOOP:
+        for (col = 0; col < width; col++) {
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=COLS/NPC max=COLS/NPC
+#pragma HLS pipeline II=1
+#pragma HLS LOOP_FLATTEN OFF
+            // clang-format on
+            in_buf_n = src.read(read_index++);
+
+            ap_fixed<STEP + 8, STEP + 2> value = 0;
+            ap_fixed<STEP + STEP + 16, STEP + 8> divval = 0;
+            ap_fixed<STEP + 16, STEP + 16> finalmul = 0;
+            ap_int<32> dstval;
+
+            for (int p = 0; p < XF_NPIXPERCYCLE(NPC); p++) {
+// clang-format off
+#pragma HLS UNROLL
+                // clang-format on
+                XF_CTUNAME(SRC_T, NPC)
+                val = in_buf_n.range(p * STEP + STEP - 1, p * STEP);
+
+                value = val - minValue;
+                divval = value * inv_val;
+                finalmul = divval * newdiff;
+                dstval = (int)(finalmul + newmin);
+                if (dstval.range(31, 31) == 1) {
+                    dstval = 0;
+                }
+                out_buf_n.range(p * STEP + STEP - 1, p * STEP) = xf_satcast_aec<XF_CTUNAME(SRC_T, NPC)>(dstval);
+            }
+
+            dst.write(row * width + col, out_buf_n);
+        }
+    }
+}
 
 /****************************************************************
  * equalizeHist : Wrapper function which calls the main kernel
@@ -167,6 +335,7 @@ void equalizeHist(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src,
     xFEqualize<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT, XF_WORDWIDTH(SRC_T, NPC),
                (COLS >> XF_BITSHIFT(NPC))>(_src1, histogram, _dst, img_height, img_width);
 }
+
 } // namespace cv
 } // namespace xf
 #endif // _XF_HIST_EQUALIZE_H_

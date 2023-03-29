@@ -20,14 +20,15 @@
 // clang-format off
 #include <adf/window/types.h>
 #include <adf/stream/types.h>
+#include "adf.h"
 // clang-format on
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 
-void accumulate_weighted(input_window_int16* input1,
-                         input_window_int16* input2,
-                         output_window_int16* output,
-                         const float& alpha);
+void accumulate_weighted(adf::input_buffer<int16>& input1,
+                         adf::input_buffer<int16>& input2,
+                         adf::output_buffer<int16>& output,
+                         float alpha);
 
 #endif

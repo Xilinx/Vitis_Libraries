@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-#include "xf_mean_shift_config.h"
+#include "xf_mean_shift_accel_config.h"
 
-static constexpr int __XF_DEPTH =
-    (XF_HEIGHT * XF_WIDTH * (XF_PIXELWIDTH(XF_8UC4, XF_NPPC1)) / 8) / (INPUT_PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH = (XF_HEIGHT * XF_WIDTH * (XF_PIXELWIDTH(IN_TYPE, NPPCX)) / 8) / (INPUT_PTR_WIDTH / 8);
 static constexpr int __XF_MAX_OBJECTS = XF_MAX_OBJECTS;
 
 void mean_shift_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
@@ -50,9 +49,9 @@ void mean_shift_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC4, XF_HEIGHT, XF_WIDTH, XF_NPPC1, XF_CV_DEPTH_IN> inMat(rows, cols, img_inp);
+    xf::cv::Mat<IN_TYPE, XF_HEIGHT, XF_WIDTH, NPPCX, XF_CV_DEPTH_IN> inMat(rows, cols, img_inp);
 
-    xf::cv::MeanShift<XF_MAX_OBJECTS, XF_MAX_ITERS, XF_MAX_OBJ_HEIGHT, XF_MAX_OBJ_WIDTH, XF_8UC4, XF_HEIGHT, XF_WIDTH,
-                      XF_NPPC1, XF_CV_DEPTH_IN>(inMat, tlx, tly, obj_height, obj_width, dx, dy, track, frame_status,
-                                                no_objects, no_of_iterations);
+    xf::cv::MeanShift<XF_MAX_OBJECTS, XF_MAX_ITERS, XF_MAX_OBJ_HEIGHT, XF_MAX_OBJ_WIDTH, IN_TYPE, XF_HEIGHT, XF_WIDTH,
+                      NPPCX, XF_CV_DEPTH_IN>(inMat, tlx, tly, obj_height, obj_width, dx, dy, track, frame_status,
+                                             no_objects, no_of_iterations);
 }

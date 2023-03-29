@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2023 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,8 +39,8 @@ static int highest_bit(unsigned int a) {
     std::frexp(a, &count);
     return count;
 }
-template <int WIDTH = 16>
-void logarithm(ap_uint<WIDTH> in, ap_ufixed<WIDTH, 4>& out) {
+template <int WIDTH>
+void logarithm(ap_uint<WIDTH> in, ap_ufixed<16, 4>& out) {
     ap_uint<WIDTH> input = (unsigned int)(in); // input rawbits converted to uint
 
     int N = highest_bit((unsigned int)input); // To calculate the position of MSB bit
@@ -65,7 +65,7 @@ void logarithm(ap_uint<WIDTH> in, ap_ufixed<WIDTH, 4>& out) {
 }
 
 template <int WIDTH = 16>
-void exponential(ap_fixed<WIDTH, 4> in, ap_ufixed<WIDTH, 8>& out) {
+void exponential(ap_fixed<WIDTH, 4> in, ap_ufixed<16, 8>& out) {
     ap_ufixed<WIDTH, 4> eval = 1.44269f;
 
     ap_ufixed<WIDTH, 4> eval1 = 0.69314f;
@@ -318,7 +318,9 @@ void gtm(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
          float c1,
          float c2) {
 #ifndef __SYNTHESIS__
-    assert(((SRC_T == XF_16UC3) || (SIN_CHANNEL_IN_TYPE == XF_16UC1)) && "Input TYPE must be XF_16UC3");
+    assert(((SRC_T == XF_16UC3) || (SRC_T == XF_14UC3)) && "Input TYPE must be XF_16UC3 or XF_14UC3");
+    assert(((SIN_CHANNEL_IN_TYPE == XF_16UC1) || (SIN_CHANNEL_IN_TYPE == XF_14UC1)) &&
+           "Input Single Channel TYPE must be XF_16UC1 or XF_14UC1");
     assert(((DST_T == XF_8UC3) || (SIN_CHANNEL_OUT_TYPE == XF_8UC1)) && "OUTPUT TYPE must be XF_8UC3");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2)) && "NPC must be XF_NPPC1, XF_NPPC2 ");
     assert((src.rows <= ROWS) && (src.cols <= COLS) && "ROWS and COLS should be greater than input image size ");
@@ -378,6 +380,85 @@ void gtm(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
 
     return;
 }
+template <int SRC_T,
+          int DST_T,
+          int SIN_CHANNEL_IN_TYPE,
+          int SIN_CHANNEL_OUT_TYPE,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void gtm_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
+               xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& dst,
+               ap_ufixed<16, 4>& mean1,
+               ap_ufixed<16, 4>& mean2,
+               ap_ufixed<16, 4>& L_max1,
+               ap_ufixed<16, 4>& L_max2,
+               ap_ufixed<16, 4>& L_min1,
+               ap_ufixed<16, 4>& L_min2,
+               float c1,
+               float c2,
+               bool& flag,
+               bool& eof) {
+// clang-format off
+#pragma HLS INLINE OFF
+    // clang-format on
+
+    if (!flag) {
+        xf::cv::gtm<SRC_T, DST_T, SIN_CHANNEL_IN_TYPE, SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN,
+                    XFCVDEPTH_OUT>(src, dst, mean1, mean2, L_max1, L_max2, L_min1, L_min2, c1, c2);
+        if (eof) flag = 1;
+    } else {
+        xf::cv::gtm<SRC_T, DST_T, SIN_CHANNEL_IN_TYPE, SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN,
+                    XFCVDEPTH_OUT>(src, dst, mean2, mean1, L_max2, L_max1, L_min2, L_min1, c1, c2);
+        if (eof) flag = 0;
+    }
+    return;
+}
+template <int SRC_T,
+          int DST_T,
+          int SIN_CHANNEL_IN_TYPE,
+          int SIN_CHANNEL_OUT_TYPE,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int STREAMS = 2,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void gtm_multi_wrap(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
+                    xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& dst,
+                    ap_ufixed<16, 4> mean1[STREAMS],
+                    ap_ufixed<16, 4> mean2[STREAMS],
+                    ap_ufixed<16, 4> L_max1[STREAMS],
+                    ap_ufixed<16, 4> L_max2[STREAMS],
+                    ap_ufixed<16, 4> L_min1[STREAMS],
+                    ap_ufixed<16, 4> L_min2[STREAMS],
+                    float c1[STREAMS],
+                    float c2[STREAMS],
+                    bool flag[STREAMS],
+                    bool eof[STREAMS],
+                    int strm_id) {
+// clang-format off
+#pragma HLS ARRAY_PARTITION variable= mean1 dim=1 complete
+#pragma HLS ARRAY_PARTITION variable= mean2 dim=1 complete
+#pragma HLS ARRAY_PARTITION variable= L_max1 dim=1 complete
+#pragma HLS ARRAY_PARTITION variable= L_max2 dim=1 complete
+#pragma HLS ARRAY_PARTITION variable= L_min1 dim=1 complete
+#pragma HLS ARRAY_PARTITION variable= L_min2 dim=1 complete
+#pragma HLS ARRAY_PARTITION variable= c1 dim=1 complete
+#pragma HLS ARRAY_PARTITION variable= c2 dim=1 complete
+#pragma HLS ARRAY_PARTITION variable=flag dim=1 complete
+#pragma HLS ARRAY_PARTITION variable=eof dim=1 complete
+    // clang-format on  
+    gtm_multi<SRC_T, DST_T, SIN_CHANNEL_IN_TYPE, SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT>
+              (src, dst, mean1[strm_id], mean2[strm_id], L_max1[strm_id], L_max2[strm_id], L_min1[strm_id], L_min2[strm_id],
+                 c1[strm_id], c2[strm_id], flag[strm_id], eof[strm_id]);
+         
+}
+
+
+////////
 
 } // namespace cv
 } // namespace xf

@@ -60,8 +60,11 @@ class demosaicGraph : public adf::graph {
         out1[CORE_IDX] = output_plio::create(sso.str().c_str(), adf::plio_128_bits, "data/output.txt");
 
         // create nets to connect kernels and IO ports
-        connect<window<TILE_WINDOW_SIZE> >(in1[CORE_IDX].out[0], k[CORE_IDX].in[0]);
-        connect<window<TILE_WINDOW_SIZE_RGBA> >(k[CORE_IDX].out[0], out1[CORE_IDX].in[0]);
+        connect<>(in1[CORE_IDX].out[0], k[CORE_IDX].in[0]);
+        connect<>(k[CORE_IDX].out[0], out1[CORE_IDX].in[0]);
+
+        adf::dimensions(k[CORE_IDX].in[0]) = {ELEM_WITH_METADATA};
+        adf::dimensions(k[CORE_IDX].out[0]) = {ELEM_WITH_METADATA_RGBA};
 
         // specify kernel sources
         source(k[CORE_IDX]) = "xf_demosaicing.cc";

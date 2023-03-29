@@ -31,6 +31,8 @@ static constexpr int TILE_WIDTH = 480;
 static constexpr int TILE_HEIGHT = 8;
 static constexpr int TILE_ELEMENTS = (TILE_WIDTH * TILE_HEIGHT);
 static constexpr int TILE_WINDOW_SIZE = ((TILE_ELEMENTS * sizeof(DATA_TYPE)) + xf::cv::aie::METADATA_SIZE);
+static constexpr int ELEM_WITH_METADATA = TILE_ELEMENTS + (xf::cv::aie::METADATA_SIZE / sizeof(DATA_TYPE));
+
 #define MAX_TILE_WIDTH 480
 #define MAX_TILE_HEIGHT 8
 #define VECTORIZATION_FACTOR PARALLEL_FACTOR_16b

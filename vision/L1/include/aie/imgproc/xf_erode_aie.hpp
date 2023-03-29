@@ -37,9 +37,9 @@ namespace cv {
 namespace aie {
 
 template <typename T, int VECTORIZATION_FACTOR>
-void erode_rect_3x3_api(input_window<T>* img_in, output_window<T>* img_out) {
-    T* img_in_ptr = (T*)img_in->ptr;
-    T* img_out_ptr = (T*)img_out->ptr;
+void erode_rect_3x3_api(adf::input_buffer<T>& img_in, adf::output_buffer<T>& img_out) {
+    T* img_in_ptr = (T*)::aie::begin(img_in);
+    T* img_out_ptr = (T*)::aie::begin(img_out);
 
     const int16_t img_width = xfGetTileWidth(img_in_ptr);
     const int16_t img_height = xfGetTileHeight(img_in_ptr);

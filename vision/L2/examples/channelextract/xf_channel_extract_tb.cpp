@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_channel_extract_config.h"
-
+#include "xf_channel_extract_tb_config.h"
 #include "xcl2.hpp"
 
 int main(int argc, char** argv) {
@@ -30,18 +29,18 @@ int main(int argc, char** argv) {
 
     // read image
     in_src = cv::imread(argv[1], 1);
-    in_src.convertTo(in_ref, CV_INTYPE);
+    in_src.convertTo(in_ref, CV_IN_TYPE);
 
     if (in_src.data == NULL) {
         fprintf(stderr, "Cannot open image \n");
         return 0;
     }
 
-    out_img.create(in_src.rows, in_src.cols, CV_OUTTYPE);
+    out_img.create(in_src.rows, in_src.cols, CV_OUT_TYPE);
 
-    if (BGR) {
+    if (RGB) {
         in_ref.copyTo(in_accel);
-    } else if (BGRA) {
+    } else if (RGBA) {
         cv::cvtColor(in_ref, in_accel, cv::COLOR_BGR2BGRA);
     }
 
@@ -64,9 +63,9 @@ int main(int argc, char** argv) {
     cl::Context context(device);
 
     cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(INPUT_CH_TYPE, NPC1) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(INPUT_CH_TYPE, NPC1) << std::endl;
-    std::cout << "NPPC:" << NPC1 << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_channelextract");
@@ -128,7 +127,7 @@ int main(int argc, char** argv) {
     cv::imwrite("out_ocv.png", bgr_planes[2]);
 
     cv::Mat diff;
-    diff.create(in_ref.rows, in_ref.cols, CV_OUTTYPE);
+    diff.create(in_ref.rows, in_ref.cols, CV_OUT_TYPE);
 
     // Check with the correct channel. Keep 2 for R, 1 for G and 0 for B in index of bgr_planes
     cv::absdiff(bgr_planes[2], out_img, diff);

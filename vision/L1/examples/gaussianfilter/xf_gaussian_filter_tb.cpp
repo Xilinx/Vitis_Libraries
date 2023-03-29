@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_gaussian_filter_config.h"
+#include "xf_gaussian_filter_tb_config.h"
 
 using namespace std;
 
@@ -40,14 +40,14 @@ int main(int argc, char** argv) {
 // extractChannel(in_img, in_img, 1);
 #if GRAY
 
-    out_img.create(in_img.rows, in_img.cols, CV_8UC1); // create memory for output image
-    diff.create(in_img.rows, in_img.cols, CV_8UC1);    // create memory for OCV-ref image
-    ocv_ref.create(in_img.rows, in_img.cols, CV_8UC1); // create memory for OCV-ref image
+    out_img.create(in_img.rows, in_img.cols, CV_OUT_TYPE); // create memory for output image
+    diff.create(in_img.rows, in_img.cols, CV_OUT_TYPE);    // create memory for OCV-ref image
+    ocv_ref.create(in_img.rows, in_img.cols, CV_OUT_TYPE); // create memory for OCV-ref image
 
 #else
-    out_img.create(in_img.rows, in_img.cols, CV_8UC3); // create memory for output image
-    diff.create(in_img.rows, in_img.cols, CV_8UC3);    // create memory for OCV-ref image
-    ocv_ref.create(in_img.rows, in_img.cols, CV_8UC3); // create memory for OCV-ref image
+    out_img.create(in_img.rows, in_img.cols, CV_OUT_TYPE); // create memory for output image
+    diff.create(in_img.rows, in_img.cols, CV_OUT_TYPE);    // create memory for OCV-ref image
+    ocv_ref.create(in_img.rows, in_img.cols, CV_OUT_TYPE); // create memory for OCV-ref image
 #endif
 
 #if FILTER_WIDTH == 3

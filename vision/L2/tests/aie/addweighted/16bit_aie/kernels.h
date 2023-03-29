@@ -16,10 +16,10 @@
 
 #include <adf/window/types.h>
 #include <adf/stream/types.h>
-
-void addweighted(input_window_int16* img_in1,
-                 input_window_int16* img_in2,
-                 output_window_int16* img_out,
+#include <adf.h>
+void addweighted(adf::input_buffer<int16>& img_in1,
+                 adf::input_buffer<int16>& img_in2,
+                 adf::output_buffer<int16>& img_out,
                  const float& alpha,
                  const float& beta,
                  const float& gamma);

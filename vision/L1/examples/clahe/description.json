@@ -18,21 +18,21 @@
         "source": [
             "${XF_PROJ_ROOT}/L1/examples/clahe/xf_clahe_accel.cpp"
         ], 
-        "cflags": "-I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/clahe/build -I ./ -D__SDSVHLS__ -std=c++0x", 
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/clahe/config -I ./ -D__SDSVHLS__ -std=c++0x", 
         "csimflags": "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
     }, 
     "testbench": {
         "source": [
             "${XF_PROJ_ROOT}/L1/examples/clahe/xf_clahe_tb.cpp"
         ], 
-        "cflags": "-I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/clahe/build -I ./ -D__SDSVHLS__ -std=c++0x", 
+        "cflags": "-I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/clahe/config -I ./ -D__SDSVHLS__ -std=c++0x", 
         "ldflags": "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core", 
         "argv": {
             "hls_csim": " ${XF_PROJ_ROOT}/data/4k_1.jpg ", 
             "hls_cosim": " ${XF_PROJ_ROOT}/data/4k_1.jpg "
         }, 
         "stdmath": false, 
-        "csimflags": "-I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/clahe/build -I ./ -D__SDSVHLS__ -std=c++0x"
+        "csimflags": "-I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/clahe/config -I ./ -D__SDSVHLS__ -std=c++0x"
     }, 
     "testinfo": {
         "disable": false, 

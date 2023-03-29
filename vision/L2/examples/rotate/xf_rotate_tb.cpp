@@ -17,7 +17,7 @@
 #include "common/xf_headers.hpp"
 #include <stdlib.h>
 #include <ap_int.h>
-#include "xf_rotate_config.h"
+#include "xf_rotate_tb_config.h"
 #include "xcl2.hpp"
 #include "xf_opencl_wrap.hpp"
 
@@ -45,21 +45,11 @@ int main(int argc, char** argv) {
     int direction = 0;
 // Allocate memory for the output images:
 #if R_180
-#if GRAY
-    out_img.create(in_gray.rows, in_gray.cols, CV_8UC1);
-    out_hls.create(in_gray.rows, in_gray.cols, CV_8UC1);
+    out_img.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
+    out_hls.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
 #else
-    out_img.create(in_gray.rows, in_gray.cols, CV_8UC3);
-    out_hls.create(in_gray.rows, in_gray.cols, CV_8UC3);
-#endif
-#else
-#if GRAY
-    out_img.create(in_gray.cols, in_gray.rows, CV_8UC1);
-    out_hls.create(in_gray.cols, in_gray.rows, CV_8UC1);
-#else
-    out_img.create(in_gray.cols, in_gray.rows, CV_8UC3);
-    out_hls.create(in_gray.cols, in_gray.rows, CV_8UC3);
-#endif
+    out_img.create(in_gray.cols, in_gray.rows, CV_OUT_TYPE);
+    out_hls.create(in_gray.cols, in_gray.rows, CV_OUT_TYPE);
 #endif
 
     int height = in_gray.rows;
@@ -70,7 +60,6 @@ int main(int argc, char** argv) {
 
 #if R_90
     cv::rotate(in_gray, out_img, cv::ROTATE_90_CLOCKWISE);
-
 #else
 #if R_180
     cv::rotate(in_gray, out_img, cv::ROTATE_180);
@@ -81,9 +70,9 @@ int main(int argc, char** argv) {
 #endif
 #endif
 
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPC1) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPC1) << std::endl;
-    std::cout << "NPPC:" << NPC1 << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     ////////////////////	HLS TOP function call	/////////////////
 

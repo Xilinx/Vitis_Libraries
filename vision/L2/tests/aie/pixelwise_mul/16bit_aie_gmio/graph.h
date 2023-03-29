@@ -48,10 +48,15 @@ class pixelwiseMulGraph : public adf::graph {
         // 8192=2048*4
         // create nets to connect kernels and IO ports
         // create nets to connect kernels and IO ports
-        connect<window<TILE_WINDOW_SIZE> >(in1, k1.in[0]);
-        connect<window<TILE_WINDOW_SIZE> >(in2, k1.in[1]);
-        connect<window<TILE_WINDOW_SIZE> >(k1.out[0], out);
+        connect<>(in1, k1.in[0]);
+        connect<>(in2, k1.in[1]);
+        connect<>(k1.out[0], out);
         connect<parameter>(scale, async(k1.in[2]));
+
+        // specify dimensions
+        adf::dimensions(k1.in[0]) = {ELEM_WITH_METADATA};
+        adf::dimensions(k1.in[1]) = {ELEM_WITH_METADATA};
+        adf::dimensions(k1.out[0]) = {ELEM_WITH_METADATA};
 
         // specify kernel sources
         source(k1) = "xf_multiplication.cc";

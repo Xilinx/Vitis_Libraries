@@ -199,7 +199,7 @@
     "launch": [
         {
             "target": "sw_emu", 
-            "cmd_args": "LIB_DIR/data/left_emu.png LIB_DIR/data/right_emu.png ", 
+            "cmd_args": "LIB_DIR/data/tvl_left.png LIB_DIR/data/tvl_right.png ", 
             "name": "sw_emu", 
             "ld_library_path": [
                 "$(OPENCV_LIB)", 
@@ -209,7 +209,7 @@
         }, 
         {
             "target": "hw_emu", 
-            "cmd_args": "LIB_DIR/data/left_emu.png LIB_DIR/data/right_emu.png ", 
+            "cmd_args": "LIB_DIR/data/tvl_left.png LIB_DIR/data/tvl_right.png ", 
             "name": "hw_emu", 
             "ld_library_path": [
                 "$(OPENCV_LIB)", 
@@ -229,8 +229,8 @@
         }
     ], 
     "data": [
-        "LIB_DIR/data/left_emu.png", 
-        "LIB_DIR/data/right_emu.png", 
+        "LIB_DIR/data/tvl_left.png", 
+        "LIB_DIR/data/tvl_right.png", 
         "LIB_DIR/data/left.png", 
         "LIB_DIR/data/right.png"
     ], 

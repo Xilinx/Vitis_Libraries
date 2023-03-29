@@ -21,21 +21,21 @@
         "source": [
             "${XF_PROJ_ROOT}/L1/examples/3dlut/xf_3dlut_accel.cpp"
         ], 
-        "cflags": " -I ${XF_PROJ_ROOT}/L1/examples/3dlut/build -I${XF_PROJ_ROOT}/L1/include -I ./ ", 
-        "csimflags": " -I ${XF_PROJ_ROOT}/L1/examples/3dlut/build -I${XF_PROJ_ROOT}/L1/include -I ./ "
+        "cflags": " -I ${XF_PROJ_ROOT}/L1/examples/3dlut/config -I${XF_PROJ_ROOT}/L1/include -I ./ ", 
+        "csimflags": " -I ${XF_PROJ_ROOT}/L1/examples/3dlut/config -I${XF_PROJ_ROOT}/L1/include -I ./ "
     }, 
     "testbench": {
         "source": [
             "${XF_PROJ_ROOT}/L1/examples/3dlut/xf_3dlut_tb.cpp"
         ], 
-        "cflags": " -I ${XF_PROJ_ROOT}/L1/examples/3dlut/build -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ ", 
+        "cflags": " -I ${XF_PROJ_ROOT}/L1/examples/3dlut/config -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ ", 
         "ldflags": "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core", 
         "argv": {
             "hls_csim": " ${XF_PROJ_ROOT}/data/HD.jpg ${XF_PROJ_ROOT}/data/input-lut-33.txt", 
             "hls_cosim": " ${XF_PROJ_ROOT}/data/HD.jpg ${XF_PROJ_ROOT}/data/input-lut-33.txt"
         }, 
         "stdmath": false, 
-        "csimflags": " -I ${XF_PROJ_ROOT}/L1/examples/3dlut/build -I${XF_PROJ_ROOT}/L1/include -I ./"
+        "csimflags": " -I ${XF_PROJ_ROOT}/L1/examples/3dlut/config -I${XF_PROJ_ROOT}/L1/include -I ./"
     }, 
     "testinfo": {
         "disable": false, 

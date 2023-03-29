@@ -19,7 +19,7 @@ the processor and the programmable logic. These examples also illustrate
 different ways to implement complex dataflow paths. The following
 examples are described in this section:
 
--  `Iterative Pyramidal Dense Optical Flow <#interactive-pyramidal>`_
+-  `Iterative Pyramidal Dense Optical Flow <#iterative-pyramidal>`_
 -  `Corner Tracking Using Optical Flow <#corner-tracking>`_
 -  `Color Detection <#color-detection>`_
 -  `Defect Detection <#defect-detection-pipeline>`_
@@ -28,14 +28,14 @@ examples are described in this section:
 -  `Blob From Image <#x-mlpipeline>`_
 -  `Letterbox <#letter-box>`_
 -  `Image Sensor Processing pipeline <#isp>`_
--  `Image Sensor Processing pipeline - 2020.2 version <#isp-202>`_
--  `Image Sensor Processing pipeline - 2021.1 version <#isp-201>`_
 -  `Image Sensor Processing pipeline with HDR <#isp-201hdr>`_
 -  `Image Sensor Processing pipeline with GTM <#isp-201gtm>`_
 -  `Mono image Sensor Processing pipeline <#isp-201mono>`_
 -  `RGB-IR image Sensor Processing pipeline <#isp_201rgbir>`_
--  `Image Sensor Processing multistream pipeline - 2022.1 version <#_isp-201multistream>`_
--  `Image Sensor Processing All-in-one pipeline <#isp-aio>`_
+-  `Image Sensor Processing multistream pipeline <#isp-201multistream>`_
+-  `Image Sensor Processing all-in-one-adas pipeline <#isp-aio-adas>`_
+-  `Image Sensor Processing all-in-one pipeline <#isp-aio>`_
+-  `24 bits-per-channel Image Sensor Processing pipeline <#isp-24bit>`_
 
 .. Important::
    **All the functions in the library are implemented in streaming model except 7. Crop, EdgeTracing, MeanShiftTracking, Rotate are memory mapped implemenations. These functions need to have the flag __SDA_MEM_MAP__ set for compiling correctly**
@@ -45,7 +45,7 @@ examples are described in this section:
    Default depth value for all the streaming model implemenations is "_XFCVDEPTH_DEFAULT = 2".**
 
 
-.. _interative-pyramidal:
+.. _iterative-pyramidal:
 
 Iterative Pyramidal Dense Optical Flow
 ======================================
@@ -759,211 +759,9 @@ The output of that function is passed to the xf::cv::insertBorder module and the
 .. _isp: 
 
 Image Sensor Processing pipeline
-================================
+=================================
 
 Image Sensor Processing (ISP) is a pipeline of image processing functions processing the raw image from the sensor. 
-
-Current ISP includes following 4 blocks:
-
-
--  BPC (Bad pixel correction) : An image sensor may have a certain number of defective/bad pixels that may be the result of manufacturing faults or variations in pixel voltage levels based on temperature or exposure. Bad pixel correction module removes defective pixels.
--  Gain Control : The Gain control module improves the overall brightness of the image.
--  Demosaicing : The demosaic module reconstructs RGB pixels from the input Bayer image (RGGB,BGGR,RGBG,GRGB).
--  Auto white balance: The AWB module improves color balance of the image by using  image statistics.
-
-Current design example demonstrates how to use ISP functions in a pipeline. User can include other modules (like gamma correction, color conversion, resize etc) based on their need.
-
-|pp_image_es|
-
-The following example demonstrates the ISP pipeline.
-
-.. code:: c
-
-			void ISPPipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp, ap_uint<OUTPUT_PTR_WIDTH>* img_out, int height, int width) {
-		
-			#pragma HLS INTERFACE m_axi     port=img_inp  offset=slave bundle=gmem1
-			#pragma HLS INTERFACE m_axi     port=img_out  offset=slave bundle=gmem2
-			#pragma HLS INTERFACE s_axilite port=height     
-			#pragma HLS INTERFACE s_axilite port=width     
-			#pragma HLS INTERFACE s_axilite port=return
-			#pragma HLS ARRAY_PARTITION variable=hist0 complete dim=1
-			#pragma HLS ARRAY_PARTITION variable=hist1 complete dim=1
-			
-				if (!flag) {
-					ISPpipeline(img_inp, img_out, height, width, hist0, hist1);
-					flag = 1;
-				} else {
-					ISPpipeline(img_inp, img_out, height, width, hist1, hist0);
-					flag = 0;
-				}
-			}
-			void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
-							 ap_uint<OUTPUT_PTR_WIDTH>* img_out,
-							 int height,
-							 int width,
-							 uint32_t hist0[3][256],
-							 uint32_t hist1[3][256]) {
-			#pragma HLS INLINE OFF
-				xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> imgInput1(height, width);
-				xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> bpc_out(height, width);
-				xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> gain_out(height, width);
-				xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> demosaic_out(height, width);
-				xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> impop(height, width);
-				xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> _dst(height, width);
-
-			#pragma HLS stream variable=bpc_out.data dim=1 depth=2
-			#pragma HLS stream variable=gain_out.data dim=1 depth=2
-			#pragma HLS stream variable=demosaic_out.data dim=1 depth=2
-			#pragma HLS stream variable=imgInput1.data dim=1 depth=2
-			#pragma HLS stream variable=impop.data dim=1 depth=2
-			#pragma HLS stream variable=_dst.data dim=1 depth=2
-
-			#pragma HLS DATAFLOW
-				
-
-				float inputMin = 0.0f;
-				float inputMax = 255.0f;
-				float outputMin = 0.0f;
-				float outputMax = 255.0f;
-				float p = 2.0f;
-
-				xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(img_inp, imgInput1);
-				xf::cv::badpixelcorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0, 0>(imgInput1, bpc_out);
-				xf::cv::gaincontrol<XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(bpc_out, gain_out);
-				xf::cv::demosaicing<XF_BAYER_PATTERN, XF_SRC_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0>(gain_out, demosaic_out);
-				xf::cv::AWBhistogram<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, WB_TYPE>(
-					demosaic_out, impop, hist0, p, inputMin, inputMax, outputMin, outputMax);
-				xf::cv::AWBNormalization<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, WB_TYPE>(impop, _dst, hist1, p, inputMin,
-																									inputMax, outputMin, outputMax);
-				xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(_dst, img_out);
-			}
-
-
-.. _isp-202: 
-
-Image Sensor Processing pipeline - 2020.2 version
-=================================================
-
-This ISP includes following 8 blocks:
-
-*  Black level correction : Black level leads to the whitening of image in dark region and perceived loss of overall
-   contrast. The Blacklevelcorrection algorithm corrects the black and white levels of the overall image.
-*  BPC (Bad pixel correction) : An image sensor may have a certain number of defective/bad pixels that may be the result of manufacturing faults or variations in pixel voltage levels based on temperature or exposure. Bad pixel correction module removes defective pixels.
-*  Gain Control : The Gain control module improves the overall brightness of the image.
-*  Demosaicing : The demosaic module reconstructs RGB pixels from the input Bayer image (RGGB,BGGR,RGBG,GRGB).
-*  Auto white balance: The AWB module improves color balance of the image by using  image statistics.
-*  Colorcorrection matrix : corrects color suitable for display or video system.
-*  Quantization and Dithering : Quantization and Dithering performs the uniform quantization to also reduce higher bit depth to lower bit depths.
-*  Autoexposurecorrection : This function automatically attempts to correct the exposure level of captured image and also improves contrast of the image.
-
-|isp_20202|
-
-Current design example demonstrates how to use ISP functions in a pipeline. User can include other modules (like gamma correction, color conversion, resize etc) based on their need.
-
-
-The following example demonstrates the ISP pipeline with above list of functions.
-
-.. code:: c
-
-			void ISPPipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp, ap_uint<OUTPUT_PTR_WIDTH>* img_out, int height, int width) {
-
-			#pragma HLS INTERFACE m_axi     port=img_inp  offset=slave bundle=gmem1
-			#pragma HLS INTERFACE m_axi     port=img_out  offset=slave bundle=gmem2
-
-			#pragma HLS ARRAY_PARTITION variable=hist0 complete dim=1
-			#pragma HLS ARRAY_PARTITION variable=hist1 complete dim=1
-
-				if (!flag) {
-					ISPpipeline(img_inp, img_out, height, width, hist0, hist1, histogram0, histogram1, igain_0, igain_1);
-					flag = 1;
-
-				} else {
-					ISPpipeline(img_inp, img_out, height, width, hist1, hist0, histogram1, histogram0, igain_1, igain_0);
-					flag = 0;
-				}
-			}
-				
-			void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
-							ap_uint<OUTPUT_PTR_WIDTH>* img_out,
-							unsigned short height,
-							unsigned short width,
-							uint32_t hist0[3][HIST_SIZE],
-							uint32_t hist1[3][HIST_SIZE],
-							uint32_t hist_aec1[1][256],
-							uint32_t hist_aec2[1][256],
-							int gain0[3], int gain1[3]) {
-				
-				#pragma HLS INLINE OFF
-				
-					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> imgInput1(height, width);
-					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> imgInput2(height, width);
-					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> bpc_out(height, width);
-					xf::cv::Mat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> gain_out(height, width);
-					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> demosaic_out(height, width);
-					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> impop(height, width);
-					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> ltm_in(height, width);
-					xf::cv::Mat<XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> lsc_out(height, width);
-					xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> _dst(height, width);
-					xf::cv::Mat<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC> aecin(height, width);
-				
-				#pragma HLS stream variable=bpc_out.data dim=1 depth=2
-				#pragma HLS stream variable=gain_out.data dim=1 depth=2
-				#pragma HLS stream variable=demosaic_out.data dim=1 depth=2
-				#pragma HLS stream variable=imgInput1.data dim=1 depth=2
-				#pragma HLS stream variable=imgInput2.data dim=1 depth=2
-				#pragma HLS stream variable=impop.data dim=1 depth=2
-				#pragma HLS stream variable=_dst.data dim=1 depth=2
-				#pragma HLS stream variable=ltm_in.data dim=1 depth=2
-				#pragma HLS stream variable=lsc_out.data dim=1 depth=2
-				#pragma HLS stream variable=aecin.data dim=1 depth=2
-					
-				#pragma HLS DATAFLOW
-					
-					float inputMin = 0.0f;
-					float inputMax = (1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC))) - 1; // 65535.0f;
-					float outputMin = 0.0f;
-					float outputMax = (1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC))) - 1; // 65535.0f;
-					float p = 0.2f;
-					float thresh = 0.6f;
-
-					float mul_fact = (inputMax / (inputMax - BLACK_LEVEL));
-
-					xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(img_inp, imgInput1);
-					xf::cv::blackLevelCorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1>(imgInput1, imgInput2, BLACK_LEVEL,
-																									mul_fact);
-
-					xf::cv::badpixelcorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0, 0>(imgInput2, bpc_out);
-					xf::cv::gaincontrol<XF_BAYER_PATTERN, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(bpc_out, gain_out);
-					xf::cv::demosaicing<XF_BAYER_PATTERN, XF_SRC_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0>(gain_out, demosaic_out);
-
-					if (WB_TYPE) {
-						xf::cv::AWBhistogram<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, WB_TYPE, HIST_SIZE>(
-							demosaic_out, impop, hist0, thresh, inputMin, inputMax, outputMin, outputMax);
-						xf::cv::AWBNormalization<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, WB_TYPE, HIST_SIZE>(
-							impop, ltm_in, hist1, thresh, inputMin, inputMax, outputMin, outputMax);
-					} else {
-						xf::cv::AWBChannelGain<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0>(demosaic_out, impop, p, gain0);
-						xf::cv::AWBGainUpdate<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0>(impop, ltm_in, p, gain1);
-					}
-
-					xf::cv::colorcorrectionmatrix<XF_CCM_TYPE, XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(ltm_in, lsc_out);
-
-					xf::cv::xf_QuatizationDithering<XF_DST_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, 256, 65536, XF_NPPC>(lsc_out, aecin);
-
-					if (AEC_EN) {
-						xf::cv::autoexposurecorrection<XF_LTM_T, XF_LTM_T, SIN_CHANNEL_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPC>(
-							aecin, _dst, hist_aec1, hist_aec2);
-
-						xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(_dst, img_out);
-					}
-
-					xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(aecin, img_out);
-				}
-				
-.. _isp-201:
-
-Image Sensor Processing pipeline - 2021.1 version
-=================================================
 
 This ISP includes following blocks:
 
@@ -1767,96 +1565,308 @@ User can also use below compile time parameters to the pipeline.
 
 .. _isp-201multistream:
 
-Image Sensor Processing multistream pipeline - 2022.1 version
-=============================================================
+Image Sensor Processing multistream pipeline
+==============================================================
 
-	ISP multistream pipeline allows user to process input from multi streams using one instance of ISP.
-	Current multi stream pipeline process 4 streams in a Round-Robin method with ouput steams TYPE as XF_8UC3(RGB). And after the color conversion to YUV color space, they are XF_16UC1(YUYV).
-	
-This ISP pipeline inclues 8 blocks, they are following:
-	
-*	Black level correction
-*   Gain Control 
-*   Demosaicing
-*	Auto white balance
-*   Colorcorrection matrix
-*   Quantization and Dithering
-*	Gamma correction
-*   Color space conversion
+ISP multistream pipeline allows user to process input from multi streams using one instance of ISP.
+Current multistream pipeline processes 4 streams in a Round-Robin method with input TYPE as XF_16UC1 
+and output TYPE as XF_8UC3(RGB). After the color conversion from RGB to YUV colorspace the output TYPE is XF_16UC1(YUYV).
 
-Note: CCM and Q&D currently supports one output type for all the streams. Upcoming versions will support different output types. 
+This ISP pipeline includes 19 modules, they are following:
 
-|isp-20221|
+-  **Extract Exposure Frames:** The Extract Exposure Frames module returns
+   the Short Exposure Frame and Long Exposure Frame from the input frame
+   using the Digital overlap parameter.
 
-Current design example demonstrates how to use ISP functions in a pipeline. 
- 
-User can dynamically configure the below parameters to the pipeline.
+-  **HDR Merge:** HDR Merge module generates the High Dynamic Range
+   image from a set of different exposure frames. Usually, image sensors
+   have limited dynamic range and it’s difficult to get HDR image with
+   single image capture. From the sensor, the frames are collected with
+   different exposure times and will get different exposure frames.
+   HDR Merge will generate the HDR frame with those exposure frames.
 
-.. table::  Runtime parameters for the pipeline
+-  **HDR Decompand:** This module decompands or decompresses a piecewise 
+   linear (PWL) companded data. Companding is performed in image sensors
+   not capable of high bitwidth during data transmission. This decompanding
+   module supports Bayer raw data with 4 knee point PWL mapping and equations
+   are provided for 12-bit to 16-bit conversion.    
 
-   +---------------+------------------------------------------------------+
-   | Parameter     | Description                                          |
-   +===============+======================================================+
-   | blacklevel    | black level value to adjustment overall brightness   |
-   |               | of the image                                         |
-   +---------------+------------------------------------------------------+
-   | rgain         | To configure gain value for the red channel.         |
-   +---------------+------------------------------------------------------+
-   | bgain         | To configure gain value for the blue channel.        |
-   +---------------+------------------------------------------------------+
-   | ggain         | To configure gain value for the green channel.       |
-   +---------------+------------------------------------------------------+
-   | bayer pattern | The Bayer format of the RAW input image.             |
-   |               | supported formats are RGGB, BGGR, GBRG, GRBG         |
-   +---------------+------------------------------------------------------+
-   | gamma_lut     | Lookup table for gamma values.first 256 will be R,   |
-   |               | next 256 values are G gamma and last 256 values are  | 
-   |               | B values                                             | 
-   +---------------+------------------------------------------------------+
-   | pawb          | %top and %bottom pixels are ignored while computing  |
-   |               | min and max to improve quality.                      |
-   +---------------+------------------------------------------------------+
-   | rows          | The number of rows in the image or height of the     |
-   |               | image.                                               |
-   +---------------+------------------------------------------------------+
-   | cols          | The number of columns in the image or width of the   |
-   |               | image.                                               |
-   +---------------+------------------------------------------------------+
+-  **RGBIR to Bayer (RGBIR):** This module converts the input image with 
+   R, G, B, IR pixel data into a standard Bayer pattern image along with 
+   a full IR data image. 
 
-User can also use below compile time parameters to the pipeline.
+-  **Auto Exposure Compensation (AEC):** This module automatically 
+   attempts to correct the exposure level of captured image and also 
+   improves contrast of the image.
 
-.. table::  Compiletime parameters for the pipeline
-
-   +-----------------+------------------------------------------------------+
-   | Parameter       | Description                                          |
-   +=================+======================================================+
-   | XF_HEIGHT       | Maximum height of input and output image             |
-   +-----------------+------------------------------------------------------+
-   | XF_WIDTH        | Maximum width of input and output image              |
-   |                 | (Must be multiple of NPC)                            |
-   +-----------------+------------------------------------------------------+
-   | XF_SRC_T        |Input pixel type,Supported pixel widths are 8,10,12,16|
-   +-----------------+------------------------------------------------------+
-   | NUM_STREAMS     | Total number of streams                              |
-   +-----------------+------------------------------------------------------+
-   | STRM1_ROWS      | maximum number of rows to be processed for stream 1  | 
-   |                 | in one burst                                         |
-   +-----------------+------------------------------------------------------+
-   | STRM2_ROWS      | maximum number of rows to be processed for stream 2  | 
-   |                 | in one burst                                         |
-   +-----------------+------------------------------------------------------+
-   | STRM3_ROWS      | maximum number of rows to be processed for stream 3  | 
-   |                 | in one burst                                         |
-   +-----------------+------------------------------------------------------+
-   | STRM4_ROWS      | maximum number of rows to be processed for stream 4  | 
-   |                 | in one burst                                         |
-   +-----------------+------------------------------------------------------+
+-  **Black Level Correction (BLC):** This module corrects the black and white 
+   levels of the overall image. Black level leads to the whitening of
+   image in dark regions and perceived loss of overall contrast. 
    
-The following example demonstrates the ISP pipeline with above list of functions.
+-  **Bad Pixel Correction (BPC):** This module removes defective/bad pixels 
+   from an image sensor resulting from of manufacturing faults or variations 
+   in pixel voltage levels based on temperature or exposure.
+   
+-  **Degamma:** This module linearizes the input from sensor in order to facilitate ISP processing that operates on linear domain. 
+
+-  **Lens Shading Correction (LSC):** This module corrects the darkening toward 
+   the edge of the image caused by camera lens limitations. This darkening 
+   effect is also known as vignetting. 
+
+-  **Gain Control:** This module improves the overall brightness of the image.
+
+-  **Demosaicing:** This module reconstructs RGB pixels from the input Bayer 
+   image (RGGB, BGGR, RGBG, GRGB).
+
+-  **Auto White Balance (AWB):** This module improves color balance of the
+   image by using image statistics.
+
+-  **Color Correction Matrix (CCM):** This module converts the input image 
+   color format to output image color format using the Color Correction Matrix 
+   provided by the user (CCM_TYPE).
+
+-  **Quantization & Dithering (QnD):** This module is a tone-mapper that 
+   dithers input image using Floyd-Steinberg dithering method. It is commonly 
+   used by image manipulation software, for example when an image is converted 
+   into GIF format each pixel intensity value is quantized to 8 bits i.e. 256
+   colors.
+
+-  **Global Tone Mapping (GTM):** This module is a tone-mapper that reduces 
+   the dynamic range from higher range to display range using tone mapping.
+   
+-  **Local Tone Mapping (LTM):** This module is a tone-mapper that takes pixel
+   neighbor statistics into account and produces images with more contrast and 
+   brightness.
+
+-  **Gamma Correction:** This module improve the overall brightness of the image. 
+
+-  **3DLUT:** The 3D LUT module operates on three independent parameters. 
+   This drastically increases the number of mapped indexes to value pairs. 
+   For example, a combination of 3 individual 1D LUTs can map 2^n \* 3 values 
+   where n is the bit depth, whereas a 3D LUT processing 3 channels will have
+   2^n \* 2^n \* 2^n possible values.
+   
+-  **Color Space Conversion (CSC):** The CSS module converts RGB image to 
+   YUV422(YUYV) image for HDMI display purpose. RGB2YUYV converts the RGB image 
+   into Y channel for every pixel and U and V for alternating pixels.
+
+
+.. rubric:: ISP multistream Diagram
+.. image:: ./images/ISP_Multi_Diagram.PNG
+   :class: image 
+   :width: 1000 
+
+.. rubric:: Parameter Descriptions    
+  
+.. table:: Runtime parameter
+
+    +------------------+-----------------------------------+
+    | **Parameter**    | **Description**                   |
+    +==================+===================================+  
+    | dcp_params_16to12| Params to converts the 16bit      |
+    |                  | input image bit depth to 12bit.   |
+    +------------------+-----------------------------------+
+    | dcp_params_12to16| Params to converts the 12bit      |
+    |                  | input image bit depth to 16bit.   |
+    +------------------+-----------------------------------+
+    | R_IR_C1_wgts     | 5x5 Weights to calculate R at IR  |
+    |                  | location for constellation1.      |
+    +------------------+-----------------------------------+
+    | R_IR_C2_wgts     | 5x5 Weights to calculate R at IR  |
+    |                  | location for constellation2.      |
+    +------------------+-----------------------------------+
+    | B_at_R_wgts      | 5x5 Weights to calculate B at R   |
+    |                  | location.                         |
+    +------------------+-----------------------------------+
+    | IR_at_R_wgts     | 3x3 Weights to calculate IR at R  |
+    |                  | location.                         |
+    +------------------+-----------------------------------+
+    | IR_at_B_wgts     | 3x3 Weights to calculate IR at B  |
+    |                  | location.                         |
+    +------------------+-----------------------------------+
+    | sub_wgts         | Weights to perform weighted       |
+    |                  | subtraction of IR image from RGB  |
+    |                  | image. sub_wgts[0] -> G Pixel,    |
+    |                  | sub_wgts[1] -> R Pixel,           |
+    |                  | sub_wgts[2] -> B Pixel            |
+    |                  | sub_wgts[3] -> calculated B Pixel |
+    +------------------+-----------------------------------+  
+    | wr_hls           | Lookup table for weight values.   |
+    |                  | Computing the weights LUT in host |
+    |                  | side and passing as input to the  |
+    |                  | function.                         |
+    +------------------+-----------------------------------+
+    | array_params     | Parameters added in one array for |
+    |                  | multistream pipeline.             |
+    +------------------+-----------------------------------+
+    | gamma_lut        | Lookup table for gamma values.    |
+    |                  | First 256 will be R, next 256     |
+    |                  | values are G and last 256 values  |
+    |                  | are B.                            |
+    +------------------+-----------------------------------+
+    | dgam_params      | Array containing upper limit,     |
+    |                  | slope and intercept of linear     |
+    |                  | equations for Red, Green and      |
+    |                  | Blue colour.                      |
+    +------------------+-----------------------------------+
+    | c1               | To retain the details in bright   |
+    |                  | area using, c1 in the tone        |
+    |                  | mapping.                          |
+    +------------------+-----------------------------------+
+    | c2               | Efficiency factor, ranges from    |
+    |                  | 0.5 to 1 based on output device   |
+    |                  | dynamic range.                    |
+    +------------------+-----------------------------------+
+    
+    
+.. table:: Compile time parameter
+
+    +------------------+-----------------------------------+
+    | **Parameter**    | **Description**                   |
+    +==================+===================================+
+    | XF_HEIGHT        | Maximum height of input and       |
+    |                  | output image.                     |
+    +------------------+-----------------------------------+
+    | XF_WIDTH         | Maximum width of input and output |
+    |                  | image.                            |
+    +------------------+-----------------------------------+
+    | XF_SRC_T         | Input pixel type. Supported pixel |
+    |                  | width is 16.                      |
+    +------------------+-----------------------------------+
+    | NUM_STREAMS      | Total number of streams.          |
+    +------------------+-----------------------------------+
+    | STRM1_ROWS       | Maximum number of rows to be      |
+    |                  | processed for stream 1 in one     |
+    |                  | burst.                            |
+    +------------------+-----------------------------------+
+    | STRM2_ROWS       | Maximum number of rows to be      |
+    |                  | processed for stream 2 in one     |
+    |                  | burst.                            |
+    +------------------+-----------------------------------+
+    | STRM3_ROWS       | Maximum number of rows to be      |
+    |                  | processed for stream 3 in one     |
+    |                  | burst.                            |
+    +------------------+-----------------------------------+
+    | STRM4_ROWS       | Maximum number of rows to be      |
+    |                  | processed for stream 4 in one     |
+    |                  | burst.                            |
+    +------------------+-----------------------------------+ 
+    | NUM_SLICES       | Number of slices processing in    |
+    |                  | each stream.                      |
+    +------------------+-----------------------------------+
+    | BLOCK_WIDTH      | Maximum block width the image is  |
+    |                  | divided into. This can be any     |
+    |                  | positive integer greater than or  |
+    |                  | equal to 32 and less than input   |
+    |                  | image width.                      |
+    +------------------+-----------------------------------+
+    | BLOCK_HEIGHT     | Maximum block height the image is |
+    |                  | divided into. This can be any     |
+    |                  | positive integer greater than or  |
+    |                  | equal to 32 and less than input   |
+    |                  | image height.                     |
+    +------------------+----------------+------------------+
+    | XF_NPPC          | Number of pixels processed per    |
+    |                  | cycle.                            |
+    +------------------+-----------------------------------+
+    | NO_EXPS          | Number of exposure frames to be   |
+    |                  | merged in the module.             |
+    +------------------+-----------------------------------+
+    | W_B_SIZE         | W_B_SIZE is used to define the    |
+    |                  | array size for storing the weight |
+    |                  | values for wr_hls.                |
+    |                  | W_B_SIZE should be 2^bit depth.   |
+    +------------------+-----------------------------------+
+    | FILTERSIZE1      | Filter size for RGB pixels.       |
+    |                  |                                   |
+    +------------------+-----------------------------------+                 
+    | FILTERSIZE2      | Filter size for IR pixels.        |
+    |                  |                                   |
+    +------------------+-----------------------------------+
+    | DGAMMA_KP        | Configurable number of knee       |
+    |                  | points in degamma.                |
+    +------------------+-----------------------------------+ 
+    | SQLUTDIM         | Squared value of maximum          |
+    |                  | dimension of input LUT.           |
+    +------------------+-----------------------------------+
+    | LUTDIM           | 33x33 dimension of input LUT.     |
+    +------------------+-----------------------------------+                
+   
+       
+
+.. table:: Descriptions of array_params 
+
+    +------------------+-----------------------------------+
+    | **Parameter**    | **Description**                   |
+    +==================+===================================+
+    | rgain            | To configure gain value for the   |
+    |                  | red channel.                      |
+    +------------------+-----------------------------------+
+    | bgain            | To configure gain value for the   |
+    |                  | blue channel.                     |
+    +------------------+-----------------------------------+
+    | ggain            | To configure gain value for the   |
+    |                  | green channel.                    |
+    +------------------+-----------------------------------+
+    | pawb             | %top and %bottom pixels are       |
+    |                  | ignored while computing min and   |
+    |                  | max to improve quality.           |
+    +------------------+-----------------------------------+
+    | bayer_p          | The Bayer format of the RAW input |
+    |                  | image.                            |
+    +------------------+-----------------------------------+
+    | black_level      | Black level value to adjust       |
+    |                  | overall brightness of the image.  |
+    +------------------+-----------------------------------+
+    | height           | The number of rows in the image   |
+    |                  | or height of the image.           |
+    +------------------+-----------------------------------+
+    | width            | The number of columns in the      |
+    |                  | image or width of the image.      |
+    +------------------+-----------------------------------+
+    | blk_height       | Actual block height.              |
+    +------------------+-----------------------------------+
+    | blk_width        | Actual block width.               |
+    +------------------+-----------------------------------+
+    | lut_dim          | Dimension of input LUT.           |
+    +------------------+-----------------------------------+
+
+
+.. table:: Compile time flags 
+
+    +------------------+-----------------------------------+
+    | **Parameter**    | **Description**                   |
+    +==================+===================================+
+    | USE_HDR_FUSION   | Flag to enable or disable HDR     |
+    |                  | fusion module.                    |
+    +------------------+-----------------------------------+
+    | USE_GTM          | Flag to enable or disable GTM     |
+    |                  | module.                           |
+    +------------------+-----------------------------------+
+    | USE_LTM          | Flag to enable or disable LTM     |
+    |                  | module.                           |
+    +------------------+-----------------------------------+
+    | USE_QND          | Flag to enable or disable QND     |
+    |                  | module.                           |
+    +------------------+-----------------------------------+
+    | USE_RGBIR        | Flag to enable or disable RGBIR   |
+    |                  | module.                           |
+    +------------------+-----------------------------------+
+    | USE_3DLUT        | Flag to enable or disable 3DLUT   |
+    |                  | module.                           |
+    +------------------+-----------------------------------+
+    | USE_DEGAMMA      | Flag to enable or disable Degamma |
+    |                  | module.                           |
+    +------------------+-----------------------------------+
+    | USE_AEC          | Flag to enable or disable AEC     |
+    |                  | module.                           |
+    +------------------+-----------------------------------+ 	
+   
+The following example demonstrates the top-level ISP pipeline:
 
 .. code:: c
 
-			void ISPPipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp1,
+        ISPPipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp1,
                        ap_uint<INPUT_PTR_WIDTH>* img_inp2,
                        ap_uint<INPUT_PTR_WIDTH>* img_inp3,
                        ap_uint<INPUT_PTR_WIDTH>* img_inp4,
@@ -1864,200 +1874,554 @@ The following example demonstrates the ISP pipeline with above list of functions
                        ap_uint<OUTPUT_PTR_WIDTH>* img_out2,
                        ap_uint<OUTPUT_PTR_WIDTH>* img_out3,
                        ap_uint<OUTPUT_PTR_WIDTH>* img_out4,
-                       int height,
-                       int width,
-                       unsigned short array_params[NUM_STREAMS][6],
-                       unsigned char gamma_lut[NUM_STREAMS][256 * 3]) {
-				// clang-format off
-				#pragma HLS INTERFACE m_axi     port=img_inp1  offset=slave bundle=gmem1
-				#pragma HLS INTERFACE m_axi     port=img_inp2  offset=slave bundle=gmem2
-				#pragma HLS INTERFACE m_axi     port=img_inp3  offset=slave bundle=gmem3
-				#pragma HLS INTERFACE m_axi     port=img_inp4  offset=slave bundle=gmem4
-				#pragma HLS INTERFACE m_axi     port=img_out1  offset=slave bundle=gmem5
-				#pragma HLS INTERFACE m_axi     port=img_out2  offset=slave bundle=gmem6
-				#pragma HLS INTERFACE m_axi     port=img_out3  offset=slave bundle=gmem7
-				#pragma HLS INTERFACE m_axi     port=img_out4  offset=slave bundle=gmem8
-				// clang-format on
+                       ap_uint<OUTPUT_PTR_WIDTH>* img_out_ir1,
+                       ap_uint<OUTPUT_PTR_WIDTH>* img_out_ir2,
+                       ap_uint<OUTPUT_PTR_WIDTH>* img_out_ir3,
+                       ap_uint<OUTPUT_PTR_WIDTH>* img_out_ir4,
+                       short wr_hls[NUM_STREAMS][NO_EXPS * XF_NPPC * W_B_SIZE],
+                       int dcp_params_12to16[NUM_STREAMS][3][4][3],
+                       char R_IR_C1_wgts[NUM_STREAMS][25],
+                       char R_IR_C2_wgts[NUM_STREAMS][25],
+                       char B_at_R_wgts[NUM_STREAMS][25],
+                       char IR_at_R_wgts[NUM_STREAMS][9],
+                       char IR_at_B_wgts[NUM_STREAMS][9],
+                       char sub_wgts[NUM_STREAMS][4],
+                       ap_ufixed<32, 18> dgam_params[NUM_STREAMS][3][DGAMMA_KP][3],
+                       float c1[NUM_STREAMS],
+                       float c2[NUM_STREAMS],
+                       unsigned short array_params[NUM_STREAMS][11],
+                       unsigned char gamma_lut[NUM_STREAMS][256 * 3],
+                       ap_uint<LUT_PTR_WIDTH>* lut1,
+                       ap_uint<LUT_PTR_WIDTH>* lut2,
+                       ap_uint<LUT_PTR_WIDTH>* lut3,
+                       ap_uint<LUT_PTR_WIDTH>* lut4) {
+        // clang-format off
+        #pragma HLS INTERFACE m_axi     port=img_inp1             offset=slave bundle=gmem1
+        #pragma HLS INTERFACE m_axi     port=img_inp2             offset=slave bundle=gmem2
+        #pragma HLS INTERFACE m_axi     port=img_inp3             offset=slave bundle=gmem3
+        #pragma HLS INTERFACE m_axi     port=img_inp4             offset=slave bundle=gmem4
+        #pragma HLS INTERFACE m_axi     port=img_out1             offset=slave bundle=gmem5
+        #pragma HLS INTERFACE m_axi     port=img_out2             offset=slave bundle=gmem6
+        #pragma HLS INTERFACE m_axi     port=img_out3             offset=slave bundle=gmem7
+        #pragma HLS INTERFACE m_axi     port=img_out4             offset=slave bundle=gmem8
 
-				// clang-format off
-				#pragma HLS ARRAY_PARTITION variable=hist0_awb complete dim=1
-				#pragma HLS ARRAY_PARTITION variable=hist1_awb complete dim=1
-					// clang-format on
+        #pragma HLS INTERFACE m_axi     port=img_out_ir1          offset=slave bundle=gmem9
+        #pragma HLS INTERFACE m_axi     port=img_out_ir2          offset=slave bundle=gmem10
+        #pragma HLS INTERFACE m_axi     port=img_out_ir3          offset=slave bundle=gmem11
+        #pragma HLS INTERFACE m_axi     port=img_out_ir4          offset=slave bundle=gmem12
+        #pragma HLS INTERFACE m_axi     port=wr_hls               offset=slave bundle=gmem13
+        #pragma HLS INTERFACE m_axi     port=dcp_params_12to16    offset=slave bundle=gmem14
+        #pragma HLS INTERFACE m_axi     port=R_IR_C1_wgts         offset=slave bundle=gmem15
+        #pragma HLS INTERFACE m_axi     port=R_IR_C2_wgts         offset=slave bundle=gmem16
+        #pragma HLS INTERFACE m_axi     port=B_at_R_wgts          offset=slave bundle=gmem17
+        #pragma HLS INTERFACE m_axi     port=IR_at_R_wgts         offset=slave bundle=gmem18
+        #pragma HLS INTERFACE m_axi     port=IR_at_B_wgts         offset=slave bundle=gmem19
+        #pragma HLS INTERFACE m_axi     port=sub_wgts             offset=slave bundle=gmem20
+        #pragma HLS INTERFACE m_axi     port=dgam_params          offset=slave bundle=gmem21
+        #pragma HLS INTERFACE m_axi     port=c1                   offset=slave bundle=gmem22
+        #pragma HLS INTERFACE m_axi     port=c2                   offset=slave bundle=gmem23
+        #pragma HLS INTERFACE m_axi     port=array_params         offset=slave bundle=gmem24
+        #pragma HLS INTERFACE m_axi     port=gamma_lut            offset=slave bundle=gmem25
+        #pragma HLS INTERFACE m_axi     port=lut1                 offset=slave bundle=gmem26
+        #pragma HLS INTERFACE m_axi     port=lut2                 offset=slave bundle=gmem27
+        #pragma HLS INTERFACE m_axi     port=lut3                 offset=slave bundle=gmem28
+        #pragma HLS INTERFACE m_axi     port=lut4                 offset=slave bundle=gmem29
+           // clang-format on
 
-					struct ispparams_config params[NUM_STREAMS];
-					
-					for(int i = 0; i < NUM_STREAMS; i++){
-				// clang-format off
-				#pragma HLS UNROLL
-					// clang-format on
-								
-						params[i].rgain = array_params[i][0];
-						params[i].bgain = array_params[i][1];
-						params[i].ggain = array_params[i][2];
-						params[i].pawb = array_params[i][3];
-						params[i].bayer_p = array_params[i][4];
-						params[i].black_level = array_params[i][5];
-					}
-					
-					uint32_t tot_rows = NUM_STREAMS * height;
-					const uint16_t pt[NUM_STREAMS] = {STRM1_ROWS, STRM2_ROWS, STRM3_ROWS, STRM4_ROWS};
-					uint16_t max = STRM1_ROWS;
-					for(int i = 1; i < NUM_STREAMS; i++){
-						
-						if(pt[i] > max)
-							max = pt[i];
-					}
-					
-					const uint16_t TC = tot_rows / max;
-					
-					uint32_t addrbound, num_rows;
+           struct ispparams_config params[NUM_STREAMS];
 
-					int strm_id = 0, idx = 0;
+           uint32_t tot_rows = 0;
+           int rem_rows[NUM_STREAMS];
+           static short wr_hls_tmp[NUM_STREAMS][NO_EXPS * XF_NPPC * W_B_SIZE];
+           static unsigned char gamma_lut_tmp[NUM_STREAMS][256 * 3];
+           static float c1_tmp[NUM_STREAMS], c2_tmp[NUM_STREAMS];
+           static ap_ufixed<32, 18> dgam_params_tmp[NUM_STREAMS][3][DGAMMA_KP][3];
+           static int dcp_params_12to16_tmp[NUM_STREAMS][3][4][3];
+           static char R_IR_C1_wgts_tmp[NUM_STREAMS][25], R_IR_C2_wgts_tmp[NUM_STREAMS][25], 
+                       B_at_R_wgts_tmp[NUM_STREAMS][25], IR_at_R_wgts_tmp[NUM_STREAMS][9],
+                       IR_at_B_wgts_tmp[NUM_STREAMS][9], sub_wgts_tmp[NUM_STREAMS][4];
 
-					int rem_rows[NUM_STREAMS] = {height, height, height, height};
+           unsigned short height_arr[NUM_STREAMS], width_arr[NUM_STREAMS];
+           constexpr int dg_parms_c1 = 3;
+           constexpr int dg_parms_c2 = 3;
+           constexpr int dcp_parms1 = 3;
+           constexpr int dcp_parms2 = 4;
+           constexpr int dcp_parms3 = 3;
+        DEGAMMA_PARAMS_LOOP:
+           for (int n = 0; n < NUM_STREAMS; n++) {
+        // clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=NUM_STREAMS max=NUM_STREAMS
+              // clang-format on
 
-					uint32_t offset1 = 0, offset2 = 0, offset3 = 0, offset4 = 0;
+              for (int i = 0; i < dg_parms_c1; i++) {
+        // clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=dg_parms_c1 max=dg_parms_c1
+                // clang-format on   
+                for(int j=0; j<DGAMMA_KP; j++){
+        // clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=DGAMMA_KP max=DGAMMA_KP
+                  // clang-format on             
+                  for(int k=0; k<dg_parms_c2; k++){
+        // clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=dg_parms_c2 max=dg_parms_c2
+                    // clang-format on  
+                    dgam_params_tmp[n][i][j][k] = dgam_params[n][i][j][k];
+                    }
+                 }                
+                }
+            }
+    
+        DECOMPAND_PARAMS_LOOP:
+           for(int n=0; n<NUM_STREAMS; n++){
+        // clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=NUM_STREAMS max=NUM_STREAMS
+              // clang-format on
 
-					for (int r = 0; r < tot_rows;) {
-				// clang-format off
-						#pragma HLS LOOP_TRIPCOUNT min=0 max=TC
-						#pragma HLS LOOP_FLATTEN off
-						// clang-format on
+              for (int i = 0; i < dcp_parms1; i++) {
+        // clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=dcp_parms1 max=dcp_parms1
+                // clang-format on   
+                for(int j=0; j<dcp_parms2; j++){
+        // clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=dcp_parms2 max=dcp_parms2
+                  // clang-format on             
+                  for(int k=0; k<dcp_parms3; k++){
+        // clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=dcp_parms3 max=dcp_parms3
+                    // clang-format on  
+                    dcp_params_12to16_tmp[n][i][j][k] = dcp_params_12to16[n][i][j][k];
+                  }
+                }                
+              }
+           }
+        
+   
+        C1_C2_INIT_LOOP:   
+           for(int i=0; i < NUM_STREAMS; i++){
+        // clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=NUM_STREAMS max=NUM_STREAMS
+              // clang-format on    
+              c1_tmp[i]=c1[i];
+              c2_tmp[i]=c2[i];
+        
+        }  
+           constexpr int R_B_count=25, IR_count=9, sub_count=4;    
+      
+        RGBIR_INIT_LOOP_1:
+           for(int n=0; n < NUM_STREAMS; n++){
+      
+           // clang-format off
+           #pragma HLS LOOP_TRIPCOUNT min=NUM_STREAMS max=NUM_STREAMS
+              // clang-format on
 
-						// Compute no.of rows to process
-						if (rem_rows[idx] > pt[idx])
-							num_rows = pt[idx];
-						else
-							num_rows = rem_rows[idx];
+              for (int i = 0; i < R_B_count; i++) {
+        // clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=R_B_count max=R_B_count
+              // clang-format on         
+            
+              R_IR_C1_wgts_tmp[n][i] = R_IR_C1_wgts[n][i];
+              R_IR_C2_wgts_tmp[n][i] = R_IR_C2_wgts[n][i];
+              B_at_R_wgts_tmp[n][i]  = B_at_R_wgts[n][i];      
+              }
+           }
 
-						// Compute
-						addrbound = num_rows * (width >> XF_BITSHIFT(XF_NPPC));
-						strm_id = idx;
+        RGBIR_INIT_LOOP_2:
+          for(int n=0; n < NUM_STREAMS; n++){
+      
+        // clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=NUM_STREAMS max=NUM_STREAMS
+           // clang-format on
 
-						if (idx == 0 && num_rows > 0) {
-							Streampipeline(img_inp1 + offset1, img_out1 + offset1, num_rows, width, hist0_awb[idx], hist1_awb[idx],
-										   igain_0, igain_1, params[idx], gamma_lut[idx], flag[idx]);
-							offset1 += addrbound;
-						} else if (idx == 1 && num_rows > 0) {
-							Streampipeline(img_inp2 + offset2, img_out2 + offset2, num_rows, width, hist0_awb[idx], hist1_awb[idx],
-										   igain_0, igain_1, params[idx], gamma_lut[idx], flag[idx]);
+            for (int i = 0; i < IR_count; i++) {
+        // clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=IR_count max=IR_count
+              // clang-format on         
+            
+              IR_at_R_wgts_tmp[n][i] = IR_at_R_wgts[n][i];
+              IR_at_B_wgts_tmp[n][i] = IR_at_B_wgts[n][i];
+            }
+          }
 
-							offset2 += addrbound;
-						} else if (idx == 2 && num_rows > 0) {
-							Streampipeline(img_inp3 + offset3, img_out3 + offset3, num_rows, width, hist0_awb[idx], hist1_awb[idx],
-										   igain_0, igain_1, params[idx], gamma_lut[idx], flag[idx]);
+        RGBIR_INIT_LOOP_3:
+           for(int n=0; n < NUM_STREAMS; n++){
+      
+        // clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=NUM_STREAMS max=NUM_STREAMS
+              // clang-format on
 
-							offset3 += addrbound;
-						} else if (idx == 3 && num_rows > 0) {
-							Streampipeline(img_inp4 + offset4, img_out4 + offset4, num_rows, width, hist0_awb[idx], hist1_awb[idx],
-										   igain_0, igain_1, params[idx], gamma_lut[idx], flag[idx]);
+              for (int i = 0; i < sub_count; i++) {
+        // clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=sub_count max=sub_count
+                // clang-format on         
+            
+                sub_wgts_tmp[n][i] = sub_wgts[n][i];
+              }
+           }
 
-							offset4 += addrbound;
-						}
-						// Update remaining rows to process
-						rem_rows[idx] = rem_rows[idx] - num_rows;
+        ARRAY_PARAMS_LOOP:
+           for (int i = 0; i < NUM_STREAMS; i++) {
+        // clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=1 max=NUM_STREAMS
+              // clang-format on
 
-						// Next stream selection
-						if (idx == NUM_STREAMS - 1)
-							idx = 0;
-						else
-							idx++;
+              height_arr[i] = array_params[i][6];
+              width_arr[i] = array_params[i][7];
+              height_arr[i] = height_arr[i] * RD_MULT;
+              tot_rows = tot_rows + height_arr[i];
+              rem_rows[i] = height_arr[i];
+           }
+           constexpr int glut_TC = 256 * 3;
 
-						// Update total rows to process
-						r += num_rows;
-					}
+        GAMMA_LUT_LOOP:
+           for (int n = 0; n < NUM_STREAMS; n++) {
+        // clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=NUM_STREAMS max=NUM_STREAMS
+              // clang-format on        
+              for(int i=0; i < glut_TC; i++){
+        // clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=glut_TC max=glut_TC
+                // clang-format on           
+           
+                gamma_lut_tmp[n][i] = gamma_lut[n][i];
+       
+              }
+           }     
+           
+        WR_HLS_INIT_LOOP:  
+           for(int n =0; n < NUM_STREAMS; n++) {
+        // clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=NUM_STREAMS max=NUM_STREAMS
+           // clang-format on
+              for (int k = 0; k < XF_NPPC; k++) {
+        // clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=XF_NPPC max=XF_NPPC
+                // clang-format on
+                for (int i = 0; i < NO_EXPS; i++) {
+        // clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=NO_EXPS max=NO_EXPS
+                  // clang-format on
+                  for (int j = 0; j < (W_B_SIZE); j++) {
+        // clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=W_B_SIZE max=W_B_SIZE
+                    // clang-format on
+                    wr_hls_tmp[n][(i + k * NO_EXPS) * W_B_SIZE + j] = wr_hls[n][(i + k * NO_EXPS) * W_B_SIZE + j];
+                  }
+                }
+              }
+           }
 
-					return;
-				}
+           const uint16_t pt[NUM_STREAMS] = {STRM1_ROWS, STRM2_ROWS, STRM3_ROWS, STRM4_ROWS};
+           uint16_t max = STRM1_ROWS;
+           for (int i = 1; i < NUM_STREAMS; i++) {
+              if (pt[i] > max) max = pt[i];
+           }
 
-			void Streampipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
-								ap_uint<OUTPUT_PTR_WIDTH>* img_out,
-								unsigned short height,
-								unsigned short width,
-								uint32_t hist0[3][HIST_SIZE],
-								uint32_t hist1[3][HIST_SIZE],
-								int gain0[3],
-								int gain1[3],
-								struct ispparams_config params,
-								unsigned char _gamma_lut[256 * 3],
-								bool flag) {
-				xf::cv::Mat<XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_0> imgInput(height, width);
-				xf::cv::Mat<XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_1> blc_out(height, width);
-				xf::cv::Mat<XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_2> bpc_out(height, width);
-				xf::cv::Mat<XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_3> gain_out(height, width);
-				xf::cv::Mat<XF_DST_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_0> demosaic_out(height, width);
-				xf::cv::Mat<XF_DST_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_1> impop(height, width);
-				xf::cv::Mat<XF_DST_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_2> ltm_in(height, width);
-				xf::cv::Mat<XF_DST_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_3> lsc_out(height, width);
-				xf::cv::Mat<XF_LTM_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_4> _dst(height, width);
-				xf::cv::Mat<XF_LTM_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_5> aecin(height, width);
-				xf::cv::Mat<XF_16UC1, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_6> imgOutput(height, width);
+           const uint16_t TC = tot_rows / max;
+           uint32_t addrbound, wr_addrbound, num_rows;
 
-			// clang-format off
-			#pragma HLS DATAFLOW
-				// clang-format on
-				const int Q_VAL = 1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC));
+           int strm_id = 0, stream_idx = 0, slice_idx = 0;
+           bool eof_awb[NUM_STREAMS] = {0};
+           bool eof_tm[NUM_STREAMS] = {0};
+           bool eof_aec[NUM_STREAMS] = {0};
 
-				float thresh = (float)params.pawb / 256;
-				float inputMax = (1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC))) - 1; // 65535.0f;
+           uint32_t rd_offset1 = 0, rd_offset2 = 0, rd_offset3 = 0, rd_offset4 = 0;
+           uint32_t wr_offset1 = 0, wr_offset2 = 0, wr_offset3 = 0, wr_offset4 = 0;
 
-				float mul_fact = (inputMax / (inputMax - params.black_level));
+        TOTAL_ROWS_LOOP:
+           for (int r = 0; r < tot_rows;) {
+        // clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=(XF_HEIGHT/STRM_HEIGHT)*NUM_STREAMS max=(XF_HEIGHT/STRM_HEIGHT)*NUM_STREAMS
+              // clang-format on
 
-				xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_0>(img_inp, imgInput);
+        // Compute no.of rows to process
+             if (rem_rows[stream_idx] / RD_MULT > pt[stream_idx]) { // Check number for remaining rows of 1 interleaved image
+               num_rows = pt[stream_idx];
+               eof_awb[stream_idx] = 0; // 1 interleaved image/stream is not done
+               eof_tm[stream_idx] = 0;
+               eof_aec[stream_idx] = 0;
+             } else {
+               num_rows = rem_rows[stream_idx] / RD_MULT;
+               eof_awb[stream_idx] = 1; // 1 interleaved image/stream done
+               eof_tm[stream_idx] = 1;
+               eof_aec[stream_idx] = 1;
+             }
 
-				xf::cv::blackLevelCorrection<XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_IN_1>(imgInput, blc_out,
-																								  params.black_level, mul_fact);
-				// xf::cv::badpixelcorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 0, 0>(imgInput2, bpc_out);
+             strm_id = stream_idx;
 
-				xf::cv::gaincontrol<XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_3>(blc_out, gain_out, params.rgain, params.bgain,
-																			  params.ggain, params.bayer_p);
-				xf::cv::demosaicing<XF_SRC_T, XF_DST_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, 0, XF_CV_DEPTH_IN_3, XF_CV_DEPTH_OUT_0>(gain_out, demosaic_out, params.bayer_p);
+             if (stream_idx == 0 && num_rows > 0) {
+             Streampipeline(img_inp1 + rd_offset1, img_out1 + wr_offset1, img_out_ir1 + wr_offset1, lut1, num_rows,
+                           height_arr[stream_idx], width_arr[stream_idx], STRM1_ROWS, dgam_params_tmp, hist0_awb,
+                           hist1_awb, igain_0, igain_1, flag_awb, eof_awb, array_params, gamma_lut_tmp, wr_hls_tmp,
+                           R_IR_C1_wgts_tmp, R_IR_C2_wgts_tmp, B_at_R_wgts_tmp, IR_at_R_wgts_tmp, IR_at_B_wgts_tmp,
+                           sub_wgts_tmp, dcp_params_12to16_tmp, hist0_aec, hist1_aec, flag_aec, eof_aec, omin_r, omax_r,
+                           omin_w, omax_w, mean1, mean2, L_max1, L_max2, L_min1, L_min2, c1_tmp, c2_tmp, flag_tm,
+                           eof_tm, stream_idx, slice_idx);
+             rd_offset1 += (RD_MULT * num_rows * ((width_arr[stream_idx] + RD_ADD) >> XF_BITSHIFT(XF_NPPC))) / 4;
+             wr_offset1 += (num_rows * (width_arr[stream_idx] >> XF_BITSHIFT(XF_NPPC))) / 4;
 
-				function_awb<XF_DST_T, XF_DST_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_2>(demosaic_out, ltm_in, hist0, hist1, gain0, gain1,
-																				 height, width, thresh, flag);
-				xf::cv::colorcorrectionmatrix<XF_CCM_TYPE, XF_DST_T, XF_DST_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_2, XF_CV_DEPTH_OUT_3>(ltm_in, lsc_out);
-				if (XF_DST_T == XF_8UC3) {
-					fifo_copy<XF_DST_T, XF_LTM_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_3, XF_CV_DEPTH_OUT_5>(lsc_out, aecin, height, width);
-				} else {
-					xf::cv::xf_QuatizationDithering<XF_DST_T, XF_LTM_T, STRM_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPC, XF_CV_DEPTH_OUT_3, XF_CV_DEPTH_OUT_5>(lsc_out, aecin);
-				}
-				xf::cv::gammacorrection<XF_LTM_T, XF_LTM_T, STRM_HEIGHT, XF_WIDTH, XF_NPP, XF_CV_DEPTH_OUT_5, XF_CV_DEPTH_OUT_4C>(aecin, _dst, _gamma_lut);
-				// ColorMat2AXIvideo<XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPC>(_dst, m_axis_video);
-				xf::cv::rgb2yuyv<XF_LTM_T, XF_16UC1, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_4, XF_CV_DEPTH_OUT_6>(_dst, imgOutput);
+             } else if (stream_idx == 1 && num_rows > 0) {
+             Streampipeline(img_inp2 + rd_offset2, img_out2 + wr_offset2, img_out_ir2 + wr_offset2, lut2, num_rows,
+                           height_arr[stream_idx], width_arr[stream_idx], STRM2_ROWS, dgam_params_tmp, hist0_awb,
+                           hist1_awb, igain_0, igain_1, flag_awb, eof_awb, array_params, gamma_lut_tmp, wr_hls_tmp,
+                           R_IR_C1_wgts_tmp, R_IR_C2_wgts_tmp, B_at_R_wgts_tmp, IR_at_R_wgts_tmp, IR_at_B_wgts_tmp,
+                           sub_wgts_tmp, dcp_params_12to16_tmp, hist0_aec, hist1_aec, flag_aec, eof_aec, omin_r, omax_r,
+                           omin_w, omax_w, mean1, mean2, L_max1, L_max2, L_min1, L_min2, c1_tmp, c2_tmp, flag_tm,
+                           eof_tm, stream_idx, slice_idx);
 
-				xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_6>(imgOutput, img_out);
+             rd_offset2 += (RD_MULT * num_rows * ((width_arr[stream_idx] + RD_ADD) >> XF_BITSHIFT(XF_NPPC))) / 4;
+             wr_offset2 += (num_rows * (width_arr[stream_idx] >> XF_BITSHIFT(XF_NPPC))) / 4;
 
-				return;
-			}
+             } else if (stream_idx == 2 && num_rows > 0) {
+             Streampipeline(img_inp3 + rd_offset3, img_out3 + wr_offset3, img_out_ir3 + wr_offset3, lut3, num_rows,
+                           height_arr[stream_idx], width_arr[stream_idx], STRM3_ROWS, dgam_params_tmp, hist0_awb,
+                           hist1_awb, igain_0, igain_1, flag_awb, eof_awb, array_params, gamma_lut_tmp, wr_hls_tmp,
+                           R_IR_C1_wgts_tmp, R_IR_C2_wgts_tmp, B_at_R_wgts_tmp, IR_at_R_wgts_tmp, IR_at_B_wgts_tmp,
+                           sub_wgts_tmp, dcp_params_12to16_tmp, hist0_aec, hist1_aec, flag_aec, eof_aec, omin_r, omax_r,
+                           omin_w, omax_w, mean1, mean2, L_max1, L_max2, L_min1, L_min2, c1_tmp, c2_tmp, flag_tm,
+                           eof_tm, stream_idx, slice_idx);
+             rd_offset3 += (RD_MULT * num_rows * ((width_arr[stream_idx] + RD_ADD) >> XF_BITSHIFT(XF_NPPC))) / 4;
+             wr_offset3 += (num_rows * (width_arr[stream_idx] >> XF_BITSHIFT(XF_NPPC))) / 4;
 
-The ISP multistream Pipeline design is validated on Alveo U200 board at 300 MHz frequency. 
+             } else if (stream_idx == 3 && num_rows > 0) {
+             Streampipeline(img_inp4 + rd_offset4, img_out4 + wr_offset4, img_out_ir4 + wr_offset4, lut4, num_rows,
+                           height_arr[stream_idx], width_arr[stream_idx], STRM4_ROWS, dgam_params_tmp, hist0_awb,
+                           hist1_awb, igain_0, igain_1, flag_awb, eof_awb, array_params, gamma_lut_tmp, wr_hls_tmp,
+                           R_IR_C1_wgts_tmp, R_IR_C2_wgts_tmp, B_at_R_wgts_tmp, IR_at_R_wgts_tmp, IR_at_B_wgts_tmp,
+                           sub_wgts_tmp, dcp_params_12to16_tmp, hist0_aec, hist1_aec, flag_aec, eof_aec, omin_r, omax_r,
+                           omin_w, omax_w, mean1, mean2, L_max1, L_max2, L_min1, L_min2, c1_tmp, c2_tmp, flag_tm,
+                           eof_tm, stream_idx, slice_idx);
 
-.. table:: Table Resource Utilization Summary
+             rd_offset4 += (RD_MULT * num_rows * ((width_arr[stream_idx] + RD_ADD) >> XF_BITSHIFT(XF_NPPC))) / 4;
+             wr_offset4 += (num_rows * (width_arr[stream_idx] >> XF_BITSHIFT(XF_NPPC))) / 4;
+             }
+             // Update remaining rows to process
+             rem_rows[stream_idx] = rem_rows[stream_idx] - num_rows * RD_MULT;
 
-    +----------------+----------------+---------------------+----------------------+----------+-------+-------+------+
-    | Operating Mode | Filter size    | Operating Frequency |              Utilization Estimate                      |
-    |                |                |                     |                                                        |
-    |                |                | (MHz)               |                                                        |
-    +                +                +                     +----------------------+----------+-------+-------+------+
-    |                |                |                     | BRAM_18K             | DSP      | FF    | LUT   | URAM |
-    +================+================+=====================+======================+==========+=======+=======+======+
-    | 2 Pixel        | 3x3            | 300                 | 29                   | 69       | 21230 | 18332 | 0    |
-    +----------------+----------------+---------------------+----------------------+----------+-------+-------+------+
+             // Next stream selection
+             if (stream_idx == NUM_STREAMS - 1) {
+               stream_idx = 0;
+               slice_idx++;
 
-.. table:: Table Performance Estimate Summary
+             } else {
+               stream_idx++;
+             }
 
-    +----------------+---------------------+------------------+
-    | Operating Mode | Operating Frequency | Latency Estimate |
-    |                |                     |                  |
-    |                | (MHz)               |                  |
-    +                +                     +------------------+
-    |                |                     | Max (ms)         |
-    +================+=====================+==================+
-    | 2 pixel        | 300                 | 17.9ms           |
-    +----------------+---------------------+------------------+
+             // Update total rows to process
+             r += num_rows * RD_MULT;
+           } // TOTAL_ROWS_LOOP
+
+         return;
+
+        }
+
+
+Create and Launch kernel in the testbench:
+
+Histogram needs two frames to populate the histogram and to get correct result in
+auto exposure frame. Auto white balance, GTM and other tone-mapping functions needs
+one extra frame in each to populate its parameters and apply those parameters to
+get a correct image. For the specific example below, four iterations
+are needed because the AEC, AWB and LTM module selected.
+
+
+.. code:: c
+
+        // Create a kernel:
+        OCL_CHECK(err, cl::Kernel kernel(program, "ISPPipeline_accel", &err));
+
+        for (int i = 0; i < 4; i++) {
+
+          OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inVec_Weights,  // buffer on the FPGA
+                                            CL_TRUE,                 // blocking call
+                                            0,                       // buffer offset in bytes
+                                            vec_weight_size_bytes,   // Size in bytes
+                                            wr_hls));
+
+          OCL_CHECK(err, q.enqueueWriteBuffer(buffer_decompand_params,  // buffer on the FPGA
+                                            CL_TRUE,                  // blocking call
+                                            0,                        // buffer offset in bytes
+                                            dcp_params_in_size_bytes, // Size in bytes
+                                            dcp_params_12to16));
+
+           OCL_CHECK(err, q.enqueueWriteBuffer(buffer_R_IR_C1,        // buffer on the FPGA
+                                            CL_TRUE,               // blocking call
+                                            0,                     // buffer offset in bytes
+                                            filter1_in_size_bytes, // Size in bytes
+                                            R_IR_C1_wgts));
+          OCL_CHECK(err, q.enqueueWriteBuffer(buffer_R_IR_C2,        // buffer on the FPGA
+                                            CL_TRUE,               // blocking call
+                                            0,                     // buffer offset in bytes
+                                            filter1_in_size_bytes, // Size in bytes
+                                            R_IR_C2_wgts));
+
+          OCL_CHECK(err, q.enqueueWriteBuffer(buffer_B_at_R,         // buffer on the FPGA
+                                            CL_TRUE,               // blocking call
+                                            0,                     // buffer offset in bytes
+                                            filter1_in_size_bytes, // Size in bytes
+                                            B_at_R_wgts));
+
+          OCL_CHECK(err, q.enqueueWriteBuffer(buffer_IR_at_R,        // buffer on the FPGA
+                                            CL_TRUE,               // blocking call
+                                            0,                     // buffer offset in bytes
+                                            filter2_in_size_bytes, // Size in bytes
+                                            IR_at_R_wgts));
+
+          OCL_CHECK(err, q.enqueueWriteBuffer(buffer_IR_at_B,        // buffer on the FPGA
+                                            CL_TRUE,               // blocking call
+                                            0,                     // buffer offset in bytes
+                                            filter2_in_size_bytes, // Size in bytes
+                                            IR_at_B_wgts));
+
+          OCL_CHECK(err, q.enqueueWriteBuffer(buffer_sub_wgts,        // buffer on the FPGA
+                                            CL_TRUE,                // blocking call
+                                            0,                      // buffer offset in bytes
+                                            sub_wgts_in_size_bytes, // Size in bytes
+                                            sub_wgts));
+          OCL_CHECK(err, q.enqueueWriteBuffer(buffer_dgam_params,        // buffer on the FPGA
+                                            CL_TRUE,                   // blocking call
+                                            0,                         // buffer offset in bytes
+                                            dgam_params_in_size_bytes, // Size in bytes
+                                            dgam_params));
+
+          OCL_CHECK(err, q.enqueueWriteBuffer(buffer_c1,     // buffer on the FPGA
+                                            CL_TRUE,       // blocking call
+                                            0,             // buffer offset in bytes
+                                            c1_size_bytes, // Size in bytes
+                                            c1));
+          OCL_CHECK(err, q.enqueueWriteBuffer(buffer_c2,     // buffer on the FPGA
+                                            CL_TRUE,       // blocking call
+                                            0,             // buffer offset in bytes
+                                            c2_size_bytes, // Size in bytes
+                                            c2));
+
+          OCL_CHECK(err, q.enqueueWriteBuffer(buffer_array,     // buffer on the FPGA
+                                            CL_TRUE,            // blocking call
+                                            0,                  // buffer offset in bytes
+                                            array_size_bytes,   // Size in bytes
+                                            array_params));
+
+          OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inVec,      // buffer on the FPGA
+                                            CL_TRUE,             // blocking call
+                                            0,                   // buffer offset in bytes
+                                            vec_in_size_bytes,   // Size in bytes
+                                            gamma_lut));
+         
+          OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inLut1,     // buffer on the FPGA
+                                            CL_TRUE,           // blocking call
+                                            0,                 // buffer offset in bytes
+                                            lut_in_size_bytes, // Size in bytes
+                                            casted_lut1,       // Pointer to the data to copy
+                                            nullptr));
+
+          OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inLut2,     // buffer on the FPGA
+                                            CL_TRUE,           // blocking call
+                                            0,                 // buffer offset in bytes
+                                            lut_in_size_bytes, // Size in bytes
+                                            casted_lut2,       // Pointer to the data to copy
+                                            nullptr));
+
+          OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inLut3,     // buffer on the FPGA
+                                            CL_TRUE,           // blocking call
+                                            0,                 // buffer offset in bytes
+                                            lut_in_size_bytes, // Size in bytes
+                                            casted_lut3,       // Pointer to the data to copy
+                                            nullptr));
+
+          OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inLut4,     // buffer on the FPGA
+                                            CL_TRUE,           // blocking call
+                                            0,                 // buffer offset in bytes
+                                            lut_in_size_bytes, // Size in bytes
+                                            casted_lut4,       // Pointer to the data to copy
+                                            nullptr));
+
+          
+          if(HDR_FUSION) {
+            OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inImage1, CL_TRUE, 0, image_in_size_bytes, interleaved_img1.data));
+            OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inImage2, CL_TRUE, 0, image_in_size_bytes, interleaved_img2.data));
+            OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inImage3, CL_TRUE, 0, image_in_size_bytes, interleaved_img3.data));
+            OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inImage4, CL_TRUE, 0, image_in_size_bytes, interleaved_img4.data));
+
+          }
+          else {
+            OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inImage1, CL_TRUE, 0, image_in_size_bytes, out_img1_12bit.data));
+            OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inImage2, CL_TRUE, 0, image_in_size_bytes, out_img1_12bit.data));
+            OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inImage3, CL_TRUE, 0, image_in_size_bytes, out_img1_12bit.data));
+            OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inImage4, CL_TRUE, 0, image_in_size_bytes, out_img1_12bit.data));
+          }
+
+          // Profiling Objects
+          cl_ulong start = 0;
+          cl_ulong end = 0;
+          double diff_prof = 0.0f;
+          cl::Event event_sp;
+
+          // Launch the kernel
+          OCL_CHECK(err, err = q.enqueueTask(kernel, NULL, &event_sp));
+          clWaitForEvents(1, (const cl_event*)&event_sp);
+
+          event_sp.getProfilingInfo(CL_PROFILING_COMMAND_START, &start);
+          event_sp.getProfilingInfo(CL_PROFILING_COMMAND_END, &end);
+          diff_prof = end - start;
+          std::cout << (diff_prof / 1000000) << "ms" << std::endl;
+          // Copying Device result data to Host memory
+          q.enqueueReadBuffer(buffer_outImage1, CL_TRUE, 0, image_out_size_bytes, out_img1.data);
+          q.enqueueReadBuffer(buffer_outImage2, CL_TRUE, 0, image_out_size_bytes, out_img2.data);
+          q.enqueueReadBuffer(buffer_outImage3, CL_TRUE, 0, image_out_size_bytes, out_img3.data);
+          q.enqueueReadBuffer(buffer_outImage4, CL_TRUE, 0, image_out_size_bytes, out_img4.data);
+
+          if (USE_RGBIR) {
+            q.enqueueReadBuffer(buffer_IRoutImage1, CL_TRUE, 0, image_out_ir_size_bytes, out_img_ir1.data);
+            q.enqueueReadBuffer(buffer_IRoutImage2, CL_TRUE, 0, image_out_ir_size_bytes, out_img_ir2.data);
+            q.enqueueReadBuffer(buffer_IRoutImage3, CL_TRUE, 0, image_out_ir_size_bytes, out_img_ir3.data);
+            q.enqueueReadBuffer(buffer_IRoutImage4, CL_TRUE, 0, image_out_ir_size_bytes, out_img_ir4.data);
+          }
+        }
+
+        
+.. rubric:: Resource Utilization
+
+The following table summarizes the resource utilization of ISP multistream generated using Vitis 
+HLS 2023.1 tool on ZCU102 board.
+
+.. table:: ISP multistream Resource Utilization Summary
+
+
+    +----------------+----------------------+-------------------------------------------------+
+    | Operating Mode | Operating Frequency  |            Utilization Estimate                 |
+    +                +        (MHz)         +------------+-----------+-----------+------------+
+    |                |                      |    BRAM    |    DSP    | CLB       |    CLB     |      
+    |                |                      |            |           | Registers |    LUT     | 
+    +================+======================+============+===========+===========+============+
+    | 1 Pixel        |         150          |    209.5   |    325    | 60142     |    63718   |     
+    +----------------+----------------------+------------+-----------+-----------+------------+
+
+.. rubric:: Performance Estimate    
+
+The following table summarizes the performance of the ISP multistream in 1-pixel
+mode as generated using Vitis HLS 2023.1 tool on ZCU102 board.
+ 
+Estimated average latency is obtained by running the accel with 4 iterations. 
+The input to the accel is a 12bit non-linearized full-HD (1920x1080) image.
+
+.. table:: ISP multistream Performance Estimate Summary
+
+    +-----------------------------+-------------------------+
+    |                             | Latency Estimate        |
+    +      Operating Mode         +-------------------------+
+    |                             | Average latency(ms)     |             
+    +=============================+=========================+
+    | 1 pixel operation (150 MHz) |        62.742           | 
+    +-----------------------------+-------------------------+
+
+
+.. _isp-aio-adas:
+.. include:: include/isp_aio_adas_api.rst
 
 .. _isp-aio:
 .. include:: include/isp_aio_api.rst
+
+.. _isp-24bit:
+.. include:: include/isp_24bit_api.rst
 
 .. |pp_image1| image:: ./images/letterbox.PNG
    :class: image 

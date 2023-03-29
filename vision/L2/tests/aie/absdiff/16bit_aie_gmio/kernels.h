@@ -24,7 +24,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <adf.h>
 
-void absdiff(input_window_int16* input1, input_window_int16* input2, output_window_int16* output);
+void absdiff(adf::input_buffer<int16>& input1, adf::input_buffer<int16>& input2, adf::output_buffer<int16>& output);
 
 #endif

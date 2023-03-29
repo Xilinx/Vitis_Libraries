@@ -17,6 +17,6 @@
 #include "kernels.h"
 #include "imgproc/xf_filter2d_aie.hpp"
 
-void filter2D(input_window_int32* input, output_window_int32* output) {
+void filter2D(adf::input_buffer<int32>& input, adf::output_buffer<int32>& output) {
     xf::cv::aie::filter2D_api(input, output);
 };

@@ -175,7 +175,7 @@ Below are the example scripts to do environment settings for L1 functions:
 
    source < path-to-Vitis-installation-directory >/settings64.sh
    source < part-to-XRT-installation-directory >/setup.sh
-   export DEVICE=< path-to-platform-directory >/< platform >.xpfm
+   export PLATFORM=< path-to-platform-directory >/< platform >.xpfm
    export OPENCV_INCLUDE=< path-to-opencv-include-folder >
    export OPENCV_LIB=< path-to-opencv-lib-folder >
    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:< path-to-opencv-lib-folder >

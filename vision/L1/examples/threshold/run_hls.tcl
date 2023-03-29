@@ -25,12 +25,11 @@ if {![info exists CLKP]} {
 
 open_project -reset $PROJ
 
-add_files "${XF_PROJ_ROOT}/L1/examples/threshold/xf_threshold_accel.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/threshold/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/threshold/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
-add_files -tb "${XF_PROJ_ROOT}/L1/examples/threshold/xf_threshold_tb.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/threshold/build -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/threshold/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+add_files "${XF_PROJ_ROOT}/L1/examples/threshold/xf_threshold_accel.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/threshold/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/threshold/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+add_files -tb "${XF_PROJ_ROOT}/L1/examples/threshold/xf_threshold_tb.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/threshold/config -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/threshold/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
 set_top threshold_accel
 
 open_solution -reset $SOLN
-
 
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@
 #include <fstream>
 #include <cstring>
 #include <sstream>
-#include "xf_3dlut_config.h"
+#include "xf_3dlut_tb_config.h"
 #include "common/xf_sw_utils.hpp"
 
 // linear interpolation
@@ -236,7 +236,7 @@ int main(int argc, char* argv[]) {
 
     // HLS function
     lut3d_accel((ap_uint<INPUT_PTR_WIDTH>*)in_img.data, (ap_uint<OUTPUT_PTR_WIDTH>*)out_img_hls.data,
-                (ap_uint<INPUT_PTR_WIDTH>*)casted_lut, height, width, lut_dim);
+                (ap_uint<LUT_PTR_WIDTH>*)casted_lut, height, width, lut_dim);
 
     cv::imwrite("out_ocv.png", out_img_ocv);
     cv::imwrite("out_hls.png", out_img_hls);

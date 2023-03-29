@@ -15,10 +15,11 @@
  */
 
 #include "imgproc/xf_addweighted_aie.hpp"
+#include "kernels.h"
 
-void addweighted(input_window_int16* input1,
-                 input_window_int16* input2,
-                 output_window_int16* output,
+void addweighted(adf::input_buffer<int16>& input1,
+                 adf::input_buffer<int16>& input2,
+                 adf::output_buffer<int16>& output,
                  const float& alpha,
                  const float& beta,
                  const float& gamma) {

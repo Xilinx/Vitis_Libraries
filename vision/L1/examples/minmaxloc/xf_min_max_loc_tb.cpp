@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_min_max_loc_config.h"
+#include "xf_min_max_loc_tb_config.h"
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
     uint16_t _min_locx, _min_locy, _max_locx, _max_locy;
 
     ////////  Call the Top function ///
-    min_max_loc_accel((ap_uint<PTR_WIDTH>*)in_conv.data, min_value, max_value, _min_locx, _min_locy, _max_locx,
+    min_max_loc_accel((ap_uint<INPUT_PTR_WIDTH>*)in_conv.data, min_value, max_value, _min_locx, _min_locy, _max_locx,
                       _max_locy, height, width);
 
     /////// OpenCV output ////////

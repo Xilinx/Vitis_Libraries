@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_median_blur_config.h"
+#include "xf_median_blur_tb_config.h"
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -39,13 +39,13 @@ int main(int argc, char** argv) {
 
 // create memory for output image
 #if GRAY
-    ocv_ref.create(in_img.rows, in_img.cols, CV_8UC1);
-    out_img.create(in_img.rows, in_img.cols, CV_8UC1); // create memory for output image
-    diff.create(in_img.rows, in_img.cols, CV_8UC1);
+    ocv_ref.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    out_img.create(in_img.rows, in_img.cols, CV_OUT_TYPE); // create memory for output image
+    diff.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
 #else
-    ocv_ref.create(in_img.rows, in_img.cols, CV_8UC3);
-    out_img.create(in_img.rows, in_img.cols, CV_8UC3); // create memory for output image
-    diff.create(in_img.rows, in_img.cols, CV_8UC3);
+    ocv_ref.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    out_img.create(in_img.rows, in_img.cols, CV_OUT_TYPE); // create memory for output image
+    diff.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
 #endif
 
     // OpenCV reference:
@@ -60,7 +60,8 @@ int main(int argc, char** argv) {
     size_t image_out_size_bytes = image_in_size_bytes;
 
     // Call the top function
-    median_blur_accel((ap_uint<PTR_WIDTH>*)in_img.data, in_img.rows, in_img.cols, (ap_uint<PTR_WIDTH>*)out_img.data);
+    median_blur_accel((ap_uint<INPUT_PTR_WIDTH>*)in_img.data, in_img.rows, in_img.cols,
+                      (ap_uint<OUTPUT_PTR_WIDTH>*)out_img.data);
 
     // Write down output images:
     cv::imwrite("hls_out.jpg", out_img); // kernel output

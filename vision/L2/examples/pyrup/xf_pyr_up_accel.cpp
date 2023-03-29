@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-#include "xf_pyr_up_config.h"
+#include "xf_pyr_up_accel_config.h"
+
 extern "C" {
 void pyr_up_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                   ap_uint<OUTPUT_PTR_WIDTH>* img_out,
@@ -32,19 +33,19 @@ void pyr_up_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC_T, XF_CV_DEPTH_IN> in_mat(in_rows, in_cols);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN> in_mat(in_rows, in_cols);
     // clang-format off
     // clang-format on
 
-    xf::cv::Mat<TYPE, 2 * HEIGHT, 2 * WIDTH, NPC_T, XF_CV_DEPTH_OUT> out_mat(out_rows, out_cols);
+    xf::cv::Mat<OUT_TYPE, 2 * HEIGHT, 2 * WIDTH, NPPCX, XF_CV_DEPTH_OUT> out_mat(out_rows, out_cols);
 // clang-format off
 // clang-format on
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC_T, XF_CV_DEPTH_IN>(img_inp, in_mat);
-    xf::cv::pyrUp<TYPE, HEIGHT, WIDTH, NPC_T, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(in_mat, out_mat);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, TYPE, 2 * HEIGHT, 2 * WIDTH, NPC_T, XF_CV_DEPTH_OUT>(out_mat, img_out);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN>(img_inp, in_mat);
+    xf::cv::pyrUp<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(in_mat, out_mat);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, 2 * HEIGHT, 2 * WIDTH, NPPCX, XF_CV_DEPTH_OUT>(out_mat, img_out);
 }
 }

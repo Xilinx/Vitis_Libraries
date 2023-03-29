@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include <ap_int.h>
 #include <stdio.h>
-#include "xf_flip_config.h"
+#include "xf_flip_tb_config.h"
 #include "xcl2.hpp"
 #include "xf_opencl_wrap.hpp"
 
@@ -48,11 +48,11 @@ int main(int argc, char** argv) {
 
 // Allocate memory for the output images:
 #if GRAY
-    out_img.create(in_gray.rows, in_gray.cols, CV_8UC1);
-    out_hls.create(in_gray.rows, in_gray.cols, CV_8UC1);
+    out_img.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
+    out_hls.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
 #else
-    out_img.create(in_gray.rows, in_gray.cols, CV_8UC3);
-    out_hls.create(in_gray.rows, in_gray.cols, CV_8UC3);
+    out_img.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
+    out_hls.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
 #endif
 
     int height = in_gray.rows;
@@ -76,9 +76,9 @@ int main(int argc, char** argv) {
     direction = 0;
 #endif
 
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(TYPE, NPC1) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(TYPE, NPC1) << std::endl;
-    std::cout << "NPPC:" << NPC1 << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     ////////////////////	HLS TOP function call	/////////////////
 

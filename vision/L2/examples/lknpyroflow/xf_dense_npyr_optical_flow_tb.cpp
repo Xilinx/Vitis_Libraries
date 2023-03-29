@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 #include "ap_int.h"
 #include "hls_stream.h"
-#include "xf_dense_npyr_optical_flow_config.h"
+#include "xf_dense_npyr_optical_flow_tb_config.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -109,7 +109,7 @@ static void getOutPix(float* fx, float* fy, pix_t* p, hls::stream<rgba_t>& out_p
 static void writeMatRowsRGBA(hls::stream<rgba_t>& pixStream, unsigned int* dst, int rows, int cols, int size) {
     for (int i = 0; i < size; i++) {
 // clang-format off
-        #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS*COLS/NPC
+        #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS*COLS/NPPCX
         #pragma HLS PIPELINE
         // clang-format on
         rgba_t tmpData = pixStream.read();
@@ -158,8 +158,8 @@ int main(int argc, char** argv) {
     char out_string[200];
 
 #if HLS
-    static xf::cv::Mat<XF_32FC1, MAX_HEIGHT, MAX_WIDTH, OF_PIX_PER_CLOCK> flowx(frame0.rows, frame0.cols);
-    static xf::cv::Mat<XF_32FC1, MAX_HEIGHT, MAX_WIDTH, OF_PIX_PER_CLOCK> flowy(frame0.rows, frame0.cols);
+    static xf::cv::Mat<OUT_TYPE, MAX_HEIGHT, MAX_WIDTH, OF_PIX_PER_CLOCK> flowx(frame0.rows, frame0.cols);
+    static xf::cv::Mat<OUT_TYPE, MAX_HEIGHT, MAX_WIDTH, OF_PIX_PER_CLOCK> flowy(frame0.rows, frame0.cols);
 
 #endif
     /////////////////////////////////////// CL ////////////////////////
@@ -181,9 +181,9 @@ int main(int argc, char** argv) {
     cl::Context context(device);
 
     std::cout << "device context created" << std::endl;
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPPC) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPPC) << std::endl;
-    std::cout << "NPPC:" << NPPC << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPCX:" << NPPCX << std::endl;
 
     cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
 

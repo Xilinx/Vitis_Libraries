@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 
 #include "common/xf_headers.hpp"
 #include "xcl2.hpp"
-#include "xf_bilateral_filter_config.h"
-
+#include "xf_bilateral_filter_tb_config.h"
 #include <time.h>
 
 int main(int argc, char** argv) {
@@ -108,9 +107,9 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::cout << "INFO: Device found - " << device_name << std::endl;
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(TYPE, NPC1) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(TYPE, NPC1) << std::endl;
-    std::cout << "NPPC:" << NPC1 << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(OUT_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(OUT_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     // Load binary:
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_bilateralfilter");

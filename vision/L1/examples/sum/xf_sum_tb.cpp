@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_sum_config.h"
+#include "xf_sum_tb_config.h"
 #include <ap_int.h>
 #include <stdlib.h>
 
@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
     double* scl = (double*)malloc(channels * sizeof(double));
 
     // Call the top function
-    sum_accel((ap_uint<PTR_WIDTH>*)in_gray.data, scl);
+    sum_accel((ap_uint<INPUT_PTR_WIDTH>*)in_gray.data, scl);
 
     for (int i = 0; i < in_gray.channels(); i++) {
         printf("sum of opencv is=== %lf\n", ocv_scl[i]);

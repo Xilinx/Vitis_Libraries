@@ -41,10 +41,13 @@ class preprocessgraph : public adf::graph {
     preprocessgraph() {
         k1 = kernel::create(pp_top);
 
-        connect<adf::window<TILE_WINDOW_SIZE> >(in1, k1.in[0]);
-
         // blob window passsed directly to output
-        connect<window<TILE_WINDOW_SIZE> >(k1.out[0], out);
+        adf::connect<>(in1, k1.in[0]);
+        adf::connect<>(k1.out[0], out);
+
+        adf::dimensions(k1.in[0]) = {ELEM_WITH_METADATA};
+        adf::dimensions(k1.out[0]) = {ELEM_WITH_METADATA};
+
         connect<parameter>(alpha, async(k1.in[1]));
 #if OP_MODE == 1 || OP_MODE == 2
         connect<parameter>(beta, async(k1.in[2]));

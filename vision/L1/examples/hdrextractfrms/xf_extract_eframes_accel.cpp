@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,9 @@
 #ifndef __XF_EXTRACT_EFRAMES_ACCEL_CPP__
 #define __XF_EXTRACT_EFRAMES_ACCEL_CPP__
 
-#include "xf_extract_eframes_config.h"
+#include "xf_extract_eframes_accel_config.h"
 
-static constexpr int __XF_DEPTH =
-    (XF_MAX_COLS * XF_MAX_ROWS * (XF_PIXELWIDTH(XF_SRC_T, XF_NPPC)) / 8) / (IMAGE_PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH = (WIDTH * HEIGHT * (XF_PIXELWIDTH(IN_TYPE, NPPCX)) / 8) / (IMAGE_PTR_WIDTH / 8);
 static constexpr int __XF_DEPTH_2 = __XF_DEPTH * 2;
 
 /************************************************************************************
@@ -113,7 +112,7 @@ void GRAYMat2AXIvideo(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XF_CV_DEPTH_GRAY>& gra
 
     const int m_pix_width = XF_PIXELWIDTH(TYPE, NPPC) * XF_NPIXPERCYCLE(NPPC);
 
-    int depth = XF_DTPIXELDEPTH(TYPE, XF_NPPC);
+    int depth = XF_DTPIXELDEPTH(TYPE, NPPCX);
 
     bool sof = true; // Indicates start of frame
 
@@ -187,10 +186,9 @@ void extractEFrames_accel(InVideoStrm_t_e_s& in_ptr,
     // -----------------------------------------------
     // Internal xf::Mat objects
     // -----------------------------------------------
-    xf::cv::Mat<XF_SRC_T, XF_MAX_ROWS * 2, XF_MAX_COLS + NUM_H_BLANK, XF_NPPC, XF_CV_DEPTH_IN> InImg(
-        height * 2, width + NUM_H_BLANK);
-    xf::cv::Mat<XF_SRC_T, XF_MAX_ROWS, XF_MAX_COLS, XF_NPPC, XF_CV_DEPTH_LEF> LEF_Img(height, width);
-    xf::cv::Mat<XF_SRC_T, XF_MAX_ROWS, XF_MAX_COLS, XF_NPPC, XF_CV_DEPTH_SEF> SEF_Img(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT * 2, WIDTH + NUM_H_BLANK, NPPCX, XF_CV_DEPTH_IN> InImg(height * 2, width + NUM_H_BLANK);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_LEF> LEF_Img(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_SEF> SEF_Img(height, width);
 
 // -----------------------------------------------
 // Actual Body
@@ -199,14 +197,13 @@ void extractEFrames_accel(InVideoStrm_t_e_s& in_ptr,
     #pragma HLS DATAFLOW
     // clang-format on
 
-    AXIVideo2BayerMat<XF_SRC_T, XF_MAX_ROWS * 2, XF_MAX_COLS + NUM_H_BLANK, XF_NPPC, XF_CV_DEPTH_IN>(in_ptr, InImg);
+    AXIVideo2BayerMat<IN_TYPE, HEIGHT * 2, WIDTH + NUM_H_BLANK, NPPCX, XF_CV_DEPTH_IN>(in_ptr, InImg);
     // Actual accelerator
-    xf::cv::extractExposureFrames<XF_SRC_T, NUM_V_BLANK_LINES, NUM_H_BLANK, XF_MAX_ROWS, XF_MAX_COLS, XF_NPPC,
-                                  XF_USE_URAM, XF_CV_DEPTH_IN, XF_CV_DEPTH_LEF, XF_CV_DEPTH_SEF>(InImg, LEF_Img,
-                                                                                                 SEF_Img);
+    xf::cv::extractExposureFrames<IN_TYPE, NUM_V_BLANK_LINES, NUM_H_BLANK, HEIGHT, WIDTH, NPPCX, XF_USE_URAM,
+                                  XF_CV_DEPTH_IN, XF_CV_DEPTH_LEF, XF_CV_DEPTH_SEF>(InImg, LEF_Img, SEF_Img);
 
-    GRAYMat2AXIvideo<XF_SRC_T, XF_MAX_ROWS, XF_MAX_COLS, XF_NPPC, XF_CV_DEPTH_LEF>(LEF_Img, lef_ptr);
-    GRAYMat2AXIvideo<XF_SRC_T, XF_MAX_ROWS, XF_MAX_COLS, XF_NPPC, XF_CV_DEPTH_SEF>(SEF_Img, sef_ptr);
+    GRAYMat2AXIvideo<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_LEF>(LEF_Img, lef_ptr);
+    GRAYMat2AXIvideo<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_SEF>(SEF_Img, sef_ptr);
 }
 
 #endif // __XF_EXTRACT_EFRAMES_ACCEL_CPP__

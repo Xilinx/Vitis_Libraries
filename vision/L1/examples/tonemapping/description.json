@@ -21,21 +21,21 @@
         "source": [
             "${XF_PROJ_ROOT}/L1/examples/tonemapping/xf_tonemapping_accel.cpp"
         ], 
-        "cflags": "-I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/tonemapping/build -I ./ -D__SDSVHLS__ -std=c++0x", 
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/tonemapping/config -I ./ -D__SDSVHLS__ -std=c++0x", 
         "csimflags": "-I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
     }, 
     "testbench": {
         "source": [
             "${XF_PROJ_ROOT}/L1/examples/tonemapping/xf_tonemapping_tb.cpp"
         ], 
-        "cflags": "-I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/tonemapping/build -I ./ -D__SDSVHLS__ -std=c++0x", 
+        "cflags": "-I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/tonemapping/config -I ./ -D__SDSVHLS__ -std=c++0x", 
         "ldflags": "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core", 
         "argv": {
             "hls_csim": " ${XF_PROJ_ROOT}/data/512x512.png ", 
             "hls_cosim": " ${XF_PROJ_ROOT}/data/512x512.png "
         }, 
         "stdmath": false, 
-        "csimflags": "-I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/tonemapping/build -I ./ -D__SDSVHLS__ -std=c++0x"
+        "csimflags": "-I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/tonemapping/config -I ./ -D__SDSVHLS__ -std=c++0x"
     }, 
     "testinfo": {
         "disable": false, 

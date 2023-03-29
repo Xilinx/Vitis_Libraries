@@ -320,7 +320,7 @@ For x86Simulation / AIE simulation, top level application had simple ADF API cal
 
    5. Sync output device buffer objects to host memory.
 
-   xrtBOSync(out_bohdl, XCL_BO_SYNC_BO_FROM_DEVICE , output_size_in_bytes,/*OFFSET=*/ 0);
+   xrtBOSync(out_bohdl, XCL_BO_SYNC_BO_FROM_PLATFORM , output_size_in_bytes,/*OFFSET=*/ 0);
 
    //6. post-processing on host memory - "host_out
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_convert_bitdepth_config.h"
+#include "xf_convert_bitdepth_tb_config.h"
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -35,15 +35,15 @@ int main(int argc, char** argv) {
     }
 
     // Convert first to initial type:
-    in_img.convertTo(input_img, OCV_INTYPE);
+    in_img.convertTo(input_img, CV_IN_TYPE);
 
     // Create memory for output image
-    cv::Mat ocv_ref(in_img.rows, in_img.cols, OCV_OUTTYPE);
-    cv::Mat diff(in_img.rows, in_img.cols, OCV_OUTTYPE);
-    cv::Mat out_img(in_img.rows, in_img.cols, OCV_OUTTYPE);
+    cv::Mat ocv_ref(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    cv::Mat diff(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    cv::Mat out_img(in_img.rows, in_img.cols, CV_OUT_TYPE);
 
     // Opencv reference::
-    input_img.convertTo(ocv_ref, OCV_OUTTYPE);
+    input_img.convertTo(ocv_ref, CV_OUT_TYPE);
     cv::imwrite("out_ocv.jpg", ocv_ref);
 
     int shift = 0;

@@ -28,7 +28,7 @@ void cca_custom_accel(uint8_t* in_ptr, uint8_t* fwd_ptr, uint8_t* out_ptr, int* 
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_OUT> rev_out_mat(height, width);
+    xf::cv::Mat<TYPE, HEIGHT, STRIDE, NPIX, XF_CV_DEPTH_OUT> rev_out_mat(height, width);
 
 // clang-format off
 #pragma HLS DATAFLOW
@@ -36,8 +36,8 @@ void cca_custom_accel(uint8_t* in_ptr, uint8_t* fwd_ptr, uint8_t* out_ptr, int* 
 
     int tmp_def;
 
-    xf::cv::rev_cca<TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_OUT>(in_ptr, rev_out_mat, height, width);
-    xf::cv::pass_2<TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_OUT>(fwd_ptr, rev_out_mat, out_ptr, tmp_def, height, width);
+    xf::cv::rev_cca<TYPE, HEIGHT, STRIDE, NPIX, XF_CV_DEPTH_OUT>(in_ptr, rev_out_mat, height, width);
+    xf::cv::pass_2<TYPE, HEIGHT, STRIDE, NPIX, XF_CV_DEPTH_OUT>(fwd_ptr, rev_out_mat, out_ptr, tmp_def, height, width);
 
     // xf::cv::ccaCustom<TYPE, HEIGHT, WIDTH, NPIX>(fwd_ptr, in_ptr, rev_out_mat, out_ptr, tmp_def, height,
     //                               width);

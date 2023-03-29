@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_histogram_config.h"
+#include "xf_histogram_tb_config.h"
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
     int cols = in_img.cols;
 
     //////////////// Top function call ///////////////////////
-    histogram_accel((ap_uint<PTR_WIDTH>*)in_img.data, histogram, rows, cols);
+    histogram_accel((ap_uint<INPUT_PTR_WIDTH>*)in_img.data, histogram, rows, cols);
 
 #if GRAY
     FILE *fp, *fp1;

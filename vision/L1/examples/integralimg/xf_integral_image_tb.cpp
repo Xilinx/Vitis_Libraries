@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_integral_image_config.h"
+#include "xf_integral_image_tb_config.h"
 
 int main(int argc, char** argv) {
     cv::Mat in_img, in_img1, out_img, ocv_ref, ocv_ref1;
@@ -34,8 +34,8 @@ int main(int argc, char** argv) {
     }
 
     // create memory for output images
-    ocv_ref.create(in_img.rows, in_img.cols, CV_32S);
-    ocv_ref1.create(in_img.rows, in_img.cols, CV_32S);
+    ocv_ref.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    ocv_ref1.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
 
     cv::integral(in_img, ocv_ref, -1);
 
@@ -48,8 +48,8 @@ int main(int argc, char** argv) {
     imwrite("out_ocv.png", ocv_ref1);
 
     // create memory for output image
-    diff.create(in_img.rows, in_img.cols, CV_32S);
-    out_img.create(in_img.rows, in_img.cols, CV_32S);
+    diff.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    out_img.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
 
     int cols = in_img.cols;
     int rows = in_img.rows;

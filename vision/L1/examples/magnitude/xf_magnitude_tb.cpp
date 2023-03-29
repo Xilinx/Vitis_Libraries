@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_magnitude_config.h"
+#include "xf_magnitude_tb_config.h"
 
 ////////////    Reference for L1NORM    //////////
 int ComputeMagnitude(cv::Mat gradx, cv::Mat grady, cv::Mat& dst) {
@@ -75,25 +75,29 @@ int main(int argc, char** argv) {
     magnitude_accel((ap_uint<INPUT_PTR_WIDTH>*)c_grad_x.data, (ap_uint<INPUT_PTR_WIDTH>*)c_grad_y.data,
                     (ap_uint<OUTPUT_PTR_WIDTH>*)out_img.data, rows, cols);
 
-/////////////////    OpenCV reference  /////////////////
-#if L1NORM
-    ComputeMagnitude(c_grad_x, c_grad_y, ocv_ref1);
-#elif L2NORM
-    cv::Sobel(in_img, c_grad_x1, CV_32FC1, 1, 0, filter_size, scale, delta, cv::BORDER_CONSTANT);
-    Sobel(in_img, c_grad_y1, CV_32FC1, 0, 1, filter_size, scale, delta, cv::BORDER_CONSTANT);
-    magnitude(c_grad_x1, c_grad_y1, ocv_ref2);
-#endif
+    /////////////////    OpenCV reference  /////////////////
 
-#if L1NORM
-    imwrite("ref_img.jpg", ocv_ref1); // save the reference image
-    absdiff(ocv_ref1, out_img, diff); // Compute absolute difference image
-    imwrite("diff_img.jpg", diff);    // Save the difference image for debugging purpose
-#elif L2NORM
-    ocv_ref2.convertTo(ocv_res, CV_16S); //  convert from 32F type to 16S type for finding the AbsDiff
-    imwrite("ref_img.jpg", ocv_res);     // save the reference image
-    absdiff(ocv_res, out_img, diff);     // Compute absolute difference image
-    imwrite("diff_img.jpg", diff);       // Save the difference image for debugging purpose
-#endif
+    switch (NORM_TYPE) {
+        case 0:
+            ComputeMagnitude(c_grad_x, c_grad_y, ocv_ref1);
+            imwrite("ref_img.jpg", ocv_ref1); // save the reference image
+            absdiff(ocv_ref1, out_img, diff); // Compute absolute difference image
+            imwrite("diff_img.jpg", diff);    // Save the difference image for debugging purpose
+            break;
+
+        case 1:
+            cv::Sobel(in_img, c_grad_x1, CV_32FC1, 1, 0, filter_size, scale, delta, cv::BORDER_CONSTANT);
+            Sobel(in_img, c_grad_y1, CV_32FC1, 0, 1, filter_size, scale, delta, cv::BORDER_CONSTANT);
+            magnitude(c_grad_x1, c_grad_y1, ocv_ref2);
+            ocv_ref2.convertTo(ocv_res, CV_16S); //  convert from 32F type to 16S type for finding the AbsDiff
+            imwrite("ref_img.jpg", ocv_res);     // save the reference image
+            absdiff(ocv_res, out_img, diff);     // Compute absolute difference image
+            imwrite("diff_img.jpg", diff);       // Save the difference image for debugging purpose
+            break;
+
+        default:
+            break;
+    }
 
     // Find minimum and maximum differences
 
@@ -110,9 +114,9 @@ int main(int argc, char** argv) {
     }
 
     float err_per = 100.0 * (float)cnt / (in_img.rows * in_img.cols);
-    std::cout << "Minimum error in intensity =" << minval << "\t"
+    std::cout << "Minimum error in intensity = " << minval << "\t"
               << "Maximum error in intensity = " << maxval << "\t"
-              << "Percentage of pixels above error" << err_per << std::endl;
+              << "Percentage of pixels above error = " << err_per << std::endl;
 
     if (err_per > 0.0f) {
         fprintf(stderr, "ERROR: Test Failed.\n ");

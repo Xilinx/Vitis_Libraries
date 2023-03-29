@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-#include "xf_pyr_dense_optical_flow_config.h"
+#include "xf_pyr_dense_optical_flow_accel_config.h"
+
 extern "C" {
 void pyr_down_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                     ap_uint<OUTPUT_PTR_WIDTH>* img_out,
@@ -35,12 +36,12 @@ void pyr_down_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC_T, XF_CV_DEPTH_IN> in_mat;
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN> in_mat;
     // clang-format off
     // clang-format on
     in_mat.rows = in_rows;
     in_mat.cols = in_cols;
-    xf::cv::Mat<TYPE, (HEIGHT / 2), (WIDTH / 2), NPC_T, XF_CV_DEPTH_OUT> out_mat;
+    xf::cv::Mat<IN_TYPE, (HEIGHT / 2), (WIDTH / 2), NPPCX, XF_CV_DEPTH_OUT> out_mat;
     // clang-format off
     // clang-format on
     out_mat.rows = out_rows;
@@ -49,8 +50,8 @@ void pyr_down_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC_T, XF_CV_DEPTH_IN>(img_inp, in_mat);
-    xf::cv::pyrDown<TYPE, HEIGHT, WIDTH, NPC_T, XF_USE_URAM, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(in_mat, out_mat);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, TYPE, (HEIGHT / 2), (WIDTH / 2), NPC_T, XF_CV_DEPTH_OUT>(out_mat, img_out);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN>(img_inp, in_mat);
+    xf::cv::pyrDown<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_USE_URAM, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(in_mat, out_mat);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, IN_TYPE, (HEIGHT / 2), (WIDTH / 2), NPPCX, XF_CV_DEPTH_OUT>(out_mat, img_out);
 }
 }

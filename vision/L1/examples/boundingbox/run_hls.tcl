@@ -25,12 +25,11 @@ if {![info exists CLKP]} {
 
 open_project -reset $PROJ
 
-add_files "${XF_PROJ_ROOT}/L1/examples/boundingbox/xf_boundingbox_accel.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/boundingbox/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDA_MEM_MAP__ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/boundingbox/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
-add_files -tb "${XF_PROJ_ROOT}/L1/examples/boundingbox/xf_boundingbox_tb.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/boundingbox/build -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDA_MEM_MAP__ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/boundingbox/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+add_files "${XF_PROJ_ROOT}/L1/examples/boundingbox/xf_boundingbox_accel.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/boundingbox/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDA_MEM_MAP__ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/boundingbox/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+add_files -tb "${XF_PROJ_ROOT}/L1/examples/boundingbox/xf_boundingbox_tb.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/boundingbox/config -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDA_MEM_MAP__ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/boundingbox/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
 set_top boundingbox_accel
 
 open_solution -reset $SOLN
-
 
 
 

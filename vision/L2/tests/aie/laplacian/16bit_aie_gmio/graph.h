@@ -37,11 +37,12 @@ class laplacianGraph : public adf::graph {
     laplacianGraph() {
         k1 = kernel::create(laplacian);
 
-        connect<window<TILE_WINDOW_SIZE> >(inprt, k1.in[0]);
-
+        connect<>(inprt, k1.in[0]);
         adf::connect<parameter>(kernelCoefficients, async(k1.in[1]));
+        connect<>(k1.out[0], outprt);
 
-        connect<window<TILE_WINDOW_SIZE> >(k1.out[0], outprt);
+        adf::dimensions(k1.in[0]) = {ELEM_WITH_METADATA};
+        adf::dimensions(k1.out[0]) = {ELEM_WITH_METADATA};
 
         source(k1) = "xf_laplacian.cc";
 

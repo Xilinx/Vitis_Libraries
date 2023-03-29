@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 #include "common/xf_headers.hpp"
 #include "opencv2/imgproc/types_c.h"
-#include "xf_clahe_config.h"
+#include "xf_clahe_tb_config.h"
 #include "xf_opencl_wrap.hpp"
 #include <fstream>
 int main(int argc, char** argv) {
@@ -53,9 +53,9 @@ int main(int argc, char** argv) {
     int clip = 3;
     int tilesY = 4;
     int tilesX = 4;
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPC) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPC) << std::endl;
-    std::cout << "NPPC:" << NPC << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     (void)cl_kernel_mgr::registerKernel("clahe_accel", "krnl_clahe", XCLIN(yuv_planes_hls[0]), XCLOUT(dst_hls),
                                         XCLIN(rows), XCLIN(cols), XCLIN(clip), XCLIN(tilesY), XCLIN(tilesX));

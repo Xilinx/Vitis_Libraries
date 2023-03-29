@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 #include "common/xf_headers.hpp"
 #include "xcl2.hpp"
-#include "xf_quantizationdithering_config.h"
+#include "xf_quantizationdithering_tb_config.h"
 #include <opencv2/core/matx.hpp>
 
 #define MAXVALUE MAXREPRESENTEDVALUE
@@ -39,14 +39,14 @@ cv::Mat floyd_steinberg_dithering(cv::Mat image, int scale) {
     for (int rowID = 0; rowID < image.rows; rowID++) {
         for (int colID = 0; colID < image.cols; colID++) {
             if (image.channels() == 1) {
-#if IN16BIT_EN == 1
+#if T_16U
                 new_image.at<float>(rowID, colID) = (float)image.at<unsigned short>(rowID, colID);
 #else
                 new_image.at<float>(rowID, colID) = (float)image.at<unsigned char>(rowID, colID);
 #endif
             } else if (image.channels() == 3) {
                 for (int c = 0; c < 3; c++)
-#if IN16BIT_EN == 1
+#if T_16U
                     new_image.at<cv::Vec3f>(rowID, colID)[c] = (float)image.at<cv::Vec3w>(rowID, colID)[c];
 #else
                     new_image.at<cv::Vec3f>(rowID, colID)[c] = (float)image.at<cv::Vec3b>(rowID, colID)[c];
@@ -149,7 +149,7 @@ int main(int argc, char** argv) {
     cv::Mat in_img = cv::imread(argv[1], 0);
 #else
 
-#if IN16BIT_EN == 1
+#if T_16U
     cv::Mat in_img = cv::imread(argv[1], -1);
 #else
     cv::Mat in_img = cv::imread(argv[1], 1);
@@ -172,7 +172,6 @@ int main(int argc, char** argv) {
     out_img.create(cv::Size(in_width, in_height), CV_8UC1);
     outref_img.create(cv::Size(in_width, in_height), CV_8UC1);
     error.create(cv::Size(in_width, in_height), CV_32FC1);
-    img_fl.create(cv::Size(in_width, in_height), CV_32FC1);
 #else
     out_img.create(cv::Size(in_width, in_height), CV_8UC3);
     outref_img.create(cv::Size(in_width, in_height), CV_8UC3);
@@ -182,14 +181,14 @@ int main(int argc, char** argv) {
     outref_img = floyd_steinberg_dithering(in_img, SCALEFACTOR);
 
 #if GRAY
-#if IN16BIT_EN == 1
+#if T_16U
     size_t image_in_size_bytes = in_height * in_width * 1 * sizeof(unsigned short);
 #else
     size_t image_in_size_bytes = in_height * in_width * 1 * sizeof(unsigned char);
 #endif
     size_t image_out_size_bytes = in_height * in_width * 1 * sizeof(unsigned char);
 #else
-#if IN16BIT_EN == 1
+#if T_16U
     size_t image_in_size_bytes = in_height * in_width * 3 * sizeof(unsigned short);
 #else
     size_t image_in_size_bytes = in_height * in_width * 3 * sizeof(unsigned char);
@@ -211,9 +210,9 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::cout << "INFO: Device found - " << device_name << std::endl;
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(TYPEIN, NPC_T) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(TYPEIN, NPC_T) << std::endl;
-    std::cout << "NPPC:" << NPC_T << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     // Load binary:
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_quantizationdithering");

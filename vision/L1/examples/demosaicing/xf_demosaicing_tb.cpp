@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_demosaicing_config.h"
+#include "xf_demosaicing_tb_config.h"
 
 void demosaicImage(cv::Mat cfa_output, cv::Mat& output_image, int code);
 
@@ -139,11 +139,11 @@ int main(int argc, char** argv) {
     cv::imwrite("cfa_output.png", cfa_bayer_output);
 
 #if (T_16U)
-    cfa_bayer_output.convertTo(cfa_bayer_16bit, CV_INTYPE);
+    cfa_bayer_output.convertTo(cfa_bayer_16bit, CV_IN_TYPE);
 #endif
 
     // Demosaic the CFA output using reference code
-    cv::Mat ref_output_image(img.rows, img.cols, CV_OUTTYPE);
+    cv::Mat ref_output_image(img.rows, img.cols, CV_OUT_TYPE);
 #if (T_16U)
     demosaicImage(cfa_bayer_16bit, ref_output_image, code);
 #else
@@ -153,7 +153,7 @@ int main(int argc, char** argv) {
     cv::imwrite("reference_output_image.png", ref_output_image);
 
     // Allocate memory for kernel output:
-    cv::Mat output_image_hls(img.rows, img.cols, CV_OUTTYPE);
+    cv::Mat output_image_hls(img.rows, img.cols, CV_OUT_TYPE);
 
 // OpenCL section:
 #if T_16U

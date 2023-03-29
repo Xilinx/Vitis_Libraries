@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright 2023 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -168,22 +168,58 @@ void degamma(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
     assert(((bayerp == XF_BAYER_BG) || (bayerp == XF_BAYER_GB) || (bayerp == XF_BAYER_GR) || (bayerp == XF_BAYER_RG)) &&
            ("Unsupported Bayer pattern. Use anyone among: "
             "XF_BAYER_BG;XF_BAYER_GB;XF_BAYER_GR;XF_BAYER_RG"));
-    assert(((SRC_T == XF_8UC1) || (SRC_T == XF_16UC1)) && "Input TYPE must be XF_8UC1 or XF_16UC1");
-    assert(((DST_T == XF_8UC1) || (SRC_T == XF_16UC1)) && "OUTPUT TYPE must be XF_8UC1 or XF_16UC1");
-    assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2)) && "NPC must be XF_NPPC1, XF_NPPC2 ");
+    assert(((SRC_T == XF_8UC1) || (SRC_T == XF_14UC1) || (SRC_T == XF_16UC1)) &&
+           "Input TYPE must be XF_8UC1 or XF_14UC1 or XF_16UC1");
+    assert(((DST_T == XF_8UC1) || (DST_T == XF_14UC1) || (DST_T == XF_16UC1)) &&
+           "OUTPUT TYPE must be XF_8UC1 or XF_14UC1 or XF_16UC1");
+    assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2) || (NPC == XF_NPPC4) || (NPC == XF_NPPC8)) &&
+           "NPC must be XF_NPPC1, XF_NPPC2 ");
     assert((src.rows <= ROWS) && (src.cols <= COLS) && "ROWS and COLS should be greater than input image size ");
 #endif
     int rows = src.rows;
     int cols = src.cols;
 
     uint16_t cols_shifted = cols >> (XF_BITSHIFT(NPC));
+    ap_ufixed<32, 16> copy_params[3][N][3];
 
-    xFcompute<SRC_T, DST_T, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT, (COLS >> (XF_BITSHIFT(NPC)), N)>(
-        src, dst, params, bayerp, rows, cols_shifted);
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < N; j++) {
+            for (int k = 0; k < 3; k++) {
+                copy_params[i][j][k] = params[i][j][k];
+            }
+        }
+    }
+#pragma HLS ARRAY_PARTITION variable = copy_params complete dim = 2
+
+    xFcompute<SRC_T, DST_T, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT, (COLS >> (XF_BITSHIFT(NPC))), N>(
+        src, dst, copy_params, bayerp, rows, cols_shifted);
 
     return;
 }
 
+////////////Multi//////////////////
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
+          int N,
+          int STREAMS = 2>
+void degamma_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
+                   xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& dst,
+                   ap_ufixed<32, 16> dgam_params[STREAMS][3][N][3],
+                   unsigned short dgam_bayer[STREAMS],
+                   int strm_id) {
+// clang-format off
+#pragma HLS ARRAY_PARTITION variable= dgam_params dim=1 complete
+#pragma HLS ARRAY_PARTITION variable= dgam_bayer dim=1 complete
+   // clang-format on                
+   degamma<SRC_T, DST_T, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT, N>(src, dst, dgam_params[strm_id],
+                                          dgam_bayer[strm_id]);             
+
+}
 } // namespace cv
 } // namespace xf
 

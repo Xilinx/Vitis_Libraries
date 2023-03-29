@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 #include "common/xf_headers.hpp"
 #include "xf_vision_message.h"
 #define XF_HLS_MODE 1
-#include "xf_black_level_config.h"
+#include "xf_black_level_tb_config.h"
 #define BLACK_LEVEL 32
 
 #if XF_HLS_MODE

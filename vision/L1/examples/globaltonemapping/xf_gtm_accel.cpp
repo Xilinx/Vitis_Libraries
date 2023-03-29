@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#include "xf_gtm_config.h"
+#include "xf_gtm_accel_config.h"
 
-static constexpr int __XF_DEPTH_IN = (HEIGHT * WIDTH * XF_PIXELWIDTH(IN_TYPE, NPC1)) / INPUT_PTR_WIDTH;
-static constexpr int __XF_DEPTH_OUT = (HEIGHT * WIDTH * XF_PIXELWIDTH(OUT_TYPE, NPC1)) / OUTPUT_PTR_WIDTH;
+static constexpr int __XF_DEPTH_IN = (HEIGHT * WIDTH * XF_PIXELWIDTH(IN_TYPE, NPPCX)) / INPUT_PTR_WIDTH;
+static constexpr int __XF_DEPTH_OUT = (HEIGHT * WIDTH * XF_PIXELWIDTH(OUT_TYPE, NPPCX)) / OUTPUT_PTR_WIDTH;
 
 static ap_ufixed<16, 4> mean1 = 0;
 static ap_ufixed<16, 4> mean2 = 0;
@@ -44,19 +44,19 @@ void gtm_kernel(ap_uint<INPUT_PTR_WIDTH>* src,
 #pragma HLS INLINE OFF
     // clang-format on
 
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> imgInput(height, width);
-    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> imgOutput(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN> imgInput(height, width);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT> imgOutput(height, width);
 
 // clang-format off
 #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(src, imgInput);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN>(src, imgInput);
 
-    gtm<IN_TYPE, OUT_TYPE, SIN_CHANNEL_IN_TYPE, SIN_CHANNEL_OUT_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN,
+    gtm<IN_TYPE, OUT_TYPE, SIN_CHANNEL_IN_TYPE, SIN_CHANNEL_OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN,
         XF_CV_DEPTH_OUT>(imgInput, imgOutput, mean1, mean2, L_max1, L_max2, L_min1, L_min2, c1, c2);
 
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(imgOutput, dst);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT>(imgOutput, dst);
 }
 
 void gtm_accel(

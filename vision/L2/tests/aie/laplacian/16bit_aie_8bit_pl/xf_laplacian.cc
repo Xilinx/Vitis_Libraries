@@ -17,6 +17,6 @@
 #include "kernels_16b.h"
 #include "imgproc/xf_laplacian_16b_aie.hpp"
 
-void laplacian(input_window_int16* input, const int16 (&kernel_coeff)[16], output_window_int16* output) {
+void laplacian(adf::input_buffer<int16>& input, const int16 (&kernel_coeff)[16], adf::output_buffer<int16>& output) {
     xf::cv::aie::laplacian_k3_border(input, kernel_coeff, output);
 };

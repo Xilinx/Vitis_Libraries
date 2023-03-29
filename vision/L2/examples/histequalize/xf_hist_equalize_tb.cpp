@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_hist_equalize_config.h"
-
+#include "xf_hist_equalize_tb_config.h"
 #include "xcl2.hpp"
 
 int main(int argc, char** argv) {
@@ -43,9 +42,9 @@ int main(int argc, char** argv) {
 
     // create memory for output images
     in_img.copyTo(in_img_copy);
-    out_img.create(height, width, XF_8UC1);
-    ocv_ref.create(height, width, XF_8UC1);
-    diff.create(height, width, XF_8UC1);
+    out_img.create(height, width, OUT_TYPE);
+    ocv_ref.create(height, width, OUT_TYPE);
+    diff.create(height, width, OUT_TYPE);
 
     ///////////////// 	Opencv  Reference  ////////////////////////
     cv::equalizeHist(in_img, ocv_ref);
@@ -58,9 +57,9 @@ int main(int argc, char** argv) {
 
     cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
 
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPC_T) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPC_T) << std::endl;
-    std::cout << "NPPC:" << NPC_T << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_hist_equalize");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,7 @@
 #include "common/xf_headers.hpp"
 #include "xcl2.hpp"
 
-#include "xf_accumulate_config.h"
-
+#include "xf_accumulate_image_tb_config.h"
 int main(int argc, char** argv) {
     if (argc != 3) {
         fprintf(stderr, "Usage: %s <INPUT IMAGE PATH 1> <INPUT IMAGE PATH 2>\n", argv[0]);
@@ -49,13 +48,13 @@ int main(int argc, char** argv) {
 
 // Allocate memory for the output images:
 #if GRAY
-    cv::Mat out_gray(in_gray.rows, in_gray.cols, CV_16U);
+    cv::Mat out_gray(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
     cv::Mat ocv_ref_32f(in_gray.rows, in_gray.cols, CV_32F);
-    cv::Mat ocv_ref(in_gray.rows, in_gray.cols, CV_16U);
+    cv::Mat ocv_ref(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
 #else
-    cv::Mat out_gray(in_gray.rows, in_gray.cols, CV_16UC3);
+    cv::Mat out_gray(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
     cv::Mat ocv_ref_32f(in_gray.rows, in_gray.cols, CV_32FC3);
-    cv::Mat ocv_ref(in_gray.rows, in_gray.cols, CV_16UC3);
+    cv::Mat ocv_ref(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
 #endif
 
     int height = in_gray.rows;
@@ -67,7 +66,7 @@ int main(int argc, char** argv) {
     // OpenCV functions
     in_gray1.convertTo(ocv_ref_32f, CV_32F);
     cv::accumulate(in_gray, ocv_ref_32f, cv::noArray());
-    ocv_ref_32f.convertTo(ocv_ref, CV_16U);
+    ocv_ref_32f.convertTo(ocv_ref, CV_OUT_TYPE);
 
     // Write OpenCV reference image
     cv::imwrite("out_ocv.jpg", ocv_ref);
@@ -89,9 +88,9 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::cout << "INFO: Device found - " << device_name << std::endl;
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPC1) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPC1) << std::endl;
-    std::cout << "NPPC:" << NPC1 << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     // Load binary:
 

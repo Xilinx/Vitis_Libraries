@@ -183,6 +183,20 @@ static void analyzeDiff(::cv::Mat& diff_img, int err_thresh, float& err_per) {
     std::cout << "\tMaximum error in intensity = " << maxval << std::endl;
     std::cout << "\tPercentage of pixels above error threshold = " << err_per << std::endl;
 }
+
+static void remapPreproc(::cv::Mat& mapy, int& num_of_lines) {
+    float max = 0;
+    for (int i = 0; i < mapy.rows; i++) {
+        for (int j = 0; j < mapy.cols; j++) {
+            float val = abs(mapy.at<float>(i, j) - i);
+            max = max < val ? val : max;
+        }
+    }
+    if (max < 1) max = 1;
+
+    num_of_lines = 2 * max;
+    std::cout << "\tNumber of lines to be stored = " << num_of_lines << std::endl;
+}
 } // namespace cv
 } // namespace xf
 

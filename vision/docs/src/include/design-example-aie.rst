@@ -186,6 +186,6 @@ Run 'make help' to get list of commands and flows supported. Running below comma
 	source < path-to-Vitis-installation-directory >/settings64.sh
 	export SYSROOT=< path-to-platform-sysroot >
 	export EDGE_COMMON_SW=< path-to-rootfs-and-Image-files >
-	make all TARGET=hw DEVICE=< path-to-platform-directory >/< platform >.xpfm
+	make all TARGET=hw PLATFORM=< path-to-platform-directory >/< platform >.xpfm
 	
 .. include:: include/f2d-l3-pipeline.rst

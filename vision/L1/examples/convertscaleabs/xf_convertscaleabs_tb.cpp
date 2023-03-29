@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_convertscaleabs_config.h"
+#include "xf_convertscaleabs_tb_config.h"
 #include <ap_int.h>
 #include <stdlib.h>
 
@@ -38,9 +38,9 @@ int main(int argc, char** argv) {
     int width = in_gray.cols;
 
     // Allocate memory for the outputs:
-    ocv_ref.create(in_gray.rows, in_gray.cols, CV_8UC1);
-    out_gray.create(in_gray.rows, in_gray.cols, CV_8UC1);
-    diff.create(in_gray.rows, in_gray.cols, CV_8UC1);
+    ocv_ref.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
+    out_gray.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
+    diff.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
 
     float scale = 1.5;
     float shift = 0;

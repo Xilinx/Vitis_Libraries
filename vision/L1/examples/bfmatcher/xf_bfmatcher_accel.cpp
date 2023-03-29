@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 // =========================================================================
 
 // Configuration file
-#include "xf_bfmatcher_config.h"
+#include "xf_bfmatcher_accel_config.h"
 
 // =========================================================================
 // Some internal macros for ease of use and readability

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,20 @@
 
 #include "common/xf_headers.hpp"
 #include "xcl2.hpp"
-#include "xf_arithm_config.h"
-
+#include "xf_arithm_tb_config.h"
 int main(int argc, char** argv) {
-#if ARRAY
+    // #if ARRAY
     if (argc != 3) {
         fprintf(stderr, "Usage: %s <INPUT IMAGE PATH 1> <INPUT IMAGE PATH 2>\n", argv[0]);
         return EXIT_FAILURE;
     }
-#else
-    if (argc != 2) {
-        fprintf(stderr, "Usage: %s <INPUT IMAGE PATH 1>\n", argv[0]);
-        return EXIT_FAILURE;
-    }
+    // #else
+    //     if (argc != 2) {
+    //         fprintf(stderr, "Usage: %s <INPUT IMAGE PATH 1>\n", argv[0]);
+    //         return EXIT_FAILURE;
+    //     }
 
-#endif
+    // #endif
     cv::Mat in_img1, in_img2, in_gray1, in_gray2, out_img, ocv_ref, diff;
 
 #if GRAY
@@ -116,7 +115,7 @@ int main(int argc, char** argv) {
 #endif
 
 #if SCALAR
-    unsigned char scalar[XF_CHANNELS(TYPE, NPC1)];
+    unsigned char scalar[XF_CHANNELS(IN_TYPE, NPPCX)];
 
     for (int i = 0; i < in_gray1.channels(); ++i) {
         scalar[i] = 150;
@@ -138,9 +137,9 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::cout << "INFO: Device found - " << device_name << std::endl;
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(TYPE, NPC1) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(TYPE, NPC1) << std::endl;
-    std::cout << "NPPC:" << NPC1 << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     // Load binary:
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_arithm");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#include "xf_quantizationdithering_config.h"
+#include "xf_quantizationdithering_accel_config.h"
 
-static constexpr int __XF_DEPTH_IN = (HEIGHT * WIDTH * (XF_PIXELWIDTH(TYPEIN, NPC_T)) / 8) / (INPUT_PTR_WIDTH / 8);
-static constexpr int __XF_DEPTH_OUT = (HEIGHT * WIDTH * (XF_PIXELWIDTH(TYPEOUT, NPC_T)) / 8) / (OUTPUT_PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH_IN = (HEIGHT * WIDTH * (XF_PIXELWIDTH(IN_TYPE, NPPCX)) / 8) / (INPUT_PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH_OUT = (HEIGHT * WIDTH * (XF_PIXELWIDTH(OUT_TYPE, NPPCX)) / 8) / (OUTPUT_PTR_WIDTH / 8);
 
 void quantizationdithering_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                                  ap_uint<OUTPUT_PTR_WIDTH>* img_out,
@@ -31,15 +31,15 @@ void quantizationdithering_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<TYPEIN, HEIGHT, WIDTH, NPC_T, XF_CV_DEPTH_IN> in_mat(rows_in, cols_in);
-    xf::cv::Mat<TYPEOUT, HEIGHT, WIDTH, NPC_T, XF_CV_DEPTH_OUT> out_mat(rows_in, cols_in);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN> in_mat(rows_in, cols_in);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT> out_mat(rows_in, cols_in);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, TYPEIN, HEIGHT, WIDTH, NPC_T, XF_CV_DEPTH_IN>(img_inp, in_mat);
-    xf::cv::xf_QuatizationDithering<TYPEIN, TYPEOUT, HEIGHT, WIDTH, SCALEFACTOR, MAXREPRESENTEDVALUE, NPC_T,
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN>(img_inp, in_mat);
+    xf::cv::xf_QuatizationDithering<IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, SCALEFACTOR, MAXREPRESENTEDVALUE, NPPCX,
                                     XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(in_mat, out_mat);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, TYPEOUT, HEIGHT, WIDTH, NPC_T, XF_CV_DEPTH_OUT>(out_mat, img_out);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT>(out_mat, img_out);
 }

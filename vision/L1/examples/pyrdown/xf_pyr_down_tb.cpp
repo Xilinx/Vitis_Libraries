@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,12 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_pyr_down_config.h"
+#include "xf_pyr_down_tb_config.h"
 
 int main(int argc, char* argv[]) {
     cv::Mat input_image, output_image, output_diff_xf_cv, output_xf;
 
-#if RGBA
+#if RGB
     input_image = cv::imread(argv[1], 1);
 #else
     input_image = cv::imread(argv[1], 0);
@@ -32,12 +32,12 @@ int main(int argc, char* argv[]) {
     int output_height = (input_image.rows + 1) >> 1;
     int output_width = (input_image.cols + 1) >> 1;
 
-#if RGBA
-    output_xf.create(output_height, output_width, CV_8UC3);
-    output_diff_xf_cv.create(output_height, output_width, CV_8UC3);
+#if RGB
+    output_xf.create(output_height, output_width, CV_OUT_TYPE);
+    output_diff_xf_cv.create(output_height, output_width, CV_OUT_TYPE);
 #else
-    output_xf.create(output_height, output_width, CV_8UC1);
-    output_diff_xf_cv.create(output_height, output_width, CV_8UC1);
+    output_xf.create(output_height, output_width, CV_OUT_TYPE);
+    output_diff_xf_cv.create(output_height, output_width, CV_OUT_TYPE);
 #endif
 
     std::cout << "Input Height " << input_height << " Input_Width " << input_width << std::endl;

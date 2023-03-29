@@ -15,7 +15,7 @@
  */
 
 #include "imgproc/xf_zero_aie.hpp"
-
-void zero(input_window_int16* input, output_window_int16* output) {
+#include "kernels.h"
+void zero(adf::input_buffer<int16>& input, adf::output_buffer<int16>& output) {
     xf::cv::aie::zero_api(input, output);
 };

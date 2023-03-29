@@ -125,7 +125,8 @@ void custom_bgr2y8(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat
 #ifndef __SYNTHESIS__
     assert(((SRC_T == XF_8UC3) && (DST_T == XF_8UC1)) &&
            "Input and Output TYPE must be XF_8UC1 for 1-channel, XF_8UC3 for 3-channel");
-    assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2)) && "NPC must be XF_NPPC1, XF_NPPC2 ");
+    assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2) || (NPC == XF_NPPC4) || (NPC == XF_NPPC8)) &&
+           "NPC must be XF_NPPC1,XF_NPPC2, XF_NPPC4, XF_NPPC8 ");
     assert((_src_mat.rows <= ROWS) && (_src_mat.cols <= COLS) &&
            "ROWS and COLS should be greater or equal to input image size ");
 #endif

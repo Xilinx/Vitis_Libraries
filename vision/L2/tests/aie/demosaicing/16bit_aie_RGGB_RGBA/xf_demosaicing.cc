@@ -17,7 +17,7 @@
 #include "kernels.h"
 #include "imgproc/xf_demosaicing_impl.hpp"
 
-void DemosaicRunner::run(input_window<int16_t>* in, output_window<int16_t>* out) {
+void DemosaicRunner::run(adf::input_buffer<int16_t>& in, adf::output_buffer<int16_t>& out) {
     xf::cv::aie::DemosaicRGBA<xf::cv::aie::BayerPattern::RGGB, TILE_ELEMENTS> demosaic(mInEven, mInOdd, mRChannel,
                                                                                        mGChannel, mBChannel);
     demosaic.runImpl(in, out);

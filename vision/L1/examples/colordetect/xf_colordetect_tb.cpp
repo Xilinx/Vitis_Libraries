@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 #include "common/xf_headers.hpp"
 
-#include "xf_colordetect_config.h"
+#include "xf_colordetect_tb_config.h"
 // OpenCV reference function:
 void colordetect_ref(cv::Mat& _src, cv::Mat& _dst, unsigned char* nLowThresh, unsigned char* nHighThresh) {
     // Temporary matrices for processing
@@ -67,8 +67,8 @@ int main(int argc, char** argv) {
     }
 
     // Allocate the memory for output images:
-    out_img.create(in_img.rows, in_img.cols, CV_8UC1);
-    ocv_ref.create(in_img.rows, in_img.cols, CV_8UC1);
+    out_img.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    ocv_ref.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
 
     // Convert input from BGR to RGBA:
     //   cv::cvtColor(in_img, img_rgba, CV_BGR2RGBA);

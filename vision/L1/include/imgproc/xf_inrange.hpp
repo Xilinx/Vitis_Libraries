@@ -142,8 +142,10 @@ void inRange(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
     unsigned short height = src.rows;
 
 #ifndef __SYNTHESIS__
-    assert(((SRC_T == XF_8UC1) || (SRC_T == XF_8UC3)) && "Type must be XF_8UC1 or XF_8UC3");
-    assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1, XF_NPPC8");
+    assert(((SRC_T == XF_8UC1) || (SRC_T == XF_8UC3) || (SRC_T == XF_16UC1) || (SRC_T == XF_16UC3)) &&
+           "Type must be XF_8UC1 or XF_8UC3");
+    assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2) || (NPC == XF_NPPC4) || (NPC == XF_NPPC8)) &&
+           "NPC must be XF_NPPC1,XF_NPPC2, XF_NPPC4, XF_NPPC8 ");
 
     assert(((lower_thresh[0] >= 0) && (lower_thresh[0] <= 255)) && "lower_thresh must be with the range of 0 to 255");
 

@@ -42,21 +42,12 @@ namespace aie {
  *  |8_|__________3____________|9_|  last row
  *
  */
-__attribute__((noinline)) void filter2D_k3_border(input_window_int16* img_in,
-                                                  const int16_t (&coeff)[16],
-                                                  output_window_int16* img_out) {
-    int16* restrict img_in_ptr = (int16*)img_in->ptr;
-    int16* restrict img_out_ptr = (int16*)img_out->ptr;
-
-    const int16_t image_width = xfGetTileWidth(img_in_ptr);
-    const int16_t image_height = xfGetTileHeight(img_in_ptr);
-    const int16_t stride = image_width;
-
-    xfCopyMetaData(img_in_ptr, img_out_ptr);
-
-    v16int16* restrict ptr_img_buffer = (v16int16*)xfGetImgDataPtr(img_in_ptr);
-    v16int16* restrict ptr_img_out = (v16int16*)xfGetImgDataPtr(img_out_ptr);
-
+__attribute__((noinline)) void filter2D_k3_border_impl(v16int16* restrict ptr_img_buffer,
+                                                       const int16_t (&coeff)[16],
+                                                       v16int16* restrict ptr_img_out,
+                                                       const int16_t image_width,
+                                                       const int16_t stride,
+                                                       const int16_t image_height) {
     v32int16 data_buf1;
     v32int16 data_buf2;
     v32int16 data_buf3;
@@ -513,6 +504,24 @@ __attribute__((noinline)) void filter2D_k3_border(input_window_int16* img_in,
             *(ptr_out++) = data_out;
         }
     }
+}
+
+__attribute__((noinline)) void filter2D_k3_border(adf::input_buffer<int16>& img_in,
+                                                  const int16_t (&coeff)[16],
+                                                  adf::output_buffer<int16>& img_out) {
+    int16* restrict img_in_ptr = (int16*)::aie::begin(img_in);
+    int16* restrict img_out_ptr = (int16*)::aie::begin(img_out);
+
+    const int16_t image_width = xfGetTileWidth(img_in_ptr);
+    const int16_t image_height = xfGetTileHeight(img_in_ptr);
+    const int16_t stride = image_width;
+
+    xfCopyMetaData(img_in_ptr, img_out_ptr);
+
+    v16int16* restrict ptr_img_buffer = (v16int16*)xfGetImgDataPtr(img_in_ptr);
+    v16int16* restrict ptr_img_out = (v16int16*)xfGetImgDataPtr(img_out_ptr);
+
+    filter2D_k3_border_impl(ptr_img_buffer, coeff, ptr_img_out, image_width, stride, image_height);
 }
 
 } // aie

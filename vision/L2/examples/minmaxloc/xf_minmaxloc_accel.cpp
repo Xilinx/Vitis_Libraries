@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-#include "xf_min_max_loc_config.h"
+#include "xf_minmaxloc_accel_config.h"
 
 extern "C" {
 
 void minmaxloc_accel(
-    ap_uint<PTR_WIDTH>* img_in, int32_t* min_max_value, uint16_t* min_max_loc_xy, int height, int width) {
+    ap_uint<INPUT_PTR_WIDTH>* img_in, int32_t* min_max_value, uint16_t* min_max_loc_xy, int height, int width) {
 // clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in          offset=slave  bundle=gmem0
     #pragma HLS INTERFACE m_axi      port=min_max_value   offset=slave  bundle=gmem1
@@ -30,7 +30,7 @@ void minmaxloc_accel(
     // clang-format on
 
     // Local objects:
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> imgInput(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN> imgInput(height, width);
     int32_t min_value, max_value;
     uint16_t _min_locx, _min_locy, _max_locx, _max_locy;
 
@@ -42,11 +42,11 @@ void minmaxloc_accel(
     // clang-format on
 
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(img_in, imgInput);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN>(img_in, imgInput);
 
     // Run xfOpenCV kernel:
-    xf::cv::minMaxLoc<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, &min_value, &max_value, &_min_locx,
-                                                                 &_min_locy, &_max_locx, &_max_locy);
+    xf::cv::minMaxLoc<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN>(imgInput, &min_value, &max_value, &_min_locx,
+                                                                     &_min_locy, &_max_locx, &_max_locy);
 
     // Copy local outputs to global pointer:
     min_max_value[0] = min_value;

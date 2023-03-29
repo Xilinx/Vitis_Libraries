@@ -36,11 +36,14 @@ class myGraph : public adf::graph {
     myGraph() {
         k1 = kernel::create(accumulate_weighted);
 
-        connect<window<TILE_WINDOW_SIZE> >(inprt1, k1.in[0]);
-        connect<window<TILE_WINDOW_SIZE> >(inprt2, k1.in[1]);
+        connect<>(inprt1, k1.in[0]);
+        connect<>(inprt2, k1.in[1]);
         connect<parameter>(alpha, async(k1.in[2]));
+        connect<>(k1.out[0], outprt);
 
-        connect<window<TILE_WINDOW_SIZE> >(k1.out[0], outprt);
+        adf::dimensions(k1.in[0]) = {ELEM_WITH_METADATA};
+        adf::dimensions(k1.in[1]) = {ELEM_WITH_METADATA};
+        adf::dimensions(k1.out[0]) = {ELEM_WITH_METADATA};
 
         source(k1) = "xf_accumulate_weighted.cc";
         // Initial mapping

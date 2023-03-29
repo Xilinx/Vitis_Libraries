@@ -169,7 +169,7 @@
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-                "LIB_DIR/L2/examples/modefilter/build"
+                "LIB_DIR/L2/examples/modefilter/config"
             ], 
             "options": "-O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include", 
             "symbols": [
@@ -181,7 +181,7 @@
         "compiler": {
             "symbols": [], 
             "includepaths": [
-                "LIB_DIR/L2/examples/modefilter/build"
+                "LIB_DIR/L2/examples/modefilter/config"
             ], 
             "clflags": []
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_otsuthreshold_config.h"
+#include "xf_otsuthreshold_tb_config.h"
 
 // Reference implementation:
 double GetOtsuThresholdFloat(cv::Mat _src) {
@@ -105,7 +105,7 @@ int main(int argc, char** argv) {
     Otsuval_ref = GetOtsuThresholdFloat(res_img);
 
     // HLS function
-    otsuthreshold_accel((ap_uint<PTR_WIDTH>*)img.data, Otsuval, height, width);
+    otsuthreshold_accel((ap_uint<INPUT_PTR_WIDTH>*)img.data, Otsuval, height, width);
 
     // Results verification:
     if (abs(Otsuval_ref - Otsuval) > maxdiff) maxdiff = abs(Otsuval_ref - Otsuval);

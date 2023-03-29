@@ -253,7 +253,7 @@ Changing the Hardware Kernel Configuration
 
    To modify the configuration of any function, update the following file:
    
-   <path to vitis vision git folder>/vision/L1/examples/<function>/build/xf_config_params.h .
+   <path to vitis vision git folder>/vision/L1/examples/<function>/config/xf_config_params.h .
 
 
 Using the Vitis vision Library Functions on Hardware

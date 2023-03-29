@@ -17,6 +17,7 @@
 #include <adf.h>
 #include <common/xf_aie_hw_utils.hpp>
 #include <algorithm>
+#include <aie_api/aie.hpp>
 
 #define PARALLEL_FACTOR_16b 16 // Parallelization factor for 16b operations (16x mults)
 #define SRS_SHIFT 10           // SRS shift used can be increased if input data likewise adjusted)
@@ -42,11 +43,11 @@ namespace aie {
  *  |8_|__________3____________|9_|  last row
  *
  */
-__attribute__((noinline)) void gaussian_k3_border(input_window_int16* img_in,
+__attribute__((noinline)) void gaussian_k3_border(adf::input_buffer<int16>& img_in,
                                                   const int16_t (&coeff)[16],
-                                                  output_window_int16* img_out) {
-    int16* restrict img_in_ptr = (int16*)img_in->ptr;
-    int16* restrict img_out_ptr = (int16*)img_out->ptr;
+                                                  adf::output_buffer<int16>& img_out) {
+    int16* restrict img_in_ptr = (int16*)::aie::begin(img_in);
+    int16* restrict img_out_ptr = (int16*)::aie::begin(img_out);
 
     const int16_t image_width = xfGetTileWidth(img_in_ptr);
     const int16_t image_height = xfGetTileHeight(img_in_ptr);

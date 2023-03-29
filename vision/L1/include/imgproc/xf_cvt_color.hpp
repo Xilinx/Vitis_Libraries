@@ -5945,8 +5945,10 @@ void bgr2xyz(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src,
 #pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
-    assert(((SRC_T == XF_8UC3) || (SRC_T == XF_16UC3)) && " BGR image Type must be XF_8UC3 or XF_16UC3");
-    assert(((DST_T == XF_8UC3) || (DST_T == XF_16UC3)) && " XYZ image Type must be XF_8UC3 or XF_16UC3");
+    assert(((SRC_T == XF_8UC3) || (SRC_T == XF_16UC3) || (SRC_T == XF_14UC3)) &&
+           " BGR image Type must be XF_8UC3 or XF_16UC3 or XF_14UC3");
+    assert(((DST_T == XF_8UC3) || (DST_T == XF_16UC3) || (DST_T == XF_14UC3)) &&
+           " XYZ image Type must be XF_8UC3 or XF_16UC3 or XF_14UC3");
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && " BGR image rows and cols should be less than ROWS, COLS");
     assert(((_dst.cols == _src.cols) && (_dst.rows == _src.rows)) && "BGR and XYZ plane dimensions mismatch");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2)) && " 1,2 pixel parallelism is supported  ");

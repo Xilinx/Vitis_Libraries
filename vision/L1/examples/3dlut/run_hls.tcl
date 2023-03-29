@@ -25,12 +25,11 @@ if {![info exists CLKP]} {
 
 open_project -reset $PROJ
 
-add_files "${XF_PROJ_ROOT}/L1/examples/3dlut/xf_3dlut_accel.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/3dlut/build -I${XF_PROJ_ROOT}/L1/include -I ./ " -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/3dlut/build -I${XF_PROJ_ROOT}/L1/include -I ./ "
-add_files -tb "${XF_PROJ_ROOT}/L1/examples/3dlut/xf_3dlut_tb.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/3dlut/build -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ " -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/3dlut/build -I${XF_PROJ_ROOT}/L1/include -I ./ "
+add_files "${XF_PROJ_ROOT}/L1/examples/3dlut/xf_3dlut_accel.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/3dlut/config -I${XF_PROJ_ROOT}/L1/include -I ./ " -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/3dlut/config -I${XF_PROJ_ROOT}/L1/include -I ./ "
+add_files -tb "${XF_PROJ_ROOT}/L1/examples/3dlut/xf_3dlut_tb.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/3dlut/config -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ " -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/3dlut/config -I${XF_PROJ_ROOT}/L1/include -I ./ "
 set_top lut3d_accel
 
 open_solution -reset $SOLN
-
 
 
 

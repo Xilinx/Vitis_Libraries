@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#include "xf_cca_custom_config.h"
-
+#include "xf_cca_custom_accel_config.h"
 extern "C" {
 
 void cca_custom_accel(uint8_t* in_ptr1,

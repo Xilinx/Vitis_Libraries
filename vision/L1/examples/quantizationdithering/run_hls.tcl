@@ -25,12 +25,11 @@ if {![info exists CLKP]} {
 
 open_project -reset $PROJ
 
-add_files "${XF_PROJ_ROOT}/L1/examples/quantizationdithering/xf_quantizationdithering_accel.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/quantizationdithering/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/quantizationdithering/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
-add_files -tb "${XF_PROJ_ROOT}/L1/examples/quantizationdithering/xf_quantizationdithering_tb.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/quantizationdithering/build -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/quantizationdithering/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+add_files "${XF_PROJ_ROOT}/L1/examples/quantizationdithering/xf_quantizationdithering_accel.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/quantizationdithering/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/quantizationdithering/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+add_files -tb "${XF_PROJ_ROOT}/L1/examples/quantizationdithering/xf_quantizationdithering_tb.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/quantizationdithering/config -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/quantizationdithering/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
 set_top quantizationdithering_accel
 
 open_solution -reset $SOLN
-
 
 
 

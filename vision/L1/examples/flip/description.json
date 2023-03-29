@@ -21,21 +21,21 @@
         "source": [
             "${XF_PROJ_ROOT}/L1/examples/flip/xf_flip_accel.cpp"
         ], 
-        "cflags": " -I ${XF_PROJ_ROOT}/L1/examples/flip/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x", 
-        "csimflags": " -I ${XF_PROJ_ROOT}/L1/examples/flip/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+        "cflags": " -I ${XF_PROJ_ROOT}/L1/examples/flip/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x", 
+        "csimflags": " -I ${XF_PROJ_ROOT}/L1/examples/flip/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
     }, 
     "testbench": {
         "source": [
             "${XF_PROJ_ROOT}/L1/examples/flip/xf_flip_tb.cpp"
         ], 
-        "cflags": " -I ${XF_PROJ_ROOT}/L1/examples/flip/build -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x", 
+        "cflags": " -I ${XF_PROJ_ROOT}/L1/examples/flip/config -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x", 
         "ldflags": "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core", 
         "argv": {
             "hls_csim": " ${XF_PROJ_ROOT}/data/512x512.png ", 
             "hls_cosim": " ${XF_PROJ_ROOT}/data/4k_5.png "
         }, 
         "stdmath": false, 
-        "csimflags": " -I ${XF_PROJ_ROOT}/L1/examples/flip/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+        "csimflags": " -I ${XF_PROJ_ROOT}/L1/examples/flip/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
     }, 
     "testinfo": {
         "disable": false, 

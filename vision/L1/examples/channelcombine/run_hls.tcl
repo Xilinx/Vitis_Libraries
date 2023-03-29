@@ -25,12 +25,11 @@ if {![info exists CLKP]} {
 
 open_project -reset $PROJ
 
-add_files "${XF_PROJ_ROOT}/L1/examples/channelcombine/xf_channel_combine_accel.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/channelcombine/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/channelcombine/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
-add_files -tb "${XF_PROJ_ROOT}/L1/examples/channelcombine/xf_channel_combine_tb.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/channelcombine/build -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/channelcombine/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+add_files "${XF_PROJ_ROOT}/L1/examples/channelcombine/xf_channel_combine_accel.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/channelcombine/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/channelcombine/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+add_files -tb "${XF_PROJ_ROOT}/L1/examples/channelcombine/xf_channel_combine_tb.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/channelcombine/config -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/channelcombine/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
 set_top channel_combine_accel
 
 open_solution -reset $SOLN
-
 
 
 
@@ -38,7 +37,7 @@ set_part $XPART
 create_clock -period $CLKP
 
 if {$CSIM == 1} {
-  csim_design -ldflags "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d" -argv " ${XF_PROJ_ROOT}/data/128x128_1.png ${XF_PROJ_ROOT}/data/128x128_2.png "
+  csim_design -ldflags "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d" -argv " ${XF_PROJ_ROOT}/data/128x128_1.png ${XF_PROJ_ROOT}/data/128x128_2.png ${XF_PROJ_ROOT}/data/128x128_3.png ${XF_PROJ_ROOT}/data/128x128_4.png "
 }
 
 if {$CSYNTH == 1} {
@@ -46,7 +45,7 @@ if {$CSYNTH == 1} {
 }
 
 if {$COSIM == 1} {
-  cosim_design -ldflags "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d" -argv " ${XF_PROJ_ROOT}/data/128x128_1.png ${XF_PROJ_ROOT}/data/128x128_2.png "
+  cosim_design -ldflags "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d" -argv "${XF_PROJ_ROOT}/data/128x128_1.png ${XF_PROJ_ROOT}/data/128x128_2.png ${XF_PROJ_ROOT}/data/128x128_3.png ${XF_PROJ_ROOT}/data/128x128_4.png "
 }
 
 if {$VIVADO_SYN == 1} {

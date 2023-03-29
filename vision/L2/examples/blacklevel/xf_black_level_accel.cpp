@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,7 @@
 
 //#include "imgproc/xf_black_level.hpp"
 
-#include "xf_black_level_config.h"
-
+#include "xf_black_level_accel_config.h"
 // =======================================================================
 // H/W Acclerated functions that are visible to host
 // =======================================================================

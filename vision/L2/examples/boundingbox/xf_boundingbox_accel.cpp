@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#include "xf_boundingbox_config.h"
-
+#include "xf_boundingbox_accel_config.h"
 extern "C" {
 void boundingbox_accel(
     ap_uint<INPUT_PTR_WIDTH>* in_img, int* roi, int color_info[MAX_BOXES][4], int height, int width, int num_box) {
@@ -44,12 +43,12 @@ void boundingbox_accel(
         _roi[i].width = roi[j + 3];
     }
     for (int i = 0; i < (num_box); i++) {
-        for (int j = 0; j < XF_CHANNELS(TYPE, NPIX); j++) {
-            color[i].val[j] = color_info[i][j]; //(i*XF_CHANNELS(TYPE,NPIX))+j];
+        for (int j = 0; j < XF_CHANNELS(IN_TYPE, NPPCX); j++) {
+            color[i].val[j] = color_info[i][j]; //(i*XF_CHANNELS(TYPE,NPPCX))+j];
         }
     }
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_IN> in_mat(height, width, in_img);
-    xf::cv::boundingbox<TYPE, HEIGHT, WIDTH, MAX_BOXES, NPIX, XF_CV_DEPTH_IN>(in_mat, _roi, color, num_box);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN> in_mat(height, width, in_img);
+    xf::cv::boundingbox<IN_TYPE, HEIGHT, WIDTH, MAX_BOXES, NPPCX, XF_CV_DEPTH_IN>(in_mat, _roi, color, num_box);
 }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-#include "xf_rgbir_config_axivideo.h"
+#include "xf_rgbir_tb_axivideo.cpp_accel_config.h"
+#include "xf_rgbir_tb_axivideo.cpp_tb_config.h"
 
 void rgbir_accel(InStream& img_in,
                  OutStream& rggb_out,
@@ -42,20 +43,20 @@ void rgbir_accel(InStream& img_in,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_IN> imgInput(height, width);
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_OUT_1> rggbOutput(height, width);
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_OUT_2> fullIrOutput(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN> imgInput(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT_1> rggbOutput(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT_2> fullIrOutput(height, width);
 
 #pragma HLS DATAFLOW
 
     // Retrieve xf::cv::Mat objects from img_in data:
     xf::cv::AXIvideo2xfMat(img_in, imgInput);
 
-    static constexpr int n = XF_DTPIXELDEPTH(IN_TYPE, NPC);
+    static constexpr int n = XF_DTPIXELDEPTH(IN_TYPE, NPPCX);
 
     // Run xfOpenCV kernels:
 
-    xf::cv::rgbir2bayer<FILTERSIZE1, FILTERSIZE2, BPATTERN, IN_TYPE, HEIGHT, WIDTH, NPC, XF_BORDER_CONSTANT,
+    xf::cv::rgbir2bayer<FILTERSIZE1, FILTERSIZE2, BPATTERN, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_BORDER_CONSTANT,
                         XF_USE_URAM, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT_1, XF_CV_DEPTH_OUT_2, XF_CV_DEPTH_3XWIDTH>(
         imgInput, R_IR_C1_wgts, R_IR_C2_wgts, B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts, sub_wgts, rggbOutput,
         fullIrOutput);

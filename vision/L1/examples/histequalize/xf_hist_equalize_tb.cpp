@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_hist_equalize_config.h"
+#include "xf_hist_equalize_tb_config.h"
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -34,14 +34,11 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-    int height = in_img.rows;
-    int width = in_img.cols;
-
     // create memory for output images
     in_img.copyTo(in_img_copy);
-    out_img.create(height, width, XF_8UC1);
-    ocv_ref.create(height, width, XF_8UC1);
-    diff.create(height, width, XF_8UC1);
+    out_img.create(in_img.rows, in_img.cols, in_img.type());
+    ocv_ref.create(in_img.rows, in_img.cols, in_img.type());
+    diff.create(in_img.rows, in_img.cols, in_img.type());
 
     ///////////////// 	Opencv  Reference  ////////////////////////
     cv::equalizeHist(in_img, ocv_ref);
@@ -49,7 +46,7 @@ int main(int argc, char** argv) {
     ///////////////// Call the top function ///////////////////////
 
     equalizeHist_accel((ap_uint<INPUT_PTR_WIDTH>*)in_img.data, (ap_uint<INPUT_PTR_WIDTH>*)in_img_copy.data,
-                       (ap_uint<OUTPUT_PTR_WIDTH>*)out_img.data, height, width);
+                       (ap_uint<OUTPUT_PTR_WIDTH>*)out_img.data, in_img.rows, in_img.cols);
 
     //////////////////  Compute Absolute Difference ////////////////////
     cv::absdiff(ocv_ref, out_img, diff);

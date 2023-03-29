@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_hog_descriptor_config.h"
+#include "xf_hog_descriptor_tb_config.h"
 #include "ObjDet_reference.hpp"
 
 // for masking the output value
@@ -39,9 +39,9 @@ int main(int argc, char** argv) {
     }
 
 // Converting the image type based on the configuration
-#if GRAY_T
+#if GRAY
     cvtColor(img_raw, img, cv::COLOR_BGR2GRAY);
-#elif RGB_T
+#elif RGB
     cvtColor(img_raw, img, cv::COLOR_BGR2RGB);
 #endif
 
@@ -87,9 +87,9 @@ int main(int argc, char** argv) {
 
     d.AURcompute(img, descriptorsValues, cv::Size(XF_CELL_WIDTH, XF_CELL_HEIGHT), cv::Size(0, 0), locations);
 
-#if GRAY_T
+#if GRAY
     int _planes = 1;
-#elif RGB_T
+#elif RGB
     int _planes = 3;
 #endif
 

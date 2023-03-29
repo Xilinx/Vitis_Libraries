@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,22 +38,22 @@ static void Mat2MultiBayerAXIvideo(cv::Mat& img, InVideoStrm_t& AXI_video_strm, 
     unsigned short cv_pix;
 #endif
     ap_axiu<AXI_WIDTH_IN, 1, 1, 1> axi;
-    int depth = XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC);
+    int depth = XF_DTPIXELDEPTH(IN_TYPE, NPPCX);
 
     for (i = 0; i < img.rows; i++) {
-        for (j = 0; j < img.cols; j += XF_NPPC) {
+        for (j = 0; j < img.cols; j += NPPCX) {
             if ((i == 0) && (j == 0)) {
                 axi.user = 1;
             } else {
                 axi.user = 0;
             }
-            if (j == (img.cols - XF_NPPC)) {
+            if (j == (img.cols - NPPCX)) {
                 axi.last = 1;
             } else {
                 axi.last = 0;
             }
             axi.data = -1;
-            for (l = 0; l < XF_NPPC; l++) {
+            for (l = 0; l < NPPCX; l++) {
                 if (img.depth() == CV_16U)
                     cv_pix = img.at<unsigned short>(i, j + l);
                 else
@@ -98,11 +98,11 @@ static void MultiPixelAXIvideo2Mat(OutVideoStrm_t& AXI_video_strm, cv::Mat& img,
     cv::Vec3w cv_pix;
 #endif
 
-    int depth = XF_DTPIXELDEPTH(XF_LTM_T, XF_NPPC);
+    int depth = XF_DTPIXELDEPTH(XF_LTM_T, NPPCX);
     bool sof = 0;
 
     for (i = 0; i < img.rows; i++) {
-        for (j = 0; j < img.cols / XF_NPPC; j++) { // 4 pixels read per iteration
+        for (j = 0; j < img.cols / NPPCX; j++) { // 4 pixels read per iteration
             AXI_video_strm >> axi;
             if ((i == 0) && (j == 0)) {
                 if (axi.user.to_int() == 1) {
@@ -112,7 +112,7 @@ static void MultiPixelAXIvideo2Mat(OutVideoStrm_t& AXI_video_strm, cv::Mat& img,
                 }
             }
             if (sof) {
-                for (l = 0; l < XF_NPPC; l++) {
+                for (l = 0; l < NPPCX; l++) {
                     int num_comp =
                         ((ColorFormat == 0) || (ColorFormat == 1) || (ColorFormat == 4)) ? (img.channels()) : 2;
                     for (k = 0; k < num_comp; k++) {
@@ -163,9 +163,9 @@ static void MultiPixelAXIvideo2Mat(OutVideoStrm_t& AXI_video_strm, cv::Mat& img,
                         }
                     }
 #if 1
-                    img.at<cv::Vec3b>(i, (XF_NPPC * j + l)) = cv_pix;
+                    img.at<cv::Vec3b>(i, (NPPCX * j + l)) = cv_pix;
 #else
-                    img.at<cv::Vec3w>(i, (XF_NPPC * j + l)) = cv_pix;
+                    img.at<cv::Vec3w>(i, (NPPCX * j + l)) = cv_pix;
 #endif
                 }
             } // if(sof)
@@ -189,11 +189,11 @@ static void MultiPixelAXIvideo2Mat_yuv(OutVideoStrm_t& AXI_video_strm, cv::Mat& 
     #endif
     */
     unsigned short cv_pix;
-    int depth = XF_DTPIXELDEPTH(XF_16UC1, XF_NPPC);
+    int depth = XF_DTPIXELDEPTH(XF_16UC1, NPPCX);
     bool sof = 0;
 
     for (i = 0; i < img.rows; i++) {
-        for (j = 0; j < img.cols / XF_NPPC; j++) { // 4 pixels read per iteration
+        for (j = 0; j < img.cols / NPPCX; j++) { // 4 pixels read per iteration
             AXI_video_strm >> axi;
             if ((i == 0) && (j == 0)) {
                 if (axi.user.to_int() == 1) {
@@ -203,10 +203,10 @@ static void MultiPixelAXIvideo2Mat_yuv(OutVideoStrm_t& AXI_video_strm, cv::Mat& 
                 }
             }
             if (sof) {
-                for (l = 0; l < XF_NPPC; l++) {
+                for (l = 0; l < NPPCX; l++) {
                     cv_pix = axi.data(l * depth + depth - 1, l * depth);
 
-                    img.at<unsigned short>(i, (XF_NPPC * j + l)) = cv_pix;
+                    img.at<unsigned short>(i, (NPPCX * j + l)) = cv_pix;
                 }
             } // if(sof)
         }
@@ -361,14 +361,8 @@ int main(int argc, char** argv) {
                           IR_at_R_wgts, IR_at_B_wgts, sub_wgts, rgain, bgain, gamma_lut, mode_reg, pawb);
 
         // Convert processed image back to CV image
-        // MultiPixelAXIvideo2Mat(dst_axi, final_output, 0);
-        AXIvideo2cvMatxf<XF_NPPC, XF_DTPIXELDEPTH(XF_YUV_T, XF_NPPC)>(dst_axi, final_output);
-#if T_8U
-        AXIvideo2cvMatxf<XF_NPPC, XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC)>(ir_axi, ir_output);
-#else
-        MultiPixelAXIvideo2Mat(ir_axi, ir_output, 0);
-#endif
-        // AXIvideo2cvMatxf<XF_NPPC, XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC)>(ir_axi, ir_output);
+        AXIvideo2cvMatxf<NPPCX, XF_DTPIXELDEPTH(XF_YUV_T, NPPCX)>(dst_axi, final_output);
+        AXIvideo2cvMatxf<NPPCX, XF_DTPIXELDEPTH(IN_TYPE, NPPCX)>(ir_axi, ir_output);
     }
 
     imwrite("output.png", final_output);

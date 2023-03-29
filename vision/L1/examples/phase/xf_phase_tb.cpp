@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_phase_config.h"
+#include "xf_phase_tb_config.h"
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -46,11 +46,16 @@ int main(int argc, char** argv) {
     cv::Sobel(in_gray, c_grad_x1, CV_32FC1, 1, 0, filter_size, scale, delta, cv::BORDER_CONSTANT);
     cv::Sobel(in_gray, c_grad_y1, CV_32FC1, 0, 1, filter_size, scale, delta, cv::BORDER_CONSTANT);
 
-#if DEGREES
-    phase(c_grad_x1, c_grad_y1, ocv_ref, true);
-#elif RADIANS
-    phase(c_grad_x1, c_grad_y1, ocv_ref, false);
-#endif
+    int pow_var = 6;
+    bool deg_bool = true;
+    // XF_RADIANS = 0, XF_DEGREES = 1
+    if (DEG_TYPE == 0) {
+        pow_var = 12;
+        deg_bool = false;
+    }
+
+    phase(c_grad_x1, c_grad_y1, ocv_ref, deg_bool);
+
     /////////   End Opencv Phase computation API  ///////
 
     cv::Sobel(in_gray, c_grad_x, ddepth, 1, 0, filter_size, scale, delta, cv::BORDER_CONSTANT);
@@ -58,11 +63,8 @@ int main(int argc, char** argv) {
 
     out_img.create(in_gray.rows, in_gray.cols, CV_16S);
 
-#if DEGREES
-    phase(c_grad_x1, c_grad_y1, ocv_ref, true);
-#elif RADIANS
-    phase(c_grad_x1, c_grad_y1, ocv_ref, false);
-#endif
+    phase(c_grad_x1, c_grad_y1, ocv_ref, deg_bool);
+
     /////////   End Opencv Phase computation API  ///////
 
     int rows = in_img.rows;
@@ -72,7 +74,6 @@ int main(int argc, char** argv) {
     phase_accel((ap_uint<INPUT_PTR_WIDTH>*)c_grad_x.data, (ap_uint<INPUT_PTR_WIDTH>*)c_grad_y.data,
                 (ap_uint<INPUT_PTR_WIDTH>*)out_img.data, rows, cols);
 
-#if DEGREES
     /////   writing the difference between the OpenCV and the Kernel output into a text file /////
     FILE* fp;
     fp = fopen("diff.txt", "w");
@@ -80,7 +81,7 @@ int main(int argc, char** argv) {
         for (int j = 0; j < in_img.cols; j++) {
             short int v = out_img.at<short int>(i, j);
             float v1 = ocv_ref.at<float>(i, j);
-            float v2 = v / pow(2.0, 6);
+            float v2 = v / pow(2.0, pow_var);
             fprintf(fp, "%f ", v1 - v2); // converting the output fixed point format from Q4.12 format to float
         }
         fprintf(fp, "\n");
@@ -97,11 +98,7 @@ int main(int argc, char** argv) {
             short int v3 = out_img.at<short int>(i, j);
             float v2 = ocv_ref.at<float>(i, j);
             float v1;
-
-            if (DEGREES) {
-                v1 = v3 / (pow(2.0, 6)); // converting the output fixed point format from Q4.12 format to float
-            }
-
+            v1 = v3 / pow(2.0, pow_var); // converting the output fixed point format from Q4.12 format to float
             float v = (v2 - v1);
 
             if (v > 1) cnt++;
@@ -119,62 +116,11 @@ int main(int argc, char** argv) {
     }
     printf("Minimum value ocv = %f Minimum value hls = %f\n", ocvminvalue, hlsminvalue);
     printf("Maximum value ocv = %f Maximum value hls = %f\n", ocvmaxvalue, hlsmaxvalue);
-
-#elif RADIANS
-
-    /////   writing the difference between the OpenCV and the Kernel output into a text file /////
-    FILE* fp;
-    fp = fopen("diff.txt", "w");
-    for (int i = 0; i < in_img.rows; i++) {
-        for (int j = 0; j < in_img.cols; j++) {
-            short int v = out_img.at<short int>(i, j);
-            float v1 = ocv_ref.at<float>(i, j);
-            float v2 = v / pow(2.0, 12);
-            fprintf(fp, "%f ", v1 - v2); // converting the output fixed point format from Q4.12 format to float
-        }
-        fprintf(fp, "\n");
-    }
-    fclose(fp);
-
-    // Find minimum and maximum differences
-    float ocvminvalue, ocvmaxvalue;
-    float hlsminvalue, hlsmaxvalue;
-    double minval = 65535, maxval = 0;
-    int cnt = 0;
-    for (int i = 0; i < in_img.rows; i++) {
-        for (int j = 0; j < in_img.cols; j++) {
-            short int v3 = out_img.at<short int>(i, j);
-            float v2 = ocv_ref.at<float>(i, j);
-            float v1;
-
-            if (RADIANS) {
-                v1 = v3 / (pow(2.0, 12)); // converting the output fixed point format from Q4.12 format to float
-            }
-
-            float v = (v2 - v1);
-
-            if (v > 1) cnt++;
-            if (minval > v) {
-                minval = v;
-                ocvminvalue = v2;
-                hlsminvalue = v1;
-            }
-            if (maxval < v) {
-                maxval = v;
-                ocvmaxvalue = v2;
-                hlsmaxvalue = v1;
-            }
-        }
-    }
-    printf("Minimum value ocv = %f Minimum value hls = %f\n", ocvminvalue, hlsminvalue);
-    printf("Maximum value ocv = %f Maximum value hls = %f\n", ocvmaxvalue, hlsmaxvalue);
-
-#endif
 
     float err_per = 100.0 * (float)cnt / (in_img.rows * in_img.cols);
     std::cout << "Minimum error in intensity =" << minval << "\n"
               << "Maximum error in intensity = " << maxval << "\n"
-              << "Percentage of pixels above error" << err_per << std::endl;
+              << "Percentage of pixels above error = " << err_per << std::endl;
 
     in_img.~Mat();
     in_gray.~Mat();
@@ -190,7 +136,7 @@ int main(int argc, char** argv) {
         fprintf(stderr, "ERROR: Test Failed.\n ");
         return 1;
     } else
-        std::cout << "Test Passed " << std::endl;
+        std::cout << "Test Passed." << std::endl;
 
     return 0;
 }

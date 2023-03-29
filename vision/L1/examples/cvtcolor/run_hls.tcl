@@ -25,12 +25,11 @@ if {![info exists CLKP]} {
 
 open_project -reset $PROJ
 
-add_files "${XF_PROJ_ROOT}/L1/examples/cvtcolor/xf_cvt_color_accel_gen_vitis.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/cvtcolor/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/cvtcolor/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
-add_files -tb "${XF_PROJ_ROOT}/L1/examples/cvtcolor/xf_cvt_color_tb_gen_vitis.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/cvtcolor/build -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/cvtcolor/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+add_files "${XF_PROJ_ROOT}/L1/examples/cvtcolor/xf_cvt_color_accel_gen_vitis.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/cvtcolor/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/cvtcolor/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+add_files -tb "${XF_PROJ_ROOT}/L1/examples/cvtcolor/xf_cvt_color_tb_gen_vitis.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/cvtcolor/config -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/cvtcolor/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
 set_top cvtcolor_rgba2iyuv
 
 open_solution -reset $SOLN
-
 
 
 

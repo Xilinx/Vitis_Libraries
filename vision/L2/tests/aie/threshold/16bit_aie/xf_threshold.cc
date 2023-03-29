@@ -17,6 +17,9 @@
 #include "kernels.h"
 #include "imgproc/xf_threshold_aie.hpp"
 
-void threshold(input_window_int16* input, output_window_int16* output, const int16& thresh_val, const int16& max_val) {
+void threshold(adf::input_buffer<int16>& input,
+               adf::output_buffer<int16>& output,
+               const int16& thresh_val,
+               const int16& max_val) {
     xf::cv::aie::threshold_api(input, output, thresh_val, max_val);
 };

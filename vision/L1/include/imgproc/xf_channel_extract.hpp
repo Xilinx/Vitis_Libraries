@@ -125,7 +125,8 @@ void extractChannel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_ma
     assert(((_src_mat.rows <= ROWS) && (_src_mat.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert(((_dst_mat.rows <= ROWS) && (_dst_mat.cols <= COLS)) && "ROWS and COLS should be greater than output image");
     assert((((SRC_T == XF_8UC4 || SRC_T == XF_8UC3) && (DST_T == XF_8UC1)) ||
-            ((SRC_T == XF_16UC3 || SRC_T == XF_16UC4) && (DST_T == XF_16UC1))) &&
+            ((SRC_T == XF_16UC3 || SRC_T == XF_16UC4) && (DST_T == XF_16UC1)) ||
+            ((SRC_T == XF_14UC3 || SRC_T == XF_16UC4) && (DST_T == XF_14UC1))) &&
            "Source image should be of either 8 or 16 bit with 3 or 4 channels and destination image of 8 or 16 bit 1 "
            "channel");
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2) || (NPC == XF_NPPC4) || (NPC == XF_NPPC8)) &&

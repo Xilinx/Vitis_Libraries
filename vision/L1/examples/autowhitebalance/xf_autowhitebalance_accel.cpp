@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include "xf_autowhitebalance_config.h"
+#include "xf_autowhitebalance_accel_config.h"
 
-static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * XF_PIXELWIDTH(IN_TYPE, NPC1)) / INPUT_PTR_WIDTH;
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * XF_PIXELWIDTH(IN_TYPE, NPPCX)) / INPUT_PTR_WIDTH;
 
 static bool flag;
 
@@ -40,29 +40,29 @@ void AWBKernel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                float outputMax) {
 #pragma HLS INLINE OFF
 
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1> in_mat(height, width);
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> out_mat(height, width);
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_2> impop(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1> in_mat(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT_1> out_mat(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_2> impop(height, width);
 
 // clang-format off
 #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1>(img_inp, in_mat);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1>(img_inp, in_mat);
 
     if (WB_TYPE == 1) {
-        xf::cv::AWBhistogram<IN_TYPE, IN_TYPE, HEIGHT, WIDTH, NPC1, 1, HIST_SIZE, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2>(
+        xf::cv::AWBhistogram<IN_TYPE, IN_TYPE, HEIGHT, WIDTH, NPPCX, 1, HIST_SIZE, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2>(
             in_mat, impop, hist0, thresh, inputMin, inputMax, outputMin, outputMax);
-        xf::cv::AWBNormalization<IN_TYPE, IN_TYPE, HEIGHT, WIDTH, NPC1, 1, HIST_SIZE, XF_CV_DEPTH_IN_2,
+        xf::cv::AWBNormalization<IN_TYPE, IN_TYPE, HEIGHT, WIDTH, NPPCX, 1, HIST_SIZE, XF_CV_DEPTH_IN_2,
                                  XF_CV_DEPTH_OUT_1>(impop, out_mat, hist1, thresh, inputMin, inputMax, outputMin,
                                                     outputMax);
     } else {
-        xf::cv::AWBChannelGain<IN_TYPE, IN_TYPE, HEIGHT, WIDTH, NPC1, 0, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2>(
+        xf::cv::AWBChannelGain<IN_TYPE, IN_TYPE, HEIGHT, WIDTH, NPPCX, 0, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2>(
             in_mat, impop, thresh, gain0);
-        xf::cv::AWBGainUpdate<IN_TYPE, IN_TYPE, HEIGHT, WIDTH, NPC1, 0, XF_CV_DEPTH_IN_2, XF_CV_DEPTH_OUT_1>(
+        xf::cv::AWBGainUpdate<IN_TYPE, IN_TYPE, HEIGHT, WIDTH, NPPCX, 0, XF_CV_DEPTH_IN_2, XF_CV_DEPTH_OUT_1>(
             impop, out_mat, thresh, gain1);
     }
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(out_mat, img_out);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT_1>(out_mat, img_out);
 }
 
 void autowhitebalance_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,

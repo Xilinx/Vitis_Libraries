@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_box_filter_config.h"
+#include "xf_box_filter_tb_config.h"
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -35,13 +35,13 @@ int main(int argc, char** argv) {
 
 /*  convert to specific types  */
 #if T_8U
-    in_img.convertTo(in_conv_img, CV_8U); // Size conversion
+    in_img.convertTo(in_conv_img, CV_IN_TYPE); // Size conversion
     int in_bytes = 1;
 #elif T_16U
-    in_img.convertTo(in_conv_img, CV_16U); // Size conversion
+    in_img.convertTo(in_conv_img, CV_IN_TYPE); // Size conversion
     int in_bytes = 2;
 #elif T_16S
-    in_img.convertTo(in_conv_img, CV_16S); // Size conversion
+    in_img.convertTo(in_conv_img, CV_IN_TYPE); // Size conversion
     int in_bytes = 2;
 #endif
 

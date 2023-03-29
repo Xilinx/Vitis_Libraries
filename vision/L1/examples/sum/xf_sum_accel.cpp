@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-#include "xf_sum_config.h"
+#include "xf_sum_accel_config.h"
 
-static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(TYPE, NPC1)) / 8) / (PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(IN_TYPE, NPPCX)) / 8) / (INPUT_PTR_WIDTH / 8);
 
-void sum_accel(ap_uint<PTR_WIDTH>* img_in, double* sum_out) {
+void sum_accel(ap_uint<INPUT_PTR_WIDTH>* img_in, double* sum_out) {
 // clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0 depth =__XF_DEPTH
     #pragma HLS INTERFACE m_axi      port=sum_out       offset=slave  bundle=gmem1 depth =3
     #pragma HLS INTERFACE s_axilite  port=return 		      bundle=control
     // clang-format on
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> imgInput(HEIGHT, WIDTH);
-    double sum_local[XF_CHANNELS(TYPE, NPC1)];
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN> imgInput(HEIGHT, WIDTH);
+    double sum_local[XF_CHANNELS(IN_TYPE, NPPCX)];
 
 // clang-format off
 
@@ -37,13 +37,13 @@ void sum_accel(ap_uint<PTR_WIDTH>* img_in, double* sum_out) {
     // clang-format on
 
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(img_in, imgInput);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN>(img_in, imgInput);
 
     // Run xfOpenCV kernel:
-    xf::cv::sum<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, sum_local);
+    xf::cv::sum<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN>(imgInput, sum_local);
 
     // Copy the result to output port:
-    for (unsigned int i = 0; i < XF_CHANNELS(TYPE, NPC1); ++i) {
+    for (unsigned int i = 0; i < XF_CHANNELS(IN_TYPE, NPPCX); ++i) {
         sum_out[i] = sum_local[i];
     }
 

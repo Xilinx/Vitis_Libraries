@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 #include "common/xf_headers.hpp"
 #include <math.h>
-#include "xf_hdrmerge_config.h"
+#include "xf_hdrmerge_tb_config.h"
 
 int g_value_com(unsigned short& value_in, float& alpha, float& ob) {
     float radiance_out = (value_in - ob) / alpha;
@@ -319,22 +319,22 @@ static void Mat2MultiBayerAXIvideo(cv::Mat& img, InVideoStrm_t_e_s& AXI_video_st
     unsigned short cv_pix;
 #endif
     ap_axiu<AXI_WIDTH_IN, 1, 1, 1> axi;
-    int depth = XF_DTPIXELDEPTH(IN_TYPE, NPIX);
+    int depth = XF_DTPIXELDEPTH(IN_TYPE, NPPCX);
 
     for (i = 0; i < img.rows; i++) {
-        for (j = 0; j < img.cols; j += NPIX) {
+        for (j = 0; j < img.cols; j += NPPCX) {
             if ((i == 0) && (j == 0)) {
                 axi.user = 1;
             } else {
                 axi.user = 0;
             }
-            if (j == (img.cols - NPIX)) {
+            if (j == (img.cols - NPPCX)) {
                 axi.last = 1;
             } else {
                 axi.last = 0;
             }
             axi.data = -1;
-            for (l = 0; l < NPIX; l++) {
+            for (l = 0; l < NPPCX; l++) {
                 if (img.depth() == CV_16U)
                     cv_pix = img.at<unsigned short>(i, j + l);
                 else
@@ -378,11 +378,11 @@ static void MultiPixelAXIvideo2Mat_gray(OutVideoStrm_t_e_s& AXI_video_strm, cv::
 #else
     unsigned short cv_pix;
 #endif
-    int depth = XF_DTPIXELDEPTH(IN_TYPE, NPIX);
+    int depth = XF_DTPIXELDEPTH(IN_TYPE, NPPCX);
     bool sof = 0;
 
     for (i = 0; i < img.rows; i++) {
-        for (j = 0; j < img.cols / NPIX; j++) { // 4 pixels read per iteration
+        for (j = 0; j < img.cols / NPPCX; j++) { // 4 pixels read per iteration
             AXI_video_strm >> axi;
             if ((i == 0) && (j == 0)) {
                 if (axi.user.to_int() == 1) {
@@ -392,13 +392,13 @@ static void MultiPixelAXIvideo2Mat_gray(OutVideoStrm_t_e_s& AXI_video_strm, cv::
                 }
             }
             if (sof) {
-                for (l = 0; l < NPIX; l++) {
+                for (l = 0; l < NPPCX; l++) {
                     cv_pix = axi.data(l * depth + depth - 1, l * depth);
 
 #if T_8U
-                    img.at<unsigned char>(i, (NPIX * j + l)) = cv_pix;
+                    img.at<unsigned char>(i, (NPPCX * j + l)) = cv_pix;
 #else
-                    img.at<unsigned short>(i, (NPIX * j + l)) = cv_pix;
+                    img.at<unsigned short>(i, (NPPCX * j + l)) = cv_pix;
 #endif
                 }
             } // if(sof)
@@ -421,14 +421,8 @@ int main(int argc, char** argv) {
     hdr_img_1 = cv::imread(argv[1], -1);
     hdr_img_2 = cv::imread(argv[2], -1);
 
-#if T_8U
-    hls_out.create(hdr_img_1.rows, hdr_img_1.cols, CV_8UC1);
-    final_ocv.create(hdr_img_1.rows, hdr_img_1.cols, CV_8UC1);
-#endif
-#if T_16U || T_10U || T_12U
-    hls_out.create(hdr_img_1.rows, hdr_img_1.cols, CV_16UC1);
-    final_ocv.create(hdr_img_1.rows, hdr_img_1.cols, CV_16UC1);
-#endif
+    hls_out.create(hdr_img_1.rows, hdr_img_1.cols, hdr_img_1.type());
+    final_ocv.create(hdr_img_1.rows, hdr_img_1.cols, hdr_img_1.type());
 
     short wr_ocv[NO_EXPS][W_B_SIZE];
 
@@ -437,10 +431,10 @@ int main(int argc, char** argv) {
     int rows = hdr_img_1.rows;
     int cols = hdr_img_1.cols;
 
-    short wr_hls[NO_EXPS * NPIX * W_B_SIZE];
+    short wr_hls[NO_EXPS * NPPCX * W_B_SIZE];
 
     // FILE *fp = fopen("exposuredata.txt","w");
-    for (int k = 0; k < NPIX; k++) {
+    for (int k = 0; k < NPPCX; k++) {
         for (int i = 0; i < NO_EXPS; i++) {
             for (int j = 0; j < (W_B_SIZE); j++) {
                 int index1 = (i + k * NO_EXPS) * W_B_SIZE;

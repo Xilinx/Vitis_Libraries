@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_mean_stddev_config.h"
+#include "xf_mean_stddev_tb_config.h"
 
 template <int CHNLS>
 float* xmean(cv::Mat& img) {
@@ -83,7 +83,7 @@ int main(int argc, char** argv) {
 
     int channels = in_img.channels();
     printf("Channels - %d\n", channels);
-    const int xfcv_channels = XF_CHANNELS(TYPE, __NPPC);
+    const int xfcv_channels = XF_CHANNELS(IN_TYPE, NPPCX);
     int height = in_img.rows;
     int width = in_img.cols;
 
@@ -101,7 +101,7 @@ int main(int argc, char** argv) {
     unsigned short* stddev = (unsigned short*)malloc(channels * sizeof(unsigned short));
 
     /// HLS function call
-    mean_stddev_accel((ap_uint<PTR_WIDTH>*)in_img.data, mean, stddev, height, width);
+    mean_stddev_accel((ap_uint<INPUT_PTR_WIDTH>*)in_img.data, mean, stddev, height, width);
 
     for (int c = 0; c < channels; c++) {
         stddev_c[c] = sqrt(var_c[c]);

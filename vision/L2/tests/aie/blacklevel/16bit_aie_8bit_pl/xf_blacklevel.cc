@@ -17,8 +17,8 @@
 #include "kernels.h"
 #include "imgproc/xf_blacklevel_aie.hpp"
 
-void blackLevelCorrection(input_window_int16* input,
-                          output_window_int16* output,
+void blackLevelCorrection(adf::input_buffer<int16>& input,
+                          adf::output_buffer<int16>& output,
                           const int16_t& black_level,
                           const int32_t& mul_fact) {
     xf::cv::aie::blackLevelCorrection_api(input, output, black_level, mul_fact);

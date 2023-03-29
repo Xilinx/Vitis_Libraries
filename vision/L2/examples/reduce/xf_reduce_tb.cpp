@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 #include "common/xf_headers.hpp"
 #include "xcl2.hpp"
-#include "xf_reduce_config.h"
+#include "xf_reduce_tb_config.h"
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -34,22 +34,23 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-#if DIM
+#if DIM == 1
     if ((REDUCTION_OP == cv::REDUCE_AVG) || (REDUCTION_OP == cv::REDUCE_SUM)) {
-        dst_hls.create(in_img.rows, 1, CV_32SC1);
-        ocv_ref.create(in_img.rows, 1, CV_32SC1);
+        dst_hls.create(in_img.rows, 1, CV_OUT_TYPE);
+        ocv_ref.create(in_img.rows, 1, CV_OUT_TYPE);
 
     } else {
-        dst_hls.create(in_img.rows, 1, CV_8UC1);
-        ocv_ref.create(in_img.rows, 1, CV_8UC1);
+        dst_hls.create(in_img.rows, 1, CV_IN_TYPE);
+        ocv_ref.create(in_img.rows, 1, CV_IN_TYPE);
     }
-#else
+#endif
+#if DIM == 0
     if ((REDUCTION_OP == cv::REDUCE_AVG) || (REDUCTION_OP == cv::REDUCE_SUM)) {
-        dst_hls.create(1, in_img.cols, CV_32SC1);
-        ocv_ref.create(1, in_img.cols, CV_32SC1);
+        dst_hls.create(1, in_img.cols, CV_OUT_TYPE);
+        ocv_ref.create(1, in_img.cols, CV_OUT_TYPE);
     } else {
-        dst_hls.create(1, in_img.cols, CV_8UC1);
-        ocv_ref.create(1, in_img.cols, CV_8UC1);
+        dst_hls.create(1, in_img.cols, CV_IN_TYPE);
+        ocv_ref.create(1, in_img.cols, CV_IN_TYPE);
     }
 #endif
 
@@ -81,9 +82,9 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::cout << "INFO: Device found - " << device_name << std::endl;
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPC1) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPC1) << std::endl;
-    std::cout << "NPPC:" << NPC1 << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     // Load binary:
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_reduce");
@@ -126,17 +127,17 @@ int main(int argc, char** argv) {
                             CL_TRUE,         // blocking call
                             0,               // offset
                             image_out_size_bytes,
-                            (ap_uint<PTR_OUT_WIDTH>*)dst_hls.data, // Data will be stored here
+                            (ap_uint<OUTPUT_PTR_WIDTH>*)dst_hls.data, // Data will be stored here
                             nullptr, &event);
 
     // Clean up:
     queue.finish();
 
     // Reference function
-    if ((CV_REDUCE == cv::REDUCE_AVG) || (CV_REDUCE == cv::REDUCE_SUM))
-        cv::reduce(in_img, ocv_ref, DIM, CV_REDUCE, CV_32SC1); // avg, sum
+    if ((REDUCTION_OP == cv::REDUCE_AVG) || (REDUCTION_OP == cv::REDUCE_SUM))
+        cv::reduce(in_img, ocv_ref, DIM, REDUCTION_OP, CV_OUT_TYPE); // avg, sum
     else
-        cv::reduce(in_img, ocv_ref, DIM, CV_REDUCE, CV_8UC1);
+        cv::reduce(in_img, ocv_ref, DIM, REDUCTION_OP, CV_IN_TYPE);
 
     // Results verification:
     FILE* fp = fopen("hls", "w");

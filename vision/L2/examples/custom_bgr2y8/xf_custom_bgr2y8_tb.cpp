@@ -20,7 +20,7 @@
 #include <iostream>
 #include <math.h>
 
-#include "xf_custom_bgr2y8_config.h"
+#include "xf_custom_bgr2y8_tb_config.h"
 #include "xcl2.hpp"
 #include "xf_opencl_wrap.hpp"
 
@@ -40,9 +40,9 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-    gray_image.create(input_rgb_image.rows, input_rgb_image.cols, CV_8UC1);
-    diff.create(input_rgb_image.rows, input_rgb_image.cols, CV_8UC1);
-    gray_image_hls.create(input_rgb_image.rows, input_rgb_image.cols, CV_8UC1);
+    gray_image.create(input_rgb_image.rows, input_rgb_image.cols, CV_OUT_TYPE);
+    diff.create(input_rgb_image.rows, input_rgb_image.cols, CV_OUT_TYPE);
+    gray_image_hls.create(input_rgb_image.rows, input_rgb_image.cols, CV_OUT_TYPE);
 
     for (int i = 0; i < input_rgb_image.rows; i++) {
         for (int j = 0; j < input_rgb_image.cols; j++) {

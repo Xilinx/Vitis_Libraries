@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_gammacorrection_config.h"
+#include "xf_gammacorrection_tb_config.h"
 /*
 float mean_pixel(cv::Mat img) {
     if (img.channels() > 2) {
@@ -130,9 +130,9 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    ocv_ref.create(in_gray.rows, in_gray.cols, CV_8UC3);
-    out_gray.create(in_gray.rows, in_gray.cols, CV_8UC3);
-    diff.create(in_gray.rows, in_gray.cols, CV_8UC3);
+    ocv_ref.create(in_gray.rows, in_gray.cols, in_gray.type());
+    out_gray.create(in_gray.rows, in_gray.cols, in_gray.type());
+    diff.create(in_gray.rows, in_gray.cols, in_gray.type());
 
     // float gamma_ = auto_gamma_value(in_gray);
 

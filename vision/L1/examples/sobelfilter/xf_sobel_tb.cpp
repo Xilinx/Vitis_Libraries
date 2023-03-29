@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 #include <stdlib.h>
 
 #include "common/xf_headers.hpp"
-#include "xf_sobel_config.h"
+#include "xf_sobel_tb_config.h"
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -58,9 +58,9 @@ int main(int argc, char** argv) {
     int ddepth = CV_8U;
     typedef unsigned char TYPE; // Should be short int when ddepth is CV_16S
 #if GRAY
-#define PTYPE CV_8UC1 // Should be CV_16S when ddepth is CV_16S
+#define PTYPE CV_OUT_TYPE // Should be CV_16S when ddepth is CV_16S
 #else
-#define PTYPE CV_8UC3 // Should be CV_16S when ddepth is CV_16S
+#define PTYPE CV_OUT_TYPE // Should be CV_16S when ddepth is CV_16S
 #endif
 #endif
 #if (FILTER_WIDTH == 7)
@@ -68,9 +68,9 @@ int main(int argc, char** argv) {
     int ddepth = -1;            // CV_32F;	//Should be CV_32F if the output pixel type is XF_32UC1
     typedef unsigned char TYPE; // Should be int when ddepth is CV_32F
 #if GRAY
-#define PTYPE CV_8UC1 // Should be CV_16S when ddepth is CV_16S
+#define PTYPE CV_OUT_TYPE // Should be CV_16S when ddepth is CV_16S
 #else
-#define PTYPE CV_8UC3 // Should be CV_16S when ddepth is CV_16S
+#define PTYPE CV_OUT_TYPE // Should be CV_16S when ddepth is CV_16S
 #endif
 
 #endif
@@ -82,9 +82,9 @@ int main(int argc, char** argv) {
     int ddepth = CV_16S;
     typedef short TYPE; // Should be short int when ddepth is CV_16S
 #if GRAY
-#define PTYPE CV_16SC1 // Should be CV_16S when ddepth is CV_16S
+#define PTYPE CV_OUT_TYPE // Should be CV_16S when ddepth is CV_16S
 #else
-#define PTYPE CV_16SC3 // Should be CV_16S when ddepth is CV_16S
+#define PTYPE CV_OUT_TYPE // Should be CV_16S when ddepth is CV_16S
 #endif
 #endif
 #if (FILTER_WIDTH == 7)
@@ -92,9 +92,9 @@ int main(int argc, char** argv) {
     int ddepth = CV_16S; // CV_32F;	//Should be CV_32F if the output pixel type is XF_32UC1
     typedef short TYPE;  // Should be int when ddepth is CV_32F
 #if GRAY
-#define PTYPE CV_16SC1 // Should be CV_16S when ddepth is CV_16S
+#define PTYPE CV_OUT_TYPE // Should be CV_16S when ddepth is CV_16S
 #else
-#define PTYPE CV_16SC3 // Should be CV_16S when ddepth is CV_16S
+#define PTYPE CV_OUT_TYPE // Should be CV_16S when ddepth is CV_16S
 #endif
 
 #endif

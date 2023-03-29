@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright 2023 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,25 +25,25 @@
 #include "xf_cvt_color.hpp"
 #include <iostream>
 #include <assert.h>
-
+//#include <ap_fixed.h>
 namespace xf {
 namespace cv {
 
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC>
-void compute_pxl(XF_DTUNAME(SRC_T, NPC) pxl_val, XF_DTUNAME(DST_T, NPC) & out_val, int params[3][4][3], int idx) {
+void compute_pxl(XF_DTUNAME(SRC_T, NPC) pxl_val, XF_DTUNAME(DST_T, NPC) & out_val, int params[4][3]) {
 // clang-format off
 		#pragma HLS INLINE
     // clang-format on
 
-    if (pxl_val < params[idx][0][0]) {
-        out_val = params[idx][0][1] * (pxl_val - params[idx][0][2]);
+    if (pxl_val < params[0][0]) {
+        out_val = params[0][1] * (pxl_val - params[0][2]);
 
-    } else if (pxl_val < params[idx][1][0]) {
-        out_val = params[idx][1][1] * (pxl_val - params[idx][1][2]);
-    } else if (pxl_val < params[idx][2][0]) {
-        out_val = params[idx][2][1] * (pxl_val - params[idx][2][2]);
+    } else if (pxl_val < params[1][0]) {
+        out_val = params[1][1] * (pxl_val - params[1][2]);
+    } else if (pxl_val < params[2][0]) {
+        out_val = params[2][1] * (pxl_val - params[2][2]);
     } else {
-        out_val = params[idx][3][1] * (pxl_val - params[idx][3][2]);
+        out_val = params[3][1] * (pxl_val - params[3][2]);
     }
 }
 
@@ -58,6 +58,7 @@ template <int SRC_T,
 void xFcompute(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
                xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& dst,
                int params[3][4][3],
+
                unsigned short bayerp,
                int rows,
                int cols) {
@@ -68,8 +69,9 @@ void xFcompute(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
 		constexpr int PXL_WIDTH_IN = XF_PIXELWIDTH(SRC_T, NPC);
 		constexpr int PXL_WIDTH_OUT = XF_PIXELWIDTH(DST_T, NPC);
 		
-		int rd_ptr = 0,wr_ptr = 0, row_idx, col_idx,  color_idx;
-		
+		int rd_ptr = 0,wr_ptr = 0, row_idx, col_idx;
+		ap_uint<2> row_rem, col_rem, sum_rem, row_incr, col_incr, color_idx;
+        
 		ap_int<13> i,j,k;
 		
 		ap_uint<24> val_out;
@@ -79,22 +81,36 @@ void xFcompute(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
 		
 		XF_DTUNAME(SRC_T, NPC) pxl_in;
 		XF_DTUNAME(DST_T, NPC) pxl_out;
+        
+        row_incr = 0;
+        col_incr = 0;
+
+        if((bayerp == XF_BAYER_GB) || (bayerp == XF_BAYER_RG))
+            col_incr = 1;
+        else col_incr = 0;
+        
+        if((bayerp == XF_BAYER_GR) || (bayerp == XF_BAYER_RG))
+            row_incr = 1;
+        else row_incr = 0;
+
 	rowLoop:
 		for (i = 0; i < rows; i++) {
 	// clang-format off
 			#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
 			#pragma HLS LOOP_FLATTEN off
-    // clang-format on
+        // clang-format on
+
+        row_idx = i + row_incr;
+        row_rem = row_idx & 0x00000001;
+
     colLoop:
         for (j = 0; j < cols; j++) {
 // clang-format off
 				#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
-				#pragma HLS PIPELINE
+				#pragma HLS PIPELINE II=1
             // clang-format on
 
             val_src = src.read(rd_ptr++);
-            row_idx = i;
-            col_idx = 0;
 
         procLoop:
             for (k = 0; k < XF_NPIXPERCYCLE(NPC); k++) {
@@ -104,35 +120,13 @@ void xFcompute(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
                 pxl_in = val_src.range((k + 1) * PXL_WIDTH_IN - 1,
                                        k * PXL_WIDTH_IN); // Get bits from certain range of positions.
 
-                col_idx = j * NPC + k;
+                col_idx = j * NPC + k + col_incr;
 
-                if (bayerp == XF_BAYER_GB) {
-                    col_idx += 1;
-                }
-                if (bayerp == XF_BAYER_GR) {
-                    row_idx += 1;
-                }
-                if (bayerp == XF_BAYER_RG) {
-                    col_idx += 1;
-                    row_idx += 1;
-                }
-                if ((row_idx & 0x00000001) == 0) {     // even row
-                    if ((col_idx & 0x00000001) == 0) { // even col
-                        color_idx = 0;                 // R location
-                        compute_pxl<SRC_T, DST_T, ROWS, COLS, NPC>(pxl_in, pxl_out, params, color_idx);
-                    } else {           // odd col
-                        color_idx = 1; // G location
-                        compute_pxl<SRC_T, DST_T, ROWS, COLS, NPC>(pxl_in, pxl_out, params, color_idx);
-                    }
-                } else {                               // odd row
-                    if ((col_idx & 0x00000001) == 0) { // even col
-                        color_idx = 1;                 // G location
-                        compute_pxl<SRC_T, DST_T, ROWS, COLS, NPC>(pxl_in, pxl_out, params, color_idx);
-                    } else {           // odd col
-                        color_idx = 2; // B location
-                        compute_pxl<SRC_T, DST_T, ROWS, COLS, NPC>(pxl_in, pxl_out, params, color_idx);
-                    }
-                }
+                col_rem = col_idx & 0x00000001;
+
+                color_idx = row_rem + col_rem;
+
+                compute_pxl<SRC_T, DST_T, ROWS, COLS, NPC>(pxl_in, pxl_out, params[color_idx]);
 
                 val_dst.range((k + 1) * PXL_WIDTH_OUT - 1, k * PXL_WIDTH_OUT) = pxl_out;
             }
@@ -159,19 +153,56 @@ void hdr_decompand(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
            ("Unsupported Bayer pattern. Use anyone among: "
             "XF_BAYER_BG;XF_BAYER_GB;XF_BAYER_GR;XF_BAYER_RG"));
     assert(((SRC_T == XF_12UC1) || (SRC_T == XF_16UC1)) && "Input TYPE must be XF_12UC1 or XF_16UC1");
-    assert((DST_T == XF_32UC1) && "OUTPUT TYPE must be XF_32UC1");
-    assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2)) && "NPC must be XF_NPPC1, XF_NPPC2 ");
+    assert((DST_T == XF_32UC1) || (DST_T == XF_32SC1) || (DST_T == XF_24UC1) ||
+           (DST_T == XF_16UC1) && "OUTPUT TYPE must be XF_32UC1 or XF_32SC1 or XF_24UC1");
+    assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2) || (NPC == XF_NPPC4) || (NPC == XF_NPPC8)) &&
+           "NPC must be XF_NPPC1, XF_NPPC2, XF_NPPC4, XF_NPPC8");
     assert((src.rows <= ROWS) && (src.cols <= COLS) && "ROWS and COLS should be greater than input image size ");
 #endif
     int rows = src.rows;
     int cols = src.cols;
 
     uint16_t cols_shifted = cols >> (XF_BITSHIFT(NPC));
+    int copy_params[3][4][3];
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 4; j++) {
+            for (int k = 0; k < 3; k++) {
+                copy_params[i][j][k] = params[i][j][k];
+            }
+        }
+    }
+#pragma HLS ARRAY_PARTITION variable = copy_params complete dim = 2
 
     xFcompute<SRC_T, DST_T, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT, (COLS >> (XF_BITSHIFT(NPC)))>(
-        src, dst, params, bayerp, rows, cols_shifted);
+        src, dst, copy_params, bayerp, rows, cols_shifted);
 
     return;
+}
+
+////////multistream/////////////////
+
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
+          int STREAMS = 2>
+void hdr_decompand_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
+                         xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& dst,
+                         int dcom_params[STREAMS][3][4][3],
+                         unsigned short dcom_bayer[STREAMS],
+                         int strm_id) {
+// clang-format off
+#pragma HLS ARRAY_PARTITION variable= dcom_params dim=1 complete
+#pragma HLS ARRAY_PARTITION variable= dcom_bayer dim=1 complete
+   // clang-format on  
+   hdr_decompand<SRC_T, DST_T, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT>
+                         (src, dst, dcom_params[strm_id], dcom_bayer[strm_id]);
+                         
+      
 }
 
 } // namespace cv

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#include "xf_channel_extract_config.h"
-
+#include "xf_channel_extract_accel_config.h"
 extern "C" {
 void channel_extract_accel(
     ap_uint<INPUT_PTR_WIDTH>* img_rgba, ap_uint<OUTPUT_PTR_WIDTH>* img_gray, uint16_t channel, int rows, int cols) {
@@ -28,19 +27,19 @@ void channel_extract_accel(
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<INPUT_CH_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput0;
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_0> imgInput0;
     imgInput0.rows = rows;
     imgInput0.cols = cols;
-    xf::cv::Mat<OUTPUT_CH_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0> imgOutput0;
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT_0> imgOutput0;
     imgOutput0.rows = rows;
     imgOutput0.cols = cols;
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, INPUT_CH_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_rgba, imgInput0);
-    xf::cv::extractChannel<INPUT_CH_TYPE, OUTPUT_CH_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_0>(img_rgba, imgInput0);
+    xf::cv::extractChannel<IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_0>(
         imgInput0, imgOutput0, channel);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUTPUT_CH_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_0>(imgOutput0, img_gray);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT_0>(imgOutput0, img_gray);
 }
 }

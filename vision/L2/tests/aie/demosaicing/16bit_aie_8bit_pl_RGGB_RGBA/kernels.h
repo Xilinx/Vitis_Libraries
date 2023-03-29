@@ -16,10 +16,9 @@
 
 #ifndef _DEMOSAIC_RUNNER_H
 #define _DEMOSAIC_RUNNER_H
-
-#include <adf/window/types.h>
+#include <adf.h>
+#include <adf/io_buffer/io_buffer.h>
 #include <adf/stream/types.h>
-#include "adf.h"
 #include "config.h"
 #include "imgproc/xf_demosaicing.hpp"
 
@@ -42,7 +41,7 @@ class DemosaicRunner {
                    int16_t (&gch)[TILE_ELEMENTS],
                    int16_t (&bch)[TILE_ELEMENTS])
         : mInEven(iEven), mInOdd(iOdd), mRChannel(rch), mGChannel(gch), mBChannel(bch) {}
-    void run(input_window<int16_t>* in, output_window<int16_t>* out);
+    void run(adf::input_buffer<int16_t>& in, adf::output_buffer<int16_t>& out);
     static void registerKernelClass() {
         REGISTER_FUNCTION(DemosaicRunner::run);
         REGISTER_PARAMETER(mInEven);

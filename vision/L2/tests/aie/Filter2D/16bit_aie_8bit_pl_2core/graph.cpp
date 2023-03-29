@@ -19,6 +19,7 @@
 
 static constexpr int AIE_CORES = 2;
 // Graph object
+
 myGraph filter_graph[AIE_CORES];
 
 #define SRS_SHIFT 10

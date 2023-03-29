@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include "xf_rotate_config.h"
+#include "xf_rotate_accel_config.h"
 
-static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(IN_TYPE, NPC1)) / 8) / (INPUT_PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(IN_TYPE, NPPCX)) / 8) / (INPUT_PTR_WIDTH / 8);
 
 void rotate_accel(
     ap_uint<INPUT_PTR_WIDTH>* img_in, ap_uint<OUTPUT_PTR_WIDTH>* img_out, int height, int width, int direction) {
@@ -30,8 +30,8 @@ void rotate_accel(
     // clang-format on
 
     // Run xfOpenCV kernel:
-    xf::cv::rotate<INPUT_PTR_WIDTH, OUTPUT_PTR_WIDTH, IN_TYPE, TILE_SIZE, HEIGHT, WIDTH, NPC1>(img_in, img_out, height,
-                                                                                               width, direction);
+    xf::cv::rotate<INPUT_PTR_WIDTH, OUTPUT_PTR_WIDTH, IN_TYPE, TILE_SIZE, HEIGHT, WIDTH, NPPCX>(img_in, img_out, height,
+                                                                                                width, direction);
 
     return;
 } // End of kernel

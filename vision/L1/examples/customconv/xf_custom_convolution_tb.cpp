@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_custom_convolution_config.h"
+#include "xf_custom_convolution_tb_config.h"
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -53,28 +53,28 @@ int main(int argc, char** argv) {
 /////////////////    OpenCV reference   /////////////////
 #if GRAY
 #if OUT_8U
-    out_img.create(in_img.rows, in_img.cols, CV_8UC1); // create memory for output image
-    diff.create(in_img.rows, in_img.cols, CV_8UC1);    // create memory for difference image
+    out_img.create(in_img.rows, in_img.cols, CV_OUT_TYPE); // create memory for output image
+    diff.create(in_img.rows, in_img.cols, CV_OUT_TYPE);    // create memory for difference image
 #elif OUT_16S
-    out_img.create(in_img.rows, in_img.cols, CV_16SC1); // create memory for output image
-    diff.create(in_img.rows, in_img.cols, CV_16SC1);    // create memory for difference image
+    out_img.create(in_img.rows, in_img.cols, CV_OUT_TYPE); // create memory for output image
+    diff.create(in_img.rows, in_img.cols, CV_OUT_TYPE);    // create memory for difference image
 #endif
 #else
 #if OUT_8U
-    out_img.create(in_img.rows, in_img.cols, CV_8UC3); // create memory for output image
-    diff.create(in_img.rows, in_img.cols, CV_8UC3);    // create memory for difference image
+    out_img.create(in_img.rows, in_img.cols, CV_OUT_TYPE); // create memory for output image
+    diff.create(in_img.rows, in_img.cols, CV_OUT_TYPE);    // create memory for difference image
 #elif OUT_16S
-    out_img.create(in_img.rows, in_img.cols, CV_16SC3); // create memory for output image
-    diff.create(in_img.rows, in_img.cols, CV_16SC3);    // create memory for difference image
+    out_img.create(in_img.rows, in_img.cols, CV_OUT_TYPE); // create memory for output image
+    diff.create(in_img.rows, in_img.cols, CV_OUT_TYPE);    // create memory for difference image
 #endif
 #endif
 
     cv::Point anchor = cv::Point(-1, -1);
 
 #if OUT_8U
-    cv::filter2D(in_img, ocv_ref, CV_8U, filter, anchor, 0, cv::BORDER_CONSTANT);
+    cv::filter2D(in_img, ocv_ref, CV_OUT_TYPE, filter, anchor, 0, cv::BORDER_CONSTANT);
 #elif OUT_16S
-    cv::filter2D(in_img, ocv_ref, CV_16S, filter, anchor, 0, cv::BORDER_CONSTANT);
+    cv::filter2D(in_img, ocv_ref, CV_OUT_TYPE, filter, anchor, 0, cv::BORDER_CONSTANT);
 #endif
 
     cv::imwrite("ref_img.jpg", ocv_ref); // reference image

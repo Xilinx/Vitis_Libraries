@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_scharr_config.h"
+#include "xf_scharr_tb_config.h"
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -40,9 +40,9 @@ int main(int argc, char** argv) {
 
     int ddepth = CV_8U;
 #if GRAY
-#define PTYPE CV_8UC1 // Should be CV_16S when ddepth is CV_16S
+#define PTYPE CV_OUT_TYPE // Should be CV_16S when ddepth is CV_16S
 #else
-#define PTYPE CV_8UC3 // Should be CV_16S when ddepth is CV_16S
+#define PTYPE CV_OUT_TYPE // Should be CV_16S when ddepth is CV_16S
 #endif
 
     typedef unsigned char TYPE; // short int TYPE; //
@@ -50,9 +50,9 @@ int main(int argc, char** argv) {
 
     int ddepth = CV_16S;
 #if GRAY
-#define PTYPE CV_16SC1 // Should be CV_16S when ddepth is CV_16S
+#define PTYPE CV_OUT_TYPE // Should be CV_16S when ddepth is CV_16S
 #else
-#define PTYPE CV_16SC3 // Should be CV_16S when ddepth is CV_16S
+#define PTYPE CV_OUT_TYPE // Should be CV_16S when ddepth is CV_16S
 #endif
     typedef unsigned short TYPE; // short int TYPE; //
 #endif

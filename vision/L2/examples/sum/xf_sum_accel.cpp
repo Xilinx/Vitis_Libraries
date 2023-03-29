@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-#include "xf_sum_config.h"
-
+#include "xf_sum_accel_config.h"
 extern "C" {
 
-void sum_accel(ap_uint<PTR_WIDTH>* img_in, double* sum_out, int height, int width) {
+void sum_accel(ap_uint<INPUT_PTR_WIDTH>* img_in, double* sum_out, int height, int width) {
 // clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0
     #pragma HLS INTERFACE m_axi      port=sum_out       offset=slave  bundle=gmem1
@@ -27,8 +26,8 @@ void sum_accel(ap_uint<PTR_WIDTH>* img_in, double* sum_out, int height, int widt
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> imgInput(height, width);
-    double sum_local[XF_CHANNELS(TYPE, NPC1)];
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN> imgInput(height, width);
+    double sum_local[XF_CHANNELS(IN_TYPE, NPPCX)];
 
 // clang-format off
 // clang-format on
@@ -38,13 +37,13 @@ void sum_accel(ap_uint<PTR_WIDTH>* img_in, double* sum_out, int height, int widt
     // clang-format on
 
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(img_in, imgInput);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN>(img_in, imgInput);
 
     // Run xfOpenCV kernel:
-    xf::cv::sum<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, sum_local);
+    xf::cv::sum<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN>(imgInput, sum_local);
 
     // Copy the result to output port:
-    for (unsigned int i = 0; i < XF_CHANNELS(TYPE, NPC1); ++i) {
+    for (unsigned int i = 0; i < XF_CHANNELS(IN_TYPE, NPPCX); ++i) {
         sum_out[i] = sum_local[i];
     }
 

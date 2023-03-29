@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "xf_hdrmerge_config.h"
+#include "xf_hdrmerge_accel_config.h"
 
 /************************************************************************************
  * Function:    AXIVideo2BayerMat
@@ -106,7 +106,7 @@ void GRAYMat2AXIvideo(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XF_CV_DEPTH_GRAY>& gra
 
     const int m_pix_width = XF_PIXELWIDTH(TYPE, NPPC) * XF_NPIXPERCYCLE(NPPC);
 
-    int depth = XF_DTPIXELDEPTH(TYPE, NPIX);
+    int depth = XF_DTPIXELDEPTH(TYPE, NPPCX);
 
     bool sof = true; // Indicates start of frame
 
@@ -160,7 +160,7 @@ void hdrmerge_accel(InVideoStrm_t_e_s& img_in1,
                     OutVideoStrm_t_e_s& img_out,
                     int rows,
                     int cols,
-                    short wr_hls[NO_EXPS * NPIX * W_B_SIZE]) {
+                    short wr_hls[NO_EXPS * NPPCX * W_B_SIZE]) {
 // clang-format off
 	#pragma HLS INTERFACE axis port=&img_in1 register
 	#pragma HLS INTERFACE axis port=&img_in2 register
@@ -172,20 +172,20 @@ void hdrmerge_accel(InVideoStrm_t_e_s& img_in1,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_IN_1> imgInput1(rows, cols);
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_IN_2> imgInput2(rows, cols);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1> imgInput1(rows, cols);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_2> imgInput2(rows, cols);
 
-    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_OUT> imgOutput(rows, cols);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT> imgOutput(rows, cols);
 
 // clang-format off
 #pragma HLS DATAFLOW
     // clang-format on
 
-    AXIVideo2BayerMat<IN_TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_IN_1>(img_in1, imgInput1);
-    AXIVideo2BayerMat<IN_TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_IN_2>(img_in2, imgInput2);
+    AXIVideo2BayerMat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1>(img_in1, imgInput1);
+    AXIVideo2BayerMat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_2>(img_in2, imgInput2);
 
-    xf::cv::Hdrmerge_bayer<IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPIX, NO_EXPS, W_B_SIZE, XF_CV_DEPTH_IN_1,
+    xf::cv::Hdrmerge_bayer<IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPPCX, NO_EXPS, W_B_SIZE, XF_CV_DEPTH_IN_1,
                            XF_CV_DEPTH_IN_2, XF_CV_DEPTH_OUT>(imgInput1, imgInput2, imgOutput, wr_hls);
 
-    GRAYMat2AXIvideo<IN_TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_OUT>(imgOutput, img_out);
+    GRAYMat2AXIvideo<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT>(imgOutput, img_out);
 }

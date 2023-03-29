@@ -43,21 +43,7 @@
                     ]
                 }
             }
-        }, 
-        "u50": {
-            "host": {
-                "compiler": {
-                    "includepaths": [
-                        "$(OPENCV_INCLUDE)"
-                    ]
-                }, 
-                "linker": {
-                    "librarypaths": [
-                        "$(OPENCV_LIB)"
-                    ]
-                }
-            }
-        }, 
+        },
         "zcu102": {
             "host": {
                 "compiler": {
@@ -182,7 +168,7 @@
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-                "LIB_DIR/L2/examples/houghlines/build"
+                "LIB_DIR/L2/examples/houghlines/config"
             ], 
             "options": "-O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include"
         }
@@ -191,7 +177,7 @@
         "compiler": {
             "symbols": [], 
             "includepaths": [
-                "LIB_DIR/L2/examples/houghlines/build"
+                "LIB_DIR/L2/examples/houghlines/config"
             ], 
             "clflags": []
         }

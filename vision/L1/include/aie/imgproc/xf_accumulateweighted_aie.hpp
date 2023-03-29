@@ -40,7 +40,7 @@ __attribute__((noinline)) void accumulateweighted(const T* restrict img_in1,
                                                   T* restrict img_out,
                                                   const T& img_width,
                                                   const T& img_height,
-                                                  const float& scale) {
+                                                  float& scale) {
     //    int16_t fix_scale=float2fix(scale,SRS_SHIFT) ;//(float)scale*(1<<8);
     //    int16_t fix_scale1=float2fix((1-scale),SRS_SHIFT) ;// (1-scale)*(1<<8);
     T fix_scale = ::aie::to_fixed<T>(scale, SRS_SHIFT);        //(float)scale*(1<<8);
@@ -69,13 +69,13 @@ __attribute__((noinline)) void accumulateweighted(const T* restrict img_in1,
  * 16-bit Accumulate
  * ----------------------------------------------------------------------------
  */
-__attribute__((noinline)) void accumulateweighted_api(input_window_int16* img_in1,
-                                                      input_window_int16* img_in2,
-                                                      output_window_int16* img_out,
-                                                      const float& alpha) {
-    int16* restrict img_in_ptr = (int16*)img_in1->ptr;
-    int16* restrict img_in_ptr1 = (int16*)img_in2->ptr;
-    int16* restrict img_out_ptr = (int16*)img_out->ptr;
+__attribute__((noinline)) void accumulateweighted_api(adf::input_buffer<int16>& img_in1,
+                                                      adf::input_buffer<int16>& img_in2,
+                                                      adf::output_buffer<int16>& img_out,
+                                                      float& alpha) {
+    int16* restrict img_in_ptr = (int16*)::aie::begin(img_in1);
+    int16* restrict img_in_ptr1 = (int16*)::aie::begin(img_in2);
+    int16* restrict img_out_ptr = (int16*)::aie::begin(img_out);
 
     const int16_t img_width = xfGetTileWidth(img_in_ptr);
     const int16_t img_height = xfGetTileHeight(img_in_ptr);

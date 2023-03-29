@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#include "xf_crop_config.h"
-
+#include "xf_crop_accel_config.h"
 extern "C" {
 void crop_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
                 ap_uint<OUTPUT_PTR_WIDTH>* _dst,
@@ -47,16 +46,16 @@ void crop_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
         _roi[i].width = roi[j + 3];
     }
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_IN> in_mat(height, width, img_in);
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_OUT> out_mat(_roi[0].height, _roi[0].width, _dst);
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_OUT_1> out_mat1(_roi[1].height, _roi[1].width, _dst1);
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_OUT_2> out_mat2(_roi[2].height, _roi[2].width, _dst2);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN> in_mat(height, width, img_in);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT> out_mat(_roi[0].height, _roi[0].width, _dst);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT_1> out_mat1(_roi[1].height, _roi[1].width, _dst1);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT_2> out_mat2(_roi[2].height, _roi[2].width, _dst2);
 
-    xf::cv::crop<TYPE, HEIGHT, WIDTH, MEMORYMAPPED_ARCH, NPC, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(in_mat, out_mat,
-                                                                                               _roi[0]);
-    xf::cv::crop<TYPE, HEIGHT, WIDTH, MEMORYMAPPED_ARCH, NPC, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT_1>(in_mat, out_mat1,
-                                                                                                 _roi[1]);
-    xf::cv::crop<TYPE, HEIGHT, WIDTH, MEMORYMAPPED_ARCH, NPC, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT_2>(in_mat, out_mat2,
-                                                                                                 _roi[2]);
+    xf::cv::crop<OUT_TYPE, HEIGHT, WIDTH, MEMORYMAPPED_ARCH, NPPCX, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(in_mat, out_mat,
+                                                                                                     _roi[0]);
+    xf::cv::crop<OUT_TYPE, HEIGHT, WIDTH, MEMORYMAPPED_ARCH, NPPCX, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT_1>(in_mat, out_mat1,
+                                                                                                       _roi[1]);
+    xf::cv::crop<OUT_TYPE, HEIGHT, WIDTH, MEMORYMAPPED_ARCH, NPPCX, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT_2>(in_mat, out_mat2,
+                                                                                                       _roi[2]);
 }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 #include "common/xf_headers.hpp"
 
-#include "xf_warp_transform_config.h"
+#include "xf_warp_transform_tb_config.h"
 
 // Changing transformation matrix dimensions with transform Affine 2x3,
 // Perspecitve 3x3
@@ -116,7 +116,7 @@ int main(int argc, char* argv[]) {
     diff_img.create(image_input.rows, image_input.cols, image_input.type());
 
     // Call the top function
-    warp_transform_accel((ap_uint<PTR_WIDTH>*)image_input.data, R, (ap_uint<PTR_WIDTH>*)image_output.data,
+    warp_transform_accel((ap_uint<INPUT_PTR_WIDTH>*)image_input.data, R, (ap_uint<OUTPUT_PTR_WIDTH>*)image_output.data,
                          image_input.rows, image_input.cols);
 
     cv::imwrite("output.png", image_output);
@@ -124,9 +124,9 @@ int main(int argc, char* argv[]) {
     // OpenCV reference:
     cv::Mat opencv_image;
 #if GRAY
-    opencv_image.create(image_input.rows, image_input.cols, CV_8UC1);
+    opencv_image.create(image_input.rows, image_input.cols, CV_OUT_TYPE);
 #else
-    opencv_image.create(image_input.rows, image_input.cols, CV_8UC3);
+    opencv_image.create(image_input.rows, image_input.cols, CV_OUT_TYPE);
 #endif
 
     for (int I1 = 0; I1 < opencv_image.rows; I1++) {

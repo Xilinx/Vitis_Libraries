@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 #include "common/xf_headers.hpp"
 #include <stdlib.h>
 #include <ap_int.h>
-#include "xf_dilation_config.h"
+#include "xf_dilation_tb_config.h"
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -45,14 +45,14 @@ int main(int argc, char** argv) {
     int width = in_img.cols;
 // create memory for output images
 #if GRAY
-    ocv_ref.create(in_img.rows, in_img.cols, CV_8UC1);
-    out_img.create(in_img.rows, in_img.cols, CV_8UC1);
-    diff.create(in_img.rows, in_img.cols, CV_8UC1);
+    ocv_ref.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    out_img.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    diff.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
 
 #else
-    ocv_ref.create(in_img.rows, in_img.cols, CV_8UC3);
-    out_img.create(in_img.rows, in_img.cols, CV_8UC3);
-    diff.create(in_img.rows, in_img.cols, CV_8UC3);
+    ocv_ref.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    out_img.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    diff.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
 #endif
 
     cv::Mat element = cv::getStructuringElement(KERNEL_SHAPE, cv::Size(FILTER_SIZE, FILTER_SIZE), cv::Point(-1, -1));

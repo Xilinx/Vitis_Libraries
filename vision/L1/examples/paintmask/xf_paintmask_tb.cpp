@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_paintmask_config.h"
+#include "xf_paintmask_tb_config.h"
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
     ocv_ref.create(in_img.rows, in_img.cols, in_img.depth());
     out_img.create(in_img.rows, in_img.cols, in_img.depth());
     diff.create(in_img.rows, in_img.cols, in_img.depth());
-    in_mask.create(in_img.rows, in_img.cols, CV_8UC1);
+    in_mask.create(in_img.rows, in_img.cols, CV_IN_TYPE);
 
     uint64_t q = 0;
     for (int i = 0; i < in_img.rows; i++) {
@@ -55,15 +55,15 @@ int main(int argc, char** argv) {
         }
     }
 
-    unsigned char color[XF_CHANNELS(TYPE, NPC1)];
+    unsigned char color[XF_CHANNELS(IN_TYPE, NPPCX)];
     for (int i = 0; i < in_img.channels(); i++) {
         color[i] = 150;
     }
 
     // Call the top function
 
-    paintmask_accel((ap_uint<PTR_WIDTH>*)in_img.data, (ap_uint<PTR_WIDTH>*)in_mask.data, color,
-                    (ap_uint<PTR_WIDTH>*)out_img.data, height, width);
+    paintmask_accel((ap_uint<INPUT_PTR_WIDTH>*)in_img.data, (ap_uint<INPUT_PTR_WIDTH>*)in_mask.data, color,
+                    (ap_uint<OUTPUT_PTR_WIDTH>*)out_img.data, height, width);
 
     // Reference function:
     unsigned long long int p = 0;

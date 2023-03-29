@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright 2023 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,99 @@
 #include "common/xf_headers.hpp"
 #include "xf_isp_types.h"
 #include "xcl2.hpp"
+#include <bitset>
+#include <iostream>
+using namespace std;
 
-unsigned short mode_reg = 0;
-unsigned char awb_en = 1;
-unsigned char hdr_en = 1;
-unsigned char rgbir_en = 0;
-unsigned char qnd_en = 0;
-unsigned char ltm_en = 0;
-unsigned char gtm_en = 1;
-unsigned char ccm_en = 1;
-unsigned char lut3d_en = 0;
-unsigned char csc_en = 1;
+void bayerizeImage(cv::Mat img, cv::Mat& bayer_image, cv::Mat& cfa_output, int code) {
+    for (int i = 0; i < img.rows; i++) {
+        for (int j = 0; j < img.cols; j++) {
+            cv::Vec3w in = img.at<cv::Vec3w>(i, j);
+            cv::Vec3w b;
+            b[0] = 0;
+            b[1] = 0;
+            b[2] = 0;
+
+            if (code == 0) {            // BG
+                if ((i & 1) == 0) {     // even row
+                    if ((j & 1) == 0) { // even col
+                        b[0] = in[0];
+                        cfa_output.at<ushort>(i, j) = in[0];
+                    } else { // odd col
+                        b[1] = in[1];
+                        cfa_output.at<ushort>(i, j) = in[1];
+                    }
+                } else {                // odd row
+                    if ((j & 1) == 0) { // even col
+                        b[1] = in[1];
+                        cfa_output.at<ushort>(i, j) = in[1];
+                    } else { // odd col
+                        b[2] = in[2];
+                        cfa_output.at<ushort>(i, j) = in[2];
+                    }
+                }
+            }
+            if (code == 1) {            // GB
+                if ((i & 1) == 0) {     // even row
+                    if ((j & 1) == 0) { // even col
+                        b[1] = in[1];
+                        cfa_output.at<ushort>(i, j) = in[1];
+                    } else { // odd col
+                        b[0] = in[0];
+                        cfa_output.at<ushort>(i, j) = in[0];
+                    }
+                } else {                // odd row
+                    if ((j & 1) == 0) { // even col
+                        b[2] = in[2];
+                        cfa_output.at<ushort>(i, j) = in[2];
+                    } else { // odd col
+                        b[1] = in[1];
+                        cfa_output.at<ushort>(i, j) = in[1];
+                    }
+                }
+            }
+            if (code == 2) {            // GR
+                if ((i & 1) == 0) {     // even row
+                    if ((j & 1) == 0) { // even col
+                        b[1] = in[1];
+                        cfa_output.at<ushort>(i, j) = in[1];
+                    } else { // odd col
+                        b[2] = in[2];
+                        cfa_output.at<ushort>(i, j) = in[2];
+                    }
+                } else {                // odd row
+                    if ((j & 1) == 0) { // even col
+                        b[0] = in[0];
+                        cfa_output.at<ushort>(i, j) = in[0];
+                    } else { // odd col
+                        b[1] = in[1];
+                        cfa_output.at<ushort>(i, j) = in[1];
+                    }
+                }
+            }
+            if (code == 3) {            // RG
+                if ((i & 1) == 0) {     // even row
+                    if ((j & 1) == 0) { // even col
+                        b[2] = in[2];
+                        cfa_output.at<ushort>(i, j) = in[2];
+                    } else { // odd col
+                        b[1] = in[1];
+                        cfa_output.at<ushort>(i, j) = in[1];
+                    }
+                } else {                // odd row
+                    if ((j & 1) == 0) { // even col
+                        b[1] = in[1];
+                        cfa_output.at<ushort>(i, j) = in[1];
+                    } else { // odd col
+                        b[0] = in[0];
+                        cfa_output.at<ushort>(i, j) = in[0];
+                    }
+                }
+            }
+            bayer_image.at<cv::Vec3w>(i, j) = b;
+        }
+    }
+}
 
 int g_value_com(unsigned short& value_in, float& alpha, float& ob) {
     float radiance_out = (value_in - ob) / alpha;
@@ -160,29 +242,42 @@ void wr_ocv_gen(float& alpha,
     fclose(fp);
 }
 
+void compute_pxl(int pxl_val, int& out_val, float params[3][4][3], int color_idx) {
+    if (pxl_val < params[color_idx][0][0]) {
+        out_val = params[color_idx][0][1] * pxl_val + params[color_idx][0][2];
+    } else if (pxl_val < params[color_idx][1][0]) {
+        out_val = params[color_idx][1][1] * pxl_val + params[color_idx][1][2];
+    } else if (pxl_val < params[color_idx][2][0]) {
+        out_val = params[color_idx][2][1] * pxl_val + params[color_idx][2][2];
+    } else {
+        out_val = params[color_idx][3][1] * pxl_val + params[color_idx][3][2];
+    }
+
+    return;
+}
+
 int main(int argc, char** argv) {
-    if (argc != 4) {
+    if (argc != 5) {
         fprintf(stderr, "Invalid Number of Arguments!\nUsage:\n");
-        fprintf(stderr, "<Executable Name> <input image 1 (SEF) path> <input image 2 (LEF) path> <Input LUT file> \n");
+        fprintf(stderr,
+                "<Executable Name> <input image 1 (SEF) path> <input image 2 (LEF) path> <input image 3 (original) "
+                "path> <Input LUT file> \n");
         return -1;
     }
 
-    cv::Mat in_img1, in_img2, interleaved_img, out_img, out_img_ir, ocv_ref, in_gray, diff;
-
-    unsigned short in_width, in_height;
-    int height, width;
+    cv::Mat in_img1, in_img2, in_img3, interleaved_img, out_img, out_img_ir, ocv_ref, in_gray, diff;
 
 /*  reading in the color image  */
 #if T_8U
     in_img1 = cv::imread(argv[1], 0); // read image
     in_img2 = cv::imread(argv[2], 0); // read image
+    in_img3 = cv::imread(argv[3], 0); // read image
 
 #else
     in_img1 = cv::imread(argv[1], -1); // read image
     in_img2 = cv::imread(argv[2], -1); // read image
+    in_img3 = cv::imread(argv[3], -1); // read image
 #endif
-    height = in_img1.rows;
-    width = in_img1.cols;
 
     if (in_img1.data == NULL) {
         fprintf(stderr, "Cannot open image at %s\n", argv[1]);
@@ -194,15 +289,134 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-#if T_8U
-    interleaved_img.create(cv::Size(in_img1.cols + NUM_H_BLANK, in_img1.rows * 2), CV_8UC1);
+    if (in_img3.data == NULL) {
+        fprintf(stderr, "Cannot open image at %s\n", argv[3]);
+        return 0;
+    }
 
-#else
-    interleaved_img.create(cv::Size(in_img1.cols + NUM_H_BLANK, in_img1.rows * 2), CV_16UC1);
+    unsigned short in_width, in_height;
+    int height, width;
 
-#endif
+    unsigned short bformat = XF_BAYER_PATTERN; // Bayer format BG-0; GB-1; GR-2; RG-3
+
+    height = in_img3.rows;
+    width = in_img3.cols;
+
+    cv::Mat diff_16bit(in_img3.rows, in_img3.cols, CV_16UC1);
+
     cv::imwrite("in_img1.png", in_img1);
     cv::imwrite("in_img2.png", in_img2);
+    cv::imwrite("in_img3.png", in_img3);
+
+    cv::Mat cfa_bayer_output_sef(in_img1.rows, in_img1.cols, CV_16UC1);
+    cv::Mat cfa_bayer_output_lef(in_img2.rows, in_img2.cols, CV_16UC1);
+    cv::Mat cfa_bayer_output_org(in_img3.rows, in_img3.cols, CV_16UC1);
+
+    cv::Mat color_cfa_bayer_output_sef(in_img1.rows, in_img1.cols, in_img1.type());
+    cv::Mat color_cfa_bayer_output_lef(in_img2.rows, in_img2.cols, in_img2.type());
+    cv::Mat color_cfa_bayer_output_org(in_img3.rows, in_img3.cols, in_img3.type());
+
+    bayerizeImage(in_img1, color_cfa_bayer_output_sef, cfa_bayer_output_sef, bformat);
+    bayerizeImage(in_img2, color_cfa_bayer_output_lef, cfa_bayer_output_lef, bformat);
+    bayerizeImage(in_img3, color_cfa_bayer_output_org, cfa_bayer_output_org, bformat);
+
+    cv::imwrite("bayer_image_sef.png", color_cfa_bayer_output_sef);
+    cv::imwrite("cfa_output_sef.png", cfa_bayer_output_sef);
+
+    cv::imwrite("bayer_image_lef.png", color_cfa_bayer_output_lef);
+    cv::imwrite("cfa_output_lef.png", cfa_bayer_output_lef);
+
+    cv::imwrite("bayer_image_org.png", color_cfa_bayer_output_org);
+    cv::imwrite("cfa_output_org.png", cfa_bayer_output_org);
+
+    cv::Mat gamma_img;
+    gamma_img.create(in_img3.rows, in_img3.cols, CV_16UC1);
+
+    int out_val1;
+    int pxl_val1;
+
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+#if T_8U
+            pxl_val1 = cfa_bayer_output_org.at<unsigned char>(i, j);
+            float val = (float)pxl_val1 / 255;
+            float val1 = (float)std::pow(val, 0.4545);
+            float out_val1 = val1 * 255.0;
+
+            gamma_img.at<unsigned char>(i, j) = (int)out_val1;
+#else
+            pxl_val1 = cfa_bayer_output_org.at<unsigned short>(i, j);
+            float val = (float)pxl_val1 / 65535;
+            float val1 = (float)std::pow(val, 0.4545);
+            float out_val1 = val1 * 65535.0;
+
+            gamma_img.at<unsigned short>(i, j) = (int)out_val1;
+#endif
+        }
+    }
+
+    imwrite("gamma.png", gamma_img);
+
+    // conversion from   16 bit to 12 bit
+    float params_16_to_12[3][4][3] = {
+        {{4096, 0.25, 0}, {8192, 0.125, 512}, {32768, 0.0625, 1024}, {65536, 0.03125, 2048}},
+        {{4096, 0.25, 0}, {8192, 0.125, 512}, {32768, 0.0625, 1024}, {65536, 0.03125, 2048}},
+        {{4096, 0.25, 0}, {8192, 0.125, 512}, {32768, 0.0625, 1024}, {65536, 0.03125, 2048}}};
+
+    cv::Mat out_img_12bit;
+    out_img_12bit.create(cfa_bayer_output_org.rows, cfa_bayer_output_org.cols, CV_16UC1);
+
+    int pxl_val;
+    int out_val;
+    int color_idx, row_idx, col_idx;
+
+    // Convertion of 16bit image to 12bit image
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            pxl_val = gamma_img.at<unsigned short>(i, j);
+            row_idx = i;
+            col_idx = j;
+
+            if (bformat == XF_BAYER_GB) {
+                col_idx += 1;
+            }
+
+            if (bformat == XF_BAYER_GR) {
+                row_idx += 1;
+            }
+
+            if (bformat == XF_BAYER_RG) { // RGRG
+                                          // GBGB
+                col_idx += 1;
+                row_idx += 1;
+            }
+            if ((row_idx & 1) == 0) {     // even row
+                if ((col_idx & 1) == 0) { // even col
+                    color_idx = 0;        // R location
+                } else {                  // odd col
+                    color_idx = 1;        // G location
+                }
+            } else {                      // odd row
+                if ((col_idx & 1) == 0) { // even col
+                    color_idx = 1;        // G location
+                } else {                  // odd col
+                    color_idx = 2;        // B location
+                }
+            }
+            compute_pxl(pxl_val, out_val, params_16_to_12, color_idx);
+            out_img_12bit.at<unsigned short>(i, j) = out_val;
+        }
+    }
+
+    imwrite("12_bit.png", out_img_12bit); // 12bit image
+
+#if T_8U
+    interleaved_img.create(cv::Size(cfa_bayer_output_sef.cols + NUM_H_BLANK, cfa_bayer_output_sef.rows * 2), CV_8UC1);
+
+#else
+    interleaved_img.create(cv::Size(cfa_bayer_output_sef.cols + NUM_H_BLANK, cfa_bayer_output_sef.rows * 2), CV_16UC1);
+
+#endif
 
 #if T_8U
     int sc = 1;
@@ -211,7 +425,8 @@ int main(int argc, char** argv) {
         for (int c = 0; c < width + NUM_H_BLANK; c++) {
             if (r < NUM_V_BLANK_LINES) {
                 if (c >= NUM_H_BLANK)
-                    interleaved_img.at<unsigned char>(r, c) = in_img1.at<unsigned char>(r, c - NUM_H_BLANK);
+                    interleaved_img.at<unsigned char>(r, c) =
+                        cfa_bayer_output_sef.at<unsigned char>(r, c - NUM_H_BLANK);
                 else
                     interleaved_img.at<unsigned char>(r, c) = 0;
             }
@@ -219,20 +434,22 @@ int main(int argc, char** argv) {
             if (r >= NUM_V_BLANK_LINES && r <= ((2 * height) - NUM_V_BLANK_LINES)) {
                 if (r % 2 == 0) {
                     if (c >= NUM_H_BLANK)
-                        interleaved_img.at<unsigned char>(r, c) = in_img2.at<unsigned char>(cnt, c - NUM_H_BLANK);
+                        interleaved_img.at<unsigned char>(r, c) =
+                            cfa_bayer_output_lef.at<unsigned char>(cnt, c - NUM_H_BLANK);
                     else
                         interleaved_img.at<unsigned char>(r, c) = 0;
                 } else {
                     if (c >= NUM_H_BLANK)
                         interleaved_img.at<unsigned char>(r, c) =
-                            in_img1.at<unsigned char>(cnt1 + NUM_V_BLANK_LINES - 1, c - NUM_H_BLANK);
+                            cfa_bayer_output_sef.at<unsigned char>(cnt1 + NUM_V_BLANK_LINES - 1, c - NUM_H_BLANK);
                     else
                         interleaved_img.at<unsigned char>(r, c) = 0;
                 }
             }
             if (r >= ((2 * height) - NUM_V_BLANK_LINES)) {
                 if (c >= NUM_H_BLANK)
-                    interleaved_img.at<unsigned char>(r, c) = in_img2.at<unsigned char>(cnt, c - NUM_H_BLANK);
+                    interleaved_img.at<unsigned char>(r, c) =
+                        cfa_bayer_output_lef.at<unsigned char>(cnt, c - NUM_H_BLANK);
                 else
                     interleaved_img.at<unsigned char>(r, c) = 0;
             }
@@ -251,7 +468,8 @@ int main(int argc, char** argv) {
         for (int c = 0; c < width + NUM_H_BLANK; c++) {
             if (r < NUM_V_BLANK_LINES) {
                 if (c >= NUM_H_BLANK)
-                    interleaved_img.at<unsigned short>(r, c) = in_img1.at<unsigned short>(r, c - NUM_H_BLANK);
+                    interleaved_img.at<unsigned short>(r, c) =
+                        cfa_bayer_output_sef.at<unsigned short>(r, c - NUM_H_BLANK);
                 else
                     interleaved_img.at<unsigned short>(r, c) = 0;
             }
@@ -259,20 +477,22 @@ int main(int argc, char** argv) {
             if (r >= NUM_V_BLANK_LINES && r <= ((2 * height) - NUM_V_BLANK_LINES)) {
                 if (r % 2 == 0) {
                     if (c >= NUM_H_BLANK)
-                        interleaved_img.at<unsigned short>(r, c) = in_img2.at<unsigned short>(cnt, c - NUM_H_BLANK);
+                        interleaved_img.at<unsigned short>(r, c) =
+                            cfa_bayer_output_lef.at<unsigned short>(cnt, c - NUM_H_BLANK);
                     else
                         interleaved_img.at<unsigned short>(r, c) = 0;
                 } else {
                     if (c >= NUM_H_BLANK)
                         interleaved_img.at<unsigned short>(r, c) =
-                            in_img1.at<unsigned short>(cnt1 + NUM_V_BLANK_LINES - 1, c - NUM_H_BLANK);
+                            cfa_bayer_output_sef.at<unsigned short>(cnt1 + NUM_V_BLANK_LINES - 1, c - NUM_H_BLANK);
                     else
                         interleaved_img.at<unsigned short>(r, c) = 0;
                 }
             }
             if (r >= ((2 * height) - NUM_V_BLANK_LINES)) {
                 if (c >= NUM_H_BLANK)
-                    interleaved_img.at<unsigned short>(r, c) = in_img2.at<unsigned short>(cnt, c - NUM_H_BLANK);
+                    interleaved_img.at<unsigned short>(r, c) =
+                        cfa_bayer_output_lef.at<unsigned short>(cnt, c - NUM_H_BLANK);
                 else
                     interleaved_img.at<unsigned short>(r, c) = 0;
             }
@@ -288,55 +508,66 @@ int main(int argc, char** argv) {
 
     imwrite("interleaved_img.png", interleaved_img);
 
-    mode_reg = (awb_en << AWB_EN_LSB) + (hdr_en << HDR_EN_LSB) + (rgbir_en << RGBIR_EN_LSB) + (qnd_en << QnD_EN_LSB) +
-               (ltm_en << LTM_EN_LSB) + (gtm_en << GTM_EN_LSB) + (ccm_en << CCM_EN_LSB) + (lut3d_en << LUT3D_EN_LSB) +
-               (csc_en << CSC_EN_LSB);
-
     size_t image_out_size_bytes;
     size_t image_in_size_bytes;
+    size_t image_out_size_bytes_decom;
+    size_t image_out_size_bytes_deggama;
+    size_t image_out_size_bytes_demo;
+
+    cv::Mat decom_out;
+    decom_out.create(in_img3.rows, in_img3.cols, CV_16UC1);
+    image_out_size_bytes_decom = decom_out.rows * decom_out.cols * 1 * sizeof(unsigned short);
+
+    cv::Mat deggama_out;
+    deggama_out.create(in_img3.rows, in_img3.cols, CV_16UC1);
+    image_out_size_bytes_deggama = deggama_out.rows * deggama_out.cols * 1 * sizeof(unsigned short);
+
+    cv::Mat ccm;
+    ccm.create(in_img3.rows, in_img3.cols, CV_16UC3);
+    size_t image_out_size_bytes_ccm = ccm.rows * ccm.cols * 3 * sizeof(unsigned short);
 
 #if T_8U
 
-    if (csc_en == 0) {
-        out_img.create(in_img1.rows, in_img1.cols, CV_8UC3);
-        image_out_size_bytes = in_img1.rows * in_img1.cols * 3 * sizeof(unsigned char);
+    if (USE_CSC == 0) {
+        out_img.create(cfa_bayer_output_sef.rows, cfa_bayer_output_sef.cols, CV_8UC3);
+        image_out_size_bytes = cfa_bayer_output_sef.rows * cfa_bayer_output_sef.cols * 3 * sizeof(unsigned char);
     }
-    if (csc_en == 1) {
-        out_img.create(in_img1.rows, in_img1.cols, CV_16UC1);
-        image_out_size_bytes = in_img1.rows * in_img1.cols * 1 * sizeof(unsigned short);
+    if (USE_CSC == 1) {
+        out_img.create(cfa_bayer_output_sef.rows, cfa_bayer_output_sef.cols, CV_16UC1);
+        image_out_size_bytes = cfa_bayer_output_sef.rows * cfa_bayer_output_sef.cols * 1 * sizeof(unsigned short);
     }
 
-    out_img_ir.create(in_img1.rows, in_img1.cols, CV_16UC1);
+    out_img_ir.create(cfa_bayer_output_sef.rows, cfa_bayer_output_sef.cols, CV_16UC1);
     size_t vec_in_size_bytes = 256 * 3 * sizeof(unsigned char);
     size_t vec_weight_size_bytes = NO_EXPS * XF_NPPC * W_B_SIZE * sizeof(short);
 
-    if (hdr_en) {
+    if (USE_HDR_FUSION) {
         image_in_size_bytes = interleaved_img.rows * interleaved_img.cols * sizeof(unsigned char);
     } else {
-        image_in_size_bytes = in_img1.rows * in_img1.cols * sizeof(unsigned char);
+        image_in_size_bytes = cfa_bayer_output_sef.rows * cfa_bayer_output_sef.cols * sizeof(unsigned char);
     }
-    size_t image_out_ir_size_bytes = in_img1.rows * in_img1.cols * 1 * sizeof(unsigned short);
+    size_t image_out_ir_size_bytes = cfa_bayer_output_sef.rows * cfa_bayer_output_sef.cols * 1 * sizeof(unsigned short);
 
 #else
 
-    if (csc_en == 0) {
-        out_img.create(in_img1.rows, in_img1.cols, CV_8UC3);
-        image_out_size_bytes = in_img1.rows * in_img1.cols * 3 * sizeof(unsigned char);
+    if (USE_CSC == 0) {
+        out_img.create(cfa_bayer_output_sef.rows, cfa_bayer_output_sef.cols, CV_8UC3);
+        image_out_size_bytes = cfa_bayer_output_sef.rows * cfa_bayer_output_sef.cols * 3 * sizeof(unsigned char);
     }
-    if (csc_en == 1) {
-        out_img.create(in_img1.rows, in_img1.cols, CV_16UC1);
-        image_out_size_bytes = in_img1.rows * in_img1.cols * 1 * sizeof(unsigned short);
+    if (USE_CSC == 1) {
+        out_img.create(cfa_bayer_output_sef.rows, cfa_bayer_output_sef.cols, CV_16UC1);
+        image_out_size_bytes = cfa_bayer_output_sef.rows * cfa_bayer_output_sef.cols * 1 * sizeof(unsigned short);
     }
 
-    out_img_ir.create(in_img1.rows, in_img1.cols, CV_16UC1);
+    out_img_ir.create(cfa_bayer_output_sef.rows, cfa_bayer_output_sef.cols, CV_16UC1);
     size_t vec_in_size_bytes = 256 * 3 * sizeof(unsigned char);
     size_t vec_weight_size_bytes = NO_EXPS * XF_NPPC * W_B_SIZE * sizeof(short);
-    if (hdr_en) {
+    if (USE_HDR_FUSION) {
         image_in_size_bytes = interleaved_img.rows * interleaved_img.cols * sizeof(unsigned short);
     } else {
-        image_in_size_bytes = in_img1.rows * in_img1.cols * sizeof(unsigned short);
+        image_in_size_bytes = in_img3.rows * in_img3.cols * sizeof(unsigned short);
     }
-    size_t image_out_ir_size_bytes = in_img1.rows * in_img1.cols * 1 * sizeof(unsigned short);
+    size_t image_out_ir_size_bytes = cfa_bayer_output_sef.rows * cfa_bayer_output_sef.cols * 1 * sizeof(unsigned short);
 #endif
 
     float alpha = 1.0f;
@@ -392,7 +623,7 @@ int main(int argc, char** argv) {
 
     std::string fileText;
 
-    std::ifstream infile(argv[3]);
+    std::ifstream infile(argv[4]);
 
     if (infile.fail()) {
         fprintf(stderr, "ERROR: Cannot open input lut file %s\n ", argv[3]);
@@ -431,15 +662,86 @@ int main(int argc, char** argv) {
         blk_width = (1 << i);
     }
 
+    int params_decomand[3][4][3] = {{{1024, 4, 0}, {1536, 8, 512}, {3072, 16, 1024}, {4096, 32, 2048}},
+                                    {{1024, 4, 0}, {1536, 8, 512}, {3072, 16, 1024}, {4096, 32, 2048}},
+                                    {{1024, 4, 0}, {1536, 8, 512}, {3072, 16, 1024}, {4096, 32, 2048}}};
+
+#if T_8U
+
+    ap_ufixed<32, 18> params_degamma[3][DEGAMMA_KP][3] = {
+        {{32, 0.08, 0},
+         {64, 0.3, 7},
+         {96, 0.55, 23},
+         {128, 0.82, 49},
+         {160, 1.1, 84},
+         {192, 1.4, 132},
+         {224, 1.75, 200},
+         {256, 2, 256}},
+        {{32, 0.08, 0},
+         {64, 0.3, 7},
+         {96, 0.55, 23},
+         {128, 0.82, 49},
+         {160, 1.1, 84},
+         {192, 1.4, 132},
+         {224, 1.75, 200},
+         {256, 2, 256}},
+        {{32, 0.08, 0},
+         {64, 0.3, 7},
+         {96, 0.55, 23},
+         {128, 0.82, 49},
+         {160, 1.1, 84},
+         {192, 1.4, 132},
+         {224, 1.75, 200},
+         {256, 2, 256}}}; // 8 knee points {upper_bound, slope, intercept}
+
+#endif
+
+#if T_16U
+
+    ap_ufixed<32, 16> params_degamma[3][DEGAMMA_KP][3] = {
+        {{8192, 0.082, 0},
+         {16384, 0.296, 1749},
+         {24576, 0.545, 5825},
+         {32768, 0.816, 12476},
+         {40960, 1.1, 21782},
+         {49152, 1.4, 34162},
+         {57344, 1.715, 49506},
+         {65536, 2.0, 65536}},
+        {{8192, 0.082, 0},
+         {16384, 0.296, 1749},
+         {24576, 0.545, 5825},
+         {32768, 0.816, 12476},
+         {40960, 1.1, 21782},
+         {49152, 1.4, 34162},
+         {57344, 1.715, 49506},
+         {65536, 2.0, 65536}},
+        {{8192, 0.082, 0},
+         {16384, 0.296, 1749},
+         {24576, 0.545, 5825},
+         {32768, 0.816, 12476},
+         {40960, 1.1, 21782},
+         {49152, 1.4, 34162},
+         {57344, 1.715, 49506},
+         {65536, 2.0, 65536}}}; // 8 knee points {upper_bound, slope, intercept}
+
+#endif
+
     /////////////////////////////////////// CL ////////////////////////
     size_t filter1_in_size_bytes = 25 * sizeof(unsigned char);
     size_t filter2_in_size_bytes = 9 * sizeof(unsigned char);
     size_t sub_wgts_in_size_bytes = 4 * sizeof(unsigned char);
+    size_t decompand_params_in_size_bytes = 36 * sizeof(int);
+    size_t degamma_params_in_size_bytes = 3 * DEGAMMA_KP * 3 * sizeof(int);
 
-    size_t ir_image_out_size_bytes = in_img1.rows * in_img1.cols * 1 * sizeof(CVTYPE);
+    size_t ir_image_out_size_bytes = cfa_bayer_output_sef.rows * cfa_bayer_output_sef.cols * 1 * sizeof(CVTYPE);
     size_t lut_in_size_bytes = lut_dim * lut_dim * lut_dim * sizeof(float) * 3;
 
     float gamma_val_r = 0.5f, gamma_val_g = 0.8f, gamma_val_b = 0.8f;
+
+    std::cout << "INPUT_PTR_WIDTH :" << INPUT_PTR_WIDTH << std::endl;
+    std::cout << "OUTPUT_PTR_WIDTH :" << OUTPUT_PTR_WIDTH << std::endl;
+    std::cout << "LUT_PTR_WIDTH :" << LUT_PTR_WIDTH << std::endl;
+    std::cout << "XF_NPPC :" << XF_NPPC << std::endl;
 
     compute_gamma(gamma_val_r, gamma_val_g, gamma_val_b, gamma_lut);
 
@@ -464,6 +766,10 @@ int main(int argc, char** argv) {
     std::vector<cl::Memory> inBufVec, outBufVec;
     OCL_CHECK(err, cl::Buffer imageToDevice(context, CL_MEM_READ_ONLY, image_in_size_bytes, NULL, &err));
     OCL_CHECK(err, cl::Buffer imageFromDevice(context, CL_MEM_WRITE_ONLY, image_out_size_bytes, NULL, &err));
+    OCL_CHECK(err,
+              cl::Buffer imageFromDevice_decom(context, CL_MEM_WRITE_ONLY, image_out_size_bytes_decom, NULL, &err));
+    OCL_CHECK(err,
+              cl::Buffer imageFromDevice_deggama(context, CL_MEM_WRITE_ONLY, image_out_size_bytes_deggama, NULL, &err));
     OCL_CHECK(err, cl::Buffer imageFromDevice_ir(context, CL_MEM_WRITE_ONLY, image_out_ir_size_bytes, NULL, &err));
     OCL_CHECK(err, cl::Buffer buffer_inLut(context, CL_MEM_READ_ONLY, lut_in_size_bytes, NULL, &err));
     OCL_CHECK(err, cl::Buffer buffer_inVec(context, CL_MEM_READ_ONLY, vec_in_size_bytes, NULL, &err));
@@ -474,7 +780,10 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, cl::Buffer buffer_IR_at_R(context, CL_MEM_READ_ONLY, filter2_in_size_bytes, NULL, &err));
     OCL_CHECK(err, cl::Buffer buffer_IR_at_B(context, CL_MEM_READ_ONLY, filter2_in_size_bytes, NULL, &err));
     OCL_CHECK(err, cl::Buffer buffer_sub_wgts(context, CL_MEM_READ_ONLY, sub_wgts_in_size_bytes, NULL, &err));
-
+    OCL_CHECK(
+        err, cl::Buffer buffer_decompand_params(context, CL_MEM_READ_ONLY, decompand_params_in_size_bytes, NULL, &err));
+    OCL_CHECK(err,
+              cl::Buffer buffer_degamma_params(context, CL_MEM_READ_ONLY, degamma_params_in_size_bytes, NULL, &err));
     // Set the kernel arguments
 
     OCL_CHECK(err, err = kernel.setArg(0, imageToDevice));
@@ -496,12 +805,20 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, err = kernel.setArg(16, c1));
     OCL_CHECK(err, err = kernel.setArg(17, c2));
     OCL_CHECK(err, err = kernel.setArg(18, buffer_inVec));
-    OCL_CHECK(err, err = kernel.setArg(19, mode_reg));
-    OCL_CHECK(err, err = kernel.setArg(20, buffer_inLut));
-    OCL_CHECK(err, err = kernel.setArg(21, lut_dim));
-    OCL_CHECK(err, err = kernel.setArg(22, pawb));
+    OCL_CHECK(err, err = kernel.setArg(19, buffer_inLut));
+    OCL_CHECK(err, err = kernel.setArg(20, lut_dim));
+    OCL_CHECK(err, err = kernel.setArg(21, pawb));
+    OCL_CHECK(err, err = kernel.setArg(22, bformat));
+    OCL_CHECK(err, err = kernel.setArg(23, buffer_decompand_params));
+    OCL_CHECK(err, err = kernel.setArg(24, buffer_degamma_params));
 
-    for (int i = 0; i < 3; i++) {
+    OCL_CHECK(err, err = kernel.setArg(25, imageFromDevice_decom));
+    OCL_CHECK(err, err = kernel.setArg(26, imageFromDevice_deggama));
+
+    double exec_sum = 0.0f;
+    double avg_runtime = 0.0f;
+    int loop_count = 4;
+    for (int i = 0; i < loop_count; i++) {
         OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inVec,      // buffer on the FPGA
                                             CL_TRUE,           // blocking call
                                             0,                 // buffer offset in bytes
@@ -544,7 +861,19 @@ int main(int argc, char** argv) {
                                             sub_wgts_in_size_bytes, // Size in bytes
                                             sub_wgts));
 
-        if (hdr_en) {
+        OCL_CHECK(err, q.enqueueWriteBuffer(buffer_decompand_params,        // buffer on the FPGA
+                                            CL_TRUE,                        // blocking call
+                                            0,                              // buffer offset in bytes
+                                            decompand_params_in_size_bytes, // Size in bytes
+                                            params_decomand));
+
+        OCL_CHECK(err, q.enqueueWriteBuffer(buffer_degamma_params,        // buffer on the FPGA
+                                            CL_TRUE,                      // blocking call
+                                            0,                            // buffer offset in bytes
+                                            degamma_params_in_size_bytes, // Size in bytes
+                                            params_degamma));
+
+        if (USE_HDR_FUSION) {
             OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inVec_Weights,  // buffer on the FPGA
                                                 CL_TRUE,               // blocking call
                                                 0,                     // buffer offset in bytes
@@ -553,9 +882,12 @@ int main(int argc, char** argv) {
 
             OCL_CHECK(err, q.enqueueWriteBuffer(imageToDevice, CL_TRUE, 0, image_in_size_bytes, interleaved_img.data));
 
-        } else {
-            OCL_CHECK(err, q.enqueueWriteBuffer(imageToDevice, CL_TRUE, 0, image_in_size_bytes, in_img1.data));
         }
+
+        else {
+            OCL_CHECK(err, q.enqueueWriteBuffer(imageToDevice, CL_TRUE, 0, image_in_size_bytes, out_img_12bit.data));
+        }
+
         OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inLut,      // buffer on the FPGA
                                             CL_TRUE,           // blocking call
                                             0,                 // buffer offset in bytes
@@ -569,7 +901,6 @@ int main(int argc, char** argv) {
         cl::Event event_sp;
 
         // Launch the kernel
-
         OCL_CHECK(err, err = q.enqueueTask(kernel, NULL, &event_sp));
 
         clWaitForEvents(1, (const cl_event*)&event_sp);
@@ -579,23 +910,31 @@ int main(int argc, char** argv) {
         event_sp.getProfilingInfo(CL_PROFILING_COMMAND_END, &end);
 
         diff_prof = end - start;
-        std::cout << (diff_prof / 1000000) << "ms" << std::endl;
+        std::cout << (diff_prof / 1000000) << std::endl;
+        exec_sum = exec_sum + diff_prof;
 
         // Copying Device result data to Host memory
         q.enqueueReadBuffer(imageFromDevice, CL_TRUE, 0, image_out_size_bytes, out_img.data);
-        if (rgbir_en) {
+        q.enqueueReadBuffer(imageFromDevice_decom, CL_TRUE, 0, image_out_size_bytes_decom, decom_out.data);
+        q.enqueueReadBuffer(imageFromDevice_deggama, CL_TRUE, 0, image_out_size_bytes_deggama, deggama_out.data);
+        if (USE_RGBIR) {
             q.enqueueReadBuffer(imageFromDevice_ir, CL_TRUE, 0, image_out_ir_size_bytes, out_img_ir.data);
         }
     }
 
     q.finish();
-
+    std::cout << "exec_sum =" << exec_sum << std::endl;
+    avg_runtime = exec_sum / loop_count;
+    std::cout << "avg_runtime =" << (avg_runtime / 1000000) << "ms" << std::endl;
     /////////////////////////////////////// end of CL ////////////////////////
 
-    // Write output image
-
+    cv::absdiff(decom_out, cfa_bayer_output_org, diff_16bit);
+    imwrite("16bit_diff.png", diff_16bit);
+    imwrite("decom_out.png", decom_out);
+    imwrite("deggama_out.png", deggama_out);
     imwrite("hls_out.png", out_img);
-    if (rgbir_en) {
+
+    if (USE_RGBIR) {
         imwrite("hls_out_ir.png", out_img_ir);
     }
 

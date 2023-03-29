@@ -49,8 +49,8 @@ class ResizeNorm {
                  int b2,
                  int b3);
     void runImpl(uint8* input, int8* output, int row, int a0, int a1, int a2, int a3, int b0, int b1, int b2, int b3);
-    void runImpl(input_window<uint8>* input,
-                 output_window<int8>* output,
+    void runImpl(adf::input_buffer<uint8_t>& input,
+                 adf::output_buffer<int8_t>& output,
                  int a0,
                  int a1,
                  int a2,
@@ -136,8 +136,9 @@ void ResizeNorm<WIDTH_IN, HEIGHT_IN, WIDTH_OUT, HEIGHT_OUT, IMG_HEIGHT_OUT>::run
 }
 
 template <int WIDTH_IN, int HEIGHT_IN, int WIDTH_OUT, int HEIGHT_OUT, int IMG_HEIGHT_OUT>
-void ResizeNorm<WIDTH_IN, HEIGHT_IN, WIDTH_OUT, HEIGHT_OUT, IMG_HEIGHT_OUT>::runImpl(input_window<uint8>* input,
-                                                                                     output_window<int8>* output,
+void ResizeNorm<WIDTH_IN, HEIGHT_IN, WIDTH_OUT, HEIGHT_OUT, IMG_HEIGHT_OUT>::runImpl(adf::input_buffer<uint8_t>& input,
+
+                                                                                     adf::output_buffer<int8_t>& output,
                                                                                      int a0,
                                                                                      int a1,
                                                                                      int a2,
@@ -146,9 +147,8 @@ void ResizeNorm<WIDTH_IN, HEIGHT_IN, WIDTH_OUT, HEIGHT_OUT, IMG_HEIGHT_OUT>::run
                                                                                      int b1,
                                                                                      int b2,
                                                                                      int b3) {
-    uint8* img_in_ptr = (uint8*)input->ptr;
-    int8* img_out_ptr = (int8*)output->ptr;
-
+    uint8* img_in_ptr = (uint8*)::aie::begin(input);
+    int8* img_out_ptr = (int8*)::aie::begin(output);
     xfCopyMetaData(img_in_ptr, img_out_ptr);
 
     uint8* restrict ptr_in = (uint8*)xfGetImgDataPtr(img_in_ptr);

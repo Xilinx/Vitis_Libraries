@@ -20,8 +20,8 @@
                         "--clock.freqHz 400000000:stitcher_top_1", 
                         "--clock.defaultTolerance 0.001", 
                         "--config PROJECT/system.cfg", 
-                        "LIB_DIR/L1/lib/hw/8_16/tiler.xo", 
-                        "LIB_DIR/L1/lib/hw/8_16/stitcher.xo"
+                        "LIB_DIR/L1/lib/hw/tiler.xo", 
+                        "LIB_DIR/L1/lib/hw/stitcher.xo"
                     ]
                 }, 
                 "package": {
@@ -63,7 +63,7 @@
                 "LIB_DIR/L1/include/aie", 
                 "./"
             ], 
-            "options": "--sysroot=$(SYSROOT) -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include", 
+            "options": "--sysroot=$(SYSROOT) -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -std=c++17",
             "symbols": [
                 "__PS_ENABLE_AIE__"
             ]

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #include "common/xf_headers.hpp"
-#include "xf_modefilter_config.h"
+#include "xf_modefilter_tb_config.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -148,15 +148,15 @@ int main(int argc, char** argv) {
 // create memory for output image
 #if GRAY
     cout << "gray:";
-    ocv_ref.create(in_img.rows, in_img.cols, CV_8UC1);
-    ocv_ref1.create(in_img.rows, in_img.cols, CV_8UC1);
-    out_img.create(in_img.rows, in_img.cols, CV_8UC1); // create memory for output image
-    diff.create(in_img.rows, in_img.cols, CV_8UC1);
+    ocv_ref.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    ocv_ref1.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    out_img.create(in_img.rows, in_img.cols, CV_OUT_TYPE); // create memory for output image
+    diff.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
 #else
-    ocv_ref.create(in_img.rows, in_img.cols, CV_8UC3);
-    ocv_ref1.create(in_img.rows, in_img.cols, CV_8UC3);
-    out_img.create(in_img.rows, in_img.cols, CV_8UC3); // create memory for output image
-    diff.create(in_img.rows, in_img.cols, CV_8UC3);
+    ocv_ref.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    ocv_ref1.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    out_img.create(in_img.rows, in_img.cols, CV_OUT_TYPE); // create memory for output image
+    diff.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
 #endif
 
 #if GRAY
@@ -167,7 +167,8 @@ int main(int argc, char** argv) {
     mode_filter_rgb(in_img, ocv_ref, WINDOW_SIZE);
 #endif
 
-    modefilter_accel((ap_uint<PTR_WIDTH>*)in_img.data, in_img.rows, in_img.cols, (ap_uint<PTR_WIDTH>*)out_img.data);
+    modefilter_accel((ap_uint<INPUT_PTR_WIDTH>*)in_img.data, in_img.rows, in_img.cols,
+                     (ap_uint<OUTPUT_PTR_WIDTH>*)out_img.data);
 
     imwrite("out_img.jpg", out_img);
     imwrite("ocv_ref.jpg", ocv_ref);

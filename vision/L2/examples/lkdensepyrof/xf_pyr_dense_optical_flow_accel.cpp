@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "xf_pyr_dense_optical_flow_config.h"
+#include "xf_pyr_dense_optical_flow_accel_config.h"
 
 extern "C" {
 void pyr_dense_optical_flow_accel(ap_uint<INPUT_PTR_WIDTH>* _current_img,
@@ -56,26 +56,26 @@ void pyr_dense_optical_flow_accel(ap_uint<INPUT_PTR_WIDTH>* _current_img,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1, XF_CV_DEPTH_IN_1> current_img_mat(cur_img_rows, cur_img_cols);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1, XF_CV_DEPTH_IN_2> next_img_mat(next_img_rows, next_img_cols);
-    xf::cv::Mat<XF_32UC1, HEIGHT, WIDTH, XF_NPPC1, XF_CV_DEPTH_IN_3> streamFlowin_mat(flow_rows, flow_cols);
-    xf::cv::Mat<XF_32UC1, HEIGHT, WIDTH, XF_NPPC1, XF_CV_DEPTH_IN_4> streamFlowout_mat(flow_iter_rows, flow_iter_cols);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1> current_img_mat(cur_img_rows, cur_img_cols);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_2> next_img_mat(next_img_rows, next_img_cols);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_3> streamFlowin_mat(flow_rows, flow_cols);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_4> streamFlowout_mat(flow_iter_rows, flow_iter_cols);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, XF_NPPC1, XF_CV_DEPTH_IN_1>(_current_img,
-                                                                                             current_img_mat);
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, XF_NPPC1, XF_CV_DEPTH_IN_2>(_next_image, next_img_mat);
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_32UC1, HEIGHT, WIDTH, XF_NPPC1, XF_CV_DEPTH_IN_3>(_streamFlowin,
-                                                                                              streamFlowin_mat);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1>(_current_img,
+                                                                                          current_img_mat);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_2>(_next_image, next_img_mat);
+    xf::cv::Array2xfMat<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_3>(_streamFlowin,
+                                                                                            streamFlowin_mat);
 
-    xf::cv::densePyrOpticalFlow<NUM_LEVELS, NUM_LINES_FINDIT, WINSIZE_OFLOW, TYPE_FLOW_WIDTH, TYPE_FLOW_INT, XF_8UC1,
-                                HEIGHT, WIDTH, XF_NPPC1, XF_USE_URAM, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2,
-                                XF_CV_DEPTH_IN_3, XF_CV_DEPTH_IN_4>(
-        current_img_mat, next_img_mat, streamFlowin_mat, streamFlowout_mat, level, scale_up_flag, scale_in, init_flag);
+    xf::cv::densePyrOpticalFlow<NUM_LEVELS, NUM_LINES_FINDIT, WINSIZE_OFLOW, TYPE_FLOW_WIDTH, TYPE_FLOW_INT, IN_TYPE,
+                                HEIGHT, WIDTH, NPPCX, XF_USE_URAM, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2, XF_CV_DEPTH_IN_3,
+                                XF_CV_DEPTH_IN_4>(current_img_mat, next_img_mat, streamFlowin_mat, streamFlowout_mat,
+                                                  level, scale_up_flag, scale_in, init_flag);
 
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_32UC1, HEIGHT, WIDTH, XF_NPPC1, XF_CV_DEPTH_IN_4>(streamFlowout_mat,
-                                                                                               _streamFlowout);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_4>(streamFlowout_mat,
+                                                                                            _streamFlowout);
 }
 }

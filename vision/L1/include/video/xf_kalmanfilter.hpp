@@ -829,7 +829,6 @@ template <int N_STATE,
           bool EKF_EN,
           int TYPE,
           int NPC,
-          int XFCVDEPTH_U = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_Y = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_R = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_H = _XFCVDEPTH_DEFAULT,
@@ -841,9 +840,6 @@ void MeasUpdate(float U_matrix[PROC_MU][UMAT_DEPTH],
                 float D_vector[512],
                 float xu_vector[512],
                 float ry_vector[512],
-#if KF_C != 0
-                xf::cv::Mat<TYPE, C_CTRL, 1, NPC, XFCVDEPTH_U>& u_mat,
-#endif
                 xf::cv::Mat<TYPE, M_MEAS, 1, NPC, XFCVDEPTH_Y>& y_mat,
                 xf::cv::Mat<TYPE, M_MEAS, 1, NPC, XFCVDEPTH_R>& R_mat,
                 xf::cv::Mat<TYPE, M_MEAS, N_STATE, NPC, XFCVDEPTH_H>& H_mat,
@@ -912,9 +908,6 @@ void MeasUpdate(float U_matrix[PROC_MU][UMAT_DEPTH],
         }
     } else {
         Zekf = y_mat.read_float(0);
-#if KF_C != 0
-        hx = u_mat.read_float(0);
-#endif
         Rekf = R_mat.read_float(0);
 
         ap_uint<32> offset_incH = 0;
@@ -1017,7 +1010,6 @@ template <int N_STATE,
           bool EKF_EN,
           int TYPE,
           int NPC,
-          int XFCVDEPTH_U = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_Y = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_R = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_H = _XFCVDEPTH_DEFAULT,
@@ -1031,9 +1023,6 @@ void MeasUpdate_wrapper(float U_matrix[PROC_MU][UMAT_DEPTH],
                         float ry_vector[512],
                         float T_matrix[PROC_TU][TMAT_DEPTH],
                         float Uq_matrix[UQMAT_DEPTH],
-#if KF_C != 0
-                        xf::cv::Mat<TYPE, C_CTRL, 1, NPC, XFCVDEPTH_U>& u_mat,
-#endif
                         xf::cv::Mat<TYPE, M_MEAS, 1, NPC, XFCVDEPTH_Y>& y_mat,
                         xf::cv::Mat<TYPE, M_MEAS, 1, NPC, XFCVDEPTH_R>& R_mat,
                         xf::cv::Mat<TYPE, M_MEAS, N_STATE, NPC, XFCVDEPTH_H>& H_mat,
@@ -1085,28 +1074,18 @@ LOOP1:
         load_Uq<N_STATE, PROC_TU, DEPTH_TU, TMAT_DEPTH, UQMAT_DEPTH, URAM_EN>(T_matrix, Uq_matrix);
 
         MeasUpdate<N_STATE, C_CTRL, M_MEAS, PROC_MU, DEPTH_MU, UMAT_DEPTH, HMAT_DEPTH, URAM_EN, EKF_EN, TYPE, NPC,
-                   XFCVDEPTH_U, XFCVDEPTH_Y, XFCVDEPTH_R, XFCVDEPTH_H, XFCVDEPTH_XOUT, XFCVDEPTH_UOUT, XFCVDEPTH_DOUT>(
-            U_matrix, H_matrix, D_vector, xu_vector, ry_vector,
-#if KF_C != 0
-            u_mat,
-#endif
-            y_mat, R_mat, H_mat, Xout_mat, Uout_mat, Dout_mat, X_write_en, UD_write_en);
+                   XFCVDEPTH_Y, XFCVDEPTH_R, XFCVDEPTH_H, XFCVDEPTH_XOUT, XFCVDEPTH_UOUT, XFCVDEPTH_DOUT>(
+            U_matrix, H_matrix, D_vector, xu_vector, ry_vector, y_mat, R_mat, H_mat, Xout_mat, Uout_mat, Dout_mat,
+            X_write_en, UD_write_en);
     }
 }
 
 template <int N_STATE, int U_SIZE, int TYPE, int NPC, int XFCVDEPTH_U = _XFCVDEPTH_DEFAULT>
-void load_control_input(
-#if KF_C != 0
-    xf::cv::Mat<TYPE, U_SIZE, 1, NPC, XFCVDEPTH_U>& control_input,
-#endif
-    float xu_vector[512]) {
+void load_control_input(float xu_vector[512]) {
     for (ap_uint<8> idx = 0; idx < U_SIZE; idx++) {
 // clang-format off
 #pragma HLS pipeline
-// clang-format on
-#if KF_C != 0
-        xu_vector[N_STATE + idx] = control_input.read_float(idx);
-#endif
+        // clang-format on
     }
 }
 
@@ -1499,17 +1478,13 @@ LOOPM_1:
             for (ap_uint<10> idx = 0; idx < PROC_TU; idx++) {
 // clang-format off
 #pragma HLS unroll
-// clang-format on
-#if !__SYNTHESIS__
+                // clang-format on
                 float T_mat_read;
                 if (u_row_num == -1)
                     T_mat_read = 0;
                 else {
                     T_mat_read = T_matrix[idx][index_num];
                 }
-#else
-                float T_mat_read = T_matrix[idx][index_num];
-#endif
                 Ti_chunk[idx] = T_mat_read;
                 if (start[0] == 0)
                     Ti_ping[idx][depth_num] = T_mat_read;
@@ -1696,7 +1671,6 @@ template <int N_STATE,
           bool EKF_EN,
           int TYPE,
           int NPC,
-          int XFCVDEPTH_U = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_XOUT = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_UOUT = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_DOUT = _XFCVDEPTH_DEFAULT>
@@ -1705,24 +1679,17 @@ void TimeUpdate(float T_matrix[PROC_TU][TMAT_DEPTH],
                 float xu_vector[512],
                 float U_matrix[PROC_MU][UMAT_DEPTH],
                 float D_vector[512],
-#if KF_C != 0
-                xf::cv::Mat<TYPE, C_CTRL, 1, NPC, XFCVDEPTH_U>& u_mat,
-#endif
                 xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_XOUT>& Xout_mat,
                 xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_UOUT>& Uout_mat,
                 xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_DOUT>& Dout_mat,
                 bool X_write_en,
                 bool UD_write_en) {
-
 // clang-format off
     #pragma HLS inline off
 // clang-format on
 
 LOOP1:
     for (int itr1 = 0; itr1 < 1; itr1++) {
-#if KF_C != 0
-        if (EKF_EN == 0) load_control_input<N_STATE, C_CTRL, TYPE, NPC, XFCVDEPTH_U>(u_mat, xu_vector);
-#endif
         AU_compute<N_STATE, PROC_TU, DEPTH_TU, PROC_MU, DEPTH_MU, ABMAT_DEPTH, UMAT_DEPTH, TMAT_DEPTH, URAM_EN>(
             AB_matrix, U_matrix, T_matrix);
     }
@@ -1763,7 +1730,6 @@ template <int N_STATE,
           int TYPE,
           int NPC,
           int XFCVDEPTH_A = _XFCVDEPTH_DEFAULT,
-          int XFCVDEPTH_B = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_UQ = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_DQ = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_H = _XFCVDEPTH_DEFAULT,
@@ -1772,9 +1738,6 @@ template <int N_STATE,
           int XFCVDEPTH_D0 = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_R = _XFCVDEPTH_DEFAULT>
 void initialization(xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_A>& A_mat,
-#if KF_C != 0
-                    xf::cv::Mat<TYPE, N_STATE, C_CTRL, NPC, XFCVDEPTH_B>& B_mat,
-#endif
                     xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_UQ>& Uq_mat,
                     xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_DQ>& Dq_mat,
                     xf::cv::Mat<TYPE, M_MEAS, N_STATE, NPC, XFCVDEPTH_H>& H_mat,
@@ -2033,9 +1996,895 @@ LOOPI_B:
         ap_uint<32> offset = offset_incB + counter_Brow;
         ap_uint<8> dim1 = offset % PROC_MU;
         ap_uint<16> dim2 = offset / PROC_MU;
-#if KF_C != 0
+        if (counter_Brow == C_CTRL - 1) {
+            counter_Brow = 0;
+            offset_incB += DEPTH_MU_CTRL * PROC_MU;
+        } else
+            counter_Brow++;
+    }
+
+    //******************************Load Dq only digonal elements****************************//
+    int Dq_loop_cnt;
+    if (EKF_EN == 1 && read_opt_flag == 1)
+        Dq_loop_cnt = 0;
+    else
+        Dq_loop_cnt = N_STATE;
+
+LOOPI_T2:
+    for (int ptr = 0; ptr < Dq_loop_cnt; ptr++) {
+// clang-format off
+        #pragma HLS pipeline
+        // clang-format on
+
+        D_vector[ptr + 2 * N_STATE] = Dq_mat.read_float(ptr);
+    }
+    //******************************Load Uq <Row major> ****************************//
+    int Uq_loop_cnt;
+    if (EKF_EN == 1 && read_opt_flag == 1)
+        Uq_loop_cnt = 0;
+    else
+        Uq_loop_cnt = N_STATE * N_STATE;
+
+    ap_uint<16> counter_trow = 0;
+    ap_uint<32> offset_inc = N_STATE;
+LOOPI_UQ:
+    for (int ptr = 0; ptr < Uq_loop_cnt; ptr++) {
+// clang-format off
+        #pragma HLS pipeline
+        // clang-format on
+
+        ap_uint<32> offset = offset_inc + counter_trow;
+        ap_uint<8> dim1 = offset % PROC_TU;
+        ap_uint<16> dim2 = offset / PROC_TU;
+
+        float Uq_value = Uq_mat.read_float(ptr);
+
+        T_matrix[dim1][dim2] = Uq_value;
+        Uq_matrix[ptr] = Uq_value;
+
+        if (counter_trow == N_STATE - 1) {
+            counter_trow = 0;
+            offset_inc += DEPTH_TU * PROC_TU;
+        } else
+            counter_trow++;
+    }
+}
+
+template <int N_STATE,
+          int M_MEAS,
+          int C_CTRL,
+          int PROC_TU,
+          int PROC_MU,
+          bool URAM_EN,
+          bool EKF_EN,
+          int TYPE,
+          int NPC,
+          int XFCVDEPTH_A = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_B = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_UQ = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_DQ = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_H = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_X0 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U0 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_D0 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_R = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_Y = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_XOUT = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_UOUT = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_DOUT = _XFCVDEPTH_DEFAULT>
+void KalmanFilter_def(xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_A>& A_mat,
+                      xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_UQ>& Uq_mat,
+                      xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_DQ>& Dq_mat,
+                      xf::cv::Mat<TYPE, M_MEAS, N_STATE, NPC, XFCVDEPTH_H>& H_mat,
+                      xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_X0>& X0_mat,
+                      xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_U0>& U0_mat,
+                      xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_D0>& D0_mat,
+                      xf::cv::Mat<TYPE, M_MEAS, 1, NPC, XFCVDEPTH_R>& R_mat,
+                      xf::cv::Mat<TYPE, M_MEAS, 1, NPC, XFCVDEPTH_Y>& y_mat,
+                      xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_XOUT>& Xout_mat,
+                      xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_UOUT>& Uout_mat,
+                      xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_DOUT>& Dout_mat,
+                      unsigned char flag) {
+// clang-format off
+    #pragma HLS inline off
+    // clang-format on
+
+    enum {
+        DEPTH_TU = ((2 * N_STATE) / PROC_TU + (((2 * N_STATE) % PROC_TU) != 0)),
+        DEPTH_MU = (N_STATE / PROC_MU + ((N_STATE % PROC_MU) != 0)),
+        DEPTH_MU_CTRL = (C_CTRL / PROC_MU + ((C_CTRL % PROC_MU) != 0)),
+        UMAT_DEPTH = (DEPTH_MU * N_STATE),
+        HMAT_DEPTH = (DEPTH_MU * M_MEAS),
+        ABMAT_DEPTH = ((DEPTH_MU * N_STATE) + (DEPTH_MU_CTRL * N_STATE)),
+        DPDQ_DEPTH = DEPTH_TU,
+        TMAT_DEPTH = (DEPTH_TU * N_STATE),
+        UQMAT_DEPTH = (N_STATE * N_STATE)
+    };
+
+    static float H_matrix[PROC_MU][HMAT_DEPTH];
+    if (URAM_EN == 0) {
+// clang-format off
+        #pragma HLS ARRAY_PARTITION variable=H_matrix complete dim=1
+        // clang-format on
+    } else {
+// clang-format off
+        #pragma HLS bind_storage variable=H_matrix type=RAM_S2P impl=URAM
+        #pragma HLS ARRAY_RESHAPE variable=H_matrix complete dim=1
+        // clang-format on
+    }
+
+    static float U_matrix[PROC_MU][UMAT_DEPTH];
+    if (URAM_EN == 0) {
+// clang-format off
+        #pragma HLS ARRAY_PARTITION variable=U_matrix complete dim=1
+        // clang-format on
+    } else {
+// clang-format off
+        #pragma HLS bind_storage variable=U_matrix type=RAM_S2P impl=URAM
+        #pragma HLS ARRAY_RESHAPE variable=U_matrix complete dim=1
+        // clang-format on
+    }
+
+    static float xu_vector[512];
+    static float ry_vector[512];
+    static float D_vector[512];
+
+    static float AB_matrix[PROC_MU][ABMAT_DEPTH];
+    if (URAM_EN == 0) {
+// clang-format off
+        #pragma HLS ARRAY_PARTITION variable=AB_matrix complete dim=1
+        // clang-format on
+    } else {
+// clang-format off
+        #pragma HLS bind_storage variable=AB_matrix type=RAM_S2P impl=URAM
+        #pragma HLS ARRAY_RESHAPE variable=AB_matrix complete dim=1
+        // clang-format on
+    }
+
+    static float T_matrix[PROC_TU][TMAT_DEPTH];
+    if (URAM_EN == 0) {
+// clang-format off
+        #pragma HLS ARRAY_PARTITION variable=T_matrix complete dim=1
+        #pragma HLS bind_storage variable=T_matrix type=RAM_S2P impl=BRAM
+        // clang-format on
+    } else {
+// clang-format off
+        #pragma HLS bind_storage variable=T_matrix type=RAM_S2P impl=URAM
+        #pragma HLS ARRAY_RESHAPE variable=T_matrix complete dim=1
+        // clang-format on
+    }
+
+    static float Uq_matrix[UQMAT_DEPTH];
+    if (URAM_EN == 1) {
+// clang-format off
+        #pragma HLS bind_storage variable=Uq_matrix type=RAM_S2P impl=URAM
+        // clang-format on
+    }
+
+    ap_uint<8> flag_reg = flag;
+
+    if (EKF_EN == 1) {
+        if (flag_reg[0] == 1) xu_vector[511] = 0;
+    }
+
+    if (flag_reg[0])
+        initialization<N_STATE, M_MEAS, C_CTRL, PROC_TU, DEPTH_TU, PROC_MU, DEPTH_MU, DEPTH_MU_CTRL, UMAT_DEPTH,
+                       HMAT_DEPTH, ABMAT_DEPTH, DPDQ_DEPTH, TMAT_DEPTH, UQMAT_DEPTH, URAM_EN, EKF_EN, TYPE, NPC,
+                       XFCVDEPTH_A, XFCVDEPTH_UQ, XFCVDEPTH_DQ, XFCVDEPTH_H, XFCVDEPTH_X0, XFCVDEPTH_U0, XFCVDEPTH_D0,
+                       XFCVDEPTH_R>(A_mat, Uq_mat, Dq_mat, H_mat, X0_mat, U0_mat, D0_mat, R_mat, H_matrix, U_matrix,
+                                    xu_vector, ry_vector, D_vector, AB_matrix, T_matrix, Uq_matrix, flag_reg[7]);
+
+    if (flag_reg[1])
+        TimeUpdate<N_STATE, M_MEAS, C_CTRL, PROC_TU, DEPTH_TU, PROC_MU, DEPTH_MU, DEPTH_MU_CTRL, UMAT_DEPTH,
+                   ABMAT_DEPTH, DPDQ_DEPTH, TMAT_DEPTH, URAM_EN, EKF_EN, TYPE, NPC, XFCVDEPTH_XOUT, XFCVDEPTH_UOUT,
+                   XFCVDEPTH_DOUT>(T_matrix, AB_matrix, xu_vector, U_matrix, D_vector, Xout_mat, Uout_mat, Dout_mat,
+                                   flag_reg[3], flag_reg[4]);
+
+    if (flag_reg[2])
+        MeasUpdate_wrapper<N_STATE, C_CTRL, M_MEAS, PROC_TU, DEPTH_TU, PROC_MU, DEPTH_MU, UMAT_DEPTH, HMAT_DEPTH,
+                           TMAT_DEPTH, UQMAT_DEPTH, URAM_EN, EKF_EN, TYPE, NPC, XFCVDEPTH_Y, XFCVDEPTH_R, XFCVDEPTH_H,
+                           XFCVDEPTH_XOUT, XFCVDEPTH_UOUT, XFCVDEPTH_DOUT>(
+            U_matrix, H_matrix, D_vector, xu_vector, ry_vector, T_matrix, Uq_matrix, y_mat, R_mat, H_mat, Xout_mat,
+            Uout_mat, Dout_mat, flag_reg[5], flag_reg[6]);
+
+    if (EKF_EN == 1) {
+        if (flag_reg[2] == 1) xu_vector[511]++;
+    }
+}
+
+template <int N_STATE,
+          int M_MEAS,
+          int C_CTRL,
+          int MTU,
+          int MMU,
+          bool USE_URAM = 0,
+          bool EKF_EN = 0,
+          int TYPE,
+          int NPC = 1,
+          int XFCVDEPTH_A = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_B = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_UQ = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_DQ = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_H = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_X0 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U0 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_D0 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_R = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_Y = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_XOUT = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_UOUT = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_DOUT = _XFCVDEPTH_DEFAULT>
+void KalmanFilter(xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_A>& A_mat,
+                  xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_UQ>& Uq_mat,
+                  xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_DQ>& Dq_mat,
+                  xf::cv::Mat<TYPE, M_MEAS, N_STATE, NPC, XFCVDEPTH_H>& H_mat,
+                  xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_X0>& X0_mat,
+                  xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_U0>& U0_mat,
+                  xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_D0>& D0_mat,
+                  xf::cv::Mat<TYPE, M_MEAS, 1, NPC, XFCVDEPTH_R>& R_mat,
+                  xf::cv::Mat<TYPE, M_MEAS, 1, NPC, XFCVDEPTH_Y>& y_mat,
+                  xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_XOUT>& Xout_mat,
+                  xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_UOUT>& Uout_mat,
+                  xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_DOUT>& Dout_mat,
+                  unsigned char flag) {
+    assert((N_STATE > 0 && N_STATE <= 128) && "For N_STATE, possible options are 1 to 128");
+    assert((M_MEAS > 0 && M_MEAS <= 128) && "For M_MEAS, possible options are 1 to 128");
+    assert((C_CTRL >= 0 && C_CTRL <= 128) && "For C_CTRL, possible options are 0 to 128");
+    assert((MTU > 0 && MTU <= N_STATE) && "For MTU, possible options are 1 to N_STATE");
+    assert((MMU > 0 && MMU <= N_STATE) && "For MMU, possible options are 1 to N_STATE");
+    assert(((A_mat.rows == N_STATE) && (A_mat.cols == N_STATE)) && "A matrix dimension must be N_STATE x N_STATE");
+    assert(((Uq_mat.rows == N_STATE) && (Uq_mat.cols == N_STATE)) && "Uq matrix dimension must be N_STATE x N_STATE");
+    assert(((Dq_mat.rows == N_STATE) && (Dq_mat.cols == 1)) && "Dq matrix dimension must be N_STATE x 1");
+    assert(((H_mat.rows == M_MEAS) && (H_mat.cols == N_STATE)) && "H matrix dimension must be M_MEAS x N_STATE");
+    assert(((X0_mat.rows == N_STATE) && (X0_mat.cols == 1)) && "X0 matrix dimension must be N_STATE x 1");
+    assert(((U0_mat.rows == N_STATE) && (U0_mat.cols == N_STATE)) && "U0 matrix dimension must be N_STATE x N_STATE");
+    assert(((D0_mat.rows == N_STATE) && (D0_mat.cols == 1)) && "D0 matrix dimension must be N_STATE x 1");
+    assert(((R_mat.rows == M_MEAS) && (R_mat.cols == 1)) && "R matrix dimension must be M_MEAS x 1");
+    assert(((y_mat.rows == M_MEAS) && (y_mat.cols == 1)) && "y matrix dimension must be M_MEAS x 1");
+    assert(((Xout_mat.rows == N_STATE) && (Xout_mat.cols == 1)) && "Xout matrix dimension must be N_STATE x 1");
+    assert(((Uout_mat.rows == N_STATE) && (Uout_mat.cols == N_STATE)) &&
+           "Uout matrix dimension must be N_STATE x N_STATE");
+    assert(((Dout_mat.rows == N_STATE) && (Dout_mat.cols == 1)) && "Dout matrix dimension must be N_STATE x 1");
+    assert((TYPE == XF_32FC1) && "TYPE must be XF_32FC1");
+    assert((NPC == XF_NPPC1) && "NPC must be XF_NPPC1");
+
+    KalmanFilter_def<N_STATE, M_MEAS, C_CTRL, MTU, MMU, USE_URAM, EKF_EN, TYPE, NPC, XFCVDEPTH_A, XFCVDEPTH_UQ,
+                     XFCVDEPTH_DQ, XFCVDEPTH_H, XFCVDEPTH_X0, XFCVDEPTH_U0, XFCVDEPTH_D0, XFCVDEPTH_R, XFCVDEPTH_Y,
+                     XFCVDEPTH_XOUT, XFCVDEPTH_UOUT, XFCVDEPTH_DOUT>(
+        A_mat, Uq_mat, Dq_mat, H_mat, X0_mat, U0_mat, D0_mat, R_mat, y_mat, Xout_mat, Uout_mat, Dout_mat, flag);
+}
+
+/*******************************
+
+Configuration for KF_C != 0
+
+*******************************/
+
+template <int N_STATE,
+          int C_CTRL,
+          int M_MEAS,
+          int PROC_MU,
+          int DEPTH_MU,
+          int UMAT_DEPTH,
+          int HMAT_DEPTH,
+          bool URAM_EN,
+          bool EKF_EN,
+          int TYPE,
+          int NPC,
+          int XFCVDEPTH_U = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_Y = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_R = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_H = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_XOUT = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_UOUT = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_DOUT = _XFCVDEPTH_DEFAULT>
+void MeasUpdate(float U_matrix[PROC_MU][UMAT_DEPTH],
+                float H_matrix[PROC_MU][HMAT_DEPTH],
+                float D_vector[512],
+                float xu_vector[512],
+                float ry_vector[512],
+                xf::cv::Mat<TYPE, C_CTRL, 1, NPC, XFCVDEPTH_U>& u_mat,
+                xf::cv::Mat<TYPE, M_MEAS, 1, NPC, XFCVDEPTH_Y>& y_mat,
+                xf::cv::Mat<TYPE, M_MEAS, 1, NPC, XFCVDEPTH_R>& R_mat,
+                xf::cv::Mat<TYPE, M_MEAS, N_STATE, NPC, XFCVDEPTH_H>& H_mat,
+                xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_XOUT>& Xout_mat,
+                xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_UOUT>& Uout_mat,
+                xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_DOUT>& Dout_mat,
+                bool X_write_en,
+                bool UD_write_en) {
+    if (URAM_EN == 0) {
+// clang-format off
+        #pragma HLS ARRAY_PARTITION variable=U_matrix complete dim=1
+        // clang-format on
+    } else {
+// clang-format off
+        #pragma HLS bind_storage variable=U_matrix type=RAM_S2P impl=URAM
+        #pragma HLS ARRAY_RESHAPE variable=U_matrix complete dim=1
+        // clang-format on
+    }
+
+    if (URAM_EN == 0) {
+// clang-format off
+        #pragma HLS ARRAY_PARTITION variable=H_matrix complete dim=1
+        // clang-format on
+    } else {
+// clang-format off
+        #pragma HLS bind_storage variable=H_matrix type=RAM_S2P impl=URAM
+        #pragma HLS ARRAY_RESHAPE variable=H_matrix complete dim=1
+        // clang-format on
+    }
+
+// clang-format off
+    #pragma HLS inline off
+    // clang-format on
+
+    enum { M_MEAS_align2 = (M_MEAS + (M_MEAS % 2)) };
+
+    float Uint_matrix[PROC_MU][UMAT_DEPTH];
+    if (URAM_EN == 0) {
+// clang-format off
+        #pragma HLS ARRAY_PARTITION variable=Uint_matrix complete dim=1
+        // clang-format on
+    } else {
+// clang-format off
+        #pragma HLS bind_storage variable=Uint_matrix type=RAM_S2P impl=URAM
+        #pragma HLS ARRAY_RESHAPE variable=Uint_matrix complete dim=1
+        // clang-format on
+    }
+
+    float Dint_vector[512];
+
+    ap_uint<8> meas_index;
+    if (EKF_EN == 1)
+        meas_index = xu_vector[511];
+    else
+        meas_index = 0;
+
+    float hx, Zekf, Rekf;
+    //##### Read Y mesurements
+    if (EKF_EN == 0) {
+    LOOP1:
+        for (ap_uint<8> ddr_ptr = 0; ddr_ptr < M_MEAS; ddr_ptr++) {
+// clang-format off
+            #pragma HLS pipeline
+            // clang-format on
+            ry_vector[ddr_ptr + M_MEAS] = y_mat.read_float(ddr_ptr);
+        }
+    } else {
+        Zekf = y_mat.read_float(0);
+        hx = u_mat.read_float(0);
+        Rekf = R_mat.read_float(0);
+
+        ap_uint<32> offset_incH = 0;
+    LOOPI_H:
+        for (int ptr = 0; ptr < N_STATE; ptr++) {
+// clang-format off
+            #pragma HLS pipeline
+            // clang-format on
+            ap_uint<10> dim1 = ptr % PROC_MU;
+            ap_uint<16> dim2 = ptr / PROC_MU;
+
+            H_matrix[dim1][dim2] = H_mat.read_float(ptr);
+        }
+    }
+
+    bool flip = 0;
+
+    ap_uint<8> meas_loop_cnt;
+    if (EKF_EN == 1)
+        meas_loop_cnt = 2;
+    else
+        meas_loop_cnt = M_MEAS_align2;
+
+LOOP2:
+    for (ap_uint<8> meas = 0; meas < meas_loop_cnt; meas++) {
+        bool UDX_en;
+        if (EKF_EN == 0) {
+            if (meas == M_MEAS)
+                UDX_en = 0;
+            else
+                UDX_en = 1;
+        } else {
+            if (meas == 1)
+                UDX_en = 0;
+            else
+                UDX_en = 1;
+        }
+
+        float h_vector[PROC_MU][DEPTH_MU];
+// clang-format off
+        #pragma HLS ARRAY_PARTITION variable=h_vector complete dim=0
+    // clang-format on
+    LOOPHM:
+        for (ap_uint<8> i = 0; i < DEPTH_MU; i++) {
+// clang-format off
+            #pragma HLS LOOP_FLATTEN off
+            #pragma HLS pipeline
+            // clang-format on
+            for (ap_uint<8> j = 0; j < PROC_MU; j++) {
+// clang-format off
+                #pragma HLS unroll
+                // clang-format on
+
+                h_vector[j][i] = H_matrix[j][meas * DEPTH_MU + i];
+            }
+        }
+        float r_value; // = ry_vector[meas];
+
+        float z_value;
+        if (EKF_EN == 0) {
+            z_value = ry_vector[meas + M_MEAS];
+            r_value = ry_vector[meas];
+        } else {
+            z_value = Zekf - hx;
+            r_value = Rekf;
+        }
+
+        if (flip == 0) {
+            MeasUpdate_1x<N_STATE, M_MEAS, PROC_MU, DEPTH_MU, UMAT_DEPTH, URAM_EN, EKF_EN>(
+                U_matrix, D_vector, Uint_matrix, Dint_vector, xu_vector, h_vector, r_value, z_value, UDX_en);
+            flip = 1;
+        } else {
+            MeasUpdate_1x<N_STATE, M_MEAS, PROC_MU, DEPTH_MU, UMAT_DEPTH, URAM_EN, EKF_EN>(
+                Uint_matrix, Dint_vector, U_matrix, D_vector, xu_vector, h_vector, r_value, z_value, UDX_en);
+            flip = 0;
+        }
+    }
+
+    //###### Write X corrected state vector
+    if (X_write_en) KF_X_write<N_STATE, TYPE, NPC, XFCVDEPTH_XOUT>(xu_vector, Xout_mat);
+
+    //###### Write P corrected state vector
+    if (UD_write_en)
+        KF_UD_write<N_STATE, PROC_MU, DEPTH_MU, UMAT_DEPTH, TYPE, NPC, XFCVDEPTH_UOUT, XFCVDEPTH_DOUT>(
+            U_matrix, D_vector, Uout_mat, Dout_mat);
+}
+
+template <int N_STATE,
+          int C_CTRL,
+          int M_MEAS,
+          int PROC_TU,
+          int DEPTH_TU,
+          int PROC_MU,
+          int DEPTH_MU,
+          int UMAT_DEPTH,
+          int HMAT_DEPTH,
+          int TMAT_DEPTH,
+          int UQMAT_DEPTH,
+          bool URAM_EN,
+          bool EKF_EN,
+          int TYPE,
+          int NPC,
+          int XFCVDEPTH_U = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_Y = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_R = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_H = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_XOUT = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_UOUT = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_DOUT = _XFCVDEPTH_DEFAULT>
+void MeasUpdate_wrapper(float U_matrix[PROC_MU][UMAT_DEPTH],
+                        float H_matrix[PROC_MU][HMAT_DEPTH],
+                        float D_vector[512],
+                        float xu_vector[512],
+                        float ry_vector[512],
+                        float T_matrix[PROC_TU][TMAT_DEPTH],
+                        float Uq_matrix[UQMAT_DEPTH],
+                        xf::cv::Mat<TYPE, C_CTRL, 1, NPC, XFCVDEPTH_U>& u_mat,
+                        xf::cv::Mat<TYPE, M_MEAS, 1, NPC, XFCVDEPTH_Y>& y_mat,
+                        xf::cv::Mat<TYPE, M_MEAS, 1, NPC, XFCVDEPTH_R>& R_mat,
+                        xf::cv::Mat<TYPE, M_MEAS, N_STATE, NPC, XFCVDEPTH_H>& H_mat,
+                        xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_XOUT>& Xout_mat,
+                        xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_UOUT>& Uout_mat,
+                        xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_DOUT>& Dout_mat,
+                        bool X_write_en,
+                        bool UD_write_en) {
+    if (URAM_EN == 0) {
+// clang-format off
+        #pragma HLS ARRAY_PARTITION variable=U_matrix complete dim=1
+        // clang-format on
+    } else {
+// clang-format off
+        #pragma HLS bind_storage variable=U_matrix type=RAM_S2P impl=URAM
+        #pragma HLS ARRAY_RESHAPE variable=U_matrix complete dim=1
+        // clang-format on
+    }
+
+    if (URAM_EN == 0) {
+// clang-format off
+        #pragma HLS ARRAY_PARTITION variable=H_matrix complete dim=1
+        // clang-format on
+    } else {
+// clang-format off
+        #pragma HLS bind_storage variable=H_matrix type=RAM_S2P impl=URAM
+        #pragma HLS ARRAY_RESHAPE variable=H_matrix complete dim=1
+        // clang-format on
+    }
+
+    if (URAM_EN == 0) {
+// clang-format off
+        #pragma HLS ARRAY_PARTITION variable=T_matrix complete dim=1
+        #pragma HLS bind_storage variable=T_matrix type=RAM_S2P impl=BRAM
+        // clang-format on
+    } else {
+// clang-format off
+        #pragma HLS bind_storage variable=T_matrix type=RAM_S2P impl=URAM
+        #pragma HLS ARRAY_RESHAPE variable=T_matrix complete dim=1
+        // clang-format on
+    }
+
+// clang-format off
+    #pragma HLS inline off
+// clang-format on
+
+LOOP1:
+    for (int itr1 = 0; itr1 < 1; itr1++) {
+        load_Uq<N_STATE, PROC_TU, DEPTH_TU, TMAT_DEPTH, UQMAT_DEPTH, URAM_EN>(T_matrix, Uq_matrix);
+
+        MeasUpdate<N_STATE, C_CTRL, M_MEAS, PROC_MU, DEPTH_MU, UMAT_DEPTH, HMAT_DEPTH, URAM_EN, EKF_EN, TYPE, NPC,
+                   XFCVDEPTH_U, XFCVDEPTH_Y, XFCVDEPTH_R, XFCVDEPTH_H, XFCVDEPTH_XOUT, XFCVDEPTH_UOUT, XFCVDEPTH_DOUT>(
+            U_matrix, H_matrix, D_vector, xu_vector, ry_vector, u_mat, y_mat, R_mat, H_mat, Xout_mat, Uout_mat,
+            Dout_mat, X_write_en, UD_write_en);
+    }
+}
+
+template <int N_STATE, int U_SIZE, int TYPE, int NPC, int XFCVDEPTH_U = _XFCVDEPTH_DEFAULT>
+void load_control_input(xf::cv::Mat<TYPE, U_SIZE, 1, NPC, XFCVDEPTH_U>& control_input, float xu_vector[512]) {
+    for (ap_uint<8> idx = 0; idx < U_SIZE; idx++) {
+// clang-format off
+#pragma HLS pipeline
+        // clang-format on
+        xu_vector[N_STATE + idx] = control_input.read_float(idx);
+    }
+}
+
+template <int N_STATE,
+          int M_MEAS,
+          int C_CTRL,
+          int PROC_TU,
+          int DEPTH_TU,
+          int PROC_MU,
+          int DEPTH_MU,
+          int DEPTH_MU_CTRL,
+          int UMAT_DEPTH,
+          int ABMAT_DEPTH,
+          int DPDQ_DEPTH,
+          int TMAT_DEPTH,
+          bool URAM_EN,
+          bool EKF_EN,
+          int TYPE,
+          int NPC,
+          int XFCVDEPTH_U = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_XOUT = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_UOUT = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_DOUT = _XFCVDEPTH_DEFAULT>
+void TimeUpdate(float T_matrix[PROC_TU][TMAT_DEPTH],
+                float AB_matrix[PROC_MU][ABMAT_DEPTH],
+                float xu_vector[512],
+                float U_matrix[PROC_MU][UMAT_DEPTH],
+                float D_vector[512],
+                xf::cv::Mat<TYPE, C_CTRL, 1, NPC, XFCVDEPTH_U>& u_mat,
+                xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_XOUT>& Xout_mat,
+                xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_UOUT>& Uout_mat,
+                xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_DOUT>& Dout_mat,
+                bool X_write_en,
+                bool UD_write_en) {
+// clang-format off
+    #pragma HLS inline off
+// clang-format on
+
+LOOP1:
+    for (int itr1 = 0; itr1 < 1; itr1++) {
+        if (EKF_EN == 0) load_control_input<N_STATE, C_CTRL, TYPE, NPC, XFCVDEPTH_U>(u_mat, xu_vector);
+        AU_compute<N_STATE, PROC_TU, DEPTH_TU, PROC_MU, DEPTH_MU, ABMAT_DEPTH, UMAT_DEPTH, TMAT_DEPTH, URAM_EN>(
+            AB_matrix, U_matrix, T_matrix);
+    }
+
+LOOP2:
+    for (int itr1 = 0; itr1 < 1; itr1++) {
+        if (EKF_EN == 0)
+            state_predict<N_STATE, C_CTRL, PROC_MU, DEPTH_MU, DEPTH_MU_CTRL, ABMAT_DEPTH, UMAT_DEPTH>(AB_matrix,
+                                                                                                      xu_vector);
+
+        UD_compute<N_STATE, PROC_TU, DEPTH_TU, PROC_MU, DEPTH_MU, TMAT_DEPTH, UMAT_DEPTH, DPDQ_DEPTH, URAM_EN>(
+            T_matrix, U_matrix, D_vector);
+    }
+
+    if (X_write_en) KF_X_write<N_STATE, TYPE, NPC, XFCVDEPTH_XOUT>(xu_vector, Xout_mat);
+
+    if (UD_write_en)
+        KF_UD_write<N_STATE, PROC_MU, DEPTH_MU, UMAT_DEPTH, TYPE, NPC, XFCVDEPTH_UOUT, XFCVDEPTH_DOUT>(
+            U_matrix, D_vector, Uout_mat, Dout_mat);
+}
+
+template <int N_STATE,
+          int M_MEAS,
+          int C_CTRL,
+          int PROC_TU,
+          int DEPTH_TU,
+          int PROC_MU,
+          int DEPTH_MU,
+          int DEPTH_MU_CTRL,
+          int UMAT_DEPTH,
+          int HMAT_DEPTH,
+          int ABMAT_DEPTH,
+          int DPDQ_DEPTH,
+          int TMAT_DEPTH,
+          int UQMAT_DEPTH,
+          bool URAM_EN,
+          bool EKF_EN,
+          int TYPE,
+          int NPC,
+          int XFCVDEPTH_A = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_B = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_UQ = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_DQ = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_H = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_X0 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_U0 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_D0 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_R = _XFCVDEPTH_DEFAULT>
+void initialization(xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_A>& A_mat,
+                    xf::cv::Mat<TYPE, N_STATE, C_CTRL, NPC, XFCVDEPTH_B>& B_mat,
+                    xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_UQ>& Uq_mat,
+                    xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_DQ>& Dq_mat,
+                    xf::cv::Mat<TYPE, M_MEAS, N_STATE, NPC, XFCVDEPTH_H>& H_mat,
+                    xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_X0>& X0_mat,
+                    xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_U0>& U0_mat,
+                    xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_D0>& D0_mat,
+                    xf::cv::Mat<TYPE, M_MEAS, 1, NPC, XFCVDEPTH_R>& R_mat,
+                    float H_matrix[PROC_MU][HMAT_DEPTH],
+                    float U_matrix[PROC_MU][UMAT_DEPTH],
+                    float xu_vector[512],
+                    float ry_vector[512],
+                    float D_vector[512],
+                    float AB_matrix[PROC_MU][ABMAT_DEPTH],
+                    float T_matrix[PROC_TU][TMAT_DEPTH],
+                    float Uq_matrix[UQMAT_DEPTH],
+                    bool read_opt_flag) {
+    if (URAM_EN == 0) {
+// clang-format off
+        #pragma HLS ARRAY_PARTITION variable=H_matrix complete dim=1
+        // clang-format on
+    } else {
+// clang-format off
+        #pragma HLS bind_storage variable=H_matrix type=RAM_S2P impl=URAM
+        #pragma HLS ARRAY_RESHAPE variable=H_matrix complete dim=1
+        // clang-format on
+    }
+
+    if (URAM_EN == 0) {
+// clang-format off
+        #pragma HLS ARRAY_PARTITION variable=U_matrix complete dim=1
+        // clang-format on
+    } else {
+// clang-format off
+        #pragma HLS bind_storage variable=U_matrix type=RAM_S2P impl=URAM
+        #pragma HLS ARRAY_RESHAPE variable=U_matrix complete dim=1
+        // clang-format on
+    }
+
+    if (URAM_EN == 0) {
+// clang-format off
+        #pragma HLS ARRAY_PARTITION variable=AB_matrix complete dim=1
+        // clang-format on
+    } else {
+// clang-format off
+        #pragma HLS bind_storage variable=AB_matrix type=RAM_S2P impl=URAM
+        #pragma HLS ARRAY_RESHAPE variable=AB_matrix complete dim=1
+        // clang-format on
+    }
+
+    if (URAM_EN == 0) {
+// clang-format off
+        #pragma HLS ARRAY_PARTITION variable=T_matrix complete dim=1
+        #pragma HLS bind_storage variable=T_matrix type=RAM_S2P impl=BRAM
+        // clang-format on
+    } else {
+// clang-format off
+        #pragma HLS bind_storage variable=T_matrix type=RAM_S2P impl=URAM
+        #pragma HLS ARRAY_RESHAPE variable=T_matrix complete dim=1
+        // clang-format on
+    }
+
+    if (URAM_EN == 1) {
+// clang-format off
+        #pragma HLS bind_storage variable=Uq_matrix type=RAM_S2P impl=URAM
+        // clang-format on
+    }
+
+// clang-format off
+    #pragma HLS inline off
+    // clang-format on
+
+    int U0_loop_cnt;
+    if (EKF_EN == 1 && read_opt_flag == 1)
+        U0_loop_cnt = 0;
+    else
+        U0_loop_cnt = N_STATE * N_STATE;
+
+    ap_uint<32> counter1 = 0;
+    ap_uint<32> counter1_1 = 0; // for dim2
+    ap_uint<32> counter2 = 0;   // for dim1
+    ap_uint<32> counter3 = 0;   // for dim2
+LOOPI_U:
+    for (int ptr = 0; ptr < U0_loop_cnt; ptr++) {
+// clang-format off
+        #pragma HLS pipeline
+        // clang-format on
+
+        ap_uint<8> dim1 = counter2;
+        ap_uint<16> dim2 = counter1_1 + counter3;
+
+        U_matrix[dim1][dim2] = U0_mat.read_float(ptr);
+
+        if (counter1 == N_STATE - 1) {
+            if (counter2 == PROC_MU - 1) {
+                counter2 = 0;
+                counter3++;
+            } else {
+                counter2++;
+            }
+
+            counter1 = 0;
+            counter1_1 = 0;
+        } else {
+            counter1++;
+            counter1_1 += DEPTH_MU;
+        }
+    }
+
+LOOPHZ:
+    for (int ptr_zero = 0, dim2 = (DEPTH_MU - 1); ptr_zero < M_MEAS; ptr_zero++, dim2 += DEPTH_MU) {
+// clang-format off
+        #pragma HLS pipeline
+        // clang-format on
+
+        for (int dim1 = 0; dim1 < PROC_MU; dim1++) {
+// clang-format off
+            #pragma HLS unroll
+            // clang-format on
+
+            H_matrix[dim1][dim2] = 0;
+        }
+    }
+
+    if (EKF_EN == 0) {
+        ap_uint<32> offset_incH = 0;
+        ap_uint<32> counter_Hrow = 0;
+
+    LOOPI_H:
+        for (int ptr = 0; ptr < M_MEAS * N_STATE; ptr++) {
+// clang-format off
+            #pragma HLS pipeline
+            // clang-format on
+            ap_uint<32> offset = offset_incH + counter_Hrow;
+            ap_uint<10> dim1 = offset % PROC_MU;
+            ap_uint<16> dim2 = offset / PROC_MU;
+
+            H_matrix[dim1][dim2] = H_mat.read_float(ptr);
+
+            if (counter_Hrow == N_STATE - 1) {
+                counter_Hrow = 0;
+                offset_incH += DEPTH_MU * PROC_MU;
+            } else
+                counter_Hrow++;
+        }
+    }
+
+    //******************************Load R ****************************//
+    int R_loop_cnt;
+    if (EKF_EN == 1 && read_opt_flag == 1)
+        R_loop_cnt = 0;
+    else
+        R_loop_cnt = M_MEAS;
+
+LOOPI_R:
+    for (int ptr = 0; ptr < R_loop_cnt; ptr++) {
+// clang-format off
+        #pragma HLS pipeline
+        // clang-format on
+
+        ry_vector[ptr] = R_mat.read_float(ptr);
+    }
+
+//******************************Load X0 ****************************//
+LOOPI_X:
+    for (int ptr = 0; ptr < N_STATE; ptr++) {
+// clang-format off
+        #pragma HLS pipeline
+        // clang-format on
+
+        xu_vector[ptr] = X0_mat.read_float(ptr);
+    }
+
+    //******************************Load D0 ****************************//
+    int D0_loop_cnt;
+    if (EKF_EN == 1 && read_opt_flag == 1)
+        D0_loop_cnt = 0;
+    else
+        D0_loop_cnt = N_STATE;
+
+LOOPI_D:
+    for (int ptr = 0; ptr < D0_loop_cnt; ptr++) {
+// clang-format off
+        #pragma HLS pipeline
+        // clang-format on
+
+        D_vector[ptr] = D0_mat.read_float(ptr);
+    }
+
+LOOPI_T1:
+    for (int ptr = 0; ptr < D0_loop_cnt; ptr++) {
+// clang-format off
+        #pragma HLS pipeline
+        // clang-format on
+
+        D_vector[ptr + N_STATE] = D_vector[ptr];
+    }
+
+    //******************************Load A <Row major>****************************//
+
+    ap_uint<16> dim2 = (DEPTH_MU - 1);
+LOOPAZ:
+    for (int ptr_zero = 0; ptr_zero < 2 * N_STATE; ptr_zero++) {
+// clang-format off
+        #pragma HLS pipeline
+        // clang-format on
+
+        for (int dim1 = 0; dim1 < PROC_MU; dim1++) {
+// clang-format off
+            #pragma HLS unroll
+            // clang-format on
+
+            AB_matrix[dim1][dim2] = 0;
+        }
+        if (ptr_zero < (N_STATE - 1))
+            dim2 += DEPTH_MU;
+        else
+            dim2 += DEPTH_MU_CTRL;
+    }
+
+    ap_uint<32> offset_incA = 0;
+    ap_uint<32> counter_Arow = 0;
+LOOPI_A:
+    for (int ptr = 0; ptr < N_STATE * N_STATE; ptr++) {
+// clang-format off
+        #pragma HLS pipeline
+        // clang-format on
+
+        ap_uint<32> offset = offset_incA + counter_Arow;
+        ap_uint<8> dim1 = offset % PROC_MU;
+        ap_uint<16> dim2 = offset / PROC_MU;
+
+        AB_matrix[dim1][dim2] = A_mat.read_float(ptr);
+
+        if (counter_Arow == N_STATE - 1) {
+            counter_Arow = 0;
+            offset_incA += DEPTH_MU * PROC_MU;
+        } else
+            counter_Arow++;
+    }
+
+    ap_uint<32> offset_incB = 0;
+    ap_uint<32> counter_Brow = 0;
+
+    int B_loop_cnt;
+    if (EKF_EN == 1)
+        B_loop_cnt = 0;
+    else
+        B_loop_cnt = N_STATE * C_CTRL;
+
+LOOPI_B:
+    for (int ptr = 0; ptr < B_loop_cnt; ptr++) {
+// clang-format off
+        #pragma HLS pipeline
+        // clang-format on
+
+        ap_uint<32> offset = offset_incB + counter_Brow;
+        ap_uint<8> dim1 = offset % PROC_MU;
+        ap_uint<16> dim2 = offset / PROC_MU;
         AB_matrix[dim1][dim2 + (DEPTH_MU * N_STATE)] = B_mat.read_float(ptr);
-#endif
         if (counter_Brow == C_CTRL - 1) {
             counter_Brow = 0;
             offset_incB += DEPTH_MU_CTRL * PROC_MU;
@@ -2114,9 +2963,7 @@ template <int N_STATE,
           int XFCVDEPTH_UOUT = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_DOUT = _XFCVDEPTH_DEFAULT>
 void KalmanFilter_def(xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_A>& A_mat,
-#if KF_C != 0
                       xf::cv::Mat<TYPE, N_STATE, C_CTRL, NPC, XFCVDEPTH_B>& B_mat,
-#endif
                       xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_UQ>& Uq_mat,
                       xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_DQ>& Dq_mat,
                       xf::cv::Mat<TYPE, M_MEAS, N_STATE, NPC, XFCVDEPTH_H>& H_mat,
@@ -2124,9 +2971,7 @@ void KalmanFilter_def(xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_A>& A_m
                       xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_U0>& U0_mat,
                       xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_D0>& D0_mat,
                       xf::cv::Mat<TYPE, M_MEAS, 1, NPC, XFCVDEPTH_R>& R_mat,
-#if KF_C != 0
                       xf::cv::Mat<TYPE, C_CTRL, 1, NPC, XFCVDEPTH_U>& u_mat,
-#endif
                       xf::cv::Mat<TYPE, M_MEAS, 1, NPC, XFCVDEPTH_Y>& y_mat,
                       xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_XOUT>& Xout_mat,
                       xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_UOUT>& Uout_mat,
@@ -2218,42 +3063,27 @@ void KalmanFilter_def(xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_A>& A_m
         initialization<N_STATE, M_MEAS, C_CTRL, PROC_TU, DEPTH_TU, PROC_MU, DEPTH_MU, DEPTH_MU_CTRL, UMAT_DEPTH,
                        HMAT_DEPTH, ABMAT_DEPTH, DPDQ_DEPTH, TMAT_DEPTH, UQMAT_DEPTH, URAM_EN, EKF_EN, TYPE, NPC,
                        XFCVDEPTH_A, XFCVDEPTH_B, XFCVDEPTH_UQ, XFCVDEPTH_DQ, XFCVDEPTH_H, XFCVDEPTH_X0, XFCVDEPTH_U0,
-                       XFCVDEPTH_D0, XFCVDEPTH_R>(A_mat,
-#if KF_C != 0
-                                                  B_mat,
-#endif
-                                                  Uq_mat, Dq_mat, H_mat, X0_mat, U0_mat, D0_mat, R_mat, H_matrix,
-                                                  U_matrix, xu_vector, ry_vector, D_vector, AB_matrix, T_matrix,
-                                                  Uq_matrix, flag_reg[7]);
+                       XFCVDEPTH_D0, XFCVDEPTH_R>(A_mat, B_mat, Uq_mat, Dq_mat, H_mat, X0_mat, U0_mat, D0_mat, R_mat,
+                                                  H_matrix, U_matrix, xu_vector, ry_vector, D_vector, AB_matrix,
+                                                  T_matrix, Uq_matrix, flag_reg[7]);
 
     if (flag_reg[1])
         TimeUpdate<N_STATE, M_MEAS, C_CTRL, PROC_TU, DEPTH_TU, PROC_MU, DEPTH_MU, DEPTH_MU_CTRL, UMAT_DEPTH,
                    ABMAT_DEPTH, DPDQ_DEPTH, TMAT_DEPTH, URAM_EN, EKF_EN, TYPE, NPC, XFCVDEPTH_U, XFCVDEPTH_XOUT,
-                   XFCVDEPTH_UOUT, XFCVDEPTH_DOUT>(T_matrix, AB_matrix, xu_vector, U_matrix, D_vector,
-#if KF_C != 0
-                                                   u_mat,
-#endif
-                                                   Xout_mat, Uout_mat, Dout_mat, flag_reg[3], flag_reg[4]);
+                   XFCVDEPTH_UOUT, XFCVDEPTH_DOUT>(T_matrix, AB_matrix, xu_vector, U_matrix, D_vector, u_mat, Xout_mat,
+                                                   Uout_mat, Dout_mat, flag_reg[3], flag_reg[4]);
 
     if (flag_reg[2])
         MeasUpdate_wrapper<N_STATE, C_CTRL, M_MEAS, PROC_TU, DEPTH_TU, PROC_MU, DEPTH_MU, UMAT_DEPTH, HMAT_DEPTH,
                            TMAT_DEPTH, UQMAT_DEPTH, URAM_EN, EKF_EN, TYPE, NPC, XFCVDEPTH_U, XFCVDEPTH_Y, XFCVDEPTH_R,
                            XFCVDEPTH_H, XFCVDEPTH_XOUT, XFCVDEPTH_UOUT, XFCVDEPTH_DOUT>(
-            U_matrix, H_matrix, D_vector, xu_vector, ry_vector, T_matrix, Uq_matrix,
-#if KF_C != 0
-            u_mat,
-#endif
-            y_mat, R_mat, H_mat, Xout_mat, Uout_mat, Dout_mat, flag_reg[5], flag_reg[6]);
+            U_matrix, H_matrix, D_vector, xu_vector, ry_vector, T_matrix, Uq_matrix, u_mat, y_mat, R_mat, H_mat,
+            Xout_mat, Uout_mat, Dout_mat, flag_reg[5], flag_reg[6]);
 
     if (EKF_EN == 1) {
         if (flag_reg[2] == 1) xu_vector[511]++;
     }
 }
-
-#if KF_C != 0
-#endif
-#if KF_C != 0
-#endif
 
 template <int N_STATE,
           int M_MEAS,
@@ -2279,9 +3109,7 @@ template <int N_STATE,
           int XFCVDEPTH_UOUT = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_DOUT = _XFCVDEPTH_DEFAULT>
 void KalmanFilter(xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_A>& A_mat,
-#if KF_C != 0
                   xf::cv::Mat<TYPE, N_STATE, C_CTRL, NPC, XFCVDEPTH_B>& B_mat,
-#endif
                   xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_UQ>& Uq_mat,
                   xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_DQ>& Dq_mat,
                   xf::cv::Mat<TYPE, M_MEAS, N_STATE, NPC, XFCVDEPTH_H>& H_mat,
@@ -2289,9 +3117,7 @@ void KalmanFilter(xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_A>& A_mat,
                   xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_U0>& U0_mat,
                   xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_D0>& D0_mat,
                   xf::cv::Mat<TYPE, M_MEAS, 1, NPC, XFCVDEPTH_R>& R_mat,
-#if KF_C != 0
                   xf::cv::Mat<TYPE, C_CTRL, 1, NPC, XFCVDEPTH_U>& u_mat,
-#endif
                   xf::cv::Mat<TYPE, M_MEAS, 1, NPC, XFCVDEPTH_Y>& y_mat,
                   xf::cv::Mat<TYPE, N_STATE, 1, NPC, XFCVDEPTH_XOUT>& Xout_mat,
                   xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_UOUT>& Uout_mat,
@@ -2303,9 +3129,7 @@ void KalmanFilter(xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_A>& A_mat,
     assert((MTU > 0 && MTU <= N_STATE) && "For MTU, possible options are 1 to N_STATE");
     assert((MMU > 0 && MMU <= N_STATE) && "For MMU, possible options are 1 to N_STATE");
     assert(((A_mat.rows == N_STATE) && (A_mat.cols == N_STATE)) && "A matrix dimension must be N_STATE x N_STATE");
-#if KF_C != 0
     assert(((B_mat.rows == N_STATE) && (B_mat.cols == C_CTRL)) && "B matrix dimension must be N_STATE x C_CTRL");
-#endif
     assert(((Uq_mat.rows == N_STATE) && (Uq_mat.cols == N_STATE)) && "Uq matrix dimension must be N_STATE x N_STATE");
     assert(((Dq_mat.rows == N_STATE) && (Dq_mat.cols == 1)) && "Dq matrix dimension must be N_STATE x 1");
     assert(((H_mat.rows == M_MEAS) && (H_mat.cols == N_STATE)) && "H matrix dimension must be M_MEAS x N_STATE");
@@ -2313,9 +3137,7 @@ void KalmanFilter(xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_A>& A_mat,
     assert(((U0_mat.rows == N_STATE) && (U0_mat.cols == N_STATE)) && "U0 matrix dimension must be N_STATE x N_STATE");
     assert(((D0_mat.rows == N_STATE) && (D0_mat.cols == 1)) && "D0 matrix dimension must be N_STATE x 1");
     assert(((R_mat.rows == M_MEAS) && (R_mat.cols == 1)) && "R matrix dimension must be M_MEAS x 1");
-#if KF_C != 0
     assert(((u_mat.rows == C_CTRL) && (u_mat.cols == 1)) && "u matrix dimension must be C_CTRL x 1");
-#endif
     assert(((y_mat.rows == M_MEAS) && (y_mat.cols == 1)) && "y matrix dimension must be M_MEAS x 1");
     assert(((Xout_mat.rows == N_STATE) && (Xout_mat.cols == 1)) && "Xout matrix dimension must be N_STATE x 1");
     assert(((Uout_mat.rows == N_STATE) && (Uout_mat.cols == N_STATE)) &&
@@ -2327,16 +3149,10 @@ void KalmanFilter(xf::cv::Mat<TYPE, N_STATE, N_STATE, NPC, XFCVDEPTH_A>& A_mat,
     KalmanFilter_def<N_STATE, M_MEAS, C_CTRL, MTU, MMU, USE_URAM, EKF_EN, TYPE, NPC, XFCVDEPTH_A, XFCVDEPTH_B,
                      XFCVDEPTH_UQ, XFCVDEPTH_DQ, XFCVDEPTH_H, XFCVDEPTH_X0, XFCVDEPTH_U0, XFCVDEPTH_D0, XFCVDEPTH_R,
                      XFCVDEPTH_U, XFCVDEPTH_Y, XFCVDEPTH_XOUT, XFCVDEPTH_UOUT, XFCVDEPTH_DOUT>(
-        A_mat,
-#if KF_C != 0
-        B_mat,
-#endif
-        Uq_mat, Dq_mat, H_mat, X0_mat, U0_mat, D0_mat, R_mat,
-#if KF_C != 0
-        u_mat,
-#endif
-        y_mat, Xout_mat, Uout_mat, Dout_mat, flag);
+        A_mat, B_mat, Uq_mat, Dq_mat, H_mat, X0_mat, U0_mat, D0_mat, R_mat, u_mat, y_mat, Xout_mat, Uout_mat, Dout_mat,
+        flag);
 }
+
 } // namespace cv
 } // namespace xf
 #endif //_XF_KALMANFILTER_HPP_

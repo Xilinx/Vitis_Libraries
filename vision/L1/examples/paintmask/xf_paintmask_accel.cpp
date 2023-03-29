@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-#include "xf_paintmask_config.h"
+#include "xf_paintmask_accel_config.h"
 
-static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(TYPE, NPC1)) / 8) / (PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(IN_TYPE, NPPCX)) / 8) / (INPUT_PTR_WIDTH / 8);
 
-void paintmask_accel(ap_uint<PTR_WIDTH>* img_in,
-                     ap_uint<PTR_WIDTH>* mask_in,
+void paintmask_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
+                     ap_uint<INPUT_PTR_WIDTH>* mask_in,
                      unsigned char* color,
-                     ap_uint<PTR_WIDTH>* img_out,
+                     ap_uint<OUTPUT_PTR_WIDTH>* img_out,
                      int height,
                      int width) {
 // clang-format off
@@ -32,9 +32,9 @@ void paintmask_accel(ap_uint<PTR_WIDTH>* img_in,
     #pragma HLS INTERFACE s_axilite  port=return 		      bundle=control
     // clang-format on
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> imgInput(height, width);
-    xf::cv::Mat<M_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_MASK_IN> maskInput(height, width);
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> imgOutput(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN> imgInput(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_MASK_IN> maskInput(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT> imgOutput(height, width);
 
 // clang-format off
 // clang-format on
@@ -44,21 +44,21 @@ void paintmask_accel(ap_uint<PTR_WIDTH>* img_in,
     // clang-format on
 
     // Copy the color data to local memory:
-    unsigned char color_local[XF_CHANNELS(TYPE, NPC1)];
-    for (unsigned int i = 0; i < XF_CHANNELS(TYPE, NPC1); ++i) {
+    unsigned char color_local[XF_CHANNELS(IN_TYPE, NPPCX)];
+    for (unsigned int i = 0; i < XF_CHANNELS(IN_TYPE, NPPCX); ++i) {
         color_local[i] = color[i];
     }
 
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(img_in, imgInput);
-    xf::cv::Array2xfMat<PTR_WIDTH, M_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_MASK_IN>(mask_in, maskInput);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN>(img_in, imgInput);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_MASK_IN>(mask_in, maskInput);
 
     // Run xfOpenCV kernel:
-    xf::cv::paintmask<TYPE, M_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_MASK_IN, XF_CV_DEPTH_OUT>(
+    xf::cv::paintmask<IN_TYPE, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN, XF_CV_DEPTH_MASK_IN, XF_CV_DEPTH_OUT>(
         imgInput, maskInput, imgOutput, color_local);
 
     // Convert _dst xf::cv::Mat object to output array:
-    xf::cv::xfMat2Array<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(imgOutput, img_out);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT>(imgOutput, img_out);
 
     return;
 } // End of kernel

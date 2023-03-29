@@ -16,5 +16,6 @@
 
 #include <adf/window/types.h>
 #include <adf/stream/types.h>
+#include <adf/io_buffer/io_buffer.h>
 
-void erode_rect_3x3(input_window<int16_t>* img_in, output_window<int16_t>* img_out);
+void erode_rect_3x3(adf::input_buffer<int16_t>& img_in, adf::output_buffer<int16_t>& img_out);

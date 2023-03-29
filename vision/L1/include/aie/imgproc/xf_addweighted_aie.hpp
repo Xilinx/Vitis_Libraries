@@ -70,15 +70,15 @@ __attribute__((noinline)) void addweighted(const T* restrict src1,
         }
 }
 
-void addweighted_api(input_window_int16* img_in1,
-                     input_window_int16* img_in2,
-                     output_window_int16* img_out,
+void addweighted_api(adf::input_buffer<int16>& img_in1,
+                     adf::input_buffer<int16>& img_in2,
+                     adf::output_buffer<int16>& img_out,
                      const float& alpha,
                      const float& beta,
                      const float& gamma) {
-    int16* ptr0 = (int16*)img_in1->ptr;
-    int16* ptr1 = (int16*)img_in2->ptr;
-    int16* ptr_out = (int16*)img_out->ptr;
+    int16* ptr0 = (int16*)::aie::begin(img_in1);
+    int16* ptr1 = (int16*)::aie::begin(img_in2);
+    int16* ptr_out = (int16*)::aie::begin(img_out);
 
     const int16_t img_width = xfGetTileWidth(ptr0);
     const int16_t img_height = xfGetTileHeight(ptr0);

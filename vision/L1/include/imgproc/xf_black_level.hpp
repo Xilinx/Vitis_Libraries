@@ -48,6 +48,12 @@ inline ap_uint<12> xf_satcast_bl<ap_uint<12> >(int v) {
     return v;
 };
 template <>
+inline ap_uint<14> xf_satcast_bl<ap_uint<14> >(int v) {
+    v = (v > 16383 ? 16383 : v);
+    v = (v < 0 ? 0 : v);
+    return v;
+};
+template <>
 inline ap_uint<16> xf_satcast_bl<ap_uint<16> >(int v) {
     v = (v > 65535 ? 65535 : v);
     v = (v < 0 ? 0 : v);
@@ -58,17 +64,17 @@ namespace xf {
 namespace cv {
 
 template <int SRC_T,
-          int MAX_ROWS,
-          int MAX_COLS,
+          int _MAX_ROWS,
+          int _MAX_COLS,
           int NPPC = XF_NPPC1,
           int MUL_VALUE_WIDTH = 16,
           int FL_POS = 15,
           int USE_DSP = 1,
           int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
-void blackLevelCorrection(xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPPC, XFCVDEPTH_IN>& _Src,
-                          xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPPC, XFCVDEPTH_OUT>& _Dst,
-                          XF_CTUNAME(SRC_T, NPPC) black_level,
+void blackLevelCorrection(xf::cv::Mat<SRC_T, _MAX_ROWS, _MAX_COLS, NPPC, XFCVDEPTH_IN>& _Src,
+                          xf::cv::Mat<SRC_T, _MAX_ROWS, _MAX_COLS, NPPC, XFCVDEPTH_OUT>& _Dst,
+                          unsigned short black_level,
                           float mul_value // ap_uint<MUL_VALUE_WIDTH> mul_value
                           ) {
 // clang-format off
@@ -77,7 +83,7 @@ void blackLevelCorrection(xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPPC, XFCVDEPTH
 
     // max/(max-black)
 
-    const uint32_t _TC = MAX_ROWS * (MAX_COLS >> XF_BITSHIFT(NPPC));
+    const uint32_t _TC = _MAX_ROWS * (_MAX_COLS >> XF_BITSHIFT(NPPC));
 
     const int STEP = XF_DTPIXELDEPTH(SRC_T, NPPC);
 
@@ -119,6 +125,29 @@ void blackLevelCorrection(xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPPC, XFCVDEPTH
 
         _Dst.write(wrptr++, wr_val);
     }
+}
+
+template <int SRC_T,
+          int _MAX_ROWS,
+          int _MAX_COLS,
+          int NPPC = XF_NPPC1,
+          int MUL_VALUE_WIDTH = 16,
+          int FL_POS = 15,
+          int USE_DSP = 1,
+          int STREAMS = 2,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void blackLevelCorrection_multi(xf::cv::Mat<SRC_T, _MAX_ROWS, _MAX_COLS, NPPC, XFCVDEPTH_IN>& _Src,
+                                xf::cv::Mat<SRC_T, _MAX_ROWS, _MAX_COLS, NPPC, XFCVDEPTH_OUT>& _Dst,
+                                unsigned short black_level[STREAMS],
+                                int stream_id) {
+// clang-format off
+#pragma HLS ARRAY_PARTITION variable= black_level dim=1 complete
+    // clang-format on
+    float inputMax = (1 << (XF_DTPIXELDEPTH(SRC_T, NPPC))) - 1; // 65535.0f;
+    float mul_value = (inputMax / (inputMax - black_level[stream_id]));
+    blackLevelCorrection<SRC_T, _MAX_ROWS, _MAX_COLS, NPPC, MUL_VALUE_WIDTH, FL_POS, USE_DSP, XFCVDEPTH_IN,
+                         XFCVDEPTH_OUT>(_Src, _Dst, black_level[stream_id], mul_value);
 }
 }
 }

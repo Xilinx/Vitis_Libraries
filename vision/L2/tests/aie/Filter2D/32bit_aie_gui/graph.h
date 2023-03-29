@@ -22,6 +22,10 @@
 //#include "gauss2_stitcher.h"
 //#include "gauss2_tiler.h"
 
+static constexpr int TILE_WIDTH = 256;
+static constexpr int TILE_HEIGHT = 16;
+static constexpr int TILE_ELEMENTS = (TILE_WIDTH * TILE_HEIGHT);
+
 using namespace adf;
 
 class two_node_pipeline : public graph {
@@ -47,13 +51,13 @@ class two_node_pipeline : public graph {
         // connect< stream >(in,tiler.in[0]);
 
         // gauss1 processes 4096 32b blocks or 16384 byte blocks
-        connect<adf::window<16384> >(in, gauss1.in[0]);
+        connect<>(in, gauss1.in[0]);
         // connect< stream, window<16384> >(tiler.out[0], gauss1.in[0]);
 
         // gauss1 window passsed directly to gauss2
-        connect<window<16384> >(gauss1.out[0], gauss2.in[0]);
+        connect<>(gauss1.out[0], gauss2.in[0]);
         // gauss2 window passed to output
-        connect<window<16384>, stream>(gauss2.out[0], out);
+        connect<>(gauss2.out[0], out);
         // connect< window<16384>, stream >(gauss2.out[0], stitcher.in[0]);
 
         // connect< stream >(stitcher.out[0],out);
@@ -63,6 +67,12 @@ class two_node_pipeline : public graph {
         source(gauss1) = "xf_filter2d.cc";
         source(gauss2) = "xf_filter2d.cc";
         // source(stitcher) = "kernels/gauss2_stitcher.cpp";
+
+        adf::dimensions(gauss1.in[0]) = {TILE_ELEMENTS};
+        adf::dimensions(gauss1.out[0]) = {TILE_ELEMENTS};
+        adf::dimensions(gauss1.out[0]) = {TILE_ELEMENTS};
+        adf::dimensions(gauss2.in[0]) = {TILE_ELEMENTS};
+        adf::dimensions(gauss2.out[0]) = {TILE_ELEMENTS};
 
         // Initial mapping
         runtime<ratio>(gauss1) = 0.5;

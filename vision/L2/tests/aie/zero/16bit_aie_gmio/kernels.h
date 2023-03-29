@@ -16,5 +16,5 @@
 
 #include <adf/stream/types.h>
 #include <adf/window/types.h>
-
-void zero(input_window_int16* input, output_window_int16* output);
+#include <adf.h>
+void zero(adf::input_buffer<int16>& input, adf::output_buffer<int16>& output);

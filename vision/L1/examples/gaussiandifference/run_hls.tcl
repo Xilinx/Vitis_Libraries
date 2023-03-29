@@ -25,12 +25,11 @@ if {![info exists CLKP]} {
 
 open_project -reset $PROJ
 
-add_files "${XF_PROJ_ROOT}/L1/examples/gaussiandifference/xf_gaussian_diff_accel.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/gaussiandifference/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/gaussiandifference/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
-add_files -tb "${XF_PROJ_ROOT}/L1/examples/gaussiandifference/xf_gaussian_diff_tb.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/gaussiandifference/build -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/gaussiandifference/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+add_files "${XF_PROJ_ROOT}/L1/examples/gaussiandifference/xf_gaussian_diff_accel.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/gaussiandifference/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/gaussiandifference/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+add_files -tb "${XF_PROJ_ROOT}/L1/examples/gaussiandifference/xf_gaussian_diff_tb.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/gaussiandifference/config -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/gaussiandifference/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
 set_top gaussian_diff_accel
 
 open_solution -reset $SOLN
-
 
 
 

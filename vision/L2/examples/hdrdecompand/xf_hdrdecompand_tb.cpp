@@ -20,7 +20,7 @@
 #include <iostream>
 #include <math.h>
 
-#include "xf_hdrdecompand_config.h"
+#include "xf_hdrdecompand_tb_config.h"
 #include "xcl2.hpp"
 #include "xf_opencl_wrap.hpp"
 
@@ -143,10 +143,10 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-    diff.create(in_img.rows, in_img.cols, CV_32SC1);
+    diff.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
 
-    out_img.create(in_img.rows, in_img.cols, CV_32SC1);
-    out_hls.create(in_img.rows, in_img.cols, CV_32SC1);
+    out_img.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    out_hls.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
 
     int height = in_img.rows;
     int width = in_img.cols;
@@ -156,7 +156,7 @@ int main(int argc, char** argv) {
     int pxl_val;
 
     // Create the Bayer pattern CFA output
-    cv::Mat cfa_bayer_output(in_img.rows, in_img.cols, CV_16UC1); // simulate the Bayer pattern CFA outputi
+    cv::Mat cfa_bayer_output(in_img.rows, in_img.cols, CV_IN_TYPE); // simulate the Bayer pattern CFA outputi
 
     cv::Mat color_cfa_bayer_output(in_img.rows, in_img.cols, in_img.type()); // Bayer pattern CFA output in color
     unsigned short bformat = BPATTERN;                                       // Bayer format BG-0; GB-1; GR-2; RG-3

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_scharr_config.h"
-
+#include "xf_scharr_tb_config.h"
 #include "xcl2.hpp"
 
 int main(int argc, char** argv) {
@@ -38,12 +37,6 @@ int main(int argc, char** argv) {
     in_img = cv::imread(argv[1], 1);
 #endif
 
-#if GRAY
-#define PTYPE CV_8UC1 // Should be CV_16S when ddepth is CV_16S
-#else
-#define PTYPE CV_8UC3 // Should be CV_16S when ddepth is CV_16S
-#endif
-
     if (in_img.data == NULL) {
         fprintf(stderr, "Cannot open image\n");
         return 0;
@@ -52,12 +45,12 @@ int main(int argc, char** argv) {
     typedef unsigned char TYPE; // short int TYPE; //
 
     // create memory for output images
-    c_grad_x.create(in_img.rows, in_img.cols, PTYPE);
-    c_grad_y.create(in_img.rows, in_img.cols, PTYPE);
-    hls_grad_x.create(in_img.rows, in_img.cols, PTYPE);
-    hls_grad_y.create(in_img.rows, in_img.cols, PTYPE);
-    diff_grad_x.create(in_img.rows, in_img.cols, PTYPE);
-    diff_grad_y.create(in_img.rows, in_img.cols, PTYPE);
+    c_grad_x.create(in_img.rows, in_img.cols, CV_IN_TYPE);
+    c_grad_y.create(in_img.rows, in_img.cols, CV_IN_TYPE);
+    hls_grad_x.create(in_img.rows, in_img.cols, CV_IN_TYPE);
+    hls_grad_y.create(in_img.rows, in_img.cols, CV_IN_TYPE);
+    diff_grad_x.create(in_img.rows, in_img.cols, CV_IN_TYPE);
+    diff_grad_y.create(in_img.rows, in_img.cols, CV_IN_TYPE);
 
     ////////////    Opencv Reference    //////////////////////
     int scale = 1;
@@ -80,9 +73,9 @@ int main(int argc, char** argv) {
     std::vector<cl::Device> devices = xcl::get_xil_devices();
     cl::Device device = devices[0];
     cl::Context context(device);
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPC1) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPC1) << std::endl;
-    std::cout << "NPPC:" << NPC1 << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE);
 
@@ -94,17 +87,17 @@ int main(int argc, char** argv) {
     cl::Kernel krnl(program, "scharr_accel");
 
     std::vector<cl::Memory> inBufVec, outBufVec1, outBufVec2;
-    cl::Buffer imageToDevice(context, CL_MEM_READ_ONLY, (height * width * CH_TYPE)); //,in_img.data);
+    cl::Buffer imageToDevice(context, CL_MEM_READ_ONLY, (height * width * XF_INPUT_COLOR)); //,in_img.data);
     cl::Buffer imageFromDevice1(context, CL_MEM_WRITE_ONLY,
-                                (height * width * CH_TYPE)); //,(ap_uint<OUTPUT_PTR_WIDTH>*)hls_grad_x.data);
+                                (height * width * XF_INPUT_COLOR)); //,(ap_uint<OUTPUT_PTR_WIDTH>*)hls_grad_x.data);
     cl::Buffer imageFromDevice2(context, CL_MEM_WRITE_ONLY,
-                                (height * width * CH_TYPE)); //,(ap_uint<OUTPUT_PTR_WIDTH>*)hls_grad_y.data);
+                                (height * width * XF_INPUT_COLOR)); //,(ap_uint<OUTPUT_PTR_WIDTH>*)hls_grad_y.data);
 
     // inBufVec.push_back(imageToDevice);
     // outBufVec1.push_back(imageFromDevice1);
     // outBufVec2.push_back(imageFromDevice2);
 
-    q.enqueueWriteBuffer(imageToDevice, CL_TRUE, 0, (height * width * CH_TYPE), in_img.data);
+    q.enqueueWriteBuffer(imageToDevice, CL_TRUE, 0, (height * width * XF_INPUT_COLOR), in_img.data);
 
     // Set the kernel arguments
     krnl.setArg(0, imageToDevice);
@@ -130,8 +123,8 @@ int main(int argc, char** argv) {
 
     // q.enqueueMigrateMemObjects(outBufVec1,CL_MIGRATE_MEM_OBJECT_HOST);
     // q.enqueueMigrateMemObjects(outBufVec2,CL_MIGRATE_MEM_OBJECT_HOST);
-    q.enqueueReadBuffer(imageFromDevice1, CL_TRUE, 0, (height * width * CH_TYPE), hls_grad_x.data);
-    q.enqueueReadBuffer(imageFromDevice2, CL_TRUE, 0, (height * width * CH_TYPE), hls_grad_y.data);
+    q.enqueueReadBuffer(imageFromDevice1, CL_TRUE, 0, (height * width * XF_INPUT_COLOR), hls_grad_x.data);
+    q.enqueueReadBuffer(imageFromDevice2, CL_TRUE, 0, (height * width * XF_INPUT_COLOR), hls_grad_y.data);
     q.finish();
     /////////////////////////////////////// end of CL ////////////////////////
 

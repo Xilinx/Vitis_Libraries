@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 #include "common/xf_headers.hpp"
 #include "xcl2.hpp"
-#include "xf_warp_transform_config.h"
+#include "xf_warp_transform_tb_config.h"
 
 // Changing transformation matrix dimensions with transform Affine 2x3,
 // Perspecitve 3x3
@@ -140,9 +140,9 @@ int main(int argc, char* argv[]) {
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::cout << "INFO: Device found - " << device_name << std::endl;
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(TYPE, NPC1) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(TYPE, NPC1) << std::endl;
-    std::cout << "NPPC:" << NPC1 << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     // Load binary:
     ;
@@ -208,11 +208,7 @@ int main(int argc, char* argv[]) {
 
     // OpenCV reference:
     cv::Mat opencv_image;
-#if GRAY
-    opencv_image.create(image_input.rows, image_input.cols, CV_8UC1);
-#else
-    opencv_image.create(image_input.rows, image_input.cols, CV_8UC3);
-#endif
+    opencv_image.create(image_input.rows, image_input.cols, CV_IN_TYPE);
 
     for (int I1 = 0; I1 < opencv_image.rows; I1++) {
         for (int J1 = 0; J1 < opencv_image.cols; J1++) {

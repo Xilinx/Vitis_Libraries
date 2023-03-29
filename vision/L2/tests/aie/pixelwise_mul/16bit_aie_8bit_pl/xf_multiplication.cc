@@ -16,9 +16,9 @@
 
 #include "imgproc/xf_multiplication_aie.hpp"
 
-void pixelwise_mul(input_window_int16* input1,
-                   input_window_int16* input2,
-                   output_window_int16* output,
-                   const float& scale) {
+void pixelwise_mul(adf::input_buffer<int16>& input1,
+                   adf::input_buffer<int16>& input2,
+                   adf::output_buffer<int16>& output,
+                   float scale) {
     xf::cv::aie::multiplication_api(input1, input2, output, scale);
 };

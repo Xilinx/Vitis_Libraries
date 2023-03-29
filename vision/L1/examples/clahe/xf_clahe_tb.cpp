@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 #include "common/xf_headers.hpp"
 #include "opencv2/imgcodecs/legacy/constants_c.h"
 #include "opencv2/imgproc/types_c.h"
-#include "xf_clahe_config.h"
+#include "xf_clahe_tb_config.h"
 #include <fstream>
 int main(int argc, char** argv) {
     cv::Mat in_img;
@@ -49,11 +49,11 @@ int main(int argc, char** argv) {
     cv::Mat dst_hls_tmp(rows, cols, CV_8UC1);
     cv::Mat dst_hls(rows, cols, CV_8UC1);
     // apply the CLAHE algorithm to the L channel
-    clahe_accel((ap_uint<PTR_WIDTH>*)yuv_planes_hls[0].data, (ap_uint<PTR_WIDTH>*)dst_hls_tmp.data, rows, cols, 3,
-                TILES_Y_MAX, TILES_X_MAX);
+    clahe_accel((ap_uint<INPUT_PTR_WIDTH>*)yuv_planes_hls[0].data, (ap_uint<OUTPUT_PTR_WIDTH>*)dst_hls_tmp.data, rows,
+                cols, 3, TILES_Y_MAX, TILES_X_MAX);
 
-    clahe_accel((ap_uint<PTR_WIDTH>*)yuv_planes_hls[0].data, (ap_uint<PTR_WIDTH>*)dst_hls.data, rows, cols, 3,
-                TILES_Y_MAX, TILES_X_MAX);
+    clahe_accel((ap_uint<INPUT_PTR_WIDTH>*)yuv_planes_hls[0].data, (ap_uint<OUTPUT_PTR_WIDTH>*)dst_hls.data, rows, cols,
+                3, TILES_Y_MAX, TILES_X_MAX);
 
     imwrite("hls_out_Y.png", dst_hls);
     //]]

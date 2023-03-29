@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include "xf_magnitude_config.h"
+#include "xf_magnitude_accel_config.h"
 
-static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(XF_16SC1, NPC1)) / 8) / (INPUT_PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(IN_TYPE, NPPCX)) / 8) / (INPUT_PTR_WIDTH / 8);
 
 void magnitude_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp1,
                      ap_uint<INPUT_PTR_WIDTH>* img_inp2,
@@ -36,15 +36,15 @@ void magnitude_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp1,
     #pragma HLS INTERFACE s_axilite port=return   bundle=control
     // clang-format on
 
-    xf::cv::Mat<XF_16SC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN1> _src1(rows, cols);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN1> _src1(rows, cols);
     // clang-format off
     // clang-format on
 
-    xf::cv::Mat<XF_16SC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN2> _src2(rows, cols);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN2> _src2(rows, cols);
     // clang-format off
     // clang-format on
 
-    xf::cv::Mat<XF_16SC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> _dst(rows, cols);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT> _dst(rows, cols);
 // clang-format off
 // clang-format on
 
@@ -52,11 +52,11 @@ void magnitude_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp1,
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_16SC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN1>(img_inp1, _src1);
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_16SC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN2>(img_inp2, _src2);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN1>(img_inp1, _src1);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN2>(img_inp2, _src2);
 
-    xf::cv::magnitude<NORM_TYPE, XF_16SC1, XF_16SC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN1, XF_CV_DEPTH_IN2,
+    xf::cv::magnitude<NORM_TYPE, IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN1, XF_CV_DEPTH_IN2,
                       XF_CV_DEPTH_OUT>(_src1, _src2, _dst);
 
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16SC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(_dst, img_out);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT>(_dst, img_out);
 }

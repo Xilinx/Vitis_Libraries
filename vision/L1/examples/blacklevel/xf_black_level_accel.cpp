@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 
 #include "common/xf_utility.hpp"
 
-#include "xf_black_level_config.h"
+#include "xf_black_level_accel_config.h"
 
 static constexpr int __XF_DEPTH =
     (XF_MAX_ROWS * XF_MAX_COLS * (XF_PIXELWIDTH(XF_SRC_T, XF_NPPC)) / 8) / (IMAGE_PTR_WIDTH / 8);

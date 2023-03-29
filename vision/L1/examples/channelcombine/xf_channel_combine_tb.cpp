@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,31 +15,15 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_channel_combine_config.h"
+#include "xf_channel_combine_tb_config.h"
 
 int main(int argc, char** argv) {
-#if FOUR_INPUT
     if (argc != 5) {
         fprintf(stderr, "Invalid Number of Arguments!\nUsage:\n");
         fprintf(stderr,
                 "<Executable Name> <input image1 path> <input image2 path> <input image3 path> <input image4 path>\n");
         return -1;
     }
-#endif
-#if THREE_INPUT
-    if (argc != 4) {
-        fprintf(stderr, "Invalid Number of Arguments!\nUsage:\n");
-        fprintf(stderr, "<Executable Name> <input image1 path> <input image2 path> <input image3 path> \n");
-        return -1;
-    }
-#endif
-#if TWO_INPUT
-    if (argc != 3) {
-        fprintf(stderr, "Invalid Number of Arguments!\nUsage:\n");
-        fprintf(stderr, "<Executable Name> <input image1 path> <input image2 path> \n");
-        return -1;
-    }
-#endif
 
     cv::Mat in_gray1, in_gray2;
     cv::Mat in_gray3, in_gray4;
@@ -76,9 +60,9 @@ int main(int argc, char** argv) {
     int width = in_gray1.cols;
 
     // Allocate memory for the output images:
-    out_img.create(height, width, CV_TYPE);
+    out_img.create(height, width, CV_OUT_TYPE);
     // creating memory for diff image
-    diff.create(height, width, CV_TYPE);
+    diff.create(height, width, CV_OUT_TYPE);
 
 // Call the top function
 #if TWO_INPUT

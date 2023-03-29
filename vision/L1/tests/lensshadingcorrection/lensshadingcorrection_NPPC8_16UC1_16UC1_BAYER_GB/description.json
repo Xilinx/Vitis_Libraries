@@ -1,0 +1,61 @@
+{
+    "name": "xilinx lsc test", 
+    "description": "HLS case", 
+    "flow": "hls", 
+    "platform_allowlist": [
+        "u200", 
+        "zcu102", 
+        "zcu104", 
+        "zc706", 
+        "aws-vu9p-f1", 
+        "vck190"
+    ], 
+    "platform_blocklist": [], 
+    "part_allowlist": [], 
+    "part_blocklist": [], 
+    "project": "lensshading", 
+    "solution": "sol1", 
+    "clock": "3.3", 
+    "topfunction": "lensshading_accel", 
+    "top": {
+        "source": [
+            "${XF_PROJ_ROOT}/L1/examples/lensshadingcorrection/xf_lensshading_accel.cpp"
+        ], 
+        "cflags": " -I ${XF_PROJ_ROOT}/L1/tests/lensshadingcorrection/lensshadingcorrection_NPPC8_16UC1_16UC1_BAYER_GB -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x", 
+        "csimflags": " -I ${XF_PROJ_ROOT}/L1/tests/lensshadingcorrection/lensshadingcorrection_NPPC8_16UC1_16UC1_BAYER_GB -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+    }, 
+    "testbench": {
+        "source": [
+            "${XF_PROJ_ROOT}/L1/examples/lensshadingcorrection/xf_lensshading_tb.cpp"
+        ], 
+        "cflags": " -I ${XF_PROJ_ROOT}/L1/tests/lensshadingcorrection/lensshadingcorrection_NPPC8_16UC1_16UC1_BAYER_GB -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x", 
+        "ldflags": "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d", 
+        "argv": {
+            "hls_csim": "  ${XF_PROJ_ROOT}/data/ltm_input.png",
+            "hls_cosim": "  ${XF_PROJ_ROOT}/data/ltm_input.png"
+        }, 
+        "stdmath": false, 
+        "csimflags": " -I ${XF_PROJ_ROOT}/L1/tests/lensshadingcorrection/lensshadingcorrection_NPPC8_16UC1_16UC1_BAYER_GB -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+    }, 
+    "testinfo": {
+        "disable": false, 
+        "jobs": [
+            {
+                "index": 0, 
+                "dependency": [], 
+                "env": "", 
+                "cmd": "", 
+                "max_memory_MB": 16384, 
+                "max_time_min": 300
+            }
+        ], 
+        "targets": [
+            "hls_csim", 
+            "hls_csynth", 
+            "hls_cosim", 
+            "vivado_syn", 
+            "vivado_impl"
+        ], 
+        "category": "canary"
+    }
+}

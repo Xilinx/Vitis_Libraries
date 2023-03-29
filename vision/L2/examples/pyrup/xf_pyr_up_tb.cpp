@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,12 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_pyr_up_config.h"
-
+#include "xf_pyr_up_tb_config.h"
 #include "xcl2.hpp"
 
 int main(int argc, char* argv[]) {
     cv::Mat input_image, output_image, output_xf, output_diff_xf_cv;
-#if RGBA
+#if RGB
     input_image = cv::imread(argv[1], 1);
 #else
     input_image = cv::imread(argv[1], 0);
@@ -32,13 +31,10 @@ int main(int argc, char* argv[]) {
 
     int output_height = input_image.rows << 1;
     int output_width = input_image.cols << 1;
-#if RGBA
-    output_xf.create(output_height, output_width, CV_8UC3);
-    output_diff_xf_cv.create(output_height, output_width, CV_8UC3);
-#else
-    output_xf.create(output_height, output_width, CV_8UC1);
-    output_diff_xf_cv.create(output_height, output_width, CV_8UC1);
-#endif
+
+    output_xf.create(output_height, output_width, CV_OUT_TYPE);
+    output_diff_xf_cv.create(output_height, output_width, CV_OUT_TYPE);
+
     std::cout << "Input image height : " << input_height << std::endl;
     std::cout << "Input image width  : " << input_width << std::endl;
 
@@ -70,9 +66,9 @@ int main(int argc, char* argv[]) {
                                (output_height * output_width * CH_TYPE), output_xf.data);
     inBufVec.push_back(imageToDevice);
     outBufVec.push_back(imageFromDevice);
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(TYPE, NPC_T) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(TYPE, NPC_T) << std::endl;
-    std::cout << "NPPC:" << NPC_T << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     // Set the kernel arguments
     krnl.setArg(0, imageToDevice);

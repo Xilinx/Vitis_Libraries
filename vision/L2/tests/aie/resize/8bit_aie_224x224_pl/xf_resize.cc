@@ -18,8 +18,8 @@
 #include "imgproc/xf_resize.hpp"
 
 template <int WIDTH_IN, int HEIGHT_IN, int WIDTH_OUT, int HEIGHT_OUT, int IMG_HEIGHT_OUT>
-void ResizeRunner<WIDTH_IN, HEIGHT_IN, WIDTH_OUT, HEIGHT_OUT, IMG_HEIGHT_OUT>::run(input_window<uint8_t>* input,
-                                                                                   output_window<uint8_t>* output) {
+void ResizeRunner<WIDTH_IN, HEIGHT_IN, WIDTH_OUT, HEIGHT_OUT, IMG_HEIGHT_OUT>::run(
+    adf::input_buffer<uint8_t>& input, adf::output_buffer<uint8_t>& output) {
     xf::cv::aie::Resize<TILE_WIDTH_IN, TILE_HEIGHT_IN, TILE_WIDTH_OUT, TILE_HEIGHT_OUT, IMG_HEIGHT_OUT> resize(
         mPos, mwtsX, mwtsY);
     resize.runImpl(input, output);

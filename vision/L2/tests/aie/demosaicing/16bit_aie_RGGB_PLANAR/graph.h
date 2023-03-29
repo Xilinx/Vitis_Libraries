@@ -22,6 +22,8 @@
 #include <sstream>
 #include <type_traits>
 
+static constexpr int ELEM_WITH_METADATA = TILE_ELEMENTS + (xf::cv::aie::METADATA_SIZE / 2);
+
 using namespace adf;
 
 /*
@@ -66,10 +68,15 @@ class demosaicGraph : public adf::graph {
         outb[CORE_IDX] = output_plio::create(sso_b.str().c_str(), adf::plio_64_bits, "data/outputb.txt");
 
         // create nets to connect kernels and IO ports
-        connect<window<TILE_WINDOW_SIZE> >(in1[CORE_IDX].out[0], k[CORE_IDX].in[0]);
-        connect<window<TILE_WINDOW_SIZE> >(k[CORE_IDX].out[0], outr[CORE_IDX].in[0]);
-        connect<window<TILE_WINDOW_SIZE> >(k[CORE_IDX].out[1], outg[CORE_IDX].in[0]);
-        connect<window<TILE_WINDOW_SIZE> >(k[CORE_IDX].out[2], outb[CORE_IDX].in[0]);
+        connect<>(in1[CORE_IDX].out[0], k[CORE_IDX].in[0]);
+        connect<>(k[CORE_IDX].out[0], outr[CORE_IDX].in[0]);
+        connect<>(k[CORE_IDX].out[1], outg[CORE_IDX].in[0]);
+        connect<>(k[CORE_IDX].out[2], outb[CORE_IDX].in[0]);
+
+        adf::dimensions(k[CORE_IDX].in[0]) = {ELEM_WITH_METADATA};
+        adf::dimensions(k[CORE_IDX].out[0]) = {ELEM_WITH_METADATA};
+        adf::dimensions(k[CORE_IDX].out[1]) = {ELEM_WITH_METADATA};
+        adf::dimensions(k[CORE_IDX].out[2]) = {ELEM_WITH_METADATA};
 
         // specify kernel sources
         source(k[CORE_IDX]) = "xf_demosaicing.cc";

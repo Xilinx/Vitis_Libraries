@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,9 @@
 
 #include "common/xf_headers.hpp"
 #include "xcl2.hpp"
-#include "xf_channel_combine_config.h"
-
+#include "xf_channel_combine_tb_config.h"
 int main(int argc, char** argv) {
-#if FOUR_INPUT
+    // #if FOUR_INPUT
     if (argc != 5) {
         fprintf(stderr, "Invalid Number of Arguments!\nUsage:\n");
         fprintf(stderr,
@@ -27,23 +26,23 @@ int main(int argc, char** argv) {
                 "<input image3 path> <input image4 path>\n");
         return -1;
     }
-#endif
-#if THREE_INPUT
-    if (argc != 4) {
-        fprintf(stderr, "Invalid Number of Arguments!\nUsage:\n");
-        fprintf(stderr,
-                "<Executable Name> <input image1 path> <input image2 path> "
-                "<input image3 path> \n");
-        return -1;
-    }
-#endif
-#if TWO_INPUT
-    if (argc != 3) {
-        fprintf(stderr, "Invalid Number of Arguments!\nUsage:\n");
-        fprintf(stderr, "<Executable Name> <input image1 path> <input image2 path> \n");
-        return -1;
-    }
-#endif
+    // #endif
+    // #if THREE_INPUT
+    //     if (argc != 4) {
+    //         fprintf(stderr, "Invalid Number of Arguments!\nUsage:\n");
+    //         fprintf(stderr,
+    //                 "<Executable Name> <input image1 path> <input image2 path> "
+    //                 "<input image3 path> \n");
+    //         return -1;
+    //     }
+    // #endif
+    // #if TWO_INPUT
+    //     if (argc != 3) {
+    //         fprintf(stderr, "Invalid Number of Arguments!\nUsage:\n");
+    //         fprintf(stderr, "<Executable Name> <input image1 path> <input image2 path> \n");
+    //         return -1;
+    //     }
+    // #endif
 
     cv::Mat in_gray1, in_gray2;
     cv::Mat in_gray3, in_gray4;
@@ -62,7 +61,7 @@ int main(int argc, char** argv) {
     }
 #endif
     // creating memory for diff image
-    diff.create(in_gray1.rows, in_gray1.cols, CV_TYPE);
+    diff.create(in_gray1.rows, in_gray1.cols, CV_OUT_TYPE);
 
 #if FOUR_INPUT
 
@@ -82,7 +81,7 @@ int main(int argc, char** argv) {
     std::cout << "Input image width  : " << width << std::endl;
 
     // Allocate memory for the output images:
-    out_img.create(in_gray1.rows, in_gray1.cols, CV_TYPE);
+    out_img.create(in_gray1.rows, in_gray1.cols, CV_OUT_TYPE);
 
     // OpenCL section:
     size_t image_in_size_bytes = in_gray1.rows * in_gray1.cols * in_gray1.channels() * sizeof(unsigned char);
@@ -101,9 +100,9 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::cout << "INFO: Device found - " << device_name << std::endl;
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPC1) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPC1) << std::endl;
-    std::cout << "NPPC:" << NPC1 << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     // Load binary:
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_channelcombine");
@@ -252,7 +251,7 @@ int main(int argc, char** argv) {
         }
     }
 
-    float err_per = 100.0 * (float)cnt / (out_img.rows * out_img.cols * out_img.channels());
+    float err_per = 100.0 * (float)cnt / (in_gray1.rows * in_gray1.cols * in_gray1.channels());
 
     std::cout << "INFO: Verification results:" << std::endl;
     std::cout << "\tMinimum error in intensity = " << minval << std::endl;

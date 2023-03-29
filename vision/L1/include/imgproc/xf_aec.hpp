@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Xilinx, Inc.
+ * Copyright 2023 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,12 @@
 #include "xf_channel_combine.hpp"
 #include "xf_channel_extract.hpp"
 #include "xf_cvt_color.hpp"
-#include "xf_cvt_color_1.hpp"
+#include "xf_cvt_color.hpp"
 #include "xf_duplicateimage.hpp"
 #include "xf_hist_equalize.hpp"
 #include "xf_histogram.hpp"
 
-template <typename T>
+/*template <typename T>
 T xf_satcast_aec(int in_val){};
 
 template <>
@@ -54,7 +54,7 @@ inline ap_uint<16> xf_satcast_aec<ap_uint<16> >(int v) {
     v = (v > 65535 ? 65535 : v);
     v = (v < 0 ? 0 : v);
     return v;
-};
+};*/
 
 namespace xf {
 namespace cv {
@@ -162,6 +162,176 @@ void autoexposurecorrection(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& s
         vimage_eq, simage, himage, imgHelper6);
 
     xf::cv::hsv2bgr<SRC_T, SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT>(imgHelper6, dst);
+}
+
+/////////16bit single channel/////////////
+template <int SRC_T,
+          int DST_T,
+          int SIN_CHANNEL_TYPE,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
+          int AEC_HISTSIZE>
+void autoexposurecorrection_sin(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src1,
+                                xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& dst,
+                                uint32_t hist_array1[AEC_HISTSIZE],
+                                uint32_t hist_array2[AEC_HISTSIZE],
+                                float p,
+                                float inputMin,
+                                float inputMax,
+                                float outputMin,
+                                float outputMax) {
+#pragma HLS INLINE OFF
+
+    int rows = src1.rows;
+    int cols = src1.cols;
+
+    uint16_t cols_shifted = cols >> (XF_BITSHIFT(NPC));
+    uint16_t rows_shifted = rows;
+    xf::cv::Mat<SIN_CHANNEL_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> src2(rows, cols);
+    xf::cv::Mat<SIN_CHANNEL_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> src3(rows, cols);
+
+    assert(((rows <= ROWS) && (cols <= COLS)) && "ROWS and COLS should be greater than input image");
+
+// clang-format off
+#pragma HLS DATAFLOW
+    // clang-format on
+
+    xFHistogramKernel_sin<SIN_CHANNEL_TYPE, ROWS, COLS, XF_DEPTH(SIN_CHANNEL_TYPE, NPC), NPC, XFCVDEPTH_IN,
+                          XFCVDEPTH_IN, XF_WORDWIDTH(SIN_CHANNEL_TYPE, NPC), ((COLS >> (XF_BITSHIFT(NPC))) >> 1),
+                          XF_CHANNELS(SIN_CHANNEL_TYPE, NPC), AEC_HISTSIZE>(src1, src2, hist_array1, p, inputMin,
+                                                                            inputMax, outputMin, outputMax);
+
+    xFEqualize_norm_sin<SIN_CHANNEL_TYPE, ROWS, COLS, XF_DEPTH(SIN_CHANNEL_TYPE, NPC), NPC, XFCVDEPTH_IN, XFCVDEPTH_IN,
+                        XF_WORDWIDTH(SIN_CHANNEL_TYPE, NPC), (COLS >> XF_BITSHIFT(NPC)), AEC_HISTSIZE>(
+        src2, hist_array2, dst, p, inputMin, inputMax, outputMin, outputMax);
+}
+
+template <int SRC_T,
+          int DST_T,
+          int SIN_CHANNEL_TYPE,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
+          int AEC_HISTSIZE>
+void autoexposurecorrection_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src1,
+                                  xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& dst,
+                                  uint32_t hist_array1[AEC_HISTSIZE],
+                                  uint32_t hist_array2[AEC_HISTSIZE],
+                                  float p,
+                                  float inputMin,
+                                  float inputMax,
+                                  float outputMin,
+                                  float outputMax,
+                                  int slc_id) {
+#pragma HLS INLINE OFF
+
+    int rows = src1.rows;
+    int cols = src1.cols;
+
+    uint16_t cols_shifted = cols >> (XF_BITSHIFT(NPC));
+    uint16_t rows_shifted = rows;
+    xf::cv::Mat<SIN_CHANNEL_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> src2(rows, cols);
+    xf::cv::Mat<SIN_CHANNEL_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> src3(rows, cols);
+
+    assert(((rows <= ROWS) && (cols <= COLS)) && "ROWS and COLS should be greater than input image");
+
+// clang-format off
+#pragma HLS DATAFLOW
+    // clang-format on
+
+    xFHistogramKernel_multi<SIN_CHANNEL_TYPE, ROWS, COLS, XF_DEPTH(SIN_CHANNEL_TYPE, NPC), NPC, XFCVDEPTH_IN,
+                            XFCVDEPTH_IN, XF_WORDWIDTH(SIN_CHANNEL_TYPE, NPC), ((COLS >> (XF_BITSHIFT(NPC))) >> 1),
+                            XF_CHANNELS(SIN_CHANNEL_TYPE, NPC), AEC_HISTSIZE>(src1, src2, hist_array1, p, inputMin,
+                                                                              inputMax, outputMin, outputMax, slc_id);
+
+    xFEqualize_norm_sin<SIN_CHANNEL_TYPE, ROWS, COLS, XF_DEPTH(SIN_CHANNEL_TYPE, NPC), NPC, XFCVDEPTH_IN, XFCVDEPTH_IN,
+                        XF_WORDWIDTH(SIN_CHANNEL_TYPE, NPC), (COLS >> XF_BITSHIFT(NPC)), AEC_HISTSIZE>(
+        src2, hist_array2, dst, p, inputMin, inputMax, outputMin, outputMax);
+}
+template <int SRC_T,
+          int DST_T,
+          int SIN_CHANNEL_TYPE,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
+          int AEC_HISTSIZE>
+void aec_wrap(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src1,
+              xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& dst,
+              uint32_t hist_array1[AEC_HISTSIZE],
+              uint32_t hist_array2[AEC_HISTSIZE],
+              float thresh,
+              float inputMin,
+              float inputMax,
+              float outputMin,
+              float outputMax,
+              bool& flag,
+              bool& eof,
+              int slc_id) {
+// clang-format off
+#pragma HLS INLINE OFF
+    // clang-format on
+
+    if (!flag) {
+        xf::cv::autoexposurecorrection_multi<SRC_T, DST_T, SIN_CHANNEL_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN,
+                                             XFCVDEPTH_OUT, AEC_HISTSIZE>(
+            src1, dst, hist_array1, hist_array2, thresh, inputMin, inputMax, outputMin, outputMax, slc_id);
+
+        if (eof) flag = 1;
+
+    } else {
+        xf::cv::autoexposurecorrection_multi<SRC_T, DST_T, SIN_CHANNEL_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN,
+                                             XFCVDEPTH_OUT, AEC_HISTSIZE>(
+            src1, dst, hist_array2, hist_array1, thresh, inputMin, inputMax, outputMin, outputMax, slc_id);
+
+        if (eof) flag = 0;
+    }
+
+    return;
+}
+template <int SRC_T,
+          int DST_T,
+          int SIN_CHANNEL_TYPE,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
+          int AEC_HISTSIZE,
+          int STREAMS = 2>
+void aec_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src1,
+               xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& dst,
+               uint32_t hist_array0[STREAMS][AEC_HISTSIZE],
+               uint32_t hist_array1[STREAMS][AEC_HISTSIZE],
+               unsigned short pawb[STREAMS],
+               float inputMin,
+               float inputMax,
+               float outputMin,
+               float outputMax,
+               bool flag[STREAMS],
+               bool eof[STREAMS],
+               int strm_id,
+               int slc_id) {
+// clang-format off
+#pragma HLS ARRAY_PARTITION variable=hist_array0 complete dim=1
+#pragma HLS ARRAY_PARTITION variable=hist_array1 complete dim=1
+#pragma HLS ARRAY_PARTITION variable=pawb complete dim=1
+#pragma HLS ARRAY_PARTITION variable=flag complete dim=1
+#pragma HLS ARRAY_PARTITION variable=eof complete dim=1
+
+    // clang-format on
+
+    float thresh = (float)pawb[strm_id] / 256;
+
+    xf::cv::aec_wrap<SRC_T, DST_T, SIN_CHANNEL_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT, AEC_HISTSIZE>(
+        src1, dst, hist_array0[strm_id], hist_array1[strm_id], thresh, inputMin, inputMax, outputMin, outputMax,
+        flag[strm_id], eof[strm_id], slc_id);
 }
 }
 }

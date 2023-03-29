@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_threshold_config.h"
-
+#include "xf_threshold_tb_config.h"
 #include "xcl2.hpp"
 
 int main(int argc, char** argv) {
@@ -67,9 +66,9 @@ int main(int argc, char** argv) {
     cl::Device device = devices[0];
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, NPIX) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, NPIX) << std::endl;
-    std::cout << "NPPC:" << NPIX << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_threshold");

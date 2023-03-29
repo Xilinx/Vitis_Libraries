@@ -16,6 +16,7 @@
 
 #include <adf/window/types.h>
 #include <adf/stream/types.h>
+#include <adf.h>
 
 // Thresholding types
 enum _threshold_type {
@@ -29,4 +30,7 @@ enum _threshold_type {
 
 #define THRESH_TYPE XF_THRESHOLD_TYPE_BINARY
 
-void threshold(input_window_int16* input, output_window_int16* output, const int16& thresh_val, const int16& max_val);
+void threshold(adf::input_buffer<int16>& input,
+               adf::output_buffer<int16>& output,
+               const int16& thresh_val,
+               const int16& max_val);

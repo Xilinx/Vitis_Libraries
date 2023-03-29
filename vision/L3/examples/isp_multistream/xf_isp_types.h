@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright 2023-2024 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,10 +30,11 @@
 
 // Requried Vision modules
 #include "imgproc/xf_bpc.hpp"
-#include "imgproc/xf_gaincontrol_multi.hpp"
+#include "imgproc/xf_gaincontrol.hpp"
 #include "imgproc/xf_autowhitebalance.hpp"
-#include "imgproc/xf_demosaicing_rt.hpp"
+#include "imgproc/xf_demosaicing.hpp"
 #include "imgproc/xf_ltm.hpp"
+#include "imgproc/xf_gtm.hpp"
 #include "imgproc/xf_quantizationdithering.hpp"
 #include "imgproc/xf_lensshadingcorrection.hpp"
 #include "imgproc/xf_colorcorrectionmatrix.hpp"
@@ -46,6 +47,12 @@
 #include "imgproc/xf_clahe.hpp"
 #include "imgproc/xf_hdrmerge.hpp"
 #include "imgproc/xf_extract_eframes.hpp"
+#include "imgproc/xf_bpc.hpp"
+#include "imgproc/xf_rgbir.hpp"
+#include "imgproc/xf_3dlut.hpp"
+#include "imgproc/xf_degamma.hpp"
+#include "imgproc/xf_hdrdecompand.hpp"
+#include "imgproc/xf_duplicateimage.hpp"
 
 #define S_DEPTH 4096
 #define NO_EXPS 2
@@ -68,7 +75,7 @@ static constexpr int TILES_X_MIN = 2;
 static constexpr int TILES_Y_MAX = 4;
 static constexpr int TILES_X_MAX = 4;
 // --------------------------------------------------------------------
-// Macros definitions
+// Macros definations
 // --------------------------------------------------------------------
 
 // Useful macro functions definitions
@@ -105,7 +112,19 @@ typedef hls::stream<OutVideoStrmBus_t> OutVideoStrm_t;
 #define HIST_SIZE 4096
 #endif
 
+#if T_8U
+#define AEC_HIST_SIZE 256
+#elif T_10U
+#define AEC_HIST_SIZE 1024
+#else
+#define AEC_HIST_SIZE 4096
+#endif
+
 #define MAX_PIX_VAL (1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC))) - 1
+static constexpr int FILTERSIZE1 = 5, FILTERSIZE2 = 3;
+
+static constexpr int LUT_DIM = 33;
+static constexpr int SQ_LUTDIM = LUT_DIM * LUT_DIM;
 
 // HW Registers
 typedef struct {
@@ -122,10 +141,11 @@ struct ispparams_config {
     unsigned short pawb = 128;
     unsigned short bayer_p = 3;
     unsigned short black_level = 32;
-    unsigned short height = 128;
-    unsigned short width = 128;
+    unsigned short height = 256;
+    unsigned short width = 256;
     unsigned short blk_height = 32;
     unsigned short blk_width = 32;
+    unsigned short lut_dim = 33;
 };
 
 #endif //_XF_ISP_TYPES_H_

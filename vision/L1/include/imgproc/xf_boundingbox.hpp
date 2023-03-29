@@ -161,8 +161,10 @@ void boundingbox(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
     unsigned short width = _src_mat.cols;
     unsigned short height = _src_mat.rows;
 #ifndef __SYNTHESIS__
-    assert((SRC_T == XF_8UC1) || (SRC_T == XF_8UC4) && "Type must be XF_8UC1 or XF_8UC4");
-    assert((NPC == XF_NPPC1) && "NPC must be 1, Multipixel parallelism is not supported");
+    assert((SRC_T == XF_8UC1) || (SRC_T == XF_8UC4) || (SRC_T == XF_16UC1) ||
+           (SRC_T == XF_16UC4) && "Type must be XF_8UC1 or XF_8UC4");
+    assert((NPC == XF_NPPC1) || (NPC == XF_NPPC2) || (NPC == XF_NPPC4) ||
+           (NPC == XF_NPPC8) && "NPC must be 1, Multipixel parallelism is not supported");
 
     assert(((height <= ROWS) && (width <= COLS)) && "ROWS and COLS should be greater than input image");
 

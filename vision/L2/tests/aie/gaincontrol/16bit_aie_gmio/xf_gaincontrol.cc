@@ -18,6 +18,9 @@
 #include <imgproc/xf_gaincontrol_aie.hpp>
 
 template <int code>
-void gaincontrol(input_window_int16* input, output_window_int16* output, const int16_t& rgain, const int16_t& bgain) {
+void gaincontrol(adf::input_buffer<int16>& input,
+                 adf::output_buffer<int16>& output,
+                 const int16_t& rgain,
+                 const int16_t& bgain) {
     xf::cv::aie::gaincontrol_api<code>(input, output, rgain, bgain);
 };

@@ -29,10 +29,10 @@
 #define MPC 0
 #define SPC 1
 
-#define XF_CV_DEPTH_IN_0 1
-#define XF_CV_DEPTH_IN_1 1
+#define XF_CV_DEPTH_IN_0 2
+#define XF_CV_DEPTH_IN_1 2
 #define XF_CV_DEPTH_IN_2 2
 #define XF_CV_DEPTH_IN_3 15360
-#define XF_CV_DEPTH_IN_4 4
+#define XF_CV_DEPTH_IN_4 2
 
-#define XF_CV_DEPTH_OUT_1 3
+#define XF_CV_DEPTH_OUT_1 2

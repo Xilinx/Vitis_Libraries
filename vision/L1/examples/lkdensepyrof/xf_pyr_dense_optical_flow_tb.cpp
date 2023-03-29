@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_pyr_dense_optical_flow_config.h"
+#include "xf_pyr_dense_optical_flow_tb_config.h"
 
 #include "opencv2/video.hpp"
 #include <time.h>
@@ -24,13 +24,13 @@
 /* Color Coding */
 // kernel returns this type. Packed strcuts on axi ned to be powers-of-2.
 typedef struct __rgba {
-    IN_TYPE r, g, b;
-    IN_TYPE a; // can be unused
+    TYPE r, g, b;
+    TYPE a; // can be unused
 } rgba_t;
-typedef struct __rgb { IN_TYPE r, g, b; } rgb_t;
+typedef struct __rgb { TYPE r, g, b; } rgb_t;
 
 typedef cv::Vec<unsigned short, 3> Vec3u;
-typedef cv::Vec<IN_TYPE, 3> Vec3ucpt;
+typedef cv::Vec<TYPE, 3> Vec3ucpt;
 
 const float powTwo15 = pow(2, 15);
 #define THRESHOLD 3.0
@@ -38,7 +38,7 @@ const float powTwo15 = pow(2, 15);
 /* color coding */
 #define NORM_FAC 10
 // custom, hopefully, low cost colorizer.
-void getPseudoColorInt(IN_TYPE pix, float fx, float fy, rgba_t& rgba) {
+void getPseudoColorInt(TYPE pix, float fx, float fy, rgba_t& rgba) {
     // TODO get the normFac from the host as cmdline arg
     const int normFac = 10;
 
@@ -86,10 +86,10 @@ void pyrof_hw(cv::Mat im0,
               cv::Mat im1,
               cv::Mat flowUmat,
               cv::Mat flowVmat,
-              xf::cv::Mat<XF_32UC1, HEIGHT, WIDTH, XF_NPPC1>& flow,
-              xf::cv::Mat<XF_32UC1, HEIGHT, WIDTH, XF_NPPC1>& flow_iter,
-              xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> mat_imagepyr1[NUM_LEVELS],
-              xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> mat_imagepyr2[NUM_LEVELS],
+              xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPPCX>& flow,
+              xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPPCX>& flow_iter,
+              xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX> mat_imagepyr1[NUM_LEVELS],
+              xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX> mat_imagepyr2[NUM_LEVELS],
               int pyr_h[NUM_LEVELS],
               int pyr_w[NUM_LEVELS]) {
     for (int l = 0; l < NUM_LEVELS; l++) {
@@ -197,10 +197,10 @@ int main(int argc, char** argv) {
         return -1;
     }
     // allocating memory spaces for all the hardware operations
-    static xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> imagepyr1[NUM_LEVELS];
-    static xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPC1> imagepyr2[NUM_LEVELS];
-    static xf::cv::Mat<XF_32UC1, HEIGHT, WIDTH, XF_NPPC1> flow;
-    static xf::cv::Mat<XF_32UC1, HEIGHT, WIDTH, XF_NPPC1> flow_iter;
+    static xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX> imagepyr1[NUM_LEVELS];
+    static xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX> imagepyr2[NUM_LEVELS];
+    static xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPPCX> flow;
+    static xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPPCX> flow_iter;
 
     for (int i = 0; i < NUM_LEVELS; i++) {
         imagepyr1[i].init(HEIGHT, WIDTH);
@@ -212,8 +212,8 @@ int main(int argc, char** argv) {
     // initializing flow pointers to 0
     // initializing flow vector with 0s
     cv::Mat init_mat = cv::Mat::zeros(HEIGHT, WIDTH, CV_32SC1);
-    flow_iter.copyTo((XF_PTSNAME(XF_32UC1, XF_NPPC1)*)init_mat.data);
-    flow.copyTo((XF_PTSNAME(XF_32UC1, XF_NPPC1)*)init_mat.data);
+    flow_iter.copyTo((XF_PTSNAME(OUT_TYPE, NPPCX)*)init_mat.data);
+    flow.copyTo((XF_PTSNAME(OUT_TYPE, NPPCX)*)init_mat.data);
     init_mat.release();
 
     cv::Mat im0, im1;
@@ -278,9 +278,9 @@ int main(int argc, char** argv) {
         pyr_h[lvls] = (pyr_h[lvls - 1] + 1) >> 1;
     }
 
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, XF_NPPC1) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, XF_NPPC1) << std::endl;
-    std::cout << "NPPC:" << XF_NPPC1 << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     // call the hls optical flow implementation
     pyrof_hw(im0, im1, glx, gly, flow, flow_iter, imagepyr1, imagepyr2, pyr_h, pyr_w);

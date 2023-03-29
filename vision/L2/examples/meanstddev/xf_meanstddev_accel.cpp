@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-#include "xf_mean_stddev_config.h"
-
+#include "xf_meanstddev_accel_config.h"
 extern "C" {
 
-void meanstddev_accel(ap_uint<PTR_WIDTH>* img_in, unsigned short* mean, unsigned short* stddev, int height, int width) {
+void meanstddev_accel(
+    ap_uint<INPUT_PTR_WIDTH>* img_in, unsigned short* mean, unsigned short* stddev, int height, int width) {
 // clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0
     #pragma HLS INTERFACE m_axi      port=mean          offset=slave  bundle=gmem1
@@ -28,7 +28,7 @@ void meanstddev_accel(ap_uint<PTR_WIDTH>* img_in, unsigned short* mean, unsigned
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> imgInput(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN> imgInput(height, width);
 
 // clang-format off
 // clang-format on
@@ -38,10 +38,10 @@ void meanstddev_accel(ap_uint<PTR_WIDTH>* img_in, unsigned short* mean, unsigned
     // clang-format on
 
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(img_in, imgInput);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN>(img_in, imgInput);
 
     // Run xfOpenCV kernel:
-    xf::cv::meanStdDev<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, mean, stddev);
+    xf::cv::meanStdDev<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN>(imgInput, mean, stddev);
 
     return;
 } // End of kernel

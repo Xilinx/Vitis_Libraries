@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-#include "xf_tonemapping_config.h"
-
-static constexpr int __XF_DEPTH_IN = (HEIGHT * WIDTH * XF_PIXELWIDTH(IN_TYPE, NPC)) / IN_PTR_WIDTH;
-static constexpr int __XF_DEPTH_OUT = (HEIGHT * WIDTH * XF_PIXELWIDTH(OUT_TYPE, NPC)) / OUT_PTR_WIDTH;
-static constexpr int MinMaxVArrSize = LTMTile<BLOCK_HEIGHT, BLOCK_WIDTH, HEIGHT, WIDTH, NPC>::MinMaxVArrSize;
-static constexpr int MinMaxHArrSize = LTMTile<BLOCK_HEIGHT, BLOCK_WIDTH, HEIGHT, WIDTH, NPC>::MinMaxHArrSize;
+#include "xf_tonemapping_accel_config.h"
+static constexpr int __XF_DEPTH_IN = (HEIGHT * WIDTH * XF_PIXELWIDTH(IN_TYPE, NPPCX)) / INPUT_PTR_WIDTH;
+static constexpr int __XF_DEPTH_OUT = (HEIGHT * WIDTH * XF_PIXELWIDTH(OUT_TYPE, NPPCX)) / OUTPUT_PTR_WIDTH;
+static constexpr int MinMaxVArrSize = LTMTile<BLOCK_HEIGHT, BLOCK_WIDTH, HEIGHT, WIDTH, NPPCX>::MinMaxVArrSize;
+static constexpr int MinMaxHArrSize = LTMTile<BLOCK_HEIGHT, BLOCK_WIDTH, HEIGHT, WIDTH, NPPCX>::MinMaxHArrSize;
 
 static bool flg = false;
-static XF_CTUNAME(IN_TYPE, NPC) omin[2][MinMaxVArrSize][MinMaxHArrSize];
-static XF_CTUNAME(IN_TYPE, NPC) omax[2][MinMaxVArrSize][MinMaxHArrSize];
+static XF_CTUNAME(IN_TYPE, NPPCX) omin[2][MinMaxVArrSize][MinMaxHArrSize];
+static XF_CTUNAME(IN_TYPE, NPPCX) omax[2][MinMaxVArrSize][MinMaxHArrSize];
 
-void tonemapping_accel_i(ap_uint<IN_PTR_WIDTH>* in_ptr,
-                         ap_uint<OUT_PTR_WIDTH>* out_ptr,
-                         XF_CTUNAME(IN_TYPE, NPC) omin_r[MinMaxVArrSize][MinMaxHArrSize],
-                         XF_CTUNAME(IN_TYPE, NPC) omax_r[MinMaxVArrSize][MinMaxHArrSize],
-                         XF_CTUNAME(IN_TYPE, NPC) omin_w[MinMaxVArrSize][MinMaxHArrSize],
-                         XF_CTUNAME(IN_TYPE, NPC) omax_w[MinMaxVArrSize][MinMaxHArrSize],
+void tonemapping_accel_i(ap_uint<INPUT_PTR_WIDTH>* in_ptr,
+                         ap_uint<OUTPUT_PTR_WIDTH>* out_ptr,
+                         XF_CTUNAME(IN_TYPE, NPPCX) omin_r[MinMaxVArrSize][MinMaxHArrSize],
+                         XF_CTUNAME(IN_TYPE, NPPCX) omax_r[MinMaxVArrSize][MinMaxHArrSize],
+                         XF_CTUNAME(IN_TYPE, NPPCX) omin_w[MinMaxVArrSize][MinMaxHArrSize],
+                         XF_CTUNAME(IN_TYPE, NPPCX) omax_w[MinMaxVArrSize][MinMaxHArrSize],
                          int height,
                          int width,
                          int blk_height,
@@ -39,21 +38,21 @@ void tonemapping_accel_i(ap_uint<IN_PTR_WIDTH>* in_ptr,
 #pragma HLS INLINE OFF
     // clang-format on
 
-    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_IN> imgInput(height, width);
-    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_OUT> imgOutput(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN> imgInput(height, width);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT> imgOutput(height, width);
 
 // clang-format off
 #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<IN_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_IN>(in_ptr, imgInput);
-    xf::cv::LTM<IN_TYPE, OUT_TYPE, BLOCK_HEIGHT, BLOCK_WIDTH, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_IN,
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN>(in_ptr, imgInput);
+    xf::cv::LTM<IN_TYPE, OUT_TYPE, BLOCK_HEIGHT, BLOCK_WIDTH, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN,
                 XF_CV_DEPTH_OUT>::process(imgInput, blk_height, blk_width, omin_r, omax_r, omin_w, omax_w, imgOutput);
-    xf::cv::xfMat2Array<OUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_OUT>(imgOutput, out_ptr);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT>(imgOutput, out_ptr);
 }
 
-void tonemapping_accel(ap_uint<IN_PTR_WIDTH>* in_ptr,
-                       ap_uint<OUT_PTR_WIDTH>* out_ptr,
+void tonemapping_accel(ap_uint<INPUT_PTR_WIDTH>* in_ptr,
+                       ap_uint<OUTPUT_PTR_WIDTH>* out_ptr,
                        int height,
                        int width,
                        int blk_height,

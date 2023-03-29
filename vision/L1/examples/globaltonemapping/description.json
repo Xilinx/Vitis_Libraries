@@ -21,21 +21,21 @@
         "source": [
             "${XF_PROJ_ROOT}/L1/examples/globaltonemapping/xf_gtm_accel.cpp"
         ], 
-        "cflags": " -I ${XF_PROJ_ROOT}/L1/examples/globaltonemapping/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x", 
-        "csimflags": " -I ${XF_PROJ_ROOT}/L1/examples/globaltonemapping/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+        "cflags": " -I ${XF_PROJ_ROOT}/L1/examples/globaltonemapping/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x", 
+        "csimflags": " -I ${XF_PROJ_ROOT}/L1/examples/globaltonemapping/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
     }, 
     "testbench": {
         "source": [
             "${XF_PROJ_ROOT}/L1/examples/globaltonemapping/xf_gtm_tb.cpp"
         ], 
-        "cflags": " -I ${XF_PROJ_ROOT}/L1/examples/globaltonemapping/build -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x", 
+        "cflags": " -I ${XF_PROJ_ROOT}/L1/examples/globaltonemapping/config -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x", 
         "ldflags": "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core", 
         "argv": {
             "hls_csim": " ${XF_PROJ_ROOT}/data/ltm_input_s.png", 
             "hls_cosim": " ${XF_PROJ_ROOT}/data/ltm_input_s.png "
         }, 
         "stdmath": false, 
-        "csimflags": " -I ${XF_PROJ_ROOT}/L1/examples/globaltonemapping/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+        "csimflags": " -I ${XF_PROJ_ROOT}/L1/examples/globaltonemapping/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
     }, 
     "testinfo": {
         "disable": false, 

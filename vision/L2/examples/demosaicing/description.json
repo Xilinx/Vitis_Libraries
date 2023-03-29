@@ -183,7 +183,7 @@
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-                "LIB_DIR/L2/examples/demosaicing/build"
+                "LIB_DIR/L2/examples/demosaicing/config"
             ], 
             "options": "-O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include"
         }
@@ -192,7 +192,7 @@
         "compiler": {
             "symbols": [], 
             "includepaths": [
-                "LIB_DIR/L2/examples/demosaicing/build"
+                "LIB_DIR/L2/examples/demosaicing/config"
             ], 
             "clflags": []
         }

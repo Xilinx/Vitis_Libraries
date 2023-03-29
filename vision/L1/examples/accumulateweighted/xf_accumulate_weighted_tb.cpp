@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 #include "common/xf_headers.hpp"
 #include <stdlib.h>
 #include <ap_int.h>
-#include "xf_accumulate_weighted_config.h"
+#include "xf_accumulate_weighted_tb_config.h"
 
 int main(int argc, char** argv) {
     if (argc != 3) {
@@ -45,22 +45,22 @@ int main(int argc, char** argv) {
         return -1;
     }
 #if GRAY
-    cv::Mat inout_gray(in_gray.rows, in_gray.cols, CV_16U, 1);
-    cv::Mat out_gray(in_gray.rows, in_gray.cols, CV_16U, 1);
+    cv::Mat inout_gray(in_gray.rows, in_gray.cols, CV_OUT_TYPE, 1);
+    cv::Mat out_gray(in_gray.rows, in_gray.cols, CV_OUT_TYPE, 1);
     cv::Mat inout_gray1(in_gray.rows, in_gray.cols, CV_32FC1, 1);
 
-    cv::Mat ocv_ref(in_gray.rows, in_gray.cols, CV_16U, 1);
+    cv::Mat ocv_ref(in_gray.rows, in_gray.cols, CV_OUT_TYPE, 1);
     cv::Mat ocv_ref_in1(in_gray.rows, in_gray.cols, CV_32FC1, 1);
     cv::Mat ocv_ref_in2(in_gray.rows, in_gray.cols, CV_32FC1, 1);
 
     in_gray.convertTo(ocv_ref_in1, CV_32FC1);
     in_gray1.convertTo(ocv_ref_in2, CV_32FC1);
 #else
-    cv::Mat inout_gray(in_gray.rows, in_gray.cols, CV_16UC3, 1);
-    cv::Mat out_gray(in_gray.rows, in_gray.cols, CV_16UC3, 1);
+    cv::Mat inout_gray(in_gray.rows, in_gray.cols, CV_OUT_TYPE, 1);
+    cv::Mat out_gray(in_gray.rows, in_gray.cols, CV_OUT_TYPE, 1);
     cv::Mat inout_gray1(in_gray.rows, in_gray.cols, CV_32FC3, 1);
 
-    cv::Mat ocv_ref(in_gray.rows, in_gray.cols, CV_16UC3, 1);
+    cv::Mat ocv_ref(in_gray.rows, in_gray.cols, CV_OUT_TYPE, 1);
     cv::Mat ocv_ref_in1(in_gray.rows, in_gray.cols, CV_32FC3, 1);
     cv::Mat ocv_ref_in2(in_gray.rows, in_gray.cols, CV_32FC3, 1);
 
@@ -74,9 +74,9 @@ int main(int argc, char** argv) {
     // OpenCV function
     cv::accumulateWeighted(ocv_ref_in1, ocv_ref_in2, alpha, cv::noArray());
 #if GRAY
-    ocv_ref_in2.convertTo(ocv_ref, CV_16U);
+    ocv_ref_in2.convertTo(ocv_ref, CV_OUT_TYPE);
 #else
-    ocv_ref_in2.convertTo(ocv_ref, CV_16UC3);
+    ocv_ref_in2.convertTo(ocv_ref, CV_OUT_TYPE);
 #endif
     // Write OpenCV reference image
     cv::imwrite("out_ocv.jpg", ocv_ref);

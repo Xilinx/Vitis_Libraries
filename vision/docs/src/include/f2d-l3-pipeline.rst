@@ -42,7 +42,7 @@ Run the following make command to build your XCLBIN and host binary targeting a 
 
 .. code-block:: bash
 
-   export DEVICE=< path-to-platform-directory >/< platform >.xpfm
+   export PLATFORM=< path-to-platform-directory >/< platform >.xpfm
    make all TARGET=hw
 
 * **Run kernel(Step 3)**

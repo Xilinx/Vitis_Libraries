@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-#include "xf_dense_npyr_optical_flow_config.h"
+#include "xf_dense_npyr_optical_flow_accel_config.h"
 
 static constexpr int _XF_DEPTH_IN =
-    (MAX_HEIGHT * MAX_WIDTH * (XF_PIXELWIDTH(XF_8UC1, NPPC)) / 8) / (INPUT_PTR_WIDTH / 8);
+    (MAX_HEIGHT * MAX_WIDTH * (XF_PIXELWIDTH(IN_TYPE, NPPCX)) / 8) / (INPUT_PTR_WIDTH / 8);
 static constexpr int _XF_DEPTH_OUT =
-    (MAX_HEIGHT * MAX_WIDTH * (XF_PIXELWIDTH(XF_32FC1, NPPC)) / 32) / (OUTPUT_PTR_WIDTH / 32);
+    (MAX_HEIGHT * MAX_WIDTH * (XF_PIXELWIDTH(OUT_TYPE, NPPCX)) / 32) / (OUTPUT_PTR_WIDTH / 32);
 
 void dense_non_pyr_of_accel(ap_uint<INPUT_PTR_WIDTH>* img_curr,
                             ap_uint<INPUT_PTR_WIDTH>* img_prev,
@@ -37,23 +37,23 @@ void dense_non_pyr_of_accel(ap_uint<INPUT_PTR_WIDTH>* img_curr,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC1, MAX_HEIGHT, MAX_WIDTH, NPPC, XF_CV_DEPTH_IN_CURR> in_curr_mat(rows, cols);
-    xf::cv::Mat<XF_8UC1, MAX_HEIGHT, MAX_WIDTH, NPPC, XF_CV_DEPTH_IN_PREV> in_prev_mat(rows, cols);
-    xf::cv::Mat<XF_32FC1, MAX_HEIGHT, MAX_WIDTH, NPPC, XF_CV_DEPTH_OUTX> outx_mat(rows, cols);
-    xf::cv::Mat<XF_32FC1, MAX_HEIGHT, MAX_WIDTH, NPPC, XF_CV_DEPTH_OUTY> outy_mat(rows, cols);
+    xf::cv::Mat<IN_TYPE, MAX_HEIGHT, MAX_WIDTH, NPPCX, XF_CV_DEPTH_IN_CURR> in_curr_mat(rows, cols);
+    xf::cv::Mat<IN_TYPE, MAX_HEIGHT, MAX_WIDTH, NPPCX, XF_CV_DEPTH_IN_PREV> in_prev_mat(rows, cols);
+    xf::cv::Mat<OUT_TYPE, MAX_HEIGHT, MAX_WIDTH, NPPCX, XF_CV_DEPTH_OUTX> outx_mat(rows, cols);
+    xf::cv::Mat<OUT_TYPE, MAX_HEIGHT, MAX_WIDTH, NPPCX, XF_CV_DEPTH_OUTY> outy_mat(rows, cols);
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, MAX_HEIGHT, MAX_WIDTH, NPPC, XF_CV_DEPTH_IN_CURR>(img_curr,
-                                                                                                    in_curr_mat);
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, MAX_HEIGHT, MAX_WIDTH, NPPC, XF_CV_DEPTH_IN_PREV>(img_prev,
-                                                                                                    in_prev_mat);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, MAX_HEIGHT, MAX_WIDTH, NPPCX, XF_CV_DEPTH_IN_CURR>(img_curr,
+                                                                                                     in_curr_mat);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, MAX_HEIGHT, MAX_WIDTH, NPPCX, XF_CV_DEPTH_IN_PREV>(img_prev,
+                                                                                                     in_prev_mat);
 
-    xf::cv::DenseNonPyrLKOpticalFlow<KMED, XF_8UC1, MAX_HEIGHT, MAX_WIDTH, NPPC, XF_USE_URAM, XF_CV_DEPTH_IN_CURR,
+    xf::cv::DenseNonPyrLKOpticalFlow<KMED, IN_TYPE, MAX_HEIGHT, MAX_WIDTH, NPPCX, XF_USE_URAM, XF_CV_DEPTH_IN_CURR,
                                      XF_CV_DEPTH_IN_PREV, XF_CV_DEPTH_OUTX, XF_CV_DEPTH_OUTY>(in_curr_mat, in_prev_mat,
                                                                                               outx_mat, outy_mat);
 
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_32FC1, MAX_HEIGHT, MAX_WIDTH, NPPC, XF_CV_DEPTH_OUTX>(outx_mat, img_outx);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_32FC1, MAX_HEIGHT, MAX_WIDTH, NPPC, XF_CV_DEPTH_OUTY>(outy_mat, img_outy);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, MAX_HEIGHT, MAX_WIDTH, NPPCX, XF_CV_DEPTH_OUTX>(outx_mat, img_outx);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, MAX_HEIGHT, MAX_WIDTH, NPPCX, XF_CV_DEPTH_OUTY>(outy_mat, img_outy);
 }

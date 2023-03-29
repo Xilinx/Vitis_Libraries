@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_boundingbox_config.h"
-
+#include "xf_boundingbox_tb_config.h"
 #include <sys/time.h>
 #include <iostream>
 #include <stdio.h>
@@ -108,8 +107,8 @@ int main(int argc, char** argv) {
     diff.create(in_img.rows, in_img.cols, in_img.depth());
 
 #else
-    diff.create(in_img.rows, in_img.cols, CV_8UC4);
-    out_img.create(in_img.rows, in_img.cols, CV_8UC4);
+    diff.create(in_img.rows, in_img.cols, CV_IN_TYPE);
+    out_img.create(in_img.rows, in_img.cols, CV_IN_TYPE);
 #endif
 
     ////////////////  reference code  ////////////////
@@ -117,14 +116,14 @@ int main(int argc, char** argv) {
 
 #if GRAY
     for (int i = 0; i < num_box; i++) {
-        for (int c = 0; c < XF_CHANNELS(TYPE, NPIX); c++) {
+        for (int c = 0; c < XF_CHANNELS(IN_TYPE, NPPCX); c++) {
             cv::rectangle(in_img1, cv::Rect(x_loc[i], y_loc[i], ROI_width[i], ROI_height[i]),
                           cv::Scalar(color_info[i][0], 0, 0), 1); // BGR format
         }
     }
 #else
     for (int i = 0; i < num_box; i++) {
-        for (int c = 0; c < XF_CHANNELS(TYPE, NPIX); c++) {
+        for (int c = 0; c < XF_CHANNELS(IN_TYPE, NPPCX); c++) {
             cv::rectangle(in_img1, cv::Rect(x_loc[i], y_loc[i], ROI_width[i], ROI_height[i]),
                           cv::Scalar(color_info[i][0], color_info[i][1], color_info[i][2], 255), 1); // BGR format
         }
@@ -153,9 +152,9 @@ int main(int argc, char** argv) {
     /*		for(int i=0;i<(MAX_BOXES);i++)
                     {
 
-                            for(int j=0,k=0;j<XF_CHANNELS(TYPE,NPIX);j++,k+=XF_DTPIXELDEPTH(TYPE,NPIX))
+                            for(int j=0,k=0;j<XF_CHANNELS(IN_TYPE,NPPCX);j++,k+=XF_DTPIXELDEPTH(IN_TYPE,NPPCX))
                             {
-                                    color[i].range(k+(XF_DTPIXELDEPTH(TYPE,NPIX)-1),k)  = color_info[i][j];
+                                    color[i].range(k+(XF_DTPIXELDEPTH(IN_TYPE,NPPCX)-1),k)  = color_info[i][j];
                             }
                     }*/
     int height = in_img.rows;
@@ -176,9 +175,9 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::cout << "INFO: Device found - " << device_name << std::endl;
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(TYPE, NPIX) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(TYPE, NPIX) << std::endl;
-    std::cout << "NPPC:" << NPIX << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     // Load binary:
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-#include "xf_erosion_config.h"
-
+#include "xf_erosion_accel_config.h"
 extern "C" {
 
-void erosion(
-    ap_uint<PTR_WIDTH>* img_in, unsigned char* process_shape, ap_uint<PTR_WIDTH>* img_out, int height, int width) {
+void erosion(ap_uint<INPUT_PTR_WIDTH>* img_in,
+             unsigned char* process_shape,
+             ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+             int height,
+             int width) {
 // clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0
     #pragma HLS INTERFACE m_axi      port=process_shape offset=slave  bundle=gmem1
@@ -30,30 +32,30 @@ void erosion(
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1> imgInput(height, width);
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> imgOutput(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1> imgInput(height, width);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT_1> imgOutput(height, width);
 
-    // Copy the shape data:
-    unsigned char _kernel[FILTER_SIZE * FILTER_SIZE];
-    for (unsigned int i = 0; i < FILTER_SIZE * FILTER_SIZE; ++i) {
-// clang-format off
-        #pragma HLS PIPELINE
-        // clang-format on
-        _kernel[i] = process_shape[i];
-    }
+// Copy the shape data:
+//     unsigned char _kernel[FILTER_SIZE * FILTER_SIZE];
+//     for (unsigned int i = 0; i < FILTER_SIZE * FILTER_SIZE; ++i) {
+// // clang-format off
+//         #pragma HLS PIPELINE
+//         // clang-format on
+//         _kernel[i] = process_shape[i];
+//     }
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1>(img_in, imgInput);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1>(img_in, imgInput);
 
     // Run xfOpenCV kernel:
-    xf::cv::erode<XF_BORDER_CONSTANT, TYPE, HEIGHT, WIDTH, KERNEL_SHAPE, FILTER_SIZE, FILTER_SIZE, ITERATIONS, NPC1,
-                  XF_CV_DEPTH_IN_1, XF_CV_DEPTH_OUT_1>(imgInput, imgOutput, _kernel);
+    xf::cv::erode<XF_BORDER_CONSTANT, IN_TYPE, HEIGHT, WIDTH, KERNEL_SHAPE, FILTER_SIZE, FILTER_SIZE, ITERATIONS, NPPCX,
+                  XF_CV_DEPTH_IN_1, XF_CV_DEPTH_OUT_1>(imgInput, imgOutput, process_shape);
 
     // Convert imgOutput xf::cv::Mat object to output array:
-    xf::cv::xfMat2Array<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(imgOutput, img_out);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT_1>(imgOutput, img_out);
 
     return;
 } // End of kernel

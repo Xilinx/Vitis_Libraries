@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-#include <adf/window/types.h>
+#include <adf.h>
 #include <adf/stream/types.h>
+#include <adf/io_buffer/io_buffer.h>
 
 #define PARALLEL_FACTOR_32b 8 // Parallelization factor for 32b operations (8x mults)
 #define SRS_SHIFT 10          // SRS shift used can be increased if input data likewise adjusted)
@@ -31,4 +32,4 @@ const int kernel_height = 3;
 #define INLINE_DECL
 #endif
 
-void filter2D(input_window_int32* input, output_window_int32* output);
+void filter2D(adf::input_buffer<int32>& input, adf::output_buffer<int32>& output);

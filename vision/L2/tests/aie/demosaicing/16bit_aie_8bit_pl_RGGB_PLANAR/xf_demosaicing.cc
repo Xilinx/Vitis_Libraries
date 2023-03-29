@@ -17,10 +17,10 @@
 #include "kernels.h"
 #include "imgproc/xf_demosaicing_impl.hpp"
 
-void DemosaicRunner::run(input_window<int16_t>* in,
-                         output_window<int16_t>* outr,
-                         output_window<int16_t>* outg,
-                         output_window<int16_t>* outb) {
+void DemosaicRunner::run(adf::input_buffer<int16_t>& in,
+                         adf::output_buffer<int16_t>& outr,
+                         adf::output_buffer<int16_t>& outg,
+                         adf::output_buffer<int16_t>& outb) {
     xf::cv::aie::DemosaicPlanar<xf::cv::aie::BayerPattern::RGGB, TILE_ELEMENTS> demosaic(mInEven, mInOdd);
     demosaic.runImpl(in, outr, outg, outb);
 }

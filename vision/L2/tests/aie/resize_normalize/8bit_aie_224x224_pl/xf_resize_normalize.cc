@@ -18,18 +18,20 @@
 #include "imgproc/xf_resize_normalize.hpp"
 
 template <int WIDTH_IN, int HEIGHT_IN, int WIDTH_OUT, int HEIGHT_OUT, int IMG_HEIGHT_OUT>
-void ResizeNormRunner<WIDTH_IN, HEIGHT_IN, WIDTH_OUT, HEIGHT_OUT, IMG_HEIGHT_OUT>::run(input_window<uint8_t>* input,
-                                                                                       output_window<int8_t>* output,
-                                                                                       int a0,
-                                                                                       int a1,
-                                                                                       int a2,
-                                                                                       int a3,
-                                                                                       int b0,
-                                                                                       int b1,
-                                                                                       int b2,
-                                                                                       int b3) {
-    uint8* img_in_ptr = (uint8*)input->ptr;
-    int8* img_out_ptr = (int8*)output->ptr;
+void ResizeNormRunner<WIDTH_IN, HEIGHT_IN, WIDTH_OUT, HEIGHT_OUT, IMG_HEIGHT_OUT>::run(
+    adf::input_buffer<uint8_t>& input,
+
+    adf::output_buffer<int8_t>& output,
+    int a0,
+    int a1,
+    int a2,
+    int a3,
+    int b0,
+    int b1,
+    int b2,
+    int b3) {
+    uint8* img_in_ptr = (uint8*)::aie::begin(input);
+    int8* img_out_ptr = (int8*)::aie::begin(output);
 
     xf::cv::aie::ResizeNorm<TILE_WIDTH_IN, TILE_HEIGHT_IN, TILE_WIDTH_OUT, TILE_HEIGHT_OUT, IMG_HEIGHT_OUT> resize_norm(
         mPos, mwtsX, mwtsY);

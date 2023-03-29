@@ -1,5 +1,5 @@
 #
-# Copyright 2022 Xilinx, Inc.
+# Copyright 2019-2022 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,6 +22,9 @@
 REPORT := no
 PROFILE := no
 DEBUG := no
+
+#Get PLATFORM_NAME by PLATFORM
+PLATFORM_NAME = $(strip $(patsubst %.xpfm, % , $(shell basename $(PLATFORM))))
 
 #'estimate' for estimate report generation
 #'system' for system report generation
@@ -82,9 +85,14 @@ endif
 
 # Special processing for tool version/platform type
 VITIS_VER = $(shell v++ --version | grep 'v++' | sed 's/^[[:space:]]*//' | sed -e 's/^[*]* v++ v//g' | cut -d " " -f1)
-# 1) for versal flow from 2022.1
-DEVICE_TYPE = $(shell platforminfo -p $(PLATFORM) | grep 'FPGA Family' | sed 's/.*://' | sed '/ai_engine/d' | sed 's/^[[:space:]]*//')
-ifeq ($(DEVICE_TYPE), versal)
+AIE_TYPE := $(shell platforminfo $(PLATFORM) -f -j | grep "arch.:" | sed 's|"arch":||g' | sed 's|["|,]||g')
+ifeq (AIE ,$(findstring AIE, $(AIE_TYPE)))
+HAS_AIE := on
+else
+HAS_AIE := off
+endif
+# 1) for aie flow from 2022.1
+ifeq (on, $(HAS_AIE))
 ifeq ($(shell expr $(VITIS_VER) \>= 2022.1), 1)
 LINK_TARGET_FMT := xsa
 else
@@ -110,6 +118,13 @@ HOST_ARCH := x86
 endif
 endif
 endif
+# 4) for aie on x86 flow
+pcie_aie := off
+ifeq ($(HOST_ARCH), x86)
+ifeq ($(HAS_AIE), on)
+pcie_aie := on
+endif
+endif
 
 #when x86 arch, check XRT setup
 ifeq ($(HOST_ARCH), x86)
@@ -127,6 +142,9 @@ ifeq ($(HOST_ARCH), aarch64)
 SD_CARD_NEEDED := on
 endif
 ifeq ($(ps_on_x86), on)
+SD_CARD_NEEDED := on
+endif
+ifeq ($(pcie_aie), on)
 SD_CARD_NEEDED := on
 endif
 
@@ -313,11 +331,6 @@ ifeq (,$(XPLATFORM))
 	@echo "$${MSG_PLATFORM}" && false
 endif
 #Check ends
-
-#   device2xsa - create a filesystem friendly name from device name
-#   $(1) - full name of device
-PLATFORM_NAME = $(strip $(patsubst %.xpfm, % , $(shell basename $(PLATFORM))))
-
 
 # Cleaning stuff
 RM = rm -f

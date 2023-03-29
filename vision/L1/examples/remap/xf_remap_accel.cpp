@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-#include "xf_remap_config.h"
+#include "xf_remap_accel_config.h"
 
-static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(TYPE, NPC)) / 8) / (PTR_IMG_WIDTH / 8);
-static constexpr int __XF_DEPTH_MAP = (HEIGHT * WIDTH * (XF_PIXELWIDTH(TYPE_XY, NPC)) / 8) / (4);
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(IN_TYPE, NPPCX)) / 8) / (INPUT_PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH_MAP = (HEIGHT * WIDTH * (XF_PIXELWIDTH(TYPE_XY, NPPCX)) / 8) / (4);
 
-void remap_accel(
-    ap_uint<PTR_IMG_WIDTH>* img_in, float* map_x, float* map_y, ap_uint<PTR_IMG_WIDTH>* img_out, int rows, int cols) {
+void remap_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
+                 float* map_x,
+                 float* map_y,
+                 ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+                 int rows,
+                 int cols) {
 // clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0 depth=__XF_DEPTH
     #pragma HLS INTERFACE m_axi      port=map_x         offset=slave  bundle=gmem1 depth=__XF_DEPTH_MAP
@@ -31,12 +35,12 @@ void remap_accel(
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_IN> imgInput(rows, cols);
-    xf::cv::Mat<TYPE_XY, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_MAP_X> mapX(rows, cols);
-    xf::cv::Mat<TYPE_XY, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_MAP_Y> mapY(rows, cols);
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_OUT> imgOutput(rows, cols);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN> imgInput(rows, cols);
+    xf::cv::Mat<TYPE_XY, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_MAP_X> mapX(rows, cols);
+    xf::cv::Mat<TYPE_XY, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_MAP_Y> mapY(rows, cols);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT> imgOutput(rows, cols);
 
-    const int HEIGHT_WIDTH_LOOPCOUNT = HEIGHT * WIDTH / XF_NPIXPERCYCLE(NPC);
+    const int HEIGHT_WIDTH_LOOPCOUNT = HEIGHT * WIDTH / XF_NPIXPERCYCLE(NPPCX);
     for (unsigned int i = 0; i < rows * cols; ++i) {
 // clang-format off
 	#pragma HLS LOOP_TRIPCOUNT min=1 max=HEIGHT_WIDTH_LOOPCOUNT
@@ -53,15 +57,15 @@ void remap_accel(
     // clang-format on
 
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<PTR_IMG_WIDTH, TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_IN>(img_in, imgInput);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN>(img_in, imgInput);
 
     // Run xfOpenCV kernel:
-    xf::cv::remap<XF_WIN_ROWS, XF_INTERPOLATION_TYPE, TYPE, TYPE_XY, TYPE, HEIGHT, WIDTH, NPC, XF_USE_URAM,
-                  XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT, XF_CV_DEPTH_MAP_X, XF_CV_DEPTH_MAP_Y>(imgInput, imgOutput, mapX,
-                                                                                         mapY);
+    xf::cv::remap<XF_WIN_ROWS, XF_REMAP_INTERPOLATION_TYPE, IN_TYPE, TYPE_XY, OUT_TYPE, HEIGHT, WIDTH, NPPCX,
+                  XF_USE_URAM, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT, XF_CV_DEPTH_MAP_X, XF_CV_DEPTH_MAP_Y>(
+        imgInput, imgOutput, mapX, mapY);
 
     // Convert _dst xf::cv::Mat object to output array:
-    xf::cv::xfMat2Array<PTR_IMG_WIDTH, TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_OUT>(imgOutput, img_out);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT>(imgOutput, img_out);
 
     return;
 } // End of kernel

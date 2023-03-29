@@ -66,11 +66,11 @@ inline void pp_meansub(const T* restrict img_in,
     clr_sat();
 }
 
-__attribute__((noinline)) void pp_meansub_api(input_window_int16* img_in,
-                                              output_window_int16* img_out,
+__attribute__((noinline)) void pp_meansub_api(adf::input_buffer<int16>& img_in,
+                                              adf::output_buffer<int16>& img_out,
                                               const float& alpha) {
-    int16_t* img_in_ptr = (int16_t*)img_in->ptr;
-    int16_t* img_out_ptr = (int16_t*)img_out->ptr;
+    int16_t* img_in_ptr = (int16_t*)::aie::begin(img_in);
+    int16_t* img_out_ptr = (int16_t*)::aie::begin(img_out);
 
     const int16_t img_width = xfGetTileWidth(img_in_ptr);
     const int16_t img_height = xfGetTileHeight(img_in_ptr);

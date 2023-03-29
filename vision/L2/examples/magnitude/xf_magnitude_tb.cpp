@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_magnitude_config.h"
-
+#include "xf_magnitude_tb_config.h"
 #include "xcl2.hpp"
 
 ////////////    Reference for L1NORM    //////////
@@ -85,9 +84,9 @@ int main(int argc, char** argv) {
 
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_16SC1, NPC1) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_16SC1, NPC1) << std::endl;
-    std::cout << "NPPC:" << NPC1 << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_magnitude");
@@ -132,26 +131,30 @@ int main(int argc, char** argv) {
 
     q.enqueueReadBuffer(imageFromDevice, CL_TRUE, 0, (height * width * 2), out_img.data);
     q.finish();
-/////////////////////////////////////// end of CL ////////////////////////
-/////////////////    OpenCV reference  /////////////////
-#if L1NORM
-    ComputeMagnitude(c_grad_x, c_grad_y, ocv_ref1);
-#elif L2NORM
-    cv::Sobel(in_img, c_grad_x1, CV_32FC1, 1, 0, filter_size, scale, delta, cv::BORDER_CONSTANT);
-    Sobel(in_img, c_grad_y1, CV_32FC1, 0, 1, filter_size, scale, delta, cv::BORDER_CONSTANT);
-    magnitude(c_grad_x1, c_grad_y1, ocv_ref2);
-#endif
+    /////////////////////////////////////// end of CL ////////////////////////
+    /////////////////    OpenCV reference  /////////////////
 
-#if L1NORM
-    imwrite("ref_img.jpg", ocv_ref1); // save the reference image
-    absdiff(ocv_ref1, out_img, diff); // Compute absolute difference image
-    imwrite("diff_img.jpg", diff);    // Save the difference image for debugging purpose
-#elif L2NORM
-    ocv_ref2.convertTo(ocv_res, CV_16S); //  convert from 32F type to 16S type for finding the AbsDiff
-    imwrite("ref_img.jpg", ocv_res);     // save the reference image
-    absdiff(ocv_res, out_img, diff);     // Compute absolute difference image
-    imwrite("diff_img.jpg", diff);       // Save the difference image for debugging purpose
-#endif
+    switch (NORM_TYPE) {
+        case 0:
+            ComputeMagnitude(c_grad_x, c_grad_y, ocv_ref1);
+            imwrite("ref_img.jpg", ocv_ref1); // save the reference image
+            absdiff(ocv_ref1, out_img, diff); // Compute absolute difference image
+            imwrite("diff_img.jpg", diff);    // Save the difference image for debugging purpose
+            break;
+
+        case 1:
+            cv::Sobel(in_img, c_grad_x1, CV_32FC1, 1, 0, filter_size, scale, delta, cv::BORDER_CONSTANT);
+            Sobel(in_img, c_grad_y1, CV_32FC1, 0, 1, filter_size, scale, delta, cv::BORDER_CONSTANT);
+            magnitude(c_grad_x1, c_grad_y1, ocv_ref2);
+            ocv_ref2.convertTo(ocv_res, CV_16S); //  convert from 32F type to 16S type for finding the AbsDiff
+            imwrite("ref_img.jpg", ocv_res);     // save the reference image
+            absdiff(ocv_res, out_img, diff);     // Compute absolute difference image
+            imwrite("diff_img.jpg", diff);       // Save the difference image for debugging purpose
+            break;
+
+        default:
+            break;
+    }
 
     // Find minimum and maximum differences
 

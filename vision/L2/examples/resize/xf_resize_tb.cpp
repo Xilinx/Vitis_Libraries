@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_resize_config.h"
-
+#include "xf_resize_tb_config.h"
 #include "xcl2.hpp"
 
 int main(int argc, char** argv) {
@@ -46,15 +45,9 @@ int main(int argc, char** argv) {
     std::cout << "Input image height : " << in_height << std::endl;
     std::cout << "Input image width  : " << in_width << std::endl;
 
-#if GRAY
-    result_hls.create(cv::Size(out_width, out_height), CV_8UC1);
-    result_ocv.create(cv::Size(out_width, out_height), CV_8UC1);
-    error.create(cv::Size(out_width, out_height), CV_8UC1);
-#else
-    result_hls.create(cv::Size(out_width, out_height), CV_8UC3);
-    result_ocv.create(cv::Size(out_width, out_height), CV_8UC3);
-    error.create(cv::Size(out_width, out_height), CV_8UC3);
-#endif
+    result_hls.create(cv::Size(out_width, out_height), CV_IN_TYPE);
+    result_ocv.create(cv::Size(out_width, out_height), CV_IN_TYPE);
+    error.create(cv::Size(out_width, out_height), CV_IN_TYPE);
 
 // OpenCL section:
 #if GRAY
@@ -78,9 +71,9 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::cout << "INFO: Device found - " << device_name << std::endl;
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(TYPE, NPC_T) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(TYPE, NPC_T) << std::endl;
-    std::cout << "NPPC:" << NPC_T << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     // Load binary:
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_resize");

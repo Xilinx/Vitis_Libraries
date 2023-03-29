@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_gaussian_filter_config.h"
+#include "xf_gaussian_filter_tb_config.h"
 #include <iostream>
 
 #include "xcl2.hpp"
@@ -41,14 +41,14 @@ int main(int argc, char** argv) {
 // extractChannel(in_img, in_img, 1);
 #if GRAY
 
-    out_img.create(in_img.rows, in_img.cols, CV_8UC1); // create memory for output image
-    diff.create(in_img.rows, in_img.cols, CV_8UC1);    // create memory for OCV-ref image
-    ocv_ref.create(in_img.rows, in_img.cols, CV_8UC1); // create memory for OCV-ref image
+    out_img.create(in_img.rows, in_img.cols, CV_OUT_TYPE); // create memory for output image
+    diff.create(in_img.rows, in_img.cols, CV_OUT_TYPE);    // create memory for OCV-ref image
+    ocv_ref.create(in_img.rows, in_img.cols, CV_OUT_TYPE); // create memory for OCV-ref image
 
 #else
-    out_img.create(in_img.rows, in_img.cols, CV_8UC3); // create memory for output image
-    diff.create(in_img.rows, in_img.cols, CV_8UC3);    // create memory for OCV-ref image
-    ocv_ref.create(in_img.rows, in_img.cols, CV_8UC3); // create memory for OCV-ref image
+    out_img.create(in_img.rows, in_img.cols, CV_OUT_TYPE); // create memory for output image
+    diff.create(in_img.rows, in_img.cols, CV_OUT_TYPE);    // create memory for OCV-ref image
+    ocv_ref.create(in_img.rows, in_img.cols, CV_OUT_TYPE); // create memory for OCV-ref image
 #endif
 
 #if FILTER_WIDTH == 3
@@ -87,9 +87,9 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::cout << "INFO: Device found - " << device_name << std::endl;
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(TYPE, NPC1) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(TYPE, NPC1) << std::endl;
-    std::cout << "NPPC:" << NPC1 << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     // Load binary:
 
@@ -102,9 +102,9 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, cl::Kernel kernel(program, "gaussian_filter_accel", &err));
 
     // Allocate the buffers:
-    OCL_CHECK(err, cl::Buffer imageToDevice(context, CL_MEM_READ_ONLY, (height * width * CH_TYPE), NULL,
+    OCL_CHECK(err, cl::Buffer imageToDevice(context, CL_MEM_READ_ONLY, (height * width * INPUT_CH_TYPE), NULL,
                                             &err)); //,in_img.data);
-    OCL_CHECK(err, cl::Buffer imageFromDevice(context, CL_MEM_WRITE_ONLY, (height * width * CH_TYPE), NULL,
+    OCL_CHECK(err, cl::Buffer imageFromDevice(context, CL_MEM_WRITE_ONLY, (height * width * OUTPUT_CH_TYPE), NULL,
                                               &err)); //,(ap_uint<OUTPUT_PTR_WIDTH>*)out_img.data);
 
     // Set kernel arguments:
@@ -117,11 +117,11 @@ int main(int argc, char** argv) {
     // Initialize the buffers:
     cl::Event event;
 
-    OCL_CHECK(err, q.enqueueWriteBuffer(imageToDevice,              // buffer on the FPGA
-                                        CL_TRUE,                    // blocking call
-                                        0,                          // buffer offset in bytes
-                                        (height * width * CH_TYPE), // Size in bytes
-                                        in_img.data,                // Pointer to the data to copy
+    OCL_CHECK(err, q.enqueueWriteBuffer(imageToDevice,                    // buffer on the FPGA
+                                        CL_TRUE,                          // blocking call
+                                        0,                                // buffer offset in bytes
+                                        (height * width * INPUT_CH_TYPE), // Size in bytes
+                                        in_img.data,                      // Pointer to the data to copy
                                         nullptr, &event));
 
     // Profiling Objects
@@ -143,7 +143,7 @@ int main(int argc, char** argv) {
     q.enqueueReadBuffer(imageFromDevice, // This buffers data will be read
                         CL_TRUE,         // blocking call
                         0,               // offset
-                        (height * width * CH_TYPE),
+                        (height * width * OUTPUT_CH_TYPE),
                         out_img.data, // Data will be stored here
                         nullptr, &event_sp);
 

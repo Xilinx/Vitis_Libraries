@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-#include "xf_stereo_pipeline_config.h"
+#include "xf_stereo_pipeline_accel_config.h"
 
 static constexpr int __XF_DEPTH =
-    (XF_HEIGHT * XF_WIDTH * (XF_PIXELWIDTH(XF_8UC1, XF_NPPC1)) / 8) / (INPUT_PTR_WIDTH / 8);
+    (XF_HEIGHT * XF_WIDTH * (XF_PIXELWIDTH(REMAP_TYPE, NPPCX)) / 8) / (INPUT_PTR_WIDTH / 8);
 static constexpr int __XF_DEPTH_DISP =
-    (XF_HEIGHT * XF_WIDTH * (XF_PIXELWIDTH(XF_16UC1, XF_NPPC1)) / 8) / (OUTPUT_PTR_WIDTH / 8);
+    (XF_HEIGHT * XF_WIDTH * (XF_PIXELWIDTH(OUT_TYPE, NPPCX)) / 8) / (OUTPUT_PTR_WIDTH / 8);
 
 void stereopipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_L,
                           ap_uint<INPUT_PTR_WIDTH>* img_R,
@@ -85,41 +85,40 @@ void stereopipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_L,
 
     int _cm_size = 9, _dc_size = 5;
 
-    xf::cv::Mat<XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1, XF_CV_DEPTH_L> mat_L(rows, cols);
-    xf::cv::Mat<XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1, XF_CV_DEPTH_R> mat_R(rows, cols);
-    xf::cv::Mat<XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1, XF_CV_DEPTH_disp> mat_disp(rows, cols);
-    xf::cv::Mat<XF_32FC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1, XF_CV_DEPTH_mapxL> mapxLMat(rows, cols);
-    xf::cv::Mat<XF_32FC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1, XF_CV_DEPTH_mapyL> mapyLMat(rows, cols);
-    xf::cv::Mat<XF_32FC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1, XF_CV_DEPTH_mapxR> mapxRMat(rows, cols);
-    xf::cv::Mat<XF_32FC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1, XF_CV_DEPTH_mapyR> mapyRMat(rows, cols);
-    xf::cv::Mat<XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1, XF_CV_DEPTH_leftRemapped> leftRemappedMat(rows, cols);
-    xf::cv::Mat<XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1, XF_CV_DEPTH_rightRemapped> rightRemappedMat(rows, cols);
+    xf::cv::Mat<IN_TYPE, XF_HEIGHT, XF_WIDTH, NPPCX, XF_CV_DEPTH_L> mat_L(rows, cols);
+    xf::cv::Mat<IN_TYPE, XF_HEIGHT, XF_WIDTH, NPPCX, XF_CV_DEPTH_R> mat_R(rows, cols);
+    xf::cv::Mat<OUT_TYPE, XF_HEIGHT, XF_WIDTH, NPPCX, XF_CV_DEPTH_disp> mat_disp(rows, cols);
+    xf::cv::Mat<MAP_TYPE, XF_HEIGHT, XF_WIDTH, NPPCX, XF_CV_DEPTH_mapxL> mapxLMat(rows, cols);
+    xf::cv::Mat<MAP_TYPE, XF_HEIGHT, XF_WIDTH, NPPCX, XF_CV_DEPTH_mapyL> mapyLMat(rows, cols);
+    xf::cv::Mat<MAP_TYPE, XF_HEIGHT, XF_WIDTH, NPPCX, XF_CV_DEPTH_mapxR> mapxRMat(rows, cols);
+    xf::cv::Mat<MAP_TYPE, XF_HEIGHT, XF_WIDTH, NPPCX, XF_CV_DEPTH_mapyR> mapyRMat(rows, cols);
+    xf::cv::Mat<REMAP_TYPE, XF_HEIGHT, XF_WIDTH, NPPCX, XF_CV_DEPTH_leftRemapped> leftRemappedMat(rows, cols);
+    xf::cv::Mat<REMAP_TYPE, XF_HEIGHT, XF_WIDTH, NPPCX, XF_CV_DEPTH_rightRemapped> rightRemappedMat(rows, cols);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1, XF_CV_DEPTH_L>(img_L, mat_L);
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1, XF_CV_DEPTH_R>(img_R, mat_R);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, XF_HEIGHT, XF_WIDTH, NPPCX, XF_CV_DEPTH_L>(img_L, mat_L);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, XF_HEIGHT, XF_WIDTH, NPPCX, XF_CV_DEPTH_R>(img_R, mat_R);
 
-    xf::cv::InitUndistortRectifyMapInverse<XF_CAMERA_MATRIX_SIZE, XF_DIST_COEFF_SIZE, XF_32FC1, XF_HEIGHT, XF_WIDTH,
-                                           XF_NPPC1, XF_CV_DEPTH_mapxL, XF_CV_DEPTH_mapyL>(
+    xf::cv::InitUndistortRectifyMapInverse<XF_CAMERA_MATRIX_SIZE, XF_DIST_COEFF_SIZE, MAP_TYPE, XF_HEIGHT, XF_WIDTH,
+                                           NPPCX, XF_CV_DEPTH_mapxL, XF_CV_DEPTH_mapyL>(
         cameraMA_l_fix, distC_l_fix, irA_l_fix, mapxLMat, mapyLMat, _cm_size, _dc_size);
-    xf::cv::remap<XF_REMAP_BUFSIZE, XF_INTERPOLATION_BILINEAR, XF_8UC1, XF_32FC1, XF_8UC1, XF_HEIGHT, XF_WIDTH,
-                  XF_NPPC1, XF_USE_URAM, XF_CV_DEPTH_L, XF_CV_DEPTH_leftRemapped, XF_CV_DEPTH_mapxL, XF_CV_DEPTH_mapyL>(
+    xf::cv::remap<XF_REMAP_BUFSIZE, XF_INTERPOLATION_BILINEAR, IN_TYPE, MAP_TYPE, REMAP_TYPE, XF_HEIGHT, XF_WIDTH,
+                  NPPCX, XF_USE_URAM, XF_CV_DEPTH_L, XF_CV_DEPTH_leftRemapped, XF_CV_DEPTH_mapxL, XF_CV_DEPTH_mapyL>(
         mat_L, leftRemappedMat, mapxLMat, mapyLMat);
 
-    xf::cv::InitUndistortRectifyMapInverse<XF_CAMERA_MATRIX_SIZE, XF_DIST_COEFF_SIZE, XF_32FC1, XF_HEIGHT, XF_WIDTH,
-                                           XF_NPPC1, XF_CV_DEPTH_mapxR, XF_CV_DEPTH_mapyR>(
+    xf::cv::InitUndistortRectifyMapInverse<XF_CAMERA_MATRIX_SIZE, XF_DIST_COEFF_SIZE, MAP_TYPE, XF_HEIGHT, XF_WIDTH,
+                                           NPPCX, XF_CV_DEPTH_mapxR, XF_CV_DEPTH_mapyR>(
         cameraMA_r_fix, distC_r_fix, irA_r_fix, mapxRMat, mapyRMat, _cm_size, _dc_size);
-    xf::cv::remap<XF_REMAP_BUFSIZE, XF_INTERPOLATION_BILINEAR, XF_8UC1, XF_32FC1, XF_8UC1, XF_HEIGHT, XF_WIDTH,
-                  XF_NPPC1, XF_USE_URAM, XF_CV_DEPTH_R, XF_CV_DEPTH_rightRemapped, XF_CV_DEPTH_mapxR,
-                  XF_CV_DEPTH_mapyR>(mat_R, rightRemappedMat, mapxRMat, mapyRMat);
+    xf::cv::remap<XF_REMAP_BUFSIZE, XF_INTERPOLATION_BILINEAR, IN_TYPE, MAP_TYPE, REMAP_TYPE, XF_HEIGHT, XF_WIDTH,
+                  NPPCX, XF_USE_URAM, XF_CV_DEPTH_R, XF_CV_DEPTH_rightRemapped, XF_CV_DEPTH_mapxR, XF_CV_DEPTH_mapyR>(
+        mat_R, rightRemappedMat, mapxRMat, mapyRMat);
 
-    xf::cv::StereoBM<SAD_WINDOW_SIZE, NO_OF_DISPARITIES, PARALLEL_UNITS, XF_8UC1, XF_16UC1, XF_HEIGHT, XF_WIDTH,
-                     XF_NPPC1, XF_USE_URAM, XF_CV_DEPTH_leftRemapped, XF_CV_DEPTH_rightRemapped, XF_CV_DEPTH_disp>(
+    xf::cv::StereoBM<SAD_WINDOW_SIZE, NO_OF_DISPARITIES, PARALLEL_UNITS, REMAP_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH,
+                     NPPCX, XF_USE_URAM, XF_CV_DEPTH_leftRemapped, XF_CV_DEPTH_rightRemapped, XF_CV_DEPTH_disp>(
         leftRemappedMat, rightRemappedMat, mat_disp, bm_state);
 
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPC1, XF_CV_DEPTH_disp>(mat_disp,
-                                                                                                     img_disp);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, XF_HEIGHT, XF_WIDTH, NPPCX, XF_CV_DEPTH_disp>(mat_disp, img_disp);
 }

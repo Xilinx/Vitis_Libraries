@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 #include "common/xf_headers.hpp"
 #include <stdlib.h>
 #include <ap_int.h>
-#include "xf_flip_config.h"
+#include "xf_flip_tb_config.h"
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -44,11 +44,11 @@ int main(int argc, char** argv) {
 
 // Allocate memory for the output images:
 #if GRAY
-    out_img.create(in_gray.rows, in_gray.cols, CV_8UC1);
-    out_hls.create(in_gray.rows, in_gray.cols, CV_8UC1);
+    out_img.create(in_gray.rows, in_gray.cols, CV_IN_TYPE);
+    out_hls.create(in_gray.rows, in_gray.cols, CV_IN_TYPE);
 #else
-    out_img.create(in_gray.rows, in_gray.cols, CV_8UC3);
-    out_hls.create(in_gray.rows, in_gray.cols, CV_8UC3);
+    out_img.create(in_gray.rows, in_gray.cols, CV_IN_TYPE);
+    out_hls.create(in_gray.rows, in_gray.cols, CV_IN_TYPE);
 #endif
 
     int height = in_gray.rows;
@@ -69,7 +69,8 @@ int main(int argc, char** argv) {
     direction = 0;
 #endif
 
-    flip_accel((ap_uint<PTR_WIDTH>*)in_gray.data, (ap_uint<PTR_WIDTH>*)out_hls.data, height, width, direction);
+    flip_accel((ap_uint<INPUT_PTR_WIDTH>*)in_gray.data, (ap_uint<OUTPUT_PTR_WIDTH>*)out_hls.data, height, width,
+               direction);
 
     // Compute absolute difference image
     cv::absdiff(out_hls, out_img, diff);

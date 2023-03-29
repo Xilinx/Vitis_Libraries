@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_boundingbox_config.h"
+#include "xf_boundingbox_tb_config.h"
 
 #include <sys/time.h>
 #include <iostream>
@@ -33,7 +33,7 @@
 using namespace std;
 
 int main(int argc, char** argv) {
-    cv::Mat in_img, in_img1, out_img, diff;
+    cv::Mat in_img, in_img1, out_img, diff, in_conv_img, in_conv_img1;
 
     struct timespec start_time;
     struct timespec end_time;
@@ -99,16 +99,28 @@ int main(int argc, char** argv) {
         {0, 255, 0, 255},
         {0, 0, 255, 255},
         {123, 234, 108, 255},
-        {122, 255, 167, 255}}; // Feeding color information for each boundary should be modified if MAX_BOXES varies
+        {122, 255, 167, 255}};                   // Feeding color information for each boundary should be modified if MAX_BOXES varies
+#endif
+
+/*  convert to specific types  */
+#if T_8U
+    in_img.convertTo(in_conv_img, CV_IN_TYPE);   // Size conversion
+    in_img1.convertTo(in_conv_img1, CV_IN_TYPE); // Size conversion
+
+    int in_bytes = 1;
+#elif T_16U
+    in_img.convertTo(in_conv_img, CV_IN_TYPE);   // Size conversion
+    in_img1.convertTo(in_conv_img1, CV_IN_TYPE); // Size conversion
+    int in_bytes = 2;
 #endif
 
 #if GRAY
-    out_img.create(in_img.rows, in_img.cols, in_img.depth());
-    diff.create(in_img.rows, in_img.cols, in_img.depth());
+    out_img.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    diff.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
 
 #else
-    diff.create(in_img.rows, in_img.cols, CV_8UC4);
-    out_img.create(in_img.rows, in_img.cols, CV_8UC4);
+    diff.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    out_img.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
 #endif
 
     ////////////////  reference code  ////////////////
@@ -116,15 +128,15 @@ int main(int argc, char** argv) {
 
 #if GRAY
     for (int i = 0; i < num_box; i++) {
-        for (int c = 0; c < XF_CHANNELS(TYPE, NPIX); c++) {
-            cv::rectangle(in_img1, cv::Rect(x_loc[i], y_loc[i], ROI_width[i], ROI_height[i]),
+        for (int c = 0; c < XF_CHANNELS(OUT_TYPE, NPPCX); c++) {
+            cv::rectangle(in_conv_img1, cv::Rect(x_loc[i], y_loc[i], ROI_width[i], ROI_height[i]),
                           cv::Scalar(color_info[i][0], 0, 0), 1); // BGR format
         }
     }
 #else
     for (int i = 0; i < num_box; i++) {
-        for (int c = 0; c < XF_CHANNELS(TYPE, NPIX); c++) {
-            cv::rectangle(in_img1, cv::Rect(x_loc[i], y_loc[i], ROI_width[i], ROI_height[i]),
+        for (int c = 0; c < XF_CHANNELS(OUT_TYPE, NPPCX); c++) {
+            cv::rectangle(in_conv_img1, cv::Rect(x_loc[i], y_loc[i], ROI_width[i], ROI_height[i]),
                           cv::Scalar(color_info[i][0], color_info[i][1], color_info[i][2], 255), 1); // BGR format
         }
     }
@@ -151,16 +163,16 @@ int main(int argc, char** argv) {
     /*		for(int i=0;i<(MAX_BOXES);i++)
                     {
 
-                            for(int j=0,k=0;j<XF_CHANNELS(TYPE,NPIX);j++,k+=XF_DTPIXELDEPTH(TYPE,NPIX))
+                            for(int j=0,k=0;j<XF_CHANNELS(OUT_TYPE,NPPCX);j++,k+=XF_DTPIXELDEPTH(OUT_TYPE,NPPCX))
                             {
-                                    color[i].range(k+(XF_DTPIXELDEPTH(TYPE,NPIX)-1),k)  = color_info[i][j];
+                                    color[i].range(k+(XF_DTPIXELDEPTH(OUT_TYPE,NPPCX)-1),k)  = color_info[i][j];
                             }
                     }*/
     int height = in_img.rows;
     int width = in_img.cols;
 
     //////////////// Call the top function ////////////////
-    boundingbox_accel((ap_uint<INPUT_PTR_WIDTH>*)in_img.data, roi, color_info, height, width, num_box);
+    boundingbox_accel((ap_uint<INPUT_PTR_WIDTH>*)in_conv_img.data, roi, color_info, height, width, num_box);
 
     cv::imwrite("hls_out.jpg", in_img);
 

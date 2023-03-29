@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright 2023 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,27 @@
  * limitations under the License.
  */
 
-#include "xf_ispstats_config.h"
+#include "xf_ispstats_accel_config.h"
 
 extern "C" {
 
-void ispstats_accel(ap_uint<PTR_WIDTH>* img_in,
+void ispstats_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
                     unsigned int* stats,
-                    unsigned int* max_bins,
+                    ap_uint<13>* max_bins,
                     int rows,
                     int cols,
                     int roi_tlx,
                     int roi_tly,
                     int roi_brx,
                     int roi_bry,
-                    int zone_col_num,   // N
-                    int zone_row_num) { // M
-                                        // clang-format off
-#pragma HLS INTERFACE m_axi     port=img_in   offset=slave bundle=gmem0 
+                    int zone_col_num, // N
+                    int zone_row_num, // M
+                    float inputMin,
+                    float inputMax,
+                    float outputMin,
+                    float outputMax) {
+// clang-format off
+#pragma HLS INTERFACE m_axi     port=img_in   offset=slave bundle=gmem0
 #pragma HLS INTERFACE m_axi     port=stats    offset=slave bundle=gmem1 
 #pragma HLS INTERFACE m_axi     port=max_bins offset=slave bundle=gmem2 
 #pragma HLS INTERFACE s_axilite port=rows
@@ -41,17 +45,22 @@ void ispstats_accel(ap_uint<PTR_WIDTH>* img_in,
 #pragma HLS INTERFACE s_axilite port=roi_bry
 #pragma HLS INTERFACE s_axilite port=zone_col_num
 #pragma HLS INTERFACE s_axilite port=zone_row_num
+#pragma HLS INTERFACE s_axilite port=inputMin 
+#pragma HLS INTERFACE s_axilite port=inputMax 
+#pragma HLS INTERFACE s_axilite port=outputMin
+#pragma HLS INTERFACE s_axilite port=outputMax
 #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1> imgInput(rows, cols);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN> imgInput(rows, cols);
 // clang-format off
 #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1>(img_in, imgInput);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN>(img_in, imgInput);
 
-    xf::cv::ispStats<MAX_ZONES, STATS_SIZE, FINAL_BINS_NUM, MERGE_BINS, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(
-        imgInput, stats, max_bins, roi_tlx, roi_tly, roi_brx, roi_bry, zone_col_num, zone_row_num);
+    xf::cv::ispStats<MAX_ZONES, STATS_SIZE, FINAL_BINS_NUM, MERGE_BINS, IN_TYPE, NUM_OUT_CH, HEIGHT, WIDTH, NPPCX,
+                     XF_CV_DEPTH_IN>(imgInput, stats, max_bins, roi_tlx, roi_tly, roi_brx, roi_bry, zone_col_num,
+                                     zone_row_num, inputMin, inputMax, outputMin, outputMax);
 
     return;
 } // End of kernel

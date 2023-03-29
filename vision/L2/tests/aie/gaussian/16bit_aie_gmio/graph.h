@@ -32,9 +32,13 @@ class myGraph : public adf::graph {
 
     myGraph() {
         k1 = kernel::create(gaussian);
-        adf::connect<window<TILE_WINDOW_SIZE> >(inptr, k1.in[0]);
-        adf::connect<parameter>(kernelCoefficients, async(k1.in[1]));
-        adf::connect<window<TILE_WINDOW_SIZE> >(k1.out[0], outptr);
+        adf::connect<>(inptr, k1.in[0]);
+        adf::connect<>(k1.out[0], outptr);
+
+        adf::dimensions(k1.in[0]) = {ELEM_WITH_METADATA};
+        adf::dimensions(k1.out[0]) = {ELEM_WITH_METADATA};
+
+        connect<parameter>(kernelCoefficients, async(k1.in[1]));
 
         source(k1) = "xf_gaussian.cc";
         // Initial mapping

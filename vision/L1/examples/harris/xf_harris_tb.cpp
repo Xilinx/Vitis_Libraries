@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_harris_config.h"
+#include "xf_harris_tb_config.h"
 #include "xf_ocv_ref.hpp"
 
 int main(int argc, char** argv) {
@@ -48,8 +48,8 @@ int main(int argc, char** argv) {
     }
     //	cvtColor(in_img, img_gray, CV_BGR2GRAY);
     // Convert rgb into grayscale
-    hls_out_img.create(in_img.rows, in_img.cols, CV_8U); // create memory for hls output image
-    ocv_out_img.create(in_img.rows, in_img.cols, CV_8U); // create memory for opencv output image
+    hls_out_img.create(in_img.rows, in_img.cols, CV_OUT_TYPE); // create memory for hls output image
+    ocv_out_img.create(in_img.rows, in_img.cols, CV_OUT_TYPE); // create memory for opencv output image
 
     ocv_ref(in_img, ocv_out_img, Th);
     /**************		HLS Function	  *****************/

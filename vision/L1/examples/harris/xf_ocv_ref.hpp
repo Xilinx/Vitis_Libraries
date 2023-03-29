@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,8 @@
 #ifndef _XF_OCV_REF_HPP_
 #define _XF_OCV_REF_HPP_
 
-#include "xf_harris_config.h"
+#include "xf_harris_accel_config.h"
+#include "xf_harris_tb_config.h"
 
 using namespace cv;
 using namespace std;

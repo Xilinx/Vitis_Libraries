@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-#include "xf_laplacian_config.h"
-
+#include "xf_laplacian_accel_config.h"
 extern "C" {
 
-void laplacian(ap_uint<PTR_IN_WIDTH>* img_in,
+void laplacian(ap_uint<INPUT_PTR_WIDTH>* img_in,
                short int* filter,
                unsigned char shift,
-               ap_uint<PTR_OUT_WIDTH>* img_out,
+               ap_uint<OUTPUT_PTR_WIDTH>* img_out,
                int rows,
                int cols) {
 // clang-format off
@@ -36,8 +35,8 @@ void laplacian(ap_uint<PTR_IN_WIDTH>* img_in,
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<INTYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> imgInput(rows, cols);
-    xf::cv::Mat<OUTTYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> imgOutput(rows, cols);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN> imgInput(rows, cols);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT> imgOutput(rows, cols);
 
 // clang-format off
 // clang-format on
@@ -45,14 +44,14 @@ void laplacian(ap_uint<PTR_IN_WIDTH>* img_in,
 #pragma HLS DATAFLOW
 
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<PTR_IN_WIDTH, INTYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(img_in, imgInput);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN>(img_in, imgInput);
 
     // Run xfOpenCV kernel:
-    xf::cv::filter2D<XF_BORDER_CONSTANT, FILTER_WIDTH, FILTER_HEIGHT, INTYPE, OUTTYPE, HEIGHT, WIDTH, NPC1,
+    xf::cv::filter2D<XF_BORDER_CONSTANT, FILTER_WIDTH, FILTER_HEIGHT, IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPPCX,
                      XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(imgInput, imgOutput, filter, shift);
 
     // Convert _dst xf::cv::Mat object to output array:
-    xf::cv::xfMat2Array<PTR_OUT_WIDTH, OUTTYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(imgOutput, img_out);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT>(imgOutput, img_out);
 
     return;
 } // End of kernel

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 #include "ap_int.h"
 #include "hls_stream.h"
-#include "xf_dense_npyr_optical_flow_config.h"
+#include "xf_dense_npyr_optical_flow_tb_config.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>

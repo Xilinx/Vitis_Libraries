@@ -17,6 +17,6 @@
 #include "imgproc/xf_erode_aie.hpp"
 #include "kernels.h"
 
-void erode_rect_3x3(input_window_int16* input, output_window_int16* output) {
+void erode_rect_3x3(adf::input_buffer<int16_t>& input, adf::output_buffer<int16_t>& output) {
     xf::cv::aie::erode_rect_3x3_api<int16_t, 32>(input, output);
 };

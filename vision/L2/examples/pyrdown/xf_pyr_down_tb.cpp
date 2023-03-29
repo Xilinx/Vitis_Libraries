@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,13 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_pyr_down_config.h"
-
+#include "xf_pyr_down_tb_config.h"
 #include "xcl2.hpp"
 
 int main(int argc, char* argv[]) {
     cv::Mat input_image, output_image, output_diff_xf_cv, output_xf;
 
-#if RGBA
+#if RGB
     input_image = cv::imread(argv[1], 1);
 #else
     input_image = cv::imread(argv[1], 0);
@@ -34,7 +33,7 @@ int main(int argc, char* argv[]) {
     int output_height = (input_image.rows + 1) >> 1;
     int output_width = (input_image.cols + 1) >> 1;
 
-#if RGBA
+#if RGB
     output_xf.create(output_height, output_width, CV_8UC3);
     output_diff_xf_cv.create(output_height, output_width, CV_8UC3);
 #else
@@ -68,16 +67,16 @@ int main(int argc, char* argv[]) {
     cl::Kernel krnl(program, "pyr_down_accel");
 
     std::vector<cl::Memory> inBufVec, outBufVec;
-    cl::Buffer imageToDevice(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY, (input_height * input_width * CH_TYPE),
-                             input_image.data);
+    cl::Buffer imageToDevice(context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
+                             (input_height * input_width * XF_INPUT_COLOR), input_image.data);
     cl::Buffer imageFromDevice(context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
-                               (output_height * output_width * CH_TYPE), output_xf.data);
+                               (output_height * output_width * XF_INPUT_COLOR), output_xf.data);
 
     inBufVec.push_back(imageToDevice);
     outBufVec.push_back(imageFromDevice);
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(TYPE, NPC_T) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(TYPE, NPC_T) << std::endl;
-    std::cout << "NPPC:" << NPC_T << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     // Set the kernel arguments
     krnl.setArg(0, imageToDevice);

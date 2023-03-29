@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-#include "xf_svm_config.h"
+#include "xf_svm_accel_config.h"
 
 static constexpr int __XF_DEPTH =
-    (IN_ARRAY_SIZE_1 * IN_ARRAY_SIZE_1 * (XF_PIXELWIDTH(IN_TYPE, NPC1)) / 8) / (INPUT_PTR_WIDTH / 8);
+    (IN_ARRAY_SIZE_1 * IN_ARRAY_SIZE_1 * (XF_PIXELWIDTH(IN_TYPE, NPPCX)) / 8) / (INPUT_PTR_WIDTH / 8);
 static constexpr int __XF_DEPTH2 =
-    (IN_ARRAY_SIZE_2 * IN_ARRAY_SIZE_2 * (XF_PIXELWIDTH(IN_TYPE, NPC1)) / 8) / (INPUT_PTR_WIDTH / 8);
+    (IN_ARRAY_SIZE_2 * IN_ARRAY_SIZE_2 * (XF_PIXELWIDTH(IN_TYPE, NPPCX)) / 8) / (INPUT_PTR_WIDTH / 8);
 
 void svm_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
                ap_uint<INPUT_PTR_WIDTH>* img_in2,
@@ -35,8 +35,8 @@ void svm_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
     #pragma HLS INTERFACE s_axilite  port=return
     // clang-format on
 
-    xf::cv::Mat<IN_TYPE, IN_ARRAY_SIZE_1, IN_ARRAY_SIZE_1, NPC1, XF_CV_DEPTH_IN_1> imgInput1;
-    xf::cv::Mat<IN_TYPE, IN_ARRAY_SIZE_2, IN_ARRAY_SIZE_2, NPC1, XF_CV_DEPTH_IN_2> imgInput2;
+    xf::cv::Mat<IN_TYPE, IN_ARRAY_SIZE_1, IN_ARRAY_SIZE_1, NPPCX, XF_CV_DEPTH_IN_1> imgInput1;
+    xf::cv::Mat<IN_TYPE, IN_ARRAY_SIZE_2, IN_ARRAY_SIZE_2, NPPCX, XF_CV_DEPTH_IN_2> imgInput2;
 
     // Retrieve all the params:
     unsigned short index1 = params[0];
@@ -48,14 +48,14 @@ void svm_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
 #pragma HLS DATAFLOW
 
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, IN_ARRAY_SIZE_1, IN_ARRAY_SIZE_1, NPC1, XF_CV_DEPTH_IN_1>(img_in1,
-                                                                                                            imgInput1);
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, IN_ARRAY_SIZE_2, IN_ARRAY_SIZE_2, NPC1, XF_CV_DEPTH_IN_2>(img_in2,
-                                                                                                            imgInput2);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, IN_ARRAY_SIZE_1, IN_ARRAY_SIZE_1, NPPCX, XF_CV_DEPTH_IN_1>(img_in1,
+                                                                                                             imgInput1);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, IN_ARRAY_SIZE_2, IN_ARRAY_SIZE_2, NPPCX, XF_CV_DEPTH_IN_2>(img_in2,
+                                                                                                             imgInput2);
 
     // Run xfOpenCV kernel:
     xf::cv::SVM<IN_TYPE, IN_TYPE, OUTPUT_PTR_WIDTH, IN_ARRAY_SIZE_1, IN_ARRAY_SIZE_1, IN_ARRAY_SIZE_2, IN_ARRAY_SIZE_2,
-                NPC1, NO_OF_KERNEL_ELEMENTS, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2>(
+                NPPCX, NO_OF_KERNEL_ELEMENTS, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2>(
         imgInput1, imgInput2, index1, index2, frac1, frac2, n, fractional_out, result_out);
 
     return;

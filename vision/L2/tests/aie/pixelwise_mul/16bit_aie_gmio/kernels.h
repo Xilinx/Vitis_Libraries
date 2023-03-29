@@ -18,11 +18,11 @@
 #define _KERNELS_H_
 
 #include <adf/stream/types.h>
-#include <adf/window/types.h>
+#include <adf/io_buffer/io_buffer.h>
 
-void pixelwise_mul(input_window_int16* input1,
-                   input_window_int16* input2,
-                   output_window_int16* output,
-                   const float& scale);
+void pixelwise_mul(adf::input_buffer<int16>& input1,
+                   adf::input_buffer<int16>& input2,
+                   adf::output_buffer<int16>& output,
+                   float scale);
 
 #endif

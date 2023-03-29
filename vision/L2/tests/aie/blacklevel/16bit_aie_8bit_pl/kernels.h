@@ -16,8 +16,9 @@
 
 #include <adf/window/types.h>
 #include <adf/stream/types.h>
+#include <adf.h>
 
-void blackLevelCorrection(input_window_int16* input,
-                          output_window_int16* output,
+void blackLevelCorrection(adf::input_buffer<int16>& input,
+                          adf::output_buffer<int16>& output,
                           const int16_t& black_level,
                           const int32_t& mul_fact);

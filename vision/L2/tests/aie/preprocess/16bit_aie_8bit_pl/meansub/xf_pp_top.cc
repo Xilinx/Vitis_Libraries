@@ -25,16 +25,19 @@
 #endif
 
 #if OP_MODE == 0
-void pp_top(input_window_int16* input, output_window_int16* output, const float& alpha) {
+void pp_top(adf::input_buffer<int16>& input, adf::output_buffer<int16>& output, const float& alpha) {
     xf::cv::aie::pp_meansub_api(input, output, alpha);
 };
 #elif OP_MODE == 1
-void pp_top(input_window_int16* input, output_window_int16* output, const float& alpha, const float& beta) {
+void pp_top(adf::input_buffer<int16>& input, adf::output_buffer<int16>& output, const float& alpha, const float& beta) {
     xf::cv::aie::pp_meansub_scale_api(input, output, alpha, beta);
 };
 #else
-void pp_top(
-    input_window_int16* input, output_window_int16* output, const float& alpha, const float& beta, const float& gamma) {
+void pp_top(adf::input_buffer<int16>& input,
+            adf::output_buffer<int16>& output,
+            const float& alpha,
+            const float& beta,
+            const float& gamma) {
     xf::cv::aie::pp_all_op_api(input, output, alpha, beta, gamma);
 };
 #endif

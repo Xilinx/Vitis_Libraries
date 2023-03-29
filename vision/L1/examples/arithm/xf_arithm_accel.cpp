@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-#include "xf_arithm_config.h"
+#include "xf_arithm_accel_config.h"
 
-static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(TYPE, NPC1)) / 8) / (PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(IN_TYPE, NPPCX)) / 8) / (INPUT_PTR_WIDTH / 8);
 
 #if ARRAY
 #if defined(FUNCT_BITWISENOT) || defined(FUNCT_ZERO)
-void arithm_accel(
-    ap_uint<PTR_WIDTH>* img_in1, ap_uint<PTR_WIDTH>* img_in2, ap_uint<PTR_WIDTH>* img_out, int height, int width) {
+void arithm_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
+                  ap_uint<INPUT_PTR_WIDTH>* img_in2,
+                  ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+                  int height,
+                  int width) {
 // clang-format off
 #pragma HLS INTERFACE m_axi      port=img_in1       offset=slave  bundle=gmem0 depth=__XF_DEPTH
 #pragma HLS INTERFACE m_axi      port=img_in2       offset=slave  bundle=gmem1 depth=__XF_DEPTH
@@ -36,8 +39,8 @@ void arithm_accel(
     #pragma HLS INTERFACE s_axilite  port=return 			          bundle=control
     // clang-format on
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1> imgInput1(height, width);
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> imgOutput(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1> imgInput1(height, width);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT_1> imgOutput(height, width);
 
 // clang-format off
 
@@ -48,23 +51,23 @@ void arithm_accel(
     // clang-format on
 
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1>(img_in1, imgInput1);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1>(img_in1, imgInput1);
 
     // Run xfOpenCV kernel:
-    xf::cv::FUNCT_NAME<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_OUT_1>(imgInput1, imgOutput);
+    xf::cv::FUNCT_NAME<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_OUT_1>(imgInput1, imgOutput);
 
     // Convert _dst xf::cv::Mat object to output array:
-    xf::cv::xfMat2Array<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(imgOutput, img_out);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT_1>(imgOutput, img_out);
 
     return;
 } // End of kernel
 #else
-void arithm_accel(ap_uint<PTR_WIDTH>* img_in1,
-                  ap_uint<PTR_WIDTH>* img_in2,
+void arithm_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
+                  ap_uint<INPUT_PTR_WIDTH>* img_in2,
 #ifdef FUNCT_MULTIPLY
                   float scale,
 #endif
-                  ap_uint<PTR_WIDTH>* img_out,
+                  ap_uint<OUTPUT_PTR_WIDTH>* img_out,
                   int height,
                   int width) {
 // clang-format off
@@ -83,9 +86,9 @@ void arithm_accel(ap_uint<PTR_WIDTH>* img_in1,
     #pragma HLS INTERFACE s_axilite  port=return 			          bundle=control
     // clang-format on
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1> imgInput1(height, width);
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_2> imgInput2(height, width);
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> imgOutput(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1> imgInput1(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_2> imgInput2(height, width);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT_1> imgOutput(height, width);
 
 // clang-format off
 
@@ -96,25 +99,25 @@ void arithm_accel(ap_uint<PTR_WIDTH>* img_in1,
     // clang-format on
 
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1>(img_in1, imgInput1);
-    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_2>(img_in2, imgInput2);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1>(img_in1, imgInput1);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_2>(img_in2, imgInput2);
 
 // Run xfOpenCV kernel:
 #ifdef EXTRA_PARM
-    xf::cv::FUNCT_NAME<EXTRA_PARM, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2, XF_CV_DEPTH_OUT_1>(
-        imgInput1, imgInput2, imgOutput
+    xf::cv::FUNCT_NAME<EXTRA_PARM, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2,
+                       XF_CV_DEPTH_OUT_1>(imgInput1, imgInput2, imgOutput
 #ifdef FUNCT_MULTIPLY
-        ,
-        scale
+                                          ,
+                                          scale
 #endif
-        );
+                                          );
 #else
-    xf::cv::FUNCT_NAME<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2, XF_CV_DEPTH_OUT_1>(
+    xf::cv::FUNCT_NAME<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2, XF_CV_DEPTH_OUT_1>(
         imgInput1, imgInput2, imgOutput);
 #endif
 
     // Convert _dst xf::cv::Mat object to output array:
-    xf::cv::xfMat2Array<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(imgOutput, img_out);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT_1>(imgOutput, img_out);
 
     return;
 } // End of kernel
@@ -122,8 +125,11 @@ void arithm_accel(ap_uint<PTR_WIDTH>* img_in1,
 #endif
 
 #if SCALAR
-void arithm_accel(
-    ap_uint<PTR_WIDTH>* img_in1, unsigned char* scl_in, ap_uint<PTR_WIDTH>* img_out, int height, int width) {
+void arithm_accel(ap_uint<INPUT_PTR_WIDTH>* img_in1,
+                  unsigned char* scl_in,
+                  ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+                  int height,
+                  int width) {
 // clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in1       offset=slave  bundle=gmem0 depth=__XF_DEPTH
     #pragma HLS INTERFACE m_axi      port=scl_in        offset=slave  bundle=gmem1 depth=3
@@ -131,32 +137,33 @@ void arithm_accel(
     #pragma HLS INTERFACE s_axilite  port=return 			          bundle=control
     // clang-format on
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1> imgInput1(height, width);
-    unsigned char scl[XF_CHANNELS(TYPE, NPC1)];
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> imgOutput(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1> imgInput1(height, width);
+    // xf::cv::Scalar<XF_CHANNELS(IN_TYPE, NPPCX), unsigned char> scl;
+    // unsigned char scl[XF_CHANNELS(IN_TYPE, NPPCX)];
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT_1> imgOutput(height, width);
 
-    // clang-format off
+// clang-format off
 
-    // clang-format on
-    for (unsigned int i = 0; i < XF_CHANNELS(TYPE, NPC1); ++i) {
-        scl[i] = scl_in[i];
-    }
+// clang-format on
+// for (unsigned int i = 0; i < XF_CHANNELS(IN_TYPE, NPPCX); ++i) {
+//     scl.val[i] = scl_in[i];
+// }
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1>(img_in1, imgInput1);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1>(img_in1, imgInput1);
 
     // Run xfOpenCV kernel:
     xf::cv::FUNCT_NAME<
 #ifdef EXTRA_PARM
         EXTRA_PARM,
 #endif
-        TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_OUT_1>(imgInput1, scl, imgOutput);
+        IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_OUT_1>(imgInput1, scl_in, imgOutput);
 
     // Convert _dst xf::cv::Mat object to output array:
-    xf::cv::xfMat2Array<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(imgOutput, img_out);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT_1>(imgOutput, img_out);
 
     return;
 } // End of kernel

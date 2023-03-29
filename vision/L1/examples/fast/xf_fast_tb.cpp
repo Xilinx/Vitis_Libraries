@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_fast_config.h"
+#include "xf_fast_tb_config.h"
 
 int main(int argc, char** argv) {
     cv::Mat in_img, out_img, out_img_ocv, out_hls;
@@ -44,7 +44,8 @@ int main(int argc, char** argv) {
     out_hls.create(in_gray.rows, in_gray.cols, CV_8U);
 
     // Call the top function
-    fast_accel((ap_uint<PTR_WIDTH>*)in_gray.data, threshold, (ap_uint<PTR_WIDTH>*)out_hls.data, imgheight, imgwidth);
+    fast_accel((ap_uint<INPUT_PTR_WIDTH>*)in_gray.data, threshold, (ap_uint<OUTPUT_PTR_WIDTH>*)out_hls.data, imgheight,
+               imgwidth);
 
     std::vector<cv::Point> hls_points;
     std::vector<cv::Point> ocv_points;

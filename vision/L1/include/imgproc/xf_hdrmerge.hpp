@@ -20,7 +20,6 @@
 #ifndef __cplusplus
 #error C++ is needed to include this header
 #endif
-
 typedef unsigned short uint16_t;
 typedef unsigned char uchar;
 
@@ -77,6 +76,7 @@ void Hdrmerge_bayer(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_ma
 
 
 	//FILE *fp1 = fopen("imagevals_hls.txt","w");
+HDRmerge_LOOP:    
 	for(int i = 0;i< height;i++){
 // clang-format off
 #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
@@ -121,6 +121,34 @@ void Hdrmerge_bayer(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_ma
 	}
 	//fclose(fp1);
 }
+
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int NO_EXPS,
+          int W_SIZE,
+          int STREAMS = 2, 
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void Hdrmerge_bayer_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat1,
+                    xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& _src_mat2,
+                    xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst_mat,
+                    short wr_hls[STREAMS][NO_EXPS * NPC * W_SIZE],
+                    int stream_id){
+               
+                        
+                        
+// clang-format off
+    #pragma HLS ARRAY_PARTITION variable=wr_hls dim=1 complete
+// clang-format on	
+
+    Hdrmerge_bayer<SRC_T, DST_T, ROWS, COLS, NPC, NO_EXPS, W_SIZE, XFCVDEPTH_IN_1, XFCVDEPTH_IN_2, 
+         XFCVDEPTH_OUT>(_src_mat1, _src_mat2, _dst_mat, wr_hls[stream_id]);     
+}	
+   
 } // namespace cv
 } // namespace xf
 

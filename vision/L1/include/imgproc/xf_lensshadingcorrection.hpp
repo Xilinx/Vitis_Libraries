@@ -47,6 +47,12 @@ inline ap_uint<12> xf_satcast_lsc<ap_uint<12> >(int v) {
     return v;
 };
 template <>
+inline ap_uint<14> xf_satcast_lsc<ap_uint<14> >(int v) {
+    v = (v > 16383 ? 16383 : v);
+    v = (v < 0 ? 0 : v);
+    return v;
+};
+template <>
 inline ap_uint<16> xf_satcast_lsc<ap_uint<16> >(int v) {
     v = (v > 65535 ? 65535 : v);
     v = (v < 0 ? 0 : v);
@@ -106,6 +112,83 @@ void Lscdistancebased(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
             // clang-format on
             float y_dist = center_pixel_pos_y - i;
 
+            float y_dist_2 = y_dist * y_dist;
+
+            in_pix = src.read(i * (cols) + j);
+
+            for (ap_uint<9> p = 0; p < XF_NPIXPERCYCLE(NPC); p++) {
+// clang-format off
+#pragma HLS unroll
+                // clang-format on
+                float x_dist = center_pixel_pos_x - (j * NPC + p);
+                float x_dist_2 = x_dist * x_dist;
+
+                float xy_2 = std::sqrt(y_dist_2 + x_dist_2);
+                float distance = xy_2 / max_distance;
+
+                float gain_val = (a * ((distance + b) * (distance + b))) - c;
+
+                XF_CTUNAME(SRC_T, NPC)
+                val = in_pix.range(p * STEP + STEP - 1, p * STEP);
+
+                int value = (int)(val * gain_val);
+
+                out_pix.range(p * STEP + STEP - 1, p * STEP) = xf_satcast_lsc<XF_CTUNAME(SRC_T, NPC)>(value);
+            }
+
+            dst.write(i * cols + j, out_pix);
+        }
+    }
+}
+template <int SRC_T,
+          int DST_T,
+          int ROWS,
+          int COLS,
+          int NPC = 1,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void Lscdistancebased_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
+                            xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& dst,
+                            unsigned short height,
+                            unsigned short width,
+                            int slc_id,
+                            uint16_t strm_row) {
+    int rows = src.rows;
+    int cols = src.cols >> XF_BITSHIFT(NPC);
+    unsigned short org_rows = height;
+
+    unsigned short org_cols = width;
+
+    assert(((rows <= ROWS) && (cols <= COLS)) && "ROWS and COLS should be greater than input image");
+
+    short center_pixel_pos_x = (org_cols >> 1);
+    short center_pixel_pos_y = (org_rows >> 1);
+    short y_distance = org_rows - center_pixel_pos_y;
+    short x_distance = org_cols - center_pixel_pos_x;
+    float y_2 = y_distance * y_distance;
+    float x_2 = x_distance * x_distance;
+
+    float max_distance = std::sqrt(y_2 + x_2);
+    // ap_fixed<48,24> max_distance_inv = (1/max_distance);
+    XF_TNAME(SRC_T, NPC) in_pix, in_pix1, out_pix;
+    const int STEP = XF_DTPIXELDEPTH(SRC_T, NPC);
+    float a = 0.01759;
+    float b = 28.37;
+    float c = 13.36;
+
+    for (int i = 0; i < rows; i++) {
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+        // clang-format on
+        for (int j = 0; j < cols; j++) {
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=COLS/NPC max=COLS/NPC
+#pragma HLS pipeline II=1
+#pragma HLS LOOP_FLATTEN OFF
+            // clang-format on
+            // float y_dist = center_pixel_pos_y - i;
+
+            float y_dist = center_pixel_pos_y - i - slc_id * strm_row;
             float y_dist_2 = y_dist * y_dist;
 
             in_pix = src.read(i * (cols) + j);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_autowhitebalance_config.h"
-
+#include "xf_autowhitebalance_tb_config.h"
 #include "xcl2.hpp"
 
 template <typename T>
@@ -32,7 +31,7 @@ void balanceWhiteSimple(std::vector<cv::Mat_<T> >& src,
     const float s2 = p; // high quantile
 
     int depth = 2; // depth of histogram tree
-    if (src[0].depth() != CV_8U) ++depth;
+    if (src[0].depth() != CV_IN_TYPE) ++depth;
     int bins = HIST_SIZE; // number of bins at each histogram level
 
     int nElements = HIST_SIZE; // int(pow((float)bins, (float)depth));
@@ -162,7 +161,7 @@ void applyChannelGains(cv::Mat& src, cv::Mat& dst, float gainB, float gainG, flo
         gainR /= gain_max;
     }
 
-    if (src.type() == CV_8UC3) {
+    if (src.type() == CV_IN_TYPE) {
         // Fixed point arithmetic, mul by 2^8 then shift back 8 bits
         int i_gainB = cvRound(gainB * (1 << 8)), i_gainG = cvRound(gainG * (1 << 8)),
             i_gainR = cvRound(gainR * (1 << 8));
@@ -173,7 +172,7 @@ void applyChannelGains(cv::Mat& src, cv::Mat& dst, float gainB, float gainG, flo
             dst_data[i + 1] = (uchar)((src_data[i + 1] * i_gainG) >> 8);
             dst_data[i + 2] = (uchar)((src_data[i + 2] * i_gainR) >> 8);
         }
-    } else if (src.type() == CV_16UC3) {
+    } else if (src.type() == CV_IN_TYPE) {
         // Fixed point arithmetic, mul by 2^16 then shift back 16 bits
         int i_gainB = cvRound(gainB * (1 << 16)), i_gainG = cvRound(gainG * (1 << 16)),
             i_gainR = cvRound(gainR * (1 << 16));
@@ -250,10 +249,10 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    ocv_ref.create(in_gray.rows, in_gray.cols, CV_8UC3);
-    ocv_ref_gw.create(in_gray.rows, in_gray.cols, CV_8UC3);
-    out_gray.create(in_gray.rows, in_gray.cols, CV_8UC3);
-    diff.create(in_gray.rows, in_gray.cols, CV_8UC3);
+    ocv_ref.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
+    ocv_ref_gw.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
+    out_gray.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
+    diff.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
 
     float thresh = 0.9;
     /// simple white balancing cref code
@@ -283,9 +282,9 @@ int main(int argc, char** argv) {
     devices.resize(1);
     cl::Program program(context, devices, bins);
     cl::Kernel krnl(program, "autowhitebalance_accel");
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPC1) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPC1) << std::endl;
-    std::cout << "NPPC:" << NPC1 << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     std::vector<cl::Memory> inBufVec, outBufVec;
     cl::Buffer imageToDevice(context, CL_MEM_READ_ONLY, (height * width * 3));

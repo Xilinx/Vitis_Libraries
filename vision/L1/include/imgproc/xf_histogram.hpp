@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2023 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@
 
 #include "common/xf_common.hpp"
 #include "hls_stream.h"
+
 namespace xf {
 namespace cv {
 
@@ -129,6 +130,310 @@ MERGE_HIST_LOOP:
 
             hist_array[ch][i] = value;
         }
+    }
+}
+
+/////////16bit support
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH,
+          int SRC_TC,
+          int PLANES,
+          int AEC_HISTSIZE>
+void xFHistogramKernel_sin(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
+                           xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& src2,
+                           uint32_t hist[AEC_HISTSIZE],
+                           float p,
+                           float inputMin,
+                           float inputMax,
+                           float outputMin,
+                           float outputMax) {
+// clang-format off
+#pragma HLS INLINE OFF
+    // clang-format on
+
+    const int STEP = XF_DTPIXELDEPTH(SRC_T, NPC);
+    int width = src1.cols >> XF_BITSHIFT(NPC);
+    int height = src1.rows;
+    XF_TNAME(SRC_T, NPC) in_pix, in_pix1, out_pix;
+    int writenct = 0;
+    int depth = 1;                // depth of histogram tree
+    int bins = AEC_HISTSIZE;      // number of bins at each histogram level
+    int nElements = AEC_HISTSIZE; // int(pow((float)bins, (float)depth));
+    int val;
+// histogram initialization
+INITIALIZE_HIST:
+    for (int k = 0; k < AEC_HISTSIZE; k++) {
+// clang-format off
+#pragma HLS PIPELINE
+#pragma HLS LOOP_TRIPCOUNT min=AEC_HISTSIZE max=AEC_HISTSIZE
+        // clang-format on
+        hist[k] = 0;
+    }
+
+    // Temporary array used while computing histogram
+    ap_uint<32> tmp_hist[XF_NPIXPERCYCLE(NPC)][AEC_HISTSIZE];
+// clang-format off
+#pragma HLS bind_storage variable=tmp_hist type=RAM_T2P impl=BRAM
+#pragma HLS ARRAY_PARTITION variable=tmp_hist complete dim=1
+    // clang-format on
+
+    XF_TNAME(SRC_T, NPC) in_buf, in_buf1, temp_buf;
+    bool flag = 0;
+HIST_INITIALIZE_LOOP:
+    for (ap_uint<32> i = 0; i < AEC_HISTSIZE; i++) //
+    {
+// clang-format off
+#pragma HLS PIPELINE
+        // clang-format on
+        for (ap_uint<5> j = 0; j < XF_NPIXPERCYCLE(NPC); j++) {
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=AEC_HISTSIZE max=AEC_HISTSIZE
+            // clang-format on
+            tmp_hist[j][i] = 0;
+        }
+    }
+
+    static uint32_t old[XF_NPIXPERCYCLE(NPC)] = {};
+    uint32_t acc_rd[XF_NPIXPERCYCLE(NPC)] = {};
+    uint32_t acc_wr[XF_NPIXPERCYCLE(NPC)] = {};
+#pragma HLS ARRAY_PARTITION variable = old complete
+#pragma HLS ARRAY_PARTITION variable = acc_rd complete
+#pragma HLS ARRAY_PARTITION variable = acc_wr complete
+
+    int readcnt = 0;
+    ap_fixed<STEP + 8, STEP + 2> min_vals = inputMin - 0.5f;
+    ap_fixed<STEP + 8, STEP + 2> max_vals = inputMax + 0.5f;
+    ap_fixed<STEP + 8, STEP + 2> minValue = min_vals, minValue1 = min_vals;
+    ap_fixed<STEP + 8, STEP + 2> maxValue = max_vals, maxValue1 = max_vals;
+    ap_fixed<STEP + 8, STEP + 2> interval = ap_fixed<STEP + 8, STEP + 2>(maxValue - minValue) / bins;
+    ap_fixed<STEP + 8, 2> internal_inv = ((ap_fixed<STEP + 8, 2>)1 / interval);
+    int pos = 0, pos1 = 0;
+    int currentBin = 0, currentBin1 = 0;
+ROW_LOOP:
+    for (int row = 0; row != (height); row++) // histogram filling
+    {
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
+    // clang-format on
+    COL_LOOP:
+        for (int col = 0; col < (width); col = col + 1) // histogram filling
+        {
+// clang-format off
+#pragma HLS PIPELINE II=1
+#pragma HLS LOOP_FLATTEN OFF
+#pragma HLS LOOP_TRIPCOUNT min=1 max=COLS
+
+            // clang-format on
+            in_pix = src1.read(row * (width) + col);
+            src2.write(row * (width) + col, in_pix);
+
+            for (ap_uint<9> j = 0; j < XF_NPIXPERCYCLE(NPC); j++) {
+// clang-format off
+#pragma HLS DEPENDENCE variable=tmp_hist array intra false
+#pragma HLS UNROLL
+                // clang-format on
+                XF_CTUNAME(SRC_T, NPC) val = 0, val1 = 0;
+                val = in_pix.range(j * STEP + STEP - 1, j * STEP);
+
+                currentBin = int((val - minValue) * internal_inv);
+
+                if (currentBin == old[j]) {
+                    acc_rd[j] = acc_wr[j];
+                } else {
+                    acc_rd[j] = tmp_hist[j][currentBin];
+                }
+
+                tmp_hist[j][old[j]] = acc_wr[j];
+
+                acc_wr[j] = acc_rd[j] + 1;
+                old[j] = currentBin;
+            }
+        }
+    }
+
+END_HIST_LOOP:
+    for (ap_uint<5> ch_ppc = 0; ch_ppc < XF_NPIXPERCYCLE(NPC); ch_ppc++) {
+// clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=1 max=NPC
+		#pragma HLS UNROLL
+        // clang-format on
+        uint32_t tmp = old[ch_ppc];
+        tmp_hist[ch_ppc][tmp] = acc_wr[ch_ppc];
+    }
+//	Now merge computed partial histograms
+MERGE_HIST_LOOP:
+    for (ap_uint<32> i = 0; i < AEC_HISTSIZE; i++) {
+// clang-format off
+#pragma HLS pipeline
+        // clang-format on
+        uint32_t value = 0;
+    MERGE_HIST_NPPC_UNROLL:
+        for (ap_uint<5> p = 0; p < XF_NPIXPERCYCLE(NPC); p++) {
+// clang-format off
+#pragma HLS UNROLL
+            // clang-format on
+            value += tmp_hist[p][i];
+        }
+        hist[i] = value;
+    }
+}
+
+template <int SRC_T,
+          int ROWS,
+          int COLS,
+          int DEPTH,
+          int NPC,
+          int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
+          int WORDWIDTH,
+          int SRC_TC,
+          int PLANES,
+          int AEC_HISTSIZE>
+void xFHistogramKernel_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
+                             xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& src2,
+                             uint32_t hist[AEC_HISTSIZE],
+                             float p,
+                             float inputMin,
+                             float inputMax,
+                             float outputMin,
+                             float outputMax,
+                             int slc_id) {
+// clang-format off
+#pragma HLS INLINE OFF
+    // clang-format on
+
+    const int STEP = XF_DTPIXELDEPTH(SRC_T, NPC);
+    int width = src1.cols >> XF_BITSHIFT(NPC);
+    int height = src1.rows;
+    XF_TNAME(SRC_T, NPC) in_pix, in_pix1, out_pix;
+    int writenct = 0;
+    int depth = 1;                // depth of histogram tree
+    int bins = AEC_HISTSIZE;      // number of bins at each histogram level
+    int nElements = AEC_HISTSIZE; // int(pow((float)bins, (float)depth));
+    int val;
+    // histogram initialization
+    if (slc_id == 0) {
+    INITIALIZE_HIST:
+        for (int k = 0; k < AEC_HISTSIZE; k++) {
+// clang-format off
+#pragma HLS PIPELINE
+#pragma HLS LOOP_TRIPCOUNT min=AEC_HISTSIZE max=AEC_HISTSIZE
+            // clang-format on
+            hist[k] = 0;
+        }
+    }
+
+    // Temporary array used while computing histogram
+    ap_uint<32> tmp_hist[XF_NPIXPERCYCLE(NPC)][AEC_HISTSIZE];
+// clang-format off
+#pragma HLS bind_storage variable=tmp_hist type=RAM_T2P impl=BRAM
+#pragma HLS ARRAY_PARTITION variable=tmp_hist complete dim=1
+    // clang-format on
+
+    XF_TNAME(SRC_T, NPC) in_buf, in_buf1, temp_buf;
+    bool flag = 0;
+HIST_INITIALIZE_LOOP:
+    for (ap_uint<32> i = 0; i < AEC_HISTSIZE; i++) //
+    {
+// clang-format off
+#pragma HLS PIPELINE
+        // clang-format on
+        for (ap_uint<5> j = 0; j < XF_NPIXPERCYCLE(NPC); j++) {
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=AEC_HISTSIZE max=AEC_HISTSIZE
+            // clang-format on
+            tmp_hist[j][i] = 0;
+        }
+    }
+
+    static uint32_t old[XF_NPIXPERCYCLE(NPC)] = {};
+    uint32_t acc_rd[XF_NPIXPERCYCLE(NPC)] = {};
+    uint32_t acc_wr[XF_NPIXPERCYCLE(NPC)] = {};
+#pragma HLS ARRAY_PARTITION variable = old complete
+#pragma HLS ARRAY_PARTITION variable = acc_rd complete
+#pragma HLS ARRAY_PARTITION variable = acc_wr complete
+
+    int readcnt = 0;
+    ap_fixed<STEP + 8, STEP + 2> min_vals = inputMin - 0.5f;
+    ap_fixed<STEP + 8, STEP + 2> max_vals = inputMax + 0.5f;
+    ap_fixed<STEP + 8, STEP + 2> minValue = min_vals, minValue1 = min_vals;
+    ap_fixed<STEP + 8, STEP + 2> maxValue = max_vals, maxValue1 = max_vals;
+    ap_fixed<STEP + 8, STEP + 2> interval = ap_fixed<STEP + 8, STEP + 2>(maxValue - minValue) / bins;
+    ap_fixed<STEP + 8, 2> internal_inv = ((ap_fixed<STEP + 8, 2>)1 / interval);
+    int pos = 0, pos1 = 0;
+    int currentBin = 0, currentBin1 = 0;
+ROW_LOOP:
+    for (int row = 0; row != (height); row++) // histogram filling
+    {
+// clang-format off
+#pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
+    // clang-format on
+    COL_LOOP:
+        for (int col = 0; col < (width); col = col + 1) // histogram filling
+        {
+// clang-format off
+#pragma HLS PIPELINE II=1
+#pragma HLS LOOP_FLATTEN OFF
+#pragma HLS LOOP_TRIPCOUNT min=1 max=COLS
+
+            // clang-format on
+            in_pix = src1.read(row * (width) + col);
+            src2.write(row * (width) + col, in_pix);
+
+            for (ap_uint<9> j = 0; j < XF_NPIXPERCYCLE(NPC); j++) {
+// clang-format off
+#pragma HLS DEPENDENCE variable=tmp_hist array intra false
+#pragma HLS UNROLL
+                // clang-format on
+                XF_CTUNAME(SRC_T, NPC) val = 0, val1 = 0;
+                val = in_pix.range(j * STEP + STEP - 1, j * STEP);
+
+                currentBin = int((val - minValue) * internal_inv);
+
+                if (currentBin == old[j]) {
+                    acc_rd[j] = acc_wr[j];
+                } else {
+                    acc_rd[j] = tmp_hist[j][currentBin];
+                }
+
+                tmp_hist[j][old[j]] = acc_wr[j];
+
+                acc_wr[j] = acc_rd[j] + 1;
+                old[j] = currentBin;
+            }
+        }
+    }
+
+END_HIST_LOOP:
+    for (ap_uint<5> ch_ppc = 0; ch_ppc < XF_NPIXPERCYCLE(NPC); ch_ppc++) {
+// clang-format off
+        #pragma HLS LOOP_TRIPCOUNT min=1 max=NPC
+		#pragma HLS UNROLL
+        // clang-format on
+        uint32_t tmp = old[ch_ppc];
+        tmp_hist[ch_ppc][tmp] = acc_wr[ch_ppc];
+    }
+//	Now merge computed partial histograms
+MERGE_HIST_LOOP:
+    for (ap_uint<32> i = 0; i < AEC_HISTSIZE; i++) {
+// clang-format off
+#pragma HLS pipeline
+        // clang-format on
+        uint32_t value = 0;
+    MERGE_HIST_NPPC_UNROLL:
+        for (ap_uint<5> p = 0; p < XF_NPIXPERCYCLE(NPC); p++) {
+// clang-format off
+#pragma HLS UNROLL
+            // clang-format on
+            value += tmp_hist[p][i];
+        }
+        hist[i] += value;
     }
 }
 

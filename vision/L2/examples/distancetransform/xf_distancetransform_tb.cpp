@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,7 @@
 #include "common/xf_headers.hpp"
 #include "opencv2/features2d.hpp"
 
-#include "xf_distancetransform_config.h"
-
+#include "xf_distancetransform_tb_config.h"
 #include "xcl2.hpp"
 #include "xf_opencl_wrap.hpp"
 

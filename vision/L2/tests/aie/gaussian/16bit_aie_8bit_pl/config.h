@@ -25,6 +25,7 @@ static constexpr int TILE_WIDTH = 256;
 static constexpr int TILE_HEIGHT = 16;
 static constexpr int TILE_ELEMENTS = (TILE_WIDTH * TILE_HEIGHT);
 static constexpr int TILE_WINDOW_SIZE = ((TILE_ELEMENTS * sizeof(uint16_t)) + xf::cv::aie::METADATA_SIZE);
+static constexpr int ELEM_WITH_METADATA = TILE_ELEMENTS + (xf::cv::aie::METADATA_SIZE / sizeof(uint16_t));
 
 /* Graph specific configuration */
 static constexpr int VECTORIZATION_FACTOR = 16;

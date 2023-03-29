@@ -76,16 +76,19 @@ void xf_QuatizationDithering(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>
            "ROWS and COLS should be greater than input image");
     assert(((stream_out.rows <= ROWS) && (stream_out.cols <= COLS)) &&
            "ROWS and COLS should be greater than output image");
-    assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2)) && "The NPC must be XF_NPPC1 or XF_NPPC2");
+    assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2) || (NPC == XF_NPPC4)) &&
+           "The NPC must be XF_NPPC1 or XF_NPPC2 or XF_NPPC4");
     assert(((IN_TYPE == XF_8UC1) || (IN_TYPE == XF_8UC3) || (IN_TYPE == XF_10UC1) || (IN_TYPE == XF_10UC3) ||
-            (IN_TYPE == XF_12UC1) || (IN_TYPE == XF_12UC3) || (IN_TYPE == XF_16UC1) || (IN_TYPE == XF_16UC3)) &&
+            (IN_TYPE == XF_12UC1) || (IN_TYPE == XF_12UC3) || (IN_TYPE == XF_14UC1) || (IN_TYPE == XF_14UC3) ||
+            (IN_TYPE == XF_16UC1) || (IN_TYPE == XF_16UC3)) &&
            "The IN_TYPE must be XF_8UC1 or XF_8UC3 or XF_10UC1 or XF_10UC3 or "
-           "XF_12UC1 or XF_12UC3 or XF_16UC1 or XF_16UC3");
+           "XF_12UC1 or XF_12UC3 or XF_14UC1 or XF_14UC3 or XF_16UC1 or XF_16UC3");
 
     assert(((OUT_TYPE == XF_8UC1) || (OUT_TYPE == XF_8UC3) || (OUT_TYPE == XF_10UC1) || (OUT_TYPE == XF_10UC3) ||
-            (OUT_TYPE == XF_12UC1) || (OUT_TYPE == XF_12UC3) || (OUT_TYPE == XF_16UC1) || (OUT_TYPE == XF_16UC3)) &&
+            (OUT_TYPE == XF_12UC1) || (OUT_TYPE == XF_12UC3) || (OUT_TYPE == XF_14UC1) || (OUT_TYPE == XF_14UC3) ||
+            (OUT_TYPE == XF_16UC1) || (OUT_TYPE == XF_16UC3)) &&
            "The OUT_TYPE must be XF_8UC1 or XF_8UC3 or XF_10UC1 or XF_10UC3 or "
-           "XF_12UC1 or XF_12UC3 or XF_16UC1 or XF_16UC3");
+           "XF_12UC1 or XF_12UC3 or XF_14UC1 or XF_14UC3 or XF_16UC1 or XF_16UC3");
 
     bool scale_power_of_2 = isPowerOfTwo<OUT_TYPE>(SCALE_FACTOR);
     assert((scale_power_of_2 == 1) && "The SCALE_FACTOR must be power of two");

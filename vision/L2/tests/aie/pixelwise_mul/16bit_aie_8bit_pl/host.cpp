@@ -155,12 +155,13 @@ int main(int argc, char** argv) {
             }
             //}
         }
-        mygraph.end();
         std::cout << "Test passed" << std::endl;
         std::cout << "Average time to process frame : " << (((float)tt.count() * 0.001) / (float)iterations) << " ms"
                   << std::endl;
         std::cout << "Average frames per second : " << (((float)1000000 / (float)tt.count()) * (float)iterations)
                   << " fps" << std::endl;
+
+        mygraph.end();
 
         return 0;
     } catch (std::exception& e) {

@@ -15,7 +15,11 @@
  */
 
 #include "imgproc/xf_convertscaleabs_aie.hpp"
+#include "kernels.h"
 
-void convertscaleabs(input_window_int16* input, output_window_int16* output, const float& alpha, const float& beta) {
+void convertscaleabs(adf::input_buffer<int16>& input,
+                     adf::output_buffer<int16>& output,
+                     const float& alpha,
+                     const float& beta) {
     xf::cv::aie::convertscaleabs_api(input, output, alpha, beta);
 };

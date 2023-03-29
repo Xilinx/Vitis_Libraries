@@ -17,7 +17,7 @@
 #include "common/xf_headers.hpp"
 #include <stdlib.h>
 #include <ap_int.h>
-#include "xf_rotate_config.h"
+#include "xf_rotate_tb_config.h"
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -45,19 +45,19 @@ int main(int argc, char** argv) {
 // Allocate memory for the output images:
 #if R_180
 #if GRAY
-    out_img.create(in_gray.rows, in_gray.cols, CV_8UC1);
-    out_hls.create(in_gray.rows, in_gray.cols, CV_8UC1);
+    out_img.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
+    out_hls.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
 #else
-    out_img.create(in_gray.rows, in_gray.cols, CV_8UC3);
-    out_hls.create(in_gray.rows, in_gray.cols, CV_8UC3);
+    out_img.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
+    out_hls.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
 #endif
 #else
 #if GRAY
-    out_img.create(in_gray.cols, in_gray.rows, CV_8UC1);
-    out_hls.create(in_gray.cols, in_gray.rows, CV_8UC1);
+    out_img.create(in_gray.cols, in_gray.rows, CV_OUT_TYPE);
+    out_hls.create(in_gray.cols, in_gray.rows, CV_OUT_TYPE);
 #else
-    out_img.create(in_gray.cols, in_gray.rows, CV_8UC3);
-    out_hls.create(in_gray.cols, in_gray.rows, CV_8UC3);
+    out_img.create(in_gray.cols, in_gray.rows, CV_OUT_TYPE);
+    out_hls.create(in_gray.cols, in_gray.rows, CV_OUT_TYPE);
 #endif
 #endif
 

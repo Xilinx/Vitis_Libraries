@@ -2,7 +2,8 @@
 #include <fstream>
 #include <strstream>
 #include <opencv2/opencv.hpp>
-#include "xf_rgbir_config_axivideo.h"
+#include "xf_rgbir_tb_axivideo.cpp_accel_config.h"
+#include "xf_rgbir_tb_axivideo.cpp_tb_config.h"
 #include "common/xf_axi.hpp"
 #include "common/xf_sw_utils.hpp"
 #include "common/xf_headers.hpp"
@@ -446,13 +447,13 @@ int main(int argc, char* argv[]) {
     ir_out.create(in_rows, in_cols, CV_INTYPE);
 
     char bformat = BPATTERN;
-    xf::cv::cvMat2AXIvideoxf<NPC>(img_in, Input);
+    xf::cv::cvMat2AXIvideoxf<NPPCX>(img_in, Input);
 
     rgbir_accel(Input, rggbOutput, irOutput, R_IR_C1_wgts, R_IR_C2_wgts, B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts, wgts,
                 in_rows, in_cols);
 
-    xf::cv::AXIvideo2cvMatxf<NPC>(rggbOutput, rggb_out);
-    xf::cv::AXIvideo2cvMatxf<NPC>(irOutput, ir_out);
+    xf::cv::AXIvideo2cvMatxf<NPPCX>(rggbOutput, rggb_out);
+    xf::cv::AXIvideo2cvMatxf<NPPCX>(irOutput, ir_out);
 
 #ifndef __SYNTHESIS
 #ifdef __DEBUG

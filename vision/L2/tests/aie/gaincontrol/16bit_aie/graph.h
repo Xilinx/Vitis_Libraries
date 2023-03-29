@@ -23,7 +23,7 @@
 
 static constexpr int TILE_ELEMENTS = 4096;
 static constexpr int TILE_WINDOW_SIZE = TILE_ELEMENTS * sizeof(int16_t) + xf::cv::aie::METADATA_SIZE;
-
+static constexpr int ELEM_WITH_METADATA = TILE_ELEMENTS + (xf::cv::aie::METADATA_SIZE / sizeof(int16_t));
 static constexpr int XF_BAYER_RG = 0;
 static constexpr int XF_BAYER_GR = 1;
 static constexpr int XF_BAYER_BG = 2;
@@ -51,8 +51,12 @@ class gaincontrolGraph : public adf::graph {
         k1 = kernel::create(gaincontrol<XF_BAYER_RG>);
 
         // create nets to connect kernels and IO ports
-        connect<window<TILE_WINDOW_SIZE> >(in1, k1.in[0]);
-        connect<window<TILE_WINDOW_SIZE> >(k1.out[0], out);
+        adf::connect<>(in1, k1.in[0]);
+        adf::connect<>(k1.out[0], out);
+
+        adf::dimensions(k1.in[0]) = {ELEM_WITH_METADATA};
+        adf::dimensions(k1.out[0]) = {ELEM_WITH_METADATA};
+
         connect<parameter>(rgain, async(k1.in[1]));
         connect<parameter>(bgain, async(k1.in[2]));
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_tonemapping_config.h"
+#include "xf_tonemapping_tb_config.h"
 int main(int argc, char** argv) {
     cv::Mat in_img;
 
@@ -42,9 +42,9 @@ int main(int argc, char** argv) {
     cv::Mat out_img_tmp(rows, cols, CV_8UC3);
     cv::Mat out_img(rows, cols, CV_8UC3);
     ////////////Top function call //////////////////
-    tonemapping_accel((ap_uint<IN_PTR_WIDTH>*)in_img.data, (ap_uint<OUT_PTR_WIDTH>*)out_img_tmp.data, rows, cols,
+    tonemapping_accel((ap_uint<INPUT_PTR_WIDTH>*)in_img.data, (ap_uint<OUTPUT_PTR_WIDTH>*)out_img_tmp.data, rows, cols,
                       blk_height, blk_width);
-    tonemapping_accel((ap_uint<IN_PTR_WIDTH>*)in_img.data, (ap_uint<OUT_PTR_WIDTH>*)out_img.data, rows, cols,
+    tonemapping_accel((ap_uint<INPUT_PTR_WIDTH>*)in_img.data, (ap_uint<OUTPUT_PTR_WIDTH>*)out_img.data, rows, cols,
                       blk_height, blk_width);
 
     // Write output image

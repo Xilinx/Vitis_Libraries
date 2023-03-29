@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_gaincontrol_config.h"
+#include "xf_gaincontrol_tb_config.h"
 
 #include <time.h>
 void gainControlOCV(cv::Mat input, cv::Mat& output, int code, unsigned short rgain, unsigned short bgain) {

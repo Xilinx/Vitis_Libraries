@@ -19,10 +19,10 @@ hardware.
 Prerequisites
 =============
 
-#. Valid installation of Vitis™ 2022.2 or later version and the
+#. Valid installation of Vitis™ 2023.1 or later version and the
    corresponding licenses.
 #. Download the Vitis Vision library from github.
-#. Install the card for which the platform is supported in Vitis 2022.2 or
+#. Install the card for which the platform is supported in Vitis 2023.1 or
    later versions.
 #. If targeting an embedded platform, downlaod the platform, common images and set up the evaluation board.
 #. Xilinx® Runtime (XRT) must be installed. XRT provides software
@@ -416,7 +416,7 @@ Vitis Vision.
        cl::Device device = devices[0];
        cl::Context context(device);
        cl::CommandQueue q(context, device,CL_QUEUE_PROFILING_ENABLE);
-       std::string device_name = device.getInfo<CL_DEVICE_NAME>();
+       std::string device_name = device.getInfo<CL_PLATFORM_NAME>();
 
        // Kernel 1: Canny
        std::string binaryFile=xcl::find_binary_file(device_name,"krnl_canny");

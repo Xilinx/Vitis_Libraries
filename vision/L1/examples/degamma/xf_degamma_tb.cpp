@@ -20,7 +20,7 @@
 #include <iostream>
 #include <math.h>
 
-#include "xf_degamma_config.h"
+#include "xf_degamma_tb_config.h"
 
 void bayerizeImage(cv::Mat in_img, cv::Mat& bayer_image, cv::Mat& cfa_output, int code) {
     for (int i = 0; i < in_img.rows; i++) {
@@ -152,17 +152,17 @@ int main(int argc, char** argv) {
     }
 
 #if T_8U
-    out_img.create(in_img.rows, in_img.cols, CV_8UC1);
-    out_hls.create(in_img.rows, in_img.cols, CV_8UC1);
-    diff.create(in_img.rows, in_img.cols, CV_8UC1);
-    gamma_img.create(in_img.rows, in_img.cols, CV_8UC1);
-    cfa_bayer_output.create(in_img.rows, in_img.cols, CV_8UC1);
+    out_img.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    out_hls.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    diff.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    gamma_img.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    cfa_bayer_output.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
 #else
-    out_img.create(in_img.rows, in_img.cols, CV_16UC1);
-    out_hls.create(in_img.rows, in_img.cols, CV_16UC1);
-    diff.create(in_img.rows, in_img.cols, CV_16UC1);
-    gamma_img.create(in_img.rows, in_img.cols, CV_16UC1);
-    cfa_bayer_output.create(in_img.rows, in_img.cols, CV_16UC1);
+    out_img.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    out_hls.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    diff.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    gamma_img.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    cfa_bayer_output.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
 #endif
 
     int height = in_img.rows;
@@ -220,7 +220,7 @@ int main(int argc, char** argv) {
                                             {40960, 1.1, 21782},
                                             {49152, 1.4, 34162},
                                             {57344, 1.715, 49506},
-                                            {65536, 2.03, 67554}},
+                                            {65536, 2.0, 65536}},
                                            {{8192, 0.082, 0},
                                             {16384, 0.296, 1749},
                                             {24576, 0.545, 5825},
@@ -228,7 +228,7 @@ int main(int argc, char** argv) {
                                             {40960, 1.1, 21782},
                                             {49152, 1.4, 34162},
                                             {57344, 1.715, 49506},
-                                            {65536, 2.03, 67554}},
+                                            {65536, 2.0, 65536}},
                                            {{8192, 0.082, 0},
                                             {16384, 0.296, 1749},
                                             {24576, 0.545, 5825},
@@ -236,7 +236,7 @@ int main(int argc, char** argv) {
                                             {40960, 1.1, 21782},
                                             {49152, 1.4, 34162},
                                             {57344, 1.715, 49506},
-                                            {65536, 2.03, 67554}}}; // 8 knee points {upper_bound, slope, intercept}
+                                            {65536, 2.0, 65536}}}; // 8 knee points {upper_bound, slope, intercept}
 #endif
 
     for (int i = 0; i < height; i++) {

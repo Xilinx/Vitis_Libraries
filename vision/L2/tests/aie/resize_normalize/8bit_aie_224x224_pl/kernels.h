@@ -19,7 +19,7 @@
 
 #include <adf/window/types.h>
 #include <adf/stream/types.h>
-#include "adf.h"
+#include <adf.h>
 #include "config.h"
 
 template <int WIDTH_IN, int HEIGHT_IN, int WIDTH_OUT, int HEIGHT_OUT, int IMG_HEIGHT_OUT>
@@ -31,8 +31,8 @@ class ResizeNormRunner {
    public:
     ResizeNormRunner(uint16_t (&pos)[WIDTH_OUT], uint8_t (&wtsx)[WIDTH_OUT << 2], uint8_t (&wtsy)[IMG_HEIGHT_OUT])
         : mPos(pos), mwtsX(wtsx), mwtsY(wtsy) {}
-    void run(input_window<uint8_t>* input,
-             output_window<int8_t>* output,
+    void run(adf::input_buffer<uint8_t>& input,
+             adf::output_buffer<int8_t>& output,
              int a0,
              int a1,
              int a2,

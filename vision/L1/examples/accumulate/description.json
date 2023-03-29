@@ -21,21 +21,21 @@
         "source": [
             "${XF_PROJ_ROOT}/L1/examples/accumulate/xf_accumulate_image_accel.cpp"
         ], 
-        "cflags": "-I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/accumulate/build -I ./ -D__SDSVHLS__ -std=c++0x", 
-        "csimflags": "-I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/accumulate/build -I ./ -D__SDSVHLS__ -std=c++0x"
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/accumulate/config -I ./ -D__SDSVHLS__ -std=c++0x", 
+        "csimflags": "-I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/accumulate/config -I ./ -D__SDSVHLS__ -std=c++0x"
     }, 
     "testbench": {
         "source": [
             "${XF_PROJ_ROOT}/L1/examples/accumulate/xf_accumulate_image_tb.cpp"
         ], 
-        "cflags": "-I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/accumulate/build -I ./ -D__SDSVHLS__ -std=c++0x", 
+        "cflags": "-I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/accumulate/config -I ./ -D__SDSVHLS__ -std=c++0x", 
         "ldflags": "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core", 
         "argv": {
             "hls_csim": " ${XF_PROJ_ROOT}/data/128x128_1.png ${XF_PROJ_ROOT}/data/128x128_2.png ", 
             "hls_cosim": " ${XF_PROJ_ROOT}/data/128x128_1.png ${XF_PROJ_ROOT}/data/128x128_2.png "
         }, 
         "stdmath": false, 
-        "csimflags": "-I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/accumulate/build -I ./ -D__SDSVHLS__ -std=c++0x"
+        "csimflags": "-I${XF_PROJ_ROOT}/L1/include -I ${XF_PROJ_ROOT}/L1/examples/accumulate/config -I ./ -D__SDSVHLS__ -std=c++0x"
     }, 
     "testinfo": {
         "disable": false, 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 
 #include "common/xf_headers.hpp"
 #include "xcl2.hpp"
-#include "xf_convert_bitdepth_config.h"
-
+#include "xf_convertbitdepth_tb_config.h"
 int main(int argc, char** argv) {
     if (argc != 2) {
         fprintf(stderr, "Usage: %s <INPUT IMAGE PATH >\n", argv[0]);
@@ -36,15 +35,15 @@ int main(int argc, char** argv) {
     }
 
     // Convert first to initial type:
-    in_img.convertTo(input_img, OCV_INTYPE);
+    in_img.convertTo(input_img, CV_IN_TYPE);
 
     // Create memory for output image
-    cv::Mat ocv_ref(in_img.rows, in_img.cols, OCV_OUTTYPE);
-    cv::Mat diff(in_img.rows, in_img.cols, OCV_OUTTYPE);
-    cv::Mat out_img(in_img.rows, in_img.cols, OCV_OUTTYPE);
+    cv::Mat ocv_ref(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    cv::Mat diff(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    cv::Mat out_img(in_img.rows, in_img.cols, CV_OUT_TYPE);
 
     // Opencv reference::
-    input_img.convertTo(ocv_ref, OCV_OUTTYPE);
+    input_img.convertTo(ocv_ref, CV_OUT_TYPE);
     cv::imwrite("out_ocv.jpg", ocv_ref);
 
     int shift = 0;
@@ -69,9 +68,9 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::cout << "INFO: Device found - " << device_name << std::endl;
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPC1) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPC1) << std::endl;
-    std::cout << "NPPC:" << NPC1 << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     // Load binary:
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_convertbitdepth");

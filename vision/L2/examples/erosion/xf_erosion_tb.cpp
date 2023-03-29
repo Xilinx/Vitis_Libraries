@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 
 #include "common/xf_headers.hpp"
 #include "xcl2.hpp"
-#include "xf_erosion_config.h"
-
+#include "xf_erosion_tb_config.h"
 int main(int argc, char** argv) {
     if (argc != 2) {
         fprintf(stderr, "Usage: %s <INPUT IMAGE PATH 1>\n", argv[0]);
@@ -43,14 +42,14 @@ int main(int argc, char** argv) {
     std::cout << "Input image width  : " << width << std::endl;
 #if GRAY
     // Create memory for output images:
-    ocv_ref.create(in_gray.rows, in_gray.cols, CV_8UC1);
-    out_img.create(in_gray.rows, in_gray.cols, CV_8UC1);
-    diff.create(in_gray.rows, in_gray.cols, CV_8UC1);
+    ocv_ref.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
+    out_img.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
+    diff.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
 #else
     // Create memory for output images:
-    ocv_ref.create(in_gray.rows, in_gray.cols, CV_8UC3);
-    out_img.create(in_gray.rows, in_gray.cols, CV_8UC3);
-    diff.create(in_gray.rows, in_gray.cols, CV_8UC3);
+    ocv_ref.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
+    out_img.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
+    diff.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
 #endif
     // OpenCV reference:
     cv::Mat element = cv::getStructuringElement(KERNEL_SHAPE, cv::Size(FILTER_SIZE, FILTER_SIZE), cv::Point(-1, -1));
@@ -82,9 +81,9 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::cout << "INFO: Device found - " << device_name << std::endl;
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(TYPE, NPC1) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(TYPE, NPC1) << std::endl;
-    std::cout << "NPPC:" << NPC1 << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     // Load binary:
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_erosion");

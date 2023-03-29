@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
 #include <string>
 #include <map>
 #include "common/xf_headers.hpp"
-#include "xf_extract_eframes_config.h"
+#include "xf_extract_eframes_tb_config.h"
 using namespace std;
 
 static void Mat2MultiBayerAXIvideo(cv::Mat& img, InVideoStrm_t_e_s& AXI_video_strm, unsigned char InColorFormat) {
@@ -33,22 +33,22 @@ static void Mat2MultiBayerAXIvideo(cv::Mat& img, InVideoStrm_t_e_s& AXI_video_st
     unsigned short cv_pix;
 #endif
     ap_axiu<AXI_WIDTH_IN, 1, 1, 1> axi;
-    int depth = XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC);
+    int depth = XF_DTPIXELDEPTH(IN_TYPE, NPPCX);
 
     for (i = 0; i < img.rows; i++) {
-        for (j = 0; j < img.cols; j += XF_NPPC) {
+        for (j = 0; j < img.cols; j += NPPCX) {
             if ((i == 0) && (j == 0)) {
                 axi.user = 1;
             } else {
                 axi.user = 0;
             }
-            if (j == (img.cols - XF_NPPC)) {
+            if (j == (img.cols - NPPCX)) {
                 axi.last = 1;
             } else {
                 axi.last = 0;
             }
             axi.data = -1;
-            for (l = 0; l < XF_NPPC; l++) {
+            for (l = 0; l < NPPCX; l++) {
                 if (img.depth() == CV_16U)
                     cv_pix = img.at<unsigned short>(i, j + l);
                 else
@@ -92,11 +92,11 @@ static void MultiPixelAXIvideo2Mat_gray(OutVideoStrm_t_e_s& AXI_video_strm, cv::
 #else
     unsigned short cv_pix;
 #endif
-    int depth = XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC);
+    int depth = XF_DTPIXELDEPTH(IN_TYPE, NPPCX);
     bool sof = 0;
 
     for (i = 0; i < img.rows; i++) {
-        for (j = 0; j < img.cols / XF_NPPC; j++) { // 4 pixels read per iteration
+        for (j = 0; j < img.cols / NPPCX; j++) { // 4 pixels read per iteration
             AXI_video_strm >> axi;
             if ((i == 0) && (j == 0)) {
                 if (axi.user.to_int() == 1) {
@@ -106,13 +106,13 @@ static void MultiPixelAXIvideo2Mat_gray(OutVideoStrm_t_e_s& AXI_video_strm, cv::
                 }
             }
             if (sof) {
-                for (l = 0; l < XF_NPPC; l++) {
+                for (l = 0; l < NPPCX; l++) {
                     cv_pix = axi.data(l * depth + depth - 1, l * depth);
 
 #if T_8U
-                    img.at<unsigned char>(i, (XF_NPPC * j + l)) = cv_pix;
+                    img.at<unsigned char>(i, (NPPCX * j + l)) = cv_pix;
 #else
-                    img.at<unsigned short>(i, (XF_NPPC * j + l)) = cv_pix;
+                    img.at<unsigned short>(i, (NPPCX * j + l)) = cv_pix;
 #endif
                 }
             } // if(sof)

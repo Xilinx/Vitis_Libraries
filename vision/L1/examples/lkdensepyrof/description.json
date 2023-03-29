@@ -21,21 +21,21 @@
         "source": [
             "${XF_PROJ_ROOT}/L1/examples/lkdensepyrof/xf_pyr_dense_optical_flow_accel.cpp"
         ], 
-        "cflags": " -I ${XF_PROJ_ROOT}/L1/examples/lkdensepyrof/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x", 
-        "csimflags": " -I ${XF_PROJ_ROOT}/L1/examples/lkdensepyrof/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+        "cflags": " -I ${XF_PROJ_ROOT}/L1/examples/lkdensepyrof/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x", 
+        "csimflags": " -I ${XF_PROJ_ROOT}/L1/examples/lkdensepyrof/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
     }, 
     "testbench": {
         "source": [
             "${XF_PROJ_ROOT}/L1/examples/lkdensepyrof/xf_pyr_dense_optical_flow_tb.cpp"
         ], 
-        "cflags": " -I ${XF_PROJ_ROOT}/L1/examples/lkdensepyrof/build -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x", 
+        "cflags": " -I ${XF_PROJ_ROOT}/L1/examples/lkdensepyrof/config -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x", 
         "ldflags": "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d -lopencv_videoio -lopencv_video -lopencv_calib3d -l opencv_objdetect", 
         "argv": {
             "hls_csim": " ${XF_PROJ_ROOT}/data/im0.png ${XF_PROJ_ROOT}/data/im1.png ", 
             "hls_cosim": " ${XF_PROJ_ROOT}/data/im0.png ${XF_PROJ_ROOT}/data/im1.png "
         }, 
         "stdmath": false, 
-        "csimflags": " -I ${XF_PROJ_ROOT}/L1/examples/lkdensepyrof/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+        "csimflags": " -I ${XF_PROJ_ROOT}/L1/examples/lkdensepyrof/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
     }, 
     "testinfo": {
         "disable": false, 

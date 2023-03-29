@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-#include "xf_gaussian_diff_config.h"
+#include "xf_gaussian_diff_accel_config.h"
 
-static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(TYPE, NPC1)) / 8) / (PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(IN_TYPE, NPPCX)) / 8) / (INPUT_PTR_WIDTH / 8);
 
-void gaussian_diff_accel(
-    ap_uint<PTR_WIDTH>* img_in, float sigma1, float sigma2, ap_uint<PTR_WIDTH>* img_out, int rows, int cols) {
+void gaussian_diff_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
+                         float sigma1,
+                         float sigma2,
+                         ap_uint<OUTPUT_PTR_WIDTH>* img_out,
+                         int rows,
+                         int cols) {
 // clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0 depth=__XF_DEPTH
     #pragma HLS INTERFACE m_axi      port=img_out       offset=slave  bundle=gmem1   depth=__XF_DEPTH
@@ -30,12 +34,12 @@ void gaussian_diff_accel(
     #pragma HLS INTERFACE s_axilite  port=return 			          bundle=control
     // clang-format on
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0> imgInput(rows, cols);
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1> imgin1(rows, cols);
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_2> imgin2(rows, cols);
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_3> imgin3(rows, cols);
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_4> imgin4(rows, cols);
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> imgOutput(rows, cols);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_0> imgInput(rows, cols);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1> imgin1(rows, cols);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_2> imgin2(rows, cols);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_3> imgin3(rows, cols);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_4> imgin4(rows, cols);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT_1> imgOutput(rows, cols);
 
 // clang-format off
 // clang-format on
@@ -45,22 +49,22 @@ void gaussian_diff_accel(
     // clang-format on
 
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0>(img_in, imgInput);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_0>(img_in, imgInput);
 
     // Run xfOpenCV kernel:
-    xf::cv::GaussianBlur<FILTER_WIDTH_1, XF_BORDER_CONSTANT, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_0,
+    xf::cv::GaussianBlur<FILTER_WIDTH_1, XF_BORDER_CONSTANT, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_0,
                          XF_CV_DEPTH_IN_1>(imgInput, imgin1, sigma1);
 
-    xf::cv::duplicateMat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2, XF_CV_DEPTH_IN_3>(
+    xf::cv::duplicateMat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2, XF_CV_DEPTH_IN_3>(
         imgin1, imgin2, imgin3);
 
-    xf::cv::GaussianBlur<FILTER_WIDTH_2, XF_BORDER_CONSTANT, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_2,
+    xf::cv::GaussianBlur<FILTER_WIDTH_2, XF_BORDER_CONSTANT, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_2,
                          XF_CV_DEPTH_IN_4>(imgin2, imgin4, sigma2);
-    xf::cv::subtract<XF_CONVERT_POLICY_SATURATE, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN_3, XF_CV_DEPTH_IN_4,
+    xf::cv::subtract<XF_CONVERT_POLICY_SATURATE, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_3, XF_CV_DEPTH_IN_4,
                      XF_CV_DEPTH_OUT_1>(imgin3, imgin4, imgOutput);
 
     // Convert output xf::cv::Mat object to output array:
-    xf::cv::xfMat2Array<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(imgOutput, img_out);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT_1>(imgOutput, img_out);
 
     return;
 } // End of kernel

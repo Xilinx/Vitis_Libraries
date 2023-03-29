@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_autowhitebalance_config.h"
+#include "xf_autowhitebalance_tb_config.h"
 using namespace std;
 
 template <typename T>
@@ -239,26 +239,19 @@ int main(int argc, char** argv) {
     }
 
     cv::Mat in_gray, in_gray1, ocv_ref, out_gray, diff, ocv_ref_in1, ocv_ref_in2, inout_gray1, ocv_ref_gw;
-#if T_8U
+
     in_gray = cv::imread(argv[1], 1); // read image
-#else
-    in_gray = cv::imread(argv[1], -1); // read image
-#endif
+
     if (in_gray.data == NULL) {
         fprintf(stderr, "Cannot open image %s\n", argv[1]);
         return -1;
     }
-#if T_8U
-    ocv_ref.create(in_gray.rows, in_gray.cols, CV_8UC3);
-    ocv_ref_gw.create(in_gray.rows, in_gray.cols, CV_8UC3);
-    out_gray.create(in_gray.rows, in_gray.cols, CV_8UC3);
-    diff.create(in_gray.rows, in_gray.cols, CV_8UC3);
-#else
-    ocv_ref.create(in_gray.rows, in_gray.cols, CV_16UC3);
-    ocv_ref_gw.create(in_gray.rows, in_gray.cols, CV_16UC3);
-    out_gray.create(in_gray.rows, in_gray.cols, CV_16UC3);
-    diff.create(in_gray.rows, in_gray.cols, CV_16UC3);
-#endif
+
+    ocv_ref.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
+    ocv_ref_gw.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
+    out_gray.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
+    diff.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
+
     float thresh = 0.9;
 /// simple white balancing cref code
 #if T_8U

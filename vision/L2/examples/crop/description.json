@@ -183,7 +183,7 @@
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-                "LIB_DIR/L2/examples/crop/build"
+                "LIB_DIR/L2/examples/crop/config"
             ], 
             "options": "-O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include", 
             "symbols": [
@@ -198,7 +198,7 @@
                 "__SDA_MEM_MAP__"
             ], 
             "includepaths": [
-                "LIB_DIR/L2/examples/crop/build"
+                "LIB_DIR/L2/examples/crop/config"
             ], 
             "clflags": []
         }

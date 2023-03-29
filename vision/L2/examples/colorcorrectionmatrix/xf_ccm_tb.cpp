@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 #include "common/xf_headers.hpp"
 #include "xcl2.hpp"
-#include "xf_ccm_config.h"
+#include "xf_ccm_tb_config.h"
 #include <iostream>
 
 using namespace std;
@@ -224,15 +224,15 @@ int main(int argc, char** argv) {
     std::cout << "Input image height : " << height << std::endl;
     std::cout << "Input image width  : " << width << std::endl;
 #if T_8U
-    out_img.create(in_img.rows, in_img.cols, CV_8UC3);
-    out_img_hls.create(in_img.rows, in_img.cols, CV_8UC3);
-    diff.create(in_img.rows, in_img.cols, CV_8UC3);
+    out_img.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    out_img_hls.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    diff.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
     size_t image_in_size_bytes = in_img.rows * in_img.cols * 3 * sizeof(unsigned char);
     size_t image_out_size_bytes = image_in_size_bytes;
 #else
-    out_img.create(in_img.rows, in_img.cols, CV_16UC3);
-    out_img_hls.create(in_img.rows, in_img.cols, CV_16UC3);
-    diff.create(in_img.rows, in_img.cols, CV_16UC3);
+    out_img.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    out_img_hls.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    diff.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
     size_t image_in_size_bytes = in_img.rows * in_img.cols * 3 * sizeof(unsigned short);
     size_t image_out_size_bytes = image_in_size_bytes;
 #endif
@@ -252,9 +252,9 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::cout << "INFO: Device found - " << device_name << std::endl;
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPIX) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPIX) << std::endl;
-    std::cout << "NPPC:" << NPIX << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     // Load binary:
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_ccm");

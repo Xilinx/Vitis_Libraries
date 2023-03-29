@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #include "common/xf_headers.hpp"
-#include "xf_ccm_config.h"
+#include "xf_ccm_tb_config.h"
 #include <iostream>
 
 using namespace std;
@@ -219,15 +219,9 @@ int main(int argc, char** argv) {
 
     imwrite("in_img.png", in_img);
 
-#if T_8U
-    out_img.create(in_img.rows, in_img.cols, CV_8UC3);
-    out_img_hls.create(in_img.rows, in_img.cols, CV_8UC3);
-    diff.create(in_img.rows, in_img.cols, CV_8UC3);
-#else
-    out_img.create(in_img.rows, in_img.cols, CV_16UC3);
-    out_img_hls.create(in_img.rows, in_img.cols, CV_16UC3);
-    diff.create(in_img.rows, in_img.cols, CV_16UC3);
-#endif
+    out_img.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    out_img_hls.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
+    diff.create(in_img.rows, in_img.cols, CV_OUT_TYPE);
 
     colorcorrectionmatrix(in_img, out_img);
 

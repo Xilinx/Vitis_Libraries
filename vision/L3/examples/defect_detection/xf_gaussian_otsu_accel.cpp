@@ -28,6 +28,7 @@ void gaussian_otsu_accel(ap_uint<GAUSSIAN_INPUT_PTR_WIDTH>* img_inp,
     #pragma HLS INTERFACE m_axi     port=img_inp  offset=slave bundle=gmem1
     #pragma HLS INTERFACE m_axi     port=img_out  offset=slave bundle=gmem2
 	#pragma HLS INTERFACE m_axi     port=Otsuval  offset=slave bundle=gmem3
+	#pragma HLS INTERFACE m_axi     port=array_params depth=12
     #pragma HLS INTERFACE s_axilite port=sigma     
     #pragma HLS INTERFACE s_axilite port=rows     
     #pragma HLS INTERFACE s_axilite port=cols     

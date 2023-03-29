@@ -1,5 +1,5 @@
 {
-    "name": "Xilinx ISP Stats RGB L2 Test", 
+    "name": "Xilinx ISP Stats BGR L2 Test", 
     "description": [
         "ISP Stats RGB L2 function example"
     ], 
@@ -183,7 +183,7 @@
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-                "LIB_DIR/L2/examples/ispstats/build"
+                "LIB_DIR/L2/examples/ispstats/config"
             ], 
             "options": "-O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include"
         }
@@ -192,7 +192,7 @@
         "compiler": {
             "symbols": [], 
             "includepaths": [
-                "LIB_DIR/L2/examples/ispstats/build"
+                "LIB_DIR/L2/examples/ispstats/config"
             ], 
             "clflags": []
         }

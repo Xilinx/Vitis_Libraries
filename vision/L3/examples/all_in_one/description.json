@@ -100,7 +100,7 @@
     "launch": [
         {
             "target": "sw_emu", 
-            "cmd_args": "LIB_DIR/data/cropped1_128x128.png LIB_DIR/data/cropped3_128x128.png LIB_DIR/data/input-lut-33.txt ", 
+            "cmd_args": "LIB_DIR/data/ltm_input_HD_sef.png LIB_DIR/data/ltm_input_HD_lef.png LIB_DIR/data/ltm_input_HD.png LIB_DIR/data/input-lut-33.txt ", 
             "name": "sw_emu", 
             "ld_library_path": [
                 "$(OPENCV_LIB)", 
@@ -110,7 +110,7 @@
         }, 
         {
             "target": "hw_emu", 
-            "cmd_args": "LIB_DIR/data/cropped1_128x128.png LIB_DIR/data/cropped3_128x128.png LIB_DIR/data/input-lut-33.txt", 
+            "cmd_args": "LIB_DIR/data/ltm_input_sef_128x128.png LIB_DIR/data/ltm_input_lef_128x128.png LIB_DIR/data/ltm_input_128x128.png LIB_DIR/data/input-lut-33.txt ", 
             "name": "hw_emu", 
             "ld_library_path": [
                 "$(OPENCV_LIB)", 
@@ -120,7 +120,7 @@
         }, 
         {
             "target": "hw", 
-            "cmd_args": "LIB_DIR/data/cropped1_128x128.png LIB_DIR/data/cropped3_128x128.png LIB_DIR/data/input-lut-33.txt", 
+            "cmd_args": "LIB_DIR/data/ltm_input_HD_sef.png LIB_DIR/data/ltm_input_HD_lef.png LIB_DIR/data/ltm_input_HD.png LIB_DIR/data/input-lut-33.txt ", 
             "name": "hardware_build", 
             "ld_library_path": [
                 "$(OPENCV_LIB)", 
@@ -130,8 +130,9 @@
         }
     ], 
     "data": [
-        "LIB_DIR/data/cropped1_128x128.png",
-        "LIB_DIR/data/cropped3_128x128.png",
+        "LIB_DIR/data/ltm_input_HD_sef.png",
+        "LIB_DIR/data/ltm_input_HD_lef.png",
+        "LIB_DIR/data/ltm_input_HD.png",
         "LIB_DIR/data/input-lut-33.txt"
     ], 
     "host": {

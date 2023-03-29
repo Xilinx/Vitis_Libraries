@@ -25,12 +25,11 @@ if {![info exists CLKP]} {
 
 open_project -reset $PROJ
 
-add_files "${XF_PROJ_ROOT}/L1/examples/meanshifttracking/xf_mean_shift_accel.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/meanshifttracking/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x -D__SDA_MEM_MAP__" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/meanshifttracking/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x -D__SDA_MEM_MAP__"
-add_files -tb "${XF_PROJ_ROOT}/L1/examples/meanshifttracking/xf_mean_shift_tb.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/meanshifttracking/build -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x -D__SDA_MEM_MAP__" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/meanshifttracking/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x -D__SDA_MEM_MAP__"
+add_files "${XF_PROJ_ROOT}/L1/examples/meanshifttracking/xf_mean_shift_accel.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/meanshifttracking/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x -D__SDA_MEM_MAP__" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/meanshifttracking/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x -D__SDA_MEM_MAP__"
+add_files -tb "${XF_PROJ_ROOT}/L1/examples/meanshifttracking/xf_mean_shift_tb.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/meanshifttracking/config -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x -D__SDA_MEM_MAP__" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/meanshifttracking/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x -D__SDA_MEM_MAP__"
 set_top mean_shift_accel
 
 open_solution -reset $SOLN
-
 
 
 

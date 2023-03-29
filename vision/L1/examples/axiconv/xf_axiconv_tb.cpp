@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_axiconv_config.h"
+#include "xf_axiconv_tb_config.h"
 #include "common/xf_axi.hpp"
 
 using namespace std;
@@ -37,11 +37,11 @@ int main(int argc, char** argv) {
 
     int rows = img.rows;
     int cols = img.cols;
-    cv::Mat out_img(rows, cols, CV_8UC1);
+    cv::Mat out_img(rows, cols, CV_OUT_TYPE);
 
     // convert input to axiStream
     hls::stream<ap_axiu<_W, 1, 1, 1> > _src;
-    xf::cv::cvMat2AXIvideoxf<XF_NPPC1, _W>(img, _src);
+    xf::cv::cvMat2AXIvideoxf<NPPCX, _W>(img, _src);
 
     // output axiStream
     hls::stream<ap_axiu<_W, 1, 1, 1> > _dst;
@@ -49,14 +49,14 @@ int main(int argc, char** argv) {
     // Launch the kernel
     axiconv_accel(_src, _dst, rows, cols);
 
-    xf::cv::AXIvideo2cvMatxf<XF_NPPC1>(_dst, out_img);
+    xf::cv::AXIvideo2cvMatxf<NPPCX>(_dst, out_img);
 
     // Write output image
     cv::imwrite("output.png", out_img);
 
     /**** validation ****/
     // diff
-    diff.create(img.rows, img.cols, CV_8UC1);
+    diff.create(img.rows, img.cols, CV_OUT_TYPE);
     // Compute absolute difference image
     cv::absdiff(img, out_img, diff);
     imwrite("error.png", diff); // Save the difference image for debugging purpose

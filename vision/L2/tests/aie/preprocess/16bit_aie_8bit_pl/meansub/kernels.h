@@ -16,14 +16,17 @@
 
 #include <adf/window/types.h>
 #include <adf/stream/types.h>
-
+#include <adf.h>
 #include "config.h"
 
 #if OP_MODE == 0
-void pp_top(input_window_int16* input, output_window_int16* output, const float& alpha);
+void pp_top(adf::input_buffer<int16>& input, adf::output_buffer<int16>& output, const float& alpha);
 #elif OP_MODE == 1
-void pp_top(input_window_int16* input, output_window_int16* output, const float& alpha, const float& beta);
+void pp_top(adf::input_buffer<int16>& input, adf::output_buffer<int16>& output, const float& alpha, const float& beta);
 #else
-void pp_top(
-    input_window_int16* input, output_window_int16* output, const float& alpha, const float& beta, const float& gamma);
+void pp_top(adf::input_buffer<int16>& input,
+            adf::output_buffer<int16>& output,
+            const float& alpha,
+            const float& beta,
+            const float& gamma);
 #endif

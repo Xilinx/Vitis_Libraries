@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_gaussian_diff_config.h"
+#include "xf_gaussian_diff_tb_config.h"
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -72,8 +72,8 @@ int main(int argc, char** argv) {
 
     //////////Top function call //////////////////////////////
 
-    gaussian_diff_accel((ap_uint<PTR_WIDTH>*)in_gray.data, sigma1, sigma2, (ap_uint<PTR_WIDTH>*)out_img.data, rows,
-                        cols);
+    gaussian_diff_accel((ap_uint<INPUT_PTR_WIDTH>*)in_gray.data, sigma1, sigma2,
+                        (ap_uint<OUTPUT_PTR_WIDTH>*)out_img.data, rows, cols);
 
     // Write the output of kernel:
     cv::imwrite("output_hls.png", out_img);

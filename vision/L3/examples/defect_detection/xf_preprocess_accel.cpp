@@ -19,12 +19,13 @@
 extern "C" {
 void preprocess_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                       ap_uint<OUTPUT_PTR_WIDTH>* img_out,
-                      uint8_t* fw_img_out,
+                      ap_uint<OUTPUT_PTR_WIDTH>* fw_img_out,
                       int* obj_pix,
                       unsigned char thresh,
                       unsigned char maxval,
                       int rows,
-                      int cols) {
+                      int cols,
+                      int stride) {
 // clang-format off
     #pragma HLS INTERFACE m_axi     port=img_inp  offset=slave bundle=gmem1
     #pragma HLS INTERFACE m_axi     port=img_out  offset=slave bundle=gmem2
@@ -35,6 +36,7 @@ void preprocess_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     #pragma HLS INTERFACE s_axilite port=maxval     
     #pragma HLS INTERFACE s_axilite port=rows     
     #pragma HLS INTERFACE s_axilite port=cols     
+    #pragma HLS INTERFACE s_axilite port=stride   
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
@@ -48,6 +50,7 @@ void preprocess_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
 
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_OUT> out_mat(rows, cols);
 
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> in_mat_fw(rows, cols);
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> out_mat_fw(rows, cols);
     xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> out_mat_ret(rows, cols);
 
@@ -66,11 +69,14 @@ void preprocess_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
         xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPIX>(imgOutput, img_out);*/
 
     xf::cv::duplicateMat<TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_OUT, XF_CV_DEPTH_OUT, XF_CV_DEPTH_OUT>(
-        out_mat, out_mat_fw, out_mat_ret);
+        out_mat, in_mat_fw, out_mat_ret);
 
-    xf::cv::fw_cca<TYPE, HEIGHT, WIDTH, NPIX>(out_mat_fw, fw_img_out, tmp_obj, rows, cols);
+    xf::cv::fw_cca<TYPE, HEIGHT, WIDTH, NPIX>(in_mat_fw, out_mat_fw, tmp_obj, rows, cols);
 
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_OUT>(out_mat_ret, img_out);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_OUT, 1>(out_mat_ret, img_out, stride);
+
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_OUT, 1>(out_mat_fw, fw_img_out,
+                                                                                         stride);
 
     *obj_pix = tmp_obj;
 }

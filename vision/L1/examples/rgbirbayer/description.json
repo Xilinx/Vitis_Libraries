@@ -21,21 +21,21 @@
         "source": [
             "${XF_PROJ_ROOT}/L1/examples/accumulate/xf_rgbir_accel.cpp"
         ], 
-        "cflags": " -I ${XF_PROJ_ROOT}/L1/examples/rgbirbayer/build -I${XF_PROJ_ROOT}/L1/include -I ./ ", 
-        "csimflags": " -I ${XF_PROJ_ROOT}/L1/examples/rgbirbayer/build -I${XF_PROJ_ROOT}/L1/include -I ./ "
+        "cflags": " -I ${XF_PROJ_ROOT}/L1/examples/rgbirbayer/config -I${XF_PROJ_ROOT}/L1/include -I ./ ", 
+        "csimflags": " -I ${XF_PROJ_ROOT}/L1/examples/rgbirbayer/config -I${XF_PROJ_ROOT}/L1/include -I ./ "
     }, 
     "testbench": {
         "source": [
             "${XF_PROJ_ROOT}/L1/examples/accumulate/xf_rgbir_tb.cpp"
         ], 
-        "cflags": " -I ${XF_PROJ_ROOT}/L1/examples/rgbirbayer/build -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ ", 
+        "cflags": " -I ${XF_PROJ_ROOT}/L1/examples/rgbirbayer/config -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ ", 
         "ldflags": "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core", 
         "argv": {
             "hls_csim": " ", 
             "hls_cosim": " "
         }, 
         "stdmath": false, 
-        "csimflags": " -I ${XF_PROJ_ROOT}/L1/examples/rgbirbayer/build -I${XF_PROJ_ROOT}/L1/include -I ./"
+        "csimflags": " -I ${XF_PROJ_ROOT}/L1/examples/rgbirbayer/config -I${XF_PROJ_ROOT}/L1/include -I ./"
     }, 
     "testinfo": {
         "disable": true, 

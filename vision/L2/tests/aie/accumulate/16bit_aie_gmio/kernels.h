@@ -18,13 +18,12 @@
 #define _KERNELS_H_
 
 // clang-format off
-#include <adf/window/types.h>
-#include <adf/stream/types.h>
+#include <adf/io_buffer/io_buffer.h>
 // clang-format on
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 
-void accumulate(input_window_int16* input1, input_window_int16* input2, output_window_int16* output);
+void accumulate(adf::input_buffer<int16>& input1, adf::input_buffer<int16>& input2, adf::output_buffer<int16>& output);
 
 #endif

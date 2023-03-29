@@ -32,9 +32,12 @@ class myGraph : public adf::graph {
 
     myGraph() {
         k1 = kernel::create(filter2D);
-        adf::connect<window<TILE_WINDOW_SIZE> >(inptr, k1.in[0]);
+        adf::connect<>(inptr, k1.in[0]);
         adf::connect<parameter>(kernelCoefficients, async(k1.in[1]));
-        adf::connect<window<TILE_WINDOW_SIZE> >(k1.out[0], outptr);
+        adf::connect<>(k1.out[0], outptr);
+
+        adf::dimensions(k1.in[0]) = {ELEM_WITH_METADATA};
+        adf::dimensions(k1.out[0]) = {ELEM_WITH_METADATA};
 
         source(k1) = "xf_filter2d.cc";
         // Initial mapping

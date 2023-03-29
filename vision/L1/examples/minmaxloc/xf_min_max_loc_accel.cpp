@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-#include "xf_min_max_loc_config.h"
+#include "xf_min_max_loc_accel_config.h"
 
-static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(TYPE, NPC1)) / 8) / (PTR_WIDTH / 8);
+static constexpr int __XF_DEPTH = (HEIGHT * WIDTH * (XF_PIXELWIDTH(IN_TYPE, NPPCX)) / 8) / (INPUT_PTR_WIDTH / 8);
 
-void min_max_loc_accel(ap_uint<PTR_WIDTH>* img_in,
+void min_max_loc_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
                        int32_t& min_value,
                        int32_t& max_value,
                        uint16_t& min_loc_x,
@@ -41,18 +41,18 @@ void min_max_loc_accel(ap_uint<PTR_WIDTH>* img_in,
     // clang-format on
 
     // Local objects:
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> imgInput(height, width);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN> imgInput(height, width);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(img_in, imgInput);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN>(img_in, imgInput);
 
     // Run xfOpenCV kernel:
-    xf::cv::minMaxLoc<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(imgInput, &min_value, &max_value, &min_loc_x,
-                                                                 &min_loc_y, &max_loc_x, &max_loc_y);
+    xf::cv::minMaxLoc<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN>(imgInput, &min_value, &max_value, &min_loc_x,
+                                                                     &min_loc_y, &max_loc_x, &max_loc_y);
 
     return;
 } // End of kernel

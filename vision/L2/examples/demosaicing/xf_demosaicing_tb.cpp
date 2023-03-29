@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 #include "common/xf_headers.hpp"
 #include "xcl2.hpp"
-#include "xf_demosaicing_config.h"
+#include "xf_demosaicing_tb_config.h"
 #include "xf_demosaicing_ref.hpp"
 
 void bayerizeImage(cv::Mat img, cv::Mat& bayer_image, cv::Mat& cfa_output, int code) {
@@ -125,25 +125,25 @@ int main(int argc, char** argv) {
     }
 
     // Create the Bayer pattern CFA output
-    cv::Mat cfa_bayer_output(img.rows, img.cols, CV_8UC1);             // simulate the Bayer pattern CFA output
-    cv::Mat cfa_bayer_output_converted(img.rows, img.cols, CV_INTYPE); // simulate the Bayer pattern CFA output
-    cv::Mat color_cfa_bayer_output(img.rows, img.cols, img.type());    // Bayer pattern CFA output in color
-    int code = BPATTERN;                                               // Bayer format BG-0; GB-1; GR-2; RG-3
+    cv::Mat cfa_bayer_output(img.rows, img.cols, CV_IN_TYPE);           // simulate the Bayer pattern CFA output
+    cv::Mat cfa_bayer_output_converted(img.rows, img.cols, CV_IN_TYPE); // simulate the Bayer pattern CFA output
+    cv::Mat color_cfa_bayer_output(img.rows, img.cols, img.type());     // Bayer pattern CFA output in color
+    int code = BPATTERN;                                                // Bayer format BG-0; GB-1; GR-2; RG-3
 
     bayerizeImage(img, color_cfa_bayer_output, cfa_bayer_output, code);
     cv::imwrite("bayer_image.png", color_cfa_bayer_output);
     cv::imwrite("cfa_output.png", cfa_bayer_output);
 
     // Convert cfa_bayer_output to chosen type:
-    cfa_bayer_output.convertTo(cfa_bayer_output_converted, CV_INTYPE);
+    cfa_bayer_output.convertTo(cfa_bayer_output_converted, CV_IN_TYPE);
 
     // Demosaic the CFA output using reference code
-    cv::Mat ref_output_image(img.rows, img.cols, CV_OUTTYPE);
+    cv::Mat ref_output_image(img.rows, img.cols, CV_OUT_TYPE);
     demosaicImage(cfa_bayer_output_converted, ref_output_image, code);
     cv::imwrite("reference_output_image.png", ref_output_image);
 
     // Allocate memory for kernel output:
-    cv::Mat output_image_hls(img.rows, img.cols, CV_OUTTYPE);
+    cv::Mat output_image_hls(img.rows, img.cols, CV_OUT_TYPE);
 
 // OpenCL section:
 #if T_16U
@@ -173,9 +173,9 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::cout << "INFO: Device found - " << device_name << std::endl;
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPC1) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPC1) << std::endl;
-    std::cout << "NPPC:" << NPC1 << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     // Load binary:
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_demosaicing");

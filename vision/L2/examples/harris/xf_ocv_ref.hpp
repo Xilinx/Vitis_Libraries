@@ -17,7 +17,7 @@
 #ifndef _XF_OCV_REF_HPP_
 #define _XF_OCV_REF_HPP_
 
-#include "xf_harris_config.h"
+#include "xf_harris_accel_config.h"
 
 typedef float NMSTYPE;
 

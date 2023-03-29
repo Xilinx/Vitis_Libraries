@@ -61,6 +61,11 @@ struct StreamType<XF_12UW> {
     static const int bitdepth = 12;
 };
 template <>
+struct StreamType<XF_14UW> {
+    typedef ap_uint<14> name;
+    static const int bitdepth = 14;
+};
+template <>
 struct StreamType<XF_16UW> {
     typedef ap_uint<16> name;
     static const int bitdepth = 16;
@@ -89,6 +94,11 @@ template <>
 struct StreamType<XF_24SW> {
     typedef ap_int<24> name;
     static const int bitdepth = 24;
+};
+template <>
+struct StreamType<XF_28UW> {
+    typedef ap_uint<28> name;
+    static const int bitdepth = 28;
 };
 template <>
 struct StreamType<XF_30UW> {
@@ -146,6 +156,11 @@ struct StreamType<XF_40UW> {
     static const int bitdepth = 40;
 };
 template <>
+struct StreamType<XF_42UW> {
+    typedef ap_uint<42> name;
+    static const int bitdepth = 42;
+};
+template <>
 struct StreamType<XF_48UW> {
     typedef ap_uint<48> name;
     static const int bitdepth = 48;
@@ -154,6 +169,11 @@ template <>
 struct StreamType<XF_48SW> {
     typedef ap_int<48> name;
     static const int bitdepth = 48;
+};
+template <>
+struct StreamType<XF_56UW> {
+    typedef ap_uint<56> name;
+    static const int bitdepth = 56;
 };
 template <>
 struct StreamType<XF_60UW> {
@@ -176,6 +196,11 @@ struct StreamType<XF_80UW> {
     static const int bitdepth = 80;
 };
 template <>
+struct StreamType<XF_84UW> {
+    typedef ap_uint<84> name;
+    static const int bitdepth = 84;
+};
+template <>
 struct StreamType<XF_96UW> {
     typedef ap_uint<96> name;
     static const int bitdepth = 96;
@@ -184,6 +209,11 @@ template <>
 struct StreamType<XF_96SW> {
     typedef ap_int<96> name;
     static const int bitdepth = 96;
+};
+template <>
+struct StreamType<XF_112UW> {
+    typedef ap_uint<112> name;
+    static const int bitdepth = 112;
 };
 template <>
 struct StreamType<XF_120UW> {
@@ -214,6 +244,11 @@ template <>
 struct StreamType<XF_160SW> {
     typedef ap_int<160> name;
     static const int bitdepth = 160;
+};
+template <>
+struct StreamType<XF_168UW> {
+    typedef ap_int<168> name;
+    static const int bitdepth = 168;
 };
 template <>
 struct StreamType<XF_176UW> {
@@ -254,6 +289,11 @@ template <>
 struct StreamType<XF_320UW> {
     typedef ap_int<320> name;
     static const int bitdepth = 320;
+};
+template <>
+struct StreamType<XF_336UW> {
+    typedef ap_int<336> name;
+    static const int bitdepth = 336;
 };
 template <>
 struct StreamType<XF_352UW> {
@@ -400,6 +440,12 @@ struct PixelType<XF_12UP> {
     typedef ap_uint<12> name;
     typedef ap_uint<12> uname;
     static const int bitdepth = 12;
+};
+template <>
+struct PixelType<XF_14UP> {
+    typedef ap_uint<14> name;
+    typedef ap_uint<14> uname;
+    static const int bitdepth = 14;
 };
 #define XF_NPIXPERCYCLE(flags) xfNPixelsPerCycle<flags>::nppc
 
@@ -837,6 +883,111 @@ struct DataType<XF_16UC1, XF_NPPC16> {
     static const int channel = 1;
 };
 
+template <>
+struct DataType<XF_24UC1, XF_NPPC1> {
+    typedef ap_uint<24> name;
+    typedef ap_uint<24> uname;
+    typedef ap_uint<24> cname;
+    typedef unsigned int sname;
+    typedef unsigned int wname;
+    static const int bitdepth = 24;
+    static const int pixelwidth = 24;
+    static const int pixeldepth = XF_24UP;
+    static const int wordwidth = XF_24UW;
+    static const int channel = 1;
+};
+template <>
+struct DataType<XF_24UC1, XF_NPPC2> {
+    typedef ap_uint<48> name;
+    typedef ap_uint<24> uname;
+    typedef ap_uint<24> cname;
+    typedef unsigned int sname;
+    typedef unsigned int wname;
+    static const int bitdepth = 24;
+    static const int pixelwidth = 24;
+    static const int pixeldepth = XF_24UP;
+    static const int wordwidth = XF_48UW;
+    static const int channel = 1;
+};
+template <>
+struct DataType<XF_24UC1, XF_NPPC4> {
+    typedef ap_uint<96> name;
+    typedef ap_uint<24> uname;
+    typedef ap_uint<24> cname;
+    typedef unsigned int sname;
+    typedef unsigned int wname;
+    static const int bitdepth = 24;
+    static const int pixelwidth = 24;
+    static const int pixeldepth = XF_24UP;
+    static const int wordwidth = XF_96UW;
+    static const int channel = 1;
+};
+template <>
+struct DataType<XF_24UC1, XF_NPPC8> {
+    typedef ap_uint<192> name;
+    typedef ap_uint<24> uname;
+    typedef ap_uint<24> cname;
+    typedef unsigned int sname;
+    typedef unsigned int wname;
+    static const int bitdepth = 24;
+    static const int pixelwidth = 24;
+    static const int pixeldepth = XF_24UP;
+    static const int wordwidth = XF_192UW;
+    static const int channel = 1;
+};
+
+template <>
+struct DataType<XF_14UC1, XF_NPPC1> {
+    typedef ap_uint<14> name;
+    typedef ap_uint<14> uname;
+    typedef ap_uint<14> cname;
+    typedef unsigned int sname;
+    typedef unsigned int wname;
+    static const int bitdepth = 14;
+    static const int pixelwidth = 14;
+    static const int pixeldepth = XF_14UP;
+    static const int wordwidth = XF_14UW;
+    static const int channel = 1;
+};
+template <>
+struct DataType<XF_14UC1, XF_NPPC2> {
+    typedef ap_uint<28> name;
+    typedef ap_uint<14> uname;
+    typedef ap_uint<14> cname;
+    typedef unsigned int sname;
+    typedef unsigned int wname;
+    static const int bitdepth = 14;
+    static const int pixelwidth = 14;
+    static const int pixeldepth = XF_14UP;
+    static const int wordwidth = XF_28UW;
+    static const int channel = 1;
+};
+template <>
+struct DataType<XF_14UC1, XF_NPPC4> {
+    typedef ap_uint<56> name;
+    typedef ap_uint<14> uname;
+    typedef ap_uint<14> cname;
+    typedef unsigned int sname;
+    typedef unsigned int wname;
+    static const int bitdepth = 14;
+    static const int pixelwidth = 14;
+    static const int pixeldepth = XF_14UP;
+    static const int wordwidth = XF_56UW;
+    static const int channel = 1;
+};
+template <>
+struct DataType<XF_14UC1, XF_NPPC8> {
+    typedef ap_uint<112> name;
+    typedef ap_uint<14> uname;
+    typedef ap_uint<14> cname;
+    typedef unsigned int sname;
+    typedef unsigned int wname;
+    static const int bitdepth = 14;
+    static const int pixelwidth = 14;
+    static const int pixeldepth = XF_14UP;
+    static const int wordwidth = XF_112UW;
+    static const int channel = 1;
+};
 template <>
 struct DataType<XF_32UC1, XF_NPPC1> {
     typedef ap_uint<32> name;
@@ -1349,6 +1500,58 @@ struct DataType<XF_12UC3, XF_NPPC8> {
     static const int channel = 3;
 };
 template <>
+struct DataType<XF_14UC3, XF_NPPC1> {
+    typedef ap_uint<42> name;
+    typedef ap_uint<42> uname;
+    typedef ap_uint<14> cname;
+    typedef unsigned short sname;
+    typedef unsigned long int wname;
+    static const int bitdepth = 14;
+    static const int pixelwidth = 42;
+    static const int pixeldepth = XF_42UP;
+    static const int wordwidth = XF_42UW;
+    static const int channel = 3;
+};
+template <>
+struct DataType<XF_14UC3, XF_NPPC2> {
+    typedef ap_uint<84> name;
+    typedef ap_uint<42> uname;
+    typedef ap_uint<14> cname;
+    typedef unsigned short sname;
+    typedef unsigned long int wname;
+    static const int bitdepth = 14;
+    static const int pixelwidth = 42;
+    static const int pixeldepth = XF_42UP;
+    static const int wordwidth = XF_84UW;
+    static const int channel = 3;
+};
+template <>
+struct DataType<XF_14UC3, XF_NPPC4> {
+    typedef ap_uint<168> name;
+    typedef ap_uint<42> uname;
+    typedef ap_uint<14> cname;
+    typedef unsigned short sname;
+    typedef unsigned long int wname;
+    static const int bitdepth = 14;
+    static const int pixelwidth = 42;
+    static const int pixeldepth = XF_42UP;
+    static const int wordwidth = XF_168UW;
+    static const int channel = 3;
+};
+template <>
+struct DataType<XF_14UC3, XF_NPPC8> {
+    typedef ap_uint<336> name;
+    typedef ap_uint<42> uname;
+    typedef ap_uint<14> cname;
+    typedef unsigned short sname;
+    typedef unsigned long int wname;
+    static const int bitdepth = 14;
+    static const int pixelwidth = 42;
+    static const int pixeldepth = XF_42UP;
+    static const int wordwidth = XF_336UW;
+    static const int channel = 3;
+};
+template <>
 struct DataType<XF_16UC3, XF_NPPC1> {
     typedef ap_uint<48> name;
     typedef ap_uint<48> uname;
@@ -1452,7 +1655,6 @@ struct DataType<XF_16SC3, XF_NPPC8> {
     static const int wordwidth = XF_384SW;
     static const int channel = 3;
 };
-
 // Four channels data types
 template <>
 struct DataType<XF_8UC4, XF_NPPC1> {

@@ -83,17 +83,11 @@ int main(int argc, char** argv) {
         // Initializa device
         xF::deviceInit(xclBinName);
 
-        xuid_t uuid;
-        xrtDeviceGetXclbinUUID(xF::gpDhdl, uuid);
-        auto tiler_accel = xrtPLKernelOpen(xF::gpDhdl, uuid, "Tiler_top");
-        auto stitcher_accel = xrtPLKernelOpen(xF::gpDhdl, uuid, "stitcher_top");
-
         // Load image
         void* srcData = nullptr;
         xrtBufferHandle src_hndl = xrtBOAlloc(xF::gpDhdl, (srcImageR.total() * srcImageR.elemSize()), 0, 0);
         srcData = xrtBOMap(src_hndl);
         memcpy(srcData, srcImageR.data, (srcImageR.total() * srcImageR.elemSize()));
-
         // Allocate output buffer
         void* dstData = nullptr;
         xrtBufferHandle dst_hndl = xrtBOAlloc(xF::gpDhdl, (op_height * op_width * srcImageR.elemSize()), 0, 0);

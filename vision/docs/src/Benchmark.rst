@@ -137,7 +137,7 @@ Specify the corresponding Vitis, XRT, FPGA device, and path to the OpenCV libs b
 
    source <intstall_path>/installs/lin64/Vitis/2021.1_released/settings64.sh
    source <path-to-xrt-installation>/setup.sh
-   export DEVICE=< path-to-platform-directory >/< platform >.xpfm
+   export PLATFORM=< path-to-platform-directory >/< platform >.xpfm
    export OPENCV_INCLUDE=< path-to-opencv-include-folder >
    export OPENCV_LIB=< path-to-opencv-lib-folder >
    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:< path-to-opencv-lib-folder > 

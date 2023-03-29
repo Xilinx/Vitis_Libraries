@@ -25,6 +25,11 @@ namespace xf {
 namespace cv {
 namespace aie {
 
+template <typename T, int FBITS>
+constexpr T ToFixed(float f) {
+    return (T)(f * (1 << FBITS));
+}
+
 // Utility functions which can be used only inside kernel programs
 inline void xfCopyMetaData(void* img_in_ptr, void* img_out_ptr) {
     ::aie::store_v(((metadata_elem_t*)img_out_ptr), ::aie::load_v<METADATA_ELEMENTS>(((metadata_elem_t*)img_in_ptr)));

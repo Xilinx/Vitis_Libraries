@@ -98,7 +98,8 @@ void integral(xf::cv::Mat<SRC_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_mat,
     #pragma HLS INLINE OFF
 // clang-format on
 #ifndef __SYNTHESIS__
-    assert(((NPC == XF_NPPC1)) && "NPC must be XF_NPPC1");
+    assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2) || (NPC == XF_NPPC4) || (NPC == XF_NPPC8)) &&
+           "NPC must be XF_NPPC1,XF_NPPC2, XF_NPPC4, XF_NPPC8 ");
     assert(((_src_mat.rows <= ROWS) && (_dst_mat.cols <= COLS)) &&
            "ROWS and COLS should be greater than or equal to input image size");
 #endif

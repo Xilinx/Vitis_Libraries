@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_erosion_config.h"
+#include "xf_erosion_tb_config.h"
 #include <ap_int.h>
 #include <stdlib.h>
 
@@ -42,14 +42,14 @@ int main(int argc, char** argv) {
     int width = in_gray.cols;
 #if GRAY
     // Create memory for output images:
-    ocv_ref.create(in_gray.rows, in_gray.cols, CV_8UC1);
-    out_img.create(in_gray.rows, in_gray.cols, CV_8UC1);
-    diff.create(in_gray.rows, in_gray.cols, CV_8UC1);
+    ocv_ref.create(in_gray.rows, in_gray.cols, CV_IN_TYPE);
+    out_img.create(in_gray.rows, in_gray.cols, CV_IN_TYPE);
+    diff.create(in_gray.rows, in_gray.cols, CV_IN_TYPE);
 #else
     // Create memory for output images:
-    ocv_ref.create(in_gray.rows, in_gray.cols, CV_8UC3);
-    out_img.create(in_gray.rows, in_gray.cols, CV_8UC3);
-    diff.create(in_gray.rows, in_gray.cols, CV_8UC3);
+    ocv_ref.create(in_gray.rows, in_gray.cols, CV_IN_TYPE);
+    out_img.create(in_gray.rows, in_gray.cols, CV_IN_TYPE);
+    diff.create(in_gray.rows, in_gray.cols, CV_IN_TYPE);
 #endif
     // OpenCV reference:
     cv::Mat element = cv::getStructuringElement(KERNEL_SHAPE, cv::Size(FILTER_SIZE, FILTER_SIZE), cv::Point(-1, -1));
@@ -66,7 +66,8 @@ int main(int argc, char** argv) {
     cv::imwrite("hls_out.jpg", out_img);
 
     // Call the top function
-    erosion_accel((ap_uint<PTR_WIDTH>*)in_gray.data, shape, (ap_uint<PTR_WIDTH>*)out_img.data, height, width);
+    erosion_accel((ap_uint<INPUT_PTR_WIDTH>*)in_gray.data, shape, (ap_uint<OUTPUT_PTR_WIDTH>*)out_img.data, height,
+                  width);
 
     //  Compute absolute difference:
     cv::absdiff(ocv_ref, out_img, diff);

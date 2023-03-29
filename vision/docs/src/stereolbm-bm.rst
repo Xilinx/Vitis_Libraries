@@ -46,7 +46,7 @@ Run the following make command to build your XCLBIN and host binary targeting a 
    export OPENCV_INCLUDE=< path-to-opencv-include-folder >
    export OPENCV_LIB=< path-to-opencv-lib-folder >
    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:< path-to-opencv-lib-folder >
-   export DEVICE=< path-to-platform-directory >/< platform >.xpfm
+   export PLATFORM=< path-to-platform-directory >/< platform >.xpfm
    make host xclbin TARGET=hw
 
 * **Run kernel(Step 3)**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,37 +15,31 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_quantizationdithering_config.h"
+#include "xf_quantizationdithering_tb_config.h"
 #include <opencv2/core/matx.hpp>
 
 #define MAXVALUE MAXREPRESENTEDVALUE
-#if INPUTPIXELDEPTH == 16
-#define IN16BIT_EN 1
-#else
-#define IN16BIT_EN 0
-#endif
 
 cv::Mat floyd_steinberg_dithering(cv::Mat image, int scale) {
     cv::Mat new_image, new_image2;
+    new_image2.create(cv::Size(image.cols, image.rows), CV_OUT_TYPE);
 #if GRAY
     new_image.create(cv::Size(image.cols, image.rows), CV_32FC1);
-    new_image2.create(cv::Size(image.cols, image.rows), CV_8UC1);
 #else
     new_image.create(cv::Size(image.cols, image.rows), CV_32FC3);
-    new_image2.create(cv::Size(image.cols, image.rows), CV_8UC3);
 #endif
     // new_image = image;
     for (int rowID = 0; rowID < image.rows; rowID++) {
         for (int colID = 0; colID < image.cols; colID++) {
             if (image.channels() == 1) {
-#if IN16BIT_EN
+#if T_16U
                 new_image.at<float>(rowID, colID) = (float)image.at<unsigned short>(rowID, colID);
 #else
                 new_image.at<float>(rowID, colID) = (float)image.at<unsigned char>(rowID, colID);
 #endif
             } else if (image.channels() == 3) {
                 for (int c = 0; c < 3; c++)
-#if IN16BIT_EN
+#if T_16U
                     new_image.at<cv::Vec3f>(rowID, colID)[c] = (float)image.at<cv::Vec3w>(rowID, colID)[c];
 #else
                     new_image.at<cv::Vec3f>(rowID, colID)[c] = (float)image.at<cv::Vec3b>(rowID, colID)[c];
@@ -145,7 +139,7 @@ int main(int argc, char** argv) {
     cv::Mat in_img = cv::imread(argv[1], 0);
 #else
 
-#if IN16BIT_EN
+#if T_16U
     cv::Mat in_img = cv::imread(argv[1], -1);
 #else
     cv::Mat in_img = cv::imread(argv[1], 1);
@@ -164,13 +158,11 @@ int main(int argc, char** argv) {
     in_height = in_img.rows;
 
     cv::Mat out_img, outref_img, error;
+    out_img.create(cv::Size(in_width, in_height), CV_OUT_TYPE);
+    outref_img.create(cv::Size(in_width, in_height), CV_OUT_TYPE);
 #if GRAY
-    out_img.create(cv::Size(in_width, in_height), CV_8UC1);
-    outref_img.create(cv::Size(in_width, in_height), CV_8UC1);
     error.create(cv::Size(in_width, in_height), CV_32FC1);
 #else
-    out_img.create(cv::Size(in_width, in_height), CV_8UC3);
-    outref_img.create(cv::Size(in_width, in_height), CV_8UC3);
     error.create(cv::Size(in_width, in_height), CV_32FC3);
 #endif
     /* software reference */

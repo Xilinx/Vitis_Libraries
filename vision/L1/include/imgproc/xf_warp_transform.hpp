@@ -332,7 +332,8 @@ void store_in_UramBL(hls::stream<XF_TNAME(DEPTH, NPC)>& input_image,
                      ap_uint<16> temppix[PLANES],
                      ap_uint<24> pixval[PLANES],
                      ap_uint<48> pixval_2[PLANES],
-                     ap_uint<24> prev_pixval[PLANES]) {
+                     ap_uint<24> prev_pixval[PLANES],
+                     ap_uint<24> lineBuf[PLANES][(COLS + 1) / 2]) {
 // clang-format off
     #pragma HLS INLINE
     // clang-format on
@@ -354,10 +355,10 @@ void store_in_UramBL(hls::stream<XF_TNAME(DEPTH, NPC)>& input_image,
     prev_pixval_t[pl]= prev_pixval[pl];
     }*/
 
-    ap_uint<24> lineBuf[PLANES][(COLS + 1) / 2];
-// clang-format off
-    #pragma HLS bind_storage variable=lineBuf type=RAM_S2P impl=BRAM latency=1
-    #pragma HLS ARRAY_PARTITION variable=lineBuf dim=1
+    //    ap_uint<24> lineBuf[PLANES][(COLS + 1) / 2];
+    // clang-format off
+//    #pragma HLS bind_storage variable=lineBuf type=RAM_S2P impl=BRAM latency=1
+//    #pragma HLS ARRAY_PARTITION variable=lineBuf dim=1
     // clang-format on
     ap_int<16> i_hlf_mns1 = i / 2 - 1;
     i_hlf_mns1 = i_hlf_mns1 + (i_hlf_mns1 < 0 ? (STORE_LINES + 1) / 2 : 0);
@@ -626,6 +627,18 @@ COPY_MAT1:
         prev_pixval[pl] = 0;
     }
 
+    ap_uint<24> lineBuf[PLANES][(COLS + 1) / 2];
+
+    if (USE_URAM) {
+#pragma HLS bind_storage variable = lineBuf type = RAM_T2P impl = URAM
+#pragma HLS ARRAY_PARTITION variable = lineBuf dim = 1
+    }
+    for (int m = 0; m < PLANES; ++m) {
+        for (int n = 0; n < (COLS + 1) / 2; ++n) {
+            lineBuf[m][n] = 0;
+        }
+    }
+
 // main loop
 MAIN_ROWS:
     for (i = 0; i < (img_rows + START_ROW); i++) {
@@ -660,7 +673,7 @@ MAIN_ROWS:
                     if (INTERPOLATION_TYPE)
                         store_in_UramBL<COLS, PLANES, STORE_LINES, DEPTH, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT>(
                             input_image, i - l, j, bufUramBL, img_cols, store_row, store_col, temppix, pixval, pixval_2,
-                            prev_pixval);
+                            prev_pixval, lineBuf);
                     else {
                         if (j < img_cols)
                             store_in_UramNN<COLS, PLANES, STORE_LINES, DEPTH, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT>(

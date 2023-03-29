@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-#include "xf_hog_descriptor_config.h"
-
+#include "xf_hog_descriptor_accel_config.h"
 extern "C" {
 
 void hog_descriptor_accel(
-    ap_uint<PTR_IN_WIDTH>* img_in, ap_uint<PTR_OUT_WIDTH>* desc_out, int rows, int cols, int _desc_size) {
+    ap_uint<INPUT_PTR_WIDTH>* img_in, ap_uint<OUTPUT_PTR_WIDTH>* desc_out, int rows, int cols, int _desc_size) {
 // clang-format off
     #pragma HLS INTERFACE m_axi      port=img_in        offset=slave  bundle=gmem0
     #pragma HLS INTERFACE m_axi      port=desc_out       offset=slave  bundle=gmem1
@@ -33,21 +32,22 @@ void hog_descriptor_accel(
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Mat<IN_TYPE, XF_HEIGHT, XF_WIDTH, NPC, XF_CV_DEPTH_IN> imgInput(rows, cols);
-    xf::cv::Mat<OUT_TYPE, 1, XF_DESC_SIZE, NPC, XF_CV_DEPTH_OUT> descOutput(1, _desc_size);
+    xf::cv::Mat<IN_TYPE, XF_HEIGHT, XF_WIDTH, NPPCX, XF_CV_DEPTH_IN> imgInput(rows, cols);
+    xf::cv::Mat<OUT_TYPE, 1, XF_DESC_SIZE, NPPCX, XF_CV_DEPTH_OUT> descOutput(1, _desc_size);
     // clang-format off
     // clang-format on
 
     // Retrieve xf::cv::Mat objects from img_in data:
-    xf::cv::Array2xfMat<PTR_IN_WIDTH, IN_TYPE, XF_HEIGHT, XF_WIDTH, NPC, XF_CV_DEPTH_IN>(img_in, imgInput);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, XF_HEIGHT, XF_WIDTH, NPPCX, XF_CV_DEPTH_IN>(img_in, imgInput);
 
     // Run xfOpenCV kernel:
     xf::cv::HOGDescriptor<XF_WIN_HEIGHT, XF_WIN_WIDTH, XF_WIN_STRIDE, XF_BLOCK_HEIGHT, XF_BLOCK_WIDTH, XF_CELL_HEIGHT,
                           XF_CELL_WIDTH, XF_NO_OF_BINS, XF_DESC_SIZE, XF_INPUT_COLOR, XF_OUTPUT_MODE, IN_TYPE, OUT_TYPE,
-                          XF_HEIGHT, XF_WIDTH, NPC, XF_USE_URAM, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(imgInput, descOutput);
+                          XF_HEIGHT, XF_WIDTH, NPPCX, XF_USE_URAM, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(imgInput,
+                                                                                                    descOutput);
 
     // Convert _dst xf::cv::Mat object to output array:
-    xf::cv::xfMat2Array<PTR_OUT_WIDTH, OUT_TYPE, 1, XF_DESC_SIZE, NPC, XF_CV_DEPTH_OUT>(descOutput, desc_out);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, 1, XF_DESC_SIZE, NPPCX, XF_CV_DEPTH_OUT>(descOutput, desc_out);
 
     return;
 } // End of kernel

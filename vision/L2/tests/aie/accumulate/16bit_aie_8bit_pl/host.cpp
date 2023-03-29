@@ -15,7 +15,7 @@
  */
 
 #define PROFILE
-
+#include "adf.h"
 #include <adf/adf_api/XRTConfig.h>
 #include <chrono>
 #include <common/xf_aie_sw_utils.hpp>

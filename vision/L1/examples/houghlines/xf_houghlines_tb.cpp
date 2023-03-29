@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 #include "common/xf_headers.hpp"
 
-#include "xf_houghlines_config.h"
+#include "xf_houghlines_tb_config.h"
 
 float sinvalt[360] = {
     0.000000, 0.008727, 0.017452, 0.026177, 0.034899, 0.043619, 0.052336, 0.061049, 0.069756, 0.078459, 0.087156,
@@ -261,7 +261,7 @@ int main(int argc, char** argv) {
     int height = in_gray.rows;
     int width = in_gray.cols;
 
-    houghlines_accel((ap_uint<PTR_WIDTH>*)dst.data, threshold, LINESMAX, outputrho, outputtheta, height, width);
+    houghlines_accel((ap_uint<INPUT_PTR_WIDTH>*)dst.data, threshold, LINESMAX, outputrho, outputtheta, height, width);
 
     // Running the reference function:
     std::vector<cv::Vec2f> linesxi;

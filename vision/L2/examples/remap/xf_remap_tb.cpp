@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 
 #include "common/xf_headers.hpp"
 #include "xcl2.hpp"
-#include "xf_remap_config.h"
-
+#include "xf_remap_tb_config.h"
 #define READ_MAPS_FROM_FILE 0
 
 int main(int argc, char** argv) {
@@ -59,6 +58,7 @@ int main(int argc, char** argv) {
     std::cout << "Input image height : " << src.rows << std::endl;
     std::cout << "Input image width  : " << src.cols << std::endl;
 // Initialize the float maps:
+#if BARREL == 0
 #if READ_MAPS_FROM_FILE
     // read the float map data from the file (code could be alternated for reading
     // from image)
@@ -87,6 +87,14 @@ int main(int argc, char** argv) {
         }
     }
 #endif
+#else // For barrel correction, camera matrix and distortion coeff for camera should be provided by user
+    cv::initUndistortRectifyMap(cameraMatrix, distCoeffs, cv::Mat::eye(3, 3, CV_32F), cameraMatrix, src.size(),
+                                CV_32FC1, map_x, map_y);
+#endif
+
+    // XF_WIN_ROWS should be updated with the vakue of num_of_lines by user
+    int num_of_lines;
+    xf::cv::remapPreproc(map_y, num_of_lines);
 
     // Opencv reference:
     std::cout << "INFO: Run reference function in CV." << std::endl;
@@ -114,9 +122,9 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::cout << "INFO: Device found - " << device_name << std::endl;
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(TYPE, NPC) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(TYPE, NPC) << std::endl;
-    std::cout << "NPPC:" << NPC << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     // Load binary:
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_remap");

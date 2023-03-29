@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_accumulate_squared_config.h"
+#include "xf_accumulate_squared_tb_config.h"
 #include <ap_int.h>
 #include <stdlib.h>
 
@@ -49,22 +49,22 @@ int main(int argc, char** argv) {
     int width = in_gray.cols;
 // Allocate memory or the input and output images:
 #if GRAY
-    cv::Mat inout_gray(in_gray.rows, in_gray.cols, CV_16U, 1);
-    cv::Mat out_gray(in_gray.rows, in_gray.cols, CV_16U, 1);
+    cv::Mat inout_gray(in_gray.rows, in_gray.cols, CV_OUT_TYPE, 1);
+    cv::Mat out_gray(in_gray.rows, in_gray.cols, CV_OUT_TYPE, 1);
     cv::Mat inout_gray1(in_gray.rows, in_gray.cols, CV_32FC1, 1);
 
-    cv::Mat ocv_ref(in_gray.rows, in_gray.cols, CV_16U, 1);
+    cv::Mat ocv_ref(in_gray.rows, in_gray.cols, CV_OUT_TYPE, 1);
     cv::Mat ocv_ref_in1(in_gray.rows, in_gray.cols, CV_32FC1, 1);
     cv::Mat ocv_ref_in2(in_gray.rows, in_gray.cols, CV_32FC1, 1);
     in_gray.convertTo(ocv_ref_in1, CV_32FC1);
     in_gray1.convertTo(ocv_ref_in2, CV_32FC1);
 #else
 
-    cv::Mat inout_gray(in_gray.rows, in_gray.cols, CV_16UC3, 1);
-    cv::Mat out_gray(in_gray.rows, in_gray.cols, CV_16UC3, 1);
+    cv::Mat inout_gray(in_gray.rows, in_gray.cols, CV_OUT_TYPE, 1);
+    cv::Mat out_gray(in_gray.rows, in_gray.cols, CV_OUT_TYPE, 1);
     cv::Mat inout_gray1(in_gray.rows, in_gray.cols, CV_32FC3, 1);
 
-    cv::Mat ocv_ref(in_gray.rows, in_gray.cols, CV_16UC3, 1);
+    cv::Mat ocv_ref(in_gray.rows, in_gray.cols, CV_OUT_TYPE, 1);
     cv::Mat ocv_ref_in1(in_gray.rows, in_gray.cols, CV_32FC3, 1);
     cv::Mat ocv_ref_in2(in_gray.rows, in_gray.cols, CV_32FC3, 1);
     in_gray.convertTo(ocv_ref_in1, CV_32FC3);
@@ -74,11 +74,11 @@ int main(int argc, char** argv) {
     // OpenCV function
     cv::accumulateSquare(ocv_ref_in1, ocv_ref_in2, cv::noArray());
 #if GRAY
-    ocv_ref_in2.convertTo(ocv_ref, CV_16U);
-    in_gray1.convertTo(inout_gray, CV_8UC1);
+    ocv_ref_in2.convertTo(ocv_ref, CV_OUT_TYPE);
+    in_gray1.convertTo(inout_gray, CV_IN_TYPE);
 #else
-    ocv_ref_in2.convertTo(ocv_ref, CV_16UC3);
-    in_gray1.convertTo(inout_gray, CV_8UC3);
+    ocv_ref_in2.convertTo(ocv_ref, CV_OUT_TYPE);
+    in_gray1.convertTo(inout_gray, CV_IN_TYPE);
 
 #endif
     // Write OpenCV reference output

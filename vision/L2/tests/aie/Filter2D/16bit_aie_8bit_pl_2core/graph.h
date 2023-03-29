@@ -21,6 +21,8 @@
 #include "kernels.h"
 #include <adf.h>
 
+static constexpr int ELEM_WITH_METADATA = TILE_ELEMENTS + (xf::cv::aie::METADATA_SIZE / 2);
+
 using namespace adf;
 
 class myGraph : public adf::graph {
@@ -35,9 +37,12 @@ class myGraph : public adf::graph {
         inptr = input_plio::create(adf::plio_128_bits, "data/input.txt");
         outptr = output_plio::create(adf::plio_128_bits, "data/output.txt");
 
-        adf::connect<window<TILE_WINDOW_SIZE> >(inptr.out[0], k1.in[0]);
+        adf::connect<>(inptr.out[0], k1.in[0]);
         adf::connect<parameter>(kernelCoefficients, async(k1.in[1]));
-        adf::connect<window<TILE_WINDOW_SIZE> >(k1.out[0], outptr.in[0]);
+        adf::connect<>(k1.out[0], outptr.in[0]);
+
+        adf::dimensions(k1.in[0]) = {ELEM_WITH_METADATA};
+        adf::dimensions(k1.out[0]) = {ELEM_WITH_METADATA};
 
         source(k1) = "xf_filter2d.cc";
         // Initial mapping

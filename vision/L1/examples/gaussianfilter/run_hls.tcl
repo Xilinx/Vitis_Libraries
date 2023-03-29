@@ -25,12 +25,11 @@ if {![info exists CLKP]} {
 
 open_project -reset $PROJ
 
-add_files "${XF_PROJ_ROOT}/L1/examples/gaussianfilter/xf_gaussian_filter_accel.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/gaussianfilter/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/gaussianfilter/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
-add_files -tb "${XF_PROJ_ROOT}/L1/examples/gaussianfilter/xf_gaussian_filter_tb.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/gaussianfilter/build -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/gaussianfilter/build -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+add_files "${XF_PROJ_ROOT}/L1/examples/gaussianfilter/xf_gaussian_filter_accel.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/gaussianfilter/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/gaussianfilter/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
+add_files -tb "${XF_PROJ_ROOT}/L1/examples/gaussianfilter/xf_gaussian_filter_tb.cpp" -cflags " -I ${XF_PROJ_ROOT}/L1/examples/gaussianfilter/config -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x" -csimflags " -I ${XF_PROJ_ROOT}/L1/examples/gaussianfilter/config -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
 set_top gaussian_filter_accel
 
 open_solution -reset $SOLN
-
 
 
 

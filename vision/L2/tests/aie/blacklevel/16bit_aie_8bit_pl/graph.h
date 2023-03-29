@@ -42,10 +42,14 @@ class blacklevelGraph : public adf::graph {
         out1 = output_plio::create("DataOut0", adf::plio_128_bits, "data/output.txt");
 
         // create nets to connect kernels and IO ports
-        connect<window<TILE_WINDOW_SIZE> >(in1.out[0], k1.in[0]);
+        adf::connect<>(in1.out[0], k1.in[0]);
+        adf::connect<>(k1.out[0], out1.in[0]);
+
+        adf::dimensions(k1.in[0]) = {ELEM_WITH_METADATA};
+        adf::dimensions(k1.out[0]) = {ELEM_WITH_METADATA};
+
         connect<parameter>(blacklevel, async(k1.in[1]));
         connect<parameter>(mulfact, async(k1.in[2]));
-        connect<window<TILE_WINDOW_SIZE> >(k1.out[0], out1.in[0]);
 
         // specify kernel sources
         source(k1) = "xf_blacklevel.cc";

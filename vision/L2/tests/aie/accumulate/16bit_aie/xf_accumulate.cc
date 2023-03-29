@@ -16,6 +16,6 @@
 
 #include "imgproc/xf_accumulate_aie.hpp"
 
-void accumulate(input_window_int16* input1, input_window_int16* input2, output_window_int16* output) {
+void accumulate(adf::input_buffer<int16>& input1, adf::input_buffer<int16>& input2, adf::output_buffer<int16>& output) {
     xf::cv::aie::accumulate_api(input1, input1, output);
 };

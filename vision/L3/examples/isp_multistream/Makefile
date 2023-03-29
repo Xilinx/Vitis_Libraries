@@ -1,4 +1,4 @@
-# Copyright 2019-2022 Xilinx, Inc.
+# Copyright 2023-2024 Xilinx, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -181,21 +181,21 @@ EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 EXE_FILE_DEPS := $(HOST_SRCS) $(EXE_FILE_DEPS)
 
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu))
-HOST_ARGS := $(XFLIB_DIR)/data/128x128_bayer_16bit_sef.png $(XFLIB_DIR)/data/128x128_bayer_16bit_lef.png $(XFLIB_DIR)/data/128x128_1_bayer_16bit_sef.png $(XFLIB_DIR)/data/128x128_1_bayer_16bit_lef.png $(XFLIB_DIR)/data/128x128_2_bayer_16bit_sef.png $(XFLIB_DIR)/data/128x128_2_bayer_16bit_lef.png $(XFLIB_DIR)/data/128x128_3_bayer_16bit_sef.png $(XFLIB_DIR)/data/128x128_3_bayer_16bit_lef.png
+HOST_ARGS := $(XFLIB_DIR)/data/256x256_bayer_16bit_sef.png $(XFLIB_DIR)/data/256x256_bayer_16bit_lef.png $(XFLIB_DIR)/data/256x256_1_bayer_16bit_sef.png $(XFLIB_DIR)/data/256x256_1_bayer_16bit_lef.png $(XFLIB_DIR)/data/256x256_2_bayer_16bit_sef.png $(XFLIB_DIR)/data/256x256_2_bayer_16bit_lef.png $(XFLIB_DIR)/data/256x256_3_bayer_16bit_sef.png $(XFLIB_DIR)/data/256x256_3_bayer_16bit_lef.png $(XFLIB_DIR)/data/256x256_48.png $(XFLIB_DIR)/data/256x256_1_48.png $(XFLIB_DIR)/data/256x256_2_48.png $(XFLIB_DIR)/data/256x256_3_48.png $(XFLIB_DIR)/data/input-lut-33.txt $(XFLIB_DIR)/data/input-lut-33.txt $(XFLIB_DIR)/data/input-lut-33.txt $(XFLIB_DIR)/data/input-lut-33.txt
 ifneq ($(HOST_ARCH), x86)
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 endif
 LIBRARY_PATH := $(OPENCV_LIB):$(LD_LIBRARY_PATH):$(XILINX_XRT)/lib
 endif
 ifeq ($(TARGET),$(filter $(TARGET),hw_emu))
-HOST_ARGS := $(XFLIB_DIR)/data/128x128_bayer_16bit_sef.png $(XFLIB_DIR)/data/128x128_bayer_16bit_lef.png $(XFLIB_DIR)/data/128x128_1_bayer_16bit_sef.png $(XFLIB_DIR)/data/128x128_1_bayer_16bit_lef.png $(XFLIB_DIR)/data/128x128_2_bayer_16bit_sef.png $(XFLIB_DIR)/data/128x128_2_bayer_16bit_lef.png $(XFLIB_DIR)/data/128x128_3_bayer_16bit_sef.png $(XFLIB_DIR)/data/128x128_3_bayer_16bit_lef.png
+HOST_ARGS := $(XFLIB_DIR)/data/256x256_bayer_16bit_sef.png $(XFLIB_DIR)/data/256x256_bayer_16bit_lef.png $(XFLIB_DIR)/data/256x256_1_bayer_16bit_sef.png $(XFLIB_DIR)/data/256x256_1_bayer_16bit_lef.png $(XFLIB_DIR)/data/256x256_2_bayer_16bit_sef.png $(XFLIB_DIR)/data/256x256_2_bayer_16bit_lef.png $(XFLIB_DIR)/data/256x256_3_bayer_16bit_sef.png $(XFLIB_DIR)/data/256x256_3_bayer_16bit_lef.png $(XFLIB_DIR)/data/256x256_48.png $(XFLIB_DIR)/data/256x256_1_48.png $(XFLIB_DIR)/data/256x256_2_48.png $(XFLIB_DIR)/data/256x256_3_48.png $(XFLIB_DIR)/data/input-lut-33.txt $(XFLIB_DIR)/data/input-lut-33.txt $(XFLIB_DIR)/data/input-lut-33.txt $(XFLIB_DIR)/data/input-lut-33.txt
 ifneq ($(HOST_ARCH), x86)
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 endif
 LIBRARY_PATH := $(OPENCV_LIB):$(LD_LIBRARY_PATH):$(XILINX_XRT)/lib
 endif
 ifeq ($(TARGET),$(filter $(TARGET),hw))
-HOST_ARGS := $(XFLIB_DIR)/data/128x128_bayer_16bit_sef.png $(XFLIB_DIR)/data/128x128_bayer_16bit_lef.png $(XFLIB_DIR)/data/128x128_1_bayer_16bit_sef.png $(XFLIB_DIR)/data/128x128_1_bayer_16bit_lef.png $(XFLIB_DIR)/data/128x128_2_bayer_16bit_sef.png $(XFLIB_DIR)/data/128x128_2_bayer_16bit_lef.png $(XFLIB_DIR)/data/128x128_3_bayer_16bit_sef.png $(XFLIB_DIR)/data/128x128_3_bayer_16bit_lef.png
+HOST_ARGS := $(XFLIB_DIR)/data/256x256_bayer_16bit_sef.png $(XFLIB_DIR)/data/256x256_bayer_16bit_lef.png $(XFLIB_DIR)/data/256x256_1_bayer_16bit_sef.png $(XFLIB_DIR)/data/256x256_1_bayer_16bit_lef.png $(XFLIB_DIR)/data/256x256_2_bayer_16bit_sef.png $(XFLIB_DIR)/data/256x256_2_bayer_16bit_lef.png $(XFLIB_DIR)/data/256x256_3_bayer_16bit_sef.png $(XFLIB_DIR)/data/256x256_3_bayer_16bit_lef.png $(XFLIB_DIR)/data/256x256_48.png $(XFLIB_DIR)/data/256x256_1_48.png $(XFLIB_DIR)/data/256x256_2_48.png $(XFLIB_DIR)/data/256x256_3_48.png $(XFLIB_DIR)/data/input-lut-33.txt $(XFLIB_DIR)/data/input-lut-33.txt $(XFLIB_DIR)/data/input-lut-33.txt $(XFLIB_DIR)/data/input-lut-33.txt
 ifneq ($(HOST_ARCH), x86)
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 endif
@@ -272,7 +272,8 @@ endif
 	@echo 'fi' >> $(RUN_SCRIPT)
 	@echo 'echo "INFO: Embedded host run completed."' >> $(RUN_SCRIPT)
 	@echo 'exit $$return_code' >> $(RUN_SCRIPT)
-DATA_FILE := $(XFLIB_DIR)/data/128x128_3_bayer_16bit_lef.png $(XFLIB_DIR)/data/128x128_3_bayer_16bit_sef.png $(XFLIB_DIR)/data/128x128_2_bayer_16bit_lef.png $(XFLIB_DIR)/data/128x128_2_bayer_16bit_sef.png $(XFLIB_DIR)/data/128x128_1_bayer_16bit_lef.png $(XFLIB_DIR)/data/128x128_1_bayer_16bit_sef.png $(XFLIB_DIR)/data/128x128_bayer_16bit_lef.png $(XFLIB_DIR)/data/128x128_bayer_16bit_sef.png $(custom_data_file)
+DATA_FILE := $(XFLIB_DIR)/data/256x256_bayer_16bit_sef.png $(XFLIB_DIR)/data/256x256_bayer_16bit_lef.png $(XFLIB_DIR)/data/256x256_1_bayer_16bit_sef.png $(XFLIB_DIR)/data/256x256_1_bayer_16bit_lef.png $(XFLIB_DIR)/data/256x256_2_bayer_16bit_sef.png $(XFLIB_DIR)/data/256x256_2_bayer_16bit_lef.png $(XFLIB_DIR)/data/256x256_3_bayer_16bit_sef.png $(XFLIB_DIR)/data/256x256_3_bayer_16bit_lef.png $(XFLIB_DIR)/data/256x256_48.png $(XFLIB_DIR)/data/256x256_1_48.png $(XFLIB_DIR)/data/256x256_2_48.png $(XFLIB_DIR)/data/256x256_3_48.png $(XFLIB_DIR)/data/input-lut-33.txt $(XFLIB_DIR)/data/input-lut-33.txt $(XFLIB_DIR)/data/input-lut-33.txt $(XFLIB_DIR)/data/input-lut-33.txt $(custom_data_file)
+ 
 DATA_DIR := $(custom_data_dir)
 SD_FILES += $(RUN_SCRIPT)
 SD_FILES += $(EXE_FILE)

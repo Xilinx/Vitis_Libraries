@@ -1893,7 +1893,7 @@ The following table describes the template and the function parameters.
    |                      | be multiple of 8, for 8-pixel operation)      |
    +----------------------+-----------------------------------------------+
    | NPC                  | Number of pixels to be processed per cycle;   |
-   |                      | this function supports XF_NPPC1 and XF_NPPC8. |
+   |                      | this function supports XF_NPPC1 and XF_NPPC4. |
    +----------------------+-----------------------------------------------+
    | XFCVDEPTH_IN_1       | Depth of input image                          |
    +----------------------+-----------------------------------------------+

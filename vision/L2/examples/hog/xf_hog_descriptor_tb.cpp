@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_hog_descriptor_config.h"
+#include "xf_hog_descriptor_tb_config.h"
 #include "ObjDet_reference.hpp"
 #include "opencv2/objdetect.hpp"
 #include "xcl2.hpp"
@@ -46,9 +46,9 @@ int main(int argc, char** argv) {
     }
 
 // Converting the image type based on the configuration
-#if GRAY_T
+#if GRAY
     cvtColor(img_raw, img, cv::COLOR_BGR2GRAY);
-#elif RGB_T
+#elif RGB
     cvtColor(img_raw, img, cv::COLOR_BGR2RGB);
 #endif
 
@@ -84,9 +84,9 @@ int main(int argc, char** argv) {
 #endif
     int dim = (total_no_of_windows * nodpw_tb);
 
-#if GRAY_T
+#if GRAY
     int _planes = 1;
-#elif RGB_T
+#elif RGB
     int _planes = 3;
 #endif
 
@@ -112,7 +112,7 @@ int main(int argc, char** argv) {
 
     std::cout << "INFO: Device found - " << device_name << std::endl;
 
-    std::cout << "NPPC:" << NPC << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     // Load binary:
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_hog");

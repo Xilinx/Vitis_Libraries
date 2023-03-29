@@ -17,10 +17,10 @@
 // Max image resoultion
 
 // Enable or disable channel Swap
-#define XF_CV_DEPTH_imgInput 3
-#define XF_CV_DEPTH_rgb2hsv 3
-#define XF_CV_DEPTH_imgHelper1 3
-#define XF_CV_DEPTH_imgHelper2 3
-#define XF_CV_DEPTH_imgHelper3 3
-#define XF_CV_DEPTH_imgHelper4 3
-#define XF_CV_DEPTH_imgOutput 3
+#define XF_CV_DEPTH_imgInput 2
+#define XF_CV_DEPTH_rgb2hsv 2
+#define XF_CV_DEPTH_imgHelper1 2
+#define XF_CV_DEPTH_imgHelper2 2
+#define XF_CV_DEPTH_imgHelper3 2
+#define XF_CV_DEPTH_imgHelper4 2
+#define XF_CV_DEPTH_imgOutput 2

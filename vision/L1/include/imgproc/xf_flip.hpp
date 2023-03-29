@@ -160,7 +160,7 @@ void flip(ap_uint<PTR_WIDTH>* SrcPtr,
 #ifndef __SYNTHESIS__
     assert(((TYPE == XF_8UC1) || (TYPE == XF_8UC3)) &&
            "Input TYPE must be XF_8UC1 for 1-channel, XF_8UC3 for 3-channel");
-    assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC4)) && "NPC must be XF_NPPC1, XF_NPPC4 ");
+    assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC4) || (NPC == XF_NPPC2) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1, XF_NPPC4 ");
     assert((Rows <= ROWS) && (Cols <= COLS) && "COLS should be greater than input image size ");
 #endif
 	const int NPC_COLS = COLS >> XF_BITSHIFT(NPC);

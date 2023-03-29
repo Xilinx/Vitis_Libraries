@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Xilinx, Inc.
+ * Copyright 2022 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 
 #include "common/xf_headers.hpp"
 #include "xcl2.hpp"
-#include "xf_modefilter_config.h"
-
+#include "xf_modefilter_tb_config.h"
 cv::RNG rng(12345);
 void mode_filter_rgb(cv::Mat _src, cv::Mat _dst, int win_sz) {
     int win_sz_sq = win_sz * win_sz;
@@ -77,7 +76,7 @@ void mode_filter_gray(cv::Mat _src, cv::Mat _dst, int win_sz) {
 
     cv::Mat _src_border;
 
-    _src_border.create(_src.rows + win_sz - 1, _src.cols + win_sz - 1, CV_8UC1);
+    _src_border.create(_src.rows + win_sz - 1, _src.cols + win_sz - 1, CV_IN_TYPE);
 
     int border = floor(win_sz / 2);
 
@@ -140,16 +139,10 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-// create memory for output image
-#if GRAY
-    ocv_ref.create(in_img.rows, in_img.cols, CV_8UC1);
-    out_img.create(in_img.rows, in_img.cols, CV_8UC1); // create memory for output image
-    diff.create(in_img.rows, in_img.cols, CV_8UC1);
-#else
-    ocv_ref.create(in_img.rows, in_img.cols, CV_8UC3);
-    out_img.create(in_img.rows, in_img.cols, CV_8UC3); // create memory for output image
-    diff.create(in_img.rows, in_img.cols, CV_8UC3);
-#endif
+    // create memory for output image
+    ocv_ref.create(in_img.rows, in_img.cols, CV_IN_TYPE);
+    out_img.create(in_img.rows, in_img.cols, CV_IN_TYPE); // create memory for output image
+    diff.create(in_img.rows, in_img.cols, CV_IN_TYPE);
 
 #if GRAY
     mode_filter_gray(in_img, ocv_ref, WINDOW_SIZE);
@@ -180,9 +173,9 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
 
     std::cout << "INFO: Device found - " << device_name << std::endl;
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(TYPE, NPC1) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(TYPE, NPC1) << std::endl;
-    std::cout << "NPPC:" << NPC1 << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, NPPCX) << std::endl;
+    std::cout << "NPPC:" << NPPCX << std::endl;
 
     // Load binary:
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_modefilter");
