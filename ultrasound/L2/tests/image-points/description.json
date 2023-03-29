@@ -54,9 +54,7 @@
                 "LIB_DIR/L2/include",
                 "LIB_DIR/L2/tests/image-points/aie_graph"
             ],
-            "options": [
-                "-include LIB_DIR/L1/include/kernels.hpp"
-            ],
+            "options": "-include LIB_DIR/L1/include/kernels.hpp",
             "symbols": [
                 "__PS_ENABLE_AIE__"
             ]

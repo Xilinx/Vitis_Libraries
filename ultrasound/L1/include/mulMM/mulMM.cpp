@@ -20,7 +20,7 @@ namespace us {
 namespace L1 {
 
 template <typename T, const unsigned int LEN, const unsigned int INCREMENT, const unsigned VECDIM>
-void mulMM(adf::input_buffer<T>& __restrict in1, 
+void mulMM(adf::input_buffer<T>& __restrict in1,
            adf::input_buffer<T>& __restrict in2,
            adf::output_buffer<T>& __restrict out) {
     T* __restrict p_in1 = in1.data();

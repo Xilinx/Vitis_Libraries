@@ -30,7 +30,6 @@
 #define SPACE_DIMENSION 4
 //#define WIN_SIZE 128
 #define FIFO_DEPTH 8100
-//#define FRAME_LENGTH 64
 //#define N_SAMPLES 2048
 #define INCREMENT_MATRIX (SIMD_DEPTH / SPACE_DIMENSION)
 #define INCREMENT_VECTOR SIMD_DEPTH
@@ -114,9 +113,6 @@ void diffVSStreamOut(adf::input_buffer<T>& __restrict in1,
                      adf::output_buffer<T>& __restrict out);
 
 template <typename T, const unsigned int LEN, const unsigned int INCREMENT, const unsigned VECDIM>
-void mulVSStreamIn(input_window<T>* in1, input_stream<T>* in2, output_window<T>* out);
-
-template <typename T, const unsigned int LEN, const unsigned int INCREMENT, const unsigned VECDIM>
 void sumVOne(adf::input_buffer<T>& __restrict in1, adf::output_buffer<T>& __restrict out);
 
 template <typename T, const unsigned int LEN, const unsigned int INCREMENT, const unsigned VECDIM>
@@ -141,9 +137,9 @@ template <typename T, const unsigned int LEN, const unsigned int INCREMENT, cons
 void sqrtV(adf::input_buffer<T>& __restrict in1, adf::output_buffer<T>& __restrict out);
 
 template <typename T, const unsigned int LEN, const unsigned VECDIM>
-void mulVSCRSWindow(adf::input_buffer<T>& __restrict in1,
-                    adf::input_buffer<T>& __restrict in2,
-                    adf::output_buffer<T>& __restrict out);
+void mulVSCRS(adf::input_buffer<T>& __restrict in1,
+              adf::input_buffer<T>& __restrict in2,
+              adf::output_buffer<T>& __restrict out);
 
 template <typename T, const unsigned int LEN, const unsigned VECDIM>
 void mulLinSCRStreamIn(adf::input_buffer<T>& __restrict in2, adf::output_buffer<T>& __restrict out);
@@ -158,9 +154,6 @@ template <typename T, const unsigned int LEN, const unsigned VECDIM>
 void diffLinOne(adf::output_buffer<T>& __restrict out);
 
 template <typename T, const unsigned int LEN, const unsigned VECDIM>
-void sumVVStreamOut(input_window<T>* in1, input_window<T>* in2, output_stream<T>* out);
-
-template <typename T, const unsigned int LEN, const unsigned VECDIM>
 void diffLinTwo(adf::output_buffer<T>& __restrict out);
 
 template <typename T, const unsigned int LEN, const unsigned VECDIM>
@@ -168,9 +161,6 @@ void mulVHalfInt(adf::input_buffer<T>& __restrict in1, adf::output_buffer<T>& __
 
 template <typename T, const unsigned int LEN, const unsigned VECDIM>
 void mulLinHalf(adf::output_buffer<T>& __restrict out);
-
-template <typename T, const unsigned int LEN, const unsigned VECDIM>
-void mulVVStream(input_window<T>* in1, input_stream<T>* in2, output_window<T>* out);
 
 template <typename T, const unsigned int LEN, const unsigned VECDIM>
 void dataMover(adf::input_buffer<T>& __restrict in1, adf::output_buffer<T>& __restrict out);
@@ -196,9 +186,6 @@ void mulVS(adf::input_buffer<T>& __restrict in1,
            adf::output_buffer<T>& __restrict out);
 
 template <typename T, const unsigned LEN, const unsigned INCREMENT, const unsigned VECDIM>
-void mulVSStream(input_stream<T>* in1, input_stream<T>* in2, output_stream<T>* out);
-
-template <typename T, const unsigned LEN, const unsigned INCREMENT, const unsigned VECDIM>
 void mulVSWS(adf::input_buffer<T>& __restrict in1, adf::input_buffer<T>& __restrict in2, adf::output_buffer<T>& out);
 
 template <typename T, const unsigned LEN, const unsigned INCREMENT, const unsigned VECDIM>
@@ -209,9 +196,6 @@ void reciprocalV(adf::input_buffer<T>& __restrict in1, adf::output_buffer<T>& __
 
 template <typename T, const unsigned LEN, const unsigned INCREMENT, const unsigned VECDIM>
 void cosV(adf::input_buffer<T>& __restrict in1, adf::output_buffer<T>& __restrict out);
-
-template <typename T, const unsigned int LEN, const unsigned int INCREMENT, const unsigned VECDIM>
-void diffOneV(input_stream<T>* in1, output_window<T>* out);
 
 template <typename T, const unsigned LEN, const unsigned INCREMENT, const unsigned VECDIM>
 void absVWS(adf::input_buffer<T>& __restrict in1, adf::output_buffer<T>& __restrict out);
@@ -229,12 +213,6 @@ void mulVVStreamOut(adf::input_buffer<T>& __restrict in1,
 
 template <typename T, const unsigned int LEN, const unsigned int INCREMENT, const unsigned VECDIM>
 void diffOneVWW(adf::input_buffer<T>& __restrict in, adf::output_buffer<T>& __restrict out);
-
-// template <typename T, const unsigned int LEN, const unsigned int INCREMENT, const unsigned VECDIM>
-// void sumVVStreamIn1(input_stream<T>* in1, input_window<T>* in2, output_window<T>* out);
-
-// template <typename T, const unsigned int LEN, const unsigned int INCREMENT, const unsigned VECDIM>
-// void diffMS(adf::input_buffer<T>& __restrict in, adf::output_buffer<T>& __restrict out);
 
 template <typename T, const unsigned int LEN, const unsigned int INCREMENT, const unsigned VECDIM>
 void sign(adf::input_buffer<T>& __restrict in1, adf::output_buffer<T>& __restrict out);

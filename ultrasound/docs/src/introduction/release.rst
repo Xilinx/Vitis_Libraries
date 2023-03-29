@@ -29,3 +29,9 @@ Vitis Ultrasound library provides implementation of different L1/L2/L3 APIs Tool
 - L1, the lowest level of abstraction and is composed of simple BLAS operation
 - L2, the functional units of the Beamformer, which can be obtained by composing L1 libraries
 - L3, the example for connected units for 3 beamformer of PW/SA/Scanline
+
+2023.1
+-------
+- L1, imgrate window port to buffer port for aligning latest aie compiler feature
+- L2, refine graph for dimension definition, now it could be inferred from template configuration
+- L3, refine L3 graph for including L2 graphs as sub-graph and set the L3 beamformer as top graph

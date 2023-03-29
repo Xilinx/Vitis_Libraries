@@ -44,22 +44,6 @@ void mulVV(adf::input_buffer<T>& __restrict in1,
     }
 };
 
-template <typename T, const unsigned int LEN, const unsigned VECDIM>
-void mulVVStream(input_window<T>* in1, input_stream<T>* in2, output_window<T>* out) {
-    aie::vector<T, SIMD_DEPTH> op1 = aie::zeros<T, SIMD_DEPTH>();
-    aie::vector<T, SIMD_DEPTH> op2 = aie::zeros<T, SIMD_DEPTH>();
-    aie::vector<T, SIMD_DEPTH> res = aie::zeros<T, SIMD_DEPTH>();
-
-    for (unsigned i = 0; i < LEN; ++i) {
-        window_readincr_v(in1, op1);
-        op2 = readincr_v<SIMD_DEPTH>(in2);
-
-        res = aie::mul(op1, op2);
-
-        window_writeincr(out, res);
-    }
-};
-
 template <typename T, const unsigned int LEN, const unsigned int INCREMENT, const unsigned VECDIM>
 void mulVVStreamOut(adf::input_buffer<T>& __restrict in1,
                     adf::input_buffer<T>& __restrict in2,

@@ -125,7 +125,7 @@ else
 AIETARGET := x86sim
 endif
 
-AIE_CXXFLAGS += --target=$(AIETARGET) --platform=$(XPLATFORM) --pl-freq=100
+AIE_CXXFLAGS += --target=$(AIETARGET) --platform=$(XPLATFORM) --pl-freq=100 
 AIE_CXXFLAGS += $(AIE_CXXFLAGS_INC)
 AIE_CONTAINER = $(TEMP_DIR)/libadf.a
 AIE_WORK_DIR = $(CUR_DIR)/Work
@@ -252,6 +252,11 @@ VPP_FLAGS_s2mm5 +=
 VPP_FLAGS_s2mm5 += --hls.clock 100000000:s2mm5
 VPP_FLAGS_s2mm6 +=  
 VPP_FLAGS_s2mm6 += --hls.clock 100000000:s2mm6
+ifneq ($(HOST_ARCH_temp), x86)
+VPP_LDFLAGS_scanline += --clock.defaultFreqHz 100000000
+else
+VPP_LDFLAGS_scanline += --kernel_frequency 100
+endif
 
 ifneq ($(SD_CARD_NEEDED), on)
 BINARY_CONTAINERS += $(BUILD_DIR)/scanline.xclbin
@@ -562,8 +567,8 @@ endif
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_stdout.log
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_stdout.log || exit 1
 	
 endif
 endif
@@ -575,8 +580,8 @@ ifeq ($(HOST_ARCH), x86)
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_stdout.log
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_stdout.log || exit 1
 	
 endif
 endif

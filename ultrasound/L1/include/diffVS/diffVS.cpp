@@ -74,20 +74,6 @@ void diffVSStreamOut(adf::input_buffer<T>& __restrict in1,
     }
 };
 
-void diffVOne(input_window<float>* in1, output_window<float>* out) {
-    aie::vector<float, SIMD_DEPTH> op1 = aie::zeros<float, SIMD_DEPTH>();
-    aie::vector<float, SIMD_DEPTH> op2 = aie::broadcast<float, SIMD_DEPTH>(1);
-    aie::vector<float, SIMD_DEPTH> res = aie::zeros<float, SIMD_DEPTH>();
-
-    for (unsigned i = 0; i < POINTS_PER_ITERATION; ++i) {
-        window_readincr_v(in1, op1);
-
-        res = aie::sub(op1, op2);
-
-        window_writeincr(out, res);
-    }
-};
-
 template <typename T, const unsigned int LEN, const unsigned VECDIM>
 void diffLinOne(adf::output_buffer<T>& __restrict out) {
     T* __restrict p_out = out.data();
@@ -144,34 +130,6 @@ void diffLinOne(adf::output_buffer<T>& __restrict out) {
     }
 };
 
-void diffVOneStreamIn(input_stream<float>* in1, output_window<float>* out) {
-    aie::vector<float, SIMD_DEPTH> op1 = aie::zeros<float, SIMD_DEPTH>();
-    aie::vector<float, SIMD_DEPTH> op2 = aie::broadcast<float, SIMD_DEPTH>(1);
-    aie::vector<float, SIMD_DEPTH> res = aie::zeros<float, SIMD_DEPTH>();
-
-    for (unsigned i = 0; i < POINTS_PER_ITERATION; ++i) {
-        op1 = readincr_v<SIMD_DEPTH>(in1);
-
-        res = aie::sub(op1, op2);
-
-        window_writeincr(out, res);
-    }
-};
-
-void diffVTwo(input_window<float>* in1, output_window<float>* out) {
-    aie::vector<float, SIMD_DEPTH> op1 = aie::zeros<float, SIMD_DEPTH>();
-    aie::vector<float, SIMD_DEPTH> op2 = aie::broadcast<float, SIMD_DEPTH>(2);
-    aie::vector<float, SIMD_DEPTH> res = aie::zeros<float, SIMD_DEPTH>();
-
-    for (unsigned i = 0; i < POINTS_PER_ITERATION; ++i) {
-        window_readincr_v(in1, op1);
-
-        res = aie::sub(op1, op2);
-
-        window_writeincr(out, res);
-    }
-};
-
 template <typename T, const unsigned int LEN, const unsigned VECDIM>
 void diffLinTwo(adf::output_buffer<T>& __restrict out) {
     T* __restrict p_out = out.data();
@@ -225,48 +183,6 @@ void diffLinTwo(adf::output_buffer<T>& __restrict out) {
 
         aie::store_v(p_out, res);
         p_out = byte_incr(p_out, VECDIM * sizeof(T));
-    }
-};
-
-void diffVTwoStreamIn(input_stream<float>* in1, output_window<float>* out) {
-    aie::vector<float, SIMD_DEPTH> op1 = aie::zeros<float, SIMD_DEPTH>();
-    aie::vector<float, SIMD_DEPTH> op2 = aie::broadcast<float, SIMD_DEPTH>(2);
-    aie::vector<float, SIMD_DEPTH> res = aie::zeros<float, SIMD_DEPTH>();
-
-    for (unsigned i = 0; i < POINTS_PER_ITERATION; ++i) {
-        op1 = readincr_v<SIMD_DEPTH>(in1);
-
-        res = aie::sub(op1, op2);
-
-        window_writeincr(out, res);
-    }
-};
-
-void diffVThree(input_window<float>* in1, output_window<float>* out) {
-    aie::vector<float, SIMD_DEPTH> op1 = aie::zeros<float, SIMD_DEPTH>();
-    aie::vector<float, SIMD_DEPTH> op2 = aie::broadcast<float, SIMD_DEPTH>(3);
-    aie::vector<float, SIMD_DEPTH> res = aie::zeros<float, SIMD_DEPTH>();
-
-    for (unsigned i = 0; i < POINTS_PER_ITERATION; ++i) {
-        window_readincr_v(in1, op1);
-
-        res = aie::sub(op1, op2);
-
-        window_writeincr(out, res);
-    }
-};
-
-void diffVThreeStreamIn(input_stream<float>* in1, output_window<float>* out) {
-    aie::vector<float, SIMD_DEPTH> op1 = aie::zeros<float, SIMD_DEPTH>();
-    aie::vector<float, SIMD_DEPTH> op2 = aie::broadcast<float, SIMD_DEPTH>(3);
-    aie::vector<float, SIMD_DEPTH> res = aie::zeros<float, SIMD_DEPTH>();
-
-    for (unsigned i = 0; i < POINTS_PER_ITERATION; ++i) {
-        op1 = readincr_v<SIMD_DEPTH>(in1);
-
-        res = aie::sub(op1, op2);
-
-        window_writeincr(out, res);
     }
 };
 

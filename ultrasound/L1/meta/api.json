@@ -362,42 +362,6 @@
             }
         },
         {
-            "api_name": "us::L1::sign",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "us::L1::sign",
-                "display_name": "sign",
-                "brief": "",
-                "target_domain": "",
-                "header_file_name": [
-                    "kernels.hpp"
-                ],
-                "search_paths": [
-                    "L1/include"
-                ],
-                "instance": "function",
-                "parameters": [
-                    {
-                        "name": "T",
-                        "type": "typename"
-                    },
-                    {
-                        "name": "LEN",
-                        "type": "const unsigned int"
-                    },
-                    {
-                        "name": "INCREMENT",
-                        "type": "const unsigned int"
-                    },
-                    {
-                        "name": "VECDIM",
-                        "type": "const unsigned"
-                    }
-                ],
-                "ports": []
-            }
-        },
-        {
             "api_name": "us::L1::mulVV",
             "spec": {
                 "schema": "vitis_libraries_api_list_schema-1.0",
@@ -547,42 +511,6 @@
                 "schema": "vitis_libraries_api_list_schema-1.0",
                 "api_name": "us::L1::diffVSStreamOut",
                 "display_name": "diffVSStreamOut",
-                "brief": "",
-                "target_domain": "",
-                "header_file_name": [
-                    "kernels.hpp"
-                ],
-                "search_paths": [
-                    "L1/include"
-                ],
-                "instance": "function",
-                "parameters": [
-                    {
-                        "name": "T",
-                        "type": "typename"
-                    },
-                    {
-                        "name": "LEN",
-                        "type": "const unsigned int"
-                    },
-                    {
-                        "name": "INCREMENT",
-                        "type": "const unsigned int"
-                    },
-                    {
-                        "name": "VECDIM",
-                        "type": "const unsigned"
-                    }
-                ],
-                "ports": []
-            }
-        },
-        {
-            "api_name": "us::L1::mulVSStreamIn",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "us::L1::mulVSStreamIn",
-                "display_name": "mulVSStreamIn",
                 "brief": "",
                 "target_domain": "",
                 "header_file_name": [
@@ -830,11 +758,11 @@
             }
         },
         {
-            "api_name": "us::L1::mulVSCRSWindow",
+            "api_name": "us::L1::mulVSCRS",
             "spec": {
                 "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "us::L1::mulVSCRSWindow",
-                "display_name": "mulVSCRSWindow",
+                "api_name": "us::L1::mulVSCRS",
+                "display_name": "mulVSCRS",
                 "brief": "",
                 "target_domain": "",
                 "header_file_name": [
@@ -990,38 +918,6 @@
             }
         },
         {
-            "api_name": "us::L1::sumVVStreamOut",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "us::L1::sumVVStreamOut",
-                "display_name": "sumVVStreamOut",
-                "brief": "",
-                "target_domain": "",
-                "header_file_name": [
-                    "kernels.hpp"
-                ],
-                "search_paths": [
-                    "L1/include"
-                ],
-                "instance": "function",
-                "parameters": [
-                    {
-                        "name": "T",
-                        "type": "typename"
-                    },
-                    {
-                        "name": "LEN",
-                        "type": "const unsigned int"
-                    },
-                    {
-                        "name": "VECDIM",
-                        "type": "const unsigned"
-                    }
-                ],
-                "ports": []
-            }
-        },
-        {
             "api_name": "us::L1::diffLinTwo",
             "spec": {
                 "schema": "vitis_libraries_api_list_schema-1.0",
@@ -1091,38 +987,6 @@
                 "schema": "vitis_libraries_api_list_schema-1.0",
                 "api_name": "us::L1::mulLinHalf",
                 "display_name": "mulLinHalf",
-                "brief": "",
-                "target_domain": "",
-                "header_file_name": [
-                    "kernels.hpp"
-                ],
-                "search_paths": [
-                    "L1/include"
-                ],
-                "instance": "function",
-                "parameters": [
-                    {
-                        "name": "T",
-                        "type": "typename"
-                    },
-                    {
-                        "name": "LEN",
-                        "type": "const unsigned int"
-                    },
-                    {
-                        "name": "VECDIM",
-                        "type": "const unsigned"
-                    }
-                ],
-                "ports": []
-            }
-        },
-        {
-            "api_name": "us::L1::mulVVStream",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "us::L1::mulVVStream",
-                "display_name": "mulVVStream",
                 "brief": "",
                 "target_domain": "",
                 "header_file_name": [
@@ -1402,42 +1266,6 @@
             }
         },
         {
-            "api_name": "us::L1::mulVSStream",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "us::L1::mulVSStream",
-                "display_name": "mulVSStream",
-                "brief": "",
-                "target_domain": "",
-                "header_file_name": [
-                    "kernels.hpp"
-                ],
-                "search_paths": [
-                    "L1/include"
-                ],
-                "instance": "function",
-                "parameters": [
-                    {
-                        "name": "T",
-                        "type": "typename"
-                    },
-                    {
-                        "name": "LEN",
-                        "type": "const unsigned"
-                    },
-                    {
-                        "name": "INCREMENT",
-                        "type": "const unsigned"
-                    },
-                    {
-                        "name": "VECDIM",
-                        "type": "const unsigned"
-                    }
-                ],
-                "ports": []
-            }
-        },
-        {
             "api_name": "us::L1::mulVSWS",
             "spec": {
                 "schema": "vitis_libraries_api_list_schema-1.0",
@@ -1572,42 +1400,6 @@
                     {
                         "name": "INCREMENT",
                         "type": "const unsigned"
-                    },
-                    {
-                        "name": "VECDIM",
-                        "type": "const unsigned"
-                    }
-                ],
-                "ports": []
-            }
-        },
-        {
-            "api_name": "us::L1::diffOneV",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "us::L1::diffOneV",
-                "display_name": "diffOneV",
-                "brief": "",
-                "target_domain": "",
-                "header_file_name": [
-                    "kernels.hpp"
-                ],
-                "search_paths": [
-                    "L1/include"
-                ],
-                "instance": "function",
-                "parameters": [
-                    {
-                        "name": "T",
-                        "type": "typename"
-                    },
-                    {
-                        "name": "LEN",
-                        "type": "const unsigned int"
-                    },
-                    {
-                        "name": "INCREMENT",
-                        "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
@@ -1767,6 +1559,42 @@
                 "schema": "vitis_libraries_api_list_schema-1.0",
                 "api_name": "us::L1::diffOneVWW",
                 "display_name": "diffOneVWW",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "kernels.hpp"
+                ],
+                "search_paths": [
+                    "L1/include"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "T",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "LEN",
+                        "type": "const unsigned int"
+                    },
+                    {
+                        "name": "INCREMENT",
+                        "type": "const unsigned int"
+                    },
+                    {
+                        "name": "VECDIM",
+                        "type": "const unsigned"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "us::L1::sign",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "us::L1::sign",
+                "display_name": "sign",
                 "brief": "",
                 "target_domain": "",
                 "header_file_name": [

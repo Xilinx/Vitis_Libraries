@@ -40,13 +40,13 @@ sys.path.insert(1, os.path.join(tools_dir, 'share/doxyrest_b/sphinx'))
 # -- Project information -----------------------------------------------------
 
 project = 'Vitis Ultrasound Library'
-copyright = '2022, Xilinx'
+copyright = '2023, Xilinx'
 author = 'Xilinx'
 
 # The short X.Y version
-version = '2022.2'
+version = '2023.1'
 # The full version, including alpha/beta/rc tags
-release = 'v2022.2'
+release = 'v2023.1'
 
 # For bottom-left nav
 try:
@@ -56,7 +56,7 @@ except NameError:
 
 #html_context['display_lower_left'] = True
 html_context['current_version'] = version
-html_context['versions'] = ['2022.2']
+html_context['versions'] = ['2023.1']
 
 # -- General configuration ---------------------------------------------------
 

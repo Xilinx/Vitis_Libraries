@@ -55,9 +55,7 @@
                 "LIB_DIR/L3/include",
                 "LIB_DIR/L3/tests/plane_wave/aie_graph"
             ],
-            "options": [
-                "-include LIB_DIR/L1/include/kernels.hpp"
-            ],
+            "options": "-include LIB_DIR/L1/include/kernels.hpp",
             "symbols": [
                 "__PS_ENABLE_AIE__"
             ]
@@ -267,6 +265,7 @@
                     "name": "s2mm6"
                 }
             ],
+            "frequency": 100.0,
             "name": "plane_wave"
         }
     ],

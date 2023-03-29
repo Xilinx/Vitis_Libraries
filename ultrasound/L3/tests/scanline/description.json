@@ -55,9 +55,7 @@
                 "LIB_DIR/L3/include",
                 "LIB_DIR/L3/tests/scanline/aie_graph"
             ],
-            "options": [
-                "-include LIB_DIR/L1/include/kernels.hpp"
-            ],
+            "options": "-include LIB_DIR/L1/include/kernels.hpp",
             "symbols": [
                 "__PS_ENABLE_AIE__"
             ]
@@ -291,6 +289,7 @@
                     "name": "s2mm6"
                 }
             ],
+            "frequency": 100.0,
             "name": "scanline"
         }
     ],
@@ -303,7 +302,7 @@
                 "env": "",
                 "cmd": "",
                 "max_memory_MB": 65536,
-                "max_time_min": 450
+                "max_time_min": 550
             }
         ],
         "targets": [

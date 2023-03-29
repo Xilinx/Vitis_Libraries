@@ -160,7 +160,7 @@ endif
 
 EXE_NAME := host.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-EXE_FILE_DEPS := $(HOST_SRCS) $(EXE_FILE_DEPS)
+EXE_FILE_DEPS := $(HOST_SRCS) $(INSTANCE_FILES)  $(EXE_FILE_DEPS)
 
 HOST_ARGS := -xclbin synthetic_aperture.xclbin -data data/
 ifneq ($(HOST_ARCH), x86)
@@ -252,6 +252,11 @@ VPP_FLAGS_s2mm5 +=
 VPP_FLAGS_s2mm5 += --hls.clock 100000000:s2mm5
 VPP_FLAGS_s2mm6 +=  
 VPP_FLAGS_s2mm6 += --hls.clock 100000000:s2mm6
+ifneq ($(HOST_ARCH_temp), x86)
+VPP_LDFLAGS_synthetic_aperture += --clock.defaultFreqHz 100000000
+else
+VPP_LDFLAGS_synthetic_aperture += --kernel_frequency 100
+endif
 
 ifneq ($(SD_CARD_NEEDED), on)
 BINARY_CONTAINERS += $(BUILD_DIR)/synthetic_aperture.xclbin
@@ -437,7 +442,7 @@ $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/synthetic_aperture $(VPP_LDFLAGS)  $(VPP_LDFLAGS_synthetic_aperture) $(AIE_LDFLAGS)   -o $@ $^
 
 ############################## Setting Rules for AIE (Building Kernels) ##################
-$(AIE_CONTAINER): $(XFLIB_DIR)/L3/tests/synthetic_aperture/aie_graph/graph.cpp  
+$(AIE_CONTAINER): $(XFLIB_DIR)/L3/tests/synthetic_aperture/aie_graph/graph.cpp  $(INST_FILES) 
 	$(ECHO) "Compiling: libadf.a"
 	mkdir -p $(dir $@)
 	$(AIECXX) $(AIE_CXXFLAGS) $^
@@ -551,8 +556,8 @@ endif
 ifneq (,$(filter hw_emu, $(TARGET)))
 ifeq ($(HOST_ARCH), x86)
 ifeq ($(pcie_aie), on)
-	cp Work/reports/dma_lock_report.json ./
-	cp Work/ps/c_rts/aie_control_config.json ./
+	cp $(AIE_WORK_DIR)/reports/dma_lock_report.json ./
+	cp $(AIE_WORK_DIR)/ps/c_rts/aie_control_config.json ./
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) $(BINARY_CONTAINERS_PKG)
 	
@@ -562,8 +567,8 @@ endif
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_stdout.log
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_stdout.log || exit 1
 	
 endif
 endif
@@ -575,8 +580,8 @@ ifeq ($(HOST_ARCH), x86)
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_stdout.log
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_stdout.log || exit 1
 	
 endif
 endif
@@ -619,18 +624,24 @@ else
 xclbin: check_vpp check_sysroot  $(BINARY_CONTAINERS)
 endif
 
+gen_instances: $(INSTANCE_FILES)
+	@echo "Nothing to generate."
+
+valid_params:
+	@echo "Nothing to validate."
+
 ############################## Cleaning Rules ##############################
 cleanh:
-	-$(RMDIR) $(EXE_FILE) vitis_* TempConfig system_estimate.xtxt *.rpt .run/
+	-$(RMDIR) $(EXE_FILE)  vitis_* TempConfig system_estimate.xtxt *.rpt .run/  $(INST_TB_FILES)
 	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb sample_link.ini sample_compile.ini obj*  bin* *.csv *.jpg *.jpeg *.png *.db
 
 cleank:
 	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl*start_simulation. sh *.xclbin
-	-$(RMDIR) _x_temp.* _x*
+	-$(RMDIR) _x_temp.* _x* $(INST_FILES)
 
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR) sd_card* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
 	-$(RMDIR) $(AIE_CONTAINER) aiesimulator_output .AIE_SIM_CMD_LINE_OPTIONS x86simulator_output $(AIE_WORK_DIR) $(AIE_PKG_DIR) $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
-	-$(RMDIR) 
+	-$(RMDIR)  *.html $(INSTANCE_FILES)
 
 clean: cleanh

@@ -20,8 +20,7 @@ namespace us {
 namespace L1 {
 
 template <typename T, const unsigned LEN, const unsigned INCREMENT, const unsigned VECDIM, const unsigned SCALAR>
-void equalS(adf::input_buffer<T>& __restrict in1, 
-            adf::output_buffer<T>& __restrict out) {
+void equalS(adf::input_buffer<T>& __restrict in1, adf::output_buffer<T>& __restrict out) {
     T* __restrict p_in1 = in1.data();
     T* __restrict p_out = out.data();
 

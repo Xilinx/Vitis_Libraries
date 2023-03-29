@@ -19,21 +19,8 @@
 namespace us {
 namespace L1 {
 
-// void tileV(input_stream<float>* in1, output_window<float>* out){
-//
-//	aie::vector<float, SPACE_DIMENSION> res = aie::vector<float, SPACE_DIMENSION>();
-//
-//	res = readincr_v<SPACE_DIMENSION>(in1);
-//
-//	for(unsigned i = 0; i < LENGTH; ++i){
-//		window_writeincr(out, res);
-//	}
-//
-// };
-
 template <typename T, const unsigned int LEN, const unsigned int INCREMENT, const unsigned VECDIM>
 void tileVApo(adf::output_buffer<T>& __restrict out) {
-
     T* __restrict p_out = out.data();
     aie::vector<float, VECDIM> res = aie::vector<float, VECDIM>();
 
@@ -45,7 +32,6 @@ void tileVApo(adf::output_buffer<T>& __restrict out) {
     for (unsigned i = 0; i < LEN; i += INCREMENT) {
         aie::store_v(p_out, res);
         p_out = byte_incr(p_out, VECDIM * sizeof(T));
-
     }
 };
 

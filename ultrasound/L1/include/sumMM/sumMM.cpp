@@ -25,7 +25,7 @@ void sumMM(adf::input_buffer<T>& in1, adf::input_buffer<T>& in2, adf::output_buf
     T* __restrict p_in1 = in1.data();
     T* __restrict p_in2 = in2.data();
     T* __restrict p_out = out.data();
-    
+
     aie::vector<float, VECDIM> op1 = aie::zeros<float, VECDIM>();
     aie::vector<float, VECDIM> op2 = aie::zeros<float, VECDIM>();
     aie::vector<float, VECDIM> res = aie::zeros<float, VECDIM>();
@@ -39,28 +39,8 @@ void sumMM(adf::input_buffer<T>& in1, adf::input_buffer<T>& in2, adf::output_buf
 
         res = aie::add(op1, op2);
         aie::store_v(p_out, res);
-        p_out = byte_incr(p_out, VECDIM * sizeof(T)); 
+        p_out = byte_incr(p_out, VECDIM * sizeof(T));
     }
 };
 } // namespace L1
 } // namespace us
-
-void sumMM2Out(input_window<float>* in1,
-               input_window<float>* in2,
-               output_stream<float>* out1,
-               output_stream<float>* out2) {
-    // matrix of beamf are nx3, so we pad with 1 zero and operate row by row, count = n° rows
-    aie::vector<float, SIMD_DEPTH> op1 = aie::zeros<float, SIMD_DEPTH>();
-    aie::vector<float, SIMD_DEPTH> op2 = aie::zeros<float, SIMD_DEPTH>();
-    aie::vector<float, SIMD_DEPTH> res = aie::zeros<float, SIMD_DEPTH>();
-
-    for (unsigned i = 0; i < LENGTH; i += SPACE_DIMENSION) {
-        window_readincr_v(in1, op1);
-        window_readincr_v(in2, op2);
-
-        res = aie::add(op1, op2);
-
-        writeincr(out1, res);
-        writeincr(out2, res);
-    }
-};

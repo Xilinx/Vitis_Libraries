@@ -29,7 +29,6 @@ void dataMover(adf::input_buffer<T>& __restrict in1, adf::output_buffer<T>& __re
     for (unsigned i = 0; i < LEN; ++i) {
         res = aie::broadcast<float, VECDIM>(*p_in);
         p_in++;
-        // // window_writeincr(out1, res);
 
         aie::store_v(p_out, res);
         p_out = byte_incr(p_out, VECDIM * sizeof(T));

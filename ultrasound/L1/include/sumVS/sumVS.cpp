@@ -57,13 +57,11 @@ void sumVOne(adf::input_buffer<T>& __restrict in1, adf::output_buffer<T>& __rest
     aie::vector<T, VECDIM> res = aie::zeros<T, VECDIM>();
 
     for (unsigned i = 0; i < LEN; i += INCREMENT) {
-        // window_readincr_v(in1, op1);
         op1 = aie::load_v<VECDIM>(p_in1);
         p_in1 = byte_incr(p_in1, VECDIM * sizeof(T));
 
         res = aie::add(op1, op2);
 
-        // writeincr(out, res);
         aie::store_v(p_out, res);
         p_out = byte_incr(p_out, VECDIM * sizeof(T));
     }
@@ -91,34 +89,3 @@ void sumVOneSW(adf::input_buffer<T>& __restrict in1, adf::output_buffer<T>& __re
 
 } // namespace L1
 } // namespace us
-
-// void sumVOne(input_window<float>* in1, output_stream<float>* out){
-//
-//	aie::vector<float, SIMD_DEPTH> op1 = aie::zeros<float, SIMD_DEPTH>();
-//	aie::vector<float, SIMD_DEPTH> op2 = aie::broadcast<float, SIMD_DEPTH>(1);
-//	aie::vector<float, SIMD_DEPTH> res = aie::zeros<float, SIMD_DEPTH>();
-//
-//	for(unsigned i = 0; i < LENGTH; i+=SIMD_DEPTH){
-//
-//		window_readincr_v(in1, op1);
-//
-//		res = aie::add(op1, op2);
-//
-//		writeincr(out, res);
-//	}
-//
-// };
-
-void sumVOneStreamIn(input_stream<float>* in1, output_window<float>* out) {
-    aie::vector<float, SIMD_DEPTH> op1 = aie::zeros<float, SIMD_DEPTH>();
-    aie::vector<float, SIMD_DEPTH> op2 = aie::broadcast<float, SIMD_DEPTH>(1);
-    aie::vector<float, SIMD_DEPTH> res = aie::zeros<float, SIMD_DEPTH>();
-
-    for (unsigned i = 0; i < LENGTH; i += 16) {
-        op1 = readincr_v<SIMD_DEPTH>(in1);
-
-        res = aie::add(op1, op2);
-
-        window_writeincr(out, res);
-    }
-};

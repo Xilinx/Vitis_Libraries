@@ -76,18 +76,5 @@ void absVSW(adf::input_buffer<T>& __restrict in1, adf::output_buffer<T>& __restr
     }
 };
 
-void absVStreamIn(input_stream<float>* in1, output_window<float>* out) {
-    aie::vector<float, SIMD_DEPTH> op1 = aie::zeros<float, SIMD_DEPTH>();
-    aie::vector<float, SIMD_DEPTH> res = aie::zeros<float, SIMD_DEPTH>();
-
-    for (unsigned i = 0; i < LENGTH; i += INCREMENT_VECTOR) {
-        op1 = readincr_v<SIMD_DEPTH>(in1);
-
-        res = aie::abs(op1);
-
-        window_writeincr(out, res);
-    }
-};
-
 } // namespace L1
 } // namespace us

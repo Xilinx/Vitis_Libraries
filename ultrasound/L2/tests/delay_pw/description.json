@@ -54,9 +54,7 @@
                 "LIB_DIR/L2/include",
                 "LIB_DIR/L2/tests/delay_pw/aie_graph"
             ],
-            "options": [
-                "-include LIB_DIR/L1/include/kernels.hpp"
-            ],
+            "options": "-include LIB_DIR/L1/include/kernels.hpp",
             "symbols": [
                 "__PS_ENABLE_AIE__"
             ]
@@ -121,7 +119,13 @@
                 "dependency": [],
                 "env": "",
                 "cmd": "",
-                "max_memory_MB": 32768,
+                "max_memory_MB": {
+		    "vitis_aie_sim": 32768,
+		    "vitis_aie_x86sim": 32768,
+		    "vitis_sw_emu": 32768,
+		    "vitis_hw_emu": 32768,
+		    "vitis_hw_build": 40960
+		},
                 "max_time_min": 300
             }
         ],

@@ -34,14 +34,14 @@ Setup Environment
    #!/bin/bash
 
    # setup vitis env
-   source <Vitis_install_path>/Vitis/2022.2/settings64.sh 
-   source <XRT_install_path>/2022.2/xbb/xrt/packages/setenv.sh
+   source <Vitis_install_path>/Vitis/2023.1/settings64.sh 
+   source <XRT_install_path>/2023.1/xbb/xrt/packages/setenv.sh
    export PLATFORM_REPO_PATHS=<path_to_platforms>
 
    # set petalinux related env
-   export SYSROOT=<path_to_platforms>/sw/versal/xilinx-versal-common-v2022.2/sysroots/aarch64-xilinx-linux/
-   export ROOTFS=<path_to_platforms>/sw/versal/xilinx-versal-common-v2022.2/rootfs.ext4
-   export K_IMAGE=<path_to_platforms>/sw/versal/xilinx-versal-common-v2022.2/Image
+   export SYSROOT=<path_to_platforms>/sw/versal/xilinx-versal-common-v2023.1/sysroots/aarch64-xilinx-linux/
+   export ROOTFS=<path_to_platforms>/sw/versal/xilinx-versal-common-v2023.1/rootfs.ext4
+   export K_IMAGE=<path_to_platforms>/sw/versal/xilinx-versal-common-v2023.1/Image
 
 Download the Vitis Ultrasound Library
 --------------------------------------

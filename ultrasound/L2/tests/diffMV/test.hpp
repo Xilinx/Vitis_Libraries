@@ -28,7 +28,6 @@ class diffMV : public adf::graph {
     adf::output_plio output_diffMV;
 
     diffMV() {
-
         // input and output port
         input1_diffMV = adf::input_plio::create("input1_diffMV", adf::plio_32_bits, "data/input1.txt");
         input2_diffMV = adf::input_plio::create("input2_diffMV", adf::plio_32_bits, "data/input2.txt");
@@ -51,8 +50,6 @@ class diffMV : public adf::graph {
         adf::dimensions(diffMVKernel.in[1]) = {1024};
         adf::dimensions(diffMVKernel.out[0]) = {128};
     }
-
-
 
    private:
     // Kernel declaration

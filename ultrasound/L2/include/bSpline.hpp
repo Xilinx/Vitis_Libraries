@@ -38,20 +38,20 @@ class bSpline_graph : public adf::graph {
     bSpline_graph(double kernel_ratio = KERNEL_RATIO) {
         // kernels
         interpolator_A1_diffSVKernel = adf::kernel::create(us::L1::diffOneLin<T, LENGTH_, SIMD_DEPTH_>);
-        interpolator_A1_mulVSCRStreamIn1Kernel = adf::kernel::create(us::L1::mulVSCRSWindow<T, LENGTH_, SIMD_DEPTH_>);
+        interpolator_A1_mulVSCRStreamIn1Kernel = adf::kernel::create(us::L1::mulVSCRS<T, LENGTH_, SIMD_DEPTH_>);
         interpolator_A1_mulVSCRStreamIn2Kernel =
             adf::kernel::create(us::L1::mulLinSCRStreamIn<T, LENGTH_, SIMD_DEPTH_>);
         interpolator_A1_sumVVKernel = adf::kernel::create(us::L1::sumVV<T, LENGTH_, 1, SIMD_DEPTH_>);
 
         interpolator_A2_diffSVKernel = adf::kernel::create(us::L1::diffTwoLin<T, LENGTH_, SIMD_DEPTH_>);
-        interpolator_A2_mulVSCRStreamIn1Kernel = adf::kernel::create(us::L1::mulVSCRSWindow<T, LENGTH_, SIMD_DEPTH_>);
-        interpolator_A2_mulVSCRStreamIn2Kernel = adf::kernel::create(us::L1::mulVSCRSWindow<T, LENGTH_, SIMD_DEPTH_>);
+        interpolator_A2_mulVSCRStreamIn1Kernel = adf::kernel::create(us::L1::mulVSCRS<T, LENGTH_, SIMD_DEPTH_>);
+        interpolator_A2_mulVSCRStreamIn2Kernel = adf::kernel::create(us::L1::mulVSCRS<T, LENGTH_, SIMD_DEPTH_>);
         interpolator_A2_diffVSKernel = adf::kernel::create(us::L1::diffLinOne<T, LENGTH_, SIMD_DEPTH_>);
         interpolator_A2_sumVVKernel = adf::kernel::create(us::L1::sumVV<T, LENGTH_, 1, SIMD_DEPTH_>);
 
         interpolator_A3_diffSVKernel = adf::kernel::create(us::L1::diffThreeLin<T, LENGTH_, SIMD_DEPTH_>);
-        interpolator_A3_mulVSCRStreamIn1Kernel = adf::kernel::create(us::L1::mulVSCRSWindow<T, LENGTH_, SIMD_DEPTH_>);
-        interpolator_A3_mulVSCRStreamIn2Kernel = adf::kernel::create(us::L1::mulVSCRSWindow<T, LENGTH_, SIMD_DEPTH_>);
+        interpolator_A3_mulVSCRStreamIn1Kernel = adf::kernel::create(us::L1::mulVSCRS<T, LENGTH_, SIMD_DEPTH_>);
+        interpolator_A3_mulVSCRStreamIn2Kernel = adf::kernel::create(us::L1::mulVSCRS<T, LENGTH_, SIMD_DEPTH_>);
         interpolator_A3_diffVSKernel = adf::kernel::create(us::L1::diffLinTwo<T, LENGTH_, SIMD_DEPTH_>);
         interpolator_A3_sumVVKernel = adf::kernel::create(us::L1::sumVV<T, LENGTH_, 1, SIMD_DEPTH_>);
 
