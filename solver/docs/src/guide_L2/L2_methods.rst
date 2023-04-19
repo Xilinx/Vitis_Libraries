@@ -1,5 +1,6 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
   
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -32,6 +33,7 @@ Matrix Decomposition
    Lower-Upper Decomposition (GETRF_NOPIVOT) <MatrixDecomposition/getrf_nopivot/getrf_nopivot.rst>
    Cholesky Decomposition for SPD matrix (POTRF) <MatrixDecomposition/potrf/potrf.rst>
    Cholesky Decomposition on AIE <MatrixDecomposition/cholesky_decomposition/cholesky_decomposition.rst>
+   QR Decomposition on AIE <MatrixDecomposition/qr_decomposition/qr_decomposition.rst>
 
 Linear Solver
 =============

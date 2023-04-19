@@ -1,7 +1,7 @@
 {
-    "name": "AIE Adder", 
+    "name": "QR decomposition on comlex float", 
     "description": [
-        "This simple example demonstrate the flow to create aie Kernel and how to connect aie Kernel to PL Kernels and validate the design running on the AI Engine."
+        ""
     ],
     "flow": "versal",
     "keywords": [
@@ -14,10 +14,10 @@
         "Adaptive Data Flow", 
         "Graph"
     ],
-    "platform_whitelist": [
+    "platform_allowlist": [
         "vck190"
     ],
-    "platform_blacklist": [
+    "platform_blocklist": [
 
     ],
     "os": [
@@ -25,26 +25,19 @@
     ], 
     "runtime": [
         "OpenCL"
-    ], 
-    "host": {
-       "host_exe": "aie_adder",
-        "compiler": {
-            "sources": [
-                "./ps/host.cpp",
-                "./Work/ps/c_rts/aie_control_xrt.cpp"
-            ], 
-            "includepaths": [
-                "./",
-                "LIB_DIR/L1/include",
-                "$(SYSROOT)/usr/include/xrt/"                
-            ],
-            "options": "--sysroot=$(SYSROOT)"
+    ],
+    "pre_build" : [
+        {
+            "build_cmd": "cd tv && make tv -f tv.mk"
         }
-    },
+    ],
     "aiecompiler": {
         "compiler": {
             "includepaths": [
-                "./aie"
+                "./aie",
+                "LIB_DIR/L1/include/aie",
+                "LIB_DIR/L2/include/aie",
+                "LIB_DIR/L1/src/aie"
             ]
         }
     },
@@ -61,47 +54,7 @@
             ]
         }
     ],
-    "data": [
-        "PROJECT/data/golden.txt",
-        "PROJECT/data/input0.txt",
-        "PROJECT/data/input1.txt"
-    ],
-    "v++": {
-        "linker": {
-                    "cflags": [
-                        "--config PROJECT/system.cfg"
-                    ]
-                },
-        "package": {
-                    "cflags": [
-                        "--package.defer_aie_run"
-                    ]
-                }
-     },
     "match_makefile" : "true",
-    "containers": [
-        {
-            "accelerators": [
-                {
-                    "name": "pl_mm2s", 
-                    "location": "pl_kernels/pl_mm2s.cpp",
-                    "num_compute_units": "1"
-                },
-                {
-                    "name": "pl_s2mm", 
-                    "location": "pl_kernels/pl_s2mm.cpp",
-                    "num_compute_units": "1"
-                }
-            ], 
-            "name": "krnl_adder"
-        }
-    ],
-    "launch": [
-        {
-            "cmd_args": "BUILD/krnl_adder.xclbin", 
-            "name": "generic launch for all flows"
-        }
-    ],
     "contributors": [
         {
             "url": "http://www.xilinx.com", 

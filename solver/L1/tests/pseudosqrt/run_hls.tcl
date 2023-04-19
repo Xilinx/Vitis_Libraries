@@ -1,5 +1,5 @@
-#
-# Copyright 2019-2021 Xilinx, Inc.
+# Copyright (C) 2019-2022, Xilinx, Inc.
+# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+# vitis hls makefile-generator v2.0.0
 
 source settings.tcl
 
@@ -30,7 +30,6 @@ add_files -tb "./host/test_pseudosqrt.cpp" -cflags "-D _USE_STRM_ -D _HLS_TEST_ 
 set_top kernel_pseudosqrt_0
 
 open_solution -reset $SOLN
-
 
 
 
