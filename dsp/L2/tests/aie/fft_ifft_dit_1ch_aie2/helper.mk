@@ -1,5 +1,6 @@
 #
-# Copyright 2021 Xilinx, Inc.
+# Copyright (C) 2019-2022, Xilinx, Inc.
+# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -56,31 +57,29 @@ else ifeq ($(POINT_SIZE), 65536)
 endif
 
 ifeq ($(AIE_VARIANT), 1)
-INPUTS_PER_TILE = 2
-else ifeq ($(AIE_VARIANT), 2)
-INPUTS_PER_TILE = 1
+	ifeq ($(API_IO),0)
+		INPUTS_PER_TILE := 1
+	else
+		INPUTS_PER_TILE := 2
+	endif
 else
-INPUTS_PER_TILE = 1
+	INPUTS_PER_TILE := 1
 endif
 
-ifeq ($(API_IO),0)
-	NUM_INPUTS := 1
-else
-	ifeq ($(PARALLEL_POWER), 0)
-		NUM_INPUTS=$$((1*$(INPUTS_PER_TILE)))
-	else ifeq ($(PARALLEL_POWER), 1)
-		NUM_INPUTS=$$((2*$(INPUTS_PER_TILE)))
-	else ifeq ($(PARALLEL_POWER), 2)
-		NUM_INPUTS=$$((4*$(INPUTS_PER_TILE)))
-	else ifeq ($(PARALLEL_POWER), 3)
-		NUM_INPUTS=$$((8*$(INPUTS_PER_TILE)))
-	else ifeq ($(PARALLEL_POWER), 4)
-		NUM_INPUTS=$$((16*$(INPUTS_PER_TILE)))
-	else ifeq ($(PARALLEL_POWER), 5)
-		NUM_INPUTS=$$((32*$(INPUTS_PER_TILE)))
-	else ifeq ($(PARALLEL_POWER), 6)
-		NUM_INPUTS=$$((64*$(INPUTS_PER_TILE)))
-	endif
+ifeq ($(PARALLEL_POWER), 0)
+	NUM_INPUTS=$$((1*$(INPUTS_PER_TILE)))
+else ifeq ($(PARALLEL_POWER), 1)
+	NUM_INPUTS=$$((2*$(INPUTS_PER_TILE)))
+else ifeq ($(PARALLEL_POWER), 2)
+	NUM_INPUTS=$$((4*$(INPUTS_PER_TILE)))
+else ifeq ($(PARALLEL_POWER), 3)
+	NUM_INPUTS=$$((8*$(INPUTS_PER_TILE)))
+else ifeq ($(PARALLEL_POWER), 4)
+	NUM_INPUTS=$$((16*$(INPUTS_PER_TILE)))
+else ifeq ($(PARALLEL_POWER), 5)
+	NUM_INPUTS=$$((32*$(INPUTS_PER_TILE)))
+else ifeq ($(PARALLEL_POWER), 6)
+	NUM_INPUTS=$$((64*$(INPUTS_PER_TILE)))
 endif
 
 ifeq ($(DYN_PT_SIZE), 1)

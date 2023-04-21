@@ -1,5 +1,7 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +24,7 @@ Reference model graph.
 
 #include <adf.h>
 #include <vector>
+#include "device_defs.h"
 #include "test_stim.hpp"
 #include "graph_utils.hpp"
 
@@ -79,7 +82,7 @@ void printConfig() {
     printf(QUOTE(COEFF_TYPE));
     printf("\n");
     printf("Input samples           = %d \n", INPUT_SAMPLES);
-    printf("Input window [B         = %lu \n", INPUT_SAMPLES * sizeof(DATA_TYPE));
+    printf("Input window [B]        = %lu \n", INPUT_SAMPLES * sizeof(DATA_TYPE));
     printf("Input margin            = %lu \n", INPUT_MARGIN(FIR_LEN, DATA_TYPE));
     printf("Output samples          = %d \n", OUTPUT_SAMPLES);
     printf("FIR Length              = %d \n", FIR_LEN);

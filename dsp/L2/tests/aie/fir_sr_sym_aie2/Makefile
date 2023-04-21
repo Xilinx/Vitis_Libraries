@@ -1,4 +1,5 @@
-# Copyright 2019-2022 Xilinx, Inc.
+# Copyright (C) 2019-2022, Xilinx, Inc.
+# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.8
+# vitis makefile-generator v2.0.9
 
 ############################## Help Section ##############################
 .PHONY: help
@@ -168,7 +169,7 @@ LOG_FILE ?= ./logs/log_$(UUT_FILE_SUFFIX).txt
 STATUS_LOG_FILE ?= ./logs/status_$(UUT_FILE_SUFFIX).txt
 STATUS_FILE ?= $(STATUS_LOG_FILE)
 MAX_FIR_PER_KERNEL ?= 256
-UUT_TARGET_COMPILE_ARGS ?= --Xrouter=DMAFIFOsInFreeBankOnly --xlopt=1 -stacksize=$$(( $(MAX_FIR_PER_KERNEL) * $(INTERPOLATE_FACTOR) * $(COEFF_SIZE) + 1536))  -Xchess=llvm.xargs="-std=c++2a" -Xchess=main:backend.mist2.xargs="+NOdra"  -Xchess=main:backend.mist2.pnll="off" 
+UUT_TARGET_COMPILE_ARGS ?= --xlopt=1 -stacksize=$$(( $(MAX_FIR_PER_KERNEL) * $(INTERPOLATE_FACTOR) * $(COEFF_SIZE) + 1536))  -Xchess=llvm.xargs="-std=c++2a" -Xchess=main:backend.mist2.xargs="+NOdra"  -Xchess=main:backend.mist2.pnll="off" 
 REF_TARGET_COMPILE_ARGS ?= 
 UUT_WORK_DIR ?= ./Work
 REF_WORK_DIR ?= ./Work

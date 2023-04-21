@@ -1,4 +1,5 @@
-# Copyright 2019-2022 Xilinx, Inc.
+# Copyright (C) 2019-2022, Xilinx, Inc.
+# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.8
+# vitis makefile-generator v2.0.9
 
 ############################## Help Section ##############################
 .PHONY: help
@@ -321,8 +322,7 @@ ifeq ($(TARGET), x86sim)
 	$(if $(filter-out REF,$(TAG)), perl $(XFLIB_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./x86simulator_output/data/uut_output.txt --type $(DATA_TYPE) --ssr $(UUT_SSR) --zip --dual 0 -k 0 -w $(UUT_SSR_WINDOW_VSIZE))
 	$(if $(filter-out REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/uut_output.txt > ./logs/uut_output.txt)
 	$(if $(filter REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./logs/ref_output.txt)
-	$(if $(filter-out REF,$(TAG)), make -f $(XFLIB_DIR)/L2/tests/aie/dds_mixer_lut_aie1/helper.mk diff HELPER_CUR_DIR=$(XFLIB_DIR)/L2/tests/aie/dds_mixer_lut_aie1 HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_SSR=UUT_SSR P_API=P_API DATA_TYPE=DATA_TYPE SFDR=SFDR)
-	$(if $(filter-out REF,$(TAG)), tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE) abs)
+	$(if $(filter-out REF,$(TAG)), make -f $(XFLIB_DIR)/L2/tests/aie/dds_mixer_lut_aie1/helper.mk diff HELPER_CUR_DIR=$(XFLIB_DIR)/L2/tests/aie/dds_mixer_lut_aie1 HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_SSR=$(UUT_SSR) P_API=$(P_API) DATA_TYPE=$(DATA_TYPE) SFDR=$(SFDR))
 	$(if $(filter-out REF,$(TAG)), tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(META_PARAM_MAP))
 	$(if $(filter-out REF,$(TAG)), tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/diff_exit.tcl ./)
 endif
@@ -332,7 +332,7 @@ ifeq ($(TARGET), aiesim)
 	mkdir -p logs
 	perl $(XFLIB_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file ./aiesimulator_output/data/uut_output.txt --type $(DATA_TYPE) --ssr $(UUT_SSR) --zip --dual 0 -k 0 -w $(UUT_SSR_WINDOW_VSIZE)
 	grep -ve '[XT]' ./aiesimulator_output/data/uut_output.txt > ./logs/uut_output.txt
-	make -f $(XFLIB_DIR)/L2/tests/aie/dds_mixer_lut_aie1/helper.mk diff HELPER_CUR_DIR=$(XFLIB_DIR)/L2/tests/aie/dds_mixer_lut_aie1 HELPER_ROOT_DIR=$(XFLIB_DIR)  UUT_SSR=UUT_SSR P_API=P_API DATA_TYPE=DATA_TYPE SFDR=SFDR
+	make -f $(XFLIB_DIR)/L2/tests/aie/dds_mixer_lut_aie1/helper.mk diff HELPER_CUR_DIR=$(XFLIB_DIR)/L2/tests/aie/dds_mixer_lut_aie1 HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_SSR=$(UUT_SSR) P_API=$(P_API) DATA_TYPE=$(DATA_TYPE) SFDR=$(SFDR)
 	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(META_PARAM_MAP)
 	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output $(STATUS_FILE) $(UUT_SSR_WINDOW_VSIZE) $(NITER_UUT)
 	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(UUT_SSR_WINDOW_VSIZE) 1 $(STATUS_FILE) ./aiesimulator_output dds $(NITER_UUT)

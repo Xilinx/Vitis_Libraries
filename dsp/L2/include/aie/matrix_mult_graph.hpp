@@ -1,5 +1,7 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,18 +74,22 @@ using namespace adf;
  * @tparam TP_SHIFT describes power of 2 shift down applied to the accumulation of
  *         product terms before each output. TP_SHIFT must be in the range 0 to 61.
  * @tparam TP_RND describes the selection of rounding to be applied during the
- *         shift down stage of processing. TP_RND must be in the range 0 to 7
- *         where
- *         - 0 = floor (truncate) eg. 3.8 Would become 3.
- *         - 1 = ceiling e.g. 3.2 would become 4.
- *         - 2 = round to positive infinity.
- *         - 3 = round to negative infinity.
- *         - 4 = round symmetrical to infinity.
- *         - 5 = round symmetrical to zero.
- *         - 6 = round convergent to even.
- *         - 7 = round convergent to odd. \n
- *         Modes 2 to 7 round to the nearest integer. They differ only in how
- *         they round for values of 0.5.
+ *         shift down stage of processing. Although, TP_RND accepts unsignedinteger values
+ *         descriptive macros are recommended where
+ *         - rnd_floor      = Truncate LSB, always round down (towards negative infinity).
+ *         - rnd_ceil       = Always round up (towards positive infinity).
+ *         - rnd_sym_floor  = Truncate LSB, always round towards 0.
+ *         - rnd_sym_ceil   = Always round up towards infinity.
+ *         - rnd_pos_inf    = Round halfway towards positive infinity.
+ *         - rnd_neg_inf    = Round halfway towards negative infinity.
+ *         - rnd_sym_inf    = Round halfway towards infinity (away from zero).
+ *         - rnd_sym_zero   = Round halfway towards zero (away from infinity).
+ *         - rnd_conv_even  = Round halfway towards nearest even number.
+ *         - rnd_conv_odd   = Round halfway towards nearest odd number. \n
+ *         No rounding is performed on ceil or floor mode variants. \n
+ *         Other modes round to the nearest integer. They differ only in how
+ *         they round for values of 0.5. \n
+ *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
  * @tparam TP_DIM_A_LEADING describes the scheme in which the data should be stored
  *         in memory. ROW_MAJOR = 0, COL_MAJOR = 1. Note, a COL_MAJOR matrix can be
  *         transposed to become a ROW_MAJOR matrix.

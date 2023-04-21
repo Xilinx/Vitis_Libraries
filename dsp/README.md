@@ -3,7 +3,7 @@
 Vitis DSP library provides implementation of different L1/L2/L3 primitives for digital signal processing.
 Current version provides:
 - L1 level HLS C++ implementation of Discrete Fourier Transform using Fast Fourier Transform algorithm for acceleration on Xilinx FPGAs.
-- L2 level AIE C++ graph implementation of FFT, FIRs, Matrix Multiply (GeMM) and utility Widgets.
+- L2 level AIE C++ graph implementation of DDS, FFT, FIRs, Matrix Multiply (GeMM) and utility Widgets.
 
 Note: Only L1/L2 primitives are delivered currently.
 
@@ -17,14 +17,16 @@ Vitis library is organized into L1, L2, and L3 folders, each relating to a diffe
 * Estimate resource usage, latency, etc. (Synthesis)
 * Run cycle accurate simulations (Co-simulation)
 * Package as IP and get final resource utilization/timing details (Export RTL)
-       
+
 	**Note**:  Once RTL (or XO file after packaging IP) is generated, the Vivado flow is invoked for XCLBIN file generation if required.
 
 **L2** :
        Makefiles and sources in L2 facilitate building XCLBIN file from various sources (HDL, HLS or XO files) of kernels with host code written in OpenCL/XRT framework targeting a device. This flow supports:
 
+* AIE x86 Functional Simulation for rapid AIE functionality check
+* AIE SystemC Simulation for cycle approximate AIE performance check
 * Software emulation to check the functionality
-* Hardware emulation to check RTL level simulation
+* Hardware emulation to simulate the entire system, including AI Engine graph and PL logic along with XRT-based host application to control the AI Engine and PL
 * Build and test on hardware
 
 
@@ -32,14 +34,15 @@ Vitis library is organized into L1, L2, and L3 folders, each relating to a diffe
 
 Licensed using the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0).
 
-    Copyright 2019-2022 Xilinx, Inc.
-    
+    Copyright (C) 2019-2022, Xilinx, Inc.
+    Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
-    
+
         http://www.apache.org/licenses/LICENSE-2.0
-    
+
     Unless required by applicable law or agreed to in writing, software
     distributed under the License is distributed on an "AS IS" BASIS,
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.

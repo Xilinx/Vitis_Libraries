@@ -39,7 +39,13 @@ def vmc_validate_casc_length(args):
     data_type = args["data_type"]
     point_size = args["point_size"]
     casc_length = args["casc_length"]
-    return fn_validate_casc_len(data_type, point_size, casc_length)
+    ssr = args["ssr"]
+    pp = fn_get_parallel_power(ssr)
+
+    if pp == -1:
+      return isError(f"Invalid SSR value specified. The value should be of the form 2^N between 2 and 512.")
+
+    return fn_validate_casc_len(data_type, point_size, pp, casc_length)
 
 def vmc_validate_ssr(args):
     api = 1;

@@ -1,5 +1,6 @@
 ..
-   Copyright 2022 Xilinx, Inc.
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -48,9 +49,9 @@ Additionally, each FIR filter has been placed in its unique FIR type namespace. 
    +----------------------------------+-----------------------------------------------------------+
    | Interpolation asymmetrical       | dsplib::fir::interpolate_asym::fir_interpolate_asym_graph |
    +----------------------------------+-----------------------------------------------------------+
-   | Decimation, half-band             | dsplib::fir::decimate_hb::fir_decimate_hb_graph           |
+   | Decimation, half-band            | dsplib::fir::decimate_hb::fir_decimate_hb_graph           |
    +----------------------------------+-----------------------------------------------------------+
-   | Interpolation, half-band          | dsplib::fir::interpolate_hb::fir_interpolate_hb_graph     |
+   | Interpolation, half-band         | dsplib::fir::interpolate_hb::fir_interpolate_hb_graph     |
    +----------------------------------+-----------------------------------------------------------+
    | Decimation, asymmetric           | dsplib::fir::decimate_asym::fir_decimate_asym_graph       |
    +----------------------------------+-----------------------------------------------------------+
@@ -103,8 +104,10 @@ Template Parameters
 ~~~~~~~~~~~~~~~~~~~
 
 The following table lists parameters for all the FIR filters.
-Note that some parameters are not present on certain variants of FIR where the parameter is not applicable to that variant:
-Also note that TP_RND values may vary between AIE and AIE-ML for the same rounding mechanism. For AIE-ML see :ref:`fir_supported_params_aieml`.
+
+.. note:: Note that some parameters are not present on certain variants of FIR where the parameter is not applicable to that variant, e.g.: ``TP_INTERPOLATE_FACTOR`` is not present on single-rate FIRs.
+
+.. note:: ``TP_RND`` values may vary between AIE and AIE-ML for the same rounding mechanism. String macro defitions are recommended for convienience and compatibility between devices. For AIE-ML see :ref:`fir_supported_params_aieml`.
 
 .. _fir_supported_params:
 
@@ -147,34 +150,34 @@ Also note that TP_RND values may vary between AIE and AIE-ML for the same roundi
    |                        |                | down by before  |                                 |
    |                        |                | output.         |                                 |
    +------------------------+----------------+-----------------+---------------------------------+
-   |    TP_RND              |    Unsigned    | Round mode      |    0 =                          |
+   |    TP_RND              |    Unsigned    | Round mode      |    0 = ``rnd_floor``            |
    |                        |    int         |                 |    truncate or                  |
    |                        |                |                 |    floor                        |
    |                        |                |                 |                                 |
-   |                        |                |                 |    1 =                          |
+   |                        |                |                 |    1 = ``rnd_ceil``             |
    |                        |                |                 |    ceiling                      |
    |                        |                |                 |                                 |
-   |                        |                |                 |    2 =                          |
+   |                        |                |                 |    2 = ``rnd_pos_inf``          |
    |                        |                |                 |    positive                     |
    |                        |                |                 |    infinity                     |
    |                        |                |                 |                                 |
-   |                        |                |                 |    3 =                          |
+   |                        |                |                 |    3 = ``rnd_neg_inf``          |
    |                        |                |                 |    negative                     |
    |                        |                |                 |    infinity                     |
    |                        |                |                 |                                 |
-   |                        |                |                 |    4 =                          |
+   |                        |                |                 |    4 = ``rnd_sym_inf``          |
    |                        |                |                 |    symmetrical                  |
    |                        |                |                 |    to infinity                  |
    |                        |                |                 |                                 |
-   |                        |                |                 |    5 =                          |
+   |                        |                |                 |    5 = ``rnd_sym_zero``         |
    |                        |                |                 |    symmetrical                  |
    |                        |                |                 |    to zero                      |
    |                        |                |                 |                                 |
-   |                        |                |                 |    6 =                          |
+   |                        |                |                 |    6 = ``rnd_conv_even``        |
    |                        |                |                 |    convergent                   |
    |                        |                |                 |    to even                      |
    |                        |                |                 |                                 |
-   |                        |                |                 |    7 =                          |
+   |                        |                |                 |    7 = ``rnd_conv_odd``         |
    |                        |                |                 |    convergent                   |
    |                        |                |                 |    to odd                       |
    +------------------------+----------------+-----------------+---------------------------------+
@@ -241,11 +244,11 @@ Also note that TP_RND values may vary between AIE and AIE-ML for the same roundi
    |                        |                | the graph       |                                 |
    |                        |                | when set to 2.  |                                 |
    +------------------------+----------------+-----------------+---------------------------------+
-   |  TP_UPSHIFT_CT         |    Unsigned    | Center tap coeff|  0 = center tap operates like   |
-   |                        |    int         | form            |      all other coefficients     |
-   |                        |                |                 |  1 = center tap coeff is a      |
-   |                        |                |                 |      power of 2 shift.          |
-   |                        |                |                 |      (interpolate half-band only)|
+   |  TP_UPSHIFT_CT         |    Unsigned    | Center tap coeff| 0 = center tap operates like    |
+   |                        |    int         | form            |     all other coefficients      |
+   |                        |                |                 | 1 = center tap coeff is a       |
+   |                        |                |                 |     power of 2 shift.           |
+   |                        |                |                 |     (interpolate half-band only)|
    +------------------------+----------------+-----------------+---------------------------------+
    |  TP_API                |    Unsigned    | I/O interface   |  0 = Window                     |
    |                        |    int         | port type       |                                 |
@@ -279,8 +282,8 @@ Also note that TP_RND values may vary between AIE and AIE-ML for the same roundi
 
 For a list of template parameters for each FIR variant, see :ref:`API_REFERENCE`.
 
-**TP_CASC_LEN** describes the number of AIE processors to split the operation over, which allows resources to be traded for higher performance. TP_CASC_LEN must be in the range 1 (default) to 9.
-FIR graph instance creates TP_CASC_LEN kernels. Computation workload of the FIR (defined by its length parameter TP_FIR_LEN) is divided and each kernel in the graph is then assigned a fraction of the workload, i.e. each kernel performs TP_FIR_LEN / TP_CASC_LEN.
+**TP_CASC_LEN** describes the number of AIE processors to split the operation over, which allows resources to be traded for higher performance. ``TP_CASC_LEN`` must be in the range 1 (default) to 9.
+FIR graph instance creates ``TP_CASC_LEN`` kernels. Computation workload of the FIR (defined by its length parameter ``TP_FIR_LEN``) is divided and each kernel in the graph is then assigned a fraction of the workload, i.e. each kernel performs ``TP_FIR_LEN / TP_CASC_LEN``.
 Kernels are connected with cascade ports, which pass partial accumulation products downstream until last kernel in chain produces the output.
 
 **TP_DUAL_IP** is an implementation trade-off between performance and resource utilization.
@@ -319,15 +322,15 @@ Stream API uses the additional output port to increase the FIR's throughput. Ple
 For more details about the internals of the graph with SSR operation, refer to :ref:`SSR_OPERATION`.
 
 | **TP_PARA_INTERP_POLY** sets the number of interpolator polyphases which are executed in parallel with output data produced by each polyphase output directly its own output port (or ports when TP_SSR>1).
-| TP_PARA_INTERP_POLY does not affect the number of input data ports.
-| TP_PARA_INTERP_POLY can be used in combination with TP_SSR.
+| ``TP_PARA_INTERP_POLY`` does not affect the number of input data ports.
+| ``TP_PARA_INTERP_POLY`` can be used in combination with ``TP_SSR``.
 | The number of AIEs used is given by ``TP_PARA_INTERP_POLY * TP_SSR^2 * TP_CASC_LEN``.
 
 For more details about the internals of the graph with SSR operation, refer to :ref:`SSR_OPERATION`.
 
 | **TP_PARA_DECI_POLY** specifies the number of distinct input data polyphases over which the input stream will be split.
 | The polyphase computations are performed in a series and the outputs are combined into a single output stream.
-| TP_PARA_DECI_POLY does not affect the number of output data ports.
+| ``TP_PARA_DECI_POLY`` does not affect the number of output data ports.
 | The number of AIEs used is given by ``TP_PARA_DECI_POLY * TP_SSR^2 * TP_CASC_LEN``.
 
 For more details about how to configure the various parameters to meet various performance metrics, see :ref:`SSR_OPERATION_MODES`
@@ -361,7 +364,7 @@ For all non-reloadable filter configurations, the coefficient values are passed 
 Static Coefficients - array size
 ////////////////////////////////
 
-**Asymmetrical* FIR**
+**Asymmetrical FIR**
 
 Asymmetrical filters expect the port to contain the full array of coefficients, i.e. coefficient array size is equal to the ``TP_FIR_LEN``.
 
@@ -639,7 +642,7 @@ Maximum FIR Length
 Maximum Window based FIRs Length
 ////////////////////////////////
 
-When using window-API for instance, the window buffer must fit into a 32kByte memory bank and since this includes the margin, it limits the maximum window size. Therefore, it also indirectly sets an upper limit on TP_FIR_LEN.
+When using window-API for instance, the window buffer must fit into a 32kByte memory bank and since this includes the margin, it limits the maximum window size. Therefore, it also indirectly sets an upper limit on ``TP_FIR_LEN``.
 
 In addition, the `single_buffer()` constraint is needed to implement window buffers of > 16kB. Please refer to: :ref:`SINGLE_BUFFER_CONSTRAINT` for more details.
 
@@ -653,7 +656,7 @@ As a guide, a single rate symmetric FIR can support up to:
 
 | Another limiting factor when considering implementation of high order FIRs is the Program Memory and sysmem requirements.
 | Increasing FIR length requires greater amounts of heap and stack memory to store coefficients. Program Memory footprint also increases, as the number of instructions grows.
-| As a result, a single FIR kernel can only support a limited amount of coefficents. Longer FIRs have to be split up into a design consisting of multiple FIR kernels using `TP_CASC_LEN` parameter.
+| As a result, a single FIR kernel can only support a limited amount of coefficients. Longer FIRs have to be split up into a design consisting of multiple FIR kernels using `TP_CASC_LEN` parameter.
 
 Maximum Stream based FIRs Length
 ////////////////////////////////
@@ -670,7 +673,7 @@ To help find the number of FIR kernels required (or desired) to implement reques
 Minimum Cascade Length
 ----------------------
 
-| To help find the minimum supported TP_CASC_LEN value for a given configuration, the following utility functions have been created in each FIR's graph file.
+| To help find the minimum supported ``TP_CASC_LEN`` value for a given configuration, the following utility functions have been created in each FIR's graph file.
 | The function signature for the single rate asymmetric filter is shown below:
 
 .. code-block::
@@ -698,7 +701,7 @@ More details are provided in the  :ref:`API_REFERENCE`.
 Optimum Cascade Length
 ----------------------
 
-| For FIR variants configured to use streaming interfaces, i.e. TP_API=1, the optimum TP_CASC_LEN for a given configuration of the other parameters is a complicated equation. Here, the optimum value of TP_CASC_LEN refers to the least number of kernels that the overall calculations can be divided, when the interface bandwidth limits the maximum performance.
+| For FIR variants configured to use streaming interfaces, i.e. ``TP_API=1``, the optimum ``TP_CASC_LEN`` for a given configuration of the other parameters is a complicated equation. Here, the optimum value of ``TP_CASC_LEN`` refers to the least number of kernels that the overall calculations can be divided, when the interface bandwidth limits the maximum performance.
 | To aid in this determination, utility functions have been created for FIR variants in their respective graph files.
 | The function signature for the single rate asymmetric filter is shown below, as an example:
 
@@ -825,7 +828,7 @@ Super Sample Rate - Coefficient & Data distribution
 ///////////////////////////////////////////////////
 
 The base mode of SSR is driven by the use of template parameter ``TP_SSR``.
-The parameter TP_SSR allows a trade of performance for resource use in the form of tiles used.
+The parameter ``TP_SSR`` allows a trade of performance for resource use in the form of tiles used.
 
 When used, a number of ``TP_SSR`` input phases and a number of ``TP_SSR`` output paths will be created.
 An array of ``TP_SSR^2`` FIR sub-graphs will be created to connect input phases and output paths.
@@ -938,7 +941,7 @@ The output stream would produce data in this form:
    out[4] = o4, o10, o16, o22, o28, ...
    out[5] = o5, o11, o17, o23, o29, ...
 
-We see that we can think of TP_SSR x TP_PARA_INTERP_POLY as an effective ``OUT_SSR`` which gives us the maximum output sample rate of the filter.
+We see that we can think of ``TP_SSR x TP_PARA_INTERP_POLY`` as an effective ``OUT_SSR`` which gives us the maximum output sample rate of the filter.
 
 .. _SSR_OPERATION_PARA_DECI_POLY:
 
@@ -1007,22 +1010,22 @@ Should it be necessary to apply constraints within the FIR instance to achieve s
 
 Each FIR variant has a variety of access methods to help assign a constraint on a kernel and/or a net, e.g.:
 
-- `get_kernels()` which returns a pointer to an array of kernel pointers, or
+- `getKernels()` which returns a pointer to an array of kernel pointers, or
 
 - `getInNet()` which returns a pointer to a net indexed by method's argument(s).
 
 More details are provided in the  :ref:`API_REFERENCE`.
 
 An example of how to use this is given in the section :ref:`FIR_CODE_EXAMPLE`.
-When configured for SSR operation, the FIR as a two-dimensional array (paths x phases) of units which are themselves FIRs, though each atomic FIR in this structure may itself be a series of kernels as described by TP_CASC_LEN. The access function `get_kernels()` returns a pointer to the array of kernels within the SSR FIR. This array will have TP_SSR * TP_SSR * TP_CASC_LEN members. The index in the array is determined by its path number, phase number and cascade position as shown in the following equation.
+When configured for SSR operation, the FIR as a two-dimensional array (paths x phases) of units which are themselves FIRs, though each atomic FIR in this structure may itself be a series of kernels as described by TP_CASC_LEN. The access function `getKernels()` returns a pointer to the array of kernels within the SSR FIR. This array will have TP_SSR * TP_SSR * TP_CASC_LEN members. The index in the array is determined by its path number, phase number and cascade position as shown in the following equation.
 
 .. code-block::
 
    Kernel Index = Kernel Path * TP_SSR * TP_CASC_LEN + Kernel Phase * TP_CASC_LEN + Kernel Cascade index
 
-For example, in a design with TP_CASC_LEN=2 and TP_SSR=3, the first kernel of the last path would have index 12.
+For example, in a design with ``TP_CASC_LEN=2`` and ``TP_SSR=3``, the first kernel of the last path would have index 12.
 
-The nets returned by the getInNet() function can be assigned custom fifo_depths values to override the defaults.
+The nets returned by the `getInNet()` function can be assigned custom fifo_depths values to override the defaults.
 
 .. _FIR_CODE_EXAMPLE:
 
@@ -1055,10 +1058,10 @@ The least resource-expensive method to obtain higher performance is to use the d
 | ``TP_PARA_X_POLY`` can take a minimum value of 1 and a maximum value equal to the interpolation factor or the decimation factor. It can increase in steps of the integer factors of the interpolation or decimation factor.
 | It is important to note that, the advantage of higher throughput comes at the cost of additional AIE tiles. When we set the ``TP_PARA_X_POLY`` parameter, the graph creates a number of ``TP_PARA_X_POLY`` polyphase paths. Each path contains ``TP_CASC_LEN`` kernels. The number of tiles used will be ``TP_PARA_X_POLY * TP_CASC_LEN``, i.e. ``TP_PARA_X_POLY`` is a single dimensional expansion.
 
-| TP_SSR is the parameter that enables finer control over the throughput and AIE tiles use.
-| The number of tiles used will be ``TP_CASC_LEN * TP_SSR * TP_SSR``, i.e. SSR is a 2-dimensional expansion. Both methods may work in addition to the TP_CASC_LEN parameter which also increases the number of tiles. TP_SSR can take any positive integer value and its maximum is only limited by the number of AIE tiles available. This can be used to prevent over-utilization of kernels if the throughput requirement is not as high as the one offered by the ``TP_PARA_X_POLY``.
+| ``TP_SSR`` is the parameter that enables finer control over the throughput and AIE tiles use.
+| The number of tiles used will be ``TP_CASC_LEN * TP_SSR * TP_SSR``, i.e. SSR is a 2-dimensional expansion. Both methods may work in addition to the ``TP_CASC_LEN`` parameter which also increases the number of tiles. ``TP_SSR`` can take any positive integer value and its maximum is only limited by the number of AIE tiles available. This can be used to prevent over-utilization of kernels if the throughput requirement is not as high as the one offered by the ``TP_PARA_X_POLY``.
 
-``TP_CASC_LEN`` indicates the number of kernels to be cascaded together to distribute the calculation of the TP_FIR_LEN parameter. It works in addition to ``TP_SSR`` and ``TP_PARA_X_POLY`` to overcome any bottlenecks posed by the vector processor. The library provides access functions to determine the value of ``TP_CASC_LEN`` that gives us the optimum performance, i.e., the minimum number of kernels that can provide the maximum performance. These are documented here (insert link here to API reference docs here).
+``TP_CASC_LEN`` indicates the number of kernels to be cascaded together to distribute the calculation of the ``TP_FIR_LEN`` parameter. It works in addition to ``TP_SSR`` and ``TP_PARA_X_POLY`` to overcome any bottlenecks posed by the vector processor. The library provides access functions to determine the value of ``TP_CASC_LEN`` that gives us the optimum performance, i.e., the minimum number of kernels that can provide the maximum performance. These are documented here (insert link here to API reference docs here).
 
 If there is no constraint on the number of AIE tiles, the easiest way to get the required performance is to set the ``TP_PARA_X_POLY`` to the closest factor of the interpolation/decimation rate that is higher than the throughput needed. If, however, the goal is to obtain a performance using the least number of tiles, ``TP_SSR`` may need to be used as a finer tuning parameter to get the throughput we want.
 
@@ -1071,7 +1074,7 @@ If there is no constraint on the number of AIE tiles, the easiest way to get the
 **SCENARIO 2:**
 
 | For a 32 tap interpolate by 2 filter that needs 4GSa/s at output:
-| ``TP_PARA_INTERP_POLY`` can be set to 2. This would create 2 output paths and so, at least 2 AIE tiles. Let's say that the optimum cascade length for the data_type/coeff_type combination is 2, Set TP_CASC_LEN = 2.
+| ``TP_PARA_INTERP_POLY`` can be set to 2. This would create 2 output paths and so, at least 2 AIE tiles. Let's say that the optimum cascade length for the data_type/coeff_type combination is 2, Set ``TP_CASC_LEN = 2``.
 | Note that the optimum cascade lengths for the various parameters can be obtained using the helper functions in :ref:`API_REFERENCE`. With these 2 output paths, it is possible to obtain the required sample rate of 4GSa/s.
 
 **SCENARIO 3:**

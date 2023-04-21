@@ -1,5 +1,6 @@
 ..
-   Copyright 2022 Xilinx, Inc.
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -24,21 +25,22 @@ Requirements
 Software Platform
 ~~~~~~~~~~~~~~~~~
 
-This library is designed to work with Vitis, and therefore inherits the system requirements of Vitis and XRT.
+This library is designed to work with Vitis |trade|, and therefore inherits the system requirements of Vitis |trade| and XRT.
 
-Supported operating systems are RHEL/CentOS 7.4, 7.5 and Ubuntu 16.04.4 LTS, 18.04.1 LTS.
+Supported operating systems are RHEL/CentOS 7.9, RHEL 8.3 and Ubuntu 18.04.4 LTS, 20.04 LTS, 22.04 LTS.
 
 PCIE Accelerator Card
 ~~~~~~~~~~~~~~~~~~~~~
 
-Hardware modules and kernels are designed to work with Alveo U200 and U280 cards.
+Hardware modules and kernels are designed to work with AMD Alveo |trade|  U200 and U280 cards.
 
 License
 -------
 
 Licensed using the `Apache 2.0 license <https://www.apache.org/licenses/LICENSE-2.0>`_.
 
-    Copyright 2022 Xilinx, Inc.
+    Copyright (C) 2019-2022, Xilinx, Inc.
+    Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -59,3 +61,10 @@ Trademark Notice
     other designated brands included herein are trademarks of Xilinx in the
     United States and other countries.  All other trademarks are the property
     of their respective owners.
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:
+
+

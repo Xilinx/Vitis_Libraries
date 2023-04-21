@@ -47,8 +47,8 @@ import fir_sr_asym as sr_asym
 def fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1, TP_PARA_DECI_POLY=1):
     # decimate halfband always uses 384b version of lanes.
     checkMultipleLanes =  fn_windowsize_multiple_lanes(TT_DATA, TT_COEF, TP_INPUT_WINDOW_VSIZE, TP_API, numLanes=fnNumLanes384b(TT_DATA, TT_COEF)*4)
-    #  also checks output size (this isn't done on static asserts for some reason right now)
-    checkMaxBuffer = fn_max_windowsize_for_buffer(TT_DATA, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR, TP_INTERPOLATE_FACTOR=1, TP_DECIMATE_FACTOR=2)
+    symApiSSR      = 0 if (TP_SSR == 1 and TP_PARA_DECI_POLY == 1) else TP_API  # Force buffer checks when not in SSR mode.
+    checkMaxBuffer = fn_max_windowsize_for_buffer(TT_DATA, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, symApiSSR, TP_SSR, TP_INTERPOLATE_FACTOR=1, TP_DECIMATE_FACTOR=2)
     # Input samples are round-robin split to each SSR input paths, so total frame size must be divisable by SSR factor.
     checkIfDivisableBySSR = fn_windowsize_divisible_by_ssr(TP_INPUT_WINDOW_VSIZE, TP_SSR * TP_PARA_DECI_POLY)
 
@@ -64,7 +64,10 @@ def fn_halfband_len(TP_FIR_LEN):
 def fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD, TP_PARA_DECI_POLY):
     minLenCheck =  fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR)
 
-    maxLenCheck = fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR, TP_API, 4)
+    symFactor   = 4 # Symmetric, half-band
+    symFactorSSR   = 2 if (TP_SSR != 1 ) else symFactor # SSR mode will discard the symmetry
+    symApiSSR      = 0 if (TP_SSR == 1 and TP_PARA_DECI_POLY == 1) else TP_API  # Force buffer checks when not in SSR mode.
+    maxLenCheck = fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR, symApiSSR, symFactorSSR)
     halfbandLenCheck = fn_halfband_len(TP_FIR_LEN)
     dataNeededCheck = isValid
     if TP_PARA_DECI_POLY > 1:

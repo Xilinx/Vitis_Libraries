@@ -1,9 +1,8 @@
 {
     "gui": false,
     "name": "Xilinx 1D FFT Fixed Reference Design",
-    "description": "",
+    "description": "Xilinx 1D FFT Fixed Reference Design",
     "flow": "vitis",
-    "platform_type": "",
     "platform_allowlist": [
         "u250",
         "aws-vu9p-f1",

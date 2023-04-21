@@ -68,7 +68,9 @@ def fnNumLanesSym(TT_DATA, TT_COEF):
 def fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1):
 
     checkMultipleLanes =  fn_windowsize_multiple_lanes(TT_DATA, TT_COEF, TP_INPUT_WINDOW_VSIZE, TP_API, numLanes=fnNumLanesSym(TT_DATA, TT_COEF))
-    checkMaxBuffer = fn_max_windowsize_for_buffer(TT_DATA, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR)
+    # Force Max buffer check for symmetric FIRs in non-SSR mode.
+    symApiSSR = 0 if TP_SSR == 1 else TP_API
+    checkMaxBuffer = fn_max_windowsize_for_buffer(TT_DATA, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, symApiSSR, TP_SSR)
     # Input samples are round-robin split to each SSR input paths, so total frame size must be divisable by SSR factor.
     checkIfDivisableBySSR = fn_windowsize_divisible_by_ssr(TP_INPUT_WINDOW_VSIZE, TP_SSR)
 
@@ -81,8 +83,10 @@ def fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INPUT_WINDOW_
 
 def fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD, AIE_VARIANT=1):
     minLenCheck =  fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR)
-    symFactor   = 1 if (TT_DATA == "cfloat" or TT_DATA == "float") else 2  # guessing this is because the code bloats up very easily for float data types and we hit program memory limitations earlier
-    maxLenCheck = fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR, TP_API, symFactor)
+    symFactor   = 1 if (TP_API == 0 and (TT_DATA == "cfloat" or TT_DATA == "float")) else 2  # Avoid program memory limitations
+    symFactorSSR   = 1 if (TP_SSR != 1 ) else symFactor # SSR mode will discard the symmetry
+    symApiSSR      = 0 if (TP_SSR == 1 ) else TP_API  # Force buffer checks when not in SSR mode.
+    maxLenCheck = fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR, symApiSSR, symFactorSSR)
     dataNeededCheck = isValid
     if ((TP_SSR > 1) or (AIE_VARIANT == 2)):
       dataNeededCheck = sr_asym.fn_data_needed_within_buffer_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN,TP_API, TP_SSR )

@@ -1,5 +1,6 @@
 ..
-   Copyright 2022 Xilinx, Inc.
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -68,7 +69,6 @@ Code Example including constraints
 
 The following code example shows how the widget_api_cast graph class may be used within a user super-graph, including how to set the runtime<ratio> of internal kernels. This example shows the widget configured to interlace two input streams on a sample-by-sample basis, with the output written to a window.
 
-.. code-block::
 .. literalinclude:: ../../../../L2/examples/docs_examples/test_widget_api_cast.hpp
     :language: cpp
     :lines: 15-

@@ -1,5 +1,6 @@
 #
-# Copyright 2021 Xilinx, Inc.
+# Copyright (C) 2019-2022, Xilinx, Inc.
+# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,17 +24,10 @@
 # loss due to rounding. Further, there is a rounding error from their multiplication.
 HELPER_CUR_DIR ?= .
 HELPER_ROOT_DIR ?= ./../../../../
+DIFF_TOLERANCE ?= 4
+CC_TOLERANCE ?= 0
 
-ifeq ($(UUT_SSR), 1)
-	ifeq ($(P_API), 1)
-		ifeq ($(DATA_TYPE), cint32)
-			DIFF_TOLERANCE := 25400
-		endif
-		ifeq ($(DATA_TYPE), cint16)
-			DIFF_TOLERANCE := 6
-		endif			
-	endif
-else
+ifneq ($(UUT_SSR), 1)
 	ifeq ($((expr SFDR \> 60)), 1)
 		ifeq ($(DATA_TYPE), cint32)
 			DIFF_TOLERANCE := 25750

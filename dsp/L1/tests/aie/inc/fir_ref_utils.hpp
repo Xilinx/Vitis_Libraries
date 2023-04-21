@@ -1,5 +1,7 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,37 +24,6 @@ functions for use by the reference model classes.
 */
 
 #include "device_defs.h"
-// Rounding modes
-#ifndef rnd_floor
-#define rnd_floor 0
-#endif
-#ifndef rnd_ceil
-#define rnd_ceil 1
-#endif
-#ifndef rnd_pos_inf
-#define rnd_pos_inf 2
-#endif
-#ifndef rnd_neg_inf
-#define rnd_neg_inf 3
-#endif
-#ifndef rnd_sym_inf
-#define rnd_sym_inf 4
-#endif
-#ifndef rnd_sym_zero
-#define rnd_sym_zero 5
-#endif
-#ifndef rnd_conv_even
-#define rnd_conv_even 6
-#endif
-#ifndef rnd_conv_odd
-#define rnd_conv_odd 7
-#endif
-#ifndef rnd_sym_floor
-#define rnd_sym_floor 8
-#endif
-#ifndef rnd_sym_ceil
-#define rnd_sym_ceil 9
-#endif
 #define CASC_IN_TRUE true
 #define CASC_IN_FALSE false
 #define CASC_OUT_TRUE true

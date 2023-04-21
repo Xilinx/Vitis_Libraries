@@ -34,7 +34,7 @@
             "STIM_TYPE":"0",
             "CASC_LEN":"4",
             "PORT_API":"1",
-            "INPUT_WINDOW_VSIZE":"25600"
+            "INPUT_WINDOW_VSIZE":"2560"
         },
         "test_4_fir_768t_casc3_window": {
             "DATA_TYPE":"cint16",
@@ -68,7 +68,7 @@
             "NUM_OUTPUTS":"1",
             "PORT_API":"1",
             "USE_COEFF_RELOAD":"1",
-            "INPUT_WINDOW_VSIZE":"25600"
+            "INPUT_WINDOW_VSIZE":"2560"
         }
     }
 }

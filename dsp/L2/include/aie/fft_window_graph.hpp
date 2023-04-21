@@ -1,5 +1,7 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,14 +85,16 @@ class fft_window_graph : public graph {
     static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
     static constexpr int kStreamsPerTile = get_input_streams_core_module(); // a device trait
 
-    // Defensive configuration legality checks
-    static_assert((std::is_same<TT_DATA, cint16>::value) || (std::is_same<TT_DATA, cint32>::value)
+// Defensive configuration legality checks
 #if __SUPPORTS_CFLOAT__ == 1
-                      ||
-                      (std::is_same<TT_DATA, cfloat>::value)
-#endif //__SUPPORTS_CFLOAT__ == 0
-                      ,
+    static_assert((std::is_same<TT_DATA, cint16>::value) || (std::is_same<TT_DATA, cint32>::value) ||
+                      (std::is_same<TT_DATA, cfloat>::value),
                   "ERROR: TT_DATA is not supported");
+#else
+    // AIE variants that don't support cfloat should flag that.
+    static_assert((std::is_same<TT_DATA, cint16>::value) || (std::is_same<TT_DATA, cint32>::value),
+                  "ERROR: TT_DATA is not supported");
+#endif //__SUPPORTS_CFLOAT__ == 0
     static_assert((std::is_same<TT_COEFF, int16>::value) || (std::is_same<TT_COEFF, int32>::value) ||
                       (std::is_same<TT_COEFF, float>::value),
                   "ERROR: TT_COEFF is not supported");

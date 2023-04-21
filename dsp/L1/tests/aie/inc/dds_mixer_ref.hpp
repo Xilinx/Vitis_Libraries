@@ -1,5 +1,7 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,18 +52,12 @@ template <>
 constexpr unsigned int fnDDSLanes<cint32, USE_INBUILT_SINCOS>() {
     return 4;
 };
-#if __SUPPORTS_CFLOAT__ == 1
 template <>
 constexpr unsigned int fnDDSLanes<cfloat, USE_INBUILT_SINCOS>() {
     return 4;
 };
-#endif
 
 #if __SUPPORTS_CFLOAT__ == 1
-template <>
-constexpr unsigned int fnDDSLanes<cfloat, USE_LUT_SINCOS>() {
-    return 2;
-};
 template <>
 constexpr unsigned int fnDDSLanes<cint16, USE_LUT_SINCOS>() {
     return 8;
@@ -70,10 +66,14 @@ template <>
 constexpr unsigned int fnDDSLanes<cint32, USE_LUT_SINCOS>() {
     return 4;
 };
+template <>
+constexpr unsigned int fnDDSLanes<cfloat, USE_LUT_SINCOS>() {
+    return 2;
+};
 #else
 template <>
 constexpr unsigned int fnDDSLanes<cint16, USE_LUT_SINCOS>() {
-    return 16;
+    return 8;
 };
 template <>
 constexpr unsigned int fnDDSLanes<cint32, USE_LUT_SINCOS>() {

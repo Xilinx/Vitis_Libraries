@@ -25,7 +25,8 @@ def vmc_validate_casc_length(args):
     data_type = args["data_type"]
     point_size = args["point_size"]
     casc_length = args["casc_length"]
-    return fn_validate_casc_len(data_type, point_size, casc_length)
+    parallel_power = 0;
+    return fn_validate_casc_len(data_type, point_size, parallel_power, casc_length)
 	
 # Get twiddle types	
 k_twiddle_type = {"cfloat":"cfloat", "cint32":"cint16", "cint16":"cint16"}

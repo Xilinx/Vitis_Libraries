@@ -53,7 +53,10 @@ def fn_halfband_len(TP_FIR_LEN):
 def fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD, TP_PARA_INTERP_POLY):
     minLenCheck =  fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR)
 
-    maxLenCheck = fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR, TP_API, 4)
+    symFactor   = 4 # Symmetric, half-band
+    symFactorSSR   = 2 if (TP_SSR != 1 ) else symFactor # SSR mode will discard the symmetry
+    symApiSSR      = 0 if (TP_SSR == 1 and TP_PARA_INTERP_POLY == 1) else TP_API  # Force buffer checks when not in SSR mode.
+    maxLenCheck = fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR, symApiSSR, symFactorSSR)
     halfbandLenCheck = fn_halfband_len(TP_FIR_LEN)
     dataNeededCheck = isValid
     if TP_PARA_INTERP_POLY > 1:
@@ -121,11 +124,11 @@ def fn_validate_upshift_ct(TT_DATA, TP_UPSHIFT_CT):
     else isValid
     )
 
-def fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1):
+def fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1, TP_PARA_INTERP_POLY=1):
     # interpolate halfband always uses 384b version of lanes. Some archs use repeat factors, like zig-zag, hence the factor of 2.
     checkMultipleLanes =  fn_windowsize_multiple_lanes(TT_DATA, TT_COEF, TP_INPUT_WINDOW_VSIZE, TP_API, numLanes=fnNumLanes384b(TT_DATA, TT_COEF)*2)
-    #  also checks output size (this isn't done on static asserts for some reason right now)
-    checkMaxBuffer = fn_max_windowsize_for_buffer(TT_DATA, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR, TP_INTERPOLATE_FACTOR=2, TP_DECIMATE_FACTOR=1)
+    symApiSSR      = 0 if (TP_SSR == 1 and TP_PARA_INTERP_POLY == 1) else TP_API  # Force buffer checks when not in SSR mode.
+    checkMaxBuffer = fn_max_windowsize_for_buffer(TT_DATA, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, symApiSSR, TP_SSR, TP_INTERPOLATE_FACTOR=2, TP_DECIMATE_FACTOR=1)
     # Input samples are round-robin split to each SSR input paths, so total frame size must be divisable by SSR factor.
     checkIfDivisableBySSR = fn_windowsize_divisible_by_ssr(TP_INPUT_WINDOW_VSIZE, TP_SSR)
 
@@ -147,10 +150,10 @@ def validate_TP_INPUT_WINDOW_VSIZE(args):
     TP_FIR_LEN = args["TP_FIR_LEN"]
     TP_API = args["TP_API"]
     TP_SSR = args["TP_SSR"]
+    TP_PARA_INTERP_POLY = args["TP_PARA_INTERP_POLY"]
 
-    #interpolate_hb traits looks like the UPSHIFT_CT types have different number of lanes, but it's actually stil the exact same as 384..
-    # decimate_hb also just uses 384, so no additional rules here.
-    return fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR)
+
+    return fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR, TP_PARA_INTERP_POLY)
 
 
 

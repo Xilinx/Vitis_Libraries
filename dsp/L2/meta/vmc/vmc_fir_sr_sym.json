@@ -144,7 +144,7 @@
       "description": "The length of cascaded kernels",
       "default": 1,
       "type": "int",
-      "maximum": 9,
+      "maximum": 40,
       "minimum": 1,
       "blockgui":{
           "tablabel": "Main",

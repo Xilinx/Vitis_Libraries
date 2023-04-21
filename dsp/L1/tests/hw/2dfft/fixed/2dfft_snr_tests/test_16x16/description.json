@@ -57,7 +57,7 @@
                     "vivado_syn": 32768, 
                     "hls_csim": 10240, 
                     "hls_cosim": 16384, 
-                    "vivado_impl": 20480, 
+                    "vivado_impl": 40960, 
                     "hls_csynth": 10240
                 }, 
                 "max_time_min": {

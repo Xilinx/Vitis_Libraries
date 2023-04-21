@@ -1,5 +1,7 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -276,7 +278,6 @@ kernelFilterClass<TT_DATA,
         constexpr(m_kArch == kArchStream) { filterStream(inInterface, outInterface); }
     windowRelease(inInterface);
 }
-#undef _DSPLIB_FIR_DECIMATE_ASYM_HPP_DEBUG_
 
 // -------------------------------------------------------------- Basic
 // -------------------------------------------------------------- //
@@ -490,9 +491,6 @@ void kernelFilterClass<TT_DATA,
                        TP_COEFF_PHASES,
                        TP_COEFF_PHASES_LEN>::filterIncrStrobe(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                                                               T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
-    static constexpr unsigned int m_kRepeatFactor =
-        TP_DECIMATE_FACTOR % 2 == 0 ? m_kInitLoadsInReg
-                                    : m_kSamplesInBuff / m_kVOutSize; // only FACTORS of 2 or 3 supported
     static constexpr unsigned int m_kDataUsedRptp1 =
         m_kDataBuffXOffset + TP_FIR_RANGE_LEN - 1 + TP_DECIMATE_FACTOR * m_kVOutSize * (m_kRepeatFactor + 1);
     static constexpr unsigned int m_kDataUsedRpt =

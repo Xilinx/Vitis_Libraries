@@ -1,5 +1,7 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,6 +48,34 @@ namespace dsp {
 namespace aie {
 namespace fft {
 namespace dit_1ch {
+
+// function to return the accumulator sample width in AIE-ML (Cascade for parallel interconnect)
+template <typename TT_DATA>
+INLINE_DECL constexpr int fnFFTAccWidthCasc() {
+    return -1; // will cause error by default
+}
+template <>
+INLINE_DECL constexpr int fnFFTAccWidthCasc<cint16>() {
+    return 32;
+};
+template <>
+INLINE_DECL constexpr int fnFFTAccWidthCasc<cint32>() {
+    return 64;
+};
+
+// function to return the accumulator vector in samples in AIE-ML (Cascade for parallel interconnect)
+template <typename TT_DATA>
+INLINE_DECL constexpr int fnFFTCascVWidth() {
+    return -1; // will cause error by default
+}
+template <>
+INLINE_DECL constexpr int fnFFTCascVWidth<cint16>() {
+    return 8;
+};
+template <>
+INLINE_DECL constexpr int fnFFTCascVWidth<cint32>() {
+    return 4;
+};
 
 template <typename T_D>
 T_D INLINE_DECL unitVector(){};
@@ -483,8 +513,6 @@ INLINE_DECL void readStreamIn(input_stream<TT_DATA>* __restrict inStream0,
     constexpr int kSamplesIn128b = 128 / 8 / sizeof(TT_DATA);
     using t128VectorType = ::aie::vector<TT_DATA, kSamplesIn128b>;
     using t256VectorType = ::aie::vector<TT_DATA, kSamplesIn128b * 2>;
-    // T_buff_128b<TT_DATA> readVal1;
-    // T_buff_128b<TT_DATA> readVal2;
     t128VectorType readVal1;
     t128VectorType readVal2;
     t256VectorType writeVal;
@@ -496,8 +524,6 @@ INLINE_DECL void readStreamIn(input_stream<TT_DATA>* __restrict inStream0,
         constexpr(TP_HEADER_BYTES > 0) {
             for (int i = 0; i < TP_HEADER_BYTES / 16; i++) // 16? bytes/ 128bits. 8/128 = 1/16
                 chess_prepare_for_pipelining chess_loop_range(TP_HEADER_BYTES / 16, ) {
-                    // readVal1 = stream_readincr_128b(inStream0, 0);
-                    // readVal2 = stream_readincr_128b(inStream1, 1); //read but ignored
                     readVal1 = readincr_v<kSamplesIn128b, aie_stream_resource_in::a>(inStream0);
                     readVal2 = readincr_v<kSamplesIn128b, aie_stream_resource_in::b>(inStream1); // read, but ignored
                     *out128Ptr0++ = readVal1;
@@ -507,12 +533,8 @@ INLINE_DECL void readStreamIn(input_stream<TT_DATA>* __restrict inStream0,
 
     constexpr int kLsize = TP_WINDOW_VSIZE / (kSamplesIn128b * 2); // number of 256 bit ops in Window
     for (int i = 0; i < kLsize; i++) chess_prepare_for_pipelining chess_loop_range(kLsize, ) {
-            // readVal1 = stream_readincr_128b(inStream0, 0);
-            // readVal2 = stream_readincr_128b(inStream1, 1);
             readVal1 = readincr_v<kSamplesIn128b, aie_stream_resource_in::a>(inStream0);
             readVal2 = readincr_v<kSamplesIn128b, aie_stream_resource_in::b>(inStream1);
-            // inIntlv = ::aie::interleave_zip(readVal1.val ,readVal2.val, 1);//convert to complex by interleaving zeros
-            // for imag parts
             inIntlv =
                 ::aie::interleave_zip(readVal1, readVal2, 1); // convert to complex by interleaving zeros for imag parts
             writeVal = ::aie::concat<t128VectorType, t128VectorType>(inIntlv.first, inIntlv.second);
@@ -525,113 +547,75 @@ template <typename TT_DATA, unsigned int TP_DYN_PT_SIZE, unsigned int TP_WINDOW_
 INLINE_DECL void readStreamIn(input_stream<TT_DATA>* __restrict inStream0, TT_DATA* inBuff) {
     constexpr int TP_HEADER_BYTES = 32 * TP_DYN_PT_SIZE;
     constexpr unsigned int kDataReadSize = 32;
-    constexpr int kSamplesIn128b = 128 / 8 / sizeof(TT_DATA);
-    using t128VectorType = ::aie::vector<TT_DATA, kSamplesIn128b>;
-    t128VectorType readVal1;
-    t128VectorType* out128Ptr0 = (t128VectorType*)&inBuff[0];
+    constexpr int kSamplesIn256b = 256 / 8 / sizeof(TT_DATA);
+    using t256VectorType = ::aie::vector<TT_DATA, kSamplesIn256b>;
+    t256VectorType readVal1;
+    t256VectorType* out256Ptr0 = (t256VectorType*)&inBuff[0];
 
-    for (int i = 0; i < TP_HEADER_BYTES / 16 + TP_WINDOW_VSIZE / kSamplesIn128b; i++) // 16? bytes/ 128bits. 8/128 =
-                                                                                      // 1/16
-        chess_prepare_for_pipelining chess_loop_range(TP_HEADER_BYTES / 16 + TP_WINDOW_VSIZE / kSamplesIn128b, ) {
-            // readVal1 = readincr_v<kSamplesIn128b,aie_stream_resource_in::a>(inStream0);
-            readVal1 = readincr_v<kSamplesIn128b>(inStream0);
+    for (int i = 0; i < TP_HEADER_BYTES / kDataReadSize + TP_WINDOW_VSIZE / kSamplesIn256b;
+         i++) // 16? bytes/ 128bits. 8/128 = 1/16
+        chess_prepare_for_pipelining chess_loop_range(
+            TP_HEADER_BYTES / kDataReadSize + TP_WINDOW_VSIZE / kSamplesIn256b, ) {
+            readVal1 = readincr_v<kSamplesIn256b>(inStream0);
             //    ::aie::print(readVal1, true, " readVal1");
-            *out128Ptr0++ = readVal1;
+            *out256Ptr0++ = readVal1;
         }
 }
 
 #ifdef __SUPPORTS_ACC64__
 //-----------------------------------------------------------------------------------------------------
 // read casc/stream, write window/buffer
+
 template <typename TT_DATA, unsigned int TP_DYN_PT_SIZE, unsigned int TP_WINDOW_VSIZE>
 INLINE_DECL void readCascStreamIn(input_stream<cacc64>* __restrict inStream0,
                                   input_stream<TT_DATA>* __restrict inStream1,
                                   TT_DATA* inBuff) {
     constexpr int TP_HEADER_BYTES = 32 * TP_DYN_PT_SIZE;
     constexpr unsigned int kDataReadSize = 32;
-    constexpr int kSamplesIn128b = 128 / 8 / sizeof(TT_DATA);
-    using t128VectorType = ::aie::vector<TT_DATA, kSamplesIn128b>;
-    using t256VectorType = ::aie::vector<TT_DATA, kSamplesIn128b * 2>;
-    using accVect_t = ::aie::detail::accum<fnAccClass<TT_DATA>(), // int, cint, FP or CFP
-                                           64,                    // acc width
-                                           4>; // both cint16 and cint32 use 4 * cacc64kSamplesIn128b>;
+    constexpr int kSamplesIn256b = 256 / 8 / sizeof(TT_DATA);
+    constexpr int kCascVWidth = fnFFTCascVWidth<TT_DATA>();
+    using t256VectorType = ::aie::vector<TT_DATA, kSamplesIn256b>;
+    using t512VectorType = ::aie::vector<TT_DATA, kSamplesIn256b * 2>;
+    using accTag = typename accClassTag< ::aie::detail::AccumClass::CInt, sizeof(TT_DATA) * 8>::type;
+    using accVect_t = ::aie::detail::accum<fnAccClass<TT_DATA>(),        // int, cint, FP or CFP
+                                           fnFFTAccWidthCasc<TT_DATA>(), // acc width per sample
+                                           kCascVWidth>;                 //#samples in the casc vector;
+    input_stream<accTag>* __restrict inCasc0 = (input_stream<accTag>*)inStream0;
     accVect_t acc;
-    t128VectorType readVal1, readVal1a, readVal1b;
-    t128VectorType readVal2;
+    t256VectorType readVal1, readVal1a, readVal1b;
+    t256VectorType readVal2;
     t256VectorType read256Val;
-    t256VectorType writeVal;
-    t128VectorType* out128Ptr0 = (t128VectorType*)&inBuff[0];
+    t512VectorType writeVal;
+    t256VectorType writeVal2a, writeVal2b;
     t256VectorType* outPtr0 = (t256VectorType*)&inBuff[0];
-    ::std::pair<t128VectorType, t128VectorType> inIntlv;
+    ::std::pair<t256VectorType, t256VectorType> inIntlv;
 
     if
         constexpr(TP_HEADER_BYTES > 0) {
-            if
-                constexpr(kSamplesIn128b == 4) {                   // ie 4 cint16 in 128b
-                    for (int i = 0; i < TP_HEADER_BYTES / 16; i++) // 16? bytes/ 128bits. 8/128 = 1/16
-                        chess_prepare_for_pipelining chess_loop_range(TP_HEADER_BYTES / 16, ) {
-                            acc = readincr_v4(inStream0);                  // cascade read;
-                            readVal1 = acc.template to_vector<TT_DATA>(0); // convert acc type to standard type.
-                            //        readVal2 = readincr_v<kSamplesIn128b,aie_stream_resource_in::a>(inStream1);
-                            //        //read, but ignored
-                            readVal2 = readincr_v<kSamplesIn128b>(inStream1); // read, but ignored
-                            *out128Ptr0++ = readVal1;
-                        }
-                    outPtr0 = (t256VectorType*)out128Ptr0;
+            for (int i = 0; i < TP_HEADER_BYTES / kDataReadSize; i++) // 16? bytes/ 128bits. 8/128 = 1/16
+                chess_prepare_for_pipelining chess_loop_range(TP_HEADER_BYTES / kDataReadSize, ) {
+                    acc = readincr_v<kCascVWidth, accTag>(inCasc0);   // cascade read;
+                    readVal1 = acc.template to_vector<TT_DATA>(0);    // convert acc type to standard type.
+                    readVal2 = readincr_v<kSamplesIn256b>(inStream1); // read, but ignored
+                    *outPtr0++ = readVal1;
                 }
-            else {                                             // for cint32 handling
-                for (int i = 0; i < TP_HEADER_BYTES / 32; i++) // 32? bytes/ 256bits. 8/256 = 1/32
-                    chess_prepare_for_pipelining chess_loop_range(TP_HEADER_BYTES / 32, ) {
-                        acc = readincr_v4(inStream0); // cascade read;
-                        read256Val =
-                            acc.template to_vector<TT_DATA>(0); // convert acc type (cacc64) to standard type (cint32).
-                        // readVal2 = readincr_v<kSamplesIn128b,aie_stream_resource_in::a>(inStream1); //read 128 bits,
-                        // but ignored
-                        // readVal2 = readincr_v<kSamplesIn128b,aie_stream_resource_in::a>(inStream1); //read 128 bits,
-                        // but ignored
-                        readVal2 = readincr_v<kSamplesIn128b>(inStream1); // read 128 bits, but ignored
-                        readVal2 = readincr_v<kSamplesIn128b>(inStream1); // read 128 bits,  but ignored
-                        *outPtr0++ = read256Val;
-                    }
-            }
+            chess_memory_fence(); // necessary, as figure of 8 lockup can occur in the trellis of kernels
         }
 
-    if
-        constexpr(kSamplesIn128b == 4) {                                   // ie 4 cint16 in 128b
-            constexpr int kLsize = TP_WINDOW_VSIZE / (kSamplesIn128b * 2); // number of 256 bit ops in Window
-            for (int i = 0; i < kLsize; i++) chess_prepare_for_pipelining chess_loop_range(kLsize, ) {
-                    acc = readincr_v4(inStream0);                  // cascade read;
-                    readVal1 = acc.template to_vector<TT_DATA>(0); // convert acc type to standard type.
-                    //      readVal2 = readincr_v<kSamplesIn128b,aie_stream_resource_in::a>(inStream1);
-                    readVal2 = readincr_v<kSamplesIn128b>(inStream1);
-                    inIntlv = ::aie::interleave_zip(readVal1, readVal2, 1);
-                    writeVal = ::aie::concat<t128VectorType, t128VectorType>(inIntlv.first, inIntlv.second);
-                    *outPtr0++ = writeVal;
-                }
+    constexpr int kLsize = TP_WINDOW_VSIZE / (kSamplesIn256b * 2); // number of 256 bit ops in Window
+    for (int i = 0; i < kLsize; i++) chess_prepare_for_pipelining chess_loop_range(kLsize, ) {
+            acc = readincr_v<kCascVWidth, accTag>(inCasc0); // cascade read;
+            readVal1 = acc.template to_vector<TT_DATA>(0);  // convert acc type to standard type.
+            readVal2 = readincr_v<kSamplesIn256b>(inStream1);
+            inIntlv = ::aie::interleave_zip(readVal1, readVal2, 1);
+            writeVal = ::aie::concat<t256VectorType, t256VectorType>(inIntlv.first, inIntlv.second);
+            writeVal2a = writeVal.template extract<kSamplesIn256b>(0);
+            *outPtr0++ = writeVal2a;
+            writeVal2b = writeVal.template extract<kSamplesIn256b>(1);
+            *outPtr0++ = writeVal2b;
         }
-    else {
-        constexpr int kLsize = TP_WINDOW_VSIZE / (kSamplesIn128b * 2) / 2; // number of 512 bit ops in Window
-        for (int i = 0; i < kLsize; i++) chess_prepare_for_pipelining chess_loop_range(kLsize, ) {
-                // here, the cascade port reads 4 samples, but the stream reads only 2, hence
-                // this asymmetrically unrolled loop.
-                acc = readincr_v4(inStream0);                    // cascade read;
-                read256Val = acc.template to_vector<TT_DATA>(0); // convert acc type to standard type.
-                readVal1a = read256Val.template extract<kSamplesIn128b>(0);
-                readVal1b = read256Val.template extract<kSamplesIn128b>(1);
-
-                //      readVal2 = readincr_v<kSamplesIn128b,aie_stream_resource_in::a>(inStream1);
-                readVal2 = readincr_v<kSamplesIn128b>(inStream1);
-                inIntlv = ::aie::interleave_zip(readVal1a, readVal2, 1);
-                writeVal = ::aie::concat<t128VectorType, t128VectorType>(inIntlv.first, inIntlv.second);
-                *outPtr0++ = writeVal;
-                //      readVal2 = readincr_v<kSamplesIn128b,aie_stream_resource_in::a>(inStream1);
-                readVal2 = readincr_v<kSamplesIn128b>(inStream1);
-                inIntlv = ::aie::interleave_zip(readVal1b, readVal2, 1);
-                writeVal = ::aie::concat<t128VectorType, t128VectorType>(inIntlv.first, inIntlv.second);
-                *outPtr0++ = writeVal;
-            }
-    }
 }
+
 #endif //__SUPPORTS_ACC64__
 
 #ifdef __SUPPORTS_ACC64__
@@ -643,86 +627,48 @@ INLINE_DECL void readStreamCascIn(input_stream<TT_DATA>* __restrict inStream0,
                                   TT_DATA* inBuff) {
     constexpr int TP_HEADER_BYTES = 32 * TP_DYN_PT_SIZE;
     constexpr unsigned int kDataReadSize = 32;
-    constexpr int kSamplesIn128b = 128 / 8 / sizeof(TT_DATA);
-    using t128VectorType = ::aie::vector<TT_DATA, kSamplesIn128b>;
-    using t256VectorType = ::aie::vector<TT_DATA, kSamplesIn128b * 2>;
-    using accVect_t = ::aie::detail::accum<fnAccClass<TT_DATA>(), // int, cint, FP or CFP
-                                           64,                    // acc width
-                                           4>;                    // boths cint16 and cint32 use 4*cacc64
+    constexpr int kSamplesIn256b = 256 / 8 / sizeof(TT_DATA);
+    constexpr int kCascVWidth = fnFFTCascVWidth<TT_DATA>();
+    using t256VectorType = ::aie::vector<TT_DATA, kSamplesIn256b>;
+    using t512VectorType = ::aie::vector<TT_DATA, kSamplesIn256b * 2>;
+    using accTag = typename accClassTag< ::aie::detail::AccumClass::CInt, sizeof(TT_DATA) * 8>::type;
+    using accVect_t = ::aie::detail::accum<fnAccClass<TT_DATA>(),        // int, cint, FP or CFP
+                                           fnFFTAccWidthCasc<TT_DATA>(), // acc width per sample
+                                           kCascVWidth>;                 //#samples in the casc vector;
+    input_stream<accTag>* __restrict inCasc1 = (input_stream<accTag>*)inStream1;
     accVect_t acc;
-    t128VectorType readVal1;
-    t128VectorType readVal2, readVal2a, readVal2b;
+    t256VectorType readVal1, readVal1a, readVal1b;
+    t256VectorType readVal2;
     t256VectorType read256Val;
-    t256VectorType writeVal;
-    t128VectorType* out128Ptr0 = (t128VectorType*)&inBuff[0];
+    t512VectorType writeVal;
+    t256VectorType writeVal2a, writeVal2b;
     t256VectorType* outPtr0 = (t256VectorType*)&inBuff[0];
-    ::std::pair<t128VectorType, t128VectorType> inIntlv;
+    ::std::pair<t256VectorType, t256VectorType> inIntlv;
 
     if
         constexpr(TP_HEADER_BYTES > 0) {
-            if
-                constexpr(kSamplesIn128b == 4) {                   // ie 4 cint16 in 128b
-                    for (int i = 0; i < TP_HEADER_BYTES / 16; i++) // 16? bytes/ 128bits. 8/128 = 1/16
-                        chess_prepare_for_pipelining chess_loop_range(TP_HEADER_BYTES / 16, ) {
-                            //        readVal1 = readincr_v<kSamplesIn128b,aie_stream_resource_in::a>(inStream0);
-                            //        //read, but ignored
-                            readVal1 = readincr_v<kSamplesIn128b>(inStream0); // read, but ignored
-                            acc = readincr_v4(inStream1);                     // cascade read;
-                            readVal2 = acc.template to_vector<TT_DATA>(0);    // convert acc type to standard type.
-                            *out128Ptr0++ = readVal1;
-                        }
-                    outPtr0 = (t256VectorType*)out128Ptr0;
+            for (int i = 0; i < TP_HEADER_BYTES / kDataReadSize; i++) // 16? bytes/ 128bits. 8/128 = 1/16
+                chess_prepare_for_pipelining chess_loop_range(TP_HEADER_BYTES / kDataReadSize, ) {
+                    acc = readincr_v<kCascVWidth, accTag>(inCasc1);   // cascade read;
+                    readVal1 = acc.template to_vector<TT_DATA>(0);    // convert acc type to standard type.
+                    readVal2 = readincr_v<kSamplesIn256b>(inStream0); // read, but ignored
+                    *outPtr0++ = readVal1;
                 }
-            else {                                             // cint32 handling
-                for (int i = 0; i < TP_HEADER_BYTES / 32; i++) // 16? bytes/ 128bits. 8/128 = 1/16
-                    chess_prepare_for_pipelining chess_loop_range(TP_HEADER_BYTES / 32, ) {
-                        // readVal1 = readincr_v<kSamplesIn128b,aie_stream_resource_in::a>(inStream0); //read, but
-                        // ignored
-                        // readVal1 = readincr_v<kSamplesIn128b,aie_stream_resource_in::a>(inStream0); //read, but
-                        // ignored
-                        readVal1 = readincr_v<kSamplesIn128b>(inStream0); // read, but ignored
-                        readVal1 = readincr_v<kSamplesIn128b>(inStream0); // read, but ignored
-                        acc = readincr_v4(inStream1);                     // cascade read;
-                        read256Val = acc.template to_vector<TT_DATA>(0);  // convert acc type to standard type.
-                        *outPtr0++ = read256Val;
-                    }
-            }
+            chess_memory_fence(); // necessary, as figure of 8 lockup can occur in the trellis of kernels
         }
 
-    if
-        constexpr(kSamplesIn128b == 4) {                                   // ie 4 cint16 in 128b
-            constexpr int kLsize = TP_WINDOW_VSIZE / (kSamplesIn128b * 2); // number of 256 bit ops in Window
-            for (int i = 0; i < kLsize; i++) chess_prepare_for_pipelining chess_loop_range(kLsize, ) {
-                    //      readVal1 = readincr_v<kSamplesIn128b,aie_stream_resource_in::a>(inStream0); //read, but
-                    //      ignored
-                    readVal1 = readincr_v<kSamplesIn128b>(inStream0); // read, but ignored
-                    acc = readincr_v4(inStream1);                     // cascade read;
-                    readVal2 = acc.template to_vector<TT_DATA>(0);    // convert acc type to standard type.
-                    inIntlv = ::aie::interleave_zip(readVal1, readVal2,
-                                                    1); // convert to complex by interleaving zeros for imag parts
-                    writeVal = ::aie::concat<t128VectorType, t128VectorType>(inIntlv.first, inIntlv.second);
-                    *outPtr0++ = writeVal;
-                }
+    constexpr int kLsize = TP_WINDOW_VSIZE / (kSamplesIn256b * 2); // number of 256 bit ops in Window
+    for (int i = 0; i < kLsize; i++) chess_prepare_for_pipelining chess_loop_range(kLsize, ) {
+            acc = readincr_v<kCascVWidth, accTag>(inCasc1); // cascade read;
+            readVal2 = acc.template to_vector<TT_DATA>(0);  // convert acc type to standard type.
+            readVal1 = readincr_v<kSamplesIn256b>(inStream0);
+            inIntlv = ::aie::interleave_zip(readVal1, readVal2, 1);
+            writeVal = ::aie::concat<t256VectorType, t256VectorType>(inIntlv.first, inIntlv.second);
+            writeVal2a = writeVal.template extract<kSamplesIn256b>(0);
+            *outPtr0++ = writeVal2a;
+            writeVal2b = writeVal.template extract<kSamplesIn256b>(1);
+            *outPtr0++ = writeVal2b;
         }
-    else {
-        constexpr int kLsize = TP_WINDOW_VSIZE / (kSamplesIn128b * 2) / 2; // number of 256 bit ops in Window
-        for (int i = 0; i < kLsize; i++) chess_prepare_for_pipelining chess_loop_range(kLsize, ) {
-                acc = readincr_v4(inStream1);                    // cascade read;
-                read256Val = acc.template to_vector<TT_DATA>(0); // convert acc type to standard type.
-                readVal2a = read256Val.template extract<kSamplesIn128b>(0);
-                readVal2b = read256Val.template extract<kSamplesIn128b>(1);
-                //      readVal1 = readincr_v<kSamplesIn128b,aie_stream_resource_in::a>(inStream0);
-                readVal1 = readincr_v<kSamplesIn128b>(inStream0);
-                inIntlv = ::aie::interleave_zip(readVal1, readVal2a, 1);
-                writeVal = ::aie::concat<t128VectorType, t128VectorType>(inIntlv.first, inIntlv.second);
-                *outPtr0++ = writeVal;
-                //      readVal1 = readincr_v<kSamplesIn128b,aie_stream_resource_in::a>(inStream0);
-                readVal1 = readincr_v<kSamplesIn128b>(inStream0);
-                inIntlv = ::aie::interleave_zip(readVal1, readVal2b, 1);
-                writeVal = ::aie::concat<t128VectorType, t128VectorType>(inIntlv.first, inIntlv.second);
-                *outPtr0++ = writeVal;
-            }
-    }
 }
 #endif //__SUPPORTS_ACC64__
 
@@ -739,10 +685,8 @@ INLINE_DECL void writeStreamOut(output_stream<TT_DATA>* __restrict outStream0,
     using t256VectorType = ::aie::vector<TT_DATA, kSamplesIn128b * 2>;
     using t128VectorType = ::aie::vector<TT_DATA, kSamplesIn128b>;
     t128VectorType read128Val;
-    // T_buff_128b<TT_DATA> read128Val;
     t256VectorType read256Val;
     t128VectorType writeVal;
-    // T_buff_128b<TT_DATA> out128a, out128b;
     t128VectorType out128a, out128b;
     t128VectorType* rdptr0 = (t128VectorType*)&outBuff[0];
     t256VectorType* rd256ptr = (t256VectorType*)&outBuff[0];
@@ -751,10 +695,7 @@ INLINE_DECL void writeStreamOut(output_stream<TT_DATA>* __restrict outStream0,
         constexpr(TP_HEADER_BYTES > 0) {
             for (int i = 0; i < TP_HEADER_BYTES / 16; i++)
                 chess_prepare_for_pipelining chess_loop_range(TP_HEADER_BYTES / 16, ) {
-                    // read128Val.val = *rdptr0++;
                     read128Val = *rdptr0++;
-                    // stream_writeincr_128b(outStream0, read128Val, 0);
-                    // stream_writeincr_128b(outStream1, read128Val, 1);
                     writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outStream0, read128Val);
                     writeincr<aie_stream_resource_out::b, TT_DATA, kSamplesIn128b>(outStream1, read128Val);
                 }
@@ -764,10 +705,6 @@ INLINE_DECL void writeStreamOut(output_stream<TT_DATA>* __restrict outStream0,
     constexpr int kLsize = TP_WINDOW_VSIZE / (kSamplesIn128b * 2); // number of 256 bit ops in Window
     for (int k = 0; k < kLsize; k++) chess_prepare_for_pipelining chess_loop_range(kLsize, ) {
             read256Val = *rd256ptr++;
-            // out128a.val = ::aie::filter_even<t256VectorType>(read256Val);
-            // out128b.val = ::aie::filter_odd<t256VectorType>(read256Val);
-            // stream_writeincr_128b(outStream0, out128a, 0);
-            // stream_writeincr_128b(outStream1, out128b, 1);
             out128a = ::aie::filter_even<t256VectorType>(read256Val);
             out128b = ::aie::filter_odd<t256VectorType>(read256Val);
             writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outStream0, out128a);
@@ -781,20 +718,22 @@ INLINE_DECL void writeStreamOut(output_stream<TT_DATA>* __restrict outStream0,
 template <typename TT_DATA, unsigned int TP_DYN_PT_SIZE, unsigned int TP_WINDOW_VSIZE>
 INLINE_DECL void writeStreamOut(output_stream<TT_DATA>* __restrict outStream0, TT_DATA* outBuff) {
     constexpr int TP_HEADER_BYTES = 32 * TP_DYN_PT_SIZE;
-    constexpr int kSamplesIn128b = 16 / sizeof(TT_DATA);
-    using t128VectorType = ::aie::vector<TT_DATA, kSamplesIn128b>;
-    t128VectorType read128Val;
-    t128VectorType writeVal;
-    t128VectorType out128a;
-    t128VectorType* rdptr0 = (t128VectorType*)&outBuff[0];
+    constexpr unsigned int kDataReadSize = 32; // bytes
+    constexpr int kSamplesIn256b = 32 / sizeof(TT_DATA);
+    using t256VectorType = ::aie::vector<TT_DATA, kSamplesIn256b>;
+    t256VectorType read256Val;
+    t256VectorType writeVal;
+    t256VectorType out256a;
+    t256VectorType* rdptr0 = (t256VectorType*)&outBuff[0];
 
     //  printf("in writeStreamOut\n");
 
-    for (int i = 0; i < TP_HEADER_BYTES / 16 + TP_WINDOW_VSIZE / kSamplesIn128b; i++)
-        chess_prepare_for_pipelining chess_loop_range(TP_HEADER_BYTES / 16 + TP_WINDOW_VSIZE / kSamplesIn128b, ) {
-            read128Val = *rdptr0++;
+    for (int i = 0; i < TP_HEADER_BYTES / kDataReadSize + TP_WINDOW_VSIZE / kSamplesIn256b; i++)
+        chess_prepare_for_pipelining chess_loop_range(
+            TP_HEADER_BYTES / kDataReadSize + TP_WINDOW_VSIZE / kSamplesIn256b, ) {
+            read256Val = *rdptr0++;
             //    ::aie::print(read128Val, true, " read128Val ");
-            writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outStream0, read128Val);
+            writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn256b>(outStream0, read256Val);
         }
 }
 
@@ -808,76 +747,47 @@ INLINE_DECL void writeCascStreamOut(output_stream<cacc64>* __restrict outStream0
     //  printf("Entering writeStreamOut with window size %d\n",
     //  (int)(TP_WINDOW_VSIZE+TP_DYN_PT_SIZE*32/sizeof(TT_DATA)));
     constexpr int TP_HEADER_BYTES = 32 * TP_DYN_PT_SIZE;
-    constexpr int kSamplesIn128b = 16 / sizeof(TT_DATA);
-    using t256VectorType = ::aie::vector<TT_DATA, kSamplesIn128b * 2>;
-    using t128VectorType = ::aie::vector<TT_DATA, kSamplesIn128b>;
-    t128VectorType read128Val, read128Val0, read128Val1;
-    t256VectorType read256Val;
-    t128VectorType writeVal;
-    t128VectorType out128a, out128b, out128a0, out128a1;
-    t256VectorType out256a;
-    t128VectorType* rdptr0 = (t128VectorType*)&outBuff[0];
-    t256VectorType* rd256ptr = (t256VectorType*)&outBuff[0];
-    using accVect_t = ::aie::detail::accum<fnAccClass<TT_DATA>(), // int, cint, FP or CFP
-                                           64,                    // acc width
-                                           4>; // Ought to be kSamplesIn128b>;, but both cint16 and cint32 use 4*cacc64
+    constexpr unsigned int kDataReadSize = 32;
+    constexpr int kSamplesIn256b = 32 / sizeof(TT_DATA);
+    constexpr int kCascVWidth = fnFFTCascVWidth<TT_DATA>();
+    using t512VectorType = ::aie::vector<TT_DATA, kSamplesIn256b * 2>;
+    using t256VectorType = ::aie::vector<TT_DATA, kSamplesIn256b>;
+    t256VectorType read256Val, read256Val0, read256Val1;
+    t512VectorType read512Val;
+    t256VectorType writeVal;
+    t256VectorType out256a, out256b, out256a0, out256a1;
+    t512VectorType out512a;
+    t256VectorType* rdptr0 = (t256VectorType*)&outBuff[0];
+    using accTag = typename accClassTag< ::aie::detail::AccumClass::CInt, sizeof(TT_DATA) * 8>::type;
+    using accVect_t = ::aie::detail::accum<fnAccClass<TT_DATA>(),        // int, cint, FP or CFP
+                                           fnFFTAccWidthCasc<TT_DATA>(), // acc width per sample
+                                           kCascVWidth>;                 //#samples in the casc vector;
     accVect_t acc;
+    output_stream<accTag>* __restrict outCasc0 = (output_stream<accTag>*)outStream0;
 
     if
         constexpr(TP_HEADER_BYTES > 0) {
-            if
-                constexpr(kSamplesIn128b == 4) { // ie 4 cint16 in 128b
-                    for (int i = 0; i < TP_HEADER_BYTES / 16; i++)
-                        chess_prepare_for_pipelining chess_loop_range(TP_HEADER_BYTES / 16, ) {
-                            read128Val = *rdptr0++;
-                            acc = ::aie::from_vector<cacc64>(read128Val);
-                            writeincr_v4(outStream0, acc);
-                            writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outStream1, read128Val);
-                        }
+            for (int i = 0; i < TP_HEADER_BYTES / kDataReadSize; i++)
+                chess_prepare_for_pipelining chess_loop_range(TP_HEADER_BYTES / kDataReadSize, ) {
+                    read256Val = *rdptr0++;
+                    acc = ::aie::from_vector<accTag>(read256Val);
+                    writeincr<accTag, kCascVWidth>(outCasc0, acc);
+                    writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn256b>(outStream1, read256Val);
                 }
-            else {
-                for (int i = 0; i < TP_HEADER_BYTES / 32; i++)
-                    chess_prepare_for_pipelining chess_loop_range(TP_HEADER_BYTES / 32, ) {
-                        read128Val0 = *rdptr0++;
-                        writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outStream1, read128Val0);
-                        read128Val1 = *rdptr0++;
-                        writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outStream1, read128Val1);
-                        read256Val = ::aie::concat<t128VectorType, t128VectorType>(read128Val0, read128Val1);
-                        acc = ::aie::from_vector<cacc64>(read256Val);
-                        writeincr_v4(outStream0, acc);
-                    }
-            }
-            rd256ptr = (t256VectorType*)rdptr0;
+            chess_memory_fence(); // necessary, as figure of 8 lockup can occur in the trellis of kernels
         }
 
-    if
-        constexpr(kSamplesIn128b == 4) {                                   // ie 4 cint16 in 128b
-            constexpr int kLsize = TP_WINDOW_VSIZE / (kSamplesIn128b * 2); // number of 256 bit ops in Window
-            for (int k = 0; k < kLsize; k++) chess_prepare_for_pipelining chess_loop_range(kLsize, ) {
-                    read256Val = *rd256ptr++;
-                    out128a = ::aie::filter_even<t256VectorType>(read256Val);
-                    out128b = ::aie::filter_odd<t256VectorType>(read256Val);
-                    acc = ::aie::from_vector<cacc64>(out128a);
-                    writeincr_v4(outStream0, acc);
-                    writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outStream1, out128b);
-                }
+    constexpr int kLsize = TP_WINDOW_VSIZE / (kSamplesIn256b * 2); // number of 256 bit ops in Window
+    for (int k = 0; k < kLsize; k++) chess_prepare_for_pipelining chess_loop_range(kLsize, ) {
+            read256Val0 = *rdptr0++;
+            read256Val1 = *rdptr0++;
+            read512Val = ::aie::concat<t256VectorType, t256VectorType>(read256Val0, read256Val1);
+            out256a = ::aie::filter_even<t512VectorType>(read512Val);
+            out256b = ::aie::filter_odd<t512VectorType>(read512Val);
+            acc = ::aie::from_vector<accTag>(out256a);
+            writeincr<accTag, kCascVWidth>(outCasc0, acc);
+            writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn256b>(outStream1, out256b);
         }
-    else {                                                                 // cint32 handling
-        constexpr int kLsize = TP_WINDOW_VSIZE / (kSamplesIn128b * 2) / 2; // number of 512 bit ops in Window
-        for (int k = 0; k < kLsize; k++) chess_prepare_for_pipelining chess_loop_range(kLsize, ) {
-                read256Val = *rd256ptr++;
-                out128a0 = ::aie::filter_even<t256VectorType>(read256Val);
-                out128b = ::aie::filter_odd<t256VectorType>(read256Val);
-                writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outStream1, out128b);
-                read256Val = *rd256ptr++;
-                out128a1 = ::aie::filter_even<t256VectorType>(read256Val);
-                out128b = ::aie::filter_odd<t256VectorType>(read256Val);
-                writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outStream1, out128b);
-                out256a = ::aie::concat<t128VectorType, t128VectorType>(out128a0, out128a1);
-                acc = ::aie::from_vector<cacc64>(out256a);
-                writeincr_v4(outStream0, acc);
-            }
-    }
 }
 #endif //__SUPPORTS_ACC64__
 
@@ -889,79 +799,47 @@ INLINE_DECL void writeStreamCascOut(output_stream<TT_DATA>* __restrict outStream
                                     output_stream<cacc64>* __restrict outStream1,
                                     TT_DATA* outBuff) {
     constexpr int TP_HEADER_BYTES = 32 * TP_DYN_PT_SIZE;
-    constexpr int kSamplesIn128b = 16 / sizeof(TT_DATA);
-    using t256VectorType = ::aie::vector<TT_DATA, kSamplesIn128b * 2>;
-    using t128VectorType = ::aie::vector<TT_DATA, kSamplesIn128b>;
-    t128VectorType read128Val, read128Val0, read128Val1;
-    t256VectorType read256Val;
-    t128VectorType writeVal;
-    t128VectorType out128a, out128b, out128b0, out128b1;
-    t256VectorType out256b;
-    t128VectorType* rdptr0 = (t128VectorType*)&outBuff[0];
-    t256VectorType* rd256ptr = (t256VectorType*)&outBuff[0];
-    using accVect_t = ::aie::detail::accum<fnAccClass<TT_DATA>(), // int, cint, FP or CFP
-                                           64,                    // acc width
-                                           4>;                    // both cint16 and cint32 use 4*cacc64
+    constexpr unsigned int kDataReadSize = 32;
+    constexpr int kSamplesIn256b = 32 / sizeof(TT_DATA);
+    constexpr int kCascVWidth = fnFFTCascVWidth<TT_DATA>();
+    using t512VectorType = ::aie::vector<TT_DATA, kSamplesIn256b * 2>;
+    using t256VectorType = ::aie::vector<TT_DATA, kSamplesIn256b>;
+    t256VectorType read256Val, read256Val0, read256Val1;
+    t512VectorType read512Val;
+    t256VectorType writeVal;
+    t256VectorType out256a, out256b, out256b0, out256b1;
+    t512VectorType out512b;
+    t256VectorType* rdptr0 = (t256VectorType*)&outBuff[0];
+    using accTag = typename accClassTag< ::aie::detail::AccumClass::CInt, sizeof(TT_DATA) * 8>::type;
+    using accVect_t = ::aie::detail::accum<fnAccClass<TT_DATA>(),        // int, cint, FP or CFP
+                                           fnFFTAccWidthCasc<TT_DATA>(), // acc width per sample
+                                           kCascVWidth>;                 //#samples in the casc vector;
     accVect_t acc;
-    static constexpr unsigned int kAccVect = 4; // cacc64 samples in 384bus
+    output_stream<accTag>* __restrict outCasc1 = (output_stream<accTag>*)outStream1;
 
     if
         constexpr(TP_HEADER_BYTES > 0) {
-            if
-                constexpr(kSamplesIn128b == 4) { // ie 4 cint16 in 128b
-
-                    for (int i = 0; i < TP_HEADER_BYTES / 16; i++)
-                        chess_prepare_for_pipelining chess_loop_range(TP_HEADER_BYTES / 16, ) {
-                            read128Val = *rdptr0++;
-                            writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outStream0, read128Val);
-                            acc = ::aie::from_vector<cacc64>(read128Val);
-                            writeincr_v4(outStream1, acc);
-                        }
+            for (int i = 0; i < TP_HEADER_BYTES / kDataReadSize; i++)
+                chess_prepare_for_pipelining chess_loop_range(TP_HEADER_BYTES / kDataReadSize, ) {
+                    read256Val = *rdptr0++;
+                    acc = ::aie::from_vector<accTag>(read256Val);
+                    writeincr<accTag, kCascVWidth>(outCasc1, acc);
+                    writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn256b>(outStream0, read256Val);
                 }
-            else { // cint32 handling
-                for (int i = 0; i < TP_HEADER_BYTES / 32; i++)
-                    chess_prepare_for_pipelining chess_loop_range(TP_HEADER_BYTES / 32, ) {
-                        read128Val0 = *rdptr0++;
-                        writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outStream0, read128Val0);
-                        read128Val1 = *rdptr0++;
-                        writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outStream0, read128Val1);
-                        read256Val = ::aie::concat<t128VectorType, t128VectorType>(read128Val0, read128Val1);
-                        acc = ::aie::from_vector<cacc64>(read256Val);
-                        writeincr_v4(outStream1, acc);
-                    }
-            }
-            rd256ptr = (t256VectorType*)rdptr0;
+            chess_memory_fence(); // necessary, as figure of 8 lockup can occur in the trellis of kernels
         }
 
-    if
-        constexpr(kSamplesIn128b == 4) {                                   // ie 4 cint16 in 128b
-            constexpr int kLsize = TP_WINDOW_VSIZE / (kSamplesIn128b * 2); // number of 256 bit ops in Window
-            for (int k = 0; k < kLsize; k++) chess_prepare_for_pipelining chess_loop_range(kLsize, ) {
-                    read256Val = *rd256ptr++;
-                    out128a = ::aie::filter_even<t256VectorType>(read256Val);
-                    out128b = ::aie::filter_odd<t256VectorType>(read256Val);
-                    acc = ::aie::from_vector<cacc64>(out128b);
-                    writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outStream0, out128a);
-                    writeincr_v4(outStream1, acc);
-                }
+    constexpr int kLsize = TP_WINDOW_VSIZE / (kSamplesIn256b * 2); // number of 256 bit ops in Window
+    for (int k = 0; k < kLsize; k++) chess_prepare_for_pipelining chess_loop_range(kLsize, ) {
+            read256Val0 = *rdptr0++;
+            read256Val1 = *rdptr0++;
+            read512Val = ::aie::concat<t256VectorType, t256VectorType>(read256Val0, read256Val1);
+            out256a = ::aie::filter_even<t512VectorType>(read512Val);
+            out256b = ::aie::filter_odd<t512VectorType>(read512Val);
+            acc = ::aie::from_vector<accTag>(out256b);
+            writeincr<accTag, kCascVWidth>(outCasc1, acc);
+            writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn256b>(outStream0, out256a);
         }
-    else {
-        // cint32 handling
-        constexpr int kLsize = TP_WINDOW_VSIZE / (kSamplesIn128b * 2) / 2; // number of 512 bit ops in Window
-        for (int k = 0; k < kLsize; k++) chess_prepare_for_pipelining chess_loop_range(kLsize, ) {
-                read256Val = *rd256ptr++;
-                out128a = ::aie::filter_even<t256VectorType>(read256Val);
-                out128b0 = ::aie::filter_odd<t256VectorType>(read256Val);
-                writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outStream0, out128a);
-                read256Val = *rd256ptr++;
-                out128a = ::aie::filter_even<t256VectorType>(read256Val);
-                out128b1 = ::aie::filter_odd<t256VectorType>(read256Val);
-                writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn128b>(outStream0, out128a);
-                out256b = ::aie::concat<t128VectorType, t128VectorType>(out128b0, out128b1);
-                acc = ::aie::from_vector<cacc64>(out256b);
-                writeincr_v4(outStream1, acc);
-            }
-    }
 }
 #endif //__SUPPORTS_ACC64__
 }

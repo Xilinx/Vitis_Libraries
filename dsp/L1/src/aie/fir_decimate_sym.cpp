@@ -1,5 +1,7 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2178,7 +2180,8 @@ NOINLINE_DECL void fir_decimate_sym<TT_DATA,
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<16> >*)&inWindow;
     outInterface.outCascade = outCascade;
-    outInterface.outWindow = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<16> >*)&inWindow; // dummy
+    outInterface.outWindow =
+        (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<16> >*)&inWindow; // dummy
     this->filterKernel(inInterface, outInterface);
 };
 

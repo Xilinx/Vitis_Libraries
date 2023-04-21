@@ -1,5 +1,7 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,6 +43,7 @@ template <typename TT_DATA, unsigned int tp_sincos_mode>
 constexpr int ddsMulVecScalarLanes() {
     return 0;
 } // effectively an error trap
+
 template <>
 constexpr int ddsMulVecScalarLanes<cint16, USE_INBUILT_SINCOS>() {
     return 8;
@@ -49,86 +52,41 @@ template <>
 constexpr int ddsMulVecScalarLanes<cint32, USE_INBUILT_SINCOS>() {
     return 4;
 };
-#if __SUPPORTS_CFLOAT__ == 1
 template <>
 constexpr int ddsMulVecScalarLanes<cfloat, USE_INBUILT_SINCOS>() {
     return 4;
 };
-#endif
+
 #if __SUPPORTS_CFLOAT__ == 1
+template <>
+constexpr int ddsMulVecScalarLanes<cint16, USE_LUT_SINCOS>() {
+    return 8;
+};
+template <>
+constexpr int ddsMulVecScalarLanes<cint32, USE_LUT_SINCOS>() {
+    return 4;
+};
 template <>
 constexpr int ddsMulVecScalarLanes<cfloat, USE_LUT_SINCOS>() {
     return 2;
 };
-template <>
-constexpr int ddsMulVecScalarLanes<cint32, USE_LUT_SINCOS>() {
-    return 4;
-};
+#else
 template <>
 constexpr int ddsMulVecScalarLanes<cint16, USE_LUT_SINCOS>() {
     return 8;
 };
-#else
 template <>
 constexpr int ddsMulVecScalarLanes<cint32, USE_LUT_SINCOS>() {
     return 8;
 };
 template <>
-constexpr int ddsMulVecScalarLanes<cint16, USE_LUT_SINCOS>() {
-    return 16;
-};
-#endif
-
-// this is a temporary fix until the stream read CR is fixed
-template <typename TT_DATA, unsigned int tp_sincos_mode>
-constexpr int ddsMulVecScalarLanesStream() {
-    return 0;
-} // effectively an error trap
-#if __SUPPORTS_CFLOAT__ == 1
-template <>
-constexpr int ddsMulVecScalarLanesStream<cfloat, USE_LUT_SINCOS>() {
+constexpr int ddsMulVecScalarLanes<cfloat, USE_LUT_SINCOS>() {
     return 2;
-};
-template <>
-constexpr int ddsMulVecScalarLanesStream<cint32, USE_LUT_SINCOS>() {
-    return 4;
-};
-template <>
-constexpr int ddsMulVecScalarLanesStream<cint16, USE_LUT_SINCOS>() {
-    return 8;
-};
-template <>
-constexpr int ddsMulVecScalarLanesStream<cfloat, USE_INBUILT_SINCOS>() {
-    return 2;
-};
-template <>
-constexpr int ddsMulVecScalarLanesStream<cint32, USE_INBUILT_SINCOS>() {
-    return 4;
-};
-template <>
-constexpr int ddsMulVecScalarLanesStream<cint16, USE_INBUILT_SINCOS>() {
-    return 8;
-};
-#else
-template <>
-constexpr int ddsMulVecScalarLanesStream<cint32, USE_LUT_SINCOS>() {
-    return 2;
-};
-template <>
-constexpr int ddsMulVecScalarLanesStream<cint16, USE_LUT_SINCOS>() {
-    return 4;
-};
-template <>
-constexpr int ddsMulVecScalarLanesStream<cint32, USE_INBUILT_SINCOS>() {
-    return 2;
-};
-template <>
-constexpr int ddsMulVecScalarLanesStream<cint16, USE_INBUILT_SINCOS>() {
-    return 4;
 };
 #endif
 
 /**
+
 Base IO_API interface struct for shared functions across specialisations
 */
 template <typename TT_DATA, typename PortType>

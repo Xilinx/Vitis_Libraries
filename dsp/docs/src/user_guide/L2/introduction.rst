@@ -1,5 +1,6 @@
 ..
-   Copyright 2022 Xilinx, Inc.
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -124,7 +125,7 @@ Use the following option in the aiecompiler command to provide the path:
 Known Issues
 ============
 
-See Xilinx |reg| Answer Record `75802 <https://www.xilinx.com/support/answers/75802.html>`__ for the list of known issues.
+See Answer Record `75802 <https://www.xilinx.com/support/answers/75802.html>`__ for the list of known issues.
 
 
 .. _TUTORIALS:
@@ -133,9 +134,9 @@ See Xilinx |reg| Answer Record `75802 <https://www.xilinx.com/support/answers/75
 Vitis Tutorials
 ========================
 
-Xilinx |reg| provides an extensive library of purpose build tutorials. It is recommended to visit `Vitis Tutorials <https://github.com/Xilinx/Vitis-Tutorials>`__ to get familiar with Vitis |trade| in-Depth tutorials.
+AMD provides an extensive library of purpose build tutorials. It is recommended to visit `Vitis Tutorials <https://github.com/Xilinx/Vitis-Tutorials>`__ to get familiar with Vitis |trade| in-Depth tutorials.
 
-To learn how to use the Vitis core tools to develop for Versal |reg|, the first Adaptive Compute Acceleration Platform (ACAP) device from Xilinx please visit `AI Engine Development Tutorials <https://github.com/Xilinx/Vitis-Tutorials/tree/HEAD/AI_Engine_Development>`__. There is a variety of design, methodology, and feature tutorials, where you may also find a highly recommended `DSP Library Tutorial <https://github.com/Xilinx/Vitis-Tutorials/tree/HEAD/AI_Engine_Development/Feature_Tutorials/08-dsp-library>`__
+To learn how to use the AMD Vitis |trade| core tools to develop for AMD Versal |trade|, the first Adaptive SoC please visit `AI Engine Development Tutorials <https://github.com/Xilinx/Vitis-Tutorials/tree/HEAD/AI_Engine_Development>`__. There is a variety of design, methodology, and feature tutorials, where you may also find a highly recommended `DSP Library Tutorial <https://github.com/Xilinx/Vitis-Tutorials/tree/HEAD/AI_Engine_Development/Feature_Tutorials/08-dsp-library>`__
 which demonstrates how to use kernels provided by the DSP library for a filtering application, how to analyze the design results, and how to use filter parameters to optimize the design's performance using simulation.
 
 Finally, Simulink users could be interested in `AI Engine DSP Library and Model Composer Tutorial <https://github.com/Xilinx/Vitis-Tutorials/tree/HEAD/AI_Engine_Development/Feature_Tutorials/10-aie-dsp-lib-model-composer>`__ which shows how to design AI Engine applications using Model Composer

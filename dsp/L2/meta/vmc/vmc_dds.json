@@ -22,7 +22,7 @@
     },
     {
       "name": "output_window_size",
-      "label": "Output window size (Number of Samples)",
+      "label": "Samples per frame",
       "description": "The number of samples in output window",
       "default": 32,
       "maximum": 4096,

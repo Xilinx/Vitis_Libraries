@@ -1,5 +1,7 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -3069,7 +3071,7 @@ class fir_sr_sym_tl : public fir_sr_sym<typename fp::BTT_DATA,
     static constexpr unsigned int getIF() { return 1; };
 
     // Get FIR variant
-    static constexpr eFIRVariant getFirType() { return eFIRVariant::kSrAsym; };
+    static constexpr eFIRVariant getFirType() { return eFIRVariant::kSrSym; };
 
     using parent_class = fir_sr_sym<typename fp::BTT_DATA,
                                     typename fp::BTT_COEFF,

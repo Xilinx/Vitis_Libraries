@@ -1,5 +1,7 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1221,13 +1223,15 @@ class fft_ifft_dit_1ch_graph : public graph {
     // more, as of 23.1
     static_assert(TP_PARALLEL_POWER >= 1 && TP_PARALLEL_POWER < 9,
                   "Error: TP_PARALLEL_POWER is out of supported range");
-    static_assert((std::is_same<TT_DATA, cint16>::value) || (std::is_same<TT_DATA, cint32>::value)
 #if __SUPPORTS_CFLOAT__ == 1
-                      ||
-                      (std::is_same<TT_DATA, cfloat>::value)
-#endif //__SUPPORTS_CFLOAT__ == 0
-                      ,
+    static_assert((std::is_same<TT_DATA, cint16>::value) || (std::is_same<TT_DATA, cint32>::value) ||
+                      (std::is_same<TT_DATA, cfloat>::value),
                   "ERROR: TT_DATA is not supported");
+#else
+    // AIE variants that don't support cfloat should flag that.
+    static_assert((std::is_same<TT_DATA, cint16>::value) || (std::is_same<TT_DATA, cint32>::value),
+                  "ERROR: TT_DATA is not supported");
+#endif //__SUPPORTS_CFLOAT__ == 0
 
     static constexpr int kParallel_factor = 1 << TP_PARALLEL_POWER;
     static constexpr int kWindowSize = TP_WINDOW_VSIZE >> TP_PARALLEL_POWER;

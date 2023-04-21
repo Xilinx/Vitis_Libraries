@@ -1,5 +1,7 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +29,7 @@ int main(void) {
 #if (USE_COEFF_RELOAD == 1)
     // SSR configs call asym kernels, that require asym taps
     COEFF_TYPE tapsAsym[FIR_LEN];
-#if (P_SSR > 1)
+#if ((P_SSR > 1) || (USING_UUT == 1 && __HAS_SYM_PREADD__ == 0))
     xf::dsp::aie::convert_sym_taps_to_asym(tapsAsym, FIR_LEN, filter.m_taps[0]);
     for (int i = 0; i < P_SSR; i++) {
         filter.update(filter.coeff[i], tapsAsym, FIR_LEN);
@@ -37,7 +39,7 @@ int main(void) {
 #endif
     filter.run(NITER / 2);
     filter.wait();
-#if (P_SSR > 1)
+#if ((P_SSR > 1) || (USING_UUT == 1 && __HAS_SYM_PREADD__ == 0))
     xf::dsp::aie::convert_sym_taps_to_asym(tapsAsym, FIR_LEN, filter.m_taps[1]);
     for (int i = 0; i < P_SSR; i++) {
         filter.update(filter.coeff[i], tapsAsym, FIR_LEN);

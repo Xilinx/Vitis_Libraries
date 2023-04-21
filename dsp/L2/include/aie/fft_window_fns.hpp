@@ -1,5 +1,7 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -196,6 +198,7 @@ float fn_io(float x) {
  * @tparam T_C describes the type of weights in the FFT window.
  * @param[out] weights a pointer to the area where Window will be created
  * @param[in] pointSize size of the window to create
+ * @param[in] alpha  a non-negative real number that determines the shape of the window
  */
 template <typename T_C>
 void getKaiserWindow(T_C* weights, const unsigned int pointSize, const float alpha = 1.27) {

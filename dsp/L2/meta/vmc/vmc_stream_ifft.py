@@ -13,8 +13,12 @@ def vmc_generate_graph(name, args):
     tmpargs["TP_DYN_PT_SIZE"] = 0
     tmpargs["TP_API"] = 1
     ssr = args["ssr"]
-    parallel_power = int(math.log2(ssr)) - 1
-    tmpargs["TP_PARALLEL_POWER"] = parallel_power 
+    pp = fn_get_parallel_power(ssr)
+
+    if pp == -1:
+      return isError(f"Invalid SSR value specified. The value should be of the form 2^N between 2 and 512.")
+
+    tmpargs["TP_PARALLEL_POWER"] = pp
     tmpargs["TP_FFT_NIFFT"] = 0
 
     return generate_graph(name, tmpargs)

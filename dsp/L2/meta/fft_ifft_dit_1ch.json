@@ -72,11 +72,11 @@
       "description": "The length of the cascade chain.",
       "type": "uint",
       "minimum": 1,
-      "maximum": 9,
+      "maximum": 11,
       "validator": {
         "file" : "fft_ifft_dit_1ch.py",
         "function" : "validate_TP_CASC_LEN",
-        "args": ["TT_DATA", "TP_POINT_SIZE"]
+        "args": ["TT_DATA", "TP_POINT_SIZE", "TP_PARALLEL_POWER"]
       }
     },
     {

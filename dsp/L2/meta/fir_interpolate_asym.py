@@ -108,7 +108,9 @@ def fn_max_fir_len_overall(TT_DATA, TT_COEF, TP_FIR_LEN):
 def fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD, TP_DUAL_IP):
     minLenCheck =  fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_Rnd=TP_INTERPOLATE_FACTOR)
 
-    maxLenCheck = fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR, TP_API, 1)
+    coeffSizeMult = 1 if TP_API == 0 else TP_INTERPOLATE_FACTOR
+
+    maxLenCheck = fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR, TP_API, coeffSizeMult)
 
     maxLenOverallCheck = fn_max_fir_len_overall(TT_DATA, TT_COEF, TP_FIR_LEN)
 
@@ -216,6 +218,11 @@ def validate_TP_FIR_LEN(args):
     TP_API = args["TP_API"]
     TP_USE_COEF_RELOAD = args["TP_USE_COEF_RELOAD"]
     TP_DUAL_IP = args["TP_DUAL_IP"]
+
+    print(TP_API)
+    print(TP_FIR_LEN)
+    print(TP_CASC_LEN)
+    print("Here")
 
     return fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN,TP_INTERPOLATE_FACTOR, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD, TP_DUAL_IP)
 

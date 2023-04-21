@@ -55,8 +55,9 @@ def fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_DECIMATE_FACT
 
   # Slightly cheating here by putting in numLanes as the multiplied value.
   checkMultipleLanes =  fn_windowsize_multiple_lanes(TT_DATA, TT_COEF, TP_INPUT_WINDOW_VSIZE, TP_API, numLanes=windowSizeMultiplier)
-  #  also checks output size (this isn't done on static asserts for some reason right now)
-  checkMaxBuffer = fn_max_windowsize_for_buffer(TT_DATA, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR, TP_INTERPOLATE_FACTOR=1)
+  # Force Max buffer check for symmetric FIRs in non-SSR mode.
+  symApiSSR = 0 if TP_SSR == 1 else TP_API
+  checkMaxBuffer = fn_max_windowsize_for_buffer(TT_DATA, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, symApiSSR, TP_SSR, TP_INTERPOLATE_FACTOR=1)
   # Input samples are round-robin split to each SSR input paths, so total frame size must be divisable by SSR factor.
   checkIfDivisableBySSR = fn_windowsize_divisible_by_ssr(TP_INPUT_WINDOW_VSIZE, TP_SSR)
 
@@ -75,8 +76,10 @@ def fn_multiple_decimation(TP_FIR_LEN,TP_DECIMATE_FACTOR, TP_CASC_LEN):
 
 def fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD):
     minLenCheck =  fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR)
-    # apprently this is what the graph does, but i think we should be taking into account the rate change factors here.
-    maxLenCheck = fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR, TP_API, 2)
+    symFactor   = 2
+    symFactorSSR   = 1 if (TP_SSR != 1 ) else symFactor # SSR mode will discard the symmetry
+    symApiSSR      = 0 if (TP_SSR == 1 ) else TP_API  # Force buffer checks when not in SSR mode.
+    maxLenCheck = fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR, symApiSSR, symFactorSSR)
     dataNeededCheck = isValid
     if TP_SSR > 1:
       dataNeededCheck = dec_asym.fn_data_needed_within_buffer_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN,TP_API, TP_SSR, TP_DECIMATE_FACTOR)

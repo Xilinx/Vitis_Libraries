@@ -1,5 +1,6 @@
 ..
-   Copyright 2022 Xilinx, Inc.
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -39,7 +40,7 @@ FIR filters have been categorized into classes and placed in a distinct namespac
 
 Additionally, each FIR filter has been placed in its unique FIR type namespace. The available FIR filter classes and the corresponding graph entry point are listed below:
 
-.. _tab-fir-filter-classes:
+.. _tab-fir-filter-classes-aieml:
 
 .. table:: FIR Filter Classes
    :align: center
@@ -84,7 +85,8 @@ Template Parameters
 ~~~~~~~~~~~~~~~~~~~
 
 The following table lists parameters for the FIR filters on AIE-ML.
-Also note that TP_RND values may vary between AIE and AIE-ML for the same rounding mechanism. For AIE, see :ref:`fir_supported_params`.
+
+.. note:: ``TP_RND`` values may vary between AIE and AIE-ML for the same rounding mechanism. String macro defitions are recommended for convienience and compatibility between devices. For AIE, see :ref:`fir_supported_params`.
 
 .. _fir_supported_params_aieml:
 
@@ -111,41 +113,41 @@ Also note that TP_RND values may vary between AIE and AIE-ML for the same roundi
    |                        |                | down by before  |                                 |
    |                        |                | output.         |                                 |
    +------------------------+----------------+-----------------+---------------------------------+
-   |    TP_RND              |    Unsigned    | Round mode      |    0 =                          |
+   |    TP_RND              |    Unsigned    | Round mode      |    0 = ``rnd_floor``            |
    |                        |    int         |                 |    truncate or                  |
    |                        |                |                 |    floor                        |
    |                        |                |                 |                                 |
-   |                        |                |                 |    1 =                          |
+   |                        |                |                 |    1 =  ``rnd_ceil``            |
    |                        |                |                 |    ceiling                      |
    |                        |                |                 |                                 |
-   |                        |                |                 |    2 =                          |
+   |                        |                |                 |    2 = ``rnd_sym_floor``        |
    |                        |                |                 |    floor to zero                |
    |                        |                |                 |                                 |
-   |                        |                |                 |    3 =                          |
+   |                        |                |                 |    3 = ``rnd_sym_ceil``         |
    |                        |                |                 |    ceil to                      |
    |                        |                |                 |    infinity                     |
    |                        |                |                 |                                 |
-   |                        |                |                 |    8 =                          |
+   |                        |                |                 |    8 = ``rnd_neg_inf``          |
    |                        |                |                 |    round to negative            |
    |                        |                |                 |    infinity                     |
    |                        |                |                 |                                 |
-   |                        |                |                 |    9 =                          |
+   |                        |                |                 |    9 = ``rnd_pos_inf``          |
    |                        |                |                 |    round to positive            |
    |                        |                |                 |    infinity                     |
    |                        |                |                 |                                 |
-   |                        |                |                 |    10 =                         |
+   |                        |                |                 |    10 = ``rnd_sym_zero``        |
    |                        |                |                 |    symmetrical                  |
    |                        |                |                 |    to zero                      |
    |                        |                |                 |                                 |
-   |                        |                |                 |    11 =                         |
+   |                        |                |                 |    11 = ``rnd_sym_inf``         |
    |                        |                |                 |    symmetrical                  |
    |                        |                |                 |    to infinity                  |
    |                        |                |                 |                                 |
-   |                        |                |                 |    12 =                         |
+   |                        |                |                 |    12 = ``rnd_conv_even``       |
    |                        |                |                 |    convergent                   |
    |                        |                |                 |    to even                      |
    |                        |                |                 |                                 |
-   |                        |                |                 |    13 =                         |
+   |                        |                |                 |    13 = ``rnd_conv_odd``        |
    |                        |                |                 |    convergent                   |
    |                        |                |                 |    to odd                       |
    +------------------------+----------------+-----------------+---------------------------------+
@@ -197,8 +199,8 @@ Also note that TP_RND values may vary between AIE and AIE-ML for the same roundi
 
 For a list of template parameters for each FIR variant, see :ref:`API_REFERENCE`.
 
-**TP_CASC_LEN** describes the number of AIE processors to split the operation over, which allows resources to be traded for higher performance. TP_CASC_LEN must be in the range 1 (default) to 9.
-FIR graph instance creates TP_CASC_LEN kernels. Computation workload of the FIR (defined by its length parameter TP_FIR_LEN) is divided and each kernel in the graph is then assigned a fraction of the workload, i.e. each kernel performs TP_FIR_LEN / TP_CASC_LEN.
+**TP_CASC_LEN** describes the number of AIE processors to split the operation over, which allows resources to be traded for higher performance. ``TP_CASC_LEN`` must be in the range 1 (default) to 9.
+FIR graph instance creates ``TP_CASC_LEN`` kernels. Computation workload of the FIR (defined by its length parameter ``TP_FIR_LEN``) is divided and each kernel in the graph is then assigned a fraction of the workload, i.e. each kernel performs ``TP_FIR_LEN / TP_CASC_LEN``.
 Kernels are connected with cascade ports, which pass partial accumulation products downstream until last kernel in chain produces the output.
 
 **TP_USE_COEFF_RELOAD**  allows the user to select if runtime coefficient reloading should be used.
@@ -237,10 +239,7 @@ For all non-reloadable filter configurations, the coefficient values are passed 
 Static Coefficients - array size
 ////////////////////////////////
 
-Static Coefficients - array size
-////////////////////////////////
-
-**Asymmetrical* FIR**
+**Asymmetrical FIR**
 
 Asymmetrical filters expect the port to contain the full array of coefficients, i.e. coefficient array size is equal to the ``TP_FIR_LEN``.
 
@@ -255,16 +254,17 @@ Asymmetrical filters expect the port to contain the full array of coefficients, 
 Reloadable coefficients
 ///////////////////////
 
-Reloadable coefficients are available through the use of run-time programmable (RTP) input port, programmed by Processor Subsystem (PS) at run-time.
+Reloadable coefficients are available through the use of run-time programmable (RTP) Asynchronous input port, programmed by Processor Subsystem (PS) at run-time.
 Reloadable configurations do not require the coefficient array to be passed to the constructor at compile time.
-Instead, the graph's `update()` (refer to `UG1076 Run-Time Parameter Update/Read Mechanisms <https://docs.xilinx.com/r/en-US/ug1076-ai-engine-environment/Run-Time-Parameter-Update/Read-Mechanisms>`_ for usage instructions) method is used to input the coefficient array.
-Graph's `update()` method takes an argument of either scalar or an array type. Please refer to `UG1076 Run-Time Parameter Support Summary <https://docs.xilinx.com/r/en-US/ug1076-ai-engine-environment/Run-Time-Parameter-Support-Summary>`_.
+Instead, the graph's `update()` (refer to `UG1079 Run-Time Parameter Update/Read Mechanisms <https://docs.xilinx.com/r/en-US/ug1079-ai-engine-kernel-coding/Run-Time-Parameter-Update/Read-Mechanisms>`_ for usage instructions) method is used to input the coefficient array.
+Graph's `update()` method takes an argument of either scalar or an array type.
+Please refer to `UG1079 Run-Time Parameter Support Summary <https://docs.xilinx.com/r/en-US/ug1079-ai-engine-kernel-coding/Run-Time-Parameter-Support-Summary>`_.
 
 .. note:: Graph's `update()` method must be called after graph has been initialized, but before kernel starts operation on data samples.
 
 
 Reloadable Coefficients - array dimensions
-///////////////////////////////////////////
+//////////////////////////////////////////
 
 FIR filters expect the port to contain the full array of coefficients, i.e. coefficient array size is equal to the ``TP_FIR_LEN``.
 
@@ -329,7 +329,7 @@ Constraints
 
 Each FIR variant has a variety of access methods to help assign a constraint on a kernel and/or a net, e.g.:
 
-- `get_kernels()` which returns a pointer to an array of kernel pointers, or
+- `getKernels()` which returns a pointer to an array of kernel pointers, or
 
 - `getInNet()` which returns a pointer to a net indexed by method's argument(s).
 
@@ -341,7 +341,7 @@ An example of how to use this is given in the section :ref:`FIR_CODE_EXAMPLE`.
 
    Kernel Index = Kernel Cascade index
 
-The nets returned by the getInNet() function can be assigned custom fifo_depths values to override the defaults.
+The nets returned by the `getInNet()` function can be assigned custom fifo_depths values to override the defaults.
 
 FIR Code Example
 ----------------

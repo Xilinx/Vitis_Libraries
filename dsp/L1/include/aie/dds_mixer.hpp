@@ -1,5 +1,7 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,8 +65,7 @@ class kernelDdsMixerClass {
     // 0 = rnd_floor, 1 = rnd_ceil, 2 = rnd_pos_inf, 3 = rnd_neg_inf, 4 = rnd_sym_inf, 5 = rnd_sym_zero, 6 =
     // rnd_conv_even, 7 = rnd_conv_odd
     static constexpr unsigned int kRoundMode = 0; // mode used in point designs.
-    static constexpr unsigned int m_kNumLanes = TP_API == 0 ? ddsMulVecScalarLanes<TT_DATA, USE_INBUILT_SINCOS>()
-                                                            : ddsMulVecScalarLanesStream<TT_DATA, USE_INBUILT_SINCOS>();
+    static constexpr unsigned int m_kNumLanes = ddsMulVecScalarLanes<TT_DATA, USE_INBUILT_SINCOS>();
     static constexpr unsigned int m_kDOutEachLoop = m_kNumLanes;
 #if __SUPPORTS_CFLOAT__ == 1
     static constexpr unsigned int m_kDdsShift = std::is_same<TT_DATA, cfloat>::value ? 0 : 15;
@@ -120,9 +121,7 @@ class kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API,
     // 0 = rnd_floor, 1 = rnd_ceil, 2 = rnd_pos_inf, 3 = rnd_neg_inf, 4 = rnd_sym_inf, 5 = rnd_sym_zero, 6 =
     // rnd_conv_even, 7 = rnd_conv_odd
     static constexpr unsigned int kRoundMode = 0; // mode used in point designs.
-    static constexpr unsigned int m_kNumLanes =
-        TP_API == 0 ? ddsMulVecScalarLanes<TT_DATA, USE_LUT_SINCOS>()
-                    : ddsMulVecScalarLanesStream<TT_DATA, USE_LUT_SINCOS>(); // todo - calculate for other types
+    static constexpr unsigned int m_kNumLanes = ddsMulVecScalarLanes<TT_DATA, USE_LUT_SINCOS>();
     // todo, make these parameters in future release.
 
     static constexpr unsigned int m_kDOutEachLoop = m_kNumLanes * m_kNumLanes;

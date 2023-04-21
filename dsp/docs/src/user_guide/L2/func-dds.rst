@@ -1,5 +1,6 @@
 ..
-   Copyright 2022 Xilinx, Inc.
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -21,7 +22,7 @@ DDS / Mixer
 ===========
 
 The DSPLib contains two different DDS/Mixer implementations. These will be referred to as the dds_mixer and dds_mixer_lut in this document. They both differ in their implementations of the DDS and hence don't have identical outputs. The dds_mixer solution is available only on AIE while the dds_mixer_lut is available on both AIE and AIE-ML.
-The dds_mixer_lut has modes that enable higher SFDR figures for the signal generator than the dds_mixer. Both implementations have three different modes of operation. 
+The dds_mixer_lut has modes that enable higher SFDR figures for the signal generator than the dds_mixer. Both implementations have three different modes of operation.
 The mode of the component is driven by template parameter ``TP_MIXER_MODE``.
 
 In DDS Only mode (``MIXER_MODE_0``), there is a single output port that contains the sin/cosine components corresponding to the programmed phase increment. The phase increment is a fixed uint32 value provided as a constructor argument, where 2^31 corresponds to Pi (180 degrees phase increment). The number of samples sent through the output port is determined by the TP_INPUT_WINDOW_SIZE parameter. The output port can be a window interface or a stream interface depending on the use of ``TP_API``.

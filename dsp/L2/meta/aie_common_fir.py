@@ -114,13 +114,14 @@ def fnNumCols384(TT_DATA, TT_COEF):
 
 ### Common constraints based on traits
 
-def fn_windowsize_multiple_lanes(TT_DATA, TT_COEF, TP_INPUT_WINDOW_VSIZE, TP_API, numLanes=None):
+def fn_windowsize_multiple_lanes(TT_DATA, TT_COEF, TP_INPUT_WINDOW_VSIZE, TP_API, numLanes=None, TP_SSR=1):
     # Use the default nmber of lanes
     num_lanes = fnNumLanes(TT_DATA, TT_COEF, TP_API) if not numLanes else numLanes
-    if ((TP_INPUT_WINDOW_VSIZE % num_lanes) != 0):
+    numLanesMultiple = num_lanes * TP_SSR
+    if (((TP_INPUT_WINDOW_VSIZE / TP_SSR) % num_lanes) != 0):
       return isError(
         f"Unsupported window size ({TP_INPUT_WINDOW_VSIZE}). For Input/Output and coefficient type combination :\n\t"\
-          f"{TT_DATA},{TT_COEF} window size should be multiple of {num_lanes}.\n"
+          f"{TT_DATA},{TT_COEF} and taking into account SSR operation mode ({TP_SSR}), window size should be multiple of {numLanesMultiple}.\n"
       )
     return isValid
 
@@ -188,28 +189,35 @@ def fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR=1, TP_Rnd=1):
 
 
 def fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR=1, TP_API=0, symFactor = 1):
-  if TP_API == 0:
-    # Coeff array needs storage on heap and unrolled MAC operation inflate Program Memory.
-    firLengthMax = 256 * symFactor
-  else:
-    # Data samples must fit into 1024-bit (128 Byte) vector register
-    firLengthMax = 128  * symFactor / fn_size_by_byte(TT_DATA)
+  # Coeff array needs storage on heap and unrolled MAC operation inflate Program Memory.
+  firLengthMaxCoeffArray = 256 * symFactor
+  # Data samples must fit into 1024-bit (128 Byte) vector register
+  firLengthMaxDataReg = 128  * symFactor / fn_size_by_byte(TT_DATA)
+  # Fir length per kernel in a cascaded design that may also be decomposed into multiple SSR paths.
+  firLengthPerKernel = TP_FIR_LEN / (TP_CASC_LEN * TP_SSR)
 
-  # Coeff array gets divided up in SSR mode, where each SSR phase gets a fraction of the array.
-  if TP_USE_COEF_RELOAD == 1:
-    if TP_FIR_LEN / (TP_SSR) <= firLengthMax:
-      vld = True
+  if TP_API == 0:
+    # When buffer IO, check that the coeff array fits into heap
+    if TP_USE_COEF_RELOAD == 1:
+      # Coeff array gets divided up in SSR mode, where each SSR phase gets a fraction of the array.
+      if TP_FIR_LEN / (TP_SSR) <= firLengthMaxCoeffArray:
+        vld = True
+      else:
+        vld = False
     else:
-      vld = False
+      if firLengthPerKernel <= firLengthMaxCoeffArray:
+        vld = True
+      else:
+        vld = False
   else:
-    # For static coeffs, each kernel in a cascaded design only stores the part that it operates on.
-    if TP_FIR_LEN / (TP_CASC_LEN * TP_SSR) <= firLengthMax:
+    # When stream IO, check that the data fits into a 1024-bit reg. Coeff Array condition always met.
+    if firLengthPerKernel <= firLengthMaxDataReg:
       vld = True
     else:
       vld = False
 
   if not vld:
-    return isError("Maximum fir length is enforced for each kernel in cascade chain. Consider increasing the number of cascade stages.")
+    return isError(f"Maximum fir length ({firLengthPerKernel}) is enforced for each kernel in cascade chain. Consider increasing the number of cascade stages.")
   else :
     return isValid
 

@@ -1,5 +1,7 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,7 +66,6 @@ template <>
 INLINE_DECL constexpr unsigned int fnNumLanesStream<float, float>() {
     return fnNumLanes<float, float>();
 };
-#if __SUPPORTS_CFLOAT__ == 1
 template <>
 INLINE_DECL constexpr unsigned int fnNumLanesStream<cfloat, float>() {
     return fnNumLanes<cfloat, float>();
@@ -73,8 +74,7 @@ template <>
 INLINE_DECL constexpr unsigned int fnNumLanesStream<cfloat, cfloat>() {
     return fnNumLanes<cfloat, cfloat>();
 };
-#endif
-//
+
 template <typename T_D, typename T_C>
 INLINE_DECL constexpr unsigned int fnNumColsStream() {
     return fnNumCols384<T_D, T_C>();
@@ -99,7 +99,6 @@ template <>
 INLINE_DECL constexpr unsigned int fnNumColsStream<float, float>() {
     return fnNumCols<float, float>();
 };
-#if __SUPPORTS_CFLOAT__ == 1
 template <>
 INLINE_DECL constexpr unsigned int fnNumColsStream<cfloat, float>() {
     return fnNumCols<cfloat, float>();
@@ -108,8 +107,8 @@ template <>
 INLINE_DECL constexpr unsigned int fnNumColsStream<cfloat, cfloat>() {
     return fnNumCols<cfloat, cfloat>();
 };
-#endif
-//
+
+#if __MIN_REGSIZE__ == 128
 template <typename T_D, typename T_C>
 INLINE_DECL constexpr unsigned int fnStreamReadWidth() {
     return 128;
@@ -134,7 +133,6 @@ template <>
 INLINE_DECL constexpr unsigned int fnStreamReadWidth<float, float>() {
     return 256;
 };
-#if __SUPPORTS_CFLOAT__ == 1
 template <>
 INLINE_DECL constexpr unsigned int fnStreamReadWidth<cfloat, float>() {
     return 256;
@@ -144,6 +142,13 @@ INLINE_DECL constexpr unsigned int fnStreamReadWidth<cfloat, cfloat>() {
     return 256;
 };
 #endif
+#if __MIN_REGSIZE__ == 256
+template <typename T_D, typename T_C>
+INLINE_DECL constexpr unsigned int fnStreamReadWidth() {
+    return 256;
+};
+#endif
+
 // align to num cols coeffs for FIR cascade splitting for optimal mac efficiency
 template <typename T_D, typename T_C>
 INLINE_DECL constexpr unsigned int fnStreamFirRangeRound() {

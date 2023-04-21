@@ -20,7 +20,7 @@
     },
     {
       "name": "output_window_size",
-      "label": "Output window size (Number of Samples)",
+      "label": "Samples per frame",
       "description": "The number of samples in output window",
       "default": 32,
       "maximum": 4096,
@@ -38,7 +38,7 @@
     },
 	{
 	  "name": "ssr",
-      "label": "Number of parallel input/output (SSR)",
+      "label": "Number of parallel output (SSR)",
       "description": "Specify number of data input/output in parallel for a single channel.",
       "default": 1,
       "minimum": 1,

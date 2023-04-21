@@ -1,5 +1,6 @@
 ..
-   Copyright 2022 Xilinx, Inc.
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -99,7 +100,7 @@ It is also possible to randomly generate coefficient and input data, or to gener
 .. code-block::
 
       make run STIM_TYPE=4.
-      
+
 Troubleshooting Compilation
 ---------------------------
 The Makefiles supplied with the library allow each library unit to be compiled and simulated in isolation. When the library unit is instanced within your design, compilation may fail. This may be because compilation of your system may need arguments not present in your system. The following are possible compile-time errors and suggested remedies for each.
@@ -321,7 +322,7 @@ For the FFT Window library element the list of configurable parameters and defau
     |                        |                |                |                                      |
     |                        |                |                | 2 - Blackman                         |
     |                        |                |                |                                      |
-    |                        |                |                | 3 - Keiser                           |
+    |                        |                |                | 3 - Kaiser                           |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | NITER                  |    unsigned    |    4           | Number of iterations to execute.     |

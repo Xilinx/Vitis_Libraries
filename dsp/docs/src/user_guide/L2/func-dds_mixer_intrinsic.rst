@@ -1,5 +1,6 @@
 ..
-   Copyright 2022 Xilinx, Inc.
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -33,9 +34,9 @@ The graph entry point is the following:
 Supported Types
 ~~~~~~~~~~~~~~~
 
-The DDS/Mixer supports input types of cint16, cint32 and cfloat as selected by TT_DATA. Input is only required when TP_MIXER_MODE is
+The DDS/Mixer supports input types of cint16, cint32 and cfloat as selected by ``TT_DATA``. Input is only required when ``TP_MIXER_MODE`` is
 set to 1 (simple mixer) or 2 (dual conjugate mixer).
-The output type is also set by TT_DATA. When TP_MIXER_MODE is set to 0 (DDS mode), TT_DATA types of cint16 or cfloat only are supported.
+The output type is also set by ``TT_DATA``. When `TP_MIXER_MODE` is set to 0 (DDS mode), ``TT_DATA`` types of cint16 or cfloat only are supported.
 
 ~~~~~~~~~~~~~~~~~~~
 Template Parameters
@@ -62,7 +63,7 @@ Design Notes
 Scaling
 -------
 
-When configured as a DDS (TP_MIXER_MODE=0) the output of the DDS is intended to be the components of a unit vector. For TT_DATA = cfloat, this means that the outputs will be in the range -1.0 to +1.0. For TT_DATA=cint16 the output is scaled by 2 to the power 15 such that the binary point follows the most significant bit of the output. Therefore, if the DDS output is used to multiply/mix, you must account for this 15 bit shift.
+When configured as a DDS (TP_MIXER_MODE=0) the output of the DDS is intended to be the components of a unit vector. For ``TT_DATA = cfloat``, this means that the outputs will be in the range -1.0 to +1.0. For ``TT_DATA = cint16`` the output is scaled by 2 to the power 15 such that the binary point follows the most significant bit of the output. Therefore, if the DDS output is used to multiply/mix, you must account for this 15 bit shift.
 
 .. _DDS_SSR:
 
@@ -82,9 +83,9 @@ Implementation Notes
 ~~~~~~~~~~~~~~~~~~~~
 In a conventional DDS (sometimes known as an Numerically Controlled Oscillator), a phase increment value is added to a phase accumulator on each cycle. The value of the phase accumulator is effectively the phase part of a unit vector in polar form. This unit vector is then converted to cartesian form by lookup of sin and cos values from a table of precomputed values. These cartesian values are then output.
 
-The AIE is a vector processor where multiple data samples are operated upon each cycle. This is often referred to as Super Sample Rate, where the data rate exceeds the clock rate. The AIE DSP Library DDS is Super Sample Rate for maximal performance. The operation to convert phase to sin/cos values is a scalar operation, not a vector operation. The performance per kernel is limited by the number of data samples which can be written out per cycle. This number of samples differs according to data type size. Call this value N. The implementation therefore is for the phase accumulator to have N*phase_increment per cycle. This phase value is then converted to sin/cos values as described earlier. To convert this into N output samples, this scalar cartesian value is then multiplied by a vector of precomputed cartesian offset values to give the output values for samples 0, 1, 2, ... N-1.
+The AIE is a vector processor where multiple data samples are operated upon each cycle. This is often referred to as Super Sample Rate, where the data rate exceeds the clock rate. The AIE DSP Library DDS is Super Sample Rate for maximal performance. The operation to convert phase to sin/cos values is a scalar operation, not a vector operation. The performance per kernel is limited by the number of data samples which can be written out per cycle. This number of samples differs according to data type size. Call this value N. The implementation therefore is for the phase accumulator to have N*phase_increment per cycle. This phase value is then converted to sin/cos values as described earlier. To convert this into N output samples, this scalar cartesian value is then multiplied by a vector of precomputed cartesian offset values to give the output values for samples ``0, 1, 2, ..., N-1``.
 
-The precomputation occurs at construction time. The vector of offset values is created by a series of polar to cartesian lookups using 0, phase_increment*1, phase_increment*2, ... phase_increment*(N-1).
+The precomputation occurs at construction time. The vector of offset values is created by a series of polar to cartesian lookups using ``0, phase_increment*1, phase_increment*2, ..., phase_increment*(N-1)``.
 
 It should be noted that the cartesian values for lookup in hardware are scaled to use the full range of int16, so -1 becomes -32768, but +1 is saturated to +32767. Also, following the run-time multiplication of the looked-up cartesian value for a cycle by the precomputed vector, scaling down and rounding will lead to slightly different values than if the lookup had been used directly for each output value. In other words, the DDS output is not bit-accurate to the sin/cos lookup intrinsic.
 

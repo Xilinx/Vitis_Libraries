@@ -89,24 +89,37 @@ def fn_validate_point_size(TP_POINT_SIZE, TP_DYN_PT_SIZE, TT_DATA, TP_PARALLEL_P
     else isValid
   )
 
-  for check in (checkPointSizeIsPowerOf2,checkDynPointSizeIsMoreThanMinPointSize):
-    if check["is_valid"] == False :
-      return check
-
+  # Check for max FFT point size per kernel.
+  # Allow for 4k cint16. May require single buffer constraint to map with IO buffer interface.
+  # Allow for 4k cint32, as buffer reuse optimization results in reduced memory footprint
+  # Allow for 2k for cfloat.
+  checkMaxPointSizePerKernel = isValid
   if (TT_DATA=="cint16"):
     if (TP_API == 0):
       if ((TP_POINT_SIZE>>TP_PARALLEL_POWER) > 2048):
-        isError(f"Point size per kernel cannot exceed 2048 for cint16 with Windowed interfaces ")
-      else:
-        if ((TP_POINT_SIZE>>TP_PARALLEL_POWER) > 4096):
-          isError(f"Point size per kernel cannot exceed 4096 for cint16 with Streaming interfaces ")
+        # Allow for 4k FFT with IO buffer.
+        checkMaxPointSizePerKernel = isError(f"Point size per kernel cannot exceed 2048 for cint16 with Windowed interfaces ")
     else:
-      if (TP_API == 0):
-        if ((TP_POINT_SIZE>>TP_PARALLEL_POWER) > 1024):
-          isError(f"Point size per kernel cannot exceed 1024 for cint32 or cfloat with Windowed interfaces ")
-        else:
-          if ((TP_POINT_SIZE>>TP_PARALLEL_POWER) > 2048):
-            isError(f"Point size per kernel cannot exceed 2048 for cint32 or cfloat with Streaming interfaces ")
+      if ((TP_POINT_SIZE>>TP_PARALLEL_POWER) > 4096):
+        checkMaxPointSizePerKernel = isError(f"Point size per kernel cannot exceed 4096 for cint16 with Streaming interfaces ")
+  elif (TT_DATA=="cint32"):
+    if (TP_API == 0):
+      if ((TP_POINT_SIZE>>TP_PARALLEL_POWER) > 2048):
+        checkMaxPointSizePerKernel = isError(f"Point size per kernel cannot exceed 2048 for cint32 with Windowed interfaces ")
+    else:
+      if ((TP_POINT_SIZE>>TP_PARALLEL_POWER) > 4096):
+        checkMaxPointSizePerKernel = isError(f"Point size per kernel cannot exceed 4096 for cint32 with Streaming interfaces ")
+  else:
+    if (TP_API == 0):
+      if ((TP_POINT_SIZE>>TP_PARALLEL_POWER) > 1024):
+        checkMaxPointSizePerKernel = isError(f"Point size per kernel cannot exceed 1024 for cfloat with Windowed interfaces ")
+    else:
+      if ((TP_POINT_SIZE>>TP_PARALLEL_POWER) > 2048):
+        checkMaxPointSizePerKernel = isError(f"Point size per kernel cannot exceed 2048 for cfloat with Streaming interfaces ")
+
+  for check in (checkPointSizeIsPowerOf2,checkDynPointSizeIsMoreThanMinPointSize, checkMaxPointSizePerKernel):
+    if check["is_valid"] == False :
+      return check
   return isValid
 
 def validate_TP_POINT_SIZE(args):
@@ -142,17 +155,15 @@ def fn_log2(n):
     sys.exit("Can't log2 0")
     #return Inf
 
-def fn_validate_casc_len(TT_DATA, TP_POINT_SIZE, TP_CASC_LEN):
-  # Defines how many radix-2 ranks there are.
-  log2PointSize = fn_log2(TP_POINT_SIZE)
+def fn_validate_casc_len(TT_DATA, TP_POINT_SIZE, TP_PARALLEL_POWER, TP_CASC_LEN):
+  # Defines how many radix-2 ranks there are in the FFT itself (subframe or main FFT).
+  log2PointSize = fn_log2(TP_POINT_SIZE>>TP_PARALLEL_POWER)
   # equation for integer ffts is complicated by the fact that odd power of 2 point sizes start with a radix 2 stage
   TP_END_RANK = CEIL(log2PointSize, 2) if TT_DATA != "cfloat" else log2PointSize
-  # Integer implementation uses Radix4, while cfloat uses a Radix2.
-  maxCascLen = ((TP_END_RANK) / 2) if TT_DATA != "cfloat" else TP_END_RANK
 
   checkCascLenIsNotGreaterThanRanks = (
-    isValid if (TP_CASC_LEN <= maxCascLen)  else
-    isError(f"Cascade length is greater than maximum supported value for requested point size ({maxCascLen}).")
+    isValid if (TP_CASC_LEN <= TP_END_RANK) else
+    isError(f"The cascade length provided ({TP_CASC_LEN}) exceeds the maximum of ({TP_END_RANK}) for the given point size ({TP_POINT_SIZE})")
   )
 
   return checkCascLenIsNotGreaterThanRanks
@@ -160,8 +171,9 @@ def fn_validate_casc_len(TT_DATA, TP_POINT_SIZE, TP_CASC_LEN):
 def validate_TP_CASC_LEN(args):
   TT_DATA = args["TT_DATA"]
   TP_POINT_SIZE = args["TP_POINT_SIZE"]
+  TP_PARALLEL_POWER = args["TP_PARALLEL_POWER"]
   TP_CASC_LEN = args["TP_CASC_LEN"]
-  return fn_validate_casc_len(TT_DATA, TP_POINT_SIZE, TP_CASC_LEN)
+  return fn_validate_casc_len(TT_DATA, TP_POINT_SIZE, TP_PARALLEL_POWER, TP_CASC_LEN)
 
 
 

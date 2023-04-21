@@ -1,5 +1,6 @@
 ..
-   Copyright 2022 Xilinx, Inc.
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,7 +20,7 @@
 Benchmark/QoR
 =============
 
-This section provides the L2 performance benchmarks and QoR (Quality of Results) for AIE DSP library elements with various configurations. The results are extracted from hardware emulation based simulations. The device used for benchmarking (xcvc1902-vsva2197-1MP-e-S) uses a 1GHz clock for the AIE array. Some devices and speed grades available clock the array at other frequencies (e.g. 1.25GHz for the xcvc1902-vsva2197-2MP-e-S ). Since the library elements measured here are contained entirely within the AIE array and subject to one clock alone, it is fair to scale throughput figures seen here by the ratio of clock speeds to get the throughput figures for devices where the AIE array is clocked at a different frequency.
+This section provides the L2 performance benchmarks and QoR (Quality of Results) for AIE DSP library elements with various configurations. The results are extracted from hardware emulation based simulations. The device used for AIE benchmarking is the xcvc1902-vsva2197-1MP-e-S which has a 1GHz clock, and the device used for AIE-ML is the xcve2802-vsvh1760-1MP-e-S-es1 which has a 1.15GHz clock. Some devices and speed grades available clock the array at other frequencies (e.g. 1.25GHz for the xcvc1902-vsva2197-2MP-e-S ). Since the library elements measured here are contained entirely within the AIE array and subject to one clock alone, it is fair to scale throughput figures seen here by the ratio of clock speeds to get the throughput figures for devices where the AIE array is clocked at a different frequency.
 
 The metrics reported for each case are:
 
@@ -30,26 +31,26 @@ The metrics reported for each case are:
 - DATA_MEMORY           - total data memory in Bytes used by the design
 - PROGRAM_MEMORY        - program memory in Bytes used by each kernel
 
-The parameter, AIE_VARIANT, refers to the type of AI Engine that is used for each particular case in the benchmark results. A value of 1 denotes the AIE, and a value of 2 denotes the AIE-ML. The device used for AIE benchmarking is the xcvc1902-vsva2197-1MP-e-S, and the device used for AIE-ML is the xcve2802-vsvh1760-1MP-e-S-es1.
+The parameter, AIE_VARIANT, refers to the type of AI Engine that is used for each particular case in the benchmark results. A value of 1 denotes the AIE, and a value of 2 denotes the AIE-ML.
 
 The PROGRAM_MEMORY metrics are harvested for each kernel the design consists of. For example a FIR configured to be implemented on two tiles (CASC_LEN=2) will have two sets of figures displayed in the table below (space delimited).
 
 Latency and Throughput
 ~~~~~~~~~~~~~~~~~~~~~~
 
-The latency and throughput values are calculated using the input and output timestamp feature of the aiesimulator. The simulator will create files for the input and output PLIO ports containing the data stream and the timestamp information. Each line of data is preceded by a line containing a timestamp of when it was read or written by the graph port. This feature can be enabled using the option: 
+The latency and throughput values are calculated using the input and output timestamp feature of the aiesimulator. The simulator will create files for the input and output PLIO ports containing the data stream and the timestamp information. Each line of data is preceded by a line containing a timestamp of when it was read or written by the graph port. This feature can be enabled using the option:
 
 .. code-block::
 
     aiesimulator --graph-latency
- 
+
 The latency value for each iteration is found by calculating the difference between the first input timestamp and the first output timestamp.
 Throughput is calculated from the number of samples in an iteration divided by the time difference between the first input timestamp of two consecutive iterations.
 
-The latency and throughput values, as reported for each library element in the tables below, are representative of the function operating at a stable rate. In this context, stability is assumed once the latency is consistent across consecutive iterations. 
+The latency and throughput values, as reported for each library element in the tables below, are representative of the function operating at a stable rate. In this context, stability is assumed once the latency is consistent across consecutive iterations.
 Following power-on, systems typically take several iterations before a stable rate is achieved. This is due to the buffers being initially empty and other such effects. The figures reported are from when the system has reached a steady state after this initial transient phase.
 
-In the case where there are multiple input ports and/or multiple output ports, the timestamps from the first of these ports are used as these are the ports that contain the first timestamped sample of each iteration. 
+In the case where there are multiple input ports and/or multiple output ports, the timestamps from the first of these ports are used as these are the ports that contain the first timestamped sample of each iteration.
 Furthermore, if there are no input ports included in the design (such as DDS only mode) then the throughput will be measured using the timestamped data on the output port.
 
 DDS/Mixer
@@ -103,7 +104,7 @@ Following table gives results for FIR filter with a wide variety of supported pa
    :file: ../../csv_data_files/L2/fir_benchmark.csv
    :align: center
    :header-rows: 1
-   :widths: auto
+   :widths: 10, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
 
 
 Matrix Multiply

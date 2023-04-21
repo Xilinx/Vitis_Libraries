@@ -1,5 +1,7 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -250,6 +252,12 @@ class kernelFilterClass {
         getKernelStreamLoadVsize<TT_DATA, TT_COEFF, TP_DECIMATE_FACTOR>(); //
 
     static constexpr unsigned int m_kVOutSize = fnVOutSizeDecAsym<TT_DATA, TT_COEFF>();
+    static constexpr unsigned int m_kLsize =
+        (TP_INPUT_WINDOW_VSIZE / TP_DECIMATE_FACTOR) /
+        m_kVOutSize; // loop length, given that <m_kVOutSize> samples are output per iteration of loop
+    static constexpr unsigned int m_kRepeatFactor =
+        TP_DECIMATE_FACTOR % 2 == 0 ? m_kInitLoadsInReg
+                                    : m_kSamplesInBuff / m_kVOutSize; // only FACTORS of 2 or 3 supported
 
     static constexpr int dataOffsetNthKernel = getDataOffset<TP_FIR_LEN, TP_FIR_RANGE_LEN, m_kFirRangeOffset>();
     static constexpr int streamInitNullAccs =
@@ -276,7 +284,7 @@ class kernelFilterClass {
     static constexpr eArchType m_kArchIncrStrobeEn =
         (fnFirDecIncStrSupported<TT_DATA, TT_COEFF>() == SUPPORTED) ? kArchIncrStrobe : kArchBasic;
     static constexpr eArchType m_kArchWindow =
-        ((TP_INPUT_WINDOW_VSIZE / TP_DECIMATE_FACTOR) % (m_kLanes * m_kInitLoadsInReg) == 0) &&
+        ((TP_INPUT_WINDOW_VSIZE / TP_DECIMATE_FACTOR) % (m_kLanes * m_kRepeatFactor) == 0) &&
                 (m_kInitDataNeeded <= m_kInitLoadVsize * (m_kInitLoadsInReg - 1) + 1)
             ? m_kArchIncrStrobeEn
             : kArchBasic;
@@ -286,9 +294,6 @@ class kernelFilterClass {
     static constexpr unsigned int m_kFirLenCeilCols = CEIL(TP_FIR_RANGE_LEN, m_kColumns);
     static constexpr unsigned int m_kZbuffSize = 32; // kZbuffSize (256bit) - const for all data/coeff types
     static constexpr unsigned int m_kCoeffRegVsize = m_kZbuffSize / sizeof(TT_COEFF);
-    static constexpr unsigned int m_kLsize =
-        (TP_INPUT_WINDOW_VSIZE / TP_DECIMATE_FACTOR) /
-        m_kVOutSize; // loop length, given that <m_kVOutSize> samples are output per iteration of loop
     unsigned int m_kDecimateOffsets;
 
     static constexpr int streamRptFactor = 8; //

@@ -87,7 +87,7 @@
       "validator": {
         "file": "fir_interpolate_hb.py",
         "function": "validate_TP_INPUT_WINDOW_VSIZE",
-        "args": ["TT_DATA", "TT_COEF", "TP_FIR_LEN", "TP_API", "TP_SSR"]
+        "args": ["TT_DATA", "TT_COEF", "TP_FIR_LEN", "TP_API", "TP_SSR", "TP_PARA_INTERP_POLY"]
       }
     },
     {
@@ -114,7 +114,7 @@
         "file": "aie_common_fir.py",
         "function": "validate_TP_USE_COEF_RELOAD",
         "args": ["TP_API", "TP_SSR"]
-        }                    
+        }
     },
     {
       "name": "TP_NUM_OUTPUTS",
@@ -126,7 +126,7 @@
         "file": "fir_interpolate_hb.py",
         "function": "validate_TP_NUM_OUTPUTS",
         "args": ["TP_PARA_INTERP_POLY", "TP_DUAL_IP"]
-      }                    
+      }
     },
     {
       "name": "TP_UPSHIFT_CT",
@@ -138,7 +138,7 @@
         "file": "fir_interpolate_hb.py",
         "function": "validate_TP_UPSHIFT_CT",
         "args": ["TT_DATA"]
-      }      
+      }
     },
     {
       "name": "TP_API",
@@ -169,7 +169,7 @@
         "args": ["TP_API"]
       }
     },
-    {                                    
+    {
       "name": "coeff",
       "description": "The filter coefficients.",
       "element_type": "TT_COEF",

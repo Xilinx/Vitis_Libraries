@@ -1,5 +1,7 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +33,11 @@
 // all ok
 #else
 //#error Unexpected __AIE_ARCH__ or __AIEARCH__ encountered //removed because compilation of gen_cfo.cpp fails here
+#endif
+
+#ifndef __AIE_ARCH__
+// AIE Graph compilation graph_preprocessor is unaware of the ARCH.
+// #define __AIE_ARCH__ 10
 #endif
 
 //----------------------------------
@@ -137,6 +144,109 @@
     (__AIEARCH__ == 21) || (__AIEARCH__ == 22)
 #define __SUPPORTS_V8INT16__ 0
 #define __SUPPORTS_V16INT16__ 0
+#endif
+
+#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#define __MIN_REGSIZE__ 128
+#endif
+#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22) || (__AIEARCH__ == 20) || \
+    (__AIEARCH__ == 21) || (__AIEARCH__ == 22)
+#define __MIN_REGSIZE__ 256
+#endif
+
+#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22) || (__AIEARCH__ == 20) || \
+    (__AIEARCH__ == 21) || (__AIEARCH__ == 22)
+// AIE-ML variants offers additional rounding modes, restricting some values for future use.
+#define __ROUNDING_MODES__ 13
+
+#ifndef rnd_floor
+//! @brief No rounding - Truncate LSB, always round down (towards negative infinity)
+#define rnd_floor 0
+#endif
+#ifndef rnd_ceil
+//! @brief No rounding - Always round up (towards positive infinity)
+#define rnd_ceil 1
+#endif
+#ifndef rnd_sym_floor
+//! @brief No rounding - Truncate LSB, always round towards 0
+#define rnd_sym_floor 2
+#endif
+#ifndef rnd_sym_ceil
+//! @brief No rounding - Always round up towards infinity
+#define rnd_sym_ceil 3
+#endif
+#ifndef rnd_neg_inf
+//! @brief Round halfway towards negative infinity
+#define rnd_neg_inf 8
+#endif
+#ifndef rnd_pos_inf
+//! @brief Round halfway towards positive infinity
+#define rnd_pos_inf 9
+#endif
+#ifndef rnd_sym_zero
+//! @brief Round halfway towards zero (away from infinity)
+#define rnd_sym_zero 10
+#endif
+#ifndef rnd_sym_inf
+//! @brief Round halfway towards infinity (away from zero)
+#define rnd_sym_inf 11
+#endif
+#ifndef rnd_conv_even
+//! @brief Round halfway towards nearest even number
+#define rnd_conv_even 12
+#endif
+#ifndef rnd_conv_odd
+//! @brief Round halfway towards nearest odd number
+#define rnd_conv_odd 13
+#endif
+
+#else
+
+// AIE1 offers 8 rounding modes
+#define __ROUNDING_MODES__ 7
+
+#ifndef rnd_floor
+//! @brief No rounding - Truncate LSB, always round down (towards negative infinity)
+#define rnd_floor 0
+#endif
+#ifndef rnd_ceil
+//! @brief No rounding - Always round up (towards positive infinity)
+#define rnd_ceil 1
+#endif
+#ifndef rnd_pos_inf
+//! @brief Round halfway towards positive infinity
+#define rnd_pos_inf 2
+#endif
+#ifndef rnd_neg_inf
+//! @brief Round halfway towards negative infinity
+#define rnd_neg_inf 3
+#endif
+#ifndef rnd_sym_inf
+//! @brief Round halfway towards infinity (away from zero)
+#define rnd_sym_inf 4
+#endif
+#ifndef rnd_sym_zero
+//! @brief Round halfway towards zero (away from infinity)
+#define rnd_sym_zero 5
+#endif
+#ifndef rnd_conv_even
+//! @brief Round halfway towards nearest even number
+#define rnd_conv_even 6
+#endif
+#ifndef rnd_conv_odd
+//! @brief Round halfway towards nearest odd number
+#define rnd_conv_odd 7
+#endif
+
+#ifndef rnd_sym_floor
+//! @brief Not available
+#define rnd_sym_floor 8
+#endif
+#ifndef rnd_sym_ceil
+//! @brief Not available
+#define rnd_sym_ceil 9
+#endif
+
 #endif
 
 #endif // __DEVICE_DEFS__

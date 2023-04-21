@@ -1,5 +1,7 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,9 +33,6 @@
 
 #include <stdio.h>
 #include <adf.h>
-//#include "aie_api/detail/vector.hpp"
-//#include "aie_api/aie_adf.hpp"
-//#include "aie_api/aie_types.hpp"
 #include "device_defs.h"
 #include "fir_params_defaults.hpp"
 
@@ -58,8 +57,10 @@ struct empty {
 #define FIR_LEN_MIN 1
 #define SHIFT_MAX 62
 #define SHIFT_MIN 0
-#define ROUND_MAX 7
+
+#define ROUND_MAX __ROUNDING_MODES__
 #define ROUND_MIN 0
+
 #define INTERPOLATE_FACTOR_MAX 16
 #define INTERPOLATE_FACTOR_MIN 1
 
@@ -68,13 +69,13 @@ struct empty {
 
 #define IS_ASYM 0
 #define IS_SYM 1
+
 // CEIL and TRUNC are common utilities where x is rounded up (CEIL) or down (TRUNC)
 // until a value which is multiple of y is found. This may be x.
 // e.g. CEIL(10,8) = 16, TRUNC(10, 8) = 8
 #define CEIL(x, y) (((x + y - 1) / y) * y)
 #define TRUNC(x, y) (((x) / y) * y)
 #define FLOOR(X, Y) X >= 0 ? (int)((int)(X) / (int)(Y)) : (int)((int)((X) - (Y) + 1) / (int)(Y));
-// performs floor((float)(inVal/rnd))
 
 // Pragma unroll complains if you try to unroll(0);
 // It's safe to just unroll(1) in this circumstance.
@@ -253,6 +254,7 @@ INLINE_DECL constexpr unsigned int fnAccSize<float, float>() {
 };
 #endif //__SUPPORTS_ACC64__
 
+#if __MIN_REGSIZE__ == 128
 // function to return the number of 768-bit acc's lanes for a type combo
 template <typename TT_DATA, typename TT_COEFF>
 INLINE_DECL constexpr unsigned int fnNumLanes() {
@@ -385,8 +387,18 @@ template <>
 INLINE_DECL constexpr unsigned int fnNumLanes384<cfloat, cfloat>() {
     return 4;
 };
+#else
+template <typename TT_DATA, typename TT_COEFF>
+INLINE_DECL constexpr unsigned int fnNumLanes() {
+    return 256 / 8 / sizeof(TT_DATA);
+};
+template <typename TT_DATA, typename TT_COEFF>
+INLINE_DECL constexpr unsigned int fnNumLanes384() {
+    return 256 / 8 / sizeof(TT_DATA);
+};
+#endif
 
-#if __SUPPORTS_CFLOAT__ == 1
+#if __MIN_REGSIZE__ == 128
 // function to return the number of columns for a tall-narrow atomic intrinsic for a type combo
 template <typename TT_DATA, typename TT_COEFF>
 INLINE_DECL constexpr unsigned int fnNumCols() {
@@ -482,6 +494,8 @@ INLINE_DECL constexpr unsigned int fnNumCols384() {
     return 4;
 };
 #endif
+
+#if __MIN_REGSIZE__ == 128
 // Define Data Width read from stream. Data types operating on long, 768-bit accs require 256-bits of input data.
 template <typename T_D, typename T_C>
 INLINE_DECL constexpr unsigned int fnStreamReadWidth() {
@@ -527,6 +541,12 @@ template <>
 INLINE_DECL constexpr unsigned int fnStreamReadWidth<cfloat, cfloat>() {
     return 256;
 };
+#else
+template <typename T_D, typename T_C>
+INLINE_DECL constexpr unsigned int fnStreamReadWidth() {
+    return 256;
+};
+#endif
 
 namespace fir {
 

@@ -1,5 +1,6 @@
 ..
-   Copyright 2022 Xilinx, Inc.
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
@@ -30,7 +31,7 @@
 
 Overview
 ========
-Vitis DSP Library offers a fully synthesizable Super Sample data Rate (SSR) FFT with a systolic
+AMD Vitis |trade| DSP Library offers a fully synthesizable Super Sample data Rate (SSR) FFT with a systolic
 architecture to process multiple input samples every clock cycle. The number of samples
 processed in parallel per cycle is denoted by the SSR factor. The SSR FFT is implemented as a C++
 template function that synthesizes into a streaming architecture. The SSR FFT architecture used for implementation can be parameterized through template parameters, which are grouped in a C++ struct of type **ssr_fft_default_params**. A new structure can be defined by extending the default structure and re-defining required member constants as follows:
@@ -84,13 +85,13 @@ Currently 1-D SSR FFT supports fixed point and floating point complex inputs for
 Fixed Point
 -----------
 The fixed point SSR FFT implementation is based on fixed point data types **std::complex<ap_fixed<>>** which are used for synthesis and implementation. It is possible to use floating point types **std::complex<float>** and **std::complex<double>** for simulation but these floating point complex models will consume massive resources if synthesized to hardware.
-For the best results with fixed point type, limit the data bit width to 27 bits (integer + fraction) as it helps to map multiplication and addition within SSR FFT butterflies directly onto a single DSP block. Larger inputs can be used but may lead to slower Fmax and more resource utilization. Finally, note that the complex exponential/twiddle factor storage is on 18 bits (16F+2I bits). The selection of 18-bit is made keeping in view the 18x27 multipliers available within DSP blocks on Xilinx FPGAs.
+For the best results with fixed point type, limit the data bit width to 27 bits (integer + fraction) as it helps to map multiplication and addition within SSR FFT butterflies directly onto a single DSP block. Larger inputs can be used but may lead to slower Fmax and more resource utilization. Finally, note that the complex exponential/twiddle factor storage is on 18 bits (16F+2I bits). The selection of 18-bit is made keeping in view the 18x27 multipliers available within DSP blocks on FPGAs.
 
 .. _FLOAT_FFT_PARAMS_STRUCT_LABEL:
 
 Floating Point
 --------------
-1-D SSR FFT also supports synthesis for single or double precision floating point type. For synthesizing a complex floating point type, it is required that std::complex type not to be used as a complex wrapper. Since this wrapper has some issues and it is required that a wrapper class provided with the Vitis DSP library called **complex_wrapper<...>** is used for wrapping complex float numbers.
+1-D SSR FFT also supports synthesis for single or double precision floating point type. For synthesizing a complex floating point type, it is required that std::complex type not to be used as a complex wrapper. Since this wrapper has some issues and it is required that a wrapper class provided with the AMD Vitis |trade| DSP library called **complex_wrapper<...>** is used for wrapping complex float numbers.
 Also while synthesizing floating point 1-D SSR FFT the parameters in the structure which carry information such as scaling mode, twiddle factor storage bits, butterfly rounding mode etc. which are only related to fixed point data-path, carry no meaning. Instead SSR FFT parameter structure can simply define relevant parameters as shown below:
 
 .. code-block:: cpp
@@ -215,7 +216,7 @@ Twiddle Factor or Sine/Cosine Lookup Table Quantization
 You can change the number of bits used to quantize the sin/cos table (twiddle factors/complex
 exponential). The recommended setting is total 18 bits and 2 bits for the fraction. This setting
 ensures that during multiplication, the twiddle/sin/cos input can map to the 18-bit input of the
-DSP block in Xilinx® FPGAs. The model can synthesize and work for other large bit widths, but
+DSP block in AMD Adaptive Engineering FPGAs. The model can synthesize and work for other large bit widths, but
 performance might be worse due to multiplication operations not mapping to a single DSP
 block and being implemented using multiple DSP blocks and/or FPGA fabric.
 The twiddle factor width reduction can be useful when the initial setting for twiddle factor
@@ -247,7 +248,7 @@ output widths of one stage increase beyond a limit where multiplication operatio
 blocks on the FPGA, the design performance in terms of speed may fall considerably. For
 example, for a given design with logR(N) * log2(R) + Input Bit Width(IL+FL) > max(DSP
 Block Multiplier Inputs), you might consider using one of the other two available scaling
-schemes. For Xilinx DSP48 blocks with 18x27 multipliers, the condition will be logR(N) * log2(R) + Input Bit Width > 27.
+schemes. For DSP48 blocks with 18x27 multipliers, the condition will be logR(N) * log2(R) + Input Bit Width > 27.
 
 SSR_FFT_GROW_TO_MAX_WIDTH
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -269,12 +270,12 @@ SNR/RMS requirements for given application.
 
 1-D SSR FFT Library Usage
 =========================
-Following sections describe how to use SSR FFT from Vitis DSP Library.
+Following sections describe how to use SSR FFT from AMD Vitis |trade| DSP Library.
 
 Fixed Point 1-D SSR FFT Usage
 -----------------------------
-The Vitis 1-D SSR FFT L1 module can be used in a C++ HLS design by:
-1- cloning the Vitis DSP Library git repository and add the following path to compiler include path:
+Vitis 1-D SSR FFT L1 module can be used in a C++ HLS design by:
+1- cloning Vitis DSP Library git repository and add the following path to compiler include path:
 
          ``REPO_PATH/dsp/L1/include/hw/vitis_fft/fixed/``
 
@@ -341,9 +342,9 @@ mode based bit-growth and input bit-widths).
 
 Floating Point 1-D SSR FFT Usage
 --------------------------------
-The Vitis 1-D SSR FFT L1 module can be used in a C++ HLS design by:
+Vitis 1-D SSR FFT L1 module can be used in a C++ HLS design by:
 
-1- Cloning the Vitis DSP Library git repository and add the following path to compiler include path:
+1- Cloning Vitis DSP Library git repository and add the following path to compiler include path:
 
          ``REPO_PATH/dsp/L1/include/hw/vitis_fft/float/``
 

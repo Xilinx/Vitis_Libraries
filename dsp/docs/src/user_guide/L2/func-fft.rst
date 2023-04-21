@@ -1,5 +1,6 @@
 ..
-   Copyright 2022 Xilinx, Inc.
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -38,8 +39,8 @@ The graph entry point is the following:
 Supported Types
 ~~~~~~~~~~~~~~~
 
-The data type to the FFT is controlled by the template parameter TT_DATA. This may take one of 3 choices: cint16, cint32 or cfloat. This selection applies to both input data and output data.
-The template parameter TT_TWIDDLE may take one of two values, cint16 or cfloat, but currently this value is forced by the choice of TT_DATA, so TT_TWIDDLE must be set to cint16 for TT_DATA = cint16 or cint32 and TT_TWIDDLE must be set to cfloat when TT_DATA=cfloat.
+The data type to the FFT is controlled by the template parameter ``TT_DATA``. This may take one of 3 choices: cint16, cint32 or cfloat. This selection applies to both input data and output data.
+The template parameter ``TT_TWIDDLE`` may take one of two values, cint16 or cfloat, but currently this value is forced by the choice of ``TT_DATA``, so ``TT_TWIDDLE`` must be set to cint16 for ``TT_DATA = cint16`` or ``cint32`` and ``TT_TWIDDLE`` must be set to cfloat when ``TT_DATA=cfloat``.
 
 ~~~~~~~~~~~~~~~~~~~
 Template Parameters
@@ -47,9 +48,11 @@ Template Parameters
 
 To see details on the template parameters for the FFT, see :ref:`API_REFERENCE`.
 
-For guidance on configuration with some example scenarios, see :ref:`Configuration Notes`
+For guidance on configuration with some example scenarios, see :ref:`FFT_CONFIGURATION_NOTES`
 
 See also :ref:`PARAMETER_LEGALITY_NOTES` regarding legality checking of parameters.
+
+Note that window interfaces are now referred to as iobuffers. IObuffers are conceptually the same as windows. Graph connections between windows and iobuffers are supported. More details on iobuffers can be found in UG1076 and UG1079. For backwards compatibility, template parameters which refer to windows, eg. ``TP_WINDOW_VSIZE``, remain unchanged.
 
 ~~~~~~~~~~~~~~~~
 Access functions
@@ -70,7 +73,7 @@ Design Notes
 Dynamic Point Size
 ------------------
 
-The FFT supports dynamic (run-time controlled) point sizes. This feature is available when the template parameter TP_DYN_PT_SIZE is set. When set to 0 (static point size) all data will be expected in frames of TP_POINT_SIZE data samples, though multiple frames may be input together using TP_WINDOW_VSIZE. When set to 1 (dynamic point size) each window must be preceded by a 256-bit header to describe the run-time parameters of that window. Note that TP_WINDOW_VSIZE described the number of samples in a window so does not include this header. The format of the header is described in Table 5. When TP_DYN_PT_SIZE =1, TP_POINT_SIZE describes the maximum point size which may be input.
+The FFT supports dynamic (run-time controlled) point sizes. This feature is available when the template parameter ``TP_DYN_PT_SIZE`` is set. When set to 0 (static point size) all data will be expected in frames of ``TP_POINT_SIZE`` data samples, though multiple frames may be input together using ``TP_WINDOW_VSIZE``. When set to 1 (dynamic point size) each window must be preceded by a 256-bit header to describe the run-time parameters of that window. Note that ``TP_WINDOW_VSIZE`` described the number of samples in a window so does not include this header. The format of the header is described in Table 5. When ``TP_DYN_PT_SIZE`` =1, ``TP_POINT_SIZE`` describes the maximum point size which may be input.
 
 .. _FFT_IFFT_HEADER_FORMAT:
 
@@ -95,18 +98,18 @@ The FFT supports dynamic (run-time controlled) point sizes. This feature is avai
    |                               | (real part)          | 0 = legal point size, 1 = illegal point size                                    |
    +-------------------------------+----------------------+---------------------------------------------------------------------------------+
 
-The locations are set to suit TT_DATA type. That is, for TT_DATA=cint16, direction is described in the first cint16 (real part) of the 256 bit header and point size is described in the real part of the second cint16 value.
-Similarly, for TT_DATA=cint32, the real part of the first cint32 value in the header holds the direction field and the real part of the second cint32 value holds the Point size (radix2) field.
+The locations are set to suit ``TT_DATA`` type. That is, for ``TT_DATA=cint16``, direction is described in the first cint16 (real part) of the 256 bit header and point size is described in the real part of the second cint16 value.
+Similarly, for ``TT_DATA=cint32``, the real part of the first cint32 value in the header holds the direction field and the real part of the second cint32 value holds the Point size (radix2) field.
 
-Note that for TT_DATA=cfloat, the values in the header are expected as cfloat and are value-cast (not reinterpret-cast) to integers internally. The output window also has a header. This is copied from the input header except for the status field, which is inserted. The status field is ignored on input. If an illegal point size is entered, the output header will have this field set to a non-zero value and the remainder of the output window is undefined.
+Note that for ``TT_DATA=cfloat``, the values in the header are expected as cfloat and are value-cast (not reinterpret-cast) to integers internally. The output window also has a header. This is copied from the input header except for the status field, which is inserted. The status field is ignored on input. If an illegal point size is entered, the output header will have this field set to a non-zero value and the remainder of the output window is undefined.
 
 Super Sample Rate Operation
 ---------------------------
 
 While the term Super Sample Rate strictly means the processing of more than one sample per clock cycle, in the AIE context it is taken to mean an implementation using parallel kernels to improve performance at the expense of additional resource use.
-In the FFT, SSR operation is controlled by the template parameter TP_PARALLEL_POWER. This parameter is intended to improve performance and also allow support of point sizes beyond the limitations of a single tile. Diagram :ref:`FIGURE_FFT_CONSTRAINTS` shows an example graph with TP_PARALLEL_POWER set to 2. This results in 4 subframe processors in parallel each performing an FFT of N/2^TP_PARALLEL_POWER point size. These subframe outputs are then combined by TP_PARALLEL_POWER stages of radix2  to create the final result. The order of samples is described in the note for TP_API above.
+In the FFT, SSR operation is controlled by the template parameter ``TP_PARALLEL_POWER``. This parameter is intended to improve performance and also allow support of point sizes beyond the limitations of a single tile. Diagram :ref:`FIGURE_FFT_CONSTRAINTS` shows an example graph with ``TP_PARALLEL_POWER`` set to 2. This results in 4 subframe processors in parallel each performing an FFT of ``N/2^TP_PARALLEL_POWER`` point size. These subframe outputs are then combined by ``TP_PARALLEL_POWER`` stages of radix2  to create the final result. The order of samples is described in the note for ``TP_API`` above.
 
-The parameter TP_PARALLEL_POWER allows a trade of performance for resource use in the form of tiles used. The following table shows the tile utilization versus TP_PARALLEL_POWER assuming that all widgets co-habit with FFT processing kernels.
+The parameter ``TP_PARALLEL_POWER`` allows a trade of performance for resource use in the form of tiles used. The following table shows the tile utilization versus ``TP_PARALLEL_POWER`` assuming that all widgets co-habit with FFT processing kernels.
 
 
 
@@ -134,19 +137,21 @@ When Super Sample Rate operation is used, data is input and output using multipl
 
 Scaling
 -------
-Scaling in the FFT is controlled by the TP_SHIFT parameter which describes how many binary places by which to shift the result to the right, i.e. only power-of-2 scaling values are supported. The FFT implementation does not implement the 1/N scaling of an IFFT directly, but this may be configured via TP_SHIFT.
+
+Scaling in the FFT is controlled by the ``TP_SHIFT`` parameter which describes how many binary places by which to shift the result to the right, i.e. only power-of-2 scaling values are supported. The FFT implementation does not implement the 1/N scaling of an IFFT directly, but this may be configured via ``TP_SHIFT``.
 Internal to the FFT, for cint16 and cint32 data, an data type of cint32 is used for temporary value. After each rank, the values are scaled by only enough to normalize the bit growth caused by the twiddle multiplication (i.e., 15 bits), but there is no compensation for the bit growth of the adder in the butterfly operation.
-No scaling is applied at any point when the data type is cfloat. Setting TP_SHIFT to any value other than 0 when TT_DATA is cfloat will result in an error.
-In the case of TP_PARALLEL_POWER > 0 for cint16, the streams carrying data between subframe processors and the combiner stages carry cint16 data so as to allow for high performance. In this case, the scaling value applied to each subframe processor is (TP_SHIFT-TP_PARALLEL_POWER) (if positive and 0 if not). Each combiner stage will have a shift of 1 is applied, to compensate for the bit growth of 1 in the stage's butterfly, if there is adequate TP_SHIFT to allow for this, or 0 if there is not.
-For example, with an FFT configured to be POINT_SIZE=1024, DATA_TYPE=cint16, PARALLEL_POWER=2 and TP_SHIFT=10, there will be 4 subframe processors and 2 further ranks of 4 combiners. The 4 subframe processors will all have a local TP_SHIFT of 10-2 = 8 applied and each of the combiners will have a local TP_SHIFT of 1 applied.
+No scaling is applied at any point when the data type is cfloat. Setting TP_SHIFT to any value other than 0 when ``TT_DATA`` is cfloat will result in an error.
+In the case of TP_PARALLEL_POWER > 0 for cint16, the streams carrying data between subframe processors and the combiner stages carry cint16 data so as to allow for high performance. In this case, the scaling value applied to each subframe processor is (``TP_SHIFT-TP_PARALLEL_POWER``) (if positive and 0 if not). Each combiner stage will have a shift of 1 is applied, to compensate for the bit growth of 1 in the stage's butterfly, if there is adequate ``TP_SHIFT`` to allow for this, or 0 if there is not.
+For example, with an FFT configured to be POINT_SIZE=1024, DATA_TYPE=cint16, PARALLEL_POWER=2 and ``TP_SHIFT=10``, there will be 4 subframe processors and 2 further ranks of 4 combiners. The 4 subframe processors will all have a local ``TP_SHIFT`` of 10-2 = 8 applied and each of the combiners will have a local ``TP_SHIFT`` of 1 applied.
 This scheme is designed to preserve as much accuracy as possible without compromising performance.
-If better accuracy or noise performance is required, this may be achieved at the expense of throughput by using TT_DATA=cint32.
+If better accuracy or noise performance is required, this may be achieved at the expense of throughput by using ``TT_DATA=cint32``.
 
 Saturation
 ----------
-Distortion caused by saturation will be possible for certain configurations of the FFT. For instance, with DATA_TYPE=cint32, it is possible for the sample values within the FFT to grow beyond the range of int32 values. In the final stage when TP_SHIFT is applied, saturation is also applied. Similarly, if the FFT is configured for DATA_TYPE=cint16, but insufficient scaling (TP_SHIFT) is applied, then sample values may exceed the range of int16 and so these too will be saturated in the final stage.
-Note that for cases with TP_PARALLEL_POWER>1, saturation is applied at the end of each subframe processor and also in each combiner, so for data sets which cause saturation even in the subframe processor, the output will likely not match the output of an FFT model.
-For DATA_TYPE=cfloat, the FFT performs no scaling, nor saturation. Any saturation effects will be due to the atomic float operations returning positive infinity, negative infinity or NaN.
+
+Distortion caused by saturation will be possible for certain configurations of the FFT. For instance, with ``TT_DATA=cint32``, it is possible for the sample values within the FFT to grow beyond the range of int32 values. In the final stage when ``TP_SHIFT`` is applied, saturation is also applied. Similarly, if the FFT is configured for ``TT_DATA=cint16``, but insufficient scaling (``TP_SHIFT``) is applied, then sample values may exceed the range of int16 and so these too will be saturated in the final stage.
+Note that for cases with ``TP_PARALLEL_POWER>1``, saturation is applied at the end of each subframe processor and also in each combiner, so for data sets which cause saturation even in the subframe processor, the output will likely not match the output of an FFT model.
+For ``TT_DATA=cfloat``, the FFT performs no scaling, nor saturation. Any saturation effects will be due to the atomic float operations returning positive infinity, negative infinity or NaN.
 
 Constraints
 -----------
@@ -176,7 +181,7 @@ For the same example, to ensure that the second radix2 combiner kernel in the fi
 
 	not_equal(location<kernel>(myFFT.FFTsubframe[0].m_combInKernel[1]),location<kernel>( myFFT.FFTsubframe[0].m_r2Comb[1]));
 
-For large point sizes, e.g. 65536, the design is large, requiring 80 tiles. With such a large design, the Vitis AIE mapper may time out due to there being too many possibilities of placement, so placement constraints are recommended to reduce the solution space and so reduce the time spent by the Vitis AIE mapper tool to find a solution. Example constraints have been provided in the test.hpp file for the fft_ifft_dit_1ch, i.e in: `L2/tests/aie/fft_ifft_dit_1ch/test.hpp`.
+For large point sizes, e.g. 65536, the design is large, requiring 80 tiles. With such a large design, the AMD Vitis |trade| AIE mapper may time out due to there being too many possibilities of placement, so placement constraints are recommended to reduce the solution space and so reduce the time spent by the Vitis AIE mapper tool to find a solution. Example constraints have been provided in the test.hpp file for the fft_ifft_dit_1ch, i.e in: `L2/tests/aie/fft_ifft_dit_1ch/test.hpp`.
 
 Use of single_buffer
 --------------------
@@ -200,6 +205,8 @@ The following code block shows example code of how to include an instance of the
     :language: cpp
     :lines: 15-
 
+.. _FFT_CONFIGURATION_NOTES:
+
 ~~~~~~~~~~~~~~~~~~~
 Configuration Notes
 ~~~~~~~~~~~~~~~~~~~
@@ -207,42 +214,55 @@ This section is intended to provide guidance for the user on how best to configu
 
 Configuration for performance vs resource
 -----------------------------------------
-Simple configurations of the FFT use a single kernel. Multiple kernels will be used when either TP_PARALLEL_POWER > 0 or TP_CASC_LEN > 1. Both of these parameters exist to allow higher throughput, though TP_PARALLEL_POWER also allows larger point sizes that can be implemented in a single kernel.
-If a higher throughput is required than what can be achieved with a single kernel then TP_CASC_LEN should be increased in preference to TP_PARALLEL_POWER. This is because resource (number of kernels) will match TP_CASC_LEN, whereas for TP_PARALLEL_POWER, resource increases quadratically.
-It is recommended that TP_PARALLEL_POWER is only increased after TP_CASC_LEN has been increased, but where throughput still needs to be increased.
-Of course, TP_PARALLEL_POWER may be required if the point size required is greater than a single kernel can be achieved. In this case, to keep resource minimised, increase TP_PARALLEL_POWER as required to support the point size in question, then increase TP_CASC_LEN to achieve the required throughput, before again increasing TP_PARALLEL_POWER if higher throughput is still required.
+Simple configurations of the FFT use a single kernel. Multiple kernels will be used when either ``TP_PARALLEL_POWER > 0`` or ``TP_CASC_LEN > 1``. Both of these parameters exist to allow higher throughput, though ``TP_PARALLEL_POWER`` also allows larger point sizes that can be implemented in a single kernel.
+If a higher throughput is required than what can be achieved with a single kernel then ``TP_CASC_LEN`` should be increased in preference to ``TP_PARALLEL_POWER``. This is because resource (number of kernels) will match ``TP_CASC_LEN``, whereas for ``TP_PARALLEL_POWER``, resource increases quadratically.
+It is recommended that TP_PARALLEL_POWER is only increased after ``TP_CASC_LEN`` has been increased, but where throughput still needs to be increased.
+Of course, ``TP_PARALLEL_POWER`` may be required if the point size required is greater than a single kernel can be achieved. In this case, to keep resource minimized, increase ``TP_PARALLEL_POWER`` as required to support the point size in question, then increase ``TP_CASC_LEN`` to achieve the required throughput, before again increasing ``TP_PARALLEL_POWER`` if higher throughput is still required.
 The maximum point size supported by a single kernel may be increased by use of the single_kernel constraint. This only applies when TP_API=0 (windows) as the streaming implementation always uses single buffering.
 
 Scenarios
 ---------
 
-Scenario 1: 512 point forward FFT with cint16 data requires >500 MSamples/sec with a window interface and minimal latency. With TP_CASC_LEN=1 and TP_PARALLEL_POWER=0 this is seen to achieve approx 419Msa/sec. With TP_CASC_LEN=2 this increases to 590Msa/s. The configuration will be as follows:
-xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph<cint16, cint16, 512, 1, 9, 2, 0, 512, 0, 0> myFFT;
-Notes: TP_SHIFT is set to 9 for nominal 1/N scaling. TP_WINDOW_VSIZE has been set to TP_POINT_SIZE to minimize latency.
+**Scenario 1:**
 
-Scenario 2: 4096 point inverse FFT with cint32 data is required with 100Msa/sec. This cannot be accommodated in a single kernel due to memory limits. These memory limits apply to cascaded implementations too, so the recommended configuration is as follows:
-xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph<cint32, cint16, 4096, 0, 12, 1, 0, 4096, 1, 1> myFFT;
-Notes: TP_SHIFT is set to 12 for nominal 1/N scaling. TP_WINDOW_VSIZE has been set to TP_POINT_SIZE as to attempt any multiple of TP_POINT_SIZE would exceed memory limits.
+ 512 point forward FFT with cint16 data requres >500 MSa/sec with a window interface and minimal latency. With TP_CASC_LEN=1 and TP_PARALLEL_POWER=0 this is seen to achieve approx 419 Msa/sec. With ``TP_CASC_LEN=2`` this increases to 590 Msa/s. The configuration will be as follows:
+
+.. code-block::
+
+   xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph<cint16, cint16, 512, 1, 9, 2, 0, 512, 0, 0> myFFT;
+
+.. note:: ``TP_SHIFT`` is set to 9 for nominal 1/N scaling. ``TP_WINDOW_VSIZE`` has been set to ``TP_POINT_SIZE`` to minimize latency.
+
+**Scenario 2:**
+
+4096 point inverse FFT with cint32 data is required with 100 Msa/sec. This cannot be accommodated in a single kernel due to memory limits. These memory limits apply to cascaded implementations too, so the recommended configuration is as follows:
+
+.. code-block::
+
+   xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph<cint32, cint16, 4096, 0, 12, 1, 0, 4096, 1, 1> myFFT;
+
+.. note:: ``TP_SHIFT`` is set to 12 for nominal 1/N scaling. ``TP_WINDOW_VSIZE`` has been set to ``TP_POINT_SIZE`` because to attempt any multiple of ``TP_POINT_SIZE`` would exceed memory limits.
 
 .. _PARAMETER_LEGALITY_NOTES:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 Parameter Legality Notes
 ~~~~~~~~~~~~~~~~~~~~~~~~
-Where possible, illegal values for template parameters, or illegal combinations of values of template parameters are detected at compilation time.
-Where an illegal configuration is detected, compilation will fail with an error message indicating the constraint in question.
-However, no attempt has been made to detect and error upon configurations which are simply too large for the resource available, as the library element cannot know how much of the device is used by the user code and also because the resource limits vary by device. In these cases, compilation will likely fail, but due to the over-use of a resource detected by the aie tools.
-For example, an FFT of TT_DATA = cint16 can be supported up to TP_POINT_SIZE=65536 using TP_PARALLEL_POWER=4.
-A similarly configured FFT with TT_DATA=cint32 will not compile because the per-tile memory use, which is constant and predictable, is exceeded. This condition is detected and an error would be issued.
-An FFT with TT_DATA=cint32 and TP_PARALLEL_POWER=5 should, in theory, be possible to implement, but this will use 192 tiles directly and will use the memory of many other tiles, so is likely to exceed the capacity of the AIE array. However, the available capacity cannot easily be determined, so no error check is applied here.
 
-The largest point size which can be supported in a single kernel is limited by data memory availability. Since iobuffer connections default to double buffering for maximal throughput, the choice of API_IO (iobuffer or streams) affects the maximum point size, since the limit will be reached for iobuffers for a lower POINT_SIZE than for streams. The following table indicates the maximum point size possible for a single kernel for various values of TP_DATA_TYPE and TP_API_IO.
+Where possible, illegal values for template parameters, or illegal combinations of values for template parameters are detected at compilation time.
+Where an illegal configuration is detected, compilation will fail with an error message indicating the constraint in question.
+However, no attempt has been made to detect an error upon configurations which are simply too large for the resource available, as the library element cannot know how much of the device is used by the user code and also because the resource limits vary by device. In these cases, compilation will likely fail, but due to the over-use of a resource detected by the aie tools.
+For example, an FFT of ``TT_DATA = cint16`` can be supported up to ``TP_POINT_SIZE=65536`` using ``TP_PARALLEL_POWER=4``.
+A similarly configured FFT with ``TT_DATA=cint32`` will not compile because the per-tile memory use, which is constant and predictable, is exceeded. This condition is detected and an error would be issued.
+An FFT with ``TT_DATA=cint32`` and ``TP_PARALLEL_POWER=5`` should, in theory, be possible to implement, but this will use 192 tiles directly and will use the memory of many other tiles, so is likely to exceed the capacity of the AIE array. However, the available capacity cannot easily be determined, so no error check is applied here.
+
+The largest point size which can be supported in a single kernel is limited by data memory availability. Since iobuffer connections default to double buffering for maximal throughput, the choice of ``TP_API`` (iobuffer or streams) affects the maximum point size, since the limit will be reached for iobuffers for a lower ``TP_POINT_SIZE`` than for streams. The following table indicates the maximum point size possible for a single kernel for various values of ``TT_DATA`` and ``TP_API``.
 
 .. table:: Maximum Point Size in a single kernel
    :align: center
 
    +-------------------+-------------------------+-----------------------+
-   | TP_DATA_TYPE      | Max Point Size                                  |
+   | TT_DATA           | Max Point Size                                  |
    |                   +-------------------------+-----------------------+
    |                   | TP_API=0 (iobuffer I/O) | TP_API=1 (stream I/O) |
    +===================+=========================+=======================+
@@ -254,7 +274,7 @@ The largest point size which can be supported in a single kernel is limited by d
    +-------------------+-------------------------+-----------------------+
 
 
-The maximum point size supported per kernel puts a practical limit on the maximum point size supported when using TP_PARALLEL_POWER>1. This is because the largest devices available currently support a maximum TP_PARALLEL_POWER of 4. .The largest possible FFT can be found by multiplying the values in the table by 2^4. E.g. the largest practical FFT with stream IO and cint16 data is 4096 << 4 = 65536. However, the extensive use of neighboring tile RAM makes placement a challenge the the mapper, so 32768 may be a practical upper limit for cint32.
+The maximum point size supported per kernel puts a practical limit on the maximum point size supported when using ``TP_PARALLEL_POWER>1``. This is because the largest devices available currently support a maximum ``TP_PARALLEL_POWER`` of 4. .The largest possible FFT can be found by multiplying the values in the table by 2^4. E.g. the largest practical FFT with stream IO and ``cint16`` data is 4096 << 4 = 65536. However, the extensive use of neighboring tile RAM makes placement a challenge the the mapper, so 32768 may be a practical upper limit for ``cint32``.
 
 
 .. |image1| image:: ./media/image1.png

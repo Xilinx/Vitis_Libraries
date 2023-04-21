@@ -1,5 +1,6 @@
 ..
-   Copyright 2022 Xilinx, Inc.
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,7 +18,7 @@
 Vitis DSP Library
 ========================
 
-The Vitis |trade| digital signal processing library (DSPLib) provides an implementation of different L1/L2/L3 elements for digital signal processing.
+AMD Vitis |trade| digital signal processing library (DSPLib) provides an implementation of different L1/L2/L3 elements for digital signal processing.
 
 The DSPLib contains:
 
@@ -32,8 +33,8 @@ The DSPLib contains:
 PL DSP library
 ****************
 
-The current PL (Programmable Logic) library consists of an implementation of a Discrete Fourier Transform using a Fast
-Fourier Transform (FFT) algorithm for acceleration on Xilinx |reg| FPGAs. The library is planned
+AMD Vitis |trade| PL DSP  (Programmable Logic) library consists of an implementation of a Discrete Fourier Transform using a Fast
+Fourier Transform (FFT) algorithm for acceleration on AMD Adaptive Engineering FPGAs. The library is planned
 to provide three types of implementations, namely L1 PL primitives, L2 PL kernels, and L3 software APIs.
 Those implementations are organized in hardware (hw) sub-directories of the corresponding L1, L2, and L3.
 
@@ -55,7 +56,7 @@ Vitis |trade| PL DSP Library provides a fully synthesizable PL based Super Sampl
 AI Engine DSP library
 *********************
 
-AIE DSP library consists of designs of various DSP algorithms, optimized to take full advantage of the processing power of the Xilinx |reg| Versal |reg| Adaptive Computing Acceleration Platform (ACAP) devices, which contain an array of Xilinx |reg| AI Engines - high-performance vector processors.
+AMD Vitis |trade| AIE DSP library consists of designs of various DSP algorithms, optimized to take full advantage of the processing power of the Versal |trade| Adaptive SoC devices, which contain an array of AI Engines - high-performance vector processors.
 
 The library is organized into three part, namely:
 
@@ -74,21 +75,21 @@ Vitis |trade| AIE DSP Library provides a SSR FFT implementation targeting AIE, a
 
 .. toctree::
    :caption: Introduction
-   :maxdepth: 4
+   :maxdepth: 1
 
    Overview <overview.rst>
    Release Note <release.rst>
 
 .. toctree::
    :caption: L1 PL DSP Library User Guide
-   :maxdepth: 4
+   :maxdepth: 2
 
    1-Dimensional(Line) SSR FFT L1 FPGA Module <user_guide/L1.rst>
    2-Dimensional(Matrix) SSR FFT L1 FPGA Module <user_guide/L1_2dfft.rst>
 
 .. toctree::
    :caption: L2 AIE DSP Library User Guide
-   :maxdepth: 4
+   :maxdepth: 2
 
    Introduction <user_guide/L2/introduction.rst>
    DSP Library Functions <user_guide/L2/dsp-lib-func.rst>

@@ -1,5 +1,6 @@
 ..
-   Copyright 2022 Xilinx, Inc.
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -49,7 +50,7 @@ Template Parameters
 
 To see details on the template parameters for the Matrix Multiply, see :ref:`API_REFERENCE`.
 
-NOTE: Maximum matrix dimensions per kernel. 
+NOTE: Maximum matrix dimensions per kernel.
 Maximum memory accessible by an AIE kernel is 32kB x 4 for AIE. The maximum matrix dimensions per kernel is limited by the memory requirements and how much memory is available.
 A matrix_mult design needs to allocate memory for the following:
 
@@ -66,13 +67,13 @@ Optionally, depending on whether we use the tiling/detiling feature of the eleme
 
 * If Matrix B needs to be tiled - add memory of Window Size B
 
-* If Output matrix needs to be detiled - add memory of Window Size Out 
+* If Output matrix needs to be detiled - add memory of Window Size Out
 
 
 Further, if these buffers are ping-pong buffers, their memory requirement doubles in size. We can reduce this factor by using the single_buffer constraint on the buffer.
-Apart from these, the program also needs some system memory to run which has been empirically observed to occupy around 2.5kB. 
+Apart from these, the program also needs some system memory to run which has been empirically observed to occupy around 2.5kB.
 
-To get around issues of memory requirements too large to fit in a single kernel, increase the value of TP_CASC_LEN to split the dimension P_DIM_AB over multiple kernels. 
+To get around issues of memory requirements too large to fit in a single kernel, increase the value of TP_CASC_LEN to split the dimension P_DIM_AB over multiple kernels.
 
 ~~~~~~~~~~~~~~~~
 Access functions

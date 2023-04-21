@@ -1,5 +1,6 @@
 ..
-   Copyright 2022 Xilinx, Inc.
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
@@ -29,10 +30,10 @@
 Overview
 ========
 
-Vitis DSP library provides a fully synthesizable 2-Dimensional Fast Fourier Transform(FFT) as an L1 primitive.
-This L1 primitive is designed to be easily transformed into an L2 Vitis kernel by adding memory adapters.
+AMD Vitis |trade| DSP library provides a fully synthesizable 2-Dimensional Fast Fourier Transform(FFT) as an L1 primitive.
+This L1 primitive is designed to be easily transformed into an L2  kernel by adding memory adapters.
 The L1 primitive is designed to have an array of stream interface, as wide as device DDR memory
-widths on boards like Xilinx U200, U250 and U280. Adding memory adapters requires a plugin at the SSR FFT input
+widths on boards like U200, U250 and U280. Adding memory adapters requires a plugin at the SSR FFT input
 side which has AXI interface for connection with DDR memory on one side and other sides need to have
 memory wide streaming interface to connect with the 2-D SSR FFT L1 primitive. A second memory plugin is required
 at the output side of the SSR FFT, which reads in an array of stream data and connects it to the output AXI interface

@@ -1,5 +1,7 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,7 +45,11 @@ namespace dsplib = xf::dsp::aie;
 
 class test_graph : public graph {
    private:
+#if ((P_SSR > 1) || (USING_UUT == 1 && __HAS_SYM_PREADD__ == 0))
+    static constexpr unsigned int kNumTaps = FIR_LEN;
+#else
     static constexpr unsigned int kNumTaps = (FIR_LEN + 1) / 2;
+#endif
     COEFF_TYPE taps[kNumTaps];
 
    public:

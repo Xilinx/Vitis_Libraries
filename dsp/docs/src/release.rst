@@ -1,5 +1,6 @@
 ..
-   Copyright 2022 Xilinx, Inc.
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -37,12 +38,53 @@ The below features have been added to the library in this release.
 
 This element adds a second implementation of a DDS/Mixer that provides higher SFDR figures than the existing DDS/Mixer solution.
 
-* **DDS Mixer** 
+Supports both AIE and AIE-ML devices.
 
-Additional restriction to template parameter that defines the number of samples processed per iteration.
-The TP_INPUT_WINDOW_VSIZE template parameter has the added restriction that it needs to be divisible by TP_SSR. Until 2022.2 this parameter was used
-to refer the number of samples output/processed per iteration by a single kernel which is also a single SSR unit. 
-This has now been updated to refer to the number of samples output/processed by the entire graph.
+* **DDS Mixer**
+
+The usage of Input Window Size parameter (TP_INPUT_WINDOW_VSIZE) has been changed in the DDS and DDS Mixer LUT elements to be consistent with other library elements.
+TP_INPUT_WINDOW_VSIZE describes the number of samples processed by the graph in a single iteration run.
+
+*  **FFT Window** -
+
+FFT Window now supports AIE-ML device, in addition to AIE device.
+
+*  **FFT/iFFT**
+
+FFT/iFFT now supports AIE-ML device, in addition to AIE device.
+
+
+*  **FIR Filters**
+
+Single Rate FIRs now support AIE-ML device with the 16-bit data types and 16-bit coeff types which are listed below:
+
++-------------------------------+------------------------------------+
+|                               |     **Data        Type**           |
+|                               +------------------+-----------------+
+|                               | **Int16**        | **Cint16**      |
++----------------------+--------+------------------+-----------------+
+| **Coefficient type** | Int16  | Supported        | Supported       |
+|                      +--------+------------------+-----------------+
+|                      | Cint16 | note 1           | Supported       |
++----------------------+--------+------------------+-----------------+
+| 1. Complex coefficients are not supported for real-only data types.|
++--------------------------------------------------------------------+
+
+All FIR library elements now support AIE device with 16-bit data types and 32-bit coefficients which are listed below:
+
++-------------------------------+------------------------------------+
+|                               |     **Data        Type**           |
+|                               +------------------+-----------------+
+|                               | **Int16**        | **Cint16**      |
++----------------------+--------+------------------+-----------------+
+| **Coefficient type** | Int32  | Supported        | Supported       |
+|                      +--------+------------------+-----------------+
+|                      | Cint32 | note 1           | Supported       |
++----------------------+--------+------------------+-----------------+
+| 1. Complex coefficients are not supported for real-only data types.|
++--------------------------------------------------------------------+
+
+FIR Resampler now supports Super Sample Rate operation for higher throughput, through polyphase decomposition.
 
 2022.2
 ------
@@ -57,7 +99,7 @@ The below features have been added to the library in this release.
 | FFT Window                            |  xf::dsp::aie::fft::windowfn::fft_window_graph                              |
 +---------------------------------------+-----------------------------------------------------------------------------+
 
-FFT Window is a utility to apply a windowing (scaling) function such as Hamming to a frame of data samples. 
+FFT Window is a utility to apply a windowing (scaling) function such as Hamming to a frame of data samples.
 
 *  **FFT/iFFT**
 
@@ -65,13 +107,13 @@ FFT Dynamic Point Size, i.e. run-time point size determination is now supported 
 
 *  **FIR Filters**
 
-All FIR library elements (with the exception of FIR Resampler) now support Super Sample Rate operation for higher throughput. 
-To minimize latency, Super Sample Rate operation is implemented using streaming interfaces. 
+All FIR library elements (with the exception of FIR Resampler) now support Super Sample Rate operation for higher throughput.
+To minimize latency, Super Sample Rate operation is implemented using streaming interfaces.
 
 In addition, usage of Input Window Size (TP_INPUT_WINDOW_VSIZE) parameter has been consolidated across library.
-TP_INPUT_WINDOW_VSIZE describes the number of samples processed by the graph in a single iteration run. 
+TP_INPUT_WINDOW_VSIZE describes the number of samples processed by the graph in a single iteration run.
 
-Reloadable coefficients within the Super Sample Rate configurations are now supported on all FIR variants that support SSR operation. 
+Reloadable coefficients within the Super Sample Rate configurations are now supported on all FIR variants that support SSR operation.
 
 
 2022.1
@@ -203,7 +245,7 @@ DSP Library functions are supported in Vitis Model Composer, enabling users to e
 2020.2
 ------
 
-Revised the APIs to fully support Vitis HLS.
+Revised the APIs to fully support Vitis |trade| HLS.
 
 
 

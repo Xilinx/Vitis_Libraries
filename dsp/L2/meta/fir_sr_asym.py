@@ -51,12 +51,12 @@ def fnNumColsStream( T_D, T_C):
 
 def fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1):
     # CAUTION: this constant overlaps many factors. The main need is a "strobe" concept that means we unroll until xbuff is back to starting conditions.
-    streamRptFactor = 4;
+    streamRptFactor = 8
 
     # Need to take unrolloing into account
     windowSizeMultiplier = (fnNumLanes(TT_DATA, TT_COEF, TP_API)) if TP_API == 0 else (fnNumLanes(TT_DATA, TT_COEF, TP_API)*streamRptFactor)
 
-    checkMultipleLanes =  fn_windowsize_multiple_lanes(TT_DATA, TT_COEF, TP_INPUT_WINDOW_VSIZE, TP_API, numLanes=windowSizeMultiplier)
+    checkMultipleLanes =  fn_windowsize_multiple_lanes(TT_DATA, TT_COEF, TP_INPUT_WINDOW_VSIZE, TP_API, windowSizeMultiplier, TP_SSR)
     checkMaxBuffer = fn_max_windowsize_for_buffer(TT_DATA, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR)
     # Input samples are round-robin split to each SSR input paths, so total frame size must be divisable by SSR factor.
     checkIfDivisableBySSR = fn_windowsize_divisible_by_ssr(TP_INPUT_WINDOW_VSIZE, TP_SSR)

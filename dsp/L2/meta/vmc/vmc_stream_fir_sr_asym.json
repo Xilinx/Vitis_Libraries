@@ -89,7 +89,7 @@
       "description": "The number of samples in the window API used for input to the filter function. The number of samples in the output window will depend on the FIR filter parameters",
       "default": 256,
       "minimum": 4,
-      "maximum": 8192,
+      "maximum": 2147483647,
       "type": "int",
       "validator": {
         "file": "vmc_stream_fir_sr_asym.py",
@@ -150,7 +150,7 @@
       "description": "The length of cascaded kernels",
       "default": 2,
       "type": "int",
-      "maximum": 9,
+      "maximum": 40,
       "minimum": 1,
       "validator": {
         "file": "vmc_stream_fir_sr_asym.py",

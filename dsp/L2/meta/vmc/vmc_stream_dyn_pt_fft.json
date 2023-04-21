@@ -96,12 +96,12 @@
       "description": "The length of cascaded kernels",
       "type": "int",
       "default": 1,
-      "maximum": 9,
+      "maximum": 11,
       "minimum": 1,
       "validator": {
         "file": "vmc_stream_dyn_pt_fft.py",
         "function": "vmc_validate_casc_length",
-        "args": ["data_type", "point_size"]
+        "args": ["data_type", "point_size", "ssr"]
       },
       "blockgui":{
             "tablabel": "Main",

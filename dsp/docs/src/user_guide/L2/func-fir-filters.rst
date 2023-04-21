@@ -1,5 +1,6 @@
 ..
-   Copyright 2022 Xilinx, Inc.
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -21,9 +22,9 @@ Filters
 =======
 
 
-The DSPLib contains several variants of Finite Impulse Response (FIR) filters. 
-These include single-rate FIRs, half-band interpolation/decimation FIRs, as well as integer and fractional interpolation/decimation FIRs for AIE. 
-AIE-ML devices have support for only the single rate FIRs. Differences in hardware lead to different constraints and implementations for FIRs in each device. 
+The DSPLib contains several variants of Finite Impulse Response (FIR) filters.
+These include single-rate FIRs, half-band interpolation/decimation FIRs, as well as integer and fractional interpolation/decimation FIRs for AIE.
+AIE-ML devices have support for only the single rate FIRs. Differences in hardware lead to different constraints and implementations for FIRs in each device.
 
 .. toctree::
    :maxdepth: 1

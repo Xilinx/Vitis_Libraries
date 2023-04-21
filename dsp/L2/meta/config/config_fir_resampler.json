@@ -14,6 +14,9 @@
       "TP_NUM_OUTPUTS" : 1,
       "TP_API": 1,
       "TP_DUAL_IP": 0,
+      "TP_SSR": 1,
+      "TP_PARA_INTERP_POLY": 1,
+      "TP_PARA_DECI_POLY": 1,
       "coeff": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
     },
     "outdir" : "./fir_resampler_generated_graph"

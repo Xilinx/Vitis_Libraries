@@ -1,5 +1,7 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,12 +85,68 @@ class casc_kernels {
    public:
     static void create_and_recurse(kernel firKernels[casc_params::BTP_CASC_LEN],
                                    const std::vector<typename casc_params::BTT_COEFF>& taps) {
-        firKernels[casc_params::Bdim] = kernel::create_object<thisKernelParentClass>(taps);
+        using namespace fir;
+        if
+            constexpr(thisKernelClass::getFirType() == eFIRVariant::kSrAsym) {
+                firKernels[casc_params::Bdim] = kernel::create_object<thisKernelParentClass>(taps);
+            }
+        else if
+            constexpr(thisKernelClass::getFirType() == eFIRVariant::kSrSym) {
+                firKernels[casc_params::Bdim] = kernel::create_object<thisKernelParentClass>(taps);
+            }
+        else if
+            constexpr(thisKernelClass::getFirType() == eFIRVariant::kResamp) {
+                firKernels[casc_params::Bdim] = kernel::create_object<thisKernelParentClass>(taps);
+            }
+        else if
+            constexpr(thisKernelClass::getFirType() == eFIRVariant::kIntHB) {
+                firKernels[casc_params::Bdim] = kernel::create_object<thisKernelParentClass>(taps);
+            }
+        else if
+            constexpr(thisKernelClass::getFirType() == eFIRVariant::kIntAsym) {
+                firKernels[casc_params::Bdim] = kernel::create_object<thisKernelParentClass>(taps);
+            }
+        else if
+            constexpr(thisKernelClass::getFirType() == eFIRVariant::kDecHB) {
+                firKernels[casc_params::Bdim] = kernel::create_object<thisKernelParentClass>(taps);
+            }
+        else if
+            constexpr(thisKernelClass::getFirType() == eFIRVariant::kDecAsym) {
+                firKernels[casc_params::Bdim] = kernel::create_object<thisKernelParentClass>(taps);
+            }
         if
             constexpr(casc_params::Bdim != 0) { next_casc_kernels::create_and_recurse(firKernels, taps); }
     }
     static void create_and_recurse(kernel firKernels[casc_params::BTP_CASC_LEN]) {
-        firKernels[casc_params::Bdim] = kernel::create_object<thisKernelParentClass>();
+        using namespace fir;
+        if
+            constexpr(thisKernelClass::getFirType() == eFIRVariant::kSrAsym) {
+                firKernels[casc_params::Bdim] = kernel::create_object<thisKernelParentClass>();
+            }
+        else if
+            constexpr(thisKernelClass::getFirType() == eFIRVariant::kSrSym) {
+                firKernels[casc_params::Bdim] = kernel::create_object<thisKernelParentClass>();
+            }
+        else if
+            constexpr(thisKernelClass::getFirType() == eFIRVariant::kResamp) {
+                firKernels[casc_params::Bdim] = kernel::create_object<thisKernelParentClass>();
+            }
+        else if
+            constexpr(thisKernelClass::getFirType() == eFIRVariant::kIntHB) {
+                firKernels[casc_params::Bdim] = kernel::create_object<thisKernelParentClass>();
+            }
+        else if
+            constexpr(thisKernelClass::getFirType() == eFIRVariant::kIntAsym) {
+                firKernels[casc_params::Bdim] = kernel::create_object<thisKernelParentClass>();
+            }
+        else if
+            constexpr(thisKernelClass::getFirType() == eFIRVariant::kDecHB) {
+                firKernels[casc_params::Bdim] = kernel::create_object<thisKernelParentClass>();
+            }
+        else if
+            constexpr(thisKernelClass::getFirType() == eFIRVariant::kDecAsym) {
+                firKernels[casc_params::Bdim] = kernel::create_object<thisKernelParentClass>();
+            }
         if
             constexpr(casc_params::Bdim != 0) { next_casc_kernels::create_and_recurse(firKernels); }
     }
@@ -154,7 +212,7 @@ class ssr_kernels {
                  : (kernelPos + 1) * CEIL(TP_DECIMATE_FACTOR, TP_INTERPOLATE_FACTOR) / TP_INTERPOLATE_FACTOR);
 
         const int baseFifoDepth = 32;
-        unsigned int fifo_depth_multiple = 40;
+        unsigned int fifo_depth_multiple = 15;
 
         int fifoDepth = baseFifoDepth + fifo_depth_multiple * fifoStep;
         // limit size at a single memory bank - 8kB
@@ -169,6 +227,8 @@ class ssr_kernels {
         // pass the kernels from a specific index so cascades can be placed as normal.
 
         static_assert(TP_FIR_LEN % TP_SSR == 0, "TP_FIR LEN must be divisble by TP_SSR. "); //
+        // static_assert(TP_USE_COEFF_RELOAD != 2 || (TP_FIR_LEN % TP_SSR == 0), "TP_FIR LEN must be divisble by TP_SSR,
+        // at least for the header based coefficient reaload."); //
         this_casc_kernels::create_and_recurse(firKernels + kernelStartingIndex, ssrPhaseTaps);
 
         if
@@ -308,6 +368,8 @@ class ssr_kernels {
 
    private:
     static_assert(ssr_params::Bdim >= 0, "ERROR: ssr_params::Bdim must be a positive integer");
+    // static_assert(TP_FIR_LEN %  TP_SSR == 0, "ERROR: TP_FIR_LEN must be an integer multiple of TP_SSR. Please ceil up
+    // TP_FIR_LEN" );
 
     static constexpr unsigned int kDF = fir_type<ssr_params>::getDF();
     static constexpr unsigned int kIF = fir_type<ssr_params>::getIF();
@@ -528,6 +590,8 @@ class ssr_kernels {
         if
             constexpr(TP_NUM_OUTPUTS == 2 && casc_out == false) {
                 if (TP_API == USE_WINDOW_API) {
+                    // connect<window<OUTPUT_WINDOW_BYTESIZE> >(firKernels[TP_CASC_LEN - 1].out[DUAL_OUT_PORT_POS],
+                    // out2);
                     connect<>(firKernels[TP_CASC_LEN - 1].out[DUAL_OUT_PORT_POS], out2);
                     dimensions(firKernels[TP_CASC_LEN - 1].out[DUAL_OUT_PORT_POS]) = {OUTPUT_WINDOW_BYTESIZE /
                                                                                       sizeof(TT_DATA)};

@@ -1,5 +1,7 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -139,7 +141,7 @@ class fir_resampler_tl {
     static constexpr unsigned int getIF() { return fp::BTP_INTERPOLATE_FACTOR; };
 
     // Get FIR variant
-    static constexpr eFIRVariant getFirType() { return eFIRVariant::kSrAsym; };
+    static constexpr eFIRVariant getFirType() { return eFIRVariant::kResamp; };
     // Get FIR source file
     static const char* getFirSource() { return "fir_resampler.cpp"; };
 
