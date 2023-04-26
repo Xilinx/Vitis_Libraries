@@ -39,3 +39,13 @@ Eigenvalue Solver
 .. include:: ../rst_L2_eigensolver/namespace_xf_solver.rst
    :start-after: FunctionSection
 
+Cholesky Decomposition on AI Engine
+====================================
+
+.. include:: ../rst_L2_aie/class_xf_solver_CholeskyGraph.rst
+
+QR Decomposition on AI Engine
+==============================
+
+.. include:: ../rst_L2_aie/class_xf_solver_QRDComplexFloat.rst
+

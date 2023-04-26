@@ -29,13 +29,13 @@ Release Note
    :hidden:
    :maxdepth: 1
 
-2022.2
+2023.1
 ------
 
 In this release, we add two API running on AI Engine.
 
-* QRF (QR decomposition)
-* Cholesky decomposition
+* QRF (QR decomposition), for float / complex float matrix input
+* Cholesky decomposition, for complex float matrix input
 
 2022.1
 ------

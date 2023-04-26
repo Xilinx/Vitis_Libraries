@@ -44,6 +44,7 @@ install: .stamp/sphinx
 	doxygen Doxyfile_L2_linearsolver
 	doxygen Doxyfile_L2_eigensolver
 	doxygen Doxyfile_2
+	doxygen Doxyfile_L2_aie
 	mkdir -p .stamp
 	touch .stamp/doxygen
 
@@ -55,12 +56,14 @@ DOXYREST_FRAME = $(dir $(shell which doxyrest))/../doxyrest_frame
 	doxyrest xml_L1/index.xml -o src/rst_L1/index.rst -F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
 	rm -f src/rst_L1/index.rst src/rst_L1/global.rst
 	rm -rf src/rst_L2_*
-	mkdir src/rst_L2_mat src/rst_L2_linearsolver src/rst_L2_eigensolver
+	mkdir src/rst_L2_mat src/rst_L2_linearsolver src/rst_L2_eigensolver src/rst_L2_aie
 	doxyrest xml_L2_mat/index.xml -o src/rst_L2_mat/index.rst -F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
+	doxyrest xml_L2_aie/index.xml -o src/rst_L2_aie/index.rst -F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
 	doxyrest xml_L2_linearsolver/index.xml -o src/rst_L2_linearsolver/index.rst -F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
 	doxyrest xml_L2_eigensolver/index.xml -o src/rst_L2_eigensolver/index.rst -F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
 
 	rm -f src/rst_L2_mat/index.rst src/rst_L2_mat/global.rst
+	rm -f src/rst_L2_aie/index.rst src/rst_L2_aie/global.rst
 	rm -f src/rst_L2_linearsolver/index.rst src/rst_L2_linearsolver/global.rst
 	rm -f src/rst_L2_eigensolver/index.rst src/rst_L2_eigensolver/global.rst
 

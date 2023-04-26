@@ -27,7 +27,7 @@
 Library Overview
 =================
 
-Vitis Solver Library provides a collection of matrix decomposition operations, linear solvers and eigenvalue solvers.
+Vitis Solver Library provides a collection of matrix decomposition operations, linear solvers and eigenvalue solvers on PL.
  
 Currently this includes the following operations for dense matrix
  
@@ -45,6 +45,14 @@ Currently this includes the following operations for dense matrix
  
 * Eigenvalue solver
    * Jacobi eigenvalue solver for symmetric matrix
+
+Vitis Solver Library also provides matrix decomposition operations on AI Engine.
+
+Currently this includes the following operations for dense matrix
+
+* Matrix decomposition
+   * Cholesky decomposition for symmetric positive definite matrix
+   * QR decomposition for general matrix
 
 Requirements
 ------------

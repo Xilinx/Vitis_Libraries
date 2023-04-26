@@ -15,7 +15,19 @@
 # vitis makefile-generator v2.0.9
 #
 
-CXX = g++
+CXX := g++
+ifneq ($(shell expr $(shell echo "__GNUG__" | g++ -E -x c++ - | tail -1) \>= 6), 1)
+ifndef XILINX_VIVADO
+$(error [ERROR]: g++ version too old. Please use $(CXX_VER) or above)
+else
+CXX := $(XILINX_VIVADO)/tps/lnx64/gcc-8.3.0/bin/g++
+ifeq ($(LD_LIBRARY_PATH),)
+export LD_LIBRARY_PATH := $(XILINX_VIVADO)/tps/lnx64/gcc-8.3.0/lib64
+else
+export LD_LIBRARY_PATH := $(XILINX_VIVADO)/tps/lnx64/gcc-8.3.0/lib64:$(LD_LIBRARY_PATH)
+endif
+endif
+endif
 
 HOST_SRCS += main.cpp
 
