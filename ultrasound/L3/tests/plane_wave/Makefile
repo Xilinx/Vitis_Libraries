@@ -1,4 +1,5 @@
-# Copyright 2019-2022 Xilinx, Inc.
+# Copyright (C) 2019-2022, Xilinx, Inc.
+# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.8
+# vitis makefile-generator v2.0.9
 
 ############################## Help Section ##############################
 .PHONY: help
@@ -56,14 +57,14 @@ XFLIB_DIR = $(XF_PROJ_ROOT)
 
 # setting devault value
 TARGET ?= aiesim
-HOST_ARCH ?= 
+HOST_ARCH ?= aarch64
 
 #setting PLATFORM
 ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := 
+PLATFORM := xilinx_vck190_base_202310_1
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
@@ -130,8 +131,9 @@ AIE_CXXFLAGS += $(AIE_CXXFLAGS_INC)
 AIE_CONTAINER = $(TEMP_DIR)/libadf.a
 AIE_WORK_DIR = $(CUR_DIR)/Work
 AIE_PKG_DIR = $(AIE_WORK_DIR)
-AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/
-AIE_CXXFLAGS += -I $(XFLIB_DIR)/L2/include/
+
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/ -I $(XFLIB_DIR)/L2/include/
+
 $(AIE_WORK_DIR)/ps/c_rts/aie_control_xrt.cpp: $(AIE_CONTAINER)
 
 EXE_FILE_DEPS += $(AIE_CONTAINER)
@@ -145,17 +147,17 @@ ifeq ($(ps_on_x86), on)
 HOST_SRCS += $(XFLIB_DIR)/L3/tests/plane_wave/PS_host/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
 CXXFLAGS +=  -D __PS_ENABLE_AIE__
 CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/tests/plane_wave/aie_graph
-CXXFLAGS +=   -include $(XFLIB_DIR)/L1/include/kernels.hpp
+CXXFLAGS += -include $(XFLIB_DIR)/L1/include/kernels.hpp
 else
 HOST_SRCS += $(XFLIB_DIR)/L3/tests/plane_wave/PS_host/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
 CXXFLAGS +=  -D __PS_ENABLE_AIE__
 CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/tests/plane_wave/aie_graph
-CXXFLAGS +=   -include $(XFLIB_DIR)/L1/include/kernels.hpp
+CXXFLAGS += -include $(XFLIB_DIR)/L1/include/kernels.hpp
 endif
 
 # workaround for opencv
 ifeq (,$(findstring opencv,$(CXXFLAGS)))
-#CXXFLAGS += $(XRT_CXXFLAGS)
+CXXFLAGS += $(XRT_CXXFLAGS)
 endif
 
 EXE_NAME := host.exe
@@ -414,7 +416,7 @@ $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/plane_wave $(VPP_LDFLAGS)  $(VPP_LDFLAGS_plane_wave) $(AIE_LDFLAGS)   -o $@ $^
 
 ############################## Setting Rules for AIE (Building Kernels) ##################
-$(AIE_CONTAINER): $(XFLIB_DIR)/L3/tests/plane_wave/aie_graph/graph.cpp  $(INST_FILES) 
+$(AIE_CONTAINER): $(XFLIB_DIR)/L3/tests/plane_wave/aie_graph/graph.cpp   
 	$(ECHO) "Compiling: libadf.a"
 	mkdir -p $(dir $@)
 	$(AIECXX) $(AIE_CXXFLAGS) $^
@@ -452,7 +454,7 @@ endif
 	@echo 'echo "INFO: Embedded host run completed."' >> $(RUN_SCRIPT)
 	@echo 'exit $$return_code' >> $(RUN_SCRIPT)
 DATA_FILE := $(custom_data_file)
-DATA_DIR := $(CUR_DIR)//data $(custom_data_dir)
+DATA_DIR := $(CUR_DIR)/data $(custom_data_dir)
 SD_FILES += $(RUN_SCRIPT)
 SD_FILES += $(EXE_FILE)
 SD_FILES += $(EMCONFIG)
@@ -539,8 +541,8 @@ endif
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_stdout.log
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_stdout.log || exit 1
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
 	
 endif
 endif
@@ -552,8 +554,8 @@ ifeq ($(HOST_ARCH), x86)
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_stdout.log
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_stdout.log || exit 1
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
 	
 endif
 endif
@@ -579,7 +581,7 @@ endif
 
 ############################## Setting Targets ##############################
 
-.PHONY: clean cleanall emconfig
+.PHONY: clean cleanall emconfig gen_instances valid_params
 emconfig: $(EMCONFIG)
 
 .PHONY: host

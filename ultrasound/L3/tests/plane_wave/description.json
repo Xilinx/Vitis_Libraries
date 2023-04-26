@@ -31,6 +31,9 @@
     "data": [
         "PROJECT/data"
     ],
+    "os": [
+        "centos8"
+    ],
     "launch": [
         {
             "cmd_args": "-xclbin plane_wave.xclbin -data data/",

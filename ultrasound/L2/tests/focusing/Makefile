@@ -56,14 +56,14 @@ XFLIB_DIR = $(XF_PROJ_ROOT)
 
 # setting devault value
 TARGET ?= aiesim
-HOST_ARCH ?= aarch64
+HOST_ARCH ?= 
 
 #setting PLATFORM
 ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := xilinx_vck190_base_202310_1
+PLATFORM := 
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
@@ -145,12 +145,12 @@ ifeq ($(ps_on_x86), on)
 HOST_SRCS += $(XFLIB_DIR)/L2/tests/focusing/PS_host/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
 CXXFLAGS +=  -D __PS_ENABLE_AIE__
 CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L2/tests/focusing/aie_graph
-CXXFLAGS +=   -include $(XFLIB_DIR)/L1/include/kernels.hpp
+CXXFLAGS += -include $(XFLIB_DIR)/L1/include/kernels.hpp
 else
 HOST_SRCS += $(XFLIB_DIR)/L2/tests/focusing/PS_host/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
 CXXFLAGS +=  -D __PS_ENABLE_AIE__
 CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L2/tests/focusing/aie_graph
-CXXFLAGS +=   -include $(XFLIB_DIR)/L1/include/kernels.hpp
+CXXFLAGS += -include $(XFLIB_DIR)/L1/include/kernels.hpp
 endif
 
 # workaround for opencv
@@ -359,8 +359,8 @@ endif
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_stdout.log
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_stdout.log || exit 1
 	
 endif
 endif
@@ -372,8 +372,8 @@ ifeq ($(HOST_ARCH), x86)
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_stdout.log
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_stdout.log || exit 1
 	
 endif
 endif
