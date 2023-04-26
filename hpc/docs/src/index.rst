@@ -20,10 +20,10 @@ Vitis HPC Library
 Vitis HPC Library provides an acceleration libray for applications with high
 computation workload, e.g.  seismic imaging and inversion, high-precision simulations, 
 genomics and etc. Three types of components are provided in this library, 
-namely L1 primitives, L2 kernels and L3 software APIs. These implementations are organized in their
-corresponding directories L1, L2 and L3. The L1 primitives' implementations can be leveraged
+namely L1 primitives and L2 kernels. These implementations are organized in their
+corresponding directories L1 and L2. The L1 primitives' implementations can be leveraged
 by FPGA hardware developers. The L2 kernels' implementations provide examples for 
-Vitis kernel developers. The L3 APIs provide C/C++ functions for software developers to offload HPC workloads.
+Vitis kernel developers.
 This library depends on the **Xilinx BLAS and SPARSE** library to implement some components.
 
 Because HPC applications normally have high precision requirements, the current supported data
@@ -73,7 +73,6 @@ for reference.
    Python Environment Setup Guide <pyenvguide.rst>
    L1 Primitives User Guide <user_guide/L1/L1.rst>
    L2 Kernels User Guide <user_guide/L2/L2.rst>
-   L3 RTM API User Guide <user_guide/L3/L3.rst>
 
 .. toctree::
   :caption: Benchmark 

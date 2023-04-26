@@ -144,53 +144,6 @@ Notice that **RTM_time** must be multiple of **RTM_numBSMs**.
     |  RTM_time      |   10           |  Running time: No.time             |
     +----------------+----------------+------------------------------------+
 
-RTM kernel
---------------------------------
-
-RTM kernel is a combination of forward kernel and backward kenrel. 
-It fulfils the entire RTM algorithm.
-
-.. code-block:: bash
-
-  make run TARGET=sw_emu/hw_emu
-
-The above command will test and verify RTM kernel via Vitis software-emulation or hardware-emulation.
-Once the emulations are pased, one can use the following command to build FPGA bitstream 
-and launch the kernel on Alveo U280 FPGA. 
-
-.. code-block:: bash
-
-  make run TARGET=hw
-
-The paramters listed in the following table can be configured with **make** command.
-Notice that **RTM_time** must be multiple of **RTM_numFSMs** and **RTM_numBSMs**.
-
-.. table:: Parameters with make command 
-    :align: center
-
-    +----------------+----------------+------------------------------------+
-    |  Parameter     |  Default Value |  Notes                             |
-    +================+================+====================================+
-    |  RTM_maxDim    |   1282         |  Compile time: One dimmention limit|
-    +----------------+----------------+------------------------------------+
-    |  RTM_NXB       |   40           |  Compile time: Boundary width      |
-    +----------------+----------------+------------------------------------+
-    |  RTM_NZB       |   40           |  Compile time: Boundary height     |
-    +----------------+----------------+------------------------------------+
-    |  NUM_numFSMs   |   4            |  Compile time: No.stream module    |
-    +----------------+----------------+------------------------------------+
-    |  NUM_numBSMs   |   4            |  Compile time: No.stream module    |
-    +----------------+----------------+------------------------------------+
-    |  RTM_nPE       |   2            |  Compile time: No.PE               |
-    +----------------+----------------+------------------------------------+
-    |  RTM_order     |   8            |  Compile time: Spatial Order       |
-    +----------------+----------------+------------------------------------+
-    |  RTM_height    |   10           |  Running time: Image total height  |
-    +----------------+----------------+------------------------------------+
-    |  RTM_width     |   10           |  Running time: Image total widht   |
-    +----------------+----------------+------------------------------------+
-    |  RTM_time      |   12           |  Running time: No.time             |
-    +----------------+----------------+------------------------------------+
 
 Test 3D RTM
 ===============

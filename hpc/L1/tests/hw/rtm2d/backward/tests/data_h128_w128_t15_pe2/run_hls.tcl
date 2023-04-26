@@ -1,5 +1,5 @@
-#
-# Copyright 2019-2020 Xilinx, Inc.
+# Copyright (C) 2019-2022, Xilinx, Inc.
+# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+# vitis hls makefile-generator v2.0.0
 
 source settings.tcl
 
@@ -33,14 +33,8 @@ open_solution -reset $SOLN
 
 
 
-
 set_part $XPART
 create_clock -period $CLKP
-
-if { [ file exists directives.tcl ] == 1 } {
-    source directives.tcl
-}
-
 
 if {$CSIM == 1} {
   csim_design -argv "${XF_PROJ_ROOT}/L1/tests/hw/rtm2d/backward/tests/data_h128_w128_t15_pe2/data/"
