@@ -23,6 +23,37 @@
 Release Note
 ============
 
+2023.1
+-----------
+
+There are some known issues for this release. Please use 2022.2 Vitis for them.
+
+* L2/tests/M76Engine - hw build failure on u250 platform
+* L2/tests/PortfolioOptimisation - hw build failure 
+* L2/tests/MCEuropeanHestonGreeksEngine - hw build failure on u50 and u200 platform
+* L2/tests/MCAmericanEngineMultiKernel - hw build failure on u50 platform
+* L2/tests/Quadrature - hw build failure on u200 platform
+* L2/tests/MCAmericanEngine - hw build failure on u50 platform
+
+The L3 of this library will be soon deprecated and removed. It has the following known issue.
+
+* All L3 APIs will fail when running on Ubuntu Operating System
+
+If you are still using the L3 of this library please reach us through [forum](https://support.xilinx.com) for help.
+
+
+Version 1.0
+-----------
+
+Vitis Quantitative Finance library 1.0 provides engines and primitives for the acceleration of quantitative financial applications on FPGA. It comprises two approaches to pricing:
+
+* A family of Trinomial-Tree based pricing engines for 4 interest rate derivatives (including swaption, swap, cap/floor and callable bond), using 6 short-term interest rate models (including Hull-White, Two-additive-factor gaussian, Vasicek, Cox-Ingersoll-Ross, Extended Cox-Ingersoll-Ross and BlackKarasinski). All of these pricing engines are based on a provided generic Trinomial-Tree Framework.
+
+* 2 Finite-difference method based pricing engines for swaption, using Hull-White model and Two-additive-factor gaussian model. 1 Monte-Carlo based pricing engine for cap/floor, using Hull-White model, based on the Monte-Carlo simulation API we provided in release 0.5. 
+
+* 3 close form pricing engine for inflation cap/floor, CPI cap/floor, and discounting bond.
+
+
 Version 0.5
 -----------
 
@@ -36,15 +67,4 @@ Vitis Quantitative Finance Library 0.5 provides engines and primitives for the a
 In addition, the library supports low-level functions, such as random number generator (RNG), singular value decomposition (SVD), and tridiagonal and pentadiagonal matrix solvers.
 
 
-Version 1.0
------------
-
-
-Vitis Quantitative Finance library 1.0 provides engines and primitives for the acceleration of quantitative financial applications on FPGA. It comprises two approaches to pricing:
-
-* A family of Trinomial-Tree based pricing engines for 4 interest rate derivatives (including swaption, swap, cap/floor and callable bond), using 6 short-term interest rate models (including Hull-White, Two-additive-factor gaussian, Vasicek, Cox-Ingersoll-Ross, Extended Cox-Ingersoll-Ross and BlackKarasinski). All of these pricing engines are based on a provided generic Trinomial-Tree Framework.
-
-* 2 Finite-difference method based pricing engines for swaption, using Hull-White model and Two-additive-factor gaussian model. 1 Monte-Carlo based pricing engine for cap/floor, using Hull-White model, based on the Monte-Carlo simulation API we provided in release 0.5. 
-
-* 3 close form pricing engine for inflation cap/floor, CPI cap/floor, and discounting bond.
 

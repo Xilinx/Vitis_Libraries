@@ -94,7 +94,7 @@ Check the [comprehensive HTML documentation](https://docs.xilinx.com/r/en-US/Vit
 
 This library is designed to work with Vitis 2022.1 and later, and therefore inherits the system requirements of Vitis and XRT.
 
-Supported operating systems are RHEL/CentOS 7.4, 7.5 and Ubuntu 16.04.4 LTS, 18.04.1 LTS.
+Supported operating systems are RHEL/CentOS 7.4, 7.5.
 With CentOS/RHEL 7.4 and 7.5, C++11/C++14 should be enabled via
 [devtoolset-6](https://www.softwarecollections.org/en/scls/rhscl/devtoolset-6/).
 
@@ -255,4 +255,10 @@ Licensed using the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-
 
 Welcome! Guidelines to be published soon.
 
+## Deprecation Notification 
+**The L3 of this library and some of its L2 APIs will be deprecated soon.**
+
+**If you have a dependency, please access [forum](https://support.xilinx.com) for help.**
+
+**For known issues, please kindly refer to L2/README.md and L3/README.md.**
 

@@ -5,9 +5,9 @@
     "flow": "vitis", 
     "platform_type": "pcie", 
     "platform_allowlist": [
+        "u50",
         "u250", 
-        "u200", 
-        "u50"
+        "u200"
     ], 
     "platform_blocklist": [
         "zc"
@@ -130,7 +130,7 @@
         }
     ], 
     "testinfo": {
-        "disable": false, 
+        "disable": true, 
         "jobs": [
             {
                 "index": 0, 
