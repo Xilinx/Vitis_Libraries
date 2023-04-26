@@ -23,7 +23,11 @@ Release Note
    :maxdepth: 1
 
 2023.1
-------
+-------
 
 In this release, we migrate all data mover design from utils library. Also we add 4D datamover with internal URAM buffer support and tile based descriptor.
 
+Known issue
+------------
+
+We use Jinja2 template to generate source code of data mover. When running on RHEL 9.x, it will fail. We'll get this fixed in next release.

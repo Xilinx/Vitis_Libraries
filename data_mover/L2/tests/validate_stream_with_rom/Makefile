@@ -1,4 +1,5 @@
-# Copyright 2019-2022 Xilinx, Inc.
+# Copyright (C) 2019-2022, Xilinx, Inc.
+# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.8
+# vitis makefile-generator v2.0.9
 
 ############################## Help Section ##############################
 .PHONY: help
@@ -105,12 +106,12 @@ VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 
 #Inclue Required Host Source Files
 ifeq ($(ps_on_x86), on)
-HOST_SRCS += $(CUR_DIR)/host/main.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(CUR_DIR)/host -I $(CUR_DIR)/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L1/include
+HOST_SRCS += host/main.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
+CXXFLAGS +=  -I host -I kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L1/include
 CXXFLAGS += -std=c++14
 else
-HOST_SRCS += $(CUR_DIR)/host/main.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(CUR_DIR)/host -I $(CUR_DIR)/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L1/include
+HOST_SRCS += host/main.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
+CXXFLAGS +=  -I host -I kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L1/include
 CXXFLAGS += -std=c++14
 endif
 
@@ -129,7 +130,7 @@ PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args
 endif
 
 ########################## Kernel compiler global settings ##########################
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/hw -I $(CUR_DIR)/kernel -I $(XFLIB_DIR)/L1/include
+VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/hw -I kernel -I $(XFLIB_DIR)/L1/include
 
 ######################### binary container global settings ##########################
 VPP_LDFLAGS_data_mover_temp := --config $(CUR_DIR)/conn.cfg
@@ -143,12 +144,12 @@ BINARY_CONTAINERS_PKG += $(BUILD_DIR)/data_mover.xclbin
 endif
 
 # ################ Setting Rules for Binary Containers (Building Kernels) ################
-$(TEMP_DIR)/m2s_x2.xo: $(CUR_DIR)/kernel/m2s_x2.cpp 
+$(TEMP_DIR)/m2s_x2.xo: kernel/m2s_x2.cpp 
 	$(ECHO) "Compiling Kernel: m2s_x2"
 	mkdir -p $(TEMP_DIR)
 	$(VPP) -c $(VPP_FLAGS_m2s_x2) $(VPP_FLAGS) -k m2s_x2 -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
 BINARY_CONTAINER_data_mover_OBJS += $(TEMP_DIR)/m2s_x2.xo
-$(TEMP_DIR)/romCs_x2.xo: $(CUR_DIR)/kernel/romCs_x2.cpp 
+$(TEMP_DIR)/romCs_x2.xo: kernel/romCs_x2.cpp 
 	$(ECHO) "Compiling Kernel: romCs_x2"
 	mkdir -p $(TEMP_DIR)
 	$(VPP) -c $(VPP_FLAGS_romCs_x2) $(VPP_FLAGS) -k romCs_x2 -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
@@ -263,8 +264,8 @@ endif
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_stdout.log
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_stdout.log || exit 1
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
 	
 endif
 endif
@@ -276,8 +277,8 @@ ifeq ($(HOST_ARCH), x86)
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))  2>&1 | tee $(SD_CARD)/qemu_stdout.log
-	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_stdout.log || exit 1
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
+	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
 	
 endif
 endif
@@ -306,7 +307,7 @@ endif
 pre_build:
 	make -f $(CUR_DIR)/ksrc.mk GENKERNEL=$(XFLIB_DIR)/L2/scripts/generate_kernels SPEC=$(CUR_DIR)/kernel/spec.json TOOLDIR=$(CUR_DIR)/_krnlgen
 
-.PHONY: clean cleanall emconfig
+.PHONY: clean cleanall emconfig gen_instances valid_params
 emconfig: $(EMCONFIG)
 
 .PHONY: host
@@ -341,6 +342,6 @@ cleank:
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR)  emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
 	-$(RMDIR)  $(AIE_WORK_DIR) $(AIE_PKG_DIR) $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
-	-$(RMDIR) $(CUR_DIR)/_krnlgen $(CUR_DIR)/kernel/.stamp $(CUR_DIR)/kernel/*.inc $(CUR_DIR)/kernel/*.cpp  *.html $(INSTANCE_FILES)
+	-$(RMDIR) _krnlgen kernel/.stamp kernel/*.inc kernel/*.cpp  *.html $(INSTANCE_FILES)
 
 clean: cleanh

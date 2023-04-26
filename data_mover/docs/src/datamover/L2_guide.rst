@@ -4,24 +4,10 @@
    :caption: Table of Contents
    :maxdepth: 3
 
-   L2.rst
 
-======================
-Data-Mover User Guide
-======================
+All static Data-Mover designs are "codeless" that user need to create the OpenCL kernels by simply calling the **Kernel Generator** with a JSON description and ROM content (if needed) as text file.
 
-Overview
-=========
-
-AIE applications often need to read data in or write data out of AIE array.
-Kernel on PL is one of the way to exchange data between AIE and other types of memory.
-We introduce ``Programmable 4D Data-Mover`` and ``Static Data-Mover`` to help generate kernel design and improve development efficiency.
-``Programmable 4D Data-Mover`` have 2 types of kernel: ``4DCuboidRead`` and ``4DCuboidWrite`` which provide both flexible access pattern and keep high performance between DDR and AIE.
-``Static Data-Mover`` has 9 types of kernel which help AIE connect with DDR / URAM and BRAM. Their access pattern is simple continously read / write.
-
-All Data-Mover design is "codeless" that user need to create the OpenCL kernels by simply calling the ``Kernel Generator`` with a JSON description and ROM content (if needed) as text file.
-
-``Kernel Generator`` consists of:
+**Kernel Generator** consists of:
 
 - Kernel templates (in Jinja2), which can be instantiated through configurations from JSON
 - Data converter to transform the user provided texture ROM content into usable initialization file
@@ -31,8 +17,11 @@ All Data-Mover design is "codeless" that user need to create the OpenCL kernels 
     Generated kernels are not self-contained source code, they would reference low-level block implementation headers in ``L1/include`` folder.
     Ensure that folder is passed to Vitis compiler as header search path when compiling project using generated PL kernels.
 
+
 Programmable 4D Data-Mover
 ===========================
+
+.. _programmable-features:
 
 Feature
 --------
@@ -114,6 +103,8 @@ Programmable 4D Data Mover's performance depends on:
    :alt: various pattern
    :width: 50%
    :align: center
+
+.. _programmable-build-config:
 
 Build Time Configuration
 -------------------------
@@ -217,6 +208,8 @@ It will use AXI-M port ``dout_0`` for output. Both AXI-M ports have "latency", "
    source /opt/xilinx/xrt/setup.sh
    export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
    make run TARGET=hw PLATFORM=${PLATFORM_REPO_PATHS}/xilinx_vck190_base_202210_1/xilinx_vck190_base_202210_1.xpfm
+
+.. _programmable-runtime-config:
 
 Run Time Configuration
 -----------------------
@@ -330,8 +323,10 @@ Descriptor[3]: {4, 1, 4, 8, 3, 56, 2, 0, 1}. The implied pattern is:
 Static Data-Mover
 ==================
 
+.. _static-features:
+
 Feature
---------
+-------
 
 ``Static Data Mover`` has 9 types of kernels in 2 different categories.
 They all access certain amount of data in Memory/URAM/BRAM in a continuous style.
@@ -351,6 +346,8 @@ Data from AIE:
 - ValidateStreamWithMaster: For receiving data from AIE through AXI stream and comparing with the goldens in PL's DDR, as well as putting the overall pass/fail flag into PL's DDR
 - ValidateStreamWithRom: For receiving data from AIE through AXI stream and comparing with the goldens in PL's BRAM, as well as putting the overall pass/fail flag into PL's DDR
 - ValidateStreamWithRam: For receiving data from AIE through AXI stream and comparing with the goldens in PL's URAM, as well as putting the overall pass/fail flag into PL's DDR
+
+.. _static-build-config:
 
 Build Time Configuration
 -------------------------
@@ -429,7 +426,7 @@ Kindly refer to ``L2/tests/datamover`` for JSON format of all 9 types of kernels
     # The pre_build command is as follows:
     # pre_build:
     #     make -f $(CUR_DIR)/ksrc.mk GENKERNEL=$(XFLIB_DIR)/L2/scripts/generate_kernels SPEC=$(CUR_DIR)/kernel/spec.json TOOLDIR=$(CUR_DIR)/_krnlgen
-    
+
 **Example of How to run hardware emulation of hardware**
 
 .. code-block:: bash
@@ -443,7 +440,6 @@ Kindly refer to ``L2/tests/datamover`` for JSON format of all 9 types of kernels
 .. ATTENTION::
    * Only HW_EMU and HW run available
    * Kernel-to-kernel streaming is not available in software emulation, design can only be enulated in hardware emulation.
-
 
 Data Converter
 --------------

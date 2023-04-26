@@ -16,23 +16,25 @@
 
 #include <ap_int.h>
 #include "xf_data_mover/pl_data_mover.hpp"
-#define N 3200
+
+static constexpr int N = 3200;
+static constexpr int descriptor_num = 2;
+static constexpr int M = (9 * descriptor_num + 1);
 
 void dut(hls::burst_maxi<ap_uint<64> > data,
          hls::burst_maxi<ap_uint<64> > descriptors,
          hls::stream<ap_axiu<64, 0, 0, 0> >& w_data) {
 #pragma HLS interface m_axi offset = slave bundle = gmem0 port = data latency = 32 num_write_outstanding = \
-    32 num_read_outstanding = 32 max_write_burst_length = 32 max_read_burst_length = 32 depth = 3200
+    32 num_read_outstanding = 32 max_write_burst_length = 32 max_read_burst_length = 32 depth = N
 #pragma HLS interface m_axi offset = slave bundle = gmem1 port = descriptors latency = 32 num_write_outstanding = \
-    32 num_read_outstanding = 32 max_write_burst_length = 32 max_read_burst_length = 32 depth = 3200
+    32 num_read_outstanding = 32 max_write_burst_length = 32 max_read_burst_length = 32 depth = M
 #pragma HLS interface axis port = w_data
     xf::data_mover::read4D<64, 32, 32, 32>(descriptors, data, w_data);
 }
 
 #ifndef __SYNTHESIS__
 int main() {
-    const int descriptor_num = 2;
-    ap_uint<64> cfg[descriptor_num * 9 + 1];
+    ap_uint<64> cfg[M];
     cfg[0] = descriptor_num;
     cfg[1 + 0] = 10;
     cfg[1 + 1] = 1;
@@ -52,6 +54,7 @@ int main() {
     cfg[10 + 6] = 10;
     cfg[10 + 7] = 1000;
     cfg[10 + 8] = 2;
+    static_assert(10 + 8 < M, "cfg overflow");
 
     ap_uint<64>* data = (ap_uint<64>*)malloc(N * sizeof(ap_uint<64>));
     for (int i = 0; i < N; i++) {
@@ -61,7 +64,6 @@ int main() {
     hls::stream<ap_axiu<64, 0, 0, 0> > w_data;
 
     dut(data, cfg, w_data);
-    // dut(offset, incr_num, total_num, cmd_num, data, w_data);
 
     bool check = true;
     std::cout << "start res checking" << std::endl;

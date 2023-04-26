@@ -23,6 +23,13 @@ Overview
 
 Vitis Data Mover Library is an open-sourced Vitis library of exchanging data between PL and AIE.
 
+This library provides **Programmable 4D Data-Mover** and **Static Data-Mover** to help generate kernel design and improve development efficiency.
+
+**Programmable 4D Data-Mover** have 2 types of kernel: **4DCuboidRead** and **4DCuboidWrite** which provide both flexible access pattern and keep high performance between DDR and AIE.
+
+**Static Data-Mover** has 9 types of kernel which help AIE connect with DDR / URAM and BRAM. Their access pattern is simple continously read / write.
+
+
 **Memory Access**
 
 TBD
