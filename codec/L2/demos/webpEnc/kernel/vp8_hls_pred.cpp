@@ -140,20 +140,20 @@ void kernel_IntraPredLoop2_NoOut(
     int32_t* p_info, uint32_t* ysrc, uint32_t* usrc, uint32_t* vsrc, int32_t* pout_level, uint8_t* pout_prob) {
 #pragma HLS INTERFACE m_axi port = pout_level offset = slave bundle = gmem0 depth =              \
     65536 * 512 / 2 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = p_info offset = slave bundle = gmem1 depth = 64 num_read_outstanding = \
-    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16
+    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = ysrc offset = slave bundle = gmem1 depth =                    \
     4096 * 4096 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = usrc offset = slave bundle = gmem1 depth =                    \
     2048 * 2048 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = vsrc offset = slave bundle = gmem1 depth =                    \
     2048 * 2048 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = pout_prob offset = slave bundle = gmem2 depth = 2048 num_read_outstanding = \
-    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16
+    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE s_axilite port = p_info bundle = control
 #pragma HLS INTERFACE s_axilite port = ysrc bundle = control
 #pragma HLS INTERFACE s_axilite port = usrc bundle = control
@@ -3661,20 +3661,20 @@ void kernel_IntraPredLoop2_NoOut_1_6axi(
     int32_t* p_info, uint32_t* ysrc, uint32_t* usrc, uint32_t* vsrc, int32_t* pout_level, uint8_t* pout_prob) {
 #pragma HLS INTERFACE m_axi port = pout_level offset = slave bundle = gmem1 depth =              \
     65536 * 512 / 2 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = p_info offset = slave bundle = gmem0 depth = 64 num_read_outstanding = \
-    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16
+    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = ysrc offset = slave bundle = gmem2 depth =                    \
     4096 * 4096 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = usrc offset = slave bundle = gmem3 depth =                    \
     2048 * 2048 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = vsrc offset = slave bundle = gmem4 depth =                    \
     2048 * 2048 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = pout_prob offset = slave bundle = gmem5 depth = 2048 num_read_outstanding = \
-    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16
+    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16 max_widen_bitwidth = 32
 
 #pragma HLS INTERFACE s_axilite port = p_info bundle = control
 #pragma HLS INTERFACE s_axilite port = ysrc bundle = control
@@ -3773,20 +3773,20 @@ void kernel_IntraPredLoop2_NoOut_2_6axi(
     int32_t* p_info, uint32_t* ysrc, uint32_t* usrc, uint32_t* vsrc, int32_t* pout_level, uint8_t* pout_prob) {
 #pragma HLS INTERFACE m_axi port = pout_level offset = slave bundle = gmem1 depth =              \
     65536 * 512 / 2 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = p_info offset = slave bundle = gmem0 depth = 64 num_read_outstanding = \
-    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16
+    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = ysrc offset = slave bundle = gmem2 depth =                    \
     4096 * 4096 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = usrc offset = slave bundle = gmem3 depth =                    \
     2048 * 2048 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = vsrc offset = slave bundle = gmem4 depth =                    \
     2048 * 2048 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = pout_prob offset = slave bundle = gmem5 depth = 2048 num_read_outstanding = \
-    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16
+    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16 max_widen_bitwidth = 32
 
 #pragma HLS INTERFACE s_axilite port = p_info bundle = control
 #pragma HLS INTERFACE s_axilite port = ysrc bundle = control
@@ -3885,20 +3885,20 @@ void kernel_IntraPredLoop2_NoOut_3_6axi(
     int32_t* p_info, uint32_t* ysrc, uint32_t* usrc, uint32_t* vsrc, int32_t* pout_level, uint8_t* pout_prob) {
 #pragma HLS INTERFACE m_axi port = pout_level offset = slave bundle = gmem1 depth =              \
     65536 * 512 / 2 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = p_info offset = slave bundle = gmem0 depth = 64 num_read_outstanding = \
-    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16
+    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = ysrc offset = slave bundle = gmem2 depth =                    \
     4096 * 4096 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = usrc offset = slave bundle = gmem3 depth =                    \
     2048 * 2048 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = vsrc offset = slave bundle = gmem4 depth =                    \
     2048 * 2048 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = pout_prob offset = slave bundle = gmem5 depth = 2048 num_read_outstanding = \
-    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16
+    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16 max_widen_bitwidth = 32
 
 #pragma HLS INTERFACE s_axilite port = p_info bundle = control
 #pragma HLS INTERFACE s_axilite port = ysrc bundle = control
@@ -3997,20 +3997,20 @@ void kernel_IntraPredLoop2_NoOut_4_6axi(
     int32_t* p_info, uint32_t* ysrc, uint32_t* usrc, uint32_t* vsrc, int32_t* pout_level, uint8_t* pout_prob) {
 #pragma HLS INTERFACE m_axi port = pout_level offset = slave bundle = gmem1 depth =              \
     65536 * 512 / 2 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = p_info offset = slave bundle = gmem0 depth = 64 num_read_outstanding = \
-    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16
+    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = ysrc offset = slave bundle = gmem2 depth =                    \
     4096 * 4096 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = usrc offset = slave bundle = gmem3 depth =                    \
     2048 * 2048 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = vsrc offset = slave bundle = gmem4 depth =                    \
     2048 * 2048 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = pout_prob offset = slave bundle = gmem5 depth = 2048 num_read_outstanding = \
-    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16
+    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16 max_widen_bitwidth = 32
 
 #pragma HLS INTERFACE s_axilite port = p_info bundle = control
 #pragma HLS INTERFACE s_axilite port = ysrc bundle = control
@@ -4231,20 +4231,20 @@ void webp_IntraPredLoop2_NoOut_1(
     int32_t* p_info, uint32_t* ysrc, uint32_t* usrc, uint32_t* vsrc, int32_t* pout_level, uint8_t* pout_prob) {
 #pragma HLS INTERFACE m_axi port = pout_level offset = slave bundle = gmem0 depth =              \
     65536 * 512 / 2 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = p_info offset = slave bundle = gmem1 depth = 64 * 64 num_read_outstanding = \
-    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16
+    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = ysrc offset = slave bundle = gmem1 depth =                    \
     4096 * 4096 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = usrc offset = slave bundle = gmem1 depth =                    \
     2048 * 2048 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = vsrc offset = slave bundle = gmem1 depth =                    \
     2048 * 2048 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = pout_prob offset = slave bundle = gmem2 depth = 2048 * 64 num_read_outstanding = \
-    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16
+    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE s_axilite port = p_info bundle = control
 #pragma HLS INTERFACE s_axilite port = ysrc bundle = control
 #pragma HLS INTERFACE s_axilite port = usrc bundle = control
@@ -4280,20 +4280,20 @@ void kernel_IntraPredLoop2_NoOut_2(
     int32_t* p_info, uint32_t* ysrc, uint32_t* usrc, uint32_t* vsrc, int32_t* pout_level, uint8_t* pout_prob) {
 #pragma HLS INTERFACE m_axi port = pout_level offset = slave bundle = gmem0 depth =              \
     65536 * 512 / 2 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = p_info offset = slave bundle = gmem1 depth = 64 * 64 num_read_outstanding = \
-    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16
+    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = ysrc offset = slave bundle = gmem1 depth =                    \
     4096 * 4096 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = usrc offset = slave bundle = gmem1 depth =                    \
     2048 * 2048 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = vsrc offset = slave bundle = gmem1 depth =                    \
     2048 * 2048 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = pout_prob offset = slave bundle = gmem2 depth = 2048 * 64 num_read_outstanding = \
-    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16
+    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE s_axilite port = p_info bundle = control
 #pragma HLS INTERFACE s_axilite port = ysrc bundle = control
 #pragma HLS INTERFACE s_axilite port = usrc bundle = control
@@ -4315,20 +4315,20 @@ void kernel_IntraPredLoop2_NoOut_3(
     int32_t* p_info, uint32_t* ysrc, uint32_t* usrc, uint32_t* vsrc, int32_t* pout_level, uint8_t* pout_prob) {
 #pragma HLS INTERFACE m_axi port = pout_level offset = slave bundle = gmem0 depth =              \
     65536 * 512 / 2 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = p_info offset = slave bundle = gmem1 depth = 64 * 64 num_read_outstanding = \
-    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16
+    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = ysrc offset = slave bundle = gmem1 depth =                    \
     4096 * 4096 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = usrc offset = slave bundle = gmem1 depth =                    \
     2048 * 2048 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = vsrc offset = slave bundle = gmem1 depth =                    \
     2048 * 2048 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = pout_prob offset = slave bundle = gmem2 depth = 2048 * 64 num_read_outstanding = \
-    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16
+    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE s_axilite port = p_info bundle = control
 #pragma HLS INTERFACE s_axilite port = ysrc bundle = control
 #pragma HLS INTERFACE s_axilite port = usrc bundle = control
@@ -4350,20 +4350,20 @@ void kernel_IntraPredLoop2_NoOut_4(
     int32_t* p_info, uint32_t* ysrc, uint32_t* usrc, uint32_t* vsrc, int32_t* pout_level, uint8_t* pout_prob) {
 #pragma HLS INTERFACE m_axi port = pout_level offset = slave bundle = gmem0 depth =              \
     65536 * 512 / 2 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = p_info offset = slave bundle = gmem1 depth = 64 * 64 num_read_outstanding = \
-    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16
+    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = ysrc offset = slave bundle = gmem1 depth =                    \
     4096 * 4096 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = usrc offset = slave bundle = gmem1 depth =                    \
     2048 * 2048 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = vsrc offset = slave bundle = gmem1 depth =                    \
     2048 * 2048 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = pout_prob offset = slave bundle = gmem2 depth = 2048 * 64 num_read_outstanding = \
-    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16
+    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE s_axilite port = p_info bundle = control
 #pragma HLS INTERFACE s_axilite port = ysrc bundle = control
 #pragma HLS INTERFACE s_axilite port = usrc bundle = control
@@ -4385,20 +4385,20 @@ void kernel_IntraPredLoop2_NoOut_5(
     int32_t* p_info, uint32_t* ysrc, uint32_t* usrc, uint32_t* vsrc, int32_t* pout_level, uint8_t* pout_prob) {
 #pragma HLS INTERFACE m_axi port = pout_level offset = slave bundle = gmem0 depth =              \
     65536 * 512 / 2 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = p_info offset = slave bundle = gmem1 depth = 64 * 64 num_read_outstanding = \
-    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16
+    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = ysrc offset = slave bundle = gmem1 depth =                    \
     4096 * 4096 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = usrc offset = slave bundle = gmem1 depth =                    \
     2048 * 2048 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = vsrc offset = slave bundle = gmem1 depth =                    \
     2048 * 2048 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = pout_prob offset = slave bundle = gmem2 depth = 2048 * 64 num_read_outstanding = \
-    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16
+    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE s_axilite port = p_info bundle = control
 #pragma HLS INTERFACE s_axilite port = ysrc bundle = control
 #pragma HLS INTERFACE s_axilite port = usrc bundle = control
@@ -4420,20 +4420,20 @@ void kernel_IntraPredLoop2_NoOut_6(
     int32_t* p_info, uint32_t* ysrc, uint32_t* usrc, uint32_t* vsrc, int32_t* pout_level, uint8_t* pout_prob) {
 #pragma HLS INTERFACE m_axi port = pout_level offset = slave bundle = gmem0 depth =              \
     65536 * 512 / 2 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = p_info offset = slave bundle = gmem1 depth = 64 * 64 num_read_outstanding = \
-    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16
+    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = ysrc offset = slave bundle = gmem1 depth =                    \
     4096 * 4096 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = usrc offset = slave bundle = gmem1 depth =                    \
     2048 * 2048 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = vsrc offset = slave bundle = gmem1 depth =                    \
     2048 * 2048 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = pout_prob offset = slave bundle = gmem2 depth = 2048 * 64 num_read_outstanding = \
-    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16
+    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE s_axilite port = p_info bundle = control
 #pragma HLS INTERFACE s_axilite port = ysrc bundle = control
 #pragma HLS INTERFACE s_axilite port = usrc bundle = control
@@ -4451,20 +4451,20 @@ void kernel_IntraPredLoop2_NoOut_7(
     int32_t* p_info, uint32_t* ysrc, uint32_t* usrc, uint32_t* vsrc, int32_t* pout_level, uint8_t* pout_prob) {
 #pragma HLS INTERFACE m_axi port = pout_level offset = slave bundle = gmem0 depth =              \
     65536 * 512 / 2 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = p_info offset = slave bundle = gmem1 depth = 64 * 64 num_read_outstanding = \
-    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16
+    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = ysrc offset = slave bundle = gmem1 depth =                    \
     4096 * 4096 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = usrc offset = slave bundle = gmem1 depth =                    \
     2048 * 2048 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = vsrc offset = slave bundle = gmem1 depth =                    \
     2048 * 2048 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = pout_prob offset = slave bundle = gmem2 depth = 2048 * 64 num_read_outstanding = \
-    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16
+    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE s_axilite port = p_info bundle = control
 #pragma HLS INTERFACE s_axilite port = ysrc bundle = control
 #pragma HLS INTERFACE s_axilite port = usrc bundle = control
@@ -4486,20 +4486,20 @@ void kernel_IntraPredLoop2_NoOut_8(
     int32_t* p_info, uint32_t* ysrc, uint32_t* usrc, uint32_t* vsrc, int32_t* pout_level, uint8_t* pout_prob) {
 #pragma HLS INTERFACE m_axi port = pout_level offset = slave bundle = gmem0 depth =              \
     65536 * 512 / 2 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = p_info offset = slave bundle = gmem1 depth = 64 * 64 num_read_outstanding = \
-    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16
+    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = ysrc offset = slave bundle = gmem1 depth =                    \
     4096 * 4096 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = usrc offset = slave bundle = gmem1 depth =                    \
     2048 * 2048 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = vsrc offset = slave bundle = gmem1 depth =                    \
     2048 * 2048 / 4 num_read_outstanding = 32 num_write_outstanding = 32 max_read_burst_length = \
-        16 max_write_burst_length = 16
+        16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE m_axi port = pout_prob offset = slave bundle = gmem2 depth = 2048 * 64 num_read_outstanding = \
-    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16
+    32 num_write_outstanding = 32 max_read_burst_length = 16 max_write_burst_length = 16 max_widen_bitwidth = 32
 #pragma HLS INTERFACE s_axilite port = p_info bundle = control
 #pragma HLS INTERFACE s_axilite port = ysrc bundle = control
 #pragma HLS INTERFACE s_axilite port = usrc bundle = control
