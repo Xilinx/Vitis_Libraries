@@ -1,5 +1,5 @@
-#
-# Copyright 2019-2021 Xilinx, Inc.
+# Copyright (C) 2019-2022, Xilinx, Inc.
+# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+# vitis hls makefile-generator v2.0.0
 
 source settings.tcl
 
@@ -20,7 +20,7 @@ set PROJ "hmac_sha384_test.prj"
 set SOLN "solution1"
 
 if {![info exists CLKP]} {
-  set CLKP 10.0
+  set CLKP 3.33
 }
 
 open_project -reset $PROJ
@@ -30,7 +30,6 @@ add_files -tb "test.cpp gld.dat" -cflags "-I${XF_PROJ_ROOT}/L1/include"
 set_top test_hmac_sha384
 
 open_solution -reset $SOLN
-
 
 
 

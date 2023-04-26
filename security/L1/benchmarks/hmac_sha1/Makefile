@@ -1,4 +1,5 @@
-# Copyright 2019-2022 Xilinx, Inc.
+# Copyright (C) 2019-2022, Xilinx, Inc.
+# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.8
+# vitis makefile-generator v2.0.9
 
 ############################## Help Section ##############################
 .PHONY: help
@@ -35,7 +36,7 @@ help::
 	$(ECHO) "        Run the sdk.sh script from the common-image directory to install sysroot using the command : ./sdk.sh -y -d ./ -p "
 	$(ECHO) "        Unzip the rootfs file : gunzip ./rootfs.ext4.gz"
 	$(ECHO) "        export SYSROOT=< path-to-platform-sysroot >"
-	$(ECHO) "      b. User could also define SYSROOT, K_IMAGE and ROOTFS by themselves: "
+	$(ECHO) "      b.User could also define SYSROOT, K_IMAGE and ROOTFS by themselves: "
 	$(ECHO) "        export SYSROOT=< path-to-platform-sysroot >"
 	$(ECHO) "        export K_IMAGE=< path-to-Image-files >"
 	$(ECHO) "        export ROOTFS=< path-to-rootfs >"
@@ -43,7 +44,7 @@ help::
 	$(ECHO) "  make clean "
 	$(ECHO) "      Command to remove the generated non-hardware files."
 	$(ECHO) ""
-	$(ECHO) "  make cleanall"
+	$(ECHO) "  make cleanall TARGET=<hw/hw_emu/sw_emu/>"
 	$(ECHO) "      Command to remove all the generated files."
 	$(ECHO) ""
 
@@ -102,25 +103,19 @@ CXXFLAGS += $(EXTRA_CXXFLAGS)
 VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 
 ########################## Setting up Host Variables ##########################
-ifeq ($(TARGET),sw_emu)
-CXXFLAGS += -D SW_EMU_TEST
-endif
-ifeq ($(TARGET),hw_emu)
-CXXFLAGS += -D HW_EMU_TEST
-endif
 
 #Inclue Required Host Source Files
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
-HOST_SRCS += $(CUR_DIR)/host/main.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
+HOST_SRCS += host/main.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -D USE_DDR
-CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(CUR_DIR)/host -I $(CUR_DIR)/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/xcl2
+CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I host -I kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/xcl2
 else 
 ifeq ($(ps_on_x86), on)
-HOST_SRCS += $(CUR_DIR)/host/main.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(CUR_DIR)/host -I $(CUR_DIR)/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/xcl2
+HOST_SRCS += host/main.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
+CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I host -I kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/xcl2
 else
-HOST_SRCS += $(CUR_DIR)/host/main.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(CUR_DIR)/host -I $(CUR_DIR)/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/xcl2
+HOST_SRCS += host/main.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
+CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I host -I kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/xcl2
 endif
 endif
 # workaround for opencv
@@ -130,7 +125,7 @@ endif
 
 EXE_NAME := hmacSha1Benchmark.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-EXE_FILE_DEPS := $(HOST_SRCS) $(EXE_FILE_DEPS)
+EXE_FILE_DEPS := $(HOST_SRCS) $(INSTANCE_FILES)  $(EXE_FILE_DEPS)
 
 HOST_ARGS :=  -mode fpga -xclbin $(BUILD_DIR)/hmacSha1Kernel.xclbin -gld $(CUR_DIR)/data/gld.dat
 ifneq ($(HOST_ARCH), x86)
@@ -140,10 +135,10 @@ endif
 ########################## Kernel compiler global settings ##########################
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
 VPP_FLAGS +=   --config $(CUR_DIR)/conn_u250.cfg
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(CUR_DIR)/kernel -I $(XFLIB_DIR)/L1/include
+VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include -I kernel -I $(XFLIB_DIR)/L1/include
 
 else 
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(CUR_DIR)/kernel -I $(XFLIB_DIR)/L1/include
+VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include -I kernel -I $(XFLIB_DIR)/L1/include
 
 endif
 
@@ -166,22 +161,22 @@ BINARY_CONTAINERS_PKG += $(BUILD_DIR)/hmacSha1Kernel.xclbin
 endif
 
 # ################ Setting Rules for Binary Containers (Building Kernels) ################
-$(TEMP_DIR)/hmacSha1Kernel_1.xo: $(CUR_DIR)/kernel/hmacSha1Kernel1.cpp 
+$(TEMP_DIR)/hmacSha1Kernel_1.xo: kernel/hmacSha1Kernel1.cpp 
 	$(ECHO) "Compiling Kernel: hmacSha1Kernel_1"
 	mkdir -p $(TEMP_DIR)
 	$(VPP) -c $(VPP_FLAGS_hmacSha1Kernel_1) $(VPP_FLAGS) -k hmacSha1Kernel_1 -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
 BINARY_CONTAINER_hmacSha1Kernel_OBJS += $(TEMP_DIR)/hmacSha1Kernel_1.xo
-$(TEMP_DIR)/hmacSha1Kernel_2.xo: $(CUR_DIR)/kernel/hmacSha1Kernel2.cpp 
+$(TEMP_DIR)/hmacSha1Kernel_2.xo: kernel/hmacSha1Kernel2.cpp 
 	$(ECHO) "Compiling Kernel: hmacSha1Kernel_2"
 	mkdir -p $(TEMP_DIR)
 	$(VPP) -c $(VPP_FLAGS_hmacSha1Kernel_2) $(VPP_FLAGS) -k hmacSha1Kernel_2 -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
 BINARY_CONTAINER_hmacSha1Kernel_OBJS += $(TEMP_DIR)/hmacSha1Kernel_2.xo
-$(TEMP_DIR)/hmacSha1Kernel_3.xo: $(CUR_DIR)/kernel/hmacSha1Kernel3.cpp 
+$(TEMP_DIR)/hmacSha1Kernel_3.xo: kernel/hmacSha1Kernel3.cpp 
 	$(ECHO) "Compiling Kernel: hmacSha1Kernel_3"
 	mkdir -p $(TEMP_DIR)
 	$(VPP) -c $(VPP_FLAGS_hmacSha1Kernel_3) $(VPP_FLAGS) -k hmacSha1Kernel_3 -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
 BINARY_CONTAINER_hmacSha1Kernel_OBJS += $(TEMP_DIR)/hmacSha1Kernel_3.xo
-$(TEMP_DIR)/hmacSha1Kernel_4.xo: $(CUR_DIR)/kernel/hmacSha1Kernel4.cpp 
+$(TEMP_DIR)/hmacSha1Kernel_4.xo: kernel/hmacSha1Kernel4.cpp 
 	$(ECHO) "Compiling Kernel: hmacSha1Kernel_4"
 	mkdir -p $(TEMP_DIR)
 	$(VPP) -c $(VPP_FLAGS_hmacSha1Kernel_4) $(VPP_FLAGS) -k hmacSha1Kernel_4 -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
@@ -222,8 +217,8 @@ endif
 	@echo 'fi' >> $(RUN_SCRIPT)
 	@echo 'echo "INFO: Embedded host run completed."' >> $(RUN_SCRIPT)
 	@echo 'exit $$return_code' >> $(RUN_SCRIPT)
-DATA_FILE := $(CUR_DIR)//data/gld.dat 
-DATA_DIR := 
+DATA_FILE := data/gld.dat $(custom_data_file)
+DATA_DIR := $(custom_data_dir)
 SD_FILES += $(RUN_SCRIPT)
 SD_FILES += $(EXE_FILE)
 SD_FILES += $(EMCONFIG)
@@ -249,11 +244,19 @@ ifeq ($(ps_on_x86), on)
 	@echo "### ***** running PS X86 SE_EMU ***** ###"
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir $(SD_CARD) --package.emu_ps x86
 endif
-#3. General Embeded flow
+# 3. AIE_ON_X86 Flow
+ifeq ($(pcie_aie), on)
+	@echo "### ***** running AIE ON_X86 ***** ###"
+	${VPP} -p $(VPP_PACKAGE) -t ${TARGET} -f ${XPLATFORM} ${AIE_CONTAINER} ${BINARY_CONTAINERS} -o $(BINARY_CONTAINERS_PKG) --package.boot_mode ospi
+	@echo "### ***** sd_card generation done! ***** ###"
+endif
+# 4. General Embeded flow
 ifeq ($(dfx_hw), off)
 ifeq ($(ps_on_x86), off)
+ifeq ($(pcie_aie), off)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 	@echo "### ***** sd_card generation done! ***** ###"
+endif
 endif
 endif
 
@@ -269,17 +272,26 @@ mkflag:
 	mkdir -p $(BUILD_DIR)
 	rm -rf $(BUILD_DIR)/makefile_args.txt
 	@for var in $(MAKEFLAGS); do echo $$var >> $(BUILD_DIR)/makefile_args.txt; done
+
 all: check_device check_vpp check_platform mkflag $(RUN_DEPS)
+
 run: all
 #hw_emu
 ifneq (,$(filter hw_emu, $(TARGET)))
 ifeq ($(HOST_ARCH), x86)
+ifeq ($(pcie_aie), on)
+	cp $(AIE_WORK_DIR)/reports/dma_lock_report.json ./
+	cp $(AIE_WORK_DIR)/ps/c_rts/aie_control_config.json ./
+	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) $(BINARY_CONTAINERS_PKG)
+	
+endif
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
 	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
 	
 endif
@@ -292,7 +304,7 @@ ifeq ($(HOST_ARCH), x86)
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
 	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
 	
 endif
@@ -319,7 +331,7 @@ endif
 
 ############################## Setting Targets ##############################
 
-.PHONY: clean cleanall emconfig
+.PHONY: clean cleanall emconfig gen_instances valid_params
 emconfig: $(EMCONFIG)
 
 .PHONY: host
@@ -336,18 +348,24 @@ else
 xclbin: check_vpp check_sysroot  $(BINARY_CONTAINERS)
 endif
 
+gen_instances: $(INSTANCE_FILES)
+	@echo "Nothing to generate."
+
+valid_params:
+	@echo "Nothing to validate."
+
 ############################## Cleaning Rules ##############################
 cleanh:
-	-$(RMDIR) $(EXE_FILE) vitis_* TempConfig system_estimate.xtxt *.rpt .run/
-	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb sample_link.ini sample_compile.ini obj*  bin* *.csv *.jpg *.jpeg *.png
+	-$(RMDIR) $(EXE_FILE)  vitis_* TempConfig system_estimate.xtxt *.rpt .run/  $(INST_TB_FILES)
+	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb sample_link.ini sample_compile.ini obj*  bin* *.csv *.jpg *.jpeg *.png *.db
 
 cleank:
 	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl*start_simulation. sh *.xclbin
-	-$(RMDIR) _x_temp.*
+	-$(RMDIR) _x_temp.* _x* $(INST_FILES)
 
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR)  emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
-	-$(RMDIR)  $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
-	-$(RMDIR) 
+	-$(RMDIR)  $(AIE_WORK_DIR) $(AIE_PKG_DIR) $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
+	-$(RMDIR)  *.html $(INSTANCE_FILES)
 
 clean: cleanh

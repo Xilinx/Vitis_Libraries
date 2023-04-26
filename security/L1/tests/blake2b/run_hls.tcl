@@ -1,5 +1,5 @@
-#
-# Copyright 2019 Xilinx, Inc.
+# Copyright (C) 2019-2022, Xilinx, Inc.
+# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+# vitis hls makefile-generator v2.0.0
 
 source settings.tcl
 
@@ -31,9 +31,11 @@ set_top test
 
 open_solution -reset $SOLN
 
+
+
 set_part $XPART
 create_clock -period $CLKP
-
+set_clock_uncertainty 1.05
 
 if {$CSIM == 1} {
   csim_design
@@ -53,10 +55,6 @@ if {$VIVADO_SYN == 1} {
 
 if {$VIVADO_IMPL == 1} {
   export_design -flow impl -rtl verilog
-}
-
-if {$QOR_CHECK == 1} {
-  puts "QoR check not implemented yet"
 }
 
 exit

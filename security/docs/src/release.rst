@@ -29,6 +29,12 @@ Release Note
    :hidden:
    :maxdepth: 1
 
+Known Issue
+------------
+
+Benchmark cases `L1/benchmarks/aes256CbcDecrypt_sc` and `L1/benchmarks/aes256CbcEncrypt_sc` failed building on CentOS 7.9.
+We'll get this fixed in next release.
+
 2022.2
 ------
 

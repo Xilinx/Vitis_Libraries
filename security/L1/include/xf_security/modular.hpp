@@ -37,7 +37,7 @@ namespace security {
 namespace internal {
 
 /*
- * @brief Montgomery Production of opA and opB and returns opA * opB * opM^-1 mod R
+ * @brief Montgomery Production of opA and opB and returns opA * opB * R^-1 mod opM
  * Reference: "Efficient architectures for implementing montgomery modular multiplication and RSA modular exponentiation
  * on reconfigurable logic" by Alan Daly, William Marnane
  *
