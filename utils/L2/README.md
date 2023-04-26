@@ -10,4 +10,6 @@ in hardware. No HLS kernel development experience is required to use this tool.
 The `src/xf_datamover` subfolder contains the template of kernels used by the tool,
 in [Jinja2](https://jinja.palletsprojects.com/en/2.11.x/) format.
 
+**Attention: the data-mover APIs have be moved to new top-level Data-Mover Library.
+They will be deleted from this library soon.**
 

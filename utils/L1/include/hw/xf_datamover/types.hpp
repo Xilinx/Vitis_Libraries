@@ -17,6 +17,11 @@
 #ifndef DATAMOVER_TYPES_HPP
 #define DATAMOVER_TYPES_HPP
 
+#ifndef WARN_DEPR_UTILS_MOVER
+#define WARN_DEPR_UTILS_MOVER
+#warning Data Mover APIs in Utility Library have been moved to top-level Data Mover Library in 2023.1. Its files would be removed from Utility Library in future release.
+#endif
+
 #include <ap_int.h>
 #include <stdint.h>
 

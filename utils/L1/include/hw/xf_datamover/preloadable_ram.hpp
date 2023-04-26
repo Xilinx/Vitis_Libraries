@@ -17,6 +17,11 @@
 #ifndef DATAMOVER_PRELOADABLE_RAM_HPP
 #define DATAMOVER_PRELOADABLE_RAM_HPP
 
+#ifndef WARN_DEPR_UTILS_MOVER
+#define WARN_DEPR_UTILS_MOVER
+#warning Data Mover APIs in Utility Library have been moved to top-level Data Mover Library in 2023.1. Its files would be removed from Utility Library in future release.
+#endif
+
 #include "xf_datamover/types.hpp"
 #include "ap_axi_sdata.h"
 #include <hls_stream.h>

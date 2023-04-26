@@ -22,6 +22,12 @@ Release Note
    :hidden:
    :maxdepth: 1
 
+2023.1
+------
+
+The data-mover APIs are promoted as a new top-level library.
+They will be removed from this library in future release.
+
 2022.2
 ------
 
