@@ -1,18 +1,30 @@
 /*
- * Copyright 2022 Xilinx, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+SPDX-License-Identifier: X11
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+IN THE SOFTWARE.
+
+Except as contained in this notice, the name of Advanced Micro Devices
+shall not be used in advertising or otherwise to promote the sale,
+use or other dealings in this Software without prior written authorization
+from Advanced Micro Devices, Inc.
+*/
 #ifndef _FOC_HPP_
 #define _FOC_HPP_
 #include <hls_stream.h>
@@ -575,16 +587,16 @@ void foc_core_ap_fixed(
 
     // static T_Vabc SVM_inv_index = MAX_LIM >> 1;
     // short V_fw = 1;
-    static t_RPMI Speed_GiE_prev = 0;
-    static t_RPME Speed_Err_prev = 0;
+    static t_RPMI Speed_I_err_prev = 0;
+    static t_RPME Speed_Error_prev = 0;
 
     static t_ID Vd_weakened = 0; // case FW
 
-    static t_IDI Flux_GiE_prev = 0; // Variable for previous integral value
-    static t_IDE Flux_Err_prev = 0; // Variable for previous derivative value
+    static t_IDI Flux_I_err_prev = 0; // Variable for previous integral value
+    static t_IDE Flux_Error_prev = 0; // Variable for previous derivative value
 
-    static t_IQI Torque_GiE_prev = 0; // Variable for previous integral value
-    static t_IQE Torque_Err_prev = 0; // Variable for previous derivative value
+    static t_IQI Torque_I_err_prev = 0; // Variable for previous integral value
+    static t_IQE Torque_Error_prev = 0; // Variable for previous derivative value
 
     static t_IDI FWiE_prev = 0;
     static t_IDE FW_err_prev = 0;
@@ -598,16 +610,16 @@ void foc_core_ap_fixed(
     t_mode FOC_mode = control_mode_args;
     /*
     if(FOC_mode == MOD_STOPPED){
-        Speed_GiE_prev = 0;
-        Speed_Err_prev = 0;
+        Speed_I_err_prev = 0;
+        Speed_Error_prev = 0;
 
         Vd_weakened = 0;// case FW
 
-        Flux_GiE_prev = 0; // Variable for previous integral value
-        Flux_Err_prev = 0; // Variable for previous derivative value
+        Flux_I_err_prev = 0; // Variable for previous integral value
+        Flux_Error_prev = 0; // Variable for previous derivative value
 
-        Torque_GiE_prev = 0; // Variable for previous integral value
-        Torque_Err_prev = 0; // Variable for previous derivative value
+        Torque_I_err_prev = 0; // Variable for previous integral value
+        Torque_Error_prev = 0; // Variable for previous derivative value
 
         FWiE_prev = 0;
         FW_err_prev = 0;
@@ -692,18 +704,18 @@ void foc_core_ap_fixed(
     t_RPM         Speed_pid_dout;
     PID_Control_ap_fixed<t_RPM, t_RPMI, t_RPME, t_pid>(
         Speed_pid_dout, 
-        Speed_GiE_prev, 
-        Speed_Err_prev, 
+        Speed_I_err_prev, 
+        Speed_Error_prev, 
         Speed_pid_din, 
         apx_speed_sp_args,
         apx_speed_kp_args,
         apx_speed_ki_args,
         apx_speed_kd_args,
         Mode_Change);
-    RANGETRACER("FOC.PID.Speed_GiE_prev", Speed_GiE_prev);
+    RANGETRACER("FOC.PID.Speed_I_err_prev", Speed_I_err_prev);
     RANGETRACER("FOC.PID.Speed_pid_dout", Speed_pid_dout);
-    RANGETRACER("FOC.PID.Speed_GiE_prev", Speed_GiE_prev);
-    RANGETRACER("FOC.PID.Speed_Err_prev", Speed_Err_prev);
+    RANGETRACER("FOC.PID.Speed_I_err_prev", Speed_I_err_prev);
+    RANGETRACER("FOC.PID.Speed_Error_prev", Speed_Error_prev);
     RANGETRACER("FOC.PID.Speed_pid_din", Speed_pid_din);
     RANGETRACER("FOC.PID.apx_speed_sp_args", apx_speed_sp_args);
 
@@ -718,8 +730,8 @@ void foc_core_ap_fixed(
                     : (t_ID)apx_flux_sp_args;
     PID_Control_ap_fixed<t_ID, t_IDI, t_IDE, t_pid>(
         Flux_pid_dout, 
-        Flux_GiE_prev, 
-        Flux_Err_prev, 
+        Flux_I_err_prev, 
+        Flux_Error_prev, 
         Id, 
         Flux_sp, 
         apx_flux_kp_args, 
@@ -729,8 +741,8 @@ void foc_core_ap_fixed(
 
     T_IO Flux_pid_dout_io = (T_IO)Clip_AP<t_IQ>(Flux_pid_dout, (t_IQ)(0-MAX_IO), (t_IQ)MAX_IO);
     RANGETRACER("FOC.Flux_pid.Flux_pid_dout", Flux_pid_dout);
-    RANGETRACER("FOC.Flux_pid.Flux_GiE_prev", Flux_GiE_prev);
-    RANGETRACER("FOC.Flux_pid.Flux_Err_prev", Flux_Err_prev);
+    RANGETRACER("FOC.Flux_pid.Flux_I_err_prev", Flux_I_err_prev);
+    RANGETRACER("FOC.Flux_pid.Flux_Error_prev", Flux_Error_prev);
     RANGETRACER("FOC.Flux_pid.Id", Id);
     RANGETRACER("FOC.Flux_pid.Flux_sp", Flux_sp);
     RANGETRACER("FOC.Flux_pid.apx_flux_sp_args", apx_flux_sp_args);
@@ -744,8 +756,8 @@ void foc_core_ap_fixed(
                     : (t_IQ)Speed_pid_dout; // Only in Torque mode Speed_pid not be the setpoint
     PID_Control_ap_fixed<t_IQ, t_IQI, t_IQE, t_pid>(
         Torque_pid_dout, 
-        Torque_GiE_prev, 
-        Torque_Err_prev, 
+        Torque_I_err_prev, 
+        Torque_Error_prev, 
         Iq,
         Torque_Sp, 
         apx_torque_kp_args, 
@@ -755,8 +767,8 @@ void foc_core_ap_fixed(
     T_IO Torque_pid_dout_io = (T_IO)Clip_AP<t_IQ>(Torque_pid_dout, (t_IQ)(0-MAX_IO), (t_IQ)MAX_IO);
 
     RANGETRACER("FOC.Torque_pid.Torque_pid_dout", Torque_pid_dout);
-    RANGETRACER("FOC.Torque_pid.Torque_GiE_prev", Torque_GiE_prev);
-    RANGETRACER("FOC.Torque_pid.Torque_Err_prev", Torque_Err_prev);
+    RANGETRACER("FOC.Torque_pid.Torque_I_err_prev", Torque_I_err_prev);
+    RANGETRACER("FOC.Torque_pid.Torque_Error_prev", Torque_Error_prev);
     RANGETRACER("FOC.Torque_pid.Iq", Iq);
     RANGETRACER("FOC.Torque_pid.Torque_Sp", Torque_Sp);
     RANGETRACER("FOC.Torque_pid.apx_torque_sp_args", apx_torque_sp_args);
@@ -781,28 +793,28 @@ void foc_core_ap_fixed(
     RANGETRACER("FOC.Decoupling.Torque_pid_dout_io", Torque_pid_dout_io);
 
     //--------------------------------------------------------------------------
-    T_IO M_index, M_threshold;
+    T_IO Modulation, Modulation_sp;
     Field_Weakening_T<T_IO, T_IO, t_mid2>(
-        M_index, 
-        M_threshold, 
+        Modulation, 
+        Modulation_sp, 
         Flux_decoupled, 
         Torque_decoupled, 
         1,//V,
         SVM_inv_index);//SVM_inv_index);
-    RANGETRACER("FOC.Field_W.M_index", M_index);
-    RANGETRACER("FOC.Field_W.M_threshold", M_threshold);
+    RANGETRACER("FOC.Field_W.Modulation", Modulation);
+    RANGETRACER("FOC.Field_W.Modulation_sp", Modulation_sp);
     RANGETRACER("FOC.Field_W.Flux_decoupled", Flux_decoupled);
     RANGETRACER("FOC.Field_W.Torque_decoupled", Torque_decoupled);
-    const T_IO MAX_CURRENT = MAX_IO>>1; // 0.88 from datasheet - 10%
+    const T_IO MAX_CURRENT = COMM_MOTOR_PARA_IMAX; // stall current limit which is ~2.7A per the motor datasheet 
 
-    //M_index = Clip_AP<T_IO>(M_index, (T_IO)(0-MAX_IO), (T_IO)MAX_IO);  
+    //Modulation = Clip_AP<T_IO>(Modulation, (T_IO)(0-MAX_IO), (T_IO)MAX_IO);  
 
     PID_Control_ap_fixed<t_ID, t_IDI, t_IDE, t_pid>(
         Vd_weakened, 
         FWiE_prev, 
         FW_err_prev, 
-        (t_ID)M_index,
-        (t_ID)M_threshold, 
+        (t_ID)Modulation,
+        (t_ID)Modulation_sp, 
         (t_pid)apx_fw_kp_args,
         (t_pid)apx_fw_ki_args,
         (t_pid)0, 
@@ -814,8 +826,8 @@ void foc_core_ap_fixed(
 
    
     RANGETRACER("FOC.PID.Field_W.FWiE_prev", FWiE_prev);
-    RANGETRACER("FOC.PID.Field_W.M_index", M_index);
-    RANGETRACER("FOC.PID.Field_W.M_threshold", M_threshold);
+    RANGETRACER("FOC.PID.Field_W.Modulation", Modulation);
+    RANGETRACER("FOC.PID.Field_W.Modulation_sp", Modulation_sp);
     RANGETRACER("FOC.PID.Field_W.apx_fw_kp_args", apx_fw_kp_args);
     RANGETRACER("FOC.PID.Field_W.apx_fw_ki_args", apx_fw_ki_args);
     RANGETRACER("FOC.PID.Field_W.Clip_Vd_weakened", Vd_weakened);
@@ -880,14 +892,14 @@ void foc_core_ap_fixed(
 
     t_glb_q15q16 apx_id_stts = Id;
     t_glb_q15q16 apx_iq_stts = Iq;
-    t_glb_q15q16 apx_flux_acc_stts = Flux_GiE_prev;
-    t_glb_q15q16 apx_flux_err_stts = Flux_Err_prev;
+    t_glb_q15q16 apx_flux_acc_stts = Flux_I_err_prev;
+    t_glb_q15q16 apx_flux_err_stts = Flux_Error_prev;
     t_glb_q15q16 apx_flux_out_stts = Flux_pid_dout;
-    t_glb_q15q16 apx_torque_acc_stts = Torque_GiE_prev;
-    t_glb_q15q16 apx_torque_err_stts = Torque_Err_prev;
+    t_glb_q15q16 apx_torque_acc_stts = Torque_I_err_prev;
+    t_glb_q15q16 apx_torque_err_stts = Torque_Error_prev;
     t_glb_q15q16 apx_torque_out_stts = Torque_pid_dout;
-    t_glb_q15q16 apx_speed_acc_stts = Speed_GiE_prev;
-    t_glb_q15q16 apx_speed_err_stts = Speed_Err_prev;
+    t_glb_q15q16 apx_speed_acc_stts = Speed_I_err_prev;
+    t_glb_q15q16 apx_speed_err_stts = Speed_Error_prev;
     t_glb_q15q16 apx_speed_out_stts = Speed_pid_dout;
 
     t_glb_q15q16 apx_speed_Ialpha_stts = Ialpha;
@@ -901,14 +913,14 @@ void foc_core_ap_fixed(
     angle_stts = apx_angle_stts.range(31, 0);
     id_stts = apx_id_stts.range(31, 0);
     iq_stts = apx_iq_stts.range(31, 0);
-    flux_acc_stts = apx_flux_acc_stts.range(31, 0);     // Flux_GiE_prev;
-    flux_err_stts = apx_flux_err_stts.range(31, 0);     // Flux_Err_prev;
+    flux_acc_stts = apx_flux_acc_stts.range(31, 0);     // Flux_I_err_prev;
+    flux_err_stts = apx_flux_err_stts.range(31, 0);     // Flux_Error_prev;
     flux_out_stts = apx_flux_out_stts.range(31, 0);     // Flux_pid_dout;
-    torque_acc_stts = apx_torque_acc_stts.range(31, 0); // Torque_GiE_prev;
-    torque_err_stts = apx_torque_err_stts.range(31, 0); // Torque_Err_prev;
+    torque_acc_stts = apx_torque_acc_stts.range(31, 0); // Torque_I_err_prev;
+    torque_err_stts = apx_torque_err_stts.range(31, 0); // Torque_Error_prev;
     torque_out_stts = apx_torque_out_stts.range(31, 0); // Torque_pid_dout;
-    speed_acc_stts = apx_speed_acc_stts.range(31, 0);   // Speed_GiE_prev;
-    speed_err_stts = apx_speed_err_stts.range(31, 0);   // Speed_Err_prev;
+    speed_acc_stts = apx_speed_acc_stts.range(31, 0);   // Speed_I_err_prev;
+    speed_err_stts = apx_speed_err_stts.range(31, 0);   // Speed_Error_prev;
     speed_out_stts = apx_speed_out_stts.range(31, 0);   // Speed_pid_dout;
     Ialpha_stts = apx_speed_Ialpha_stts.range(31, 0);
     Ibeta_stts = apx_speed_Ibeta_stts.range(31, 0);

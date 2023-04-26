@@ -1,47 +1,59 @@
 /*
- * Copyright 2022 Xilinx, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+SPDX-License-Identifier: X11
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+IN THE SOFTWARE.
+
+Except as contained in this notice, the name of Advanced Micro Devices
+shall not be used in advertising or otherwise to promote the sale,
+use or other dealings in this Software without prior written authorization
+from Advanced Micro Devices, Inc.
+*/
 #ifndef _MODEL_PID_INT_HPP_
 #define _MODEL_PID_INT_HPP_
 #include "model_base.hpp"
 template <class T_IN, class T_MID, class T_OUT, int MAX_OUT, int MIN_OUT, int KP_SCALE>
 void PID_Control_T2(T_OUT& Res_out,
-                    T_MID& GiE_prev,
-                    T_MID& Err_prev,
-                    T_IN in_data,
+                    T_MID& I_err_prev,
+                    T_MID& Error_prev,
+                    T_IN in_Measured,
                     T_IN Sp,
                     T_IN Kp,
                     T_IN Ki,
                     T_IN Kd,
                     bool mode_change) {
-    T_MID err = Sp - in_data;
-    T_MID acc = GiE_prev + err;
-    T_MID diff = err - Err_prev;
+    T_MID err = Sp - in_Measured;
+    T_MID acc = I_err_prev + err;
+    T_MID diff = err - Error_prev;
     T_MID P = Kp * err;
     T_MID I = Ki * acc;
     T_MID D = Kd * diff;
     T_MID sum = (P + I + D) >> KP_SCALE;
-    T_MID out = in_data + sum;
+    T_MID out = in_Measured + sum;
     if (out > MAX_OUT)
         Res_out = MAX_OUT;
     else if (out < MIN_OUT)
         Res_out = MIN_OUT;
     else
         Res_out = out;
-    Err_prev = err;
-    GiE_prev = mode_change == true ? err : acc;
+    Error_prev = err;
+    I_err_prev = mode_change == true ? err : acc;
 }
 
 template <class t_float>

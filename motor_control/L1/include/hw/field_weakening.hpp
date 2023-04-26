@@ -1,18 +1,30 @@
 /*
- * Copyright 2022 Xilinx, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+SPDX-License-Identifier: X11
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+IN THE SOFTWARE.
+
+Except as contained in this notice, the name of Advanced Micro Devices
+shall not be used in advertising or otherwise to promote the sale,
+use or other dealings in this Software without prior written authorization
+from Advanced Micro Devices, Inc.
+*/
 #ifndef _FIELD_WEAKENING_HPP_
 #define _FIELD_WEAKENING_HPP_
 
@@ -21,98 +33,54 @@
 
 //--------------------------------------------------------------------------
 // DECOUPLING
-// Flux_decoup 	 = Flux + Coupling_factor_q
-// Torque_decoup = Torque - Coupling_factor_d
-// Where:
-//		Coupling_factor_q = RPM * (Ls * Iq)
-//		Coupling_factor_d = RPM * ((Ls * Id) + Psi_m)
+// Flux_decoup 	 = Vd + speed * (Ls * Iq)
+// Torque_decoup = Vq - speed * ((Ls * Id) + FAI_M)
 //--------------------------------------------------------------------------
-#ifdef __SYNTHESIS__
-template <class T_NUM>
-void Decoupling(T_NUM& Vd_decoupled, T_NUM& Vq_decoupled, T_NUM Id, T_NUM Iq, T_NUM Vd, T_NUM Vq, T_NUM RPM) {
-    static T_NUM Ls = 0.000845; // Value for BLWR111D-24V-10000	Line-To-Line Inductance 1,69mH divided by 2
-    T_NUM Psi_m = 0.0080144861;
-    T_NUM Flux_decoup, Torque_decoup;
-
-    Flux_decoup = Vd + RPM * (Ls * Iq);
-    Torque_decoup = Vq - RPM * ((Ls * Id) + Psi_m);
-
-    Vd_decoupled = (T_NUM)Flux_decoup;
-    Vq_decoupled = (T_NUM)Torque_decoup;
-}
-#endif
-
 /**
  * @brief Decoupling Flux from the Vd and Torque from the Vq
- * @tparam T_IN	    	Type of the input data. ex. short or ap_int<16> is enough for Q16.16
- * @tparam T_MID        Type of the data in the middle of calculation. ex. int_32t or ap_int<32> is enough for Q16.16
- * @tparam T_MID2		Type of the data in the middle of calculation. ex. ap_fixed<32, 16> is enough for Q16.16
- * @tparam T_OUT		Type of the output data. ex. short or ap_int<16> is enough for Q16.16
- * @param Vd_decoupled  Direct component of the voltage decoupled
- * @param Vq_decoupled  Quadrature component of the voltage decoupled
+ * @tparam T_IN	    	Type of the input data. ex. ap_fixed<32,16> is fit for Q16.16
+ * @tparam T_MID        Type of the data in the middle of calculation.
+ * @tparam T_MID2		Type of the data in the middle of calculation.
+ * @tparam T_OUT		Type of the output data.
+ * @param Vd_decoup     Direct component of the voltage decoupled
+ * @param Vq_decoup     Quadrature component of the voltage decoupled
  * @param Id    		Direct component of the current
  * @param Iq    		Quadrature component of the current
  * @param Vd    		Direct component of the voltage to decouple
  * @param Vq     		Quadrature component of the voltage to decouple
  * @param RPM     		Speed, in RPM
+ * @param RPM_to_speed  Constant factor for conversion
  */
 template <class T_IN, class T_MID, class T_MID2, class T_OUT, int MAX_AD_SCL>
-void Decoupling_T(T_OUT& Vd_decoupled, T_OUT& Vq_decoupled, T_MID Id, T_MID Iq, T_IN Vd, T_IN Vq, T_IN RPM) {
-#pragma HLS INLINE off
-    // static double Ls = 0.00022; // Value for BLWR111D-24V-10000	Line-To-Line Inductance 1,69mH divided by 2
-    const T_MID2 Pi = 3.1415926535;
-    const T_MID AD_scl = MAX_AD_SCL;
-    const T_MID Imax = COMM_MOTOR_PARA_IMAX;
-    const T_MID Umax = COMM_MOTOR_PARA_UMAX;
-    const T_MID ppr = COMM_MACRO_PPR;
-    const T_MID2 Ls = COMM_MOTOR_PARA_LD;
-    const T_MID2 Psi_m = COMM_MOTOR_PARA_FAI_M;
-    T_MID2 Ls_scl = Ls * Imax / Umax;
-    T_MID2 Psi_m_scl = Psi_m / Umax * AD_scl;
-    T_MID2 Flux_decoup, Torque_decoup;
-    T_MID2 w = 2 * Pi * RPM / 60;
-
-    Flux_decoup = Vd + ppr * w * (Ls_scl * Iq);
-    Torque_decoup = Vq - ppr * w * ((Ls_scl * Id) + Psi_m_scl);
-
-    Vd_decoupled = (T_OUT)Flux_decoup;
-    Vd_decoupled = 0;
-    Vq_decoupled = (T_OUT)Torque_decoup;
-}
-
-template <class T_IN, class T_MID, class T_MID2, class T_OUT, int MAX_AD_SCL>
 void Decoupling_T_ap_fixed(
-    T_OUT& Vd_decoupled, T_OUT& Vq_decoupled, T_MID Id, T_MID Iq, T_IN Vd, T_IN Vq, T_IN RPM, T_OUT RPM_to_speed) {
+    T_OUT& Vd_decoup, T_OUT& Vq_decoup, T_MID Id, T_MID Iq, T_IN Vd, T_IN Vq, T_IN RPM, T_OUT RPM_to_speed) {
 #pragma HLS INLINE
-    // static double Ls = 0.00022; // Value for BLWR111D-24V-10000	Line-To-Line Inductance 1,69mH divided by 2
-    // const T_MID2 Pi = 3.1415926535;
-    // const T_MID ppr = COMM_MACRO_PPR;
+
     const T_MID2 Ls = COMM_MOTOR_PARA_LD;
-    const T_MID2 Psi_m = COMM_MOTOR_PARA_FAI_M;
+    const T_MID2 FAI_M = COMM_MOTOR_PARA_FAI_M;
     T_MID2 Flux_decoup, Torque_decoup;
-    // T_MID2 w = 2 * Pi * RPM / 60;
 
     Flux_decoup = Vd + RPM_to_speed * RPM * (Ls * Iq);
-    Torque_decoup = Vq - RPM_to_speed * RPM * ((Ls * Id) + Psi_m);
+    Torque_decoup = Vq - RPM_to_speed * RPM * ((Ls * Id) + FAI_M);
 
-    Vd_decoupled = Flux_decoup;
-    Vd_decoupled = 0;
-    Vq_decoupled = Torque_decoup;
+    Vd_decoup = Flux_decoup;
+    Vd_decoup = 0;
+    Vq_decoup = Torque_decoup;
 }
 
 //--------------------------------------------------------------------------
 // Field Weakening
 //
-// Modulation index:
-//		M_index = sqrt(Vd^2 + Vq^2)
+// Modulation:
+//		Modulation = sqrt(Vd^2 + Vq^2)
 //
-// Modulation Threshold:
-//		M_threshold = SVM_inv_index / (2*Vdc - V_reserve)
+// Modulation set point:
+//		Modulation_sp = Max_SVM / (2*Vdc - V_reserve)
 //
-// M_error = M_threshold - M_index
+// Modulation_error = Modulation_sp - Modulation
 //
-// PI regualtor:
-// 		FW_PI_out = Kp * M_error + Ki * (M_error)
+// PID for Field Weakening:
+// 		PID_out = Kp * Modulation_error + Ki * (Modulation_error)
 //
 //--------------------------------------------------------------------------
 
@@ -147,79 +115,54 @@ static float Sqrt2(float x) {
     return res;
 }
 
-template <class T_NUM>
-void Field_Weakening(
-    T_NUM& Vd_weakened, T_NUM Vd_decoupled, T_NUM Vq_decoupled, T_NUM V_sensed, T_NUM SVM_index, T_NUM Kp, T_NUM Ki) {
-    const T_NUM V_reserve = 0;
-    T_NUM MAX_CURRENT = 0.78; // 0.88 from datasheet - 10%
-    T_NUM M_index, M_threshold, FW_PI_out;
-
-    M_index = sqrt(Vd_decoupled * Vd_decoupled + Vq_decoupled * Vq_decoupled); // Modulation Index
-    M_threshold = (SVM_index / ((V_sensed << 1) - V_reserve));                 // Modulation Threshold
-
-    static T_NUM ierror; // Variable for PI regulator result
-
-    T_NUM error = M_threshold - M_index;
-    ierror += error;
-    FW_PI_out = Kp * error + Ki * ierror;
-    if (FW_PI_out > MAX_CURRENT) {
-        FW_PI_out = MAX_CURRENT;
-    }
-    if (FW_PI_out < -MAX_CURRENT) {
-        FW_PI_out = -MAX_CURRENT;
-    }
-    Vd_weakened = (T_NUM)FW_PI_out;
-}
 #endif
 
 /**
  * @brief Field Weakening
- * @tparam T_IN	    	    Type of the input data. ex. short or ap_int<16> is enough for Q16.16
- * @tparam T_MID        Type of the data in the middle of calculation. ex. int_32t or ap_int<32> is enough for Q16.16
- * @tparam T_MID2		Type of the data in the middle of calculation. ex. ap_fixed<32, 16> is enough for Q16.16
- * @tparam T_OUT		    Type of the output data. ex. short or ap_int<16> is enough for Q16.16
- * @param Vd_weakened    	Voltage Direct component, the Weakening value needed to reach higher velocity
- * @param Vd_decoupled      Direct component of the voltage decoupled
- * @param Vq_decoupled      Quadrature component of the voltage decoupled
- * @param V_sensed          Voltage sensed on the DC bus
- * @param SVM_index		    Maximum positive Phase Voltage (A or B or C) actual activated
- * @param Kp                Proportional coefficient for the PI Regulator of the Field Weakening
- * @param Ki                Integral coefficient for the PI Regulator of the Field Weakening
+ * @tparam T_IN	    	    Type of the input data. ex. ap_fixed<32,16> is fit for Q16.16
+ * @tparam T_MID            Type of the data in the middle of calculation.
+ * @tparam T_MID2		    Type of the data in the middle of calculation.
+ * @param Modulation        Modulation, Euclidean distance of the Vd_decoup and Vq_decoup
+ * @param Modulation_sp    	Setpoint for the Modulation
+ * @param Vd_decoup         Direct component of the voltage decoupled
+ * @param Vq_decoup         Quadrature component of the voltage decoupled
+ * @param Volt_sensord      Voltage sensed on the DC bus
+ * @param Max_SVM		    Positive Phase Voltage (A or B or C) actual activated, now is [MAX_Volt]/2
  */
 template <class T_IN, class T_MID, class T_MID2>
 void Field_Weakening_T(
-    T_MID& M_index, T_MID& M_threshold, T_IN Vd_decoupled, T_IN Vq_decoupled, T_IN V_sensed, T_MID SVM_index) {
+    T_MID& Modulation, T_MID& Modulation_sp, T_IN Vd_decoup, T_IN Vq_decoup, T_IN Volt_sensord, T_MID Max_SVM) {
 #pragma HLS INLINE off
     const T_IN V_reserve = 0;
     // const T_MID MAX_CURRENT = MAX_AD_SCL>>1; // 0.88 from datasheet - 10%
-    // T_MID M_index, M_threshold, FW_PI_out;
+    // T_MID Modulation, Modulation_sp, FW_PI_out;
     T_MID FW_PI_out;
 
-    // M_index = hls::sqrt(Vd_decoupled * Vd_decoupled + Vq_decoupled * Vq_decoupled); // Modulation Index
+    // Modulation = hls::sqrt(Vd_decoup * Vd_decoup + Vq_decoup * Vq_decoup); // Modulation Index
 
-    ap_fixed<48, 32> squareSum = Vd_decoupled * Vd_decoupled + Vq_decoupled * Vq_decoupled;
+    ap_fixed<48, 32> squareSum = Vd_decoup * Vd_decoup + Vq_decoup * Vq_decoup;
     float temp;
 #pragma HLS BIND_OP variable = temp op = fsqrt impl = dsp
     temp = std::sqrt(squareSum.to_float());
-    M_index = temp;
+    Modulation = temp;
 
     //     ap_fixed< 32, 16> tmp_mul1;
     // #pragma HLS BIND_OP variable=tmp_mul1 op=mul impl=dsp
-    //     tmp_mul1 = Vd_decoupled * Vd_decoupled;
+    //     tmp_mul1 = Vd_decoup * Vd_decoup;
     //     ap_fixed< 32, 16> tmp_mul2;
     // #pragma HLS BIND_OP variable=tmp_mul2 op=mul impl=dsp
-    //     tmp_mul2 = Vq_decoupled * Vq_decoupled;
+    //     tmp_mul2 = Vq_decoup * Vq_decoup;
 
     //     ap_fixed< 32, 16> tmp_add1;
     // #pragma HLS BIND_OP variable=tmp_add1 op=add impl=dsp
     //     tmp_add1 = tmp_mul1 + tmp_mul2;
 
-    //     M_index = sqrt_fixed_pipelineOff<32, 16> (tmp_add1);
-    //     //M_index = hls::sqrt(tmp_mul1); // Modulation Index
-    // #pragma HLS BIND_OP variable=M_threshold op=mul impl=dsp
-    // #pragma HLS BIND_OP variable=M_threshold op=add impl=dsp
+    //     Modulation = sqrt_fixed_pipelineOff<32, 16> (tmp_add1);
+    //     //Modulation = hls::sqrt(tmp_mul1); // Modulation Index
+    // #pragma HLS BIND_OP variable=Modulation_sp op=mul impl=dsp
+    // #pragma HLS BIND_OP variable=Modulation_sp op=add impl=dsp
 
-    M_threshold = (SVM_index / ((V_sensed << 1) - V_reserve)); // Modulation Threshold
+    Modulation_sp = (Max_SVM / ((Volt_sensord << 1) - V_reserve)); // Modulation Threshold
 
     // pid has move outside
 }
