@@ -17,7 +17,7 @@
 all: rapidcsv fastcluster
 
 rapidcsv:
-	git clone https://github.com/d99kris/rapidcsv.git -b v8.43
+	git clone https://github.com/d99kris/rapidcsv.git -b v8.75
 
 fastcluster:
 	git clone https://github.com/dmuellner/fastcluster.git -b v1.1.28

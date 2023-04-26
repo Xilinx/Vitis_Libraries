@@ -49,11 +49,11 @@ fi
 echo "building arrow..."
 if [ ! -d ${ext}/arrow/cpp/release ];then
 mkdir -p ${ext}/arrow/cpp/release
-fi
 cd ${ext}/arrow/cpp/release
 cmake .. -DCMAKE_CXX_COMPILER=$COMPILER_PATH -DCMAKE_C_COMPILER=$(dirname $COMPILER_PATH)/gcc -DCMAKE_CXX_FLAGS=$USER_CXX_FLAGS -DCMAKE_BUILD_TYPE=release -DARROW_JSON:BOOL=ON -DARROW_CSV:BOOL=ON  -DARROW_USE_OPENSSL=ON -DARROW_PARQUET=ON -DPARQUET_REQUIRE_ENCRYPTION=ON -DARROW_DEPENDENCY_SOURCE=BUNDLED 
 #cmake .. -DARROW_FLIGHT=ON -DARROW_BUILD_TESTS=ON -DARROW_DEPENDENCY_SOURCE=BUNDLED
 make -j 8
+fi
 exit 0
 
 

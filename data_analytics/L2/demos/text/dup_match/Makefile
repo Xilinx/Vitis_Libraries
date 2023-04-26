@@ -1,5 +1,5 @@
-#
-# Copyright 2022 Xilinx, Inc.
+# Copyright (C) 2019-2022, Xilinx, Inc.
+# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+# vitis makefile-generator v2.0.9
 
 ############################## Help Section ##############################
 .PHONY: help
@@ -36,7 +36,7 @@ help::
 	$(ECHO) "        Run the sdk.sh script from the common-image directory to install sysroot using the command : ./sdk.sh -y -d ./ -p "
 	$(ECHO) "        Unzip the rootfs file : gunzip ./rootfs.ext4.gz"
 	$(ECHO) "        export SYSROOT=< path-to-platform-sysroot >"
-	$(ECHO) "      b. User could also define SYSROOT, K_IMAGE and ROOTFS by themselves: "
+	$(ECHO) "      b.User could also define SYSROOT, K_IMAGE and ROOTFS by themselves: "
 	$(ECHO) "        export SYSROOT=< path-to-platform-sysroot >"
 	$(ECHO) "        export K_IMAGE=< path-to-Image-files >"
 	$(ECHO) "        export ROOTFS=< path-to-rootfs >"
@@ -44,7 +44,7 @@ help::
 	$(ECHO) "  make clean "
 	$(ECHO) "      Command to remove the generated non-hardware files."
 	$(ECHO) ""
-	$(ECHO) "  make cleanall"
+	$(ECHO) "  make cleanall TARGET=<hw/hw_emu/sw_emu/>"
 	$(ECHO) "      Command to remove all the generated files."
 	$(ECHO) ""
 
@@ -103,25 +103,19 @@ CXXFLAGS += $(EXTRA_CXXFLAGS)
 VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 
 ########################## Setting up Host Variables ##########################
-ifeq ($(TARGET),sw_emu)
-CXXFLAGS += -D SW_EMU_TEST
-endif
-ifeq ($(TARGET),hw_emu)
-CXXFLAGS += -D HW_EMU_TEST
-endif
 
 #Inclue Required Host Source Files
 ifeq ($(ps_on_x86), on)
-HOST_SRCS += $(CUR_DIR)/host/main.cpp $(CUR_DIR)/host/dup_match.cpp $(CUR_DIR)/host/dm/cluster.cpp $(CUR_DIR)/host/dm/common.cpp $(CUR_DIR)/host/dm/predicate.cpp $(CUR_DIR)/host/ext/hcluster.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(CUR_DIR)/host -I $(CUR_DIR)/kernel -I $(XFLIB_DIR)/L2/include/hw -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include -I $(CUR_DIR)//host/ext/re_compile/lib/include -I $(XFLIB_DIR)/L1/include/sw -I $(XFLIB_DIR)/L3/include/sw -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/L1/include/sw -I $(XFLIB_DIR)/L3/include/sw -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include
+HOST_SRCS += host/main.cpp host/dup_match.cpp host/dm/cluster.cpp host/dm/common.cpp host/dm/predicate.cpp host/ext/hcluster.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
+CXXFLAGS +=  -I host -I kernel -I $(XFLIB_DIR)/L2/include/hw -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include -I $(CUR_DIR)/host/ext/re_compile/lib/include -I $(XFLIB_DIR)/L1/include/sw -I $(XFLIB_DIR)/L3/include/sw -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/L1/include/sw -I $(XFLIB_DIR)/L3/include/sw -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include
 CXXFLAGS += -O3 
-LDFLAGS +=  -L $(CUR_DIR)//host/ext/re_compile/lib/lib
+LDFLAGS +=  -L $(CUR_DIR)/host/ext/re_compile/lib/lib
 LDFLAGS +=  -l onig
 else
-HOST_SRCS += $(CUR_DIR)/host/main.cpp $(CUR_DIR)/host/dup_match.cpp $(CUR_DIR)/host/dm/cluster.cpp $(CUR_DIR)/host/dm/common.cpp $(CUR_DIR)/host/dm/predicate.cpp $(CUR_DIR)/host/ext/hcluster.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(CUR_DIR)/host -I $(CUR_DIR)/kernel -I $(XFLIB_DIR)/L2/include/hw -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include -I $(CUR_DIR)//host/ext/re_compile/lib/include -I $(XFLIB_DIR)/L1/include/sw -I $(XFLIB_DIR)/L3/include/sw -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/L1/include/sw -I $(XFLIB_DIR)/L3/include/sw -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include
+HOST_SRCS += host/main.cpp host/dup_match.cpp host/dm/cluster.cpp host/dm/common.cpp host/dm/predicate.cpp host/ext/hcluster.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
+CXXFLAGS +=  -I host -I kernel -I $(XFLIB_DIR)/L2/include/hw -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include -I $(CUR_DIR)/host/ext/re_compile/lib/include -I $(XFLIB_DIR)/L1/include/sw -I $(XFLIB_DIR)/L3/include/sw -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/L1/include/sw -I $(XFLIB_DIR)/L3/include/sw -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include
 CXXFLAGS += -O3 
-LDFLAGS +=  -L $(CUR_DIR)//host/ext/re_compile/lib/lib
+LDFLAGS +=  -L $(CUR_DIR)/host/ext/re_compile/lib/lib
 LDFLAGS +=  -l onig
 endif
 
@@ -132,7 +126,7 @@ endif
 
 EXE_NAME := host.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-EXE_FILE_DEPS := $(HOST_SRCS) $(EXE_FILE_DEPS)
+EXE_FILE_DEPS := $(HOST_SRCS) $(INSTANCE_FILES)  $(EXE_FILE_DEPS)
 
 HOST_ARGS :=  -xclbin $(BUILD_DIR)/TGP_Kernel.xclbin -in $(CUR_DIR)/data/test.csv -golden $(CUR_DIR)/data/golden.txt
 ifneq ($(HOST_ARCH), x86)
@@ -143,10 +137,10 @@ LIBRARY_PATH := $(CUR_DIR)/host/ext/re_compile:$(CUR_DIR)/host/ext/re_compile/li
 ########################## Kernel compiler global settings ##########################
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
 VPP_FLAGS +=   --config $(CUR_DIR)/conn_u50.cfg
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/include/hw -I $(CUR_DIR)/kernel -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L2/include/hw
+VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/include/hw -I kernel -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L2/include/hw
 
 else 
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/include/hw -I $(CUR_DIR)/kernel -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L2/include/hw
+VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/include/hw -I kernel -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L2/include/hw
 
 endif
 
@@ -166,7 +160,7 @@ BINARY_CONTAINERS_PKG += $(BUILD_DIR)/TGP_Kernel.xclbin
 endif
 
 # ################ Setting Rules for Binary Containers (Building Kernels) ################
-$(TEMP_DIR)/TGP_Kernel.xo: $(CUR_DIR)/kernel/predicate_kernel.cpp 
+$(TEMP_DIR)/TGP_Kernel.xo: kernel/predicate_kernel.cpp 
 	$(ECHO) "Compiling Kernel: TGP_Kernel"
 	mkdir -p $(TEMP_DIR)
 	$(VPP) -c $(VPP_FLAGS_TGP_Kernel) $(VPP_FLAGS) -k TGP_Kernel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
@@ -207,8 +201,8 @@ endif
 	@echo 'fi' >> $(RUN_SCRIPT)
 	@echo 'echo "INFO: Embedded host run completed."' >> $(RUN_SCRIPT)
 	@echo 'exit $$return_code' >> $(RUN_SCRIPT)
-DATA_FILE := 
-DATA_DIR := 
+DATA_FILE := $(custom_data_file)
+DATA_DIR := $(custom_data_dir)
 SD_FILES += $(RUN_SCRIPT)
 SD_FILES += $(EXE_FILE)
 SD_FILES += $(EMCONFIG)
@@ -234,11 +228,19 @@ ifeq ($(ps_on_x86), on)
 	@echo "### ***** running PS X86 SE_EMU ***** ###"
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir $(SD_CARD) --package.emu_ps x86
 endif
-#3. General Embeded flow
+# 3. AIE_ON_X86 Flow
+ifeq ($(pcie_aie), on)
+	@echo "### ***** running AIE ON_X86 ***** ###"
+	${VPP} -p $(VPP_PACKAGE) -t ${TARGET} -f ${XPLATFORM} ${AIE_CONTAINER} ${BINARY_CONTAINERS} -o $(BINARY_CONTAINERS_PKG) --package.boot_mode ospi
+	@echo "### ***** sd_card generation done! ***** ###"
+endif
+# 4. General Embeded flow
 ifeq ($(dfx_hw), off)
 ifeq ($(ps_on_x86), off)
+ifeq ($(pcie_aie), off)
 	$(VPP) -t $(TARGET) --platform $(XPLATFORM) -o $(BINARY_CONTAINERS_PKG) -p $(PACKAGE_FILES) $(VPP_PACKAGE) --package.out_dir  $(SD_CARD) --package.rootfs $(ROOTFS) --package.kernel_image $(K_IMAGE)  $(SD_FILES_WITH_PREFIX) $(SD_DIRS_WITH_PREFIX)
 	@echo "### ***** sd_card generation done! ***** ###"
+endif
 endif
 endif
 
@@ -254,17 +256,26 @@ mkflag:
 	mkdir -p $(BUILD_DIR)
 	rm -rf $(BUILD_DIR)/makefile_args.txt
 	@for var in $(MAKEFLAGS); do echo $$var >> $(BUILD_DIR)/makefile_args.txt; done
+
 all: check_device check_vpp check_platform mkflag $(RUN_DEPS)
+
 run: all
 #hw_emu
 ifneq (,$(filter hw_emu, $(TARGET)))
 ifeq ($(HOST_ARCH), x86)
+ifeq ($(pcie_aie), on)
+	cp $(AIE_WORK_DIR)/reports/dma_lock_report.json ./
+	cp $(AIE_WORK_DIR)/ps/c_rts/aie_control_config.json ./
+	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) $(BINARY_CONTAINERS_PKG)
+	
+endif
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
 	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
 	
 endif
@@ -277,7 +288,7 @@ ifeq ($(HOST_ARCH), x86)
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
 	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
 	
 endif
@@ -307,7 +318,7 @@ endif
 pre_build:
 	make -C $(CUR_DIR)/host/ext/re_compile; make -C $(CUR_DIR)/host/ext
 
-.PHONY: clean cleanall emconfig
+.PHONY: clean cleanall emconfig gen_instances valid_params
 emconfig: $(EMCONFIG)
 
 .PHONY: host
@@ -319,23 +330,29 @@ endif
 
 .PHONY: xclbin
 ifeq ($(HOST_ARCH), x86)
-xclbin: check_vpp check_xrt pre_build $(BINARY_CONTAINERS)
+xclbin: check_vpp check_xrt  pre_build $(BINARY_CONTAINERS)
 else
-xclbin: check_vpp check_sysroot pre_build $(BINARY_CONTAINERS)
+xclbin: check_vpp check_sysroot  pre_build $(BINARY_CONTAINERS)
 endif
+
+gen_instances: $(INSTANCE_FILES)
+	@echo "Nothing to generate."
+
+valid_params:
+	@echo "Nothing to validate."
 
 ############################## Cleaning Rules ##############################
 cleanh:
-	-$(RMDIR) $(EXE_FILE) vitis_* TempConfig system_estimate.xtxt *.rpt .run/
-	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb sample_link.ini sample_compile.ini obj*  bin* *.csv *.jpg *.jpeg *.png
+	-$(RMDIR) $(EXE_FILE)  vitis_* TempConfig system_estimate.xtxt *.rpt .run/  $(INST_TB_FILES)
+	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb sample_link.ini sample_compile.ini obj*  bin* *.csv *.jpg *.jpeg *.png *.db
 
 cleank:
 	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl*start_simulation. sh *.xclbin
-	-$(RMDIR) _x_temp.*
+	-$(RMDIR) _x_temp.* _x* $(INST_FILES)
 
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR)  emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
-	-$(RMDIR)  $(CUR_DIR)/Work $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
-	-$(RMDIR) 
+	-$(RMDIR)  $(AIE_WORK_DIR) $(AIE_PKG_DIR) $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
+	-$(RMDIR)  *.html $(INSTANCE_FILES)
 
 clean: cleanh

@@ -21,6 +21,20 @@ Release Note
 .. toctree::
    :hidden:
    :maxdepth: 1
+
+2023.1
+------
+There are some known issues for this release.
+
+- Following kernels in L2/tests fail hardware run with 2023.1 Vitis and XRT. Please use 2022.2 Vitis and XRT for it.
+
+  - clustering/kmeans
+  - classification/xGradientBoost  
+  - classification/decisiontree
+  - regression/linearRegressionSGDTrain  
+  - regression/ridgeRegressionSGDTrain
+
+
 2022.2
 ------
 The 2022.2 release has the following addition:
@@ -39,7 +53,7 @@ The Data Analytics Library has the following addition in the 2022.1 release:
 
 There are some known issues for this release.
 
-* Log Analyer in L2 demo fails hardware build with 2022.1 Vitis. Please use 2021.2 Vitis for it,
+* Log Analyer in L2 demo fails hardware build with 2022.1 Vitis. Please use 2021.2 Vitis for it.
 
 2021.2
 ------

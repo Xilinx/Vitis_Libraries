@@ -84,7 +84,7 @@ VPP_LDFLAGS ?=
 # ######################### Setting Targets of Makefile ################################
 .PHONY: run pre_build all
 
-CXX_PATH := $(patsubst %/,%,$(dir $(CXX)))
+CXX_PATH := $(patsubst %/,%,$(dir $(shell which $(CXX))))
 CMAKE_PATHS := $(sort $(wildcard $(XILINX_VITIS)/tps/lnx64/cmake-3.2*.*))
 CMAKE_PATH := $(word $(words $(CMAKE_PATHS)),$(CMAKE_PATHS))
 
