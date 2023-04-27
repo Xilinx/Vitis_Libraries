@@ -159,7 +159,7 @@
     ], 
     "data": [
         "LIB_DIR/data/512x512.png", 
-        "LIB_DIR/data/HD.jpg"
+        "LIB_DIR/data/4k_5.png"
     ], 
     "host": {
         "host_exe": "rotate", 

@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_isp_types.h"
+#include "xf_isp_tb_config.h"
 #include "xcl2.hpp"
 
 unsigned short mode_reg = 0;
@@ -307,7 +307,7 @@ int main(int argc, char** argv) {
 
     out_img_ir.create(in_img1.rows, in_img1.cols, CV_16UC1);
     size_t vec_in_size_bytes = 256 * 3 * sizeof(unsigned char);
-    size_t vec_weight_size_bytes = NO_EXPS * XF_NPPC * W_B_SIZE * sizeof(short);
+    size_t vec_weight_size_bytes = NO_EXPS * XF_NPPCX * W_B_SIZE * sizeof(short);
 
     if (hdr_en) {
         image_in_size_bytes = interleaved_img.rows * interleaved_img.cols * sizeof(unsigned char);
@@ -329,7 +329,7 @@ int main(int argc, char** argv) {
 
     out_img_ir.create(in_img1.rows, in_img1.cols, CV_16UC1);
     size_t vec_in_size_bytes = 256 * 3 * sizeof(unsigned char);
-    size_t vec_weight_size_bytes = NO_EXPS * XF_NPPC * W_B_SIZE * sizeof(short);
+    size_t vec_weight_size_bytes = NO_EXPS * XF_NPPCX * W_B_SIZE * sizeof(short);
     if (hdr_en) {
         image_in_size_bytes = interleaved_img.rows * interleaved_img.cols * sizeof(unsigned short);
     } else {
@@ -348,9 +348,9 @@ int main(int argc, char** argv) {
     // wr_ocv_gen() function call
     wr_ocv_gen(alpha, optical_black_value, intersec, rho, imax, t, wr_ocv);
 
-    short wr_hls[NO_EXPS * XF_NPPC * W_B_SIZE];
+    short wr_hls[NO_EXPS * XF_NPPCX * W_B_SIZE];
 
-    for (int k = 0; k < XF_NPPC; k++) {
+    for (int k = 0; k < XF_NPPCX; k++) {
         for (int i = 0; i < NO_EXPS; i++) {
             for (int j = 0; j < (W_B_SIZE); j++) {
                 wr_hls[(i + k * NO_EXPS) * W_B_SIZE + j] = wr_ocv[i][j];

@@ -70,32 +70,6 @@
                 }
             }
         }, 
-        "zcu104": {
-            "host": {
-                "compiler": {
-                    "includepaths": [
-                        "$(SYSROOT)/usr/include", 
-                        "$(SYSROOT)/usr/include/opencv4"
-                    ]
-                }, 
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib", 
-                        "${SYSROOT}/lib"
-                    ]
-                }, 
-                "compiler_x86": {
-                    "includepaths": [
-                        "$(OPENCV_INCLUDE)"
-                    ]
-                }, 
-                "linker_x86": {
-                    "librarypaths": [
-                        "$(OPENCV_LIB)"
-                    ]
-                }
-            }
-        }, 
         "vck190": {
             "host": {
                 "compiler": {

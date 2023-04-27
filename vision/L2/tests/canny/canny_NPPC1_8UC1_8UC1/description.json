@@ -142,7 +142,7 @@
     "launch": [
         {
             "target": "sw_emu", 
-            "cmd_args": " LIB_DIR/data/512x512.jpg",
+            "cmd_args": " LIB_DIR/data/128x128_24.jpg",
             "name": "sw_emu", 
             "ld_library_path": [
                 "$(OPENCV_LIB)", 
@@ -152,7 +152,7 @@
         }, 
         {
             "target": "hw_emu", 
-            "cmd_args": " LIB_DIR/data/512x512.jpg",
+            "cmd_args": " LIB_DIR/data/128x128_24.jpg",
             "name": "hw_emu", 
             "ld_library_path": [
                 "$(OPENCV_LIB)", 
@@ -172,7 +172,8 @@
         }
     ], 
     "data": [
-        "LIB_DIR/data/512x512.jpg"
+        "LIB_DIR/data/512x512.jpg",
+        "LIB_DIR/data/128x128_24.jpg"
     ], 
     "host": {
         "host_exe": "canny", 
@@ -237,6 +238,7 @@
     ], 
     "testinfo": {
         "disable": false, 
+        "stacksize": 16384,
         "jobs": [
             {
                 "index": 0, 
@@ -244,15 +246,15 @@
                 "env": "", 
                 "cmd": "", 
                 "max_memory_MB": {
-                    "vitis_hw_build": 40960, 
+                    "vitis_hw_build": 65535, 
                     "vitis_hw_emu": 28672, 
                     "vitis_sw_emu": 10240, 
                     "vitis_hw_run": 10240
                 }, 
                 "max_time_min": {
                     "vitis_hw_build": 470, 
-                    "vitis_hw_emu": 470, 
-                    "vitis_sw_emu": 60, 
+                    "vitis_hw_emu": 600, 
+                    "vitis_sw_emu": 90, 
                     "vitis_hw_run": 30
                 }
             }

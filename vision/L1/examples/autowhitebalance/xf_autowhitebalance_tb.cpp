@@ -1,5 +1,6 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -239,8 +240,11 @@ int main(int argc, char** argv) {
     }
 
     cv::Mat in_gray, in_gray1, ocv_ref, out_gray, diff, ocv_ref_in1, ocv_ref_in2, inout_gray1, ocv_ref_gw;
-
+#if T_8U
     in_gray = cv::imread(argv[1], 1); // read image
+#else
+    in_gray = cv::imread(argv[1], -1); // read image
+#endif
 
     if (in_gray.data == NULL) {
         fprintf(stderr, "Cannot open image %s\n", argv[1]);

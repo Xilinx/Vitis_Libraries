@@ -142,7 +142,7 @@
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-                "LIB_DIR/L3/examples/isp_24bit_decompand/build"
+                "LIB_DIR/L3/examples/isp_24bit_decompand/config"
             ], 
             "options": "-O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include", 
             "symbols": [
@@ -154,7 +154,7 @@
         "compiler": {
             "symbols": [], 
             "includepaths": [
-                "LIB_DIR/L3/examples/isp_24bit_decompand/build"
+                "LIB_DIR/L3/examples/isp_24bit_decompand/config"
             ], 
             "clflags": []
         }
@@ -189,7 +189,7 @@
                 "env": "", 
                 "cmd": "", 
                 "max_memory_MB": {
-                    "vitis_hw_build": 40960, 
+                    "vitis_hw_build": 65535, 
                     "vitis_hw_emu": 28672, 
                     "vitis_sw_emu": 10240, 
                     "vitis_hw_run": 10240

@@ -1,4 +1,5 @@
-# Copyright 2019-2022 Xilinx, Inc.
+# Copyright (C) 2019-2022, Xilinx, Inc.
+# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.8
+# vitis makefile-generator v2.0.9
 
 ############################## Help Section ##############################
 .PHONY: help
@@ -117,20 +118,6 @@ CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/
 LDFLAGS +=  -L $(OPENCV_LIB)
 LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/zcu102/'))
-ifeq ($(ps_on_x86), on)
-HOST_SRCS += $(XFLIB_DIR)/L2/examples/houghlines/xf_houghlines_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L2/examples/houghlines/config -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
-LDFLAGS +=  -L $(OPENCV_LIB)
-LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-else
-HOST_SRCS += $(XFLIB_DIR)/L2/examples/houghlines/xf_houghlines_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L2/examples/houghlines/config -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
-LDFLAGS +=  -L $(SYSROOT)/usr/lib -L ${SYSROOT}/lib
-LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-endif
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/zcu104/'))
 ifeq ($(ps_on_x86), on)
 HOST_SRCS += $(XFLIB_DIR)/L2/examples/houghlines/xf_houghlines_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L2/examples/houghlines/config -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
@@ -336,7 +323,7 @@ endif
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
 	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
 	
 endif
@@ -349,7 +336,7 @@ ifeq ($(HOST_ARCH), x86)
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
 	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
 	
 endif

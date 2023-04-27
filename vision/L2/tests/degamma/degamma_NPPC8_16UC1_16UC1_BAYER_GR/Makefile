@@ -1,4 +1,5 @@
-# Copyright 2019-2022 Xilinx, Inc.
+# Copyright (C) 2019-2022, Xilinx, Inc.
+# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.8
+# vitis makefile-generator v2.0.9
 
 ############################## Help Section ##############################
 .PHONY: help
@@ -221,11 +222,11 @@ VPP_LDFLAGS_krnl_degamma += --kernel_frequency 200
 endif
 
 else 
-VPP_FLAGS_degamma_accel += --hls.clock 300000000:degamma_accel
+VPP_FLAGS_degamma_accel += --hls.clock 200000000:degamma_accel
 ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_krnl_degamma += --clock.defaultFreqHz 300000000
+VPP_LDFLAGS_krnl_degamma += --clock.defaultFreqHz 200000000
 else
-VPP_LDFLAGS_krnl_degamma += --kernel_frequency 300
+VPP_LDFLAGS_krnl_degamma += --kernel_frequency 200
 endif
 
 endif

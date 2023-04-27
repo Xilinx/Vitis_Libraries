@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +16,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_isp_types.h"
+#include "xf_isp_tb_config.h"
 
 #include "xcl2.hpp"
 
@@ -113,7 +114,7 @@ int main(int argc, char** argv) {
 
     in_img.read((char*)img_in_buffer, total_bytes);
 
-    cv::Mat raw_input(in_rows, in_cols, CV_INTYPE, img_in_buffer);
+    cv::Mat raw_input(in_rows, in_cols, CV_IN_TYPE, img_in_buffer);
 
     if (raw_input.data == NULL) {
         std::cout << "Unable to read the input image" << std::endl;
@@ -121,7 +122,7 @@ int main(int argc, char** argv) {
     }
 
     out_img.create(in_rows, in_cols, CV_16UC1);
-    ir_output.create(in_rows, in_cols, CV_INTYPE);
+    ir_output.create(in_rows, in_cols, CV_IN_TYPE);
 
     // Write input image
     imwrite("input.png", raw_input);
@@ -180,9 +181,9 @@ int main(int argc, char** argv) {
     cl::Device device = devices[0];
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_SRC_T, XF_NPPC) << std::endl;
-    std::cout << "NPPC:" << XF_NPPC << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, XF_NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, XF_NPPCX) << std::endl;
+    std::cout << "NPPC:" << XF_NPPCX << std::endl;
 
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_ISPPipeline");

@@ -32,13 +32,13 @@ class xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTO
 
     int imgSize() { return (mImageSize[0] * mImageSize[1] * mImageSize[2]); }
 
-    int tileWindowSize() {
-        return ((xf::cv::aie::METADATA_SIZE + (TILE_HEIGHT_MAX * TILE_WIDTH_MAX * sizeof(DATA_TYPE))));
+    int tileWindowSize(uint8_t channels) {
+        return ((xf::cv::aie::METADATA_SIZE + (channels * TILE_HEIGHT_MAX * TILE_WIDTH_MAX * sizeof(DATA_TYPE))));
     }
 
-    int tileImgSize(uint8_t channels) { return (tileWindowSize() * (mTileRows * mTileCols * channels)); }
+    int tileImgSize(uint8_t channels) { return (tileWindowSize(channels) * (mTileRows * mTileCols)); }
 
-    int bufferSizePerCore() { return (tileWindowSize() * ((mTileRows * mTileCols) / CORES)); }
+    int bufferSizePerCore() { return (tileWindowSize(mchannels) * ((mTileRows * mTileCols) / CORES)); }
 
     // Helper function for Tiler copy {
     template <DataMoverKind _t = KIND, typename std::enable_if<(_t == TILER)>::type* = nullptr>
@@ -46,10 +46,11 @@ class xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTO
         assert(mpImgData);
 
         char* buffer = (char*)xrtBOMap(mImageBOHndl);
-        int tileSize = tileWindowSize();
+        int tileSize = tileWindowSize(mchannels);
         for (int t = startInd; t < endInd; t++) {
             xf::cv::aie::metadata_elem_t* meta_data_p = (xf::cv::aie::metadata_elem_t*)(buffer + (t * tileSize));
             memset(meta_data_p, 0, xf::cv::aie::METADATA_SIZE);
+
             xf::cv::aie::xfSetTileWidth(meta_data_p, mMetaDataList[t].tileWidth());
             xf::cv::aie::xfSetTileHeight(meta_data_p, mMetaDataList[t].tileHeight());
             xf::cv::aie::xfSetTilePosH(meta_data_p, mMetaDataList[t].positionH());
@@ -83,7 +84,7 @@ class xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTO
             int16_t positionH = mMetaDataList[t].positionH();
             for (int ti = 0; ti < tileHeight; ti++) {
                 memcpy(image_data_p + (ti * (tileWidth * mchannels)),
-                       mpImgData + (((positionV + ti) * (mImageSize[1] * mchannels)) + positionH),
+                       mpImgData + (((positionV + ti) * (mImageSize[1] * mchannels)) + positionH * mchannels),
                        tileWidth * sizeof(DATA_TYPE) * mchannels);
             }
         }
@@ -118,7 +119,7 @@ class xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTO
         assert(mpImgData != nullptr);
 
         char* buffer = (char*)xrtBOMap(mImageBOHndl);
-        int tileSize = tileWindowSize();
+        int tileSize = tileWindowSize(mchannels);
         for (int t = startInd; t < endInd; t++) {
             xf::cv::aie::metadata_elem_t* meta_data_p = (xf::cv::aie::metadata_elem_t*)(buffer + (t * tileSize));
 
@@ -138,8 +139,10 @@ class xfcvDataMovers<KIND, DATA_TYPE, TILE_HEIGHT_MAX, TILE_WIDTH_MAX, AIE_VECTO
 
             DATA_TYPE* image_data_p = (DATA_TYPE*)xf::cv::aie::xfGetImgDataPtr(meta_data_p);
             for (int ti = 0; ti < correctedTileHeight; ti++) {
-                memcpy(mpImgData + (((correctedPositionV + ti) * (mImageSize[1] * mchannels)) + correctedPositionH),
-                       image_data_p + (((overlapSizeV_top + ti) * (tileWidth * mchannels)) + overlapSizeH_left),
+                memcpy(mpImgData +
+                           (((correctedPositionV + ti) * (mImageSize[1] * mchannels)) + correctedPositionH * mchannels),
+                       image_data_p +
+                           (((overlapSizeV_top + ti) * (tileWidth * mchannels)) + overlapSizeH_left * mchannels),
                        correctedTileWidth * sizeof(DATA_TYPE) * mchannels);
             }
         }

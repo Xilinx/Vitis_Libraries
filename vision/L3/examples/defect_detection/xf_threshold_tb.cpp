@@ -1,5 +1,6 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +23,7 @@
 #include <vector>
 
 #include "common/xf_headers.hpp"
-#include "xf_threshold_config.h"
+#include "xf_threshold_tb_config.h"
 
 #include "xcl2.hpp"
 #include <unistd.h>

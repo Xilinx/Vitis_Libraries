@@ -180,7 +180,7 @@
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-                "LIB_DIR/L3/examples/defect_detection/build"
+                "LIB_DIR/L3/examples/defect_detection/config"
             ], 
             "options": "-O3"
         }
@@ -189,7 +189,7 @@
         "compiler": {
             "symbols": [], 
             "includepaths": [
-                "LIB_DIR/L3/examples/defect_detection/build"
+                "LIB_DIR/L3/examples/defect_detection/config"
             ], 
             "clflags": []
         }

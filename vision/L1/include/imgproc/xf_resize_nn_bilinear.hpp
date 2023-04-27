@@ -1,5 +1,6 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -292,7 +293,8 @@ void resizeNNBilinear(xf::cv::Mat<SRC_TYPE, INHEIGHT, INWIDTH, NPPC, XFCVDEPTH_I
     const int COMP_INDEX_WIDTH = 42; // SCALE_WIDTH+PRE_INDEX_WIDTH;
     const int COMP_INDEX_INT = 20;   // SCALE_INT+PRE_INDEX_INT;
 
-    const int BUFFER_WORDS = MAX_DOWN_SCALE;
+    const int BUFFER_WORDS = MAX_DOWN_SCALE + 1; // +1 is added to cover a corner case. e.g., input width = 3840, output
+                                                 // width = 2976, scale factor = 1.290322580645.
     const int BUFFER_DUP_FACTOR = (BUFFER_WORDS + 1) >> 1;
 
     uint64_t xnew, ynew;

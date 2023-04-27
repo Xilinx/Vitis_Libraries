@@ -1,5 +1,6 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +15,7 @@
  * limitations under the License.
  */
 
-#include "xf_threshold_config.h"
+#include "xf_cca_custom_accel_config.h"
 
 extern "C" {
 void cca_custom_accel(uint8_t* in_ptr, uint8_t* fwd_ptr, uint8_t* out_ptr, int* def_pix, int height, int width) {
@@ -28,7 +29,7 @@ void cca_custom_accel(uint8_t* in_ptr, uint8_t* fwd_ptr, uint8_t* out_ptr, int* 
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<TYPE, HEIGHT, STRIDE, NPIX, XF_CV_DEPTH_OUT> rev_out_mat(height, width);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, STRIDE, XF_NPPCX, XF_CV_DEPTH_OUT> rev_out_mat(height, width);
 
 // clang-format off
 #pragma HLS DATAFLOW
@@ -36,10 +37,11 @@ void cca_custom_accel(uint8_t* in_ptr, uint8_t* fwd_ptr, uint8_t* out_ptr, int* 
 
     int tmp_def;
 
-    xf::cv::rev_cca<TYPE, HEIGHT, STRIDE, NPIX, XF_CV_DEPTH_OUT>(in_ptr, rev_out_mat, height, width);
-    xf::cv::pass_2<TYPE, HEIGHT, STRIDE, NPIX, XF_CV_DEPTH_OUT>(fwd_ptr, rev_out_mat, out_ptr, tmp_def, height, width);
+    xf::cv::rev_cca<OUT_TYPE, HEIGHT, STRIDE, XF_NPPCX, XF_CV_DEPTH_OUT>(in_ptr, rev_out_mat, height, width);
+    xf::cv::pass_2<OUT_TYPE, HEIGHT, STRIDE, XF_NPPCX, XF_CV_DEPTH_OUT>(fwd_ptr, rev_out_mat, out_ptr, tmp_def, height,
+                                                                        width);
 
-    // xf::cv::ccaCustom<TYPE, HEIGHT, WIDTH, NPIX>(fwd_ptr, in_ptr, rev_out_mat, out_ptr, tmp_def, height,
+    // xf::cv::ccaCustom<OUT_TYPE, HEIGHT, WIDTH, XF_NPPCX>(fwd_ptr, in_ptr, rev_out_mat, out_ptr, tmp_def, height,
     //                               width);
     //*obj_pix = tmp_obj;
     *def_pix = tmp_def;

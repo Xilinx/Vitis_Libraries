@@ -227,7 +227,7 @@
                 "dependency": [], 
                 "env": "", 
                 "cmd": "", 
-                "max_memory_MB": 32768, 
+                "max_memory_MB": 40960, 
                 "max_time_min": 520
             }
         ], 

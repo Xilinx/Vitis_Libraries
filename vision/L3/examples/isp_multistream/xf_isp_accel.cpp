@@ -1,5 +1,6 @@
 /*
- * Copyright 2023-2024 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +15,7 @@
  * limitations under the License.
  */
 
-#include "xf_isp_types.h"
+#include "xf_isp_accel_config.h"
 #include <iostream>
 
 static uint32_t hist0_awb[NUM_STREAMS][3][HIST_SIZE] = {0};
@@ -26,17 +27,18 @@ static constexpr int MinMaxVArrSize =
     LTMTile<BLOCK_HEIGHT, BLOCK_WIDTH, STRM_HEIGHT, XF_WIDTH, XF_NPPC>::MinMaxVArrSize;
 static constexpr int MinMaxHArrSize =
     LTMTile<BLOCK_HEIGHT, BLOCK_WIDTH, STRM_HEIGHT, XF_WIDTH, XF_NPPC>::MinMaxHArrSize;
-static XF_CTUNAME(XF_DST_T, XF_NPPC) omin_r[NUM_STREAMS][MinMaxVArrSize][MinMaxHArrSize];
-static XF_CTUNAME(XF_DST_T, XF_NPPC) omax_r[NUM_STREAMS][MinMaxVArrSize][MinMaxHArrSize];
-static XF_CTUNAME(XF_DST_T, XF_NPPC) omin_w[NUM_STREAMS][MinMaxVArrSize][MinMaxHArrSize];
-static XF_CTUNAME(XF_DST_T, XF_NPPC) omax_w[NUM_STREAMS][MinMaxVArrSize][MinMaxHArrSize];
+static XF_CTUNAME(OUT_TYPE, XF_NPPC) omin_r[NUM_STREAMS][MinMaxVArrSize][MinMaxHArrSize];
+static XF_CTUNAME(OUT_TYPE, XF_NPPC) omax_r[NUM_STREAMS][MinMaxVArrSize][MinMaxHArrSize];
+static XF_CTUNAME(OUT_TYPE, XF_NPPC) omin_w[NUM_STREAMS][MinMaxVArrSize][MinMaxHArrSize];
+static XF_CTUNAME(OUT_TYPE, XF_NPPC) omax_w[NUM_STREAMS][MinMaxVArrSize][MinMaxHArrSize];
 
-static ap_ufixed<16, 4> mean1[NUM_STREAMS] = {0};
-static ap_ufixed<16, 4> mean2[NUM_STREAMS] = {0};
-static ap_ufixed<16, 4> L_max1[NUM_STREAMS] = {0.1};
-static ap_ufixed<16, 4> L_max2[NUM_STREAMS] = {0.1};
-static ap_ufixed<16, 4> L_min1[NUM_STREAMS] = {10};
-static ap_ufixed<16, 4> L_min2[NUM_STREAMS] = {10};
+static ap_ufixed<16, 4> mean1[NUM_STREAMS] = {0, 0, 0, 0};
+static ap_ufixed<16, 4> mean2[NUM_STREAMS] = {0, 0, 0, 0};
+static ap_ufixed<16, 4> L_max1[NUM_STREAMS] = {0.1, 0.1, 0.1, 0.1};
+static ap_ufixed<16, 4> L_max2[NUM_STREAMS] = {0.1, 0.1, 0.1, 0.1};
+static ap_ufixed<16, 4> L_min1[NUM_STREAMS] = {10, 10, 10, 10};
+static ap_ufixed<16, 4> L_min2[NUM_STREAMS] = {10, 10, 10, 10};
+static ap_ufixed<32, 24> acc_sum[NUM_STREAMS] = {0, 0, 0, 0};
 
 static int igain_0[NUM_STREAMS][3] = {0};
 static int igain_1[NUM_STREAMS][3] = {0};
@@ -103,12 +105,12 @@ void function_rgbir(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& hdr_out
  #pragma HLS INLINE OFF
     // clang-format on
 
-    xf::cv::Mat<XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_OUT_IR> fullir_out(height, width);
+    xf::cv::Mat<IN_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_OUT_IR> fullir_out(height, width);
 // clang-format off
  #pragma HLS DATAFLOW
     // clang-format on
     if (USE_RGBIR) {
-        xf::cv::rgbir2bayer_multi_wrap<FILTERSIZE1, FILTERSIZE2, XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC,
+        xf::cv::rgbir2bayer_multi_wrap<FILTERSIZE1, FILTERSIZE2, IN_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC,
                                        XF_BORDER_CONSTANT, XF_USE_URAM, NUM_STREAMS, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1,
                                        XFCVDEPTH_OUT_IR, XFCVDEPTH_3XWIDTH>(
             hdr_out, R_IR_C1_wgts, R_IR_C2_wgts, B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts, sub_wgts, bayer_form,
@@ -117,8 +119,45 @@ void function_rgbir(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& hdr_out
         xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_OUT_IR>(fullir_out,
                                                                                                           img_out_ir);
     } else {
-        fifo_copy<XF_SRC_T, XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>(
-            hdr_out, rggb_out, height, width);
+        fifo_copy<IN_TYPE, IN_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>(hdr_out, rggb_out,
+                                                                                                     height, width);
+    }
+}
+template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int STREAMS, int XFCVDEPTH_IN_1, int XFCVDEPTH_OUT_1>
+void fifo_awb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& demosaic_out,
+              xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& awb_out,
+              uint32_t awb_hist0[STREAMS][3][HIST_SIZE],
+              uint32_t awb_hist1[STREAMS][3][HIST_SIZE],
+              int awb_gain0[STREAMS][3],
+              int awb_gain1[STREAMS][3],
+              unsigned short height,
+              unsigned short width,
+              bool awb_flg[STREAMS],
+              bool eof_awb[STREAMS],
+              unsigned short pawb[STREAMS],
+              int stream_id,
+              int slice_id,
+              unsigned short full_height) {
+// clang-format off
+#pragma HLS INLINE OFF
+    // clang-format on
+
+    float inputMin = 0.0f;
+    float inputMax = (1 << (XF_DTPIXELDEPTH(IN_TYPE, XF_NPPC))) - 1; // 65535.0f;
+    float outputMin = 0.0f;
+    float outputMax = (1 << (XF_DTPIXELDEPTH(IN_TYPE, XF_NPPC))) - 1; // 65535.0f;
+
+    if (WB_TYPE) {
+        std::cout << "Hist_Nor_awb_multi instance:" << std::endl;
+        xf::cv::hist_nor_awb_multi<OUT_TYPE, OUT_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, WB_TYPE, HIST_SIZE, NUM_STREAMS,
+                                   XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>(
+            demosaic_out, awb_out, awb_hist0, awb_hist1, height, width, inputMin, inputMax, outputMin, outputMax,
+            awb_flg, eof_awb, pawb, stream_id, slice_id, full_height);
+    } else {
+        std::cout << "chgain_update_awb_multi instance:" << std::endl;
+        xf::cv::chgain_update_awb_multi<OUT_TYPE, OUT_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, 0, NUM_STREAMS,
+                                        XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>(
+            demosaic_out, awb_out, awb_gain0, awb_gain1, height, width, awb_flg, eof_awb, pawb, stream_id);
     }
 }
 
@@ -135,35 +174,29 @@ void function_awb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& demosaic_
                   bool eof_awb[STREAMS],
                   unsigned short pawb[STREAMS],
                   int stream_id,
-                  int slice_id) {
+                  int slice_id,
+                  unsigned short full_height) {
 // clang-format off
 #pragma HLS INLINE OFF
     // clang-format on
 
-    float inputMin = 0.0f;
-    float inputMax = (1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC))) - 1; // 65535.0f;
-    float outputMin = 0.0f;
-    float outputMax = (1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC))) - 1; // 65535.0f;
-
-    if (WB_TYPE) {
-        xf::cv::hist_nor_awb_multi<XF_DST_T, XF_DST_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, WB_TYPE, HIST_SIZE, NUM_STREAMS,
-                                   XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>(demosaic_out, awb_out, awb_hist0, awb_hist1, height,
-                                                                    width, inputMin, inputMax, outputMin, outputMax,
-                                                                    awb_flg, eof_awb, pawb, stream_id, slice_id);
+    if (USE_AWB) {
+        fifo_awb<OUT_TYPE, OUT_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, NUM_STREAMS, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>(
+            demosaic_out, awb_out, awb_hist0, awb_hist1, awb_gain0, awb_gain1, height, width, awb_flg, eof_awb, pawb,
+            stream_id, slice_id, full_height);
     } else {
-        xf::cv::chgain_update_awb_multi<XF_DST_T, XF_DST_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, 0, NUM_STREAMS,
-                                        XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>(
-            demosaic_out, awb_out, awb_gain0, awb_gain1, height, width, awb_flg, eof_awb, pawb, stream_id);
+        fifo_copy<OUT_TYPE, OUT_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>(
+            demosaic_out, awb_out, height, width);
     }
 }
 
 template <int DST_T, int LTM_T, int ROWS, int COLS, int NPC, int STREAMS, int XFCVDEPTH_IN_1, int XFCVDEPTH_OUT_1>
 void function_tm(xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& awb_out,
                  xf::cv::Mat<LTM_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& aecin,
-                 XF_CTUNAME(XF_DST_T, XF_NPPC) omin_r[STREAMS][MinMaxVArrSize][MinMaxHArrSize],
-                 XF_CTUNAME(XF_DST_T, XF_NPPC) omax_r[STREAMS][MinMaxVArrSize][MinMaxHArrSize],
-                 XF_CTUNAME(XF_DST_T, XF_NPPC) omin_w[STREAMS][MinMaxVArrSize][MinMaxHArrSize],
-                 XF_CTUNAME(XF_DST_T, XF_NPPC) omax_w[STREAMS][MinMaxVArrSize][MinMaxHArrSize],
+                 XF_CTUNAME(OUT_TYPE, XF_NPPC) omin_r[STREAMS][MinMaxVArrSize][MinMaxHArrSize],
+                 XF_CTUNAME(OUT_TYPE, XF_NPPC) omax_r[STREAMS][MinMaxVArrSize][MinMaxHArrSize],
+                 XF_CTUNAME(OUT_TYPE, XF_NPPC) omin_w[STREAMS][MinMaxVArrSize][MinMaxHArrSize],
+                 XF_CTUNAME(OUT_TYPE, XF_NPPC) omax_w[STREAMS][MinMaxVArrSize][MinMaxHArrSize],
                  unsigned short blk_height[STREAMS],
                  unsigned short blk_width[STREAMS],
                  ap_ufixed<16, 4> mean1[STREAMS],
@@ -176,18 +209,22 @@ void function_tm(xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& awb_out,
                  float c2[STREAMS],
                  bool tm_flg[STREAMS],
                  bool eof_tm[STREAMS],
-                 int stream_id) {
+                 int stream_id,
+                 unsigned short full_height,
+                 int slice_id,
+                 ap_ufixed<32, 24> acc_sum[STREAMS]) {
 // clang-format off
 #pragma HLS INLINE OFF
     // clang-format on
-    constexpr int Q_VAL = 1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC)); /* Used in xf_QuatizationDithering */
+    constexpr int Q_VAL = 1 << (XF_DTPIXELDEPTH(IN_TYPE, XF_NPPC)); /* Used in xf_QuatizationDithering */
     if (USE_GTM) {
-        xf::cv::gtm_multi_wrap<XF_DST_T, XF_LTM_T, XF_SRC_T, SIN_CHANNEL_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC,
+        xf::cv::gtm_multi_wrap<OUT_TYPE, XF_LTM_T, IN_TYPE, SIN_CHANNEL_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC,
                                NUM_STREAMS, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>(
-            awb_out, aecin, mean1, mean2, L_max1, L_max2, L_min1, L_min2, c1, c2, tm_flg, eof_tm, stream_id);
+            awb_out, aecin, mean1, mean2, L_max1, L_max2, L_min1, L_min2, c1, c2, tm_flg, eof_tm, stream_id,
+            full_height, slice_id, acc_sum);
 
     } else if (USE_LTM) {
-        xf::cv::LTM_multi_wrap<XF_DST_T, XF_LTM_T, BLOCK_HEIGHT, BLOCK_WIDTH, STRM_HEIGHT, XF_WIDTH, XF_NPPC,
+        xf::cv::LTM_multi_wrap<OUT_TYPE, XF_LTM_T, BLOCK_HEIGHT, BLOCK_WIDTH, STRM_HEIGHT, XF_WIDTH, XF_NPPC,
                                NUM_STREAMS, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>::LTM_multistream_wrap(awb_out, blk_height,
                                                                                                    blk_width, omin_r,
                                                                                                    omax_r, omin_w,
@@ -196,7 +233,7 @@ void function_tm(xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& awb_out,
                                                                                                    stream_id);
 
     } else if (USE_QnD) {
-        xf::cv::xf_QuatizationDithering<XF_DST_T, XF_LTM_T, STRM_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPC, XFCVDEPTH_IN_1,
+        xf::cv::xf_QuatizationDithering<OUT_TYPE, XF_LTM_T, STRM_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPC, XFCVDEPTH_IN_1,
                                         XFCVDEPTH_OUT_1>(awb_out, aecin);
     }
 }
@@ -246,7 +283,7 @@ template <int SRC_T,
           int STREAMS>
 void function_degamma(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& bpc_out,
                       xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dgamma_out,
-                      ap_ufixed<32, 16> dgam_params[STREAMS][3][N][3],
+                      ap_ufixed<32, 18> dgam_params[STREAMS][3][N][3],
                       unsigned short dgam_bayer[STREAMS],
                       unsigned short height,
                       unsigned short width,
@@ -255,10 +292,10 @@ void function_degamma(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& bpc_o
 #pragma HLS INLINE OFF
     // clang-format on
     if (USE_DEGAMMA) {
-        degamma_multi<XF_SRC_T, XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_IN_1, XF_CV_DEPTH_OUT_1, DGAMMA_KP,
+        degamma_multi<IN_TYPE, IN_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_IN_1, XF_CV_DEPTH_OUT_1, DGAMMA_KP,
                       NUM_STREAMS>(bpc_out, dgamma_out, dgam_params, dgam_bayer, stream_id);
     } else {
-        fifo_copy<XF_SRC_T, XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>(
+        fifo_copy<IN_TYPE, IN_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>(
             bpc_out, dgamma_out, height, width);
     }
 }
@@ -274,28 +311,29 @@ void function_aec(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& rggb_out,
                   bool eof_aec[STREAMS],
                   unsigned short paec[STREAMS],
                   int stream_id,
-                  int slice_id) {
+                  int slice_id,
+                  unsigned short full_height) {
 // clang-format off
 #pragma HLS INLINE OFF
     // clang-format on
 
     float aec_inputMin = 0.0f;
-    float aec_inputMax = (1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC))) - 1; // 65535.0f;
+    float aec_inputMax = (1 << (XF_DTPIXELDEPTH(IN_TYPE, XF_NPPC))) - 1; // 65535.0f;
     float aec_outputMin = 0.0f;
-    float aec_outputMax = (1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC))) - 1; // 65535.0f;
+    float aec_outputMax = (1 << (XF_DTPIXELDEPTH(IN_TYPE, XF_NPPC))) - 1; // 65535.0f;
 
 // clang-format off
 #pragma HLS DATAFLOW
     // clang-format on
     if (USE_AEC) {
-        xf::cv::aec_multi<XF_SRC_T, XF_SRC_T, AEC_SIN_CHANNEL_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_IN_1,
+        xf::cv::aec_multi<IN_TYPE, IN_TYPE, AEC_SIN_CHANNEL_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_IN_1,
                           XFCVDEPTH_OUT_1, AEC_HIST_SIZE, NUM_STREAMS>(
             rggb_out, aec_out, aec_hist0, aec_hist1, paec, aec_inputMin, aec_inputMax, aec_outputMin, aec_outputMax,
-            aec_flg, eof_aec, stream_id, slice_id);
+            aec_flg, eof_aec, stream_id, slice_id, full_height);
 
     } else {
-        fifo_copy<XF_SRC_T, XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>(
-            rggb_out, aec_out, height, width);
+        fifo_copy<IN_TYPE, IN_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>(rggb_out, aec_out,
+                                                                                                     height, width);
     }
 }
 
@@ -309,7 +347,7 @@ void Streampipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                     unsigned short width,
                     uint16_t strm_rows,
 
-                    ap_ufixed<32, 16> dgam_params[NUM_STREAMS][3][DGAMMA_KP][3],
+                    ap_ufixed<32, 18> dgam_params[NUM_STREAMS][3][DGAMMA_KP][3],
                     uint32_t awb_hist0[NUM_STREAMS][3][HIST_SIZE],
                     uint32_t awb_hist1[NUM_STREAMS][3][HIST_SIZE],
                     int awb_gain0[NUM_STREAMS][3],
@@ -332,10 +370,10 @@ void Streampipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                     bool aec_flg[NUM_STREAMS],
                     bool eof_aec[NUM_STREAMS],
 
-                    XF_CTUNAME(XF_DST_T, XF_NPPC) omin_r[NUM_STREAMS][MinMaxVArrSize][MinMaxHArrSize],
-                    XF_CTUNAME(XF_DST_T, XF_NPPC) omax_r[NUM_STREAMS][MinMaxVArrSize][MinMaxHArrSize],
-                    XF_CTUNAME(XF_DST_T, XF_NPPC) omin_w[NUM_STREAMS][MinMaxVArrSize][MinMaxHArrSize],
-                    XF_CTUNAME(XF_DST_T, XF_NPPC) omax_w[NUM_STREAMS][MinMaxVArrSize][MinMaxHArrSize],
+                    XF_CTUNAME(OUT_TYPE, XF_NPPC) omin_r[NUM_STREAMS][MinMaxVArrSize][MinMaxHArrSize],
+                    XF_CTUNAME(OUT_TYPE, XF_NPPC) omax_r[NUM_STREAMS][MinMaxVArrSize][MinMaxHArrSize],
+                    XF_CTUNAME(OUT_TYPE, XF_NPPC) omin_w[NUM_STREAMS][MinMaxVArrSize][MinMaxHArrSize],
+                    XF_CTUNAME(OUT_TYPE, XF_NPPC) omax_w[NUM_STREAMS][MinMaxVArrSize][MinMaxHArrSize],
                     ap_ufixed<16, 4> mean1[NUM_STREAMS],
                     ap_ufixed<16, 4> mean2[NUM_STREAMS],
                     ap_ufixed<16, 4> L_max1[NUM_STREAMS],
@@ -347,7 +385,8 @@ void Streampipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                     bool tm_flg[NUM_STREAMS],
                     bool eof_tm[NUM_STREAMS],
                     int stream_id,
-                    int slice_id) {
+                    int slice_id,
+                    ap_ufixed<32, 24> acc_sum[NUM_STREAMS]) {
     int max_height, max_width;
     static unsigned short black_level[NUM_STREAMS];
     static unsigned short rgain[NUM_STREAMS];
@@ -384,22 +423,22 @@ void Streampipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
         lutDim[i] = array_params[i][10];
     }
 
-    xf::cv::Mat<XF_SRC_T, MAX_HEIGHT, MAX_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_0_1> imgInput1(max_height, max_width);
-    xf::cv::Mat<XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_0_2> imgInput2(height, width);
-    xf::cv::Mat<XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_LEF> LEF_Img(height, width);
-    xf::cv::Mat<XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_SEF> SEF_Img(height, width);
-    xf::cv::Mat<XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_1> hdr_out(height, width);
-    xf::cv::Mat<XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_2> rggb_out(height, width);
-    xf::cv::Mat<XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_3> aec_out(height, width);
-    xf::cv::Mat<XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_4> blc_out(height, width);
-    xf::cv::Mat<XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_5> bpc_out(height, width);
-    xf::cv::Mat<XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_6> dgamma_out(height, width);
-    xf::cv::Mat<XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_7> LscOut(height, width);
-    xf::cv::Mat<XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_8> gain_out(height, width);
-    xf::cv::Mat<XF_DST_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_0> demosaic_out(height, width);
-    xf::cv::Mat<XF_DST_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_1> impop(height, width);
-    xf::cv::Mat<XF_DST_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_2> awb_out(height, width);
-    xf::cv::Mat<XF_DST_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_3> ccm_out(height, width);
+    xf::cv::Mat<IN_TYPE, MAX_HEIGHT, MAX_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_0_1> imgInput1(max_height, max_width);
+    xf::cv::Mat<IN_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_0_2> imgInput2(height, width);
+    xf::cv::Mat<IN_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_LEF> LEF_Img(height, width);
+    xf::cv::Mat<IN_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_SEF> SEF_Img(height, width);
+    xf::cv::Mat<IN_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_1> hdr_out(height, width);
+    xf::cv::Mat<IN_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_2> rggb_out(height, width);
+    xf::cv::Mat<IN_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_3> aec_out(height, width);
+    xf::cv::Mat<IN_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_4> blc_out(height, width);
+    xf::cv::Mat<IN_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_5> bpc_out(height, width);
+    xf::cv::Mat<IN_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_6> dgamma_out(height, width);
+    xf::cv::Mat<IN_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_7> LscOut(height, width);
+    xf::cv::Mat<IN_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_8> gain_out(height, width);
+    xf::cv::Mat<OUT_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_0> demosaic_out(height, width);
+    xf::cv::Mat<OUT_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_1> impop(height, width);
+    xf::cv::Mat<OUT_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_2> awb_out(height, width);
+    xf::cv::Mat<OUT_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_3> ccm_out(height, width);
     xf::cv::Mat<XF_LTM_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_4> aecin(height, width);
     xf::cv::Mat<XF_LTM_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_5> _dst(height, width);
     xf::cv::Mat<XF_LTM_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_6> lut_out(height, width);
@@ -408,66 +447,68 @@ void Streampipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
 // clang-format off
 #pragma HLS DATAFLOW
     // clang-format on
-    const int Q_VAL = 1 << (XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC));
+    const int Q_VAL = 1 << (XF_DTPIXELDEPTH(IN_TYPE, XF_NPPC));
     if (USE_HDR_FUSION) {
-        xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_SRC_T, MAX_HEIGHT, MAX_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_0_1>(img_inp,
-                                                                                                           imgInput1);
+        xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, MAX_HEIGHT, MAX_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_0_1>(img_inp,
+                                                                                                          imgInput1);
 
-        xf::cv::extractExposureFrames<XF_SRC_T, NUM_V_BLANK_LINES, NUM_H_BLANK, STRM_HEIGHT, XF_WIDTH, XF_NPPC,
+        xf::cv::extractExposureFrames<IN_TYPE, NUM_V_BLANK_LINES, NUM_H_BLANK, STRM_HEIGHT, XF_WIDTH, XF_NPPC,
                                       XF_USE_URAM, XF_CV_DEPTH_IN_0_1, XF_CV_DEPTH_LEF, XF_CV_DEPTH_SEF>(
             imgInput1, LEF_Img, SEF_Img);
 
-        xf::cv::Hdrmerge_bayer_multi<XF_SRC_T, XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, NO_EXPS, W_B_SIZE, NUM_STREAMS,
+        xf::cv::Hdrmerge_bayer_multi<IN_TYPE, IN_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, NO_EXPS, W_B_SIZE, NUM_STREAMS,
                                      XF_CV_DEPTH_LEF, XF_CV_DEPTH_SEF, XF_CV_DEPTH_IN_1>(LEF_Img, SEF_Img, hdr_out,
                                                                                          wr_hls, stream_id);
     } else {
-        xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_0_2>(img_inp,
-                                                                                                           imgInput2);
-        xf::cv::hdr_decompand_multi<XF_SRC_T, XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_0_2,
+        xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_0_2>(img_inp,
+                                                                                                          imgInput2);
+        xf::cv::hdr_decompand_multi<IN_TYPE, IN_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_0_2,
                                     XF_CV_DEPTH_IN_1, NUM_STREAMS>(imgInput2, hdr_out, dcp_params_12to16, dcp_bayer,
                                                                    stream_id);
     }
 
-    function_rgbir<XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, NUM_STREAMS, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2,
+    function_rgbir<IN_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, NUM_STREAMS, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2,
                    XF_CV_DEPTH_OUT_IR, XF_CV_DEPTH_3XWIDTH>(hdr_out, rggb_out, img_out_ir, R_IR_C1_wgts, R_IR_C2_wgts,
                                                             B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts, sub_wgts,
                                                             bayer_form, height, width, stream_id);
 
-    function_aec<XF_SRC_T, XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_2, XF_CV_DEPTH_IN_3, NUM_STREAMS>(
-        rggb_out, aec_out, aec_hist0, aec_hist1, height, width, aec_flg, eof_aec, paec, stream_id, slice_id);
+    function_aec<IN_TYPE, IN_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_2, XF_CV_DEPTH_IN_3, NUM_STREAMS>(
+        rggb_out, aec_out, aec_hist0, aec_hist1, height, width, aec_flg, eof_aec, paec, stream_id, slice_id,
+        full_height);
 
-    xf::cv::blackLevelCorrection_multi<XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1, NUM_STREAMS,
+    xf::cv::blackLevelCorrection_multi<IN_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1, NUM_STREAMS,
                                        XF_CV_DEPTH_IN_3, XF_CV_DEPTH_IN_4>(aec_out, blc_out, black_level, stream_id);
 
-    xf::cv::badpixelcorrection<XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, 0, 0, XF_CV_DEPTH_IN_4, XF_CV_DEPTH_IN_5>(
+    xf::cv::badpixelcorrection<IN_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, 0, 0, XF_CV_DEPTH_IN_4, XF_CV_DEPTH_IN_5>(
         blc_out, bpc_out);
 
-    function_degamma<XF_SRC_T, XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_5, XF_CV_DEPTH_IN_6, DGAMMA_KP,
+    function_degamma<IN_TYPE, IN_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_5, XF_CV_DEPTH_IN_6, DGAMMA_KP,
                      NUM_STREAMS>(bpc_out, dgamma_out, dgam_params, dgam_bayer, height, width, stream_id);
 
-    xf::cv::Lscdistancebased_multi<XF_SRC_T, XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_6,
+    xf::cv::Lscdistancebased_multi<IN_TYPE, IN_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_6,
                                    XF_CV_DEPTH_IN_7>(dgamma_out, LscOut, full_height, width, slice_id, strm_rows);
 
-    xf::cv::gaincontrol_multi_wrap<XF_SRC_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, NUM_STREAMS, XF_CV_DEPTH_IN_7,
+    xf::cv::gaincontrol_multi_wrap<IN_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, NUM_STREAMS, XF_CV_DEPTH_IN_7,
                                    XF_CV_DEPTH_IN_8>(LscOut, gain_out, rgain, bgain, ggain, bayer_p, stream_id);
 
-    xf::cv::demosaicing_multi_wrap<XF_SRC_T, XF_DST_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, 0, NUM_STREAMS, XF_CV_DEPTH_IN_8,
+    xf::cv::demosaicing_multi_wrap<IN_TYPE, OUT_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, 0, NUM_STREAMS, XF_CV_DEPTH_IN_8,
                                    XF_CV_DEPTH_OUT_0>(gain_out, demosaic_out, bformat, stream_id);
 
-    function_awb<XF_DST_T, XF_DST_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, NUM_STREAMS, XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_2>(
+    function_awb<OUT_TYPE, OUT_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, NUM_STREAMS, XF_CV_DEPTH_OUT_0, XF_CV_DEPTH_OUT_2>(
         demosaic_out, awb_out, awb_hist0, awb_hist1, awb_gain0, awb_gain1, height, width, awb_flg, eof_awb, pawb,
-        stream_id, slice_id);
+        stream_id, slice_id, full_height);
 
-    xf::cv::colorcorrectionmatrix<XF_CCM_TYPE, XF_DST_T, XF_DST_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_2,
+    xf::cv::colorcorrectionmatrix<XF_CCM_TYPE, OUT_TYPE, OUT_TYPE, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_2,
                                   XF_CV_DEPTH_OUT_3>(awb_out, ccm_out);
 
-    if (XF_DST_T == XF_8UC3) {
-        fifo_copy<XF_DST_T, XF_LTM_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_3, XF_CV_DEPTH_OUT_4>(
+    if (OUT_TYPE == XF_8UC3) {
+        fifo_copy<OUT_TYPE, XF_LTM_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_3, XF_CV_DEPTH_OUT_4>(
             ccm_out, aecin, height, width);
     } else {
-        function_tm<XF_DST_T, XF_LTM_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, NUM_STREAMS, XF_CV_DEPTH_OUT_3,
+        function_tm<OUT_TYPE, XF_LTM_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, NUM_STREAMS, XF_CV_DEPTH_OUT_3,
                     XF_CV_DEPTH_OUT_4>(ccm_out, aecin, omin_r, omax_r, omin_w, omax_w, block_height, block_width, mean1,
-                                       mean2, L_max1, L_max2, L_min1, L_min2, c1, c2, tm_flg, eof_tm, stream_id);
+                                       mean2, L_max1, L_max2, L_min1, L_min2, c1, c2, tm_flg, eof_tm, stream_id,
+                                       full_height, slice_id, acc_sum);
     }
     xf::cv::gammacorrection_multi<XF_LTM_T, XF_LTM_T, STRM_HEIGHT, XF_WIDTH, XF_NPPC, NUM_STREAMS, XF_CV_DEPTH_OUT_4,
                                   XF_CV_DEPTH_OUT_5>(aecin, _dst, gamma_lut, stream_id);
@@ -511,7 +552,7 @@ void ISPPipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp1,
                        char IR_at_R_wgts[NUM_STREAMS][9],
                        char IR_at_B_wgts[NUM_STREAMS][9],
                        char sub_wgts[NUM_STREAMS][4],
-                       ap_ufixed<32, 16> dgam_params[NUM_STREAMS][3][DGAMMA_KP][3],
+                       ap_ufixed<32, 18> dgam_params[NUM_STREAMS][3][DGAMMA_KP][3],
                        float c1[NUM_STREAMS],
                        float c2[NUM_STREAMS],
                        unsigned short array_params[NUM_STREAMS][11],
@@ -562,7 +603,7 @@ void ISPPipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp1,
     static short wr_hls_tmp[NUM_STREAMS][NO_EXPS * XF_NPPC * W_B_SIZE];
     static unsigned char gamma_lut_tmp[NUM_STREAMS][256 * 3];
     static float c1_tmp[NUM_STREAMS], c2_tmp[NUM_STREAMS];
-    static ap_ufixed<32, 16> dgam_params_tmp[NUM_STREAMS][3][DGAMMA_KP][3];
+    static ap_ufixed<32, 18> dgam_params_tmp[NUM_STREAMS][3][DGAMMA_KP][3];
 
     static int dcp_params_12to16_tmp[NUM_STREAMS][3][4][3];
 
@@ -786,7 +827,7 @@ TOTAL_ROWS_LOOP:
                            R_IR_C1_wgts_tmp, R_IR_C2_wgts_tmp, B_at_R_wgts_tmp, IR_at_R_wgts_tmp, IR_at_B_wgts_tmp,
                            sub_wgts_tmp, dcp_params_12to16_tmp, hist0_aec, hist1_aec, flag_aec, eof_aec, omin_r, omax_r,
                            omin_w, omax_w, mean1, mean2, L_max1, L_max2, L_min1, L_min2, c1_tmp, c2_tmp, flag_tm,
-                           eof_tm, stream_idx, slice_idx);
+                           eof_tm, stream_idx, slice_idx, acc_sum);
             rd_offset1 += (RD_MULT * num_rows * ((width_arr[stream_idx] + RD_ADD) >> XF_BITSHIFT(XF_NPPC))) / 4;
             wr_offset1 += (num_rows * (width_arr[stream_idx] >> XF_BITSHIFT(XF_NPPC))) / 4;
 
@@ -797,7 +838,7 @@ TOTAL_ROWS_LOOP:
                            R_IR_C1_wgts_tmp, R_IR_C2_wgts_tmp, B_at_R_wgts_tmp, IR_at_R_wgts_tmp, IR_at_B_wgts_tmp,
                            sub_wgts_tmp, dcp_params_12to16_tmp, hist0_aec, hist1_aec, flag_aec, eof_aec, omin_r, omax_r,
                            omin_w, omax_w, mean1, mean2, L_max1, L_max2, L_min1, L_min2, c1_tmp, c2_tmp, flag_tm,
-                           eof_tm, stream_idx, slice_idx);
+                           eof_tm, stream_idx, slice_idx, acc_sum);
 
             rd_offset2 += (RD_MULT * num_rows * ((width_arr[stream_idx] + RD_ADD) >> XF_BITSHIFT(XF_NPPC))) / 4;
             wr_offset2 += (num_rows * (width_arr[stream_idx] >> XF_BITSHIFT(XF_NPPC))) / 4;
@@ -809,7 +850,7 @@ TOTAL_ROWS_LOOP:
                            R_IR_C1_wgts_tmp, R_IR_C2_wgts_tmp, B_at_R_wgts_tmp, IR_at_R_wgts_tmp, IR_at_B_wgts_tmp,
                            sub_wgts_tmp, dcp_params_12to16_tmp, hist0_aec, hist1_aec, flag_aec, eof_aec, omin_r, omax_r,
                            omin_w, omax_w, mean1, mean2, L_max1, L_max2, L_min1, L_min2, c1_tmp, c2_tmp, flag_tm,
-                           eof_tm, stream_idx, slice_idx);
+                           eof_tm, stream_idx, slice_idx, acc_sum);
             rd_offset3 += (RD_MULT * num_rows * ((width_arr[stream_idx] + RD_ADD) >> XF_BITSHIFT(XF_NPPC))) / 4;
             wr_offset3 += (num_rows * (width_arr[stream_idx] >> XF_BITSHIFT(XF_NPPC))) / 4;
 
@@ -820,7 +861,7 @@ TOTAL_ROWS_LOOP:
                            R_IR_C1_wgts_tmp, R_IR_C2_wgts_tmp, B_at_R_wgts_tmp, IR_at_R_wgts_tmp, IR_at_B_wgts_tmp,
                            sub_wgts_tmp, dcp_params_12to16_tmp, hist0_aec, hist1_aec, flag_aec, eof_aec, omin_r, omax_r,
                            omin_w, omax_w, mean1, mean2, L_max1, L_max2, L_min1, L_min2, c1_tmp, c2_tmp, flag_tm,
-                           eof_tm, stream_idx, slice_idx);
+                           eof_tm, stream_idx, slice_idx, acc_sum);
 
             rd_offset4 += (RD_MULT * num_rows * ((width_arr[stream_idx] + RD_ADD) >> XF_BITSHIFT(XF_NPPC))) / 4;
             wr_offset4 += (num_rows * (width_arr[stream_idx] >> XF_BITSHIFT(XF_NPPC))) / 4;

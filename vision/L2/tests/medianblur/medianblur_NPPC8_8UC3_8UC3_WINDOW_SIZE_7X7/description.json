@@ -8,13 +8,13 @@
         "u200", 
         "aws-vu9p-f1", 
         "vck190", 
-        "zcu102", 
-        "zcu104", 
         "u50"
     ], 
     "platform_blocklist": [
         "u280", 
-        "u250"
+        "u250", 
+        "zcu102", 
+        "zcu104"
     ], 
     "platform_properties": {
         "u200": {
@@ -53,58 +53,6 @@
                     ]
                 }, 
                 "linker": {
-                    "librarypaths": [
-                        "$(OPENCV_LIB)"
-                    ]
-                }
-            }
-        }, 
-        "zcu102": {
-            "host": {
-                "compiler": {
-                    "includepaths": [
-                        "$(SYSROOT)/usr/include", 
-                        "$(SYSROOT)/usr/include/opencv4"
-                    ]
-                }, 
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib", 
-                        "${SYSROOT}/lib"
-                    ]
-                }, 
-                "compiler_x86": {
-                    "includepaths": [
-                        "$(OPENCV_INCLUDE)"
-                    ]
-                }, 
-                "linker_x86": {
-                    "librarypaths": [
-                        "$(OPENCV_LIB)"
-                    ]
-                }
-            }
-        }, 
-        "zcu104": {
-            "host": {
-                "compiler": {
-                    "includepaths": [
-                        "$(SYSROOT)/usr/include", 
-                        "$(SYSROOT)/usr/include/opencv4"
-                    ]
-                }, 
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib", 
-                        "${SYSROOT}/lib"
-                    ]
-                }, 
-                "compiler_x86": {
-                    "includepaths": [
-                        "$(OPENCV_INCLUDE)"
-                    ]
-                }, 
-                "linker_x86": {
                     "librarypaths": [
                         "$(OPENCV_LIB)"
                     ]
@@ -232,6 +180,7 @@
     ], 
     "testinfo": {
         "disable": false, 
+"stacksize": 16384,
         "jobs": [
             {
                 "index": 0, 
@@ -239,13 +188,13 @@
                 "env": "", 
                 "cmd": "", 
                 "max_memory_MB": {
-                    "vitis_hw_build": 40960, 
+                    "vitis_hw_build": 65535, 
                     "vitis_hw_emu": 28672, 
                     "vitis_sw_emu": 10240, 
                     "vitis_hw_run": 10240
                 }, 
                 "max_time_min": {
-                    "vitis_hw_build": 470, 
+                    "vitis_hw_build": 1200, 
                     "vitis_hw_emu": 470, 
                     "vitis_sw_emu": 60, 
                     "vitis_hw_run": 30

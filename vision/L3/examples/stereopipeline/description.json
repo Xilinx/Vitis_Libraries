@@ -185,7 +185,7 @@
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-                "LIB_DIR/L3/examples/stereopipeline/build"
+                "LIB_DIR/L3/examples/stereopipeline/config"
             ], 
             "options": "-O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include", 
             "symbols": [
@@ -197,7 +197,7 @@
         "compiler": {
             "symbols": [], 
             "includepaths": [
-                "LIB_DIR/L3/examples/stereopipeline/build"
+                "LIB_DIR/L3/examples/stereopipeline/config"
             ], 
             "clflags": []
         }

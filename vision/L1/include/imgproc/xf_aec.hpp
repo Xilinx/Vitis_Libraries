@@ -1,5 +1,6 @@
 /*
- * Copyright 2023 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -227,7 +228,8 @@ void autoexposurecorrection_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_
                                   float inputMax,
                                   float outputMin,
                                   float outputMax,
-                                  int slc_id) {
+                                  int slc_id,
+                                  unsigned short org_height) {
 #pragma HLS INLINE OFF
 
     int rows = src1.rows;
@@ -249,9 +251,9 @@ void autoexposurecorrection_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_
                             XF_CHANNELS(SIN_CHANNEL_TYPE, NPC), AEC_HISTSIZE>(src1, src2, hist_array1, p, inputMin,
                                                                               inputMax, outputMin, outputMax, slc_id);
 
-    xFEqualize_norm_sin<SIN_CHANNEL_TYPE, ROWS, COLS, XF_DEPTH(SIN_CHANNEL_TYPE, NPC), NPC, XFCVDEPTH_IN, XFCVDEPTH_IN,
-                        XF_WORDWIDTH(SIN_CHANNEL_TYPE, NPC), (COLS >> XF_BITSHIFT(NPC)), AEC_HISTSIZE>(
-        src2, hist_array2, dst, p, inputMin, inputMax, outputMin, outputMax);
+    xFEqualize_norm_multi<SIN_CHANNEL_TYPE, ROWS, COLS, XF_DEPTH(SIN_CHANNEL_TYPE, NPC), NPC, XFCVDEPTH_IN,
+                          XFCVDEPTH_IN, XF_WORDWIDTH(SIN_CHANNEL_TYPE, NPC), (COLS >> XF_BITSHIFT(NPC)), AEC_HISTSIZE>(
+        src2, hist_array2, dst, p, inputMin, inputMax, outputMin, outputMax, org_height);
 }
 template <int SRC_T,
           int DST_T,
@@ -273,7 +275,8 @@ void aec_wrap(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src1,
               float outputMax,
               bool& flag,
               bool& eof,
-              int slc_id) {
+              int slc_id,
+              unsigned short org_height) {
 // clang-format off
 #pragma HLS INLINE OFF
     // clang-format on
@@ -281,14 +284,14 @@ void aec_wrap(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src1,
     if (!flag) {
         xf::cv::autoexposurecorrection_multi<SRC_T, DST_T, SIN_CHANNEL_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN,
                                              XFCVDEPTH_OUT, AEC_HISTSIZE>(
-            src1, dst, hist_array1, hist_array2, thresh, inputMin, inputMax, outputMin, outputMax, slc_id);
+            src1, dst, hist_array1, hist_array2, thresh, inputMin, inputMax, outputMin, outputMax, slc_id, org_height);
 
         if (eof) flag = 1;
 
     } else {
         xf::cv::autoexposurecorrection_multi<SRC_T, DST_T, SIN_CHANNEL_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN,
                                              XFCVDEPTH_OUT, AEC_HISTSIZE>(
-            src1, dst, hist_array2, hist_array1, thresh, inputMin, inputMax, outputMin, outputMax, slc_id);
+            src1, dst, hist_array2, hist_array1, thresh, inputMin, inputMax, outputMin, outputMax, slc_id, org_height);
 
         if (eof) flag = 0;
     }
@@ -317,7 +320,8 @@ void aec_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src1,
                bool flag[STREAMS],
                bool eof[STREAMS],
                int strm_id,
-               int slc_id) {
+               int slc_id,
+               unsigned short full_height) {
 // clang-format off
 #pragma HLS ARRAY_PARTITION variable=hist_array0 complete dim=1
 #pragma HLS ARRAY_PARTITION variable=hist_array1 complete dim=1
@@ -331,7 +335,7 @@ void aec_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src1,
 
     xf::cv::aec_wrap<SRC_T, DST_T, SIN_CHANNEL_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT, AEC_HISTSIZE>(
         src1, dst, hist_array0[strm_id], hist_array1[strm_id], thresh, inputMin, inputMax, outputMin, outputMax,
-        flag[strm_id], eof[strm_id], slc_id);
+        flag[strm_id], eof[strm_id], slc_id, full_height);
 }
 }
 }

@@ -1,5 +1,6 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,7 +124,7 @@ void bayerizeImage(cv::Mat in_img, cv::Mat& bayer_image, cv::Mat& cfa_output, in
     }
 }
 
-void compute_pxl(int pxl_val, int& out_val, ap_ufixed<32, 16> params[3][NUM][3], int color_idx) {
+void compute_pxl(int pxl_val, int& out_val, ap_ufixed<32, 18> params[3][NUM][3], int color_idx) {
     for (int i = 0; i < NUM; i++) {
         if (pxl_val < params[color_idx][i][0]) {
             out_val = params[color_idx][i][1] * (pxl_val)-params[color_idx][i][2];
@@ -186,7 +187,7 @@ int main(int argc, char** argv) {
 		{{64, 0.19, 0}, {128, 0.68, 31}, {192, 1.25, 104}, {256, 1.88, 225}},
 		{{64, 0.19, 0}, {128, 0.68, 31}, {192, 1.25, 104}, {256, 1.88, 225}}}; */ //
 
-    ap_ufixed<32, 16> params[3][NUM][3] = {{{32, 0.08, 0},
+    ap_ufixed<32, 18> params[3][NUM][3] = {{{32, 0.08, 0},
                                             {64, 0.3, 7},
                                             {96, 0.55, 23},
                                             {128, 0.82, 49},
@@ -215,7 +216,7 @@ int main(int argc, char** argv) {
 
 #if T_16U
 
-    ap_ufixed<32, 16> params[3][NUM][3] = {{{8192, 0.082, 0},
+    ap_ufixed<32, 18> params[3][NUM][3] = {{{8192, 0.082, 0},
                                             {16384, 0.296, 1749},
                                             {24576, 0.545, 5825},
                                             {32768, 0.816, 12476},

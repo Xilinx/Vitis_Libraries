@@ -1,5 +1,5 @@
-#
-# Copyright 2019-2020 Xilinx, Inc.
+# Copyright (C) 2019-2022, Xilinx, Inc.
+# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+# vitis hls makefile-generator v2.0.0
 
 MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
@@ -57,11 +57,20 @@ ifeq (,$(wildcard $(XILINX_VIVADO)/bin/vivado))
 	@echo "Cannot locate Vivado installation. Please set XILINX_VIVADO variable." && false
 endif
 
+.PHONY: check_opencv
+check_opencv:
+ifeq (,$(OPENCV_INCLUDE))
+	@echo "Cannot find OpenCV include path. Please set OPENCV_INCLUDE variable" && false
+endif
+ifeq (,$(OPENCV_LIB))
+	@echo "Cannot find Opencv lib path. Please set OPENCV_LIB variable" && false
+endif
+
 export PATH := $(XILINX_VIVADO)/bin:$(PATH)
 
 # MK_INC_END vivado.mk
 
-DEVICE ?= u200
+PLATFORM ?= xilinx_u200_gen3x16_xdma_2_202110_1
 
 # MK_INC_BEGIN vitis_set_part.mk
 
@@ -77,15 +86,6 @@ endif
 check_xrt:
 ifeq (,$(wildcard $(XILINX_XRT)/lib/libxilinxopencl.so))
 	@echo "Cannot locate XRT installation. Please set XILINX_XRT variable." && false
-endif
-
-.PHONY: check_opencv
-check_opencv:
-ifeq (,$(OPENCV_INCLUDE))
-	@echo "Cannot find OpenCV include path. Please set OPENCV_INCLUDE variable" && false
-endif
-ifeq (,$(OPENCV_LIB))
-	@echo "Cannot find Opencv lib path. Please set OPENCV_LIB variable" && false
 endif
 
 
@@ -125,12 +125,21 @@ endif # 1.2
 endif # 1
 # 2. search Vitis installation
 ifeq (,$(XPLATFORM))
-# 2.1 as exact name
+# 2.1 as exact name vitis < 2022.2
 XPLATFORM := $(strip $(wildcard $(XILINX_VITIS)/platforms/$(DEVICE_L)/$(DEVICE_L).xpfm))
-# 2.2 as a pattern
+ifeq (,$(XPLATFORM))
+# 2.2 as exact name vitis >= 2022.2
+XPLATFORM := $(strip $(wildcard $(XILINX_VITIS)/base_platforms/$(DEVICE_L)/$(DEVICE_L).xpfm))
+# 2.3 as a pattern vitis < 2022.2
 ifeq (,$(XPLATFORM))
 XPLATFORMS := $(wildcard $(XILINX_VITIS)/platforms/*/*.xpfm)
 XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
+# 2.4 as a pattern vitis > 2022.2
+ifeq (,$(XPLATFORM))
+XPLATFORMS := $(wildcard $(XILINX_VITIS)/base_platforms/*/*.xpfm)
+XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(DEVICE_L)/')))
+endif # 2.4
+endif # 2.3
 endif # 2.2
 endif # 2
 # 3. search default locations

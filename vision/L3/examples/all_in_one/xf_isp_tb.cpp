@@ -1,5 +1,6 @@
 /*
- * Copyright 2023 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include "xf_isp_tb_config.h"
 #include "common/xf_headers.hpp"
-#include "xf_isp_types.h"
+
 #include "xcl2.hpp"
 #include <bitset>
 #include <iostream>
@@ -539,7 +540,7 @@ int main(int argc, char** argv) {
 
     out_img_ir.create(cfa_bayer_output_sef.rows, cfa_bayer_output_sef.cols, CV_16UC1);
     size_t vec_in_size_bytes = 256 * 3 * sizeof(unsigned char);
-    size_t vec_weight_size_bytes = NO_EXPS * XF_NPPC * W_B_SIZE * sizeof(short);
+    size_t vec_weight_size_bytes = NO_EXPS * XF_NPPCX * W_B_SIZE * sizeof(short);
 
     if (USE_HDR_FUSION) {
         image_in_size_bytes = interleaved_img.rows * interleaved_img.cols * sizeof(unsigned char);
@@ -561,7 +562,7 @@ int main(int argc, char** argv) {
 
     out_img_ir.create(cfa_bayer_output_sef.rows, cfa_bayer_output_sef.cols, CV_16UC1);
     size_t vec_in_size_bytes = 256 * 3 * sizeof(unsigned char);
-    size_t vec_weight_size_bytes = NO_EXPS * XF_NPPC * W_B_SIZE * sizeof(short);
+    size_t vec_weight_size_bytes = NO_EXPS * XF_NPPCX * W_B_SIZE * sizeof(short);
     if (USE_HDR_FUSION) {
         image_in_size_bytes = interleaved_img.rows * interleaved_img.cols * sizeof(unsigned short);
     } else {
@@ -580,9 +581,9 @@ int main(int argc, char** argv) {
     // wr_ocv_gen() function call
     wr_ocv_gen(alpha, optical_black_value, intersec, rho, imax, t, wr_ocv);
 
-    short wr_hls[NO_EXPS * XF_NPPC * W_B_SIZE];
+    short wr_hls[NO_EXPS * XF_NPPCX * W_B_SIZE];
 
-    for (int k = 0; k < XF_NPPC; k++) {
+    for (int k = 0; k < XF_NPPCX; k++) {
         for (int i = 0; i < NO_EXPS; i++) {
             for (int j = 0; j < (W_B_SIZE); j++) {
                 wr_hls[(i + k * NO_EXPS) * W_B_SIZE + j] = wr_ocv[i][j];
@@ -698,7 +699,7 @@ int main(int argc, char** argv) {
 
 #if T_16U
 
-    ap_ufixed<32, 16> params_degamma[3][DEGAMMA_KP][3] = {
+    ap_ufixed<32, 18> params_degamma[3][DEGAMMA_KP][3] = {
         {{8192, 0.082, 0},
          {16384, 0.296, 1749},
          {24576, 0.545, 5825},
@@ -741,7 +742,7 @@ int main(int argc, char** argv) {
     std::cout << "INPUT_PTR_WIDTH :" << INPUT_PTR_WIDTH << std::endl;
     std::cout << "OUTPUT_PTR_WIDTH :" << OUTPUT_PTR_WIDTH << std::endl;
     std::cout << "LUT_PTR_WIDTH :" << LUT_PTR_WIDTH << std::endl;
-    std::cout << "XF_NPPC :" << XF_NPPC << std::endl;
+    std::cout << "XF_NPPCX :" << XF_NPPCX << std::endl;
 
     compute_gamma(gamma_val_r, gamma_val_g, gamma_val_b, gamma_lut);
 

@@ -52,10 +52,28 @@ auto float2fixed_coeff(float data[9]) {
 }
 
 #if defined(__AIESIM__) || defined(__X86SIM__)
+#include <common/xf_aie_utils.hpp>
+
 int main(int argc, char** argv) {
+    int BLOCK_SIZE_in_Bytes = TILE_WINDOW_SIZE;
+
+    int16_t* inputData = (int16_t*)GMIO::malloc(BLOCK_SIZE_in_Bytes);
+    int16_t* outputData = (int16_t*)GMIO::malloc(BLOCK_SIZE_in_Bytes);
+
+    memset(inputData, 0, BLOCK_SIZE_in_Bytes);
+    xf::cv::aie::xfSetTileWidth(inputData, TILE_WIDTH);
+    xf::cv::aie::xfSetTileHeight(inputData, TILE_HEIGHT);
+
+    int16_t* dataIn = (int16_t*)xf::cv::aie::xfGetImgDataPtr(inputData);
+    for (int i = 0; i < TILE_ELEMENTS; i++) {
+        dataIn[i] = rand() % 256;
+    }
+
     gaussian_graph.init();
     gaussian_graph.update(gaussian_graph.kernelCoefficients, float2fixed_coeff<10, 16>(kData).data(), 16);
     gaussian_graph.run(1);
+    gmioIn[0].gm2aie_nb(inputData, BLOCK_SIZE_in_Bytes);
+    gmioOut[0].aie2gm_nb(outputData, BLOCK_SIZE_in_Bytes);
     gaussian_graph.end();
     return 0;
 }

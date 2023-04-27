@@ -1,5 +1,6 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +25,9 @@
 #include <ap_int.h>
 
 /* Input image Dimensions */
-#define WIDTH 1024
+#define WIDTH 3840
 // Maximum Input image width
-#define HEIGHT 676
+#define HEIGHT 2160
 // Maximum Input image height
 
 #define XF_CV_DEPTH_IN_1 2

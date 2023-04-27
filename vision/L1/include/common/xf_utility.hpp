@@ -1,5 +1,6 @@
 /*
- * Copyright 2020 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,10 +68,16 @@ void xfMat2Ptr(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN>& in_mat, ap_uin
 // ======================================================================================
 // Function to split xf::cv::Mat into 2 streams (1 for DDR PTR and 1 for xf::cv::Mat)
 // ======================================================================================
-template <int BUS_WIDTH, int TYPE, int ROWS, int COLS, int NPPC>
-void xFDuplicateMat_PTRMAT(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& in_mat,
+template <int BUS_WIDTH,
+          int TYPE,
+          int ROWS,
+          int COLS,
+          int NPPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void xFDuplicateMat_PTRMAT(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN>& in_mat,
                            ap_uint<BUS_WIDTH>* out_ptr,
-                           xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& out_mat) {
+                           xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT>& out_mat) {
 #pragma HLS INLINE OFF
 
     const int c_TRIP_COUNT = ROWS * COLS;
@@ -92,11 +99,18 @@ void xFDuplicateMat_PTRMAT(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& in_mat,
 // ======================================================================================
 // Function to split xf::cv::Mat into 3 streams (1 for DDR PTR and 2 for xf::cv::Mat)
 // ======================================================================================
-template <int BUS_WIDTH, int TYPE, int ROWS, int COLS, int NPPC>
-void xFDuplicateMat_PTRMAT2(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& in_mat,
+template <int BUS_WIDTH,
+          int TYPE,
+          int ROWS,
+          int COLS,
+          int NPPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT_2 = _XFCVDEPTH_DEFAULT>
+void xFDuplicateMat_PTRMAT2(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN>& in_mat,
                             ap_uint<BUS_WIDTH>* out_ptr,
-                            xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& out_mat1,
-                            xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& out_mat2) {
+                            xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT_1>& out_mat1,
+                            xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT_2>& out_mat2) {
 #pragma HLS INLINE OFF
 
     const int c_TRIP_COUNT = ROWS * COLS;
@@ -120,10 +134,16 @@ void xFDuplicateMat_PTRMAT2(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& in_mat,
 // ======================================================================================
 // Function to split xf::cv::Mat into 3 streams (1 for DDR PTR, 1 for xf::cv::Mat and 1 for AXI stream)
 // ======================================================================================
-template <int BUS_WIDTH, int TYPE, int ROWS, int COLS, int NPPC>
-void xFDuplicateMat_PTR_MAT_AXI(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& in_mat,
+template <int BUS_WIDTH,
+          int TYPE,
+          int ROWS,
+          int COLS,
+          int NPPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void xFDuplicateMat_PTR_MAT_AXI(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN>& in_mat,
                                 ap_uint<BUS_WIDTH>* out_ptr,
-                                xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& out_mat,
+                                xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT>& out_mat,
                                 hls::stream<ap_axiu<BUS_WIDTH, 0, 0, 0> >& out_axi) {
 #pragma HLS INLINE OFF
 
@@ -150,8 +170,9 @@ void xFDuplicateMat_PTR_MAT_AXI(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& in_mat,
 // ======================================================================================
 // Function to stream out xf::cv::Mat on AXI bus for K2K streaming
 // ======================================================================================
-template <int BUS_WIDTH, int TYPE, int ROWS, int COLS, int NPPC>
-void xFMat2AXI_Strm(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& in_mat, hls::stream<ap_axiu<BUS_WIDTH, 0, 0, 0> >& out_axi) {
+template <int BUS_WIDTH, int TYPE, int ROWS, int COLS, int NPPC, int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT>
+void xFMat2AXI_Strm(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN>& in_mat,
+                    hls::stream<ap_axiu<BUS_WIDTH, 0, 0, 0> >& out_axi) {
 #pragma HLS INLINE OFF
 
     const int c_TRIP_COUNT = ROWS * COLS;
@@ -173,8 +194,9 @@ void xFMat2AXI_Strm(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& in_mat, hls::stream<ap_
 // ======================================================================================
 // Function to read AXI stream into xf::cv::Mat for K2K streaming
 // ======================================================================================
-template <int BUS_WIDTH, int TYPE, int ROWS, int COLS, int NPPC>
-void AXI_Strm2xFMat(hls::stream<ap_axiu<BUS_WIDTH, 0, 0, 0> >& in_axi, xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& out_mat) {
+template <int BUS_WIDTH, int TYPE, int ROWS, int COLS, int NPPC, int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void AXI_Strm2xFMat(hls::stream<ap_axiu<BUS_WIDTH, 0, 0, 0> >& in_axi,
+                    xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT>& out_mat) {
 #pragma HLS INLINE OFF
 
     const int c_TRIP_COUNT = ROWS * COLS;
@@ -194,8 +216,8 @@ void AXI_Strm2xFMat(hls::stream<ap_axiu<BUS_WIDTH, 0, 0, 0> >& in_axi, xf::cv::M
 // ======================================================================================
 // Function to split xf::cv::Mat into 2 streams (1 for DDR PTR and 1 for AXI stream)
 // ======================================================================================
-template <int BUS_WIDTH, int TYPE, int ROWS, int COLS, int NPPC>
-void xFDuplicateMat_PTR_AXI(xf::cv::Mat<TYPE, ROWS, COLS, NPPC>& in_mat,
+template <int BUS_WIDTH, int TYPE, int ROWS, int COLS, int NPPC, int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT>
+void xFDuplicateMat_PTR_AXI(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN>& in_mat,
                             ap_uint<BUS_WIDTH>* out_ptr,
                             hls::stream<ap_axiu<BUS_WIDTH, 0, 0, 0> >& out_axi) {
 #pragma HLS INLINE OFF
@@ -483,9 +505,15 @@ class accel_utils {
         }
     }
 
-    template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC, int TRIPCOUNT>
+    template <int PTR_WIDTH,
+              int MAT_T,
+              int ROWS,
+              int COLS,
+              int NPC,
+              int TRIPCOUNT,
+              int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
     void hlsStrm2xfMat(hls::stream<ap_uint<PTR_WIDTH> >& srcStrm,
-                       xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& dstMat,
+                       xf::cv::Mat<MAT_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& dstMat,
                        int dstMat_cols_align_npc) {
         int rows = dstMat.rows;
         int cols = dstMat.cols;
@@ -579,7 +607,8 @@ class accel_utils {
         int dstMat_cols_align_npc = ((dstMat.cols + (NPC - 1)) >> XF_BITSHIFT(NPC)) << XF_BITSHIFT(NPC);
         Array2hlsStrm<PTR_WIDTH, ROWS, COLS, NPC, XF_CHANNELS(MAT_T, NPC), ch_width,
                       ((ROWS * COLS * XF_CHANNELS(MAT_T, NPC) * ch_width) / PTR_WIDTH)>(srcPtr, strm, rows, cols);
-        hlsStrm2xfMat<PTR_WIDTH, MAT_T, ROWS, COLS, NPC, (ROWS * COLS) / NPC>(strm, dstMat, dstMat_cols_align_npc);
+        hlsStrm2xfMat<PTR_WIDTH, MAT_T, ROWS, COLS, NPC, (ROWS * COLS) / NPC, XFCVDEPTH>(strm, dstMat,
+                                                                                         dstMat_cols_align_npc);
 #endif
     }
 
@@ -601,8 +630,9 @@ class accel_utils {
         }
     }
 
-    template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
-    void axiStrm2xfMat(hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& srcPtr, xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& dstMat) {
+    template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC, int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+    void axiStrm2xfMat(hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& srcPtr,
+                       xf::cv::Mat<MAT_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& dstMat) {
 // clang-format off
         #pragma HLS DATAFLOW
         // clang-format on
@@ -618,15 +648,22 @@ class accel_utils {
         int dstMat_cols_align_npc = ((dstMat.cols + (NPC - 1)) >> XF_BITSHIFT(NPC)) << XF_BITSHIFT(NPC);
         axiStrm2hlsStrm<PTR_WIDTH, ROWS, COLS, NPC, XF_CHANNELS(MAT_T, NPC), ch_width,
                         ((ROWS * COLS * XF_CHANNELS(MAT_T, NPC) * ch_width) / PTR_WIDTH)>(srcPtr, strm, rows, cols);
-        hlsStrm2xfMat<PTR_WIDTH, MAT_T, ROWS, COLS, NPC, (ROWS * COLS) / NPC>(strm, dstMat, dstMat_cols_align_npc);
+        hlsStrm2xfMat<PTR_WIDTH, MAT_T, ROWS, COLS, NPC, (ROWS * COLS) / NPC, XFCVDEPTH_OUT>(strm, dstMat,
+                                                                                             dstMat_cols_align_npc);
     }
 
     // ==============================================================================
     // Write module(s) to handle data transfer from xfMat to AXI/HLS stream
     // ------------------------------------------------------------------------------
 
-    template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC, int TRIPCOUNT>
-    void xfMat2hlsStrm(xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& srcMat,
+    template <int PTR_WIDTH,
+              int MAT_T,
+              int ROWS,
+              int COLS,
+              int NPC,
+              int TRIPCOUNT,
+              int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+    void xfMat2hlsStrm(xf::cv::Mat<MAT_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& srcMat,
                        hls::stream<ap_uint<PTR_WIDTH> >& dstStrm,
                        int srcMat_cols_align_npc) {
         int rows = srcMat.rows;
@@ -733,8 +770,8 @@ class accel_utils {
         int cols = srcMat.cols;
         int srcMat_cols_align_npc = ((srcMat.cols + (NPC - 1)) >> XF_BITSHIFT(NPC)) << XF_BITSHIFT(NPC);
 
-        xfMat2hlsStrm<PTR_WIDTH, MAT_T, ROWS, COLS, NPC, ROWS*((COLS + NPC - 1) / NPC)>(srcMat, strm,
-                                                                                        srcMat_cols_align_npc);
+        xfMat2hlsStrm<PTR_WIDTH, MAT_T, ROWS, COLS, NPC, ROWS*((COLS + NPC - 1) / NPC), XFCVDEPTH>(
+            srcMat, strm, srcMat_cols_align_npc);
         hlsStrm2Array<PTR_WIDTH, ROWS, COLS, NPC, XF_CHANNELS(MAT_T, NPC), ch_width,
                       ((ROWS * COLS * XF_CHANNELS(MAT_T, NPC) * ch_width) / PTR_WIDTH)>(strm, dstPtr, rows, cols);
 #endif
@@ -759,8 +796,9 @@ class accel_utils {
         }
     }
 
-    template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
-    void xfMat2axiStrm(xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& srcMat, hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& dstPtr) {
+    template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC, int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT>
+    void xfMat2axiStrm(xf::cv::Mat<MAT_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& srcMat,
+                       hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& dstPtr) {
 // clang-format off
         #pragma HLS DATAFLOW
         // clang-format on
@@ -775,8 +813,8 @@ class accel_utils {
         int cols = srcMat.cols;
         int srcMat_cols_align_npc = ((srcMat.cols + (NPC - 1)) >> XF_BITSHIFT(NPC)) << XF_BITSHIFT(NPC);
 
-        xfMat2hlsStrm<PTR_WIDTH, MAT_T, ROWS, COLS, NPC, ROWS*((COLS + NPC - 1) / NPC)>(srcMat, strm,
-                                                                                        srcMat_cols_align_npc);
+        xfMat2hlsStrm<PTR_WIDTH, MAT_T, ROWS, COLS, NPC, ROWS*((COLS + NPC - 1) / NPC), XFCVDEPTH_IN>(
+            srcMat, strm, srcMat_cols_align_npc);
         hlsStrm2axiStrm<PTR_WIDTH, ROWS, COLS, NPC, XF_CHANNELS(MAT_T, NPC), ch_width,
                         ((ROWS * COLS * XF_CHANNELS(MAT_T, NPC) * ch_width) / PTR_WIDTH)>(strm, dstPtr, rows, cols);
     }
@@ -802,16 +840,18 @@ void Array2xfMat(ap_uint<PTR_WIDTH>* srcPtr, xf::cv::Mat<MAT_T, ROWS, COLS, NPC,
 #endif
 }
 
-template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
-void xfMat2axiStrm(xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& srcMat, hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& dstPtr) {
+template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC, int XFCVDEPTH = _XFCVDEPTH_DEFAULT>
+void xfMat2axiStrm(xf::cv::Mat<MAT_T, ROWS, COLS, NPC, XFCVDEPTH>& srcMat,
+                   hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& dstPtr) {
     accel_utils au;
-    au.xfMat2axiStrm<PTR_WIDTH, MAT_T, ROWS, COLS, NPC>(srcMat, dstPtr);
+    au.xfMat2axiStrm<PTR_WIDTH, MAT_T, ROWS, COLS, NPC, XFCVDEPTH>(srcMat, dstPtr);
 }
 
-template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC>
-void axiStrm2xfMat(hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& srcPtr, xf::cv::Mat<MAT_T, ROWS, COLS, NPC>& dstMat) {
+template <int PTR_WIDTH, int MAT_T, int ROWS, int COLS, int NPC, int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void axiStrm2xfMat(hls::stream<ap_axiu<PTR_WIDTH, 0, 0, 0> >& srcPtr,
+                   xf::cv::Mat<MAT_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& dstMat) {
     accel_utils au;
-    au.axiStrm2xfMat<PTR_WIDTH, MAT_T, ROWS, COLS, NPC>(srcPtr, dstMat);
+    au.axiStrm2xfMat<PTR_WIDTH, MAT_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>(srcPtr, dstMat);
 }
 
 } // namespace cv

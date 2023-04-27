@@ -54,7 +54,7 @@
                 "LIB_DIR/L1/include/aie/", 
                 "./"
             ], 
-            "options": "--sysroot=$(SYSROOT) -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include", 
+            "options": "--sysroot=$(SYSROOT) -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -std=c++17", 
             "symbols": [
                 "__PS_ENABLE_AIE__"
             ]
@@ -122,7 +122,7 @@
                 "dependency": [], 
                 "env": "", 
                 "cmd": "", 
-                "max_memory_MB": 32768, 
+                "max_memory_MB": 65535, 
                 "max_time_min": {
                     "vitis_aie_sim": 55, 
                     "vitis_aie_x86sim": 55, 

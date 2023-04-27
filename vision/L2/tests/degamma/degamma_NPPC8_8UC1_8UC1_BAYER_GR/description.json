@@ -217,10 +217,10 @@
                 {
                     "name": "degamma_accel", 
                     "location": "LIB_DIR/L2/examples/degamma/xf_degamma_accel.cpp",
-                    "frequency": 300.0
+                    "frequency": 200.0
                 }
             ],
-            "frequency": 300.0
+            "frequency": 200.0
         }
     ], 
     "check_env": [

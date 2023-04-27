@@ -9,12 +9,12 @@
         "aws-vu9p-f1", 
         "vck190", 
         "zcu102", 
-        "zcu104", 
         "u50"
     ], 
     "platform_blocklist": [
         "u280", 
-        "u250"
+        "u250",
+        "zcu104"
     ], 
     "platform_properties": {
         "u200": {
@@ -60,32 +60,6 @@
             }
         }, 
         "zcu102": {
-            "host": {
-                "compiler": {
-                    "includepaths": [
-                        "$(SYSROOT)/usr/include", 
-                        "$(SYSROOT)/usr/include/opencv4"
-                    ]
-                }, 
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib", 
-                        "${SYSROOT}/lib"
-                    ]
-                }, 
-                "compiler_x86": {
-                    "includepaths": [
-                        "$(OPENCV_INCLUDE)"
-                    ]
-                }, 
-                "linker_x86": {
-                    "librarypaths": [
-                        "$(OPENCV_LIB)"
-                    ]
-                }
-            }
-        }, 
-        "zcu104": {
             "host": {
                 "compiler": {
                     "includepaths": [
@@ -236,7 +210,6 @@
             "env": "EDGE_COMMON_SW", 
             "platform": [
                 "zcu102", 
-                "zcu104", 
                 "vck190"
             ], 
             "echo": "Please set EDGE_COMMON_SW variable"
@@ -244,6 +217,7 @@
     ], 
     "testinfo": {
         "disable": false, 
+"stacksize": 16384, 
         "jobs": [
             {
                 "index": 0, 

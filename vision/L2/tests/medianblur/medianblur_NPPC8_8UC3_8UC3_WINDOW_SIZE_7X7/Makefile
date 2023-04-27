@@ -1,4 +1,5 @@
-# Copyright 2019-2022 Xilinx, Inc.
+# Copyright (C) 2019-2022, Xilinx, Inc.
+# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.8
+# vitis makefile-generator v2.0.9
 
 ############################## Help Section ##############################
 .PHONY: help
@@ -56,19 +57,19 @@ XFLIB_DIR = $(XF_PROJ_ROOT)
 
 # setting devault value
 TARGET ?= sw_emu
-HOST_ARCH ?= 
+HOST_ARCH ?= x86
 
 #setting PLATFORM
 ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := 
+PLATFORM := xilinx_u200_gen3x16_xdma_2_202110_1
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST +=  u200 aws-vu9p-f1 vck190 zcu102 zcu104 u50
-PLATFORM_BLOCKLIST +=  u280 u250
+PLATFORM_ALLOWLIST +=  u200 aws-vu9p-f1 vck190 u50
+PLATFORM_BLOCKLIST +=  u280 u250 zcu102 zcu104
 
 include ./utils.mk
 TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)
@@ -122,34 +123,6 @@ CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L2/tests/medianblur/medianblur
 CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
 LDFLAGS +=  -L $(OPENCV_LIB)
 LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/zcu102/'))
-ifeq ($(ps_on_x86), on)
-HOST_SRCS += $(XFLIB_DIR)/L2/examples/medianblur/xf_median_blur_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L2/tests/medianblur/medianblur_NPPC8_8UC3_8UC3_WINDOW_SIZE_7X7 -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
-LDFLAGS +=  -L $(OPENCV_LIB)
-LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-else
-HOST_SRCS += $(XFLIB_DIR)/L2/examples/medianblur/xf_median_blur_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L2/tests/medianblur/medianblur_NPPC8_8UC3_8UC3_WINDOW_SIZE_7X7 -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
-LDFLAGS +=  -L $(SYSROOT)/usr/lib -L ${SYSROOT}/lib
-LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-endif
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/zcu104/'))
-ifeq ($(ps_on_x86), on)
-HOST_SRCS += $(XFLIB_DIR)/L2/examples/medianblur/xf_median_blur_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L2/tests/medianblur/medianblur_NPPC8_8UC3_8UC3_WINDOW_SIZE_7X7 -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
-LDFLAGS +=  -L $(OPENCV_LIB)
-LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-else
-HOST_SRCS += $(XFLIB_DIR)/L2/examples/medianblur/xf_median_blur_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L2/tests/medianblur/medianblur_NPPC8_8UC3_8UC3_WINDOW_SIZE_7X7 -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
-LDFLAGS +=  -L $(SYSROOT)/usr/lib -L ${SYSROOT}/lib
-LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-endif
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
 ifeq ($(ps_on_x86), on)
 HOST_SRCS += $(XFLIB_DIR)/L2/examples/medianblur/xf_median_blur_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
@@ -184,7 +157,7 @@ endif
 
 EXE_NAME := medianblur
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
-EXE_FILE_DEPS := $(HOST_SRCS) $(EXE_FILE_DEPS)
+EXE_FILE_DEPS := $(HOST_SRCS) $(INSTANCE_FILES)  $(EXE_FILE_DEPS)
 
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu))
 HOST_ARGS :=  $(XFLIB_DIR)/data/128x128.png
@@ -331,8 +304,8 @@ run: all
 ifneq (,$(filter hw_emu, $(TARGET)))
 ifeq ($(HOST_ARCH), x86)
 ifeq ($(pcie_aie), on)
-	cp Work/reports/dma_lock_report.json ./
-	cp Work/ps/c_rts/aie_control_config.json ./
+	cp $(AIE_WORK_DIR)/reports/dma_lock_report.json ./
+	cp $(AIE_WORK_DIR)/ps/c_rts/aie_control_config.json ./
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) $(BINARY_CONTAINERS_PKG)
 	
@@ -342,7 +315,7 @@ endif
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
 	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
 	
 endif
@@ -355,7 +328,7 @@ ifeq ($(HOST_ARCH), x86)
 	
 else
 	@echo $(RUN_DEPS)
-	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT))
+	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
 	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
 	
 endif
@@ -382,7 +355,7 @@ endif
 
 ############################## Setting Targets ##############################
 
-.PHONY: clean cleanall emconfig
+.PHONY: clean cleanall emconfig gen_instances valid_params
 emconfig: $(EMCONFIG)
 
 .PHONY: host
@@ -398,6 +371,12 @@ xclbin: check_vpp check_xrt check_env $(BINARY_CONTAINERS)
 else
 xclbin: check_vpp check_sysroot check_env $(BINARY_CONTAINERS)
 endif
+
+gen_instances: $(INSTANCE_FILES)
+	@echo "Nothing to generate."
+
+valid_params:
+	@echo "Nothing to validate."
 
 .PHONY: check_env
 check_env:
@@ -434,16 +413,16 @@ endif
 
 ############################## Cleaning Rules ##############################
 cleanh:
-	-$(RMDIR) $(EXE_FILE) vitis_* TempConfig system_estimate.xtxt *.rpt .run/
+	-$(RMDIR) $(EXE_FILE)  vitis_* TempConfig system_estimate.xtxt *.rpt .run/  $(INST_TB_FILES)
 	-$(RMDIR) src/*.ll _xocc_* .Xil dltmp* xmltmp* *.log *.jou *.wcfg *.wdb sample_link.ini sample_compile.ini obj*  bin* *.csv *.jpg *.jpeg *.png *.db
 
 cleank:
 	-$(RMDIR) $(BUILD_DIR)/*.xclbin _vimage *xclbin.run_summary qemu-memory-_* emulation/ _vimage/ pl*start_simulation. sh *.xclbin
-	-$(RMDIR) _x_temp.* _x*
+	-$(RMDIR) _x_temp.* _x* $(INST_FILES)
 
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR)  emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
 	-$(RMDIR)  $(AIE_WORK_DIR) $(AIE_PKG_DIR) $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
-	-$(RMDIR) 
+	-$(RMDIR)  *.html $(INSTANCE_FILES)
 
 clean: cleanh

@@ -31,8 +31,8 @@
         "cflags": " -I ${XF_PROJ_ROOT}/L1/tests/autowhitebalance/autowhitebalance_NPPC8_8UC3_8UC3_WB_SIMPLE -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x", 
         "ldflags": "-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d", 
         "argv": {
-            "hls_csim": "  ${XF_PROJ_ROOT}/data/ltm_input.png",
-            "hls_cosim": "  ${XF_PROJ_ROOT}/data/ltm_input.png"
+            "hls_csim": "  ${XF_PROJ_ROOT}/data/128x128.png",
+            "hls_cosim": "  ${XF_PROJ_ROOT}/data/4k.jpg"
         }, 
         "stdmath": false, 
         "csimflags": " -I ${XF_PROJ_ROOT}/L1/tests/autowhitebalance/autowhitebalance_NPPC8_8UC3_8UC3_WB_SIMPLE -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x"
@@ -46,10 +46,10 @@
                 "env": "", 
                 "cmd": "", 
                 "max_memory_MB": {
-                    "vivado_syn": 16384, 
+                    "vivado_syn": 32768, 
                     "hls_csim": 10240, 
                     "hls_cosim": 16384, 
-                    "vivado_impl": 16384, 
+                    "vivado_impl": 32768, 
                     "hls_csynth": 10240
                 }, 
                 "max_time_min": {

@@ -1,5 +1,6 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +17,7 @@
 
 #include "xf_boundingbox_accel_config.h"
 extern "C" {
+template struct ap_uint<INPUT_PTR_WIDTH>;
 void boundingbox_accel(
     ap_uint<INPUT_PTR_WIDTH>* in_img, int* roi, int color_info[MAX_BOXES][4], int height, int width, int num_box) {
 // clang-format off

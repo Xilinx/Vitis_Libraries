@@ -1,5 +1,6 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +15,7 @@
  * limitations under the License.
  */
 
-#include "xf_corner_tracker_config.h"
+#include "xf_pyr_down_accel_config.h"
 extern "C" {
 void pyr_down_accel(ap_uint<INPUT_PTR_WIDTH>* inImgPyr1,
                     ap_uint<OUTPUT_PTR_WIDTH>* outImgPyr1,

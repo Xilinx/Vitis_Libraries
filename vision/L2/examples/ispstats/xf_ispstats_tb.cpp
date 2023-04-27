@@ -1,5 +1,6 @@
 /*
- * Copyright 2023 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,8 +52,8 @@ int main(int argc, char** argv) {
     int roi_brx = 127;
     int roi_bry = 127;
     int stats_size = STATS_SIZE;
-    int N = 8;
-    int M = 8;
+    int N = 1;
+    int M = 1;
 
     // N = 0 or M = 0 is not possible so assigning it to 1 if value is 0.
     if (N == 0) {
@@ -432,7 +433,46 @@ STATS_ROW_LOOP:
     std::cout << "stats_size = " << stats_size << std::endl;
     std::cout << "total_bins = " << total_bins << std::endl;
     
+    int count=0;  //Counter to calculate total number of wrong bins
+
     if (out_ch == 3) {
+        
+        printf("HLS output\n");
+        for (int zone = 0; zone < num_zones; zone++) {
+            printf("zone %d\n", zone);
+
+            for (int cnt = 0; cnt < stats_size; cnt++) {
+                uint32_t bstat_hls = hlsstats[(zone * total_bins) + cnt];
+                uint32_t gstat_hls = hlsstats[(zone * total_bins) + cnt + stats_size];
+                uint32_t rstat_hls = hlsstats[(zone * total_bins) + cnt + stats_size * 2];
+
+                // HLS Output
+                printf("bin%04d %u %u %u\n", cnt, bstat_hls, gstat_hls, rstat_hls);
+
+            }
+        }
+ 
+        printf("Reference output \n");
+        for (int zone = 0; zone < num_zones; zone++) {
+            printf("zone %d\n", zone);
+            
+            for (int cnt = 0; cnt < stats_size; cnt++) {
+#if MERGE_BINS
+                uint32_t bstat_ref = mrg_ref_stats[zone][0][cnt];
+                uint32_t gstat_ref = mrg_ref_stats[zone][1][cnt];
+                uint32_t rstat_ref = mrg_ref_stats[zone][2][cnt];
+#else
+                uint32_t bstat_ref = ind_ref_stats[zone][0][cnt];
+                uint32_t gstat_ref = ind_ref_stats[zone][1][cnt];
+                uint32_t rstat_ref = ind_ref_stats[zone][2][cnt];
+#endif
+
+                // Reference
+                printf("bin%04d %u %u %u\n", cnt, bstat_ref, gstat_ref, rstat_ref);
+            }
+        } 
+        
+        
         // Checking of output vs reference
         for (int zone = 0; zone < num_zones; zone++) {
             fprintf(out_ref, "zone %d\n", zone);
@@ -454,19 +494,48 @@ STATS_ROW_LOOP:
 #endif
 
                 // Reference
-                fprintf(out_ref, "bin%03d %u %u %u\n", cnt, bstat_ref, gstat_ref, rstat_ref);
+                fprintf(out_ref, "bin%04d %u %u %u\n", cnt, bstat_ref, gstat_ref, rstat_ref);
                 // HLS Output
-                fprintf(out_hls, "bin%03d %u %u %u\n", cnt, bstat_hls, gstat_hls, rstat_hls);
+                fprintf(out_hls, "bin%04d %u %u %u\n", cnt, bstat_hls, gstat_hls, rstat_hls);
 
                 // Data checker
                 if ((bstat_ref != bstat_hls) || (gstat_ref != gstat_hls) || (rstat_ref != rstat_hls)) {
-                    fprintf(stderr, "\nTest Failed\n");
-                    return 1;
+                     count++;
                 }
             }
         }
        
     } else {
+        
+        printf("HLS output\n");
+        for (int zone = 0; zone < num_zones; zone++) {
+            printf("zone %d\n", zone);
+
+            for (int cnt = 0; cnt < stats_size; cnt++) {
+                uint32_t stat_hls = hlsstats[(zone * total_bins) + cnt];
+
+                printf("bin%04d %u\n", cnt, stat_hls);
+            }
+        }
+        
+        printf("Reference output \n");
+        for (int zone = 0; zone < num_zones; zone++) {
+            printf("zone %d\n", zone);
+    
+            for (int cnt = 0; cnt < stats_size; cnt++) {
+#if MERGE_BINS
+                uint32_t stat_ref = mrg_ref_stats[zone][0][cnt];
+#else
+                uint32_t stat_ref = ind_ref_stats[zone][0][cnt];
+#endif
+                // Reference
+                printf("bin%04d %u\n", cnt, stat_ref);
+            
+            }
+        }
+        
+        
+        
         for (int zone = 0; zone < num_zones; zone++) {
             fprintf(out_ref, "zone %d\n", zone);
             fprintf(out_hls, "zone %d\n", zone);
@@ -478,23 +547,29 @@ STATS_ROW_LOOP:
                 uint32_t stat_ref = ind_ref_stats[zone][0][cnt];
 #endif
                 // Reference
-               fprintf(out_ref, "bin%03d %u\n", cnt, stat_ref);
-        //        // HLS Output
-                fprintf(out_hls, "bin%03d %u\n", cnt, stat_hls);
+                fprintf(out_ref, "bin%04d %u\n", cnt, stat_ref);
+               // HLS Output
+                fprintf(out_hls, "bin%04d %u\n", cnt, stat_hls);
 
                 // Data checker
                 if (stat_ref != stat_hls) {
-                    fprintf(stderr, "\nTest Failed\n");
-                    return 1;
+                    count++;
                 }
             }
         }
     }
 
+    
     fclose(out_hls);
     fclose(out_ref);
 
-    std::cout << "Test Passed " << std::endl;
-
-    return 0;
+    if(count > 0){
+        std::cout << "Test Failed " << std::endl;
+        return 1;
+    }
+    else{  
+        std::cout << "Test Passed " << std::endl;
+        return 0;
+    }
+    
 }

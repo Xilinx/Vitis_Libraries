@@ -35,13 +35,13 @@ The below steps can help install the basic libs required to compile and link the
 5. Run the command: *export LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/*
 6. Run the command: *cmake -D CMAKE_BUILD_TYPE=RELEASE
   -D CMAKE_INSTALL_PREFIX=< path-to-install-directory>
-  -D CMAKE_CXX_COMPILER=< path-to-Vitis-installation-directory>/tps/lnx64/gcc-6.2.0/bin/g++
+  -D CMAKE_CXX_COMPILER=< path-to-Vivado-directory-in-Vitis-installation>/tps/lnx64/gcc-6.2.0/bin/g++
   -D OPENCV_EXTRA_MODULES_PATH=< path-to-source_contrib-directory>/modules/
   -D WITH_V4L=ON -DBUILD_TESTS=OFF -DBUILD_ZLIB=ON
   -DBUILD_JPEG=ON -DWITH_JPEG=ON -DWITH_PNG=ON
   -DBUILD_EXAMPLES=OFF -DINSTALL_C_EXAMPLES=OFF
   -DINSTALL_PYTHON_EXAMPLES=OFF -DWITH_OPENEXR=OFF
-  -DBUILD_OPENEXR=OFF <path-to-source-directory>*
+  -DBUILD_OPENEXR=OFF < path-to-source-directory>*
 7. Run the command: *make all -j8*
 8. Run the command: *make install*
 

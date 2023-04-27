@@ -1,5 +1,6 @@
 /*
- * Copyright 2023 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +33,7 @@ namespace cv {
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC, int N>
 void compute_pxl(XF_DTUNAME(SRC_T, NPC) pxl_val,
                  XF_DTUNAME(DST_T, NPC) & out_val,
-                 ap_ufixed<32, 16> params[3][N][3],
+                 ap_ufixed<32, 18> params[3][N][3],
                  int idx) {
 // clang-format off
 		#pragma HLS INLINE
@@ -66,7 +67,7 @@ template <int SRC_T,
           int N>
 void xFcompute(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
                xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& dst,
-               ap_ufixed<32, 16> params[3][N][3],
+               ap_ufixed<32, 18> params[3][N][3],
                unsigned short bayerp,
                int rows,
                int cols) {
@@ -162,7 +163,7 @@ template <int SRC_T,
           int N>
 void degamma(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
              xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& dst,
-             ap_ufixed<32, 16> params[3][N][3],
+             ap_ufixed<32, 18> params[3][N][3],
              unsigned short bayerp) {
 #ifndef __SYNTHESIS__
     assert(((bayerp == XF_BAYER_BG) || (bayerp == XF_BAYER_GB) || (bayerp == XF_BAYER_GR) || (bayerp == XF_BAYER_RG)) &&
@@ -180,7 +181,7 @@ void degamma(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
     int cols = src.cols;
 
     uint16_t cols_shifted = cols >> (XF_BITSHIFT(NPC));
-    ap_ufixed<32, 16> copy_params[3][N][3];
+    ap_ufixed<32, 18> copy_params[3][N][3];
 
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < N; j++) {
@@ -209,7 +210,7 @@ template <int SRC_T,
           int STREAMS = 2>
 void degamma_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
                    xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& dst,
-                   ap_ufixed<32, 16> dgam_params[STREAMS][3][N][3],
+                   ap_ufixed<32, 18> dgam_params[STREAMS][3][N][3],
                    unsigned short dgam_bayer[STREAMS],
                    int strm_id) {
 // clang-format off

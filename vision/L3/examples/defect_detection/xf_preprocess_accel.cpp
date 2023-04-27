@@ -1,5 +1,6 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +15,7 @@
  * limitations under the License.
  */
 
-#include "xf_threshold_config.h"
+#include "xf_preprocess_accel_config.h"
 
 extern "C" {
 void preprocess_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
@@ -42,41 +43,42 @@ void preprocess_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
 
     const int pROWS = HEIGHT;
     const int pCOLS = WIDTH;
-    const int pNPC1 = NPIX;
+    const int pNPC1 = XF_NPPCX;
     int tmp_obj;
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_IN> in_mat(rows, cols);
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> imgOutput(rows, cols);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_IN> in_mat(rows, cols);
+    xf::cv::Mat<OUT_TYPE, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_OUT> imgOutput(rows, cols);
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_OUT> out_mat(rows, cols);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_OUT> out_mat(rows, cols);
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> in_mat_fw(rows, cols);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> out_mat_fw(rows, cols);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> out_mat_ret(rows, cols);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_OUT> in_mat_fw(rows, cols);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_OUT> out_mat_fw(rows, cols);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_OUT> out_mat_ret(rows, cols);
 
 // clang-format off
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_IN>(img_inp, in_mat);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_IN>(img_inp, in_mat);
 
-    xf::cv::Threshold<THRESH_TYPE, XF_8UC1, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(in_mat, out_mat,
-                                                                                                  thresh, maxval);
+    xf::cv::Threshold<THRESH_TYPE, XF_8UC1, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(in_mat, out_mat,
+                                                                                                      thresh, maxval);
 
     // Run xfOpenCV median blur kernel:
-    /*    xf::cv::medianBlur<WINDOW_SIZE, XF_BORDER_REPLICATE, TYPE, HEIGHT, WIDTH, NPC1>(out_mat, imgOutput);
+    /*    xf::cv::medianBlur<WINDOW_SIZE, XF_BORDER_REPLICATE, OUT_TYPE, HEIGHT, WIDTH, XF_NPPCX>(out_mat, imgOutput);
 
-        xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPIX>(imgOutput, img_out);*/
+        xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, XF_NPPCX>(imgOutput, img_out);*/
 
-    xf::cv::duplicateMat<TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_OUT, XF_CV_DEPTH_OUT, XF_CV_DEPTH_OUT>(
+    xf::cv::duplicateMat<OUT_TYPE, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_OUT, XF_CV_DEPTH_OUT, XF_CV_DEPTH_OUT>(
         out_mat, in_mat_fw, out_mat_ret);
 
-    xf::cv::fw_cca<TYPE, HEIGHT, WIDTH, NPIX>(in_mat_fw, out_mat_fw, tmp_obj, rows, cols);
+    xf::cv::fw_cca<OUT_TYPE, HEIGHT, WIDTH, XF_NPPCX>(in_mat_fw, out_mat_fw, tmp_obj, rows, cols);
 
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_OUT, 1>(out_mat_ret, img_out, stride);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_OUT, 1>(out_mat_ret, img_out,
+                                                                                                 stride);
 
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, TYPE, HEIGHT, WIDTH, NPIX, XF_CV_DEPTH_OUT, 1>(out_mat_fw, fw_img_out,
-                                                                                         stride);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_OUT, 1>(out_mat_fw, fw_img_out,
+                                                                                                 stride);
 
     *obj_pix = tmp_obj;
 }

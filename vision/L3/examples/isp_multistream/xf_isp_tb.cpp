@@ -1,5 +1,6 @@
 /*
- * Copyright 2023-2024 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +16,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_isp_types.h"
+#include "xf_isp_tb_config.h"
 #include "xcl2.hpp"
 
 void bayerizeImage(cv::Mat img, cv::Mat& bayer_image, cv::Mat& cfa_output, int code) {
@@ -879,7 +880,7 @@ int main(int argc, char** argv) {
 
 /////////////DEGAMMA///////////////////////
 #if T_8U
-    ap_ufixed<32, 16> dparams[3][DGAMMA_KP][3] = {{{32, 0.08, 0},
+    ap_ufixed<32, 18> dparams[3][DGAMMA_KP][3] = {{{32, 0.08, 0},
                                                    {64, 0.3, 7},
                                                    {96, 0.55, 23},
                                                    {128, 0.82, 49},
@@ -908,7 +909,7 @@ int main(int argc, char** argv) {
 
 #if T_16U
 
-    ap_ufixed<32, 16> dparams[3][DGAMMA_KP][3] = {
+    ap_ufixed<32, 18> dparams[3][DGAMMA_KP][3] = {
         {{8192, 0.082, 0},
          {16384, 0.296, 1749},
          {24576, 0.545, 5825},
@@ -936,7 +937,7 @@ int main(int argc, char** argv) {
 
 #endif
 
-    ap_ufixed<32, 16> dgam_params[NUM_STREAMS][3][DGAMMA_KP][3];
+    ap_ufixed<32, 18> dgam_params[NUM_STREAMS][3][DGAMMA_KP][3];
 
     for (int n = 0; n < NUM_STREAMS; n++) {
         for (int i = 0; i < 3; i++) {

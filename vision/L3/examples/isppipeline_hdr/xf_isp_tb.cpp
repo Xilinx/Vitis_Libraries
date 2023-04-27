@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +16,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_isp_types.h"
+#include "xf_isp_tb_config.h"
 
 #include "xcl2.hpp"
 
@@ -220,13 +221,13 @@ int main(int argc, char** argv) {
 #if T_8U
     out_img.create(in_img1.rows, in_img1.cols, CV_8UC3);
     size_t vec_in_size_bytes = 256 * 3 * sizeof(unsigned char);
-    size_t vec_weight_size_bytes = NO_EXPS * XF_NPPC * W_B_SIZE * sizeof(short);
+    size_t vec_weight_size_bytes = NO_EXPS * XF_NPPCX * W_B_SIZE * sizeof(short);
     size_t image_in_size_bytes = in_img1.rows * in_img1.cols * sizeof(unsigned char);
     size_t image_out_size_bytes = in_img1.rows * in_img1.cols * 3 * sizeof(unsigned char);
 #else
     out_img.create(in_img1.rows, in_img1.cols, CV_8UC3);
     size_t vec_in_size_bytes = 256 * 3 * sizeof(unsigned char);
-    size_t vec_weight_size_bytes = NO_EXPS * XF_NPPC * W_B_SIZE * sizeof(short);
+    size_t vec_weight_size_bytes = NO_EXPS * XF_NPPCX * W_B_SIZE * sizeof(short);
     size_t image_in_size_bytes = in_img1.rows * in_img1.cols * sizeof(unsigned short);
     size_t image_out_size_bytes = in_img1.rows * in_img1.cols * 3 * sizeof(unsigned char);
 #endif
@@ -253,12 +254,12 @@ int main(int argc, char** argv) {
 
     HDR_merge(in_img1, in_img2, alpha, optical_black_value, intersec, rho, imax, t, final_ocv, wr_ocv);
 
-    short wr_hls[NO_EXPS * XF_NPPC * W_B_SIZE];
+    short wr_hls[NO_EXPS * XF_NPPCX * W_B_SIZE];
 
-    for (int k = 0; k < XF_NPPC; k++) {
+    for (int k = 0; k < XF_NPPCX; k++) {
         for (int i = 0; i < NO_EXPS; i++) {
             for (int j = 0; j < (W_B_SIZE); j++) {
-                wr_hls[(i + k * XF_NPPC) * W_B_SIZE + j] = wr_ocv[i][j];
+                wr_hls[(i + k * XF_NPPCX) * W_B_SIZE + j] = wr_ocv[i][j];
             }
         }
     }
@@ -294,9 +295,9 @@ int main(int argc, char** argv) {
     cl::Device device = devices[0];
     OCL_CHECK(err, cl::Context context(device, NULL, NULL, NULL, &err));
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_SRC_T, XF_NPPC) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_SRC_T, XF_NPPC) << std::endl;
-    std::cout << "NPPC:" << XF_NPPC << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(IN_TYPE, XF_NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(IN_TYPE, XF_NPPCX) << std::endl;
+    std::cout << "NPPC:" << XF_NPPCX << std::endl;
 
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_ISPPipeline");

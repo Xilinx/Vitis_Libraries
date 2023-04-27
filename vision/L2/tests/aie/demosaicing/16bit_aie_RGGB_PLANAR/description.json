@@ -54,7 +54,7 @@
                 "LIB_DIR/L1/include/aie/", 
                 "./"
             ], 
-            "options": "--sysroot=$(SYSROOT) -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include", 
+            "options": "--sysroot=$(SYSROOT) -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -std=c++17", 
             "symbols": [
                 "__PS_ENABLE_AIE__"
             ]

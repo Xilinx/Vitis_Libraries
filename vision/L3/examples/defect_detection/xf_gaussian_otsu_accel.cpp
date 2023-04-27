@@ -1,5 +1,6 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +15,7 @@
  * limitations under the License.
  */
 
-#include "xf_threshold_config.h"
+#include "xf_gaussian_otsu_accel_config.h"
 
 extern "C" {
 void gaussian_otsu_accel(ap_uint<GAUSSIAN_INPUT_PTR_WIDTH>* img_inp,
@@ -35,13 +36,13 @@ void gaussian_otsu_accel(ap_uint<GAUSSIAN_INPUT_PTR_WIDTH>* img_inp,
     #pragma HLS INTERFACE s_axilite port=return
     // clang-format on
 
-    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN> in_mat(rows, cols);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> out_bgr2y8_mat(rows, cols);
+    xf::cv::Mat<XF_8UC3, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_IN> in_mat(rows, cols);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_OUT> out_bgr2y8_mat(rows, cols);
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> out_mat(rows, cols);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_OUT> out_mat(rows, cols);
 
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT> out_mat_otsu(rows, cols);
-    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1> out_mat_ret(rows, cols);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_OUT> out_mat_otsu(rows, cols);
+    xf::cv::Mat<XF_8UC1, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_OUT_1> out_mat_ret(rows, cols);
 
     struct bgr2y8_params pxl_val;
 
@@ -62,20 +63,20 @@ void gaussian_otsu_accel(ap_uint<GAUSSIAN_INPUT_PTR_WIDTH>* img_inp,
     #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::Array2xfMat<GAUSSIAN_INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN>(img_inp, in_mat);
+    xf::cv::Array2xfMat<GAUSSIAN_INPUT_PTR_WIDTH, XF_8UC3, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_IN>(img_inp, in_mat);
 
-    xf::cv::custom_bgr2y8<XF_8UC3, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(
+    xf::cv::custom_bgr2y8<XF_8UC3, XF_8UC1, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(
         in_mat, out_bgr2y8_mat, pxl_val);
 
-    xf::cv::GaussianBlur<FILTER_WIDTH, XF_BORDER_CONSTANT, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN,
+    xf::cv::GaussianBlur<FILTER_WIDTH, XF_BORDER_CONSTANT, XF_8UC1, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_IN,
                          XF_CV_DEPTH_OUT>(out_bgr2y8_mat, out_mat, sigma);
 
-    xf::cv::duplicateMat<XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT, XF_CV_DEPTH_OUT_1>(
+    xf::cv::duplicateMat<XF_8UC1, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT, XF_CV_DEPTH_OUT_1>(
         out_mat, out_mat_otsu, out_mat_ret);
 
-    xf::cv::OtsuThreshold<OTSU_PIXEL_TYPE, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT>(out_mat_otsu, *Otsuval);
+    xf::cv::OtsuThreshold<OTSU_PIXEL_TYPE, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_OUT>(out_mat_otsu, *Otsuval);
 
-    xf::cv::xfMat2Array<GAUSSIAN_OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, NPC1, XF_CV_DEPTH_OUT_1>(out_mat_ret,
-                                                                                                    img_out);
+    xf::cv::xfMat2Array<GAUSSIAN_OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_OUT_1>(out_mat_ret,
+                                                                                                        img_out);
 }
 }

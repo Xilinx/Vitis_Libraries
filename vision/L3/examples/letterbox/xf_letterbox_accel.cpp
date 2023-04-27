@@ -1,5 +1,6 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +15,7 @@
  * limitations under the License.
  */
 
-#include "xf_letterbox_config.h"
+#include "xf_letterbox_accel_config.h"
 
 extern "C" {
 void letterbox_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
@@ -47,16 +48,17 @@ void letterbox_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
         rows_out_resize = rows_out;
     }
 
-    xf::cv::Mat<TYPE, HEIGHT, WIDTH, NPC_T, XF_CV_DEPTH_IN_0> imgInput0(rows_in, cols_in);
-    xf::cv::Mat<TYPE, NEWHEIGHT, NEWWIDTH, NPC_T, XF_CV_DEPTH_OUT_1> out_mat_resize(rows_out_resize, cols_out_resize);
-    xf::cv::Mat<TYPE, NEWHEIGHT, NEWWIDTH, NPC_T, XF_CV_DEPTH_OUT_2> out_mat(rows_out, cols_out);
+    xf::cv::Mat<IN_TYPE, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_IN_0> imgInput0(rows_in, cols_in);
+    xf::cv::Mat<OUT_TYPE, NEWHEIGHT, NEWWIDTH, XF_NPPCX, XF_CV_DEPTH_OUT_1> out_mat_resize(rows_out_resize,
+                                                                                           cols_out_resize);
+    xf::cv::Mat<OUT_TYPE, NEWHEIGHT, NEWWIDTH, XF_NPPCX, XF_CV_DEPTH_OUT_2> out_mat(rows_out, cols_out);
 // clang-format off
     #pragma HLS DATAFLOW
 // clang-format on	
-    xf::cv::Array2xfMat<INPUT_PTR_WIDTH,XF_8UC3,HEIGHT, WIDTH, NPC_T, XF_CV_DEPTH_IN_0>  (img_inp, imgInput0);
-    xf::cv::resize<INTERPOLATION,TYPE,HEIGHT,WIDTH,NEWHEIGHT,NEWWIDTH,NPC_T, MAXDOWNSCALE, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_1> (imgInput0, out_mat_resize);
-    xf::cv::insertBorder<TYPE, NEWHEIGHT, NEWWIDTH, NEWHEIGHT, NEWWIDTH, NPC_T, XF_CV_DEPTH_OUT_1, XF_CV_DEPTH_OUT_2>(out_mat_resize, out_mat, insert_pad_value);
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, TYPE, NEWHEIGHT, NEWWIDTH, NPC_T, XF_CV_DEPTH_OUT_2>(out_mat, img_out);
+    xf::cv::Array2xfMat<INPUT_PTR_WIDTH,XF_8UC3,HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_IN_0>  (img_inp, imgInput0);
+    xf::cv::resize<INTERPOLATION,IN_TYPE,HEIGHT,WIDTH,NEWHEIGHT,NEWWIDTH,XF_NPPCX, MAXDOWNSCALE, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_1> (imgInput0, out_mat_resize);
+    xf::cv::insertBorder<OUT_TYPE, NEWHEIGHT, NEWWIDTH, NEWHEIGHT, NEWWIDTH, XF_NPPCX, XF_CV_DEPTH_OUT_1, XF_CV_DEPTH_OUT_2>(out_mat_resize, out_mat, insert_pad_value);
+    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, NEWHEIGHT, NEWWIDTH, XF_NPPCX, XF_CV_DEPTH_OUT_2>(out_mat, img_out);
     return;
 }// end kernel
 }// end extern C

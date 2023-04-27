@@ -1,5 +1,6 @@
 /*
- * Copyright 2023 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -179,6 +180,108 @@ template <int SIN_CHANNEL_IN_TYPE,
           int ROWS,
           int COLS,
           int NPC,
+          int XFCVDEPTH_YIMAGE = _XFCVDEPTH_DEFAULT,
+          int TC>
+void xFcompute_mean_multi(xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_YIMAGE>& yimage,
+                          ap_ufixed<16, 4>& mean_fixed,
+                          ap_ufixed<16, 4>& L_max,
+                          ap_ufixed<16, 4>& L_min,
+                          int rows,
+                          int cols,
+                          unsigned short org_height,
+                          int slc_id,
+                          ap_ufixed<32, 24>& acc_sum) {
+// clang-format off
+		#pragma HLS INLINE OFF
+	// clang-format on		
+	   
+        
+		const int PXL_WIDTH = XF_PIXELWIDTH(SIN_CHANNEL_IN_TYPE, NPC);
+		int rd_ptr = 0,wr_ptr = 0;
+		ap_int<13> i,j,k;
+		
+		ap_ufixed<32, 24> tmp_sum[1 << XF_BITSHIFT(NPC)];
+		ap_ufixed<32, 24> sum=0;
+      
+		
+        
+        if(slc_id==0) {
+		
+  
+            acc_sum = 0;
+        
+        } 
+// clang-format off
+    #pragma HLS ARRAY_PARTITION variable=tmp_sum complete 
+	// clang-format on		
+		
+		for (j = 0; j < (1 << XF_BITSHIFT(NPC)); j++) {
+// clang-format off
+			#pragma HLS UNROLL
+        // clang-format on
+        tmp_sum[j] = 0;
+    }
+
+    ap_ufixed<16, 4> log_out;
+rowLoop1:
+    for (i = 0; i < rows; i++) {
+// clang-format off
+			#pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
+			#pragma HLS LOOP_FLATTEN off
+    // clang-format on
+
+    colLoop1:
+        for (j = 0; j < cols; j++) {
+// clang-format off
+				#pragma HLS LOOP_TRIPCOUNT min=TC max=TC
+				#pragma HLS PIPELINE
+            // clang-format on
+
+            XF_TNAME(SIN_CHANNEL_IN_TYPE, NPC) val_src1;
+            val_src1 = yimage.read(rd_ptr++);
+
+        procLoop1:
+            for (k = 0; k < NPC; k++) {
+// clang-format off
+					#pragma HLS UNROLL
+                // clang-format on
+
+                XF_DTUNAME(SIN_CHANNEL_IN_TYPE, NPC) pxl_val;
+                pxl_val =
+                    val_src1.range((k + 1) * PXL_WIDTH - 1, k * PXL_WIDTH); // Get bits from certain range of positions.
+
+                logarithm(pxl_val, log_out);
+
+                tmp_sum[k] = tmp_sum[k] + log_out;
+
+                if (log_out > L_max) L_max = log_out;
+                if (log_out < L_min) L_min = log_out;
+            }
+        }
+    }
+
+    for (j = 0; j < (1 << XF_BITSHIFT(NPC)); j++) {
+// clang-format off
+			#pragma HLS UNROLL
+        // clang-format on
+
+        sum = sum + tmp_sum[j];
+    }
+
+    acc_sum += sum;
+
+    ap_ufixed<32, 1> inv_divsion = (ap_ufixed<32, 1>)1 / (ap_ufixed<32, 32>)(org_height * cols * NPC);
+
+    mean_fixed = (acc_sum * inv_divsion);
+
+    return;
+}
+
+template <int SIN_CHANNEL_IN_TYPE,
+          int SIN_CHANNEL_OUT_TYPE,
+          int ROWS,
+          int COLS,
+          int NPC,
           int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
           int TC>
 void xFcompute_xyzmapped(xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>& ximage,
@@ -207,6 +310,10 @@ void xFcompute_xyzmapped(xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC, XFCVD
 		
 		ap_ufixed<16, 4> ld_nume = 2.4;
 		ap_ufixed<16, 4> ld_dinom = L_max-L_min;
+	
+        
+     
+        
 		ap_ufixed<16, 1> inv_L_range =  (ap_ufixed<16, 1>)1/ld_dinom;	
 		
 		ap_ufixed<16, 4> K1 = (ld_nume * inv_L_range);
@@ -380,6 +487,7 @@ void gtm(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
 
     return;
 }
+
 template <int SRC_T,
           int DST_T,
           int SIN_CHANNEL_IN_TYPE,
@@ -399,19 +507,112 @@ void gtm_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
                ap_ufixed<16, 4>& L_min2,
                float c1,
                float c2,
-               bool& flag,
-               bool& eof) {
+               unsigned short org_height,
+               int slc_id,
+               ap_ufixed<32, 24>& acc_sum) {
+#ifndef __SYNTHESIS__
+    assert(((SRC_T == XF_16UC3) || (SRC_T == XF_14UC3)) && "Input TYPE must be XF_16UC3 or XF_14UC3");
+    assert(((SIN_CHANNEL_IN_TYPE == XF_16UC1) || (SIN_CHANNEL_IN_TYPE == XF_14UC1)) &&
+           "Input Single Channel TYPE must be XF_16UC1 or XF_14UC1");
+    assert(((DST_T == XF_8UC3) || (SIN_CHANNEL_OUT_TYPE == XF_8UC1)) && "OUTPUT TYPE must be XF_8UC3");
+    assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC2)) && "NPC must be XF_NPPC1, XF_NPPC2 ");
+    assert((src.rows <= ROWS) && (src.cols <= COLS) && "ROWS and COLS should be greater than input image size ");
+#endif
+    int rows = src.rows;
+    int cols = src.cols;
+    uint16_t cols_shifted = cols >> (XF_BITSHIFT(NPC));
+
+    xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN> bgr2xyz(rows, cols);
+
+    xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN> xyzimg1(rows, cols);
+    xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN> xyzimg2(rows, cols);
+    xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN> xyzimg3(rows, cols);
+    xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_IN> xyzoutput(rows, cols);
+
+    xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> ximage(rows, cols);
+    xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> yimage(rows, cols);
+    xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> yimage1(rows, cols);
+    xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> yimage2(rows, cols);
+    xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> zimage(rows, cols);
+
+    xf::cv::Mat<SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> xmapped(rows, cols);
+    xf::cv::Mat<SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> ymapped(rows, cols);
+    xf::cv::Mat<SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN> zmapped(rows, cols);
+
+// clang-format off
+		#pragma HLS DATAFLOW
+    // clang-format on
+
+    // Convert BGR to XYZ:
+    xf::cv::bgr2xyz<SRC_T, SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN>(src, bgr2xyz);
+
+    xf::cv::duplicateimages<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN, XFCVDEPTH_IN, XFCVDEPTH_IN>(
+        bgr2xyz, xyzimg1, xyzimg2, xyzimg3);
+
+    xf::cv::extractChannel<SRC_T, SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN>(xyzimg1, ximage, 0);
+
+    xf::cv::extractChannel<SRC_T, SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN>(xyzimg2, yimage, 1);
+
+    xf::cv::extractChannel<SRC_T, SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN>(xyzimg3, zimage, 2);
+
+    xf::cv::duplicateMat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN, XFCVDEPTH_IN>(
+        yimage, yimage1, yimage2);
+
+    xFcompute_mean_multi<SIN_CHANNEL_IN_TYPE, SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN,
+                         (COLS >> (XF_BITSHIFT(NPC)))>(yimage1, mean1, L_max1, L_min1, rows, cols_shifted, org_height,
+                                                       slc_id, acc_sum);
+
+    xFcompute_xyzmapped<SIN_CHANNEL_IN_TYPE, SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN,
+                        (COLS >> (XF_BITSHIFT(NPC)))>(ximage, yimage2, zimage, mean2, L_max2, L_min2, c1, c2, xmapped,
+                                                      ymapped, zmapped, rows, cols_shifted);
+
+    xf::cv::merge<SIN_CHANNEL_OUT_TYPE, DST_T, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_IN, XFCVDEPTH_IN>(
+        zmapped, ymapped, xmapped, xyzoutput);
+
+    xf::cv::xyz2bgr<DST_T, DST_T, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT>(xyzoutput, dst);
+
+    return;
+}
+
+template <int SRC_T,
+          int DST_T,
+          int SIN_CHANNEL_IN_TYPE,
+          int SIN_CHANNEL_OUT_TYPE,
+          int ROWS,
+          int COLS,
+          int NPC,
+          int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+void gtm_multistream(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
+                     xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& dst,
+                     ap_ufixed<16, 4>& mean1,
+                     ap_ufixed<16, 4>& mean2,
+                     ap_ufixed<16, 4>& L_max1,
+                     ap_ufixed<16, 4>& L_max2,
+                     ap_ufixed<16, 4>& L_min1,
+                     ap_ufixed<16, 4>& L_min2,
+                     float c1,
+                     float c2,
+                     bool& flag,
+                     bool& eof,
+                     unsigned short org_height,
+                     int slc_id,
+                     ap_ufixed<32, 24>& acc_sum) {
 // clang-format off
 #pragma HLS INLINE OFF
     // clang-format on
 
     if (!flag) {
-        xf::cv::gtm<SRC_T, DST_T, SIN_CHANNEL_IN_TYPE, SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN,
-                    XFCVDEPTH_OUT>(src, dst, mean1, mean2, L_max1, L_max2, L_min1, L_min2, c1, c2);
+        xf::cv::gtm_multi<SRC_T, DST_T, SIN_CHANNEL_IN_TYPE, SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN,
+                          XFCVDEPTH_OUT>(src, dst, mean1, mean2, L_max1, L_max2, L_min1, L_min2, c1, c2, org_height,
+                                         slc_id, acc_sum);
+
         if (eof) flag = 1;
     } else {
-        xf::cv::gtm<SRC_T, DST_T, SIN_CHANNEL_IN_TYPE, SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN,
-                    XFCVDEPTH_OUT>(src, dst, mean2, mean1, L_max2, L_max1, L_min2, L_min1, c1, c2);
+        xf::cv::gtm_multi<SRC_T, DST_T, SIN_CHANNEL_IN_TYPE, SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN,
+                          XFCVDEPTH_OUT>(src, dst, mean2, mean1, L_max2, L_max1, L_min2, L_min1, c1, c2, org_height,
+                                         slc_id, acc_sum);
+
         if (eof) flag = 0;
     }
     return;
@@ -438,7 +639,10 @@ void gtm_multi_wrap(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
                     float c2[STREAMS],
                     bool flag[STREAMS],
                     bool eof[STREAMS],
-                    int strm_id) {
+                    int strm_id,
+                    unsigned short org_height,
+                    int slc_id,
+                    ap_ufixed<32, 24> acc_sum[STREAMS]) {
 // clang-format off
 #pragma HLS ARRAY_PARTITION variable= mean1 dim=1 complete
 #pragma HLS ARRAY_PARTITION variable= mean2 dim=1 complete
@@ -450,10 +654,12 @@ void gtm_multi_wrap(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
 #pragma HLS ARRAY_PARTITION variable= c2 dim=1 complete
 #pragma HLS ARRAY_PARTITION variable=flag dim=1 complete
 #pragma HLS ARRAY_PARTITION variable=eof dim=1 complete
+#pragma HLS ARRAY_PARTITION variable= acc_sum dim=1 complete
     // clang-format on  
-    gtm_multi<SRC_T, DST_T, SIN_CHANNEL_IN_TYPE, SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT>
+   
+    gtm_multistream<SRC_T, DST_T, SIN_CHANNEL_IN_TYPE, SIN_CHANNEL_OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT>
               (src, dst, mean1[strm_id], mean2[strm_id], L_max1[strm_id], L_max2[strm_id], L_min1[strm_id], L_min2[strm_id],
-                 c1[strm_id], c2[strm_id], flag[strm_id], eof[strm_id]);
+                 c1[strm_id], c2[strm_id], flag[strm_id], eof[strm_id], org_height, slc_id, acc_sum[strm_id]);
          
 }
 

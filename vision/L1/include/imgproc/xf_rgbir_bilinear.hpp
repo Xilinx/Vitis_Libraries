@@ -1,5 +1,6 @@
 /*
- * Copyright 2021 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -274,7 +275,7 @@ Row_Loop:
                     // imgblock[4][FSIZE-1+q] = tmp.range((step + step * q) - 1, step * q);
                     packed_store.range((step + step * q) - 1, step * q) =
                         //							imgblock[2][FSIZE - NPPC-1 + q]; //
-                        //Write
+                        // Write
                         // back
                         // to
                         // linebuffer

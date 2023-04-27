@@ -1,5 +1,6 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +16,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_stereo_pipeline_config.h"
+#include "xf_stereo_pipeline_tb_config.h"
 #include "cameraParameters.h"
 
 #include "xcl2.hpp"
@@ -102,9 +103,9 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, cl::CommandQueue q(context, device, CL_QUEUE_PROFILING_ENABLE, &err));
     OCL_CHECK(err, std::string device_name = device.getInfo<CL_DEVICE_NAME>(&err));
     std::cout << "INFO: Device found - " << device_name << std::endl;
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, XF_NPPC1) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, XF_NPPC1) << std::endl;
-    std::cout << "NPPC:" << XF_NPPC1 << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_8UC1, XF_NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_8UC1, XF_NPPCX) << std::endl;
+    std::cout << "NPPC:" << XF_NPPCX << std::endl;
 
     // Load binary:
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_stereopipeline");

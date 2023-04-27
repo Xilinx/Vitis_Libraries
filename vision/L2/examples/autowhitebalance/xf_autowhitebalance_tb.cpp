@@ -1,5 +1,6 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -255,11 +256,24 @@ int main(int argc, char** argv) {
     diff.create(in_gray.rows, in_gray.cols, CV_OUT_TYPE);
 
     float thresh = 0.9;
-    /// simple white balancing cref code
+/// simple white balancing cref code
+#if T_8U
     float inputMin = 0.0f;
     float inputMax = 255.0f;
     float outputMin = 0.0f;
     float outputMax = 255.0f;
+
+    std::vector<cv::Mat_<uchar> > mv;
+    split(in_gray, mv);
+#else
+    float inputMin = 0.0f;
+    float inputMax = 65535.0f;
+    float outputMin = 0.0f;
+    float outputMax = 65535.0f;
+
+    std::vector<cv::Mat_<ushort> > mv;
+    split(in_gray, mv);
+#endif
     float p = 2.0f;
 
     /////////////////////////////////////// CL ////////////////////////
@@ -331,9 +345,6 @@ int main(int argc, char** argv) {
     printf("\nafter cl flow\n");
 
     imwrite("out_hls.jpg", out_gray);
-
-    std::vector<cv::Mat_<uchar> > mv;
-    split(in_gray, mv);
 
     // simple white balancing algorithm
     balanceWhiteSimple(mv, ocv_ref, inputMin, inputMax, outputMin, outputMax, thresh);

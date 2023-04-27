@@ -1,5 +1,6 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,6 +99,15 @@ int main(int argc, char** argv) {
 
     msg.info("Dumping Kernel ouptut ...");
     cv::imwrite("hw_output.png", OutImg);
+    FILE* fp3 = fopen("kernel_out.csv", "w");
+    for (int i = 0; i < InImg.rows; ++i) {
+        for (int j = 0; j < InImg.cols; ++j) {
+            Pixel_t val = OutImg.at<Pixel_t>(i, j);
+            fprintf(fp3, "%d,", val);
+        }
+        fprintf(fp3, "");
+    }
+    fclose(fp3);
 
     msg.info("Error checking ...");
 

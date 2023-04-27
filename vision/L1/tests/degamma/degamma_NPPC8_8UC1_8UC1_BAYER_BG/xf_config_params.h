@@ -1,5 +1,6 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +58,7 @@
 
 void degamma_accel(ap_uint<INPUT_PTR_WIDTH>* img_in,
                    ap_uint<OUTPUT_PTR_WIDTH>* img_out,
-                   ap_ufixed<32, 16> params[3][NUM][3],
+                   ap_ufixed<32, 18> params[3][NUM][3],
                    unsigned short bayerp,
                    int height,
                    int width);

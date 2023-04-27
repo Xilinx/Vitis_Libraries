@@ -15,7 +15,7 @@
  */
 
 #include "common/xf_headers.hpp"
-#include "xf_isp_types.h"
+#include "xf_isp_tb_config.h"
 #include "xcl2.hpp"
 #include <bitset>
 #include <iostream>
@@ -223,7 +223,7 @@ int main(int argc, char** argv) {
          {2097152, 0.0039, 1024},
          {16777215, 0.000488, 8192}}}; // 24 bit to 14 bit
 
-    ap_ufixed<32, 16> params_degamma[3][DEGAMMA_KP][3] = {
+    ap_ufixed<32, 18> params_degamma[3][DEGAMMA_KP][3] = {
         {{2048, 0.0824, 0},
          {4096, 0.2966, 438},
          {6144, 0.5456, 1459},
@@ -417,9 +417,9 @@ int main(int argc, char** argv) {
     devices.resize(1);
 
     std::cout << "INFO: Device found - " << device_name << std::endl;
-    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_INP_T, XF_NPPC) << std::endl;
-    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_INP_T, XF_NPPC) << std::endl;
-    std::cout << "NPPC:" << XF_NPPC << std::endl;
+    std::cout << "Input Image Bit Depth:" << XF_DTPIXELDEPTH(XF_INP_T, XF_NPPCX) << std::endl;
+    std::cout << "Input Image Channels:" << XF_CHANNELS(XF_INP_T, XF_NPPCX) << std::endl;
+    std::cout << "NPPC:" << XF_NPPCX << std::endl;
 
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
 
