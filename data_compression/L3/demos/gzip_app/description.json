@@ -17,13 +17,6 @@
             "name": "generic launch for all flows"
         }
     ],
-    "post_launch": [
-        {
-            "launch_cmd": [
-                "XCL_EMULATION_MODE=$(TARGET) ./run.sh HOST_EXE LIB_DIR BUILD/compress_decompress.xclbin"
-            ]
-        }
-    ],
     "data": [
         "PROJECT/data/sample.txt"
     ],

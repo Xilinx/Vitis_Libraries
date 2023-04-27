@@ -20,13 +20,6 @@
             "name": "generic launch for all flows"
         }
     ],
-    "post_launch": [
-        {
-            "launch_cmd": [
-                "XCL_EMULATION_MODE=$(TARGET) ./run.sh HOST_EXE LIB_DIR BUILD/xilZstdDecompressStream.xclbin"
-            ]
-        }
-    ],
     "data": [
         "PROJECT/data/sample.txt",
         "PROJECT/data/sample.txt.zst"
@@ -127,7 +120,7 @@
             "containers": [
                 {
                     "name": "xilZstdDecompressStream",
-                    "ldclflags": "--clock.id 4:xilZstdDecompressStream_1"
+                    "ldclflags": "--clock.id 4:xilZstdDecompressStream_1 --config PROJECT/connectivity.cfg"
                 }
             ]
         }
