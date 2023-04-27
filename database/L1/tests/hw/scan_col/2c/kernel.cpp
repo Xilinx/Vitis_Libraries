@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Xilinx, Inc.
+ * Copyright 2019-2023 Xilinx, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ void aggr(hls::stream<ap_uint<64> >& c0_strm,
 }
 
 extern "C" {
-void Test(ap_uint<64 * VEC_LEN> buf0[BUF_DEPTH], ap_uint<64 * VEC_LEN> buf1[BUF_DEPTH], int nrow, ap_uint<64>* bufo) {
+void Test(ap_uint<64 * VEC_LEN> buf0[BUF_DEPTH], ap_uint<64 * VEC_LEN> buf1[BUF_DEPTH], int nrow, ap_uint<64> bufo[1]) {
 #pragma HLS INTERFACE m_axi port = buf0 bundle = gmem0_0 num_read_outstanding = 4 max_read_burst_length = \
     64 num_write_outstanding = 4 max_write_burst_length = 64 latency = 125 offset = slave
 

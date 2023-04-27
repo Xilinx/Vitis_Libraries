@@ -51,7 +51,7 @@
                     "hls_csim": 60, 
                     "hls_cosim": 420, 
                     "vivado_impl": 420, 
-                    "hls_csynth": 60
+                    "hls_csynth": 300
                 }
             }
         ], 

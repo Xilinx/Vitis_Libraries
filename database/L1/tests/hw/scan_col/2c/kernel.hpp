@@ -25,7 +25,7 @@
 #define BUF_DEPTH (1 << 8)
 
 extern "C" {
-void Test(ap_uint<64 * VEC_LEN> buf0[BUF_DEPTH], ap_uint<64 * VEC_LEN> buf1[BUF_DEPTH], int nrow, ap_uint<64>* bufo);
+void Test(ap_uint<64 * VEC_LEN> buf0[BUF_DEPTH], ap_uint<64 * VEC_LEN> buf1[BUF_DEPTH], int nrow, ap_uint<64> bufo[1]);
 }
 
 #endif

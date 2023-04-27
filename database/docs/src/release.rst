@@ -28,6 +28,10 @@ Release Note
    :hidden:
    :maxdepth: 1
 
+.. note:: Known Issue
+
+   * GQE Kernel does not build with 2023.1 tool. Last known working version is 2022.2.
+
 2022.2
 ------
 
