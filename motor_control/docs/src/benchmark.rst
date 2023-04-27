@@ -49,8 +49,6 @@ Table 1 : Summary table for performance and resources of APIs
     +==============================+==========+========================+=======+========+=======+========+========+=====+=====+=======+
     |  FOC                         | export IP|         20M/s          |         20M/s          | 100MHz |  5179  |  2  |  0  |  67   |
     +------------------------------+----------+------------------------+-------+--------+-------+--------+--------+-----+-----+-------+
-    |  FOC_sensorless              | export IP|         1M/s           |         1M/s           | 100MHz |  5798  |  4  |  0  |  68   |
-    +------------------------------+----------+------------------------+-------+--------+-------+--------+--------+-----+-----+-------+
     |  SVPWM_DUTY                  | export IP|         1M/s           |         1M/s           | 100MHz |  2101  |  0  |  0  |   7   |
     +------------------------------+----------+------------------------+-------+--------+-------+--------+--------+-----+-----+-------+
     |  PWM_GEN                     | export IP|         100M/s         |         100M/s         | 100MHz |  1094  |  0  |  0  |   6   |
@@ -66,7 +64,6 @@ These are details for benchmark result and usage steps.
    :maxdepth: 1
 
    Sensor_based_FOC <benchmark/FOC_sensor.rst>
-   Sensor_less_FOC <benchmark/FOC_sensorless.rst>
    QEI <benchmark/QEI.rst>
    SVPWM_DUTY <benchmark/SVPWM_DUTY.rst>
    PWM_GEN <benchmark/PWM_GEN.rst>

@@ -45,4 +45,3 @@ The 2023.1 release provides a range of algorithms, includes:
 2. SVPWM_DUTY: 1 L1 API is provided for Space Vector Pulse Width Modulation (SVPWM), Argument reg and status reg to help to control the system.
 3. PWM_GEN: 1 L1 API is provided for Space Vector Pulse Width Modulation (SVPWM), Argument reg and status reg to help to control the system.
 4. QEI: 1 L1 API is provided for the interface to incremental encoders for obtaining mechanical position data, Argument reg and status reg to help to control the system.
-5. FOC_sensorless: 1 L1 API is provided for sensor-less field-orientated control (FOC), Argument reg and status reg to help to control the system.

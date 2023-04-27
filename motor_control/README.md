@@ -7,7 +7,6 @@ Vitis Motor Control Library is an open-sourced Vitis library written in C++ for 
 The algorithms implemented by Vitis Motor Control Library include:
 
 - FOC with position sensor
-- Sensorless FOC
 - QEI
 - SVPWM_DUTY
 - PWM_GEN

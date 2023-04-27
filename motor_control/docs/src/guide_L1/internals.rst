@@ -34,7 +34,6 @@ Design Internals
    :maxdepth: 1
 
    SensorBasedFOC <IPs/SensorBasedFOC.rst>
-   SensorlessFOC <IPs/SensorlessFOC.rst>
    SVPWM_DUTY  <IPs/svpwm_duty.rst>
    PWM_GEN  <IPs/pwm_gen.rst>
    QEI <IPs/qei.rst>
