@@ -56,7 +56,7 @@ As it is shown in the aboved pictures, the whole QEI have 3 functions and datafl
 Profiling 
 ============
 
-The Post-Synthesis Resource usage are shown in the table1 below.
+The Post-Synthesis Resource usage is shown in the table1 below.
 The QEI C/RTL co-simulation on CPU, and the result is based it in table2.   
 
 .. table:: Table 1 Post-Synthesis Resource usage
@@ -71,8 +71,8 @@ The QEI C/RTL co-simulation on CPU, and the result is based it in table2.
 
 .. table:: Table 2 Case for QEI Cosim time
     :align: center
-    
-    +------ ------+----------+-----------+-----------+------------+-------------+
+
+    +-------------+----------+-----------+-----------+------------+-------------+
     |     CLK     |    CPR   |    RPM    |    DIR    |    angle   |    Cosim    |
     +-------------+----------+-----------+-----------+------------+-------------+
     |    100M     |   1000   |   3000    |     1     |     120    |    459.44   |
@@ -85,8 +85,7 @@ The QEI C/RTL co-simulation on CPU, and the result is based it in table2.
     +-------------+----------+-----------+-----------+------------+-------------+
 
 .. note::
-    | 1. QEI running on platform with Intel(R) Xeon(R) CPU E5-2690 v4 @ 2.60GHz, 28 Threads (14 Core(s)).
-    | 2. Time unit: ms.
+    | 1. Time unit: ms.
 
 .. toctree::
     :maxdepth: 1

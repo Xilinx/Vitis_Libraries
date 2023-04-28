@@ -31,14 +31,14 @@
 Sensor based field-orientated control (FOC)
 =============================================
 
-Sensor based field-orientated control(FOC) example resides in ``L1/tests/IP_FOC_sensor`` directory. The tutorial provides a step-by-step guide that covers commands for building and running IP.
+Sensor based field-orientated control(FOC) example resides in ``L1/tests/IP_FOC`` directory. The tutorial provides a step-by-step guide that covers commands for building and running IP.
 
 Executable Usage
 ==================
 
 * **Work Directory(Step 1)**
 
-The steps for library download and environment setup can be found in :ref:`l2_vitis_motorcontrol`. For getting the design,
+The steps for library download and environment setup can be found in :ref:`l1_vitis_motorcontrol`. For getting the design,
 
 .. code-block:: bash
 
@@ -46,7 +46,7 @@ The steps for library download and environment setup can be found in :ref:`l2_vi
 
 * **Run and Build IP(Step 2)**
 
-Run the following make command to build your IP targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
+Run the following make command to build your IP targeting a specific device. Please be noticed that this process will take a long time, maybe couple of minutes.
 
 .. code-block:: bash
 
@@ -109,7 +109,7 @@ Figure 2 : Motor speed in 8 modes in simulation
    :width: 70%
    :align: center
 
-The Motor Model parameters by default simulation and Derived Motor Configuration is setting in the commen.hpp and is shown by table 1 and table 2:
+The Motor Model parameters by default simulation and Derived Motor Configuration is setting in the commen.hpp, and are shown by table 1 and table 2:
 
 Table 1 : Motor Model parameters by default
 
@@ -141,7 +141,7 @@ AXI-lite Parameter of FOC setting in simulation
    :width: 70%
    :align: center
 
-Other AXI-lite Parameter is all zero in the start of simulation.
+Other AXI-lite Parameter is all setting to zero in the first mode in simulation.
 
 File Based Simulation of FOC IP's result is shown blow.
 
@@ -252,7 +252,7 @@ The max throughput is 20M/s by 22.2 and 23.1 .
     +------------+----------+----------+----------+----------+---------+-----------------+
     |     IP     |   BRAM   |   URAM   |    DSP   |    FF    |   LUT   | Frequency(MHz)  |
     +------------+----------+----------+----------+----------+---------+-----------------+
-    | FOC_sensor |     2    |     0    |     67   |   5019   |   5179  |       300       |
+    | FOC_sensor |     2    |     0    |     67   |   5019   |   5179  |       100       |
     +------------+----------+----------+----------+----------+---------+-----------------+
 
 Table 4 : IP profiling of Sensor based field-orientated control

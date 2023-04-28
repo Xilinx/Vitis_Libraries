@@ -224,7 +224,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'xf_motorcontrol', 'Vitis Motorcontrol Library',
+    (master_doc, 'xf_motorcontrol', 'Vitis Motor Control Library',
      author, 'Xilinx', 'One line description of project.',
      'Miscellaneous'),
 ]

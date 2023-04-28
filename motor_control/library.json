@@ -1,7 +1,7 @@
 {
     "id": "xf_motorcontrol",
     "name": "Vitis Motor Control Library",
-    "description": "Vitis Motor Control Library is an open-sourced Vitis library written in C++ for accelerating graph applications in a variety of use cases.",
+    "description": "Vitis Motor Control Library is an open-sourced Vitis library written in C++ for accelerating motor control applications in a variety of use cases.",
     "v++": {
         "includepaths": [
             "LIB_DIR/L1/include"

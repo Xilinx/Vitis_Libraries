@@ -38,7 +38,7 @@ Executable Usage
 
 * **Work Directory(Step 1)**
 
-The steps for library download and environment setup can be found in :ref:`l2_vitis_motorcontrol`. For getting the design,
+The steps for library download and environment setup can be found in :ref:`l1_vitis_motorcontrol`. For getting the design,
 
 .. code-block:: bash
 
@@ -46,7 +46,7 @@ The steps for library download and environment setup can be found in :ref:`l2_vi
 
 * **Run and Build IP(Step 2)**
 
-Run the following make command to build your IP targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
+Run the following make command to build your IP targeting a specific device. Please be noticed that this process will take a long time, maybe couple of minutes.
 
 .. code-block:: bash
 
@@ -112,7 +112,7 @@ Different tool versions may result slightly different resource.
     +------------+----------+----------+----------+----------+---------+-----------------+
     |     IP     |   BRAM   |   URAM   |    DSP   |    FF    |   LUT   | Frequency(MHz)  |
     +------------+----------+----------+----------+----------+---------+-----------------+
-    |    QEI     |     0    |     0    |     5    |    948   |    904  |       300       |
+    |    QEI     |     0    |     0    |     5    |    948   |    904  |       100       |
     +------------+----------+----------+----------+----------+---------+-----------------+
 
 Table 2 : Quadrature Encoder Interface control IP profiling

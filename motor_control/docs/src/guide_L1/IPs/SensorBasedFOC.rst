@@ -118,4 +118,4 @@ Profiling
 .. toctree::
    :maxdepth: 1
 
-   benchmark of Sensor Based FOC <../../benchmark/FOC_sensor.rst>
+   Benchmark of Sensor Based FOC <../../benchmark/FOC_sensor.rst>

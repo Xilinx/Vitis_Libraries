@@ -46,7 +46,7 @@ The steps for library download and environment setup can be found in :ref:`l1_vi
 
 * **Run and Build IP(Step 2)**
 
-Run the following make command to build your IP targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
+Run the following make command to build your IP targeting a specific device. Please be noticed that this process will take a long time, maybe couple of minutes.
 
 .. code-block:: bash
 
@@ -63,53 +63,55 @@ Note: Default arguments are set in run_hls.tcl
 .. code-block:: bash
 
    SIM_SVPWM: --------------------------------------------------------------------------------------------------------------------------------------------------------
-   SIM_SVPWM: Item:  | Vcmd_a       High% Low% Dead%  High   Low  Dead  | Vcmd_b    High% Low% Dead%  High   Low  Dead  | Vcmd_c    High% Low% Dead%  High   Low  Dead
+   SIM_SVPWM: Item:  | Vcmd_a	 High% Low% Dead%  High   Low  Dead  | Vcmd_b	 High% Low% Dead%  High   Low  Dead  | Vcmd_c	 High% Low% Dead%  High   Low  Dead
    SIM_SVPWM: --------------------------------------------------------------------------------------------------------------------------------------------------------
-   SIM_SVPWM:    0   | 0.0 (V)       54%   44%    1%   549   441    10  | 0.0 (V)    54%   44%    1%   549   441    10  | 0.0 (V)    54%   44%    1%   549   441    10
-   SIM_SVPWM:    1   | 7.4 (V)       82%   16%    1%   823   167    10  | -14.1(V)   27%   71%    1%   276   714    10  | 6.6 (V)    80%   18%    1%   801   189    10
-   SIM_SVPWM:    2   | 14.0(V)       82%   16%    1%   824   166    10  | -7.6(V)    27%   71%    1%   275   715    10  | -6.5(V)    30%   68%    1%   304   686    10
-   SIM_SVPWM:    3   | 8.2 (V)       83%   15%    1%   832   158    10  | 5.6 (V)    76%   22%    1%   766   224    10  | -14.0(V)   26%   72%    1%   267   723    10
-   SIM_SVPWM:    4   | -8.0(V)       27%   72%    1%   270   720    10  | 14.0(V)    82%   16%    1%   829   161    10  | -6.1(V)    31%   67%    1%   318   672    10
-   SIM_SVPWM:    5   | -14.1(V)      27%   71%    1%   279   711    10  | 6.7 (V)    80%   18%    1%   806   184    10  | 7.2 (V)    82%   17%    1%   820   170    10
-   SIM_SVPWM:    6   | -7.3(V)       27%   71%    1%   279   711    10  | -6.8(V)    29%   69%    1%   293   697    10  | 14.0(V)    82%   17%    1%   820   170    10
-   SIM_SVPWM:    7   | 6.2 (V)       78%   20%    1%   787   203    10  | -14.1(V)   27%   71%    1%   271   719    10  | 7.8 (V)    82%   16%    1%   828   162    10
-   SIM_SVPWM:    8   | 24.0(V)       54%   44%    1%   549   441    10  | 24.0(V)    54%   44%    1%   549   441    10  | 24.0(V)    54%   44%    1%   549   441    10
-   SIM_SVPWM:    9   | -24.0(V)      54%   44%    1%   549   441    10  | -24.0(V)   54%   44%    1%   549   441    10  | -24.0(V)   54%   44%    1%   549   441    10
+   SIM_SVPWM:    0   | 0.0 (V)	  49%   49%    0%  2499  2491    10  | 0.0 (V)	  49%   49%    0%  2499  2491    10  | 0.0 (V)	  49%   49%    0%  2499  2491    10
+   SIM_SVPWM:    1   | 7.4 (V)	  74%   24%    0%  3742  1248    10  | -14.1(V)	  25%   74%    0%  1257  3733    10  | 6.6 (V)	  72%   26%    0%  3644  1346    10
+   SIM_SVPWM:    2   | 14.0(V)	  74%   24%    0%  3747  1243    10  | -7.6(V)	  25%   74%    0%  1252  3738    10  | -6.5(V)	  27%   72%    0%  1382  3608    10
+   SIM_SVPWM:    3   | 8.2 (V)	  75%   24%    0%  3785  1205    10  | 5.6 (V)	  69%   30%    0%  3481  1509    10  | -14.0(V)	  24%   75%    0%  1214  3776    10
+   SIM_SVPWM:    4   | -8.0(V)	  24%   75%    0%  1230  3760    10  | 14.0(V)	  75%   24%    0%  3769  1221    10  | -6.1(V)	  28%   70%    0%  1447  3543    10
+   SIM_SVPWM:    5   | -14.1(V)	  25%   74%    0%  1268  3722    10  | 6.7 (V)	  73%   26%    0%  3666  1324    10  | 7.2 (V)	  74%   25%    0%  3731  1259    10
+   SIM_SVPWM:    6   | -7.3(V)	  25%   74%    0%  1268  3722    10  | -6.8(V)	  26%   73%    0%  1333  3657    10  | 14.0(V)	  74%   25%    0%  3731  1259    10
+   SIM_SVPWM:    7   | 6.2 (V)	  71%   28%    0%  3579  1411    10  | -14.1(V)	  24%   75%    0%  1235  3755    10  | 7.8 (V)	  75%   24%    0%  3764  1226    10
+   SIM_SVPWM:    8   | 24.0(V)	  49%   49%    0%  2499  2491    10  | 24.0(V)	  49%   49%    0%  2499  2491    10  | 24.0(V)	  49%   49%    0%  2499  2491    10
+   SIM_SVPWM:    9   | -24.0(V)	  49%   49%    0%  2499  2491    10  | -24.0(V)	  49%   49%    0%  2499  2491    10  | -24.0(V)	  49%   49%    0%  2499  2491    10
 
 
    SIM_SVPWM: **************************************     Global Const Parameters    ****************************************************
-   SIM_SVPWM: ** NAME              Type            Hex Value        Physic Value   Unit           ValueFormat      Command-line
-   SIM_SVPWM: ** TESTNUMBER        const           0x       a                 10                     long
-   SIM_SVPWM: ** clock_freq.       const           0x 5f5e100                100   MHz                int
+   SIM_SVPWM: ** NAME              Type    	Hex Value        Physic Value   Unit           ValueFormat      Command-line   
+   SIM_SVPWM: ** TESTNUMBER        const   	0x       a	           10 	               	  long
+   SIM_SVPWM: ** clock_freq.       const   	0x 5f5e100	          100 	MHz            	   int
    SIM_SVPWM: **************************************************************************************************************************
 
 
    SIM_SVPWM: **************************************************************************************************************************
    SIM_SVPWM: --------------------------------------------    SVPWM_DUTY SECTION   -----------------------------------------------------
    SIM_SVPWM: ******************************************      AXI-lite Parameter    ****************************************************
-   SIM_SVPWM: ** NAME              Type            Hex Value        Physic Value   Unit           ValueFormat      Command-line
-   SIM_SVPWM: ** stt_cnt_iter      Read            0x       a                 10   times              int
-   SIM_SVPWM: ** args_dc_link_ref  Write           0x  180000           24.00000    V                 q15q16
-   SIM_SVPWM: ** args_dc_src_mode  Write           0x       0         DC_SRC_ADC                                   [-dc_adc/-dc_ref]
-   SIM_SVPWM: ** args_sample_ii    Write           0x     3e8               1000                      int          [-ii <sampling II>]
+   SIM_SVPWM: ** NAME              Type    	Hex Value        Physic Value   Unit           ValueFormat      Command-line   
+   SIM_SVPWM: ** stt_cnt_iter      Read    	0x       a	           10 	times          	   int
+   SIM_SVPWM: ** args_dc_link_ref  Write   	0x  180000	     24.00000	 V         	   q15q16 
+   SIM_SVPWM: ** args_dc_src_mode  Write   	0x       0	   DC_SRC_ADC					[-dc_adc/-dc_ref]
+   SIM_SVPWM: ** args_sample_ii    Write   	0x    1388	         5000 	               	   int		[-ii <sampling II>]
    SIM_SVPWM: ** args_sample_ii    IMPORTANT NOTICE for value setting:
-   SIM_SVPWM: **                   for CSIM         = clock_freq / args_pwm_freq
-   SIM_SVPWM: **                   for COSIM        depends on the latency of cascading cousumer. Suggested value in run_hls_sim.tcl
-   SIM_SVPWM: **                   for HW run       '1' is better to avoid backpressure to upstream ADC
+   SIM_SVPWM: **                   for CSIM  	 = clock_freq / args_pwm_freq
+   SIM_SVPWM: **                   for COSIM 	 depends on the latency of cascading consumer.
+   SIM_SVPWM: **                   for HW run	 '1' is better to avoid backpressure to upstream ADC 
    SIM_SVPWM: --------------------------------------------------------------------------------------------------------------------------
    SIM_SVPWM: ---------------------------------------------   Static data types --------------------------------------------------------
-   SIM_SVPWM: **  Using ap_ufixed<24, 8> type  for Va, Vb, Vc and dc_link_adc       using ap_ufixed<16, 0> for ratio
+   SIM_SVPWM: **  Using ap_ufixed<24, 8> type  for Va, Vb, Vc and dc_link_adc	 using ap_ufixed<16, 0> for ratio
    SIM_SVPWM: --------------------------------------------------------------------------------------------------------------------------
    SIM_SVPWM: -------------------------------------------- Inside kernel key values ----------------------------------------------------
-   SIM_SVPWM: ** dc_link_adc      stream           0x  159999           21.59999    V                ap_ufixed<24, 8>
-   SIM_SVPWM: ** V_ref            internal         0x       0              22       V                int
-   SIM_SVPWM: ** ratio_compensate internal         0x   1199a           1.10001     times            ap_ufixed<17,1>
+   SIM_SVPWM: ** dc_link_adc      stream   	0x  159999	     21.59999	 V         	  ap_ufixed<24, 8>
+   SIM_SVPWM: ** V_ref            internal 	0x       0	        22	 V         	  int
    SIM_SVPWM: ----------------------------------------------    SVPWM_DUTY END   ---------------------------------------------------------
    SIM_SVPWM: **************************************************************************************************************************
-
    SIM_SVPWM: All 10 commands' waveform data can be found in file wave_all10
    SIM_SVPWM: csim.exe [-shift_0/-shift_120] | [-dc_adc/-dc_ref] | [-pwm_fq <pwm frequency>] | [-dead <dead cycles>] [-ii <sampling II>]
-   SIM_SVPWM:          [-v0/-v1/-v2] #for selecting different test vector
+   SIM_SVPWM:          [-v0/-v1/-v2] #for selecting different test vector 
+
+   INFO [HLS SIM]: The maximum depth reached by any hls::stream() instance in the design is 50000
+   INFO: [SIM 1] CSim done with 0 errors.
+   INFO: [SIM 3] *************** CSIM finish ***************
 
 
    
@@ -126,7 +128,7 @@ Different tool versions may result slightly different resource.
     +--------------+----------+----------+----------+----------+----------+-----------------+
     |      IP      |   BRAM   |   URAM   |    DSP   |    FF    |    LUT   | Frequency(MHz)  |
     +--------------+----------+----------+----------+----------+----------+-----------------+
-    |  SVPWM_DUTY  |     0    |     0    |     7    |   2358   |   2116   |       100       |
+    |  SVPWM_DUTY  |     0    |     0    |     3    |   2346   |   1886   |       100       |
     +--------------+----------+----------+----------+----------+----------+-----------------+
 
 Table 2 : SVPWM_DUTY control IP profiling

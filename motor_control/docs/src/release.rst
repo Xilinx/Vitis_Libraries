@@ -34,14 +34,14 @@ Release Note
    :hidden:
    :maxdepth: 1
 
-Motor Control Library is an open-sourced library written in C/C++ for accelerating Motor control. It now covers a level of acceleration: the module level(L1) and the pre-defined kernel level(L2). Currently 3 kinds of algorithms are accelerated. 
+Motor Control Library is an open-sourced library written in C/C++ for accelerating developments of motor control applications. It now covers 4 algorithm-level L1 APIs including FOC, SVPWM__DUTY, PWM_GEN and QEI. Operator-level APIs, such as Clarke transform and its inverse transform, Park transform and its inverse transform and PID are also implemented. The use of ap_fixed data types makes the code easy to understand and further develop. A virtual motor model is provided for doing the verifications of FOC solely in the Vitis environment.
 
 2023.1
 -------
 
-The 2023.1 release provides a range of algorithms, includes:
+The 2023.1 release covers a range of key algorithms, includes:
 
-1. FOC: 1 L1 API is provided for sensor based field-orientated control (FOC), Argument reg and status reg to help to control the system.
-2. SVPWM_DUTY: 1 L1 API is provided for Space Vector Pulse Width Modulation (SVPWM), Argument reg and status reg to help to control the system.
-3. PWM_GEN: 1 L1 API is provided for Space Vector Pulse Width Modulation (SVPWM), Argument reg and status reg to help to control the system.
-4. QEI: 1 L1 API is provided for the interface to incremental encoders for obtaining mechanical position data, Argument reg and status reg to help to control the system.
+1. FOC: the API is for sensor based field-orientated control (FOC).The eight control modes it supports cover basic speed and torque control modes, as well as field-weakning control.
+2. SVPWM_DUTY: the API is the front-end for Space Vector Pulse Width Modulation (SVPWM) to calculate ratios.
+3. PWM_GEN: the API is the back-end for Space Vector Pulse Width Modulation (SVPWM) to generate output signals based on ratios.
+4. QEI: the API is for quadrature encoder interface(QEI).

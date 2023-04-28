@@ -71,9 +71,9 @@ These are details for benchmark result and usage steps.
 Test Overview
 --------------
 
-Here are benchmarks of the Vitis Motor Control Library using the Vitis environment and comparing with cpu(). 
+Here are benchmarks of the Vitis Motor Control Library using the Vitis environment. 
 
-.. _l2_vitis_motorcontrol:
+.. _l1_vitis_motorcontrol:
 
 
 * **Download code**
@@ -85,7 +85,7 @@ These Motor Control benchmarks can be downloaded from `vitis libraries <https://
    git clone https://github.com/Xilinx/Vitis_Libraries.git 
    cd Vitis_Libraries
    git checkout main
-   cd motorcontorl 
+   cd motor_control 
 
 * **Setup environment**
 
@@ -93,6 +93,6 @@ Specifying the corresponding Vitis, XRT, and path to the platform repository by 
 
 .. code-block:: bash
 
-   source <intstall_path>/installs/lin64/Vitis/2022.2/settings64.sh
+   source <intstall_path>/installs/lin64/Vitis/2023.1/settings64.sh
    source /opt/xilinx/xrt/setup.sh
    export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
