@@ -28,7 +28,7 @@
 Vitis Motor Control Library
 =============================
 
-Motor Control Library is an open-sourced library written in C/C++ for accelerating developments of motor control applications. It now covers 4 algorithm-level L1 APIs including FOC, SVPWM__DUTY, PWM_GEN and QEI. Operator-level APIs, such as Clarke transform and its inverse transform, Park transform and its inverse transform and PID are also implemented. The use of ap_fixed data types makes the code easy to understand and further develop. A virtual motor model is provided for doing the verifications for 8 modes of FOC solely in the Vitis environment. The following is a short description 4 algorithm-level APIs:
+Motor Control Library is an open-sourced library written in C/C++ for accelerating developments of motor control applications. It now covers 4 algorithm-level L1 APIs including FOC, SVPWM_DUTY, PWM_GEN and QEI. Operator-level APIs, such as Clarke transform and its inverse transform, Park transform and its inverse transform and PID are also implemented. The use of ap_fixed data types makes the code easy to understand and further develop. A virtual motor model is provided for doing the verifications for 8 modes of FOC solely in the Vitis environment. The following is a short description 4 algorithm-level APIs:
 
 - FOC: the API is for sensor based field-orientated control (FOC). The eight control modes it supports cover basic speed and torque control modes, as well as field-weakning control. Besides signal ports, AXI-Lite interface is provided for system control and monitor.
 - SVPWM_DUTY: the API is the front-end for Space Vector Pulse Width Modulation (SVPWM) to calculate ratios. Besides signal ports, AXI-Lite interface is provided for system control and monitor.

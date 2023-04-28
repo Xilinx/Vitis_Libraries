@@ -40,7 +40,7 @@ Vitis Motor Control Library Tutorial
 Tutorial Overview
 ----------------------------------------------
 
-Motor Control Library provides 4 algorithm-level synthesizable APIs including FOC, SVPWM__DUTY, PWM_GEN and QEI. And a simple virtual motor model is provided for verification.
+Motor Control Library provides 4 algorithm-level synthesizable APIs including FOC, SVPWM_DUTY, PWM_GEN and QEI. And a simple virtual motor model is provided for verification.
 
 Based on the Motor Control library with a virtual motor model, users can complete all core module verifications such as FOC, QEI, SVPWM, solely in the Vitis environment. This can be helpful to improve the efficiency of design modification and iterations. This tutorial is designed to guide users on how to conduct design verification and learn how to validate design functionality at different stages of the design process.
 
