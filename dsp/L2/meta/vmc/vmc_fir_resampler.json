@@ -8,7 +8,7 @@
   "parameters": [
     {
       "name": "data_type",
-      "label": "Input/Output data type",
+      "label": "Input/Output data type:",
       "description": "The type of individual data samples input to and output of the filter function",
       "enum": [ "int16", "cint16", "int32", "cint32", "float", "cfloat" ],
       "default": "cint16",
@@ -20,7 +20,7 @@
     },
     {
       "name": "coef_type",
-      "label": "Filter coefficients type",
+      "label": "Filter coefficients data type:",
       "description": "The type of individual coefficients of the filter taps",
       "enum": [ "int16", "cint16", "int32", "cint32", "float", "cfloat" ],
       "default": "int16",
@@ -37,7 +37,7 @@
     },
     {
       "name": "use_coeff_reload",
-      "label": "Use runtime coefficient reloading",
+      "label": "Specify filter coefficients via input port",
       "description": "Allows the user to select of runtime coefficient reloading",
       "default": false,
       "type": "bool",
@@ -50,7 +50,7 @@
     },
     {
       "name": "coeff",
-      "label": "Filter coefficients",
+      "label": "Filter coefficients:",
       "description": "The FIR filter tap coefficients.",
       "element_type": "coef_type",
       "default": "[1, zeros(1,29)]",
@@ -67,7 +67,7 @@
     }, 
     {
       "name": "fir_length",
-      "label": "Filter length",
+      "label": "Filter length:",
       "description": "Specify fir length for coefficient reloading",
       "default": 30,
       "minimum": 4,
@@ -80,7 +80,7 @@
     },
 	{
       "name": "interpolate_factor",
-      "label": "The interpolation factor of the filter function.",
+      "label": "Interpolation factor:",
       "description": "",
       "default": 3,
       "minimum": 1,
@@ -93,7 +93,7 @@
     },
 	{
       "name": "decimate_factor",
-      "label": "The decimation factor of the filter function.",
+      "label": "Decimation factor:",
       "description": "",
       "default": 2,
       "minimum": 1,
@@ -111,7 +111,7 @@
     },
     {
       "name": "input_window_size",
-      "label": "Input window size (Number of samples)",
+      "label": "Input window size (Number of samples):",
       "description": "The number of samples in the window API used for input to the filter function. The number of samples in the output window will depend on the FIR filter parameters",
       "default": 256,
       "minimum": 4,
@@ -129,7 +129,7 @@
     },
     {
       "name": "shift_val",
-      "label": "Scale output down by 2^",
+      "label": "Scale output down by 2^:",
       "description": "The power of 2 shift down applied to the accumulation of FIR before output",
       "default": 0,
       "maximum": 80,
@@ -147,7 +147,7 @@
     },
     {
       "name": "rnd_mode",
-      "label": "Rounding mode",
+      "label": "Rounding mode:",
       "description": "The rounding to be applied during the shift down stage of processing.",
       "enum": [0, 1, 2, 3, 4, 5, 6, 7],
       "enum_str": ["Floor", "Ceiling", "Round to positive infinity", "Round to negative infinity", "Round symmetrical to infinity", "Round symmetrical to zero", "Round convergent to even", "Round convergent to odd"],
@@ -160,7 +160,7 @@
     },
     {
       "name": "casc_length",
-      "label": "Number of cascade stages",
+      "label": "Number of cascade stages:",
       "description": "The length of cascaded kernels",
       "default": 1,
       "type": "int",

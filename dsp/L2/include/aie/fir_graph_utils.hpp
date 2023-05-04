@@ -432,11 +432,23 @@ class ssr_kernels {
     // unsigned int inputDataIndex = ssrIdx * TP_PARA_DECI_POLY + (TP_PARA_DECI_POLY - deciPolyIdx + ((interpPolyIdx *
     // TP_DECIMATE_FACTOR) / TP_INTERPOLATE_FACTOR)) % TP_PARA_DECI_POLY;
 
-    static constexpr int posFirstDataOfPhase = ssrOutputPath * kDF * TP_PARA_DECI_POLY - decompInnerPhase2 * kIF;
-    static constexpr int MODIFY_MARGIN_OFFSET =
+    // Position of the first non-zero data sample in each SSR phase, relative to first SSR phase
+    static constexpr int posFirstDataOfPhase = (ssrOutputPath)*kDF * TP_PARA_DECI_POLY - decompInnerPhase2 * kIF;
+    // Position of the first non-zero data sample in each Parallel Polyphase phase, relative to first polyphase
+    // (TP_PARA_INTERP_INDEX, TP_PARA_DECI_INDEX = 0)
+    static constexpr int dataIndexPoly =
+        (ssrOutputPath + TP_PARA_INTERP_INDEX * TP_SSR) * kDF * TP_PARA_DECI_POLY / (kIF * TP_PARA_INTERP_POLY) -
+        (ssrInnerPhase + TP_PARA_DECI_INDEX * TP_SSR);
+    static constexpr int dataIndex = TP_SSR == 1 ? dataIndexPoly : posFirstDataOfPhase;
+    static constexpr int MODIFY_MARGIN_OFFSET2 =
         ((posFirstDataOfPhase < 0) ? -1 * (CEIL((-1 * posFirstDataOfPhase), decompInnerPhases) / decompInnerPhases)
                                    : (posFirstDataOfPhase) / decompInnerPhases) +
         ssr_params::BTP_MODIFY_MARGIN_OFFSET; // add whatever margin offset that is sent to ssr kernels
+    static constexpr int MODIFY_MARGIN_OFFSET =
+        ((dataIndex < 0) ? -1 * (CEIL((-1 * dataIndex), decompInnerPhases) / decompInnerPhases)
+                         : (dataIndex) / decompInnerPhases) +
+        ssr_params::BTP_MODIFY_MARGIN_OFFSET; // add whatever margin offset that is sent to ssr kernels
+
     /**
      * @brief Seperate taps into a specific SSR phase.
      *    Phase 0 contains taps index 0, TP_SSR, 2*TP_SSR, ...

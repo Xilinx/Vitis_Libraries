@@ -8,7 +8,7 @@
   "parameters": [
     {
       "name": "data_type",
-      "label": "Output data type",
+      "label": "Output data type:",
       "description": "The type of individual data samples output of the DDS function",
       "enum": [ "cint16", "cfloat" ],
       "default": "cint16",
@@ -22,7 +22,7 @@
     },
     {
       "name": "output_window_size",
-      "label": "Samples per frame",
+      "label": "Samples per frame:",
       "description": "The number of samples in output window",
       "default": 32,
       "maximum": 4096,
@@ -42,7 +42,7 @@
     },
     {
 	  "name": "phase_increment",
-      "label": "Phase increment",
+      "label": "Phase increment:",
       "description": "The phase increment between samples.",
       "default": 0,
       "minimum": 0,
@@ -57,7 +57,7 @@
     },
     {
 	  "name": "vmc_sample_time",
-      "label": "Sample time",
+      "label": "Sample time:",
       "description": "Sample time for the block output port(s)",
       "default": -1,
       "type": "double",

@@ -327,7 +327,7 @@ class kernelFilterClass {
     static constexpr polyphaseArray<unsigned int> zoffsets =
         getZOffsets<m_kPolyphaseLaneAlias>(TP_INTERPOLATE_FACTOR, m_kLanes);
 
-    static constexpr int m_kRepeatFactor = 16;
+    static constexpr int m_kRepeatFactor = 8;
     static constexpr int marginLoadsMappedToBuff =
         (fnFirMargin<m_kFirMarginLen, TT_DATA>() % m_kSamplesInBuff) / m_kStreamLoadVsize;
     static constexpr int streamDataOffsetWithinBuff = (m_kFirInitOffset) % m_kSamplesInBuff;

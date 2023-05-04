@@ -8,7 +8,7 @@
   "parameters": [
     {
       "name": "data_type",
-      "label": "Input/Output data type",
+      "label": "Input/Output data type:",
       "description": "The type of individual data samples input to and output of the mixer function",
       "enum": [ "cint16", "cint32", "cfloat" ],
       "default": "cint16",
@@ -20,7 +20,7 @@
     },
     {
       "name": "input_window_size",
-      "label": "Input window size (Number of Samples)",
+      "label": "Input frame size (Number of Samples):",
       "description": "The number of samples in input window",
       "default": 32,
       "maximum": 4096,
@@ -38,7 +38,7 @@
     },
     {
 	  "name": "mixer_mode",
-      "label": "Mixer mode",
+      "label": "Mixer mode:",
       "description": "The mixer operation modes.",
       "enum": [ 1, 2 ],
       "enum_str": [ "Single Input Mode", "Dual Input Mode" ],
@@ -51,7 +51,7 @@
     },
     {
 	  "name": "ssr",
-      "label": "Number of parallel input/output (SSR)",
+      "label": "Number of parallel input/output ports (SSR):",
       "description": "Specify number of data input/output in parallel for a single channel.",
       "default": 1,
       "minimum": 1,
@@ -64,7 +64,7 @@
     },
     {
 	  "name": "phase_increment", 
-      "label": "Phase increment",
+      "label": "Phase increment:",
       "description": "The phase increment between samples.",
       "default": 0,
       "minimum": 0,
@@ -77,7 +77,7 @@
     },
     {
 	  "name":   "initial_phase_offset",
-      "label": "Initial phase offset",
+      "label": "Initial phase offset:",
       "description": "The initial phase offset.",
       "default": 0,
       "minimum": 0,
