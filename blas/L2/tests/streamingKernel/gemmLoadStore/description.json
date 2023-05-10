@@ -107,10 +107,17 @@
                 "env": "", 
                 "cmd": "", 
                 "max_memory_MB": {
+		    "vitis_hw_build": 46080,
 		    "vitis_hw_emu": 32768,
-		    "vitis_hw": 40960
+		    "vitis_sw_emu": 10240,
+		    "vitis_hw_run": 10240
 		}, 
-                "max_time_min": 520
+                "max_time_min": {
+		    "vitis_hw_build": 940,
+		    "vitis_hw_emu": 940,
+		    "vitis_sw_emu": 60,
+		    "vitis_hw_run": 60
+		}
             }
         ], 
         "targets": [
