@@ -38,25 +38,25 @@ The below features have been added to the library in this release.
 
 This element adds a second implementation of a DDS/Mixer that provides higher SFDR figures than the existing DDS/Mixer solution.
 
-Supports both AIE and AIE-ML devices.
+Supports both AIE and AIE-ML devices (EA).
 
 * **DDS Mixer**
 
 The usage of Input Window Size parameter (TP_INPUT_WINDOW_VSIZE) has been changed in the DDS and DDS Mixer LUT elements to be consistent with other library elements.
 TP_INPUT_WINDOW_VSIZE describes the number of samples processed by the graph in a single iteration run.
 
-*  **FFT Window** -
+*  **FFT Window**
 
-FFT Window now supports AIE-ML device, in addition to AIE device.
+FFT Window now supports AIE-ML devices (EA), in addition to AIE devices.
 
 *  **FFT/iFFT**
 
-FFT/iFFT now supports AIE-ML device, in addition to AIE device.
+FFT/iFFT now supports AIE-ML devices (EA), in addition to AIE devices.
 
 
 *  **FIR Filters**
 
-Single Rate FIRs now support AIE-ML device with the 16-bit data types and 16-bit coeff types which are listed below:
+Single Rate FIRs now support AIE-ML devices (EA) with the 16-bit data types and 16-bit coeff types which are listed below:
 
 +-------------------------------+------------------------------------+
 |                               |     **Data        Type**           |
@@ -70,7 +70,7 @@ Single Rate FIRs now support AIE-ML device with the 16-bit data types and 16-bit
 | 1. Complex coefficients are not supported for real-only data types.|
 +--------------------------------------------------------------------+
 
-All FIR library elements now support AIE device with 16-bit data types and 32-bit coefficients which are listed below:
+All FIR library elements now support AIE devices with 16-bit data types and 32-bit coefficients which are listed below:
 
 +-------------------------------+------------------------------------+
 |                               |     **Data        Type**           |

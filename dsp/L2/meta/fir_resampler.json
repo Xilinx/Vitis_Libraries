@@ -157,13 +157,9 @@
     {
       "name": "TP_SSR",
       "description": "TP_SSR specifies the number of parallel input/output paths where samples are interleaved between paths, giving an overall higher throughput.",
-      "minimum": 1,
       "type": "uint",
-            "validator": {
-        "file": "fir_interpolate_asym.py",
-        "function": "validate_TP_SSR",
-        "args": ["TP_API", "TP_INTERPOLATE_FACTOR", "TP_PARA_INTERP_POLY"]
-      }
+      "minimum": 1,
+      "maximum": 1
     },
     {
       "name": "TP_PARA_INTERP_POLY",

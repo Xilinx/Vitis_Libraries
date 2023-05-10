@@ -137,6 +137,8 @@ enum IO_API { WINDOW = 0, STREAM };
   * @tparam TP_SSR specifies the number of parallel input paths where samples are interleaved between paths,
  giving an overall higher throughput.   \n
  *         An SSR of 1 means just one input path, and is the backwards compatible option.
+ *         SSR Decmoposition is currently unavailable. Please set TP_SSR to 1 and use
+ *         TP_PARA_INTERP_POLY/TP_PARA_DECI_POLY for Super Sample operation modes.
  * @tparam TP_PARA_INTERP_POLY sets the number of interpolator polyphases over which the coefficients will be split to
  enable parallel computation of the outputs. \n
  *         The polyphases are executed parallelly, output data is produced by each polyphase directly. \n
@@ -208,6 +210,10 @@ class fir_resampler_graph : public graph {
     static_assert(TP_API != 0 || outBufferSize < kMemoryModuleSize,
                   "ERROR: Input Window size (based on requrested window size and FIR length margin) exceeds Memory "
                   "Module size of 32kB");
+    // SSR is decomposition is currently unavailable
+    static_assert(TP_SSR == 1,
+                  "ERROR: SSR Decmoposition is currently unavailable. Please set TP_SSR to 1 and use "
+                  "TP_PARA_INTERP_POLY/TP_PARA_DECI_POLY for Super Sample operation modes.");
 
     static constexpr unsigned int TP_CASC_IN = 0;
     static constexpr unsigned int TP_CASC_OUT = 0;
