@@ -30,4 +30,5 @@ Vitis Data Mover Library
 .. toctree::
    :caption: Data-Mover User Guide
 
-   Data-Mover User Guide <datamover/L2_guide.rst>
+   Static Data-Mover User Guide <datamover/static_data_mover.rst>
+   Programmable 4D Data-Mover User Guide <datamover/programmable_data_mover.rst>

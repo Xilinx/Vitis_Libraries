@@ -31,19 +31,6 @@ This library provides **Programmable 4D Data-Mover** and **Static Data-Mover** t
 **Static Data-Mover** has 9 types of kernel which help AIE connect with DDR / URAM and BRAM. Their access pattern is simple continously read / write.
 
 
-**Memory Access**
-
-TBD
-
-* **AXI Burst Read and Write**:
-  Reading data from AXI master port, and emit to stream (of possibly different width).
-  Padding and vectoring could be removed in reading and added in writing.
-
-* **Low Initiation Interval Access to URAM Array**:
-  URAMs are 72 bit fixed, and currently very large buffers needs extra registers and forwarding-paths to be read/written every cycle.
-  By providing an API for this, users can focus on the function design and avoid mixing challenge of different level in the same code.
-
-
 License
 -------
 
