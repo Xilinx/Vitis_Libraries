@@ -23,8 +23,8 @@
 #include "common/xf_utility.hpp"
 #include "imgproc/xf_accumulate_weighted.hpp"
 
-#define HEIGHT 128
-#define WIDTH 128
+#define HEIGHT 1080
+#define WIDTH 1920
 #define XF_CV_DEPTH_IN_1 2
 #define XF_CV_DEPTH_IN_2 2
 #define XF_CV_DEPTH_OUT_1 2

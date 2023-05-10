@@ -83,6 +83,14 @@
                         "$(OPENCV_LIB)"
                     ]
                 }
+            },
+            "v++": {
+                "linker": {
+                    "ldclflags": [
+                        "--vivado.impl.strategies Performance_Explore"
+                    ]
+                }
+
             }
         }, 
         "zcu104": {
@@ -162,7 +170,7 @@
         }, 
         {
             "target": "hw", 
-            "cmd_args": " LIB_DIR/data/4k_1.jpg LIB_DIR/data/4k_2.jpg",
+            "cmd_args": " LIB_DIR/data/HD1.jpg LIB_DIR/data/HD2.JPG",
             "name": "hardware_build", 
             "ld_library_path": [
                 "$(OPENCV_LIB)", 
@@ -172,8 +180,8 @@
         }
     ], 
     "data": [
-        "LIB_DIR/data/4k_1.jpg", 
-        "LIB_DIR/data/4k_2.jpg", 
+        "LIB_DIR/data/HD1.jpg", 
+        "LIB_DIR/data/HD2.JPG", 
         "LIB_DIR/data/128x128_1.png", 
         "LIB_DIR/data/128x128_2.png"
     ], 

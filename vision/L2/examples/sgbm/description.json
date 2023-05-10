@@ -9,12 +9,12 @@
         "aws-vu9p-f1", 
         "vck190", 
         "zcu102", 
-        "zcu104", 
         "u50"
     ], 
     "platform_blocklist": [
         "u280", 
-        "u250"
+        "u250", 
+        "zcu104"
     ], 
     "platform_properties": {
         "u200": {
@@ -60,44 +60,6 @@
             }
         }, 
         "zcu102": {
-            "host": {
-                "compiler": {
-                    "includepaths": [
-                        "$(SYSROOT)/usr/include", 
-                        "$(SYSROOT)/usr/include/opencv4"
-                    ]
-                }, 
-                "linker": {
-                    "librarypaths": [
-                        "$(SYSROOT)/usr/lib", 
-                        "${SYSROOT}/lib"
-                    ]
-                }, 
-                "compiler_x86": {
-                    "includepaths": [
-                        "$(OPENCV_INCLUDE)"
-                    ]
-                }, 
-                "linker_x86": {
-                    "librarypaths": [
-                        "$(OPENCV_LIB)"
-                    ]
-                }
-            },
-			"containers": [
-				{
-					"name": "krnl_sgbm", 
-					"accelerators": [
-						{
-							"name": "sgbm_accel", 
-							"frequency": 150.0
-						}
-					],
-					"frequency": 150.0
-				}
-			]
-        }, 
-        "zcu104": {
             "host": {
                 "compiler": {
                     "includepaths": [

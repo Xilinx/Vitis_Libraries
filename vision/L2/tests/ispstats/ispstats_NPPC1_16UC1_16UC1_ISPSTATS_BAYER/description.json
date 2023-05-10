@@ -83,6 +83,14 @@
                         "$(OPENCV_LIB)"
                     ]
                 }
+            },
+            "v++": {
+                "linker": {
+                    "ldclflags": [
+                        "--vivado.impl.strategies Performance_Explore"
+                    ]
+                }
+
             }
         }, 
         "vck190": {
@@ -107,6 +115,13 @@
                 "linker_x86": {
                     "librarypaths": [
                         "$(OPENCV_LIB)"
+                    ]
+                }
+            },
+            "v++": {
+                "linker": {
+                    "ldclflags": [
+                        "--vivado.impl.strategies Performance_Explore"
                     ]
                 }
             }

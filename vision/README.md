@@ -177,13 +177,15 @@ This library is written by developers at
 **PL additions/enhancements**:
 	
     • New functions:
-    	• Added 24 bits-per-channel L3 ISP pipeline	
+    	• Added 24 bit L3 ISP pipeline	
     	• Added all-in-one L3 ISP pipeline
     	• Pin-cushion, Barrel distortion support added in L1, L2 Remap testbench.
 	
     • Updates:
     	• Added new functions in ISP-Multistream pipeline
+    	• Added NPPC 2,4,8 support for RGBIR function
     	• Improved performance and utilization for ISP Stats
+    	• Fixed the missing template parameters issue in 'axiStrm2xfMat' and 'xfMat2axiStrm' functions
 	
     • Lib Infra Changes:
     	• Renamed all existing testcases and added new cases in tests directory of L1, L2.

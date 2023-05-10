@@ -19,20 +19,14 @@
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make run TARGET=<sw_emu/hw_emu/hw> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) ""
-	$(ECHO) "  make xclbin TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform>"
-	$(ECHO) "      Command to build xclbin application."
-	$(ECHO) ""
-	$(ECHO) "  make host TARGET=<hw/hw_emu/sw_emu/>"
-	$(ECHO) "      Command to build host application."
-	$(ECHO) ""
-	$(ECHO) "  NOTE: For embedded devices, e.g. zcu102/zcu104/vck190, HOST_ARCH is either aarch32 or aarch64."
-	$(ECHO) "      a.IF Download the platform, and common-image from Xilinx Download Center(Suggested):"
+	$(ECHO) "  NOTE: For embedded platform the following setup steps are required:"
+	$(ECHO) "      a.If the platform and common-image are downloaded from Xilinx Download Center(Suggested):"
 	$(ECHO) "        Run the sdk.sh script from the common-image directory to install sysroot using the command : ./sdk.sh -y -d ./ -p "
 	$(ECHO) "        Unzip the rootfs file : gunzip ./rootfs.ext4.gz"
 	$(ECHO) "        export SYSROOT=< path-to-platform-sysroot >"
@@ -41,10 +35,10 @@ help::
 	$(ECHO) "        export K_IMAGE=< path-to-Image-files >"
 	$(ECHO) "        export ROOTFS=< path-to-rootfs >"
 	$(ECHO) ""
-	$(ECHO) "  make clean "
+	$(ECHO) "  make clean"
 	$(ECHO) "      Command to remove the generated non-hardware files."
 	$(ECHO) ""
-	$(ECHO) "  make cleanall TARGET=<hw/hw_emu/sw_emu/>"
+	$(ECHO) "  make cleanall"
 	$(ECHO) "      Command to remove all the generated files."
 	$(ECHO) ""
 
@@ -55,7 +49,7 @@ XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L2/
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 XFLIB_DIR = $(XF_PROJ_ROOT)
 
-# setting devault value
+# setting default value
 TARGET ?= sw_emu
 HOST_ARCH ?= x86
 
@@ -68,8 +62,8 @@ PLATFORM := xilinx_u200_gen3x16_xdma_2_202110_1
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST +=  u200 aws-vu9p-f1 vck190 zcu102 zcu104 u50
-PLATFORM_BLOCKLIST +=  u280 u250
+PLATFORM_ALLOWLIST +=  u200 aws-vu9p-f1 vck190 zcu102 u50
+PLATFORM_BLOCKLIST +=  u280 u250 zcu104
 
 include ./utils.mk
 TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)
@@ -124,20 +118,6 @@ CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/
 LDFLAGS +=  -L $(OPENCV_LIB)
 LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/zcu102/'))
-ifeq ($(ps_on_x86), on)
-HOST_SRCS += $(XFLIB_DIR)/L2/examples/sgbm/xf_sgbm_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L2/examples/sgbm/config -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
-LDFLAGS +=  -L $(OPENCV_LIB)
-LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-else
-HOST_SRCS += $(XFLIB_DIR)/L2/examples/sgbm/xf_sgbm_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L2/examples/sgbm/config -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
-LDFLAGS +=  -L $(SYSROOT)/usr/lib -L ${SYSROOT}/lib
-LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
-endif
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/zcu104/'))
 ifeq ($(ps_on_x86), on)
 HOST_SRCS += $(XFLIB_DIR)/L2/examples/sgbm/xf_sgbm_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L2/examples/sgbm/config -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
@@ -214,14 +194,6 @@ VPP_FLAGS +=  -I $(XFLIB_DIR)/L2/examples/sgbm/config -I $(XFLIB_DIR)/L1/include
 
 ######################### binary container global settings ##########################
 ifneq (,$(shell echo $(XPLATFORM) | awk '/zcu102/'))
-VPP_FLAGS_sgbm_accel += --hls.clock 150000000:sgbm_accel
-ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_krnl_sgbm += --clock.defaultFreqHz 150000000
-else
-VPP_LDFLAGS_krnl_sgbm += --kernel_frequency 150
-endif
-
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/zcu104/'))
 VPP_FLAGS_sgbm_accel += --hls.clock 150000000:sgbm_accel
 ifneq ($(HOST_ARCH_temp), x86)
 VPP_LDFLAGS_krnl_sgbm += --clock.defaultFreqHz 150000000

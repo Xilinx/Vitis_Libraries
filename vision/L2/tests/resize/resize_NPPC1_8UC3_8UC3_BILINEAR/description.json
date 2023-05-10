@@ -162,7 +162,7 @@
         }, 
         {
             "target": "hw", 
-            "cmd_args": " LIB_DIR/data/4k.jpg 2160 3840",
+            "cmd_args": " LIB_DIR/data/4k.jpg 1080 1920",
             "name": "hardware_build", 
             "ld_library_path": [
                 "$(OPENCV_LIB)", 

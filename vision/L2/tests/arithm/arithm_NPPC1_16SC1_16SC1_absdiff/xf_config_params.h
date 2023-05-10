@@ -24,8 +24,8 @@
 
 #include "core/xf_arithm.hpp"
 
-#define HEIGHT 128
-#define WIDTH 128
+#define HEIGHT 1080
+#define WIDTH 1920
 
 #define XF_CV_DEPTH_IN_1 2
 #define XF_CV_DEPTH_IN_2 2

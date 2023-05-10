@@ -82,7 +82,7 @@
 
 #define XF_NPPCX XF_NPPC1 // XF_NPPC1 --1PIXEL , XF_NPPC2--2PIXEL ,XF_NPPC4--4 and XF_NPPC8--8PIXEL
 
-#define XF_BAYER_PATTERN XF_BAYER_RG // bayer pattern Used in gaincontrol, demosaicing, rgbir2bayer
+#define XF_BAYER_PATTERN XF_BAYER_GR // bayer pattern Used in gaincontrol, demosaicing, rgbir2bayer
 
 #define T_8U 0
 #define T_10U 0
@@ -126,9 +126,13 @@
 #define SIN_CHANNEL_TYPE XF_8UC1 /* Used in gtm */
 #define AEC_SIN_CHANNEL_TYPE XF_16UC1
 
+#if T_8U
 #define CVTYPE unsigned char
 #define CV_IN_TYPE CV_8UC1
-#define CV_OUTTYPE CV_8UC3
+#else
+#define CVTYPE unsigned short
+#define CV_IN_TYPE CV_16UC1
+#endif
 
 #define WB_TYPE XF_WB_SIMPLE /* Used in function_awb */
 

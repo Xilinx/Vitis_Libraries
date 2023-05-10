@@ -19,20 +19,14 @@
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<hw/aiesim/x86sim/hw_emu/> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make all TARGET=<hw_emu/hw/x86sim/aiesim> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<hw/aiesim/x86sim/hw_emu/> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make run TARGET=<hw_emu/hw/x86sim/aiesim> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) ""
-	$(ECHO) "  make xclbin TARGET=<hw/aiesim/x86sim/hw_emu/> PLATFORM=<FPGA platform>"
-	$(ECHO) "      Command to build xclbin application."
-	$(ECHO) ""
-	$(ECHO) "  make host TARGET=<hw/aiesim/x86sim/hw_emu/>"
-	$(ECHO) "      Command to build host application."
-	$(ECHO) ""
-	$(ECHO) "  NOTE: For embedded devices, e.g. zcu102/zcu104/vck190, HOST_ARCH is either aarch32 or aarch64."
-	$(ECHO) "      a.IF Download the platform, and common-image from Xilinx Download Center(Suggested):"
+	$(ECHO) "  NOTE: For embedded platform the following setup steps are required:"
+	$(ECHO) "      a.If the platform and common-image are downloaded from Xilinx Download Center(Suggested):"
 	$(ECHO) "        Run the sdk.sh script from the common-image directory to install sysroot using the command : ./sdk.sh -y -d ./ -p "
 	$(ECHO) "        Unzip the rootfs file : gunzip ./rootfs.ext4.gz"
 	$(ECHO) "        export SYSROOT=< path-to-platform-sysroot >"
@@ -41,10 +35,10 @@ help::
 	$(ECHO) "        export K_IMAGE=< path-to-Image-files >"
 	$(ECHO) "        export ROOTFS=< path-to-rootfs >"
 	$(ECHO) ""
-	$(ECHO) "  make clean "
+	$(ECHO) "  make clean"
 	$(ECHO) "      Command to remove the generated non-hardware files."
 	$(ECHO) ""
-	$(ECHO) "  make cleanall TARGET=<hw/aiesim/x86sim/hw_emu/>"
+	$(ECHO) "  make cleanall"
 	$(ECHO) "      Command to remove all the generated files."
 	$(ECHO) ""
 
@@ -55,7 +49,7 @@ XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L2/
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 XFLIB_DIR = $(XF_PROJ_ROOT)
 
-# setting devault value
+# setting default value
 TARGET ?= hw_emu
 HOST_ARCH ?= aarch64
 
@@ -147,7 +141,7 @@ ifeq ($(ps_on_x86), on)
 HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie/Filter2D/32bit_aie/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
 CXXFLAGS +=  -D __PS_ENABLE_AIE__
 CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS += --sysroot=$(SYSROOT) -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
+CXXFLAGS += --sysroot=$(SYSROOT) -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -std=c++17
 LDFLAGS +=  -L $(SYSROOT)/usr/lib/
 LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 LDFLAGS += --sysroot=$(SYSROOT)
@@ -155,7 +149,7 @@ else
 HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie/Filter2D/32bit_aie/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
 CXXFLAGS +=  -D __PS_ENABLE_AIE__
 CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(CUR_DIR) -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
-CXXFLAGS += --sysroot=$(SYSROOT) -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
+CXXFLAGS += --sysroot=$(SYSROOT) -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -std=c++17
 LDFLAGS +=  -L $(SYSROOT)/usr/lib/
 LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 LDFLAGS += --sysroot=$(SYSROOT)

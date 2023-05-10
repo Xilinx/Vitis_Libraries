@@ -14,6 +14,7 @@
  */
 
 #include "xf_isp_accel_config.h"
+
 static bool flag = 0;
 
 static uint32_t hist0_awb[3][HIST_SIZE] = {0};
@@ -430,29 +431,30 @@ void function_csc_or_mat_array(xf::cv::Mat<GTM_T, ROWS, COLS, NPC, XFCVDEPTH_csc
     }
 }
 
-void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
-                 ap_uint<OUTPUT_PTR_WIDTH>* img_out,
-                 ap_uint<OUTPUT_PTR_WIDTH>* img_out_ir,
-                 unsigned short height,
-                 unsigned short width,
-                 short* wr_hls,
-                 char R_IR_C1_wgts[25],
-                 char R_IR_C2_wgts[25],
-                 char B_at_R_wgts[25],
-                 char IR_at_R_wgts[9],
-                 char IR_at_B_wgts[9],
-                 char sub_wgts[4],
-                 int params_decompand[3][4][3],
-                 ap_ufixed<32, 18> params_degamma[3][DEGAMMA_KP][3],
-                 unsigned short bayerp,
-                 uint16_t rgain,
-                 uint16_t bgain,
-                 uint32_t hist0[3][HIST_SIZE], /* function_awb */
-                 uint32_t hist1[3][HIST_SIZE], /* function_awb */
-                 int gain0[3],                 /* function_awb */
-                 int gain1[3],                 /* function_awb */
-                 uint16_t pawb,
-                 unsigned char gamma_lut[256 * 3],
+void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,     /* Array2xfMat */
+                 ap_uint<OUTPUT_PTR_WIDTH>* img_out,    /* xfMat2Array */
+                 ap_uint<OUTPUT_PTR_WIDTH>* img_out_ir, /* xfMat2Array */
+                 unsigned short height,                 /* Height of the image */
+                 unsigned short width,                  /* Width of the image */
+                 short* wr_hls,                         /* HDR extract merge */
+                 int params_decompand[3][4][3],         /* hdr_decompand */
+                 char R_IR_C1_wgts[25],                 /* rgbir */
+                 char R_IR_C2_wgts[25],                 /* rgbir */
+                 char B_at_R_wgts[25],                  /* rgbir */
+                 char IR_at_R_wgts[9],                  /* rgbir */
+                 char IR_at_B_wgts[9],                  /* rgbir */
+                 char sub_wgts[4],                      /* rgbir */
+                 uint32_t aec_hist0[AEC_HIST_SIZE],     /* function_aec */
+                 uint32_t aec_hist1[AEC_HIST_SIZE],     /* function_aec */
+                 uint16_t pawb,                         /*Used to calculate thresh which is used in function_awb */
+                 unsigned short bayerp,                 /* hdr_decompand, degamma*/
+                 ap_ufixed<32, 18> params_degamma[3][DEGAMMA_KP][3],                   /* degamma */
+                 uint16_t rgain,                                                       /* gaincontrol */
+                 uint16_t bgain,                                                       /* gaincontrol */
+                 uint32_t hist0[3][HIST_SIZE],                                         /* function_awb */
+                 uint32_t hist1[3][HIST_SIZE],                                         /* function_awb */
+                 int gain0[3],                                                         /* function_awb */
+                 int gain1[3],                                                         /* function_awb */
                  XF_CTUNAME(IN_TYPE, XF_NPPCX) omin_r[MinMaxVArrSize][MinMaxHArrSize], /* LTM */
                  XF_CTUNAME(IN_TYPE, XF_NPPCX) omax_r[MinMaxVArrSize][MinMaxHArrSize], /* LTM */
                  XF_CTUNAME(IN_TYPE, XF_NPPCX) omin_w[MinMaxVArrSize][MinMaxHArrSize], /* LTM */
@@ -467,12 +469,9 @@ void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                  ap_ufixed<16, 4>& L_min2,                                             /* gtm */
                  float c1,                                                             /* gtm */
                  float c2,                                                             /* gtm */
-                 ap_uint<LUT_PTR_WIDTH>* lut,
-                 int lutDim,
-                 uint32_t aec_hist0[AEC_HIST_SIZE], /* function_aec */
-                 uint32_t aec_hist1[AEC_HIST_SIZE], /* function_aec */
-                 ap_uint<OUTPUT_PTR_WIDTH>* img_out_decom,
-                 ap_uint<OUTPUT_PTR_WIDTH>* img_out_deggama) {
+                 unsigned char gamma_lut[256 * 3],                                     /* gamma correction */
+                 ap_uint<LUT_PTR_WIDTH>* lut,                                          /* 3dlut */
+                 int lutDim) {                                                         /* 3dlut */
 // clang-format off
 #pragma HLS INLINE OFF
     // clang-format on
@@ -491,17 +490,11 @@ void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     xf::cv::Mat<IN_TYPE, MAX_HEIGHT, MAX_WIDTH, XF_NPPCX, XF_CV_DEPTH_imgInput> imgInput1(mat_height, mat_width);
     xf::cv::Mat<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_imgInput1> imgInput2(height, width);
     xf::cv::Mat<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_hdr_out> hdr_out(height, width);
-    xf::cv::Mat<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_hdr_out> hdr_out_1(height, width);
-    xf::cv::Mat<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_hdr_out> hdr_out_2(height, width);
     xf::cv::Mat<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_rggb_out> rggb_out(height, width);
-    xf::cv::Mat<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_rggb_out> rggb_out_stats(height, width);
-    xf::cv::Mat<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_rggb_out> rggb_out_aec(height, width);
     xf::cv::Mat<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_blc_out> blc_out(height, width);
     xf::cv::Mat<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_bpc_out> bpc_out(height, width);
     xf::cv::Mat<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_aec_out> aec_out(height, width);
     xf::cv::Mat<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_dgamma_out> dgamma_out(height, width);
-    xf::cv::Mat<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_dgamma_out> dgamma_out_1(height, width);
-    xf::cv::Mat<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_dgamma_out> dgamma_out_2(height, width);
     xf::cv::Mat<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_lsc_out> LscOut(height, width);
     xf::cv::Mat<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_gain_out> gain_out(height, width);
     xf::cv::Mat<OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_demosaic_out> demosaic_out(height, width);
@@ -531,16 +524,10 @@ void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                                                                                                             imgInput2);
         xf::cv::hdr_decompand<IN_TYPE, IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_imgInput1,
                               XF_CV_DEPTH_hdr_out>(imgInput2, hdr_out, params_decompand, bayerp);
-
-        xf::cv::duplicateMat<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_hdr_out, XF_CV_DEPTH_hdr_out,
-                             XF_CV_DEPTH_hdr_out>(hdr_out, hdr_out_1, hdr_out_2);
-
-        xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_hdr_out>(
-            hdr_out_1, img_out_decom);
     }
 
     function_rgbir_or_fifo<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_hdr_out, XF_CV_DEPTH_rggb_out,
-                           XF_CV_DEPTH_fullir_out, XF_CV_DEPTH_3XWIDTH>(hdr_out_2, rggb_out, img_out_ir, R_IR_C1_wgts,
+                           XF_CV_DEPTH_fullir_out, XF_CV_DEPTH_3XWIDTH>(hdr_out, rggb_out, img_out_ir, R_IR_C1_wgts,
                                                                         R_IR_C2_wgts, B_at_R_wgts, IR_at_R_wgts,
                                                                         IR_at_B_wgts, sub_wgts, height, width);
 
@@ -556,14 +543,8 @@ void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     function_degamma<IN_TYPE, IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_bpc_out, XF_CV_DEPTH_dgamma_out,
                      DEGAMMA_KP>(bpc_out, dgamma_out, params_degamma, bayerp, height, width);
 
-    xf::cv::duplicateMat<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_dgamma_out, XF_CV_DEPTH_dgamma_out,
-                         XF_CV_DEPTH_dgamma_out>(dgamma_out, dgamma_out_1, dgamma_out_2);
-
-    xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_hdr_out>(dgamma_out_1,
-                                                                                                       img_out_deggama);
-
     xf::cv::Lscdistancebased<IN_TYPE, IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_dgamma_out,
-                             XF_CV_DEPTH_lsc_out>(dgamma_out_2, LscOut);
+                             XF_CV_DEPTH_lsc_out>(dgamma_out, LscOut);
 
     xf::cv::gaincontrol<XF_BAYER_PATTERN, IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_lsc_out,
                         XF_CV_DEPTH_gain_out>(LscOut, gain_out, rgain, bgain);
@@ -605,48 +586,44 @@ extern "C" {
 void ISPPipeline_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,           /* Array2xfMat */
                        ap_uint<OUTPUT_PTR_WIDTH>* img_out,          /* xfMat2Array */
                        ap_uint<OUTPUT_PTR_WIDTH>* img_out_ir,       /* xfMat2Array */
-                       int height,                                  /* HDR, rgbir2bayer, fifo_copy */
-                       int width,                                   /* HDR, rgbir2bayer, fifo_copy */
+                       int height,                                  /* Height of the image */
+                       int width,                                   /* Width of the image */
                        short wr_hls[NO_EXPS * XF_NPPCX * W_B_SIZE], /* HDR */
-                       uint16_t rgain,                              /* gaincontrol */
-                       uint16_t bgain,                              /* gaincontrol */
+                       int params_decompand[3][4][3],               /* Decompand */
                        char R_IR_C1_wgts[25],                       /* rgbir2bayer */
                        char R_IR_C2_wgts[25],                       /* rgbir2bayer */
                        char B_at_R_wgts[25],                        /* rgbir2bayer */
                        char IR_at_R_wgts[9],                        /* rgbir2bayer */
                        char IR_at_B_wgts[9],                        /* rgbir2bayer */
                        char sub_wgts[4],                            /* rgbir2bayer */
-                       int blk_height,                              /* LTM */
-                       int blk_width,                               /* LTM */
-                       float c1,                                    /* gtm */
-                       float c2,                                    /* gtm */
-                       unsigned char gamma_lut[256 * 3],            /* gammacorrection */
-                       ap_uint<LUT_PTR_WIDTH>* lut,                 /* lut3d */
-                       int lutDim,                                  /* lut3d */
-                       uint16_t pawb, /* used to calculate thresh which is used in function_awb */
-                       unsigned short bayerp,
-                       int params_decompand[3][4][3],
-                       ap_ufixed<32, 18> params_degamma[3][DEGAMMA_KP][3],
-                       ap_uint<OUTPUT_PTR_WIDTH>* img_out_decom,
-                       ap_uint<OUTPUT_PTR_WIDTH>* img_out_deggama) {
-// clang-format off
+                       uint16_t pawb,         /* used to calculate thresh which is used in function_awb */
+                       unsigned short bayerp, /* hdr_decompand, degamma */
+                       ap_ufixed<32, 18> params_degamma[3][DEGAMMA_KP][3], /*degamma*/
+                       uint16_t rgain,                                     /* gaincontrol */
+                       uint16_t bgain,                                     /* gaincontrol */
+                       int blk_height,                                     /* LTM */
+                       int blk_width,                                      /* LTM */
+                       float c1,                                           /* gtm */
+                       float c2,                                           /* gtm */
+                       unsigned char gamma_lut[256 * 3],                   /* gammacorrection */
+                       ap_uint<LUT_PTR_WIDTH>* lut,                        /* lut3d */
+                       int lutDim) {                                       /* lut3d */
+                                                                           // clang-format off
 
 #pragma HLS INTERFACE m_axi port=img_inp          offset=slave bundle=gmem1 
 #pragma HLS INTERFACE m_axi port=img_out          offset=slave bundle=gmem2
 #pragma HLS INTERFACE m_axi port=img_out_ir       offset=slave bundle=gmem3
-#pragma HLS INTERFACE m_axi port=R_IR_C1_wgts     offset=slave bundle=gmem4
-#pragma HLS INTERFACE m_axi port=R_IR_C2_wgts     offset=slave bundle=gmem5
-#pragma HLS INTERFACE m_axi port=B_at_R_wgts      offset=slave bundle=gmem6
-#pragma HLS INTERFACE m_axi port=IR_at_R_wgts     offset=slave bundle=gmem7
-#pragma HLS INTERFACE m_axi port=IR_at_B_wgts     offset=slave bundle=gmem8
-#pragma HLS INTERFACE m_axi port=sub_wgts         offset=slave bundle=gmem9
-#pragma HLS INTERFACE m_axi port=gamma_lut        offset=slave bundle=gmem10
-#pragma HLS INTERFACE m_axi port=wr_hls           offset=slave bundle=gmem11
-#pragma HLS INTERFACE m_axi port=lut              offset=slave bundle=gmem12
-#pragma HLS INTERFACE m_axi port=params_decompand offset=slave bundle=gmem13
-#pragma HLS INTERFACE m_axi port=params_degamma   offset=slave bundle=gmem14
-#pragma HLS INTERFACE m_axi port=img_out_decom    offset=slave bundle=gmem15
-#pragma HLS INTERFACE m_axi port=img_out_deggama  offset=slave bundle=gmem16
+#pragma HLS INTERFACE m_axi port=wr_hls           offset=slave bundle=gmem4
+#pragma HLS INTERFACE m_axi port=params_decompand offset=slave bundle=gmem5
+#pragma HLS INTERFACE m_axi port=R_IR_C1_wgts     offset=slave bundle=gmem6
+#pragma HLS INTERFACE m_axi port=R_IR_C2_wgts     offset=slave bundle=gmem7
+#pragma HLS INTERFACE m_axi port=B_at_R_wgts      offset=slave bundle=gmem8
+#pragma HLS INTERFACE m_axi port=IR_at_R_wgts     offset=slave bundle=gmem9
+#pragma HLS INTERFACE m_axi port=IR_at_B_wgts     offset=slave bundle=gmem10
+#pragma HLS INTERFACE m_axi port=sub_wgts         offset=slave bundle=gmem11
+#pragma HLS INTERFACE m_axi port=params_degamma   offset=slave bundle=gmem12
+#pragma HLS INTERFACE m_axi port=gamma_lut        offset=slave bundle=gmem13
+#pragma HLS INTERFACE m_axi port=lut              offset=slave bundle=gmem14
 
 #pragma HLS ARRAY_PARTITION variable=hist0_awb    complete dim=1
 #pragma HLS ARRAY_PARTITION variable=hist1_awb    complete dim=1
@@ -679,19 +656,21 @@ WR_HLS_INIT_LOOP:
     }
 
     if (!flag) {
-        ISPpipeline(img_inp, img_out, img_out_ir, height, width, wr_hls_tmp, R_IR_C1_wgts, R_IR_C2_wgts, B_at_R_wgts,
-                    IR_at_R_wgts, IR_at_B_wgts, sub_wgts, params_decompand, params_degamma, bayerp, rgain, bgain,
-                    hist0_awb, hist1_awb, igain_0, igain_1, pawb, gamma_lut, omin[0], omax[0], omin[1], omax[1],
-                    blk_height, blk_width, mean2, mean1, L_max2, L_max1, L_min2, L_min1, c1, c2, lut, lutDim, hist0_aec,
-                    hist1_aec, img_out_decom, img_out_deggama);
+        ISPpipeline(img_inp, img_out, img_out_ir, height, width, wr_hls_tmp, params_decompand, R_IR_C1_wgts,
+                    R_IR_C2_wgts, B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts, sub_wgts, hist0_aec, hist1_aec, pawb, bayerp,
+                    params_degamma, rgain, bgain, hist0_awb, hist1_awb, igain_0, igain_1, omin[0], omax[0], omin[1],
+                    omax[1], blk_height, blk_width, mean2, mean1, L_max2, L_max1, L_min2, L_min1, c1, c2, gamma_lut,
+                    lut, lutDim);
+
         flag = 1;
 
     } else {
-        ISPpipeline(img_inp, img_out, img_out_ir, height, width, wr_hls_tmp, R_IR_C1_wgts, R_IR_C2_wgts, B_at_R_wgts,
-                    IR_at_R_wgts, IR_at_B_wgts, sub_wgts, params_decompand, params_degamma, bayerp, rgain, bgain,
-                    hist1_awb, hist0_awb, igain_1, igain_0, pawb, gamma_lut, omin[1], omax[1], omin[0], omax[0],
-                    blk_height, blk_width, mean1, mean2, L_max1, L_max2, L_min1, L_min2, c1, c2, lut, lutDim, hist1_aec,
-                    hist0_aec, img_out_decom, img_out_deggama);
+        ISPpipeline(img_inp, img_out, img_out_ir, height, width, wr_hls_tmp, params_decompand, R_IR_C1_wgts,
+                    R_IR_C2_wgts, B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts, sub_wgts, hist1_aec, hist0_aec, pawb, bayerp,
+                    params_degamma, rgain, bgain, hist1_awb, hist0_awb, igain_1, igain_0, omin[1], omax[1], omin[0],
+                    omax[0], blk_height, blk_width, mean1, mean2, L_max1, L_max2, L_min1, L_min2, c1, c2, gamma_lut,
+                    lut, lutDim);
+
         flag = 0;
     }
 }

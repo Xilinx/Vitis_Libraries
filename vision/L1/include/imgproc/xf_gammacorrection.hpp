@@ -21,7 +21,6 @@
 #include "hls_stream.h"
 #include "common/xf_common.hpp"
 #include "xf_lut.hpp"
-#include "hls_math.h"
 
 namespace xf {
 namespace cv {

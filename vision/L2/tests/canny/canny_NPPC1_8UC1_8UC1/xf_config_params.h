@@ -24,8 +24,8 @@
 
 #define XF_USE_URAM 0
 
-#define INPUT_PTR_WIDTH 8
-#define OUTPUT_PTR_WIDTH 8
+#define INPUT_PTR_WIDTH 64
+#define OUTPUT_PTR_WIDTH 64
 
 #define XF_CV_DEPTH_IN_1 2
 #define XF_CV_DEPTH_OUT_1 2

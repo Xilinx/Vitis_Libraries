@@ -176,21 +176,21 @@ EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 EXE_FILE_DEPS := $(HOST_SRCS) $(INSTANCE_FILES)  $(EXE_FILE_DEPS)
 
 ifeq ($(TARGET),$(filter $(TARGET),sw_emu))
-HOST_ARGS := $(XFLIB_DIR)/data/ltm_input_HD_sef.png $(XFLIB_DIR)/data/ltm_input_HD_lef.png $(XFLIB_DIR)/data/ltm_input_HD.png $(XFLIB_DIR)/data/input-lut-33.txt 
+HOST_ARGS := $(XFLIB_DIR)/data/ltm_input_HD_sef.png $(XFLIB_DIR)/data/ltm_input_HD_lef.png $(XFLIB_DIR)/data/input-lut-33.txt 
 ifneq ($(HOST_ARCH), x86)
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 endif
 LIBRARY_PATH := $(OPENCV_LIB):$(LD_LIBRARY_PATH):$(XILINX_XRT)/lib
 endif
 ifeq ($(TARGET),$(filter $(TARGET),hw_emu))
-HOST_ARGS := $(XFLIB_DIR)/data/ltm_input_sef_128x128.png $(XFLIB_DIR)/data/ltm_input_lef_128x128.png $(XFLIB_DIR)/data/ltm_input_128x128.png $(XFLIB_DIR)/data/input-lut-33.txt 
+HOST_ARGS := $(XFLIB_DIR)/data/ltm_input_sef_128x128.png $(XFLIB_DIR)/data/ltm_input_lef_128x128.png $(XFLIB_DIR)/data/input-lut-33.txt 
 ifneq ($(HOST_ARCH), x86)
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 endif
 LIBRARY_PATH := $(OPENCV_LIB):$(LD_LIBRARY_PATH):$(XILINX_XRT)/lib
 endif
 ifeq ($(TARGET),$(filter $(TARGET),hw))
-HOST_ARGS := $(XFLIB_DIR)/data/ltm_input_HD_sef.png $(XFLIB_DIR)/data/ltm_input_HD_lef.png $(XFLIB_DIR)/data/ltm_input_HD.png $(XFLIB_DIR)/data/input-lut-33.txt 
+HOST_ARGS := $(XFLIB_DIR)/data/ltm_input_HD_sef.png $(XFLIB_DIR)/data/ltm_input_HD_lef.png $(XFLIB_DIR)/data/input-lut-33.txt 
 ifneq ($(HOST_ARCH), x86)
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 endif
@@ -257,7 +257,7 @@ endif
 	@echo 'fi' >> $(RUN_SCRIPT)
 	@echo 'echo "INFO: Embedded host run completed."' >> $(RUN_SCRIPT)
 	@echo 'exit $$return_code' >> $(RUN_SCRIPT)
-DATA_FILE := $(XFLIB_DIR)/data/input-lut-33.txt $(XFLIB_DIR)/data/ltm_input_HD.png $(XFLIB_DIR)/data/ltm_input_HD_lef.png $(XFLIB_DIR)/data/ltm_input_HD_sef.png $(custom_data_file)
+DATA_FILE := $(XFLIB_DIR)/data/input-lut-33.txt $(XFLIB_DIR)/data/ltm_input_HD_lef.png $(XFLIB_DIR)/data/ltm_input_HD_sef.png $(custom_data_file)
 DATA_DIR := $(custom_data_dir)
 SD_FILES += $(RUN_SCRIPT)
 SD_FILES += $(EXE_FILE)

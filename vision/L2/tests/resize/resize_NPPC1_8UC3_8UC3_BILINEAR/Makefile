@@ -202,7 +202,7 @@ endif
 LIBRARY_PATH := $(OPENCV_LIB):$(LD_LIBRARY_PATH):$(XILINX_XRT)/lib
 endif
 ifeq ($(TARGET),$(filter $(TARGET),hw))
-HOST_ARGS :=  $(XFLIB_DIR)/data/4k.jpg 2160 3840
+HOST_ARGS :=  $(XFLIB_DIR)/data/4k.jpg 1080 1920
 ifneq ($(HOST_ARCH), x86)
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 endif
