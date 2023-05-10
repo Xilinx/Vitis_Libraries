@@ -55,7 +55,7 @@ XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L2/
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 XFLIB_DIR = $(XF_PROJ_ROOT)
 
-# setting devault value
+# setting default value
 TARGET ?= hw_emu
 HOST_ARCH ?= aarch64
 
@@ -64,7 +64,7 @@ ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := xilinx_vck190_base_202110_1
+PLATFORM := xilinx_vck190_base_202310_1
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################

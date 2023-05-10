@@ -8,8 +8,6 @@
         "u200", 
         "aws-vu9p-f1"
     ], 
-    "default_target": "hw_emu",
-    "default_device": "xilinx_vck190_base_202110_1",
     "platform_blocklist": [], 
     "platform_properties": {}, 
     "launch": [
