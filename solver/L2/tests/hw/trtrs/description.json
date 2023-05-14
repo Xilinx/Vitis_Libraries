@@ -2,7 +2,6 @@
     "name": "Xilinx TRTRS",
     "description": "Linear System Solver for dense upper / lower triangular matrix",
     "flow": "vitis",
-    "platform_type": "",
     "platform_allowlist": [
         "u50",
         "u250",

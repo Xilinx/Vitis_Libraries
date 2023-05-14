@@ -2,7 +2,6 @@
     "name": "Xilinx POTRF",
     "description": "Cholesky decomposition of symmetric positive de.cfgte (SPD) matrix",
     "flow": "vitis",
-    "platform_type": "",
     "platform_allowlist": [
         "u50",
         "u250",

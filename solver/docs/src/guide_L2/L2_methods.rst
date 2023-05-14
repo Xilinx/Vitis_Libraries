@@ -20,6 +20,10 @@
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
 
+***************************
+Supported Numerical Methods
+***************************
+
 Matrix Decomposition
 ====================
 
@@ -32,8 +36,6 @@ Matrix Decomposition
    Lower-Upper Decomposition (GETRF) <MatrixDecomposition/getrf/getrf.rst>
    Lower-Upper Decomposition (GETRF_NOPIVOT) <MatrixDecomposition/getrf_nopivot/getrf_nopivot.rst>
    Cholesky Decomposition for SPD matrix (POTRF) <MatrixDecomposition/potrf/potrf.rst>
-   Cholesky Decomposition on AIE <MatrixDecomposition/cholesky_decomposition/cholesky_decomposition.rst>
-   QR Decomposition on AIE <MatrixDecomposition/qr_decomposition/qr_decomposition.rst>
 
 Linear Solver
 =============

@@ -13,33 +13,18 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-..
-
 .. meta::
-   :keywords: Matrix, Decomposition, Linear, Solver, Eigenvalue
-   :description: Vitis Solver library L2 application programming interface reference.
+   :keywords: Vitis, Solver, Library
+   :description: Vitis Solver library L2 module user guide.
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
 
-**********
-L2 PL APIs
-**********
 
-Matrix Decomposition
-====================
+***********
+L2 AIE APIs
+***********
 
-.. include:: ../rst_L2_mat/namespace_xf_solver.rst
-   :start-after: FunctionSection
+.. include:: ../rst_L2_aie/class_xf_solver_CholeskyGraph.rst
 
-Linear Solver
-=============
-
-.. include:: ../rst_L2_linearsolver/namespace_xf_solver.rst
-   :start-after: FunctionSection
-
-Eigenvalue Solver
-==================
-
-.. include:: ../rst_L2_eigensolver/namespace_xf_solver.rst
-   :start-after: FunctionSection
+.. include:: ../rst_L2_aie/class_xf_solver_QRDComplexFloat.rst
 

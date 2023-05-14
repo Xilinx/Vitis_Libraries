@@ -2,7 +2,6 @@
     "name": "Xilinx Symmetric Linear Solver",
     "description": "Linear System Solver for symmetric positive de.cfgte (SPD) matrix",
     "flow": "vitis",
-    "platform_type": "",
     "platform_allowlist": [
         "u50",
         "u250",

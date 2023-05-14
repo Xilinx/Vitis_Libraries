@@ -58,13 +58,14 @@ Currently this includes the following operations for dense matrix
    :caption: User Guide
    :maxdepth: 2
 
-   L1 Module User Guide <guide_L1/L1.rst>
-   L2 Module User Guide <guide_L2/L2.rst>
+   L1 PL User Guide <guide_L1/L1.rst>
+   L2 PL User Guide <guide_L2/L2.rst>
+   L2 AIE User Guide <guide_L2_AIE/L2_AIE.rst>
 
 .. toctree::
-   :caption: Benchmark 
+   :caption: Benchmark
    :maxdepth: 2
-   
+
    Benchmark <benchmark.rst>
 
 

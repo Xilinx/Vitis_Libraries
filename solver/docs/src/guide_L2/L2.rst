@@ -20,23 +20,12 @@
    :xlnxdocumenttype: Tutorials
 
 **************************************
-L2 Module User Guide
+L2 PL User Guide
 **************************************
 
 .. toctree::
    :maxdepth: 1
+   
+   Supported Numerical Methods <L2_methods.rst>
+   L2 PL APIs <L2_api.rst>
 
-Supported Numerical Methods
----------------------------
-.. toctree::
-   :maxdepth: 1
-  
-   Matrix Decomposition <L2_methods.rst>
-
-Level II APIs 
--------------
-
-.. toctree::
-   :maxdepth: 2
-
-   Matrix Decomposition <L2_api.rst>

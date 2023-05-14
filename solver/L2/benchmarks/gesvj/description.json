@@ -2,7 +2,6 @@
     "name": "Xilinx GESVJ",
     "description": "Singular Value Decomposition for general matrix",
     "flow": "vitis",
-    "platform_type": "",
     "platform_allowlist": [
         "u50",
         "u250",

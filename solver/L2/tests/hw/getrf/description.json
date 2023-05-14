@@ -2,7 +2,6 @@
     "name": "Xilinx GETRF",
     "description": "LU decomposition (with partial pivoting) of square matrix",
     "flow": "vitis",
-    "platform_type": "",
     "platform_allowlist": [
         "u50",
         "u250",

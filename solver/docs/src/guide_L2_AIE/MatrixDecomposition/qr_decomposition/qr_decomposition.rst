@@ -1,4 +1,3 @@
-
 .. 
    Copyright (C) 2019-2022, Xilinx, Inc.
    Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
@@ -21,9 +20,9 @@
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
 
-*******************************************************
+***********************
 QR Decomposition on AIE
-*******************************************************
+***********************
 
 Overview
 ========
@@ -54,23 +53,26 @@ Kernel Interfaces
 --------------------
 
 .. code::
+
    void GramSchmidtKernelComplexFloat::process(input_stream_cfloat* in_0,
                                                input_stream_cfloat* in_1,
                                                output_stream_cfloat* out_0,
                                                output_stream_cfloat* out_1);
+
 .. note::
+
    * To utilize bandwidth of input / output stream, the input matrix and output result are transfered in such way: Elem[N*4] and Elem[N*4+1] are transferred with in_0 / out_0, Elem[N*4 + 2] and Elem[N*4 + 3] are transferred with in_1 / out_1.
 
 
 * Input:
 
-  *  input_stream_cfloat* in_0    stream of input matrix, contains lower two elements of each 4 elements.
-  *  input_stream_cfloat* in_1    stream of input matrix, contains higher two elements of each 4 elements.
+  *  ``input_stream_cfloat* in_0``    stream of input matrix, contains lower two elements of each 4 elements.
+  *  ``input_stream_cfloat* in_1``    stream of input matrix, contains higher two elements of each 4 elements.
 
 * Output:
 
-  *  input_stream_cfloat* out_0    stream of output matrix, contains lower two elements of each 4 elements.
-  *  input_stream_cfloat* out_1    stream of output matrix, contains higher two elements of each 4 elements.
+  *  ``input_stream_cfloat* out_0``    stream of output matrix, contains lower two elements of each 4 elements.
+  *  ``input_stream_cfloat* out_1``    stream of output matrix, contains higher two elements of each 4 elements.
 
 Performance
 ==============

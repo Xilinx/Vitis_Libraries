@@ -3,7 +3,6 @@
     "name": "Xilinx GESVDJ SC",
     "description": "Symmetric Matrix Jacobi based Singular Value Decomposition",
     "flow": "vitis",
-    "platform_type": "",
     "platform_allowlist": [
         "u250",
         "u200"

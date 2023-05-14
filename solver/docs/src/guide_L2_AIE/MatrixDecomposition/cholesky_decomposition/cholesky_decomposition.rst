@@ -1,4 +1,3 @@
-
 .. 
    Copyright (C) 2019-2022, Xilinx, Inc.
    Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
@@ -21,9 +20,9 @@
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
 
-*******************************************************
+*****************************
 Cholesky Decomposition on AIE
-*******************************************************
+*****************************
 
 Overview
 ========
@@ -54,24 +53,26 @@ Interfaces
 --------------------
 .. code::
 
-    void cholesky_complex(input_stream<float>* __restrict matA_real, 
-                          input_stream<float>* __restrict matA_imag, 
-                          output_stream<float>* __restrict matL_real, 
+    void cholesky_complex(input_stream<float>* __restrict matA_real,
+                          input_stream<float>* __restrict matA_imag,
+                          output_stream<float>* __restrict matL_real,
                           output_stream<float>* __restrict matL_imag);
+
 .. note::
+
     * As the input data type is cfloat, the input matrix datas are divided into two parts: the one stores the real part of cfloat data, and the other stores the image part of cfloat data.
     * Accordingly, the output datas are divided into two parts as well, the one stores the real part of cfloat data, and the other stores the image part of cfloat data;
 
 
 * Input:
 
-  *  input_stream<float>* matA_real    stream of the real part of input matrix, contains the lower triangle elements of matrix, column-major.
-  *  input_stream<float>* matA_imag    stream of the imag part of input matrix, contains the lower triangle elements of matrix, column-major.
+  *  ``input_stream<float>* matA_real``    stream of the real part of input matrix, contains the lower triangle elements of matrix, column-major.
+  *  ``input_stream<float>* matA_imag``    stream of the imag part of input matrix, contains the lower triangle elements of matrix, column-major.
 
 * Output:
 
-  *  output_stream<float>* matL_real    stream of the real part of output matrix, contains the lower triangle elements of matrix, column-major.
-  *  output_stream<float>* matL_imag    stream of the image part of output matrix, contains the lower triangle elements of matrix, column-major.
+  *  ``output_stream<float>* matL_real``    stream of the real part of output matrix, contains the lower triangle elements of matrix, column-major.
+  *  ``output_stream<float>* matL_imag``    stream of the image part of output matrix, contains the lower triangle elements of matrix, column-major.
 
 
 Performance

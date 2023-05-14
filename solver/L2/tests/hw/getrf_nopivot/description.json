@@ -2,7 +2,6 @@
     "name": "Xilinx GETRF Without Pivoting",
     "description": "LU decomposition (without pivoting) of square matrix",
     "flow": "vitis",
-    "platform_type": "",
     "platform_allowlist": [
         "u50",
         "u250",
