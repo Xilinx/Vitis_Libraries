@@ -1703,7 +1703,6 @@
                         "direction": "",
                         "type": "hls::stream<ap_uint<PARALLEL_BYTES> >&"
                     }
-
                 ]
             }
         },
@@ -3259,6 +3258,5 @@
                 ]
             }
         }
-    ],
-    "target_domain": ""
+    ]
 }
