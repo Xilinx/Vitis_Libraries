@@ -817,14 +817,13 @@
                 "instance": "function",
                 "parameters": [],
                 "ports": [
-		    {
-			"name": "err",
-			"direction": "",
-			"type": "int"
-		    }
-		]
+                    {
+                        "name": "err",
+                        "direction": "",
+                        "type": "int"
+                    }
+                ]
             }
         }
-    ],
-    "target_domain": ""
+    ]
 }
