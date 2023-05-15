@@ -920,7 +920,6 @@
                         "name": "t_LogParEntries",
                         "type": "unsigned int",
                         "description": "log2 of the number of parallelly processed entries in the input vector"
-
                     },
                     {
                         "name": "t_IndexType",
@@ -972,6 +971,5 @@
                 ]
             }
         }
-    ],
-    "target_domain": ""
+    ]
 }
