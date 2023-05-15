@@ -162,47 +162,47 @@
                         "name": "flux_err_stts",
                         "direction": "",
                         "type": "volatile int&"
-                    },                   
+                    },
                     {
                         "name": "flux_out_stts",
                         "direction": "",
                         "type": "volatile int&"
-                    },                    
+                    },
                     {
                         "name": "iq_stts",
                         "direction": "",
                         "type": "volatile int&"
-                    },                    
+                    },
                     {
                         "name": "torque_acc_stts",
                         "direction": "",
                         "type": "volatile int&"
-                    },                    
+                    },
                     {
                         "name": "torque_err_stts",
                         "direction": "",
                         "type": "volatile int&"
-                    },                    
+                    },
                     {
                         "name": "torque_out_stts",
                         "direction": "",
                         "type": "volatile int&"
-                    },                    
+                    },
                     {
                         "name": "speed_stts",
                         "direction": "",
                         "type": "volatile int&"
-                    },                    
+                    },
                     {
                         "name": "speed_acc_stts",
                         "direction": "",
                         "type": "volatile int&"
-                    },                    
+                    },
                     {
                         "name": "speed_err_stts",
                         "direction": "",
                         "type": "volatile int&"
-                    },                    
+                    },
                     {
                         "name": "speed_out_stts",
                         "direction": "",
@@ -431,6 +431,5 @@
                 ]
             }
         }
-    ],
-    "target_domain": ""
+    ]
 }
