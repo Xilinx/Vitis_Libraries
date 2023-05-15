@@ -4720,31 +4720,31 @@
                 "parameters": [],
                 "ports": [
                     {
-			"name": "inStrm",
-			"direction": "",
-			"type": "hls::stream<ap_uint<32> >&"
-		    },
-		    {
-			"name": "inLenStrm",
-			"direction": "",
-			"type": "hls::stream<ap_uint<64> >&"
-		    },
-		    {
-			"name": "endInLenStrm",
-			"direction": "",
+                        "name": "inStrm",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<32> >&"
+                    },
+                    {
+                        "name": "inLenStrm",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<64> >&"
+                    },
+                    {
+                        "name": "endInLenStrm",
+                        "direction": "",
                         "type": "hls::stream<bool>&"
-		    },
-		    {
-			"name": "outStrm",
-			"direction": "",
-			"type": "hls::stream<ap_uint<160> >&"
-		    },
-		    {
-			"name": "endOutStrm",
-			"direction": "",
-			"type": "hls::stream<bool>&"
-		    }
-		]
+                    },
+                    {
+                        "name": "outStrm",
+                        "direction": "",
+                        "type": "hls::stream<ap_uint<160> >&"
+                    },
+                    {
+                        "name": "endOutStrm",
+                        "direction": "",
+                        "type": "hls::stream<bool>&"
+                    }
+                ]
             }
         },
         {
@@ -5786,6 +5786,5 @@
                 ]
             }
         }
-    ],
-    "target_domain": ""
+    ]
 }
