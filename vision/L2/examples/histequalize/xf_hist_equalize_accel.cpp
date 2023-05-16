@@ -45,8 +45,8 @@ void equalizeHist_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     // clang-format on
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1>(img_inp, in_mat);
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_2>(img_inp1, in_mat1);
-    xf::cv::equalizeHist<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2, XF_CV_DEPTH_OUT>(
-        in_mat, in_mat1, out_mat);
+    xf::cv::equalizeHist<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_USE_URAM, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2,
+                         XF_CV_DEPTH_OUT>(in_mat, in_mat1, out_mat);
     xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT>(out_mat, img_out);
 }
 }

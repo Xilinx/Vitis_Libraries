@@ -228,9 +228,9 @@ void fifo_awb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& demosaic_out,
 #pragma HLS DATAFLOW
     // clang-format on
     if (WB_TYPE) {
-        xf::cv::AWBhistogram<OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, NPPCX, WB_TYPE, HIST_SIZE, XFCVDEPTH_IN,
-                             XFCVDEPTH_OUT>(demosaic_out, impop, hist0, thresh, inputMin, inputMax, outputMin,
-                                            outputMax);
+        xf::cv::AWBhistogram<OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, NPPCX, XF_USE_URAM, WB_TYPE, HIST_SIZE,
+                             XFCVDEPTH_IN, XFCVDEPTH_OUT>(demosaic_out, impop, hist0, thresh, inputMin, inputMax,
+                                                          outputMin, outputMax);
         xf::cv::AWBNormalization<OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, NPPCX, WB_TYPE, HIST_SIZE, XFCVDEPTH_OUT,
                                  XFCVDEPTH_OUT>(impop, ltm_in, hist1, thresh, inputMin, inputMax, outputMin, outputMax);
     } else {

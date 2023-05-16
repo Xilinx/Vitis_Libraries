@@ -66,6 +66,7 @@ template <int SRC_T,
           int ROWS,
           int COLS,
           int NPC = 1,
+          int USE_URAM = 0,
           int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
 void autoexposurecorrection_mono(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
@@ -85,13 +86,13 @@ void autoexposurecorrection_mono(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_I
 
     xf::cv::duplicateMat(src, vimage1, vimage2);
 
-    xFHistogramKernel<SIN_CHANNEL_TYPE, ROWS, COLS, XF_DEPTH(SIN_CHANNEL_TYPE, NPC), NPC, XFCVDEPTH_IN,
+    xFHistogramKernel<SIN_CHANNEL_TYPE, ROWS, COLS, XF_DEPTH(SIN_CHANNEL_TYPE, NPC), NPC, USE_URAM, XFCVDEPTH_IN,
                       XF_WORDWIDTH(SIN_CHANNEL_TYPE, NPC), ((COLS >> (XF_BITSHIFT(NPC))) >> 1),
                       XF_CHANNELS(SIN_CHANNEL_TYPE, NPC)>(vimage1, hist_array1, rows_shifted, cols_shifted);
 
-    xFEqualize<SIN_CHANNEL_TYPE, ROWS, COLS, XF_DEPTH(SIN_CHANNEL_TYPE, NPC), NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT,
-               XF_WORDWIDTH(SIN_CHANNEL_TYPE, NPC), (COLS >> XF_BITSHIFT(NPC))>(vimage2, hist_array2, dst, rows_shifted,
-                                                                                cols_shifted);
+    xFEqualize<SIN_CHANNEL_TYPE, ROWS, COLS, XF_DEPTH(SIN_CHANNEL_TYPE, NPC), NPC, USE_URAM, XFCVDEPTH_IN,
+               XFCVDEPTH_OUT, XF_WORDWIDTH(SIN_CHANNEL_TYPE, NPC), (COLS >> XF_BITSHIFT(NPC))>(
+        vimage2, hist_array2, dst, rows_shifted, cols_shifted);
 }
 
 template <int SRC_T,
@@ -100,6 +101,7 @@ template <int SRC_T,
           int ROWS,
           int COLS,
           int NPC = 1,
+          int USE_URAM = 0,
           int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
 void autoexposurecorrection(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
@@ -151,11 +153,11 @@ void autoexposurecorrection(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& s
 
     // xf::cv::equalizeHist<SIN_CHANNEL_TYPE, ROWS, COLS, NPC>(vimage1, vimage2,
     // vimage_eq);
-    xFHistogramKernel<SIN_CHANNEL_TYPE, ROWS, COLS, XF_DEPTH(SIN_CHANNEL_TYPE, NPC), NPC, XFCVDEPTH_IN,
+    xFHistogramKernel<SIN_CHANNEL_TYPE, ROWS, COLS, XF_DEPTH(SIN_CHANNEL_TYPE, NPC), NPC, USE_URAM, XFCVDEPTH_IN,
                       XF_WORDWIDTH(SIN_CHANNEL_TYPE, NPC), ((COLS >> (XF_BITSHIFT(NPC))) >> 1),
                       XF_CHANNELS(SIN_CHANNEL_TYPE, NPC)>(vimage1, hist_array1, rows_shifted, cols_shifted);
 
-    xFEqualize<SIN_CHANNEL_TYPE, ROWS, COLS, XF_DEPTH(SIN_CHANNEL_TYPE, NPC), NPC, XFCVDEPTH_IN, XFCVDEPTH_IN,
+    xFEqualize<SIN_CHANNEL_TYPE, ROWS, COLS, XF_DEPTH(SIN_CHANNEL_TYPE, NPC), NPC, USE_URAM, XFCVDEPTH_IN, XFCVDEPTH_IN,
                XF_WORDWIDTH(SIN_CHANNEL_TYPE, NPC), (COLS >> XF_BITSHIFT(NPC))>(vimage2, hist_array2, vimage_eq,
                                                                                 rows_shifted, cols_shifted);
 
@@ -172,6 +174,7 @@ template <int SRC_T,
           int ROWS,
           int COLS,
           int NPC = 1,
+          int USE_URAM = 0,
           int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
           int AEC_HISTSIZE>
@@ -200,7 +203,7 @@ void autoexposurecorrection_sin(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN
 #pragma HLS DATAFLOW
     // clang-format on
 
-    xFHistogramKernel_sin<SIN_CHANNEL_TYPE, ROWS, COLS, XF_DEPTH(SIN_CHANNEL_TYPE, NPC), NPC, XFCVDEPTH_IN,
+    xFHistogramKernel_sin<SIN_CHANNEL_TYPE, ROWS, COLS, XF_DEPTH(SIN_CHANNEL_TYPE, NPC), NPC, USE_URAM, XFCVDEPTH_IN,
                           XFCVDEPTH_IN, XF_WORDWIDTH(SIN_CHANNEL_TYPE, NPC), ((COLS >> (XF_BITSHIFT(NPC))) >> 1),
                           XF_CHANNELS(SIN_CHANNEL_TYPE, NPC), AEC_HISTSIZE>(src1, src2, hist_array1, p, inputMin,
                                                                             inputMax, outputMin, outputMax);
@@ -216,6 +219,7 @@ template <int SRC_T,
           int ROWS,
           int COLS,
           int NPC = 1,
+          int USE_URAM = 0,
           int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
           int AEC_HISTSIZE>
@@ -246,7 +250,7 @@ void autoexposurecorrection_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_
 #pragma HLS DATAFLOW
     // clang-format on
 
-    xFHistogramKernel_multi<SIN_CHANNEL_TYPE, ROWS, COLS, XF_DEPTH(SIN_CHANNEL_TYPE, NPC), NPC, XFCVDEPTH_IN,
+    xFHistogramKernel_multi<SIN_CHANNEL_TYPE, ROWS, COLS, XF_DEPTH(SIN_CHANNEL_TYPE, NPC), NPC, USE_URAM, XFCVDEPTH_IN,
                             XFCVDEPTH_IN, XF_WORDWIDTH(SIN_CHANNEL_TYPE, NPC), ((COLS >> (XF_BITSHIFT(NPC))) >> 1),
                             XF_CHANNELS(SIN_CHANNEL_TYPE, NPC), AEC_HISTSIZE>(src1, src2, hist_array1, p, inputMin,
                                                                               inputMax, outputMin, outputMax, slc_id);
@@ -261,6 +265,7 @@ template <int SRC_T,
           int ROWS,
           int COLS,
           int NPC = 1,
+          int USE_URAM = 0,
           int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
           int AEC_HISTSIZE>
@@ -282,14 +287,14 @@ void aec_wrap(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src1,
     // clang-format on
 
     if (!flag) {
-        xf::cv::autoexposurecorrection_multi<SRC_T, DST_T, SIN_CHANNEL_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN,
+        xf::cv::autoexposurecorrection_multi<SRC_T, DST_T, SIN_CHANNEL_TYPE, ROWS, COLS, NPC, USE_URAM, XFCVDEPTH_IN,
                                              XFCVDEPTH_OUT, AEC_HISTSIZE>(
             src1, dst, hist_array1, hist_array2, thresh, inputMin, inputMax, outputMin, outputMax, slc_id, org_height);
 
         if (eof) flag = 1;
 
     } else {
-        xf::cv::autoexposurecorrection_multi<SRC_T, DST_T, SIN_CHANNEL_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN,
+        xf::cv::autoexposurecorrection_multi<SRC_T, DST_T, SIN_CHANNEL_TYPE, ROWS, COLS, NPC, USE_URAM, XFCVDEPTH_IN,
                                              XFCVDEPTH_OUT, AEC_HISTSIZE>(
             src1, dst, hist_array2, hist_array1, thresh, inputMin, inputMax, outputMin, outputMax, slc_id, org_height);
 
@@ -304,6 +309,7 @@ template <int SRC_T,
           int ROWS,
           int COLS,
           int NPC = 1,
+          int USE_URAM = 0,
           int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
           int AEC_HISTSIZE,
@@ -333,9 +339,9 @@ void aec_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src1,
 
     float thresh = (float)pawb[strm_id] / 256;
 
-    xf::cv::aec_wrap<SRC_T, DST_T, SIN_CHANNEL_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT, AEC_HISTSIZE>(
-        src1, dst, hist_array0[strm_id], hist_array1[strm_id], thresh, inputMin, inputMax, outputMin, outputMax,
-        flag[strm_id], eof[strm_id], slc_id, full_height);
+    xf::cv::aec_wrap<SRC_T, DST_T, SIN_CHANNEL_TYPE, ROWS, COLS, NPC, USE_URAM, XFCVDEPTH_IN, XFCVDEPTH_OUT,
+                     AEC_HISTSIZE>(src1, dst, hist_array0[strm_id], hist_array1[strm_id], thresh, inputMin, inputMax,
+                                   outputMin, outputMax, flag[strm_id], eof[strm_id], slc_id, full_height);
 }
 }
 }

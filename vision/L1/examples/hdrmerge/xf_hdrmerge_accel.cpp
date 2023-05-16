@@ -184,7 +184,7 @@ void hdrmerge_accel(InVideoStrm_t_e_s& img_in1,
     AXIVideo2BayerMat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1>(img_in1, imgInput1);
     AXIVideo2BayerMat<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_2>(img_in2, imgInput2);
 
-    xf::cv::Hdrmerge_bayer<IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPPCX, NO_EXPS, W_B_SIZE, XF_CV_DEPTH_IN_1,
+    xf::cv::Hdrmerge_bayer<IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_USE_URAM, NO_EXPS, W_B_SIZE, XF_CV_DEPTH_IN_1,
                            XF_CV_DEPTH_IN_2, XF_CV_DEPTH_OUT>(imgInput1, imgInput2, imgOutput, wr_hls);
 
     GRAYMat2AXIvideo<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT>(imgOutput, img_out);

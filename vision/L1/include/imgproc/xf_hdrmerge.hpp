@@ -54,6 +54,7 @@ template <int SRC_T,
           int ROWS,
           int COLS,
           int NPC = 1,
+          int USE_URAM = 0,
           int NO_EXPS,
           int W_SIZE,
           int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
@@ -63,8 +64,18 @@ void Hdrmerge_bayer(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_ma
                     xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_2>& _src_mat2,
                     xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& _dst_mat,
                     short wr_hls[NO_EXPS * NPC * W_SIZE]) {
-// clang-format off
-	#pragma HLS ARRAY_PARTITION variable=wr_hls dim=1 block factor=NO_EXPS*NPC
+    int copy_wr_hls[NO_EXPS * NPC * W_SIZE];
+    for (int i = 0; i < (NO_EXPS * NPC * W_SIZE); i++) {
+        copy_wr_hls[i] = wr_hls[i];
+    }
+    if (USE_URAM) {
+#pragma HLS bind_storage variable = copy_wr_hls type = RAM_T2P impl = URAM
+#pragma HLS ARRAY_PARTITION variable = copy_wr_hls factor = NPC type = block dim = 1
+    } else {
+#pragma HLS ARRAY_PARTITION variable = copy_wr_hls dim = 1 block factor = NO_EXPS * NPC
+    }
+    // clang-format off
+
 // clang-format on	
 	unsigned short width = _src_mat1.cols >> XF_BITSHIFT(NPC);
 	unsigned short height = _src_mat1.rows;
@@ -101,8 +112,8 @@ HDRmerge_LOOP:
 			int index1 = (n*W_SIZE)+val1;
 			int index2 = ((n+1)*W_SIZE)+val2;
 			
-			short final_w1 =  (short)(wr_hls[index1]);
-			short final_w2 =  (short)(wr_hls[index2]);
+			short final_w1 =  (short)(copy_wr_hls[index1]);
+			short final_w2 =  (short)(copy_wr_hls[index2]);
 		
 			ap_fixed<STEP+STEP*2,STEP+STEP> val_1 = (ap_fixed<STEP+STEP*2,STEP+STEP>)((float)(final_w1 * val1)/16384);
 			ap_fixed<STEP+STEP*2,STEP+STEP> val_2 = (ap_fixed<STEP+STEP*2,STEP+STEP>)((float)(final_w2 * val2)/16384);
@@ -128,6 +139,7 @@ template <int SRC_T,
           int ROWS,
           int COLS,
           int NPC = 1,
+          int USE_URAM = 0,
           int NO_EXPS,
           int W_SIZE,
           int STREAMS = 2, 
@@ -146,7 +158,7 @@ void Hdrmerge_bayer_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _
     #pragma HLS ARRAY_PARTITION variable=wr_hls dim=1 complete
 // clang-format on	
 
-    Hdrmerge_bayer<SRC_T, DST_T, ROWS, COLS, NPC, NO_EXPS, W_SIZE, XFCVDEPTH_IN_1, XFCVDEPTH_IN_2, 
+    Hdrmerge_bayer<SRC_T, DST_T, ROWS, COLS, NPC, USE_URAM, NO_EXPS, W_SIZE, XFCVDEPTH_IN_1, XFCVDEPTH_IN_2, 
          XFCVDEPTH_OUT>(_src_mat1, _src_mat2, _dst_mat, wr_hls[stream_id]);     
 }	
    

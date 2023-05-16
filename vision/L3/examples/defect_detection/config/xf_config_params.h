@@ -63,7 +63,7 @@ typedef ap_uint<64> ap_uint64_t;
 #define L1NORM 1
 #define L2NORM 0
 
-#define XF_USE_URAM true
+#define XF_USE_URAM 0
 
 #define RGB 0
 #define GRAY 1

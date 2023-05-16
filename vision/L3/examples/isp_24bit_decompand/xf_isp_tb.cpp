@@ -20,30 +20,22 @@
 #include <bitset>
 #include <iostream>
 
-void bayerizeImage(cv::Mat img, cv::Mat& bayer_image, cv::Mat& cfa_output, unsigned short code) {
+void bayerizeImage(cv::Mat img, cv::Mat& cfa_output, unsigned short code) {
     for (int i = 0; i < img.rows; i++) {
         for (int j = 0; j < img.cols; j++) {
             cv::Vec3w in = img.at<cv::Vec3w>(i, j);
-            cv::Vec3w b;
-            b[0] = 0;
-            b[1] = 0;
-            b[2] = 0;
 
             if (code == 0) {            // BG
                 if ((i & 1) == 0) {     // even row
                     if ((j & 1) == 0) { // even col
-                        b[0] = in[0];
                         cfa_output.at<ushort>(i, j) = in[0];
                     } else { // odd col
-                        b[1] = in[1];
                         cfa_output.at<ushort>(i, j) = in[1];
                     }
                 } else {                // odd row
                     if ((j & 1) == 0) { // even col
-                        b[1] = in[1];
                         cfa_output.at<ushort>(i, j) = in[1];
                     } else { // odd col
-                        b[2] = in[2];
                         cfa_output.at<ushort>(i, j) = in[2];
                     }
                 }
@@ -51,18 +43,14 @@ void bayerizeImage(cv::Mat img, cv::Mat& bayer_image, cv::Mat& cfa_output, unsig
             if (code == 1) {            // GB
                 if ((i & 1) == 0) {     // even row
                     if ((j & 1) == 0) { // even col
-                        b[1] = in[1];
                         cfa_output.at<ushort>(i, j) = in[1];
                     } else { // odd col
-                        b[0] = in[0];
                         cfa_output.at<ushort>(i, j) = in[0];
                     }
                 } else {                // odd row
                     if ((j & 1) == 0) { // even col
-                        b[2] = in[2];
                         cfa_output.at<ushort>(i, j) = in[2];
                     } else { // odd col
-                        b[1] = in[1];
                         cfa_output.at<ushort>(i, j) = in[1];
                     }
                 }
@@ -70,18 +58,14 @@ void bayerizeImage(cv::Mat img, cv::Mat& bayer_image, cv::Mat& cfa_output, unsig
             if (code == 2) {            // GR
                 if ((i & 1) == 0) {     // even row
                     if ((j & 1) == 0) { // even col
-                        b[1] = in[1];
                         cfa_output.at<ushort>(i, j) = in[1];
                     } else { // odd col
-                        b[2] = in[2];
                         cfa_output.at<ushort>(i, j) = in[2];
                     }
                 } else {                // odd row
                     if ((j & 1) == 0) { // even col
-                        b[0] = in[0];
                         cfa_output.at<ushort>(i, j) = in[0];
                     } else { // odd col
-                        b[1] = in[1];
                         cfa_output.at<ushort>(i, j) = in[1];
                     }
                 }
@@ -89,23 +73,18 @@ void bayerizeImage(cv::Mat img, cv::Mat& bayer_image, cv::Mat& cfa_output, unsig
             if (code == 3) {            // RG
                 if ((i & 1) == 0) {     // even row
                     if ((j & 1) == 0) { // even col
-                        b[2] = in[2];
                         cfa_output.at<ushort>(i, j) = in[2];
                     } else { // odd col
-                        b[1] = in[1];
                         cfa_output.at<ushort>(i, j) = in[1];
                     }
                 } else {                // odd row
                     if ((j & 1) == 0) { // even col
-                        b[1] = in[1];
                         cfa_output.at<ushort>(i, j) = in[1];
                     } else { // odd col
-                        b[0] = in[0];
                         cfa_output.at<ushort>(i, j) = in[0];
                     }
                 }
             }
-            bayer_image.at<cv::Vec3w>(i, j) = b;
         }
     }
 }
@@ -202,12 +181,10 @@ int main(int argc, char** argv) {
 
     cfa_bayer_output.create(in_img.rows, in_img.cols, CV_16UC1);
     gamma_img.create(in_img.rows, in_img.cols, CV_16UC1);
-    cv::Mat color_cfa_bayer_output(in_img.rows, in_img.cols, in_img.type()); // Bayer pattern CFA output in color
 
     unsigned short bformat = XF_BAYER_PATTERN; // Bayer format BG-0; GB-1; GR-2; RG-3
 
-    bayerizeImage(in_img, color_cfa_bayer_output, cfa_bayer_output, bformat);
-    cv::imwrite("bayer_image.png", color_cfa_bayer_output);
+    bayerizeImage(in_img, cfa_bayer_output, bformat);
     cv::imwrite("cfa_output.png", cfa_bayer_output);
 
     int params[3][4][3] = {
@@ -270,6 +247,8 @@ int main(int argc, char** argv) {
         out_img.create(in_img.rows, in_img.cols, CV_16UC1);
         image_out_size_bytes = in_img.rows * in_img.cols * 1 * sizeof(unsigned short);
     }
+
+    out_img_ir.create(in_img.rows, in_img.cols, CV_16UC1);
     size_t vec_in_size_bytes = 256 * 3 * sizeof(unsigned char);
 
     image_in_size_bytes = in_img.rows * in_img.cols * sizeof(unsigned short);

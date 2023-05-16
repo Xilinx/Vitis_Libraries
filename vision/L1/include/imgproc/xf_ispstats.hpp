@@ -544,7 +544,8 @@ void ispStats(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src,
                           NUM_OUT_CH>(_src, stats_array, height, width, roi_tlx, roi_tly, roi_brx, roi_bry,
                                       zone_col_num, zone_row_num, inputMin, inputMax, outputMin, outputMax);
 
-    } else if (((SRC_T == XF_8UC1) && (NUM_OUT_CH == 3)) || ((SRC_T == XF_16UC1) && (NUM_OUT_CH == 3))) {
+    } else if (((SRC_T == XF_8UC1) && (NUM_OUT_CH == 3)) || ((SRC_T == XF_16UC1) && (NUM_OUT_CH == 3)) ||
+               ((SRC_T == XF_14UC1) && (NUM_OUT_CH == 3))) {
         xfSTATSKernel_bayer<SRC_T, ROWS, COLS, MAX_ZONES, STATS_SIZE, XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN,
                             XF_WORDWIDTH(SRC_T, NPC), COLS, XF_CHANNELS(SRC_T, NPC), NUM_OUT_CH>(
             _src, stats_array, height, width, roi_tlx, roi_tly, roi_brx, roi_bry, zone_col_num, zone_row_num, inputMin,

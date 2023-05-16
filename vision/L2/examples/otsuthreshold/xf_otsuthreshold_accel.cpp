@@ -39,7 +39,7 @@ void otsuthreshold_accel(ap_uint<INPUT_PTR_WIDTH>* img_in, unsigned char* Otsuva
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN>(img_in, imgInput);
 
     // Run xfOpenCV kernel:
-    xf::cv::OtsuThreshold<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN>(imgInput, *Otsuval);
+    xf::cv::OtsuThreshold<IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_USE_URAM, XF_CV_DEPTH_IN>(imgInput, *Otsuval);
 
     return;
 } // End of kernel

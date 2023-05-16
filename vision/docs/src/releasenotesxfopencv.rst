@@ -30,7 +30,10 @@ New features and functions
 
 	• Updates:
 		• Added new functions in ISP-Multistream pipeline
+		• Added NPPC 2,4,8 support for RGBIR function
+		• Added URAM support for AWB, AEC, 3DLUT, Otsu-Threshold, HDRMerge, Histogram, Equalization
 		• Improved performance and utilization for ISP Stats
+		• Fixed the missing template parameters issue in 'axiStrm2xfMat' and 'xfMat2axiStrm' functions
 
 	• Lib Infra Changes:
 		• Renamed all existing testcases and added new cases in tests directory of L1, L2.
@@ -53,6 +56,8 @@ Known issues
  
 	• Vitis GUI projects on RHEL83 and CEntOS82 may fail because of a lib conflict in the LD_LIBRARY_PATH setting. User needs to remove ${env_var:LD_LIBRARY_PATH} from the project environment settings for the function to build successfully.
 	• rgbir2bayer, isppipeline_rgbir PL functions are not supplied with input images
+	• lkdensepyroptflow fails to meet timing when URAM is enabled
+	• AWB, ISPStats output will not match with reference only on VCK190, because of a known XRT issue
 
 
 

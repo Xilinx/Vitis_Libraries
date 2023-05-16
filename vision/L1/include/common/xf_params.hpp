@@ -250,6 +250,9 @@ enum _wb_type {
     XF_WB_SIMPLE = 1,
 };
 
+enum multistream {
+    SLICES_DEFAULT = 1,
+};
 // Phase computation
 enum _phase_params { XF_RADIANS = 0, XF_DEGREES = 1 };
 typedef _phase_params XF_phase_params_e;

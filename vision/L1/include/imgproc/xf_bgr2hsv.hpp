@@ -98,6 +98,7 @@ void bgr2hsv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
         591,  588,    585,   582,   580,   577,   574,   572,   569,   566,   564,   561,   559,   556,  554,  551,
         549,  546,    544,   541,   539,   537,   534,   532,   530,   527,   525,   523,   521,   518,  516,  514,
         512,  510,    508,   506,   504,   502,   500,   497,   495,   493,   492,   490,   488,   486,  484,  482};
+#pragma HLS ARRAY_PARTITION variable = hdiv complete dim = 1
     int sdiv[256] = {
         0,     1044480, 522240, 348160, 261120, 208896, 174080, 149211, 130560, 116053, 104448, 94953, 87040, 80345,
         74606, 69632,   65280,  61440,  58027,  54973,  52224,  49737,  47476,  45412,  43520,  41779, 40172, 38684,
@@ -118,7 +119,7 @@ void bgr2hsv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
         4663,  4642,    4622,   4601,   4581,   4561,   4541,   4522,   4502,   4483,   4464,   4445,  4426,  4407,
         4389,  4370,    4352,   4334,   4316,   4298,   4281,   4263,   4246,   4229,   4212,   4195,  4178,  4161,
         4145,  4128,    4112,   4096};
-
+#pragma HLS ARRAY_PARTITION variable = sdiv complete dim = 1
     XF_SNAME(XF_WORDWIDTH(SRC_T, NPC)) in_pix;
     XF_SNAME(XF_WORDWIDTH(SRC_T, NPC)) out_pix;
     ap_uint<8> r, g, b;
@@ -131,6 +132,7 @@ void bgr2hsv(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src_mat,
     ap_uint<8> diff;
     int vr, vg;
     const int STEP = XF_DTPIXELDEPTH(SRC_T, NPC);
+
     for (uint16_t row = 0; row < rows; row++) {
 // clang-format off
 #pragma HLS LOOP_TRIPCOUNT max=ROWS

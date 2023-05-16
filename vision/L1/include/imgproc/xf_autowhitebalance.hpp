@@ -988,6 +988,7 @@ template <int SRC_T,
           int ROWS,
           int COLS,
           int NPC = 1,
+          int USE_URAM = 0,
           int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
           int DEPTH_SRC,
@@ -1042,9 +1043,15 @@ INITIALIZE_HIST:
 
     // Temporary array used while computing histogram
     ap_uint<32> tmp_hist[XF_NPIXPERCYCLE(NPC) * XF_CHANNELS(SRC_T, NPC)][HISTSIZE];
-// clang-format off
-#pragma HLS bind_storage variable=tmp_hist type=RAM_T2P impl=BRAM
-#pragma HLS ARRAY_PARTITION variable=tmp_hist complete dim=1
+    // clang-format off
+
+if(USE_URAM){
+    #pragma HLS bind_storage variable=tmp_hist type=RAM_T2P impl=URAM
+    #pragma HLS ARRAY_PARTITION variable=tmp_hist complete dim=1
+}else{
+    #pragma HLS bind_storage variable=tmp_hist type=RAM_T2P impl=BRAM
+    #pragma HLS ARRAY_PARTITION variable=tmp_hist complete dim=1
+}
     // clang-format on
     XF_TNAME(SRC_T, NPC) in_buf, in_buf1, temp_buf;
 
@@ -1358,6 +1365,7 @@ template <int SRC_T,
           int ROWS,
           int COLS,
           int NPC = 1,
+          int USE_URAM = 0,
           int WB_TYPE,
           int HISTSIZE,
           int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
@@ -1374,8 +1382,9 @@ void AWBhistogram(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src1,
 #pragma HLS INLINE OFF
     // clang-format on
 
-    AWBhistogramkernel_imp<SRC_T, SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1, XF_DEPTH(SRC_T, NPC), 1,
-                           HISTSIZE>(src1, src2, histogram, thresh, inputMin, inputMax, outputMin, outputMax);
+    AWBhistogramkernel_imp<SRC_T, SRC_T, ROWS, COLS, NPC, USE_URAM, XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1,
+                           XF_DEPTH(SRC_T, NPC), 1, HISTSIZE>(src1, src2, histogram, thresh, inputMin, inputMax,
+                                                              outputMin, outputMax);
 }
 
 template <int SRC_T,

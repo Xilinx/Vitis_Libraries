@@ -39,8 +39,8 @@ void aec_kernel(ap_uint<INPUT_PTR_WIDTH>* src,
 
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1>(src, imgInput);
 
-    xf::cv::autoexposurecorrection<IN_TYPE, IN_TYPE, SIN_CHANNEL_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1,
-                                   XF_CV_DEPTH_OUT_1>(imgInput, imgOutput, hist0, hist1);
+    xf::cv::autoexposurecorrection<IN_TYPE, IN_TYPE, SIN_CHANNEL_TYPE, HEIGHT, WIDTH, NPPCX, XF_USE_URAM,
+                                   XF_CV_DEPTH_IN_1, XF_CV_DEPTH_OUT_1>(imgInput, imgOutput, hist0, hist1);
     xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT_1>(imgOutput, dst);
 }
 extern "C" {

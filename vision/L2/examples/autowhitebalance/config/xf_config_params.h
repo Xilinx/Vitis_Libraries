@@ -39,7 +39,7 @@
 #define OUT_TYPE XF_8UC3
 
 #define WB_TYPE XF_WB_GRAY
-
+#define XF_USE_URAM 0
 #define T_8U 1
 #define T_16U 0
 #define T_12U 0

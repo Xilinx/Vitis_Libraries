@@ -31,7 +31,7 @@
 #define XF_CV_DEPTH_OUT 2
 
 #define NPPCX XF_NPPC1
-
+#define XF_USE_URAM 0
 #define T_8U 1
 #define T_16U 0
 

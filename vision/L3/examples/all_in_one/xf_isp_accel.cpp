@@ -99,8 +99,9 @@ void HDR_extract_merge(xf::cv::Mat<SRC_T, MAX_ROWS_HEIGHT, MAX_COLS_WIDTH, NPC, 
     xf::cv::extractExposureFrames<IN_TYPE, NUM_V_BLANK_LINES, NUM_H_BLANK, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_USE_URAM,
                                   XFCVDEPTH_imgInput, XFCVDEPTH_imgInput, XFCVDEPTH_imgInput>(imgInput1, LEF_Img,
                                                                                               SEF_Img);
-    xf::cv::Hdrmerge_bayer<IN_TYPE, IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, NO_EXPS, W_B_SIZE, XFCVDEPTH_imgInput,
-                           XFCVDEPTH_imgInput, XFCVDEPTH_hdr_out>(LEF_Img, SEF_Img, hdr_out, wr_hls);
+    xf::cv::Hdrmerge_bayer<IN_TYPE, IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_USE_URAM, NO_EXPS, W_B_SIZE,
+                           XFCVDEPTH_imgInput, XFCVDEPTH_imgInput, XFCVDEPTH_hdr_out>(LEF_Img, SEF_Img, hdr_out,
+                                                                                      wr_hls);
 }
 
 template <int SRC_T, int DST_T, int ROWS, int COLS, int NPC = 1, int XFCVDEPTH_demosaic_out, int XFCVDEPTH_ltm_in>
@@ -128,7 +129,7 @@ void fifo_awb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_demosaic_out>& demos
     // clang-format on
 
     if (WB_TYPE) {
-        xf::cv::AWBhistogram<OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, WB_TYPE, HIST_SIZE,
+        xf::cv::AWBhistogram<OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_USE_URAM, WB_TYPE, HIST_SIZE,
                              XFCVDEPTH_demosaic_out, XFCVDEPTH_ltm_in>(demosaic_out, impop, hist0, thresh, inputMin,
                                                                        inputMax, outputMin, outputMax);
         xf::cv::AWBNormalization<OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, WB_TYPE, HIST_SIZE,
@@ -187,7 +188,7 @@ void function_aec(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_rggb_out_aec>& r
     // clang-format on
     if (USE_AEC) {
         xf::cv::autoexposurecorrection_sin<IN_TYPE, IN_TYPE, AEC_SIN_CHANNEL_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX,
-                                           XFCVDEPTH_rggb_out_aec, XFCVDEPTH_aec_out, AEC_HIST_SIZE>(
+                                           XF_USE_URAM, XFCVDEPTH_rggb_out_aec, XFCVDEPTH_aec_out, AEC_HIST_SIZE>(
             rggb_out, aec_out, aec_hist0, aec_hist1, aec_pawb, aec_inputMin, aec_inputMax, aec_outputMin,
             aec_outputMax);
 
@@ -537,8 +538,8 @@ void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,     /* Array2xfMat */
     xf::cv::blackLevelCorrection<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, 16, 15, 1, XF_CV_DEPTH_aec_out,
                                  XF_CV_DEPTH_blc_out>(aec_out, blc_out, BLACK_LEVEL, mul_fact);
 
-    xf::cv::badpixelcorrection<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, 0, 0, XF_CV_DEPTH_blc_out, XF_CV_DEPTH_bpc_out>(
-        blc_out, bpc_out);
+    xf::cv::badpixelcorrection<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, 0, XF_USE_URAM, XF_CV_DEPTH_blc_out,
+                               XF_CV_DEPTH_bpc_out>(blc_out, bpc_out);
 
     function_degamma<IN_TYPE, IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_bpc_out, XF_CV_DEPTH_dgamma_out,
                      DEGAMMA_KP>(bpc_out, dgamma_out, params_degamma, bayerp, height, width);
@@ -549,8 +550,8 @@ void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,     /* Array2xfMat */
     xf::cv::gaincontrol<XF_BAYER_PATTERN, IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_lsc_out,
                         XF_CV_DEPTH_gain_out>(LscOut, gain_out, rgain, bgain);
 
-    xf::cv::demosaicing<XF_BAYER_PATTERN, IN_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, 0, XF_CV_DEPTH_gain_out,
-                        XF_CV_DEPTH_demosaic_out>(gain_out, demosaic_out);
+    xf::cv::demosaicing<XF_BAYER_PATTERN, IN_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_USE_URAM,
+                        XF_CV_DEPTH_gain_out, XF_CV_DEPTH_demosaic_out>(gain_out, demosaic_out);
 
     function_awb<OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_demosaic_out, XF_CV_DEPTH_awb_out>(
         demosaic_out, awb_out, hist0, hist1, gain0, gain1, height, width, thresh);

@@ -30,7 +30,7 @@
 #define XF_CV_DEPTH_IN_1 2
 #define XF_CV_DEPTH_IN_2 2
 #define XF_CV_DEPTH_OUT 2
-
+#define XF_USE_URAM 0
 #define NPPCX XF_NPPC1
 
 #define T_8U 0

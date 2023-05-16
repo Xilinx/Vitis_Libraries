@@ -104,7 +104,7 @@
 #define SIN_CHANNEL_TYPE XF_8UC1
 
 #define WB_TYPE XF_WB_SIMPLE
-
+#define XF_USE_URAM 0
 #define AEC_EN 0
 
 #define XF_AXI_GBR 1

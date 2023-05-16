@@ -37,6 +37,7 @@
 
 #define IN_TYPE XF_8UC3
 #define OUT_TYPE XF_8UC3
+#define XF_USE_URAM 0
 
 #define WB_TYPE XF_WB_GRAY
 

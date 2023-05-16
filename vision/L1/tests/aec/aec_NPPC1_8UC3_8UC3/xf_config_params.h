@@ -37,6 +37,7 @@
 
 #define IN_TYPE XF_8UC3
 #define OUT_TYPE XF_8UC3
+#define XF_USE_URAM 0
 
 #if T_8U
 #define SIN_CHANNEL_TYPE XF_8UC1

@@ -114,6 +114,7 @@ XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ 
 endif # 3.2
 endif # 3
 endif
+XPLATFORM := $(firstword $(XPLATFORM))
 
 define MSG_PLATFORM
 No platform matched pattern '$(PLATFORM)'.

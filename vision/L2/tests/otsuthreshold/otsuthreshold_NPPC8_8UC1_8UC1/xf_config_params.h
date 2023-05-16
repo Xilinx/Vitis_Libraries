@@ -26,7 +26,7 @@
 #define HEIGHT 2160
 #define WIDTH 3840
 #define XF_CV_DEPTH_IN 2
-
+#define XF_USE_URAM 0
 #define NPPCX XF_NPPC8
 #define IN_TYPE XF_8UC1
 #define OUT_TYPE XF_8UC1

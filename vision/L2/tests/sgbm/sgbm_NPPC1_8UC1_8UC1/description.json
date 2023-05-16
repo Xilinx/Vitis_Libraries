@@ -122,6 +122,14 @@
                     ]
                 }
             },
+            "v++": {
+                "linker": {
+                    "ldclflags": [
+                        "--vivado.impl.strategies Performance_Explore"
+                    ]
+                }
+
+            },
 			"containers": [
 				{
 					"name": "krnl_sgbm", 

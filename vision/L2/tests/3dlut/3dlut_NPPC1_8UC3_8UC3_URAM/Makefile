@@ -188,7 +188,7 @@ endif
 LIBRARY_PATH := $(OPENCV_LIB):$(LD_LIBRARY_PATH):$(XILINX_XRT)/lib
 endif
 ifeq ($(TARGET),$(filter $(TARGET),hw))
-HOST_ARGS :=  $(XFLIB_DIR)/data/4k.jpg $(XFLIB_DIR)/data/input-lut-33.txt
+HOST_ARGS :=  $(XFLIB_DIR)/data/HD.jpg $(XFLIB_DIR)/data/input-lut-33.txt
 ifneq ($(HOST_ARCH), x86)
 PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 endif
@@ -255,7 +255,7 @@ endif
 	@echo 'fi' >> $(RUN_SCRIPT)
 	@echo 'echo "INFO: Embedded host run completed."' >> $(RUN_SCRIPT)
 	@echo 'exit $$return_code' >> $(RUN_SCRIPT)
-DATA_FILE := $(XFLIB_DIR)/data/input-lut-33.txt $(XFLIB_DIR)/data/128x128.png $(XFLIB_DIR)/data/4k.jpg $(custom_data_file)
+DATA_FILE := $(XFLIB_DIR)/data/input-lut-33.txt $(XFLIB_DIR)/data/128x128.png $(XFLIB_DIR)/data/HD.jpg $(custom_data_file)
 DATA_DIR := $(custom_data_dir)
 SD_FILES += $(RUN_SCRIPT)
 SD_FILES += $(EXE_FILE)

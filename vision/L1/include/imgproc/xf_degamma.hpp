@@ -190,7 +190,7 @@ void degamma(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
             }
         }
     }
-#pragma HLS ARRAY_PARTITION variable = copy_params complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = copy_params complete dim = 0
 
     xFcompute<SRC_T, DST_T, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT, (COLS >> (XF_BITSHIFT(NPC))), N>(
         src, dst, copy_params, bayerp, rows, cols_shifted);

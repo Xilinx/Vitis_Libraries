@@ -81,9 +81,9 @@ void fifo_awb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& demosaic_out,
 #pragma HLS DATAFLOW
     // clang-format on
     if (WB_TYPE) {
-        xf::cv::AWBhistogram<OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, WB_TYPE, HIST_SIZE, XFCVDEPTH_IN,
-                             XFCVDEPTH_OUT>(demosaic_out, impop, hist0, thresh, inputMin, inputMax, outputMin,
-                                            outputMax);
+        xf::cv::AWBhistogram<OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_USE_URAM, WB_TYPE, HIST_SIZE,
+                             XFCVDEPTH_IN, XFCVDEPTH_OUT>(demosaic_out, impop, hist0, thresh, inputMin, inputMax,
+                                                          outputMin, outputMax);
         xf::cv::AWBNormalization<OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, WB_TYPE, HIST_SIZE, XFCVDEPTH_OUT,
                                  XFCVDEPTH_OUT>(impop, ltm_in, hist1, thresh, inputMin, inputMax, outputMin, outputMax);
     } else {
@@ -168,8 +168,9 @@ void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp1,
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_IN_DR2>(img_inp2,
                                                                                                      imgInputhdr2);
 
-    xf::cv::Hdrmerge_bayer<IN_TYPE, IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, NO_EXPS, W_B_SIZE, XF_CV_DEPTH_IN_DR1,
-                           XF_CV_DEPTH_IN_DR2, XF_CV_DEPTH_IN_1>(imgInputhdr1, imgInputhdr2, imgInput1, wr_hls);
+    xf::cv::Hdrmerge_bayer<IN_TYPE, IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_USE_URAM, NO_EXPS, W_B_SIZE,
+                           XF_CV_DEPTH_IN_DR1, XF_CV_DEPTH_IN_DR2, XF_CV_DEPTH_IN_1>(imgInputhdr1, imgInputhdr2,
+                                                                                     imgInput1, wr_hls);
 
     xf::cv::blackLevelCorrection<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, 16, 15, 1, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2>(
         imgInput1, imgInput2, BLACK_LEVEL, mul_fact);

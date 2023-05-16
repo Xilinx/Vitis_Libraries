@@ -33,7 +33,7 @@
 
 #define IN_TYPE XF_8UC1
 #define OUT_TYPE XF_8UC1
-
+#define XF_USE_URAM 0
 #define INPUT_PTR_WIDTH 8
 #define OUTPUT_PTR_WIDTH 8
 

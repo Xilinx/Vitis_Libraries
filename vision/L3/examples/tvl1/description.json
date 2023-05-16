@@ -30,6 +30,14 @@
                     ],
                     "options" : "-l opencv_optflow"
                 }
+            },
+            "v++": {
+                "linker": {
+                    "ldclflags": [
+                        "--vivado.impl.strategies Performance_Explore"
+                    ]
+                }
+
             }
         }, 
         "aws-vu9p-f1": {

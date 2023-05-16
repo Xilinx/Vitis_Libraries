@@ -28,7 +28,7 @@
 #define WIDTH 128
 
 #define XF_CV_DEPTH_IN 2
-
+#define XF_USE_URAM 0
 // Resolve optimization type:
 
 #define GRAY 0

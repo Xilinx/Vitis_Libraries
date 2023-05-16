@@ -306,10 +306,15 @@ template <int TYPE,
           int NPPC,
           int XFCVDEPTH_IN_0 = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
-          int USE_URAM>
+          int USE_URAM = 0,
+          int STREAMS = 2,
+          int SLICES = 2>
 void xf_ir_bilinear_multi(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN_0>& _src,
                           xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN_1>& _full_ir,
-                          unsigned short bformat) {
+                          unsigned short bformat,
+                          int slice_id,
+                          int stream_id,
+                          XF_TNAME(TYPE, NPPC) rgbir_ir_buffs[STREAMS][2][COLS >> XF_BITSHIFT(NPPC)]) {
 #ifndef __SYNTHESIS__
 
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && "ROWS and COLS should be greater than input image");
@@ -330,7 +335,7 @@ void xf_ir_bilinear_multi(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN_0>& _
     if (USE_URAM) {
 // clang-format off
 #pragma HLS bind_storage variable=linebuffer type=RAM_T2P impl=URAM
-#pragma HLS array_reshape variable=linebuffer dim=1 factor=4 cyclic
+#pragma HLS array_reshape variable=linebuffer dim=1 factor=3 cyclic
         // clang-format on
     } else {
 // clang-format off
@@ -345,6 +350,7 @@ void xf_ir_bilinear_multi(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN_0>& _
     // clang-format on
 
     int lineStore = 1, read_index = 0, write_index = 0;
+    int demo_row_cnt_rd = 0, demo_row_cnt_wr = 0, demo_col_cnt_rd = 0, demo_col_cnt_wr = 0;
 LineBuffer:
     for (int i = 0; i < FSIZE - 1; i++) {
 // clang-format off
@@ -355,13 +361,19 @@ LineBuffer:
 #pragma HLS LOOP_TRIPCOUNT min=COLS/NPPC max=COLS/NPPC
 #pragma HLS pipeline ii=1
             // clang-format on
-            XF_TNAME(TYPE, NPPC) tmp = 0;
-            if (i == 0) {
-                tmp = 0;
-            } else {
-                tmp = _src.read(read_index++);
+            if (slice_id == 0) { // The beginning rows of full image
+                XF_TNAME(TYPE, NPPC) tmp = 0;
+                if (i == 0) {
+                    tmp = 0;
+                } else {
+                    tmp = _src.read(read_index++);
+                }
+                linebuffer[i][j] = tmp;
             }
-            linebuffer[i][j] = tmp;
+            // Condition when last 2 rows need to be read from previous slice
+            else {
+                linebuffer[i][j] = rgbir_ir_buffs[stream_id][i][j];
+            }
         }
     }
     ap_uint<3> line0 = 1, line1 = 0;
@@ -370,8 +382,16 @@ LineBuffer:
     XF_TNAME(TYPE, NPPC) tmp = 0;
     unsigned short col_wo_npc = 0;
 
+    // Last slice has to process left over rows accumulated from previous slices
+    int strm_rows = 0;
+    if (SLICES > 1 && slice_id == SLICES - 1) {
+        strm_rows = _src.rows + 1;
+    } else {
+        strm_rows = _src.rows;
+    }
+
 Row_Loop:
-    for (int i = 0; i < _src.rows; i++) {
+    for (int i = 0; i < strm_rows; i++) {
 // clang-format off
 #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         // clang-format on
@@ -420,10 +440,38 @@ Row_Loop:
 #pragma HLS LOOP_FLATTEN OFF
             // clang-format on
 
-            if ((i < _src.rows - 1) && j < ((_src.cols) >> XF_BITSHIFT(NPPC))) {
-                tmp = _src.read(read_index++); // Reading 5th row element
-            } else {
-                tmp = 0;
+            if (slice_id == 0) { // First slice
+                if ((i < _src.rows - 1) && (j < ((_src.cols) >> XF_BITSHIFT(NPPC)))) {
+                    tmp = _src.read(read_index++); // Reading 5th row element
+                    // Condition when last 2 rows need to be stored for next slice
+                    if ((i > _src.rows - 4) && (j < ((_src.cols) >> XF_BITSHIFT(NPPC)))) {
+                        rgbir_ir_buffs[stream_id][demo_row_cnt_wr][demo_col_cnt_wr++] = tmp;
+                        if (demo_col_cnt_wr == ((_src.cols) >> XF_BITSHIFT(NPPC))) {
+                            demo_col_cnt_wr = 0;
+                            demo_row_cnt_wr++;
+                        }
+                    }
+                } else {
+                    tmp = 0;
+                }
+            } else if (slice_id != SLICES - 1) { // Other than first and last slices
+                if (j < ((_src.cols) >> XF_BITSHIFT(NPPC))) {
+                    tmp = _src.read(read_index++);
+                    // Condition when last 2 rows need to be stored for next slice
+                    if (i >= _src.rows - 2) {
+                        rgbir_ir_buffs[stream_id][demo_row_cnt_wr][demo_col_cnt_wr++] = tmp;
+                        if (demo_col_cnt_wr == ((_src.cols) >> XF_BITSHIFT(NPPC))) {
+                            demo_col_cnt_wr = 0;
+                            demo_row_cnt_wr++;
+                        }
+                    }
+                }
+            } else { //	Last slice
+                if ((i < _src.rows) && (j < ((_src.cols) >> XF_BITSHIFT(NPPC)))) {
+                    tmp = _src.read(read_index++);
+                } else {
+                    tmp = 0;
+                }
             }
 
             // Fill last row last element(s)
@@ -440,32 +488,30 @@ Row_Loop:
 
             short int pstep = XF_PIXELWIDTH(TYPE, NPPC);
             if (j >= _ECPR) {
-                for (int loop = 0; loop < NPPC; loop++) {
-                    //					col_wo_npc = j * NPPC + loop;
-                    candidateCol = j * NPPC - (_ECPR * NPPC) + loop;
+                // Prohibit writing last row's o/p in first slice
+                if ((SLICES == 1) || (!((slice_id == 0) && (i > (_src.rows - 2))))) {
+                    for (int loop = 0; loop < NPPC; loop++) {
+                        candidateCol = j * NPPC - (_ECPR * NPPC) + loop;
 
-                    if (bformat == XF_BAYER_GR) {
-                        candidateRow = i + 1;
-                        candidateCol = j * NPPC - (_ECPR * NPPC) + 2 + loop;
+                        if (bformat == XF_BAYER_GR) {
+                            candidateRow = i + 1;
+                            candidateCol = j * NPPC - (_ECPR * NPPC) + 2 + loop;
+                        }
+
+                        bilinearProcess_multi<__IR_BWIDTH, TYPE, ROWS, COLS, NPPC>(imgblock, candidateRow, candidateCol,
+                                                                                   out_pix, loop, bformat);
+                        comb_out_pix[loop] = out_pix;
                     }
 
-                    /*		            if(col_wo_npc == 1923){
-                                a = 1;
-                            }*/
+                    for (int ploop = 0; ploop < NPPC; ploop++) {
+                        packed_res_pixel.range(pstep + pstep * ploop - 1, pstep * ploop) = comb_out_pix[ploop];
+                    }
 
-                    bilinearProcess_multi<__IR_BWIDTH, TYPE, ROWS, COLS, NPPC>(imgblock, candidateRow, candidateCol,
-                                                                               out_pix, loop, bformat);
-                    comb_out_pix[loop] = out_pix;
+                    // Write the data out to DDR
+                    // .........................
+
+                    _full_ir.write(write_index++, packed_res_pixel);
                 }
-
-                for (int ploop = 0; ploop < NPPC; ploop++) {
-                    packed_res_pixel.range(pstep + pstep * ploop - 1, pstep * ploop) = comb_out_pix[ploop];
-                }
-
-                // Write the data out to DDR
-                // .........................
-
-                _full_ir.write(write_index++, packed_res_pixel);
             }
 
             // Left-shift the elements in imgblock by NPPC
@@ -610,6 +656,8 @@ template <int INTYPE,
           int ROWS,
           int COLS,
           int NPPC = 1,
+          int STREAMS = 2,
+          int SLICES = 2,
           int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
@@ -617,19 +665,42 @@ void weightedSub_multi(const char weights[4],
                        xf::cv::Mat<INTYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN_1>& _src1,
                        xf::cv::Mat<INTYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN_2>& _src2,
                        xf::cv::Mat<INTYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT>& _dst,
-                       unsigned short bformat) {
+                       XF_TNAME(INTYPE, NPPC) rgbir_wgt_buffs[STREAMS][COLS >> XF_BITSHIFT(NPPC)],
+                       unsigned short height,
+                       unsigned short bformat,
+                       int slice_id,
+                       int stream_id) {
     ap_uint<4> wgts[4] = {0};
     for (int i = 0; i < 4; i++) {
         wgts[i] = weights[i];
     }
 #pragma HLS INLINE OFF
-    int rd_index = 0, wr_index = 0;
-//    int a =0;
+    int rd_index = 0, rd_index_str = 0, rd_index1 = 0, wr_index = 0;
+
+    int strm_rows = 0;
+
+    // Iterating 1 extra row for in-between
+    // slices, as the 1st row of rggb is read from stored buffer
+    // and last row to be stored back
+    if (SLICES > 1 && slice_id != SLICES - 1 && slice_id != 0) {
+        strm_rows = height + 1;
+    }
+
+    // Last slice will have rggb produce 1 extra row
+    // and IR produce 2 extra rows which evens out
+    // no.of rows diff in previous slices
+    else if (SLICES > 1 && slice_id == SLICES - 1) {
+        strm_rows = height + 1;
+    } else {
+        strm_rows = height;
+    }
+
 ROW_LOOP_COPYR:
-    for (unsigned short row = 0; row < _src1.rows; row++) {
+    for (unsigned short row = 0; row < strm_rows; row++) {
 // clang-format off
 #pragma HLS LOOP_TRIPCOUNT min=1 max=ROWS
 #pragma HLS LOOP_FLATTEN OFF
+
     // clang-format on
     COL_LOOP_COPYR:
         for (unsigned short col = 0, count = 0; col<_src1.cols>> XF_BITSHIFT(NPPC); col++) {
@@ -637,61 +708,76 @@ ROW_LOOP_COPYR:
 #pragma HLS LOOP_TRIPCOUNT min=1 max=COLS
 #pragma HLS PIPELINE II=1
             // clang-format on
-            XF_TNAME(INTYPE, NPPC) inVal1 = _src1.read(rd_index);
-            XF_TNAME(INTYPE, NPPC) inVal2 = _src2.read(rd_index++);
-            XF_TNAME(INTYPE, NPPC) outVal = 0;
-            unsigned short tmp1 = 0;
 
-            ap_int<17> tmp2 = 0;
-            ap_uint<8> step = XF_DTPIXELDEPTH(INTYPE, NPPC);
-            for (int iter = 0; iter < NPPC; iter++) {
+            // For all slices excpet last slice, store
+            // last row of rggb output, as IR output has 1 less row
+            if ((SLICES > 1) && (slice_id != SLICES - 1) && (row == _src1.rows - 1)) {
+                rgbir_wgt_buffs[stream_id][col] = _src1.read(rd_index_str++);
+            } else {
+                XF_TNAME(INTYPE, NPPC) inVal1 = 0;
+                // Read first row from stored buffer for all
+                // slices except first
+                if ((slice_id != 0) && (row == 0)) {
+                    inVal1 = rgbir_wgt_buffs[stream_id][col];
+                } else {
+                    inVal1 = _src1.read(rd_index1++);
+                }
+
+                XF_TNAME(INTYPE, NPPC) inVal2 = _src2.read(rd_index++);
+                XF_TNAME(INTYPE, NPPC) outVal = 0;
+                unsigned short tmp1 = 0;
+
+                ap_int<17> tmp2 = 0;
+                ap_uint<8> step = XF_DTPIXELDEPTH(INTYPE, NPPC);
+                for (int iter = 0; iter < NPPC; iter++) {
 #pragma HLS LOOP_TRIPCOUNT min = 1 max = NPPC
 #pragma HLS LOOP_FLATTEN OFF
-                XF_CTUNAME(INTYPE, NPPC) extractVal2 = inVal2.range(step * iter + step - 1, step * iter);
-                XF_CTUNAME(INTYPE, NPPC) extractVal1 = inVal1.range(step * iter + step - 1, step * iter);
-                unsigned short col_wnpc = col * NPPC + iter;
+                    XF_CTUNAME(INTYPE, NPPC) extractVal2 = inVal2.range(step * iter + step - 1, step * iter);
+                    XF_CTUNAME(INTYPE, NPPC) extractVal1 = inVal1.range(step * iter + step - 1, step * iter);
+                    unsigned short col_wnpc = col * NPPC + iter;
 
-                if (bformat == XF_BAYER_GR) {
-                    if ((((row & 0x0001) == 0) && ((col_wnpc & 0x0001) == 0)) ||
-                        (((row & 0x0001) == 1) && ((col_wnpc & 0x0001) == 1))) { // G Pixel
-                        tmp1 = extractVal2 >> wgts[0];                           // G has medium level of reduced weight
-                    } else if ((((row & 0x0001) == 0) && ((col_wnpc & 0x0001) == 1))) { // R Pixel
-                        tmp1 = extractVal2 >> wgts[1]; // R has lowest level of reduced weight
-                    } else if (((((row - 1) % 4) == 0) && ((col_wnpc % 4) == 0)) ||
-                               ((((row + 1) % 4) == 0) && (((col_wnpc - 2) % 4) == 0))) { // B Pixel
-                        tmp1 = extractVal2 >> wgts[2]; // B has low level of reduced weight
-                    } else if ((((((row - 1) % 4)) == 0) && (((col_wnpc - 2) % 4) == 0)) ||
-                               (((((row + 1) % 4)) == 0) && (((col_wnpc) % 4) == 0))) { // Calculated B Pixel
-                        tmp1 = extractVal2 >> wgts[3]; // B has highest level of reduced weight
+                    if (bformat == XF_BAYER_GR) {
+                        if ((((row & 0x0001) == 0) && ((col_wnpc & 0x0001) == 0)) ||
+                            (((row & 0x0001) == 1) && ((col_wnpc & 0x0001) == 1))) { // G Pixel
+                            tmp1 = extractVal2 >> wgts[0]; // G has medium level of reduced weight
+                        } else if ((((row & 0x0001) == 0) && ((col_wnpc & 0x0001) == 1))) { // R Pixel
+                            tmp1 = extractVal2 >> wgts[1]; // R has lowest level of reduced weight
+                        } else if (((((row - 1) % 4) == 0) && ((col_wnpc % 4) == 0)) ||
+                                   ((((row + 1) % 4) == 0) && (((col_wnpc - 2) % 4) == 0))) { // B Pixel
+                            tmp1 = extractVal2 >> wgts[2]; // B has low level of reduced weight
+                        } else if ((((((row - 1) % 4)) == 0) && (((col_wnpc - 2) % 4) == 0)) ||
+                                   (((((row + 1) % 4)) == 0) && (((col_wnpc) % 4) == 0))) { // Calculated B Pixel
+                            tmp1 = extractVal2 >> wgts[3]; // B has highest level of reduced weight
+                        }
+                        if ((wgts[0] == 6) || (wgts[1] == 6) || (wgts[2] == 6) || (wgts[3] == 6)) {
+                            tmp1 = 0;
+                        }
                     }
-                    if ((wgts[0] == 6) || (wgts[1] == 6) || (wgts[2] == 6) || (wgts[3] == 6)) {
-                        tmp1 = 0;
+                    if (bformat == XF_BAYER_BG) {
+                        if ((((row & 0x0001) == 0) && ((col_wnpc & 0x0001) == 1)) ||
+                            (((row & 0x0001) == 1) && ((col_wnpc & 0x0001) == 0))) { // G Pixel
+                            tmp1 = extractVal2 >> wgts[0]; // G has medium level of reduced weight
+                        } else if ((((row & 0x0001) == 1) && ((col_wnpc & 0x0001) == 1))) { // R Pixel
+                            tmp1 = extractVal2 >> wgts[1]; // R has lowest level of reduced weight
+                        } else if (((((row) % 4) == 0) && (((col_wnpc) % 4) == 0)) ||
+                                   ((((row - 2) % 4) == 0) && (((col_wnpc - 2) % 4) == 0))) { // B Pixel
+                            tmp1 = extractVal2 >> wgts[2]; // B has low level of reduced weight
+                        } else if ((((((row) % 4)) == 0) && (((col_wnpc - 2) % 4) == 0)) ||
+                                   (((((row - 2) % 4)) == 0) && (((col_wnpc) % 4) == 0))) { // Calculated B Pixel
+                            tmp1 = extractVal2 >> wgts[3]; // B has highest level of reduced weight
+                        }
                     }
-                }
-                if (bformat == XF_BAYER_BG) {
-                    if ((((row & 0x0001) == 0) && ((col_wnpc & 0x0001) == 1)) ||
-                        (((row & 0x0001) == 1) && ((col_wnpc & 0x0001) == 0))) { // G Pixel
-                        tmp1 = extractVal2 >> wgts[0];                           // G has medium level of reduced weight
-                    } else if ((((row & 0x0001) == 1) && ((col_wnpc & 0x0001) == 1))) { // R Pixel
-                        tmp1 = extractVal2 >> wgts[1]; // R has lowest level of reduced weight
-                    } else if (((((row) % 4) == 0) && (((col_wnpc) % 4) == 0)) ||
-                               ((((row - 2) % 4) == 0) && (((col_wnpc - 2) % 4) == 0))) { // B Pixel
-                        tmp1 = extractVal2 >> wgts[2]; // B has low level of reduced weight
-                    } else if ((((((row) % 4)) == 0) && (((col_wnpc - 2) % 4) == 0)) ||
-                               (((((row - 2) % 4)) == 0) && (((col_wnpc) % 4) == 0))) { // Calculated B Pixel
-                        tmp1 = extractVal2 >> wgts[3]; // B has highest level of reduced weight
-                    }
-                }
-                tmp2 = extractVal1 - tmp1;
+                    tmp2 = extractVal1 - tmp1;
 
-                if (tmp2 < 0) {
-                    tmp2 = 0;
+                    if (tmp2 < 0) {
+                        tmp2 = 0;
+                    }
+
+                    outVal.range(step * iter + step - 1, step * iter) = (XF_CTUNAME(INTYPE, NPPC))tmp2;
                 }
 
-                outVal.range(step * iter + step - 1, step * iter) = (XF_CTUNAME(INTYPE, NPPC))tmp2;
+                _dst.write(wr_index++, outVal);
             }
-
-            _dst.write(wr_index++, outVal);
         }
     }
 }

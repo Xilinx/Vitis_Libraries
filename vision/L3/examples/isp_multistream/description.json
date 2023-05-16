@@ -74,7 +74,7 @@
     "launch": [
         {
             "target": "sw_emu", 
-            "cmd_args": "LIB_DIR/data/256x256_bayer_16bit_sef.png LIB_DIR/data/256x256_bayer_16bit_lef.png LIB_DIR/data/256x256_1_bayer_16bit_sef.png LIB_DIR/data/256x256_1_bayer_16bit_lef.png LIB_DIR/data/256x256_2_bayer_16bit_sef.png LIB_DIR/data/256x256_2_bayer_16bit_lef.png LIB_DIR/data/256x256_3_bayer_16bit_sef.png LIB_DIR/data/256x256_3_bayer_16bit_lef.png LIB_DIR/data/256x256_48.png LIB_DIR/data/256x256_1_48.png LIB_DIR/data/256x256_2_48.png LIB_DIR/data/256x256_3_48.png LIB_DIR/data/input-lut-33.txt LIB_DIR/data/input-lut-33.txt LIB_DIR/data/input-lut-33.txt LIB_DIR/data/input-lut-33.txt",
+            "cmd_args": "LIB_DIR/data/ltm_input_s.png LIB_DIR/data/ltm_input_s.png LIB_DIR/data/ltm_input_s.png LIB_DIR/data/ltm_input_s.png LIB_DIR/data/input-lut-33.txt",
                    
             "name": "sw_emu", 
             "ld_library_path": [
@@ -85,7 +85,7 @@
         }, 
         {
             "target": "hw_emu", 
-            "cmd_args": "LIB_DIR/data/256x256_bayer_16bit_sef.png LIB_DIR/data/256x256_bayer_16bit_lef.png LIB_DIR/data/256x256_1_bayer_16bit_sef.png LIB_DIR/data/256x256_1_bayer_16bit_lef.png LIB_DIR/data/256x256_2_bayer_16bit_sef.png LIB_DIR/data/256x256_2_bayer_16bit_lef.png LIB_DIR/data/256x256_3_bayer_16bit_sef.png LIB_DIR/data/256x256_3_bayer_16bit_lef.png LIB_DIR/data/256x256_48.png LIB_DIR/data/256x256_1_48.png LIB_DIR/data/256x256_2_48.png LIB_DIR/data/256x256_3_48.png LIB_DIR/data/input-lut-33.txt LIB_DIR/data/input-lut-33.txt LIB_DIR/data/input-lut-33.txt LIB_DIR/data/input-lut-33.txt",
+            "cmd_args": "LIB_DIR/data/ltm_input_s.png LIB_DIR/data/ltm_input_s.png LIB_DIR/data/ltm_input_s.png LIB_DIR/data/ltm_input_s.png LIB_DIR/data/input-lut-33.txt",
             "name": "hw_emu", 
             "ld_library_path": [
                 "$(OPENCV_LIB)", 
@@ -95,7 +95,7 @@
         }, 
         {
             "target": "hw", 
-            "cmd_args": "LIB_DIR/data/256x256_bayer_16bit_sef.png LIB_DIR/data/256x256_bayer_16bit_lef.png LIB_DIR/data/256x256_1_bayer_16bit_sef.png LIB_DIR/data/256x256_1_bayer_16bit_lef.png LIB_DIR/data/256x256_2_bayer_16bit_sef.png LIB_DIR/data/256x256_2_bayer_16bit_lef.png LIB_DIR/data/256x256_3_bayer_16bit_sef.png LIB_DIR/data/256x256_3_bayer_16bit_lef.png LIB_DIR/data/256x256_48.png LIB_DIR/data/256x256_1_48.png LIB_DIR/data/256x256_2_48.png LIB_DIR/data/256x256_3_48.png LIB_DIR/data/input-lut-33.txt LIB_DIR/data/input-lut-33.txt LIB_DIR/data/input-lut-33.txt LIB_DIR/data/input-lut-33.txt",
+            "cmd_args": "LIB_DIR/data/ltm_input_s.png LIB_DIR/data/ltm_input_s.png LIB_DIR/data/ltm_input_s.png LIB_DIR/data/ltm_input_s.png LIB_DIR/data/input-lut-33.txt",
             "name": "hardware_build", 
             "ld_library_path": [
                 "$(OPENCV_LIB)", 
@@ -105,21 +105,10 @@
         }
     ], 
     "data": [
-        "LIB_DIR/data/256x256_bayer_16bit_sef.png",
-        "LIB_DIR/data/256x256_bayer_16bit_lef.png",
-        "LIB_DIR/data/256x256_1_bayer_16bit_sef.png",
-        "LIB_DIR/data/256x256_1_bayer_16bit_lef.png",
-        "LIB_DIR/data/256x256_2_bayer_16bit_sef.png",
-        "LIB_DIR/data/256x256_2_bayer_16bit_lef.png",
-        "LIB_DIR/data/256x256_3_bayer_16bit_sef.png",
-        "LIB_DIR/data/256x256_3_bayer_16bit_lef.png",
-        "LIB_DIR/data/256x256_48.png",
-        "LIB_DIR/data/256x256_1_48.png",
-        "LIB_DIR/data/256x256_2_48.png",   
-        "LIB_DIR/data/256x256_3_48.png",
-        "LIB_DIR/data/input-lut-33.txt",
-        "LIB_DIR/data/input-lut-33.txt",
-        "LIB_DIR/data/input-lut-33.txt",
+        "LIB_DIR/data/ltm_input_s.png",
+        "LIB_DIR/data/ltm_input_s.png",
+        "LIB_DIR/data/ltm_input_s.png",   
+        "LIB_DIR/data/ltm_input_s.png",
         "LIB_DIR/data/input-lut-33.txt"  
     ], 
     "host": {

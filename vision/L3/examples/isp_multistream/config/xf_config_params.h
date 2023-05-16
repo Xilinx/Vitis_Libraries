@@ -55,7 +55,7 @@
 #include "imgproc/xf_duplicateimage.hpp"
 
 #define XF_WIDTH 256  // MAX_COLS
-#define XF_HEIGHT 256 // MAX_ROWS
+#define XF_HEIGHT 168 // MAX_ROWS
 
 #define XF_CV_DEPTH_LEF 3
 #define XF_CV_DEPTH_SEF 3
@@ -84,20 +84,12 @@
 
 #define XF_NPPC XF_NPPC1 // XF_NPPC1 --1PIXEL , XF_NPPC2--2PIXEL ,XF_NPPC4--4 and XF_NPPC8--8PIXEL
 
-//#define XF_BAYER_PATTERN XF_BAYER_RG // bayer pattern
-
 #define T_8U 0
 #define T_10U 0
 #define T_12U 0
 #define T_16U 1
 
 #define XF_CCM_TYPE XF_CCM_bt2020_bt709
-
-#if (T_16U || T_10U || T_12U)
-#define CVTYPE unsigned short
-#else
-#define CVTYPE unsigned char
-#endif
 
 #if T_8U
 #define IN_TYPE XF_8UC1  // XF_8UC1
@@ -117,21 +109,27 @@
 #define OUT_TYPE XF_12UC3 // XF_8UC3
 #endif
 
+#if T_8U
+#define CVTYPE unsigned char
+#define CV_IN_TYPE CV_8UC1
+#define PXL_TYPE unsigned char
+#else
+#define CVTYPE unsigned short
+#define CV_IN_TYPE CV_16UC1
+#define PXL_TYPE unsigned short
+#endif
+
 #define NUM_STREAMS 4
 
-#define STRM_HEIGHT 256
+#define STRM_HEIGHT 168
 #define STRM1_ROWS STRM_HEIGHT
 #define STRM2_ROWS STRM_HEIGHT
 #define STRM3_ROWS STRM_HEIGHT
 #define STRM4_ROWS STRM_HEIGHT
 
-#if XF_HEIGHT == 256
-#if STRM_HEIGHT == 128 // if XF_HEIGHT 1080 STRM_HEIGHT 256, Multi-slice
-#define NUM_SLICES 2
-#elif STRM_HEIGHT == 256 //  if XF_HEIGHT 1080 STRM_HEIGHT 1080, Single-slice
+#define SLICE_HEIGHT STRM_HEIGHT + 7
+
 #define NUM_SLICES 1
-#endif
-#endif
 
 #define SIN_CHANNEL_TYPE XF_8UC1
 #define AEC_SIN_CHANNEL_TYPE XF_16UC1
@@ -145,6 +143,7 @@
 #define USE_DEGAMMA 1
 #define USE_AEC 1
 #define USE_AWB 1
+#define USE_CSC 1
 
 #if USE_HDR_FUSION
 #define RD_MULT 2
@@ -153,6 +152,18 @@
 #else
 #define RD_MULT 1
 #define RD_ADD 0
+#endif
+
+#if USE_CSC
+#define CV_OUT_TYPE CV_16UC1
+#define OUT_PORT 4
+#define CH_TYPE 1
+
+#else
+#define CV_OUT_TYPE CV_8UC3
+#define OUT_PORT 8
+#define CH_TYPE 3
+
 #endif
 
 #define WB_TYPE XF_WB_SIMPLE
@@ -170,7 +181,7 @@
 
 #define XF_USE_URAM 0 // uram enable
 
-#define MAX_HEIGHT STRM_HEIGHT * 2
+#define MAX_HEIGHT (SLICE_HEIGHT) * 2
 #define MAX_WIDTH XF_WIDTH + NUM_H_BLANK
 
 #define S_DEPTH 4096
@@ -252,19 +263,5 @@ typedef struct {
     //    uint16_t video_format;
     uint16_t bayer_phase;
 } HW_STRUCT_REG;
-
-struct ispparams_config {
-    unsigned short rgain = 256;
-    unsigned short bgain = 256;
-    unsigned short ggain = 256;
-    unsigned short pawb = 128;
-    unsigned short bayer_p = 3;
-    unsigned short black_level = 32;
-    unsigned short height = 256;
-    unsigned short width = 256;
-    unsigned short blk_height = 32;
-    unsigned short blk_width = 32;
-    unsigned short lut_dim = 33;
-};
 
 #endif //_XF_ISP_TYPES_H_

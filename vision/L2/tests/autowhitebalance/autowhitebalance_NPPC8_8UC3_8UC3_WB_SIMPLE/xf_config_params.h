@@ -34,6 +34,7 @@
 #define XF_CV_DEPTH_OUT_1 2
 
 #define NPPCX XF_NPPC8
+#define XF_USE_URAM 0
 
 #define IN_TYPE XF_8UC3
 #define OUT_TYPE XF_8UC3

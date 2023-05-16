@@ -28,7 +28,7 @@
 #define WIDTH 3840
 
 #define XF_CV_DEPTH_IN 2
-
+#define XF_USE_URAM 0
 #define NPPCX XF_NPPC1
 
 #define RGB 1

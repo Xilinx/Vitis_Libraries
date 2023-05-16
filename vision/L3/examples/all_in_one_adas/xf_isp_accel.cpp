@@ -84,8 +84,9 @@ void function_extract_merge(xf::cv::Mat<SRC_T, ROWS * 2, COLS + NUM_H_BLANK, NPC
     xf::cv::extractExposureFrames<IN_TYPE, NUM_V_BLANK_LINES, NUM_H_BLANK, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_USE_URAM,
                                   XFCVDEPTH_imgInput, XFCVDEPTH_imgInput, XFCVDEPTH_imgInput>(imgInput1, LEF_Img,
                                                                                               SEF_Img);
-    xf::cv::Hdrmerge_bayer<IN_TYPE, IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, NO_EXPS, W_B_SIZE, XFCVDEPTH_imgInput,
-                           XFCVDEPTH_imgInput, XFCVDEPTH_hdr_out>(LEF_Img, SEF_Img, hdr_out, wr_hls);
+    xf::cv::Hdrmerge_bayer<IN_TYPE, IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_USE_URAM, NO_EXPS, W_B_SIZE,
+                           XFCVDEPTH_imgInput, XFCVDEPTH_imgInput, XFCVDEPTH_hdr_out>(LEF_Img, SEF_Img, hdr_out,
+                                                                                      wr_hls);
 }
 
 template <int SRC_T,
@@ -175,7 +176,7 @@ void fifo_awb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_demosaic_out>& demos
     // clang-format on
 
     if (WB_TYPE) {
-        xf::cv::AWBhistogram<OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, WB_TYPE, HIST_SIZE,
+        xf::cv::AWBhistogram<OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_USE_URAM, WB_TYPE, HIST_SIZE,
                              XFCVDEPTH_demosaic_out, XFCVDEPTH_ltm_in>(demosaic_out, impop, hist0, thresh, inputMin,
                                                                        inputMax, outputMin, outputMax);
         xf::cv::AWBNormalization<OUT_TYPE, OUT_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, WB_TYPE, HIST_SIZE,

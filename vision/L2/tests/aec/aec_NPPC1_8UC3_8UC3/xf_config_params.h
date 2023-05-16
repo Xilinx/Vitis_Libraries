@@ -31,12 +31,12 @@
 #define XF_CV_DEPTH_OUT_1 2
 
 #define NPPCX XF_NPPC1
-
 #define T_8U 1
 #define T_16U 0
 
 #define IN_TYPE XF_8UC3
 #define OUT_TYPE XF_8UC3
+#define XF_USE_URAM 0
 
 #if T_8U
 #define SIN_CHANNEL_TYPE XF_8UC1

@@ -226,9 +226,9 @@ void fifo_awb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& demosaic_out,
 #pragma HLS DATAFLOW
     // clang-format on
     if (WB_TYPE) {
-        xf::cv::AWBhistogram<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, WB_TYPE, HIST_SIZE, XFCVDEPTH_IN,
-                             XFCVDEPTH_OUT>(demosaic_out, impop, hist0, thresh, inputMin, inputMax, outputMin,
-                                            outputMax);
+        xf::cv::AWBhistogram<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_USE_URAM, WB_TYPE, HIST_SIZE,
+                             XFCVDEPTH_IN, XFCVDEPTH_OUT>(demosaic_out, impop, hist0, thresh, inputMin, inputMax,
+                                                          outputMin, outputMax);
         xf::cv::AWBNormalization<XF_DST_T, XF_DST_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, WB_TYPE, HIST_SIZE, XFCVDEPTH_OUT,
                                  XFCVDEPTH_OUT>(impop, ltm_in, hist1, thresh, inputMin, inputMax, outputMin, outputMax);
     } else {
@@ -317,8 +317,9 @@ void ISPpipeline(InVideoStrm_t& s_axis_video,
     xf::cv::extractExposureFrames<XF_SRC_T, NUM_V_BLANK_LINES, NUM_H_BLANK, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_USE_URAM>(
         imgInput, imgInputhdr1, imgInputhdr2);
 
-    xf::cv::Hdrmerge_bayer<XF_SRC_T, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, NO_EXPS, W_B_SIZE, XF_CV_DEPTH_IN_DR1,
-                           XF_CV_DEPTH_IN_DR2, XF_CV_DEPTH_IN_1>(imgInputhdr1, imgInputhdr2, imgInput1, wr_hls);
+    xf::cv::Hdrmerge_bayer<XF_SRC_T, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, XF_USE_URAM, NO_EXPS, W_B_SIZE,
+                           XF_CV_DEPTH_IN_DR1, XF_CV_DEPTH_IN_DR2, XF_CV_DEPTH_IN_1>(imgInputhdr1, imgInputhdr2,
+                                                                                     imgInput1, wr_hls);
 
     xf::cv::blackLevelCorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2>(
         imgInput1, imgInput2, BLACK_LEVEL, mul_fact);

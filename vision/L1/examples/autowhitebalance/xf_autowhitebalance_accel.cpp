@@ -51,8 +51,8 @@ void AWBKernel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN_1>(img_inp, in_mat);
 
     if (WB_TYPE == 1) {
-        xf::cv::AWBhistogram<IN_TYPE, IN_TYPE, HEIGHT, WIDTH, NPPCX, 1, HIST_SIZE, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2>(
-            in_mat, impop, hist0, thresh, inputMin, inputMax, outputMin, outputMax);
+        xf::cv::AWBhistogram<IN_TYPE, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_USE_URAM, 1, HIST_SIZE, XF_CV_DEPTH_IN_1,
+                             XF_CV_DEPTH_IN_2>(in_mat, impop, hist0, thresh, inputMin, inputMax, outputMin, outputMax);
         xf::cv::AWBNormalization<IN_TYPE, IN_TYPE, HEIGHT, WIDTH, NPPCX, 1, HIST_SIZE, XF_CV_DEPTH_IN_2,
                                  XF_CV_DEPTH_OUT_1>(impop, out_mat, hist1, thresh, inputMin, inputMax, outputMin,
                                                     outputMax);

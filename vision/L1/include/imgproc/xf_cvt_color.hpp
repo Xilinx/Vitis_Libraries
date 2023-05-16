@@ -7082,11 +7082,13 @@ void xfhsv2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
                unsigned short int width) {
     XF_CTUNAME(SRC_T, NPC) HSV[3 * XF_NPIXPERCYCLE(NPC)];
 // clang-format off
-#pragma HLS ARRAY_PARTITION variable=HSV complete
+
+#pragma HLS ARRAY_PARTITION variable=HSV complete dim=1
     // clang-format on
     XF_DTUNAME(DST_T, NPC) RGB[XF_NPIXPERCYCLE(NPC)];
 // clang-format off
-#pragma HLS ARRAY_PARTITION variable=RGB complete
+
+#pragma HLS ARRAY_PARTITION variable=RGB complete dim=1
     // clang-format on
     XF_TNAME(SRC_T, NPC) HSV_packed = 0;
     XF_TNAME(DST_T, NPC) RGB_packed = 0;
@@ -7096,11 +7098,14 @@ void xfhsv2bgr(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
     unsigned long int b = 0;
     ap_fixed<28, 9> tab[4];
 // clang-format off
-#pragma HLS ARRAY_PARTITION variable=tab complete
+
+#pragma HLS ARRAY_PARTITION variable=tab complete dim=1
     // clang-format on
     ap_fixed<28, 9> p1, p2;
     ap_ufixed<20, 1, AP_RND> hscale = 0.0333333333333333333;
     ap_ufixed<20, 1, AP_RND> s_scale = 0.0039215686274509803921568627451;
+    static const int sector_data[][3] = {{1, 3, 0}, {1, 0, 2}, {3, 0, 1}, {0, 2, 1}, {0, 1, 3}, {2, 1, 0}};
+#pragma HLS ARRAY_PARTITION variable = sector_data complete dim = 1
 rowloop:
     for (ap_uint<13> i = 0; i < height; i++) {
 // clang-format off
@@ -7118,8 +7123,6 @@ rowloop:
 
             for (int k = 0, offset = 0; k < XF_NPIXPERCYCLE(NPC); k++, offset += 3) {
                 H = HSV[offset], S = HSV[offset + 1], V = HSV[offset + 2];
-
-                static const int sector_data[][3] = {{1, 3, 0}, {1, 0, 2}, {3, 0, 1}, {0, 2, 1}, {0, 1, 3}, {2, 1, 0}};
 
                 ap_fixed<28, 9> mul_scl = s_scale * S;
 

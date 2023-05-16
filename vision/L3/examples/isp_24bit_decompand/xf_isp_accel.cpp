@@ -161,8 +161,8 @@ void function_aec(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_aecin>& aec_in,
 #pragma HLS DATAFLOW
     // clang-format on
     if (USE_AEC) {
-        xf::cv::autoexposurecorrection_sin<XF_SRC_T, XF_SRC_T, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XFCVDEPTH_aecin,
-                                           XFCVDEPTH_aec_out, HIST_SIZE_AEC>(
+        xf::cv::autoexposurecorrection_sin<XF_SRC_T, XF_SRC_T, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_USE_URAM,
+                                           XFCVDEPTH_aecin, XFCVDEPTH_aec_out, HIST_SIZE_AEC>(
             aec_in, aec_out, aec_hist0, aec_hist1, paec, aec_inputMin, aec_inputMax, aec_outputMin, aec_outputMax);
 
     } else {
@@ -213,7 +213,7 @@ void fifo_awb(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_demosaic_out>& demos
     // clang-format on
 
     if (WB_TYPE) {
-        xf::cv::AWBhistogram<XF_GTM_T, XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPCX, WB_TYPE, HIST_SIZE_AWB,
+        xf::cv::AWBhistogram<XF_GTM_T, XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_USE_URAM, WB_TYPE, HIST_SIZE_AWB,
                              XFCVDEPTH_demosaic_out, XFCVDEPTH_ltm_in>(demosaic_out, impop, hist0, thresh, inputMin,
                                                                        inputMax, outputMin, outputMax);
 
@@ -478,15 +478,15 @@ void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
                                                                          R_IR_C2_wgts, B_at_R_wgts, IR_at_R_wgts,
                                                                          IR_at_B_wgts, sub_wgts, height, width);
 
-    // xf::cv::duplicateMat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_rggb_out, XF_CV_DEPTH_aecin,
-    // XF_CV_DEPTH_aecin>(rggb_out, aec_in1, aec_in2);
+    xf::cv::duplicateMat<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_rggb_out, XF_CV_DEPTH_aecin,
+                         XF_CV_DEPTH_aecin>(rggb_out, aec_in1, aec_in2);
     function_aec<XF_SRC_T, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_aecin, XF_CV_DEPTH_aec_out>(
-        rggb_out, aec_out, height, width, aec_thresh, aec_hist0, aec_hist1);
+        aec_in2, aec_out, height, width, aec_thresh, aec_hist0, aec_hist1);
 
-    // xf::cv::ispStats<MAX_ZONES, STATS_SIZE_AEC, FINAL_BINS_NUM, MERGE_BINS, XF_SRC_T,  NUM_OUT_CH, XF_HEIGHT,
-    // XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_aecin>(
-    // aec_in2, aec_stats, aec_max_bins, roi_tlx, roi_tly, roi_brx, roi_bry, zone_col_num, zone_row_num, inputmin,
-    // inputmax2, outputmin, outputmax2);
+    xf::cv::ispStats<MAX_ZONES, STATS_SIZE_AEC, FINAL_BINS_NUM, MERGE_BINS, XF_SRC_T, NUM_OUT_CH, XF_HEIGHT, XF_WIDTH,
+                     XF_NPPCX, XF_CV_DEPTH_aecin>(aec_in1, aec_stats, aec_max_bins, roi_tlx, roi_tly, roi_brx, roi_bry,
+                                                  zone_col_num, zone_row_num, inputmin, inputmax2, outputmin,
+                                                  outputmax2);
 
     xf::cv::blackLevelCorrection<XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPCX, 16, 15, 1, XF_CV_DEPTH_aec_out,
                                  XF_CV_DEPTH_blc_out>(aec_out, blc_out, BLACK_LEVEL, mul_fact);

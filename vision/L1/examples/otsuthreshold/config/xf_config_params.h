@@ -33,7 +33,7 @@
 
 #define CV_IN_TYPE CV_8UC1
 #define CV_OUT_TYPE CV_8UC1
-
+#define XF_USE_URAM 0
 #define INPUT_PTR_WIDTH 8
 #define OUTPUT_PTR_WIDTH 8
 

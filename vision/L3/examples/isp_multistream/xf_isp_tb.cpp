@@ -19,92 +19,84 @@
 #include "xf_isp_tb_config.h"
 #include "xcl2.hpp"
 
-void bayerizeImage(cv::Mat img, cv::Mat& bayer_image, cv::Mat& cfa_output, int code) {
+struct ispparams_config {
+    unsigned short rgain = 256;
+    unsigned short bgain = 256;
+    unsigned short ggain = 256;
+    unsigned short pawb = 128;
+    unsigned short bayer_p = 2; // bayer pattern GR
+    unsigned short black_level = 32;
+    unsigned short height = 168;
+    unsigned short width = 256;
+    unsigned short blk_height = 32;
+    unsigned short blk_width = 32;
+    unsigned short lut_dim = 33;
+};
+
+void bayerizeImage(cv::Mat img, cv::Mat& cfa_output, unsigned short code) {
     for (int i = 0; i < img.rows; i++) {
         for (int j = 0; j < img.cols; j++) {
             cv::Vec3w in = img.at<cv::Vec3w>(i, j);
-            cv::Vec3w b;
-            b[0] = 0;
-            b[1] = 0;
-            b[2] = 0;
-
             if (code == 0) {            // BG
                 if ((i & 1) == 0) {     // even row
                     if ((j & 1) == 0) { // even col
-                        b[0] = in[0];
-                        cfa_output.at<ushort>(i, j) = in[0];
+                        cfa_output.at<PXL_TYPE>(i, j) = in[0];
                     } else { // odd col
-                        b[1] = in[1];
-                        cfa_output.at<ushort>(i, j) = in[1];
+                        cfa_output.at<PXL_TYPE>(i, j) = in[1];
                     }
                 } else {                // odd row
                     if ((j & 1) == 0) { // even col
-                        b[1] = in[1];
-                        cfa_output.at<ushort>(i, j) = in[1];
+                        cfa_output.at<PXL_TYPE>(i, j) = in[1];
                     } else { // odd col
-                        b[2] = in[2];
-                        cfa_output.at<ushort>(i, j) = in[2];
+                        cfa_output.at<PXL_TYPE>(i, j) = in[2];
                     }
                 }
             }
             if (code == 1) {            // GB
                 if ((i & 1) == 0) {     // even row
                     if ((j & 1) == 0) { // even col
-                        b[1] = in[1];
-                        cfa_output.at<ushort>(i, j) = in[1];
+                        cfa_output.at<PXL_TYPE>(i, j) = in[1];
                     } else { // odd col
-                        b[0] = in[0];
-                        cfa_output.at<ushort>(i, j) = in[0];
+                        cfa_output.at<PXL_TYPE>(i, j) = in[0];
                     }
                 } else {                // odd row
                     if ((j & 1) == 0) { // even col
-                        b[2] = in[2];
-                        cfa_output.at<ushort>(i, j) = in[2];
+                        cfa_output.at<PXL_TYPE>(i, j) = in[2];
                     } else { // odd col
-                        b[1] = in[1];
-                        cfa_output.at<ushort>(i, j) = in[1];
+                        cfa_output.at<PXL_TYPE>(i, j) = in[1];
                     }
                 }
             }
             if (code == 2) {            // GR
                 if ((i & 1) == 0) {     // even row
                     if ((j & 1) == 0) { // even col
-                        b[1] = in[1];
-                        cfa_output.at<ushort>(i, j) = in[1];
+                        cfa_output.at<PXL_TYPE>(i, j) = in[1];
                     } else { // odd col
-                        b[2] = in[2];
-                        cfa_output.at<ushort>(i, j) = in[2];
+                        cfa_output.at<PXL_TYPE>(i, j) = in[2];
                     }
                 } else {                // odd row
                     if ((j & 1) == 0) { // even col
-                        b[0] = in[0];
-                        cfa_output.at<ushort>(i, j) = in[0];
+                        cfa_output.at<PXL_TYPE>(i, j) = in[0];
                     } else { // odd col
-                        b[1] = in[1];
-                        cfa_output.at<ushort>(i, j) = in[1];
+                        cfa_output.at<PXL_TYPE>(i, j) = in[1];
                     }
                 }
             }
             if (code == 3) {            // RG
                 if ((i & 1) == 0) {     // even row
                     if ((j & 1) == 0) { // even col
-                        b[2] = in[2];
-                        cfa_output.at<ushort>(i, j) = in[2];
+                        cfa_output.at<PXL_TYPE>(i, j) = in[2];
                     } else { // odd col
-                        b[1] = in[1];
-                        cfa_output.at<ushort>(i, j) = in[1];
+                        cfa_output.at<PXL_TYPE>(i, j) = in[1];
                     }
                 } else {                // odd row
                     if ((j & 1) == 0) { // even col
-                        b[1] = in[1];
-                        cfa_output.at<ushort>(i, j) = in[1];
+                        cfa_output.at<PXL_TYPE>(i, j) = in[1];
                     } else { // odd col
-                        b[0] = in[0];
-                        cfa_output.at<ushort>(i, j) = in[0];
+                        cfa_output.at<PXL_TYPE>(i, j) = in[0];
                     }
                 }
             }
-            bayer_image.at<cv::Vec3w>(i, j) = b;
         }
     }
 }
@@ -355,302 +347,131 @@ void get_image(cv::Mat img_16bit,
 }
 
 int main(int argc, char** argv) {
-    if (argc != 17) {
-        fprintf(stderr, "Invalid Number of Arguments!\nUsage:\n");
-        fprintf(stderr, "<Executable Name> <input image path> <Input LUT file>\n");
-        return -1;
-    }
-
-    cv::Mat in_img1, in_img2, in_img3, in_img4, in_img5, in_img6, in_img7, in_img8, in_img9, in_img10, in_img11,
-        in_img12, interleaved_img1, interleaved_img2, interleaved_img3, interleaved_img4, ocv_ref, in_gray, diff;
+    cv::Mat in_img1, in_img2, in_img3, in_img4, in_img5, in_img6, in_img7, in_img8, interleaved_img1, interleaved_img2,
+        interleaved_img3, interleaved_img4, diff, out_img1_12bit, out_img2_12bit, out_img3_12bit, out_img4_12bit;
 
     unsigned short in_width, in_height;
     int height, width;
 
-#if T_8U
-    in_img1 = cv::imread(argv[1], 0);
-    in_img2 = cv::imread(argv[2], 0);
-    in_img3 = cv::imread(argv[3], 0);
-    in_img4 = cv::imread(argv[4], 0);
-    in_img5 = cv::imread(argv[5], 0);
-    in_img6 = cv::imread(argv[6], 0);
-    in_img7 = cv::imread(argv[7], 0);
-    in_img8 = cv::imread(argv[8], 0);
-    in_img9 = cv::imread(argv[9], 0);
-    in_img10 = cv::imread(argv[10], 0);
-    in_img11 = cv::imread(argv[11], 0);
-    in_img12 = cv::imread(argv[12], 0);
-#else
-    in_img1 = cv::imread(argv[1], -1);
-    in_img2 = cv::imread(argv[2], -1);
-    in_img3 = cv::imread(argv[3], -1);
-    in_img4 = cv::imread(argv[4], -1);
-    in_img5 = cv::imread(argv[5], -1);
-    in_img6 = cv::imread(argv[6], -1);
-    in_img7 = cv::imread(argv[7], -1);
-    in_img8 = cv::imread(argv[8], -1);
-    in_img9 = cv::imread(argv[9], -1);
-    in_img10 = cv::imread(argv[10], -1);
-    in_img11 = cv::imread(argv[11], -1);
-    in_img12 = cv::imread(argv[12], -1);
-#endif
-    height = in_img1.rows;
-    width = in_img1.cols;
-
-    if (in_img1.data == NULL) {
-        fprintf(stderr, "Cannot open image 1 at %s\n", argv[1]);
-        return 0;
-    }
-    if (in_img2.data == NULL) {
-        fprintf(stderr, "Cannot open image 2 at %s\n", argv[2]);
-        return 0;
-    }
-
-    if (in_img3.data == NULL) {
-        fprintf(stderr, "Cannot open image 3 at %s\n", argv[3]);
-        return 0;
-    }
-    if (in_img4.data == NULL) {
-        fprintf(stderr, "Cannot open image 4 at %s\n", argv[4]);
-        return 0;
-    }
-    if (in_img5.data == NULL) {
-        fprintf(stderr, "Cannot open image 5 at %s\n", argv[5]);
-        return 0;
-    }
-    if (in_img6.data == NULL) {
-        fprintf(stderr, "Cannot open image 6 at %s\n", argv[6]);
-        return 0;
-    }
-
-    if (in_img7.data == NULL) {
-        fprintf(stderr, "Cannot open image 7 at %s\n", argv[7]);
-        return 0;
-    }
-    if (in_img8.data == NULL) {
-        fprintf(stderr, "Cannot open image 8 at %s\n", argv[8]);
-        return 0;
-    }
-    if (in_img9.data == NULL) {
-        fprintf(stderr, "Cannot open image 9 at %s\n", argv[9]);
-        return 0;
-    }
-    if (in_img10.data == NULL) {
-        fprintf(stderr, "Cannot open image 10 at %s\n", argv[10]);
-        return 0;
-    }
-    if (in_img11.data == NULL) {
-        fprintf(stderr, "Cannot open image 11 at %s\n", argv[11]);
-        return 0;
-    }
-    if (in_img12.data == NULL) {
-        fprintf(stderr, "Cannot open image 12 at %s\n", argv[12]);
-        return 0;
-    }
-    // write input image
-    imwrite("input1.png", in_img1);
-    imwrite("input2.png", in_img2);
-    imwrite("input3.png", in_img3);
-    imwrite("input4.png", in_img4);
-    imwrite("input5.png", in_img5);
-    imwrite("input6.png", in_img6);
-    imwrite("input7.png", in_img7);
-    imwrite("input8.png", in_img8);
-    imwrite("input9.png", in_img9);
-    imwrite("input10.png", in_img10);
-    imwrite("input11.png", in_img11);
-    imwrite("input12.png", in_img12);
-
-    interleaved_img1.create(cv::Size(in_img1.cols + NUM_H_BLANK, in_img1.rows * 2), CV_16UC1);
-    interleaved_img2.create(cv::Size(in_img1.cols + NUM_H_BLANK, in_img1.rows * 2), CV_16UC1);
-    interleaved_img3.create(cv::Size(in_img1.cols + NUM_H_BLANK, in_img1.rows * 2), CV_16UC1);
-    interleaved_img4.create(cv::Size(in_img1.cols + NUM_H_BLANK, in_img1.rows * 2), CV_16UC1);
-
-#if T_8U
-    int sc = 1;
-    int cnt = 0, cnt1 = 0;
-    for (int r = 0; r < height * 2; r++) {
-        for (int c = 0; c < width + NUM_H_BLANK; c++) {
-            if (r < NUM_V_BLANK_LINES) {
-                if (c >= NUM_H_BLANK) {
-                    interleaved_img1.at<unsigned char>(r, c) = in_img1.at<unsigned char>(r, c - NUM_H_BLANK);
-                    interleaved_img2.at<unsigned char>(r, c) = in_img3.at<unsigned char>(r, c - NUM_H_BLANK);
-                    interleaved_img3.at<unsigned char>(r, c) = in_img5.at<unsigned char>(r, c - NUM_H_BLANK);
-                    interleaved_img4.at<unsigned char>(r, c) = in_img7.at<unsigned char>(r, c - NUM_H_BLANK);
-                } else {
-                    interleaved_img1.at<unsigned char>(r, c) = 0;
-                    interleaved_img2.at<unsigned char>(r, c) = 0;
-                    interleaved_img3.at<unsigned char>(r, c) = 0;
-                    interleaved_img4.at<unsigned char>(r, c) = 0;
-                }
-            }
-
-            if (r >= NUM_V_BLANK_LINES && r <= ((2 * height) - NUM_V_BLANK_LINES)) {
-                if (r % 2 == 0) {
-                    if (c >= NUM_H_BLANK) {
-                        interleaved_img1.at<unsigned char>(r, c) = in_img2.at<unsigned char>(cnt, c - NUM_H_BLANK);
-                        interleaved_img2.at<unsigned char>(r, c) = in_img4.at<unsigned char>(cnt, c - NUM_H_BLANK);
-                        interleaved_img3.at<unsigned char>(r, c) = in_img6.at<unsigned char>(cnt, c - NUM_H_BLANK);
-                        interleaved_img4.at<unsigned char>(r, c) = in_img8.at<unsigned char>(cnt, c - NUM_H_BLANK);
-                    } else {
-                        interleaved_img1.at<unsigned char>(r, c) = 0;
-                        interleaved_img2.at<unsigned char>(r, c) = 0;
-                        interleaved_img3.at<unsigned char>(r, c) = 0;
-                        interleaved_img4.at<unsigned char>(r, c) = 0;
-                    }
-                } else {
-                    if (c >= NUM_H_BLANK) {
-                        interleaved_img1.at<unsigned char>(r, c) =
-                            in_img1.at<unsigned char>(cnt1 + NUM_V_BLANK_LINES - 1, c - NUM_H_BLANK);
-                        interleaved_img2.at<unsigned char>(r, c) =
-                            in_img3.at<unsigned char>(cnt1 + NUM_V_BLANK_LINES - 1, c - NUM_H_BLANK);
-                        interleaved_img3.at<unsigned char>(r, c) =
-                            in_img5.at<unsigned char>(cnt1 + NUM_V_BLANK_LINES - 1, c - NUM_H_BLANK);
-                        interleaved_img4.at<unsigned char>(r, c) =
-                            in_img7.at<unsigned char>(cnt1 + NUM_V_BLANK_LINES - 1, c - NUM_H_BLANK);
-                    }
-
-                    else {
-                        interleaved_img1.at<unsigned char>(r, c) = 0;
-                        interleaved_img2.at<unsigned char>(r, c) = 0;
-                        interleaved_img3.at<unsigned char>(r, c) = 0;
-                        interleaved_img4.at<unsigned char>(r, c) = 0;
-                    }
-                }
-            }
-            if (r >= ((2 * height) - NUM_V_BLANK_LINES)) {
-                if (c >= NUM_H_BLANK) {
-                    interleaved_img1.at<unsigned char>(r, c) = in_img2.at<unsigned char>(cnt, c - NUM_H_BLANK);
-                    interleaved_img2.at<unsigned char>(r, c) = in_img4.at<unsigned char>(cnt, c - NUM_H_BLANK);
-                    interleaved_img3.at<unsigned char>(r, c) = in_img6.at<unsigned char>(cnt, c - NUM_H_BLANK);
-                    interleaved_img4.at<unsigned char>(r, c) = in_img8.at<unsigned char>(cnt, c - NUM_H_BLANK);
-                } else {
-                    interleaved_img1.at<unsigned char>(r, c) = 0;
-                    interleaved_img2.at<unsigned char>(r, c) = 0;
-                    interleaved_img3.at<unsigned char>(r, c) = 0;
-                    interleaved_img4.at<unsigned char>(r, c) = 0;
-                }
-            }
-        }
-        if (r % 2 == 0 && r >= NUM_V_BLANK_LINES) {
-            cnt++;
-        }
-        if (r % 2 != 0 && r >= NUM_V_BLANK_LINES) {
-            cnt1++;
-        }
-    }
-#else
-    int sc = 1;
-    int cnt = 0, cnt1 = 0;
-
-    for (int r = 0; r < height * 2; r++) {
-        for (int c = 0; c < width + NUM_H_BLANK; c++) {
-            if (r < NUM_V_BLANK_LINES) {
-                if (c >= NUM_H_BLANK) {
-                    interleaved_img1.at<unsigned short>(r, c) = in_img1.at<unsigned short>(r, c - NUM_H_BLANK);
-                    interleaved_img2.at<unsigned short>(r, c) = in_img3.at<unsigned short>(r, c - NUM_H_BLANK);
-                    interleaved_img3.at<unsigned short>(r, c) = in_img5.at<unsigned short>(r, c - NUM_H_BLANK);
-                    interleaved_img4.at<unsigned short>(r, c) = in_img7.at<unsigned short>(r, c - NUM_H_BLANK);
-                } else {
-                    interleaved_img1.at<unsigned short>(r, c) = 0;
-                    interleaved_img2.at<unsigned short>(r, c) = 0;
-                    interleaved_img3.at<unsigned short>(r, c) = 0;
-                    interleaved_img4.at<unsigned short>(r, c) = 0;
-                }
-            }
-
-            if (r >= NUM_V_BLANK_LINES && r <= ((2 * height) - NUM_V_BLANK_LINES)) {
-                if (r % 2 == 0) {
-                    if (c >= NUM_H_BLANK) {
-                        interleaved_img1.at<unsigned short>(r, c) = in_img2.at<unsigned short>(cnt, c - NUM_H_BLANK);
-                        interleaved_img2.at<unsigned short>(r, c) = in_img4.at<unsigned short>(cnt, c - NUM_H_BLANK);
-                        interleaved_img3.at<unsigned short>(r, c) = in_img6.at<unsigned short>(cnt, c - NUM_H_BLANK);
-                        interleaved_img4.at<unsigned short>(r, c) = in_img8.at<unsigned short>(cnt, c - NUM_H_BLANK);
-                    } else {
-                        interleaved_img1.at<unsigned short>(r, c) = 0;
-                        interleaved_img2.at<unsigned short>(r, c) = 0;
-                        interleaved_img3.at<unsigned short>(r, c) = 0;
-                        interleaved_img4.at<unsigned short>(r, c) = 0;
-                    }
-                } else {
-                    if (c >= NUM_H_BLANK) {
-                        interleaved_img1.at<unsigned short>(r, c) =
-                            in_img1.at<unsigned short>(cnt1 + NUM_V_BLANK_LINES - 1, c - NUM_H_BLANK);
-                        interleaved_img2.at<unsigned short>(r, c) =
-                            in_img3.at<unsigned short>(cnt1 + NUM_V_BLANK_LINES - 1, c - NUM_H_BLANK);
-                        interleaved_img3.at<unsigned short>(r, c) =
-                            in_img5.at<unsigned short>(cnt1 + NUM_V_BLANK_LINES - 1, c - NUM_H_BLANK);
-                        interleaved_img4.at<unsigned short>(r, c) =
-                            in_img7.at<unsigned short>(cnt1 + NUM_V_BLANK_LINES - 1, c - NUM_H_BLANK);
-                    }
-
-                    else {
-                        interleaved_img1.at<unsigned short>(r, c) = 0;
-                        interleaved_img2.at<unsigned short>(r, c) = 0;
-                        interleaved_img3.at<unsigned short>(r, c) = 0;
-                        interleaved_img4.at<unsigned short>(r, c) = 0;
-                    }
-                }
-            }
-            if (r >= ((2 * height) - NUM_V_BLANK_LINES)) {
-                if (c >= NUM_H_BLANK) {
-                    interleaved_img1.at<unsigned short>(r, c) = in_img2.at<unsigned short>(cnt, c - NUM_H_BLANK);
-                    interleaved_img2.at<unsigned short>(r, c) = in_img4.at<unsigned short>(cnt, c - NUM_H_BLANK);
-                    interleaved_img3.at<unsigned short>(r, c) = in_img6.at<unsigned short>(cnt, c - NUM_H_BLANK);
-                    interleaved_img4.at<unsigned short>(r, c) = in_img8.at<unsigned short>(cnt, c - NUM_H_BLANK);
-                } else {
-                    interleaved_img1.at<unsigned short>(r, c) = 0;
-                    interleaved_img2.at<unsigned short>(r, c) = 0;
-                    interleaved_img3.at<unsigned short>(r, c) = 0;
-                    interleaved_img4.at<unsigned short>(r, c) = 0;
-                }
-            }
-        }
-        if (r % 2 == 0 && r >= NUM_V_BLANK_LINES) {
-            cnt++;
-        }
-        if (r % 2 != 0 && r >= NUM_V_BLANK_LINES) {
-            cnt1++;
-        }
-    }
-
-#endif
-
-    imwrite("interleaved_img1.png", interleaved_img1);
-    imwrite("interleaved_img2.png", interleaved_img2);
-    imwrite("interleaved_img3.png", interleaved_img3);
-    imwrite("interleaved_img4.png", interleaved_img4);
-
-    cv::Mat out_img1(in_img1.rows, in_img1.cols, CV_16UC1);
-    cv::Mat out_img2(in_img2.rows, in_img2.cols, CV_16UC1);
-    cv::Mat out_img3(in_img3.rows, in_img3.cols, CV_16UC1);
-    cv::Mat out_img4(in_img4.rows, in_img4.cols, CV_16UC1);
-
-    cv::Mat out_img_ir1(in_img1.rows, in_img1.cols, CV_16UC1);
-    cv::Mat out_img_ir2(in_img2.rows, in_img2.cols, CV_16UC1);
-    cv::Mat out_img_ir3(in_img3.rows, in_img3.cols, CV_16UC1);
-    cv::Mat out_img_ir4(in_img4.rows, in_img4.cols, CV_16UC1);
-    size_t image_in_size_bytes;
-#if T_8U
-    size_t vec_in_size_bytes = NUM_STREAMS * 256 * 3 * sizeof(unsigned char);
-    size_t vec_weight_size_bytes = NUM_STREAMS * NO_EXPS * XF_NPPC * W_B_SIZE * sizeof(short);
-    size_t image_in_size_bytes = in_img1.rows * in_img1.cols * sizeof(unsigned char);
-    size_t image_out_size_bytes = in_img1.rows * in_img1.cols * 1 * sizeof(unsigned short);
-    size_t image_out_ir_size_bytes = in_img1.rows * in_img1.cols * 1 * sizeof(unsigned short);
-#else
-    size_t vec_in_size_bytes = NUM_STREAMS * 256 * 3 * sizeof(unsigned char);
-    size_t vec_weight_size_bytes = NUM_STREAMS * NO_EXPS * XF_NPPC * W_B_SIZE * sizeof(short);
-
     if (USE_HDR_FUSION) {
-        image_in_size_bytes = interleaved_img1.rows * interleaved_img1.cols * sizeof(unsigned short);
-    } else {
-        image_in_size_bytes = in_img9.rows * in_img9.cols * sizeof(unsigned short);
-    }
-    size_t image_out_size_bytes = in_img1.rows * in_img1.cols * 1 * sizeof(unsigned short);
+        if (argc != 10) {
+            fprintf(stderr, "Invalid Number of Arguments!\nUsage:\n");
+            fprintf(stderr, "<Executable Name> <input image path> <Input LUT file>\n");
+            return -1;
+        }
 
-    size_t image_out_ir_size_bytes = in_img1.rows * in_img1.cols * 1 * sizeof(unsigned short);
+#if T_8U
+
+        in_img1 = cv::imread(argv[1], 0);
+        in_img2 = cv::imread(argv[2], 0);
+        in_img3 = cv::imread(argv[3], 0);
+        in_img4 = cv::imread(argv[4], 0);
+        in_img5 = cv::imread(argv[5], 0);
+        in_img6 = cv::imread(argv[6], 0);
+        in_img7 = cv::imread(argv[7], 0);
+        in_img8 = cv::imread(argv[8], 0);
+
+#else
+        in_img1 = cv::imread(argv[1], -1);
+        in_img2 = cv::imread(argv[2], -1);
+        in_img3 = cv::imread(argv[3], -1);
+        in_img4 = cv::imread(argv[4], -1);
+        in_img5 = cv::imread(argv[5], -1);
+        in_img6 = cv::imread(argv[6], -1);
+        in_img7 = cv::imread(argv[7], -1);
+        in_img8 = cv::imread(argv[8], -1);
 
 #endif
+        if (in_img1.data == NULL) {
+            fprintf(stderr, "Cannot open image 1 at %s\n", argv[1]);
+            return 0;
+        }
+        if (in_img2.data == NULL) {
+            fprintf(stderr, "Cannot open image 2 at %s\n", argv[2]);
+            return 0;
+        }
+
+        if (in_img3.data == NULL) {
+            fprintf(stderr, "Cannot open image 3 at %s\n", argv[3]);
+            return 0;
+        }
+        if (in_img4.data == NULL) {
+            fprintf(stderr, "Cannot open image 4 at %s\n", argv[4]);
+            return 0;
+        }
+        if (in_img5.data == NULL) {
+            fprintf(stderr, "Cannot open image 5 at %s\n", argv[5]);
+            return 0;
+        }
+        if (in_img6.data == NULL) {
+            fprintf(stderr, "Cannot open image 6 at %s\n", argv[6]);
+            return 0;
+        }
+
+        if (in_img7.data == NULL) {
+            fprintf(stderr, "Cannot open image 7 at %s\n", argv[7]);
+            return 0;
+        }
+        if (in_img8.data == NULL) {
+            fprintf(stderr, "Cannot open image 8 at %s\n", argv[8]);
+            return 0;
+        }
+        height = in_img1.rows;
+        width = in_img1.cols;
+        imwrite("input1.png", in_img1);
+        imwrite("input2.png", in_img2);
+        imwrite("input3.png", in_img3);
+        imwrite("input4.png", in_img4);
+        imwrite("input5.png", in_img5);
+        imwrite("input6.png", in_img6);
+        imwrite("input7.png", in_img7);
+        imwrite("input8.png", in_img8);
+
+    } else {
+        if (argc != 6) {
+            fprintf(stderr, "Invalid Number of Arguments!\nUsage:\n");
+            fprintf(stderr, "<Executable Name> <input image path> <Input LUT file>\n");
+            return -1;
+        }
+
+#if T_8U
+
+        in_img1 = cv::imread(argv[1], 0);
+        in_img2 = cv::imread(argv[2], 0);
+        in_img3 = cv::imread(argv[3], 0);
+        in_img4 = cv::imread(argv[4], 0);
+
+#else
+        in_img1 = cv::imread(argv[1], -1);
+        in_img2 = cv::imread(argv[2], -1);
+        in_img3 = cv::imread(argv[3], -1);
+        in_img4 = cv::imread(argv[4], -1);
+
+#endif
+        if (in_img1.data == NULL) {
+            fprintf(stderr, "Cannot open image 1 at %s\n", argv[1]);
+            return 0;
+        }
+        if (in_img2.data == NULL) {
+            fprintf(stderr, "Cannot open image 2 at %s\n", argv[2]);
+            return 0;
+        }
+
+        if (in_img3.data == NULL) {
+            fprintf(stderr, "Cannot open image 3 at %s\n", argv[3]);
+            return 0;
+        }
+        if (in_img4.data == NULL) {
+            fprintf(stderr, "Cannot open image 4 at %s\n", argv[4]);
+            return 0;
+        }
+        height = in_img1.rows;
+        width = in_img1.cols;
+        imwrite("input1.png", in_img1);
+        imwrite("input2.png", in_img2);
+        imwrite("input3.png", in_img3);
+        imwrite("input4.png", in_img4);
+    }
 
     /////////////////////////////////////// CL ////////////////////////
     float alpha = 1.0f;
@@ -687,10 +508,9 @@ int main(int argc, char** argv) {
 
     float gamma_val_r = 0.5f, gamma_val_g = 0.8f, gamma_val_b = 0.8f;
 
-    compute_gamma(gamma_val_r, gamma_val_g, gamma_val_b, gamma_lut[0]);
-    compute_gamma(gamma_val_r, gamma_val_g, gamma_val_b, gamma_lut[1]);
-    compute_gamma(gamma_val_r, gamma_val_g, gamma_val_b, gamma_lut[2]);
-    compute_gamma(gamma_val_r, gamma_val_g, gamma_val_b, gamma_lut[3]);
+    for (int n_strm = 0; n_strm < NUM_STREAMS; n_strm++) {
+        compute_gamma(gamma_val_r, gamma_val_g, gamma_val_b, gamma_lut[n_strm]);
+    }
 
     float c1[NUM_STREAMS], c2[NUM_STREAMS];
     for (int i = 0; i < NUM_STREAMS; i++) {
@@ -699,43 +519,41 @@ int main(int argc, char** argv) {
     }
 
     signed char R_IR_C1_wgts[NUM_STREAMS][25] = {
-        {-5, -5, 6, -5, -5, 6, 1, -4, -2, 6, 6, -5, -4, -5, 6, 6, -2, -4, 1, 6, -5, -5, 6, -5, -5},
-        {-5, -5, 6, -5, -5, 6, 1, -4, -2, 6, 6, -5, -4, -5, 6, 6, -2, -4, 1, 6, -5, -5, 6, -5, -5},
-        {-5, -5, 6, -5, -5, 6, 1, -4, -2, 6, 6, -5, -4, -5, 6, 6, -2, -4, 1, 6, -5, -5, 6, -5, -5},
-        {-5, -5, 6, -5, -5, 6, 1, -4, -2, 6, 6, -5, -4, -5, 6, 6, -2, -4, 1, 6, -5, -5, 6, -5, -5}};
+        {6, 6, 6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 6},
+        {6, 6, 6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 6},
+        {6, 6, 6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 6},
+        {6, 6, 6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 6}};
 
     signed char R_IR_C2_wgts[NUM_STREAMS][25] = {
-        {-5, -5, 6, -5, -5, 6, -2, -4, 1, 6, 6, -5, -4, -5, 6, 6, 1, -4, -2, 6, -5, -5, 6, -5, -5},
-        {-5, -5, 6, -5, -5, 6, -2, -4, 1, 6, 6, -5, -4, -5, 6, 6, 1, -4, -2, 6, -5, -5, 6, -5, -5},
-        {-5, -5, 6, -5, -5, 6, -2, -4, 1, 6, 6, -5, -4, -5, 6, 6, 1, -4, -2, 6, -5, -5, 6, -5, -5},
-        {-5, -5, 6, -5, -5, 6, -2, -4, 1, 6, 6, -5, -4, -5, 6, 6, 1, -4, -2, 6, -5, -5, 6, -5, -5}};
+        {6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6},
+        {6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6},
+        {6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6},
+        {6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6}};
 
     signed char B_at_R_wgts[NUM_STREAMS][25] = {
-        {3, 6, -3, 6, 3, 6, 6, 6, 6, 6, 3, 6, -1, 6, 3, 6, 6, 6, 6, 6, 3, 6, -3, 6, 3},
-        {3, 6, -3, 6, 3, 6, 6, 6, 6, 6, 3, 6, -1, 6, 3, 6, 6, 6, 6, 6, 3, 6, -3, 6, 3},
-        {3, 6, -3, 6, 3, 6, 6, 6, 6, 6, 3, 6, -1, 6, 3, 6, 6, 6, 6, 6, 3, 6, -3, 6, 3},
-        {3, 6, -3, 6, 3, 6, 6, 6, 6, 6, 3, 6, -1, 6, 3, 6, 6, 6, 6, 6, 3, 6, -3, 6, 3}};
+        {6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 0, 6, 6},
+        {6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 0, 6, 6},
+        {6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 0, 6, 6},
+        {6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 0, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 6, 0, 6, 6}};
 
-    signed char IR_at_R_wgts[NUM_STREAMS][9] = {{2, 6, 2, 6, -4, 6, 2, 6, 2},
-                                                {2, 6, 2, 6, -4, 6, 2, 6, 2},
-                                                {2, 6, 2, 6, -4, 6, 2, 6, 2},
-                                                {2, 6, 2, 6, -4, 6, 2, 6, 2}};
+    signed char IR_at_R_wgts[NUM_STREAMS][9] = {{2, 6, 2, 6, 6, 6, 2, 6, 2},
+                                                {2, 6, 2, 6, 6, 6, 2, 6, 2},
+                                                {2, 6, 2, 6, 6, 6, 2, 6, 2},
+                                                {2, 6, 2, 6, 6, 6, 2, 6, 2}};
 
-    signed char IR_at_B_wgts[NUM_STREAMS][9] = {{2, 6, 2, 6, -4, 6, 2, 6, 2},
-                                                {2, 6, 2, 6, -4, 6, 2, 6, 2},
-                                                {2, 6, 2, 6, -4, 6, 2, 6, 2},
-                                                {2, 6, 2, 6, -4, 6, 2, 6, 2}};
+    signed char IR_at_B_wgts[NUM_STREAMS][9] = {{2, 6, 2, 6, 6, 6, 2, 6, 2},
+                                                {2, 6, 2, 6, 6, 6, 2, 6, 2},
+                                                {2, 6, 2, 6, 6, 6, 2, 6, 2},
+                                                {2, 6, 2, 6, 6, 6, 2, 6, 2}};
 
     signed char sub_wgts[NUM_STREAMS][4] = {{3, 1, 2, 5}, {3, 1, 2, 5}, {3, 1, 2, 5}, {3, 1, 2, 5}};
 
     size_t filter1_in_size_bytes = NUM_STREAMS * 25 * sizeof(unsigned char);
     size_t filter2_in_size_bytes = NUM_STREAMS * 9 * sizeof(unsigned char);
     size_t sub_wgts_in_size_bytes = NUM_STREAMS * 4 * sizeof(unsigned char);
-    size_t ir_image_out_size_bytes = in_img1.rows * in_img1.cols * 1 * sizeof(CVTYPE);
 
     struct ispparams_config params[NUM_STREAMS];
     unsigned short array_params[NUM_STREAMS][11];
-    int lut_size[NUM_STREAMS];
     size_t lut_in_size_bytes = 0;
 
     for (int i = 0; i < NUM_STREAMS; i++) {
@@ -750,61 +568,24 @@ int main(int argc, char** argv) {
         array_params[i][8] = params[i].blk_height;
         array_params[i][9] = params[i].blk_width;
         array_params[i][10] = params[i].lut_dim;
-        lut_size[i] = params[i].lut_dim * params[i].lut_dim * params[i].lut_dim * 3;
-        lut_in_size_bytes += lut_size[i] * sizeof(float);
     }
+    int lut_size = params[0].lut_dim * params[0].lut_dim * params[0].lut_dim * 3;
+    lut_in_size_bytes += lut_size * sizeof(float);
 
-    float* lut1 = (float*)malloc(sizeof(float) * lut_size[0]);
-    float* lut2 = (float*)malloc(sizeof(float) * lut_size[1]);
-    float* lut3 = (float*)malloc(sizeof(float) * lut_size[2]);
-    float* lut4 = (float*)malloc(sizeof(float) * lut_size[3]);
-
-    unsigned int* casted_lut1 = (unsigned int*)malloc(sizeof(unsigned int) * lut_size[0]);
-    unsigned int* casted_lut2 = (unsigned int*)malloc(sizeof(unsigned int) * lut_size[1]);
-    unsigned int* casted_lut3 = (unsigned int*)malloc(sizeof(unsigned int) * lut_size[2]);
-    unsigned int* casted_lut4 = (unsigned int*)malloc(sizeof(unsigned int) * lut_size[3]);
+    float* lut1 = (float*)malloc(sizeof(float) * lut_size);
+    unsigned int* casted_lut1 = (unsigned int*)malloc(sizeof(unsigned int) * lut_size);
 
     std::string fileText1;
-    std::string fileText2;
-    std::string fileText3;
-    std::string fileText4;
-
-    std::ifstream infile1(argv[13]);
-    std::ifstream infile2(argv[14]);
-    std::ifstream infile3(argv[15]);
-    std::ifstream infile4(argv[16]);
+    std::ifstream infile1(argv[5]);
 
     if (infile1.fail()) {
-        fprintf(stderr, "ERROR: Cannot open input lut file 1 %s\n ", argv[13]);
-        return EXIT_FAILURE;
-    }
-
-    if (infile1.fail()) {
-        fprintf(stderr, "ERROR: Cannot open input lut file 2 %s\n ", argv[14]);
-        return EXIT_FAILURE;
-    }
-
-    if (infile1.fail()) {
-        fprintf(stderr, "ERROR: Cannot open input lut file 3 %s\n ", argv[15]);
-        return EXIT_FAILURE;
-    }
-
-    if (infile1.fail()) {
-        fprintf(stderr, "ERROR: Cannot open input lut file 4 %s\n ", argv[16]);
+        fprintf(stderr, "ERROR: Cannot open input lut file 1 %s\n ", argv[5]);
         return EXIT_FAILURE;
     }
 
     int idx1 = 0;
-    int idx2 = 0;
-    int idx3 = 0;
-    int idx4 = 0;
-
     float tmp_lut_val_flt = 0.0f;
-
-    function_lut(fileText1, infile1, idx1, lut1, casted_lut1, lut_size[0], tmp_lut_val_flt);
-    function_lut(fileText2, infile2, idx2, lut2, casted_lut2, lut_size[1], tmp_lut_val_flt);
-    function_lut(fileText3, infile3, idx3, lut3, casted_lut3, lut_size[2], tmp_lut_val_flt);
-    function_lut(fileText4, infile4, idx4, lut4, casted_lut4, lut_size[3], tmp_lut_val_flt);
+    function_lut(fileText1, infile1, idx1, lut1, casted_lut1, lut_size, tmp_lut_val_flt);
 
     //////////Decompanding///////////
 
@@ -824,42 +605,6 @@ int main(int argc, char** argv) {
             }
         }
     }
-
-    cv::Mat cfa_bayer_output_org1(in_img9.rows, in_img9.cols, CV_16UC1);
-    cv::Mat cfa_bayer_output_org2(in_img10.rows, in_img10.cols, CV_16UC1);
-    cv::Mat cfa_bayer_output_org3(in_img11.rows, in_img11.cols, CV_16UC1);
-    cv::Mat cfa_bayer_output_org4(in_img12.rows, in_img12.cols, CV_16UC1);
-    cv::Mat color_cfa_bayer_output_org1(in_img9.rows, in_img9.cols, in_img9.type());
-    cv::Mat color_cfa_bayer_output_org2(in_img10.rows, in_img10.cols, in_img9.type());
-    cv::Mat color_cfa_bayer_output_org3(in_img11.rows, in_img11.cols, in_img9.type());
-    cv::Mat color_cfa_bayer_output_org4(in_img12.rows, in_img12.cols, in_img9.type());
-    bayerizeImage(in_img9, color_cfa_bayer_output_org1, cfa_bayer_output_org1, params[0].bayer_p);
-    bayerizeImage(in_img10, color_cfa_bayer_output_org2, cfa_bayer_output_org2, params[1].bayer_p);
-    bayerizeImage(in_img11, color_cfa_bayer_output_org3, cfa_bayer_output_org3, params[2].bayer_p);
-    bayerizeImage(in_img12, color_cfa_bayer_output_org4, cfa_bayer_output_org4, params[3].bayer_p);
-
-    cv::imwrite("bayer_image_org1.png", color_cfa_bayer_output_org1);
-    cv::imwrite("bayer_image_org2.png", color_cfa_bayer_output_org2);
-    cv::imwrite("bayer_image_org3.png", color_cfa_bayer_output_org3);
-    cv::imwrite("bayer_image_org4.png", color_cfa_bayer_output_org4);
-
-    cv::imwrite("256x256_bayer_16bit.png", cfa_bayer_output_org1);
-    cv::imwrite("256x256_1_bayer_16bit.png", cfa_bayer_output_org2);
-    cv::imwrite("256x256_2_bayer_16bit.png", cfa_bayer_output_org3);
-    cv::imwrite("256x256_3_bayer_16bit.png", cfa_bayer_output_org4);
-
-    cv::Mat gamma_out1, gamma_out2, gamma_out3, gamma_out4;
-
-    gamma_out1.create(in_img9.rows, in_img9.cols, CV_16UC1);
-    gamma_out2.create(in_img10.rows, in_img10.cols, CV_16UC1);
-    gamma_out3.create(in_img11.rows, in_img11.cols, CV_16UC1);
-    gamma_out4.create(in_img12.rows, in_img12.cols, CV_16UC1);
-
-    cv::Mat out_img1_12bit, out_img2_12bit, out_img3_12bit, out_img4_12bit;
-    out_img1_12bit.create(gamma_out1.rows, gamma_out1.cols, CV_16UC1);
-    out_img2_12bit.create(gamma_out2.rows, gamma_out2.cols, CV_16UC1);
-    out_img3_12bit.create(gamma_out3.rows, gamma_out3.cols, CV_16UC1);
-    out_img4_12bit.create(gamma_out4.rows, gamma_out4.cols, CV_16UC1);
 
     float dcp_params_16to12[NUM_STREAMS][3][4][3];
 
@@ -949,50 +694,218 @@ int main(int argc, char** argv) {
         }
     }
 
-    size_t dgam_params_in_size_bytes = NUM_STREAMS * 3 * DGAMMA_KP * 3 * sizeof(int);
-
     /////////////////////////////////////
     int dg_pxl_val1;
     float dg_val;
     float dg_val1;
     float dg_out_val1;
-
-    degma_image(cfa_bayer_output_org1, gamma_out1, dg_pxl_val1, dg_val, dg_val1, dg_out_val1, height, width);
-    degma_image(cfa_bayer_output_org2, gamma_out2, dg_pxl_val1, dg_val, dg_val1, dg_out_val1, height, width);
-    degma_image(cfa_bayer_output_org3, gamma_out3, dg_pxl_val1, dg_val, dg_val1, dg_out_val1, height, width);
-    degma_image(cfa_bayer_output_org4, gamma_out4, dg_pxl_val1, dg_val, dg_val1, dg_out_val1, height, width);
-
-    imwrite("gamma1.png", gamma_out1);
-    imwrite("gamma2.png", gamma_out2);
-    imwrite("gamma3.png", gamma_out3);
-    imwrite("gamma4.png", gamma_out4);
-
     int pxl_val;
     int out_val;
     int color_idx, row_idx, col_idx;
-    get_image(gamma_out1, out_img1_12bit, height, width, pxl_val, out_val, color_idx, row_idx, col_idx,
-              params[0].bayer_p, dcp_params_16to12[0]);
 
-    get_image(gamma_out2, out_img2_12bit, height, width, pxl_val, out_val, color_idx, row_idx, col_idx,
-              params[1].bayer_p, dcp_params_16to12[1]);
+    if (USE_HDR_FUSION) {
+        cv::Mat cfa_bayer_output_org1(in_img1.rows, in_img1.cols, CV_16UC1);
+        cv::Mat cfa_bayer_output_org2(in_img2.rows, in_img2.cols, CV_16UC1);
+        cv::Mat cfa_bayer_output_org3(in_img3.rows, in_img3.cols, CV_16UC1);
+        cv::Mat cfa_bayer_output_org4(in_img4.rows, in_img4.cols, CV_16UC1);
+        cv::Mat cfa_bayer_output_org5(in_img5.rows, in_img5.cols, CV_16UC1);
+        cv::Mat cfa_bayer_output_org6(in_img6.rows, in_img6.cols, CV_16UC1);
+        cv::Mat cfa_bayer_output_org7(in_img7.rows, in_img7.cols, CV_16UC1);
+        cv::Mat cfa_bayer_output_org8(in_img8.rows, in_img8.cols, CV_16UC1);
 
-    get_image(gamma_out3, out_img3_12bit, height, width, pxl_val, out_val, color_idx, row_idx, col_idx,
-              params[2].bayer_p, dcp_params_16to12[2]);
+        bayerizeImage(in_img1, cfa_bayer_output_org1, params[0].bayer_p);
+        bayerizeImage(in_img2, cfa_bayer_output_org2, params[1].bayer_p);
+        bayerizeImage(in_img3, cfa_bayer_output_org3, params[2].bayer_p);
+        bayerizeImage(in_img4, cfa_bayer_output_org4, params[3].bayer_p);
+        bayerizeImage(in_img5, cfa_bayer_output_org5, params[0].bayer_p);
+        bayerizeImage(in_img6, cfa_bayer_output_org6, params[1].bayer_p);
+        bayerizeImage(in_img7, cfa_bayer_output_org7, params[2].bayer_p);
+        bayerizeImage(in_img8, cfa_bayer_output_org8, params[3].bayer_p);
 
-    get_image(gamma_out4, out_img4_12bit, height, width, pxl_val, out_val, color_idx, row_idx, col_idx,
-              params[3].bayer_p, dcp_params_16to12[3]);
+        cv::imwrite("bayer_16bit_1.png", cfa_bayer_output_org1);
+        cv::imwrite("bayer_16bit_2.png", cfa_bayer_output_org2);
+        cv::imwrite("bayer_16bit_3.png", cfa_bayer_output_org3);
+        cv::imwrite("bayer_16bit_4.png", cfa_bayer_output_org4);
+        cv::imwrite("bayer_16bit_5.png", cfa_bayer_output_org5);
+        cv::imwrite("bayer_16bit_6.png", cfa_bayer_output_org6);
+        cv::imwrite("bayer_16bit_7.png", cfa_bayer_output_org7);
+        cv::imwrite("bayer_16bit_8.png", cfa_bayer_output_org8);
 
-    imwrite("12_bit1.png", out_img1_12bit);
-    imwrite("12_bit2.png", out_img2_12bit);
-    imwrite("12_bit3.png", out_img3_12bit);
-    imwrite("12_bit4.png", out_img4_12bit);
+        interleaved_img1.create(cv::Size(cfa_bayer_output_org1.cols + NUM_H_BLANK, cfa_bayer_output_org1.rows * 2),
+                                CV_16UC1);
+        interleaved_img2.create(cv::Size(cfa_bayer_output_org1.cols + NUM_H_BLANK, cfa_bayer_output_org1.rows * 2),
+                                CV_16UC1);
+        interleaved_img3.create(cv::Size(cfa_bayer_output_org1.cols + NUM_H_BLANK, cfa_bayer_output_org1.rows * 2),
+                                CV_16UC1);
+        interleaved_img4.create(cv::Size(cfa_bayer_output_org1.cols + NUM_H_BLANK, cfa_bayer_output_org1.rows * 2),
+                                CV_16UC1);
 
+        int sc = 1;
+        int cnt = 0, cnt1 = 0;
+        for (int r = 0; r < height * 2; r++) {
+            for (int c = 0; c < width + NUM_H_BLANK; c++) {
+                if (r < NUM_V_BLANK_LINES) {
+                    if (c >= NUM_H_BLANK) {
+                        interleaved_img1.at<CVTYPE>(r, c) = cfa_bayer_output_org1.at<CVTYPE>(r, c - NUM_H_BLANK);
+                        interleaved_img2.at<CVTYPE>(r, c) = cfa_bayer_output_org3.at<CVTYPE>(r, c - NUM_H_BLANK);
+                        interleaved_img3.at<CVTYPE>(r, c) = cfa_bayer_output_org5.at<CVTYPE>(r, c - NUM_H_BLANK);
+                        interleaved_img4.at<CVTYPE>(r, c) = cfa_bayer_output_org7.at<CVTYPE>(r, c - NUM_H_BLANK);
+                    } else {
+                        interleaved_img1.at<CVTYPE>(r, c) = 0;
+                        interleaved_img2.at<CVTYPE>(r, c) = 0;
+                        interleaved_img3.at<CVTYPE>(r, c) = 0;
+                        interleaved_img4.at<CVTYPE>(r, c) = 0;
+                    }
+                }
+
+                if (r >= NUM_V_BLANK_LINES && r <= ((2 * height) - NUM_V_BLANK_LINES)) {
+                    if (r % 2 == 0) {
+                        if (c >= NUM_H_BLANK) {
+                            interleaved_img1.at<CVTYPE>(r, c) = cfa_bayer_output_org2.at<CVTYPE>(cnt, c - NUM_H_BLANK);
+                            interleaved_img2.at<CVTYPE>(r, c) = cfa_bayer_output_org4.at<CVTYPE>(cnt, c - NUM_H_BLANK);
+                            interleaved_img3.at<CVTYPE>(r, c) = cfa_bayer_output_org6.at<CVTYPE>(cnt, c - NUM_H_BLANK);
+                            interleaved_img4.at<CVTYPE>(r, c) = cfa_bayer_output_org8.at<CVTYPE>(cnt, c - NUM_H_BLANK);
+                        } else {
+                            interleaved_img1.at<CVTYPE>(r, c) = 0;
+                            interleaved_img2.at<CVTYPE>(r, c) = 0;
+                            interleaved_img3.at<CVTYPE>(r, c) = 0;
+                            interleaved_img4.at<CVTYPE>(r, c) = 0;
+                        }
+                    } else {
+                        if (c >= NUM_H_BLANK) {
+                            interleaved_img1.at<CVTYPE>(r, c) =
+                                cfa_bayer_output_org1.at<CVTYPE>(cnt1 + NUM_V_BLANK_LINES - 1, c - NUM_H_BLANK);
+                            interleaved_img2.at<CVTYPE>(r, c) =
+                                cfa_bayer_output_org3.at<CVTYPE>(cnt1 + NUM_V_BLANK_LINES - 1, c - NUM_H_BLANK);
+                            interleaved_img3.at<CVTYPE>(r, c) =
+                                cfa_bayer_output_org5.at<CVTYPE>(cnt1 + NUM_V_BLANK_LINES - 1, c - NUM_H_BLANK);
+                            interleaved_img4.at<CVTYPE>(r, c) =
+                                cfa_bayer_output_org7.at<CVTYPE>(cnt1 + NUM_V_BLANK_LINES - 1, c - NUM_H_BLANK);
+                        }
+
+                        else {
+                            interleaved_img1.at<CVTYPE>(r, c) = 0;
+                            interleaved_img2.at<CVTYPE>(r, c) = 0;
+                            interleaved_img3.at<CVTYPE>(r, c) = 0;
+                            interleaved_img4.at<CVTYPE>(r, c) = 0;
+                        }
+                    }
+                }
+                if (r >= ((2 * height) - NUM_V_BLANK_LINES)) {
+                    if (c >= NUM_H_BLANK) {
+                        interleaved_img1.at<CVTYPE>(r, c) = cfa_bayer_output_org2.at<CVTYPE>(cnt, c - NUM_H_BLANK);
+                        interleaved_img2.at<CVTYPE>(r, c) = cfa_bayer_output_org4.at<CVTYPE>(cnt, c - NUM_H_BLANK);
+                        interleaved_img3.at<CVTYPE>(r, c) = cfa_bayer_output_org6.at<CVTYPE>(cnt, c - NUM_H_BLANK);
+                        interleaved_img4.at<CVTYPE>(r, c) = cfa_bayer_output_org8.at<CVTYPE>(cnt, c - NUM_H_BLANK);
+                    } else {
+                        interleaved_img1.at<CVTYPE>(r, c) = 0;
+                        interleaved_img2.at<CVTYPE>(r, c) = 0;
+                        interleaved_img3.at<CVTYPE>(r, c) = 0;
+                        interleaved_img4.at<CVTYPE>(r, c) = 0;
+                    }
+                }
+            }
+            if (r % 2 == 0 && r >= NUM_V_BLANK_LINES) {
+                cnt++;
+            }
+            if (r % 2 != 0 && r >= NUM_V_BLANK_LINES) {
+                cnt1++;
+            }
+        }
+        imwrite("interleaved_img1.png", interleaved_img1);
+        imwrite("interleaved_img2.png", interleaved_img2);
+        imwrite("interleaved_img3.png", interleaved_img3);
+        imwrite("interleaved_img4.png", interleaved_img4);
+    } else {
+        cv::Mat cfa_bayer_output_org1(in_img1.rows, in_img1.cols, CV_16UC1);
+        cv::Mat cfa_bayer_output_org2(in_img2.rows, in_img2.cols, CV_16UC1);
+        cv::Mat cfa_bayer_output_org3(in_img3.rows, in_img3.cols, CV_16UC1);
+        cv::Mat cfa_bayer_output_org4(in_img4.rows, in_img4.cols, CV_16UC1);
+
+        bayerizeImage(in_img1, cfa_bayer_output_org1, params[0].bayer_p);
+        bayerizeImage(in_img2, cfa_bayer_output_org2, params[1].bayer_p);
+        bayerizeImage(in_img3, cfa_bayer_output_org3, params[2].bayer_p);
+        bayerizeImage(in_img4, cfa_bayer_output_org4, params[3].bayer_p);
+
+        cv::imwrite("bayer_16bit_1.png", cfa_bayer_output_org1);
+        cv::imwrite("bayer_16bit_1.png", cfa_bayer_output_org2);
+        cv::imwrite("bayer_16bit_1.png", cfa_bayer_output_org3);
+        cv::imwrite("bayer_16bit_1.png", cfa_bayer_output_org4);
+
+        cv::Mat gamma_out1, gamma_out2, gamma_out3, gamma_out4;
+
+        gamma_out1.create(in_img1.rows, in_img1.cols, CV_16UC1);
+        gamma_out2.create(in_img2.rows, in_img2.cols, CV_16UC1);
+        gamma_out3.create(in_img3.rows, in_img3.cols, CV_16UC1);
+        gamma_out4.create(in_img4.rows, in_img4.cols, CV_16UC1);
+
+        out_img1_12bit.create(gamma_out1.rows, gamma_out1.cols, CV_16UC1);
+        out_img2_12bit.create(gamma_out2.rows, gamma_out2.cols, CV_16UC1);
+        out_img3_12bit.create(gamma_out3.rows, gamma_out3.cols, CV_16UC1);
+        out_img4_12bit.create(gamma_out4.rows, gamma_out4.cols, CV_16UC1);
+
+        degma_image(cfa_bayer_output_org1, gamma_out1, dg_pxl_val1, dg_val, dg_val1, dg_out_val1, height, width);
+        degma_image(cfa_bayer_output_org2, gamma_out2, dg_pxl_val1, dg_val, dg_val1, dg_out_val1, height, width);
+        degma_image(cfa_bayer_output_org3, gamma_out3, dg_pxl_val1, dg_val, dg_val1, dg_out_val1, height, width);
+        degma_image(cfa_bayer_output_org4, gamma_out4, dg_pxl_val1, dg_val, dg_val1, dg_out_val1, height, width);
+
+        imwrite("gamma1.png", gamma_out1);
+        imwrite("gamma2.png", gamma_out2);
+        imwrite("gamma3.png", gamma_out3);
+        imwrite("gamma4.png", gamma_out4);
+
+        get_image(gamma_out1, out_img1_12bit, height, width, pxl_val, out_val, color_idx, row_idx, col_idx,
+                  params[0].bayer_p, dcp_params_16to12[0]);
+
+        get_image(gamma_out2, out_img2_12bit, height, width, pxl_val, out_val, color_idx, row_idx, col_idx,
+                  params[1].bayer_p, dcp_params_16to12[1]);
+
+        get_image(gamma_out3, out_img3_12bit, height, width, pxl_val, out_val, color_idx, row_idx, col_idx,
+                  params[2].bayer_p, dcp_params_16to12[2]);
+
+        get_image(gamma_out4, out_img4_12bit, height, width, pxl_val, out_val, color_idx, row_idx, col_idx,
+                  params[3].bayer_p, dcp_params_16to12[3]);
+
+        imwrite("12_bit1.png", out_img1_12bit);
+        imwrite("12_bit2.png", out_img2_12bit);
+        imwrite("12_bit3.png", out_img3_12bit);
+        imwrite("12_bit4.png", out_img4_12bit);
+    }
+    cv::Mat out_img1(in_img1.rows, in_img1.cols, CV_OUT_TYPE);
+    cv::Mat out_img2(in_img2.rows, in_img2.cols, CV_OUT_TYPE);
+    cv::Mat out_img3(in_img3.rows, in_img3.cols, CV_OUT_TYPE);
+    cv::Mat out_img4(in_img4.rows, in_img4.cols, CV_OUT_TYPE);
+
+    cv::Mat out_img_ir1(in_img1.rows, in_img1.cols, CV_16UC1);
+    cv::Mat out_img_ir2(in_img2.rows, in_img2.cols, CV_16UC1);
+    cv::Mat out_img_ir3(in_img3.rows, in_img3.cols, CV_16UC1);
+    cv::Mat out_img_ir4(in_img4.rows, in_img4.cols, CV_16UC1);
+
+    size_t image_in_size_bytes;
+    size_t image_out_size_bytes;
+    size_t vec_in_size_bytes = NUM_STREAMS * 256 * 3 * sizeof(unsigned char);
+    size_t vec_weight_size_bytes = NUM_STREAMS * NO_EXPS * XF_NPPC * W_B_SIZE * sizeof(short);
+
+    if (USE_HDR_FUSION) {
+        image_in_size_bytes = interleaved_img1.rows * interleaved_img1.cols * sizeof(CVTYPE);
+    } else {
+        image_in_size_bytes = in_img1.rows * in_img2.cols * sizeof(CVTYPE);
+    }
+
+    if (USE_CSC == 0) {
+        image_out_size_bytes = height * width * 3 * sizeof(unsigned char);
+    }
+    if (USE_CSC == 1) {
+        image_out_size_bytes = height * width * 1 * sizeof(unsigned short);
+    }
+
+    size_t image_out_ir_size_bytes = in_img1.rows * in_img1.cols * 1 * sizeof(unsigned short);
     size_t dcp_params_in_size_bytes = NUM_STREAMS * 36 * sizeof(int);
-
+    size_t dgam_params_in_size_bytes = NUM_STREAMS * 3 * DGAMMA_KP * 3 * sizeof(int);
     size_t array_size_bytes = NUM_STREAMS * 11 * sizeof(unsigned short);
-
     size_t c1_size_bytes = NUM_STREAMS * sizeof(float);
     size_t c2_size_bytes = NUM_STREAMS * sizeof(float);
+
     cl_int err;
     std::cout << "INFO: Running OpenCL section." << std::endl;
 
@@ -1004,10 +917,10 @@ int main(int argc, char** argv) {
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
     std::string binaryFile = xcl::find_binary_file(device_name, "krnl_ISPPipeline");
     cl::Program::Binaries bins = xcl::import_binary_file(binaryFile);
+    std::cout << "INFO: import_binary_file done." << std::endl;
     devices.resize(1);
 
     OCL_CHECK(err, cl::Program program(context, devices, bins, NULL, &err));
-
     // Create a kernel:
     OCL_CHECK(err, cl::Kernel kernel(program, "ISPPipeline_accel", &err));
     std::vector<cl::Memory> inBufVec, outBufVec;
@@ -1043,7 +956,6 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, cl::Buffer buffer_inLut4(context, CL_MEM_READ_ONLY, lut_in_size_bytes, NULL, &err));
     OCL_CHECK(err, cl::Buffer buffer_dgam_params(context, CL_MEM_READ_ONLY, dgam_params_in_size_bytes, NULL, &err));
     OCL_CHECK(err, cl::Buffer buffer_decompand_params(context, CL_MEM_READ_ONLY, dcp_params_in_size_bytes, NULL, &err));
-
     // Set the kernel arguments
     OCL_CHECK(err, err = kernel.setArg(0, buffer_inImage1));
     OCL_CHECK(err, err = kernel.setArg(1, buffer_inImage2));
@@ -1074,6 +986,7 @@ int main(int argc, char** argv) {
     OCL_CHECK(err, err = kernel.setArg(26, buffer_inLut2));
     OCL_CHECK(err, err = kernel.setArg(27, buffer_inLut3));
     OCL_CHECK(err, err = kernel.setArg(28, buffer_inLut4));
+
     for (int i = 0; i < 4; i++) {
         OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inVec_Weights,  // buffer on the FPGA
                                             CL_TRUE,               // blocking call
@@ -1149,7 +1062,6 @@ int main(int argc, char** argv) {
                                             0,                 // buffer offset in bytes
                                             vec_in_size_bytes, // Size in bytes
                                             gamma_lut));
-
         OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inLut1,     // buffer on the FPGA
                                             CL_TRUE,           // blocking call
                                             0,                 // buffer offset in bytes
@@ -1161,21 +1073,20 @@ int main(int argc, char** argv) {
                                             CL_TRUE,           // blocking call
                                             0,                 // buffer offset in bytes
                                             lut_in_size_bytes, // Size in bytes
-                                            casted_lut2,       // Pointer to the data to copy
+                                            casted_lut1,       // Pointer to the data to copy
                                             nullptr));
 
         OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inLut3,     // buffer on the FPGA
                                             CL_TRUE,           // blocking call
                                             0,                 // buffer offset in bytes
                                             lut_in_size_bytes, // Size in bytes
-                                            casted_lut3,       // Pointer to the data to copy
+                                            casted_lut1,       // Pointer to the data to copy
                                             nullptr));
-
         OCL_CHECK(err, q.enqueueWriteBuffer(buffer_inLut4,     // buffer on the FPGA
                                             CL_TRUE,           // blocking call
                                             0,                 // buffer offset in bytes
                                             lut_in_size_bytes, // Size in bytes
-                                            casted_lut4,       // Pointer to the data to copy
+                                            casted_lut1,       // Pointer to the data to copy
                                             nullptr));
 
         if (USE_HDR_FUSION) {

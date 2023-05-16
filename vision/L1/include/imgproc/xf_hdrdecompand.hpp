@@ -93,7 +93,6 @@ void xFcompute(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
         if((bayerp == XF_BAYER_GR) || (bayerp == XF_BAYER_RG))
             row_incr = 1;
         else row_incr = 0;
-
 	rowLoop:
 		for (i = 0; i < rows; i++) {
 	// clang-format off
@@ -173,7 +172,7 @@ void hdr_decompand(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
             }
         }
     }
-#pragma HLS ARRAY_PARTITION variable = copy_params complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = copy_params complete dim = 0
 
     xFcompute<SRC_T, DST_T, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT, (COLS >> (XF_BITSHIFT(NPC)))>(
         src, dst, copy_params, bayerp, rows, cols_shifted);

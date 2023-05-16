@@ -457,29 +457,6 @@ Row_Loop:
 template <int SRC_T, int NPC, int DEPTH, int buf_size>
 void Core_Process_multi(
     XF_DTUNAME(SRC_T, NPC) imgblock[5][buf_size], int& b, int& g, int& r, int row, int col, int loop) {
-    //    if (BFORMAT == XF_BAYER_RG) {
-    /*        if ((row & 0x00000001) == 0) {     // if R row
-                if ((col & 0x00000001) == 0) { // We already have R value at this location
-                    b = rb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                    g = g_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                    r = imgblock[2][2 + loop];
-                } else { // We already have G value at this location
-                    b = rgb_bgr_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                    g = imgblock[2][2 + loop];
-                    r = rgr_bgb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                }
-            } else {                           // B row
-                if ((col & 0x00000001) == 0) { // We have already G value at this location
-                    b = rgr_bgb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                    g = imgblock[2][2 + loop];
-                    r = rgb_bgr_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                } else { // We already have B value at this location
-                    b = imgblock[2][2 + loop];
-                    g = g_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                    r = rb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                }
-            }
-        } else if (BFORMAT == XF_BAYER_BG) {*/
     if ((row & 0x00000001) == 0) {     // if B row
         if ((col & 0x00000001) == 0) { // Even row, even column - We already have
                                        // B value at this location
@@ -503,55 +480,6 @@ void Core_Process_multi(
             b = rb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
         }
     }
-    /*    } else if (BFORMAT == XF_BAYER_GB) {
-            if ((row & 0x00000001) == 0) {     // if B row
-                if ((col & 0x00000001) == 0) { // Even row, even column - We already have
-                                               // G value at this location
-                    b = rgr_bgb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                    g = imgblock[2][2 + loop];
-                    r = rgb_bgr_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                } else { // Even row, odd column - We already have B value at this
-                         // location
-                    b = imgblock[2][2 + loop];
-                    g = g_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                    r = rb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                }
-            } else {                           // if R row
-                if ((col & 0x00000001) == 0) { // Odd row, even column - We have R value at this location
-                    r = imgblock[2][2 + loop];
-                    g = g_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                    b = rb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                } else { // Odd row, odd column - We already have G value at this location
-                    b = rgb_bgr_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                    g = imgblock[2][2 + loop];
-                    r = rgr_bgb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                }
-            }
-        } else if (BFORMAT == XF_BAYER_GR) {
-            if ((row & 0x00000001) == 0) {     // if R row
-                if ((col & 0x00000001) == 0) { // Even row, even column - We already have
-                                               // G value at this location
-                    b = rgb_bgr_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                    g = imgblock[2][2 + loop];
-                    r = rgr_bgb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                } else { // Even row, odd column - We already have R value at this
-                         // location
-                    r = imgblock[2][2 + loop];
-                    g = g_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                    b = rb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                }
-            } else {                           // if B row
-                if ((col & 0x00000001) == 0) { // Odd row, even column - We have B value at this location
-                    b = imgblock[2][2 + loop];
-                    g = g_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                    r = rb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                } else { // Odd row, odd column - We already have G value at this location
-                    b = rgr_bgb_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                    g = imgblock[2][2 + loop];
-                    r = rgb_bgr_kernel<XF_DTUNAME(SRC_T, NPC), buf_size>(imgblock, loop);
-                }
-            }
-        }*/
 }
 
 template <int SRC_T,
@@ -560,16 +488,18 @@ template <int SRC_T,
           int COLS,
           int NPC,
           bool USE_URAM,
+          int STREAMS,
+          int SLICES,
           int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
 void demosaicing_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src_mat,
                        xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst_mat,
-                       unsigned short& bformat) {
+                       unsigned short& bformat,
+                       unsigned char slice_id,
+                       unsigned char stream_id,
+                       XF_TNAME(SRC_T, NPC) demo_buffs[STREAMS][4][COLS >> XF_BITSHIFT(NPC)]) {
 #ifndef __SYNTHESIS__
-    //    assert(((BFORMAT == XF_BAYER_BG) || (BFORMAT == XF_BAYER_GB) || (BFORMAT == XF_BAYER_GR) ||
-    //           (BFORMAT == XF_BAYER_RG)) &&
-    //           ("Unsupported Bayer pattern. Use anyone among: "
-    //            "XF_BAYER_BG;XF_BAYER_GB;XF_BAYER_GR;XF_BAYER_RG"));
+
     assert(((src_mat.rows <= ROWS) && (src_mat.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert(((NPC == 1) || (NPC == 2) || (NPC == 4)) && "Only 1, 2 and 4 pixel-parallelism are supported");
     assert(((SRC_T == XF_8UC1) || (SRC_T == XF_10UC1) || (SRC_T == XF_12UC1) || (SRC_T == XF_16UC1)) &&
@@ -607,6 +537,7 @@ void demosaicing_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src_
     // clang-format on
 
     int lineStore = 3, read_index = 0, write_index = 0;
+    int demo_row_cnt_rd = 0, demo_row_cnt_wr = 0, demo_col_cnt_rd = 0, demo_col_cnt_wr = 0;
 LineBuffer:
     for (int i = 0; i < 2; i++) {
 // clang-format off
@@ -617,9 +548,17 @@ LineBuffer:
             #pragma HLS LOOP_TRIPCOUNT min=COLS/NPC max=COLS/NPC
             #pragma HLS pipeline ii=1
             // clang-format on
-            XF_TNAME(SRC_T, NPC) tmp = src_mat.read(read_index++);
-            linebuffer[i][j] = 0;
-            linebuffer[i + 2][j] = tmp;
+
+            if (slice_id == 0) { // The beginning rows of full image
+                XF_TNAME(SRC_T, NPC) tmp = src_mat.read(read_index++);
+                linebuffer[i][j] = 0;
+                linebuffer[i + 2][j] = tmp;
+            }
+            // Condition when last 4 rows need to be read from previous slice
+            else {
+                linebuffer[i][j] = demo_buffs[stream_id][i][j];
+                linebuffer[i + 2][j] = demo_buffs[stream_id][i + 2][j];
+            }
         }
     }
     ap_uint<3> line0 = 3, line1 = 0, line2 = 1, line3 = 2;
@@ -627,8 +566,16 @@ LineBuffer:
     int out_step = XF_DTPIXELDEPTH(DST_T, NPC);
     XF_TNAME(SRC_T, NPC) tmp;
 
+    // Last slice has to process left over rows accumulated from previous slices
+    int strm_rows = 0;
+    if (SLICES > 1 && slice_id == SLICES - 1) {
+        strm_rows = src_mat.rows + 2;
+    } else {
+        strm_rows = src_mat.rows;
+    }
+
 Row_Loop:
-    for (int i = 0; i < src_mat.rows; i++) {
+    for (int i = 0; i < strm_rows; i++) {
 // clang-format off
         #pragma HLS LOOP_TRIPCOUNT min=ROWS max=ROWS
         // clang-format on
@@ -689,16 +636,49 @@ Row_Loop:
     Col_Loop:
         for (int j = 0; j < ((src_mat.cols) >> XF_BITSHIFT(NPC)); j++) {
 // clang-format off
-            #pragma HLS PIPELINE ii=1
+            #pragma HLS PIPELINE II=1
             #pragma HLS dependence variable=linebuffer inter false
             #pragma HLS LOOP_TRIPCOUNT min=COLS/NPC max=COLS/NPC
             #pragma HLS LOOP_FLATTEN OFF
             // clang-format on
+            int a = 0;
+            if (i == 127) {
+                a = 1;
+                if (j == 254) {
+                    a = 2;
+                }
+            }
 
-            if (i < src_mat.rows - 2) {
-                tmp = src_mat.read(read_index++); // Reading 5th row element
-            } else {
-                tmp = 0;
+            if (slice_id == 0) { // First slice
+                if (i < src_mat.rows - 2) {
+                    tmp = src_mat.read(read_index++); // Reading 5th row element
+                    // Condition when last 4 rows need to be stored for next slice
+                    if (i >= src_mat.rows - 6) {
+                        demo_buffs[stream_id][demo_row_cnt_wr][demo_col_cnt_wr++] = tmp;
+                        if (demo_col_cnt_wr == ((src_mat.cols) >> XF_BITSHIFT(NPC))) {
+                            demo_col_cnt_wr = 0;
+                            demo_row_cnt_wr++;
+                        }
+                    }
+                } else {
+                    tmp = 0; // TODO: Need to break loop here
+                }
+            } else if (slice_id != SLICES - 1) { // Other than first and last slices
+                tmp = src_mat.read(read_index++);
+                // Condition when last 4 rows need to be stored for next slice
+                if (i >= src_mat.rows - 4) {
+                    demo_buffs[stream_id][demo_row_cnt_wr][demo_col_cnt_wr++] = tmp;
+                    if (demo_col_cnt_wr == ((src_mat.cols) >> XF_BITSHIFT(NPC))) {
+                        demo_col_cnt_wr = 0;
+                        demo_row_cnt_wr++;
+                    }
+                }
+            } else { //	Last slice
+                if (i < src_mat.rows) {
+                    tmp = src_mat.read(read_index++);
+                } else {
+                    tmp = 0;
+                }
             }
 
             for (int z = 0; z < NPC; ++z) {
@@ -756,43 +736,48 @@ Row_Loop:
             XF_TNAME(DST_T, NPC) res_pixel[NPC];
 
             short int candidateRow = i, candidateCol = 0;
-            for (int loop = 0; loop < NPC; loop++) {
-                candidateCol = j * NPC + loop;
 
-                if (bformat == XF_BAYER_GB) {
-                    candidateCol += 1;
+            // Prohibit writing last two rows o/p in all slices except last
+            // Prohibit writing last two rows o/p in first slice
+
+            if ((SLICES == 1) || (!((slice_id == 0) && (i > (src_mat.rows - 3))))) {
+                for (int loop = 0; loop < NPC; loop++) {
+                    candidateCol = j * NPC + loop;
+
+                    if (bformat == XF_BAYER_GB) {
+                        candidateCol += 1;
+                    }
+
+                    if (bformat == XF_BAYER_GR) {
+                        candidateRow += 1;
+                    }
+
+                    if (bformat == XF_BAYER_RG) {
+                        candidateCol += 1;
+                        candidateRow += 1;
+                    }
+                    Core_Process_multi<SRC_T, NPC, XF_DEPTH(SRC_T, NPC), __BWIDTH>(imgblock, b, g, r, candidateRow,
+                                                                                   candidateCol, loop);
+
+                    b = xf_satcast<XF_DTPIXELDEPTH(DST_T, NPC)>(b);
+                    g = xf_satcast<XF_DTPIXELDEPTH(DST_T, NPC)>(g);
+                    r = xf_satcast<XF_DTPIXELDEPTH(DST_T, NPC)>(r);
+
+                    if (XF_CHANNELS(DST_T, NPC) == 4) {
+                        res_pixel[loop].range(4 * out_step - 1, 3 * out_step) = MAXVAL(out_step);
+                    }
+                    res_pixel[loop].range(3 * out_step - 1, 2 * out_step) = r; // xf_satcast<XF_CTUNAME(SRC_T, NPC)>(r);
+                    res_pixel[loop].range(2 * out_step - 1, out_step) = g;     // xf_satcast<XF_CTUNAME(SRC_T, NPC)>(g);
+                    res_pixel[loop].range(out_step - 1, 0) = b;                // xf_satcast<XF_CTUNAME(SRC_T, NPC)>(b);
+                }
+                XF_TNAME(DST_T, NPC) packed_res_pixel;
+                int pstep = XF_PIXELWIDTH(DST_T, NPC);
+                for (int ploop = 0; ploop < NPC; ploop++) {
+                    packed_res_pixel.range(pstep + pstep * ploop - 1, pstep * ploop) = res_pixel[ploop];
                 }
 
-                if (bformat == XF_BAYER_GR) {
-                    candidateRow += 1;
-                }
-
-                if (bformat == XF_BAYER_RG) {
-                    candidateCol += 1;
-                    candidateRow += 1;
-                }
-                Core_Process_multi<SRC_T, NPC, XF_DEPTH(SRC_T, NPC), __BWIDTH>(imgblock, b, g, r, candidateRow,
-                                                                               candidateCol, loop);
-
-                b = xf_satcast<XF_DTPIXELDEPTH(DST_T, NPC)>(b);
-                g = xf_satcast<XF_DTPIXELDEPTH(DST_T, NPC)>(g);
-                r = xf_satcast<XF_DTPIXELDEPTH(DST_T, NPC)>(r);
-
-                if (XF_CHANNELS(DST_T, NPC) == 4) {
-                    res_pixel[loop].range(4 * out_step - 1, 3 * out_step) = MAXVAL(out_step);
-                }
-                res_pixel[loop].range(3 * out_step - 1, 2 * out_step) = r; // xf_satcast<XF_CTUNAME(SRC_T, NPC)>(r);
-                res_pixel[loop].range(2 * out_step - 1, out_step) = g;     // xf_satcast<XF_CTUNAME(SRC_T, NPC)>(g);
-                res_pixel[loop].range(out_step - 1, 0) = b;                // xf_satcast<XF_CTUNAME(SRC_T, NPC)>(b);
+                dst_mat.write(write_index++, packed_res_pixel);
             }
-            XF_TNAME(DST_T, NPC) packed_res_pixel;
-            int pstep = XF_PIXELWIDTH(DST_T, NPC);
-            for (int ploop = 0; ploop < NPC; ploop++) {
-                packed_res_pixel.range(pstep + pstep * ploop - 1, pstep * ploop) = res_pixel[ploop];
-            }
-
-            dst_mat.write(write_index++, packed_res_pixel);
-
         } // end COL loop
     }     // end ROW loop
 }
@@ -804,17 +789,20 @@ template <int SRC_T,
           int NPC,
           bool USE_URAM,
           int STREAMS = 2,
+          int SLICES = 1,
           int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_OUT_1 = _XFCVDEPTH_DEFAULT>
 void demosaicing_multi_wrap(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src_mat,
                             xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& dst_mat,
                             unsigned short bformat[STREAMS],
-                            int stream_id) {
+                            int stream_id,
+                            unsigned char slice_id,
+                            XF_TNAME(SRC_T, NPC) demo_buffs[STREAMS][4][COLS >> XF_BITSHIFT(NPC)]) {
 // clang-format off
 #pragma HLS ARRAY_PARTITION variable= bformat dim=1 complete
    // clang-format on	
-    demosaicing_multi<SRC_T, DST_T, ROWS, COLS, NPC, USE_URAM, XFCVDEPTH_IN_1,XFCVDEPTH_OUT_1>(
-        src_mat, dst_mat, bformat[stream_id]);   
+    demosaicing_multi<SRC_T, DST_T, ROWS, COLS, NPC, USE_URAM, STREAMS, SLICES, XFCVDEPTH_IN_1,XFCVDEPTH_OUT_1>(
+        src_mat, dst_mat, bformat[stream_id], slice_id, stream_id, demo_buffs);   
         
 }        
 

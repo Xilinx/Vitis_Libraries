@@ -74,7 +74,8 @@ void gaussian_otsu_accel(ap_uint<GAUSSIAN_INPUT_PTR_WIDTH>* img_inp,
     xf::cv::duplicateMat<XF_8UC1, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT, XF_CV_DEPTH_OUT_1>(
         out_mat, out_mat_otsu, out_mat_ret);
 
-    xf::cv::OtsuThreshold<OTSU_PIXEL_TYPE, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_OUT>(out_mat_otsu, *Otsuval);
+    xf::cv::OtsuThreshold<OTSU_PIXEL_TYPE, HEIGHT, WIDTH, XF_NPPCX, XF_USE_URAM, XF_CV_DEPTH_OUT>(out_mat_otsu,
+                                                                                                  *Otsuval);
 
     xf::cv::xfMat2Array<GAUSSIAN_OUTPUT_PTR_WIDTH, XF_8UC1, HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_OUT_1>(out_mat_ret,
                                                                                                         img_out);

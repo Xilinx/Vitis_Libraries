@@ -75,6 +75,7 @@ template <int SRC_T,
           int COLS,
           int DEPTH,
           int NPC,
+          int USE_URAM = 0,
           int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH,
@@ -93,8 +94,12 @@ void xFEqualize(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& _src1,
     // clang-format on
     // Temporary array to hold data
     ap_uint<8> tmp_cum_hist[(1 << XF_BITSHIFT(NPC))][256];
-// clang-format off
-    #pragma HLS ARRAY_PARTITION variable=tmp_cum_hist complete dim=1
+    // clang-format off
+    if(USE_URAM){
+        #pragma HLS bind_storage variable=tmp_cum_hist type=RAM_T2P impl=URAM
+    }else{
+        #pragma HLS ARRAY_PARTITION variable=tmp_cum_hist complete dim=1
+    }
     // clang-format on
     // Array which holds histogram of the image
 
@@ -451,6 +456,7 @@ template <int SRC_T,
           int ROWS,
           int COLS,
           int NPC = 1,
+          int USE_URAM = 0,
           int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
@@ -472,12 +478,12 @@ void equalizeHist(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src,
     uint32_t histogram[1][256];
 
     img_width = img_width >> XF_BITSHIFT(NPC);
-    xFHistogramKernel<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN, XF_WORDWIDTH(SRC_T, NPC),
+    xFHistogramKernel<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, USE_URAM, XFCVDEPTH_IN, XF_WORDWIDTH(SRC_T, NPC),
                       ((COLS >> (XF_BITSHIFT(NPC))) >> 1), XF_CHANNELS(SRC_T, NPC)>(_src, histogram, img_height,
                                                                                     img_width);
 
-    xFEqualize<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN_1, XFCVDEPTH_OUT, XF_WORDWIDTH(SRC_T, NPC),
-               (COLS >> XF_BITSHIFT(NPC))>(_src1, histogram, _dst, img_height, img_width);
+    xFEqualize<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, USE_URAM, XFCVDEPTH_IN_1, XFCVDEPTH_OUT,
+               XF_WORDWIDTH(SRC_T, NPC), (COLS >> XF_BITSHIFT(NPC))>(_src1, histogram, _dst, img_height, img_width);
 }
 
 } // namespace cv

@@ -33,6 +33,7 @@ template <int SRC_T,
           int COLS,
           int DEPTH,
           int NPC,
+          int USE_URAM = 0,
           int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH,
           int SRC_TC,
@@ -44,9 +45,14 @@ void xFHistogramKernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src_m
     // Temporary array used while computing histogram
     uint32_t tmp_hist[(PLANES << XF_BITSHIFT(NPC))][256];
     uint32_t tmp_hist1[(PLANES << XF_BITSHIFT(NPC))][256];
-// clang-format off
-#pragma HLS ARRAY_PARTITION variable=tmp_hist complete dim=1
-#pragma HLS ARRAY_PARTITION variable=tmp_hist1 complete dim=1
+    // clang-format off
+    if(USE_URAM){
+        #pragma HLS bind_storage variable=tmp_hist type=RAM_T2P impl=URAM
+        #pragma HLS bind_storage variable=tmp_hist1 type=RAM_T2P impl=URAM
+    }else{
+        #pragma HLS ARRAY_PARTITION variable=tmp_hist complete dim=1
+        #pragma HLS ARRAY_PARTITION variable=tmp_hist1 complete dim=1
+    }
     // clang-format on
     XF_SNAME(WORDWIDTH) in_buf, in_buf1, temp_buf;
 
@@ -140,6 +146,7 @@ template <int SRC_T,
           int COLS,
           int DEPTH,
           int NPC,
+          int USE_URAM = 0,
           int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH,
@@ -179,9 +186,15 @@ INITIALIZE_HIST:
 
     // Temporary array used while computing histogram
     ap_uint<32> tmp_hist[XF_NPIXPERCYCLE(NPC)][AEC_HISTSIZE];
-// clang-format off
-#pragma HLS bind_storage variable=tmp_hist type=RAM_T2P impl=BRAM
-#pragma HLS ARRAY_PARTITION variable=tmp_hist complete dim=1
+    // clang-format off
+
+if(USE_URAM){
+    #pragma HLS bind_storage variable=tmp_hist type=RAM_T2P impl=URAM
+    #pragma HLS ARRAY_PARTITION variable=tmp_hist complete dim=1
+}else{
+    #pragma HLS bind_storage variable=tmp_hist type=RAM_T2P impl=BRAM
+    #pragma HLS ARRAY_PARTITION variable=tmp_hist complete dim=1
+}
     // clang-format on
 
     XF_TNAME(SRC_T, NPC) in_buf, in_buf1, temp_buf;
@@ -290,6 +303,7 @@ template <int SRC_T,
           int COLS,
           int DEPTH,
           int NPC,
+          int USE_URAM = 0,
           int XFCVDEPTH_IN_1 = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_IN_2 = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH,
@@ -332,9 +346,15 @@ void xFHistogramKernel_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>
 
     // Temporary array used while computing histogram
     ap_uint<32> tmp_hist[XF_NPIXPERCYCLE(NPC)][AEC_HISTSIZE];
-// clang-format off
-#pragma HLS bind_storage variable=tmp_hist type=RAM_T2P impl=BRAM
-#pragma HLS ARRAY_PARTITION variable=tmp_hist complete dim=1
+    // clang-format off
+    if(USE_URAM){
+        #pragma HLS bind_storage variable=tmp_hist type=RAM_T2P impl=URAM
+        #pragma HLS ARRAY_PARTITION variable=tmp_hist complete dim=1
+    }else{
+        #pragma HLS bind_storage variable=tmp_hist type=RAM_T2P impl=BRAM
+        #pragma HLS ARRAY_PARTITION variable=tmp_hist complete dim=1
+    }
+
     // clang-format on
 
     XF_TNAME(SRC_T, NPC) in_buf, in_buf1, temp_buf;
@@ -438,7 +458,7 @@ MERGE_HIST_LOOP:
     }
 }
 
-template <int SRC_T, int ROWS, int COLS, int NPC = 1, int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT>
+template <int SRC_T, int ROWS, int COLS, int NPC = 1, int USE_URAM = 0, int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT>
 void calcHist(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src, uint32_t* histogram) {
 #ifndef __SYNTHESIS__
     assert(((NPC == XF_NPPC1) || (NPC == XF_NPPC8)) && "NPC must be XF_NPPC1, XF_NPPC8 ");
@@ -452,7 +472,7 @@ void calcHist(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src, uint32_t*
     uint16_t width = _src.cols >> (XF_BITSHIFT(NPC));
     uint16_t height = _src.rows;
 
-    xFHistogramKernel<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, XFCVDEPTH_IN, XF_WORDWIDTH(SRC_T, NPC),
+    xFHistogramKernel<SRC_T, ROWS, COLS, XF_DEPTH(SRC_T, NPC), NPC, USE_URAM, XFCVDEPTH_IN, XF_WORDWIDTH(SRC_T, NPC),
                       ((COLS >> (XF_BITSHIFT(NPC))) >> 1), XF_CHANNELS(SRC_T, NPC)>(_src, hist_array, height, width);
 
     for (int i = 0; i < (XF_CHANNELS(SRC_T, NPC)); i++) {
