@@ -119,7 +119,8 @@ The kernels in `L2/benchmarks` and `L2/demo` are built into xclbins targeting Al
 
 Licensed using the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0).
 
-    Copyright 2019-2022 Xilinx, Inc.
+    Copyright (C) 2019-2022, Xilinx, Inc.
+    Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
     
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
