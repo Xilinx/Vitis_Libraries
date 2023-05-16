@@ -221,7 +221,8 @@ To run the Vitis projects for benchmark evaluation and test, you may need the ex
 
 Licensed using the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0).
 
-    Copyright 2019 Xilinx, Inc.
+    Copyright (C) 2019-2022, Xilinx, Inc.
+    Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
     
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -234,7 +235,8 @@ Licensed using the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-    Copyright 2019 Xilinx, Inc.
+    Copyright (C) 2019-2022, Xilinx, Inc.
+    Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 
 ## Contribution/Feedback
 
