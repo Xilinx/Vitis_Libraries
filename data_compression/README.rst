@@ -170,7 +170,8 @@ license. <https://www.apache.org/licenses/LICENSE-2.0>`__
 
 ::
 
-   Copyright 2019-2022 Xilinx, Inc.
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -183,7 +184,8 @@ license. <https://www.apache.org/licenses/LICENSE-2.0>`__
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-   Copyright 2019-2022 Xilinx, Inc.
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 
 Contribution/Feedback
 ---------------------
