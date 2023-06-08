@@ -4,7 +4,7 @@ Vitis Utility Library is an open-sourced Vitis library of common patterns of str
 It aims to assist developers to efficiently access memory in DDR, HBM or URAM, and perform data distribution, collection,
 reordering, insertion, and discarding along stream-based transfer.
 
-Check the [comprehensive HTML document](https://docs.xilinx.com/r/en-US/Vitis_Libraries/utils/index.html) for more details.
+Check the [comprehensive HTML document](https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/utils/index.html) for more details.
 
 ## Requirements
 

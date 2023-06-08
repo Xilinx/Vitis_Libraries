@@ -1,7 +1,7 @@
 # Vitis Accelerated Libraries
 [Vitis&trade; Unified Software Platform](https://www.xilinx.com/products/design-tools/vitis/vitis-platform.html) includes an extensive set of open-source, performance-optimized libraries that offer out-of-the-box acceleration with minimal to zero-code changes to your existing applications.
 
-[Comprehensive documentation](https://docs.xilinx.com/r/en-US/Vitis_Libraries/index.html)
+[Comprehensive documentation](https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/index.html)
 
 * Common Vitis accelerated-libraries for Math, Statistics, Linear Algebra, and DSP offer a set of core functionality for a wide range of diverse applications.
 * Domain-specific Vitis accelerated libraries offer out-of-the-box acceleration for workloads like Vision and Image Processing, Quantitative Finance, Database, and Data Analytics, Data Compression and more.

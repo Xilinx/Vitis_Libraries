@@ -12,7 +12,7 @@ Currently, this library offers two levels of acceleration:
 
 * At module level is for the C++ implementation of basic components used in SpMV functions. These implementations are intended to be used by HLS (High Level Synthesis) users to build FPGA logic for their applications. 
 * The kernel level is for pre-defined kernels that are the C++ implementation of SpMV functions. These implementations are intended to demonstrate how FPGA kernels are defined and how L1 primitive functions can be used by any Vitis users to build their kernels for their applications. 
-Check the [comprehensive HTML document](https://docs.xilinx.com/r/en-US/Vitis_Libraries/sparse/index.html) for more details.
+Check the [comprehensive HTML document](https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/sparse/index.html) for more details.
 
 ## Requirements
 
@@ -58,10 +58,10 @@ Vitis libraries are organized into L1, L2, and L3 folders, each relating to a di
 
 ## Benchmark Result
 
-In `L2/benchmarks`, more details about the benchmarks, please kindly find them in [benchmark results](https://docs.xilinx.com/r/en-US/Vitis_Libraries/sparse/benchmark/spmv_double.html).
+In `L2/benchmarks`, more details about the benchmarks, please kindly find them in [benchmark results](https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/sparse/benchmark/spmv_double.html).
 
 ## Documentations
-For more details of the sparse library, please refer to [sparse Library Documentation](https://docs.xilinx.com/r/en-US/Vitis_Libraries/sparse/index.html).
+For more details of the sparse library, please refer to [sparse Library Documentation](https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/sparse/index.html).
 
 ## License
 

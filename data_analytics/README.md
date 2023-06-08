@@ -3,7 +3,7 @@
 Vitis Data Analytics Library is an open-sourced Vitis library written in C++ for accelerating
 data analytics applications in a variety of use cases.
 
-[Comprehensive documentation](https://docs.xilinx.com/r/en-US/Vitis_Libraries/data_analytics/index.html)
+[Comprehensive documentation](https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/data_analytics/index.html)
 
 ## API Categories
 
@@ -112,7 +112,7 @@ Here, `TARGET` decides the FPGA binary type
 
 ## Benchmark Result
 
-The kernels in `L2/benchmarks` and `L2/demo` are built into xclbins targeting Alveo U200/U250/U50. We achieved a good performance. For more details about the benchmarks, please kindly find them in [benchmark results](https://docs.xilinx.com/r/en-US/Vitis_Libraries/data_analytics/benchmark/benchmark.html).
+The kernels in `L2/benchmarks` and `L2/demo` are built into xclbins targeting Alveo U200/U250/U50. We achieved a good performance. For more details about the benchmarks, please kindly find them in [benchmark results](https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/data_analytics/benchmark/benchmark.html).
 
 
 ## License

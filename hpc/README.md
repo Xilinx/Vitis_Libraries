@@ -125,11 +125,11 @@ Besides ``run``, the Vitis case makefile also allows ``host`` and ``xclbin`` as 
 
 ## Benchmark Result
 
-In `L2/benchmarks`, these Kernels are built into xclbins targeting Alveo U250, U280 or U50. We achieved a good performance against several problem sizes. For more details about the benchmarks, please kindly find them in [benchmark results](https://docs.xilinx.com/r/en-US/Vitis_Libraries/hpc/benchmark.html). 
+In `L2/benchmarks`, these Kernels are built into xclbins targeting Alveo U250, U280 or U50. We achieved a good performance against several problem sizes. For more details about the benchmarks, please kindly find them in [benchmark results](https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/hpc/benchmark.html). 
 
 ## Documentations
 
-For more details of the HPC library, please refer to [Vitis HPC Library Documentation](https://docs.xilinx.com/r/en-US/Vitis_Libraries/hpc/index.html).
+For more details of the HPC library, please refer to [Vitis HPC Library Documentation](https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/hpc/index.html).
 
 ## License
 

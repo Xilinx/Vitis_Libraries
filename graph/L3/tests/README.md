@@ -12,6 +12,6 @@ Before running testcase,
     change PROJECTPATH in config.json to graph library's absolute path 
     make run TARGET=hw 
 
-For more details of the testcases, please ref to [Vitis Graph Library Documentation](https://docs.xilinx.com/r/en-US/Vitis_Libraries/graph/index.html)
+For more details of the testcases, please ref to [Vitis Graph Library Documentation](https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/graph/index.html)
     
 

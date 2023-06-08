@@ -12,7 +12,7 @@ Currently, this library offers three levels of acceleration:
 * The kernel level is for pre-defined kernels that are the C++ implementation of BLAS functions. These implementations are intended to demonstrate how FPGA kernels are defined and how L1 primitive functions can be used by any Vitis users to build their kernels for their applications. 
 * The software APIs level is an implementation of BLAS on top of the XILINX runtime (XRT). It allows software developers to use Vitis BLAS library without writing any runtime functions and hardware configurations.
 
-Check the [comprehensive HTML document](https://docs.xilinx.com/r/en-US/Vitis_Libraries/blas/index.html) for more details.
+Check the [comprehensive HTML document](https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/blas/index.html) for more details.
 
 
 ## Requirements
@@ -125,10 +125,10 @@ Besides ``run``, the Vitis case makefile also allows ``host`` and ``xclbin`` as 
 
 ## Benchmark Result
 
-More details about the benchmarks, please kindly find them in [benchmark results](https://docs.xilinx.com/r/en-US/Vitis_Libraries/blas/benchmark.html).
+More details about the benchmarks, please kindly find them in [benchmark results](https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/blas/benchmark.html).
 
 ## Documentations
-For more details of the blas library, please refer to [blas Library Documentation](https://docs.xilinx.com/r/en-US/Vitis_Libraries/blas/index.html).
+For more details of the blas library, please refer to [blas Library Documentation](https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/blas/index.html).
 
 
 ## License

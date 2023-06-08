@@ -44,11 +44,11 @@ Vitis library is organized into L1, L2, and L3 folders, each relating to a diffe
 
 ## Benchmark Result
 
-In `L2/demos`, thest Kernels are built into xclbin targeting U200. We achieved a good performance against several dataset, e.g. lena.png with latency of "value". For more details about the benchmarks, please kindly find them in [benchmark results](https://docs.xilinx.com/r/en-US/Vitis_Libraries/codec/benchmark.html).
+In `L2/demos`, thest Kernels are built into xclbin targeting U200. We achieved a good performance against several dataset, e.g. lena.png with latency of "value". For more details about the benchmarks, please kindly find them in [benchmark results](https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/codec/benchmark.html).
 
 ## Documentations
 
-For more details of the Codec library, please refer to [xf_codec Library Documentation](https://docs.xilinx.com/r/en-US/Vitis_Libraries/codec/index.html).
+For more details of the Codec library, please refer to [xf_codec Library Documentation](https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/codec/index.html).
 
 ## License
 

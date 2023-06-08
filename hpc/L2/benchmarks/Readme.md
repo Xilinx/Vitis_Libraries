@@ -38,7 +38,7 @@ Specifying the corresponding Vitis, XRT, and path to the platform repository by 
 ```
 
 ### Python 3.6+
-Follow the steps as per https://docs.xilinx.com/r/en-US/Vitis_Libraries/blas/user_guide/L1/pyenvguide.html to set up Python3 environment.
+Follow the steps as per https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/blas/user_guide/L1/pyenvguide.html to set up Python3 environment.
 
 ### Datasets
 - For dense matrix conjugate gradient solver, data are randomly generated during benchmark

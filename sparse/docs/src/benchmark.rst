@@ -86,4 +86,4 @@ Specifying the corresponding Vitis, XRT, and path to the platform repository by 
    source /opt/xilinx/xrt/setup.sh
    export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 
-Python3 environment: follow the steps as per https://docs.xilinx.com/r/en-US/Vitis_Libraries/blas/user_guide/L1/pyenvguide.html to set up Python3 environment.
+Python3 environment: follow the steps as per https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/blas/user_guide/L1/pyenvguide.html to set up Python3 environment.

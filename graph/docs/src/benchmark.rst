@@ -130,7 +130,7 @@ Spark
 
 Tigergraph
 ~~~~~~~~~~
-* `Tigergraph 2.4.1 installed and configured <https://docs.xilinx.com/r/en-US/Vitis_Libraries/graph/plugin/tigergraph_integration.html>`_.
+* `Tigergraph 2.4.1 installed and configured <https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/graph/plugin/tigergraph_integration.html>`_.
 * Tigergraph running on platform with Intel(R) Xeon(R) CPU E5-2640 v3 @2.600GHz, 32 Threads (16 Core(s)).
 
 .. _l2_vitis_graph:

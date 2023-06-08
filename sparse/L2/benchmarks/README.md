@@ -10,7 +10,7 @@ We provide a benchmark for the SpMV function of the Vitis SPARSE library. The be
 - Xilinx Vitis 2022.2 installed and configured
 
 ### Python3
-Follow the steps as per https://docs.xilinx.com/r/en-US/Vitis_Libraries/blas/user_guide/L1/pyenvguide.html to set up Python3 environment.
+Follow the steps as per https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/blas/user_guide/L1/pyenvguide.html to set up Python3 environment.
 
 ### Datasets
 - Datasets from https://sparse.tamu.edu/ will be downloaded during benchmarking process

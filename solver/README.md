@@ -45,7 +45,7 @@ Vitis libraries are organized into L1, L2, and L3 folders, each relating to a di
 **L3**: Makefiles and sources in L3 demonstrate applications developed involving multiple kernels in pipeline. These Makefiles can be used for executing tasks, as with the L2 Makefiles.
 
 ## Benchmark Result
-In `L2/benchmarks`, Kernels are built into xclbins targeting Alveo U200/U250. We achieved a good performance. For more details about the benchmarks, please kindly find them in [benchmark results](https://docs.xilinx.com/r/en-US/Vitis_Libraries/solver/benchmark.html).
+In `L2/benchmarks`, Kernels are built into xclbins targeting Alveo U200/U250. We achieved a good performance. For more details about the benchmarks, please kindly find them in [benchmark results](https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/solver/benchmark.html).
   
 ## Documentations
-For more details of the Graph library, please refer to [Vitis Solver Library Documentation](https://docs.xilinx.com/r/en-US/Vitis_Libraries/solver/index.html).
+For more details of the Graph library, please refer to [Vitis Solver Library Documentation](https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/solver/index.html).

@@ -19,7 +19,7 @@ At each level, this library strives to make modules configurable through documen
 so that advanced users can easily tailor, optimize or combine with property logic for specific needs.
 Test cases are provided for all the public APIs, and can be used as examples of usage.
 
-Check the [comprehensive HTML document](https://docs.xilinx.com/r/en-US/Vitis_Libraries/database/index.html) for more details.
+Check the [comprehensive HTML document](https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/database/index.html) for more details.
 
 ## Requirements
 
@@ -150,7 +150,7 @@ Besides ``run``, the Vitis case makefile also allows ``host`` and ``xclbin`` as 
 
 In `L1/benchmarks`, a list of key primitives are combined with data-loading/storing modules and built into xclbins targeting Alveo U280.
 For more details about the benchmarks, please kindly find them in Database Library's Benchmarking section of
-[documentation](https://docs.xilinx.com/r/en-US/Vitis_Libraries/database/index.html).
+[documentation](https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/database/index.html).
 
 
 ## License

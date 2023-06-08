@@ -11,7 +11,7 @@ The Vitis Quantitative Finance Library provides comprehensive tools from the bot
 
 * The software API level (L3) wraps the details of offloading acceleration with pre-built binary (overlay) and allow users to accelerate supported pricing tasks on Alveo cards without engaging hardware development.
 
-Check the [comprehensive HTML documentation](https://docs.xilinx.com/r/en-US/Vitis_Libraries/quantitative_finance/index.html) for more details.
+Check the [comprehensive HTML documentation](https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/quantitative_finance/index.html) for more details.
 
 ## Library Contents
 
@@ -228,9 +228,9 @@ $ cd output
 $ ./mc_example
 ```
 ## Benchmark Result
-In `L2/benchmarks`, Kernels are built into xclbins targeting Alveo U200/U250. We achieved a good performance. For more details about the benchmarks, please kindly find them in [benchmark results](https://docs.xilinx.com/r/en-US/Vitis_Libraries/quantitative_finance/benchmark.html).
+In `L2/benchmarks`, Kernels are built into xclbins targeting Alveo U200/U250. We achieved a good performance. For more details about the benchmarks, please kindly find them in [benchmark results](https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/quantitative_finance/benchmark.html).
 ## Documentations
-For more details of the Graph library, please refer to [Vitis Quantitative_Finance Library Documentation](https://docs.xilinx.com/r/en-US/Vitis_Libraries/quantitative_finance/index.html).
+For more details of the Graph library, please refer to [Vitis Quantitative_Finance Library Documentation](https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/quantitative_finance/index.html).
 
 ## License
 

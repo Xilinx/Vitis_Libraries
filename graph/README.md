@@ -40,19 +40,19 @@ Vitis libraries are organized into L1, L2, and L3 folders, each relating to a di
 
 ## Benchmark Result
 
-In `L2/benchmarks`, these kernels are built into xclbins targeting Alveo U250/U50. We achieved a good performance on several dataset. For more details about the benchmarks, please find them in [benchmark results](https://docs.xilinx.com/r/en-US/Vitis_Libraries/graph/benchmark.html).
+In `L2/benchmarks`, these kernels are built into xclbins targeting Alveo U250/U50. We achieved a good performance on several dataset. For more details about the benchmarks, please find them in [benchmark results](https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/graph/benchmark.html).
 
 ## Software level API
 
-`L3` offers asynchronous software level APIs. The L3 framework can fully use the hardware resources and achieve high throughput scheduling. And users can send multiple requests at the same time. For details on running these cases, please refer to [Vitis Graph Library Documentation](https://docs.xilinx.com/r/en-US/Vitis_Libraries/graph/guide_L3/L3_internal/getting_started.html).
+`L3` offers asynchronous software level APIs. The L3 framework can fully use the hardware resources and achieve high throughput scheduling. And users can send multiple requests at the same time. For details on running these cases, please refer to [Vitis Graph Library Documentation](https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/graph/guide_L3/L3_internal/getting_started.html).
 
 ## Get Started
 
-To get started with the Vitis Graph Library, please have a visit on our [tutorial page](https://docs.xilinx.com/r/en-US/Vitis_Libraries/graph/tutorial.html).
+To get started with the Vitis Graph Library, please have a visit on our [tutorial page](https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/graph/tutorial.html).
 
 ## Documentations
 
-For more details of the Graph library, please refer to [Vitis Graph Library Documentation](https://docs.xilinx.com/r/en-US/Vitis_Libraries/graph/index.html).
+For more details of the Graph library, please refer to [Vitis Graph Library Documentation](https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/graph/index.html).
 
 ## License
 

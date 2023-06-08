@@ -143,7 +143,7 @@ For AIE development *L2/tests/aie* , *L2/examples/aie* has Makefile(s) and sourc
 
 ## OTHER INFORMATION
 Full User Guide for Vitis Vision and using OpenCV on Xilinx devices Check here:
-[Xilinx Vitis Vision User Guide](https://docs.xilinx.com/r/en-US/Vitis_Libraries/vision/index.html)
+[Xilinx Vitis Vision User Guide](https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/vision/index.html)
 
 ## SUPPORT
 For questions and to get help on this project or your own projects, visit the [Xilinx Forums](https://support.xilinx.com/s/topic/0TO2E000000YKYAWA4/vitis-acceleration-acceleration?language=en_US)

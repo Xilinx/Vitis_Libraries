@@ -236,7 +236,7 @@ Difference image:
 
 You may browse into the source files, synthesis report or waveform viewer by simply selecting them from the *Explorer* window and *Flow Navigator* window.
 
-The *xf_custom_convolution_tb.cpp* calls the *Filter2d* accel and the parameters are defined in the *xf_custom_convolution_config.h* and *xf_config_params.h* files. For detailed instructions about how to use *custom convolution*, please refer to the github page at: https://docs.xilinx.com/r/en-US/Vitis_Libraries/vision/api-reference.html#custom-convolution.
+The *xf_custom_convolution_tb.cpp* calls the *Filter2d* accel and the parameters are defined in the *xf_custom_convolution_config.h* and *xf_config_params.h* files. For detailed instructions about how to use *custom convolution*, please refer to the github page at: https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/vision/api-reference.html#custom-convolution.
 
 3. Export IP in HLS project
 
@@ -406,7 +406,7 @@ You may follow similar flow to use other library elements.
 Reference
 ==========
 
-Documentation on Vitis Libraries: https://docs.xilinx.com/r/en-US/Vitis_Libraries/index.html
+Documentation on Vitis Libraries: https://docs.xilinx.com/r/2022.2-English/Vitis_Libraries/index.html
 
 .. |in_img| image:: ./images/128x128.png
    :class: image 
