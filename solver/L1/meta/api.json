@@ -8,7 +8,7 @@
                 "api_name": "xf::solver::back_substitute_recip",
                 "display_name": "back_substitute_recip",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "back_substitute.hpp"
                 ],
@@ -22,8 +22,10 @@
                         "type": "typename"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::backSubstituteBasic",
@@ -32,7 +34,7 @@
                 "api_name": "xf::solver::backSubstituteBasic",
                 "display_name": "backSubstituteBasic",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "back_substitute.hpp"
                 ],
@@ -58,8 +60,10 @@
                         "type": "typename"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::backSubstituteAlt",
@@ -68,7 +72,7 @@
                 "api_name": "xf::solver::backSubstituteAlt",
                 "display_name": "backSubstituteAlt",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "back_substitute.hpp"
                 ],
@@ -94,8 +98,10 @@
                         "type": "typename"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::backSubstituteTop",
@@ -104,7 +110,7 @@
                 "api_name": "xf::solver::backSubstituteTop",
                 "display_name": "backSubstituteTop",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "back_substitute.hpp"
                 ],
@@ -130,8 +136,10 @@
                         "type": "typename"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::backSubstitute",
@@ -140,7 +148,7 @@
                 "api_name": "xf::solver::backSubstitute",
                 "display_name": "backSubstitute",
                 "brief": "backSubstitute",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "back_substitute.hpp"
                 ],
@@ -185,8 +193,10 @@
                         "direction": "",
                         "type": "int &"
                     }
-                ]
-            }
+                ],
+                "visible": true
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::cholesky_sqrt_op",
@@ -195,7 +205,7 @@
                 "api_name": "xf::solver::cholesky_sqrt_op",
                 "display_name": "cholesky_sqrt_op",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "cholesky.hpp"
                 ],
@@ -213,8 +223,10 @@
                         "type": "typename"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::cholesky_rsqrt",
@@ -223,7 +235,7 @@
                 "api_name": "xf::solver::cholesky_rsqrt",
                 "display_name": "cholesky_rsqrt",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "cholesky.hpp"
                 ],
@@ -241,8 +253,10 @@
                         "type": "typename"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::cholesky_prod_sum_mult",
@@ -251,7 +265,7 @@
                 "api_name": "xf::solver::cholesky_prod_sum_mult",
                 "display_name": "cholesky_prod_sum_mult",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "cholesky.hpp"
                 ],
@@ -273,8 +287,10 @@
                         "type": "typename"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::choleskyBasic",
@@ -283,7 +299,7 @@
                 "api_name": "xf::solver::choleskyBasic",
                 "display_name": "choleskyBasic",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "cholesky.hpp"
                 ],
@@ -313,8 +329,10 @@
                         "type": "class"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::choleskyAlt",
@@ -323,7 +341,7 @@
                 "api_name": "xf::solver::choleskyAlt",
                 "display_name": "choleskyAlt",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "cholesky.hpp"
                 ],
@@ -353,8 +371,10 @@
                         "type": "class"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::choleskyAlt2",
@@ -363,7 +383,7 @@
                 "api_name": "xf::solver::choleskyAlt2",
                 "display_name": "choleskyAlt2",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "cholesky.hpp"
                 ],
@@ -393,8 +413,10 @@
                         "type": "class"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::choleskyTop",
@@ -403,7 +425,7 @@
                 "api_name": "xf::solver::choleskyTop",
                 "display_name": "choleskyTop",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "cholesky.hpp"
                 ],
@@ -433,8 +455,10 @@
                         "type": "class"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::cholesky",
@@ -443,7 +467,7 @@
                 "api_name": "xf::solver::cholesky",
                 "display_name": "cholesky",
                 "brief": "cholesky",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "cholesky.hpp"
                 ],
@@ -489,8 +513,10 @@
                         "direction": "",
                         "type": "hls::stream< OutputType > &"
                     }
-                ]
-            }
+                ],
+                "visible": true
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::choleskyInverse",
@@ -499,7 +525,7 @@
                 "api_name": "xf::solver::choleskyInverse",
                 "display_name": "choleskyInverse",
                 "brief": "CHOLESKY_INVERSE.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "cholesky_inverse.hpp"
                 ],
@@ -545,8 +571,10 @@
                         "direction": "",
                         "type": "int &"
                     }
-                ]
-            }
+                ],
+                "visible": true
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::matrixMultiplyDefault",
@@ -555,7 +583,7 @@
                 "api_name": "xf::solver::matrixMultiplyDefault",
                 "display_name": "matrixMultiplyDefault",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "matrix_multiply.hpp"
                 ],
@@ -609,8 +637,10 @@
                         "type": "typename"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::matrixMultiplyAlt1",
@@ -619,7 +649,7 @@
                 "api_name": "xf::solver::matrixMultiplyAlt1",
                 "display_name": "matrixMultiplyAlt1",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "matrix_multiply.hpp"
                 ],
@@ -673,8 +703,10 @@
                         "type": "typename"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::matrixMultiplyAlt2",
@@ -683,7 +715,7 @@
                 "api_name": "xf::solver::matrixMultiplyAlt2",
                 "display_name": "matrixMultiplyAlt2",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "matrix_multiply.hpp"
                 ],
@@ -737,8 +769,10 @@
                         "type": "typename"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::matrixMultiplyAddTree",
@@ -747,7 +781,7 @@
                 "api_name": "xf::solver::matrixMultiplyAddTree",
                 "display_name": "matrixMultiplyAddTree",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "matrix_multiply.hpp"
                 ],
@@ -801,8 +835,10 @@
                         "type": "typename"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::matrixMultiplyFull",
@@ -811,7 +847,7 @@
                 "api_name": "xf::solver::matrixMultiplyFull",
                 "display_name": "matrixMultiplyFull",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "matrix_multiply.hpp"
                 ],
@@ -865,8 +901,10 @@
                         "type": "typename"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::matrixMultiplyTop",
@@ -875,7 +913,7 @@
                 "api_name": "xf::solver::matrixMultiplyTop",
                 "display_name": "matrixMultiplyTop",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "matrix_multiply.hpp"
                 ],
@@ -929,8 +967,10 @@
                         "type": "typename"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::matrixMultiply",
@@ -939,7 +979,7 @@
                 "api_name": "xf::solver::matrixMultiply",
                 "display_name": "matrixMultiply",
                 "brief": "matrixMultiply entry point function for calculating matrix power.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "matrix_multiply.hpp"
                 ],
@@ -1005,8 +1045,10 @@
                         "direction": "",
                         "type": "hls::stream< OutputType > &"
                     }
-                ]
-            }
+                ],
+                "visible": true
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::pseudosqrt",
@@ -1015,7 +1057,7 @@
                 "api_name": "xf::solver::pseudosqrt",
                 "display_name": "pseudosqrt",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "pseudosqrt.hpp"
                 ],
@@ -1037,8 +1079,10 @@
                         "type": "int"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::pseudosqrtStrm",
@@ -1047,7 +1091,7 @@
                 "api_name": "xf::solver::pseudosqrtStrm",
                 "display_name": "pseudosqrtStrm",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "pseudosqrt.hpp"
                 ],
@@ -1077,8 +1121,10 @@
                         "type": "int"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::qrInverse",
@@ -1087,7 +1133,7 @@
                 "api_name": "xf::solver::qrInverse",
                 "display_name": "qrInverse",
                 "brief": "qrInverse the entry point function.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "qr_inverse.hpp"
                 ],
@@ -1133,8 +1179,10 @@
                         "direction": "",
                         "type": "int &"
                     }
-                ]
-            }
+                ],
+                "visible": true
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::qrf_require_extra_pass",
@@ -1143,7 +1191,7 @@
                 "api_name": "xf::solver::qrf_require_extra_pass",
                 "display_name": "qrf_require_extra_pass",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "qrf.hpp"
                 ],
@@ -1157,8 +1205,10 @@
                         "type": "typename"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::is_zero",
@@ -1167,7 +1217,7 @@
                 "api_name": "xf::solver::is_zero",
                 "display_name": "is_zero",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "qrf.hpp"
                 ],
@@ -1181,8 +1231,10 @@
                         "type": "class"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::is_zero< float >",
@@ -1191,7 +1243,7 @@
                 "api_name": "xf::solver::is_zero< float >",
                 "display_name": "is_zero< float >",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "qrf.hpp"
                 ],
@@ -1200,8 +1252,10 @@
                 ],
                 "instance": "function",
                 "parameters": [],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::is_zero< double >",
@@ -1210,7 +1264,7 @@
                 "api_name": "xf::solver::is_zero< double >",
                 "display_name": "is_zero< double >",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "qrf.hpp"
                 ],
@@ -1219,8 +1273,10 @@
                 ],
                 "instance": "function",
                 "parameters": [],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::qrf_vm",
@@ -1229,7 +1285,7 @@
                 "api_name": "xf::solver::qrf_vm",
                 "display_name": "qrf_vm",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "qrf.hpp"
                 ],
@@ -1243,8 +1299,10 @@
                         "type": "typename"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::qrf_mm",
@@ -1253,7 +1311,7 @@
                 "api_name": "xf::solver::qrf_mm",
                 "display_name": "qrf_mm",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "qrf.hpp"
                 ],
@@ -1267,8 +1325,10 @@
                         "type": "typename"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::qrf_mm_or_mag",
@@ -1277,7 +1337,7 @@
                 "api_name": "xf::solver::qrf_mm_or_mag",
                 "display_name": "qrf_mm_or_mag",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "qrf.hpp"
                 ],
@@ -1291,8 +1351,10 @@
                         "type": "typename"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::qrf_magnitude",
@@ -1301,7 +1363,7 @@
                 "api_name": "xf::solver::qrf_magnitude",
                 "display_name": "qrf_magnitude",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "qrf.hpp"
                 ],
@@ -1315,8 +1377,10 @@
                         "type": "typename"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::qrf_givens",
@@ -1325,7 +1389,7 @@
                 "api_name": "xf::solver::qrf_givens",
                 "display_name": "qrf_givens",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "qrf.hpp"
                 ],
@@ -1339,8 +1403,10 @@
                         "type": "typename"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::qrf_basic",
@@ -1349,7 +1415,7 @@
                 "api_name": "xf::solver::qrf_basic",
                 "display_name": "qrf_basic",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "qrf.hpp"
                 ],
@@ -1383,8 +1449,10 @@
                         "type": "typename"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::qrf_alt",
@@ -1393,7 +1461,7 @@
                 "api_name": "xf::solver::qrf_alt",
                 "display_name": "qrf_alt",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "qrf.hpp"
                 ],
@@ -1427,8 +1495,10 @@
                         "type": "typename"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::qrf",
@@ -1437,7 +1507,7 @@
                 "api_name": "xf::solver::qrf",
                 "display_name": "qrf",
                 "brief": "QRF, to computes the full QR factorization (QR decomposition) of input matrix A, A=QR, producing orthogonal output matrix Q and upper-triangular matrix R.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "qrf.hpp"
                 ],
@@ -1493,8 +1563,10 @@
                         "direction": "",
                         "type": "hls::stream< OutputType > &"
                     }
-                ]
-            }
+                ],
+                "visible": true
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::within_precision",
@@ -1503,7 +1575,7 @@
                 "api_name": "xf::solver::within_precision",
                 "display_name": "within_precision",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "svd.hpp"
                 ],
@@ -1517,8 +1589,10 @@
                         "type": "typename"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::vm2x1_base",
@@ -1527,7 +1601,7 @@
                 "api_name": "xf::solver::vm2x1_base",
                 "display_name": "vm2x1_base",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "svd.hpp"
                 ],
@@ -1549,8 +1623,10 @@
                         "type": "typename"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::vm2x1",
@@ -1559,7 +1635,7 @@
                 "api_name": "xf::solver::vm2x1",
                 "display_name": "vm2x1",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "svd.hpp"
                 ],
@@ -1573,8 +1649,10 @@
                         "type": "typename"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::mm2x2",
@@ -1583,7 +1661,7 @@
                 "api_name": "xf::solver::mm2x2",
                 "display_name": "mm2x2",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "svd.hpp"
                 ],
@@ -1605,8 +1683,10 @@
                         "type": "typename"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::calc_angle",
@@ -1615,7 +1695,7 @@
                 "api_name": "xf::solver::calc_angle",
                 "display_name": "calc_angle",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "svd.hpp"
                 ],
@@ -1633,8 +1713,10 @@
                         "type": "typename"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::svd2x2",
@@ -1643,7 +1725,7 @@
                 "api_name": "xf::solver::svd2x2",
                 "display_name": "svd2x2",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "svd.hpp"
                 ],
@@ -1665,8 +1747,10 @@
                         "type": "typename"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::svdBasic",
@@ -1675,7 +1759,7 @@
                 "api_name": "xf::solver::svdBasic",
                 "display_name": "svdBasic",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "svd.hpp"
                 ],
@@ -1705,8 +1789,10 @@
                         "type": "typename"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::svdPairs",
@@ -1715,7 +1801,7 @@
                 "api_name": "xf::solver::svdPairs",
                 "display_name": "svdPairs",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "svd.hpp"
                 ],
@@ -1745,8 +1831,10 @@
                         "type": "typename"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::svdTop",
@@ -1755,7 +1843,7 @@
                 "api_name": "xf::solver::svdTop",
                 "display_name": "svdTop",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "svd.hpp"
                 ],
@@ -1785,8 +1873,10 @@
                         "type": "typename"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::svd",
@@ -1795,7 +1885,7 @@
                 "api_name": "xf::solver::svd",
                 "display_name": "svd",
                 "brief": "SVD the entry point function.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "svd.hpp"
                 ],
@@ -1850,8 +1940,10 @@
                         "direction": "",
                         "type": "hls::stream< OutputType > &"
                     }
-                ]
-            }
+                ],
+                "visible": true
+            },
+            "target_domain": "PL"
         }
     ],
     "target_domain": ""
