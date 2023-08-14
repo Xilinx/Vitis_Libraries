@@ -1,0 +1,214 @@
+{
+    "name": "Xilinx DSPLIB dds_mixer_lut",
+    "description": "",
+    "gui": false,
+    "flow": "versal",
+    "platform_allowlist": [
+        "vck190",
+        "vek280"
+    ],
+    "platform_properties": {
+        "vck190": {
+            "param_set": [  "test_0_dds_mixer_lut_aie1",
+                            "test_1_dds_mixer_lut_aie1",
+                            "test_2_dds_mixer_lut_aie1",
+                            "test_3_dds_mixer_lut_aie1",
+                            "test_4_dds_mixer_lut_aie1",
+                            "test_5_dds_mixer_lut_aie1",
+                            "test_6_dds_mixer_lut_aie1",
+                            "test_7_dds_mixer_lut_aie1",
+                            "test_8_dds_mixer_lut_aie1",
+                            "test_9_dds_mixer_lut_aie1",
+                            "test_10_dds_mixer_lut_aie1",
+                            "test_11_dds_mixer_lut_aie1",
+                            "test_12_dds_mixer_lut_aie1",
+                            "test_13_dds_mixer_lut_aie1",
+                            "test_14_dds_mixer_lut_aie1",
+                            "test_15_dds_mixer_lut_aie1",
+                            "test_16_dds_mixer_lut_aie1",
+                            "test_17_dds_mixer_lut_aie1",
+                            "test_18_dds_mixer_lut_aie1"],
+            "v++": {
+                "compiler": {
+                    "clflags": []
+                },
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/system.cfg"
+                    ]
+                }
+            }
+        },
+        "vek280": {
+            "param_set": ["test_0_dds_mixer_lut_aie2" ,
+                          "test_1_dds_mixer_lut_aie2" ,
+                          "test_2_dds_mixer_lut_aie2" ,
+                          "test_3_dds_mixer_lut_aie2" ,
+                          "test_4_dds_mixer_lut_aie2" ,
+                          "test_6_dds_mixer_lut_aie2" ,
+                          "test_7_dds_mixer_lut_aie2" ,
+                          "test_8_dds_mixer_lut_aie2" ,
+                          "test_9_dds_mixer_lut_aie2" ,
+                          "test_10_dds_mixer_lut_aie2"],
+            "v++": {
+                "compiler": {
+                    "clflags": []
+                },
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/system.cfg"
+                    ]
+                }
+            }
+        }
+    },
+    "pre_build": [
+        {
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"tclsh LIB_DIR/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL)\" --connector \" \" --var \"DATA_TYPE:MIXER_MODE:INPUT_WINDOW_VSIZE:P_API:UUT_SSR:SFDR:DDS_PHASE_INC:INITIAL_DDS_OFFSET:AIE_VARIANT\")"
+        },
+        {
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), vitis --classic -exec ipmetadata_config_checker LIB_DIR/L2/meta/$(UUT_KERNEL).json ./config.json -newflow)"
+        },
+        {
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f helper.mk gen_input HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(LOC_INPUT_FILE) DATA_SEED=$(DATA_SEED)\")"
+        },
+        {
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f helper.mk gen_input HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(LOC_INPUT_FILE2) DATA_SEED=$(DATA_SEED)\")"
+        },
+        {
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f helper.mk ssr_split HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR SPLIT_ZIP_FILE=$(LOC_INPUT_FILE)\")"
+        },
+        {
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f helper.mk ssr_split HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR SPLIT_ZIP_FILE=$(LOC_INPUT_FILE2)\")"
+        },
+        {
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), make run TARGET=x86sim TAG=REF)"
+        },
+        {
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), make cleanall)"
+        }
+    ],
+    "post_launch": [
+        {
+            "target": "aiesim",
+            "launch_cmd": [
+                "mkdir -p logs",
+                "$(VITIS_PYTHON3) paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f helper.mk ssr_zip HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR SPLIT_ZIP_FILE=$(LOC_OUTPUT_FILE_HW)\"",
+                "grep -ve '[XT]' ./aiesimulator_output/data/uut_output.txt > ./logs/uut_output.txt",
+                "$(VITIS_PYTHON3) paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f helper.mk diff HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR\"",
+                "$(VITIS_PYTHON3) paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"tclsh LIB_DIR/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL)\" --connector \" \" --var \"DATA_TYPE:MIXER_MODE:INPUT_WINDOW_VSIZE:P_API:UUT_SSR:SFDR:DDS_PHASE_INC:INITIAL_DDS_OFFSET\"",
+                "$(VITIS_PYTHON3) paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f helper.mk ssr_zip HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR STATUS_FILE=$(STATUS_FILE)\"",
+                "$(VITIS_PYTHON3) paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f helper.mk get_stats HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR STATUS_FILE=$(STATUS_FILE)\"",
+                "$(VITIS_PYTHON3) paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f helper.mk get_theoretical_min HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR STATUS_FILE=$(STATUS_FILE) UUT_KERNEL=$(UUT_KERNEL)\"",
+                "LIB_DIR/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) LIB_DIR/L2/tests/aie/common/scripts",
+                "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./"
+            ]
+        },
+        {
+            "target": "x86sim",
+            "launch_cmd": [
+                "mkdir -p logs",
+                "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f helper.mk ssr_zip HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR SPLIT_ZIP_FILE=$(LOC_OUTPUT_FILE_X86)\")",
+                "$(if $(filter-out REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/uut_output.txt > ./logs/uut_output.txt)",
+                "$(if $(filter REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./logs/ref_output.txt)",
+                "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f helper.mk diff HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR\")",
+                "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"tclsh LIB_DIR/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL)\" --connector \" \" --var \"DATA_TYPE:MIXER_MODE:INPUT_WINDOW_VSIZE:P_API:UUT_SSR:SFDR:DDS_PHASE_INC:INITIAL_DDS_OFFSET\")",
+                "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./)"
+            ]
+        }
+    ],
+    "launch": [
+        {
+            "name": "aiesim-launch",
+            "target": "aiesim",
+            "sim_options": "--graph-latency"
+        },
+        {
+            "name": "x86sim-launch",
+            "target": "x86sim",
+            "sim_options": ""
+        }
+    ],
+    "aiecompiler": {
+        "compiler": {
+            "includepaths": [
+                "LIB_DIR/L1/include/aie",
+                "LIB_DIR/L1/src/aie",
+                "LIB_DIR/L1/tests/aie/inc",
+                "LIB_DIR/L1/tests/aie/src",
+                "LIB_DIR/L2/include/aie",
+                "LIB_DIR/L2/tests/aie/common/inc",
+                "./"
+            ],
+            "customized_params": {
+                "params": "-v  $($(TAG)_TARGET_COMPILE_ARGS) -Xpreproc=\"$(TAG_PREPROC_ARGS)\"",
+                "default": {
+                    "TAG": "UUT",
+                    "UUT_KERNEL": "dds_mixer_lut",
+                    "REF_KERNEL": "dds_mixer_lut_ref",
+                    "UUT_GRAPH": "dds_mixer_lut_graph",
+                    "REF_GRAPH": "dds_mixer_lut_ref_graph",
+                    "UUT_SIM_FILE": "./data/uut_output.txt",
+                    "REF_SIM_FILE": "./data/ref_output.txt",
+                    "UUT_SIM_FILE2": "./data/uut_output_2.txt",
+                    "REF_SIM_FILE2": "./data/ref_output_2.txt",
+                    "LOC_INPUT_FILE": "./data/input.txt",
+                    "LOC_INPUT_FILE2": "./data/input2.txt",
+                    "LOC_OUTPUT_FILE_X86": "./x86simulator_output/data/uut_output.txt",
+                    "LOC_OUTPUT_FILE_HW": "./aiesimulator_output/data/uut_output.txt",
+                    "UUT_FILE_SUFFIX": "$(UUT_KERNEL)_$(PARAMS)",
+                    "DATA_SEED": "1",
+                    "STATUS_FILE": "./logs/status_$(UUT_FILE_SUFFIX).txt",
+                    "UUT_TARGET_COMPILE_ARGS": "-Xchess=llvm.xargs=\"-std=c++2a\" -Xchess=main:backend.mist2.xargs=\"+NOdra\"  -Xchess=main:backend.mist2.pnll=\"off\" ",
+                    "REF_TARGET_COMPILE_ARGS": "",
+                    "PREPROC_ARGS": "-DINPUT_FILE=$(LOC_INPUT_FILE) -DINPUT_FILE2=$(LOC_INPUT_FILE2)",
+                    "USING_REF": "",
+                    "USING_UUT": "-DUSING_UUT=1",
+                    "TAG_PREPROC_ARGS": "-DUUT_GRAPH=$($(TAG)_GRAPH) -DOUTPUT_FILE=$($(TAG)_SIM_FILE) -DOUTPUT_FILE2=$($(TAG)_SIM_FILE2) $(PREPROC_ARGS) $(USING_$(TAG))"
+                }
+            }
+        }
+    },
+    "aiecontainers": [
+        {
+            "accelerators": [
+                {
+                    "location": "LIB_DIR/L2/tests/aie/dds_mixer_lut/test.cpp",
+                    "files": [
+                        "uut_config.h",
+                        "LIB_DIR/L1/src/aie/dds_mixer.cpp"
+                    ],
+                    "pl-freq": 1000,
+                    "workdir": "./Work",
+                    "options": "",
+                    "name": "libadf.a"
+                }
+            ]
+        }
+    ],
+    "generators": {
+        "uut_config.h": {"file": "LIB_DIR/L2/tests/aie/common/scripts/tb_gen.py","function": "generate_testbench"}
+    },
+    "parameter_file": "multi_params.json",
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": 32768,
+                "max_time_min": {
+                    "vitis_aie_x86sim": 60,
+                    "vitis_aie_sim": 200
+                }
+            }
+        ],
+        "targets": [
+            "vitis_aie_sim",
+            "vitis_aie_x86sim"
+        ],
+        "category": "canary"
+    }
+}

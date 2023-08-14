@@ -80,7 +80,7 @@ void fir_decimate_sym_ref<TT_DATA,
             // Here, symmetry is used by reusing the first half coefficients once past halfway
             multiplyAcc<TT_DATA, TT_COEFF>(accum, d_in[j], m_internalTaps[j]);
             if (j * 2 + 1 < TP_FIR_LEN) {
-                multiplyAcc<TT_DATA, TT_COEFF>(accum, d_in[FIR_LEN - 1 - j], m_internalTaps[j]);
+                multiplyAcc<TT_DATA, TT_COEFF>(accum, d_in[TP_FIR_LEN - 1 - j], m_internalTaps[j]);
             }
         }
         // Revert data pointer for next sample
@@ -151,7 +151,7 @@ void fir_decimate_sym_ref<TT_DATA,
             // Here, symmetry is used by reusing the first half coefficients once past halfway
             multiplyAcc<TT_DATA, TT_COEFF>(accum, d_in[j], m_internalTaps[j]);
             if (j * 2 + 1 < TP_FIR_LEN) {
-                multiplyAcc<TT_DATA, TT_COEFF>(accum, d_in[FIR_LEN - 1 - j], m_internalTaps[j]);
+                multiplyAcc<TT_DATA, TT_COEFF>(accum, d_in[TP_FIR_LEN - 1 - j], m_internalTaps[j]);
             }
         }
         // Revert data pointer for next sample

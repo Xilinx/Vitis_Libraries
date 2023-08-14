@@ -1,0 +1,69 @@
+{
+  "schema": "vitis_library_api_spec_schema-1.0",
+  "api_name": "xf::dsp::aie::widget::real2complex::widget_real2complex_graph",
+  "display_name": "widget_real2complex_graph",
+  "header_file_name": "widget_real2complex_graph.hpp",
+  "search_paths": [
+    "L1/include/aie",
+    "L1/src/aie",
+	"L1/tests/aie/inc",
+    "L1/tests/aie/src",
+	"L2/include/aie",
+	"L2/tests/aie/common/inc"
+  ],
+  "parameters": [
+    {
+      "name": "TT_DATA",
+      "type": "typename",
+      "description": "describes the type of individual data samples input to and output from the dds/mixer",
+      "enum": [
+        "int16",
+        "int32",
+        "float",
+        "cint16",
+        "cint32",
+        "cfloat"
+      ]      
+    },
+    {
+      "name": "TT_OUT_DATA",
+      "type": "typename",
+      "description": "describes the type of individual data samples input to and output from the dds/mixer",
+      "enum": [
+        "int16",
+        "int32",
+        "float",
+        "cint16",
+        "cint32",
+        "cfloat"
+      ],
+      "validator": {
+        "file" : "widget_real2complex.py",
+        "function" : "validate_TT_OUT_DATA",
+        "args": ["TT_DATA"]
+      }      
+    },
+    {
+      "name": "TP_WINDOW_VSIZE",
+      "type": "uint",
+      "description": "describes the number of samples in the input/output window API or number of samples to process per iteration.",
+      "minimum": 4,
+      "maximum": 4096
+    },
+    {
+      "name": "AIE_VARIANT",
+      "type": "uint",
+      "description": "specifies the device type",
+      "maximum": 2, 
+      "minimum": 1
+    }
+  ],
+  "ports": {
+    "file": "widget_real2complex.py",
+    "function": "info_ports"
+  },
+  "generator": {
+    "file": "widget_real2complex.py",
+    "function": "generate_graph"
+  }
+}

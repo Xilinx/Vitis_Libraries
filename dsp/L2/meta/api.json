@@ -8,12 +8,14 @@
                 "api_name": "xf::dsp::aie::convert_sym_taps_to_asym",
                 "display_name": "convert_sym_taps_to_asym",
                 "brief": "convert_sym_taps_to_asym is an helper function to convert users input coefficient array.",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "fir_graph_utils.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/aie"
+                     "L1/include/aie",
+                     "L1/src/aie",
+                     "L2/include/aie"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -40,7 +42,8 @@
                         "type": "TT_COEFF *"
                     }
                 ]
-            }
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "xf::dsp::aie::convert_hb_taps_to_asym",
@@ -49,12 +52,14 @@
                 "api_name": "xf::dsp::aie::convert_hb_taps_to_asym",
                 "display_name": "convert_hb_taps_to_asym",
                 "brief": "convert_hb_taps_to_asym is an helper function to convert users input coefficient array.",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "fir_graph_utils.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/aie"
+                     "L1/include/aie",
+                     "L1/src/aie",
+                     "L2/include/aie"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -86,7 +91,8 @@
                         "type": "unsigned int"
                     }
                 ]
-            }
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "xf::dsp::aie::fft::windowfn::getHammingWindow",
@@ -95,12 +101,14 @@
                 "api_name": "xf::dsp::aie::fft::windowfn::getHammingWindow",
                 "display_name": "getHammingWindow",
                 "brief": "getHammingWindow is utility to create Hamming window.",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "fft_window_fns.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/aie"
+                     "L1/include/aie",
+                     "L1/src/aie",
+                     "L2/include/aie"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -122,7 +130,8 @@
                         "type": "const unsigned int"
                     }
                 ]
-            }
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "xf::dsp::aie::fft::windowfn::getHannWindow",
@@ -131,12 +140,14 @@
                 "api_name": "xf::dsp::aie::fft::windowfn::getHannWindow",
                 "display_name": "getHannWindow",
                 "brief": "getHannWindow is utility to create Hann window.",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "fft_window_fns.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/aie"
+                     "L1/include/aie",
+                     "L1/src/aie",
+                     "L2/include/aie"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -158,7 +169,8 @@
                         "type": "const unsigned int"
                     }
                 ]
-            }
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "xf::dsp::aie::fft::windowfn::getBlackmanWindow",
@@ -167,12 +179,14 @@
                 "api_name": "xf::dsp::aie::fft::windowfn::getBlackmanWindow",
                 "display_name": "getBlackmanWindow",
                 "brief": "getBlackmanWindow is utility to create Hamming window.",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "fft_window_fns.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/aie"
+                     "L1/include/aie",
+                     "L1/src/aie",
+                     "L2/include/aie"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -194,7 +208,8 @@
                         "type": "const unsigned int"
                     }
                 ]
-            }
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "xf::dsp::aie::fft::windowfn::getKaiserWindow",
@@ -203,12 +218,14 @@
                 "api_name": "xf::dsp::aie::fft::windowfn::getKaiserWindow",
                 "display_name": "getKaiserWindow",
                 "brief": "geKeiserWindow is utility to create Hamming window.",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "fft_window_fns.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/aie"
+                     "L1/include/aie",
+                     "L1/src/aie",
+                     "L2/include/aie"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -230,7 +247,8 @@
                         "type": "const unsigned int"
                     }
                 ]
-            }
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "xf::dsp::aie::blas::matrix_mult::matrix_mult_graph",
@@ -239,12 +257,14 @@
                 "api_name": "xf::dsp::aie::blas::matrix_mult::matrix_mult_graph",
                 "display_name": "matrix_mult_graph",
                 "brief": "performs a GEneral Matrix Multiply (GEMM), taking two input matrices of configurable dimensions and data type.",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "matrix_mult_graph.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/aie"
+                     "L1/include/aie",
+                     "L1/src/aie",
+                     "L2/include/aie"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -346,7 +366,8 @@
                         "type": "port<output> xf::dsp::aie::blas::matrix_mult::matrix_mult_graph< TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_AB, TP_DIM_B, TP_SHIFT, TP_RND, TP_DIM_A_LEADING, TP_DIM_B_LEADING, TP_DIM_OUT_LEADING, TP_ADD_TILING_A, TP_ADD_TILING_B, TP_ADD_DETILING_OUT, TP_INPUT_WINDOW_VSIZE_A, TP_INPUT_WINDOW_VSIZE_B, TP_CASC_LEN >::out"
                     }
                 ]
-            }
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph",
@@ -355,12 +376,14 @@
                 "api_name": "xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph",
                 "display_name": "fft_ifft_dit_1ch_graph",
                 "brief": "fft_dit_1ch is a single-channel, decimation-in-time, fixed point size FFT.",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "fft_ifft_dit_1ch_graph.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/aie"
+                     "L1/include/aie",
+                     "L1/src/aie",
+                     "L2/include/aie"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -437,7 +460,8 @@
                         "type": "port_array<output, kOutputPorts> xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph< TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, TP_API, TP_PARALLEL_POWER, TP_INDEX, TP_ORIG_PAR_POWER >::out"
                     }
                 ]
-            }
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "xf::dsp::aie::fft::windowfn::fft_window_graph",
@@ -446,12 +470,14 @@
                 "api_name": "xf::dsp::aie::fft::windowfn::fft_window_graph",
                 "display_name": "fft_window_graph",
                 "brief": "fft_window is utility to apply a windowing (scaling) function such as Hamming to a frame of data samples.",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "fft_window_graph.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/aie"
+                     "L1/include/aie",
+                     "L1/src/aie",
+                     "L2/include/aie"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -508,7 +534,8 @@
                         "type": "port_array<output, kAPIFactor * TP_SSR> xf::dsp::aie::fft::windowfn::fft_window_graph< TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, TP_API, TP_SSR, TP_DYN_PT_SIZE >::out"
                     }
                 ]
-            }
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "xf::dsp::aie::fir::decimate_asym::fir_decimate_asym_graph",
@@ -517,12 +544,14 @@
                 "api_name": "xf::dsp::aie::fir::decimate_asym::fir_decimate_asym_graph",
                 "display_name": "fir_decimate_asym_graph",
                 "brief": "fir_decimate_asym is an Asymmetric Decimation FIR filter",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "fir_decimate_asym_graph.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/aie"
+                     "L1/include/aie",
+                     "L1/src/aie",
+                     "L2/include/aie"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -624,7 +653,8 @@
                         "type": "port_conditional_array<output, (TP_NUM_OUTPUTS == 2), TP_SSR> xf::dsp::aie::fir::decimate_asym::fir_decimate_asym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_API, TP_SSR, TP_PARA_DECI_POLY >::out2"
                     }
                 ]
-            }
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "xf::dsp::aie::fir::decimate_hb::fir_decimate_hb_graph",
@@ -633,12 +663,14 @@
                 "api_name": "xf::dsp::aie::fir::decimate_hb::fir_decimate_hb_graph",
                 "display_name": "fir_decimate_hb_graph",
                 "brief": "fir_decimate_hb is a Halfband Decimation FIR filter",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "fir_decimate_hb_graph.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/aie"
+                     "L1/include/aie",
+                     "L1/src/aie",
+                     "L2/include/aie"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -735,7 +767,8 @@
                         "type": "port_conditional_array<output, (TP_NUM_OUTPUTS == 2), TP_SSR> xf::dsp::aie::fir::decimate_hb::fir_decimate_hb_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_API, TP_SSR, TP_PARA_DECI_POLY >::out2"
                     }
                 ]
-            }
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "xf::dsp::aie::fir::decimate_sym::fir_decimate_sym_graph",
@@ -744,12 +777,14 @@
                 "api_name": "xf::dsp::aie::fir::decimate_sym::fir_decimate_sym_graph",
                 "display_name": "fir_decimate_sym_graph",
                 "brief": "fir_decimate_sym is a Symmetrical Decimation FIR filter",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "fir_decimate_sym_graph.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/aie"
+                     "L1/include/aie",
+                     "L1/src/aie",
+                     "L2/include/aie"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -846,7 +881,8 @@
                         "type": "port_conditional_array<output, (TP_NUM_OUTPUTS == 2), TP_SSR> xf::dsp::aie::fir::decimate_sym::fir_decimate_sym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_API, TP_SSR >::out2"
                     }
                 ]
-            }
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "xf::dsp::aie::fir::interpolate_asym::fir_interpolate_asym_graph",
@@ -855,12 +891,14 @@
                 "api_name": "xf::dsp::aie::fir::interpolate_asym::fir_interpolate_asym_graph",
                 "display_name": "fir_interpolate_asym_graph",
                 "brief": "fir_interpolate_asym is an Asymmetric Interpolation FIR filter",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "fir_interpolate_asym_graph.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/aie"
+                     "L1/include/aie",
+                     "L1/src/aie",
+                     "L2/include/aie"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -962,7 +1000,8 @@
                         "type": "port_conditional_array<output, (TP_NUM_OUTPUTS == 2), OUT_SSR> xf::dsp::aie::fir::interpolate_asym::fir_interpolate_asym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_DUAL_IP, TP_NUM_OUTPUTS, TP_API, TP_SSR, TP_PARA_INTERP_POLY >::out2"
                     }
                 ]
-            }
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "xf::dsp::aie::fir::interpolate_hb::fir_interpolate_hb_graph",
@@ -971,12 +1010,14 @@
                 "api_name": "xf::dsp::aie::fir::interpolate_hb::fir_interpolate_hb_graph",
                 "display_name": "fir_interpolate_hb_graph",
                 "brief": "fir_interpolate_hb is a Halfband Interpolation FIR filter",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "fir_interpolate_hb_graph.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/aie"
+                     "L1/include/aie",
+                     "L1/src/aie",
+                     "L2/include/aie"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -1093,7 +1134,8 @@
                         "type": "port_conditional_array<output, (TP_PARA_INTERP_POLY > 1 && TP_NUM_OUTPUTS == 2), TP_SSR> xf::dsp::aie::fir::interpolate_hb::fir_interpolate_hb_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_UPSHIFT_CT, TP_API, TP_SSR, TP_PARA_INTERP_POLY >::out4"
                     }
                 ]
-            }
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "xf::dsp::aie::fir::resampler::fir_resampler_graph",
@@ -1102,12 +1144,14 @@
                 "api_name": "xf::dsp::aie::fir::resampler::fir_resampler_graph",
                 "display_name": "fir_resampler_graph",
                 "brief": "fir_resampler is a generic asymmetric FIR filter that can do fractional and integer interpolation and decimation.",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "fir_resampler_graph.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/aie"
+                     "L1/include/aie",
+                     "L1/src/aie",
+                     "L2/include/aie"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -1219,7 +1263,8 @@
                         "type": "port_conditional_array<output, (TP_NUM_OUTPUTS == 2), OUT_SSR> xf::dsp::aie::fir::resampler::fir_resampler_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_API, TP_SSR, TP_PARA_INTERP_POLY, TP_PARA_DECI_POLY >::out2"
                     }
                 ]
-            }
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "xf::dsp::aie::fir::sr_asym::fir_sr_asym_graph",
@@ -1228,12 +1273,14 @@
                 "api_name": "xf::dsp::aie::fir::sr_asym::fir_sr_asym_graph",
                 "display_name": "fir_sr_asym_graph",
                 "brief": "fir_sr_asym is a Asymmetric Single Rate FIR filter",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "fir_sr_asym_graph.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/aie"
+                     "L1/include/aie",
+                     "L1/src/aie",
+                     "L2/include/aie"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -1325,7 +1372,8 @@
                         "type": "port_conditional_array<output, (TP_NUM_OUTPUTS == 2), TP_SSR> xf::dsp::aie::fir::sr_asym::fir_sr_asym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_API, TP_SSR >::out2"
                     }
                 ]
-            }
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "xf::dsp::aie::fir::sr_sym::fir_sr_sym_graph",
@@ -1334,12 +1382,14 @@
                 "api_name": "xf::dsp::aie::fir::sr_sym::fir_sr_sym_graph",
                 "display_name": "fir_sr_sym_graph",
                 "brief": "fir_sr_sym is a Symmetrical Single Rate FIR filter",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "fir_sr_sym_graph.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/aie"
+                     "L1/include/aie",
+                     "L1/src/aie",
+                     "L2/include/aie"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -1431,7 +1481,8 @@
                         "type": "port_conditional_array<output, (TP_NUM_OUTPUTS == 2), TP_SSR> xf::dsp::aie::fir::sr_sym::fir_sr_sym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_API, TP_SSR >::out2"
                     }
                 ]
-            }
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "xf::dsp::aie::mixer::dds_mixer::dds_mixer_graph",
@@ -1440,12 +1491,14 @@
                 "api_name": "xf::dsp::aie::mixer::dds_mixer::dds_mixer_graph",
                 "display_name": "dds_mixer_graph",
                 "brief": "operates in 3 modes:",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "dds_mixer_graph.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/aie"
+                     "L1/include/aie",
+                     "L1/src/aie",
+                     "L2/include/aie"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -1476,7 +1529,8 @@
                     }
                 ],
                 "ports": []
-            }
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "xf::dsp::aie::mixer::dds_mixer::dds_mixer_lut_graph",
@@ -1485,12 +1539,14 @@
                 "api_name": "xf::dsp::aie::mixer::dds_mixer::dds_mixer_lut_graph",
                 "display_name": "dds_mixer_lut_graph",
                 "brief": "operates in 3 modes:",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "dds_mixer_lut_graph.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/aie"
+                     "L1/include/aie",
+                     "L1/src/aie",
+                     "L2/include/aie"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -1526,7 +1582,8 @@
                     }
                 ],
                 "ports": []
-            }
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "xf::dsp::aie::widget::api_cast::widget_api_cast_graph",
@@ -1535,12 +1592,14 @@
                 "api_name": "xf::dsp::aie::widget::api_cast::widget_api_cast_graph",
                 "display_name": "widget_api_cast_graph",
                 "brief": "widget_api_cast is a design to change the interface between connected components. This component is able to change the stream interface to window interface and vice-versa. In addition, multiple input stream ports may be defined, as well as multiple copies of the window output.",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "widget_api_cast_graph.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/aie"
+                     "L1/include/aie",
+                     "L1/src/aie",
+                     "L2/include/aie"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -1597,7 +1656,8 @@
                         "type": "port<output> xf::dsp::aie::widget::api_cast::widget_api_cast_graph< TT_DATA, TP_IN_API, TP_OUT_API, TP_NUM_INPUTS, TP_WINDOW_VSIZE, TP_NUM_OUTPUT_CLONES, TP_PATTERN, TP_HEADER_BYTES >::out[TP_NUM_OUTPUT_CLONES]"
                     }
                 ]
-            }
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "xf::dsp::aie::widget::real2complex::widget_real2complex_graph",
@@ -1606,12 +1666,14 @@
                 "api_name": "xf::dsp::aie::widget::real2complex::widget_real2complex_graph",
                 "display_name": "widget_real2complex_graph",
                 "brief": "widget_real2complex is utility to convert real data to complex or vice versa",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "widget_real2complex_graph.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/aie"
+                     "L1/include/aie",
+                     "L1/src/aie",
+                     "L2/include/aie"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -1643,7 +1705,8 @@
                         "type": "port<output> xf::dsp::aie::widget::real2complex::widget_real2complex_graph< TT_DATA, TT_OUT_DATA, TP_WINDOW_VSIZE >::out"
                     }
                 ]
-            }
+            },
+            "target_domain": "AIE"
         }
     ],
     "target_domain": ""

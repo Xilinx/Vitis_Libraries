@@ -46,8 +46,6 @@
       "name": "TP_POINT_SIZE",
       "description": "The number of coefficients in the FFT Window",
       "type": "uint",
-      "minimum": 16,
-      "maximum": 65536,
       "validator": {
         "file": "fft_window.py",
         "function": "validate_TP_POINT_SIZE",
@@ -58,8 +56,6 @@
       "name": "TP_WINDOW_VSIZE",
       "description": "The number of samples per call to the kernel",
       "type": "uint",
-      "minimum": 16,
-      "maximum": 65536,
       "validator": {
         "file": "fft_window.py",
         "function": "validate_TP_WINDOW_VSIZE",
@@ -75,8 +71,6 @@
       "name": "TP_SHIFT",
       "description": "The power of 2 shift down applied the product of sample and coefficient",
       "type": "uint",
-      "maximum": 60,
-      "minimum": 0,
       "validator": {
         "file": "fft_window.py",
         "function": "validate_TP_SHIFT",
@@ -91,16 +85,12 @@
     {
       "name": "TP_API",
       "description": "The interface selection (windows/streams) of the function.",
-      "type": "uint",
-      "maximum": 1,
-      "minimum": 0
+      "type": "uint"
     },
     {
       "name": "TP_SSR",
       "description": "The number of kernels to be used in parallel to perform the function.",
       "type": "uint",
-      "minimum": 1,
-      "maximum": 32,
       "validator": {
         "file": "fft_window.py",
         "function": "validate_TP_SSR",
@@ -116,8 +106,6 @@
       "name": "TP_DYN_PT_SIZE",
       "description": "The selection of static point size or dynamic point size operation.",
       "type": "uint",
-      "minimum": 0,
-      "maximum": 1,
       "validator": {
         "file": "fft_window.py",
         "function": "validate_TP_DYN_PT_SIZE",
@@ -132,9 +120,7 @@
     {
       "name": "AIE_VARIANT",
       "type": "uint",
-      "description": "specifies the device type",
-      "maximum": 2, 
-      "minimum": 1
+      "description": "specifies the device type"
     }, 
     {
       "name": "weights",

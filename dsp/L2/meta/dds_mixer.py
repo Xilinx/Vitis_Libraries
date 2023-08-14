@@ -9,6 +9,9 @@ from aie_common import isError,isValid
 #dds_mixer.hpp:132:    static_assert((TP_INPUT_WINDOW_VSIZE % m_kNumLanes) == 0,
 #graph:78:    static_assert(TP_SSR > 0, "ERROR: Invalid SSR value, must be a value greater than 0.\n");
 
+TP_SSR_min = 1
+TP_INPUT_WINDOW_VSIZE_min = 4
+
 def fn_get_dds_lanes(TT_DATA):
   type_lane_dict = {
     "cint16" : 8,
@@ -17,8 +20,17 @@ def fn_get_dds_lanes(TT_DATA):
   }
   return type_lane_dict[TT_DATA]
 
+def fn_validate_ssr(TP_SSR):
+    if TP_SSR < TP_SSR_min:
+        return isError(
+            f"Minimum value for SSR is {TP_SSR_min}, but got {TP_SSR}."
+        )
+    return isValid
+
 def validate_TP_WINDOW_VSIZE(args):
   TP_INPUT_WINDOW_VSIZE= args["TP_INPUT_WINDOW_VSIZE"]
+  if TP_INPUT_WINDOW_VSIZE < TP_INPUT_WINDOW_VSIZE_min:
+	    return isError(f"Minimum value for Input window size is {TP_INPUT_WINDOW_VSIZE_min},respectively, but got {TP_INPUT_WINDOW_VSIZE}.")
   TT_DATA= args["TT_DATA"]
   lanes = fn_get_dds_lanes(TT_DATA)
   if (TP_INPUT_WINDOW_VSIZE % lanes != 0):
@@ -26,6 +38,9 @@ def validate_TP_WINDOW_VSIZE(args):
   
   return isValid
 
+def validate_TP_SSR(args):
+    TP_SSR = args["TP_SSR"]
+    return fn_validate_ssr(TP_SSR)
 
   ######### Graph Generator ############
 

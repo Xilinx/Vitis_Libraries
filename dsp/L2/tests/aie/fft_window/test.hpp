@@ -25,6 +25,7 @@
 #include "utils.hpp"
 
 #include "uut_config.h"
+#include "uut_static_config.h"
 #include "test_stim.hpp"
 
 #include "device_defs.h"
@@ -38,7 +39,6 @@
 #endif
 
 #include QUOTE(UUT_GRAPH.hpp)
-// val #include "fft_ifft_dit_1ch_ref_graph.hpp"     //val? validation edits
 
 using namespace adf;
 

@@ -17,6 +17,11 @@
 #ifndef __DEVICE_DEFS__
 #define __DEVICE_DEFS__
 
+// The following include is the tools device traits library. The device_defs.h file is a stop-gap means to derive device
+// traits before
+// the tools library existed
+//#include <adf/arch/aie_arch_properties.hpp> //This cannot be included here because this file is used by ref models
+
 // Preamble
 // This file exists to make preprocessor clauses more readable by abstracting the trait of the device that the clause
 // depends on
@@ -97,6 +102,8 @@
 #define __SUPPORTS_PUT_MCD__
 #endif
 
+//__STEAMS_PER_TILE__ is not recommended for use.
+// The recommendation is to use get_input_streams_core_module() from #include <adf/arch/aie_arch_properties.hpp>
 #if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
 #define __STREAMS_PER_TILE__ 2
 #elif (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22) || (__AIEARCH__ == 20) || \
@@ -152,6 +159,31 @@
 #if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22) || (__AIEARCH__ == 20) || \
     (__AIEARCH__ == 21) || (__AIEARCH__ == 22)
 #define __MIN_REGSIZE__ 256
+#endif
+
+#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#define __HAS_ACCUM_PERMUTES__ 1
+#else
+#define __HAS_ACCUM_PERMUTES__ 0
+#endif
+
+// AIE1 and 2 offer 3 saturation modes
+#define __SATURATION_MODES__ 3
+
+// saturation modes
+#ifndef s_none
+//! @brief none: No saturation is performed and the value is truncated on the MSB side.
+#define s_none 0
+#endif
+#ifndef s_saturate
+//! @brief saturate: rounds an n-bit signed value in the range [- ( 2^(n-1) ) : +2^(n-1) - 1 ]. For example if n=8, the
+//! range would be [-128:127].
+#define s_saturate 1
+#endif
+#ifndef s_symmetric
+//! @brief symmetric: rounds an n-bit signed value in the range [-( 2^(n-1) -1 ) : +2^(n-1) - 1 ]. For example if n=8,
+//! the range would be [-127:127]
+#define s_symmetric 3
 #endif
 
 #if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22) || (__AIEARCH__ == 20) || \

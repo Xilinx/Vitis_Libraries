@@ -4,10 +4,55 @@
     "gui": false,
     "flow": "versal",
     "platform_allowlist": [
-        "vck190"
+        "vck190",
+        "vek280"
     ],
     "platform_properties": {
         "vck190": {
+            "param_set": [  "test_0_fft_ifft_dit_1ch_aie1",
+                            "test_1_fft_ifft_dit_1ch_aie1",
+                            "test_2_fft_ifft_dit_1ch_aie1",
+                            "test_3_fft_ifft_dit_1ch_aie1",
+                            "test_4_fft_ifft_dit_1ch_aie1",
+                            "test_5_fft_ifft_dit_1ch_aie1",
+                            "test_6_fft_ifft_dit_1ch_aie1",
+                            "test_7_fft_ifft_dit_1ch_aie1",
+                            "test_8_fft_ifft_dit_1ch_aie1",
+                            "test_9_fft_ifft_dit_1ch_aie1",
+                            "test_10_fft_ifft_dit_1ch_aie1",
+                            "test_11_fft_ifft_dit_1ch_aie1",
+                            "test_12_fft_ifft_dit_1ch_aie1",
+                            "test_13_fft_8k_aie1",
+                            "test_14_fft_16k_aie1",
+                            "test_17_fft_dyn_pt_size_aie1",
+                            "test_18_fft_widgets_aie1"],
+            "v++": {
+                "compiler": {
+                    "clflags": []
+                },
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/system.cfg"
+                    ]
+                }
+            }
+        },
+        "vek280": {
+            "param_set": [  "test_0_fft_ifft_dit_1ch_aie2",
+                            "test_1_fft_ifft_dit_1ch_aie2",
+                            "test_2_fft_ifft_dit_1ch_aie2",
+                            "test_3_fft_ifft_dit_1ch_aie2",
+                            "test_4_fft_ifft_dit_1ch_aie2",
+                            "test_5_fft_ifft_dit_1ch_aie2",
+                            "test_6_fft_ifft_dit_1ch_aie2",
+                            "test_7_fft_ifft_dit_1ch_aie2",
+                            "test_8_fft_ifft_dit_1ch_aie2",
+                            "test_9_fft_ifft_dit_1ch_aie2",
+                            "test_10_fft_ifft_dit_1ch_aie2",
+                            "test_12_fft_ifft_dit_1ch_aie2",
+                            "test_13_fft_8k_aie2",
+                            "test_14_fft_16k_aie2",
+                            "test_17_fft_dyn_pt_size_aie2"],
             "v++": {
                 "compiler": {
                     "clflags": []
@@ -22,7 +67,7 @@
     },
     "pre_build": [
         {
-            "build_cmd": "$(if $(filter-out REF,$(TAG)), make -f PROJECT/helper.mk HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(INPUT_FILE) $(PARAMS_LIST))"
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(INPUT_FILE) UUT_KERNEL=$(UUT_KERNEL)\")"
         }
     ],
     "post_launch": [
@@ -30,11 +75,11 @@
             "target": "aiesim",
             "launch_cmd": [
                 "mkdir -p logs",
-                "make -f PROJECT/helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(INPUT_FILE) $(PARAMS_LIST) STATUS_FILE=$(STATUS_FILE) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)",
-                "tclsh LIB_DIR/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output $(STATUS_FILE) $(WINDOW_VSIZE) $(NITER)",
-                "tclsh LIB_DIR/L2/tests/aie/common/scripts/get_stats.tcl $(WINDOW_VSIZE) $(CASC_LEN) $(STATUS_FILE) ./aiesimulator_output fftMain $(NITER)",
-                "tclsh LIB_DIR/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_fft_theoretical_min.tcl $(DATA_TYPE) $(TWIDDLE_TYPE) $(WINDOW_VSIZE) $(POINT_SIZE) $(CASC_LEN) $(STATUS_FILE) $(UUT_KERNEL) $(PARALLEL_POWER) $(API_IO)",
-                "LIB_DIR/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) LIB_DIR/L2/tests/aie/common/scripts",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(INPUT_FILE) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE) UUT_KERNEL=$(UUT_KERNEL)\"",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_latency HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_stats HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) \"",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_theoretical_min HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk harvest_mem HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./"
             ]
         },
@@ -42,7 +87,7 @@
             "target": "x86sim",
             "launch_cmd": [
                 "mkdir -p logs",
-                "$(if $(filter-out REF,$(TAG)), make -f PROJECT/helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(INPUT_FILE) $(PARAMS_LIST) STATUS_FILE=$(STATUS_FILE) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE))",
+                "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(INPUT_FILE) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE) UUT_KERNEL=$(UUT_KERNEL)\")",
                 "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./)"
             ]
         }
@@ -50,7 +95,8 @@
     "launch": [
         {
             "name": "aiesim-launch",
-            "target": "aiesim"
+            "target": "aiesim",
+            "sim_options": "--graph-latency"
         },
         {
             "name": "x86sim-launch",
@@ -70,46 +116,22 @@
                 "./"
             ],
             "customized_params": {
-                "params": "--dataflow -v  $($(TAG)_TARGET_COMPILE_ARGS)  -Xpreproc=\"$($(TAG)_PREPROC_ARGS)\"",
+                "params": "-v  $($(TAG)_TARGET_COMPILE_ARGS)  -Xpreproc=\"$($(TAG)_PREPROC_ARGS)\"",
                 "default": {
                     "TAG": "UUT",
-                    "AIE_VARIANT": "1",
                     "UUT_KERNEL": "fft_ifft_dit_1ch",
                     "REF_KERNEL": "fft_ifft_dit_1ch_ref",
                     "UUT_GRAPH": "fft_ifft_dit_1ch_graph",
                     "REF_GRAPH": "fft_ifft_dit_1ch_ref_graph",
-                    "NITER": "4",
-                    "DATA_TYPE": "cint16",
-                    "TWIDDLE_TYPE": "cint16",
-                    "POINT_SIZE": "1024",
-                    "DYN_PT_SIZE": "0",
-                    "FFT_NIFFT": "1",
-                    "SHIFT": "17",
-                    "CASC_LEN": "1",
-                    "WINDOW_VSIZE": "$(POINT_SIZE)",
-                    "API_IO": "0",
-                    "PARALLEL_POWER": "0",
-                    "INPUT_WINDOW_VSIZE": "$(WINDOW_VSIZE)",
-                    "DIFF_TOLERANCE": "0",
-                    "CC_TOLERANCE": "0",
-                    "DATA_SEED": "1",
-                    "STIM_TYPE": "0",
                     "STACKSIZE_VAL": "600",
                     "UUT_SIM_FILE": "./data/uut_output.txt",
                     "REF_SIM_FILE": "./data/ref_output.txt",
                     "INPUT_FILE": "./data/input.txt",
-                    "UUT_FILE_SUFFIX": "$(UUT_KERNEL)_$(DATA_TYPE)_$(TWIDDLE_TYPE)_$(POINT_SIZE)_$(FFT_NIFFT)_$(SHIFT)_$(CASC_LEN)_$(DYN_PT_SIZE)_$(WINDOW_VSIZE)_$(API_IO)_$(PARALLEL_POWER)",
-                    "LOG_FILE": "./logs/log_$(UUT_FILE_SUFFIX).txt",
-                    "STATUS_LOG_FILE": "./logs/status_$(UUT_FILE_SUFFIX).txt",
-                    "STATUS_FILE": "$(STATUS_LOG_FILE)",
                     "UUT_TARGET_COMPILE_ARGS": "-Xchess=llvm.xargs=\"-std=c++2a\" -Xchess=main:backend.mist2.xargs=\"+NOdra\" -Xchess=main:backend.mist2.pnll=\"off\" -stacksize=$(STACKSIZE_VAL)",
                     "REF_TARGET_COMPILE_ARGS": "",
-                    "UUT_WORK_DIR": "./Work",
-                    "REF_WORK_DIR": "./Work",
-                    "PREPROC_ARGS": "-DINPUT_FILE=$(INPUT_FILE) -DDATA_TYPE=$(DATA_TYPE) -DTWIDDLE_TYPE=$(TWIDDLE_TYPE) -DPOINT_SIZE=$(POINT_SIZE) -DFFT_NIFFT=$(FFT_NIFFT) -DSHIFT=$(SHIFT) -DCASC_LEN=$(CASC_LEN) -DDYN_PT_SIZE=$(DYN_PT_SIZE) -DWINDOW_VSIZE=$(WINDOW_VSIZE) -DAPI_IO=$(API_IO) -DPARALLEL_POWER=$(PARALLEL_POWER) -DSTIM_TYPE=$(STIM_TYPE)  -DINPUT_WINDOW_VSIZE=$(INPUT_WINDOW_VSIZE) -DNITER=$(NITER)",
+                    "PREPROC_ARGS": "-DINPUT_FILE=$(INPUT_FILE)",
                     "REF_PREPROC_ARGS": "-DUUT_GRAPH=$(REF_GRAPH) -DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS) ",
-                    "UUT_PREPROC_ARGS": "-DUUT_GRAPH=$(UUT_GRAPH) -DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) -DUSING_UUT=1",
-                    "PARAMS_LIST": "UUT_KERNEL=$(UUT_KERNEL) INPUT_WINDOW_VSIZE=$(INPUT_WINDOW_VSIZE) NITER=$(NITER) SEED=$(DATA_SEED) STIM_TYPE=$(STIM_TYPE) POINT_SIZE=$(POINT_SIZE) DYN_PT_SIZE=$(DYN_PT_SIZE) DATA_TYPE=$(DATA_TYPE) TWIDDLE_TYPE=$(TWIDDLE_TYPE) FFT_NIFFT=$(FFT_NIFFT) SHIFT=$(SHIFT) CASC_LEN=$(CASC_LEN) API_IO=$(API_IO) PARALLEL_POWER=$(PARALLEL_POWER) DIFF_TOLERANCE=$(DIFF_TOLERANCE) DIFF_MODE=$(DIFF_MODE)  CC_TOLERANCE=$(CC_TOLERANCE) AIE_VARIANT=$(AIE_VARIANT)"
+                    "UUT_PREPROC_ARGS": "-DUUT_GRAPH=$(UUT_GRAPH) -DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) -DUSING_UUT=1"
                 }
             }
         }
@@ -121,7 +143,8 @@
                     "location": "LIB_DIR/L2/tests/aie/fft_ifft_dit_1ch/test.cpp",
                     "files": [
                         "LIB_DIR/L1/src/aie/fft_ifft_dit_1ch.cpp",
-                        "LIB_DIR/L1/src/aie/fft_r2comb.cpp"
+                        "LIB_DIR/L1/src/aie/fft_r2comb.cpp",
+                        "uut_config.h"
                     ],
                     "pl-freq": 1000,
                     "workdir": "./Work",
@@ -131,8 +154,12 @@
             ]
         }
     ],
+    "generators": {
+        "uut_config.h": {"file": "LIB_DIR/L2/tests/aie/common/scripts/tb_gen.py","function": "generate_testbench"}
+    },
+    "parameter_file": "multi_params.json",
     "testinfo": {
-        "disable": true,
+        "disable": false,
         "jobs": [
             {
                 "index": 0,

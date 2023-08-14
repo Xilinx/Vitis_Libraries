@@ -40,7 +40,7 @@ this file does not contain any vector types or intrinsics since it is required f
 and therefore must be suitable for the aie compiler graph-level compilation.
 */
 
-enum eArchType { kArchBasic, kArchIncrStrobe, kArchStream };
+enum eArchType { kArchBasic, kArchIncrStrobe, kArchStream, kArchPhaseParallel, kArchStreamPhaseParallel };
 
 enum eDFType { kLowDF, kHighDF };
 

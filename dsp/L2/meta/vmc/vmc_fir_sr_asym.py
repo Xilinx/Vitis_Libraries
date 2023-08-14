@@ -12,8 +12,8 @@ def vmc_validate_input_window_size(args):
 	use_coeff_reload = args["use_coeff_reload"]
 	coef_type = args["coef_type"]
 	coeff = args["coeff"]
+	ssr = args["ssr"]
 	api = 0
-	ssr = 1
 	if use_coeff_reload:
 		fir_length = args["fir_length"]
 	else:
@@ -23,16 +23,16 @@ def vmc_validate_input_window_size(args):
 			fir_length = int(len(coeff))
 	return fn_validate_input_window_size(data_type, coef_type, fir_length, input_window_size, api, ssr)
 
-def vmc_validate_casc_length(args):
-    use_coeff_reload = args["use_coeff_reload"]
-    fir_length = args["fir_length"]
+def vmc_validate_casc_len(args):
     casc_length = args["casc_length"]
-    #if not use_casc_length:
-	# TODO : Talk to DSP lib team/sumanta about how 
-	# cascade validation works - confirm its just fir length related
-	#return fn_validate_casc_length(fir_length, casc_length, use_coeff_reload)
-    return {"is_valid": True}
+    return fn_validate_casc_len(casc_length);
     
+
+def vmc_validate_out_ports(args):
+	api = 0
+	ssr = args["ssr"]
+	num_outputs = args["num_outputs"]
+	return fn_validate_num_outputs(num_outputs, api, ssr)
 
 def vmc_validate_coeff(args):
 	use_coeff_reload = args["use_coeff_reload"]
@@ -40,7 +40,7 @@ def vmc_validate_coeff(args):
 	coeff = args["coeff"]
 	data_type = args["data_type"]
 	casc_length = args["casc_length"]
-	ssr = 1
+	ssr = args["ssr"]
 	api = 0
 	if use_coeff_reload:
 		fir_length = args["fir_length"]
@@ -57,6 +57,10 @@ def vmc_validate_shift_val(args):
 	shift_val = args["shift_val"]
 	return fn_validate_shift(data_type, shift_val)
 
+def vmc_validate_ssr(args):
+    ssr = args["ssr"]
+    return fn_validate_ssr(ssr);
+
 #### VMC graph generator ####
 def vmc_generate_graph(name, args):
     tmpargs = {}
@@ -68,10 +72,10 @@ def vmc_generate_graph(name, args):
     tmpargs["TP_INPUT_WINDOW_VSIZE"] = args["input_window_size"]
     tmpargs["TP_CASC_LEN"] = args["casc_length"]
     tmpargs["TP_USE_COEF_RELOAD"] = 1 if args["use_coeff_reload"] else 0
-    tmpargs["TP_NUM_OUTPUTS"] = 1
+    tmpargs["TP_NUM_OUTPUTS"] = 2 if args["num_outputs"] else 1
     tmpargs["TP_DUAL_IP"] = 0
     tmpargs["TP_API"] = 0
-    tmpargs["TP_SSR"] = 1
+    tmpargs["TP_SSR"] = args["ssr"]
     tmpargs["coeff"] = args["coeff"]
    
     return generate_graph(name, tmpargs)

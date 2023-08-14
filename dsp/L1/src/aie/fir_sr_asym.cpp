@@ -25,6 +25,7 @@ Coding conventions
 
 #pragma once
 #include <adf.h>
+//#define _DSPLIB_FIR_SR_ASYM_HPP_DEBUG_
 
 #ifdef __X86SIM__
 // #define _DSPLIB_FIR_SR_ASYM_HPP_DEBUG_
@@ -89,8 +90,8 @@ kernelFilterClass<TT_DATA,
                   TP_COEFF_PHASES_LEN>::filterKernel(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                                                      T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
     // broadcast Window buffer through cascade, when required
-    windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE + fnFirMargin<TP_FIR_LEN, TT_DATA>(), TP_API, TP_DUAL_IP,
-                    m_kKernelPosEnum>(inInterface, outInterface);
+    windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE + fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>(),
+                    TP_API, TP_DUAL_IP, m_kKernelPosEnum>(inInterface, outInterface);
 
     isUpdateRequired = checkHeaderForUpdate<TP_API, TP_USE_COEFF_RELOAD, TP_CASC_IN, TT_DATA, TP_DUAL_IP>(inInterface);
 
@@ -149,8 +150,8 @@ kernelFilterClass<TT_DATA,
                   TP_COEFF_PHASES_LEN>::filterKernel(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                                                      T_outputIF<TP_CASC_OUT, TT_DATA> outInterface,
                                                      const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]) {
-    windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE + fnFirMargin<TP_FIR_LEN, TT_DATA>(), TP_API, TP_DUAL_IP,
-                    m_kKernelPosEnum>(inInterface, outInterface);
+    windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE + fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>(),
+                    TP_API, TP_DUAL_IP, m_kKernelPosEnum>(inInterface, outInterface);
     isUpdateRequired = rtpCompare<TT_COEFF, TP_COEFF_PHASES_LEN>(inTaps, m_rawInTaps);
     // cascade output on the last kernel in cascade chain should not send rtp trigger - should only send output.
     if
@@ -206,8 +207,8 @@ kernelFilterClass<TT_DATA,
                   TP_COEFF_PHASES,
                   TP_COEFF_PHASES_LEN>::filterKernelRtp(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                                                         T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
-    windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE + fnFirMargin<TP_FIR_LEN, TT_DATA>(), TP_API, TP_DUAL_IP,
-                    m_kKernelPosEnum>(inInterface, outInterface);
+    windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE + fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>(),
+                    TP_API, TP_DUAL_IP, m_kKernelPosEnum>(inInterface, outInterface);
     isUpdateRequired = getRtpTrigger(); // 0 - equal, 1 - not equal
     sendRtpTrigger(isUpdateRequired, outInterface);
     if (isUpdateRequired) { // Coefficients have changed
@@ -331,14 +332,15 @@ kernelFilterClass<TT_DATA,
     unsigned int dataNeeded;
     unsigned int dataLoadPhase = 0;
 
-    auto inItr = (TP_API == USE_WINDOW_API && TP_KERNEL_POSITION != 0)
+    auto inItr = (TP_API == USE_WINDOW_API && TP_CASC_IN == true && (TP_KERNEL_POSITION != 0))
                      ? ::aie::begin_random_circular(*(inInterface.inWindowLin))
                      : ::aie::begin_random_circular(*(inInterface.inWindowCirc)); // output size can be less than data
                                                                                   // load size, so this iterator needs
                                                                                   // greater precision to reach finer
                                                                                   // addressed.
-    constexpr bool hasOutWindow = (TP_API == 0 && TP_KERNEL_POSITION == TP_CASC_LEN - 1);
-    constexpr bool hasOutWindow2 = (TP_NUM_OUTPUTS == 2 && TP_API == 0 && TP_KERNEL_POSITION == TP_CASC_LEN - 1);
+
+    constexpr bool hasOutWindow = (TP_API == 0 && TP_CASC_OUT == false);
+    constexpr bool hasOutWindow2 = (TP_NUM_OUTPUTS == 2 && TP_API == 0 && TP_CASC_OUT == false);
     auto outItr = cond_begin_vector_random_or_scalar_circular<hasOutWindow, m_kVOutSize>(*outInterface.outWindow);
     auto outItr2 = cond_begin_vector_random_or_scalar_circular<hasOutWindow2, m_kVOutSize>(*outInterface.outWindow2);
 
@@ -388,8 +390,6 @@ kernelFilterClass<TT_DATA,
                 acc = macSrAsym(acc, sbuff, (op + m_kDataBuffXOffset), coe0, (op % m_kCoeffRegVsize));
             }
 
-            // window_decr(inInterface.inWindow,(m_kDataLoadVsize*numDataLoads-m_kVOutSize));  //return read pointer to
-            // start of next chunk of window.
             inItr -= m_kDataLoadVsize * numDataLoads - m_kVOutSize;
 
             // Write cascade. Do nothing if cascade not present.
@@ -491,7 +491,6 @@ kernelFilterClass<TT_DATA,
     }
 
     // Init pre-loop to deal with m_kFirInitOffset. Only generate for cascaded designs
-    // if constexpr (TP_CASC_LEN > 1) {
     if (doInit == 1) {
         dataLoaded = 0;
         dataNeeded = m_kVOutSize;
@@ -686,22 +685,22 @@ void kernelFilterClass<TT_DATA,
     unsigned int dataLoaded, dataNeeded, numDataLoads;
     unsigned int dataLoadPhase = 0;
 
-    auto inItr = (TP_API == USE_WINDOW_API && TP_KERNEL_POSITION != 0)
+    auto inItr = (TP_API == USE_WINDOW_API && TP_CASC_IN == true && (TP_KERNEL_POSITION != 0))
                      ? ::aie::begin_random_circular(*(inInterface.inWindowLin))
                      : ::aie::begin_random_circular(*(inInterface.inWindowCirc));
-    constexpr bool hasOutWindow = (TP_API == 0 && TP_KERNEL_POSITION == TP_CASC_LEN - 1);
-    constexpr bool hasOutWindow2 = (TP_NUM_OUTPUTS == 2 && TP_API == 0 && TP_KERNEL_POSITION == TP_CASC_LEN - 1);
+    constexpr bool hasOutWindow = (TP_API == 0 && TP_CASC_OUT == false);
+    constexpr bool hasOutWindow2 = (TP_NUM_OUTPUTS == 2 && TP_API == 0 && TP_CASC_OUT == false);
     auto outItr = cond_begin_vector_random_or_scalar_circular<hasOutWindow, m_kVOutSize>(*outInterface.outWindow);
     auto outItr2 = cond_begin_vector_random_or_scalar_circular<hasOutWindow2, m_kVOutSize>(*outInterface.outWindow2);
 
     // Move data pointer away from data consumed by previous cascades
     // Move only by  multiples of 128bit. Cascade phase remainder goes to m_kDataBuffXOffset
-    // window_incr(inInterface.inWindow,(TRUNC((m_kFirInitOffset),(16/sizeof(TT_DATA)))));
     inItr += (TRUNC((m_kFirInitOffset), m_kOffsetResolution));
-
-#pragma unroll(m_kInitialLoads - 1)
-    for (int initLoads = 0; initLoads < m_kInitialLoads - 1; ++initLoads) {
+    int numLoads = 0;
+#pragma unroll GUARD_ZERO(m_kInitialLoads - m_kPerLoopLoads)
+    for (int initLoads = 0; initLoads < m_kInitialLoads - m_kPerLoopLoads; ++initLoads) {
         upd_win_incr_256b<TT_DATA>(sbuff, initLoads % m_kDataLoadsInReg, inItr);
+        numLoads++;
     }
 
     // This loop creates the output window data. In each iteration a vector of samples is output
@@ -713,11 +712,22 @@ void kernelFilterClass<TT_DATA,
 #pragma unroll(m_kIncLoadsRptFactor)
             for (unsigned strobe = 0; strobe < m_kIncLoadsRptFactor; strobe++) {
                 if (dataNeeded >= dataLoaded) {
-                    upd_win_incr_256b<TT_DATA>(sbuff, ((m_kInitialLoads - 1) + numDataLoads) % m_kDataLoadsInReg,
-                                               inItr);
+                    upd_win_incr_256b<TT_DATA>(
+                        sbuff, ((m_kInitialLoads - m_kPerLoopLoads) + numDataLoads) % m_kDataLoadsInReg, inItr);
                     numDataLoads++;
                     dataLoaded += m_kDataLoadVsize;
+                    numLoads++;
+
+                    if
+                        constexpr(m_kLanes > m_kDataLoadVsize) {
+                            upd_win_incr_256b<TT_DATA>(
+                                sbuff, ((m_kInitialLoads - m_kPerLoopLoads) + numDataLoads) % m_kDataLoadsInReg, inItr);
+                            numDataLoads++;
+                            dataLoaded += m_kDataLoadVsize;
+                            numLoads++;
+                        }
                 }
+
                 dataNeeded += m_kVOutSize;
 
                 coeff = ((T_buff_256b<TT_COEFF>*)m_internalTaps);
@@ -735,8 +745,8 @@ void kernelFilterClass<TT_DATA,
                     acc = macSrAsym(acc, sbuff, strobe * m_kVOutSize + (op + m_kDataBuffXOffset), coe0,
                                     (op % m_kCoeffRegVsize));
                 }
-
                 writeCascade<TT_DATA, TT_COEFF>(outInterface, acc);
+
                 outVal = shiftAndSaturate(acc, TP_SHIFT);
                 writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, dataLoadPhase++ % 2,
                                                                        outItr);
@@ -1003,9 +1013,10 @@ void fir_sr_asym<TT_DATA,
                  TP_COEFF_PHASE_OFFSET,
                  TP_COEFF_PHASES,
                  TP_COEFF_PHASES_LEN>::
-    filter(input_circular_buffer<TT_DATA,
-                                 extents<inherited_extent>,
-                                 margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
+    filter(input_circular_buffer<
+               TT_DATA,
+               extents<inherited_extent>,
+               margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
            output_circular_buffer<TT_DATA>& __restrict outWindow) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
@@ -1053,10 +1064,12 @@ void fir_sr_asym<TT_DATA,
                  TP_COEFF_PHASE_OFFSET,
                  TP_COEFF_PHASES,
                  TP_COEFF_PHASES_LEN>::
-    filterSingleKernelSingleOP(input_circular_buffer<TT_DATA,
-                                                     extents<inherited_extent>,
-                                                     margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
-                               output_circular_buffer<TT_DATA>& __restrict outWindow) {
+    filterSingleKernelSingleOP(
+        input_circular_buffer<
+            TT_DATA,
+            extents<inherited_extent>,
+            margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
+        output_circular_buffer<TT_DATA>& __restrict outWindow) {
     constexpr int kdummy = 16;
     T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
@@ -1104,11 +1117,13 @@ void fir_sr_asym<TT_DATA,
                  TP_COEFF_PHASE_OFFSET,
                  TP_COEFF_PHASES,
                  TP_COEFF_PHASES_LEN>::
-    filterSingleKernelDualOP(input_circular_buffer<TT_DATA,
-                                                   extents<inherited_extent>,
-                                                   margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
-                             output_circular_buffer<TT_DATA>& __restrict outWindow,
-                             output_circular_buffer<TT_DATA>& __restrict outWindow2) {
+    filterSingleKernelDualOP(
+        input_circular_buffer<
+            TT_DATA,
+            extents<inherited_extent>,
+            margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
+        output_circular_buffer<TT_DATA>& __restrict outWindow,
+        output_circular_buffer<TT_DATA>& __restrict outWindow2) {
     constexpr int kdummy = 16;
     T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
@@ -1263,9 +1278,10 @@ void fir_sr_asym<TT_DATA,
                  TP_COEFF_PHASE_OFFSET,
                  TP_COEFF_PHASES,
                  TP_COEFF_PHASES_LEN>::
-    filterFirstKernel(input_circular_buffer<TT_DATA,
-                                            extents<inherited_extent>,
-                                            margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
+    filterFirstKernel(input_circular_buffer<
+                          TT_DATA,
+                          extents<inherited_extent>,
+                          margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
                       output_stream_cacc48* outCascade,
                       output_async_buffer<TT_DATA>& __restrict broadcastWindow) {
     constexpr int kdummy = 16;
@@ -1319,9 +1335,10 @@ void fir_sr_asym<TT_DATA,
                  TP_COEFF_PHASES,
                  TP_COEFF_PHASES_LEN>::
     filterFirstKernelWithoutBroadcast(
-        input_circular_buffer<TT_DATA,
-                              extents<inherited_extent>,
-                              margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
+        input_circular_buffer<
+            TT_DATA,
+            extents<inherited_extent>,
+            margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
         output_stream_cacc48* outCascade) {
     constexpr int kdummy = 16;
     T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
@@ -1375,7 +1392,6 @@ void fir_sr_asym<TT_DATA,
                                                           input_stream_cacc48* inCascade,
                                                           output_stream_cacc48* outCascade,
                                                           output_async_buffer<TT_DATA>& __restrict broadcastWindow) {
-    constexpr int kdummy = 16;
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
@@ -1385,6 +1401,52 @@ void fir_sr_asym<TT_DATA,
     this->filterKernel(inInterface, outInterface);
 };
 
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          bool TP_CASC_IN,
+          bool TP_CASC_OUT,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_NUM_OUTPUTS,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
+void fir_sr_asym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 TP_CASC_IN,
+                 TP_CASC_OUT,
+                 TP_FIR_RANGE_LEN,
+                 TP_KERNEL_POSITION,
+                 TP_CASC_LEN,
+                 USE_COEFF_RELOAD_FALSE,
+                 TP_NUM_OUTPUTS,
+                 DUAL_IP_SINGLE,
+                 USE_WINDOW_API,
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_COEFF_PHASE,
+                 TP_COEFF_PHASE_OFFSET,
+                 TP_COEFF_PHASES,
+                 TP_COEFF_PHASES_LEN>::filterMiddleKernelNoBdcst(input_async_buffer<TT_DATA>& __restrict inWindow,
+                                                                 input_stream_cacc48* inCascade,
+                                                                 output_stream_cacc48* outCascade) {
+    T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
+    T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
+    inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
+    inInterface.inCascade = inCascade;
+    outInterface.outCascade = outCascade;
+    this->filterKernel(inInterface, outInterface);
+};
 // FIR filter function overloaded with cascade interface variations
 // This is a specialization of the main class for any kernel within a cascade chain, but neither first nor last.
 // Static coefficients
@@ -1429,7 +1491,6 @@ void fir_sr_asym<
     TP_COEFF_PHASES_LEN>::filterMiddleKernelWithoutBroadcast(input_async_buffer<TT_DATA>& __restrict inWindow,
                                                              input_stream_cacc48* inCascade,
                                                              output_stream_cacc48* outCascade) {
-    constexpr int kdummy = 16;
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
@@ -1437,6 +1498,218 @@ void fir_sr_asym<
     outInterface.outCascade = outCascade;
     this->filterKernel(inInterface, outInterface);
 };
+
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          bool TP_CASC_IN,
+          bool TP_CASC_OUT,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_NUM_OUTPUTS,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
+void fir_sr_asym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 TP_CASC_IN,
+                 TP_CASC_OUT,
+                 TP_FIR_RANGE_LEN,
+                 TP_KERNEL_POSITION,
+                 TP_CASC_LEN,
+                 USE_COEFF_RELOAD_FALSE,
+                 TP_NUM_OUTPUTS,
+                 DUAL_IP_SINGLE,
+                 USE_WINDOW_API,
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_COEFF_PHASE,
+                 TP_COEFF_PHASE_OFFSET,
+                 TP_COEFF_PHASES,
+                 TP_COEFF_PHASES_LEN>::
+    filterLastChainFirstSSRKernel(
+        input_circular_buffer<
+            TT_DATA,
+            extents<inherited_extent>,
+            margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
+        input_stream_cacc48* inCascade,
+        output_circular_buffer<TT_DATA>& __restrict outWindow) {
+    constexpr int kdummy = 16;
+    T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
+    T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
+    inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<kdummy> >*)&inWindow;
+    inInterface.inCascade = inCascade;
+    outInterface.outWindow = (output_circular_buffer<TT_DATA>*)&outWindow;
+    this->filterKernel(inInterface, outInterface);
+};
+
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          bool TP_CASC_IN,
+          bool TP_CASC_OUT,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_NUM_OUTPUTS,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
+void fir_sr_asym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 TP_CASC_IN,
+                 TP_CASC_OUT,
+                 TP_FIR_RANGE_LEN,
+                 TP_KERNEL_POSITION,
+                 TP_CASC_LEN,
+                 USE_COEFF_RELOAD_FALSE,
+                 TP_NUM_OUTPUTS,
+                 DUAL_IP_SINGLE,
+                 USE_WINDOW_API,
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_COEFF_PHASE,
+                 TP_COEFF_PHASE_OFFSET,
+                 TP_COEFF_PHASES,
+                 TP_COEFF_PHASES_LEN>::
+    filterMidChainFirstSSRKernel(
+        input_circular_buffer<
+            TT_DATA,
+            extents<inherited_extent>,
+            margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
+        input_stream_cacc48* inCascade,
+        output_stream_cacc48* outCascade,
+        output_async_buffer<TT_DATA>& __restrict broadcastWindow) {
+    constexpr int kdummy = 16;
+    T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
+    T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
+    inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<kdummy> >*)&inWindow;
+    inInterface.inCascade = inCascade;
+    outInterface.outCascade = outCascade;
+    outInterface.broadcastWindow = (output_async_buffer<TT_DATA>*)&broadcastWindow;
+    this->filterKernel(inInterface, outInterface);
+};
+
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          bool TP_CASC_IN,
+          bool TP_CASC_OUT,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_NUM_OUTPUTS,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
+void fir_sr_asym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 TP_CASC_IN,
+                 TP_CASC_OUT,
+                 TP_FIR_RANGE_LEN,
+                 TP_KERNEL_POSITION,
+                 TP_CASC_LEN,
+                 USE_COEFF_RELOAD_FALSE,
+                 TP_NUM_OUTPUTS,
+                 DUAL_IP_SINGLE,
+                 USE_WINDOW_API,
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_COEFF_PHASE,
+                 TP_COEFF_PHASE_OFFSET,
+                 TP_COEFF_PHASES,
+                 TP_COEFF_PHASES_LEN>::
+    filterMidChainFirstSSRKernelNoBdcst(
+        input_circular_buffer<
+            TT_DATA,
+            extents<inherited_extent>,
+            margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
+        input_stream_cacc48* inCascade,
+        output_stream_cacc48* outCascade) {
+    constexpr int kdummy = 16;
+    T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
+    T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
+    inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<kdummy> >*)&inWindow;
+    inInterface.inCascade = inCascade;
+    outInterface.outCascade = outCascade;
+    this->filterKernel(inInterface, outInterface);
+}
+
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          bool TP_CASC_IN,
+          bool TP_CASC_OUT,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_NUM_OUTPUTS,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
+void fir_sr_asym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 TP_CASC_IN,
+                 TP_CASC_OUT,
+                 TP_FIR_RANGE_LEN,
+                 TP_KERNEL_POSITION,
+                 TP_CASC_LEN,
+                 USE_COEFF_RELOAD_FALSE,
+                 TP_NUM_OUTPUTS,
+                 DUAL_IP_SINGLE,
+                 USE_WINDOW_API,
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_COEFF_PHASE,
+                 TP_COEFF_PHASE_OFFSET,
+                 TP_COEFF_PHASES,
+                 TP_COEFF_PHASES_LEN>::
+    filterFirstKernelNoBdcst(
+        input_circular_buffer<
+            TT_DATA,
+            extents<inherited_extent>,
+            margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
+        output_stream_cacc48* outCascade) {
+    constexpr int kdummy = 16;
+    T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
+    T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
+    inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<kdummy> >*)&inWindow;
+    outInterface.outCascade = outCascade;
+    this->filterKernel(inInterface, outInterface);
+}
 
 // FIR filter function overloaded with cascade interface variations
 // This is a specialization of the main class for when there is only one kernel for the whole filter.
@@ -1479,11 +1752,13 @@ void fir_sr_asym<TT_DATA,
                  TP_COEFF_PHASE_OFFSET,
                  TP_COEFF_PHASES,
                  TP_COEFF_PHASES_LEN>::
-    filterSingleKernelSingleOP(input_circular_buffer<TT_DATA,
-                                                     extents<inherited_extent>,
-                                                     margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
-                               output_circular_buffer<TT_DATA>& __restrict outWindow,
-                               const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]) {
+    filterSingleKernelSingleOP(
+        input_circular_buffer<
+            TT_DATA,
+            extents<inherited_extent>,
+            margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
+        output_circular_buffer<TT_DATA>& __restrict outWindow,
+        const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]) {
     constexpr int kdummy = 16;
     T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
@@ -1532,12 +1807,14 @@ void fir_sr_asym<TT_DATA,
                  TP_COEFF_PHASE_OFFSET,
                  TP_COEFF_PHASES,
                  TP_COEFF_PHASES_LEN>::
-    filterSingleKernelDualOP(input_circular_buffer<TT_DATA,
-                                                   extents<inherited_extent>,
-                                                   margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
-                             output_circular_buffer<TT_DATA>& __restrict outWindow,
-                             output_circular_buffer<TT_DATA>& __restrict outWindow2,
-                             const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]) {
+    filterSingleKernelDualOP(
+        input_circular_buffer<
+            TT_DATA,
+            extents<inherited_extent>,
+            margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
+        output_circular_buffer<TT_DATA>& __restrict outWindow,
+        output_circular_buffer<TT_DATA>& __restrict outWindow2,
+        const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]) {
     constexpr int kdummy = 16;
     T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
@@ -1692,9 +1969,10 @@ void fir_sr_asym<TT_DATA,
                  TP_COEFF_PHASE_OFFSET,
                  TP_COEFF_PHASES,
                  TP_COEFF_PHASES_LEN>::
-    filterFirstKernel(input_circular_buffer<TT_DATA,
-                                            extents<inherited_extent>,
-                                            margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
+    filterFirstKernel(input_circular_buffer<
+                          TT_DATA,
+                          extents<inherited_extent>,
+                          margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
                       output_stream_cacc48* outCascade,
                       output_async_buffer<TT_DATA>& __restrict broadcastWindow,
                       const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]) {
@@ -1749,9 +2027,10 @@ void fir_sr_asym<TT_DATA,
                  TP_COEFF_PHASES,
                  TP_COEFF_PHASES_LEN>::
     filterFirstKernelWithoutBroadcast(
-        input_circular_buffer<TT_DATA,
-                              extents<inherited_extent>,
-                              margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
+        input_circular_buffer<
+            TT_DATA,
+            extents<inherited_extent>,
+            margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
         output_stream_cacc48* outCascade,
         const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]) {
     constexpr int kdummy = 16;
@@ -1869,6 +2148,269 @@ void fir_sr_asym<
     this->filterKernelRtp(inInterface, outInterface);
 };
 
+// specialisations for io buffer ssr
+
+// Reloadable coefficients
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          bool TP_CASC_IN,
+          bool TP_CASC_OUT,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_NUM_OUTPUTS,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
+void fir_sr_asym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 TP_CASC_IN,
+                 TP_CASC_OUT,
+                 TP_FIR_RANGE_LEN,
+                 TP_KERNEL_POSITION,
+                 TP_CASC_LEN,
+                 USE_COEFF_RELOAD_TRUE,
+                 TP_NUM_OUTPUTS,
+                 DUAL_IP_SINGLE,
+                 USE_WINDOW_API,
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_COEFF_PHASE,
+                 TP_COEFF_PHASE_OFFSET,
+                 TP_COEFF_PHASES,
+                 TP_COEFF_PHASES_LEN>::
+    filterLastChainFirstSSRKernel(
+        input_circular_buffer<
+            TT_DATA,
+            extents<inherited_extent>,
+            margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
+        input_stream_cacc48* inCascade,
+        output_circular_buffer<TT_DATA>& __restrict outWindow) {
+    constexpr int kdummy = 16;
+    T_inputIF<TP_CASC_IN, TT_DATA> inInterface;
+    T_outputIF<TP_CASC_OUT, TT_DATA> outInterface;
+    inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<kdummy> >*)&inWindow;
+    inInterface.inCascade = inCascade;
+    outInterface.outWindow = (output_circular_buffer<TT_DATA>*)&outWindow;
+    this->filterKernelRtp(inInterface, outInterface);
+};
+
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          bool TP_CASC_IN,
+          bool TP_CASC_OUT,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_NUM_OUTPUTS,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
+void fir_sr_asym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 TP_CASC_IN,
+                 TP_CASC_OUT,
+                 TP_FIR_RANGE_LEN,
+                 TP_KERNEL_POSITION,
+                 TP_CASC_LEN,
+                 USE_COEFF_RELOAD_TRUE,
+                 TP_NUM_OUTPUTS,
+                 DUAL_IP_SINGLE,
+                 USE_WINDOW_API,
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_COEFF_PHASE,
+                 TP_COEFF_PHASE_OFFSET,
+                 TP_COEFF_PHASES,
+                 TP_COEFF_PHASES_LEN>::
+    filterMidChainFirstSSRKernel(
+        input_circular_buffer<
+            TT_DATA,
+            extents<inherited_extent>,
+            margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
+        input_stream_cacc48* inCascade,
+        output_stream_cacc48* outCascade,
+        output_async_buffer<TT_DATA>& __restrict broadcastWindow) {
+    constexpr int kdummy = 16;
+    T_inputIF<TP_CASC_IN, TT_DATA> inInterface;
+    T_outputIF<TP_CASC_OUT, TT_DATA> outInterface;
+    inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<kdummy> >*)&inWindow;
+    inInterface.inCascade = inCascade;
+    outInterface.outCascade = outCascade;
+    outInterface.broadcastWindow = (output_async_buffer<TT_DATA>*)&broadcastWindow;
+    this->filterKernelRtp(inInterface, outInterface);
+};
+
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          bool TP_CASC_IN,
+          bool TP_CASC_OUT,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_NUM_OUTPUTS,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
+void fir_sr_asym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 TP_CASC_IN,
+                 TP_CASC_OUT,
+                 TP_FIR_RANGE_LEN,
+                 TP_KERNEL_POSITION,
+                 TP_CASC_LEN,
+                 USE_COEFF_RELOAD_TRUE,
+                 TP_NUM_OUTPUTS,
+                 DUAL_IP_SINGLE,
+                 USE_WINDOW_API,
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_COEFF_PHASE,
+                 TP_COEFF_PHASE_OFFSET,
+                 TP_COEFF_PHASES,
+                 TP_COEFF_PHASES_LEN>::
+    filterMidChainFirstSSRKernelNoBdcst(
+        input_circular_buffer<
+            TT_DATA,
+            extents<inherited_extent>,
+            margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
+        input_stream_cacc48* inCascade,
+        output_stream_cacc48* outCascade) {
+    constexpr int kdummy = 16;
+    T_inputIF<TP_CASC_IN, TT_DATA> inInterface;
+    T_outputIF<TP_CASC_OUT, TT_DATA> outInterface;
+    inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<kdummy> >*)&inWindow;
+    inInterface.inCascade = inCascade;
+    outInterface.outCascade = outCascade;
+    this->filterKernelRtp(inInterface, outInterface);
+}
+
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          bool TP_CASC_IN,
+          bool TP_CASC_OUT,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_NUM_OUTPUTS,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
+void fir_sr_asym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 TP_CASC_IN,
+                 TP_CASC_OUT,
+                 TP_FIR_RANGE_LEN,
+                 TP_KERNEL_POSITION,
+                 TP_CASC_LEN,
+                 USE_COEFF_RELOAD_TRUE,
+                 TP_NUM_OUTPUTS,
+                 DUAL_IP_SINGLE,
+                 USE_WINDOW_API,
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_COEFF_PHASE,
+                 TP_COEFF_PHASE_OFFSET,
+                 TP_COEFF_PHASES,
+                 TP_COEFF_PHASES_LEN>::filterMiddleKernelNoBdcst(input_async_buffer<TT_DATA>& __restrict inWindow,
+                                                                 input_stream_cacc48* inCascade,
+                                                                 output_stream_cacc48* outCascade) {
+    T_inputIF<TP_CASC_IN, TT_DATA> inInterface;
+    T_outputIF<TP_CASC_OUT, TT_DATA> outInterface;
+    inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
+    inInterface.inCascade = inCascade;
+    outInterface.outCascade = outCascade;
+    this->filterKernelRtp(inInterface, outInterface);
+}
+
+template <typename TT_DATA,
+          typename TT_COEFF,
+          unsigned int TP_FIR_LEN,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          bool TP_CASC_IN,
+          bool TP_CASC_OUT,
+          unsigned int TP_FIR_RANGE_LEN,
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_NUM_OUTPUTS,
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_COEFF_PHASE,
+          unsigned int TP_COEFF_PHASE_OFFSET,
+          unsigned int TP_COEFF_PHASES,
+          unsigned int TP_COEFF_PHASES_LEN>
+void fir_sr_asym<TT_DATA,
+                 TT_COEFF,
+                 TP_FIR_LEN,
+                 TP_SHIFT,
+                 TP_RND,
+                 TP_INPUT_WINDOW_VSIZE,
+                 TP_CASC_IN,
+                 TP_CASC_OUT,
+                 TP_FIR_RANGE_LEN,
+                 TP_KERNEL_POSITION,
+                 TP_CASC_LEN,
+                 USE_COEFF_RELOAD_TRUE,
+                 TP_NUM_OUTPUTS,
+                 DUAL_IP_SINGLE,
+                 USE_WINDOW_API,
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_COEFF_PHASE,
+                 TP_COEFF_PHASE_OFFSET,
+                 TP_COEFF_PHASES,
+                 TP_COEFF_PHASES_LEN>::
+    filterFirstKernelNoBdcst(
+        input_circular_buffer<
+            TT_DATA,
+            extents<inherited_extent>,
+            margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
+        output_stream_cacc48* outCascade,
+        const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]) {
+    constexpr int kdummy = 16;
+    T_inputIF<TP_CASC_IN, TT_DATA> inInterface;
+    T_outputIF<TP_CASC_OUT, TT_DATA> outInterface;
+    inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<kdummy> >*)&inWindow;
+    outInterface.outCascade = outCascade;
+    this->filterKernel(inInterface, outInterface, inTaps);
+}
 // ----------------------------------------------------------------------------
 // ---------------------------------- STREAM ----------------------------------
 // ----------------------------------------------------------------------------

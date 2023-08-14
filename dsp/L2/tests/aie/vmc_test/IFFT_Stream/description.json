@@ -22,7 +22,7 @@
     },
     "pre_build": [
         {
-            "build_cmd": "vitis -exec ipmetadata_config_checker -newflow -metadata_path LIB_DIR/L2/meta/ LIB_DIR/L2/meta/vmc/$(VMC_KERNEL).json ./config.json"
+            "build_cmd": "vitis --classic -exec ipmetadata_config_checker -newflow -metadata_path LIB_DIR/L2/meta/ LIB_DIR/L2/meta/vmc/$(VMC_KERNEL).json ./config.json"
         },
         {
             "build_cmd": "perl LIB_DIR/L2/tests/aie/common/scripts/compare_json.pl ref_out.json ./xmc_aie_lib/$(GRAPHNAME)/out.json | grep 'Files are identical' || exit 1"
@@ -56,7 +56,7 @@
                 "./"
             ],
         "customized_params": {
-                "params": "--dataflow -Xchess=llvm.xargs=-std=c++2a -Xx86sim=-client=vmc -v -output=graph",
+                "params": "-Xchess=llvm.xargs=-std=c++2a -Xx86sim=-client=vmc -v -output=graph",
                 "default": {
                     "GRAPHNAME": "IFFT_Stream_240788de",
                     "VMC_GRAPHDIR": "xmc_aie_lib/$(GRAPHNAME)",
@@ -83,7 +83,7 @@
         }
     ],
     "testinfo": {
-        "disable": false,
+        "disable": true,
         "jobs": [
             {
                 "index": 0,

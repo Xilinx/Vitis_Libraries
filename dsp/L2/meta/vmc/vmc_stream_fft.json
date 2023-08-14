@@ -1,109 +1,114 @@
 {
-  "schema": "aieip_spec_schema-0.1",
+  "low_level_file":"fft_ifft_dit_1ch.json",
   "ip_name": "vmc_stream_fft",
   "block_info": {
     "label": "FFT Stream",
     "description": "Stream-based FFT block for AI Engines. The specified value for SSR parameter should be a power of two."
   },
   "parameters": [
-    {
+      {
+      "key": "TT_DATA",
       "name": "data_type",
-      "label": "Input/Output data type:",
-      "description": "The type of individual data samples input to and output of the FFT function",
-      "enum": [ "cint16", "cint32", "cfloat" ],
+      "description": "The type of individual data samples input to and output of the fft function",
       "default": "cint16",
-      "type": "typename",
       "blockgui":{
+            "label": "Input/Output data type:",
             "tablabel": "Main",
             "parameterType":"popup"
       }
     },
     {
+      "key": "TT_TWIDDLE",
+      "name": "twiddle_type",
+      "description": "The type of individual data samples input to and output of the filter function",
+      "default": "cint16",
+      "validator": {
+        "file": "vmc_fft_common.py",
+        "function": "vmc_validate_twiddle_type",
+        "args": ["data_type"]
+      },
+      "blockgui":{
+            "label": "Twiddle factor data type:",
+            "tablabel": "Main",
+            "parameterType":"popup"
+      }
+    },
+      {
+      "key": "TP_POINT_SIZE",
       "name": "point_size",
-      "label": "FFT size:",
       "description": "The number of samples in the transform",
       "default": 64,
-      "maximum": 65536,
-      "minimum": 16,
-      "type": "int",
       "validator": {
         "file": "vmc_fft_common.py",
         "function": "vmc_validate_point_size",
         "args": ["data_type", "ssr"]
       },
       "blockgui":{
-            "tablabel": "Main",
+          "label": "FFT size:",  
+          "tablabel": "Main",
             "parameterType":"edit"
       }
     },
     {
+      "key": "TP_WINDOW_VSIZE",
       "name": "input_window_size",
-      "label": "Input frame size (Number of Samples):",
       "description": "The number of samples in the input window",
       "default": 64,
-      "maximum": 65536,
-      "minimum": 16,
-      "type": "int",
-      "validator": {
+       "validator": {
         "file": "vmc_fft_common.py",
         "function": "vmc_validate_input_window_size",
         "args": ["point_size"]
       },
       "blockgui":{
+            "label": "Input frame size (Number of Samples):",
             "tablabel": "Main",
             "parameterType":"edit"
       }
     },
-    {
+      {
+      "key": "TP_SHIFT",    
       "name": "shift_val",
-      "label": "Scale output down by 2^:",
       "description": "The power of 2 shift down applied to the accumulation of FIR before output",
       "default": 0,
-      "maximum": 60,
-      "minimum": 0,
-      "type": "int",
       "validator": {
         "file": "vmc_fft_common.py",
         "function": "vmc_validate_shift_val",
         "args": ["data_type", "point_size"]
       },
       "blockgui":{
+            "label": "Scale output down by 2^:",
             "tablabel": "Main",
             "parameterType":"edit"
       }
     },
-    {
+    {   
       "name": "ssr",
-      "label": "SSR: ",
       "description": "The number of input channels for SSR. The specified value should be of the form 2^N",
       "default": 2,
-      "maximum": 512,
-      "minimum": 2,
-      "type": "int",
+      "type": "uint",
       "validator": {
         "file": "vmc_fft_common.py",
         "function": "vmc_validate_ssr",
         "args": []
       },
       "blockgui":{
+            "label": "SSR: ",
             "tablabel": "Main",
             "parameterType":"edit"
       }
     },
     {
+      "key": "TP_CASC_LEN",
       "name": "casc_length",
-      "label": "Number of cascade stages:",
       "description": "The length of cascaded kernels",
-      "type": "int",
       "default": 1,
-      "maximum": 11,
-      "minimum": 1,
       "validator": {
         "file": "vmc_fft_common.py",
         "function": "vmc_validate_casc_length",
         "args": ["data_type", "point_size", "ssr"]
       },
       "blockgui":{
+            "label": "Number of cascade stages:",
             "tablabel": "Main",
             "parameterType":"edit"
       }

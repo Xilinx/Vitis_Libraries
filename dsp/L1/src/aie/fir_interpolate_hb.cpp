@@ -586,11 +586,13 @@ INLINE_DECL void kernelFilterClass<TT_DATA,
 
                 // Write cascade. Do nothing if cascade not present.
                 writeCascade<TT_DATA, TT_COEFF>(outInterface, accHighPolyphase);
-                if (TP_KERNEL_POSITION + 1 == TP_CASC_LEN) {
-                    // Only last kernel in cascade chain has a non-zero ct coeff.
-                    // TODO: hide the condition in template/argument
-                    accLowPolyphase = mulCentreTap1buffIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT>(sbuff, ctPos, ctCoeff);
-                }
+                if
+                    constexpr(TP_KERNEL_POSITION + 1 == TP_CASC_LEN && TP_UPSHIFT_CT == 0) {
+                        // Only last kernel in cascade chain has a non-zero ct coeff.
+                        // TODO: hide the condition in template/argument
+                        accLowPolyphase.val =
+                            mulCentreTap1buffIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT>(sbuff, ctPos, ctCoeff);
+                    }
                 // writeWindow<TT_DATA,TT_COEFF,TP_NUM_OUTPUTS>(outInterface, accHighPolyphase, accLowPolyphase,
                 // TP_SHIFT);
                 writeOutputSel<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_UPSHIFT_CT, TP_API>(
@@ -644,11 +646,12 @@ INLINE_DECL void kernelFilterClass<TT_DATA,
 
         // Write cascade. Do nothing if cascade not present.
         writeCascade<TT_DATA, TT_COEFF>(outInterface, accHighPolyphase);
-        if (TP_KERNEL_POSITION + 1 == TP_CASC_LEN) {
-            // Only last kernel in cascade chain has a non-zero ct coeff.
-            // TODO: hide the condition in template/argument
-            accLowPolyphase = mulCentreTap1buffIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT>(sbuff, ctPos, ctCoeff);
-        }
+        if
+            constexpr(TP_KERNEL_POSITION + 1 == TP_CASC_LEN && TP_UPSHIFT_CT == 0) {
+                // Only last kernel in cascade chain has a non-zero ct coeff.
+                // TODO: hide the condition in template/argument
+                accLowPolyphase.val = mulCentreTap1buffIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT>(sbuff, ctPos, ctCoeff);
+            }
         // writeWindow<TT_DATA,TT_COEFF,TP_NUM_OUTPUTS,TP_UPSHIFT_CT>(outInterface, accHighPolyphase, accLowPolyphase,
         // TP_SHIFT);
         writeOutputSel<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_UPSHIFT_CT, TP_API>(outInterface, accHighPolyphase,
@@ -2181,8 +2184,7 @@ void fir_interpolate_hb<TT_DATA,
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<16> >*)&inWindow;
     outInterface.outCascade = outCascade;
-    outInterface.outWindow =
-        (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<16> >*)&inWindow; // dummy
+    outInterface.outWindow = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<16> >*)&inWindow; // dummy
     this->filterKernel(inInterface, outInterface);
 };
 

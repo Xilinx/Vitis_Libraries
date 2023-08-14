@@ -246,55 +246,103 @@ inline void roundAcc(int rndMode, int shift, T_accRef<cint16>& accum) {
 
 // Saturation
 template <typename T_A>
-void saturateAcc(T_A& accum){};
+void saturateAcc(T_A& accum, unsigned int satMode = 1){};
 template <>
-inline void saturateAcc(T_accRef<int16>& accum) {
-    // Saturation
-    if (accum.real >= C_PMAX16) {
-        accum.real = C_PMAX16; // Cap at int max
-    } else if (accum.real <= C_NMAX16) {
-        accum.real = C_NMAX16; // Cap at int min
+inline void saturateAcc(T_accRef<int16>& accum, unsigned int satMode) {
+    if (satMode == 0 || satMode == 2) {
+    }                        // Mode: none or invalid
+    else if (satMode == 1) { // Mode: saturate
+        if (accum.real >= C_PMAX16) {
+            accum.real = C_PMAX16;
+        } else if (accum.real <= C_NMAX16) {
+            accum.real = C_NMAX16;
+        }
+    } else if (satMode == 3) { // Mode: symmetric
+        if (accum.real >= C_PMAX16) {
+            accum.real = C_PMAX16;
+        } else if (accum.real <= C_NMAX16) {
+            accum.real = C_NMAX16 + 1; // Cap at int min +1
+        }
     }
 };
+
 template <>
-inline void saturateAcc(T_accRef<int32>& accum) {
+inline void saturateAcc(T_accRef<int32>& accum, unsigned int satMode) {
     // T_accRef<int32> ret;
     // Saturation
-    if (accum.real >= C_PMAX32) {
-        accum.real = C_PMAX32; // Cap at int max
-    } else if (accum.real <= C_NMAX32) {
-        accum.real = C_NMAX32; // Cap at int min
+    if (satMode == 0 || satMode == 2) {
+    }                        // Mode: none or invalid
+    else if (satMode == 1) { // Mode: saturate
+        if (accum.real >= C_PMAX32) {
+            accum.real = C_PMAX32;
+        } else if (accum.real <= C_NMAX32) {
+            accum.real = C_NMAX32;
+        }
+    } else if (satMode == 3) { // Mode: symmetric
+        if (accum.real >= C_PMAX32) {
+            accum.real = C_PMAX32;
+        } else if (accum.real <= C_NMAX32) {
+            accum.real = C_NMAX32 + 1; // Cap at int min +1
+        }
     }
 };
 template <>
-inline void saturateAcc(T_accRef<cint16>& accum) {
+inline void saturateAcc(T_accRef<cint16>& accum, unsigned int satMode) {
     // T_accRef<cint16> ret;
-    // Saturation
-    if (accum.real >= C_PMAX16) {
-        accum.real = C_PMAX16; // Cap at int max
-    } else if (accum.real <= C_NMAX16) {
-        accum.real = C_NMAX16; // Cap at int min
-    }
-    if (accum.imag >= C_PMAX16) {
-        accum.imag = C_PMAX16; // Cap at int max
-    } else if (accum.imag <= C_NMAX16) {
-        accum.imag = C_NMAX16; // Cap at int min
+    if (satMode == 0 || satMode == 2) {
+    }                        // Mode: none or invalid
+    else if (satMode == 1) { // Mode: saturate
+        if (accum.real >= C_PMAX16) {
+            accum.real = C_PMAX16;
+        } else if (accum.real <= C_NMAX16) {
+            accum.real = C_NMAX16;
+        }
+        if (accum.imag >= C_PMAX16) {
+            accum.imag = C_PMAX16;
+        } else if (accum.imag <= C_NMAX16) {
+            accum.imag = C_NMAX16;
+        }
+    } else if (satMode == 3) { // Mode: symmetric
+        if (accum.real >= C_PMAX16) {
+            accum.real = C_PMAX16;
+        } else if (accum.real <= C_NMAX16) {
+            accum.real = C_NMAX16 + 1; // Cap at int min +1
+        }
+        if (accum.imag >= C_PMAX16) {
+            accum.imag = C_PMAX16;
+        } else if (accum.imag <= C_NMAX16) {
+            accum.imag = C_NMAX16 + 1; // Cap at int min +1
+        }
     }
     // return ret;
 };
 template <>
-inline void saturateAcc(T_accRef<cint32>& accum) {
+inline void saturateAcc(T_accRef<cint32>& accum, unsigned int satMode) {
     // T_accRef<cint32> ret;
-    // Saturation
-    if (accum.real >= C_PMAX32) {
-        accum.real = C_PMAX32; // Cap at int max
-    } else if (accum.real <= C_NMAX32) {
-        accum.real = C_NMAX32; // Cap at int min
-    }
-    if (accum.imag >= C_PMAX32) {
-        accum.imag = C_PMAX32; // Cap at int max
-    } else if (accum.imag <= C_NMAX32) {
-        accum.imag = C_NMAX32; // Cap at int min
+    if (satMode == 0 || satMode == 2) {
+    }                        // Mode: none or invalid
+    else if (satMode == 1) { // Mode: saturate
+        if (accum.real >= C_PMAX32) {
+            accum.real = C_PMAX32;
+        } else if (accum.real <= C_NMAX32) {
+            accum.real = C_NMAX32;
+        }
+        if (accum.imag >= C_PMAX32) {
+            accum.imag = C_PMAX32;
+        } else if (accum.imag <= C_NMAX32) {
+            accum.imag = C_NMAX32;
+        }
+    } else if (satMode == 3) { // Mode: symmetric
+        if (accum.real >= C_PMAX32) {
+            accum.real = C_PMAX32;
+        } else if (accum.real <= C_NMAX32) {
+            accum.real = C_NMAX32 + 1; // Cap at int min +1
+        }
+        if (accum.imag >= C_PMAX32) {
+            accum.imag = C_PMAX32;
+        } else if (accum.imag <= C_NMAX32) {
+            accum.imag = C_NMAX32 + 1; // Cap at int min +1
+        }
     }
     // return ret;
 };

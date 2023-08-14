@@ -25,9 +25,10 @@ fir_decimate_asym graph class.
 #include <adf.h>
 #include <vector>
 #include "utils.hpp"
-
 #include "uut_config.h"
+#include "uut_static_config.h"
 #include "test_utils.hpp"
+#include "fir_common_traits.hpp"
 
 #ifndef UUT_GRAPH
 #define UUT_GRAPH fir_decimate_asym_graph
@@ -49,8 +50,6 @@ class test_graph : public graph {
     COEFF_TYPE taps[FIR_LEN];
 
    public:
-    static constexpr int DUAL_INPUT_SAMPLES = (PORT_API == 1) && (DUAL_IP == 1) ? 1 : 0;
-
     static constexpr unsigned int IN_SSR = P_SSR * P_PARA_DECI_POLY;
     std::array<input_plio, IN_SSR*(DUAL_INPUT_SAMPLES + 1)> in; // 0? dual_ip - not supported by sr_sym
     std::array<output_plio, P_SSR * NUM_OUTPUTS> out;           // NUM_OUTPUTS forces to 1 for ref
@@ -76,7 +75,8 @@ class test_graph : public graph {
                                                         DUAL_IP,
                                                         PORT_API,
                                                         P_SSR,
-                                                        P_PARA_DECI_POLY>;
+                                                        P_PARA_DECI_POLY,
+                                                        SAT_MODE>;
 
     // Constructor
     test_graph() {
@@ -92,7 +92,7 @@ class test_graph : public graph {
             FIR_LEN; // Randomly selects a single coefficient to be changed in second coefficient array to test reload
         for (int j = 0; j < 2; j++) {
             taps_gen.prepSeed(COEFF_SEED);
-            taps_gen.gen(STIM_TYPE, taps);
+            taps_gen.gen(COEFF_STIM_TYPE, taps);
             for (int i = 0; i < (FIR_LEN); i++) {
                 m_taps[j][i] = taps[i];
                 if (i == error_tap && j == 1) {

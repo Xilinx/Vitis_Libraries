@@ -10,6 +10,11 @@ def fn_get_parallel_power(ssr):
 
     return pp
 
+def vmc_validate_twiddle_type(args):
+    data_type = args["data_type"]
+    twiddle_type = args["twiddle_type"]
+    return fn_validate_twiddle_type(data_type, twiddle_type)
+
 #### VMC validators ####
 def vmc_validate_point_size(args):
     ssr = args["ssr"]
@@ -50,6 +55,8 @@ def vmc_validate_casc_length(args):
 def vmc_validate_ssr(args):
     api = 1;
     ssr = args["ssr"]
+    if ssr < 1 or ssr > 512:
+      return isError(f"Minimum value for parameter SSR is 1 and 512, respectively, but got {ssr}. ")
     pp = fn_get_parallel_power(ssr)
 
     if pp == -1:

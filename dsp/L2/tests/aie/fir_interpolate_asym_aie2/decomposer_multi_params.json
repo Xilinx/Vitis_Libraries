@@ -1,0 +1,84 @@
+{
+    "daily": {
+        "test_0_fir_9t_if3_poly3": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int16",
+            "FIR_LEN":"9",
+            "INTERPOLATE_FACTOR":"3",
+            "SHIFT":"16",
+            "INPUT_WINDOW_VSIZE":"256",
+            "P_PARA_INTERP_POLY": "3"
+        },
+        "test_1_fir_27t_if3_poly3_1out_stream_casc": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int16",
+            "FIR_LEN":"27",
+            "INTERPOLATE_FACTOR":"3",
+            "SHIFT":"16",
+            "INPUT_WINDOW_VSIZE":"7680",
+            "PORT_API":"1",
+            "CASC_LEN":"3",
+            "P_PARA_INTERP_POLY": "3"
+        },
+        "test_1_fir_27t_if3_poly3_2out_stream_casc": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int16",
+            "FIR_LEN":"27",
+            "INTERPOLATE_FACTOR":"3",
+            "SHIFT":"16",
+            "INPUT_WINDOW_VSIZE":"7680",
+            "PORT_API":"1",
+            "CASC_LEN":"3",
+            "P_PARA_INTERP_POLY": "3",
+            "NUM_OUTPUTS" : "2",
+            "DUAL_IP" : "1"
+        },
+        "test_2_fir_54t_if3_poly3_1out_stream_casc_ssr2": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int16",
+            "FIR_LEN":"54",
+            "INTERPOLATE_FACTOR":"3",
+            "SHIFT":"16",
+            "INPUT_WINDOW_VSIZE":"7680",
+            "PORT_API":"1",
+            "CASC_LEN":"3",
+            "UUT_PARA_INTERP_POLY": "3",
+            "UUT_SSR": "2"
+        },
+        "test_3_fir_243t_if3_poly3_1out_stream_casc_ssr3": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int16",
+            "FIR_LEN":"243",
+            "INTERPOLATE_FACTOR":"3",
+            "SHIFT":"16",
+            "INPUT_WINDOW_VSIZE":"7680",
+            "PORT_API":"1",
+            "CASC_LEN":"3",
+            "UUT_PARA_INTERP_POLY": "3",
+            "UUT_SSR": "3"
+        },
+        "test_4_fir_108t_if6_poly3_1out_stream": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int16",
+            "FIR_LEN":"108",
+            "INTERPOLATE_FACTOR":"6",
+            "SHIFT":"16",
+            "INPUT_WINDOW_VSIZE":"7680",
+            "PORT_API":"1",
+            "UUT_PARA_INTERP_POLY": "3"
+        },
+        "test_5_fir_27t_if6_poly2_2out_stream": {
+            "DATA_TYPE":"cint16",
+            "COEFF_TYPE":"int16",
+            "FIR_LEN":"108",
+            "INTERPOLATE_FACTOR":"6",
+            "SHIFT":"16",
+            "INPUT_WINDOW_VSIZE":"7680",
+            "PORT_API":"1",
+            "UUT_PARA_INTERP_POLY": "2",
+            "NUM_OUTPUTS" : "2",
+            "DUAL_IP" : "1",
+            "UUT_SSR" : "2"
+        }
+    }
+}

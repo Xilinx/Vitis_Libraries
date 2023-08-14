@@ -95,7 +95,6 @@
                 "./"
             ],
             "clflags": [
-                "--dataflow",
                 "-Xpreproc=\"-DUUT_GRAPH=fir_decimate_asym_graph -DOUTPUT_FILE=data/uut_output.txt -DINPUT_FILE=data/input.txt  -DUSING_UUT=1 \""
             ]
         }

@@ -49,7 +49,7 @@ def fn_get_twiddle_type(data_type):
 def vmc_generate_graph(name, args):
     tmpargs = {}
     tmpargs["TT_DATA"] = args["data_type"]
-    tmpargs["TT_TWIDDLE"] = fn_get_twiddle_type(args["data_type"])
+    tmpargs["TT_TWIDDLE"] = args["twiddle_type"]
     tmpargs["TP_POINT_SIZE"] = args["point_size"]
     tmpargs["TP_SHIFT"] = args["shift_val"]
     tmpargs["TP_WINDOW_VSIZE"] = args["input_window_size"]

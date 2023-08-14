@@ -1,50 +1,86 @@
 {
-    "daily": {
-        "test_0_dds_mixer": {
-            "DATA_TYPE":"cint16",
-            "MIXER_MODE":"0",
-            "WINDOW_VSIZE":"256",
-            "P_API":"0",
-            "UUT_SSR":"1"
-        },
-        "test_1_dds_mixer": {
-            "DATA_TYPE":"cint16",
-            "MIXER_MODE":"1",
-            "WINDOW_VSIZE":"768",
-            "P_API":"1",
-            "UUT_SSR":"3"
-        },
-        "test_2_dds_mixer": {
-            "DATA_TYPE":"cint16",
-            "MIXER_MODE":"2",
-            "WINDOW_VSIZE":"4800",
-            "P_API":"0",
-            "UUT_SSR":"15"
-        },
-        "test_3_dds_mixer": {
-            "DATA_TYPE":"cint16",
-            "MIXER_MODE":"2",
-            "WINDOW_VSIZE":"5120",
-            "P_API":"1",
-            "UUT_SSR":"16",
-            "DDS_PHASE_INC": "1797958314",
-            "INITIAL_DDS_OFFSET" : "1797958314"
-        },
-        "test_5_dds_mixer": {
-            "DATA_TYPE":"cint32",
-            "MIXER_MODE":"1",
-            "WINDOW_VSIZE":"256",
-            "P_API":"0",
-            "UUT_SSR":"1"
-        },
-        "test_6_dds_mixer": {
-            "DATA_TYPE":"cfloat",
-            "MIXER_MODE":"1",
-            "WINDOW_VSIZE":"256",
-            "P_API":"0",
-            "UUT_SSR":"1",
-            "CC_TOLERANCE":"0.0025",
-            "DIFF_TOLERANCE":"0.0025"
-        }
+    "test_0_dds_mixer": {
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "0",
+        "INPUT_WINDOW_VSIZE": "256",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DIFF_TOLERANCE": "4",
+        "CC_TOLERANCE": "0",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0"
+    },
+    "test_1_dds_mixer": {
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "1",
+        "INPUT_WINDOW_VSIZE": "768",
+        "P_API": "1",
+        "UUT_SSR": "3",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DIFF_TOLERANCE": "4",
+        "CC_TOLERANCE": "0",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0"
+    },
+    "test_2_dds_mixer": {
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "2",
+        "INPUT_WINDOW_VSIZE": "4800",
+        "P_API": "0",
+        "UUT_SSR": "15",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DIFF_TOLERANCE": "4",
+        "CC_TOLERANCE": "0",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0"
+    },
+    "test_3_dds_mixer": {
+        "DATA_TYPE": "cint16",
+        "MIXER_MODE": "2",
+        "INPUT_WINDOW_VSIZE": "5120",
+        "P_API": "1",
+        "UUT_SSR": "16",
+        "DDS_PHASE_INC": "1797958314",
+        "INITIAL_DDS_OFFSET": "1797958314",
+        "NITER": "16",
+        "DIFF_TOLERANCE": "4",
+        "CC_TOLERANCE": "0",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0"
+    },
+    "test_5_dds_mixer": {
+        "DATA_TYPE": "cint32",
+        "MIXER_MODE": "1",
+        "INPUT_WINDOW_VSIZE": "256",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DIFF_TOLERANCE": "4",
+        "CC_TOLERANCE": "0",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0"
+    },
+    "test_6_dds_mixer": {
+        "DATA_TYPE": "cfloat",
+        "MIXER_MODE": "1",
+        "INPUT_WINDOW_VSIZE": "256",
+        "P_API": "0",
+        "UUT_SSR": "1",
+        "CC_TOLERANCE": "0.0025",
+        "DIFF_TOLERANCE": "0.0025",
+        "NITER": "16",
+        "INITIAL_DDS_OFFSET": "0",
+        "DDS_PHASE_INC": "1797958314",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0"
     }
 }

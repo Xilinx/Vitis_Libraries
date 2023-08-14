@@ -23,6 +23,12 @@ import sys
 # fft_ifft_dit_1ch_graph.hpp:842:    static_assert(TP_API == kStreamAPI, "Error: Only Stream interface is supported for parallel FFT");
 # fft_ifft_dit_1ch_graph.hpp:843:    static_assert(TP_PARALLEL_POWER >= 1 && TP_PARALLEL_POWER < 9,
 
+TP_POINT_SIZE_min = 16
+TP_POINT_SIZE_max = 65536
+TP_WINDOW_VSIZE_min = 16
+TP_CASC_LEN_min = 1
+TP_CASC_LEN_max = 11
+
 def fn_validate_twiddle_type(TT_DATA, TT_TWIDDLE):
   validTypeCombos = [
       ("cint16", "cint16"),
@@ -53,35 +59,15 @@ def fn_is_power_of_two(n):
 # good candidate for aie_common, especially if we want to give better error messages
 # finds the first instance of a given paramter name in the list of parameters.
 # Retuns None if can't find it
-def fn_get_parameter_json(metadata_json, param_name):
-  return next((param for param in metadata_json["parameters"] if param["name"] == param_name), None)
-
-# Resolve the dirname of this file, so this is never a relative path from cwd.
-import os
-path_dirname_to_this_file = os.path.dirname(os.path.abspath(__file__))
-#read the metadata json file to get the min supported point size, to avoid duplication and maintence hazard
-def fn_get_min_supported_point_size():
-
-  try:
-    with open(f"{path_dirname_to_this_file}/fft_ifft_dit_1ch.json") as filePointer:
-      fft_metadata_json = json.load(filePointer)
-  except Exception as e:
-    sys.exit(f"Failed to open metadata json file. {e}")
-
-  # grab the point size object from the json
-  pointSizeJson = fn_get_parameter_json(fft_metadata_json, "TP_POINT_SIZE")
-  # get the min and  if we don't find minimum, then assume no min
-  minPointSize = (pointSizeJson["minimum"]) if pointSizeJson else 0
-  return minPointSize
-
-
 
 def fn_validate_point_size(TP_POINT_SIZE, TP_DYN_PT_SIZE, TT_DATA, TP_PARALLEL_POWER, TP_API):
+  if TP_POINT_SIZE < TP_POINT_SIZE_min or TP_POINT_SIZE > TP_POINT_SIZE_max :
+        return isError(f"Minimum and maximum value for Point Size is {TP_POINT_SIZE_min} and {TP_POINT_SIZE_max},respectively, but got {TP_POINT_SIZE}.")
   checkPointSizeIsPowerOf2 = isValid if fn_is_power_of_two(TP_POINT_SIZE) else (
     isError(f"Point size ({TP_POINT_SIZE}) must be a power of 2")
   )
 
-  minPointSize = fn_get_min_supported_point_size()
+  minPointSize = TP_POINT_SIZE_min
   # You can't switch between multiple point sizes if the max point size specified is also the minimum supported..
   checkDynPointSizeIsMoreThanMinPointSize = (
     isError(f"Point size ({TP_POINT_SIZE}) must be higher than the minimum suppored size ({minPointSize}) when using dynamic point FFT.")
@@ -156,6 +142,8 @@ def fn_log2(n):
     #return Inf
 
 def fn_validate_casc_len(TT_DATA, TP_POINT_SIZE, TP_PARALLEL_POWER, TP_CASC_LEN):
+  if TP_CASC_LEN < TP_CASC_LEN_min or TP_CASC_LEN > TP_CASC_LEN_max :
+        return isError(f"Minimum and maximum value for cascade length is {TP_CASC_LEN_min} and {TP_CASC_LEN_max},respectively, but got {TP_CASC_LEN}.")
   # Defines how many radix-2 ranks there are in the FFT itself (subframe or main FFT).
   log2PointSize = fn_log2(TP_POINT_SIZE>>TP_PARALLEL_POWER)
   # equation for integer ffts is complicated by the fact that odd power of 2 point sizes start with a radix 2 stage
@@ -176,9 +164,10 @@ def validate_TP_CASC_LEN(args):
   return fn_validate_casc_len(TT_DATA, TP_POINT_SIZE, TP_PARALLEL_POWER, TP_CASC_LEN)
 
 
-
 def fn_validate_window_size(TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_DYN_PT_SIZE):
   # Disable the window_vsize check for dynamic point size, due to incorrectly created caller function's arguments.
+  if TP_WINDOW_VSIZE < TP_WINDOW_VSIZE_min:
+	    return isError(f"Minimum value for Input size is {TP_WINDOW_VSIZE_min}, but got {TP_WINDOW_VSIZE}.")
   if (TP_DYN_PT_SIZE == 1) :
    return isValid
 

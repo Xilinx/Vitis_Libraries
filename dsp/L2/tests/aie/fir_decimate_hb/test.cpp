@@ -29,9 +29,8 @@ int main(void) {
 #if (USE_COEFF_RELOAD == 1)
     // SSR configs call asym kernels, that require asym taps
     constexpr unsigned int hbRTPLength = (FIR_LEN + 1) / 4 + 1;
-    constexpr unsigned int asymRTPLength = CEIL((FIR_LEN + 1) / 2, P_SSR) + 1;
+    constexpr unsigned int asymRTPLength = CEIL((FIR_LEN + 1) / 2, UUT_SSR) + 1;
     COEFF_TYPE tapsAsym[asymRTPLength];
-
 #if (P_PARA_DECI_POLY > 1)
     // Convert compressed array into Asymmetric and odd numbered - with Center tap
     xf::dsp::aie::convert_hb_taps_to_asym(tapsAsym, hbRTPLength, filter.m_taps[0], P_SSR);
@@ -39,7 +38,13 @@ int main(void) {
         filter.update(filter.coeff[i], tapsAsym, asymRTPLength);
     }
 #else
+#if (__HAS_SYM_PREADD__ == 1 || USING_UUT == 0)
     filter.update(filter.coeff[0], filter.m_taps[0], hbRTPLength);
+#else
+    xf::dsp::aie::convert_hb_taps_to_asym(tapsAsym, hbRTPLength, filter.m_taps[0], 1);
+    tapsAsym[(FIR_LEN + 1) / 2] = filter.m_taps[0][(FIR_LEN + 1) / 4];
+    filter.update(filter.coeff[0], tapsAsym, ((FIR_LEN + 1) / 2 + 1));
+#endif
 #endif
     filter.run(NITER / 2);
     filter.wait();
@@ -50,7 +55,13 @@ int main(void) {
         filter.update(filter.coeff[i], tapsAsym, asymRTPLength);
     }
 #else
+#if (__HAS_SYM_PREADD__ == 1 || USING_UUT == 0)
     filter.update(filter.coeff[0], filter.m_taps[1], hbRTPLength);
+#else
+    xf::dsp::aie::convert_hb_taps_to_asym(tapsAsym, hbRTPLength, filter.m_taps[1], 1);
+    tapsAsym[(FIR_LEN + 1) / 2] = filter.m_taps[1][(FIR_LEN + 1) / 4];
+    filter.update(filter.coeff[0], tapsAsym, ((FIR_LEN + 1) / 2 + 1));
+#endif
 #endif
 
     filter.run(NITER / 2);

@@ -44,8 +44,13 @@ namespace interpolate_hb {
 static constexpr unsigned int kMaxColumns = 4;
 static constexpr unsigned int kUse128bitLoads = 8; // Flag to use 128-bit loads, instead of 256-bit default loads
 // Global constants,
+#if __HAS_SYM_PREADD__ == 1
 static constexpr unsigned int kSymmetryFactor = 2;
 static constexpr unsigned int kInterpolateFactor = 2;
+#else
+static constexpr unsigned int kSymmetryFactor = 1;
+static constexpr unsigned int kInterpolateFactor = 2;
+#endif
 static constexpr unsigned int kFirRangeRound =
     kSymmetryFactor * kMaxColumns;            // Round cascaded FIR SYM kernels to multiples of 4,
 static constexpr unsigned int kUpdWSize = 32; // Upd_w size in Bytes (256bit) - const for all data/coeff types
@@ -65,37 +70,19 @@ template <typename TT_DATA, typename TT_COEFF>
 INLINE_DECL constexpr unsigned int fnNumSymColsIntHb() {
     return fnNumCols384<TT_DATA, TT_COEFF>();
 };
-// template<> INLINE_DECL constexpr unsigned int fnNumSymColsIntHb< int16,  int16>(){  return 4;};
-// template<> INLINE_DECL constexpr unsigned int fnNumSymColsIntHb<cint16,  int16>(){  return 4;};
-// template<> INLINE_DECL constexpr unsigned int fnNumSymColsIntHb<cint16, cint16>(){  return 2;};
-// template<> INLINE_DECL constexpr unsigned int fnNumSymColsIntHb< int32,  int16>(){  return 2;};
-// template<> INLINE_DECL constexpr unsigned int fnNumSymColsIntHb< int32,  int32>(){  return 2;};
-// template<> INLINE_DECL constexpr unsigned int fnNumSymColsIntHb<cint32,  int16>(){  return 2;};
-// template<> INLINE_DECL constexpr unsigned int fnNumSymColsIntHb<cint32, cint16>(){  return 1;};
-// template<> INLINE_DECL constexpr unsigned int fnNumSymColsIntHb<cint32,  int32>(){  return 1;};
-// template<> INLINE_DECL constexpr unsigned int fnNumSymColsIntHb<cint32, cint32>(){  return 1;};
-// template<> INLINE_DECL constexpr unsigned int fnNumSymColsIntHb< float,  float>(){  return 1;};
-// template<> INLINE_DECL constexpr unsigned int fnNumSymColsIntHb<cfloat,  float>(){  return 1;};
-// template<> INLINE_DECL constexpr unsigned int fnNumSymColsIntHb<cfloat, cfloat>(){  return 1;};
 
 // Function to return #lanes in mul_sym function - NOT intrinsic (see cint32/cint32)
-template <typename TT_DATA, typename TT_COEFF, unsigned int TP_UPSHIFT_CT = 0>
+#if __MIN_REGSIZE__ == 128
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_API = 0, unsigned int TP_UPSHIFT_CT = 0>
 INLINE_DECL constexpr unsigned int fnNumSymLanesIntHb() {
     return fnNumLanes384<TT_DATA, TT_COEFF>();
 };
-// template<> INLINE_DECL constexpr unsigned int fnNumSymLanesIntHb< int16,  int16, 1>(){  return 8;};
-// template<> INLINE_DECL constexpr unsigned int fnNumSymLanesIntHb<cint16,  int16, 1>(){  return 4;};
-// template<> INLINE_DECL constexpr unsigned int fnNumSymLanesIntHb<cint16, cint16, 1>(){  return 4;};
-
-// template<> INLINE_DECL constexpr unsigned int fnNumSymLanesIntHb< int32,  int16>(){  return 8;};
-// template<> INLINE_DECL constexpr unsigned int fnNumSymLanesIntHb< int32,  int32>(){  return 4;};
-// template<> INLINE_DECL constexpr unsigned int fnNumSymLanesIntHb<cint32,  int16>(){  return 4;};
-// template<> INLINE_DECL constexpr unsigned int fnNumSymLanesIntHb<cint32, cint16>(){  return 4;};
-// template<> INLINE_DECL constexpr unsigned int fnNumSymLanesIntHb<cint32,  int32>(){  return 4;};
-// template<> INLINE_DECL constexpr unsigned int fnNumSymLanesIntHb<cint32, cint32>(){  return 2;};
-// template<> INLINE_DECL constexpr unsigned int fnNumSymLanesIntHb< float,  float>(){  return 8;};
-// template<> INLINE_DECL constexpr unsigned int fnNumSymLanesIntHb<cfloat,  float>(){  return 4;};
-// template<> INLINE_DECL constexpr unsigned int fnNumSymLanesIntHb<cfloat, cfloat>(){  return 4;};
+#else
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_API = 0, unsigned int TP_UPSHIFT_CT = 0>
+INLINE_DECL constexpr unsigned int fnNumSymLanesIntHb() {
+    return TP_API == 0 ? fnNumLanes<TT_DATA, TT_COEFF>() : fnNumLanes384<TT_DATA, TT_COEFF>();
+};
+#endif
 
 // Function to return #loads in xbuff register:
 // 4 for 2 buff arch, 8 for 1 buff arch, when 128-bit loads are used, else 4.

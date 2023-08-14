@@ -46,6 +46,8 @@ if [[ $config_to_test == "all" ]]; then
     config_checker fft_window
     config_checker matrix_mult
     config_checker dds_mixer
+    config_checker vector_matrix_mul
+
 else 
     echo "only running $config_to_test default configuration" |& tee -a "validate_default_configs.log"
     config_checker $config_to_test

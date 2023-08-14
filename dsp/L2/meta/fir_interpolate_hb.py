@@ -46,11 +46,20 @@ import fir_decimate_hb as deci_hb
 # and "err_message" if "is_valid" is False.
 #
 
+TP_INPUT_WINDOW_VSIZE_min = 4
+TP_SSR_min = 1
+TP_PARA_INTERP_POLY_min = 1
+TP_CASC_LEN_min = 1
+TP_CASC_LEN_max = 40
+TP_FIR_LEN_min = 4
+TP_FIR_LEN_max = 8192
 
 def fn_halfband_len(TP_FIR_LEN):
   return isValid if ((TP_FIR_LEN + 1) % 4 == 0) else isError("Filter length must be 4N-1 where N is a positive integer.")
 
 def fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD, TP_PARA_INTERP_POLY):
+    if TP_FIR_LEN < TP_FIR_LEN_min or TP_FIR_LEN > TP_FIR_LEN_max :
+        return isError(f"Minimum and maximum value for Filter length is {TP_FIR_LEN_min} and {TP_FIR_LEN_max},respectively, but got {TP_FIR_LEN}.")
     minLenCheck =  fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR)
 
     symFactor   = 4 # Symmetric, half-band
@@ -67,12 +76,21 @@ def fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_AP
 
     return isValid
 
-def fn_validate_num_outputs(TP_PARA_INTERP_POLY, TP_DUAL_IP, TP_NUM_OUTPUTS):
+def fn_validate_num_outputs(TP_PARA_INTERP_POLY, TP_DUAL_IP, TP_NUM_OUTPUTS, AIE_VARIANT):
+  if AIE_VARIANT == 2:
+    if TP_NUM_OUTPUTS == 2:
+      return isError(f"This device does not have dual ports on its kernel. Please set TP_NUM_OUTPUTS to 1")
   if TP_PARA_INTERP_POLY == 2 :
     if TP_DUAL_IP == 1  and TP_NUM_OUTPUTS == 1:
       return isError(f"When TP_PARA_INTERP_POLY is set to 2, dual inputs are only allowed with dual outputs.")
     elif TP_DUAL_IP == 0 and TP_NUM_OUTPUTS == 2:
       return isError(f"When TP_PARA_INTERP_POLY is set to 2, dual inputs are only allowed with dual outputs.")
+  return isValid
+
+def fn_validate_num_inputs(TP_DUAL_IP, AIE_VARIANT):
+  if AIE_VARIANT == 2:
+    if TP_DUAL_IP == 1:
+      return isError(f"This device does not have dual ports on its kernel. Please set TP_DUAL_IP to 0")
   return isValid
 
 def fn_parapoly_value(TP_PARA_INTERP_POLY):
@@ -91,6 +109,8 @@ def fn_stream_api_poly(TP_PARA_INTERP_POLY, TP_API):
     return isError(f"TP_PARA_INTERP_POLY can be set to 2 only for streaming API")
 
 def fn_validate_para_interp_poly(TP_API, TP_PARA_INTERP_POLY, TP_SSR):
+    if TP_PARA_INTERP_POLY < TP_PARA_INTERP_POLY_min :
+        return isError(f"Minimum value for Interpolation polyphases is {TP_PARA_INTERP_POLY_min}, but got {TP_PARA_INTERP_POLY}.")
     checkParaPolyVal = fn_parapoly_value(TP_PARA_INTERP_POLY)
     checkSSRPoly     = fn_ssr_for_para_poly(TP_PARA_INTERP_POLY, TP_SSR)
     checkStreamsPoly = fn_stream_api_poly(TP_PARA_INTERP_POLY, TP_API)
@@ -102,10 +122,21 @@ def fn_validate_para_interp_poly(TP_API, TP_PARA_INTERP_POLY, TP_SSR):
     return isValid
 
 def fn_validate_ssr(TP_API, TP_SSR):
-    ssrStreamCheck = fn_stream_ssr(TP_API, TP_SSR)
-    return ssrStreamCheck
+    if TP_SSR < TP_SSR_min:
+	    return isError(f"Minimum value for SSR is {TP_SSR_min}, but got {TP_SSR}.")
+    return isValid
+
+def fn_validate_casc_len(TP_CASC_LEN):
+    if TP_CASC_LEN < TP_CASC_LEN_min or TP_CASC_LEN > TP_CASC_LEN_max :
+        return isError(f"Minimum and maximum value for cascade length is {TP_CASC_LEN_min} and {TP_CASC_LEN_max},respectively, but got {TP_CASC_LEN}.")
+    return isValid
 
 #### validation APIs ####
+
+def validate_TP_CASC_LEN(args):
+    TP_CASC_LEN = args["TP_CASC_LEN"]
+    return fn_validate_casc_len(TP_CASC_LEN)
+
 def validate_TT_COEF(args):
     TT_DATA = args["TT_DATA"]
     TT_COEF = args["TT_COEF"]
@@ -116,16 +147,18 @@ def validate_TP_SHIFT(args):
   TP_SHIFT = args["TP_SHIFT"]
   return fn_validate_shift(TT_DATA, TP_SHIFT)
 
-def fn_validate_upshift_ct(TT_DATA, TP_UPSHIFT_CT):
+def fn_validate_upshift_ct(TT_DATA, TP_UPSHIFT_CT, AIE_VARIANT):
   #implied restriction that TT_DATA restricts TT_COEF, ie, we don't support int16,int32 or int16,cint32
-  return (
-    isError("Upshift CT is only available for 16-bit integer combinations.")
-      if ((TT_DATA not in ["cint16", "int16"] ) and (TP_UPSHIFT_CT == 1))
-    else isValid
-    )
+  if (AIE_VARIANT == 2 and TP_UPSHIFT_CT == 1):
+    return isError("Upshift CT is not available on AIE-ML. Please set TP_UPSHIFT_CT to 0.")
+  if ((TT_DATA not in ["cint16", "int16"] ) and (TP_UPSHIFT_CT == 1)):
+    return isError("Upshift CT is only available for 16-bit integer combinations.")
+  return isValid
 
 def fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1, TP_PARA_INTERP_POLY=1):
     # interpolate halfband always uses 384b version of lanes. Some archs use repeat factors, like zig-zag, hence the factor of 2.
+    if TP_INPUT_WINDOW_VSIZE < TP_INPUT_WINDOW_VSIZE_min:
+	    return isError(f"Minimum value for Input size is {TP_INPUT_WINDOW_VSIZE_min}, but got {TP_INPUT_WINDOW_VSIZE}.")
     checkMultipleLanes =  fn_windowsize_multiple_lanes(TT_DATA, TT_COEF, TP_INPUT_WINDOW_VSIZE, TP_API, numLanes=fnNumLanes384b(TT_DATA, TT_COEF)*2)
     symApiSSR      = 0 if (TP_SSR == 1 and TP_PARA_INTERP_POLY == 1) else TP_API  # Force buffer checks when not in SSR mode.
     checkMaxBuffer = fn_max_windowsize_for_buffer(TT_DATA, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, symApiSSR, TP_SSR, TP_INTERPOLATE_FACTOR=2, TP_DECIMATE_FACTOR=1)
@@ -141,7 +174,8 @@ def fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INPUT_WINDOW_
 def validate_TP_UPSHIFT_CT(args):
   TT_DATA = args["TT_DATA"]
   TP_UPSHIFT_CT = args["TP_UPSHIFT_CT"]
-  return fn_validate_upshift_ct(TT_DATA, TP_UPSHIFT_CT)
+  AIE_VARIANT = args["AIE_VARIANT"]
+  return fn_validate_upshift_ct(TT_DATA, TP_UPSHIFT_CT, AIE_VARIANT)
 
 def validate_TP_INPUT_WINDOW_VSIZE(args):
     TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
@@ -170,10 +204,16 @@ def validate_TP_FIR_LEN(args):
     return fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD, TP_PARA_INTERP_POLY)
 
 def validate_TP_NUM_OUTPUTS(args):
-    TP_NUM_OUTPUTS    = args["TP_NUM_OUTPUTS"]
+    TP_NUM_OUTPUTS      = args["TP_NUM_OUTPUTS"]
     TP_PARA_INTERP_POLY = args["TP_PARA_INTERP_POLY"]
+    TP_DUAL_IP          = args["TP_DUAL_IP"]
+    AIE_VARIANT         = args["AIE_VARIANT"]
+    return fn_validate_num_outputs(TP_PARA_INTERP_POLY, TP_DUAL_IP, TP_NUM_OUTPUTS, AIE_VARIANT)
+
+def validate_TP_DUAL_IP(args):
     TP_DUAL_IP        = args["TP_DUAL_IP"]
-    return fn_validate_num_outputs(TP_PARA_INTERP_POLY, TP_DUAL_IP, TP_NUM_OUTPUTS)
+    AIE_VARIANT       = args["AIE_VARIANT"]
+    return fn_validate_num_inputs(TP_DUAL_IP, AIE_VARIANT)
 
 def validate_TP_PARA_INTERP_POLY(args):
     TP_PARA_INTERP_POLY   = args["TP_PARA_INTERP_POLY"]

@@ -22,10 +22,10 @@
 #include "utils.hpp"
 
 #include "uut_config.h"
-#include "test_stim.hpp"
+#include "uut_static_config.h"
+#include "test_utils.hpp"
 #include "fir_common_traits.hpp"
 #include "test_stim.hpp"
-#include "test_utils.hpp"
 
 #ifndef UUT_GRAPH
 #define UUT_GRAPH fir_decimate_sym_graph
@@ -47,11 +47,6 @@ class test_graph : public graph {
     COEFF_TYPE taps[kNumTaps];
 
    public:
-#ifdef USING_UUT
-    static constexpr int DUAL_INPUT_SAMPLES = (PORT_API == 1) && (DUAL_IP == 1) ? 1 : 0;
-#else
-    static constexpr int DUAL_INPUT_SAMPLES = 0;
-#endif
     std::array<input_plio, P_SSR*(DUAL_INPUT_SAMPLES + 1)> in;
     std::array<output_plio, P_SSR * NUM_OUTPUTS> out;
 
@@ -93,7 +88,7 @@ class test_graph : public graph {
 #endif                            // _DSPLIB_FIR_DEBUG_ADL_
         for (int j = 0; j < 2; j++) {
             taps_gen.prepSeed(COEFF_SEED);
-            taps_gen.gen(STIM_TYPE, taps);
+            taps_gen.gen(COEFF_STIM_TYPE, taps);
             for (int i = 0; i < kNumTaps; i++) {
                 m_taps[j][i] = taps[i];
                 if (i == error_tap && j == 1) {

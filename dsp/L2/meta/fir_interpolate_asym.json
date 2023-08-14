@@ -40,20 +40,18 @@
       "validator": {
         "file": "fir_interpolate_asym.py",
         "function": "validate_TT_COEF",
-        "args": ["TT_DATA"]
+        "args": ["TT_DATA", "AIE_VARIANT"]
       },
       "updater": {
         "file": "fir_interpolate_asym.py",
         "function": "update_TT_COEF",
-        "args": ["TT_DATA"]
+        "args": ["TT_DATA", "AIE_VARIANT"]
       }
     },
     {
       "name": "TP_FIR_LEN",
       "description": "The number of taps in the filter",
       "type": "uint",
-      "minimum": 4,
-      "maximum": 8192,
       "validator": {
         "file": "fir_interpolate_asym.py",
         "function": "validate_TP_FIR_LEN",
@@ -64,15 +62,16 @@
       "name": "TP_INTERPOLATE_FACTOR",
       "description": "The integer upsample rate of the filter",
       "type": "uint",
-      "minimum": 2,
-      "maximum": 16
+      "validator": {
+        "file": "fir_interpolate_asym.py",
+        "function": "validate_TP_INTERPOLATE_FACTOR",
+        "args": []
+      }
     },
     {
       "name": "TP_SHIFT",
       "description": "The power of 2 shift down applied to the accumulation of FIR before output",
       "type": "uint",
-      "maximum": 80,
-      "minimum": 0,
       "validator": {
         "file": "fir_interpolate_asym.py",
         "function": "validate_TP_SHIFT",
@@ -82,15 +81,12 @@
     {
       "name": "TP_RND",
       "description": "The rounding to be applied during the shift down stage of processing.",
-      "type": "uint",
-      "maximum": 7,
-      "minimum": 0
+      "type": "uint"
     },
     {
       "name": "TP_INPUT_WINDOW_VSIZE",
       "description": "The number of samples in the window PAI used for input to the filter function. The number of values in the output window will be TP_INPUT_WINDOW_VSIZE also by virtue the single rate nature of this function.",
       "type": "uint",
-      "minimum": 4,
       "validator": {
         "file": "fir_interpolate_asym.py",
         "function": "validate_TP_INPUT_WINDOW_VSIZE",
@@ -101,51 +97,50 @@
       "name": "TP_CASC_LEN",
       "description": "The length of the cascade chain.",
       "type": "uint",
-      "minimum": 1,
-      "maximum": 40
+      "validator": {
+        "file": "fir_interpolate_asym.py",
+        "function": "validate_TP_CASC_LEN",
+        "args": []
+      }
     },
     {
       "name": "TP_USE_COEF_RELOAD",
       "description": "Selects Coefficient Reload Mode: 0 - no reload, 1 - RTP port based, 2 - Stream Header based.",
       "type": "uint",
-      "maximum": 2,
-      "minimum": 0,
       "validator": {
         "file": "aie_common_fir.py",
         "function": "validate_TP_USE_COEF_RELOAD",
         "args": ["TP_API", "TP_SSR"]
-        }                    
+        }
     },
     {
       "name": "TP_NUM_OUTPUTS",
       "description": "The number of output ports. Windows API output an exact copy of the data. Stream API interleaves the output data with a 128-bit pattern.",
       "type": "uint",
-      "minimum": 1,
-      "maximum": 2
+      "validator": {
+        "file": "fir_interpolate_asym.py",
+        "function": "validate_TP_NUM_OUTPUTS",
+        "args": ["TP_API", "AIE_VARIANT"]
+      }
     },
     {
       "name": "TP_DUAL_IP",
       "description": "TP_DUAL_IP allows 2 stream inputs to be connected to FIR, increasing available throughput. When set to 0, single stream input will be connected to FIR kernel, when set to 1, both input stream ports will be used.",
       "type": "uint",
-      "maximum": 1,
-      "minimum": 0,
       "validator": {
         "file": "fir_interpolate_asym.py",
         "function": "validate_TP_DUAL_IP",
-        "args": ["TP_NUM_OUTPUTS", "TP_API"]
+        "args": ["TP_NUM_OUTPUTS", "TP_API", "AIE_VARIANT"]
       }
     },
     {
       "name": "TP_API",
       "description": "The form of IO: 0 for windows, 1 for streams",
-      "type": "uint",
-      "minimum": 0,
-      "maximum": 1
+      "type": "uint"
     },
     {
       "name": "TP_SSR",
       "description": "TP_SSR specifies the number of parallel input/output paths where samples are interleaved between paths, giving an overall higher throughput.",
-      "minimum": 1,
       "type": "uint",
             "validator": {
         "file": "fir_interpolate_asym.py",
@@ -154,17 +149,21 @@
       }
     },
     {
-      "name": "TP_PARA_INTERP_POLY", 
-      "description" : "Number of parallel polyphases to decompose interpolator over.", 
-      "type" : "uint", 
-      "minimum": 1, 
+      "name": "TP_PARA_INTERP_POLY",
+      "description" : "Number of parallel polyphases to decompose interpolator over.",
+      "type" : "uint",
       "validator": {
         "file": "fir_polyphase_decomposer.py",
         "function": "validate_TP_PARA_INTERP_POLY",
         "args": ["TP_INTERPOLATE_FACTOR"]
       }
     },
-    {                                     
+    {
+      "name": "AIE_VARIANT",
+      "type": "uint",
+      "description": "Specifies the device type: 1-AIE, 2-AIE-ML"
+    },
+    {
       "name": "coeff",
       "description": "The filter coefficients.",
       "element_type": "TT_COEF",

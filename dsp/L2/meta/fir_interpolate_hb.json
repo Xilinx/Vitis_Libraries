@@ -52,8 +52,6 @@
       "name": "TP_FIR_LEN",
       "description": "The number of taps in the filter",
       "type": "uint",
-      "minimum": 4,
-      "maximum": 8192,
       "validator": {
         "file": "fir_interpolate_hb.py",
         "function": "validate_TP_FIR_LEN",
@@ -64,8 +62,6 @@
       "name": "TP_SHIFT",
       "description": "The power of 2 shift down applied to the accumulation of FIR before output",
       "type": "uint",
-      "maximum": 80,
-      "minimum": 0,
       "validator": {
         "file": "fir_interpolate_hb.py",
         "function": "validate_TP_SHIFT",
@@ -75,15 +71,12 @@
     {
       "name": "TP_RND",
       "description": "The rounding to be applied during the shift down stage of processing.",
-      "type": "uint",
-      "maximum": 7,
-      "minimum": 0
+      "type": "uint"
     },
     {
       "name": "TP_INPUT_WINDOW_VSIZE",
       "description": "The number of samples in the window PAI used for input to the filter function. The number of values in the output window will be TP_INPUT_WINDOW_VSIZE also by virtue the single rate nature of this function.",
       "type": "uint",
-      "minimum": 4,
       "validator": {
         "file": "fir_interpolate_hb.py",
         "function": "validate_TP_INPUT_WINDOW_VSIZE",
@@ -94,22 +87,28 @@
       "name": "TP_CASC_LEN",
       "description": "The length of the cascade chain.",
       "type": "uint",
-      "minimum": 1,
-      "maximum": 40
+	  "validator": {
+        "file": "fir_interpolate_hb.py",
+        "function": "validate_TP_CASC_LEN",
+        "args": []
+      }
     },
     {
       "name": "TP_DUAL_IP",
       "description": "TP_DUAL_IP allows 2 stream inputs to be connected to FIR, increasing available throughput. When set to 0, single stream input will be connected to FIR kernel, when set to 1, both input stream ports will be used.",
       "type": "uint",
       "maximum": 1,
-      "minimum": 0
+      "minimum": 0,
+      "validator": {
+        "file": "fir_interpolate_hb.py",
+        "function": "validate_TP_DUAL_IP",
+        "args": ["AIE_VARIANT"]
+      }
     },
     {
       "name": "TP_USE_COEF_RELOAD",
       "description": "Selects Coefficient Reload Mode: 0 - no reload, 1 - RTP port based, 2 - Stream Header based.",
       "type": "uint",
-      "maximum": 2,
-      "minimum": 0,
       "validator": {
         "file": "aie_common_fir.py",
         "function": "validate_TP_USE_COEF_RELOAD",
@@ -120,38 +119,31 @@
       "name": "TP_NUM_OUTPUTS",
       "description": "The number of output ports. Windows API output an exact copy of the data. Stream API interleaves the output data with a 128-bit pattern.",
       "type": "uint",
-      "minimum": 1,
-      "maximum": 2,
       "validator": {
         "file": "fir_interpolate_hb.py",
         "function": "validate_TP_NUM_OUTPUTS",
-        "args": ["TP_PARA_INTERP_POLY", "TP_DUAL_IP"]
+        "args": ["TP_PARA_INTERP_POLY", "TP_DUAL_IP", "AIE_VARIANT"]
       }
     },
     {
       "name": "TP_UPSHIFT_CT",
       "description": "Upshift unit center tap, uses provided center tap's value to upshift data sample",
       "type": "uint",
-      "minimum": 0,
-      "maximum": 1,
       "validator": {
         "file": "fir_interpolate_hb.py",
         "function": "validate_TP_UPSHIFT_CT",
-        "args": ["TT_DATA"]
+        "args": ["TT_DATA", "AIE_VARIANT"]
       }
     },
     {
       "name": "TP_API",
       "description": "The form of IO: 0 for windows, 1 for streams",
-      "type": "uint",
-      "minimum": 0,
-      "maximum": 1
+      "type": "uint"
     },
     {
       "name": "TP_PARA_INTERP_POLY",
       "description" : "Number of parallel polyphases to decompose interpolator over.",
       "type" : "uint",
-      "minimum": 1,
       "validator": {
         "file": "fir_interpolate_hb.py",
         "function": "validate_TP_PARA_INTERP_POLY",
@@ -162,12 +154,18 @@
       "name": "TP_SSR",
       "description" : "Parallelisation factor in addition to TP_PARA_INTERP_POLY",
       "type" : "uint",
-      "minimum": 1,
       "validator": {
         "file": "fir_interpolate_hb.py",
         "function": "validate_TP_SSR",
         "args": ["TP_API"]
       }
+    },
+    {
+      "name": "AIE_VARIANT",
+      "type": "uint",
+      "description": "Specifies the device type: 1-AIE, 2-AIE-ML",
+      "maximum": 2,
+      "minimum": 1
     },
     {
       "name": "coeff",

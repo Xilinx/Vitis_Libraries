@@ -24,6 +24,7 @@
 #include "utils.hpp"
 
 #include "uut_config.h"
+#include "uut_static_config.h"
 #include "test_stim.hpp"
 
 // The following macro allows this test harness to be used

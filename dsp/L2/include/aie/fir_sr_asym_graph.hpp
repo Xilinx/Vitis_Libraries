@@ -230,7 +230,6 @@ class fir_sr_asym_graph : public graph {
     using first_casc_kernel_in_first_ssr = fir_sr_asym_tl<first_casc_params>;
 
     static_assert(TP_SSR >= 1, "ERROR: TP_SSR must be 1 or higher");
-    static_assert(TP_SSR == 1 || TP_API != USE_WINDOW_API, "Window interfaces are not supported for SSR");
 
     static_assert(TP_FIR_LEN % TP_SSR == 0, "TP_FIR LEN must be divisble by TP_SSR"); //
     // static_assert(TP_USE_COEFF_RELOAD != 2 || (TP_FIR_LEN % TP_SSR == 0), "TP_FIR LEN must be divisble by TP_SSR, at
@@ -271,7 +270,8 @@ class fir_sr_asym_graph : public graph {
                   "(TP_USE_COEFF_RELOAD == 2) only supported with Streaming API (TP_API == 1)."); //
 
     static constexpr unsigned int kMemoryModuleSize = 32768;
-    static constexpr unsigned int bufferSize = (((TP_FIR_LEN / TP_SSR) + TP_INPUT_WINDOW_VSIZE) * sizeof(TT_DATA));
+    static constexpr unsigned int bufferSize =
+        (((TP_FIR_LEN / TP_SSR) + TP_INPUT_WINDOW_VSIZE / TP_SSR) * sizeof(TT_DATA));
     // Requested Window buffer exceeds memory module size
     static_assert(TP_API != 0 || bufferSize < kMemoryModuleSize,
                   "ERROR: Input Window size (based on requrested window size and FIR length margin) exceeds Memory "

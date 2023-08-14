@@ -25,14 +25,12 @@ def vmc_validate_input_window_size(args):
 	return fn_validate_input_window_size(data_type, coef_type, fir_length, input_window_size, api, ssr, deci_poly)
 
 def vmc_validate_casc_length(args):
-    use_coeff_reload = args["use_coeff_reload"]
-    fir_length = args["fir_length"]
     casc_length = args["casc_length"]
     #if not use_casc_length:
 	# TODO : Talk to DSP lib team/sumanta about how 
 	# cascade validation works - confirm its just fir length related
 	#return fn_validate_casc_length(fir_length, casc_length, use_coeff_reload)
-    return {"is_valid": True}
+    return fn_validate_casc_len(casc_length);
     
 
 def vmc_validate_coeff(args):
@@ -64,6 +62,23 @@ def vmc_validate_deci_poly(args):
      else:
        return {"is_valid": True}
 
+def vmc_validate_ssr(args):
+    ssr = args["ssr"]
+    api = 1
+    return fn_validate_ssr(api, ssr)
+
+def vmc_validate_input_ports(args):
+    dual_ip = args["dual_ip"]
+    AIE_VARIANT = 1
+    return fn_validate_num_inputs(dual_ip, AIE_VARIANT)
+
+def vmc_validate_out_ports(args):
+	num_outputs = args["num_outputs"]
+	deci_poly = args["deci_poly"]
+	dual_ip = args["dual_ip"]
+	AIE_VARIANT = 1
+	return fn_validate_num_outputs(deci_poly, dual_ip, num_outputs, AIE_VARIANT)
+
 #### VMC graph generator ####
 def vmc_generate_graph(name, args):
 	tmpargs = {}
@@ -76,8 +91,8 @@ def vmc_generate_graph(name, args):
 	casc_length = args["casc_length"]
 	tmpargs["TP_CASC_LEN"] = casc_length
 	tmpargs["TP_USE_COEF_RELOAD"] = 1 if args["use_coeff_reload"] else 0
-	tmpargs["TP_NUM_OUTPUTS"] = 1
-	tmpargs["TP_DUAL_IP"] = 0
+	tmpargs["TP_NUM_OUTPUTS"] = 2 if args["num_outputs"] else 1
+	tmpargs["TP_DUAL_IP"] = 1 if args["dual_ip"] else 0
 	tmpargs["TP_API"] = 1
 	tmpargs["TP_SSR"] = args["ssr"]
 	tmpargs["coeff"] = args["coeff"]

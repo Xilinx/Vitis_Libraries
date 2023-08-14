@@ -388,7 +388,8 @@ template <typename TT_DATA,
           unsigned int TP_INDEX_BASE, // the wider context. Allows calculation of TP_INDEX in overal design, not just
                                       // this level of recursion.
           unsigned int TP_ORIG_PAR_POWER,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_USE_WIDGETS>
 class create_r2comb_kernels {
    public:
     static constexpr int kParallel_factor = 1 << TP_PARALLEL_POWER;
@@ -413,11 +414,103 @@ class create_r2comb_kernels {
         }
         create_r2comb_kernels<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_DYN_PT_SIZE,
                               TP_WINDOW_VSIZE, TP_PARALLEL_POWER, (TP_INDEX - 1), TP_INDEX_BASE, TP_ORIG_PAR_POWER,
-                              TP_API>::create(m_r2Comb);
+                              TP_API, TP_USE_WIDGETS>::create(m_r2Comb);
     }
 };
 
-// end of r2comb recursion
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PARALLEL_POWER,
+          unsigned int TP_INDEX,
+          unsigned int TP_INDEX_BASE, // the wider context. Allows calculation of TP_INDEX in overal design, not just
+                                      // this level of recursion.
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_API>
+class create_r2comb_kernels<TT_DATA,
+                            TT_TWIDDLE,
+                            TP_POINT_SIZE,
+                            TP_FFT_NIFFT,
+                            TP_SHIFT,
+                            TP_DYN_PT_SIZE,
+                            TP_WINDOW_VSIZE,
+                            TP_PARALLEL_POWER,
+                            TP_INDEX,
+                            TP_INDEX_BASE,
+                            TP_ORIG_PAR_POWER,
+                            TP_API,
+                            1 /*USE_WIDGETS*/> {
+   public:
+    static constexpr int kParallel_factor = 1 << TP_PARALLEL_POWER;
+    static constexpr unsigned int kInAPI = 0;
+    static constexpr unsigned int kOutAPI = 0;
+    static void create(kernel (&m_r2Comb)[kParallel_factor]) {
+        m_r2Comb[TP_INDEX] = kernel::create_object<
+            fft_r2comb<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE,
+                       TP_PARALLEL_POWER, TP_INDEX, TP_ORIG_PAR_POWER, kInAPI, kOutAPI> >();
+        create_r2comb_kernels<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_DYN_PT_SIZE,
+                              TP_WINDOW_VSIZE, TP_PARALLEL_POWER, (TP_INDEX - 1), TP_INDEX_BASE, TP_ORIG_PAR_POWER,
+                              TP_API, 1>::create(m_r2Comb);
+    }
+};
+
+// end of r2comb recursion without widgets
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PARALLEL_POWER,
+          unsigned int TP_INDEX_BASE,
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_API,
+          unsigned int TP_USE_WIDGETS>
+class create_r2comb_kernels<TT_DATA,
+                            TT_TWIDDLE,
+                            TP_POINT_SIZE,
+                            TP_FFT_NIFFT,
+                            TP_SHIFT,
+                            TP_DYN_PT_SIZE,
+                            TP_WINDOW_VSIZE,
+                            TP_PARALLEL_POWER,
+                            0,
+                            TP_INDEX_BASE,
+                            TP_ORIG_PAR_POWER,
+                            TP_API,
+                            TP_USE_WIDGETS> {
+   public:
+    static constexpr unsigned int TP_INDEX = 0; // for this specialization (end of recursion)
+    static constexpr unsigned int kParallel_factor = 1 << TP_PARALLEL_POWER;
+    static constexpr unsigned int kInAPI =
+        fnGetR2InAPI<TP_API, TP_ORIG_PAR_POWER, TP_PARALLEL_POWER, TP_INDEX_BASE + TP_INDEX>();
+    static constexpr unsigned int kOutAPI =
+        fnGetR2OutAPI<TP_API, TP_ORIG_PAR_POWER, TP_PARALLEL_POWER, TP_INDEX_BASE + TP_INDEX>();
+
+    static void create(kernel (&m_r2Comb)[kParallel_factor]) {
+        // Memories for stream to window and window to stream conversion.
+        std::vector<TT_DATA> inBuff, outBuff;
+        inBuff.resize(TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA));
+
+        if (kOutAPI == kWindowAPI) { // no need for outbuff if output is a window anyway
+            m_r2Comb[0] = kernel::create_object<
+                fft_r2comb<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE,
+                           TP_PARALLEL_POWER, 0, TP_ORIG_PAR_POWER, kInAPI, kOutAPI> >(inBuff);
+        } else { // need and output buffer if non-window output
+            outBuff.resize(TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA));
+            m_r2Comb[0] = kernel::create_object<
+                fft_r2comb<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE,
+                           TP_PARALLEL_POWER, 0, TP_ORIG_PAR_POWER, kInAPI, kOutAPI> >(inBuff, outBuff);
+        }
+    }
+};
+
+// end of r2comb recursion with widgets
 template <typename TT_DATA,
           typename TT_TWIDDLE,
           unsigned int TP_POINT_SIZE,
@@ -440,29 +533,128 @@ class create_r2comb_kernels<TT_DATA,
                             0,
                             TP_INDEX_BASE,
                             TP_ORIG_PAR_POWER,
-                            TP_API> {
+                            TP_API,
+                            1 /*USE_WIDGETS*/> {
    public:
     static constexpr unsigned int TP_INDEX = 0; // for this specialization (end of recursion)
     static constexpr unsigned int kParallel_factor = 1 << TP_PARALLEL_POWER;
+    static constexpr unsigned int kInAPI = 0;
+    static constexpr unsigned int kOutAPI = 0;
+
+    static void create(kernel (&m_r2Comb)[kParallel_factor]) {
+        m_r2Comb[0] = kernel::create_object<
+            fft_r2comb<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE,
+                       TP_PARALLEL_POWER, 0, TP_ORIG_PAR_POWER, kInAPI, kOutAPI> >();
+    }
+};
+
+template <typename TT_DATA,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PARALLEL_POWER,
+          unsigned int TP_INDEX,
+          unsigned int TP_INDEX_BASE, // the wider context. Allows calculation of TP_INDEX in overal design, not just
+                                      // this level of recursion.
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_API,
+          unsigned int TP_HEADER_BYTES>
+class create_combInWidget_kernels {
+   public:
+    static constexpr int kParallel_factor = 1 << TP_PARALLEL_POWER;
+    static constexpr int kStreamsPerTile = get_input_streams_core_module(); // a device trait
     static constexpr unsigned int kInAPI =
         fnGetR2InAPI<TP_API, TP_ORIG_PAR_POWER, TP_PARALLEL_POWER, TP_INDEX_BASE + TP_INDEX>();
+
+    static void create(kernel (&m_combInKernel)[kParallel_factor]) {
+        m_combInKernel[TP_INDEX] = kernel::create_object<
+            widget_api_cast<TT_DATA, kInAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1, kSampleIntlv, TP_HEADER_BYTES> >();
+        create_combInWidget_kernels<TT_DATA, TP_WINDOW_VSIZE, TP_PARALLEL_POWER, (TP_INDEX - 1), TP_INDEX_BASE,
+                                    TP_ORIG_PAR_POWER, TP_API, TP_HEADER_BYTES>::create(m_combInKernel);
+    }
+};
+
+// end of combInWidget recursion
+template <typename TT_DATA,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PARALLEL_POWER,
+          unsigned int TP_INDEX_BASE, // the wider context. Allows calculation of TP_INDEX in overal design, not just
+                                      // this level of recursion.
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_API,
+          unsigned int TP_HEADER_BYTES>
+class create_combInWidget_kernels<TT_DATA,
+                                  TP_WINDOW_VSIZE,
+                                  TP_PARALLEL_POWER,
+                                  0 /*TP_INDEX*/,
+                                  TP_INDEX_BASE,
+                                  TP_ORIG_PAR_POWER,
+                                  TP_API,
+                                  TP_HEADER_BYTES> {
+   public:
+    static constexpr int TP_INDEX = 0; // end of recursion
+    static constexpr int kParallel_factor = 1 << TP_PARALLEL_POWER;
+    static constexpr int kStreamsPerTile = get_input_streams_core_module(); // a device trait
+    static constexpr unsigned int kInAPI =
+        fnGetR2InAPI<TP_API, TP_ORIG_PAR_POWER, TP_PARALLEL_POWER, TP_INDEX_BASE + TP_INDEX>();
+
+    static void create(kernel (&m_combInKernel)[kParallel_factor]) {
+        m_combInKernel[0] = kernel::create_object<
+            widget_api_cast<TT_DATA, kInAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1, kSampleIntlv, TP_HEADER_BYTES> >();
+    }
+};
+
+template <typename TT_DATA,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PARALLEL_POWER,
+          unsigned int TP_INDEX,
+          unsigned int TP_INDEX_BASE, // the wider context. Allows calculation of TP_INDEX in overal design, not just
+                                      // this level of recursion.
+          unsigned int TP_HEADER_BYTES,
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_API>
+class create_combOutWidget_kernels {
+   public:
+    static constexpr int kParallel_factor = 1 << TP_PARALLEL_POWER;
+    static constexpr int kStreamsPerTile = get_input_streams_core_module(); // a device trait
     static constexpr unsigned int kOutAPI =
         fnGetR2OutAPI<TP_API, TP_ORIG_PAR_POWER, TP_PARALLEL_POWER, TP_INDEX_BASE + TP_INDEX>();
-    static void create(kernel (&m_r2Comb)[kParallel_factor]) {
-        // Memories for stream to window and window to stream conversion.
-        std::vector<TT_DATA> inBuff, outBuff;
-        inBuff.resize(TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA));
+    static constexpr int kPortsOut = TP_PARALLEL_POWER == TP_ORIG_PAR_POWER ? kStreamsPerTile : 2;
 
-        if (kOutAPI == kWindowAPI) { // no need for outbuff if output is a window anyway
-            m_r2Comb[0] = kernel::create_object<
-                fft_r2comb<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE,
-                           TP_PARALLEL_POWER, 0, TP_ORIG_PAR_POWER, kInAPI, kOutAPI> >(inBuff);
-        } else { // need and output buffer if non-window output
-            outBuff.resize(TP_WINDOW_VSIZE + TP_DYN_PT_SIZE * 32 / sizeof(TT_DATA));
-            m_r2Comb[0] = kernel::create_object<
-                fft_r2comb<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE,
-                           TP_PARALLEL_POWER, 0, TP_ORIG_PAR_POWER, kInAPI, kOutAPI> >(inBuff, outBuff);
-        }
+    static void create(kernel (&m_combOutKernel)[kParallel_factor]) {
+        m_combOutKernel[TP_INDEX] =
+            kernel::create_object<widget_api_cast<TT_DATA, kWindowAPI, kOutAPI, 1, TP_WINDOW_VSIZE, kPortsOut,
+                                                  kSampleIntlv, TP_HEADER_BYTES> >();
+        create_combOutWidget_kernels<TT_DATA, TP_WINDOW_VSIZE, TP_PARALLEL_POWER, (TP_INDEX - 1), TP_INDEX_BASE,
+                                     TP_HEADER_BYTES, TP_ORIG_PAR_POWER, TP_API>::create(m_combOutKernel);
+    }
+};
+
+template <typename TT_DATA,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PARALLEL_POWER,
+          unsigned int TP_INDEX_BASE, // the wider context. Allows calculation of TP_INDEX in overal design, not just
+                                      // this level of recursion.
+          unsigned int TP_HEADER_BYTES,
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_API>
+class create_combOutWidget_kernels<TT_DATA,
+                                   TP_WINDOW_VSIZE,
+                                   TP_PARALLEL_POWER,
+                                   0,
+                                   TP_INDEX_BASE,
+                                   TP_HEADER_BYTES,
+                                   TP_ORIG_PAR_POWER,
+                                   TP_API> {
+   public:
+    static constexpr unsigned int TP_INDEX = 0; // for this specialization (end of recursion)
+    static constexpr int kParallel_factor = 1 << TP_PARALLEL_POWER;
+    static constexpr int kStreamsPerTile = get_input_streams_core_module(); // a device trait
+    static constexpr unsigned int kOutAPI =
+        fnGetR2OutAPI<TP_API, TP_ORIG_PAR_POWER, TP_PARALLEL_POWER, TP_INDEX_BASE + TP_INDEX>();
+    static constexpr int kPortsOut = TP_PARALLEL_POWER == TP_ORIG_PAR_POWER ? kStreamsPerTile : 2;
+
+    static void create(kernel (&m_combOutKernel)[kParallel_factor]) {
+        m_combOutKernel[0] = kernel::create_object<widget_api_cast<TT_DATA, kWindowAPI, kOutAPI, 1, TP_WINDOW_VSIZE,
+                                                                   kPortsOut, kSampleIntlv, TP_HEADER_BYTES> >();
     }
 };
 
@@ -493,13 +685,13 @@ class fft_ifft_dit_1ch_base_graph : public graph {
     kernel* getKernels() { return m_fftKernels; };
 
 #ifdef USE_GRAPH_SCOPE
-    parameter fft_buf1;
+    parameter fft_buf1[TP_CASC_LEN];
 
     // twiddle table
-    parameter fft_lut1, fft_lut1a, fft_lut1b; // large twiddle tables
-    parameter fft_lut2, fft_lut2a, fft_lut2b;
-    parameter fft_lut3, fft_lut3a, fft_lut3b;
-    parameter fft_lut4, fft_lut4a, fft_lut4b;
+    parameter fft_lut1[TP_CASC_LEN], fft_lut1a[TP_CASC_LEN], fft_lut1b[TP_CASC_LEN]; // large twiddle tables
+    parameter fft_lut2[TP_CASC_LEN], fft_lut2a[TP_CASC_LEN], fft_lut2b[TP_CASC_LEN];
+    parameter fft_lut3[TP_CASC_LEN], fft_lut3a[TP_CASC_LEN], fft_lut3b[TP_CASC_LEN];
+    parameter fft_lut4[TP_CASC_LEN], fft_lut4a[TP_CASC_LEN], fft_lut4b[TP_CASC_LEN];
 
     // interrank store
     parameter fft_buf4096;
@@ -551,76 +743,64 @@ class fft_ifft_dit_1ch_base_graph : public graph {
         // cases.
         if (std::is_same<TT_DATA, cfloat>::value) {
             if (TP_POINT_SIZE == 4096) {
-                fft_lut1 = parameter::array(fft_lut_tw2048_cfloat);
                 for (int k = 0; k < TP_CASC_LEN; ++k) {
-                    connect<>(fft_lut1, m_fftKernels[k]);
+                    fft_lut1[k] = parameter::array(fft_lut_tw2048_cfloat);
+                    connect<>(fft_lut1[k], m_fftKernels[k]);
                 }
             }
             if (TP_POINT_SIZE >= 2048) {
-                fft_lut2 = parameter::array(fft_lut_tw1024_cfloat);
                 for (int k = 0; k < TP_CASC_LEN; ++k) {
-                    connect<>(fft_lut2, m_fftKernels[k]);
+                    fft_lut2[k] = parameter::array(fft_lut_tw1024_cfloat);
+                    connect<>(fft_lut2[k], m_fftKernels[k]);
                 }
             }
             if (TP_POINT_SIZE >= 1024) {
-                fft_lut3 = parameter::array(fft_lut_tw512_cfloat);
                 for (int k = 0; k < TP_CASC_LEN; ++k) {
-                    connect<>(fft_lut3, m_fftKernels[k]);
+                    fft_lut3[k] = parameter::array(fft_lut_tw512_cfloat);
+                    connect<>(fft_lut3[k], m_fftKernels[k]);
                 }
             }
             if (TP_POINT_SIZE >= 512) {
-                fft_lut4 = parameter::array(fft_lut_tw256_cfloat);
                 for (int k = 0; k < TP_CASC_LEN; ++k) {
-                    connect<>(fft_lut4, m_fftKernels[k]);
+                    fft_lut4[k] = parameter::array(fft_lut_tw256_cfloat);
+                    connect<>(fft_lut4[k], m_fftKernels[k]);
                 }
             }
         } else {
             if (TP_POINT_SIZE == 4096) {
-                fft_lut1 = parameter::array(fft_lut_tw2048_half);
                 for (int k = 0; k < TP_CASC_LEN; ++k) {
-                    connect<>(fft_lut1, m_fftKernels[k]);
-                }
-                fft_lut2 = parameter::array(fft_lut_tw1024);
-                for (int k = 0; k < TP_CASC_LEN; ++k) {
-                    connect<>(fft_lut2, m_fftKernels[k]);
-                }
-                fft_lut3 = parameter::array(fft_lut_tw512);
-                for (int k = 0; k < TP_CASC_LEN; ++k) {
-                    connect<>(fft_lut3, m_fftKernels[k]);
-                }
-                fft_lut4 = parameter::array(fft_lut_tw256);
-                for (int k = 0; k < TP_CASC_LEN; ++k) {
-                    connect<>(fft_lut4, m_fftKernels[k]);
+                    fft_lut1[k] = parameter::array(fft_lut_tw2048_half);
+                    connect<>(fft_lut1[k], m_fftKernels[k]);
+                    fft_lut2[k] = parameter::array(fft_lut_tw1024);
+                    connect<>(fft_lut2[k], m_fftKernels[k]);
+                    fft_lut3[k] = parameter::array(fft_lut_tw512);
+                    connect<>(fft_lut3[k], m_fftKernels[k]);
+                    fft_lut4[k] = parameter::array(fft_lut_tw256);
+                    connect<>(fft_lut4[k], m_fftKernels[k]);
                 }
             }
             if (TP_POINT_SIZE == 2048) {
-                fft_lut2 = parameter::array(fft_lut_tw1024_half);
                 for (int k = 0; k < TP_CASC_LEN; ++k) {
-                    connect<>(fft_lut2, m_fftKernels[k]);
-                }
-                fft_lut3 = parameter::array(fft_lut_tw512);
-                for (int k = 0; k < TP_CASC_LEN; ++k) {
-                    connect<>(fft_lut3, m_fftKernels[k]);
-                }
-                fft_lut4 = parameter::array(fft_lut_tw256);
-                for (int k = 0; k < TP_CASC_LEN; ++k) {
-                    connect<>(fft_lut4, m_fftKernels[k]);
+                    fft_lut2[k] = parameter::array(fft_lut_tw1024_half);
+                    connect<>(fft_lut2[k], m_fftKernels[k]);
+                    fft_lut3[k] = parameter::array(fft_lut_tw512);
+                    connect<>(fft_lut3[k], m_fftKernels[k]);
+                    fft_lut4[k] = parameter::array(fft_lut_tw256);
+                    connect<>(fft_lut4[k], m_fftKernels[k]);
                 }
             }
             if (TP_POINT_SIZE == 1024) {
-                fft_lut3 = parameter::array(fft_lut_tw512_half);
                 for (int k = 0; k < TP_CASC_LEN; ++k) {
-                    connect<>(fft_lut3, m_fftKernels[k]);
-                }
-                fft_lut4 = parameter::array(fft_lut_tw256);
-                for (int k = 0; k < TP_CASC_LEN; ++k) {
-                    connect<>(fft_lut4, m_fftKernels[k]);
+                    fft_lut3[k] = parameter::array(fft_lut_tw512_half);
+                    connect<>(fft_lut3[k], m_fftKernels[k]);
+                    fft_lut4[k] = parameter::array(fft_lut_tw256);
+                    connect<>(fft_lut4[k], m_fftKernels[k]);
                 }
             }
             if (TP_POINT_SIZE == 512) {
-                fft_lut4 = parameter::array(fft_lut_tw256_half);
                 for (int k = 0; k < TP_CASC_LEN; ++k) {
-                    connect<>(fft_lut4, m_fftKernels[k]);
+                    fft_lut4[k] = parameter::array(fft_lut_tw256_half);
+                    connect<>(fft_lut4[k], m_fftKernels[k]);
                 }
             }
         }
@@ -632,28 +812,28 @@ class fft_ifft_dit_1ch_base_graph : public graph {
         fft_buf512 = parameter::array(fft_512_tmp1);
         fft_buf256 = parameter::array(fft_256_tmp1);
         fft_buf128 = parameter::array(fft_128_tmp1);
-        switch (TP_POINT_SIZE) {
-            case 4096:
-                fft_buf1 = fft_buf4096;
-                break;
-            case 2048:
-                fft_buf1 = fft_buf2048;
-                break;
-            case 1024:
-                fft_buf1 = fft_buf1024;
-                break;
-            case 512:
-                fft_buf1 = fft_buf512;
-                break;
-            case 256:
-                fft_buf1 = fft_buf256;
-                break;
-            default:
-                fft_buf1 = fft_buf128;
-                break;
-        }
         for (int k = 0; k < TP_CASC_LEN; ++k) {
-            connect<>(fft_buf1, m_fftKernels[k]);
+            switch (TP_POINT_SIZE) {
+                case 4096:
+                    fft_buf1[k] = fft_buf4096;
+                    break;
+                case 2048:
+                    fft_buf1[k] = fft_buf2048;
+                    break;
+                case 1024:
+                    fft_buf1[k] = fft_buf1024;
+                    break;
+                case 512:
+                    fft_buf1[k] = fft_buf512;
+                    break;
+                case 256:
+                    fft_buf1[k] = fft_buf256;
+                    break;
+                default:
+                    fft_buf1[k] = fft_buf128;
+                    break;
+            }
+            connect<>(fft_buf1[k], m_fftKernels[k]);
         }
 #endif // USE_GRAPH_SCOPE
 
@@ -704,6 +884,7 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE = TP_POINT_SIZE,
           unsigned int TP_IN_API = kWindowAPI,
           unsigned int TP_OUT_API = kWindowAPI,
+          unsigned int TP_USE_WIDGETS = 0,
           unsigned int TP_ORIG_PAR_POWER = 0> // invalid default because this must be set.
 class fft_ifft_dit_1ch_baseports_graph : public fft_ifft_dit_1ch_base_graph<TT_DATA,
                                                                             TT_TWIDDLE,
@@ -740,6 +921,7 @@ template <typename TT_DATA,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_USE_WIDGETS,
           unsigned int TP_ORIG_PAR_POWER>
 class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TT_TWIDDLE,
@@ -751,6 +933,7 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TP_WINDOW_VSIZE,
                                        kStreamAPI,
                                        kStreamAPI,
+                                       TP_USE_WIDGETS,
                                        TP_ORIG_PAR_POWER> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
                                                                                                TT_TWIDDLE,
                                                                                                TP_POINT_SIZE,
@@ -780,7 +963,138 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
     };
 };
 
+// This is the specialization for stream to stream ports. using widgets
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
+class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
+                                       TT_TWIDDLE,
+                                       TP_POINT_SIZE,
+                                       TP_FFT_NIFFT,
+                                       TP_SHIFT,
+                                       TP_CASC_LEN,
+                                       TP_DYN_PT_SIZE,
+                                       TP_WINDOW_VSIZE,
+                                       kStreamAPI,
+                                       kStreamAPI,
+                                       1 /*USE_WIDGETS*/,
+                                       TP_ORIG_PAR_POWER> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
+                                                                                               TT_TWIDDLE,
+                                                                                               TP_POINT_SIZE,
+                                                                                               TP_FFT_NIFFT,
+                                                                                               TP_SHIFT,
+                                                                                               TP_CASC_LEN,
+                                                                                               TP_DYN_PT_SIZE,
+                                                                                               TP_WINDOW_VSIZE,
+                                                                                               kWindowAPI,
+                                                                                               kWindowAPI,
+                                                                                               TP_ORIG_PAR_POWER> {
+   public:
+    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
+    static constexpr int kStreamsPerTile = get_input_streams_core_module(); // a device trait
+
+    /**
+     * I/O is two parallel streams each TT_DATA type for AIE1 and 1 stream if AIE2.
+     **/
+    port_array<input, kStreamsPerTile> in;
+    port_array<output, kStreamsPerTile> out;
+
+    kernel m_inWidgetKernel = kernel::create_object<widget_api_cast<TT_DATA,
+                                                                    kStreamAPI,
+                                                                    kWindowAPI,
+                                                                    kStreamsPerTile,
+                                                                    TP_WINDOW_VSIZE,
+                                                                    1,
+                                                                    kSampleIntlv,
+                                                                    kHeaderBytes> >();
+    kernel m_outWidgetKernel = kernel::create_object<widget_api_cast<TT_DATA,
+                                                                     kWindowAPI,
+                                                                     kStreamAPI,
+                                                                     1,
+                                                                     TP_WINDOW_VSIZE,
+                                                                     kStreamsPerTile,
+                                                                     kSampleIntlv,
+                                                                     kHeaderBytes> >();
+
+    fft_ifft_dit_1ch_baseports_graph() {
+        connect<>(m_inWidgetKernel.out[0], this->m_fftKernels[0].in[0]);
+        dimensions(m_inWidgetKernel.out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        dimensions(this->m_fftKernels[0].in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        connect<>(this->m_fftKernels[TP_CASC_LEN - 1].out[0], m_outWidgetKernel.in[0]);
+        dimensions(this->m_fftKernels[TP_CASC_LEN - 1].out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        dimensions(m_outWidgetKernel.in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        // Make data connections
+        for (int i = 0; i < kStreamsPerTile; i++) {
+            connect<stream>(in[i], m_inWidgetKernel.in[i]);
+            connect<stream>(m_outWidgetKernel.out[i], out[i]);
+        }
+
+        source(m_inWidgetKernel) = "widget_api_cast.cpp";
+        headers(m_inWidgetKernel) = {"widget_api_cast.hpp"};
+        runtime<ratio>(m_inWidgetKernel) = 0.9;
+        source(m_outWidgetKernel) = "widget_api_cast.cpp";
+        headers(m_outWidgetKernel) = {"widget_api_cast.hpp"};
+        runtime<ratio>(m_outWidgetKernel) = 0.9;
+    };
+};
+
 // This is the specialization for window to 2 streams
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_USE_WIDGETS,
+          unsigned int TP_ORIG_PAR_POWER>
+class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
+                                       TT_TWIDDLE,
+                                       TP_POINT_SIZE,
+                                       TP_FFT_NIFFT,
+                                       TP_SHIFT,
+                                       TP_CASC_LEN,
+                                       TP_DYN_PT_SIZE,
+                                       TP_WINDOW_VSIZE,
+                                       kWindowAPI,
+                                       kStreamAPI,
+                                       TP_USE_WIDGETS,
+                                       TP_ORIG_PAR_POWER> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
+                                                                                               TT_TWIDDLE,
+                                                                                               TP_POINT_SIZE,
+                                                                                               TP_FFT_NIFFT,
+                                                                                               TP_SHIFT,
+                                                                                               TP_CASC_LEN,
+                                                                                               TP_DYN_PT_SIZE,
+                                                                                               TP_WINDOW_VSIZE,
+                                                                                               kWindowAPI,
+                                                                                               kStreamAPI,
+                                                                                               TP_ORIG_PAR_POWER> {
+   public:
+    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
+    /**
+     * I/O is an iobuffer in of TT_DATA type and for output 2 streams.
+     **/
+    port_array<input, 1> in;
+    port_array<output, 2> out;
+
+    fft_ifft_dit_1ch_baseports_graph() {
+        // Make data connections
+        connect<>(in[0], this->m_fftKernels[0].in[0]);
+        dimensions(this->m_fftKernels[0].in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        connect<stream>(this->m_fftKernels[TP_CASC_LEN - 1].out[0], out[0]);
+        connect<stream>(this->m_fftKernels[TP_CASC_LEN - 1].out[1], out[1]);
+    };
+};
+
+// This is the specialization for window to 2 streams using a widget
 template <typename TT_DATA,
           typename TT_TWIDDLE,
           unsigned int TP_POINT_SIZE,
@@ -800,31 +1114,43 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TP_WINDOW_VSIZE,
                                        kWindowAPI,
                                        kStreamAPI,
-                                       TP_ORIG_PAR_POWER> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
-                                                                                               TT_TWIDDLE,
-                                                                                               TP_POINT_SIZE,
-                                                                                               TP_FFT_NIFFT,
-                                                                                               TP_SHIFT,
-                                                                                               TP_CASC_LEN,
-                                                                                               TP_DYN_PT_SIZE,
-                                                                                               TP_WINDOW_VSIZE,
-                                                                                               kWindowAPI,
-                                                                                               kStreamAPI,
-                                                                                               TP_ORIG_PAR_POWER> {
+                                       1 /*USE_WIDGET*/,
+                                       TP_ORIG_PAR_POWER>
+    : public fft_ifft_dit_1ch_base_graph<TT_DATA,
+                                         TT_TWIDDLE,
+                                         TP_POINT_SIZE,
+                                         TP_FFT_NIFFT,
+                                         TP_SHIFT,
+                                         TP_CASC_LEN,
+                                         TP_DYN_PT_SIZE,
+                                         TP_WINDOW_VSIZE,
+                                         kWindowAPI,
+                                         kWindowAPI,
+                                         TP_ORIG_PAR_POWER> // note output of FFT is iobuffer
+{
    public:
     static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
     /**
-     * I/O is an iobuffer in of TT_DATA type and for output a cascade and stream.
+     * I/O is an iobuffer in of TT_DATA type and for output 2 streams.
      **/
     port_array<input, 1> in;
     port_array<output, 2> out;
+
+    kernel m_outWidgetKernel = kernel::create_object<
+        widget_api_cast<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 2, kSampleIntlv, kHeaderBytes> >();
 
     fft_ifft_dit_1ch_baseports_graph() {
         // Make data connections
         connect<>(in[0], this->m_fftKernels[0].in[0]);
         dimensions(this->m_fftKernels[0].in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
-        connect<stream>(this->m_fftKernels[TP_CASC_LEN - 1].out[0], out[0]);
-        connect<stream>(this->m_fftKernels[TP_CASC_LEN - 1].out[1], out[1]);
+        connect<>(this->m_fftKernels[TP_CASC_LEN - 1].out[0], m_outWidgetKernel.in[0]);
+        dimensions(m_outWidgetKernel.in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        connect<stream>(this->m_outWidgetKernel.out[0], out[0]);
+        connect<stream>(this->m_outWidgetKernel.out[1], out[1]);
+
+        source(m_outWidgetKernel) = "widget_api_cast.cpp";
+        headers(m_outWidgetKernel) = {"widget_api_cast.hpp"};
+        runtime<ratio>(m_outWidgetKernel) = 0.9;
     };
 };
 
@@ -837,6 +1163,7 @@ template <typename TT_DATA,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_USE_WIDGETS,
           unsigned int TP_ORIG_PAR_POWER>
 class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TT_TWIDDLE,
@@ -848,6 +1175,7 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TP_WINDOW_VSIZE,
                                        kWindowAPI,
                                        kCascStreamAPI,
+                                       TP_USE_WIDGETS,
                                        TP_ORIG_PAR_POWER> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
                                                                                                TT_TWIDDLE,
                                                                                                TP_POINT_SIZE,
@@ -873,6 +1201,66 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
         dimensions(this->m_fftKernels[0].in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
         connect<cascade>(this->m_fftKernels[TP_CASC_LEN - 1].out[0], out[0]);
         connect<stream>(this->m_fftKernels[TP_CASC_LEN - 1].out[1], out[1]);
+    };
+};
+
+// This is the specialization for window to casc/stream using a widget
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
+class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
+                                       TT_TWIDDLE,
+                                       TP_POINT_SIZE,
+                                       TP_FFT_NIFFT,
+                                       TP_SHIFT,
+                                       TP_CASC_LEN,
+                                       TP_DYN_PT_SIZE,
+                                       TP_WINDOW_VSIZE,
+                                       kWindowAPI,
+                                       kCascStreamAPI,
+                                       1 /*TP_USE_WIDGETS*/,
+                                       TP_ORIG_PAR_POWER>
+    : public fft_ifft_dit_1ch_base_graph<TT_DATA,
+                                         TT_TWIDDLE,
+                                         TP_POINT_SIZE,
+                                         TP_FFT_NIFFT,
+                                         TP_SHIFT,
+                                         TP_CASC_LEN,
+                                         TP_DYN_PT_SIZE,
+                                         TP_WINDOW_VSIZE,
+                                         kWindowAPI,
+                                         kWindowAPI,
+                                         TP_ORIG_PAR_POWER> // note output of FFT is iobuffer
+{
+   public:
+    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
+    /**
+     * I/O is an iobuffer in of TT_DATA type and for output a cascade and stream.
+     **/
+    port_array<input, 1> in;
+    port_array<output, 2> out;
+
+    kernel m_outWidgetKernel = kernel::create_object<
+        widget_api_cast<TT_DATA, kWindowAPI, kCascStreamAPI, 1, TP_WINDOW_VSIZE, 2, kSampleIntlv, kHeaderBytes> >();
+
+    fft_ifft_dit_1ch_baseports_graph() {
+        // Make data connections
+        connect<>(in[0], this->m_fftKernels[0].in[0]);
+        dimensions(this->m_fftKernels[0].in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        connect<>(this->m_fftKernels[TP_CASC_LEN - 1].out[0], m_outWidgetKernel.in[0]);
+        dimensions(m_outWidgetKernel.in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        connect<cascade>(m_outWidgetKernel.out[0], out[0]);
+        connect<stream>(m_outWidgetKernel.out[1], out[1]);
+
+        source(m_outWidgetKernel) = "widget_api_cast.cpp";
+        headers(m_outWidgetKernel) = {"widget_api_cast.hpp"};
+        runtime<ratio>(m_outWidgetKernel) = 0.9;
     };
 };
 
@@ -885,6 +1273,7 @@ template <typename TT_DATA,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_USE_WIDGETS,
           unsigned int TP_ORIG_PAR_POWER>
 class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TT_TWIDDLE,
@@ -896,6 +1285,7 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TP_WINDOW_VSIZE,
                                        kWindowAPI,
                                        kStreamCascAPI,
+                                       TP_USE_WIDGETS,
                                        TP_ORIG_PAR_POWER> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
                                                                                                TT_TWIDDLE,
                                                                                                TP_POINT_SIZE,
@@ -924,7 +1314,7 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
     };
 };
 
-// This is the specialization for stream to casc/stream
+// This is the specialization for window to stream/casc using a widget
 template <typename TT_DATA,
           typename TT_TWIDDLE,
           unsigned int TP_POINT_SIZE,
@@ -942,8 +1332,67 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TP_CASC_LEN,
                                        TP_DYN_PT_SIZE,
                                        TP_WINDOW_VSIZE,
+                                       kWindowAPI,
+                                       kStreamCascAPI,
+                                       1 /*TP_USE_WIDGETS*/,
+                                       TP_ORIG_PAR_POWER> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
+                                                                                               TT_TWIDDLE,
+                                                                                               TP_POINT_SIZE,
+                                                                                               TP_FFT_NIFFT,
+                                                                                               TP_SHIFT,
+                                                                                               TP_CASC_LEN,
+                                                                                               TP_DYN_PT_SIZE,
+                                                                                               TP_WINDOW_VSIZE,
+                                                                                               kWindowAPI,
+                                                                                               kWindowAPI,
+                                                                                               TP_ORIG_PAR_POWER> {
+   public:
+    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
+    /**
+     * I/O is an iobuffer in of TT_DATA type and for output a cascade and stream.
+     **/
+    port_array<input, 1> in;
+    port_array<output, 2> out;
+
+    kernel m_outWidgetKernel = kernel::create_object<
+        widget_api_cast<TT_DATA, kWindowAPI, kStreamCascAPI, 1, TP_WINDOW_VSIZE, 2, kSampleIntlv, kHeaderBytes> >();
+
+    fft_ifft_dit_1ch_baseports_graph() {
+        // Make data connections
+        connect<>(in[0], this->m_fftKernels[0].in[0]);
+        dimensions(this->m_fftKernels[0].in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        connect<>(this->m_fftKernels[TP_CASC_LEN - 1].out[0], m_outWidgetKernel.in[0]);
+        connect<stream>(m_outWidgetKernel.out[0], out[0]);
+        connect<cascade>(m_outWidgetKernel.out[1], out[1]);
+
+        source(m_outWidgetKernel) = "widget_api_cast.cpp";
+        headers(m_outWidgetKernel) = {"widget_api_cast.hpp"};
+        runtime<ratio>(m_outWidgetKernel) = 0.9;
+    };
+};
+
+// This is the specialization for stream to casc/stream
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_USE_WIDGETS,
+          unsigned int TP_ORIG_PAR_POWER>
+class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
+                                       TT_TWIDDLE,
+                                       TP_POINT_SIZE,
+                                       TP_FFT_NIFFT,
+                                       TP_SHIFT,
+                                       TP_CASC_LEN,
+                                       TP_DYN_PT_SIZE,
+                                       TP_WINDOW_VSIZE,
                                        kStreamAPI,
                                        kCascStreamAPI,
+                                       TP_USE_WIDGETS,
                                        TP_ORIG_PAR_POWER> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
                                                                                                TT_TWIDDLE,
                                                                                                TP_POINT_SIZE,
@@ -970,7 +1419,7 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
     };
 };
 
-// This is the specialization for stream to stream/casc
+// This is the specialization for stream to casc/stream using widget
 template <typename TT_DATA,
           typename TT_TWIDDLE,
           unsigned int TP_POINT_SIZE,
@@ -989,7 +1438,81 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                        TP_DYN_PT_SIZE,
                                        TP_WINDOW_VSIZE,
                                        kStreamAPI,
+                                       kCascStreamAPI,
+                                       1 /*TP_USE_WIDGETS*/,
+                                       TP_ORIG_PAR_POWER> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
+                                                                                               TT_TWIDDLE,
+                                                                                               TP_POINT_SIZE,
+                                                                                               TP_FFT_NIFFT,
+                                                                                               TP_SHIFT,
+                                                                                               TP_CASC_LEN,
+                                                                                               TP_DYN_PT_SIZE,
+                                                                                               TP_WINDOW_VSIZE,
+                                                                                               kWindowAPI,
+                                                                                               kWindowAPI,
+                                                                                               TP_ORIG_PAR_POWER> {
+   public:
+    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
+    /**
+     * I/O is an iobuffer in of TT_DATA type and for output a cascade and stream.
+     **/
+    port_array<input, 1> in;
+    port_array<output, 2> out;
+
+    kernel m_inWidgetKernel = kernel::create_object<widget_api_cast<TT_DATA,
+                                                                    kStreamAPI,
+                                                                    kWindowAPI,
+                                                                    1 /*kStreamsPerTile*/,
+                                                                    TP_WINDOW_VSIZE,
+                                                                    1,
+                                                                    kSampleIntlv,
+                                                                    kHeaderBytes> >();
+    kernel m_outWidgetKernel = kernel::create_object<
+        widget_api_cast<TT_DATA, kWindowAPI, kCascStreamAPI, 1, TP_WINDOW_VSIZE, 2, kSampleIntlv, kHeaderBytes> >();
+
+    fft_ifft_dit_1ch_baseports_graph() {
+        // Make data connections
+        connect<stream>(in[0], m_inWidgetKernel.in[0]);
+        connect<>(m_inWidgetKernel.out[0], this->m_fftKernels[0].in[0]);
+        dimensions(m_inWidgetKernel.out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        dimensions(this->m_fftKernels[0].in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        connect<>(this->m_fftKernels[TP_CASC_LEN - 1].out[0], m_outWidgetKernel.in[0]);
+        dimensions(m_outWidgetKernel.in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        dimensions(this->m_fftKernels[TP_CASC_LEN - 1].out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        connect<cascade>(m_outWidgetKernel.out[0], out[0]);
+        connect<stream>(m_outWidgetKernel.out[1], out[1]);
+
+        source(m_inWidgetKernel) = "widget_api_cast.cpp";
+        headers(m_inWidgetKernel) = {"widget_api_cast.hpp"};
+        runtime<ratio>(m_inWidgetKernel) = 0.9;
+        source(m_outWidgetKernel) = "widget_api_cast.cpp";
+        headers(m_outWidgetKernel) = {"widget_api_cast.hpp"};
+        runtime<ratio>(m_outWidgetKernel) = 0.9;
+    };
+};
+
+// This is the specialization for stream to stream/casc
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_USE_WIDGETS,
+          unsigned int TP_ORIG_PAR_POWER>
+class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
+                                       TT_TWIDDLE,
+                                       TP_POINT_SIZE,
+                                       TP_FFT_NIFFT,
+                                       TP_SHIFT,
+                                       TP_CASC_LEN,
+                                       TP_DYN_PT_SIZE,
+                                       TP_WINDOW_VSIZE,
+                                       kStreamAPI,
                                        kStreamCascAPI,
+                                       TP_USE_WIDGETS,
                                        TP_ORIG_PAR_POWER> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
                                                                                                TT_TWIDDLE,
                                                                                                TP_POINT_SIZE,
@@ -1013,6 +1536,78 @@ class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
         connect<stream>(in[0], this->m_fftKernels[0].in[0]);
         connect<stream>(this->m_fftKernels[TP_CASC_LEN - 1].out[0], out[0]);
         connect<cascade>(this->m_fftKernels[TP_CASC_LEN - 1].out[1], out[1]);
+    };
+};
+
+// This is the specialization for stream to stream/casc using widget
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_ORIG_PAR_POWER>
+class fft_ifft_dit_1ch_baseports_graph<TT_DATA,
+                                       TT_TWIDDLE,
+                                       TP_POINT_SIZE,
+                                       TP_FFT_NIFFT,
+                                       TP_SHIFT,
+                                       TP_CASC_LEN,
+                                       TP_DYN_PT_SIZE,
+                                       TP_WINDOW_VSIZE,
+                                       kStreamAPI,
+                                       kStreamCascAPI,
+                                       1 /*TP_USE_WIDGETS*/,
+                                       TP_ORIG_PAR_POWER> : public fft_ifft_dit_1ch_base_graph<TT_DATA,
+                                                                                               TT_TWIDDLE,
+                                                                                               TP_POINT_SIZE,
+                                                                                               TP_FFT_NIFFT,
+                                                                                               TP_SHIFT,
+                                                                                               TP_CASC_LEN,
+                                                                                               TP_DYN_PT_SIZE,
+                                                                                               TP_WINDOW_VSIZE,
+                                                                                               kWindowAPI,
+                                                                                               kWindowAPI,
+                                                                                               TP_ORIG_PAR_POWER> {
+   public:
+    static constexpr int kHeaderBytes = TP_DYN_PT_SIZE > 0 ? 32 : 0;
+    /**
+     * I/O is an iobuffer in of TT_DATA type and for output a cascade and stream.
+     **/
+    port_array<input, 1> in;
+    port_array<output, 2> out;
+
+    kernel m_inWidgetKernel = kernel::create_object<widget_api_cast<TT_DATA,
+                                                                    kStreamAPI,
+                                                                    kWindowAPI,
+                                                                    1 /*kStreamsPerTile*/,
+                                                                    TP_WINDOW_VSIZE,
+                                                                    1,
+                                                                    kSampleIntlv,
+                                                                    kHeaderBytes> >();
+    kernel m_outWidgetKernel = kernel::create_object<
+        widget_api_cast<TT_DATA, kWindowAPI, kStreamCascAPI, 1, TP_WINDOW_VSIZE, 2, kSampleIntlv, kHeaderBytes> >();
+
+    fft_ifft_dit_1ch_baseports_graph() {
+        // Make data connections
+        connect<stream>(in[0], m_inWidgetKernel.in[0]);
+        connect<>(m_inWidgetKernel.out[0], this->m_fftKernels[0].in[0]);
+        dimensions(m_inWidgetKernel.out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        dimensions(this->m_fftKernels[0].in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        connect<>(this->m_fftKernels[TP_CASC_LEN - 1].out[0], m_outWidgetKernel.in[0]);
+        dimensions(this->m_fftKernels[TP_CASC_LEN - 1].out[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        dimensions(m_outWidgetKernel.in[0]) = {TP_WINDOW_VSIZE + kHeaderBytes / sizeof(TT_DATA)};
+        connect<stream>(m_outWidgetKernel.out[0], out[0]);
+        connect<cascade>(m_outWidgetKernel.out[1], out[1]);
+
+        source(m_inWidgetKernel) = "widget_api_cast.cpp";
+        headers(m_inWidgetKernel) = {"widget_api_cast.hpp"};
+        runtime<ratio>(m_inWidgetKernel) = 0.9;
+        source(m_outWidgetKernel) = "widget_api_cast.cpp";
+        headers(m_outWidgetKernel) = {"widget_api_cast.hpp"};
+        runtime<ratio>(m_outWidgetKernel) = 0.9;
     };
 };
 
@@ -1030,6 +1625,7 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE = TP_POINT_SIZE,
           unsigned int TP_IN_API = kWindowAPI,
           unsigned int TP_OUT_API = kWindowAPI,
+          unsigned int TP_USE_WIDGETS = 0,
           unsigned int TP_ORIG_PAR_POWER = 0> // invalid default because this must be set.
 class fft_ifft_dit_1ch_mono_graph : public fft_ifft_dit_1ch_baseports_graph<TT_DATA,
                                                                             TT_TWIDDLE,
@@ -1041,6 +1637,7 @@ class fft_ifft_dit_1ch_mono_graph : public fft_ifft_dit_1ch_baseports_graph<TT_D
                                                                             TP_WINDOW_VSIZE,
                                                                             TP_IN_API,
                                                                             TP_OUT_API,
+                                                                            TP_USE_WIDGETS,
                                                                             TP_ORIG_PAR_POWER> {
     // This is the default for cint32 and cfloat
 };
@@ -1055,6 +1652,7 @@ template <typename TT_TWIDDLE,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_IN_API,
           unsigned int TP_OUT_API,
+          unsigned int TP_USE_WIDGETS,
           unsigned int TP_ORIG_PAR_POWER>
 class fft_ifft_dit_1ch_mono_graph<cint16,
                                   TT_TWIDDLE,
@@ -1066,6 +1664,7 @@ class fft_ifft_dit_1ch_mono_graph<cint16,
                                   TP_WINDOW_VSIZE,
                                   TP_IN_API,
                                   TP_OUT_API,
+                                  TP_USE_WIDGETS,
                                   TP_ORIG_PAR_POWER> : public fft_ifft_dit_1ch_baseports_graph<cint16,
                                                                                                TT_TWIDDLE,
                                                                                                TP_POINT_SIZE,
@@ -1076,6 +1675,7 @@ class fft_ifft_dit_1ch_mono_graph<cint16,
                                                                                                TP_WINDOW_VSIZE,
                                                                                                TP_IN_API,
                                                                                                TP_OUT_API,
+                                                                                               TP_USE_WIDGETS,
                                                                                                TP_ORIG_PAR_POWER> {
    public:
 #ifdef USE_GRAPH_SCOPE
@@ -1195,6 +1795,13 @@ class fft_ifft_dit_1ch_mono_graph<cint16,
  *         takes 2 streams in for a total of 8 streams input and output. Sample[p] must be written to stream[p modulus
  *q]
  *         where q is the number of streams.
+ * @tparam TP_USE_WIDGETS is an unsigned integer to control the use of widgets for configurations which either use
+ *TP_API=1 (streaming IO)
+ *         or TP_PARALLEL_POWER>0 which uses streams internally, even if not externally. The default is not to use
+ *widgets
+ *         but to have the stream to window conversion performed as part of the FFT kernel or R2combiner kernel.
+ *         Using widget kernels allows this conversion to be placed in a separate tile and so boost performance
+ *         at the expense of more tiles being used.
  * @tparam TP_INDEX
  *         This parameter is for internal use regarding the recursion of the parallel power feature. It is recommended
  *         to miss this parameter from the configuration and rely instead on default values. If this parameter is set
@@ -1215,6 +1822,7 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE = TP_POINT_SIZE,
           unsigned int TP_API = 0,
           unsigned int TP_PARALLEL_POWER = 0,
+          unsigned int TP_USE_WIDGETS = 0,
           unsigned int TP_INDEX = 0,
           unsigned int TP_ORIG_PAR_POWER = TP_PARALLEL_POWER>
 class fft_ifft_dit_1ch_graph : public graph {
@@ -1267,7 +1875,7 @@ class fft_ifft_dit_1ch_graph : public graph {
      * FFT recursive decomposition. Widget kernel
      * Widgets are used to reorder data as per FFT algorithm requirements.
      **/
-    //  kernel m_combInKernel[kParallel_factor];
+    kernel m_combInKernel[kParallel_factor];
 
     /**
      * FFT recursive decomposition. R2Combiner kernel
@@ -1279,7 +1887,7 @@ class fft_ifft_dit_1ch_graph : public graph {
      * FFT recursive decomposition. Widget kernel
      * Widgets are used to reorder data as per FFT algorithm requirements.
      **/
-    //  kernel m_combOutKernel[kParallel_factor];
+    kernel m_combOutKernel[kParallel_factor];
 
     /**
      * FFT recursive decomposition. Subframe0
@@ -1296,6 +1904,7 @@ class fft_ifft_dit_1ch_graph : public graph {
                            (TP_WINDOW_VSIZE >> 1),
                            TP_API,
                            kNextParallelPower,
+                           TP_USE_WIDGETS,
                            TP_INDEX,
                            TP_ORIG_PAR_POWER>
         FFTsubframe0;
@@ -1315,6 +1924,7 @@ class fft_ifft_dit_1ch_graph : public graph {
                            (TP_WINDOW_VSIZE >> 1),
                            TP_API,
                            kNextParallelPower,
+                           TP_USE_WIDGETS,
                            TP_INDEX + kParallel_factor / 2,
                            TP_ORIG_PAR_POWER>
         FFTsubframe1;
@@ -1325,10 +1935,21 @@ class fft_ifft_dit_1ch_graph : public graph {
      **/
     fft_ifft_dit_1ch_graph() {
         // create kernels and subgraphs
-        create_r2comb_kernels<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, kR2Shift, TP_DYN_PT_SIZE, kWindowSize,
-                              TP_PARALLEL_POWER, kParallel_factor - 1, TP_INDEX, TP_ORIG_PAR_POWER,
-                              TP_API>::create(m_r2Comb);
-
+        if
+            constexpr(TP_USE_WIDGETS == 0) {
+                create_r2comb_kernels<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, kR2Shift, TP_DYN_PT_SIZE,
+                                      kWindowSize, TP_PARALLEL_POWER, kParallel_factor - 1, TP_INDEX, TP_ORIG_PAR_POWER,
+                                      TP_API, TP_USE_WIDGETS>::create(m_r2Comb);
+            }
+        else {
+            create_combInWidget_kernels<TT_DATA, kWindowSize, TP_PARALLEL_POWER, kParallel_factor - 1, TP_INDEX,
+                                        TP_ORIG_PAR_POWER, TP_API, kHeaderBytes>::create(m_combInKernel);
+            create_r2comb_kernels<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, kR2Shift, TP_DYN_PT_SIZE,
+                                  kWindowSize, TP_PARALLEL_POWER, kParallel_factor - 1, TP_INDEX, TP_ORIG_PAR_POWER,
+                                  kWindowAPI, TP_USE_WIDGETS>::create(m_r2Comb);
+            create_combOutWidget_kernels<TT_DATA, kWindowSize, TP_PARALLEL_POWER, kParallel_factor - 1, TP_INDEX,
+                                         kHeaderBytes, TP_ORIG_PAR_POWER, TP_API>::create(m_combOutKernel);
+        }
         // make input connections
         if
             constexpr(TP_API == 0) {
@@ -1348,18 +1969,48 @@ class fft_ifft_dit_1ch_graph : public graph {
         if
             constexpr(kStreamsPerTile == 2) { // AIE1
                 for (int i = 0; i < kParallel_factor; i++) {
-                    connect<stream>(FFTsubframe0.out[i], m_r2Comb[i].in[0]);
-                    connect<stream>(FFTsubframe1.out[i], m_r2Comb[i].in[1]);
+                    if
+                        constexpr(TP_USE_WIDGETS == 0) {
+                            connect<stream>(FFTsubframe0.out[i], m_r2Comb[i].in[0]);
+                            connect<stream>(FFTsubframe1.out[i], m_r2Comb[i].in[1]);
+                        }
+                    else {
+                        connect<stream>(FFTsubframe0.out[i], m_combInKernel[i].in[0]);
+                        connect<stream>(FFTsubframe1.out[i], m_combInKernel[i].in[1]);
+                        connect<>(m_combInKernel[i].out[0], m_r2Comb[i].in[0]);
+                        dimensions(m_combInKernel[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
+                        dimensions(m_r2Comb[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
+                    }
                 }
             }
         else {
             for (int i = 0; i < kParallel_factor; i++) {
                 if (i < kParallel_factor / 2) { // i.e. top half
-                    connect<cascade>(FFTsubframe0.out[i], m_r2Comb[i].in[0]);
-                    connect<stream>(FFTsubframe1.out[i], m_r2Comb[i].in[1]);
+                    if
+                        constexpr(TP_USE_WIDGETS == 0) {
+                            connect<cascade>(FFTsubframe0.out[i], m_r2Comb[i].in[0]);
+                            connect<stream>(FFTsubframe1.out[i], m_r2Comb[i].in[1]);
+                        }
+                    else {
+                        connect<cascade>(FFTsubframe0.out[i], m_combInKernel[i].in[0]);
+                        connect<stream>(FFTsubframe1.out[i], m_combInKernel[i].in[1]);
+                        connect<>(m_combInKernel[i].out[0], m_r2Comb[i].in[0]);
+                        dimensions(m_combInKernel[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
+                        dimensions(m_r2Comb[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
+                    }
                 } else { // bottom half
-                    connect<stream>(FFTsubframe0.out[i], m_r2Comb[i].in[0]);
-                    connect<cascade>(FFTsubframe1.out[i], m_r2Comb[i].in[1]);
+                    if
+                        constexpr(TP_USE_WIDGETS == 0) {
+                            connect<stream>(FFTsubframe0.out[i], m_r2Comb[i].in[0]);
+                            connect<cascade>(FFTsubframe1.out[i], m_r2Comb[i].in[1]);
+                        }
+                    else {
+                        connect<stream>(FFTsubframe0.out[i], m_combInKernel[i].in[0]);
+                        connect<cascade>(FFTsubframe1.out[i], m_combInKernel[i].in[1]);
+                        connect<>(m_combInKernel[i].out[0], m_r2Comb[i].in[0]);
+                        dimensions(m_combInKernel[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
+                        dimensions(m_r2Comb[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
+                    }
                 }
             }
         }
@@ -1368,9 +2019,21 @@ class fft_ifft_dit_1ch_graph : public graph {
         if (TP_PARALLEL_POWER == TP_ORIG_PAR_POWER) { // i.e. top level, so outputs are really outputs
             if (TP_API == kStreamAPI) {
                 for (int i = 0; i < kParallel_factor; i++) {
-                    connect<stream>(m_r2Comb[i].out[0], out[i]);
-                    if (kStreamsPerTile == 2) {
-                        connect<stream>(m_r2Comb[i].out[1], out[i + kParallel_factor]);
+                    if
+                        constexpr(TP_USE_WIDGETS == 0) {
+                            connect<stream>(m_r2Comb[i].out[0], out[i]);
+                            if (kStreamsPerTile == 2) {
+                                connect<stream>(m_r2Comb[i].out[1], out[i + kParallel_factor]);
+                            }
+                        }
+                    else {
+                        connect<>(m_r2Comb[i].out[0], m_combOutKernel[i].in[0]);
+                        dimensions(m_r2Comb[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
+                        dimensions(m_combOutKernel[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
+                        connect<stream>(m_combOutKernel[i].out[0], out[i]);
+                        if (kStreamsPerTile == 2) {
+                            connect<stream>(m_combOutKernel[i].out[1], out[i + kParallel_factor]);
+                        }
                     }
                 }
             } else {
@@ -1383,17 +2046,47 @@ class fft_ifft_dit_1ch_graph : public graph {
 
             if (kStreamsPerTile == 2) {
                 for (int i = 0; i < kParallel_factor; i++) {
-                    connect<stream>(m_r2Comb[i].out[0], out[i]);
-                    connect<stream>(m_r2Comb[i].out[1], out[i + kParallel_factor]);
+                    if
+                        constexpr(TP_USE_WIDGETS == 0) {
+                            connect<stream>(m_r2Comb[i].out[0], out[i]);
+                            connect<stream>(m_r2Comb[i].out[1], out[i + kParallel_factor]);
+                        }
+                    else {
+                        connect(m_r2Comb[i].out[0], m_combOutKernel[i].in[0]);
+                        dimensions(m_r2Comb[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
+                        dimensions(m_combOutKernel[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
+                        connect<stream>(m_combOutKernel[i].out[0], out[i]);
+                        connect<stream>(m_combOutKernel[i].out[1], out[i + kParallel_factor]);
+                    }
                 }
             } else {
                 for (int i = 0; i < kParallel_factor; i++) {
                     if ((TP_INDEX >> TP_PARALLEL_POWER) % 2 == 0) { // i.e. top half
-                        connect<cascade>(m_r2Comb[i].out[0], out[i]);
-                        connect<stream>(m_r2Comb[i].out[1], out[i + kParallel_factor]);
+                        if
+                            constexpr(TP_USE_WIDGETS == 0) {
+                                connect<cascade>(m_r2Comb[i].out[0], out[i]);
+                                connect<stream>(m_r2Comb[i].out[1], out[i + kParallel_factor]);
+                            }
+                        else {
+                            connect(m_r2Comb[i].out[0], m_combOutKernel[i].in[0]);
+                            dimensions(m_r2Comb[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
+                            dimensions(m_combOutKernel[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
+                            connect<cascade>(m_combOutKernel[i].out[0], out[i]);
+                            connect<stream>(m_combOutKernel[i].out[1], out[i + kParallel_factor]);
+                        }
                     } else {
-                        connect<stream>(m_r2Comb[i].out[0], out[i]);
-                        connect<cascade>(m_r2Comb[i].out[1], out[i + kParallel_factor]);
+                        if
+                            constexpr(TP_USE_WIDGETS == 0) {
+                                connect<stream>(m_r2Comb[i].out[0], out[i]);
+                                connect<cascade>(m_r2Comb[i].out[1], out[i + kParallel_factor]);
+                            }
+                        else {
+                            connect(m_r2Comb[i].out[0], m_combOutKernel[i].in[0]);
+                            dimensions(m_r2Comb[i].out[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
+                            dimensions(m_combOutKernel[i].in[0]) = {kWindowSize + kHeaderBytes / sizeof(TT_DATA)};
+                            connect<stream>(m_combOutKernel[i].out[0], out[i]);
+                            connect<cascade>(m_combOutKernel[i].out[1], out[i + kParallel_factor]);
+                        }
                     }
                 }
             }
@@ -1404,6 +2097,15 @@ class fft_ifft_dit_1ch_graph : public graph {
             source(m_r2Comb[i]) = "fft_r2comb.cpp";
             headers(m_r2Comb[i]) = {"fft_r2comb.hpp"};
             runtime<ratio>(m_r2Comb[i]) = 0.9;
+            if
+                constexpr(TP_USE_WIDGETS == 1) {
+                    source(m_combInKernel[i]) = "widget_api_cast.cpp";
+                    headers(m_combInKernel[i]) = {"widget_api_cast.hpp"};
+                    runtime<ratio>(m_combInKernel[i]) = 0.9;
+                    source(m_combOutKernel[i]) = "widget_api_cast.cpp";
+                    headers(m_combOutKernel[i]) = {"widget_api_cast.hpp"};
+                    runtime<ratio>(m_combOutKernel[i]) = 0.9;
+                }
         }
     };
 
@@ -1431,6 +2133,7 @@ template <typename TT_DATA,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_USE_WIDGETS,
           unsigned int TP_INDEX,
           unsigned int TP_ORIG_PAR_POWER>
 class fft_ifft_dit_1ch_graph<TT_DATA,
@@ -1443,6 +2146,7 @@ class fft_ifft_dit_1ch_graph<TT_DATA,
                              TP_WINDOW_VSIZE,
                              kWindowAPI,
                              0,
+                             TP_USE_WIDGETS,
                              TP_INDEX,
                              TP_ORIG_PAR_POWER> : public graph {
    public:
@@ -1477,6 +2181,7 @@ class fft_ifft_dit_1ch_graph<TT_DATA,
                                 TP_WINDOW_VSIZE,
                                 kWindowAPI,
                                 kOutAPI,
+                                TP_USE_WIDGETS,
                                 TP_ORIG_PAR_POWER>
         FFTwinproc;
 
@@ -1519,6 +2224,7 @@ template <typename TT_DATA,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_USE_WIDGETS,
           unsigned int TP_INDEX,
           unsigned int TP_ORIG_PAR_POWER>
 class fft_ifft_dit_1ch_graph<TT_DATA,
@@ -1531,6 +2237,7 @@ class fft_ifft_dit_1ch_graph<TT_DATA,
                              TP_WINDOW_VSIZE,
                              kStreamAPI,
                              0,
+                             TP_USE_WIDGETS,
                              TP_INDEX,
                              TP_ORIG_PAR_POWER> : public graph {
    public:
@@ -1564,6 +2271,7 @@ class fft_ifft_dit_1ch_graph<TT_DATA,
                                 TP_WINDOW_VSIZE,
                                 kStreamAPI,
                                 kOutAPI,
+                                TP_USE_WIDGETS,
                                 TP_ORIG_PAR_POWER>
         FFTstrproc;
 

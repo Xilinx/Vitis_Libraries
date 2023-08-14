@@ -9,7 +9,9 @@ def vmc_validate_output_window_size(args):
     tempargs["TT_DATA"] = args["data_type"]
     return validate_TP_WINDOW_VSIZE(tempargs)
 
-
+def vmc_validate_ssr(args):
+    ssr = args["ssr"]
+    return fn_validate_ssr(ssr);
 
 #### VMC graph generator ####
 def vmc_generate_graph(name, args):
@@ -22,6 +24,4 @@ def vmc_generate_graph(name, args):
     tmpargs["TP_API"] = 1
     tmpargs["phaseInc"] = args["phase_increment"]
     tmpargs["initialPhaseOffset"] = 0
-	
-   
     return generate_graph(name, tmpargs)

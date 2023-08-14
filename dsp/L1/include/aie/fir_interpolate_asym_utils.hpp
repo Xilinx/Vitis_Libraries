@@ -50,6 +50,8 @@ struct T_outValIntAsym : T_outVal<T_D, T_C> {
     using T_outVal<T_D, T_C>::operator=;
 };
 
+#if (__HAS_ACCUM_PERMUTES__ == 1)
+
 // Overloaded mul/mac calls for asymmetric interpolation
 //-----------------------------------------------------------------------------------------------------
 // DATA = int16, COEFF = int16
@@ -612,11 +614,6 @@ INLINE_DECL T_accIntAsym<cfloat, cfloat> macIntAsym(T_accIntAsym<cfloat, cfloat>
     return retVal;
 }
 
-template <typename TT_DATA, typename TT_COEFF>
-INLINE_DECL T_outVal<TT_DATA, TT_COEFF> shiftAndSaturateIntAsym(const T_acc<TT_DATA, TT_COEFF> acc, const int shift) {
-    return shiftAndSaturate(acc, shift);
-}
-
 // Overloaded mul call for asymmetric interpolation
 template <typename TT_DATA, typename TT_COEFF>
 INLINE_DECL T_accIntAsym<TT_DATA, TT_COEFF> mulIntAsym(T_buff_1024b<TT_DATA> xbuff,
@@ -640,6 +637,163 @@ INLINE_DECL T_accIntAsym<TT_DATA, TT_COEFF> macIntAsym(T_accIntAsym<TT_DATA, TT_
                                                        int xstart) {
     return macIntAsym(acc, xbuff.val, zbuff.val, interpolateFactor, lanes, xoffsetslut, xstart);
 };
+
+#else  // __HAS_ACCUM_PERMUTES__ = 0
+
+// Do nothing when permute is not supported
+template <typename TT_DATA, typename TT_COEFF>
+INLINE_DECL T_accIntAsym<TT_DATA, TT_COEFF> mulIntAsym(T_buff_1024b<TT_DATA> xbuff,
+                                                       T_buff_256b<TT_COEFF> zbuff,
+                                                       unsigned int interpolateFactor,
+                                                       unsigned int lanes,
+                                                       int64 xoffsetslut,
+                                                       int xstart) {
+    T_accIntAsym<TT_DATA, TT_COEFF> empty_acc;
+    return empty_acc;
+};
+
+// Do nothing when permute is not supported
+template <typename TT_DATA, typename TT_COEFF>
+INLINE_DECL T_accIntAsym<TT_DATA, TT_COEFF> macIntAsym(T_accIntAsym<TT_DATA, TT_COEFF> acc,
+                                                       T_buff_1024b<TT_DATA> xbuff,
+                                                       T_buff_256b<TT_COEFF> zbuff,
+                                                       unsigned int interpolateFactor,
+                                                       unsigned int lanes,
+                                                       int64 xoffsetslut,
+                                                       int xstart) {
+    return acc;
+};
+#endif //__HAS_ACCUM_PERMUTES__
+
+// Interleave
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_NUM_INPUTS, unsigned int TP_NUM_OUTPUTS>
+INLINE_DECL void bufferInterleaveIntAsym(std::array<T_outValIntAsym<TT_DATA, TT_COEFF>, TP_NUM_INPUTS> outArray,
+                                         auto& outItr,
+                                         auto& outItr2) {
+    constexpr int kSamplesIn128b = 16 / sizeof(TT_DATA);
+    constexpr int kSamplesIn256b = kSamplesIn128b * 2;
+    constexpr int kSamplesIn512b = kSamplesIn128b * 4;
+    using t512v = ::aie::vector<TT_DATA, kSamplesIn512b>;
+    using t256v = ::aie::vector<TT_DATA, kSamplesIn256b>;
+    using t128v = ::aie::vector<TT_DATA, kSamplesIn128b>;
+    using vec = typename T_outValIntAsym<TT_DATA, TT_COEFF>::v_type;
+    constexpr int kSamplesInVec = T_outValIntAsym<TT_DATA, TT_COEFF>::getLanes();
+    if
+        constexpr(TP_NUM_INPUTS == 1) { *outItr++ = outArray[0].val; }
+    else if
+        constexpr(TP_NUM_INPUTS == 2) {
+            vec writeVal;
+            ::std::pair<vec, vec> inIntlv = ::aie::interleave_zip(outArray[0].val, outArray[1].val, 1);
+            writeVal = inIntlv.first;
+            *outItr++ = writeVal;
+            writeVal = inIntlv.second;
+            *outItr++ = writeVal;
+            if
+                constexpr(TP_NUM_OUTPUTS == 2) {
+                    writeVal = inIntlv.first;
+                    *outItr2++ = writeVal;
+                    writeVal = inIntlv.second;
+                    *outItr2++ = writeVal;
+                }
+        }
+    else if
+        constexpr(TP_NUM_INPUTS == 3 || TP_NUM_INPUTS == 5 || TP_NUM_INPUTS == 6 || TP_NUM_INPUTS == 7) {
+            vec writeValLoc;
+#pragma unroll(TP_NUM_INPUTS* kSamplesInVec)
+            for (int j = 0; j < (TP_NUM_INPUTS * kSamplesInVec); j++) {
+                writeValLoc[j % kSamplesInVec] = outArray[j % TP_NUM_INPUTS].val.get(j / TP_NUM_INPUTS);
+
+                if ((j - kSamplesInVec + 1) % kSamplesInVec == 0) {
+                    *outItr++ = writeValLoc;
+                }
+            }
+            // Interleave 4 to 1
+        }
+    else if
+        constexpr(TP_NUM_INPUTS == 4) {
+            vec writeValLoc;
+            ::std::pair<vec, vec> inIntlv0 =
+                ::aie::interleave_zip(outArray[0].val, outArray[2].val, 1); // Interleave 4 to 2
+            ::std::pair<vec, vec> inIntlv1 =
+                ::aie::interleave_zip(outArray[1].val, outArray[3].val, 1); // Interleave 2 to 1
+            ::std::pair<vec, vec> inIntlv2 =
+                ::aie::interleave_zip(inIntlv0.first, inIntlv1.first, 1); // Interleave 2 to 1
+            writeValLoc = inIntlv2.first;
+            *outItr++ = writeValLoc;
+            writeValLoc = inIntlv2.second;
+            *outItr++ = writeValLoc;
+            inIntlv2 = ::aie::interleave_zip(inIntlv0.second, inIntlv1.second, 1); // Interleave 2 to 1
+            writeValLoc = inIntlv2.first;
+            *outItr++ = writeValLoc;
+            writeValLoc = inIntlv2.second;
+            *outItr++ = writeValLoc;
+        }
+    else if
+        constexpr(TP_NUM_INPUTS == 8) {
+            vec writeValLoc;
+            ::std::pair<vec, vec> inIntlv0 = ::aie::interleave_zip(outArray[0].val, outArray[4].val, 1);
+            ::std::pair<vec, vec> inIntlv1 = ::aie::interleave_zip(outArray[1].val, outArray[5].val, 1);
+            ::std::pair<vec, vec> inIntlv2 = ::aie::interleave_zip(outArray[2].val, outArray[6].val, 1);
+            ::std::pair<vec, vec> inIntlv3 = ::aie::interleave_zip(outArray[3].val, outArray[7].val, 1);
+
+            ::std::pair<vec, vec> inIntlv4 = ::aie::interleave_zip(inIntlv0.first, inIntlv2.first, 1);
+            ::std::pair<vec, vec> inIntlv5 = ::aie::interleave_zip(inIntlv1.first, inIntlv3.first, 1);
+
+            ::std::pair<vec, vec> inIntlv6 = ::aie::interleave_zip(inIntlv4.first, inIntlv5.first, 1);
+            writeValLoc = inIntlv6.first;
+            *outItr++ = writeValLoc;
+            writeValLoc = inIntlv6.second;
+            *outItr++ = writeValLoc;
+
+            inIntlv6 = ::aie::interleave_zip(inIntlv4.second, inIntlv5.second, 1);
+            writeValLoc = inIntlv6.first;
+            *outItr++ = writeValLoc;
+            writeValLoc = inIntlv6.second;
+            *outItr++ = writeValLoc;
+
+            inIntlv4 = ::aie::interleave_zip(inIntlv0.second, inIntlv2.second, 1);
+            inIntlv5 = ::aie::interleave_zip(inIntlv1.second, inIntlv3.second, 1);
+
+            inIntlv6 = ::aie::interleave_zip(inIntlv4.first, inIntlv5.first, 1);
+            writeValLoc = inIntlv6.first;
+            *outItr++ = writeValLoc;
+            writeValLoc = inIntlv6.second;
+            *outItr++ = writeValLoc;
+
+            inIntlv6 = ::aie::interleave_zip(inIntlv4.second, inIntlv5.second, 1);
+            writeValLoc = inIntlv6.first;
+            *outItr++ = writeValLoc;
+            writeValLoc = inIntlv6.second;
+            *outItr++ = writeValLoc;
+        }
+};
+
+// Interleave
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_NUM_INPUTS, unsigned int TP_NUM_OUTPUTS>
+INLINE_DECL void streamInterleaveIntAsym(std::array<T_outVal384<TT_DATA, TT_COEFF>, TP_NUM_INPUTS> outArray,
+                                         T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface) {
+    using vec = typename T_outVal384<TT_DATA, TT_COEFF>::v_type;
+    constexpr int kSamplesInVec = T_outVal384<TT_DATA, TT_COEFF>::getLanes();
+    T_outVal384<TT_DATA, TT_COEFF> outVal;
+    vec writeValLoc;
+#pragma unroll(TP_NUM_INPUTS* kSamplesInVec)
+    for (int j = 0; j < (TP_NUM_INPUTS * kSamplesInVec); j++) {
+        // writeValLoc[j % kSamplesInVec] = outArray[j % TP_NUM_INPUTS].val.get(j / TP_NUM_INPUTS);
+        TT_DATA outSample = outArray[j % TP_NUM_INPUTS].val.get(j / TP_NUM_INPUTS);
+        writeincr(outInterface.outStream, outSample);
+
+        if ((j - kSamplesInVec + 1) % kSamplesInVec == 0) {
+            // outVal.val = writeValLoc;
+            // writeStream<TT_DATA,TT_COEFF, TP_NUM_OUTPUTS>(outInterface, outVal, 0);
+            // writeincr(outInterface.outStream, writeValLoc);
+        }
+    }
+};
+
+template <typename TT_DATA, typename TT_COEFF>
+INLINE_DECL T_outVal<TT_DATA, TT_COEFF> shiftAndSaturateIntAsym(const T_acc<TT_DATA, TT_COEFF> acc, const int shift) {
+    return shiftAndSaturate(acc, shift);
+}
 
 // Initial MAC/MUL operation. Take inputIF as an argument to ease overloading.
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_DUAL_IP>

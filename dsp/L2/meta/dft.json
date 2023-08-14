@@ -1,0 +1,112 @@
+{
+    "schema": "vitis_library_api_spec_schema-1.0",
+    "api_name": "xf::dsp::aie::fft::dft::dft_graph",
+    "display_name": "dft_graph",
+    "header_file_name": "dft_graph.hpp",
+    "search_paths": [
+      "L1/include/aie",
+      "L1/src/aie",
+      "L1/tests/aie/inc",
+      "L1/tests/aie/src",
+      "L2/include/aie",
+      "L2/tests/aie/common/inc"
+    ],
+    "parameters": [
+      {
+        "name": "TT_DATA",
+        "description": "The type of individual data samples input to and output of the filter function",
+        "type": "typename",
+        "enum": [
+          "cint16",
+          "cint32",
+          "cfloat"
+        ]
+      },
+      {
+        "name": "TT_TWIDDLE",
+        "description": "The type of twiddle factors of the transform",
+        "type": "typename",
+        "enum": [
+          "cint16",
+          "cfloat"
+        ],
+        "validator": {
+          "file": "dft.py",
+          "function": "validate_TT_TWIDDLE",
+          "args": ["TT_DATA"]
+        }
+      },
+      {
+        "name": "TP_POINT_SIZE",
+        "description": "The number of samples in the transform.",
+        "type": "uint",
+        "minimum": 8,
+        "maximum": 128,
+        "validator": {
+          "file": "dft.py",
+          "function": "validate_TP_POINT_SIZE"
+        }
+      },
+      {
+        "name": "TP_CASC_LEN",
+        "description": "The length of the cascade chain.",
+        "type": "uint",
+        "minimum": 1,
+        "maximum": 11,
+        "validator": {
+          "file" : "dft.py",
+          "function" : "validate_TP_CASC_LEN",
+          "args": ["TP_POINT_SIZE", "TP_NUM_FRAMES"]
+        }
+      },
+      {
+        "name": "TP_NUM_FRAMES",
+        "description": "The number of frames to be processed per input window of data",
+        "type": "uint",
+        "minimum": 1,
+        "maximum": 100
+      },
+      {
+        "name": "TP_FFT_NIFFT",
+        "description": "Selects whether the transform to perform is an FFT (1) or IFFT (0)",
+        "type": "uint",
+        "maximum": 1,
+        "minimum": 0
+      },
+      {
+        "name": "TP_SHIFT",
+        "description": "The power of 2 shift down applied to the accumulation of FIR before output",
+        "type": "uint",
+        "maximum": 60,
+        "minimum": 0,
+        "validator": {
+          "file": "dft.py",
+          "function": "validate_TP_SHIFT",
+          "args": ["TT_DATA"]
+        }
+      }, 
+      {
+        "name": "TP_API",
+        "description": "The form of IO: 0 for windows, 1 for streams",
+        "type": "uint",
+        "minimum": 0,
+        "maximum": 1
+      },   
+      {
+        "name": "AIE_VARIANT",
+        "type": "uint",
+        "description": "specifies the device type",
+        "maximum": 2, 
+        "minimum": 1
+      } 
+    ],
+    "ports": {
+      "file": "dft.py",
+      "function": "info_ports"
+    },
+    "generator": {
+      "file": "dft.py",
+      "function": "generate_graph"
+    }
+  }
+  

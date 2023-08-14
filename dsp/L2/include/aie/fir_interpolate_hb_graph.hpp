@@ -26,6 +26,7 @@
 #include <vector>
 #include "fir_graph_utils.hpp"
 #include "fir_interpolate_hb.hpp"
+#include "fir_interpolate_hb_asym.hpp"
 #include "widget_api_cast.hpp"
 #include "fir_utils.hpp"
 #include "fir_sr_asym_graph.hpp"
@@ -60,14 +61,12 @@ class ct_kernels {
    public:
     static void create_and_recurse(kernel firKernels[SSR],
                                    const std::vector<typename ct_kernel_params::BTT_COEFF>& taps) {
-        printf("in the create ct kernels %d %d %d %d\n ", dim, modifyMarginOffset, ct_kernel_params::BTP_FIR_LEN, SSR);
         firKernels[dim] = kernel::create_object<kernelClass>(taps);
         if
             constexpr(dim != 0) { recurseClass::create_and_recurse(firKernels, taps); }
     }
 
     static void create_and_recurse(kernel firKernels[SSR]) {
-        printf("in the create ct kernels %d %d %d %d\n ", dim, modifyMarginOffset, ct_kernel_params::BTP_FIR_LEN, SSR);
         firKernels[dim] = kernel::create_object<kernelClass>();
         if
             constexpr(dim != 0) { recurseClass::create_and_recurse(firKernels); }
@@ -251,8 +250,6 @@ class fir_interpolate_hb_graph : public graph {
     static_assert(TP_API != 0 || bufferSize < kMemoryModuleSize,
                   "ERROR: Input Window size (based on requrested window size and FIR length margin) exceeds Memory "
                   "Module size of 32kB");
-    static_assert(TP_API == 1 || TP_SSR == 1, "ERROR: SSR > 1 is only supported for streaming API");
-    // static_assert(TP_USE_COEFF_RELOAD==0 || TP_SSR == 1, "ERROR: SSR > 1 is only supported for static coefficients");
     static_assert(!(((TP_DUAL_IP == 1 && TP_NUM_OUTPUTS == 1) || (TP_DUAL_IP == 0 && TP_NUM_OUTPUTS == 2)) &&
                     TP_SSR > 1),
                   "ERROR: if SSR is enabled, DUAL inputs is only supported with DUAL_OUTPUTS");
@@ -260,11 +257,15 @@ class fir_interpolate_hb_graph : public graph {
         TP_SSR == 1 || TP_PARA_INTERP_POLY == 2,
         "Please set TP_PARA_INTERP_POLY=2 for SSR>1; SSR>1 and TP_PARA_INTERP_POLY=1 are currently not supported");
     static_assert(TP_PARA_INTERP_POLY == 1 || TP_PARA_INTERP_POLY == 2, "TP_PARA_INTERPOLY can be set to 1 or 2 only.");
+    static_assert(TP_SSR == 1 || (((TP_FIR_LEN + 1) / 2 % TP_SSR) == 0),
+                  "Please set TP_SSR such that it is divisible by (TP_FIR_LEN+1)/2. You could also pad the fir with "
+                  "appropriate number of zero-ed taps to satisfy this condition.");
 
     // 3d array for storing net information.
     // address[inPhase][outPath][cascPos]
-    std::array<std::array<std::array<connect<stream, stream>*, TP_CASC_LEN>, TP_SSR>, TP_SSR> net;
-    std::array<std::array<std::array<connect<stream, stream>*, TP_CASC_LEN>, TP_SSR>, TP_SSR> net2;
+    using net_type = typename std::array<std::array<std::array<connect<stream, stream>*, TP_CASC_LEN>, TP_SSR>, TP_SSR>;
+    net_type net;
+    net_type net2;
     static constexpr bool TP_CASC_OUT = CASC_OUT_FALSE; // should be unsigned int if exposed on graph interface
     static constexpr bool TP_CASC_IN = CASC_IN_FALSE;   // should be unsigned int if exposed on graph interface
     static constexpr unsigned int DUAL_IP_PORT_POS = 1;
@@ -278,54 +279,14 @@ class fir_interpolate_hb_graph : public graph {
     static constexpr unsigned int CT_COEFF_PHASE = ((TP_FIR_LEN + 1) / 4 - 1) % TP_SSR;
     // This figure is mostly guesswork and will likely need changed for specfic systems.
     // If this is lower, then SSR designs (ssr2 casc2) typically suffer from stream stalls, which ruins QoR.
-    static constexpr unsigned int fifo_depth_multiple = 40;
-
-    /**
-     * Base value FIFO Depth, in words (32-bits).
-     * Used with streaming interface.
-     * During graph construction, FIFO constraint is applied to all broadcast input nets, which are created as part of a
-     *cascaded design connection.
-     * Constraint is added after the input port has been broadcast and consists of:
-     * - a base value of FIFO depth. This minimum value is applied to all broadcast nets.
-     * - a variable part, where each net will be assigned an additional value based on position in the cascade.
-     **/
-    int baseFifoDepth = 32;
-
-    int calculate_fifo_depth(int kernelPos) {
-        // In FIFO mode, FIFO size has to be a multiple of 128 bits.
-        // In FIFO mode, BD length has to be >= 128 bytes!
-        // Conservative assumptions need to be made here.
-        // For an overall decimation factor, with instreasing decimation factor,
-        // the amount of input stream data required to produce output samples also increases.
-        // This strains the FIFOs closer to the begining of the chain comparably more
-        // than the ones closest to the output.
-        //
-        // Conservative assumptions need to be made here, as mapper may place multiple buffers in
-        // each of the memory banks, that may introduce Memory conflicts.
-        // On top of that, the placement of input source wrt brodcast kernel inputs may introduce significant routing
-        // delays.
-        // which may have an adverse effect on the amount of FIFO storage available for filter design purposes.
-        int fifoStep = (TP_CASC_LEN - kernelPos + 1);
-
-        int fifoDepth = baseFifoDepth + fifo_depth_multiple * fifoStep;
-        // limit size at a single memory bank - 8kB
-        const int memBankSize = 2048; // 32-bit words
-        int fifoDepthCap = fifoDepth < memBankSize ? fifoDepth : memBankSize;
-        return fifoDepthCap;
-    }
     void create_connections() {
         // make input connections
         if
             constexpr(TP_API == USE_WINDOW_API) {
-                // connect<window<TP_INPUT_WINDOW_VSIZE*sizeof(TT_DATA),
-                // fnFirMargin<TP_FIR_LEN/kInterpolateFactor,TT_DATA>()*sizeof(TT_DATA)>>(in[0], m_firKernels[0].in[0]);
                 connect<>(in[0], m_firKernels[0].in[0]);
                 dimensions(m_firKernels[0].in[0]) = {TP_INPUT_WINDOW_VSIZE};
                 for (int i = 1; i < TP_CASC_LEN; i++) {
                     single_buffer(m_firKernels[i].in[0]);
-                    // connect<window<TP_INPUT_WINDOW_VSIZE*sizeof(TT_DATA) +
-                    // fnFirMargin<TP_FIR_LEN/kInterpolateFactor,TT_DATA>()*sizeof(TT_DATA)>>(async(m_firKernels[i-1].out[1]),
-                    // async(m_firKernels[i].in[0]));
                     connect<>(m_firKernels[i - 1].out[1], m_firKernels[i].in[0]);
                     dimensions(m_firKernels[i - 1].out[1]) = {TP_INPUT_WINDOW_VSIZE +
                                                               fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()};
@@ -334,9 +295,6 @@ class fir_interpolate_hb_graph : public graph {
                 }
                 if
                     constexpr(TP_DUAL_IP == DUAL_IP_DUAL) {
-                        // connect<window<TP_INPUT_WINDOW_VSIZE*sizeof(TT_DATA),
-                        // fnFirMargin<TP_FIR_LEN/kInterpolateFactor,TT_DATA>()*sizeof(TT_DATA)>>(in2[0],
-                        // m_firKernels[0].in[1]);
                         connect<>(in2[0], m_firKernels[0].in[1]);
                         dimensions(m_firKernels[0].in[1]) = {TP_INPUT_WINDOW_VSIZE};
                     }
@@ -344,15 +302,9 @@ class fir_interpolate_hb_graph : public graph {
         else {
             if
                 constexpr(TP_DUAL_IP == DUAL_IP_SINGLE) {
-                    // connect<window<TP_INPUT_WINDOW_VSIZE*sizeof(TT_DATA),
-                    // fnFirMargin<TP_FIR_LEN/kInterpolateFactor,TT_DATA>()*sizeof(TT_DATA)>>(in[0],
-                    // m_firKernels[0].in[0]);
                     connect<>(in[0], m_firKernels[0].in[0]);
                     dimensions(m_firKernels[0].in[0]) = {TP_INPUT_WINDOW_VSIZE};
                     for (int i = 1; i < TP_CASC_LEN; i++) {
-                        // connect<window<TP_INPUT_WINDOW_VSIZE*sizeof(TT_DATA),
-                        // fnFirMargin<TP_FIR_LEN/kInterpolateFactor,TT_DATA>()*sizeof(TT_DATA)>>(in[0],
-                        // m_firKernels[i].in[0]);
                         connect<>(in[0], m_firKernels[i].in[0]);
                         dimensions(m_firKernels[i].in[0]) = {TP_INPUT_WINDOW_VSIZE};
                     }
@@ -364,9 +316,6 @@ class fir_interpolate_hb_graph : public graph {
                         widget_api_cast<TT_DATA, USE_STREAM_API, USE_WINDOW_API, 2, TP_INPUT_WINDOW_VSIZE, 1, 0> >();
                     connect<stream>(in[0], m_inWidgetKernel.in[0]);
                     connect<stream>(in2[0], m_inWidgetKernel.in[1]);
-                    // connect<window<TP_INPUT_WINDOW_VSIZE*sizeof(TT_DATA),
-                    // fnFirMargin<TP_FIR_LEN/kInterpolateFactor,TT_DATA>()*sizeof(TT_DATA) >>( m_inWidgetKernel.out[0],
-                    // m_firKernels[0].in[0] );
                     connect<>(m_inWidgetKernel.out[0], m_firKernels[0].in[0]);
                     dimensions(m_inWidgetKernel.out[0]) = {TP_INPUT_WINDOW_VSIZE};
                     dimensions(m_firKernels[0].in[0]) = {TP_INPUT_WINDOW_VSIZE};
@@ -376,9 +325,6 @@ class fir_interpolate_hb_graph : public graph {
 
                     for (int i = 1; i < TP_CASC_LEN; i++) {
                         single_buffer(m_firKernels[i].in[0]);
-                        // connect<window<TP_INPUT_WINDOW_VSIZE*sizeof(TT_DATA) +
-                        // fnFirMargin<TP_FIR_LEN,TT_DATA>()*sizeof(TT_DATA)>>(async(m_firKernels[i-1].out[1]),
-                        // async(m_firKernels[i].in[0]));
                         connect<>(m_firKernels[i - 1].out[1], m_firKernels[i].in[0]);
                         dimensions(m_firKernels[i - 1].out[1]) = {TP_INPUT_WINDOW_VSIZE +
                                                                   fnFirMargin<TP_FIR_LEN, TT_DATA>()};
@@ -430,7 +376,14 @@ class fir_interpolate_hb_graph : public graph {
     void connect_with_ssr() {
         // create kernels
         if
-            constexpr(TP_PARA_INTERP_POLY == 1) { create_connections(); }
+            constexpr(TP_PARA_INTERP_POLY == 1) {
+#if __HAS_SYM_PREADD__ == 1
+                create_connections();
+#else
+                aiemllastSSRKernel::create_connections(m_firKernels, &in[0], in2, &out[0], out2, coeff, net, net2,
+                                                       casc_in, "fir_interpolate_hb_asym.cpp");
+#endif
+            }
         else {
             // rearrange taps
             lastSSRKernelSrAsym::create_connections(m_firKernels, &in[0], in2, &out[0], out2, coeff, net, net2,
@@ -446,15 +399,28 @@ class fir_interpolate_hb_graph : public graph {
                 source(m_ct_firKernels[i]) = "fir_sr_asym.cpp";
 
                 unsigned int CT_SSROutputPath = (i + ((TP_FIR_LEN + 1) / 4 - 1)) % TP_SSR;
-                printf("For CT phase, connecting input path %d to output path %d\n", i, CT_SSROutputPath);
-                connect<stream>(in[i], m_ct_firKernels[i].in[0]);
+                // printf("For CT phase, connecting input path %d to output path %d\n", i, CT_SSROutputPath);
                 if
-                    constexpr(TP_DUAL_IP == 1) { connect<stream>(in2[i], m_ct_firKernels[i].in[1]); }
-                connect<stream>(m_ct_firKernels[i].out[0], out3[CT_SSROutputPath]);
-                if
-                    constexpr(TP_NUM_OUTPUTS == 2) {
-                        connect<stream>(m_ct_firKernels[i].out[1], out4[CT_SSROutputPath]);
+                    constexpr(TP_API == 1) {
+                        connect<stream>(in[i], m_ct_firKernels[i].in[0]);
+                        if
+                            constexpr(TP_DUAL_IP == 1) { connect<stream>(in2[i], m_ct_firKernels[i].in[1]); }
+                        connect<stream>(m_ct_firKernels[i].out[0], out3[CT_SSROutputPath]);
+                        if
+                            constexpr(TP_NUM_OUTPUTS == 2) {
+                                connect<stream>(m_ct_firKernels[i].out[1], out4[CT_SSROutputPath]);
+                            }
                     }
+                else {
+                    connect<>(in[i], m_ct_firKernels[i].in[0]);
+                    dimensions(m_ct_firKernels[i].in[0]) = {TP_INPUT_WINDOW_VSIZE / TP_SSR};
+                    if
+                        constexpr(TP_DUAL_IP == 1) { connect<>(in2[i], m_ct_firKernels[i].in[1]); }
+                    connect<>(m_ct_firKernels[i].out[0], out3[CT_SSROutputPath]);
+                    dimensions(m_ct_firKernels[i].out[0]) = {TP_INPUT_WINDOW_VSIZE / TP_SSR};
+                    if
+                        constexpr(TP_NUM_OUTPUTS == 2) { connect<>(m_ct_firKernels[i].out[1], out4[CT_SSROutputPath]); }
+                }
                 constexpr unsigned int RTP_PORT_POS = TP_DUAL_IP + 1;
                 if
                     constexpr(TP_USE_COEFF_RELOAD == 1) {
@@ -490,6 +456,36 @@ class fir_interpolate_hb_graph : public graph {
     template <int ssr_dim>
     using ssrKernelLookup = ssr_kernels<ssr_params<ssr_dim>, fir_interpolate_hb_tl>;
     using lastSSRKernel = ssrKernelLookup<(TP_SSR * TP_SSR) - 1>;
+
+    template <int dim>
+    struct aieml_ssr_params : public fir_params_defaults {
+        static constexpr int Bdim = dim;
+        using BTT_DATA = TT_DATA;
+        using BTT_COEFF = TT_COEFF;
+        static constexpr int BTP_FIR_LEN = TP_FIR_LEN;
+        static constexpr int BTP_SHIFT = TP_SHIFT;
+        static constexpr int BTP_RND = TP_RND;
+        static constexpr int BTP_INPUT_WINDOW_VSIZE = TP_INPUT_WINDOW_VSIZE / TP_SSR;
+        static constexpr int BTP_CASC_LEN = TP_CASC_LEN;
+        static constexpr int BTP_USE_COEFF_RELOAD = TP_USE_COEFF_RELOAD;
+        static constexpr int BTP_NUM_OUTPUTS = TP_NUM_OUTPUTS;
+        static constexpr int BTP_SSR = TP_SSR;
+        static constexpr int BTP_DUAL_IP = TP_DUAL_IP;
+        static constexpr int BTP_API = TP_API;
+        static constexpr int BTP_CASC_IN = 0;
+        static constexpr int BTP_CASC_OUT = 0;
+        static constexpr int BTP_UPSHIFT_CT = TP_UPSHIFT_CT;
+        static constexpr int BTP_COEFF_PHASES = TP_SSR;
+        static constexpr int BTP_COEFF_PHASES_LEN = BTP_FIR_LEN;
+        static constexpr int BTP_POLY_SSR = TP_PARA_INTERP_POLY;
+        static constexpr int BTP_SYM_FACTOR = IS_ASYM;
+        static constexpr int BTP_INTERPOLATE_FACTOR = kInterpolateFactor;
+    };
+
+    template <int ssr_dim>
+    using aiemlssrKernelLookup =
+        ssr_kernels<aieml_ssr_params<ssr_dim>, interpolate_hb_asym::fir_interpolate_hb_asym_tl>;
+    using aiemllastSSRKernel = aiemlssrKernelLookup<(TP_SSR * TP_SSR) - 1>;
 
     // create single tap kernels
     template <unsigned int dim>
@@ -677,7 +673,16 @@ class fir_interpolate_hb_graph : public graph {
     fir_interpolate_hb_graph(const std::vector<TT_COEFF>& taps) {
         // create kernels
         if
-            constexpr(TP_PARA_INTERP_POLY == 1) { lastSSRKernel::create_and_recurse(m_firKernels, taps); }
+            constexpr(TP_PARA_INTERP_POLY == 1) {
+#if __HAS_SYM_PREADD__ == 1
+                lastSSRKernel::create_and_recurse(m_firKernels, taps);
+#else
+                std::vector<TT_COEFF> asymTaps =
+                    aiemllastSSRKernel::convert_sym_taps_to_asym(((TP_FIR_LEN + 1) / 2), taps);
+                asymTaps.push_back(taps.at((TP_FIR_LEN + 1) / 4));
+                aiemllastSSRKernel::create_and_recurse(m_firKernels, asymTaps);
+#endif
+            }
         else {
             // rearrange taps
             std::vector<TT_COEFF> ct_vector;
@@ -695,7 +700,13 @@ class fir_interpolate_hb_graph : public graph {
     fir_interpolate_hb_graph() {
         // create kernels
         if
-            constexpr(TP_PARA_INTERP_POLY == 1) { lastSSRKernel::create_and_recurse(m_firKernels); }
+            constexpr(TP_PARA_INTERP_POLY == 1) {
+#if __HAS_SYM_PREADD__ == 1
+                lastSSRKernel::create_and_recurse(m_firKernels);
+#else
+                aiemllastSSRKernel::create_and_recurse(m_firKernels);
+#endif
+            }
         else {
             // rearrange taps
             printParams<ct_fir_params<0> >();

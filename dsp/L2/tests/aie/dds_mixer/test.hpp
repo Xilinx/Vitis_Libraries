@@ -24,8 +24,8 @@
 #include <adf.h>
 #include <vector>
 #include "utils.hpp"
-
 #include "uut_config.h"
+#include "uut_static_config.h"
 #include "test_stim.hpp"
 
 #define Q(x) #x
@@ -33,12 +33,6 @@
 
 #ifndef UUT_GRAPH
 #define UUT_GRAPH dds_mixer_graph
-#endif
-// Force reference model to ignore SSR and only use array length 1
-#ifdef USING_UUT
-#define P_SSR UUT_SSR
-#else
-#define P_SSR 1
 #endif
 
 #include QUOTE(UUT_GRAPH.hpp)
@@ -70,7 +64,6 @@ class test_graph : public graph {
         printf("========================\n");
         printf("Input samples   = %d \n", INPUT_SAMPLES);
         printf("Output samples  = %d \n", OUTPUT_SAMPLES);
-        printf("SFDR            = %d \n", SFDR);
         printf("Data type       = ");
         printf(QUOTE(DATA_TYPE));
         printf("\n");

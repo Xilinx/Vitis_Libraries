@@ -68,33 +68,14 @@ INLINE_DECL T_outVal384<TT_DATA, TT_COEFF> shiftAndSaturateDecAsym(const T_acc38
 //
 template <typename TT_DATA, unsigned int T_SIZE>
 INLINE_DECL void fnLoadXIpData(T_buff_1024b<TT_DATA>& buff, const unsigned int splice, auto& inItr) {
-    constexpr int k128Vsize = 128 / 8 / sizeof(TT_DATA);
-    using t_128vect = ::aie::vector<TT_DATA, k128Vsize>;
-    t_128vect* read128Ptr;
-    constexpr int k256Vsize = 256 / 8 / sizeof(TT_DATA);
-    using t_256vect = ::aie::vector<TT_DATA, k256Vsize>;
-    t_256vect* read256Ptr;
-    using buf_type = typename T_buff_1024b<TT_DATA>::v_type;
     if
-        constexpr(T_SIZE == 256) {
-            T_buff_256b<TT_DATA> readData;
-            const short kSpliceRange = 4;
-            read256Ptr = (t_256vect*)&*inItr;
-            inItr += k256Vsize;
-            readData.val = *read256Ptr;
-            buf_type chess_storage(Y_BUFFER) sb = upd_w(buff.val, splice % kSpliceRange, readData.val);
-            buff.val = sb;
-        }
+        constexpr(T_SIZE == 256) { upd_win_incr_256b<TT_DATA>(buff, splice, inItr); }
     else {
-        T_buff_128b<TT_DATA> readData;
-        const short kSpliceRange = 8;
-        read128Ptr = (t_128vect*)&*inItr;
-        inItr += k128Vsize;
-        readData.val = *read128Ptr;
-        buf_type chess_storage(Y_BUFFER) sb = upd_v(buff.val, splice % kSpliceRange, readData.val);
-        buff.val = sb;
+        upd_win_incr_128b<TT_DATA>(buff, splice, inItr);
     }
 };
+
+#if (__HAS_ACCUM_PERMUTES__ == 1)
 
 //-----------------------------------------------------------------------------------------------------
 template <typename TT_DATA>
@@ -205,6 +186,19 @@ INLINE_DECL T_buff_512b<TT_DATA> select(T_buff_1024b<TT_DATA> xbuff,
     return retVal;
 }
 
+#else
+
+//-----------------------------------------------------------------------------------------------------
+template <typename TT_DATA, unsigned int Lanes, unsigned int Cols>
+INLINE_DECL T_buff_512b<TT_DATA> select(T_buff_1024b<TT_DATA> xbuff,
+                                        unsigned int xstart,
+                                        const unsigned int xOffsets,
+                                        const unsigned int xstartUpper) {
+    T_buff_512b<TT_DATA> retVal;
+    return retVal;
+}
+#endif // (__HAS_ACCUM_PERMUTES__ == 1)
+
 // overloaded mul/mac calls
 //-----------------------------------------------------------------------------------------------------
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_DFX, unsigned int TP_DECIMATE_FACTOR>
@@ -231,7 +225,8 @@ INLINE_DECL T_accDecAsym<TT_DATA, TT_COEFF> mulDecAsym(T_buff_1024b<TT_DATA> xbu
     else if
         constexpr(TP_DFX == kHighDF) {
             using buf_type = typename T_buff_512b<TT_DATA>::v_type;
-            buf_type chess_storage(X_BUFFER) tmp;
+            buf_type tmp;
+            // buf_type chess_storage(X_BUFFER) tmp;
             T_accDecAsym<TT_DATA, TT_COEFF> retVal;
             const unsigned int xoffsets = decimateOffsets;
             const unsigned int xmulstart = 0;
@@ -274,7 +269,8 @@ INLINE_DECL T_accDecAsym<TT_DATA, TT_COEFF> macDecAsym(T_accDecAsym<TT_DATA, TT_
     else if
         constexpr(TP_DFX == kHighDF) {
             using buf_type = typename T_buff_512b<TT_DATA>::v_type;
-            buf_type chess_storage(X_BUFFER) tmp;
+            buf_type tmp;
+            // buf_type chess_storage(X_BUFFER) tmp;
             T_accDecAsym<TT_DATA, TT_COEFF> retVal;
             const unsigned int xoffsets = decimateOffsets;
             const unsigned int xmulstart = 0;
@@ -325,6 +321,211 @@ INLINE_DECL T_accDecAsym<TT_DATA, TT_COEFF> initMacDecAsym(T_inputIF<CASC_IN_TRU
                                                            const unsigned int xstartUpper) {
     return macDecAsym<TT_DATA, TT_COEFF, TP_DFX, TP_DECIMATE_FACTOR>(acc, xbuff, xstart, zbuff, zstart, decimateOffsets,
                                                                      xstartUpper);
+};
+
+template <unsigned int offset, unsigned int kParallelPhases>
+INLINE_DECL constexpr std::array<unsigned int, kParallelPhases> fnPhaseStartOffsets() {
+    std::array<unsigned int, kParallelPhases> ret = {};
+    for (int phase = 0; phase < kParallelPhases; ++phase) {
+        ret[phase] = offset == 0 ? 0 : phase >= offset ? 1 : 0;
+    }
+    return ret;
+};
+// template<unsigned int phase, unsigned int kParallelPhases>
+INLINE_DECL constexpr unsigned int fnCoeffPhase(unsigned int phase, unsigned int kParallelPhases) {
+    return (kParallelPhases - phase) % kParallelPhases;
+};
+
+// Deinterleave
+// Read 256-bits per phase.
+template <bool TP_CASC_IN, typename TT_DATA, unsigned int TP_DUAL_IP, unsigned int TP_NUM_INPUTS>
+INLINE_DECL void streamLoadAndDeinterleave(std::array<T_buff_1024b<TT_DATA>, TP_NUM_INPUTS>& sbuffArray,
+                                           T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                           unsigned int splice,
+                                           unsigned int phaseOffset) {
+    constexpr int kSamplesIn128b = 16 / sizeof(TT_DATA);
+    constexpr int kSamplesIn256b = kSamplesIn128b * 2;
+    constexpr int kSamplesIn512b = kSamplesIn128b * 4;
+    constexpr int kSamplesIn1024b = kSamplesIn128b * 8;
+    if
+        constexpr(TP_NUM_INPUTS == 1) { readStream256(sbuffArray[0], splice, inInterface); }
+    else if
+        constexpr(TP_NUM_INPUTS == 2 || TP_NUM_INPUTS == 3 || TP_NUM_INPUTS == 4 || TP_NUM_INPUTS == 5 ||
+                  TP_NUM_INPUTS == 6 || TP_NUM_INPUTS == 7) {
+            constexpr int kSamplesInVec = T_buff_256b<TT_DATA>::getLanes();
+
+            if
+                constexpr(std::is_same<TT_DATA, int16>::value) {
+                    // special case for int16
+                    constexpr int int32Toint16Ratio = 2;
+
+#pragma unroll(TP_NUM_INPUTS* kSamplesInVec / int32Toint16Ratio)
+                    for (int j = 0; j < (TP_NUM_INPUTS * kSamplesInVec / int32Toint16Ratio); j++) {
+                        // Read scalar, as there's no efficient vector deinterleve instruction to operate on odd number
+                        // of output vectors
+                        int32 readInt32 = readincr((input_stream_int32*)inInterface.inStream);
+                        int16 readSample = 0xFFFF & readInt32; // Extract bottom int16
+
+                        unsigned int sampleIdx = (splice * kSamplesIn256b + 2 * j / TP_NUM_INPUTS) % kSamplesIn1024b;
+
+                        sbuffArray[(phaseOffset + (2 * j + 0)) % TP_NUM_INPUTS].val.set(readSample, sampleIdx);
+                        readSample = (readInt32 >> 16); // Extract bottom int16
+
+                        sampleIdx = (splice * kSamplesIn256b + (2 * j + 1) / TP_NUM_INPUTS) % kSamplesIn1024b;
+
+                        sbuffArray[(phaseOffset + (2 * j + 1)) % TP_NUM_INPUTS].val.set(readSample, sampleIdx);
+                    }
+                }
+            else {
+// 32-bit or 64-but types
+
+#pragma unroll(TP_NUM_INPUTS* kSamplesInVec)
+                for (int j = 0; j < (TP_NUM_INPUTS * kSamplesInVec); j++) {
+                    // Read scalar, as there's no efficient vector deinterleve instruction to operate on odd number of
+                    // output vectors
+                    TT_DATA readSample = readincr(inInterface.inStream);
+
+                    unsigned int sampleIdx = (splice * kSamplesIn256b + j / TP_NUM_INPUTS) % kSamplesIn1024b;
+
+                    sbuffArray[(phaseOffset + j) % TP_NUM_INPUTS].val.set(readSample, sampleIdx);
+                }
+            }
+        }
+};
+
+// Deinterleave
+// Read 256-bits per phase.
+template <typename TT_DATA, unsigned int TP_NUM_INPUTS>
+INLINE_DECL void bufferLoadAndDeinterleave(std::array<T_buff_1024b<TT_DATA>, TP_NUM_INPUTS>& sbuffArray,
+                                           auto& inItr,
+                                           unsigned int splice,
+                                           unsigned int phaseOffset) {
+    constexpr int kSamplesIn128b = 16 / sizeof(TT_DATA);
+    constexpr int kSamplesIn256b = kSamplesIn128b * 2;
+    constexpr int kSamplesIn512b = kSamplesIn128b * 4;
+    using t512v = ::aie::vector<TT_DATA, kSamplesIn512b>;
+    using t256v = ::aie::vector<TT_DATA, kSamplesIn256b>;
+    using t128v = ::aie::vector<TT_DATA, kSamplesIn128b>;
+    using vec = typename T_buff_512b<TT_DATA>::v_type;
+    if
+        constexpr(TP_NUM_INPUTS == 1) { upd_win_incr_256b<TT_DATA>(sbuffArray[0], splice, inItr); }
+    else if
+        constexpr(TP_NUM_INPUTS == 2) {
+            constexpr int kSamplesInVec = T_buff_512b<TT_DATA>::getLanes();
+            vec writeValLoc;
+            upd_win_incr_256b<TT_DATA>(writeValLoc, 0, inItr);
+            upd_win_incr_256b<TT_DATA>(writeValLoc, 1, inItr);
+            ::std::pair<t256v, t256v> inIntlv =
+                ::aie::interleave_unzip(writeValLoc.template extract<kSamplesInVec / 2>(0),
+                                        writeValLoc.template extract<kSamplesInVec / 2>(1), 1);
+            sbuffArray[0].val.insert(splice % 4, inIntlv.first);
+            sbuffArray[1].val.insert(splice % 4, inIntlv.second);
+        }
+    else if
+        constexpr(TP_NUM_INPUTS == 3 || TP_NUM_INPUTS == 5 || TP_NUM_INPUTS == 6 || TP_NUM_INPUTS == 7) {
+            constexpr int kSamplesInVec = T_buff_256b<TT_DATA>::getLanes();
+
+#pragma unroll(TP_NUM_INPUTS* kSamplesInVec)
+            for (int j = 0; j < (TP_NUM_INPUTS * kSamplesInVec); j++) {
+                // Read scalar, as there's no efficient vector deinterleve instruction to operate on odd number of
+                // output vectors
+                TT_DATA readSample;
+                upd_win_incr_sample(readSample, inItr);
+
+                sbuffArray[(phaseOffset + j) % TP_NUM_INPUTS].val.set(readSample,
+                                                                      splice * kSamplesIn256b + j / TP_NUM_INPUTS);
+            }
+
+            // Interleave 4 to 1
+        }
+    else if
+        constexpr(TP_NUM_INPUTS == 4) {
+            constexpr int kSamplesInVec = T_buff_512b<TT_DATA>::getLanes();
+            vec writeValLoc;
+            upd_win_incr_256b<TT_DATA>(writeValLoc, 0, inItr);
+            upd_win_incr_256b<TT_DATA>(writeValLoc, 1, inItr);
+            ::std::pair<t256v, t256v> inIntlv0 =
+                ::aie::interleave_unzip(writeValLoc.template extract<kSamplesInVec / 2>(0),
+                                        writeValLoc.template extract<kSamplesInVec / 2>(1), 1);
+            upd_win_incr_256b<TT_DATA>(writeValLoc, 0, inItr);
+            upd_win_incr_256b<TT_DATA>(writeValLoc, 1, inItr);
+            ::std::pair<t256v, t256v> inIntlv1 =
+                ::aie::interleave_unzip(writeValLoc.template extract<kSamplesInVec / 2>(0),
+                                        writeValLoc.template extract<kSamplesInVec / 2>(1), 1);
+            ::std::pair<t256v, t256v> inIntlv2 = ::aie::interleave_unzip(inIntlv0.first, inIntlv1.first, 1);
+            sbuffArray[0].val.insert(splice % 4, inIntlv2.first);
+            sbuffArray[2].val.insert(splice % 4, inIntlv2.second);
+            ::std::pair<t256v, t256v> inIntlv3 = ::aie::interleave_unzip(inIntlv0.second, inIntlv1.second, 1);
+            sbuffArray[1].val.insert(splice % 4, inIntlv3.first);
+            sbuffArray[3].val.insert(splice % 4, inIntlv3.second);
+        }
+};
+
+// Deinterleave
+// Read 256-bits per phase.
+template <typename TT_DATA, unsigned int TP_NUM_INPUTS>
+INLINE_DECL void bufferLoadAndDeinterleave(std::array<T_buff_1024b<TT_DATA>, TP_NUM_INPUTS>& sbuffArray,
+                                           TT_DATA*& inPtr,
+                                           unsigned int splice,
+                                           unsigned int phaseOffset) {
+    constexpr int kSamplesIn128b = 16 / sizeof(TT_DATA);
+    constexpr int kSamplesIn256b = kSamplesIn128b * 2;
+    constexpr int kSamplesIn512b = kSamplesIn128b * 4;
+    using t512v = ::aie::vector<TT_DATA, kSamplesIn512b>;
+    using t256v = ::aie::vector<TT_DATA, kSamplesIn256b>;
+    using t128v = ::aie::vector<TT_DATA, kSamplesIn128b>;
+    using vec = typename T_buff_512b<TT_DATA>::v_type;
+    if
+        constexpr(TP_NUM_INPUTS == 1) { upd_win_incr_256b<TT_DATA>(sbuffArray[0], splice, inPtr); }
+    else if
+        constexpr(TP_NUM_INPUTS == 2) {
+            constexpr int kSamplesInVec = T_buff_512b<TT_DATA>::getLanes();
+            vec writeValLoc;
+            upd_win_incr_256b<TT_DATA>(writeValLoc, 0, inPtr);
+            upd_win_incr_256b<TT_DATA>(writeValLoc, 1, inPtr);
+            ::std::pair<t256v, t256v> inIntlv =
+                ::aie::interleave_unzip(writeValLoc.template extract<kSamplesInVec / 2>(0),
+                                        writeValLoc.template extract<kSamplesInVec / 2>(1), 1);
+            sbuffArray[0].val.insert(splice % 4, inIntlv.first);
+            sbuffArray[1].val.insert(splice % 4, inIntlv.second);
+        }
+    else if
+        constexpr(TP_NUM_INPUTS == 3 || TP_NUM_INPUTS == 5 || TP_NUM_INPUTS == 6 || TP_NUM_INPUTS == 7) {
+            constexpr int kSamplesInVec = T_buff_256b<TT_DATA>::getLanes();
+
+#pragma unroll(TP_NUM_INPUTS* kSamplesInVec)
+            for (int j = 0; j < (TP_NUM_INPUTS * kSamplesInVec); j++) {
+                // Read scalar, as there's no efficient vector deinterleve instruction to operate on odd number of
+                // output vectors
+                TT_DATA readSample = *inPtr++;
+
+                sbuffArray[(phaseOffset + j) % TP_NUM_INPUTS].val.set(readSample,
+                                                                      splice * kSamplesIn256b + j / TP_NUM_INPUTS);
+            }
+
+            // Interleave 4 to 1
+        }
+    else if
+        constexpr(TP_NUM_INPUTS == 4) {
+            constexpr int kSamplesInVec = T_buff_512b<TT_DATA>::getLanes();
+            vec writeValLoc;
+            upd_win_incr_256b<TT_DATA>(writeValLoc, 0, inPtr);
+            upd_win_incr_256b<TT_DATA>(writeValLoc, 1, inPtr);
+            ::std::pair<t256v, t256v> inIntlv0 =
+                ::aie::interleave_unzip(writeValLoc.template extract<kSamplesInVec / 2>(0),
+                                        writeValLoc.template extract<kSamplesInVec / 2>(1), 1);
+            upd_win_incr_256b<TT_DATA>(writeValLoc, 0, inPtr);
+            upd_win_incr_256b<TT_DATA>(writeValLoc, 1, inPtr);
+            ::std::pair<t256v, t256v> inIntlv1 =
+                ::aie::interleave_unzip(writeValLoc.template extract<kSamplesInVec / 2>(0),
+                                        writeValLoc.template extract<kSamplesInVec / 2>(1), 1);
+            ::std::pair<t256v, t256v> inIntlv2 = ::aie::interleave_unzip(inIntlv0.first, inIntlv1.first, 1);
+            sbuffArray[0].val.insert(splice % 4, inIntlv2.first);
+            sbuffArray[2].val.insert(splice % 4, inIntlv2.second);
+            ::std::pair<t256v, t256v> inIntlv3 = ::aie::interleave_unzip(inIntlv0.second, inIntlv1.second, 1);
+            sbuffArray[1].val.insert(splice % 4, inIntlv3.first);
+            sbuffArray[3].val.insert(splice % 4, inIntlv3.second);
+        }
 };
 }
 }

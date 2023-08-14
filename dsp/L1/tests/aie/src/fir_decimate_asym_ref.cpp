@@ -18,6 +18,7 @@
 #include "fir_decimate_asym_ref.hpp"
 #include "fir_ref_utils.hpp"
 #include "fir_ref_coeff_header.hpp"
+#define _DSPLIB_FIR_DECIMATE_ASYM_REF_DEBUG_
 
 /*
 Decimator Asymmetric FIR filter reference model
@@ -37,7 +38,8 @@ template <typename TT_DATA,
           unsigned int TP_DECIMATE_FACTOR,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE>
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SAT>
 void filter_ref(
     input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
     output_circular_buffer<TT_DATA>& outWindow,
@@ -49,6 +51,7 @@ void filter_ref(
 
     auto inItr = ::aie::begin_random_circular(inWindow);
     auto outItr = ::aie::begin_random_circular(outWindow);
+    int q = 0;
 
     const unsigned int kFirMarginOffset = fnFirMargin<TP_FIR_LEN, TT_DATA>() - TP_FIR_LEN + 1; // FIR Margin Offset.
     inItr += kFirMarginOffset;
@@ -66,7 +69,7 @@ void filter_ref(
         inItr -= TP_FIR_LEN - TP_DECIMATE_FACTOR;
 
         roundAcc(TP_RND, shift, accum);
-        saturateAcc(accum);
+        saturateAcc(accum, TP_SAT);
         accumSrs = castAcc(accum);
         *outItr++ = accumSrs;
     }
@@ -80,10 +83,8 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_USE_COEFF_RELOAD,
-          unsigned int TP_NUM_OUTPUTS,
-          unsigned int TP_DUAL_IP,
-          unsigned int TP_API>
+          unsigned int TP_USE_COEFF_RELOAD, // 1 = use coeff reload, 0 = don't use coeff reload
+          unsigned int TP_SAT>
 void fir_decimate_asym_ref<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -92,15 +93,13 @@ void fir_decimate_asym_ref<TT_DATA,
                            TP_RND,
                            TP_INPUT_WINDOW_VSIZE,
                            TP_USE_COEFF_RELOAD,
-                           TP_NUM_OUTPUTS,
-                           TP_DUAL_IP,
-                           TP_API>::filter(input_circular_buffer<TT_DATA,
+                           TP_SAT>::filter(input_circular_buffer<TT_DATA,
                                                                  extents<inherited_extent>,
                                                                  margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
                                            output_circular_buffer<TT_DATA>& outWindow) {
     //    firHeaderReload<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_USE_COEFF_RELOAD>(inWindow,
     //    m_internalTaps); //header of coeffs feature is no longer supported
-    filter_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE>(
+    filter_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_SAT>(
         inWindow, outWindow, m_internalTaps);
 };
 
@@ -112,10 +111,8 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_USE_COEFF_RELOAD,
-          unsigned int TP_NUM_OUTPUTS,
-          unsigned int TP_DUAL_IP,
-          unsigned int TP_API>
+          unsigned int TP_USE_COEFF_RELOAD, // 1 = use coeff reload, 0 = don't use coeff reload
+          unsigned int TP_SAT>
 void fir_decimate_asym_ref<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -124,9 +121,7 @@ void fir_decimate_asym_ref<TT_DATA,
                            TP_RND,
                            TP_INPUT_WINDOW_VSIZE,
                            TP_USE_COEFF_RELOAD,
-                           TP_NUM_OUTPUTS,
-                           TP_DUAL_IP,
-                           TP_API>::
+                           TP_SAT>::
     filterRtp(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
                   inWindow,
               output_circular_buffer<TT_DATA>& outWindow,
@@ -135,7 +130,7 @@ void fir_decimate_asym_ref<TT_DATA,
     for (int i = 0; i < TP_FIR_LEN; i++) {
         m_internalTaps[i] = inTaps[i];
     }
-    filter_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE>(
+    filter_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_SAT>(
         inWindow, outWindow, m_internalTaps);
 };
 }

@@ -27,6 +27,7 @@
 #include <vector>
 #include "fir_graph_utils.hpp"
 #include "fir_decimate_hb.hpp"
+#include "fir_decimate_hb_asym.hpp"
 #include "fir_sr_asym.hpp"
 #include "widget_api_cast.hpp"
 #include "fir_common_traits.hpp"
@@ -249,7 +250,7 @@ class fir_decimate_hb_graph : public graph {
     static_assert(TP_API != 0 || inBufferSize < kMemoryModuleSize,
                   "ERROR: Input Window size (based on requrested window size and FIR length margin) exceeds Memory "
                   "Module size of 32kB");
-    static_assert(TP_API == 1 || TP_SSR == 1, "ERROR: SSR > 1 is only supported for streaming API");
+    // static_assert(TP_API == 1 || TP_SSR == 1, "ERROR: SSR > 1 is only supported for streaming API");
     // static_assert(TP_USE_COEFF_RELOAD==0 || TP_SSR == 1, "ERROR: SSR > 1 is only supported for static coefficients");
     static_assert(
         TP_SSR == 1 || TP_PARA_DECI_POLY == 2,
@@ -356,8 +357,12 @@ class fir_decimate_hb_graph : public graph {
         for (int i = 0; i < TP_CASC_LEN; i++) {
             // Specify mapping constraints
             runtime<ratio>(m_firKernels[i]) = 0.8;
-            // Source files
+// Source files
+#if __HAS_SYM_PREADD__ == 1
             source(m_firKernels[i]) = "fir_decimate_hb.cpp";
+#else
+            source(m_firKernels[i]) = "fir_decimate_hb_asym.cpp";
+#endif
         }
     }
 
@@ -365,10 +370,16 @@ class fir_decimate_hb_graph : public graph {
         // create kernels
         if
             constexpr(TP_PARA_DECI_POLY == 1) {
-                // Only SSR==1
+// Only SSR==1
+#if __HAS_SYM_PREADD__ == 1
                 create_connections();
+#else
+                aiemllastSSRKernel::create_connections(m_firKernels, &in[0], in2, &out[0], out2, coeff, net, net2,
+                                                       casc_in, "fir_decimate_hb_asym.cpp");
+#endif
             }
         else {
+            printf("paradecipoly=2\n");
             // SSR>=1
             // printParams<sr_asym_graph_params<0, TP_PARA_DECI_POLY>>();
 
@@ -394,11 +405,21 @@ class fir_decimate_hb_graph : public graph {
                 unsigned int CT_SSROutputPath = (i + ((TP_FIR_LEN + 1) / 4)) % TP_SSR;
                 printf("For CT phase, connecting input path %d to output path %d\n", i, CT_SSROutputPath);
 
-                connect<stream>(
-                    in[2 * i + 1],
-                    m_ct_firKernels[i].in[0]); // all the odd input data phases need to be connected to the ct kernels
                 if
-                    constexpr(TP_DUAL_IP == 1) { connect<stream>(in2[2 * i + 1], m_ct_firKernels[i].in[1]); }
+                    constexpr(TP_API == 1) {
+                        connect<stream>(
+                            in[2 * i + 1],
+                            m_ct_firKernels[i]
+                                .in[0]); // all the odd input data phases need to be connected to the ct kernels
+                        if
+                            constexpr(TP_DUAL_IP == 1) { connect<stream>(in2[2 * i + 1], m_ct_firKernels[i].in[1]); }
+                    }
+                else {
+                    connect<>(in[2 * i + 1],
+                              m_ct_firKernels[i]
+                                  .in[0]); // all the odd input data phases need to be connected to the ct kernels
+                    dimensions(m_ct_firKernels[i].in[0]) = {TP_INPUT_WINDOW_VSIZE / (TP_SSR * TP_PARA_DECI_POLY)};
+                }
                 connect<cascade>(m_ct_firKernels[i].out[0], casc_in[CT_SSROutputPath]);
                 constexpr unsigned int RTP_PORT_POS = TP_DUAL_IP + 1;
                 // TP_PARA_DECI_POLY only takes values in range 1 - 2.
@@ -449,6 +470,7 @@ class fir_decimate_hb_graph : public graph {
         static constexpr int BTP_COEFF_PHASE_OFFSET =
             1; // disregard the Center tap Coeff (BTP_COEFF_PHASES_LEN = BTP_FIR_LEN + 1)
         static constexpr int BTP_COEFF_PHASES = TP_SSR;
+        // static constexpr int BTP_PARA_DECI_POLY=TP_PARA_DECI_POLY;
         static constexpr int BTP_COEFF_PHASES_LEN = CEIL((TP_FIR_LEN + 1) / 2, TP_SSR) + 1;
         static constexpr int BTP_CASC_IN = TP_CASC_IN;
         static constexpr int BTP_POLY_SSR = TP_POLY_SSR;
@@ -476,6 +498,7 @@ class fir_decimate_hb_graph : public graph {
         static constexpr int BTP_COEFF_PHASE = 0;
         static constexpr int BTP_COEFF_PHASE_OFFSET = 0;
         static constexpr int BTP_COEFF_PHASES = 1;
+        static constexpr int BTP_PARA_DECI_POLY = TP_PARA_DECI_POLY;
         static constexpr int BTP_COEFF_PHASES_LEN = CEIL((TP_FIR_LEN + 1) / 2, TP_SSR) + 1;
         static constexpr int BTP_MODIFY_MARGIN_OFFSET =
             -1 * ((TP_FIR_LEN / 4 - 1 + dim) / (TP_SSR * TP_PARA_DECI_POLY));
@@ -491,6 +514,33 @@ class fir_decimate_hb_graph : public graph {
 
     using lastct_kernels = ct_kernels<TP_SSR - 1, TP_FIR_LEN, ct_fir_params<TP_SSR - 1> >;
 
+    template <int dim>
+    struct aieml_ssr_params : public fir_params_defaults {
+        static constexpr int Bdim = dim;
+        using BTT_DATA = TT_DATA;
+        using BTT_COEFF = TT_COEFF;
+        static constexpr int BTP_FIR_LEN = TP_FIR_LEN;
+        static constexpr int BTP_SHIFT = TP_SHIFT;
+        static constexpr int BTP_RND = TP_RND;
+        static constexpr int BTP_INPUT_WINDOW_VSIZE = TP_INPUT_WINDOW_VSIZE / TP_SSR;
+        static constexpr int BTP_DECIMATE_FACTOR = kDecimateFactor;
+        static constexpr int BTP_CASC_LEN = TP_CASC_LEN;
+        static constexpr int BTP_USE_COEFF_RELOAD = TP_USE_COEFF_RELOAD;
+        static constexpr int BTP_NUM_OUTPUTS = TP_NUM_OUTPUTS;
+        static constexpr int BTP_SSR = TP_SSR;
+        static constexpr int BTP_DUAL_IP = TP_DUAL_IP;
+        static constexpr int BTP_API = TP_API;
+        static constexpr int BTP_CASC_IN = 0;
+        static constexpr int BTP_CASC_OUT = 0;
+        static constexpr int BTP_COEFF_PHASES = TP_SSR;
+        static constexpr int BTP_COEFF_PHASES_LEN = BTP_FIR_LEN;
+        static constexpr int BTP_POLY_SSR = TP_PARA_DECI_POLY;
+        static constexpr int BTP_SYM_FACTOR = IS_ASYM;
+    };
+
+    template <int ssr_dim>
+    using aiemlssrKernelLookup = ssr_kernels<aieml_ssr_params<ssr_dim>, decimate_hb_asym::fir_decimate_hb_asym_tl>;
+    using aiemllastSSRKernel = aiemlssrKernelLookup<(TP_SSR * TP_SSR) - 1>;
     // 3d array for storing net information.
     // address[inPhase][outPath][cascPos]
     std::array<std::array<std::array<connect<stream, stream>*, TP_CASC_LEN>, TP_SSR>, TP_SSR> net;
@@ -621,8 +671,15 @@ class fir_decimate_hb_graph : public graph {
         // create kernels
         if
             constexpr(TP_PARA_DECI_POLY == 1) {
-                // Only SSR==1
+// Only SSR==1
+#if __HAS_SYM_PREADD__ == 1
                 lastSSRKernel::create_and_recurse(m_firKernels, taps);
+#else
+                std::vector<TT_COEFF> asymTaps =
+                    aiemllastSSRKernel::convert_sym_taps_to_asym(((TP_FIR_LEN + 1) / 2), taps);
+                asymTaps.push_back(taps.at((TP_FIR_LEN + 1) / 4));
+                aiemllastSSRKernel::create_and_recurse(m_firKernels, asymTaps);
+#endif
             }
         else {
             // SSR>=1
@@ -643,12 +700,17 @@ class fir_decimate_hb_graph : public graph {
         // create kernels
         if
             constexpr(TP_PARA_DECI_POLY == 1) {
-                // Only SSR==1
+// Only SSR==1
+#if __HAS_SYM_PREADD__ == 1
                 lastSSRKernel::create_and_recurse(m_firKernels);
+#else
+                aiemllastSSRKernel::create_and_recurse(m_firKernels);
+#endif
             }
         else {
             // SSR>=1
             // rearrange taps
+            printf("coeff phases length = %d\n", CEIL((TP_FIR_LEN + 1) / 2, TP_SSR) + 1);
             lastSSRKernelSrAsym::create_and_recurse(m_firKernels);
             lastct_kernels::create_and_recurse(m_ct_firKernels);
         }

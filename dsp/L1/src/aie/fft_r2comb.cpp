@@ -599,6 +599,38 @@ NOINLINE_DECL void fft_r2comb<TT_DATA,
     chess_memory_fence();
     this->calcR2Comb(inBuff, outPtr);
 };
+
+// Specialization for Window in, single Window out
+template <typename TT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_POINT_SIZE,
+          unsigned int TP_FFT_NIFFT,
+          unsigned int TP_SHIFT,
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_PARALLEL_POWER,
+          unsigned int TP_INDEX,
+          unsigned int TP_ORIG_PAR_POWER>
+NOINLINE_DECL void fft_r2comb<TT_DATA,
+                              TT_TWIDDLE,
+                              TP_POINT_SIZE,
+                              TP_FFT_NIFFT,
+                              TP_SHIFT,
+                              TP_DYN_PT_SIZE,
+                              TP_WINDOW_VSIZE,
+                              TP_PARALLEL_POWER,
+                              TP_INDEX,
+                              TP_ORIG_PAR_POWER,
+                              kWindowAPI,
+                              kWindowAPI>::fft_r2comb_main(input_buffer<TT_DATA>& __restrict inWindow0,
+                                                           output_buffer<TT_DATA>& __restrict outWindow0) {
+    TT_DATA* inPtr = inWindow0.data();
+    TT_DATA* outPtr = outWindow0.data();
+    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
+    set_sat();            // do saturate.
+
+    this->calcR2Comb(inPtr, outPtr);
+};
 }
 }
 }

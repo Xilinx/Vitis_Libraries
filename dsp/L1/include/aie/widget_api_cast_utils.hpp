@@ -32,7 +32,36 @@ namespace xf {
 namespace dsp {
 namespace aie {
 namespace widget {
-namespace api_cast {}
+namespace api_cast {
+
+// function to return the accumulator sample width in AIE-ML (Cascade for parallel interconnect)
+template <typename TT_DATA>
+INLINE_DECL constexpr int fnFFTAccWidthCasc() {
+    return -1; // will cause error by default
+}
+template <>
+INLINE_DECL constexpr int fnFFTAccWidthCasc<cint16>() {
+    return 32;
+};
+template <>
+INLINE_DECL constexpr int fnFFTAccWidthCasc<cint32>() {
+    return 64;
+};
+
+// function to return the accumulator vector in samples in AIE-ML (Cascade for parallel interconnect)
+template <typename TT_DATA>
+INLINE_DECL constexpr int fnFFTCascVWidth() {
+    return -1; // will cause error by default
+}
+template <>
+INLINE_DECL constexpr int fnFFTCascVWidth<cint16>() {
+    return 8;
+};
+template <>
+INLINE_DECL constexpr int fnFFTCascVWidth<cint32>() {
+    return 4;
+};
+}
 }
 }
 }

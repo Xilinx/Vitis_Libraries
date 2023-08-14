@@ -35,6 +35,7 @@ coefficients is therefore reversed during construction to yield conventional FIR
 #include <assert.h>
 #include <array>
 #include <cstdint>
+
 #include "fir_utils.hpp"
 #include "fir_interpolate_asym_traits.hpp"
 
@@ -174,9 +175,11 @@ class kernelFilterClass {
     static constexpr unsigned int kArchIncr = 1;
     static constexpr unsigned int kArchPhaseSeries = 2;
     static constexpr unsigned int kArchPhaseParallel = 3;
+    static constexpr unsigned int kArchStreamPhaseSeries = 4;
+    static constexpr unsigned int kArchStreamPhaseParallel = 5;
 
     // Parameter value defensive and legality checks
-    // static_assert(TP_FIR_LEN <= fnMaxTapssIntAsym<TT_DATA,TT_COEFF>(),"ERROR: Max supported FIR length exceeded for
+    // static_assert(TP_FIR_LEN <= fnMaxTapssIntAsym<TT_DATA, TT_COEFF>(),"ERROR: Max supported FIR length exceeded for
     // TT_DATA/TT_COEFF combination. ");
     static_assert(TP_FIR_RANGE_LEN >= FIR_LEN_MIN,
                   "ERROR: Illegal combination of design FIR length and cascade length, resulting in kernel FIR length "
@@ -195,8 +198,8 @@ class kernelFilterClass {
                   "ERROR: a mix of float and integer types of TT_DATA and TT_COEFF is not supported.");
     static_assert(TP_INTERPOLATE_FACTOR >= INTERPOLATE_FACTOR_MIN && TP_INTERPOLATE_FACTOR <= INTERPOLATE_FACTOR_MAX,
                   "ERROR: TP_INTERPOLATE_FACTOR is out of the supported range");
-    static_assert(fnUnsupportedTypeCombo<TT_DATA, TT_COEFF>() != 0,
-                  "ERROR: The combination of TT_DATA and TT_COEFF is not supported for this class.");
+    // static_assert(fnUnsupportedTypeCombo<TT_DATA, TT_COEFF>() != 0,"ERROR: The combination of TT_DATA and TT_COEFF is
+    // not supported for this class.");
     static_assert(TP_NUM_OUTPUTS > 0 && TP_NUM_OUTPUTS <= 2, "ERROR: only single or dual outputs are supported.");
     static_assert(!(std::is_same<TT_DATA, cfloat>::value || std::is_same<TT_DATA, float>::value) || (TP_SHIFT == 0),
                   "ERROR: TP_SHIFT cannot be performed for TT_DATA=cfloat, so must be set to 0");
@@ -207,16 +210,19 @@ class kernelFilterClass {
     // The interpolation FIR calculates over multiple phases where such that the total number of lanes is an integer
     // multiple of the
     // interpolation factor. Hence an array of accumulators is needed for this set of lanes.
+    static constexpr unsigned int m_kPermuteSupport = fnPermuteSupport();
     static constexpr unsigned int m_kNumAccRegs = fnAccRegsIntAsym<TT_DATA, TT_COEFF>();
     static constexpr unsigned int m_kWinAccessByteSize =
-        16; // 16 Bytes. The memory data path is min 128-bits wide for vector operations
+        m_kPermuteSupport == 1
+            ? 16
+            : 32; // Restrict window accesses to 256-bits when full set of permutes are not available.
     static constexpr unsigned int m_kColumns =
-        fnNumColsIntAsym<TT_DATA, TT_COEFF>(); // number of mult-adds per lane for main intrinsic
-    static constexpr unsigned int m_kLanes = fnNumLanesIntAsym<TT_DATA, TT_COEFF>(); // number of operations in parallel
-                                                                                     // of this type combinations that
-                                                                                     // the vector processor can do.
+        fnNumColsIntAsym<TT_DATA, TT_COEFF, TP_API>(); // number of mult-adds per lane for main intrinsic
+    static constexpr unsigned int m_kLanes =
+        fnNumLanesIntAsym<TT_DATA, TT_COEFF, TP_API>(); // number of operations in parallel of this type combinations
+                                                        // that the vector processor can do.
     static constexpr unsigned int m_kVOutSize =
-        fnVOutSizeIntAsym<TT_DATA, TT_COEFF>();          // This differs from kLanes for cint32/cint32
+        fnVOutSizeIntAsym<TT_DATA, TT_COEFF, TP_API>();  // This differs from kLanes for cint32/cint32
     static constexpr unsigned int m_kDataLoadsInReg = 4; // ratio of 1024-bit data buffer to 256-bit load size.
     static constexpr unsigned int m_kDataLoadVsize =
         (32 / sizeof(TT_DATA)); // number of samples in a single 256-bit load
@@ -236,17 +242,29 @@ class kernelFilterClass {
     // In some cases, the number of accumulators needed exceeds the number available in the processor leading to
     // inefficency as the
     // accumulators are loaded and stored on the stack. An alternative implementation is used to avoid this.
-    static constexpr unsigned int m_kArch =
+    static constexpr unsigned int m_kPermuteStreamArch =
+        (((m_kDataBuffXOffset + TP_FIR_RANGE_LEN + m_kLanes * m_kDataLoadVsize / m_kVOutSize) <= m_kSamplesInBuff) &&
+         (TP_INPUT_WINDOW_VSIZE % (m_kLanes * m_kDataLoadsInReg) == 0))
+            ? kArchStreamPhaseSeries
+            :                       // execute incremental load streaming architecture
+            kArchStreamPhaseSeries; // placeholder for a minicash
+    static constexpr unsigned int m_kPermuteWindowArch =
         (((m_kDataBuffXOffset + TP_FIR_RANGE_LEN + m_kLanes * m_kDataLoadVsize / m_kVOutSize) <= m_kSamplesInBuff) &&
          (TP_INPUT_WINDOW_VSIZE % (m_kLanes * m_kDataLoadsInReg) == 0))
             ? kArchIncr
             :                 // execute incremental load architecture
             kArchPhaseSeries; // execute each phase in series (reloads data)
+    static constexpr unsigned int m_kPermuteArch =
+        TP_API == USE_WINDOW_API ? m_kPermuteWindowArch : m_kPermuteStreamArch; // Select Stream od Windowed arches
+    static constexpr unsigned int m_kDecomposedArch =
+        TP_API == USE_WINDOW_API ? kArchPhaseParallel : kArchStreamPhaseParallel;
+    ; // execute each phase in parallel. No ArchIncr equivalent, as marginal benefit in QoR.  or Stream arch? Later
+    static constexpr unsigned int m_kArch = m_kPermuteSupport == 1 ? m_kPermuteArch : m_kDecomposedArch;
     static constexpr unsigned int m_kZbuffSize = 32;
     static constexpr unsigned int m_kCoeffRegVsize = m_kZbuffSize / sizeof(TT_COEFF);
     static constexpr unsigned int m_kTotalLanes =
-        fnLCMIntAsym<TT_DATA, TT_COEFF, TP_INTERPOLATE_FACTOR>(); // Lowest common multiple of Lanes and
-                                                                  // Interpolatefactor
+        fnLCMIntAsym<TT_DATA, TT_COEFF, TP_API, TP_INTERPOLATE_FACTOR>(); // Lowest common multiple of Lanes and
+                                                                          // Interpolatefactor
     static constexpr unsigned int m_kLCMPhases = m_kTotalLanes / m_kLanes;
     static constexpr unsigned int m_kPhases = TP_INTERPOLATE_FACTOR;
     static constexpr unsigned int m_kNumOps = CEIL(TP_FIR_RANGE_LEN / TP_INTERPOLATE_FACTOR, m_kColumns) / m_kColumns;
@@ -258,7 +276,20 @@ class kernelFilterClass {
     static constexpr unsigned int m_kInitialLoadsIncr =
         CEIL(m_kDataBuffXOffset + TP_FIR_RANGE_LEN + m_kLanes * m_kDataLoadVsize / m_kVOutSize - 1, m_kDataLoadVsize) /
         m_kDataLoadVsize;
-    static constexpr unsigned int m_kRepeatFactor = m_kDataLoadsInReg * m_kDataLoadVsize / m_kVOutSize;
+    static constexpr unsigned int m_kRepeatFactor =
+        m_kDataLoadVsize / m_kVOutSize == 2 ? m_kDataLoadsInReg * 2
+                                            : m_kDataLoadsInReg; // repeat x2 when dataloads to outsize ratio is 2, as
+                                                                 // data is only loaded every 2nd iteration.
+
+    template <unsigned int x>
+    static constexpr int fintDataNeeded() {
+        if
+            constexpr(x == 0) { return 0; }
+        else {
+            int dataNeeded = 1 + (int)((x - 1) / TP_INTERPOLATE_FACTOR);
+            return dataNeeded;
+        }
+    };
 
     // streaming architecture
     static constexpr unsigned int add1 =
@@ -272,16 +303,6 @@ class kernelFilterClass {
     static constexpr int m_kRepFactPhases = m_kRepeatFactor * m_kPhases;
     static constexpr int streamInitAccs =
         (CEIL(streamInitNullAccs, m_kRepFactPhases) - CEIL(streamInitNullAccs, m_kPhases)) / m_kPhases;
-
-    template <unsigned int x>
-    static constexpr int fintDataNeeded() {
-        if
-            constexpr(x == 0) { return 0; }
-        else {
-            int dataNeeded = 1 + (int)((x - 1) / TP_INTERPOLATE_FACTOR);
-            return dataNeeded;
-        }
-    };
 
     static constexpr int initPhaseDataAccesses =
         fintDataNeeded<TP_FIR_LEN - TP_FIR_RANGE_LEN - m_kFirRangeOffset * TP_INTERPOLATE_FACTOR>();
@@ -300,8 +321,9 @@ class kernelFilterClass {
     static constexpr int m_kXStart = startIndex * sizeOf1Read - (m_kColumns * (m_kNumOps - 1) + m_kColumns - 1) + add1 -
                                      coefRangeStartIndex / TP_INTERPOLATE_FACTOR;
     static constexpr int streamInitNullStrobes = CEIL(streamInitNullAccs, m_kPhases) / m_kPhases;
+
     alignas(32) int delay[(1024 / 8) / sizeof(int)] = {0};
-    int doInit = (TP_CASC_LEN == 1 || streamInitNullAccs == 0) ? 0 : 1;
+    int doInit = (streamInitNullAccs == 0) ? 0 : 1;
     // Additional defensive checks
     struct ssr_params : public fir_params_defaults {
         using BTT_DATA = TT_DATA;
@@ -323,22 +345,22 @@ class kernelFilterClass {
                   "ERROR: FIR_LENGTH is too large for the number of kernels with Stream API, increase TP_CASC_LEN");
     static_assert(TP_DUAL_IP == 0 || TP_API == USE_STREAM_API,
                   "Error: Dual input feature is only supported for stream API");
-    /*INLINE_DECL unsigned int fintDataNeeded(unsigned int x){
-        return (1 + (int)(((x) - 1)/TP_INTERPOLATE_FACTOR));
-    }*/
 
+    static constexpr int tapsArraySize =
+        CEIL(CEIL(TP_FIR_RANGE_LEN, m_kPhases) / m_kPhases, (256 / 8 / sizeof(TT_COEFF))); // ceil'ed to 256-bits
     // The m_internalTaps is defined in terms of samples, but loaded into a vector, so has to be memory-aligned to the
     // vector size.
     alignas(32) TT_COEFF m_internalTaps[m_kLCMPhases][m_kNumOps][m_kColumns][m_kLanes];
+    alignas(32) TT_COEFF m_internalTaps2[m_kPhases][tapsArraySize];
 
     // Two implementations have been written for this filter. They have identical behaviour, but one is optimised for an
     // Interpolation factor
     // greater than the number of accumulator registers available.
-    void filter_impl1(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
-                      T_outputIF<TP_CASC_OUT, TT_DATA> outInterface); // Each phase is calculated in turn which avoids
-                                                                      // need for multiple accumulators, but requires
-                                                                      // data reloading.
-    void filter_impl2(
+    void filterPhaseSeries(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                           T_outputIF<TP_CASC_OUT, TT_DATA> outInterface); // Each phase is calculated in turn which
+                                                                           // avoids need for multiple accumulators, but
+                                                                           // requires data reloading.
+    void filterPhaseParallel(
         T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
         T_outputIF<TP_CASC_OUT, TT_DATA> outInterface); // Parallel phase execution, requires multiple accumulators
     void filterIncr(
@@ -348,6 +370,9 @@ class kernelFilterClass {
                           T_outputIF<TP_CASC_OUT, TT_DATA> outInterface);
     void filterStream(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                       T_outputIF<TP_CASC_OUT, TT_DATA> outInterface); // architecture for streaming interfaces
+    void filterStreamPhaseParallel(
+        T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+        T_outputIF<TP_CASC_OUT, TT_DATA> outInterface); // architecture for streaming interfaces
     // Constants for coeff reload
     static constexpr unsigned int m_kCoeffLoadSize = 256 / 8 / sizeof(TT_COEFF);
     alignas(32) TT_COEFF
@@ -403,6 +428,19 @@ class kernelFilterClass {
                 }
             }
         }
+        for (int phase = 0; phase < m_kPhases; ++phase) {
+            for (int i = 0; i < tapsArraySize; i++) { // ceiled to columns.
+                int tapIndex = i * m_kPhases + (m_kPhases - 1 - phase);
+                int tapsAddress =
+                    TP_FIR_LEN - 1 -
+                    fnFirRangeOffset<TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TP_INTERPOLATE_FACTOR>() - tapIndex;
+                if (tapsAddress < 0 || tapIndex >= TP_FIR_RANGE_LEN) {
+                    m_internalTaps2[phase][i] = nullElem<TT_COEFF>();
+                } else {
+                    m_internalTaps2[phase][i] = taps[tapsAddress];
+                }
+            }
+        }
     };
 
     template <unsigned int coeffPhase,
@@ -451,6 +489,22 @@ class kernelFilterClass {
                             m_internalTaps[phase][op][column][lane] = nullElem<TT_COEFF>(); // 0 for the type.
                         }
                     }
+                }
+            }
+        }
+        for (int phase = 0; phase < m_kPhases; ++phase) {
+            for (int i = 0; i < tapsArraySize; i++) { // ceiled to columns.
+                int tapIndex = i * m_kPhases + (m_kPhases - 1 - phase);
+                int tapsOffset = tapIndex * coeffPhases + (coeffPhases - 1 - coeffPhase) + coeffPhaseOffset;
+                int tapsAddress =
+                    coeffPhasesLen - 1 -
+                    coeffPhases *
+                        fnFirRangeOffset<TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TP_INTERPOLATE_FACTOR>() -
+                    tapsOffset;
+                if (tapsAddress < 0 || tapIndex >= TP_FIR_RANGE_LEN) {
+                    m_internalTaps2[phase][i] = nullElem<TT_COEFF>();
+                } else {
+                    m_internalTaps2[phase][i] = taps[tapsAddress];
                 }
             }
         }

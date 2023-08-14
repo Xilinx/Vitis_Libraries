@@ -58,6 +58,8 @@ struct empty {
 #define SHIFT_MAX 62
 #define SHIFT_MIN 0
 
+#define SAT_MODE_MAX __SATURATION_MODES__
+#define SAT_MODE_MIN 0
 #define ROUND_MAX __ROUNDING_MODES__
 #define ROUND_MIN 0
 
@@ -388,14 +390,24 @@ INLINE_DECL constexpr unsigned int fnNumLanes384<cfloat, cfloat>() {
     return 4;
 };
 #else
+// for io buffer cases
 template <typename TT_DATA, typename TT_COEFF>
 INLINE_DECL constexpr unsigned int fnNumLanes() {
-    return 256 / 8 / sizeof(TT_DATA);
+    return 16;
 };
+template <>
+INLINE_DECL constexpr unsigned int fnNumLanes<int16, int16>() {
+    return 32;
+}; // 8x4
+// for streams
 template <typename TT_DATA, typename TT_COEFF>
 INLINE_DECL constexpr unsigned int fnNumLanes384() {
-    return 256 / 8 / sizeof(TT_DATA);
+    return 8;
 };
+template <>
+INLINE_DECL constexpr unsigned int fnNumLanes384<int16, int16>() {
+    return 16;
+}; // 8x4
 #endif
 
 #if __MIN_REGSIZE__ == 128
@@ -547,6 +559,11 @@ INLINE_DECL constexpr unsigned int fnStreamReadWidth() {
     return 256;
 };
 #endif
+
+// check if device has permute capabilites
+constexpr unsigned int fnPermuteSupport() {
+    return __HAS_ACCUM_PERMUTES__;
+};
 
 namespace fir {
 
@@ -919,9 +936,13 @@ INLINE_DECL cfloat nullElem() {
 #endif
 
 // function to return Margin length.
-template <size_t TP_FIR_LEN, typename TT_DATA>
+template <size_t TP_FIR_LEN, typename TT_DATA, int TP_MODIFY_MARGIN_OFFSET = 0>
 INLINE_DECL constexpr unsigned int fnFirMargin() {
-    return CEIL(TP_FIR_LEN, (32 / sizeof(TT_DATA)));
+    if
+        constexpr(TP_FIR_LEN == 1) { return CEIL(TP_FIR_LEN - TP_MODIFY_MARGIN_OFFSET, (32 / sizeof(TT_DATA))); }
+    else {
+        return CEIL(TP_FIR_LEN, (32 / sizeof(TT_DATA)));
+    }
 };
 
 // Truncation. This function rounds x down to the next multiple of y (which may be x)

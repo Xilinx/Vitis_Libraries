@@ -1,3 +1,4 @@
+
 /*
  * Copyright (C) 2019-2022, Xilinx, Inc.
  * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
@@ -22,28 +23,50 @@
 // class definitions.
 //------------------------------------------------------------------------------
 // UUT DEFAULT CONFIGURATION
+
 #ifndef DATA_TYPE
 #define DATA_TYPE int16
 #endif
+
 #ifndef DATA_OUT_TYPE
 #define DATA_OUT_TYPE cint16
 #endif
+
 #ifndef WINDOW_VSIZE
 #define WINDOW_VSIZE 256
 #endif
-#ifndef INPUT_FILE
-#define INPUT_FILE "data/input.txt"
-#endif
-#ifndef OUTPUT_FILE
-#define OUTPUT_FILE "data/output.txt"
+
+#ifndef AIE_VARIANT
+#define AIE_VARIANT 1
 #endif
 
-#ifndef NUM_ITER
-#define NUM_ITER 1
+#ifndef NITER
+#define NITER 16
 #endif
 
-#define INPUT_SAMPLES WINDOW_VSIZE* NUM_ITER
-#define OUTPUT_SAMPLES WINDOW_VSIZE* NUM_ITER
+#ifndef DIFF_TOLERANCE
+#define DIFF_TOLERANCE 0
+#endif
+
+#ifndef CC_TOLERANCE
+#define CC_TOLERANCE 0
+#endif
+
+#ifndef DATA_SEED
+#define DATA_SEED 1
+#endif
+
+#ifndef DATA_STIM_TYPE
+#define DATA_STIM_TYPE 0
+#endif
+
+#ifndef P_INPUT_SAMPLES_A
+#define P_INPUT_SAMPLES_A P_INPUT_WINDOW_VSIZE_A* NITER
+#endif
+#ifndef P_INPUT_SAMPLES_B
+#define P_INPUT_SAMPLES_B P_INPUT_WINDOW_VSIZE_B* NITER
+#endif
+#define P_OUTPUT_SAMPLES P_INPUT_WINDOW_VSIZE_A / P_DIM_AB* P_INPUT_WINDOW_VSIZE_B / P_DIM_AB* NITER
 
 // END OF UUT CONFIGURATION
 //------------------------------------------------------------------------------

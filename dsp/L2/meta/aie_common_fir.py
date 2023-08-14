@@ -66,6 +66,7 @@ def fnNumLanes(TT_DATA, TT_COEF, TP_API=0):
         elif ((TT_DATA == "cint32" and TT_COEF == "int16")
                 or (TT_DATA == "cint32" and TT_COEF == "cint16")
                 or (TT_DATA == "cint16" and TT_COEF == "int32")
+                or (TT_DATA == "cint16" and TT_COEF == "cint32")
                 or (TT_DATA == "cint16" and TT_COEF == "cint16")
                 or (TT_DATA == "cint32" and TT_COEF == "int32")
                 or (TT_DATA == "cint32" and TT_COEF == "cint32")

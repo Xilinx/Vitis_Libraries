@@ -367,8 +367,9 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_API,
           unsigned int TP_PARALLEL_POWER = 1,
-          unsigned int TP_ORIG_PAR_POWER = TP_PARALLEL_POWER,
-          unsigned int TP_INDEX = 0>
+          unsigned int TP_USE_WIDGETS = 0, // not used by ref model
+          unsigned int TP_INDEX = 0,
+          unsigned int TP_ORIG_PAR_POWER = TP_PARALLEL_POWER>
 class fft_ifft_dit_1ch_ref_graph : public graph {
    public:
     static_assert(!(std::is_same<TT_DATA, cfloat>::value) || (TP_SHIFT == 0),
@@ -406,8 +407,9 @@ class fft_ifft_dit_1ch_ref_graph : public graph {
                                (TP_WINDOW_VSIZE >> 1),
                                TP_API,
                                (TP_PARALLEL_POWER - 1),
-                               TP_ORIG_PAR_POWER,
-                               TP_INDEX>
+                               TP_USE_WIDGETS,
+                               TP_INDEX,
+                               TP_ORIG_PAR_POWER>
         FFTsubframeA; // fractal or recursive decomposition
     fft_ifft_dit_1ch_ref_graph<TT_DATA,
                                TT_TWIDDLE,
@@ -419,8 +421,9 @@ class fft_ifft_dit_1ch_ref_graph : public graph {
                                (TP_WINDOW_VSIZE >> 1),
                                TP_API,
                                (TP_PARALLEL_POWER - 1),
-                               TP_ORIG_PAR_POWER,
-                               TP_INDEX + kParallelFactor / 2>
+                               TP_USE_WIDGETS,
+                               TP_INDEX + kParallelFactor / 2,
+                               TP_ORIG_PAR_POWER>
         FFTsubframeB; // fractal or recursive decomposition
 
     // constructor
@@ -428,6 +431,15 @@ class fft_ifft_dit_1ch_ref_graph : public graph {
         printf("========================================\n");
         printf("Entering top level ref graph constructor\n");
         printf("========================================\n");
+        printf("Point size           = %d \n", TP_POINT_SIZE);
+        printf("FFT/nIFFT            = %d \n", TP_FFT_NIFFT);
+        printf("Final scaling Shift  = %d \n", TP_SHIFT);
+        printf("Cascade Length       = %d \n", TP_CASC_LEN);
+        printf("Dynamic point size   = %d \n", TP_DYN_PT_SIZE);
+        printf("Window Size          = %d \n", TP_WINDOW_VSIZE);
+        printf("API_IO               = %d \n", TP_API);
+        printf("PARALLEL_POWER       = %d \n", TP_PARALLEL_POWER);
+        printf("Use widgets          = %d \n", TP_USE_WIDGETS);
         // create kernels
         create_r2comb_kernels<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, kR2Shift, TP_DYN_PT_SIZE, kWindowSize,
                               TP_PARALLEL_POWER, kParallelFactor - 1, TP_INDEX, TP_ORIG_PAR_POWER,
@@ -540,8 +552,9 @@ template <typename TT_DATA,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER,
-          unsigned int TP_INDEX>
+          unsigned int TP_USE_WIDGETS,
+          unsigned int TP_INDEX,
+          unsigned int TP_ORIG_PAR_POWER>
 class fft_ifft_dit_1ch_ref_graph<TT_DATA,
                                  TT_TWIDDLE,
                                  TP_POINT_SIZE,
@@ -552,8 +565,9 @@ class fft_ifft_dit_1ch_ref_graph<TT_DATA,
                                  TP_WINDOW_VSIZE,
                                  kWindowAPI,
                                  0,
-                                 TP_ORIG_PAR_POWER,
-                                 TP_INDEX> : public graph {
+                                 TP_USE_WIDGETS,
+                                 TP_INDEX,
+                                 TP_ORIG_PAR_POWER> : public graph {
    public:
     static_assert(!(std::is_same<TT_DATA, cfloat>::value) || (TP_SHIFT == 0),
                   "ERROR: TP_SHIFT cannot be performed for TT_DATA=cfloat, so must be set to 0");
@@ -603,8 +617,9 @@ template <typename TT_DATA,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER,
-          unsigned int TP_INDEX>
+          unsigned int TP_USE_WIDGETS,
+          unsigned int TP_INDEX,
+          unsigned int TP_ORIG_PAR_POWER>
 class fft_ifft_dit_1ch_ref_graph<TT_DATA,
                                  TT_TWIDDLE,
                                  TP_POINT_SIZE,
@@ -615,8 +630,9 @@ class fft_ifft_dit_1ch_ref_graph<TT_DATA,
                                  TP_WINDOW_VSIZE,
                                  kStreamAPI,
                                  0,
-                                 TP_ORIG_PAR_POWER,
-                                 TP_INDEX> : public graph {
+                                 TP_USE_WIDGETS,
+                                 TP_INDEX,
+                                 TP_ORIG_PAR_POWER> : public graph {
    public:
     static_assert(!(std::is_same<TT_DATA, cfloat>::value) || (TP_SHIFT == 0),
                   "ERROR: TP_SHIFT cannot be performed for TT_DATA=cfloat, so must be set to 0");

@@ -1,0 +1,48 @@
+[hls]
+
+clock=3.33
+flow_target=vivado
+syn.file=src/top_2d_fft_test.cpp
+syn.file_cflags=src/top_2d_fft_test.cpp,-I${XF_PROJ_ROOT}/L1/include/hw/vitis_2dfft/float/
+syn.top=top_fft2d
+tb.file=${XF_PROJ_ROOT}/L1/tests/common_2dfft/2dFFTVerificationData//d_2dFFTCrandomData/d_2dFFTCrandomData_2/fft2DGoldenOut_L1024.verif
+tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/common_2dfft/2dFFTVerificationData//d_2dFFTCrandomData/d_2dFFTCrandomData_2/fft2DGoldenOut_L1024.verif,-I${XF_PROJ_ROOT}/L1/include/hw/vitis_2dfft/float/ -Wno-unknown-pragmas
+tb.file=${XF_PROJ_ROOT}/L1/tests/common_2dfft/2dFFTVerificationData//d_2dFFTCrandomData/d_2dFFTCrandomData_2/fft2DGoldenOut_L16.verif
+tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/common_2dfft/2dFFTVerificationData//d_2dFFTCrandomData/d_2dFFTCrandomData_2/fft2DGoldenOut_L16.verif,-I${XF_PROJ_ROOT}/L1/include/hw/vitis_2dfft/float/ -Wno-unknown-pragmas
+tb.file=${XF_PROJ_ROOT}/L1/tests/common_2dfft/2dFFTVerificationData//d_2dFFTCrandomData/d_2dFFTCrandomData_2/fft2DGoldenOut_L16384.verif
+tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/common_2dfft/2dFFTVerificationData//d_2dFFTCrandomData/d_2dFFTCrandomData_2/fft2DGoldenOut_L16384.verif,-I${XF_PROJ_ROOT}/L1/include/hw/vitis_2dfft/float/ -Wno-unknown-pragmas
+tb.file=${XF_PROJ_ROOT}/L1/tests/common_2dfft/2dFFTVerificationData//d_2dFFTCrandomData/d_2dFFTCrandomData_2/fft2DGoldenOut_L256.verif
+tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/common_2dfft/2dFFTVerificationData//d_2dFFTCrandomData/d_2dFFTCrandomData_2/fft2DGoldenOut_L256.verif,-I${XF_PROJ_ROOT}/L1/include/hw/vitis_2dfft/float/ -Wno-unknown-pragmas
+tb.file=${XF_PROJ_ROOT}/L1/tests/common_2dfft/2dFFTVerificationData//d_2dFFTCrandomData/d_2dFFTCrandomData_2/fft2DGoldenOut_L4096.verif
+tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/common_2dfft/2dFFTVerificationData//d_2dFFTCrandomData/d_2dFFTCrandomData_2/fft2DGoldenOut_L4096.verif,-I${XF_PROJ_ROOT}/L1/include/hw/vitis_2dfft/float/ -Wno-unknown-pragmas
+tb.file=${XF_PROJ_ROOT}/L1/tests/common_2dfft/2dFFTVerificationData//d_2dFFTCrandomData/d_2dFFTCrandomData_2/fft2DGoldenOut_L64.verif
+tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/common_2dfft/2dFFTVerificationData//d_2dFFTCrandomData/d_2dFFTCrandomData_2/fft2DGoldenOut_L64.verif,-I${XF_PROJ_ROOT}/L1/include/hw/vitis_2dfft/float/ -Wno-unknown-pragmas
+tb.file=${XF_PROJ_ROOT}/L1/tests/common_2dfft/2dFFTVerificationData//d_2dFFTCrandomData/d_2dFFTCrandomData_2/fft2DGoldenOut_L65536.verif
+tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/common_2dfft/2dFFTVerificationData//d_2dFFTCrandomData/d_2dFFTCrandomData_2/fft2DGoldenOut_L65536.verif,-I${XF_PROJ_ROOT}/L1/include/hw/vitis_2dfft/float/ -Wno-unknown-pragmas
+tb.file=${XF_PROJ_ROOT}/L1/tests/common_2dfft/2dFFTVerificationData//d_2dFFTCrandomData/d_2dFFTCrandomData_2/fft2DStimulusIn_L1024.verif
+tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/common_2dfft/2dFFTVerificationData//d_2dFFTCrandomData/d_2dFFTCrandomData_2/fft2DStimulusIn_L1024.verif,-I${XF_PROJ_ROOT}/L1/include/hw/vitis_2dfft/float/ -Wno-unknown-pragmas
+tb.file=${XF_PROJ_ROOT}/L1/tests/common_2dfft/2dFFTVerificationData//d_2dFFTCrandomData/d_2dFFTCrandomData_2/fft2DStimulusIn_L16.verif
+tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/common_2dfft/2dFFTVerificationData//d_2dFFTCrandomData/d_2dFFTCrandomData_2/fft2DStimulusIn_L16.verif,-I${XF_PROJ_ROOT}/L1/include/hw/vitis_2dfft/float/ -Wno-unknown-pragmas
+tb.file=${XF_PROJ_ROOT}/L1/tests/common_2dfft/2dFFTVerificationData//d_2dFFTCrandomData/d_2dFFTCrandomData_2/fft2DStimulusIn_L16384.verif
+tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/common_2dfft/2dFFTVerificationData//d_2dFFTCrandomData/d_2dFFTCrandomData_2/fft2DStimulusIn_L16384.verif,-I${XF_PROJ_ROOT}/L1/include/hw/vitis_2dfft/float/ -Wno-unknown-pragmas
+tb.file=${XF_PROJ_ROOT}/L1/tests/common_2dfft/2dFFTVerificationData//d_2dFFTCrandomData/d_2dFFTCrandomData_2/fft2DStimulusIn_L256.verif
+tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/common_2dfft/2dFFTVerificationData//d_2dFFTCrandomData/d_2dFFTCrandomData_2/fft2DStimulusIn_L256.verif,-I${XF_PROJ_ROOT}/L1/include/hw/vitis_2dfft/float/ -Wno-unknown-pragmas
+tb.file=${XF_PROJ_ROOT}/L1/tests/common_2dfft/2dFFTVerificationData//d_2dFFTCrandomData/d_2dFFTCrandomData_2/fft2DStimulusIn_L4096.verif
+tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/common_2dfft/2dFFTVerificationData//d_2dFFTCrandomData/d_2dFFTCrandomData_2/fft2DStimulusIn_L4096.verif,-I${XF_PROJ_ROOT}/L1/include/hw/vitis_2dfft/float/ -Wno-unknown-pragmas
+tb.file=${XF_PROJ_ROOT}/L1/tests/common_2dfft/2dFFTVerificationData//d_2dFFTCrandomData/d_2dFFTCrandomData_2/fft2DStimulusIn_L64.verif
+tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/common_2dfft/2dFFTVerificationData//d_2dFFTCrandomData/d_2dFFTCrandomData_2/fft2DStimulusIn_L64.verif,-I${XF_PROJ_ROOT}/L1/include/hw/vitis_2dfft/float/ -Wno-unknown-pragmas
+tb.file=${XF_PROJ_ROOT}/L1/tests/common_2dfft/2dFFTVerificationData//d_2dFFTCrandomData/d_2dFFTCrandomData_2/fft2DStimulusIn_L65536.verif
+tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/common_2dfft/2dFFTVerificationData//d_2dFFTCrandomData/d_2dFFTCrandomData_2/fft2DStimulusIn_L65536.verif,-I${XF_PROJ_ROOT}/L1/include/hw/vitis_2dfft/float/ -Wno-unknown-pragmas
+tb.file=src/main_2d_fft_test.cpp
+tb.file_cflags=src/main_2d_fft_test.cpp,-I${XF_PROJ_ROOT}/L1/include/hw/vitis_2dfft/float/ -Wno-unknown-pragmas
+tb.file=src/top_2d_fft_test.cpp
+tb.file_cflags=src/top_2d_fft_test.cpp,-I${XF_PROJ_ROOT}/L1/include/hw/vitis_2dfft/float/ -Wno-unknown-pragmas
+
+
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog
+
+

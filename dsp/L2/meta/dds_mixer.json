@@ -36,22 +36,22 @@
     {
       "name": "TP_MIXER_MODE",
       "type": "uint",
-      "description": "describes the mode of operation of the dds/mixer",
-      "maximum": 2, 
-      "minimum": 0
+      "description": "describes the mode of operation of the dds/mixer"
     },
     {
       "name": "TP_API",
       "type": "uint",
-      "description": "specifies if the input/output interface should be window-based or stream-based.",
-      "minimum": 0,
-      "maximum": 1
+      "description": "specifies if the input/output interface should be window-based or stream-based."
     },
     {
       "name": "TP_SSR",
       "type": "uint",
       "description": "specifies the super sample rate, ie how much data input/output in parallel for a single channel.",
-      "minimum": 1
+      "validator": {
+        "file" : "dds_mixer.py",
+        "function" : "validate_TP_SSR",
+        "args": []
+      }
     }, 
     {
       "name" : "phaseInc" ,

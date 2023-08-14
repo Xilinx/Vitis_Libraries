@@ -1,0 +1,163 @@
+{
+        "test_0": {
+            "DATA_TYPE":"int8",
+            "WINDOW_VSIZE":"256",
+            "DATA_STIM_TYPE":"0",
+            "PORT_API":"0",
+            "DELAY_INI_VALUE":"10",
+            "ALL_TESTS":"0",
+			"MAX_DELAY":"256",
+            "NITER":"16"
+        },
+        "test_1": {
+            "DATA_TYPE":"int16",
+            "WINDOW_VSIZE":"256",
+            "DATA_STIM_TYPE":"0",
+            "PORT_API":"0",
+            "DELAY_INI_VALUE":"10",
+            "ALL_TESTS":"0",
+			"MAX_DELAY":"256",
+            "NITER":"16"
+        },
+        "test_2": {
+            "DATA_TYPE":"int32",
+            "WINDOW_VSIZE":"256",
+            "DATA_STIM_TYPE":"0",
+            "PORT_API":"0",
+            "DELAY_INI_VALUE":"10",
+            "ALL_TESTS":"0",
+			"MAX_DELAY":"256",
+            "NITER":"16"
+        },
+        "test_3": {
+            "DATA_TYPE":"uint8",
+            "WINDOW_VSIZE":"256",
+            "DATA_STIM_TYPE":"0",
+            "PORT_API":"0",
+            "DELAY_INI_VALUE":"10",
+            "ALL_TESTS":"0",
+			"MAX_DELAY":"256",
+            "NITER":"16"
+        },
+        "test_4": {
+            "DATA_TYPE":"float",
+            "WINDOW_VSIZE":"256",
+            "DATA_STIM_TYPE":"0",
+            "PORT_API":"0",
+            "DELAY_INI_VALUE":"10",
+            "ALL_TESTS":"0",
+			"MAX_DELAY":"256",
+            "NITER":"16"
+        },
+        "test_5": {
+            "DATA_TYPE":"cint16",
+            "WINDOW_VSIZE":"256",
+            "DATA_STIM_TYPE":"0",
+            "PORT_API":"0",
+            "DELAY_INI_VALUE":"10",
+            "ALL_TESTS":"0",
+			"MAX_DELAY":"256",
+            "NITER":"16"
+        },
+        "test_6": {
+            "DATA_TYPE":"cint32",
+            "WINDOW_VSIZE":"256",
+            "DATA_STIM_TYPE":"0",
+            "PORT_API":"0",
+            "DELAY_INI_VALUE":"10",
+            "ALL_TESTS":"0",
+			"MAX_DELAY":"256",
+            "NITER":"16"
+        },
+        "test_7": {
+            "DATA_TYPE":"cfloat",
+            "WINDOW_VSIZE":"256",
+            "DATA_STIM_TYPE":"0",
+            "PORT_API":"0",
+            "DELAY_INI_VALUE":"10",
+            "ALL_TESTS":"0",
+			"MAX_DELAY":"256",
+            "NITER":"16"
+        },
+        "test_8": {
+            "DATA_TYPE":"int8",
+            "WINDOW_VSIZE":"1024",
+            "DATA_STIM_TYPE":"0",
+            "PORT_API":"1",
+            "DELAY_INI_VALUE":"10",
+            "ALL_TESTS":"0",
+			"MAX_DELAY":"256",
+            "NITER":"16"
+        },
+        "test_9": {
+            "DATA_TYPE":"int16",
+            "WINDOW_VSIZE":"1024",
+            "DATA_STIM_TYPE":"0",
+            "PORT_API":"1",
+            "DELAY_INI_VALUE":"10",
+            "ALL_TESTS":"0",
+			"MAX_DELAY":"256",
+            "NITER":"16"
+        },
+        "test_10": {
+            "DATA_TYPE":"int32",
+            "WINDOW_VSIZE":"1024",
+            "DATA_STIM_TYPE":"0",
+            "PORT_API":"1",
+            "DELAY_INI_VALUE":"10",
+            "ALL_TESTS":"0",
+			"MAX_DELAY":"256",
+            "NITER":"16"
+        },
+        "test_11": {
+            "DATA_TYPE":"uint8",
+            "WINDOW_VSIZE":"1024",
+            "DATA_STIM_TYPE":"0",
+            "PORT_API":"1",
+            "DELAY_INI_VALUE":"10",
+            "ALL_TESTS":"0",
+			"MAX_DELAY":"256",
+            "NITER":"16"
+        },
+        "test_12": {
+            "DATA_TYPE":"float",
+            "WINDOW_VSIZE":"1024",
+            "DATA_STIM_TYPE":"0",
+            "PORT_API":"1",
+            "DELAY_INI_VALUE":"10",
+            "ALL_TESTS":"0",
+			"MAX_DELAY":"256",
+            "NITER":"16"
+        },
+        "test_13": {
+            "DATA_TYPE":"cint16",
+            "WINDOW_VSIZE":"1024",
+            "DATA_STIM_TYPE":"0",
+            "PORT_API":"1",
+            "DELAY_INI_VALUE":"10",
+            "ALL_TESTS":"0",
+			"MAX_DELAY":"256",
+            "NITER":"16"
+        },
+        "test_14": {
+            "DATA_TYPE":"cint32",
+            "WINDOW_VSIZE":"1024",
+            "DATA_STIM_TYPE":"0",
+            "PORT_API":"1",
+            "DELAY_INI_VALUE":"10",
+            "ALL_TESTS":"0",
+			"MAX_DELAY":"256",
+            "NITER":"16"
+        },
+        "test_15": {
+            "DATA_TYPE":"cfloat",
+            "WINDOW_VSIZE":"1024",
+            "DATA_STIM_TYPE":"0",
+            "PORT_API":"1",
+            "DELAY_INI_VALUE":"10",
+            "ALL_TESTS":"0",
+			"MAX_DELAY":"256",
+            "NITER":"16"
+        }
+       
+}

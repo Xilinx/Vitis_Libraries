@@ -1,14 +1,68 @@
 {
-    "daily": {
-        "test_0_widget_real2complex": {
-            "DATA_TYPE":"int16",
-            "DATA_OUT_TYPE":"cint16",
-            "WINDOW_VSIZE":"256"
-        },
-        "test_1_widget_real2complex": {
-            "DATA_TYPE":"cint16",
-            "DATA_OUT_TYPE":"int16",
-            "WINDOW_VSIZE":"256"
-        }
+    "test_0_widget_r2c_i16_c16": {
+        "DATA_TYPE": "int16",
+        "DATA_OUT_TYPE": "cint16",
+        "WINDOW_VSIZE": "256",
+        "AIE_VARIANT": "1",
+        "NITER": "16",
+        "DIFF_TOLERANCE": "0",
+        "CC_TOLERANCE": "0",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0"
+    },
+    "test_1_widget_r2c_c16_i16": {
+        "DATA_TYPE": "cint16",
+        "DATA_OUT_TYPE": "int16",
+        "WINDOW_VSIZE": "512",
+        "AIE_VARIANT": "1",
+        "NITER": "16",
+        "DIFF_TOLERANCE": "0",
+        "CC_TOLERANCE": "0",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0"
+    },
+    "test_2_widget_r2c_i32_c32": {
+        "DATA_TYPE": "int32",
+        "DATA_OUT_TYPE": "cint32",
+        "WINDOW_VSIZE": "256",
+        "AIE_VARIANT": "1",
+        "NITER": "16",
+        "DIFF_TOLERANCE": "0",
+        "CC_TOLERANCE": "0",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0"
+    },
+    "test_3_widget_r2c_c32_i32": {
+        "DATA_TYPE": "cint32",
+        "DATA_OUT_TYPE": "int32",
+        "WINDOW_VSIZE": "1024",
+        "AIE_VARIANT": "1",
+        "NITER": "16",
+        "DIFF_TOLERANCE": "0",
+        "CC_TOLERANCE": "0",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0"
+    },
+    "test_4_widget_r2c_if_cf": {
+        "DATA_TYPE": "float",
+        "DATA_OUT_TYPE": "cfloat",
+        "WINDOW_VSIZE": "256",
+        "AIE_VARIANT": "1",
+        "NITER": "16",
+        "DIFF_TOLERANCE": "0",
+        "CC_TOLERANCE": "0",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0"
+    },
+    "test_5_widget_r2c_cf_if": {
+        "DATA_TYPE": "cfloat",
+        "DATA_OUT_TYPE": "float",
+        "WINDOW_VSIZE": "512",
+        "AIE_VARIANT": "1",
+        "NITER": "16",
+        "DIFF_TOLERANCE": "0",
+        "CC_TOLERANCE": "0",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0"
     }
 }

@@ -25,6 +25,16 @@ import json
 # and "err_message" if "is_valid" is False.
 #
 
+TP_POINT_SIZE_min = 16
+TP_POINT_SIZE_max = 65536
+TP_WINDOW_VSIZE_min = 16
+TP_WINDOW_VSIZE_max = 65536
+TP_INPUT_WINDOW_VSIZE_min = 4
+TP_SSR_min = 1
+TP_SHIFT_min = 0
+TP_SHIFT_max = 60
+TP_CASC_LEN_min = 1
+TP_CASC_LEN_max = 11
 
 def fn_validate_coeff_type(TT_DATA, TT_COEFF):
   if ((TT_DATA=="cint16" and TT_COEFF=="int16") or (TT_DATA=="cint32" and TT_COEFF=="int32") or (TT_DATA=="cfloat" and TT_COEFF=="float")):
@@ -33,18 +43,24 @@ def fn_validate_coeff_type(TT_DATA, TT_COEFF):
     return isError("Coefficient type must be the atomic type of data")
 
 def fn_validate_point_size(TP_POINT_SIZE, TT_DATA):
+  if TP_POINT_SIZE < TP_POINT_SIZE_min or TP_POINT_SIZE > TP_POINT_SIZE_max :
+        return isError(f"Minimum and maximum value for Point Size is {TP_POINT_SIZE_min} and {TP_POINT_SIZE_max},respectively, but got {TP_POINT_SIZE}.")
   if (TP_POINT_SIZE % (16/fn_size_by_byte(TT_DATA) ) == 0) :
     return isValid
   else:
     return isError("Point size must describe a frame size which is a multiple of 128 bits.")
 
 def fn_validate_window_vsize(TP_POINT_SIZE,TP_WINDOW_VSIZE):
+  if TP_WINDOW_VSIZE < TP_WINDOW_VSIZE_min or TP_WINDOW_VSIZE > TP_WINDOW_VSIZE_max :
+	    return isError(f"Minimum and maximum value for Input size is {TP_WINDOW_VSIZE_min} and {TP_WINDOW_VSIZE_max},respectively, but got {TP_WINDOW_VSIZE}.")
   if ((TP_WINDOW_VSIZE>=TP_POINT_SIZE) and (TP_WINDOW_VSIZE%TP_POINT_SIZE==0)) :
     return isValid
   else:
     return isError("Window size must be an integer multiple of point size")
 
 def fn_validate_shift(TT_DATA, TP_SHIFT):
+  if TP_SHIFT < TP_SHIFT_min or TP_SHIFT > TP_SHIFT_max :
+        return isError(f"Minimum and maximum value for Shift is {TP_SHIFT_min} and {TP_SHIFT_max},respectively, but got {TP_SHIFT}.")
   if (TT_DATA=="cfloat"):
     if (TP_SHIFT==0) :
       return isValid
@@ -62,6 +78,8 @@ def fn_validate_shift(TT_DATA, TP_SHIFT):
       return isError("Shift must be in range 0 to 31 for cint16 data type")
 
 def fn_validate_ssr(TT_DATA, TP_POINT_SIZE, TP_API, TP_SSR):
+  if TP_SSR < TP_SSR_min:
+	    return isError(f"Minimum value for SSR is {TP_SSR_min}, but got {TP_SSR}.")
   if (TP_POINT_SIZE/TP_SSR >=16 and TP_POINT_SIZE/TP_SSR<=4096) :
     if (TP_POINT_SIZE/TP_SSR<=1024 or TP_API==1) :
       return isValid

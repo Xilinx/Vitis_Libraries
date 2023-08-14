@@ -1,5 +1,5 @@
 {
-  "schema": "aieip_spec_schema-0.1",
+  "low_level_file":"fir_interpolate_asym.json",
   "ip_name": "vmc_fir_interpolate_asym",
   "block_info": {
     "label": "FIR Interpolation",
@@ -7,41 +7,39 @@
   },
   "parameters": [
     {
+      "key": "TT_DATA",
       "name": "data_type",
-      "label": "Input/Output data type:",
       "description": "The type of individual data samples input to and output of the filter function",
-      "enum": [ "int16", "cint16", "int32", "cint32", "float", "cfloat" ],
       "default": "cint16",
-      "type": "typename",
       "blockgui":{
+            "label": "Input/Output data type:",
             "tablabel": "Main",
             "parameterType":"popup"
       }
     },
     {
+      "key": "TT_COEF",  
       "name": "coef_type",
-      "label": "Filter coefficients data type:",
       "description": "The type of individual coefficients of the filter taps",
-      "enum": [ "int16", "cint16", "int32", "cint32", "float", "cfloat" ],
       "default": "int16",
-      "type": "typename",
       "validator": {
         "file": "vmc_fir_interpolate_asym.py",
         "function": "vmc_validate_coef_type",
         "args": ["data_type"]
       },
       "blockgui":{
+          "label": "Filter coefficients data type:",
             "tablabel": "Main",
             "parameterType":"popup"
       }
     },
     {
       "name": "use_coeff_reload",
-      "label": "Specify filter coefficients via input port",
       "description": "Allows the user to select of runtime coefficient reloading",
       "default": false,
       "type": "bool",
       "blockgui":{
+          "label": "Specify filter coefficients via input port:",
             "tablabel": "Main",
             "parameterType":"checkbox",
             "disable":"coeff",
@@ -49,117 +47,160 @@
       }
     },
     {
+      "key": "TP_DUAL_IP",
+      "name": "dual_ip",
+      "description": "TP_DUAL_IP allows 2 stream inputs to be connected to FIR, increasing available throughput. When set to 0, single stream input will be connected to FIR kernel, when set to 1, both input stream ports will be used.",
+      "default": false,
+      "type": "bool",
+      "validator": {
+        "file": "vmc_fir_interpolate_asym.py",
+        "function": "vmc_validate_input_ports",
+        "args": ["num_outputs"]
+      },
+      "blockgui":{
+          "label": "Provide second set of input ports:",
+            "tablabel": "Main",
+            "parameterType":"checkbox"
+      }
+    },
+    {
+      "key": "TP_NUM_OUTPUTS",
+      "name": "num_outputs",
+      "description": "The number of output ports. Windows API output an exact copy of the data. Stream API interleaves the output data with a 128-bit pattern.",
+      "default": false,
+      "type": "bool",
+      "validator": {
+        "file": "vmc_fir_interpolate_asym.py",
+        "function": "vmc_validate_out_ports",
+        "args": []
+      },
+      "blockgui":{
+          "label": "Provide second set of output ports:",
+            "tablabel": "Main",
+            "parameterType":"checkbox"
+      }
+    },
+      {
+      "key":"coeff",
       "name": "coeff",
-      "label": "Filter coefficients:",
       "description": "The FIR filter tap coefficients.",
       "element_type": "coef_type",
-      "default": "[1, zeros(1,31)]",
-      "type": "vector",
+      "default":"[1, zeros(1,31)]",
       "validator": {
         "file": "vmc_fir_interpolate_asym.py",
         "function": "vmc_validate_coeff",
-        "args": ["use_coeff_reload", "coef_type" ,"fir_length", "data_type", "casc_length", "interpolate_factor"]
+        "args": ["use_coeff_reload", "coef_type" ,"fir_length", "data_type", "casc_length", "interpolate_factor","ssr","dual_ip"]
       },
       "blockgui":{
+          "label": "Filter coefficients:",
             "tablabel": "Main",
             "parameterType":"edit"
       }
     },
     {
+      "key":"TP_FIR_LEN",
       "name": "fir_length",
-      "label": "Filter length:",
       "description": "Specify fir length for coefficient reloading",
       "default": 32,
-      "minimum": 4,
-      "maximum": 8192,
-      "type": "int",
       "blockgui":{
+            "label": "Filter length:",
             "tablabel": "Main",
             "parameterType":"edit"
       }
     },
-	{
+      {
+      "key":"TP_INTERPOLATE_FACTOR",
       "name": "interpolate_factor",
-      "label": "Interpolation factor:",
       "description": "Specify the interpolation factor.",
       "default": 2,
-      "minimum": 2,
-      "maximum": 16,
-      "type": "int",
+      "validator": {
+        "file": "vmc_fir_interpolate_asym.py",
+        "function": "vmc_validate_interpolate_factor",
+        "args": []  
+      },
       "blockgui":{
+            "label": "Interpolation factor:",
             "tablabel": "Main",
             "parameterType":"edit"
       }
     },
-    {
+      {
+      "key":"TP_INPUT_WINDOW_VSIZE",
       "name": "input_window_size",
-      "label": "Input window size (Number of samples):",
       "description": "The number of samples in the window API used for input to the filter function. The number of samples in the output window will depend on the FIR filter parameters",
       "default": 256,
-      "minimum": 4,
-      "maximum": 8192,
-      "type": "int",
       "validator": {
         "file": "vmc_fir_interpolate_asym.py",
         "function": "vmc_validate_input_window_size",
-        "args": ["data_type", "coef_type", "use_coeff_reload", "coeff", "fir_length", "interpolate_factor"]
+        "args": ["data_type", "coef_type", "use_coeff_reload", "coeff", "fir_length", "interpolate_factor","ssr"]
       },
       "blockgui":{
+            "label": "Input window size (Number of samples):",
             "tablabel": "Main",
             "parameterType":"edit"
       }
     },
-    {
+    {   
+      "key": "TP_SHIFT",
       "name": "shift_val",
-      "label": "Scale output down by 2^:",
       "description": "The power of 2 shift down applied to the accumulation of FIR before output",
       "default": 0,
-      "maximum": 61,
-      "minimum": 0,
-      "type": "int",
-	  "validator": {
+       "validator": {
         "file": "vmc_fir_interpolate_asym.py",
         "function": "vmc_validate_shift_val",
         "args": ["data_type"]
       },
       "blockgui":{
+            "label": "Scale output down by 2^:",
             "tablabel": "Main",
             "parameterType":"edit"
       }
     },
-    {
+      {
+      "key": "TP_RND",    
       "name": "rnd_mode",
-      "label": "Rounding mode:",
       "description": "The rounding to be applied during the shift down stage of processing.",
       "enum": [0, 1, 2, 3, 4, 5, 6, 7],
       "enum_str": ["Floor", "Ceiling", "Round to positive infinity", "Round to negative infinity", "Round symmetrical to infinity", "Round symmetrical to zero", "Round convergent to even", "Round convergent to odd"],
       "default": 2,
-      "type": "int",
       "blockgui":{
+            "label": "Rounding mode:",
             "tablabel": "Main",
             "parameterType":"popup"
       }
     },
     {
+      "key" :"TP_SSR",
+      "name": "ssr",
+      "description": "Specify number of data input/output in parallel for a single channel.",
+      "default": 1,
+      "validator": {
+        "file": "vmc_fir_interpolate_asym.py",
+        "function": "vmc_validate_ssr",
+        "args": ["interpolate_factor"]
+      },
+      "blockgui":{
+            "label": "Number of parallel paths (SSR):",
+            "tablabel": "Main",
+            "parameterType":"edit"
+      }
+    },
+	{
+      "key": "TP_CASC_LEN",
       "name": "casc_length",
-      "label": "Number of cascade stages:",
       "description": "The length of cascaded kernels",
       "default": 1,
-      "type": "int",
-      "maximum": 40,
-      "minimum": 1,
       "validator": {
         "file": "vmc_fir_interpolate_asym.py",
         "function": "vmc_validate_casc_length",
         "args": ["use_coeff_reload", "fir_length"]
       },
       "blockgui":{
+            "label": "Number of cascade stages:",
             "tablabel": "Main",
             "parameterType":"edit"
       }
     }
-    
-    
   ],
   "generator": {
     "file": "vmc_fir_interpolate_asym.py",

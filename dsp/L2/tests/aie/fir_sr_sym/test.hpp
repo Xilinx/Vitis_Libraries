@@ -27,6 +27,8 @@ Single Rate Symmetrical FIR graph class.
 #include "utils.hpp"
 
 #include "uut_config.h"
+#include "uut_static_config.h"
+
 #include "test_utils.hpp"
 #include "fir_common_traits.hpp"
 
@@ -94,7 +96,7 @@ class test_graph : public graph {
 #endif                            // _DSPLIB_FIR_DEBUG_ADL_
         for (int j = 0; j < 2; j++) {
             taps_gen.prepSeed(COEFF_SEED);
-            taps_gen.gen(STIM_TYPE, taps);
+            taps_gen.gen(COEFF_STIM_TYPE, taps);
             for (int i = 0; i < kNumTaps; i++) {
                 m_taps[j][i] = taps[i];
                 // if (i == error_tap && j == 1) {

@@ -32,6 +32,7 @@ The DSPLib consists of the following DSP elements:
 
    DDS / Mixer <func-dds.rst>
    FFT/iFFT <func-fft.rst>
+   Mixed Radix FFT <func-mixed_radix_fft.rst>
    FFT Window <func-fft_window.rst>
    Filters <func-fir-filters.rst>
    Matrix Multiply <func-matmul.rst>

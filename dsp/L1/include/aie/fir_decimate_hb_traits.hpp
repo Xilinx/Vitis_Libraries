@@ -48,6 +48,7 @@ static constexpr unsigned int kMaxColumns = 4;
 static constexpr unsigned int kUse128bitLoads = 8; // Flag to use 128-bit loads, instead of 256-bit default loads
 static constexpr unsigned int kSymmetryFactor = 2;
 static constexpr unsigned int kDecimateFactor = 2;
+static constexpr unsigned int kHbFactor = 2;
 static constexpr unsigned int kFirRangeRound =
     kSymmetryFactor * kMaxColumns;            // Round cascaded FIR SYM kernels to multiples of 4,
 static constexpr unsigned int kUpdWSize = 32; // Upd_w size in Bytes (256bit) - const for all data/coeff types
@@ -63,10 +64,12 @@ template <typename TT_DATA, typename TT_COEFF>
 INLINE_DECL constexpr unsigned int fnUnsupportedTypeComboFirDecHb() {
     return 1;
 }; // default here is a legal combo
+#if __HAS_SYM_PREADD__ == 1
 template <>
 INLINE_DECL constexpr unsigned int fnUnsupportedTypeComboFirDecHb<int16, int16>() {
     return 0;
 };
+#endif
 
 // Function to determine how many bits to load each time data is fetched from the input window.
 template <typename TT_DATA, typename TT_COEFF, eArchType TP_ARCH>

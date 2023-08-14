@@ -1,0 +1,15 @@
+{
+    "spec":   "dft.json",
+    "parameters":{
+        "TT_DATA" : "cint16",
+        "TT_TWIDDLE" : "cint16",
+        "TP_POINT_SIZE" : 15,
+        "TP_CASC_LEN" : 3,
+        "TP_NUM_FRAMES": 1,
+        "TP_FFT_NIFFT" : 0,
+        "TP_SHIFT" : 0,
+        "TP_API" : 0,
+        "AIE_VARIANT": 1
+    },
+    "outdir" : "./dft_generated_graph"
+}

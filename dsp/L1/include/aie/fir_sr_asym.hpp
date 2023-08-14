@@ -16,7 +16,6 @@
  */
 #ifndef _DSPLIB_FIR_SR_ASYM_HPP_
 #define _DSPLIB_FIR_SR_ASYM_HPP_
-
 /*
 Single Rate Asymmetric FIR.
 This file exists to capture the definition of the single rate asymmetric FIR
@@ -125,7 +124,8 @@ class fir_sr_asym_tl {
 
     // Get kernel's FIR Total Tap Length
     static constexpr unsigned int getSSRMargin() {
-        constexpr unsigned int margin = fnFirMargin<fp::BTP_FIR_LEN / fp::BTP_SSR, typename fp::BTT_DATA>();
+        constexpr unsigned int margin =
+            fnFirMargin<fp::BTP_FIR_LEN / fp::BTP_SSR, typename fp::BTT_DATA, fp::BTP_MODIFY_MARGIN_OFFSET>();
         return margin;
     };
 
@@ -224,9 +224,10 @@ class kernelFilterClass {
         fnFirRangeOffsetAsym<TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TT_DATA, TT_COEFF, TP_API>() +
         TP_MODIFY_MARGIN_OFFSET; // FIR Cascade Offset for this kernel position
 
-    static constexpr unsigned int m_kFirMargin = fnFirMargin<TP_FIR_LEN, TT_DATA>(); // FIR Margin.
-    static constexpr unsigned int m_kFirMarginOffset =
-        fnFirMargin<TP_FIR_LEN, TT_DATA>() - TP_FIR_LEN + 1; // FIR Margin Offset.
+    static constexpr unsigned int m_kFirMargin = TP_API == 0
+                                                     ? fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()
+                                                     : fnFirMargin<TP_FIR_LEN, TT_DATA>(); // FIR Margin.
+    static constexpr unsigned int m_kFirMarginOffset = m_kFirMargin - TP_FIR_LEN + 1;      // FIR Margin Offset.
     static constexpr unsigned int m_kFirMarginRangeOffset =
         m_kFirMarginOffset + m_kFirRangeOffset; // FIR Margin Offset.
     static constexpr unsigned int m_kFirInitOffset = m_kFirMarginRangeOffset;
@@ -237,7 +238,13 @@ class kernelFilterClass {
         TP_FIR_RANGE_LEN + m_kDataBuffXOffset; // This will check if only the portion of the FIR (TP_FIR_RANGE_LEN +
                                                // m_kDataBuffXOffset - due to xoffset alignment) fits.
     static constexpr unsigned int m_kFirCoeffByteSize = TP_FIR_RANGE_LEN * sizeof(TT_COEFF);
-    static constexpr unsigned int m_kInitDataNeeded = ((m_kArchFirLen + m_kLanes * m_kDataLoadVsize / m_kVOutSize) - 1);
+// TODO - express this more elegantly
+#if __HAS_SYM_PREADD__ == 1
+    static constexpr unsigned int m_kPerLoopLoads = 1;
+#else
+    static constexpr unsigned int m_kPerLoopLoads = 2;
+#endif
+    static constexpr unsigned int m_kInitDataNeeded = ((m_kArchFirLen + m_kDataLoadVsize * m_kPerLoopLoads) - 1);
     static constexpr eArchType m_kArchZigZagEnabled =
         kArchBasic; // zigzag architecture disabled due to compilator inefficiencies degrading performance.
     static constexpr eArchType m_kArchBufSize =
@@ -481,9 +488,10 @@ class fir_sr_asym : public kernelFilterClass<TT_DATA,
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_asym::filter); }
 
     // FIR
-    void filter(input_circular_buffer<TT_DATA,
-                                      extents<inherited_extent>,
-                                      margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
+    void filter(input_circular_buffer<
+                    TT_DATA,
+                    extents<inherited_extent>,
+                    margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
                 output_circular_buffer<TT_DATA>& __restrict outWindow);
 };
 
@@ -572,56 +580,117 @@ class fir_sr_asym<TT_DATA,
 
     // Register Kernel Class
     static void registerKernelClass() {
-        // single kernel
         if
-            constexpr(TP_CASC_IN == CASC_IN_FALSE && TP_CASC_OUT == CASC_OUT_FALSE) {
+            constexpr(TP_COEFF_PHASES == 1) {
+                // single kernel
                 if
-                    constexpr(TP_NUM_OUTPUTS == 1) { REGISTER_FUNCTION(fir_sr_asym::filterSingleKernelSingleOP); }
-                else if
-                    constexpr(TP_NUM_OUTPUTS == 2) { REGISTER_FUNCTION(fir_sr_asym::filterSingleKernelDualOP); }
-            }
-        // final kernel
-        else if
-            constexpr(TP_CASC_IN == CASC_IN_TRUE && TP_CASC_OUT == CASC_OUT_FALSE) {
-                if
-                    constexpr(TP_NUM_OUTPUTS == 1) { REGISTER_FUNCTION(fir_sr_asym::filterFinalKernelSingleOP); }
-                else if
-                    constexpr(TP_NUM_OUTPUTS == 2) { REGISTER_FUNCTION(fir_sr_asym::filterFinalKernelDualOP); }
-            }
-        // first kernel
-        else if
-            constexpr(TP_CASC_IN == CASC_IN_FALSE && TP_CASC_OUT == CASC_OUT_TRUE) {
-                if
-                    constexpr(TP_KERNEL_POSITION == (TP_CASC_LEN - 1)) {
-                        REGISTER_FUNCTION(fir_sr_asym::filterFirstKernelWithoutBroadcast);
+                    constexpr(TP_CASC_IN == CASC_IN_FALSE && TP_CASC_OUT == CASC_OUT_FALSE) {
+                        if
+                            constexpr(TP_NUM_OUTPUTS == 1) {
+                                REGISTER_FUNCTION(fir_sr_asym::filterSingleKernelSingleOP);
+                            }
+                        else if
+                            constexpr(TP_NUM_OUTPUTS == 2) { REGISTER_FUNCTION(fir_sr_asym::filterSingleKernelDualOP); }
                     }
-                else {
-                    REGISTER_FUNCTION(fir_sr_asym::filterFirstKernel);
-                }
-            }
-        // middle kernel
-        else if
-            constexpr(TP_CASC_IN == CASC_IN_TRUE && TP_CASC_OUT == CASC_OUT_TRUE) {
-                if
-                    constexpr(TP_KERNEL_POSITION == (TP_CASC_LEN - 1)) {
-                        REGISTER_FUNCTION(fir_sr_asym::filterMiddleKernelWithoutBroadcast);
+                // final kernel
+                else if
+                    constexpr(TP_CASC_IN == CASC_IN_TRUE && TP_CASC_OUT == CASC_OUT_FALSE) {
+                        if
+                            constexpr(TP_NUM_OUTPUTS == 1) {
+                                REGISTER_FUNCTION(fir_sr_asym::filterFinalKernelSingleOP);
+                            }
+                        else if
+                            constexpr(TP_NUM_OUTPUTS == 2) { REGISTER_FUNCTION(fir_sr_asym::filterFinalKernelDualOP); }
                     }
-                else {
-                    REGISTER_FUNCTION(fir_sr_asym::filterMiddleKernel);
-                }
+                // first kernel
+                else if
+                    constexpr(TP_CASC_IN == CASC_IN_FALSE && TP_CASC_OUT == CASC_OUT_TRUE) {
+                        if
+                            constexpr(TP_KERNEL_POSITION == (TP_CASC_LEN - 1)) {
+                                REGISTER_FUNCTION(fir_sr_asym::filterFirstKernelWithoutBroadcast);
+                            }
+                        else {
+                            REGISTER_FUNCTION(fir_sr_asym::filterFirstKernel);
+                        }
+                    }
+                // middle kernel
+                else if
+                    constexpr((TP_CASC_IN == CASC_IN_TRUE && TP_CASC_OUT == CASC_OUT_TRUE)) {
+                        if
+                            constexpr(TP_KERNEL_POSITION == (TP_CASC_LEN - 1)) {
+                                REGISTER_FUNCTION(fir_sr_asym::filterMiddleKernelWithoutBroadcast);
+                            }
+                        else {
+                            REGISTER_FUNCTION(fir_sr_asym::filterMiddleKernel);
+                        }
+                    }
             }
+        else {
+            if
+                constexpr(TP_CASC_IN == CASC_IN_TRUE && TP_CASC_OUT == CASC_OUT_FALSE) {
+                    if
+                        constexpr(TP_KERNEL_POSITION == 0) {
+                            REGISTER_FUNCTION(fir_sr_asym::filterLastChainFirstSSRKernel);
+                        }
+                    else {
+                        if
+                            constexpr(TP_NUM_OUTPUTS == 1) {
+                                REGISTER_FUNCTION(fir_sr_asym::filterFinalKernelSingleOP);
+                            }
+                        else if
+                            constexpr(TP_NUM_OUTPUTS == 2) { REGISTER_FUNCTION(fir_sr_asym::filterFinalKernelDualOP); }
+                    }
+                }
+            else if
+                constexpr((TP_CASC_IN == CASC_IN_TRUE && TP_CASC_OUT == CASC_OUT_TRUE)) {
+                    if
+                        constexpr(TP_KERNEL_POSITION == 0 && TP_CASC_LEN > 1) {
+                            REGISTER_FUNCTION(fir_sr_asym::filterMidChainFirstSSRKernel);
+                        }
+                    else if
+                        constexpr(TP_KERNEL_POSITION == 0 && TP_CASC_LEN == 1) {
+                            REGISTER_FUNCTION(fir_sr_asym::filterMidChainFirstSSRKernelNoBdcst);
+                        }
+                    else if
+                        constexpr(TP_KERNEL_POSITION == TP_CASC_LEN - 1) {
+                            REGISTER_FUNCTION(fir_sr_asym::filterMiddleKernelNoBdcst);
+                        }
+                    else {
+                        REGISTER_FUNCTION(fir_sr_asym::filterMiddleKernel);
+                    }
+                }
+            else if
+                constexpr(TP_CASC_IN == CASC_IN_FALSE && TP_CASC_OUT == CASC_OUT_TRUE) {
+                    if
+                        constexpr(TP_KERNEL_POSITION == TP_CASC_LEN - 1) {
+                            REGISTER_FUNCTION(fir_sr_asym::filterFirstKernelNoBdcst);
+                        }
+                    else {
+                        REGISTER_FUNCTION(fir_sr_asym::filterFirstKernel);
+                    }
+                }
+            else if
+                constexpr(TP_CASC_IN == CASC_IN_FALSE && TP_CASC_OUT == CASC_IN_FALSE) {
+                    if
+                        constexpr(TP_NUM_OUTPUTS == 1) { REGISTER_FUNCTION(fir_sr_asym::filterSingleKernelSingleOP); }
+                    else if
+                        constexpr(TP_NUM_OUTPUTS == 2) { REGISTER_FUNCTION(fir_sr_asym::filterSingleKernelDualOP); }
+                }
+        }
     }
 
     void filterSingleKernelSingleOP(
-        input_circular_buffer<TT_DATA,
-                              extents<inherited_extent>,
-                              margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
+        input_circular_buffer<
+            TT_DATA,
+            extents<inherited_extent>,
+            margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
         output_circular_buffer<TT_DATA>& __restrict outWindow);
 
     void filterSingleKernelDualOP(
-        input_circular_buffer<TT_DATA,
-                              extents<inherited_extent>,
-                              margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
+        input_circular_buffer<
+            TT_DATA,
+            extents<inherited_extent>,
+            margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
         output_circular_buffer<TT_DATA>& __restrict outWindow,
         output_circular_buffer<TT_DATA>& __restrict outWindow2);
 
@@ -634,16 +703,19 @@ class fir_sr_asym<TT_DATA,
                                  output_circular_buffer<TT_DATA>& __restrict outWindow,
                                  output_circular_buffer<TT_DATA>& __restrict outWindow2);
 
-    void filterFirstKernel(input_circular_buffer<TT_DATA,
-                                                 extents<inherited_extent>,
-                                                 margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
-                           output_stream_cacc48* outCascade,
-                           output_async_buffer<TT_DATA>& __restrict broadcastWindow);
+    void filterFirstKernel(
+        input_circular_buffer<
+            TT_DATA,
+            extents<inherited_extent>,
+            margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
+        output_stream_cacc48* outCascade,
+        output_async_buffer<TT_DATA>& __restrict broadcastWindow);
 
     void filterFirstKernelWithoutBroadcast(
-        input_circular_buffer<TT_DATA,
-                              extents<inherited_extent>,
-                              margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
+        input_circular_buffer<
+            TT_DATA,
+            extents<inherited_extent>,
+            margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
         output_stream_cacc48* outCascade);
 
     void filterMiddleKernel(input_async_buffer<TT_DATA>& __restrict inWindow,
@@ -651,9 +723,45 @@ class fir_sr_asym<TT_DATA,
                             output_stream_cacc48* outCascade,
                             output_async_buffer<TT_DATA>& __restrict broadcastWindow);
 
+    void filterMiddleKernelNoBdcst(input_async_buffer<TT_DATA>& __restrict inWindow,
+                                   input_stream_cacc48* inCascade,
+                                   output_stream_cacc48* outCascade);
+
     void filterMiddleKernelWithoutBroadcast(input_async_buffer<TT_DATA>& __restrict inWindow,
                                             input_stream_cacc48* inCascade,
                                             output_stream_cacc48* outCascade);
+
+    void filterLastChainFirstSSRKernel(
+        input_circular_buffer<
+            TT_DATA,
+            extents<inherited_extent>,
+            margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
+        input_stream_cacc48* inCascade,
+        output_circular_buffer<TT_DATA>& __restrict outWindow);
+
+    void filterMidChainFirstSSRKernel(
+        input_circular_buffer<
+            TT_DATA,
+            extents<inherited_extent>,
+            margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
+        input_stream_cacc48* inCascade,
+        output_stream_cacc48* outCascade,
+        output_async_buffer<TT_DATA>& __restrict broadcastWindow);
+
+    void filterMidChainFirstSSRKernelNoBdcst(
+        input_circular_buffer<
+            TT_DATA,
+            extents<inherited_extent>,
+            margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
+        input_stream_cacc48* inCascade,
+        output_stream_cacc48* outCascade);
+
+    void filterFirstKernelNoBdcst(
+        input_circular_buffer<
+            TT_DATA,
+            extents<inherited_extent>,
+            margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
+        output_stream_cacc48* outCascade);
 };
 
 //-----------------------------------------------------------------------------------------------------
@@ -743,56 +851,117 @@ class fir_sr_asym<TT_DATA,
     static void registerKernelClass() {
         // single kernel
         if
-            constexpr(TP_CASC_IN == CASC_IN_FALSE && TP_CASC_OUT == CASC_OUT_FALSE) {
+            constexpr(TP_COEFF_PHASES == 1) {
                 if
-                    constexpr(TP_NUM_OUTPUTS == 1) { REGISTER_FUNCTION(fir_sr_asym::filterSingleKernelSingleOP); }
-                else if
-                    constexpr(TP_NUM_OUTPUTS == 2) { REGISTER_FUNCTION(fir_sr_asym::filterSingleKernelDualOP); }
-            }
-        // final kernel
-        else if
-            constexpr(TP_CASC_IN == CASC_IN_TRUE && TP_CASC_OUT == CASC_OUT_FALSE) {
-                if
-                    constexpr(TP_NUM_OUTPUTS == 1) { REGISTER_FUNCTION(fir_sr_asym::filterFinalKernelSingleOP); }
-                else if
-                    constexpr(TP_NUM_OUTPUTS == 2) { REGISTER_FUNCTION(fir_sr_asym::filterFinalKernelDualOP); }
-            }
-        // first kernel
-        else if
-            constexpr(TP_CASC_IN == CASC_IN_FALSE && TP_CASC_OUT == CASC_OUT_TRUE) {
-                if
-                    constexpr(TP_KERNEL_POSITION == (TP_CASC_LEN - 1)) {
-                        REGISTER_FUNCTION(fir_sr_asym::filterFirstKernelWithoutBroadcast);
+                    constexpr(TP_CASC_IN == CASC_IN_FALSE && TP_CASC_OUT == CASC_OUT_FALSE) {
+                        if
+                            constexpr(TP_NUM_OUTPUTS == 1) {
+                                REGISTER_FUNCTION(fir_sr_asym::filterSingleKernelSingleOP);
+                            }
+                        else if
+                            constexpr(TP_NUM_OUTPUTS == 2) { REGISTER_FUNCTION(fir_sr_asym::filterSingleKernelDualOP); }
                     }
-                else {
-                    REGISTER_FUNCTION(fir_sr_asym::filterFirstKernel);
-                }
-            }
-        // middle kernel
-        else if
-            constexpr(TP_CASC_IN == CASC_IN_TRUE && TP_CASC_OUT == CASC_OUT_TRUE) {
-                if
-                    constexpr(TP_KERNEL_POSITION == (TP_CASC_LEN - 1)) {
-                        REGISTER_FUNCTION(fir_sr_asym::filterMiddleKernelWithoutBroadcast);
+                // final kernel
+                else if
+                    constexpr(TP_CASC_IN == CASC_IN_TRUE && TP_CASC_OUT == CASC_OUT_FALSE) {
+                        if
+                            constexpr(TP_NUM_OUTPUTS == 1) {
+                                REGISTER_FUNCTION(fir_sr_asym::filterFinalKernelSingleOP);
+                            }
+                        else if
+                            constexpr(TP_NUM_OUTPUTS == 2) { REGISTER_FUNCTION(fir_sr_asym::filterFinalKernelDualOP); }
                     }
-                else {
-                    REGISTER_FUNCTION(fir_sr_asym::filterMiddleKernel);
-                }
+                // first kernel
+                else if
+                    constexpr(TP_CASC_IN == CASC_IN_FALSE && TP_CASC_OUT == CASC_OUT_TRUE) {
+                        if
+                            constexpr(TP_KERNEL_POSITION == (TP_CASC_LEN - 1)) {
+                                REGISTER_FUNCTION(fir_sr_asym::filterFirstKernelWithoutBroadcast);
+                            }
+                        else {
+                            REGISTER_FUNCTION(fir_sr_asym::filterFirstKernel);
+                        }
+                    }
+                // middle kernel
+                else if
+                    constexpr(TP_CASC_IN == CASC_IN_TRUE && TP_CASC_OUT == CASC_OUT_TRUE) {
+                        if
+                            constexpr(TP_KERNEL_POSITION == (TP_CASC_LEN - 1)) {
+                                REGISTER_FUNCTION(fir_sr_asym::filterMiddleKernelWithoutBroadcast);
+                            }
+                        else {
+                            REGISTER_FUNCTION(fir_sr_asym::filterMiddleKernel);
+                        }
+                    }
             }
+        else {
+            if
+                constexpr(TP_CASC_IN == CASC_IN_TRUE && TP_CASC_OUT == CASC_OUT_FALSE) {
+                    if
+                        constexpr(TP_KERNEL_POSITION == 0) {
+                            REGISTER_FUNCTION(fir_sr_asym::filterLastChainFirstSSRKernel);
+                        }
+                    else {
+                        if
+                            constexpr(TP_NUM_OUTPUTS == 1) {
+                                REGISTER_FUNCTION(fir_sr_asym::filterFinalKernelSingleOP);
+                            }
+                        else if
+                            constexpr(TP_NUM_OUTPUTS == 2) { REGISTER_FUNCTION(fir_sr_asym::filterFinalKernelDualOP); }
+                    }
+                }
+            else if
+                constexpr((TP_CASC_IN == CASC_IN_TRUE && TP_CASC_OUT == CASC_OUT_TRUE)) {
+                    if
+                        constexpr(TP_KERNEL_POSITION == 0 && TP_CASC_LEN > 1) {
+                            REGISTER_FUNCTION(fir_sr_asym::filterMidChainFirstSSRKernel);
+                        }
+                    else if
+                        constexpr(TP_KERNEL_POSITION == 0 && TP_CASC_LEN == 1) {
+                            REGISTER_FUNCTION(fir_sr_asym::filterMidChainFirstSSRKernelNoBdcst);
+                        }
+                    else if
+                        constexpr(TP_KERNEL_POSITION == TP_CASC_LEN - 1) {
+                            REGISTER_FUNCTION(fir_sr_asym::filterMiddleKernelNoBdcst);
+                        }
+                    else {
+                        REGISTER_FUNCTION(fir_sr_asym::filterMiddleKernel);
+                    }
+                }
+            else if
+                constexpr(TP_CASC_IN == CASC_IN_FALSE && TP_CASC_OUT == CASC_OUT_TRUE) {
+                    if
+                        constexpr(TP_KERNEL_POSITION == TP_CASC_LEN - 1) {
+                            REGISTER_FUNCTION(fir_sr_asym::filterFirstKernelNoBdcst);
+                        }
+                    else {
+                        REGISTER_FUNCTION(fir_sr_asym::filterFirstKernel);
+                    }
+                }
+            else if
+                constexpr(TP_CASC_IN == CASC_IN_FALSE && TP_CASC_OUT == CASC_IN_FALSE) {
+                    if
+                        constexpr(TP_NUM_OUTPUTS == 1) { REGISTER_FUNCTION(fir_sr_asym::filterSingleKernelSingleOP); }
+                    else if
+                        constexpr(TP_NUM_OUTPUTS == 2) { REGISTER_FUNCTION(fir_sr_asym::filterSingleKernelDualOP); }
+                }
+        }
     }
 
     // FIR
     void filterSingleKernelSingleOP(
-        input_circular_buffer<TT_DATA,
-                              extents<inherited_extent>,
-                              margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
+        input_circular_buffer<
+            TT_DATA,
+            extents<inherited_extent>,
+            margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
         output_circular_buffer<TT_DATA>& __restrict outWindow,
         const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
 
     void filterSingleKernelDualOP(
-        input_circular_buffer<TT_DATA,
-                              extents<inherited_extent>,
-                              margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
+        input_circular_buffer<
+            TT_DATA,
+            extents<inherited_extent>,
+            margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
         output_circular_buffer<TT_DATA>& __restrict outWindow,
         output_circular_buffer<TT_DATA>& __restrict outWindow2,
         const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
@@ -806,17 +975,20 @@ class fir_sr_asym<TT_DATA,
                                  output_circular_buffer<TT_DATA>& __restrict outWindow,
                                  output_circular_buffer<TT_DATA>& __restrict outWindow2);
 
-    void filterFirstKernel(input_circular_buffer<TT_DATA,
-                                                 extents<inherited_extent>,
-                                                 margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
-                           output_stream_cacc48* outCascade,
-                           output_async_buffer<TT_DATA>& __restrict broadcastWindow,
-                           const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
+    void filterFirstKernel(
+        input_circular_buffer<
+            TT_DATA,
+            extents<inherited_extent>,
+            margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
+        output_stream_cacc48* outCascade,
+        output_async_buffer<TT_DATA>& __restrict broadcastWindow,
+        const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
 
     void filterFirstKernelWithoutBroadcast(
-        input_circular_buffer<TT_DATA,
-                              extents<inherited_extent>,
-                              margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
+        input_circular_buffer<
+            TT_DATA,
+            extents<inherited_extent>,
+            margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
         output_stream_cacc48* outCascade,
         const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
 
@@ -828,6 +1000,42 @@ class fir_sr_asym<TT_DATA,
     void filterMiddleKernelWithoutBroadcast(input_async_buffer<TT_DATA>& __restrict inWindow,
                                             input_stream_cacc48* inCascade,
                                             output_stream_cacc48* outCascade);
+
+    void filterLastChainFirstSSRKernel(
+        input_circular_buffer<
+            TT_DATA,
+            extents<inherited_extent>,
+            margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
+        input_stream_cacc48* inCascade,
+        output_circular_buffer<TT_DATA>& __restrict outWindow);
+
+    void filterMidChainFirstSSRKernel(
+        input_circular_buffer<
+            TT_DATA,
+            extents<inherited_extent>,
+            margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
+        input_stream_cacc48* inCascade,
+        output_stream_cacc48* outCascade,
+        output_async_buffer<TT_DATA>& __restrict broadcastWindow);
+
+    void filterMidChainFirstSSRKernelNoBdcst(
+        input_circular_buffer<
+            TT_DATA,
+            extents<inherited_extent>,
+            margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
+        input_stream_cacc48* inCascade,
+        output_stream_cacc48* outCascade);
+    void filterMiddleKernelNoBdcst(input_async_buffer<TT_DATA>& __restrict inWindow,
+                                   input_stream_cacc48* inCascade,
+                                   output_stream_cacc48* outCascade);
+
+    void filterFirstKernelNoBdcst(
+        input_circular_buffer<
+            TT_DATA,
+            extents<inherited_extent>,
+            margin<fnFirMargin<TP_FIR_LEN, TT_DATA, TP_MODIFY_MARGIN_OFFSET>()> >& __restrict inWindow,
+        output_stream_cacc48* outCascade,
+        const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]);
 };
 
 // ----------------------------------------------------------------------------

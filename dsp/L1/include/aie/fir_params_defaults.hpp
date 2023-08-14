@@ -56,6 +56,7 @@ struct fir_params_defaults {
     static constexpr bool BTP_CASC_OUT = false;
     static constexpr int BTP_MODIFY_MARGIN_OFFSET = 0;
     static constexpr unsigned int BTP_KERNEL_POSITION = 0;
+    static constexpr unsigned int BTP_SAT = 1;
 };
 template <typename fp = fir_params_defaults>
 void printParams() {
@@ -86,6 +87,7 @@ void printParams() {
     printf("BTP_CASC_OUT              = %d.\n", fp::BTP_CASC_OUT);
     printf("BTP_MODIFY_MARGIN_OFFSET  = %d.\n", fp::BTP_MODIFY_MARGIN_OFFSET);
     printf("BTP_KERNEL_POSITION       = %d.\n", fp::BTP_KERNEL_POSITION);
+    printf("BTP_RND                   = %d.\n", fp::BTP_SAT);
 }
 template <typename fp = fir_params_defaults>
 class fir_type_default {

@@ -76,7 +76,7 @@ using namespace adf;
  * @tparam TP_SHIFT describes power of 2 shift down applied to the accumulation of
  *         FIR terms before output. \n TP_SHIFT must be in the range 0 to 61.
  * @tparam TP_RND describes the selection of rounding to be applied during the
- *         shift down stage of processing. Although, TP_RND accepts unsignedinteger values
+ *         shift down stage of processing. Although, TP_RND accepts unsigned integer values
  *         descriptive macros are recommended where
  *         - rnd_floor      = Truncate LSB, always round down (towards negative infinity).
  *         - rnd_ceil       = Always round up (towards positive infinity).
@@ -163,6 +163,13 @@ using namespace adf;
  *         giving an overall higher throughput.   \n
  *         A TP_SSR of 1 means just one output leg and 1 input phase, and is the backwards compatible option. \n
  *         The number of AIEs used is given by ``TP_SSR^2 * TP_CASC_LEN``. \n
+ * @tparam TP_SAT describes the selection of saturation to be applied during the
+ *         shift down stage of processing. TP_SAT accepts unsigned integer values, where:
+ *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
+ *         - 1: saturate       = Default. Saturation rounds an n-bit signed value in the range [- ( 2^(n-1) ) : +2^(n-1)
+ - 1 ].
+ *         - 3: symmetric      = Controls symmetric saturation. Symmetric saturation rounds an n-bit signed value in the
+ range [- ( 2^(n-1) -1 ) : +2^(n-1) - 1 ]. \n
  **/
 
 template <typename TT_DATA,
@@ -178,7 +185,8 @@ template <typename TT_DATA,
           unsigned int TP_DUAL_IP = 0,
           unsigned int TP_API = 0,
           unsigned int TP_SSR = 1,
-          unsigned int TP_PARA_DECI_POLY = 1>
+          unsigned int TP_PARA_DECI_POLY = 1,
+          unsigned int TP_SAT = 1>
 class fir_decimate_asym_graph : public graph {
    private:
     static_assert(TP_CASC_LEN <= 40, "ERROR: Unsupported Cascade length");
@@ -286,6 +294,7 @@ class fir_decimate_asym_graph : public graph {
         static constexpr unsigned int BTP_COEFF_PHASES = TP_SSR;
         static constexpr unsigned int BTP_COEFF_PHASES_LEN = TP_FIR_LEN;
         static constexpr int BTP_MODIFY_MARGIN_OFFSET = 0;
+        static constexpr unsigned int BTP_SAT = TP_SAT;
     };
 
     template <unsigned int CL>
@@ -315,9 +324,10 @@ class fir_decimate_asym_graph : public graph {
         if
             constexpr(T_API == 0) { return 256; }
         else {
+            constexpr unsigned int kPermuteSupport = fnPermuteSupport();
             constexpr unsigned int loadSize = getKernelStreamLoadVsize<T_D, T_C, DF>();
             constexpr unsigned int lanes = fnNumLanesDecAsym<T_D, T_C>();
-            constexpr int minDataNeeded = 1 + (lanes - 1) * DF;
+            constexpr int minDataNeeded = 1 + (lanes - 1) * (kPermuteSupport == 1 ? DF : 1);
             constexpr int minDataLoads = CEIL((minDataNeeded), (loadSize));
             return 128 / sizeof(T_D) - (minDataLoads / loadSize) * loadSize - 1 - (SSR - 1) - (16 / (sizeof(T_D)) - 1);
         }

@@ -68,6 +68,7 @@ template <>
 struct T_buff_FirDecHb<cint32, int16, kArch2Buff> : T_buff_1024b<cint32> {
     using T_buff_1024b<cint32>::operator=;
 }; // See note regarding Input Vector register size selection.
+#if __SUPPORTS_CFLOAT__ == 1
 template <>
 struct T_buff_FirDecHb<float, float, kArch2Buff> : T_buff_1024b<float> {
     using T_buff_1024b<float>::operator=;
@@ -80,7 +81,7 @@ template <>
 struct T_buff_FirDecHb<cfloat, cfloat, kArch2Buff> : T_buff_1024b<cfloat> {
     using T_buff_1024b<cfloat>::operator=;
 }; // See note regarding Input Vector register size selection.
-
+#endif
 template <typename TT_DATA, typename TT_COEFF, eArchType TP_ARCH>
 struct T_accFirDecHb : T_acc384<TT_DATA, TT_COEFF> {
     using T_acc384<TT_DATA, TT_COEFF>::operator=;

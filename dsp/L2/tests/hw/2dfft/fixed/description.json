@@ -5,7 +5,6 @@
     "flow": "vitis",
     "platform_allowlist": [
         "u250",
-        "aws-vu9p-f1",
         "vck190"
     ],
     "platform_blocklist": [
@@ -24,21 +23,6 @@
                 {
                     "name": "fft2DKernel",
                     "ldclflags": "--config PROJECT/conn_u250.cfg"
-                }
-            ]
-        },
-        "aws-vu9p-f1": {
-            "host": {
-                "compiler": {
-                    "symbols": [
-                        "USE_DDR"
-                    ]
-                }
-            },
-            "containers": [
-                {
-                    "name": "fft2DKernel",
-                    "ldclflags": "--config PROJECT/conn_aws_f1.cfg"
                 }
             ]
         }

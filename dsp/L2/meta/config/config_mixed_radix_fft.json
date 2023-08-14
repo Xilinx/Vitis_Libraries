@@ -1,0 +1,14 @@
+{
+    "spec":   "mixed_radix_fft.json",
+    "parameters":{
+        "TT_DATA" : "cint16",
+        "TT_TWIDDLE" : "cint16",
+        "TP_POINT_SIZE" : 15,
+        "TP_FFT_NIFFT" : 0,
+        "TP_SHIFT" : 0,
+        "TP_RND" : 0,
+        "TP_SAT" : 1,
+        "AIE_VARIANT": 1
+    },
+    "outdir" : "./mixed_radix_fft_generated_graph"
+}

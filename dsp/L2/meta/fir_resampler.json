@@ -52,8 +52,6 @@
       "name": "TP_FIR_LEN",
       "description": "The number of taps in the filter",
       "type": "uint",
-      "minimum": 4,
-      "maximum": 8192,
       "validator": {
         "file": "fir_resampler.py",
         "function": "validate_TP_FIR_LEN",
@@ -64,15 +62,16 @@
       "name": "TP_INTERPOLATE_FACTOR",
       "description": "The integer upsample rate of the filter",
       "type": "uint",
-      "minimum": 1,
-      "maximum": 16
+       "validator": {
+        "file": "fir_resampler.py",
+        "function": "validate_TP_INTERPOLATE_FACTOR",
+        "args": []
+      }
     },
     {
       "name": "TP_DECIMATE_FACTOR",
       "description": "The integer downsample rate of the filter",
       "type": "uint",
-      "minimum": 1,
-      "maximum": 16,
       "validator": {
         "file": "fir_resampler.py",
         "function": "validate_TP_DECIMATE_FACTOR",
@@ -83,8 +82,6 @@
       "name": "TP_SHIFT",
       "description": "The power of 2 shift down applied to the accumulation of FIR before output",
       "type": "uint",
-      "maximum": 80,
-      "minimum": 0,
       "validator": {
         "file": "fir_resampler.py",
         "function": "validate_TP_SHIFT",
@@ -94,15 +91,12 @@
     {
       "name": "TP_RND",
       "description": "The rounding to be applied during the shift down stage of processing.",
-      "type": "uint",
-      "maximum": 7,
-      "minimum": 0
+      "type": "uint"
     },
     {
       "name": "TP_INPUT_WINDOW_VSIZE",
       "description": "The number of samples in the window PAI used for input to the filter function. The number of values in the output window will be TP_INPUT_WINDOW_VSIZE also by virtue the single rate nature of this function.",
       "type": "uint",
-      "minimum": 4,
       "validator": {
         "file": "fir_resampler.py",
         "function": "validate_TP_INPUT_WINDOW_VSIZE",
@@ -113,15 +107,16 @@
       "name": "TP_CASC_LEN",
       "description": "The length of the cascade chain.",
       "type": "uint",
-      "minimum": 1,
-      "maximum": 40
+      "validator": {
+        "file": "fir_resampler.py",
+        "function": "validate_TP_CASC_LEN",
+        "args": []
+      }
     },
     {
       "name": "TP_USE_COEF_RELOAD",
       "description": "Selects Coefficient Reload Mode: 0 - no reload, 1 - RTP port based, 2 - Stream Header based.",
       "type": "uint",
-      "maximum": 1,
-      "minimum": 0,
       "validator": {
         "file": "aie_common_fir.py",
         "function": "validate_TP_USE_COEF_RELOAD_NON_SSR",
@@ -131,16 +126,12 @@
     {
       "name": "TP_NUM_OUTPUTS",
       "description": "The number of output ports. Windows API output an exact copy of the data. Stream API interleaves the output data with a 128-bit pattern.",
-      "type": "uint",
-      "minimum": 1,
-      "maximum": 2
+      "type": "uint"
     },
     {
       "name": "TP_DUAL_IP",
       "description": "TP_DUAL_IP allows 2 stream inputs to be connected to FIR, increasing available throughput. When set to 0, single stream input will be connected to FIR kernel, when set to 1, both input stream ports will be used.",
       "type": "uint",
-      "maximum": 1,
-      "minimum": 0,
       "validator": {
         "file": "fir_resampler.py",
         "function": "validate_TP_DUAL_IP",
@@ -150,22 +141,17 @@
     {
       "name": "TP_API",
       "description": "The form of IO: 0 for windows, 1 for streams",
-      "type": "uint",
-      "minimum": 0,
-      "maximum": 1
+      "type": "uint"
     },
     {
       "name": "TP_SSR",
       "description": "TP_SSR specifies the number of parallel input/output paths where samples are interleaved between paths, giving an overall higher throughput.",
-      "type": "uint",
-      "minimum": 1,
-      "maximum": 1
+      "type": "uint"
     },
     {
       "name": "TP_PARA_INTERP_POLY",
       "description" : "Number of parallel polyphases to decompose interpolator over.",
       "type" : "uint",
-      "minimum": 1,
       "validator": {
         "file": "fir_polyphase_decomposer.py",
         "function": "validate_TP_PARA_INTERP_POLY",
@@ -175,8 +161,12 @@
     {
       "name": "TP_PARA_DECI_POLY",
       "description": "Number of parallel polyphases to decompose decimator over.",
-      "minimum": 1,
-      "type": "uint"
+      "type": "uint",
+      "validator": {
+        "file": "fir_resampler.py",
+        "function": "validate_TP_PARA_DECI_POLY",
+        "args": []
+      }
     },
     {
       "name": "coeff",

@@ -42,11 +42,12 @@ template <typename TT_DATA,  // type of data input and output
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_USE_COEFF_RELOAD = 0, // 1 = use coeff reload, 0 = don't use coeff reload
-          unsigned int TP_NUM_OUTPUTS = 1,
-          unsigned int TP_DUAL_IP = 0,
-          unsigned int TP_API = 0>
+          unsigned int TP_USE_COEFF_RELOAD, // 1 = use coeff reload, 0 = don't use coeff reload
+          unsigned int TP_SAT>
 class fir_decimate_asym_ref {
+   private:
+    alignas(32) TT_COEFF m_internalTaps[TP_FIR_LEN];
+
    public:
     // Constructor
     fir_decimate_asym_ref(const TT_COEFF (&taps)[TP_FIR_LEN]) {
@@ -74,9 +75,6 @@ class fir_decimate_asym_ref {
             inWindow,
         output_circular_buffer<TT_DATA>& outWindow,
         const TT_COEFF (&inTaps)[TP_FIR_LEN]);
-
-   private:
-    alignas(32) TT_COEFF m_internalTaps[TP_FIR_LEN];
 };
 }
 }

@@ -13,6 +13,8 @@ current_uut_kernel = Path(__file__).stem
 # fir_decimate_asym.hpp:        static_assert(TP_DECIMATE_FACTOR >= DECIMATE_FACTOR_MIN && TP_DECIMATE_FACTOR <= DECIMATE_FACTOR_MAX, "ERROR:TP_DECIMATE_FACTOR is outside the supported range.");
 # fir_decimate_asym.hpp:        static_assert(TP_SHIFT >= SHIFT_MIN && TP_SHIFT <= SHIFT_MAX, "ERROR: TP_SHIFT is out of the supported range.");
 # fir_decimate_asym.hpp:        static_assert(TP_RND >= ROUND_MIN && TP_RND <= ROUND_MAX, "ERROR: TP_RND is out of the supported range.");
+# fir_decimate_asym.hpp:        static_assert(TP_SAT >= SAT_MODE_MIN && TP_SAT <= SAT_MODE_MAX, "ERROR: TP_SAT is out of supported range");
+# fir_decimate_asym.hpp:        static_assert(TP_SAT != 2, "ERROR: TP_SAT is invalid. Valid values of TP_SAT are 0, 1, and 3");
 # fir_decimate_asym.hpp:        static_assert(fnEnumType<TT_DATA>() != enumUnknownType,"ERROR: TT_DATA is not a supported type.");
 # fir_decimate_asym.hpp:        static_assert(fnEnumType<TT_COEFF>() != enumUnknownType,"ERROR: TT_COEFF is not a supported type.");
 # fir_decimate_asym.hpp:        static_assert(fnFirDecAsymTypeSupport<TT_DATA, TT_COEFF>() != 0, "ERROR: The combination of TT_DATA and TT_COEFF is not supported for this class.");
@@ -61,6 +63,15 @@ current_uut_kernel = Path(__file__).stem
 
 fn_decimate_asym_lanes = fnNumLanes384b
 
+TP_DECIMATE_FACTOR_min = 2
+TP_DECIMATE_FACTOR_max = 7
+TP_INPUT_WINDOW_VSIZE_min = 4
+TP_SSR_min = 1
+TP_PARA_DECI_POLY_min = 1
+TP_CASC_LEN_min = 1
+TP_CASC_LEN_max = 40
+TP_FIR_LEN_min = 4
+TP_FIR_LEN_max = 8192
 
 def fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1):
   # CAUTION: this constant overlaps many factors. The main need is a "strobe" concept that means we unroll until xbuff is back to starting conditions.
@@ -69,6 +80,8 @@ def fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_DECIMATE_FACT
   # Given that we know there will be 3 additional loads, we need to work out how many output vector chunks that covers.
   # 8 seems to work for all current decimation values and lanes across data types..
   streamRptFactor = 8
+  if TP_INPUT_WINDOW_VSIZE < TP_INPUT_WINDOW_VSIZE_min:
+	    return isError(f"Minimum value for Input window size is {TP_INPUT_WINDOW_VSIZE_min}, but got {TP_INPUT_WINDOW_VSIZE}.")
 
   # decimator uses 384b accs, but also checks for multiple of decimate factor. When using streams, also takes into account the stream repeat factor.
   windowSizeMultiplier = (fn_decimate_asym_lanes(TT_DATA, TT_COEF)*TP_DECIMATE_FACTOR) if TP_API == 0 else (fn_decimate_asym_lanes(TT_DATA, TT_COEF)*TP_DECIMATE_FACTOR*streamRptFactor)
@@ -135,6 +148,8 @@ def fn_data_needed_within_buffer_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN,
     return isValid
 
 def fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD):
+    if TP_FIR_LEN < TP_FIR_LEN_min or TP_FIR_LEN > TP_FIR_LEN_max :
+        return isError(f"Minimum and maximum value for Filter length is {TP_FIR_LEN_min} and {TP_FIR_LEN_max}, respectively, but got {TP_FIR_LEN}.")
     minLenCheck =  fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR)
     # apprently this is what the graph does, but i think we should be taking into account the rate change factors here.
     maxLenCheck = fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR, TP_API, 1)
@@ -181,31 +196,76 @@ def fn_xoffset_range_valid(TT_DATA, TT_COEF, TP_DECIMATE_FACTOR, TP_API):
 
 # This logic is copied from the kernel class.
 
-def fn_validate_decimate_factor(TT_DATA, TT_COEF, TP_DECIMATE_FACTOR, TP_API):
+def fn_ssr_poly(AIE_VARIANT, TP_DECIMATE_FACTOR, TP_SSR, TP_PARA_DECI_POLY):
 
+  if AIE_VARIANT == 1 :
+    # AIE1 allows for SSR on a non-decomposed design, when, e.g. TP_SSR = 2 and TP_PARA_DECI_POLY = 1.
+    return isValid
+
+  if AIE_VARIANT == 2 :
+    # AIE-ML only allows SSR on a fully-decomposed design, when, e.g. TP_SSR > 1 only when TP_PARA_DECI_POLY = TP_DECIMATE_FACTOR
+    if (TP_DECIMATE_FACTOR > TP_PARA_DECI_POLY) and (TP_SSR > 1) :
+      return isError(f" Device only allows SSR (TP_SSR > 1) on a fully decomposed design, i.e. when TP_PARA_DECI_POLY R {TP_PARA_DECI_POLY} = TP_DECIMATE_FACTOR {TP_DECIMATE_FACTOR}.")
+    return isValid
+
+def fn_validate_decimate_factor(TT_DATA, TT_COEF, TP_DECIMATE_FACTOR, TP_API, AIE_VARIANT):
+
+  if TP_DECIMATE_FACTOR < TP_DECIMATE_FACTOR_min or TP_DECIMATE_FACTOR > TP_DECIMATE_FACTOR_max :
+        return isError(f"Minimum and maximum value for Decimation factor is {TP_DECIMATE_FACTOR_min} and {TP_DECIMATE_FACTOR_max}, respectively, but got {TP_DECIMATE_FACTOR}.")
+  if AIE_VARIANT == 1 :
+    # Check if permute xoffset is within range for the data type in question
     offsetRangeCheck = fn_xoffset_range_valid(TT_DATA, TT_COEF, TP_DECIMATE_FACTOR, TP_API )
-
     return offsetRangeCheck
 
-def fn_validate_dual_ip(TP_API, TP_DUAL_IP):
-    if TP_DUAL_IP == 1 and TP_API == 0:
+  if AIE_VARIANT == 2 :
+    vector1kRegisters = 4 # AIE-ML tile contiants 4 independent 1024-bit vector registers that are used for decimation purposes.
+    if TP_DECIMATE_FACTOR > vector1kRegisters :
+      return isError(f"Decimation Factor {TP_DECIMATE_FACTOR} exceeds AIE tile's vector registers resources {vector1kRegisters}. Consider using decomposition with TP_PARA_DECI_POLY.")
+    return isValid
+
+def fn_validate_dual_ip(TP_API, TP_DUAL_IP, AIE_VARIANT):
+    if TP_DUAL_IP == 1 and AIE_VARIANT == 2:
+      return isError("Dual input ports not supported on this device.")
+    if TP_DUAL_IP == 1 and TP_API == 0 and AIE_VARIANT == 1:
       return isError("Dual input ports only supported when port is a stream.")
 
     return isValid
 
-def fn_type_support(TT_DATA, TT_COEF):
-  return isError(f"The combination of {TT_DATA} and {TT_COEF} is not supported for this class.") if (TT_DATA == "int16" and TT_COEF == "int16") else isValid
+def fn_validate_num_outputs(TP_API, TP_NUM_OUTPUTS, AIE_VARIANT):
+    if TP_NUM_OUTPUTS == 2 and TP_API == 1 and AIE_VARIANT == 2:
+      return isError("Dual output stream ports not supported on this device.")
+    return isValid
 
-def fn_validate_ssr(TP_SSR, TP_API):
-    ssrStreamCheck = fn_stream_ssr(TP_API, TP_SSR)
-    return ssrStreamCheck
+def fn_type_support(TT_DATA, TT_COEF, AIE_VARIANT):
+  if TT_DATA == "int16" and TT_COEF == "int16" and AIE_VARIANT == 1:
+    return isError(f"The combination of {TT_DATA} and {TT_COEF} is not supported for this class on this device.")
+  # AIE-ML, i.e. variant 2 does support int16/int16
+  return isValid
+
+def fn_validate_ssr(TP_SSR, TP_API, TP_DECIMATE_FACTOR, TP_PARA_DECI_POLY, AIE_VARIANT):
+    # Only supported for streams
+    if TP_SSR < TP_SSR_min:
+	    return isError(f"Minimum value for SSR is {TP_SSR_min}, but got {TP_SSR}.")
+    ssrPolyCheck = fn_ssr_poly(AIE_VARIANT, TP_DECIMATE_FACTOR, TP_SSR, TP_PARA_DECI_POLY)
+    return ssrPolyCheck
+
+def fn_validate_deci_poly(TP_PARA_DECI_POLY):
+    if TP_PARA_DECI_POLY < TP_PARA_DECI_POLY_min :
+        return isError(f"Minimum value for Decimator polyphases is {TP_PARA_DECI_POLY_min}, but got {TP_PARA_DECI_POLY}.")
+    return isValid
+
+def fn_validate_casc_len(TP_CASC_LEN):
+    if TP_CASC_LEN < TP_CASC_LEN_min or TP_CASC_LEN > TP_CASC_LEN_max :
+        return isError(f"Minimum and maximum value for cascade length is {TP_CASC_LEN_min} and {TP_CASC_LEN_max}, respectively, but got {TP_CASC_LEN}.")
+    return isValid
 
 #### validation APIs ####
 def validate_TT_COEF(args):
     TT_DATA = args["TT_DATA"]
     TT_COEF = args["TT_COEF"]
+    AIE_VARIANT = args["AIE_VARIANT"]
     standard_checks = fn_validate_coef_type(TT_DATA, TT_COEF)
-    typeCheck = fn_type_support(TT_DATA, TT_COEF)
+    typeCheck = fn_type_support(TT_DATA, TT_COEF, AIE_VARIANT)
     for check in (standard_checks,typeCheck):
       if check["is_valid"] == False :
         return check
@@ -215,6 +275,10 @@ def validate_TP_SHIFT(args):
   TT_DATA = args["TT_DATA"]
   TP_SHIFT = args["TP_SHIFT"]
   return fn_validate_shift(TT_DATA, TP_SHIFT)
+
+def validate_TP_SAT(args):
+  TP_SAT = args["TP_SAT"]
+  return fn_validate_satMode(TP_SAT)
 
 def validate_TP_INPUT_WINDOW_VSIZE(args):
   check_valid_decompose = poly.fn_validate_decomposer_TP_INPUT_WINDOW_VSIZE(args)
@@ -274,12 +338,14 @@ def validate_TP_DECIMATE_FACTOR(args):
   TP_API = args["TP_API"]
   TP_DECIMATE_FACTOR = args["TP_DECIMATE_FACTOR"]
   TP_PARA_DECI_POLY = args["TP_PARA_DECI_POLY"]
+  AIE_VARIANT = args["AIE_VARIANT"]
 
   paraPolyValid = poly.validate_TP_PARA_DECI_POLY(args)
 
+
   kernelDecimate = TP_DECIMATE_FACTOR//TP_PARA_DECI_POLY
   decimateValid = (
-    fn_validate_decimate_factor(TT_DATA, TT_COEF, kernelDecimate, TP_API) if kernelDecimate > 1
+    fn_validate_decimate_factor(TT_DATA, TT_COEF, kernelDecimate, TP_API, AIE_VARIANT) if kernelDecimate > 1
     else isValid  # no decimate factor to validate
   )
 
@@ -293,15 +359,31 @@ def validate_TP_DECIMATE_FACTOR(args):
 def validate_TP_DUAL_IP(args):
     TP_API = args["TP_API"]
     TP_DUAL_IP = args["TP_DUAL_IP"]
-    return fn_validate_dual_ip(TP_API, TP_DUAL_IP)
+    AIE_VARIANT = args["AIE_VARIANT"]
+    return fn_validate_dual_ip(TP_API, TP_DUAL_IP, AIE_VARIANT)
+
+def validate_TP_NUM_OUTPUTS(args):
+    TP_API = args["TP_API"]
+    TP_NUM_OUTPUTS = args["TP_NUM_OUTPUTS"]
+    AIE_VARIANT = args["AIE_VARIANT"]
+    return fn_validate_num_outputs(TP_API, TP_NUM_OUTPUTS, AIE_VARIANT)
 
 def validate_TP_SSR(args):
     TP_API = args["TP_API"]
     TP_SSR = args["TP_SSR"]
     TP_DECIMATE_FACTOR = args["TP_DECIMATE_FACTOR"]
     TP_PARA_DECI_POLY = args["TP_PARA_DECI_POLY"]
+    AIE_VARIANT = args["AIE_VARIANT"]
 
-    return  fn_validate_ssr(TP_SSR, TP_API)
+    return  fn_validate_ssr(TP_SSR, TP_API, TP_DECIMATE_FACTOR, TP_PARA_DECI_POLY, AIE_VARIANT)
+
+def validate_TP_PARA_DECI_POLY(args):
+    TP_PARA_DECI_POLY = args["TP_PARA_DECI_POLY"]
+    return fn_validate_deci_poly(TP_PARA_DECI_POLY)
+
+def validate_TP_CASC_LEN(args):
+    TP_CASC_LEN = args["TP_CASC_LEN"]
+    return fn_validate_casc_len(TP_CASC_LEN)
 
 # Example of updater.
 #

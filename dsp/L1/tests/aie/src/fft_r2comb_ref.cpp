@@ -290,8 +290,10 @@ void fft_r2comb_ref<TT_DATA,
                 }
             }
         }
-    else {                                 // static frame size
-        constexpr int n = (TP_POINT_SIZE); // actually a dummy. The stage functions below use TP_POINT_SIZE directly.
+    else { // static frame size
+        constexpr int n =
+            (TP_POINT_SIZE >>
+             TP_PARALLEL_POWER); // actually a dummy. The stage functions below use TP_POINT_SIZE directly.
         TT_DATA* xbuff = (TT_DATA*)inWindow.data();
         TT_DATA* obuff = (TT_DATA*)outWindow.data();
         constexpr bool inv = TP_FFT_NIFFT == 1 ? false : true; // may be overwritten if dyn_pt_size is set

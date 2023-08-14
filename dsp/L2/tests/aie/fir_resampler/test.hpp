@@ -27,6 +27,7 @@ fir_resampler graph class.
 #include "utils.hpp"
 
 #include "uut_config.h"
+#include "uut_static_config.h"
 #include "test_utils.hpp"
 #include "fir_common_traits.hpp"
 
@@ -50,14 +51,6 @@ class test_graph : public graph {
     COEFF_TYPE taps[FIR_LEN];
 
    public:
-#ifndef P_SSR
-    static constexpr int P_SSR = 1; // until SSR is supported
-#endif
-#ifdef USING_UUT
-    static constexpr int DUAL_INPUT_SAMPLES = (PORT_API == 1) && (DUAL_IP == 1) ? 1 : 0;
-#else
-    static constexpr int DUAL_INPUT_SAMPLES = 0;
-#endif
     static constexpr unsigned int IN_SSR = P_SSR * P_PARA_DECI_POLY;
     static constexpr unsigned int RTP_SSR = P_SSR * P_PARA_INTERP_POLY;
     static constexpr unsigned int OUT_SSR = P_SSR * P_PARA_INTERP_POLY;
@@ -104,7 +97,7 @@ class test_graph : public graph {
 #endif                           // _DSPLIB_FIR_DEBUG_ADL_
         for (int j = 0; j < 2; j++) {
             taps_gen.prepSeed(COEFF_SEED);
-            taps_gen.gen(STIM_TYPE, taps);
+            taps_gen.gen(COEFF_STIM_TYPE, taps);
             for (int i = 0; i < FIR_LEN; i++) {
                 m_taps[j][i] = taps[i];
                 if (i == error_tap && j == 1) {

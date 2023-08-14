@@ -366,6 +366,260 @@ kernelClass<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, TP_NUM_OUTPUT_C
     }
 };
 
+#ifdef __SUPPORTS_ACC64__
+// CascStream to window
+template <typename TT_DATA,
+          unsigned int TP_NUM_INPUTS,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_NUM_OUTPUT_CLONES,
+          unsigned int TP_PATTERN,
+          unsigned int TP_HEADER_BYTES>
+INLINE_DECL void kernelClass<TT_DATA,
+                             kCascStreamAPI,
+                             kWindowAPI,
+                             TP_NUM_INPUTS,
+                             TP_WINDOW_VSIZE,
+                             TP_NUM_OUTPUT_CLONES,
+                             TP_PATTERN,
+                             TP_HEADER_BYTES>::kernelClassMain(T_inputIF<TT_DATA, kCascStreamAPI> inInterface,
+                                                               T_outputIF<TT_DATA, kWindowAPI> outInterface) {
+    constexpr unsigned int kDataReadSize = 32;
+    constexpr int kSamplesIn256b = 256 / 8 / sizeof(TT_DATA);
+    constexpr int kCascVWidth = fnFFTCascVWidth<TT_DATA>();
+    using t256VectorType = ::aie::vector<TT_DATA, kSamplesIn256b>;
+    using t512VectorType = ::aie::vector<TT_DATA, kSamplesIn256b * 2>;
+    using accTag = typename accClassTag< ::aie::detail::AccumClass::CInt, sizeof(TT_DATA) * 8>::type;
+    using accVect_t = ::aie::detail::accum<fnAccClass<TT_DATA>(),        // int, cint, FP or CFP
+                                           fnFFTAccWidthCasc<TT_DATA>(), // acc width per sample
+                                           kCascVWidth>;                 //#samples in the casc vector;
+    input_stream<accTag>* __restrict inCasc0 = (input_stream<accTag>*)inInterface.inStream0;
+    accVect_t acc;
+    t256VectorType readVal1, readVal1a, readVal1b;
+    t256VectorType readVal2;
+    t256VectorType read256Val;
+    t512VectorType writeVal;
+    t256VectorType writeVal2a, writeVal2b;
+    t256VectorType* outPtr0 = (t256VectorType*)outInterface.outWindow0; //&inBuff[0];
+    ::std::pair<t256VectorType, t256VectorType> inIntlv;
+
+    if
+        constexpr(TP_HEADER_BYTES > 0) {
+            for (int i = 0; i < TP_HEADER_BYTES / kDataReadSize; i++) // 16? bytes/ 128bits. 8/128 = 1/16
+                chess_prepare_for_pipelining chess_loop_range(TP_HEADER_BYTES / kDataReadSize, ) {
+                    acc = readincr_v<kCascVWidth, accTag>(inCasc0); // cascade read;
+                    readVal1 = acc.template to_vector<TT_DATA>(0);  // convert acc type to standard type.
+                    chess_separator_scheduler(0);                   // avoid deadlock in larger parallel powers
+                    readVal2 = readincr_v<kSamplesIn256b>(inInterface.inStream1); // read, but ignored
+                    *outPtr0++ = readVal1;
+                }
+            chess_memory_fence(); // necessary, as figure of 8 lockup can occur in the trellis of kernels
+        }
+
+    constexpr int kLsize = TP_WINDOW_VSIZE / (kSamplesIn256b * 2); // number of 256 bit ops in Window
+    for (int i = 0; i < kLsize; i++) chess_prepare_for_pipelining chess_loop_range(kLsize, ) {
+            acc = readincr_v<kCascVWidth, accTag>(inCasc0); // cascade read;
+            readVal1 = acc.template to_vector<TT_DATA>(0);  // convert acc type to standard type.
+            chess_separator_scheduler(0);                   // avoid deadlock in larger parallel powers
+            readVal2 = readincr_v<kSamplesIn256b>(inInterface.inStream1);
+            inIntlv = ::aie::interleave_zip(readVal1, readVal2, 1);
+            writeVal = ::aie::concat<t256VectorType, t256VectorType>(inIntlv.first, inIntlv.second);
+            writeVal2a = writeVal.template extract<kSamplesIn256b>(0);
+            *outPtr0++ = writeVal2a;
+            writeVal2b = writeVal.template extract<kSamplesIn256b>(1);
+            *outPtr0++ = writeVal2b;
+        }
+};
+#endif //__SUPPORTS_ACC64__
+
+#ifdef __SUPPORTS_ACC64__
+// StreamCasc to window
+template <typename TT_DATA,
+          unsigned int TP_NUM_INPUTS,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_NUM_OUTPUT_CLONES,
+          unsigned int TP_PATTERN,
+          unsigned int TP_HEADER_BYTES>
+INLINE_DECL void kernelClass<TT_DATA,
+                             kStreamCascAPI,
+                             kWindowAPI,
+                             TP_NUM_INPUTS,
+                             TP_WINDOW_VSIZE,
+                             TP_NUM_OUTPUT_CLONES,
+                             TP_PATTERN,
+                             TP_HEADER_BYTES>::kernelClassMain(T_inputIF<TT_DATA, kStreamCascAPI> inInterface,
+                                                               T_outputIF<TT_DATA, kWindowAPI> outInterface) {
+    constexpr unsigned int kDataReadSize = 32;
+    constexpr int kSamplesIn256b = 256 / 8 / sizeof(TT_DATA);
+    constexpr int kCascVWidth = fnFFTCascVWidth<TT_DATA>();
+    using t256VectorType = ::aie::vector<TT_DATA, kSamplesIn256b>;
+    using t512VectorType = ::aie::vector<TT_DATA, kSamplesIn256b * 2>;
+    using accTag = typename accClassTag< ::aie::detail::AccumClass::CInt, sizeof(TT_DATA) * 8>::type;
+    using accVect_t = ::aie::detail::accum<fnAccClass<TT_DATA>(),        // int, cint, FP or CFP
+                                           fnFFTAccWidthCasc<TT_DATA>(), // acc width per sample
+                                           kCascVWidth>;                 //#samples in the casc vector;
+    input_stream<accTag>* __restrict inCasc1 = (input_stream<accTag>*)inInterface.inStream1;
+    accVect_t acc;
+    t256VectorType readVal1, readVal1a, readVal1b;
+    t256VectorType readVal2;
+    t256VectorType read256Val;
+    t512VectorType writeVal;
+    t256VectorType writeVal2a, writeVal2b;
+    t256VectorType* outPtr0 = (t256VectorType*)outInterface.outWindow0; //&inBuff[0];
+    ::std::pair<t256VectorType, t256VectorType> inIntlv;
+
+    if
+        constexpr(TP_HEADER_BYTES > 0) {
+            for (int i = 0; i < TP_HEADER_BYTES / kDataReadSize; i++) // 16? bytes/ 128bits. 8/128 = 1/16
+                chess_prepare_for_pipelining chess_loop_range(TP_HEADER_BYTES / kDataReadSize, ) {
+                    acc = readincr_v<kCascVWidth, accTag>(inCasc1); // cascade read;
+                    readVal1 = acc.template to_vector<TT_DATA>(0);  // convert acc type to standard type.
+                    chess_separator_scheduler(0);                   // avoid deadlock in larger parallel powers
+                    readVal2 = readincr_v<kSamplesIn256b>(inInterface.inStream0); // read, but ignored
+                    *outPtr0++ = readVal1;
+                }
+            chess_memory_fence(); // necessary, as figure of 8 lockup can occur in the trellis of kernels
+        }
+
+    constexpr int kLsize = TP_WINDOW_VSIZE / (kSamplesIn256b * 2); // number of 256 bit ops in Window
+    for (int i = 0; i < kLsize; i++) chess_prepare_for_pipelining chess_loop_range(kLsize, ) {
+            acc = readincr_v<kCascVWidth, accTag>(inCasc1); // cascade read;
+            readVal2 = acc.template to_vector<TT_DATA>(0);  // convert acc type to standard type.
+            chess_separator_scheduler(0);                   // avoid deadlock in larger parallel powers
+            readVal1 = readincr_v<kSamplesIn256b>(inInterface.inStream0);
+            inIntlv = ::aie::interleave_zip(readVal1, readVal2, 1);
+            writeVal = ::aie::concat<t256VectorType, t256VectorType>(inIntlv.first, inIntlv.second);
+            writeVal2a = writeVal.template extract<kSamplesIn256b>(0);
+            *outPtr0++ = writeVal2a;
+            writeVal2b = writeVal.template extract<kSamplesIn256b>(1);
+            *outPtr0++ = writeVal2b;
+        }
+};
+#endif //__SUPPORTS_ACC64__
+
+#ifdef __SUPPORTS_ACC64__
+// window to CascStream
+template <typename TT_DATA,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_NUM_OUTPUT_CLONES,
+          unsigned int TP_PATTERN,
+          unsigned int TP_HEADER_BYTES>
+INLINE_DECL void kernelClass<TT_DATA,
+                             kWindowAPI,
+                             kCascStreamAPI,
+                             1,
+                             TP_WINDOW_VSIZE,
+                             TP_NUM_OUTPUT_CLONES,
+                             TP_PATTERN,
+                             TP_HEADER_BYTES>::kernelClassMain(T_inputIF<TT_DATA, kWindowAPI> inInterface,
+                                                               T_outputIF<TT_DATA, kCascStreamAPI> outInterface) {
+    constexpr unsigned int kDataReadSize = 32;
+    constexpr int kSamplesIn256b = 32 / sizeof(TT_DATA);
+    constexpr int kCascVWidth = fnFFTCascVWidth<TT_DATA>();
+    using t512VectorType = ::aie::vector<TT_DATA, kSamplesIn256b * 2>;
+    using t256VectorType = ::aie::vector<TT_DATA, kSamplesIn256b>;
+    t256VectorType read256Val, read256Val0, read256Val1;
+    t512VectorType read512Val;
+    t256VectorType writeVal;
+    t256VectorType out256a, out256b, out256a0, out256a1;
+    t512VectorType out512a;
+    t256VectorType* rdptr0 = (t256VectorType*)inInterface.inWindow0; //&outBuff[0];
+    using accTag = typename accClassTag< ::aie::detail::AccumClass::CInt, sizeof(TT_DATA) * 8>::type;
+    using accVect_t = ::aie::detail::accum<fnAccClass<TT_DATA>(),        // int, cint, FP or CFP
+                                           fnFFTAccWidthCasc<TT_DATA>(), // acc width per sample
+                                           kCascVWidth>;                 //#samples in the casc vector;
+    accVect_t acc;
+    output_stream<accTag>* __restrict outCasc0 = (output_stream<accTag>*)outInterface.outStream0;
+
+    if
+        constexpr(TP_HEADER_BYTES > 0) {
+            for (int i = 0; i < TP_HEADER_BYTES / kDataReadSize; i++)
+                chess_prepare_for_pipelining chess_loop_range(TP_HEADER_BYTES / kDataReadSize, ) {
+                    read256Val = *rdptr0++;
+                    acc = ::aie::from_vector<accTag>(read256Val);
+                    writeincr<accTag, kCascVWidth>(outCasc0, acc);
+                    chess_separator_scheduler(0); // avoid deadlock in larger parallel powers
+                    writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn256b>(outInterface.outStream1, read256Val);
+                }
+            chess_memory_fence(); // necessary, as figure of 8 lockup can occur in the trellis of kernels
+        }
+
+    constexpr int kLsize = TP_WINDOW_VSIZE / (kSamplesIn256b * 2); // number of 256 bit ops in Window
+    for (int k = 0; k < kLsize; k++) chess_prepare_for_pipelining chess_loop_range(kLsize, ) {
+            read256Val0 = *rdptr0++;
+            read256Val1 = *rdptr0++;
+            read512Val = ::aie::concat<t256VectorType, t256VectorType>(read256Val0, read256Val1);
+            out256a = ::aie::filter_even<t512VectorType>(read512Val);
+            out256b = ::aie::filter_odd<t512VectorType>(read512Val);
+            acc = ::aie::from_vector<accTag>(out256a);
+            writeincr<accTag, kCascVWidth>(outCasc0, acc);
+            chess_separator_scheduler(0); // avoid deadlock in larger parallel powers
+            writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn256b>(outInterface.outStream1, out256b);
+        }
+};
+#endif //__SUPPORTS_ACC64__
+
+#ifdef __SUPPORTS_ACC64__
+// window to StreamCasc
+template <typename TT_DATA,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_NUM_OUTPUT_CLONES,
+          unsigned int TP_PATTERN,
+          unsigned int TP_HEADER_BYTES>
+INLINE_DECL void kernelClass<TT_DATA,
+                             kWindowAPI,
+                             kStreamCascAPI,
+                             1,
+                             TP_WINDOW_VSIZE,
+                             TP_NUM_OUTPUT_CLONES,
+                             TP_PATTERN,
+                             TP_HEADER_BYTES>::kernelClassMain(T_inputIF<TT_DATA, kWindowAPI> inInterface,
+                                                               T_outputIF<TT_DATA, kStreamCascAPI> outInterface) {
+    constexpr unsigned int kDataReadSize = 32;
+    constexpr int kSamplesIn256b = 32 / sizeof(TT_DATA);
+    constexpr int kCascVWidth = fnFFTCascVWidth<TT_DATA>();
+    using t512VectorType = ::aie::vector<TT_DATA, kSamplesIn256b * 2>;
+    using t256VectorType = ::aie::vector<TT_DATA, kSamplesIn256b>;
+    t256VectorType read256Val, read256Val0, read256Val1;
+    t512VectorType read512Val;
+    t256VectorType writeVal;
+    t256VectorType out256a, out256b, out256b0, out256b1;
+    t512VectorType out512b;
+    t256VectorType* rdptr0 = (t256VectorType*)inInterface.inWindow0; //&outBuff[0];
+    using accTag = typename accClassTag< ::aie::detail::AccumClass::CInt, sizeof(TT_DATA) * 8>::type;
+    using accVect_t = ::aie::detail::accum<fnAccClass<TT_DATA>(),        // int, cint, FP or CFP
+                                           fnFFTAccWidthCasc<TT_DATA>(), // acc width per sample
+                                           kCascVWidth>;                 //#samples in the casc vector;
+    accVect_t acc;
+    output_stream<accTag>* __restrict outCasc1 = (output_stream<accTag>*)outInterface.outStream1;
+
+    if
+        constexpr(TP_HEADER_BYTES > 0) {
+            for (int i = 0; i < TP_HEADER_BYTES / kDataReadSize; i++)
+                chess_prepare_for_pipelining chess_loop_range(TP_HEADER_BYTES / kDataReadSize, ) {
+                    read256Val = *rdptr0++;
+                    acc = ::aie::from_vector<accTag>(read256Val);
+                    writeincr<accTag, kCascVWidth>(outCasc1, acc);
+                    chess_separator_scheduler(0); // avoid deadlock in larger parallel powers
+                    writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn256b>(outInterface.outStream0, read256Val);
+                }
+            chess_memory_fence(); // necessary, as figure of 8 lockup can occur in the trellis of kernels
+        }
+
+    constexpr int kLsize = TP_WINDOW_VSIZE / (kSamplesIn256b * 2); // number of 256 bit ops in Window
+    for (int k = 0; k < kLsize; k++) chess_prepare_for_pipelining chess_loop_range(kLsize, ) {
+            read256Val0 = *rdptr0++;
+            read256Val1 = *rdptr0++;
+            read512Val = ::aie::concat<t256VectorType, t256VectorType>(read256Val0, read256Val1);
+            out256a = ::aie::filter_even<t512VectorType>(read512Val);
+            out256b = ::aie::filter_odd<t512VectorType>(read512Val);
+            acc = ::aie::from_vector<accTag>(out256b);
+            writeincr<accTag, kCascVWidth>(outCasc1, acc);
+            chess_separator_scheduler(0); // avoid deadlock in larger parallel powers
+            writeincr<aie_stream_resource_out::a, TT_DATA, kSamplesIn256b>(outInterface.outStream0, out256a);
+        }
+};
+#endif //__SUPPORTS_ACC64__
+
 //-------------------------------------------------------------------------------------------------------
 // This is the base specialization of the main class for when there is only one window in and out
 template <typename TT_DATA,
@@ -597,6 +851,76 @@ widget_api_cast<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTE
     outInterface.outStream1 = outStream1;
     this->kernelClassMain(inInterface, outInterface);
 };
+
+#ifdef __SUPPORTS_ACC64__
+// CascStream to window, 2 in 1 out
+template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+NOINLINE_DECL void
+widget_api_cast<TT_DATA, kCascStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>::transferData(
+    input_stream_cacc64* __restrict inStream0,
+    input_stream<TT_DATA>* __restrict inStream1,
+    output_circular_buffer<TT_DATA>& __restrict outWindow0) {
+    constexpr unsigned int TP_NUM_OUTPUTS = 1;
+    T_inputIF<TT_DATA, kCascStreamAPI> inInterface;
+    T_outputIF<TT_DATA, kWindowAPI> outInterface;
+    inInterface.inStream0 = inStream0;
+    inInterface.inStream1 = inStream1;
+    outInterface.outWindow0 = (void*)outWindow0.data();
+    this->kernelClassMain(inInterface, outInterface);
+};
+#endif //__SUPPORTS_ACC64__
+
+#ifdef __SUPPORTS_ACC64__
+// StreamCasc to window, 2 in 1 out
+template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+NOINLINE_DECL void
+widget_api_cast<TT_DATA, kStreamCascAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>::transferData(
+    input_stream<TT_DATA>* __restrict inStream0,
+    input_stream_cacc64* __restrict inStream1,
+    output_circular_buffer<TT_DATA>& __restrict outWindow0) {
+    constexpr unsigned int TP_NUM_OUTPUTS = 1;
+    T_inputIF<TT_DATA, kStreamCascAPI> inInterface;
+    T_outputIF<TT_DATA, kWindowAPI> outInterface;
+    inInterface.inStream0 = inStream0;
+    inInterface.inStream1 = inStream1;
+    outInterface.outWindow0 = (void*)outWindow0.data();
+    this->kernelClassMain(inInterface, outInterface);
+};
+#endif //__SUPPORTS_ACC64__
+
+#ifdef __SUPPORTS_ACC64__
+// window to CascStream, 1 to 2
+template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+NOINLINE_DECL void
+widget_api_cast<TT_DATA, kWindowAPI, kCascStreamAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN, TP_HEADER_BYTES>::transferData(
+    input_buffer<TT_DATA>& __restrict inWindow0,
+    output_stream_cacc64* __restrict outStream0,
+    output_stream<TT_DATA>* __restrict outStream1) {
+    T_inputIF<TT_DATA, kWindowAPI> inInterface;
+    T_outputIF<TT_DATA, kCascStreamAPI> outInterface;
+    inInterface.inWindow0 = (void*)inWindow0.data();
+    outInterface.outStream0 = outStream0;
+    outInterface.outStream1 = outStream1;
+    this->kernelClassMain(inInterface, outInterface);
+};
+#endif //__SUPPORTS_ACC64__
+
+#ifdef __SUPPORTS_ACC64__
+// window to StreamCasc, 1 to 2
+template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+NOINLINE_DECL void
+widget_api_cast<TT_DATA, kWindowAPI, kStreamCascAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN, TP_HEADER_BYTES>::transferData(
+    input_buffer<TT_DATA>& __restrict inWindow0,
+    output_stream<TT_DATA>* __restrict outStream0,
+    output_stream_cacc64* __restrict outStream1) {
+    T_inputIF<TT_DATA, kWindowAPI> inInterface;
+    T_outputIF<TT_DATA, kStreamCascAPI> outInterface;
+    inInterface.inWindow0 = (void*)inWindow0.data();
+    outInterface.outStream0 = outStream0;
+    outInterface.outStream1 = outStream1;
+    this->kernelClassMain(inInterface, outInterface);
+};
+#endif //__SUPPORTS_ACC64__
 }
 }
 }

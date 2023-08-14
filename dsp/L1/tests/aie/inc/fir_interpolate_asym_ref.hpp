@@ -57,8 +57,8 @@ class fir_interpolate_asym_ref {
     fir_interpolate_asym_ref(const TT_COEFF (&taps)[TP_FIR_LEN]) {
         // This reference model uses taps directly. It does not need to pad the taps array
         // to the column width because the concept of columns does not apply to the ref model.
-        for (int i = 0; i < FIR_LEN; ++i) {
-            m_internalTaps[i] = taps[FIR_LEN - 1 - i];
+        for (int i = 0; i < TP_FIR_LEN; ++i) {
+            m_internalTaps[i] = taps[TP_FIR_LEN - 1 - i];
         }
     }
     // Constructor

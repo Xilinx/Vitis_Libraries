@@ -86,7 +86,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE = 0,
           unsigned int TP_COEFF_PHASE_OFFSET = 0,
           unsigned int TP_COEFF_PHASES = 1,
-          unsigned int TP_COEFF_PHASES_LEN = TP_FIR_LEN* TP_COEFF_PHASES>
+          unsigned int TP_COEFF_PHASES_LEN = TP_FIR_LEN* TP_COEFF_PHASES,
+          unsigned int TP_SAT = 1>
 class fir_decimate_asym;
 
 template <typename fp = fir_params_defaults>
@@ -104,17 +105,18 @@ class fir_decimate_asym_tl {
 
     template <int pos, int CLEN, unsigned int DF, int T_FIR_LEN, typename T_D, typename T_C, unsigned int SSR>
     static constexpr unsigned int fnCheckIfFits() {
+        constexpr unsigned int decimateFactor = fnPermuteSupport() == 1 ? DF : 1;
         constexpr int samplesInBuff = fnSamplesIn1024<T_D>();
-        constexpr unsigned int loadSize = getKernelStreamLoadVsize<T_D, T_C, DF>();
+        constexpr unsigned int loadSize = getKernelStreamLoadVsize<T_D, T_C, decimateFactor>();
         constexpr unsigned int lanes = fnNumLanesDecAsym<T_D, T_C>();
-        constexpr int rangeOffsetLastKernel = fnFirRangeOffset<T_FIR_LEN, CLEN, CLEN - 1, DF>();
+        constexpr int rangeOffsetLastKernel = fnFirRangeOffset<T_FIR_LEN, CLEN, CLEN - 1, decimateFactor>();
         constexpr unsigned int fir_range_len = getKernelFirRangeLen<pos>();
-        constexpr unsigned int firRangeOffset = fnFirRangeOffset<T_FIR_LEN, CLEN, pos, DF>();
+        constexpr unsigned int firRangeOffset = fnFirRangeOffset<T_FIR_LEN, CLEN, pos, decimateFactor>();
         constexpr unsigned int dataOffsetNthKernel = getDataOffset<T_FIR_LEN, fir_range_len, firRangeOffset>();
-        constexpr int streamInitNullAccs = getInitNullAccs<dataOffsetNthKernel, DF, loadSize>();
+        constexpr int streamInitNullAccs = getInitNullAccs<dataOffsetNthKernel, decimateFactor, loadSize>();
         constexpr int m_kInitDataNeeded =
-            getInitDataNeeded<DF, lanes, streamInitNullAccs, SSR - 1, dataOffsetNthKernel, loadSize, fir_range_len,
-                              firRangeOffset, rangeOffsetLastKernel>();
+            getInitDataNeeded<decimateFactor, lanes, streamInitNullAccs, SSR - 1, dataOffsetNthKernel, loadSize,
+                              fir_range_len, firRangeOffset, rangeOffsetLastKernel>();
         if
             constexpr(m_kInitDataNeeded > samplesInBuff) { return 0; }
         else {
@@ -162,7 +164,8 @@ class fir_decimate_asym_tl {
                                            fp::BTP_COEFF_PHASE,
                                            fp::BTP_COEFF_PHASE_OFFSET,
                                            fp::BTP_COEFF_PHASES,
-                                           fp::BTP_COEFF_PHASES_LEN>;
+                                           fp::BTP_COEFF_PHASES_LEN,
+                                           fp::BTP_SAT>;
 };
 
 //-----------------------------------------------------------------------------------------------------
@@ -186,7 +189,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 class kernelFilterClass {
    private:
     // Parameter value defensive and legality checks
@@ -200,10 +204,12 @@ class kernelFilterClass {
                   "ERROR:TP_DECIMATE_FACTOR is outside the supported range.");
     static_assert(TP_SHIFT >= SHIFT_MIN && TP_SHIFT <= SHIFT_MAX, "ERROR: TP_SHIFT is out of the supported range.");
     static_assert(TP_RND >= ROUND_MIN && TP_RND <= ROUND_MAX, "ERROR: TP_RND is out of the supported range.");
+    static_assert(TP_SAT >= SAT_MODE_MIN && TP_SAT <= SAT_MODE_MAX, "ERROR: TP_SAT is out of supported range");
+    static_assert(TP_SAT != 2, "ERROR: TP_SAT is invalid. Valid values of TP_SAT are 0, 1, and 3");
     static_assert(fnEnumType<TT_DATA>() != enumUnknownType, "ERROR: TT_DATA is not a supported type.");
     static_assert(fnEnumType<TT_COEFF>() != enumUnknownType, "ERROR: TT_COEFF is not a supported type.");
-    static_assert(fnFirDecAsymTypeSupport<TT_DATA, TT_COEFF>() != 0,
-                  "ERROR: The combination of TT_DATA and TT_COEFF is not supported for this class.");
+    // static_assert(fnFirDecAsymTypeSupport<TT_DATA, TT_COEFF>() != 0, "ERROR: The combination of TT_DATA and TT_COEFF
+    // is not supported for this class.");
     static_assert(fnTypeCheckDataCoeffSize<TT_DATA, TT_COEFF>() != 0,
                   "ERROR: TT_DATA type less precise than TT_COEFF is not supported.");
     static_assert(fnTypeCheckDataCoeffCmplx<TT_DATA, TT_COEFF>() != 0,
@@ -214,6 +220,7 @@ class kernelFilterClass {
     static_assert(!(std::is_same<TT_DATA, cfloat>::value || std::is_same<TT_DATA, float>::value) || (TP_SHIFT == 0),
                   "ERROR: TP_SHIFT cannot be performed for TT_DATA=cfloat, so must be set to 0");
 
+    static constexpr unsigned int m_kPermuteSupport = fnPermuteSupport();
     // constants derived from configuration parameters
     static constexpr unsigned int m_kDataRegVsize = kBuffSize128Byte / (sizeof(TT_DATA)); // buff size in Bytes
     static constexpr unsigned int m_kColumns =
@@ -233,7 +240,9 @@ class kernelFilterClass {
         m_kDataLoadSize == 256 ? 4 : 8; // kBuffSize128Byte / m_kDataLoadVsize
     static constexpr unsigned int m_kSamplesInBuff = m_kDataLoadsInReg * m_kDataLoadVsize;
     static constexpr unsigned int m_kWinAccessByteSize =
-        fnWinAccessByteSize<TT_DATA, TT_COEFF>(); // The memory data path is min 128-bits wide for vector operations
+        m_kPermuteSupport == 1
+            ? 16
+            : 32; // Restrict window accesses to 256-bits when full set of permutes are not available.
     static constexpr unsigned int m_kFirRangeOffset =
         fnFirRangeOffset<TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TP_DECIMATE_FACTOR>(); // FIR Cascade Offset for
                                                                                              // this kernel position
@@ -241,6 +250,8 @@ class kernelFilterClass {
     static constexpr unsigned int m_kFirMarginOffset =
         fnFirMargin<TP_FIR_LEN, TT_DATA>() - TP_FIR_LEN + 1; // FIR Margin Offset.
     static constexpr unsigned int m_kFirInitOffset = m_kFirRangeOffset + m_kFirMarginOffset + TP_MODIFY_MARGIN_OFFSET;
+    static constexpr unsigned int m_kFirInitWinOffset =
+        TRUNC((m_kFirInitOffset), (m_kWinAccessByteSize / sizeof(TT_DATA)));
     static constexpr unsigned int m_kDataBuffXOffset =
         m_kFirInitOffset % (m_kWinAccessByteSize / sizeof(TT_DATA)); // Remainder of m_kFirInitOffset divided by 128bit
     static constexpr unsigned int m_kFirRangeOffsetLastKernel =
@@ -288,7 +299,12 @@ class kernelFilterClass {
                 (m_kInitDataNeeded <= m_kInitLoadVsize * (m_kInitLoadsInReg - 1) + 1)
             ? m_kArchIncrStrobeEn
             : kArchBasic;
-    static constexpr eArchType m_kArch = TP_API == 1 ? kArchStream : m_kArchWindow;
+    static constexpr eArchType m_kPermuteArch = TP_API == 1 ? kArchStream : m_kArchWindow;
+    static constexpr eArchType m_kDecomposedArch =
+        TP_API == 1 ? kArchStreamPhaseParallel : kArchPhaseParallel; // execute each phase in parallel. No ArchIncr
+                                                                     // equivalent, as marginal benefit in QoR.  or
+                                                                     // Stream arch? Later
+    static constexpr eArchType m_kArch = m_kPermuteSupport == 1 ? m_kPermuteArch : m_kDecomposedArch;
     static constexpr unsigned int m_kDFDataRange = m_kDataBuffXOffset + (m_kLanes - 1) * TP_DECIMATE_FACTOR;
     static constexpr unsigned int m_kDFX = (m_kLanes - 1) * TP_DECIMATE_FACTOR < m_kXoffsetRange ? kLowDF : kHighDF;
     static constexpr unsigned int m_kFirLenCeilCols = CEIL(TP_FIR_RANGE_LEN, m_kColumns);
@@ -296,15 +312,22 @@ class kernelFilterClass {
     static constexpr unsigned int m_kCoeffRegVsize = m_kZbuffSize / sizeof(TT_COEFF);
     unsigned int m_kDecimateOffsets;
 
-    static constexpr int streamRptFactor = 8; //
+    static constexpr int streamRptFactor =
+        m_kPermuteSupport == 1 ? 8 : 4; // devices with permute support may read 128 or 256-bits per iteration. Devices
+                                        // without permute support always read 256-bits of data, i.e. will wrap around a
+                                        // 1024-bit register after 4 iterations, instead of 8.
     static constexpr int marginLoadsMappedToBuff = (m_kFirMargin % m_kSamplesInBuff) / m_kStreamLoadVsize;
     static constexpr int streamDataOffsetWithinBuff = (m_kFirInitOffset) % m_kSamplesInBuff;
 
     static constexpr int streamInitAccs =
         streamInitNullAccs == 0 ? streamRptFactor : (CEIL(streamInitNullAccs, streamRptFactor) - streamInitNullAccs);
-
-    alignas(32) int delay[32] = {0};
-    // int doInit = (TP_CASC_LEN == 1 || emptyInitLanes==0)?0: 1;
+    // static constexpr int streamInitAccs =  (CEIL(streamInitNullAccs, streamRptFactor) - streamInitNullAccs);
+    // Single vector register gets stored on heap beetween iterations when permute is supported. Multiple registers are
+    // used when permute is not supported.
+    static constexpr int delaySize = m_kPermuteSupport == 1 ? 32 : 32 * TP_DECIMATE_FACTOR;
+    alignas(32) int delay[delaySize] = {0};
+    // int doInit = (TP_CASC_LEN == 1 || streamInitNullAccs==0)?0: 1;
+    // int doPhaseParallelInit = (TP_CASC_LEN == 1 || streamInitNullAccs==0)?0: 1;
     int doInit = 1;
     // Coefficient Load Size - number of samples in 256-bits
     static constexpr unsigned int m_kCoeffLoadSize = 256 / 8 / sizeof(TT_COEFF);
@@ -322,11 +345,12 @@ class kernelFilterClass {
         static constexpr unsigned int BTP_FIR_RANGE_LEN = TP_DECIMATE_FACTOR;
         static constexpr unsigned int BTP_INPUT_WINDOW_VSIZE = TP_INPUT_WINDOW_VSIZE;
     };
+    static constexpr int vectorRegistersNo = 4; // AIE-ML device provides 4 1024-bit vector registers
 
     static_assert(TP_INPUT_WINDOW_VSIZE % (TP_DECIMATE_FACTOR * m_kLanes) == 0,
                   "ERROR: TP_INPUT_WINDOW_VSIZE must be a multiple of TP_DECIMATE_FACTOR  and of the number of lanes "
                   "for the MUL/MAC intrinsic");
-    static_assert(m_kDataRegVsize - m_kDataLoadVsize >= m_kDFDataRange,
+    static_assert(m_kPermuteSupport == 0 || (m_kDataRegVsize - m_kDataLoadVsize >= m_kDFDataRange),
                   "ERROR: TP_DECIMATION_FACTOR exceeded for this data/coeff type combination. Required input data "
                   "exceeds input vector's register offset address range.");
     static_assert(!(m_kArch == kArchStream && m_kDFX == kHighDF),
@@ -346,14 +370,28 @@ class kernelFilterClass {
                     TP_INPUT_WINDOW_VSIZE % (TP_DECIMATE_FACTOR * m_kLanes * streamRptFactor) != 0),
                   "ERROR: TP_INPUT_WINDOW_VSIZE must be a multiple of (TP_DECIMATE_FACTOR * 8)  and of the number of "
                   "lanes for the streaming MUL/MAC intrinsic");
-    static_assert(!(std::is_same<TT_DATA, int16>::value && m_kDFX == kHighDF),
+    static_assert(!(m_kArch == kArchStreamPhaseParallel &&
+                    TP_INPUT_WINDOW_VSIZE % (TP_DECIMATE_FACTOR * m_kLanes * streamRptFactor) != 0),
+                  "ERROR: TP_INPUT_WINDOW_VSIZE must be a multiple of (TP_DECIMATE_FACTOR * 4)  and of the number of "
+                  "lanes for the streaming MUL/MAC intrinsic");
+    static_assert(!(m_kArch == kArchStreamPhaseParallel && TP_DECIMATE_FACTOR > vectorRegistersNo),
+                  "ERROR: Max Decimation factor exceeds available HW tile resource. Please decompose the desing into "
+                  "multiple kernels.");
+
+    // Int16 data and int32 coeffs data/coeff type combo is supported. Check high DF only when device supports permutes,
+    // as otherwise, a Parallel architectre will be used.
+    static_assert(!(m_kPermuteSupport == 1 && std::is_same<TT_DATA, int16>::value && m_kDFX == kHighDF),
                   "ERROR: TP_DECIMATION_FACTOR exceeded for this data type. Pre-select addressing is not available, "
                   "int16 data is only supported without pre-select.");
+
     // The coefficients array must include zero padding up to a multiple of the number of columns
     // the MAC intrinsic used to eliminate the accidental inclusion of terms beyond the FIR length.
     // Since this zero padding cannot be applied to the class-external coefficient array
     // the supplied taps are copied to an internal array, m_internalTaps, which can be padded.
     alignas(32) TT_COEFF m_internalTaps[CEIL(TP_FIR_RANGE_LEN, m_kCoeffLoadSize)]; // Filter taps/coefficients
+    static constexpr int tapsArraySize = CEIL(CEIL(TP_FIR_RANGE_LEN, TP_DECIMATE_FACTOR) / TP_DECIMATE_FACTOR,
+                                              (256 / 8 / sizeof(TT_COEFF))); // ceil'ed to 256-bits
+    alignas(32) TT_COEFF m_internalTaps2[TP_DECIMATE_FACTOR][tapsArraySize];
 
     // Filter implementation functions
     void filterSelectArch(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
@@ -364,6 +402,10 @@ class kernelFilterClass {
                           T_outputIF<TP_CASC_OUT, TT_DATA> outInterface);
     void filterStream(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                       T_outputIF<TP_CASC_OUT, TT_DATA> outInterface);
+    void filterPhaseParallel(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                             T_outputIF<TP_CASC_OUT, TT_DATA> outInterface);
+    void filterStreamPhaseParallel(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                   T_outputIF<TP_CASC_OUT, TT_DATA> outInterface);
 
    public:
     // Access function for AIE Synthesizer
@@ -426,6 +468,19 @@ class kernelFilterClass {
                 i;
             m_internalTaps[i] = taps[tapsAddress];
         }
+        for (int phase = 0; phase < TP_DECIMATE_FACTOR; ++phase) {
+            for (int i = 0; i < tapsArraySize; i++) { // ceiled to columns.
+                int tapIndex = i * TP_DECIMATE_FACTOR + TP_DECIMATE_FACTOR - 1 - phase;
+                int tapsAddress = TP_FIR_LEN - 1 -
+                                  fnFirRangeOffset<TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TP_DECIMATE_FACTOR>() -
+                                  tapIndex;
+                if (tapsAddress < 0 || tapIndex >= TP_FIR_RANGE_LEN) {
+                    m_internalTaps2[phase][i] = nullElem<TT_COEFF>();
+                } else {
+                    m_internalTaps2[phase][i] = taps[tapsAddress];
+                }
+            }
+        }
     }
 
     template <unsigned int coeffPhase,
@@ -454,6 +509,22 @@ class kernelFilterClass {
                 tapsOffset;
 
             m_internalTaps[i] = taps[tapsAddress];
+        }
+
+        for (int phase = 0; phase < TP_DECIMATE_FACTOR; ++phase) {
+            for (int i = 0; i < tapsArraySize; i++) { // ceiled to columns.
+                int tapIndex = i * TP_DECIMATE_FACTOR + TP_DECIMATE_FACTOR - 1 - phase;
+                int tapsOffset = tapIndex * coeffPhases + (coeffPhases - 1 - coeffPhase) + coeffPhaseOffset;
+                int tapsAddress =
+                    coeffPhasesLen - 1 -
+                    coeffPhases * fnFirRangeOffset<TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TP_DECIMATE_FACTOR>() -
+                    tapsOffset;
+                if (tapsAddress < 0 || tapIndex >= TP_FIR_RANGE_LEN) {
+                    m_internalTaps2[phase][i] = nullElem<TT_COEFF>();
+                } else {
+                    m_internalTaps2[phase][i] = taps[tapsAddress];
+                }
+            }
         }
     };
 
@@ -492,7 +563,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 class fir_decimate_asym : public kernelFilterClass<TT_DATA,
                                                    TT_COEFF,
                                                    TP_FIR_LEN,
@@ -513,7 +585,8 @@ class fir_decimate_asym : public kernelFilterClass<TT_DATA,
                                                    TP_COEFF_PHASE,
                                                    TP_COEFF_PHASE_OFFSET,
                                                    TP_COEFF_PHASES,
-                                                   TP_COEFF_PHASES_LEN> {
+                                                   TP_COEFF_PHASES_LEN,
+                                                   TP_SAT> {
    public:
     // Constructor
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
@@ -537,7 +610,8 @@ class fir_decimate_asym : public kernelFilterClass<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -560,7 +634,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -582,27 +657,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        false,
-                                                                        false,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        0,
-                                                                        1,
-                                                                        0,
-                                                                        2,
-                                                                        DUAL_IP_SINGLE,
-                                                                        USE_WINDOW_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           false,
+                                                           false,
+                                                           TP_FIR_RANGE_LEN,
+                                                           0,
+                                                           1,
+                                                           0,
+                                                           2,
+                                                           DUAL_IP_SINGLE,
+                                                           USE_WINDOW_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
@@ -625,7 +702,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -652,7 +730,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -674,27 +753,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        CASC_IN_FALSE,
-                                                                        CASC_OUT_FALSE,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        TP_KERNEL_POSITION,
-                                                                        TP_CASC_LEN,
-                                                                        USE_COEFF_RELOAD_TRUE,
-                                                                        1,
-                                                                        DUAL_IP_SINGLE,
-                                                                        USE_WINDOW_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           CASC_IN_FALSE,
+                                                           CASC_OUT_FALSE,
+                                                           TP_FIR_RANGE_LEN,
+                                                           TP_KERNEL_POSITION,
+                                                           TP_CASC_LEN,
+                                                           USE_COEFF_RELOAD_TRUE,
+                                                           1,
+                                                           DUAL_IP_SINGLE,
+                                                           USE_WINDOW_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym()
         : kernelFilterClass<TT_DATA,
@@ -717,7 +798,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>() {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>() {}
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
                             TT_COEFF,
@@ -739,7 +821,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -765,7 +848,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -787,27 +871,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        CASC_IN_FALSE,
-                                                                        CASC_OUT_FALSE,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        TP_KERNEL_POSITION,
-                                                                        TP_CASC_LEN,
-                                                                        USE_COEFF_RELOAD_TRUE,
-                                                                        2,
-                                                                        DUAL_IP_SINGLE,
-                                                                        USE_WINDOW_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           CASC_IN_FALSE,
+                                                           CASC_OUT_FALSE,
+                                                           TP_FIR_RANGE_LEN,
+                                                           TP_KERNEL_POSITION,
+                                                           TP_CASC_LEN,
+                                                           USE_COEFF_RELOAD_TRUE,
+                                                           2,
+                                                           DUAL_IP_SINGLE,
+                                                           USE_WINDOW_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym()
         : kernelFilterClass<TT_DATA,
@@ -830,7 +916,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>() {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>() {}
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
                             TT_COEFF,
@@ -852,7 +939,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -880,7 +968,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -902,27 +991,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        CASC_IN_TRUE,
-                                                                        CASC_OUT_FALSE,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        TP_KERNEL_POSITION,
-                                                                        TP_CASC_LEN,
-                                                                        USE_COEFF_RELOAD_FALSE,
-                                                                        1,
-                                                                        DUAL_IP_SINGLE,
-                                                                        USE_WINDOW_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           CASC_IN_TRUE,
+                                                           CASC_OUT_FALSE,
+                                                           TP_FIR_RANGE_LEN,
+                                                           TP_KERNEL_POSITION,
+                                                           TP_CASC_LEN,
+                                                           USE_COEFF_RELOAD_FALSE,
+                                                           1,
+                                                           DUAL_IP_SINGLE,
+                                                           USE_WINDOW_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
@@ -945,7 +1036,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -969,7 +1061,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -991,27 +1084,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        CASC_IN_TRUE,
-                                                                        CASC_OUT_FALSE,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        TP_KERNEL_POSITION,
-                                                                        TP_CASC_LEN,
-                                                                        USE_COEFF_RELOAD_FALSE,
-                                                                        2,
-                                                                        DUAL_IP_SINGLE,
-                                                                        USE_WINDOW_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           CASC_IN_TRUE,
+                                                           CASC_OUT_FALSE,
+                                                           TP_FIR_RANGE_LEN,
+                                                           TP_KERNEL_POSITION,
+                                                           TP_CASC_LEN,
+                                                           USE_COEFF_RELOAD_FALSE,
+                                                           2,
+                                                           DUAL_IP_SINGLE,
+                                                           USE_WINDOW_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
@@ -1034,7 +1129,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -1060,7 +1156,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -1082,27 +1179,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        CASC_IN_TRUE,
-                                                                        CASC_OUT_FALSE,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        TP_KERNEL_POSITION,
-                                                                        TP_CASC_LEN,
-                                                                        USE_COEFF_RELOAD_TRUE,
-                                                                        1,
-                                                                        DUAL_IP_SINGLE,
-                                                                        USE_WINDOW_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           CASC_IN_TRUE,
+                                                           CASC_OUT_FALSE,
+                                                           TP_FIR_RANGE_LEN,
+                                                           TP_KERNEL_POSITION,
+                                                           TP_CASC_LEN,
+                                                           USE_COEFF_RELOAD_TRUE,
+                                                           1,
+                                                           DUAL_IP_SINGLE,
+                                                           USE_WINDOW_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym()
         : kernelFilterClass<TT_DATA,
@@ -1125,7 +1224,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>() {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>() {}
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
                             TT_COEFF,
@@ -1147,7 +1247,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -1171,7 +1272,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -1193,27 +1295,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        CASC_IN_TRUE,
-                                                                        CASC_OUT_FALSE,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        TP_KERNEL_POSITION,
-                                                                        TP_CASC_LEN,
-                                                                        USE_COEFF_RELOAD_TRUE,
-                                                                        2,
-                                                                        DUAL_IP_SINGLE,
-                                                                        USE_WINDOW_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           CASC_IN_TRUE,
+                                                           CASC_OUT_FALSE,
+                                                           TP_FIR_RANGE_LEN,
+                                                           TP_KERNEL_POSITION,
+                                                           TP_CASC_LEN,
+                                                           USE_COEFF_RELOAD_TRUE,
+                                                           2,
+                                                           DUAL_IP_SINGLE,
+                                                           USE_WINDOW_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym()
         : kernelFilterClass<TT_DATA,
@@ -1236,7 +1340,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>() {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>() {}
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
                             TT_COEFF,
@@ -1258,7 +1363,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -1284,7 +1390,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -1306,27 +1413,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        CASC_IN_FALSE,
-                                                                        CASC_OUT_TRUE,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        TP_KERNEL_POSITION,
-                                                                        TP_CASC_LEN,
-                                                                        USE_COEFF_RELOAD_FALSE,
-                                                                        1,
-                                                                        DUAL_IP_SINGLE,
-                                                                        USE_WINDOW_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           CASC_IN_FALSE,
+                                                           CASC_OUT_TRUE,
+                                                           TP_FIR_RANGE_LEN,
+                                                           TP_KERNEL_POSITION,
+                                                           TP_CASC_LEN,
+                                                           USE_COEFF_RELOAD_FALSE,
+                                                           1,
+                                                           DUAL_IP_SINGLE,
+                                                           USE_WINDOW_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
@@ -1349,7 +1458,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -1375,7 +1485,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -1397,27 +1508,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        CASC_IN_FALSE,
-                                                                        CASC_OUT_TRUE,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        TP_KERNEL_POSITION,
-                                                                        TP_CASC_LEN,
-                                                                        USE_COEFF_RELOAD_TRUE,
-                                                                        1,
-                                                                        DUAL_IP_SINGLE,
-                                                                        USE_WINDOW_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           CASC_IN_FALSE,
+                                                           CASC_OUT_TRUE,
+                                                           TP_FIR_RANGE_LEN,
+                                                           TP_KERNEL_POSITION,
+                                                           TP_CASC_LEN,
+                                                           USE_COEFF_RELOAD_TRUE,
+                                                           1,
+                                                           DUAL_IP_SINGLE,
+                                                           USE_WINDOW_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym()
         : kernelFilterClass<TT_DATA,
@@ -1440,7 +1553,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>() {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>() {}
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
                             TT_COEFF,
@@ -1462,7 +1576,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -1489,7 +1604,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -1511,27 +1627,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        CASC_IN_TRUE,
-                                                                        CASC_OUT_TRUE,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        TP_KERNEL_POSITION,
-                                                                        TP_CASC_LEN,
-                                                                        USE_COEFF_RELOAD_FALSE,
-                                                                        1,
-                                                                        DUAL_IP_SINGLE,
-                                                                        USE_WINDOW_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           CASC_IN_TRUE,
+                                                           CASC_OUT_TRUE,
+                                                           TP_FIR_RANGE_LEN,
+                                                           TP_KERNEL_POSITION,
+                                                           TP_CASC_LEN,
+                                                           USE_COEFF_RELOAD_FALSE,
+                                                           1,
+                                                           DUAL_IP_SINGLE,
+                                                           USE_WINDOW_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
@@ -1554,7 +1672,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -1580,7 +1699,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -1602,27 +1722,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        CASC_IN_TRUE,
-                                                                        CASC_OUT_TRUE,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        TP_KERNEL_POSITION,
-                                                                        TP_CASC_LEN,
-                                                                        USE_COEFF_RELOAD_TRUE,
-                                                                        1,
-                                                                        DUAL_IP_SINGLE,
-                                                                        USE_WINDOW_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           CASC_IN_TRUE,
+                                                           CASC_OUT_TRUE,
+                                                           TP_FIR_RANGE_LEN,
+                                                           TP_KERNEL_POSITION,
+                                                           TP_CASC_LEN,
+                                                           USE_COEFF_RELOAD_TRUE,
+                                                           1,
+                                                           DUAL_IP_SINGLE,
+                                                           USE_WINDOW_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym()
         : kernelFilterClass<TT_DATA,
@@ -1645,7 +1767,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>() {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>() {}
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
                             TT_COEFF,
@@ -1667,7 +1790,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -1697,7 +1821,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -1719,27 +1844,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        false,
-                                                                        false,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        0,
-                                                                        1,
-                                                                        0,
-                                                                        1,
-                                                                        DUAL_IP_SINGLE,
-                                                                        USE_STREAM_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           false,
+                                                           false,
+                                                           TP_FIR_RANGE_LEN,
+                                                           0,
+                                                           1,
+                                                           0,
+                                                           1,
+                                                           DUAL_IP_SINGLE,
+                                                           USE_STREAM_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
@@ -1762,7 +1889,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -1781,7 +1909,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -1803,27 +1932,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        false,
-                                                                        false,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        0,
-                                                                        1,
-                                                                        0,
-                                                                        2,
-                                                                        DUAL_IP_SINGLE,
-                                                                        USE_STREAM_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           false,
+                                                           false,
+                                                           TP_FIR_RANGE_LEN,
+                                                           0,
+                                                           1,
+                                                           0,
+                                                           2,
+                                                           DUAL_IP_SINGLE,
+                                                           USE_STREAM_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
@@ -1846,7 +1977,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -1869,7 +2001,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -1891,27 +2024,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        CASC_IN_FALSE,
-                                                                        CASC_OUT_FALSE,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        TP_KERNEL_POSITION,
-                                                                        TP_CASC_LEN,
-                                                                        USE_COEFF_RELOAD_TRUE,
-                                                                        1,
-                                                                        DUAL_IP_SINGLE,
-                                                                        USE_STREAM_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           CASC_IN_FALSE,
+                                                           CASC_OUT_FALSE,
+                                                           TP_FIR_RANGE_LEN,
+                                                           TP_KERNEL_POSITION,
+                                                           TP_CASC_LEN,
+                                                           USE_COEFF_RELOAD_TRUE,
+                                                           1,
+                                                           DUAL_IP_SINGLE,
+                                                           USE_STREAM_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym()
         : kernelFilterClass<TT_DATA,
@@ -1934,7 +2069,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>() {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>() {}
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
                             TT_COEFF,
@@ -1956,7 +2092,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -1980,7 +2117,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -2002,27 +2140,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        CASC_IN_FALSE,
-                                                                        CASC_OUT_FALSE,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        TP_KERNEL_POSITION,
-                                                                        TP_CASC_LEN,
-                                                                        USE_COEFF_RELOAD_TRUE,
-                                                                        2,
-                                                                        DUAL_IP_SINGLE,
-                                                                        USE_STREAM_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           CASC_IN_FALSE,
+                                                           CASC_OUT_FALSE,
+                                                           TP_FIR_RANGE_LEN,
+                                                           TP_KERNEL_POSITION,
+                                                           TP_CASC_LEN,
+                                                           USE_COEFF_RELOAD_TRUE,
+                                                           2,
+                                                           DUAL_IP_SINGLE,
+                                                           USE_STREAM_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym()
         : kernelFilterClass<TT_DATA,
@@ -2045,7 +2185,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>() {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>() {}
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
                             TT_COEFF,
@@ -2067,7 +2208,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -2093,7 +2235,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -2115,27 +2258,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        CASC_IN_TRUE,
-                                                                        CASC_OUT_FALSE,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        TP_KERNEL_POSITION,
-                                                                        TP_CASC_LEN,
-                                                                        USE_COEFF_RELOAD_FALSE,
-                                                                        1,
-                                                                        DUAL_IP_SINGLE,
-                                                                        USE_STREAM_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           CASC_IN_TRUE,
+                                                           CASC_OUT_FALSE,
+                                                           TP_FIR_RANGE_LEN,
+                                                           TP_KERNEL_POSITION,
+                                                           TP_CASC_LEN,
+                                                           USE_COEFF_RELOAD_FALSE,
+                                                           1,
+                                                           DUAL_IP_SINGLE,
+                                                           USE_STREAM_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
@@ -2158,7 +2303,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -2180,7 +2326,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -2202,27 +2349,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        CASC_IN_TRUE,
-                                                                        CASC_OUT_FALSE,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        TP_KERNEL_POSITION,
-                                                                        TP_CASC_LEN,
-                                                                        USE_COEFF_RELOAD_FALSE,
-                                                                        2,
-                                                                        DUAL_IP_SINGLE,
-                                                                        USE_STREAM_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           CASC_IN_TRUE,
+                                                           CASC_OUT_FALSE,
+                                                           TP_FIR_RANGE_LEN,
+                                                           TP_KERNEL_POSITION,
+                                                           TP_CASC_LEN,
+                                                           USE_COEFF_RELOAD_FALSE,
+                                                           2,
+                                                           DUAL_IP_SINGLE,
+                                                           USE_STREAM_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
@@ -2245,7 +2394,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -2271,7 +2421,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -2293,27 +2444,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        CASC_IN_FALSE,
-                                                                        CASC_OUT_TRUE,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        TP_KERNEL_POSITION,
-                                                                        TP_CASC_LEN,
-                                                                        USE_COEFF_RELOAD_FALSE,
-                                                                        1,
-                                                                        DUAL_IP_SINGLE,
-                                                                        USE_STREAM_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           CASC_IN_FALSE,
+                                                           CASC_OUT_TRUE,
+                                                           TP_FIR_RANGE_LEN,
+                                                           TP_KERNEL_POSITION,
+                                                           TP_CASC_LEN,
+                                                           USE_COEFF_RELOAD_FALSE,
+                                                           1,
+                                                           DUAL_IP_SINGLE,
+                                                           USE_STREAM_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
@@ -2336,7 +2489,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -2359,7 +2513,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -2381,27 +2536,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        CASC_IN_TRUE,
-                                                                        CASC_OUT_TRUE,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        TP_KERNEL_POSITION,
-                                                                        TP_CASC_LEN,
-                                                                        USE_COEFF_RELOAD_FALSE,
-                                                                        1,
-                                                                        DUAL_IP_SINGLE,
-                                                                        USE_STREAM_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           CASC_IN_TRUE,
+                                                           CASC_OUT_TRUE,
+                                                           TP_FIR_RANGE_LEN,
+                                                           TP_KERNEL_POSITION,
+                                                           TP_CASC_LEN,
+                                                           USE_COEFF_RELOAD_FALSE,
+                                                           1,
+                                                           DUAL_IP_SINGLE,
+                                                           USE_STREAM_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
@@ -2424,7 +2581,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -2447,7 +2605,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -2469,27 +2628,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        CASC_IN_TRUE,
-                                                                        CASC_OUT_FALSE,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        TP_KERNEL_POSITION,
-                                                                        TP_CASC_LEN,
-                                                                        USE_COEFF_RELOAD_TRUE,
-                                                                        1,
-                                                                        DUAL_IP_SINGLE,
-                                                                        USE_STREAM_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           CASC_IN_TRUE,
+                                                           CASC_OUT_FALSE,
+                                                           TP_FIR_RANGE_LEN,
+                                                           TP_KERNEL_POSITION,
+                                                           TP_CASC_LEN,
+                                                           USE_COEFF_RELOAD_TRUE,
+                                                           1,
+                                                           DUAL_IP_SINGLE,
+                                                           USE_STREAM_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym()
         : kernelFilterClass<TT_DATA,
@@ -2512,7 +2673,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>() {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>() {}
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
                             TT_COEFF,
@@ -2534,14 +2696,15 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
     void filter(input_stream<TT_DATA>* inStream, input_stream_cacc48* inCascade, output_stream<TT_DATA>* outStream);
 };
 
-// Partially specialized classes for cascaded interface - final kernel. Reloadable coefficients, dual output
+// Partially specialized classes for cascaded interface - final kernel. Re-loadable coefficients, dual output
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -2556,7 +2719,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -2578,27 +2742,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        CASC_IN_TRUE,
-                                                                        CASC_OUT_FALSE,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        TP_KERNEL_POSITION,
-                                                                        TP_CASC_LEN,
-                                                                        USE_COEFF_RELOAD_TRUE,
-                                                                        2,
-                                                                        DUAL_IP_SINGLE,
-                                                                        USE_STREAM_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           CASC_IN_TRUE,
+                                                           CASC_OUT_FALSE,
+                                                           TP_FIR_RANGE_LEN,
+                                                           TP_KERNEL_POSITION,
+                                                           TP_CASC_LEN,
+                                                           USE_COEFF_RELOAD_TRUE,
+                                                           2,
+                                                           DUAL_IP_SINGLE,
+                                                           USE_STREAM_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym()
         : kernelFilterClass<TT_DATA,
@@ -2621,7 +2787,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>() {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>() {}
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
                             TT_COEFF,
@@ -2643,7 +2810,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -2654,7 +2822,7 @@ class fir_decimate_asym<TT_DATA,
 };
 
 //-----------------------------------------------------------------------------------------------------
-// Partially specialized classes for cascaded interface - first kernel. Reloadable coefficients
+// Partially specialized classes for cascaded interface - first kernel. Re-loadable coefficients
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -2669,7 +2837,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -2691,27 +2860,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        CASC_IN_FALSE,
-                                                                        CASC_OUT_TRUE,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        TP_KERNEL_POSITION,
-                                                                        TP_CASC_LEN,
-                                                                        USE_COEFF_RELOAD_TRUE,
-                                                                        1,
-                                                                        DUAL_IP_SINGLE,
-                                                                        USE_STREAM_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           CASC_IN_FALSE,
+                                                           CASC_OUT_TRUE,
+                                                           TP_FIR_RANGE_LEN,
+                                                           TP_KERNEL_POSITION,
+                                                           TP_CASC_LEN,
+                                                           USE_COEFF_RELOAD_TRUE,
+                                                           1,
+                                                           DUAL_IP_SINGLE,
+                                                           USE_STREAM_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym()
         : kernelFilterClass<TT_DATA,
@@ -2734,7 +2905,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>() {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>() {}
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
                             TT_COEFF,
@@ -2756,7 +2928,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -2766,7 +2939,7 @@ class fir_decimate_asym<TT_DATA,
 };
 
 //-----------------------------------------------------------------------------------------------------
-// Partially specialized classes for cascaded interface - middle kernel. Reeloadable coefficients
+// Partially specialized classes for cascaded interface - middle kernel. Re-loadable coefficients
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -2781,7 +2954,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -2803,27 +2977,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        CASC_IN_TRUE,
-                                                                        CASC_OUT_TRUE,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        TP_KERNEL_POSITION,
-                                                                        TP_CASC_LEN,
-                                                                        USE_COEFF_RELOAD_TRUE,
-                                                                        1,
-                                                                        DUAL_IP_SINGLE,
-                                                                        USE_STREAM_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           CASC_IN_TRUE,
+                                                           CASC_OUT_TRUE,
+                                                           TP_FIR_RANGE_LEN,
+                                                           TP_KERNEL_POSITION,
+                                                           TP_CASC_LEN,
+                                                           USE_COEFF_RELOAD_TRUE,
+                                                           1,
+                                                           DUAL_IP_SINGLE,
+                                                           USE_STREAM_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym()
         : kernelFilterClass<TT_DATA,
@@ -2846,7 +3022,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>() {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>() {}
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
                             TT_COEFF,
@@ -2868,7 +3045,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -2895,7 +3073,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -2917,27 +3096,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        false,
-                                                                        false,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        0,
-                                                                        1,
-                                                                        0,
-                                                                        1,
-                                                                        DUAL_IP_DUAL,
-                                                                        USE_STREAM_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           false,
+                                                           false,
+                                                           TP_FIR_RANGE_LEN,
+                                                           0,
+                                                           1,
+                                                           0,
+                                                           1,
+                                                           DUAL_IP_DUAL,
+                                                           USE_STREAM_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
@@ -2960,7 +3141,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -2979,7 +3161,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -3001,27 +3184,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        false,
-                                                                        false,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        0,
-                                                                        1,
-                                                                        0,
-                                                                        2,
-                                                                        DUAL_IP_DUAL,
-                                                                        USE_STREAM_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           false,
+                                                           false,
+                                                           TP_FIR_RANGE_LEN,
+                                                           0,
+                                                           1,
+                                                           0,
+                                                           2,
+                                                           DUAL_IP_DUAL,
+                                                           USE_STREAM_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
@@ -3044,7 +3229,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -3070,7 +3256,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -3092,27 +3279,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        CASC_IN_FALSE,
-                                                                        CASC_OUT_FALSE,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        TP_KERNEL_POSITION,
-                                                                        TP_CASC_LEN,
-                                                                        USE_COEFF_RELOAD_TRUE,
-                                                                        1,
-                                                                        DUAL_IP_DUAL,
-                                                                        USE_STREAM_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           CASC_IN_FALSE,
+                                                           CASC_OUT_FALSE,
+                                                           TP_FIR_RANGE_LEN,
+                                                           TP_KERNEL_POSITION,
+                                                           TP_CASC_LEN,
+                                                           USE_COEFF_RELOAD_TRUE,
+                                                           1,
+                                                           DUAL_IP_DUAL,
+                                                           USE_STREAM_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym()
         : kernelFilterClass<TT_DATA,
@@ -3135,7 +3324,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>() {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>() {}
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
                             TT_COEFF,
@@ -3157,7 +3347,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -3182,7 +3373,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -3204,27 +3396,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        CASC_IN_FALSE,
-                                                                        CASC_OUT_FALSE,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        TP_KERNEL_POSITION,
-                                                                        TP_CASC_LEN,
-                                                                        USE_COEFF_RELOAD_TRUE,
-                                                                        2,
-                                                                        DUAL_IP_DUAL,
-                                                                        USE_STREAM_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           CASC_IN_FALSE,
+                                                           CASC_OUT_FALSE,
+                                                           TP_FIR_RANGE_LEN,
+                                                           TP_KERNEL_POSITION,
+                                                           TP_CASC_LEN,
+                                                           USE_COEFF_RELOAD_TRUE,
+                                                           2,
+                                                           DUAL_IP_DUAL,
+                                                           USE_STREAM_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym()
         : kernelFilterClass<TT_DATA,
@@ -3247,7 +3441,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>() {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>() {}
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
                             TT_COEFF,
@@ -3269,7 +3464,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -3296,7 +3492,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -3318,27 +3515,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        CASC_IN_TRUE,
-                                                                        CASC_OUT_FALSE,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        TP_KERNEL_POSITION,
-                                                                        TP_CASC_LEN,
-                                                                        USE_COEFF_RELOAD_FALSE,
-                                                                        1,
-                                                                        DUAL_IP_DUAL,
-                                                                        USE_STREAM_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           CASC_IN_TRUE,
+                                                           CASC_OUT_FALSE,
+                                                           TP_FIR_RANGE_LEN,
+                                                           TP_KERNEL_POSITION,
+                                                           TP_CASC_LEN,
+                                                           USE_COEFF_RELOAD_FALSE,
+                                                           1,
+                                                           DUAL_IP_DUAL,
+                                                           USE_STREAM_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
@@ -3361,7 +3560,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -3386,7 +3586,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -3408,27 +3609,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        CASC_IN_TRUE,
-                                                                        CASC_OUT_FALSE,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        TP_KERNEL_POSITION,
-                                                                        TP_CASC_LEN,
-                                                                        USE_COEFF_RELOAD_FALSE,
-                                                                        2,
-                                                                        DUAL_IP_DUAL,
-                                                                        USE_STREAM_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           CASC_IN_TRUE,
+                                                           CASC_OUT_FALSE,
+                                                           TP_FIR_RANGE_LEN,
+                                                           TP_KERNEL_POSITION,
+                                                           TP_CASC_LEN,
+                                                           USE_COEFF_RELOAD_FALSE,
+                                                           2,
+                                                           DUAL_IP_DUAL,
+                                                           USE_STREAM_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
@@ -3451,7 +3654,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -3478,7 +3682,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -3500,27 +3705,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        CASC_IN_FALSE,
-                                                                        CASC_OUT_TRUE,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        TP_KERNEL_POSITION,
-                                                                        TP_CASC_LEN,
-                                                                        USE_COEFF_RELOAD_FALSE,
-                                                                        1,
-                                                                        DUAL_IP_DUAL,
-                                                                        USE_STREAM_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           CASC_IN_FALSE,
+                                                           CASC_OUT_TRUE,
+                                                           TP_FIR_RANGE_LEN,
+                                                           TP_KERNEL_POSITION,
+                                                           TP_CASC_LEN,
+                                                           USE_COEFF_RELOAD_FALSE,
+                                                           1,
+                                                           DUAL_IP_DUAL,
+                                                           USE_STREAM_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
@@ -3543,7 +3750,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -3566,7 +3774,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -3588,27 +3797,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        CASC_IN_TRUE,
-                                                                        CASC_OUT_TRUE,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        TP_KERNEL_POSITION,
-                                                                        TP_CASC_LEN,
-                                                                        USE_COEFF_RELOAD_FALSE,
-                                                                        1,
-                                                                        DUAL_IP_DUAL,
-                                                                        USE_STREAM_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           CASC_IN_TRUE,
+                                                           CASC_OUT_TRUE,
+                                                           TP_FIR_RANGE_LEN,
+                                                           TP_KERNEL_POSITION,
+                                                           TP_CASC_LEN,
+                                                           USE_COEFF_RELOAD_FALSE,
+                                                           1,
+                                                           DUAL_IP_DUAL,
+                                                           USE_STREAM_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
@@ -3631,7 +3842,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -3642,7 +3854,7 @@ class fir_decimate_asym<TT_DATA,
 };
 
 //-----------------------------------------------------------------------------------------------------
-// Partially specialized classes for cascaded interface - final kernel. Reloadable coefficients
+// Partially specialized classes for cascaded interface - final kernel. Re-loadable coefficients
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -3657,7 +3869,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -3679,27 +3892,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        CASC_IN_TRUE,
-                                                                        CASC_OUT_FALSE,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        TP_KERNEL_POSITION,
-                                                                        TP_CASC_LEN,
-                                                                        USE_COEFF_RELOAD_TRUE,
-                                                                        1,
-                                                                        DUAL_IP_DUAL,
-                                                                        USE_STREAM_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           CASC_IN_TRUE,
+                                                           CASC_OUT_FALSE,
+                                                           TP_FIR_RANGE_LEN,
+                                                           TP_KERNEL_POSITION,
+                                                           TP_CASC_LEN,
+                                                           USE_COEFF_RELOAD_TRUE,
+                                                           1,
+                                                           DUAL_IP_DUAL,
+                                                           USE_STREAM_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym()
         : kernelFilterClass<TT_DATA,
@@ -3722,7 +3937,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>() {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>() {}
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
                             TT_COEFF,
@@ -3744,7 +3960,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -3754,7 +3971,7 @@ class fir_decimate_asym<TT_DATA,
                 output_stream<TT_DATA>* outStream);
 };
 
-// Partially specialized classes for cascaded interface - final kernel. Reloadable coefficients, dual output
+// Partially specialized classes for cascaded interface - final kernel. Re-loadable coefficients, dual output
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -3769,7 +3986,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -3791,27 +4009,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        CASC_IN_TRUE,
-                                                                        CASC_OUT_FALSE,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        TP_KERNEL_POSITION,
-                                                                        TP_CASC_LEN,
-                                                                        USE_COEFF_RELOAD_TRUE,
-                                                                        2,
-                                                                        DUAL_IP_DUAL,
-                                                                        USE_STREAM_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           CASC_IN_TRUE,
+                                                           CASC_OUT_FALSE,
+                                                           TP_FIR_RANGE_LEN,
+                                                           TP_KERNEL_POSITION,
+                                                           TP_CASC_LEN,
+                                                           USE_COEFF_RELOAD_TRUE,
+                                                           2,
+                                                           DUAL_IP_DUAL,
+                                                           USE_STREAM_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym()
         : kernelFilterClass<TT_DATA,
@@ -3834,7 +4054,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>() {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>() {}
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
                             TT_COEFF,
@@ -3856,7 +4077,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -3868,7 +4090,7 @@ class fir_decimate_asym<TT_DATA,
 };
 
 //-----------------------------------------------------------------------------------------------------
-// Partially specialized classes for cascaded interface - first kernel. Reloadable coefficients
+// Partially specialized classes for cascaded interface - first kernel. Re-loadable coefficients
 template <typename TT_DATA,
           typename TT_COEFF,
           unsigned int TP_FIR_LEN,
@@ -3883,7 +4105,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -3905,27 +4128,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        CASC_IN_FALSE,
-                                                                        CASC_OUT_TRUE,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        TP_KERNEL_POSITION,
-                                                                        TP_CASC_LEN,
-                                                                        USE_COEFF_RELOAD_TRUE,
-                                                                        1,
-                                                                        DUAL_IP_DUAL,
-                                                                        USE_STREAM_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           CASC_IN_FALSE,
+                                                           CASC_OUT_TRUE,
+                                                           TP_FIR_RANGE_LEN,
+                                                           TP_KERNEL_POSITION,
+                                                           TP_CASC_LEN,
+                                                           USE_COEFF_RELOAD_TRUE,
+                                                           1,
+                                                           DUAL_IP_DUAL,
+                                                           USE_STREAM_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym()
         : kernelFilterClass<TT_DATA,
@@ -3948,7 +4173,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>() {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>() {}
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
                             TT_COEFF,
@@ -3970,7 +4196,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 
@@ -3996,7 +4223,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_decimate_asym<TT_DATA,
                         TT_COEFF,
@@ -4018,27 +4246,29 @@ class fir_decimate_asym<TT_DATA,
                         TP_COEFF_PHASE,
                         TP_COEFF_PHASE_OFFSET,
                         TP_COEFF_PHASES,
-                        TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                        TT_COEFF,
-                                                                        TP_FIR_LEN,
-                                                                        TP_DECIMATE_FACTOR,
-                                                                        TP_SHIFT,
-                                                                        TP_RND,
-                                                                        TP_INPUT_WINDOW_VSIZE,
-                                                                        CASC_IN_TRUE,
-                                                                        CASC_OUT_TRUE,
-                                                                        TP_FIR_RANGE_LEN,
-                                                                        TP_KERNEL_POSITION,
-                                                                        TP_CASC_LEN,
-                                                                        USE_COEFF_RELOAD_TRUE,
-                                                                        1,
-                                                                        DUAL_IP_DUAL,
-                                                                        USE_STREAM_API,
-                                                                        TP_MODIFY_MARGIN_OFFSET,
-                                                                        TP_COEFF_PHASE,
-                                                                        TP_COEFF_PHASE_OFFSET,
-                                                                        TP_COEFF_PHASES,
-                                                                        TP_COEFF_PHASES_LEN> {
+                        TP_COEFF_PHASES_LEN,
+                        TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                           TT_COEFF,
+                                                           TP_FIR_LEN,
+                                                           TP_DECIMATE_FACTOR,
+                                                           TP_SHIFT,
+                                                           TP_RND,
+                                                           TP_INPUT_WINDOW_VSIZE,
+                                                           CASC_IN_TRUE,
+                                                           CASC_OUT_TRUE,
+                                                           TP_FIR_RANGE_LEN,
+                                                           TP_KERNEL_POSITION,
+                                                           TP_CASC_LEN,
+                                                           USE_COEFF_RELOAD_TRUE,
+                                                           1,
+                                                           DUAL_IP_DUAL,
+                                                           USE_STREAM_API,
+                                                           TP_MODIFY_MARGIN_OFFSET,
+                                                           TP_COEFF_PHASE,
+                                                           TP_COEFF_PHASE_OFFSET,
+                                                           TP_COEFF_PHASES,
+                                                           TP_COEFF_PHASES_LEN,
+                                                           TP_SAT> {
    public:
     fir_decimate_asym()
         : kernelFilterClass<TT_DATA,
@@ -4061,7 +4291,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>() {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>() {}
     fir_decimate_asym(const TT_COEFF (&taps)[TP_FIR_LEN])
         : kernelFilterClass<TT_DATA,
                             TT_COEFF,
@@ -4083,7 +4314,8 @@ class fir_decimate_asym<TT_DATA,
                             TP_COEFF_PHASE,
                             TP_COEFF_PHASE_OFFSET,
                             TP_COEFF_PHASES,
-                            TP_COEFF_PHASES_LEN>(taps) {}
+                            TP_COEFF_PHASES_LEN,
+                            TP_SAT>(taps) {}
 
     static void registerKernelClass() { REGISTER_FUNCTION(fir_decimate_asym::filter); }
 

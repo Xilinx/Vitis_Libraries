@@ -8,7 +8,7 @@
                 "api_name": "xf::dsp::fft::fft",
                 "display_name": "fft",
                 "brief": "top of stream-based SSR FFT (fixed data type)",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "hls_ssr_fft.hpp"
                 ],
@@ -40,7 +40,8 @@
                         "type": "hls::stream< typename FFTOutputTraits< ssr_fft_param_struct::N, ssr_fft_param_struct::R, ssr_fft_param_struct::scaling_mode, ssr_fft_param_struct::transform_direction, ssr_fft_param_struct::butterfly_rnd_mode, typename FFTInputTraits< T_in >::T_castedType >::T_FFTOutType >[ssr_fft_param_struct::R]"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::dsp::fft::fft",
@@ -49,7 +50,7 @@
                 "api_name": "xf::dsp::fft::fft",
                 "display_name": "fft",
                 "brief": "top of stream-based SSR FFT (fixed data type)",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "hls_ssr_fft.hpp"
                 ],
@@ -86,7 +87,8 @@
                         "type": "hls::stream< typename FFTOutputTraits< ssr_fft_param_struct::N, ssr_fft_param_struct::R, ssr_fft_param_struct::scaling_mode, ssr_fft_param_struct::transform_direction, ssr_fft_param_struct::butterfly_rnd_mode, typename FFTInputTraits< T_in >::T_castedType >::T_FFTOutType >[ssr_fft_param_struct::R]"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::dsp::fft::fft",
@@ -95,7 +97,7 @@
                 "api_name": "xf::dsp::fft::fft",
                 "display_name": "fft",
                 "brief": "top of stream-based SSR FFT (float data type)",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "hls_ssr_fft.hpp"
                 ],
@@ -127,7 +129,8 @@
                         "type": "hls::stream< typename FFTOutputTraits< ssr_fft_param_struct::N, ssr_fft_param_struct::R, ssr_fft_param_struct::scaling_mode, ssr_fft_param_struct::transform_direction, ssr_fft_param_struct::butterfly_rnd_mode, typename FFTInputTraits< T_in >::T_castedType >::T_FFTOutType >[ssr_fft_param_struct::R]"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::dsp::fft::fft",
@@ -136,7 +139,7 @@
                 "api_name": "xf::dsp::fft::fft",
                 "display_name": "fft",
                 "brief": "top of stream-based SSR FFT (float data type)",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "hls_ssr_fft.hpp"
                 ],
@@ -173,7 +176,8 @@
                         "type": "hls::stream< typename FFTOutputTraits< ssr_fft_param_struct::N, ssr_fft_param_struct::R, ssr_fft_param_struct::scaling_mode, ssr_fft_param_struct::transform_direction, ssr_fft_param_struct::butterfly_rnd_mode, typename FFTInputTraits< T_in >::T_castedType >::T_FFTOutType >[ssr_fft_param_struct::R]"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::dsp::fft::fft2d",
@@ -182,7 +186,7 @@
                 "api_name": "xf::dsp::fft::fft2d",
                 "display_name": "fft2d",
                 "brief": "Top of 2D FFT kernel (fixed data type), provides DFT/Inverse DFT of 2D data.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "hls_ssr_fft_2d.hpp"
                 ],
@@ -249,7 +253,8 @@
                         "type": "typename WideTypeDefs< t_memWidth, typename FFTIOTypes< t_ssrFFTParamsColProc, typename FFTIOTypes< t_ssrFFTParamsRowProc, T_elemType >::T_outType >::T_outType >::WideIFStreamType &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::dsp::fft::fft2d",
@@ -258,7 +263,7 @@
                 "api_name": "xf::dsp::fft::fft2d",
                 "display_name": "fft2d",
                 "brief": "Top of 2D FFT kernel (float data type), provides DFT/Inverse DFT of 2D data.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "hls_ssr_fft_2d.hpp"
                 ],
@@ -325,7 +330,8 @@
                         "type": "typename WideTypeDefs< t_memWidth, typename FFTIOTypes< t_ssrFFTParamsColProc, typename FFTIOTypes< t_ssrFFTParamsRowProc, T_elemType >::T_outType >::T_outType >::WideIFStreamType &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         }
     ],
     "target_domain": ""

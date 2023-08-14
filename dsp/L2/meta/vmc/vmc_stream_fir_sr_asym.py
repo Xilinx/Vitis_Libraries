@@ -23,16 +23,21 @@ def vmc_validate_input_window_size(args):
 			fir_length = int(len(coeff))
 	return fn_validate_input_window_size(data_type, coef_type, fir_length, input_window_size, api, ssr)
 
-def vmc_validate_casc_length(args):
-    use_coeff_reload = args["use_coeff_reload"]
-    fir_length = args["fir_length"]
+def vmc_validate_casc_len(args):
     casc_length = args["casc_length"]
-    #if not use_casc_length:
-	# TODO : Talk to DSP lib team/sumanta about how 
-	# cascade validation works - confirm its just fir length related
-	#return fn_validate_casc_length(fir_length, casc_length, use_coeff_reload)
-    return {"is_valid": True}
+    return fn_validate_casc_len(casc_length);
     
+def vmc_validate_dual_ip(args):
+	dual_ip = args["dual_ip"]
+	num_outputs = args["num_outputs"]
+	api = 1
+	return fn_validate_dual_ip(num_outputs, api, dual_ip)
+
+def vmc_validate_out_ports(args):
+	api = 1
+	num_outputs = args["num_outputs"]
+	ssr = args["ssr"]
+	return fn_validate_num_outputs(num_outputs, api, ssr)
 
 def vmc_validate_coeff(args):
 	use_coeff_reload = args["use_coeff_reload"]
@@ -63,6 +68,10 @@ def vmc_validate_use_coeff_reload(args):
 	api = 1
 	return fn_validate_use_coeff_reload(api, use_coeff_reload, ssr)
 
+def vmc_validate_ssr(args):
+    ssr = args["ssr"]
+    return fn_validate_ssr(ssr);
+
 #### VMC graph generator ####
 def vmc_generate_graph(name, args):
 	tmpargs = {}
@@ -85,8 +94,8 @@ def vmc_generate_graph(name, args):
 	casc_length = args["casc_length"]
 	tmpargs["TP_CASC_LEN"] = casc_length
 	tmpargs["TP_USE_COEF_RELOAD"] = 1 if args["use_coeff_reload"] else 0
-	tmpargs["TP_NUM_OUTPUTS"] = 1
-	tmpargs["TP_DUAL_IP"] = 0
+	tmpargs["TP_NUM_OUTPUTS"] = 2 if args["num_outputs"] else 1
+	tmpargs["TP_DUAL_IP"] = 1 if args["dual_ip"] else 0
 	tmpargs["TP_API"] = 1
 	tmpargs["TP_SSR"] = args["ssr"]
 	tmpargs["coeff"] = coeff

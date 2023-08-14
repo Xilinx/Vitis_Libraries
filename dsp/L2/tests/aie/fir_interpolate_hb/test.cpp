@@ -37,7 +37,14 @@ int main(void) {
         filter.update(filter.coeffCT[i], tapsCenterTap);
     }
 #else
+#if (__HAS_SYM_PREADD__ == 1 || USING_UUT == 0)
     filter.update(filter.coeff[0], filter.m_taps[0], ((FIR_LEN + 1) / 4 + 1));
+#else
+    xf::dsp::aie::convert_sym_taps_to_asym(tapsAsym, (FIR_LEN + 1) / 2, filter.m_taps[0]);
+    tapsCenterTap = filter.m_taps[0][(FIR_LEN + 1) / 4];
+    tapsAsym[(FIR_LEN + 1) / 2] = tapsCenterTap;
+    filter.update(filter.coeff[0], tapsAsym, ((FIR_LEN + 1) / 2 + 1));
+#endif
 #endif
     filter.run(NITER / 2);
     filter.wait();
@@ -49,7 +56,14 @@ int main(void) {
         filter.update(filter.coeffCT[i], tapsCenterTap);
     }
 #else
+#if (__HAS_SYM_PREADD__ == 1 || USING_UUT == 0)
     filter.update(filter.coeff[0], filter.m_taps[1], ((FIR_LEN + 1) / 4 + 1));
+#else
+    xf::dsp::aie::convert_sym_taps_to_asym(tapsAsym, (FIR_LEN + 1) / 2, filter.m_taps[1]);
+    tapsCenterTap = filter.m_taps[1][(FIR_LEN + 1) / 4];
+    tapsAsym[(FIR_LEN + 1) / 2] = tapsCenterTap;
+    filter.update(filter.coeff[0], tapsAsym, ((FIR_LEN + 1) / 2 + 1));
+#endif
 #endif
     filter.run(NITER / 2);
 #else

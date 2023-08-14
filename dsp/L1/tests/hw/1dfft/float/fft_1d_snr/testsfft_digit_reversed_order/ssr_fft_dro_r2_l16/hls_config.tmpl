@@ -1,0 +1,26 @@
+[hls]
+
+clock=3.3
+flow_target=vivado
+syn.file=src/main.cpp
+syn.file_cflags=src/main.cpp,-I${XF_PROJ_ROOT}/L1/include/hw/vitis_fft/float  -I${XF_PROJ_ROOT}/L1/tests/common_float
+syn.file=src/hls_ssr_fft_data_path.hpp
+syn.file_cflags=src/hls_ssr_fft_data_path.hpp,-I${XF_PROJ_ROOT}/L1/include/hw/vitis_fft/float  -I${XF_PROJ_ROOT}/L1/tests/common_float
+syn.file=src/DEBUG_CONSTANTS.hpp
+syn.file_cflags=src/DEBUG_CONSTANTS.hpp,-I${XF_PROJ_ROOT}/L1/include/hw/vitis_fft/float  -I${XF_PROJ_ROOT}/L1/tests/common_float
+syn.top=fft_top
+tb.file=src/main.cpp
+tb.file_cflags=src/main.cpp,-I${XF_PROJ_ROOT}/L1/include/hw/vitis_fft/float  -I${XF_PROJ_ROOT}/L1/tests/common_float
+tb.file=${XF_PROJ_ROOT}/L1/tests/common_float/verif/fftStimulusIn_L16.verif
+tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/common_float/verif/fftStimulusIn_L16.verif,-I${XF_PROJ_ROOT}/L1/include/hw/vitis_fft/float  -I${XF_PROJ_ROOT}/L1/tests/common_float
+tb.file=${XF_PROJ_ROOT}/L1/tests/common_float/verif/fftGoldenOut_L16.verif
+tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/common_float/verif/fftGoldenOut_L16.verif,-I${XF_PROJ_ROOT}/L1/include/hw/vitis_fft/float  -I${XF_PROJ_ROOT}/L1/tests/common_float
+
+
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog
+
+

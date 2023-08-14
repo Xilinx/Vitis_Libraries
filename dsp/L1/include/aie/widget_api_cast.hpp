@@ -125,6 +125,92 @@ class kernelClass<TT_DATA,
     void kernelClassMain(T_inputIF<TT_DATA, kWindowAPI> inInterface, T_outputIF<TT_DATA, kStreamAPI> outInterface);
 };
 
+template <typename TT_DATA,
+          unsigned int TP_NUM_INPUTS,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_NUM_OUTPUT_CLONES,
+          unsigned int TP_PATTERN,
+          unsigned int TP_HEADER_BYTES>
+class kernelClass<TT_DATA,
+                  kCascStreamAPI,
+                  kWindowAPI,
+                  TP_NUM_INPUTS,
+                  TP_WINDOW_VSIZE,
+                  TP_NUM_OUTPUT_CLONES,
+                  TP_PATTERN,
+                  TP_HEADER_BYTES> {
+   private:
+   public:
+    // Constructor
+    kernelClass() {}
+
+    void kernelClassMain(T_inputIF<TT_DATA, kCascStreamAPI> inInterface, T_outputIF<TT_DATA, kWindowAPI> outInterface);
+};
+
+template <typename TT_DATA,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_NUM_OUTPUT_CLONES,
+          unsigned int TP_PATTERN,
+          unsigned int TP_HEADER_BYTES>
+class kernelClass<TT_DATA,
+                  kWindowAPI,
+                  kCascStreamAPI,
+                  1,
+                  TP_WINDOW_VSIZE,
+                  TP_NUM_OUTPUT_CLONES,
+                  TP_PATTERN,
+                  TP_HEADER_BYTES> {
+   private:
+   public:
+    // Constructor
+    kernelClass() {}
+
+    void kernelClassMain(T_inputIF<TT_DATA, kWindowAPI> inInterface, T_outputIF<TT_DATA, kCascStreamAPI> outInterface);
+};
+
+template <typename TT_DATA,
+          unsigned int TP_NUM_INPUTS,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_NUM_OUTPUT_CLONES,
+          unsigned int TP_PATTERN,
+          unsigned int TP_HEADER_BYTES>
+class kernelClass<TT_DATA,
+                  kStreamCascAPI,
+                  kWindowAPI,
+                  TP_NUM_INPUTS,
+                  TP_WINDOW_VSIZE,
+                  TP_NUM_OUTPUT_CLONES,
+                  TP_PATTERN,
+                  TP_HEADER_BYTES> {
+   private:
+   public:
+    // Constructor
+    kernelClass() {}
+
+    void kernelClassMain(T_inputIF<TT_DATA, kStreamCascAPI> inInterface, T_outputIF<TT_DATA, kWindowAPI> outInterface);
+};
+
+template <typename TT_DATA,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_NUM_OUTPUT_CLONES,
+          unsigned int TP_PATTERN,
+          unsigned int TP_HEADER_BYTES>
+class kernelClass<TT_DATA,
+                  kWindowAPI,
+                  kStreamCascAPI,
+                  1,
+                  TP_WINDOW_VSIZE,
+                  TP_NUM_OUTPUT_CLONES,
+                  TP_PATTERN,
+                  TP_HEADER_BYTES> {
+   private:
+   public:
+    // Constructor
+    kernelClass() {}
+
+    void kernelClassMain(T_inputIF<TT_DATA, kWindowAPI> inInterface, T_outputIF<TT_DATA, kStreamCascAPI> outInterface);
+};
+
 //-----------------------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------
 // Single kernel base specialization. Used for single window to single window copy
@@ -385,6 +471,86 @@ class widget_api_cast<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 2, TP
                       output_stream<TT_DATA>* __restrict outStream0,
                       output_stream<TT_DATA>* __restrict outStream1);
 };
+
+#ifdef __SUPPORTS_ACC64__
+// CascStream to  window, 2 in 1 out
+template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+class widget_api_cast<TT_DATA, kCascStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>
+    : public kernelClass<TT_DATA, kCascStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES> {
+   public:
+    // Constructor
+    widget_api_cast()
+        : kernelClass<TT_DATA, kCascStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>() {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast::transferData); }
+
+    // Main function
+    void transferData(input_stream_cacc64* __restrict inStream0,
+                      input_stream<TT_DATA>* __restrict inStream1,
+                      output_circular_buffer<TT_DATA>& __restrict outWindow0);
+};
+#endif //__SUPPORTS_ACC64__
+
+#ifdef __SUPPORTS_ACC64__
+// StreamCasc to  window, 2 in 1 out
+template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+class widget_api_cast<TT_DATA, kStreamCascAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>
+    : public kernelClass<TT_DATA, kStreamCascAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES> {
+   public:
+    // Constructor
+    widget_api_cast()
+        : kernelClass<TT_DATA, kStreamCascAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>() {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast::transferData); }
+
+    // Main function
+    void transferData(input_stream<TT_DATA>* __restrict inStream0,
+                      input_stream_cacc64* __restrict inStream1,
+                      output_circular_buffer<TT_DATA>& __restrict outWindow0);
+};
+#endif //__SUPPORTS_ACC64__
+
+#ifdef __SUPPORTS_ACC64__
+// Window to CascStream 1 to 2
+template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+class widget_api_cast<TT_DATA, kWindowAPI, kCascStreamAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN, TP_HEADER_BYTES>
+    : public kernelClass<TT_DATA, kWindowAPI, kCascStreamAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN, TP_HEADER_BYTES> {
+   public:
+    // Constructor
+    widget_api_cast()
+        : kernelClass<TT_DATA, kWindowAPI, kCascStreamAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN, TP_HEADER_BYTES>() {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast::transferData); }
+
+    // Main function
+    void transferData(input_buffer<TT_DATA>& __restrict inWindow0,
+                      output_stream_cacc64* __restrict outStream0,
+                      output_stream<TT_DATA>* __restrict outStream1);
+};
+#endif //__SUPPORTS_ACC64__
+
+#ifdef __SUPPORTS_ACC64__
+// Window to StreamCasc 1 to 2
+template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+class widget_api_cast<TT_DATA, kWindowAPI, kStreamCascAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN, TP_HEADER_BYTES>
+    : public kernelClass<TT_DATA, kWindowAPI, kStreamCascAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN, TP_HEADER_BYTES> {
+   public:
+    // Constructor
+    widget_api_cast()
+        : kernelClass<TT_DATA, kWindowAPI, kStreamCascAPI, 1, TP_WINDOW_VSIZE, 2, TP_PATTERN, TP_HEADER_BYTES>() {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast::transferData); }
+
+    // Main function
+    void transferData(input_buffer<TT_DATA>& __restrict inWindow0,
+                      output_stream<TT_DATA>* __restrict outStream0,
+                      output_stream_cacc64* __restrict outStream1);
+};
+#endif //__SUPPORTS_ACC64__
 }
 }
 }

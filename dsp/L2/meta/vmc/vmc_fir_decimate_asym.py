@@ -5,7 +5,8 @@ def vmc_validate_coef_type(args):
 	data_type = args["data_type"]
 	coef_type = args["coef_type"]
 	standard_checks =  fn_validate_coef_type(data_type, coef_type)
-	type_check = fn_type_support(data_type, coef_type)
+	AIE_VARIANT = 1
+	type_check = fn_type_support(data_type, coef_type,AIE_VARIANT)
 	for check in (standard_checks,type_check) :
 		if check["is_valid"] == False :
 			return check
@@ -19,7 +20,7 @@ def vmc_validate_input_window_size(args):
 	coeff = args["coeff"]
 	decimate_factor = args["decimate_factor"]
 	api = 0
-	ssr = 1
+	ssr = args["ssr"]
 	if use_coeff_reload:
 		fir_length = args["fir_length"]
 	else:
@@ -30,15 +31,13 @@ def vmc_validate_input_window_size(args):
 	return fn_validate_input_window_size(data_type, coef_type, fir_length, decimate_factor, input_window_size, api, ssr)
 
 def vmc_validate_casc_length(args):
-	use_coeff_reload = args["use_coeff_reload"]
-	fir_length = args["fir_length"]
-	casc_length = args["casc_length"]
-	#if not use_casc_length:
+    casc_length = args["casc_length"]
+    #if not use_casc_length:
 	# TODO : Talk to DSP lib team/sumanta about how 
 	# cascade validation works - confirm its just fir length related
 	#return fn_validate_casc_length(fir_length, casc_length, use_coeff_reload)
-	return {"is_valid": True}
-	 
+    return fn_validate_casc_len(casc_length);
+    
 
 def vmc_validate_coeff(args):
 	use_coeff_reload = args["use_coeff_reload"]
@@ -47,7 +46,7 @@ def vmc_validate_coeff(args):
 	data_type = args["data_type"]
 	casc_length = args["casc_length"]
 	decimate_factor = args["decimate_factor"]
-	ssr = 1
+	ssr = args["ssr"]
 	api = 0
 	if use_coeff_reload:
 		fir_length = args["fir_length"]
@@ -69,7 +68,28 @@ def vmc_validate_decimate_factor(args):
 	coef_type = args["coef_type"]
 	decimate_factor = args["decimate_factor"]
 	api = 0
-	return fn_validate_decimate_factor(data_type, coef_type, decimate_factor, api)
+	AIE_VARIANT = 1
+	return fn_validate_decimate_factor(data_type, coef_type, decimate_factor, api, AIE_VARIANT)
+
+def vmc_validate_ssr(args):
+    ssr = args["ssr"]
+    api = 0
+    deci_poly = 1
+    AIE_VARIANT = 1
+    decimate_factor = args["decimate_factor"]
+    return fn_validate_ssr(ssr, api, decimate_factor, deci_poly, AIE_VARIANT)
+
+def vmc_validate_input_ports(args):
+	dual_ip = args["dual_ip"]
+	AIE_VARIANT = 1
+	api = 0
+	return fn_validate_dual_ip(api, dual_ip, AIE_VARIANT)
+
+def vmc_validate_out_ports(args):
+	num_outputs = args["num_outputs"]
+	AIE_VARIANT = 1
+	api = 0
+	return fn_validate_num_outputs(api, num_outputs, AIE_VARIANT)
 
 #### VMC graph generator ####
 def vmc_generate_graph(name, args):
@@ -93,10 +113,10 @@ def vmc_generate_graph(name, args):
 	tmpargs["TP_INPUT_WINDOW_VSIZE"] = args["input_window_size"]
 	tmpargs["TP_CASC_LEN"] = args["casc_length"]
 	tmpargs["TP_USE_COEF_RELOAD"] = 1 if args["use_coeff_reload"] else 0
-	tmpargs["TP_NUM_OUTPUTS"] = 1
-	tmpargs["TP_DUAL_IP"] = 0
+	tmpargs["TP_NUM_OUTPUTS"] = 2 if args["num_outputs"] else 1
+	tmpargs["TP_DUAL_IP"] = 1 if args["dual_ip"] else 0
 	tmpargs["TP_API"] = 0
-	tmpargs["TP_SSR"] = 1
+	tmpargs["TP_SSR"] = args["ssr"]
 	tmpargs["TP_PARA_DECI_POLY"] = 1
 	tmpargs["coeff"] = args["coeff"]
 	

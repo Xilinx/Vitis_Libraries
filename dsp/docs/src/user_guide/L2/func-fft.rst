@@ -153,6 +153,10 @@ Distortion caused by saturation will be possible for certain configurations of t
 Note that for cases with ``TP_PARALLEL_POWER>1``, saturation is applied at the end of each subframe processor and also in each combiner, so for data sets which cause saturation even in the subframe processor, the output will likely not match the output of an FFT model.
 For ``TT_DATA=cfloat``, the FFT performs no scaling, nor saturation. Any saturation effects will be due to the atomic float operations returning positive infinity, negative infinity or NaN.
 
+Cascade Feature
+---------------
+The FFT is configured using the template parameter TP_CASC_LEN. This determines the number of kernels over which the FFT function (or subframe FFT in the case of TP_PARALLEL_POWER>0) is split. To be clear, this feature does not use the cascade ports of kernels to convey any data. IObuffers are used to convey data from one kernel to the next in the chain. The term cascade is used simply in the sense that the function is split into a series of operations which are executed by a series of kernels, each on a separate tile. The FFT function is only split at stage boundaries, so the TP_CASC_LEN value cannot exceed the number of stages for that FFT. 
+
 Constraints
 -----------
 
@@ -163,8 +167,11 @@ The FFT design has large memory requirements for data buffering and twiddle stor
 
     **Applying Design Constraints**
 
-The FFT class is implemented as a recursion of the top level to implement the parallelism. The instance names of each pair of subgraphs in the recursion are FFTsubframe(0) and FFTsubframe(1). In the final level of recursion, the FFT graph will contain an instance of either FFTwinproc (for TP_API = 0) or FFTstrproc (when TP_API=1). Within this level there is an array of kernels called m_fftKernels which will have TP_CASC_LEN members.
+Location and other constraints may be applied in the parent graph which instances the FFT graph class. To apply a constraint, you will need to know the name of the kernel, which will include the hierarchial path to that kernel. The simplest way to derive names, including the hierarchial part, is to compile a design and open it in Vitis (vitis_analyser), using the graph view. The names of all kernels and memory buffers can be obtained from there. These names may then be back-annotated to the parent graph to apply the necessary constraint.
 
+The FFT graph class is implemented as a recursion of the top level to implement the parallelism. The instance names of each pair of subgraphs in the recursion are FFTsubframe(0) and FFTsubframe(1). In the final level of recursion, the FFT graph will contain an instance of either FFTwinproc (for TP_API = 0) or FFTstrproc (when TP_API=1). Within this level there is an array of kernels called m_fftKernels which will have TP_CASC_LEN members. In the above diagram, widgets are shown in green and red. The widgets either receive 2 streams and interlace these streams to form an iobuffer of data on which the FFT operates, or take the iobuffer output from the FFT and deinterlace this into 2 streams. The widgets may be expressed as separate kernels (TP_USE_WIDGETS=1), and hence then placed on separate tiles, or may be expressed as functions internal to the FFT kernel (or combiner kernel) (TP_USE_WIDGETS=0) for improved performance compared to one tile hosting both the FFT kernel and associated widgets. See also :ref:`FFT_CONFIGURATION_NOTES` below. 
+
+In release 2023.1 widget kernels which converted from dual streams to iobuffers and vice versa were blended with the parent FFT or combiner kernels they supported. This eliminated kernel-switch overheads and so improved performance versus the case where widgets were co-located with their parent FFT or combiner. However, this prevented the user from splitting each trio of kernels over multiple tiles for even higher performance albeit at a trebling of the resource cost. In 2023.2, the choice of whether to express the widgets as standalone kernels, or to blend them with the FFT or combiner they serve, has been added as TP_USE_WIDGETS. The following description applies to the configuration with widget kernels, but the principles of the recursive decomposition and the names of the FFT and FFT combiner kernels remain and apply in either case.
 The stream to window conversion kernels on input and output to the fft subframes are at the same level as m_fftKernels and are called m_inWidgetKernel and m_outWidgetKernel respectively.
 Each level of recursion will also contain an array of radix2 combiner kernels and associated stream to window conversion kernels. These are seen as a column of kernels in the above figure.
 Their instance names are m_r2Comb[] for the radix2 combiners and m_combInKernel[] and m_combOutKernel[] for the input and output widget kernels respectively.
@@ -186,7 +193,7 @@ For large point sizes, e.g. 65536, the design is large, requiring 80 tiles. With
 Use of single_buffer
 --------------------
 
-When configured for ``TP_API=0``, i.e. window API, the FFT will default to use ping-pong buffers for performance. However, for the FFT, the resulting buffers can be very large and can limit the point size achievable by a single kernel. It is possible to apply the single_buffer constraint to the input and/or output buffers to reduce the memory cost of the FFT. By this means an FFT with ``TT_DATA=cint32`` of ``TP_POINT_SIZE=4096`` can be made to fit in a single kernel. The following code shows how such a constraint may be applied.
+When configured for ``TP_API=0``, i.e. iobuffer API, the FFT will default to use ping-pong buffers for performance. However, for the FFT, the resulting buffers can be very large and can limit the point size achievable by a single kernel. It is possible to apply the single_buffer constraint to the input and/or output buffers to reduce the memory cost of the FFT, though this will come at the cost of reduced performance. By this means an FFT with ``TT_DATA=cint16`` of ``TP_POINT_SIZE=4096`` can be made to fit in a single kernel. The following code shows how such a constraint may be applied.
 
 .. code-block::
 
@@ -214,11 +221,13 @@ This section is intended to provide guidance for the user on how best to configu
 
 Configuration for performance vs resource
 -----------------------------------------
-Simple configurations of the FFT use a single kernel. Multiple kernels will be used when either ``TP_PARALLEL_POWER > 0`` or ``TP_CASC_LEN > 1``. Both of these parameters exist to allow higher throughput, though ``TP_PARALLEL_POWER`` also allows larger point sizes that can be implemented in a single kernel.
+Simple configurations of the FFT use a single kernel. Multiple kernels will be used when either ``TP_PARALLEL_POWER > 0`` or ``TP_CASC_LEN > 1`` or ``TP_USE_WIDGETS = 1`` (with stream IO or TP_PARALLEL_POWER>0). All of these parameters exist to allow higher throughput, though ``TP_PARALLEL_POWER`` also allows larger point sizes that can be implemented in a single kernel.
 If a higher throughput is required than what can be achieved with a single kernel then ``TP_CASC_LEN`` should be increased in preference to ``TP_PARALLEL_POWER``. This is because resource (number of kernels) will match ``TP_CASC_LEN``, whereas for ``TP_PARALLEL_POWER``, resource increases quadratically.
 It is recommended that TP_PARALLEL_POWER is only increased after ``TP_CASC_LEN`` has been increased, but where throughput still needs to be increased.
 Of course, ``TP_PARALLEL_POWER`` may be required if the point size required is greater than a single kernel can be achieved. In this case, to keep resource minimized, increase ``TP_PARALLEL_POWER`` as required to support the point size in question, then increase ``TP_CASC_LEN`` to achieve the required throughput, before again increasing ``TP_PARALLEL_POWER`` if higher throughput is still required.
-The maximum point size supported by a single kernel may be increased by use of the single_kernel constraint. This only applies when TP_API=0 (windows) as the streaming implementation always uses single buffering.
+TP_USE_WIDGETS can be used when either TP_API = 1 (stream IO to the FFT) or TP_PARALLEL_POWER>0 because for this, widgets are used with streams for the internal trellis connections. By default, TP_USE_WIDGETS=0 which means that the FFT with stream input will convert the incoming stream(s) to an iobuffer as a function of the FFT kernel and similarly for the output iobuffer to streams conversion. Setting TP_USE_WIDGETS=1 will mean that these conversion functions are separate kernels. The use of runtime<ratio> or location constraints can then be used to force these widget kernels to be placed on differen tiles to their parent FFT kernel and so boost performance. The resource cost will rise accordingly. 
+If the performance achieved using TP_CASC_LEN alone is close to that required (e.g. within about 20%), then TP_USE_WIDGETS may help reach the required performance with only a modest increase in resources and so should be used in preference to TP_PARALLEL_POWER. Using TP_USE_WIDGETS in conjunction with TP_PARALLEL_POWER>0 can lead to a significant increase in tile use (up to 3x).
+The maximum point size supported by a single kernel may be increased by use of the single_buffer constraint. This only applies when TP_API=0 (windows) as the streaming implementation always uses single buffering.
 
 Scenarios
 ---------
@@ -251,7 +260,7 @@ Parameter Legality Notes
 
 Where possible, illegal values for template parameters, or illegal combinations of values for template parameters are detected at compilation time.
 Where an illegal configuration is detected, compilation will fail with an error message indicating the constraint in question.
-However, no attempt has been made to detect an error upon configurations which are simply too large for the resource available, as the library element cannot know how much of the device is used by the user code and also because the resource limits vary by device. In these cases, compilation will likely fail, but due to the over-use of a resource detected by the aie tools.
+However, no attempt has been made to detect an error upon configurations which are simply too large for the resource available, as the library element cannot know how much of the device is used by the user code and also because the resource limits vary by device which the library unit cannot deduce. In these cases, compilation will likely fail, but due to the over-use of a resource detected by the aie tools.
 For example, an FFT of ``TT_DATA = cint16`` can be supported up to ``TP_POINT_SIZE=65536`` using ``TP_PARALLEL_POWER=4``.
 A similarly configured FFT with ``TT_DATA=cint32`` will not compile because the per-tile memory use, which is constant and predictable, is exceeded. This condition is detected and an error would be issued.
 An FFT with ``TT_DATA=cint32`` and ``TP_PARALLEL_POWER=5`` should, in theory, be possible to implement, but this will use 192 tiles directly and will use the memory of many other tiles, so is likely to exceed the capacity of the AIE array. However, the available capacity cannot easily be determined, so no error check is applied here.

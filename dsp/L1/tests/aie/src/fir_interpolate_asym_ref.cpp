@@ -17,8 +17,7 @@
 #include "aie_api/aie_adf.hpp"
 #include "fir_interpolate_asym_ref.hpp"
 #include "fir_ref_utils.hpp"
-//#include "fir_ref_coeff_header.hpp"
-
+#define _DSPLIB_FIR_INTERPOLATE_ASYM_REF_DEBUG_
 namespace xf {
 namespace dsp {
 namespace aie {
@@ -46,6 +45,7 @@ void filter_ref(input_circular_buffer<TT_DATA,
 
     auto inItr = ::aie::begin_random_circular(inWindow);
     auto outItr = ::aie::begin_random_circular(outWindow);
+    int q = 0;
 
     const unsigned int kFirMarginOffset = fnFirMargin<kFirLen, TT_DATA>() - kFirLen + 1; // FIR Margin Offset.
     inItr += kFirMarginOffset; // move input data pointer past the margin padding
@@ -54,6 +54,7 @@ void filter_ref(input_circular_buffer<TT_DATA,
         for (unsigned int j = 0; j < kFirLen; ++j) {
             d_in[j] = *inItr++;
         }
+
         for (int k = TP_INTERPOLATE_FACTOR - 1; k >= 0; --k) {
             accum = null_accRef<TT_DATA>(); // reset accumulator at the start of the mult-add for each output sample
             for (unsigned int j = 0; j < kFirLen; ++j) {
@@ -67,7 +68,7 @@ void filter_ref(input_circular_buffer<TT_DATA,
             *outItr++ = accum_srs;
         }
         // Revert data pointer for next sample
-        inItr -= TP_FIR_LEN / TP_INTERPOLATE_FACTOR - 1;
+        inItr -= kFirLen - 1;
     }
 };
 
@@ -130,7 +131,7 @@ void fir_interpolate_asym_ref<TT_DATA,
               const TT_COEFF (&inTaps)[TP_FIR_LEN]) {
     // Coefficient reload
     for (int i = 0; i < TP_FIR_LEN; i++) {
-        m_internalTaps[i] = inTaps[FIR_LEN - 1 - i];
+        m_internalTaps[i] = inTaps[TP_FIR_LEN - 1 - i];
     }
     filter_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE>(
         inWindow, outWindow, m_internalTaps);

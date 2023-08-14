@@ -51,7 +51,7 @@ class fir_resampler_ref {
     fir_resampler_ref(const TT_COEFF (&coefficients)[TP_FIR_LEN]) {
         // This reference model uses taps directly. It does not need to pad the taps array
         // to the column width because the concept of columns does not apply to the ref model.
-        for (int i = 0; i < FIR_LEN; ++i) {
+        for (int i = 0; i < TP_FIR_LEN; ++i) {
             // We don't need any reversal in this constructor -
             m_internalTaps[i] = coefficients[i];
         }

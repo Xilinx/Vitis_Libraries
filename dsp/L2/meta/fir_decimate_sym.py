@@ -47,9 +47,19 @@ import fir_decimate_asym as dec_asym
 
 fn_decimate_asym_lanes = fnNumLanes384b
 
+TP_DECIMATE_FACTOR_min = 2
+TP_DECIMATE_FACTOR_max = 3
+TP_INPUT_WINDOW_VSIZE_min = 4
+TP_SSR_min = 1
+TP_CASC_LEN_min = 1
+TP_CASC_LEN_max = 40
+TP_FIR_LEN_min = 4
+TP_FIR_LEN_max = 8192
 
 def fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1):
 
+  if TP_INPUT_WINDOW_VSIZE < TP_INPUT_WINDOW_VSIZE_min:
+	    return isError(f"Minimum value for Input window size is {TP_INPUT_WINDOW_VSIZE_min}, but got {TP_INPUT_WINDOW_VSIZE}.")
   # decimator uses 384b accs, but also checks for multiple of decimate factor. we don't use native stream
   windowSizeMultiplier = (fn_decimate_asym_lanes(TT_DATA, TT_COEF)*TP_DECIMATE_FACTOR) #if TP_API == 0 else (fn_decimate_asym_lanes(TT_DATA, TT_COEF)*TP_DECIMATE_FACTOR*streamRptFactor)
 
@@ -75,6 +85,8 @@ def fn_multiple_decimation(TP_FIR_LEN,TP_DECIMATE_FACTOR, TP_CASC_LEN):
 
 
 def fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD):
+    if TP_FIR_LEN < TP_FIR_LEN_min or TP_FIR_LEN > TP_FIR_LEN_max :
+        return isError(f"Minimum and maximum value for Filter length is {TP_FIR_LEN_min} and {TP_FIR_LEN_max}, respectively, but got {TP_FIR_LEN}.")
     minLenCheck =  fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR)
     symFactor   = 2
     symFactorSSR   = 1 if (TP_SSR != 1 ) else symFactor # SSR mode will discard the symmetry
@@ -104,6 +116,8 @@ def fn_max_decimate(TT_DATA, TT_COEF, TP_DECIMATE_FACTOR):
 
 def fn_validate_decimate_factor(TT_DATA, TT_COEF, TP_DECIMATE_FACTOR, TP_API):
 
+    if TP_DECIMATE_FACTOR < TP_DECIMATE_FACTOR_min or TP_DECIMATE_FACTOR > TP_DECIMATE_FACTOR_max :
+        return isError(f"Minimum and maximum value for Decimation factor is {TP_DECIMATE_FACTOR_min} and {TP_DECIMATE_FACTOR_max}, respectively, but got {TP_DECIMATE_FACTOR}.")
     maxDecimate = fn_max_decimate(TT_DATA, TT_COEF, TP_DECIMATE_FACTOR )
 
     return maxDecimate
@@ -134,12 +148,10 @@ def fn_deci_ssr(TP_DECIMATE_FACTOR, TP_SSR):
 
 
 def fn_validate_ssr(TP_SSR, TP_DECIMATE_FACTOR, TP_API):
-    ssrStreamCheck = fn_stream_ssr(TP_API, TP_SSR)
+    if TP_SSR < TP_SSR_min:
+	    return isError(f"Minimum value for SSR is {TP_SSR_min}, but got {TP_SSR}.")
     ssrDFCheck     = fn_deci_ssr(TP_DECIMATE_FACTOR, TP_SSR)
-    for check in (ssrStreamCheck, ssrDFCheck):
-      if check["is_valid"] == False :
-        return check
-    return isValid
+    return ssrDFCheck
 
 #### validation APIs ####
 def validate_TT_COEF(args):
@@ -167,7 +179,10 @@ def validate_TP_INPUT_WINDOW_VSIZE(args):
   TP_SSR = args["TP_SSR"]
   return fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR)
 
-
+def fn_validate_casc_len(TP_CASC_LEN):
+    if TP_CASC_LEN < TP_CASC_LEN_min or TP_CASC_LEN > TP_CASC_LEN_max :
+        return isError(f"Minimum and maximum value for cascade length is {TP_CASC_LEN_min} and {TP_CASC_LEN_max}, respectively, but got {TP_CASC_LEN}.")
+    return isValid
 
 def validate_TP_FIR_LEN(args):
   TT_DATA = args["TT_DATA"]
@@ -188,8 +203,6 @@ def validate_TP_DECIMATE_FACTOR(args):
   TP_DECIMATE_FACTOR = args["TP_DECIMATE_FACTOR"]
   return fn_validate_decimate_factor(TT_DATA, TT_COEF, TP_DECIMATE_FACTOR, TP_API)
 
-
-
 def validate_TP_DUAL_IP(args):
     TP_API = args["TP_API"]
     TP_DUAL_IP = args["TP_DUAL_IP"]
@@ -200,6 +213,11 @@ def validate_TP_SSR(args):
     TP_SSR = args["TP_SSR"]
     TP_DECIMATE_FACTOR = args["TP_DECIMATE_FACTOR"]
     return fn_validate_ssr(TP_SSR, TP_DECIMATE_FACTOR, TP_API)
+
+def validate_TP_CASC_LEN(args):
+    TP_CASC_LEN = args["TP_CASC_LEN"]
+    return fn_validate_casc_len(TP_CASC_LEN)
+
 # Example of updater.
 #
 # Updater are functions to help GUI to hint user on parameter setting with already given parameters.

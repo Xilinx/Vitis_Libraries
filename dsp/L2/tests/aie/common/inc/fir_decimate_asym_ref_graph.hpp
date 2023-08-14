@@ -48,7 +48,8 @@ template <typename TT_DATA,
           unsigned int TP_DUAL_IP = 0,
           unsigned int TP_API = 0,
           unsigned int TP_SSR = 1,
-          unsigned int TP_PARA_DECI_POLY = 1>
+          unsigned int TP_PARA_DECI_POLY = 1,
+          unsigned int TP_SAT = 1>
 class fir_decimate_asym_ref_graph : public graph {
    private:
     static constexpr unsigned int kInterleavePattern = 0;              // 128-bit interleave pattern
@@ -81,9 +82,10 @@ class fir_decimate_asym_ref_graph : public graph {
     // Constructor
     fir_decimate_asym_ref_graph(const std::vector<TT_COEFF>& taps) {
         // Create FIR class with static coeffs - passed at construction
-        m_firKernel = kernel::create_object<
-            fir_decimate_asym_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
-                                  TP_INPUT_WINDOW_VSIZE, TP_USE_COEFF_RELOAD, kNumFirKernelOutputs> >(taps);
+        m_firKernel =
+            kernel::create_object<fir_decimate_asym_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT,
+                                                        TP_RND, TP_INPUT_WINDOW_VSIZE, TP_USE_COEFF_RELOAD, TP_SAT> >(
+                taps);
 
         make_connections();
     };
@@ -91,9 +93,9 @@ class fir_decimate_asym_ref_graph : public graph {
     // Constructor
     fir_decimate_asym_ref_graph() {
         // Create FIR class with reloadable coeffs - passed through graph's update()
-        m_firKernel = kernel::create_object<
-            fir_decimate_asym_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
-                                  TP_INPUT_WINDOW_VSIZE, TP_USE_COEFF_RELOAD, kNumFirKernelOutputs> >();
+        m_firKernel =
+            kernel::create_object<fir_decimate_asym_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT,
+                                                        TP_RND, TP_INPUT_WINDOW_VSIZE, TP_USE_COEFF_RELOAD, TP_SAT> >();
         make_connections();
     };
     void make_connections() {

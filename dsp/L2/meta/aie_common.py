@@ -30,12 +30,15 @@ def fnTrunc(x, y):
 
 # TODO full list referring to AIETypes.cxx
 k_complex_base_type_map = {
+    "cint8": "int8",
     "cint16": "int16",
     "cint32": "int32",
     "cfloat": "float"
 }
 
 k_base_type_map = {
+    "uint8": "int8",
+    "int8": "int8",
     "int16": "int16",
     "int32": "int32",
     "float": "float",
@@ -51,7 +54,7 @@ k_base_type_size_map = {
     "float": 4
 }
 
-k_integral_types = ["int16", "int32", "cint16", "cint32"]
+k_integral_types = ["uint8", "int8", "int16", "int32", "cint8", "cint16", "cint32"]
 k_floating_point_types = ["float", "cfloat"]
 
 #### Common Functions ####
@@ -119,9 +122,15 @@ def fn_float_no_shift(TT_DATA, TP_SHIFT):
 
 # most library element only need to check this to validate shift
 def fn_validate_shift(TT_DATA, TP_SHIFT):
+  if TP_SHIFT< 0 or TP_SHIFT > 61:
+	    return isError(f"Minimum and Maximum value for parameter Shift is 0 and 61, but got {TP_SHIFT}. ")
   return fn_float_no_shift(TT_DATA, TP_SHIFT)
 
-
+# most library element only need to check this to validate saturation modes
+def fn_validate_satMode(TP_SAT) :  
+    if (not SAT_MODE_MIN <= TP_SAT <= SAT_MODE_MAX) or (TP_SAT == 2): 
+        return isError("Invalid saturation mode. Valid values for TP_SAT are 0, 1, and 3")
+    return isValid
 
 # returns a list of port objects, vectorLength=None for no index on the portname
 def get_port_info(portname, dir, TT_DATA, windowVSize, vectorLength=None, marginSize=0, TP_API=0):

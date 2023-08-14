@@ -32,14 +32,12 @@ def vmc_validate_input_window_size(args):
 	return fn_validate_input_window_size(data_type, coef_type, fir_length, interpolate_factor, input_window_size, api, ssr)
 
 def vmc_validate_casc_length(args):
-    use_coeff_reload = args["use_coeff_reload"]
-    fir_length = args["fir_length"]
     casc_length = args["casc_length"]
     #if not use_casc_length:
 	# TODO : Talk to DSP lib team/sumanta about how 
 	# cascade validation works - confirm its just fir length related
 	#return fn_validate_casc_length(fir_length, casc_length, use_coeff_reload)
-    return {"is_valid": True}
+    return fn_validate_casc_len(casc_length);
     
 
 def vmc_validate_coeff(args):
@@ -51,7 +49,7 @@ def vmc_validate_coeff(args):
 	interpolate_factor = args["interpolate_factor"]
 	ssr = args["ssr"]
 	api = 1
-	dual_ip = 0
+	dual_ip = args["dual_ip"]
 	if use_coeff_reload:
 		fir_length = args["fir_length"]
 	else:
@@ -84,6 +82,23 @@ def vmc_validate_interp_poly(args):
   else:
     return {"is_valid": True}
 
+def vmc_validate_interpolate_factor(args):
+	interpolate_factor = args["interpolate_factor"]
+	return fn_validate_interpolate_factor(interpolate_factor)
+
+def vmc_validate_input_ports(args):
+	dual_ip = args["dual_ip"]
+	num_outputs = args["num_outputs"]
+	AIE_VARIANT = 1
+	api = 0
+	return fn_validate_dual_ip(num_outputs,api, dual_ip, AIE_VARIANT)
+
+def vmc_validate_out_ports(args):
+	num_outputs = args["num_outputs"]
+	AIE_VARIANT = 1
+	api = 0
+	return fn_validate_num_outputs(api, num_outputs, AIE_VARIANT)
+
 #### VMC graph generator ####
 def vmc_generate_graph(name, args):
 	tmpargs = {}
@@ -107,8 +122,8 @@ def vmc_generate_graph(name, args):
 	casc_length = args["casc_length"]
 	tmpargs["TP_CASC_LEN"] = casc_length
 	tmpargs["TP_USE_COEF_RELOAD"] = 1 if args["use_coeff_reload"] else 0
-	tmpargs["TP_NUM_OUTPUTS"] = 1
-	tmpargs["TP_DUAL_IP"] = 0
+	tmpargs["TP_NUM_OUTPUTS"] = 2 if args["num_outputs"] else 1
+	tmpargs["TP_DUAL_IP"] = 1 if args["dual_ip"] else 0
 	tmpargs["TP_API"] = 1
 	tmpargs["TP_SSR"] = args["ssr"]
 	tmpargs["coeff"] = args["coeff"]

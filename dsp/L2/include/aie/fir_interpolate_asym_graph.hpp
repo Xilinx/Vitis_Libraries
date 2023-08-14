@@ -30,6 +30,7 @@
 #include "fir_interpolate_asym.hpp"
 #include "fir_common_traits.hpp"
 #include "fir_decomposer_utils.hpp"
+#include "widget_api_cast.hpp"
 
 namespace xf {
 namespace dsp {
@@ -164,6 +165,34 @@ template <typename TT_DATA,
           unsigned int TP_PARA_INTERP_POLY = 1>
 class fir_interpolate_asym_graph : public graph {
    private:
+#ifndef TP_COMBINE_POLYPHASES
+#define TP_COMBINE_POLYPHASES 0
+#endif
+
+#if (__HAS_ACCUM_PERMUTES__ == 1)
+    static constexpr unsigned int para_interp_poly = TP_PARA_INTERP_POLY;
+#else
+    // Decompose into a set of single rate FIRs, that don't require full permute capability.
+    // TP_COMBINE_POLYPHASES directs the graph to put all kernels in one tile and add a widget to combine the outputs
+    // into a single memory bufer.
+    // TP_COMBINE_POLYPHASES is currently passed through a #define macro.
+    static constexpr unsigned int para_interp_poly =
+        TP_COMBINE_POLYPHASES == 1 ? TP_INTERPOLATE_FACTOR : TP_PARA_INTERP_POLY;
+#endif
+#if (__STREAMS_PER_TILE__ == 1)
+    // Note: TP_SSR decomposition uses more tiles than TP_PARA_INTERP_POLY decomposition to offer equivalent gain in
+    // input/output bandwidth increase. Please use parallel polyphases decomposition in the first instance.
+    static_assert(TP_SSR == 1 || (TP_PARA_INTERP_POLY == TP_INTERPOLATE_FACTOR),
+                  "ERROR: TP_SSR mode not availalble "
+                  "when design is not fully decomposed. "
+                  "Please use Parallel polyphase decomposition (TP_PARA_INTERP_POLY == TP_INTERPOLATE_FACTOR) before "
+                  "increasing T_SSR");
+    // Device doesn't support dual input streams
+    static_assert(TP_API == 0 || TP_DUAL_IP == 0, "ERROR: Dual input stream ports not supported on this device.");
+    static_assert(TP_API == 0 || TP_NUM_OUTPUTS == 1,
+                  "ERROR: Multiple output stream ports not supported on this device.");
+
+#endif
     static constexpr unsigned int TP_CASC_IN = CASC_IN_FALSE;
 
     static_assert(TP_CASC_LEN <= 40, "ERROR: Unsupported Cascade length");
@@ -189,7 +218,7 @@ class fir_interpolate_asym_graph : public graph {
                   "ERROR: Exceeded maximum supported FIR length with reloadable coefficients. Please limit the FIR "
                   "length or disable coefficient reload.");
 
-    static constexpr unsigned int kMemoryModuleSize = 32768;
+    static constexpr unsigned int kMemoryModuleSize = 2 * 32768;
     static constexpr unsigned int inBufferSize = ((TP_FIR_LEN + TP_INPUT_WINDOW_VSIZE) * sizeof(TT_DATA));
     // Requested Input Window buffer exceeds memory module size
     static_assert(TP_API != 0 || inBufferSize < kMemoryModuleSize,
@@ -205,18 +234,17 @@ class fir_interpolate_asym_graph : public graph {
     static_assert(TP_API == 1 || TP_SSR == 1,
                   "ERROR: SSR > 1 is only supported for streaming API. Set TP_API = 1 to enable streaming API");
 
-    static_assert(((TP_INTERPOLATE_FACTOR / TP_PARA_INTERP_POLY) != TP_SSR) || TP_SSR == 1,
-                  "ERROR: Currently, we do not support SSR=(INTERPOLATE_FACTOR/TP_PARA_INTERP_POLY). Please set SSR to "
-                  "the next higher value "
-                  "to get as high a performance");
+    // static_assert(((TP_INTERPOLATE_FACTOR / para_interp_poly) != TP_SSR) || TP_SSR == 1,
+    //               "ERROR: Currently, we do not support SSR=(INTERPOLATE_FACTOR/para_interp_poly). Please set SSR to "
+    //               "the next higher value "
+    //               "to get as high a performance");
 
-    // static_assert(TP_PARA_INTERP_POLY == 1 || TP_USE_COEFF_RELOAD == 0,
+    // static_assert(para_interp_poly == 1 || TP_USE_COEFF_RELOAD == 0,
     //               "ERROR: Reloadable coefficients not supported with multiple parallel interpolation polyphases.");
-
     using casc_net_array = std::array<connect<stream, stream>*, TP_CASC_LEN>;
     using ssr_net_array = std::array<std::array<casc_net_array, TP_SSR>, TP_SSR>;
     // a 2-D array for decimator and interpolator polyphases.
-    using polyphase_net_array = std::array<std::array<ssr_net_array, 1>, TP_PARA_INTERP_POLY>;
+    using polyphase_net_array = std::array<std::array<ssr_net_array, 1>, para_interp_poly>;
 
     polyphase_net_array net;
     polyphase_net_array net2;
@@ -278,7 +306,7 @@ class fir_interpolate_asym_graph : public graph {
         static constexpr unsigned int BTP_SSR = TP_SSR;
         static constexpr unsigned int BTP_COEFF_PHASES = TP_SSR;
         static constexpr unsigned int BTP_COEFF_PHASES_LEN = TP_FIR_LEN;
-        static constexpr unsigned int BTP_PARA_INTERP_POLY = TP_PARA_INTERP_POLY;
+        static constexpr unsigned int BTP_PARA_INTERP_POLY = para_interp_poly;
         static constexpr int BTP_MODIFY_MARGIN_OFFSET = 0;
     };
 
@@ -331,19 +359,69 @@ class fir_interpolate_asym_graph : public graph {
      **/
     port_conditional_array<output, (TP_CASC_IN == CASC_IN_TRUE), TP_SSR> casc_in;
 
-   public:
     /**
      * The array of kernels that will be created and mapped onto AIE tiles.
      * Number of kernels (``TP_CASC_LEN * TP_SSR``) will be connected with each other by cascade interface.
      **/
-    kernel m_firKernels[TP_CASC_LEN * TP_SSR * TP_SSR * TP_PARA_INTERP_POLY];
+    kernel m_firKernels[TP_CASC_LEN * TP_SSR * TP_SSR * para_interp_poly];
 
     /**
-     * OUT_SSR defines the number of output paths, equal to ``TP_SSR * TP_PARA_INTERP_POLY``.
+     * OUT_SSR defines the number of output paths, equal to ``TP_SSR * para_interp_poly``.
+     * When Polyphases are combined,
      **/
 
-    static constexpr unsigned int OUT_SSR = TP_SSR * TP_PARA_INTERP_POLY;
+    static constexpr unsigned int OUT_SSR_INT = TP_SSR * para_interp_poly;
+    static constexpr unsigned int OUT_SSR =
+        (TP_COMBINE_POLYPHASES == 1 && TP_API == 0 && para_interp_poly == TP_INTERPOLATE_FACTOR)
+            ? TP_SSR
+            : TP_SSR * para_interp_poly;
 
+   private:
+    /**
+     * decomposer output. Internal when widget in use, otherwise piped to output
+     **/
+    port_array<output, OUT_SSR_INT> out_int;
+
+    /**
+     * decomposer output. Internal when widget in use, otherwise piped to output
+     *
+     **/
+    port_conditional_array<output, (TP_NUM_OUTPUTS == 2), OUT_SSR_INT> out2_int;
+
+    /**
+     * @brief Connect decomposed polyphases through a widget that interleaves data onto a single output port.
+     **/
+    void connectOutput() {
+        // When IO bufer interface is used and graph is decomposed to single-rate FIR polyphases, kernels can be mapped
+        // on a single tile.
+        // To allow consistency in the interface, polyphases get combined back to single output port using a widget.
+        if
+            constexpr(TP_COMBINE_POLYPHASES == 1 && TP_API == 0 && para_interp_poly == TP_INTERPOLATE_FACTOR) {
+                // combine with a widget when parallel polyphases, otherwise do nothing as output is already combined
+                kernel m_inWidgetKernel;
+                m_inWidgetKernel = kernel::create_object<widget::api_cast::widget_api_cast<
+                    TT_DATA, USE_WINDOW_API, USE_WINDOW_API, para_interp_poly, TP_INPUT_WINDOW_VSIZE, 1, 0> >();
+                printParams<ssr_params>();
+                for (int i = 0; i < para_interp_poly; i++) {
+                    connect(out_int[i], m_inWidgetKernel.in[i]);
+                    dimensions(m_inWidgetKernel.in[i]) = {TP_INPUT_WINDOW_VSIZE};
+
+                    runtime<ratio>(m_firKernels[i]) = 0.9 / (para_interp_poly + 1);
+                }
+                connect<>(m_inWidgetKernel.out[0], out[0]);
+                dimensions(m_firKernels[0].in[0]) = {TP_INPUT_WINDOW_VSIZE};
+                dimensions(m_inWidgetKernel.out[0]) = {TP_INPUT_WINDOW_VSIZE * para_interp_poly};
+                source(m_inWidgetKernel) = "widget_api_cast.cpp";
+                headers(m_inWidgetKernel) = {"widget_api_cast.hpp"};
+                runtime<ratio>(m_inWidgetKernel) = 0.9 / (para_interp_poly + 1);
+            }
+        else {
+            out = out_int;
+            out2 = out2_int;
+        }
+    }
+
+   public:
     /**
      * The input data to the function. This input is either a window API of
      * samples of TT_DATA type or stream API (depending on TP_API).
@@ -376,7 +454,7 @@ class fir_interpolate_asym_graph : public graph {
      *defined by TP_SSR.
      * Each port in the array holds a duplicate of the coefficient array, required to connect to each SSR input path.
      **/
-    port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), TP_SSR * TP_PARA_INTERP_POLY> coeff;
+    port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), TP_SSR * para_interp_poly> coeff;
 
     /**
      * The output data from the function.
@@ -452,8 +530,12 @@ class fir_interpolate_asym_graph : public graph {
      **/
     fir_interpolate_asym_graph(const std::vector<TT_COEFF>& taps) {
         decomposer::polyphase_decomposer<ssr_params>::create(m_firKernels, taps);
-        decomposer::polyphase_decomposer<ssr_params>::create_connections(m_firKernels, &in[0], in2, &out[0], out2,
-                                                                         coeff, net, net2, casc_in, srcFileName);
+        decomposer::polyphase_decomposer<ssr_params>::create_connections(
+            m_firKernels, &in[0], in2, &out_int[0], out2_int, coeff, net, net2, casc_in, srcFileName);
+        // When IO bufer interface is used and graph is decomposed to single-rate FIR polyphases, kernels can be mapped
+        // on a single tile.
+        // To allow consistency in the interface, polyphases get combined back to single output port using a widget.
+        connectOutput();
     }
 
     /**
@@ -461,8 +543,12 @@ class fir_interpolate_asym_graph : public graph {
      **/
     fir_interpolate_asym_graph() {
         decomposer::polyphase_decomposer<ssr_params>::create(m_firKernels);
-        decomposer::polyphase_decomposer<ssr_params>::create_connections(m_firKernels, &in[0], in2, &out[0], out2,
-                                                                         coeff, net, net2, casc_in, srcFileName);
+        decomposer::polyphase_decomposer<ssr_params>::create_connections(
+            m_firKernels, &in[0], in2, &out_int[0], out2_int, coeff, net, net2, casc_in, srcFileName);
+        // When IO bufer interface is used and graph is decomposed to single-rate FIR polyphases, kernels can be mapped
+        // on a single tile.
+        // To allow consistency in the interface, polyphases get combined back to single output port using a widget.
+        connectOutput();
     }
 
     /**

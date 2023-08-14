@@ -19,20 +19,14 @@
 
 help::
 	$(ECHO) "Makefile Usage:"
-	$(ECHO) "  make all TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make all TARGET=<sw_emu/hw_emu/hw> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to generate the design for specified Target and Shell."
 	$(ECHO) ""
-	$(ECHO) "  make run TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform>"
+	$(ECHO) "  make run TARGET=<sw_emu/hw_emu/hw> PLATFORM=<FPGA platform>"
 	$(ECHO) "      Command to run application in emulation."
 	$(ECHO) ""
-	$(ECHO) "  make xclbin TARGET=<hw/hw_emu/sw_emu/> PLATFORM=<FPGA platform>"
-	$(ECHO) "      Command to build xclbin application."
-	$(ECHO) ""
-	$(ECHO) "  make host TARGET=<hw/hw_emu/sw_emu/>"
-	$(ECHO) "      Command to build host application."
-	$(ECHO) ""
-	$(ECHO) "  NOTE: For embedded devices, e.g. zcu102/zcu104/vck190, HOST_ARCH is either aarch32 or aarch64."
-	$(ECHO) "      a.IF Download the platform, and common-image from Xilinx Download Center(Suggested):"
+	$(ECHO) "  NOTE: For embedded platform the following setup steps are required:"
+	$(ECHO) "      a.If the platform and common-image are downloaded from Xilinx Download Center(Suggested):"
 	$(ECHO) "        Run the sdk.sh script from the common-image directory to install sysroot using the command : ./sdk.sh -y -d ./ -p "
 	$(ECHO) "        Unzip the rootfs file : gunzip ./rootfs.ext4.gz"
 	$(ECHO) "        export SYSROOT=< path-to-platform-sysroot >"
@@ -41,10 +35,10 @@ help::
 	$(ECHO) "        export K_IMAGE=< path-to-Image-files >"
 	$(ECHO) "        export ROOTFS=< path-to-rootfs >"
 	$(ECHO) ""
-	$(ECHO) "  make clean "
+	$(ECHO) "  make clean"
 	$(ECHO) "      Command to remove the generated non-hardware files."
 	$(ECHO) ""
-	$(ECHO) "  make cleanall TARGET=<hw/hw_emu/sw_emu/>"
+	$(ECHO) "  make cleanall"
 	$(ECHO) "      Command to remove all the generated files."
 	$(ECHO) ""
 
@@ -55,7 +49,7 @@ XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L2/
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 XFLIB_DIR = $(XF_PROJ_ROOT)
 
-# setting devault value
+# setting default value
 TARGET ?= sw_emu
 HOST_ARCH ?= x86
 
@@ -68,7 +62,7 @@ PLATFORM := xilinx_u250_gen3x16_xdma_4_1_202210_1
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST +=  u250 aws-vu9p-f1 vck190
+PLATFORM_ALLOWLIST +=  u250 vck190
 PLATFORM_BLOCKLIST +=  zc
 
 include ./utils.mk
@@ -106,11 +100,6 @@ VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 
 #Inclue Required Host Source Files
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
-HOST_SRCS += host/main.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -D USE_DDR
-CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include/hw/vitis_2dfft/fixed -I $(XFLIB_DIR)/L2/include/hw/vitis_2dfft/fixed -I $(XFLIB_DIR)/../utils/L1/include -I host -I kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L1/include/hw
-CXXFLAGS += -O3
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/aws-vu9p-f1/'))
 HOST_SRCS += host/main.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -D USE_DDR
 CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include/hw/vitis_2dfft/fixed -I $(XFLIB_DIR)/L2/include/hw/vitis_2dfft/fixed -I $(XFLIB_DIR)/../utils/L1/include -I host -I kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L1/include/hw
@@ -168,16 +157,6 @@ endif
 VPP_LDFLAGS_fft2DKernel_temp := --config $(CUR_DIR)/conn_u250.cfg
 VPP_LDFLAGS_fft2DKernel += $(VPP_LDFLAGS_fft2DKernel_temp)
 
-else ifneq (,$(shell echo $(XPLATFORM) | awk '/aws-vu9p-f1/'))
-VPP_FLAGS_fft2DKernel += --hls.clock 300000000:fft2DKernel
-ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_fft2DKernel += --clock.defaultFreqHz 300000000
-else
-VPP_LDFLAGS_fft2DKernel += --kernel_frequency 300
-endif
-VPP_LDFLAGS_fft2DKernel_temp := --config $(CUR_DIR)/conn_aws_f1.cfg
-VPP_LDFLAGS_fft2DKernel += $(VPP_LDFLAGS_fft2DKernel_temp)
-
 else 
 VPP_FLAGS_fft2DKernel += --hls.clock 300000000:fft2DKernel
 ifneq ($(HOST_ARCH_temp), x86)
@@ -208,7 +187,7 @@ $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 ############################## Setting Rules for Host (Building Host Executable) ##############################
 $(EXE_FILE): $(EXE_FILE_DEPS)
 	mkdir -p $(BUILD_DIR)
-	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
+	$(CXX) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^) $(CXXFLAGS) $(LDFLAGS)
 
 $(EMCONFIG):
 	emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
@@ -350,7 +329,7 @@ endif
 
 ############################## Setting Targets ##############################
 
-.PHONY: clean cleanall emconfig gen_instances valid_params
+.PHONY: clean cleanall emconfig valid_params
 emconfig: $(EMCONFIG)
 
 .PHONY: host
@@ -367,11 +346,9 @@ else
 xclbin: check_vpp check_sysroot  $(BINARY_CONTAINERS)
 endif
 
-gen_instances: $(INSTANCE_FILES)
-	@echo "Nothing to generate."
+#################### Parameterized File Generation ##########################
 
-valid_params:
-	@echo "Nothing to validate."
+gen_instances: $(GENERATED_FILES)
 
 ############################## Cleaning Rules ##############################
 cleanh:
@@ -385,6 +362,6 @@ cleank:
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR)  emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
 	-$(RMDIR)  $(AIE_WORK_DIR) $(AIE_PKG_DIR) $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
-	-$(RMDIR)  *.html $(INSTANCE_FILES)
+	-$(RMDIR)  *.html $(GENERATED_FILES)
 
 clean: cleanh

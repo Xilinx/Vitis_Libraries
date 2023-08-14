@@ -54,32 +54,53 @@ unsigned int fnAccRegsIntAsym() {
     return 4;
 }; //
 
+#if (__HAS_ACCUM_PERMUTES__ == 1)
+
 // function to return the number of lanes for a type combo
-template <typename TT_DATA, typename TT_COEFF>
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_API>
 INLINE_DECL constexpr unsigned int fnNumLanesIntAsym() {
     return fnNumLanes<TT_DATA, TT_COEFF>();
 };
 
 // function to return the columns of lanes for a type combo
-template <typename TT_DATA, typename TT_COEFF>
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_API>
 INLINE_DECL constexpr unsigned int fnNumColsIntAsym() {
     return fnNumCols<TT_DATA, TT_COEFF>();
 };
 template <>
-INLINE_DECL constexpr unsigned int fnNumColsIntAsym<int16, int32>() {
+INLINE_DECL constexpr unsigned int fnNumColsIntAsym<int16, int32, 0>() {
     return 1;
 }; // only single columns can be used due to MAC operating on 256-bit coeff buffer.
+template <>
+INLINE_DECL constexpr unsigned int fnNumColsIntAsym<int16, int32, 1>() {
+    return 1;
+}; // only single columns can be used due to MAC operating on 256-bit coeff buffer.
+#else
+
+// function to return the number of lanes for a type combo, for a given IO API type
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_API>
+INLINE_DECL constexpr unsigned int fnNumLanesIntAsym() {
+    return (TP_API == 0 ? fnNumLanes<TT_DATA, TT_COEFF>() : fnNumLanes384<TT_DATA, TT_COEFF>());
+};
+
+// function to return the number of columns for a type combo for the intrinsics used for this single rate asym FIR
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_API>
+INLINE_DECL constexpr unsigned int fnNumColsIntAsym() {
+    return (TP_API == 0 ? fnNumCols<TT_DATA, TT_COEFF>() : fnNumCols384<TT_DATA, TT_COEFF>());
+};
+
+#endif
 
 // Function to return the lowest common multiple of two numbers
 // A full implementation of this would entail prime factor decomposition, but here
 // The maximum integer size is 16, so a simpler brute force method will do.
-template <typename TT_DATA, typename TT_COEFF, unsigned int TP_FACTOR>
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_API, unsigned int TP_FACTOR>
 INLINE_DECL constexpr unsigned int fnLCMIntAsym() {
-    return ((fnNumLanesIntAsym<TT_DATA, TT_COEFF>() == 2)
+    return ((fnNumLanesIntAsym<TT_DATA, TT_COEFF, TP_API>() == 2)
                 ? ((TP_FACTOR % 2 == 0) ? TP_FACTOR : (TP_FACTOR * 2))
-                : (fnNumLanesIntAsym<TT_DATA, TT_COEFF>() == 4)
+                : (fnNumLanesIntAsym<TT_DATA, TT_COEFF, TP_API>() == 4)
                       ? ((TP_FACTOR % 4 == 0) ? TP_FACTOR : ((TP_FACTOR % 2 == 0) ? (TP_FACTOR * 2) : (TP_FACTOR * 4)))
-                      : (fnNumLanesIntAsym<TT_DATA, TT_COEFF>() == 8)
+                      : (fnNumLanesIntAsym<TT_DATA, TT_COEFF, TP_API>() == 8)
                             ? ((TP_FACTOR % 8 == 0)
                                    ? TP_FACTOR
                                    : ((TP_FACTOR % 4 == 0) ? (TP_FACTOR * 2)
@@ -88,9 +109,9 @@ INLINE_DECL constexpr unsigned int fnLCMIntAsym() {
 };
 
 // function to return the number of samples in an output vector for a type combo
-template <typename TT_DATA, typename TT_COEFF>
+template <typename TT_DATA, typename TT_COEFF, unsigned int TP_API>
 INLINE_DECL constexpr unsigned int fnVOutSizeIntAsym() {
-    return fnNumLanesIntAsym<TT_DATA, TT_COEFF>();
+    return fnNumLanesIntAsym<TT_DATA, TT_COEFF, TP_API>();
 };
 }
 }

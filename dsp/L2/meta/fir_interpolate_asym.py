@@ -55,6 +55,16 @@ current_uut_kernel = Path(__file__).stem
 # and "err_message" if "is_valid" is False.
 #
 
+TP_INTERPOLATE_FACTOR_min = 2
+TP_INTERPOLATE_FACTOR_max = 16
+TP_INPUT_WINDOW_VSIZE_min = 4
+TP_SSR_min = 1
+TP_PARA_INTERP_POLY_min = 1
+TP_CASC_LEN_min = 1
+TP_CASC_LEN_max = 40
+TP_FIR_LEN_min = 4
+TP_FIR_LEN_max = 8192
+
 def fn_fir_len_multiple_interp(TP_FIR_LEN, TP_INTERPOLATE_FACTOR):
   return isError(f"Filter length ({TP_FIR_LEN}) must be an integer multiple of interpolate factor ({TP_INTERPOLATE_FACTOR}).") if TP_FIR_LEN % TP_INTERPOLATE_FACTOR != 0 else isValid
 
@@ -84,6 +94,7 @@ def fn_check_samples_can_fit_streaming(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INTERPOL
 # Values are derived from experimentation and are a factor of program memory limits, memory module sizes etc.
 def fn_max_fir_len_overall(TT_DATA, TT_COEF, TP_FIR_LEN):
   maxTaps = {
+    ( "int16",  "int16") : 4096,
     ("cint16",  "int16") : 4096,
     ("cint16", "cint16") : 2048,
     ( "int32",  "int16") : 4096,
@@ -106,6 +117,8 @@ def fn_max_fir_len_overall(TT_DATA, TT_COEF, TP_FIR_LEN):
   )
 
 def fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD, TP_DUAL_IP):
+    if TP_FIR_LEN < TP_FIR_LEN_min or TP_FIR_LEN > TP_FIR_LEN_max :
+        return isError(f"Minimum and maximum value for Filter length is {TP_FIR_LEN_min} and {TP_FIR_LEN_max},respectively, but got {TP_FIR_LEN}.")
     minLenCheck =  fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_Rnd=TP_INTERPOLATE_FACTOR)
 
     coeffSizeMult = 1 if TP_API == 0 else TP_INTERPOLATE_FACTOR
@@ -125,18 +138,22 @@ def fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_
     return isValid
 
 
-def fn_type_support(TT_DATA, TT_COEF):
-  return isError(f"The combination of {TT_DATA} and {TT_COEF} is not supported for this class.") if (TT_DATA == "int16" and TT_COEF == "int16") else isValid
+def fn_type_support(TT_DATA, TT_COEF, AIE_VARIANT=1):
+  if TT_DATA == "int16" and TT_COEF == "int16" and AIE_VARIANT == 1:
+    return isError(f"The combination of {TT_DATA} and {TT_COEF} is not supported for this class on this device.")
+  # AIE-ML, i.e. variant 2 does support int16/int16
+  return isValid
 
 
 def fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN,TP_INTERPOLATE_FACTOR, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1):
     # CAUTION: this constant overlaps many factors. The main need is a "strobe" concept that means we unroll until xbuff is back to starting conditions.
     streamRptFactor = 4
-
+    if TP_INPUT_WINDOW_VSIZE < TP_INPUT_WINDOW_VSIZE_min:
+	    return isError(f"Minimum value for Input size is {TP_INPUT_WINDOW_VSIZE_min}, but got {TP_INPUT_WINDOW_VSIZE}.")
     # Need to take unrolloing into account
     windowSizeMultiplier = (fnNumLanes(TT_DATA, TT_COEF, TP_API)) if TP_API == 0 else (fnNumLanes(TT_DATA, TT_COEF, TP_API)*streamRptFactor)
     # interpolate asym uses common lanes, but doesn't use shorter acc for streaming arch.. why?
-    checkMultipleLanes =  fn_windowsize_multiple_lanes(TT_DATA, TT_COEF, TP_INPUT_WINDOW_VSIZE, TP_API, numLanes=windowSizeMultiplier)
+    checkMultipleLanes =  fn_windowsize_multiple_lanes(TT_DATA, TT_COEF, TP_INPUT_WINDOW_VSIZE, TP_API, windowSizeMultiplier, TP_SSR)
     checkMaxBuffer = fn_max_windowsize_for_buffer(TT_DATA, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR, TP_INTERPOLATE_FACTOR)
     # Input samples are round-robin split to each SSR input paths, so total frame size must be divisable by SSR factor.
     checkIfDivisableBySSR = fn_windowsize_divisible_by_ssr(TP_INPUT_WINDOW_VSIZE, TP_SSR)
@@ -147,12 +164,43 @@ def fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN,TP_INTERPOLATE_FA
 
     return isValid
 
+def fn_validate_dual_ip(TP_NUM_OUTPUTS, TP_API, TP_DUAL_IP, AIE_VARIANT=1):
+    if TP_DUAL_IP == 1 and AIE_VARIANT == 2:
+      return isError("Dual input ports not supported on this device.")
+    if TP_DUAL_IP == 1 and TP_API == 0:
+      return isError("Dual input ports only supported when port is a stream.")
+    if TP_DUAL_IP == 1 and TP_NUM_OUTPUTS != 2:
+      return isError("Dual input streams only supported when number of output streams is also 2.")
+
+    return isValid
+
+def validate_TP_INTERPOLATE_FACTOR(args):
+    TP_INTERPOLATE_FACTOR = args["TP_INTERPOLATE_FACTOR"]
+    return fn_validate_interpolate_factor(TP_INTERPOLATE_FACTOR)
+
+def fn_validate_interpolate_factor(TP_INTERPOLATE_FACTOR):
+    if (
+        TP_INTERPOLATE_FACTOR < TP_INTERPOLATE_FACTOR_min
+        or TP_INTERPOLATE_FACTOR > TP_INTERPOLATE_FACTOR_max
+    ):
+        return isError(
+            f"Minimum and maximum value for Interpolate factor is {TP_INTERPOLATE_FACTOR_min} and {TP_INTERPOLATE_FACTOR_max},respectively, but got {TP_INTERPOLATE_FACTOR}."
+        )
+    return isValid
+
+
+def fn_validate_num_outputs(TP_API, TP_NUM_OUTPUTS, AIE_VARIANT=1):
+    if TP_NUM_OUTPUTS == 2 and TP_API == 1 and AIE_VARIANT == 2:
+      return isError("Dual output stream ports not supported on this device.")
+    return isValid
+
 #### validation APIs ####
 def validate_TT_COEF(args):
     TT_DATA = args["TT_DATA"]
     TT_COEF = args["TT_COEF"]
+    AIE_VARIANT = args["AIE_VARIANT"]
     standard_checks = fn_validate_coef_type(TT_DATA, TT_COEF)
-    typeCheck = fn_type_support(TT_DATA, TT_COEF)
+    typeCheck = fn_type_support(TT_DATA, TT_COEF, AIE_VARIANT)
     for check in (standard_checks,typeCheck):
       if check["is_valid"] == False :
         return check
@@ -219,15 +267,21 @@ def validate_TP_FIR_LEN(args):
     TP_USE_COEF_RELOAD = args["TP_USE_COEF_RELOAD"]
     TP_DUAL_IP = args["TP_DUAL_IP"]
 
-    print(TP_API)
-    print(TP_FIR_LEN)
-    print(TP_CASC_LEN)
-    print("Here")
 
     return fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN,TP_INTERPOLATE_FACTOR, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD, TP_DUAL_IP)
 
 def validate_TP_DUAL_IP(args):
-  return sr_asym.validate_TP_DUAL_IP(args)
+    TP_NUM_OUTPUTS = args["TP_NUM_OUTPUTS"]
+    TP_API = args["TP_API"]
+    TP_DUAL_IP = args["TP_DUAL_IP"]
+    AIE_VARIANT = args["AIE_VARIANT"]
+    return fn_validate_dual_ip(TP_NUM_OUTPUTS, TP_API, TP_DUAL_IP, AIE_VARIANT)
+
+def validate_TP_NUM_OUTPUTS(args):
+    TP_API = args["TP_API"]
+    TP_NUM_OUTPUTS = args["TP_NUM_OUTPUTS"]
+    AIE_VARIANT = args["AIE_VARIANT"]
+    return fn_validate_num_outputs(TP_API, TP_NUM_OUTPUTS, AIE_VARIANT)
 
 def fn_interp_ssr(TP_INTERPOLATE_FACTOR, TP_SSR):
   if TP_INTERPOLATE_FACTOR == TP_SSR:
@@ -235,13 +289,20 @@ def fn_interp_ssr(TP_INTERPOLATE_FACTOR, TP_SSR):
   return isValid
 
 def fn_validate_ssr(TP_SSR, TP_INTERPOLATE_FACTOR, TP_API):
-    ssrStreamCheck = fn_stream_ssr(TP_API, TP_SSR)
+    if TP_SSR < TP_SSR_min:
+	    return isError(f"Minimum value for SSR is {TP_SSR_min}, but got {TP_SSR}.")
     ssrIPFactorCheck = fn_interp_ssr(TP_INTERPOLATE_FACTOR, TP_SSR)
-    for check in (ssrStreamCheck, ssrIPFactorCheck):
-      if check["is_valid"] == False :
-        return check
+    
+    return ssrIPFactorCheck
 
+def fn_validate_casc_len(TP_CASC_LEN):
+    if TP_CASC_LEN < TP_CASC_LEN_min or TP_CASC_LEN > TP_CASC_LEN_max :
+        return isError(f"Minimum and maximum value for cascade length is {TP_CASC_LEN_min} and {TP_CASC_LEN_max},respectively, but got {TP_CASC_LEN}.")
     return isValid
+
+def validate_TP_CASC_LEN(args):
+    TP_CASC_LEN = args["TP_CASC_LEN"]
+    return fn_validate_casc_len(TP_CASC_LEN)
 
 def validate_TP_SSR(args):
     TP_INTERPOLATE_FACTOR = args["TP_INTERPOLATE_FACTOR"]

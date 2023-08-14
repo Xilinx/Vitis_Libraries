@@ -175,11 +175,11 @@ INLINE_DECL void windowBroadcast(input_stream_cacc48* inCascade, input_async_buf
 #if SCD_SIZE == 512
             readBuff = get_scd_v16int32();
 #endif
-            using unit_buff_type = typename ::aie::vector<int32, samplesInUnitRead>;
+            using unit_buff_type = typename ::aie::vector<int32, _32bsamplesInUnitRead>;
             unit_buff_type subBuff;
             unit_buff_type* unit_buff_ptr;
             unit_buff_ptr = (unit_buff_type*)&*outItr;
-            subBuff = readBuff.template extract<samplesInUnitRead>(0);
+            subBuff = readBuff.template extract<_32bsamplesInUnitRead>(0);
             *unit_buff_ptr = subBuff;
         }
 }
