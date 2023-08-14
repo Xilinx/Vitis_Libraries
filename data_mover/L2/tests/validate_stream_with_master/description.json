@@ -1,7 +1,7 @@
 {
     "gui": false,
     "name": "Xilinx Validate Stream with Master Kernel Test", 
-    "description": "", 
+    "description": "Fixed kernel with pre-defined parameters", 
     "flow": "vitis", 
     "platform_allowlist": [
         "vck190", 
@@ -34,25 +34,19 @@
     "v++": {
         "compiler": {
             "includepaths": [
-                "LIB_DIR/L1/include/hw", 
-                "kernel"
+                "LIB_DIR/L1/include/hw"
             ]
         }
     }, 
-    "pre_build": [
-        {
-            "build_cmd": "make -f PROJECT/ksrc.mk GENKERNEL=LIB_DIR/L2/scripts/generate_kernels SPEC=PROJECT/kernel/spec.json TOOLDIR=PROJECT/_krnlgen"
-        }
-    ], 
     "containers": [
         {
             "accelerators": [
                 {
-                    "location": "kernel/m2s_x2.cpp", 
+                    "location": "LIB_DIR/L2/src/hw/data_mover/m2s_x2.cpp", 
                     "name": "m2s_x2"
                 }, 
                 {
-                    "location": "kernel/sCm_x2.cpp", 
+                    "location": "LIB_DIR/L2/src/hw/data_mover/sCm_x2.cpp", 
                     "name": "sCm_x2"
                 }
             ], 
@@ -60,12 +54,6 @@
             "name": "data_mover"
         }
     ], 
-    "output_files": [
-        "kernel/*.cpp",
-        "kernel/*.inc",
-        "kernel/.stamp",
-        "_krnlgen"
-    ],
     "testinfo": {
         "disable": false, 
         "jobs": [

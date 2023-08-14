@@ -1,0 +1,110 @@
+{
+  "name": "Generated mm2s_4d/s2mm_4d Kernel Test",
+  "description": [
+    "Generated configurable multi-port mm2s_4d/s2mm_4d kernel test, using parameters."
+  ],
+  "flow": "versal",
+  "platform_allowlist": [
+    "u200",
+    "vck190"
+  ],
+  "os": [
+    "centos7",
+    "ubuntu"
+  ],
+  "runtime": [
+    "OpenCL"
+  ],
+  "host": {
+    "host_exe": "test.exe",
+    "compiler": {
+      "sources": [
+        "sw/main.cpp",
+        "sw/config.hpp",
+        "LIB_DIR/ext/xcl2/xcl2.cpp",
+        "system.cfg"
+      ],
+      "includepaths": [
+        "sw",
+        "LIB_DIR/ext/xcl2",
+        "LIB_DIR/../utils/L1/include"
+      ],
+      "options": "-g"
+    }
+  },
+  "data": [
+    "data/input0.txt",
+    "data/golden.txt"
+  ],
+  "v++": {
+    "compiler": {
+      "includepaths": [
+        "LIB_DIR/L2/include",
+        "LIB_DIR/L1/include"
+      ]
+    },
+    "linker": {
+      "ldclflags": [
+        "--config PROJECT/system.cfg"
+      ]
+    }
+  },
+  "containers": [
+    {
+      "accelerators": [
+        {
+          "name": "mm2s_4d",
+          "location": "pl/mm2s_4d.cpp"
+        },
+        {
+          "name": "s2mm_4d",
+          "location": "pl/s2mm_4d.cpp"
+        }
+      ],
+      "name": "data_mover"
+    }
+  ],
+  "launch": [
+    {
+      "cmd_args": "--xclbin BUILD/data_mover.xclbin",
+      "name": "generic launch for all flows"
+    }
+  ],
+  "generators": {
+    "pl/mm2s_4d.cpp": {
+      "spec": "LIB_DIR/L2/meta/mm2s_4d.json",
+      "api_name": "xf::data_mover::mm2s_4d"
+    },
+    "pl/s2mm_4d.cpp": {
+      "spec": "LIB_DIR/L2/meta/s2mm_4d.json",
+      "api_name": "xf::data_mover::s2mm_4d"
+    },
+    "sw/config.hpp": {
+      "file": "PROJECT/test_gen.py",
+      "function": "write_config_hpp"
+    },
+    "system.cfg": {
+      "file": "PROJECT/test_gen.py",
+      "function": "write_system_cfg"
+    }
+  },
+  "parameter_file": "config_params.json",
+  "testinfo": {
+    "disable": false,
+    "jobs": [
+      {
+        "index": 0,
+        "dependency": [],
+        "env": "",
+        "cmd": "",
+        "max_memory_MB": 40960,
+        "max_time_min": 390
+      }
+    ],
+    "targets": [
+      "vitis_sw_emu",
+      "vitis_hw_emu"
+    ],
+    "category": "canary"
+  }
+}

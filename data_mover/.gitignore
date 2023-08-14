@@ -38,3 +38,6 @@
 # Test temp
 TestResults
 jks.*
+
+# Python temp
+__pycache__

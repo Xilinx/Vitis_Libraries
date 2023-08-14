@@ -1,0 +1,101 @@
+{
+  "schema": "vitis_libraries_api_list_schema-1.0",
+  "api_list": [
+    {
+      "api_name": "xf::data_mover::mm2s",
+      "target_domain": "PL",
+      "spec": {
+        "schema": "vitis_library_api_spec_schema-1.0",
+        "api_name": "xf::data_mover::mm2s",
+        "display_name": "mm2s",
+        "brief": "PL kernel for reading one DDR buffer into an AXI stream.",
+        "lifecycle_status": "production",
+        "header_file_name": [
+          "xf_data_mover/mm2s.hpp"
+        ],
+        "search_paths": [
+          "L1/include",
+          "L2/include"
+        ],
+        "source_file_name": "L2/src/hw/mm2s.cpp",
+        "parameters": [],
+        "ports": [
+          {
+            "name": "mm0",
+            "direction": "in",
+            "type": "ap_uint<128>*"
+          },
+          {
+            "name": "s0",
+            "direction": "out",
+            "type": "hls::stream<ap_axiu<128, 0, 0, 0>>&"
+          },
+          {
+            "name": "nbytes0",
+            "direction": "in",
+            "type": "uint64_t"
+          }
+        ],
+        "target_domain": "PL"
+      }
+    },
+    {
+      "api_name": "xf::data_mover::s2mm",
+      "target_domain": "PL",
+      "spec": {
+        "schema": "vitis_library_api_spec_schema-1.0",
+        "api_name": "xf::data_mover::s2mm",
+        "display_name": "s2mm",
+        "brief": "PL kernel for writing one AXI stream into a DDR buffer.",
+        "lifecycle_status": "production",
+        "header_file_name": [
+          "xf_data_mover/s2mm.hpp"
+        ],
+        "search_paths": [
+          "L1/include",
+          "L2/include"
+        ],
+        "source_file_name": "L2/src/hw/s2mm.cpp",
+        "parameters": [],
+        "ports": [
+          {
+            "name": "s0",
+            "direction": "in",
+            "type": "hls::stream<ap_axiu<128, 0, 0, 0>>&"
+          },
+          {
+            "name": "mm0",
+            "direction": "out",
+            "type": "ap_uint<128>*"
+          },
+          {
+            "name": "nbytes0",
+            "direction": "in",
+            "type": "uint64_t"
+          }
+        ],
+        "target_domain": "PL"
+      }
+    },
+    {
+      "api_name": "xf::data_mover::mm2s_mp",
+      "target_domain": "PL",
+      "spec_file": "mm2s_mp.json"
+    },
+    {
+      "api_name": "xf::data_mover::s2mm_mp",
+      "target_domain": "PL",
+      "spec_file": "s2mm_mp.json"
+    },
+    {
+      "api_name": "xf::data_mover::mm2s_4d",
+      "target_domain": "PL",
+      "spec_file": "mm2s_4d.json"
+    },
+    {
+      "api_name": "xf::data_mover::s2mm_4d",
+      "target_domain": "PL",
+      "spec_file": "s2mm_4d.json"
+    }
+  ]
+}
