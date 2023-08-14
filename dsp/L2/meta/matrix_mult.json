@@ -4,9 +4,9 @@
     "display_name": "matrix_mult_graph",
     "header_file_name": "matrix_mult_graph.hpp",
     "search_paths": [
-      "L1/include/aie",
-      "L2/include/aie",
-      "L1/src/aie"
+        "L1/include/aie",
+        "L2/include/aie",
+        "L1/src/aie"
     ],
     "parameters": [
         {
@@ -14,12 +14,12 @@
             "type": "typename",
             "description": "describes the type of individual data samples input of Matrix A to the gemm function. This is a typename and must be one of the following:",
             "enum": [
-              "int16",
-              "cint16",
-              "int32",
-              "cint32",
-              "float",
-              "cfloat"
+                "int16",
+                "cint16",
+                "int32",
+                "cint32",
+                "float",
+                "cfloat"
             ]
         },
         {
@@ -27,17 +27,19 @@
             "type": "typename",
             "description": "describes the type of individual data samples input of Matrix B to the gemm function. This is a typename and must be one of the following:",
             "enum": [
-              "int16",
-              "cint16",
-              "int32",
-              "cint32",
-              "float",
-              "cfloat"
-            ], 
+                "int16",
+                "cint16",
+                "int32",
+                "cint32",
+                "float",
+                "cfloat"
+            ],
             "validator": {
-              "file": "matrix_mult.py",
-              "function": "validate_TT_DATA_B",
-              "args": ["TT_DATA_A"]
+                "file": "matrix_mult.py",
+                "function": "validate_TT_DATA_B",
+                "args": [
+                    "TT_DATA_A"
+                ]
             }
         },
         {
@@ -45,9 +47,12 @@
             "type": "uint",
             "description": "is an unsigned integer which describes the number of elements along the unique dimension (rows) of Matrix A.",
             "validator": {
-              "file": "matrix_mult.py",
-              "function": "validate_TP_DIM_A",
-              "args": ["TT_DATA_A","TT_DATA_B"]
+                "file": "matrix_mult.py",
+                "function": "validate_TP_DIM_A",
+                "args": [
+                    "TT_DATA_A",
+                    "TT_DATA_B"
+                ]
             }
         },
         {
@@ -55,9 +60,13 @@
             "type": "uint",
             "description": "is an unsigned integer which describes the number of elements along the common dimension of Matrix A (columns) and Matrix B (rows).",
             "validator": {
-              "file": "matrix_mult.py",
-              "function": "validate_TP_DIM_AB",
-              "args": ["TT_DATA_A","TT_DATA_B", "TP_CASC_LEN"]
+                "file": "matrix_mult.py",
+                "function": "validate_TP_DIM_AB",
+                "args": [
+                    "TT_DATA_A",
+                    "TT_DATA_B",
+                    "TP_CASC_LEN"
+                ]
             }
         },
         {
@@ -65,9 +74,12 @@
             "type": "uint",
             "description": "is an unsigned integer which describes the number of elements along the unique dimension (columns) of Matrix B.",
             "validator": {
-              "file": "matrix_mult.py",
-              "function": "validate_TP_DIM_B",
-              "args": ["TT_DATA_A","TT_DATA_B"]
+                "file": "matrix_mult.py",
+                "function": "validate_TP_DIM_B",
+                "args": [
+                    "TT_DATA_A",
+                    "TT_DATA_B"
+                ]
             }
         },
         {
@@ -77,11 +89,13 @@
             "maximum": 80,
             "minimum": 0,
             "validator": {
-              "file": "matrix_mult.py",
-              "function": "validate_TP_SHIFT",
-              "args": ["TT_DATA_A"]
+                "file": "matrix_mult.py",
+                "function": "validate_TP_SHIFT",
+                "args": [
+                    "TT_DATA_A"
+                ]
             }
-          },
+        },
         {
             "name": "TP_RND",
             "type": "uint",
@@ -109,9 +123,16 @@
             "type": "uint",
             "description": "describes wether or not to add an additional kernel to rearrange the matrix samples into their required position.",
             "validator": {
-              "file": "matrix_mult.py",
-              "function": "validate_TP_ADD_TILING_A",
-              "args": ["TT_DATA_A","TT_DATA_B","TP_DIM_A", "TP_DIM_AB", "TP_CASC_LEN", "TP_DIM_A_LEADING"]
+                "file": "matrix_mult.py",
+                "function": "validate_TP_ADD_TILING_A",
+                "args": [
+                    "TT_DATA_A",
+                    "TT_DATA_B",
+                    "TP_DIM_A",
+                    "TP_DIM_AB",
+                    "TP_CASC_LEN",
+                    "TP_DIM_A_LEADING"
+                ]
             }
         },
         {
@@ -119,9 +140,16 @@
             "type": "uint",
             "description": "describes wether or not to add an additional kernel to rearrange the matrix samples into their required position.",
             "validator": {
-              "file": "matrix_mult.py",
-              "function": "validate_TP_ADD_TILING_B",
-              "args": ["TT_DATA_A","TT_DATA_B", "TP_DIM_AB","TP_DIM_B","TP_CASC_LEN", "TP_DIM_B_LEADING"]
+                "file": "matrix_mult.py",
+                "function": "validate_TP_ADD_TILING_B",
+                "args": [
+                    "TT_DATA_A",
+                    "TT_DATA_B",
+                    "TP_DIM_AB",
+                    "TP_DIM_B",
+                    "TP_CASC_LEN",
+                    "TP_DIM_B_LEADING"
+                ]
             }
         },
         {
@@ -129,15 +157,15 @@
             "type": "uint",
             "description": "describes wether or not to add an additional kernel to rearrange the matrix samples into their required position.",
             "validator": {
-              "file": "matrix_mult.py",
-              "function": "validate_TP_ADD_DETILING_OUT",
-              "args": [
-                "TT_DATA_A",
-                "TT_DATA_B",
-                "TP_DIM_A",
-                "TP_DIM_B",
-                "TP_DIM_OUT_LEADING"
-              ]
+                "file": "matrix_mult.py",
+                "function": "validate_TP_ADD_DETILING_OUT",
+                "args": [
+                    "TT_DATA_A",
+                    "TT_DATA_B",
+                    "TP_DIM_A",
+                    "TP_DIM_B",
+                    "TP_DIM_OUT_LEADING"
+                ]
             }
         },
         {
@@ -146,9 +174,13 @@
             "description": "describes the number of samples in the window API used for input to Matrix A.",
             "minimum": 4,
             "validator": {
-              "file": "matrix_mult.py",
-              "function": "validate_TP_INPUT_WINDOW_VSIZE_A",
-              "args": ["TT_DATA_A", "TP_DIM_A", "TP_DIM_AB"]
+                "file": "matrix_mult.py",
+                "function": "validate_TP_INPUT_WINDOW_VSIZE_A",
+                "args": [
+                    "TT_DATA_A",
+                    "TP_DIM_A",
+                    "TP_DIM_AB"
+                ]
             }
         },
         {
@@ -157,9 +189,16 @@
             "description": "describes the number of samples in the window API used for input to Matrix B.",
             "minimum": 4,
             "validator": {
-              "file": "matrix_mult.py",
-              "function": "validate_TP_INPUT_WINDOW_VSIZE_B",
-              "args": ["TT_DATA_A", "TT_DATA_B", "TP_INPUT_WINDOW_VSIZE_A", "TP_DIM_A", "TP_DIM_AB", "TP_DIM_B"]
+                "file": "matrix_mult.py",
+                "function": "validate_TP_INPUT_WINDOW_VSIZE_B",
+                "args": [
+                    "TT_DATA_A",
+                    "TT_DATA_B",
+                    "TP_INPUT_WINDOW_VSIZE_A",
+                    "TP_DIM_A",
+                    "TP_DIM_AB",
+                    "TP_DIM_B"
+                ]
             }
         },
         {
@@ -170,12 +209,13 @@
         }
     ],
     "ports": {
-      "file": "matrix_mult.py",
-      "function": "info_ports"
+        "file": "matrix_mult.py",
+        "function": "info_ports"
     },
     "generator": {
-      "file": "matrix_mult.py",
-      "function": "generate_graph"
-    }
-  }
-  
+        "file": "matrix_mult.py",
+        "function": "generate_graph"
+    },
+    "target_domain": "AIE",
+    "visible": true
+}

@@ -13,9 +13,9 @@
                     "fir_graph_utils.hpp"
                 ],
                 "search_paths": [
-                     "L1/include/aie",
-                     "L1/src/aie",
-                     "L2/include/aie"
+                    "L1/include/aie",
+                    "L1/src/aie",
+                    "L2/include/aie"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -41,7 +41,8 @@
                         "direction": "",
                         "type": "TT_COEFF *"
                     }
-                ]
+                ],
+                "visible": true
             },
             "target_domain": "AIE"
         },
@@ -57,9 +58,9 @@
                     "fir_graph_utils.hpp"
                 ],
                 "search_paths": [
-                     "L1/include/aie",
-                     "L1/src/aie",
-                     "L2/include/aie"
+                    "L1/include/aie",
+                    "L1/src/aie",
+                    "L2/include/aie"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -90,7 +91,8 @@
                         "direction": "",
                         "type": "unsigned int"
                     }
-                ]
+                ],
+                "visible": true
             },
             "target_domain": "AIE"
         },
@@ -106,9 +108,9 @@
                     "fft_window_fns.hpp"
                 ],
                 "search_paths": [
-                     "L1/include/aie",
-                     "L1/src/aie",
-                     "L2/include/aie"
+                    "L1/include/aie",
+                    "L1/src/aie",
+                    "L2/include/aie"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -129,7 +131,8 @@
                         "direction": "",
                         "type": "const unsigned int"
                     }
-                ]
+                ],
+                "visible": true
             },
             "target_domain": "AIE"
         },
@@ -145,9 +148,9 @@
                     "fft_window_fns.hpp"
                 ],
                 "search_paths": [
-                     "L1/include/aie",
-                     "L1/src/aie",
-                     "L2/include/aie"
+                    "L1/include/aie",
+                    "L1/src/aie",
+                    "L2/include/aie"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -168,7 +171,8 @@
                         "direction": "",
                         "type": "const unsigned int"
                     }
-                ]
+                ],
+                "visible": true
             },
             "target_domain": "AIE"
         },
@@ -184,9 +188,9 @@
                     "fft_window_fns.hpp"
                 ],
                 "search_paths": [
-                     "L1/include/aie",
-                     "L1/src/aie",
-                     "L2/include/aie"
+                    "L1/include/aie",
+                    "L1/src/aie",
+                    "L2/include/aie"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -207,7 +211,8 @@
                         "direction": "",
                         "type": "const unsigned int"
                     }
-                ]
+                ],
+                "visible": true
             },
             "target_domain": "AIE"
         },
@@ -223,9 +228,9 @@
                     "fft_window_fns.hpp"
                 ],
                 "search_paths": [
-                     "L1/include/aie",
-                     "L1/src/aie",
-                     "L2/include/aie"
+                    "L1/include/aie",
+                    "L1/src/aie",
+                    "L2/include/aie"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -246,7 +251,8 @@
                         "direction": "",
                         "type": "const unsigned int"
                     }
-                ]
+                ],
+                "visible": true
             },
             "target_domain": "AIE"
         },
@@ -262,9 +268,9 @@
                     "matrix_mult_graph.hpp"
                 ],
                 "search_paths": [
-                     "L1/include/aie",
-                     "L1/src/aie",
-                     "L2/include/aie"
+                    "L1/include/aie",
+                    "L1/src/aie",
+                    "L2/include/aie"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -365,7 +371,8 @@
                         "direction": "output",
                         "type": "port<output> xf::dsp::aie::blas::matrix_mult::matrix_mult_graph< TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_AB, TP_DIM_B, TP_SHIFT, TP_RND, TP_DIM_A_LEADING, TP_DIM_B_LEADING, TP_DIM_OUT_LEADING, TP_ADD_TILING_A, TP_ADD_TILING_B, TP_ADD_DETILING_OUT, TP_INPUT_WINDOW_VSIZE_A, TP_INPUT_WINDOW_VSIZE_B, TP_CASC_LEN >::out"
                     }
-                ]
+                ],
+                "visible": true
             },
             "target_domain": "AIE"
         },
@@ -381,9 +388,9 @@
                     "fft_ifft_dit_1ch_graph.hpp"
                 ],
                 "search_paths": [
-                     "L1/include/aie",
-                     "L1/src/aie",
-                     "L2/include/aie"
+                    "L1/include/aie",
+                    "L1/src/aie",
+                    "L2/include/aie"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -459,7 +466,8 @@
                         "direction": "output",
                         "type": "port_array<output, kOutputPorts> xf::dsp::aie::fft::dit_1ch::fft_ifft_dit_1ch_graph< TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_CASC_LEN, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE, TP_API, TP_PARALLEL_POWER, TP_INDEX, TP_ORIG_PAR_POWER >::out"
                     }
-                ]
+                ],
+                "visible": true
             },
             "target_domain": "AIE"
         },
@@ -475,9 +483,9 @@
                     "fft_window_graph.hpp"
                 ],
                 "search_paths": [
-                     "L1/include/aie",
-                     "L1/src/aie",
-                     "L2/include/aie"
+                    "L1/include/aie",
+                    "L1/src/aie",
+                    "L2/include/aie"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -533,7 +541,8 @@
                         "direction": "output",
                         "type": "port_array<output, kAPIFactor * TP_SSR> xf::dsp::aie::fft::windowfn::fft_window_graph< TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, TP_API, TP_SSR, TP_DYN_PT_SIZE >::out"
                     }
-                ]
+                ],
+                "visible": true
             },
             "target_domain": "AIE"
         },
@@ -549,9 +558,9 @@
                     "fir_decimate_asym_graph.hpp"
                 ],
                 "search_paths": [
-                     "L1/include/aie",
-                     "L1/src/aie",
-                     "L2/include/aie"
+                    "L1/include/aie",
+                    "L1/src/aie",
+                    "L2/include/aie"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -652,7 +661,8 @@
                         "direction": "output",
                         "type": "port_conditional_array<output, (TP_NUM_OUTPUTS == 2), TP_SSR> xf::dsp::aie::fir::decimate_asym::fir_decimate_asym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_API, TP_SSR, TP_PARA_DECI_POLY >::out2"
                     }
-                ]
+                ],
+                "visible": true
             },
             "target_domain": "AIE"
         },
@@ -668,9 +678,9 @@
                     "fir_decimate_hb_graph.hpp"
                 ],
                 "search_paths": [
-                     "L1/include/aie",
-                     "L1/src/aie",
-                     "L2/include/aie"
+                    "L1/include/aie",
+                    "L1/src/aie",
+                    "L2/include/aie"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -766,7 +776,8 @@
                         "direction": "output",
                         "type": "port_conditional_array<output, (TP_NUM_OUTPUTS == 2), TP_SSR> xf::dsp::aie::fir::decimate_hb::fir_decimate_hb_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_API, TP_SSR, TP_PARA_DECI_POLY >::out2"
                     }
-                ]
+                ],
+                "visible": true
             },
             "target_domain": "AIE"
         },
@@ -782,9 +793,9 @@
                     "fir_decimate_sym_graph.hpp"
                 ],
                 "search_paths": [
-                     "L1/include/aie",
-                     "L1/src/aie",
-                     "L2/include/aie"
+                    "L1/include/aie",
+                    "L1/src/aie",
+                    "L2/include/aie"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -880,7 +891,8 @@
                         "direction": "output",
                         "type": "port_conditional_array<output, (TP_NUM_OUTPUTS == 2), TP_SSR> xf::dsp::aie::fir::decimate_sym::fir_decimate_sym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_API, TP_SSR >::out2"
                     }
-                ]
+                ],
+                "visible": true
             },
             "target_domain": "AIE"
         },
@@ -896,9 +908,9 @@
                     "fir_interpolate_asym_graph.hpp"
                 ],
                 "search_paths": [
-                     "L1/include/aie",
-                     "L1/src/aie",
-                     "L2/include/aie"
+                    "L1/include/aie",
+                    "L1/src/aie",
+                    "L2/include/aie"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -999,7 +1011,8 @@
                         "direction": "output",
                         "type": "port_conditional_array<output, (TP_NUM_OUTPUTS == 2), OUT_SSR> xf::dsp::aie::fir::interpolate_asym::fir_interpolate_asym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_DUAL_IP, TP_NUM_OUTPUTS, TP_API, TP_SSR, TP_PARA_INTERP_POLY >::out2"
                     }
-                ]
+                ],
+                "visible": true
             },
             "target_domain": "AIE"
         },
@@ -1015,9 +1028,9 @@
                     "fir_interpolate_hb_graph.hpp"
                 ],
                 "search_paths": [
-                     "L1/include/aie",
-                     "L1/src/aie",
-                     "L2/include/aie"
+                    "L1/include/aie",
+                    "L1/src/aie",
+                    "L2/include/aie"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -1133,7 +1146,8 @@
                         "direction": "output",
                         "type": "port_conditional_array<output, (TP_PARA_INTERP_POLY > 1 && TP_NUM_OUTPUTS == 2), TP_SSR> xf::dsp::aie::fir::interpolate_hb::fir_interpolate_hb_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_UPSHIFT_CT, TP_API, TP_SSR, TP_PARA_INTERP_POLY >::out4"
                     }
-                ]
+                ],
+                "visible": true
             },
             "target_domain": "AIE"
         },
@@ -1149,9 +1163,9 @@
                     "fir_resampler_graph.hpp"
                 ],
                 "search_paths": [
-                     "L1/include/aie",
-                     "L1/src/aie",
-                     "L2/include/aie"
+                    "L1/include/aie",
+                    "L1/src/aie",
+                    "L2/include/aie"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -1262,7 +1276,8 @@
                         "direction": "output",
                         "type": "port_conditional_array<output, (TP_NUM_OUTPUTS == 2), OUT_SSR> xf::dsp::aie::fir::resampler::fir_resampler_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_API, TP_SSR, TP_PARA_INTERP_POLY, TP_PARA_DECI_POLY >::out2"
                     }
-                ]
+                ],
+                "visible": true
             },
             "target_domain": "AIE"
         },
@@ -1278,9 +1293,9 @@
                     "fir_sr_asym_graph.hpp"
                 ],
                 "search_paths": [
-                     "L1/include/aie",
-                     "L1/src/aie",
-                     "L2/include/aie"
+                    "L1/include/aie",
+                    "L1/src/aie",
+                    "L2/include/aie"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -1371,7 +1386,8 @@
                         "direction": "output",
                         "type": "port_conditional_array<output, (TP_NUM_OUTPUTS == 2), TP_SSR> xf::dsp::aie::fir::sr_asym::fir_sr_asym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_DUAL_IP, TP_API, TP_SSR >::out2"
                     }
-                ]
+                ],
+                "visible": true
             },
             "target_domain": "AIE"
         },
@@ -1387,9 +1403,9 @@
                     "fir_sr_sym_graph.hpp"
                 ],
                 "search_paths": [
-                     "L1/include/aie",
-                     "L1/src/aie",
-                     "L2/include/aie"
+                    "L1/include/aie",
+                    "L1/src/aie",
+                    "L2/include/aie"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -1480,7 +1496,8 @@
                         "direction": "output",
                         "type": "port_conditional_array<output, (TP_NUM_OUTPUTS == 2), TP_SSR> xf::dsp::aie::fir::sr_sym::fir_sr_sym_graph< TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_API, TP_SSR >::out2"
                     }
-                ]
+                ],
+                "visible": true
             },
             "target_domain": "AIE"
         },
@@ -1496,9 +1513,9 @@
                     "dds_mixer_graph.hpp"
                 ],
                 "search_paths": [
-                     "L1/include/aie",
-                     "L1/src/aie",
-                     "L2/include/aie"
+                    "L1/include/aie",
+                    "L1/src/aie",
+                    "L2/include/aie"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -1528,7 +1545,8 @@
                         "description": "specifies the super sample rate, ie how much data input/output in parallel for a single channel."
                     }
                 ],
-                "ports": []
+                "ports": [],
+                "visible": true
             },
             "target_domain": "AIE"
         },
@@ -1544,9 +1562,9 @@
                     "dds_mixer_lut_graph.hpp"
                 ],
                 "search_paths": [
-                     "L1/include/aie",
-                     "L1/src/aie",
-                     "L2/include/aie"
+                    "L1/include/aie",
+                    "L1/src/aie",
+                    "L2/include/aie"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -1581,7 +1599,8 @@
                         "description": "specifies the super sample rate, ie how much data input/output in parallel for a single channel."
                     }
                 ],
-                "ports": []
+                "ports": [],
+                "visible": true
             },
             "target_domain": "AIE"
         },
@@ -1597,9 +1616,9 @@
                     "widget_api_cast_graph.hpp"
                 ],
                 "search_paths": [
-                     "L1/include/aie",
-                     "L1/src/aie",
-                     "L2/include/aie"
+                    "L1/include/aie",
+                    "L1/src/aie",
+                    "L2/include/aie"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -1655,7 +1674,8 @@
                         "direction": "output",
                         "type": "port<output> xf::dsp::aie::widget::api_cast::widget_api_cast_graph< TT_DATA, TP_IN_API, TP_OUT_API, TP_NUM_INPUTS, TP_WINDOW_VSIZE, TP_NUM_OUTPUT_CLONES, TP_PATTERN, TP_HEADER_BYTES >::out[TP_NUM_OUTPUT_CLONES]"
                     }
-                ]
+                ],
+                "visible": true
             },
             "target_domain": "AIE"
         },
@@ -1671,9 +1691,9 @@
                     "widget_real2complex_graph.hpp"
                 ],
                 "search_paths": [
-                     "L1/include/aie",
-                     "L1/src/aie",
-                     "L2/include/aie"
+                    "L1/include/aie",
+                    "L1/src/aie",
+                    "L2/include/aie"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -1704,7 +1724,8 @@
                         "direction": "output",
                         "type": "port<output> xf::dsp::aie::widget::real2complex::widget_real2complex_graph< TT_DATA, TT_OUT_DATA, TP_WINDOW_VSIZE >::out"
                     }
-                ]
+                ],
+                "visible": true
             },
             "target_domain": "AIE"
         }
