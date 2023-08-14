@@ -36,7 +36,8 @@
             "type": "uint64_t"
           }
         ],
-        "target_domain": "PL"
+        "target_domain": "PL",
+        "visible": true
       }
     },
     {
@@ -74,7 +75,8 @@
             "type": "uint64_t"
           }
         ],
-        "target_domain": "PL"
+        "target_domain": "PL",
+        "visible": true
       }
     },
     {

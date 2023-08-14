@@ -57,5 +57,6 @@
     "file": "mm2s_4d.py",
     "function": "generate_krnl"
   },
-  "target_domain": "PL"
+  "target_domain": "PL",
+  "visible": true
 }

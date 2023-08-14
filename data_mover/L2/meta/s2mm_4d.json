@@ -58,5 +58,6 @@
     "file": "s2mm_4d.py",
     "function": "generate_krnl"
   },
-  "target_domain": "PL"
+  "target_domain": "PL",
+  "visible": true
 }

@@ -39,5 +39,6 @@
     "file": "s2mm_mp.py",
     "function": "generate_cu"
   },
-  "target_domain": "PL"
+  "target_domain": "PL",
+  "visible": true
 }
