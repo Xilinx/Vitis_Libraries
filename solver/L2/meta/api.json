@@ -8,7 +8,7 @@
                 "api_name": "xf::solver::geqrf",
                 "display_name": "geqrf",
                 "brief": "This function computes QR decomposition of matrix",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "geqrf.hpp"
                 ],
@@ -65,7 +65,8 @@
                         "type": "T *ta"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::gesvdj_2D",
@@ -74,7 +75,7 @@
                 "api_name": "xf::solver::gesvdj_2D",
                 "display_name": "gesvdj_2D",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "gesvdj.hpp"
                 ],
@@ -105,7 +106,8 @@
                     }
                 ],
                 "ports": []
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::gesvdj",
@@ -114,7 +116,7 @@
                 "api_name": "xf::solver::gesvdj",
                 "display_name": "gesvdj",
                 "brief": "Symmetric Matrix Jacobi based Singular Value Decomposition (GESVDJ) .",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "gesvdj.hpp"
                 ],
@@ -181,7 +183,8 @@
                         "type": "int &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::gesvj",
@@ -190,7 +193,7 @@
                 "api_name": "xf::solver::gesvj",
                 "display_name": "gesvj",
                 "brief": "This function implements singular value decomposition of matrix A using one-sided Jacobi algorihtm.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "gesvj.hpp"
                 ],
@@ -257,7 +260,8 @@
                         "type": "T *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::getrf",
@@ -266,7 +270,7 @@
                 "api_name": "xf::solver::getrf",
                 "display_name": "getrf",
                 "brief": "This function computes the LU decomposition (with partial pivoting) of matrix",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "getrf.hpp"
                 ],
@@ -318,7 +322,8 @@
                         "type": "fo"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::getrf_nopivot",
@@ -327,7 +332,7 @@
                 "api_name": "xf::solver::getrf_nopivot",
                 "display_name": "getrf_nopivot",
                 "brief": "This function computes the LU decomposition (without pivoting) of matrix",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "getrf_nopivot.hpp"
                 ],
@@ -374,7 +379,8 @@
                         "type": "fo"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::potrf",
@@ -383,7 +389,7 @@
                 "api_name": "xf::solver::potrf",
                 "display_name": "potrf",
                 "brief": "This function computes the Cholesky decomposition of matrix",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "potrf.hpp"
                 ],
@@ -430,7 +436,8 @@
                         "type": "int &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::gelinearsolver",
@@ -439,7 +446,7 @@
                 "api_name": "xf::solver::gelinearsolver",
                 "display_name": "gelinearsolver",
                 "brief": "This function solves a system of linear equation with general *matrix along with multiple right-hand side vector",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "gelinearsolver.hpp"
                 ],
@@ -501,7 +508,8 @@
                         "type": "fo"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::gematrixinverse",
@@ -510,7 +518,7 @@
                 "api_name": "xf::solver::gematrixinverse",
                 "display_name": "gematrixinverse",
                 "brief": "This function computes the inverse matrix of",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "gematrixinverse.hpp"
                 ],
@@ -557,7 +565,8 @@
                         "type": "int &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::gtsv",
@@ -566,7 +575,7 @@
                 "api_name": "xf::solver::gtsv",
                 "display_name": "gtsv",
                 "brief": "Tri-diagonal linear solver. Compute solution to linear system with a tridiagonal matrix. Parallel Cyclic Reduction method.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "gtsv_pcr.hpp"
                 ],
@@ -628,7 +637,8 @@
                         "type": "*"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::polinearsolver",
@@ -637,7 +647,7 @@
                 "api_name": "xf::solver::polinearsolver",
                 "display_name": "polinearsolver",
                 "brief": "This function solves a system of linear equation with symmetric positive definite (SPD) matrix along with multiple right-hand side vector",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "polinearsolver.hpp"
                 ],
@@ -699,7 +709,8 @@
                         "type": "fo"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::pomatrixinverse",
@@ -708,7 +719,7 @@
                 "api_name": "xf::solver::pomatrixinverse",
                 "display_name": "pomatrixinverse",
                 "brief": "This function computes the inverse matrix of",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "pomatrixinverse.hpp"
                 ],
@@ -755,7 +766,8 @@
                         "type": "int &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::trtrs",
@@ -764,7 +776,7 @@
                 "api_name": "xf::solver::trtrs",
                 "display_name": "trtrs",
                 "brief": "This function solves a system of linear equation with triangular coefficient matrix along with multiple right-hand side vector",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "trtrs.hpp"
                 ],
@@ -826,7 +838,8 @@
                         "type": "int &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::solver::syevj",
@@ -835,7 +848,7 @@
                 "api_name": "xf::solver::syevj",
                 "display_name": "syevj",
                 "brief": "Symmetric Matrix Jacobi based Eigenvalue Decomposition (SYEVJ) .",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "syevj.hpp"
                 ],
@@ -892,7 +905,8 @@
                         "type": "int &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         }
     ]
 }

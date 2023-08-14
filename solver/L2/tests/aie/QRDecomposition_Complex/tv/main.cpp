@@ -41,18 +41,17 @@ void writeGLD(ComplexMatrix<T>& Q, ComplexMatrix<T>& R, std::string filename0, s
             myfile1 << Q.elem(i + 3, j).real() << endl;
             myfile1 << Q.elem(i + 3, j).imag() << endl;
         }
-    }
-    for (int i = 0; i < R.M; i++) {
-        for (int j = 0; j < R.N; j += 4) {
+
+        for (int i = 0; i < R.N; i += 4) {
             myfile0 << R.elem(i, j).real() << endl;
             myfile0 << R.elem(i, j).imag() << endl;
-            myfile0 << R.elem(i, j + 1).real() << endl;
-            myfile0 << R.elem(i, j + 1).imag() << endl;
+            myfile0 << R.elem(i + 1, j).real() << endl;
+            myfile0 << R.elem(i + 1, j).imag() << endl;
 
-            myfile1 << R.elem(i, j + 2).real() << endl;
-            myfile1 << R.elem(i, j + 2).imag() << endl;
-            myfile1 << R.elem(i, j + 3).real() << endl;
-            myfile1 << R.elem(i, j + 3).imag() << endl;
+            myfile1 << R.elem(i + 2, j).real() << endl;
+            myfile1 << R.elem(i + 2, j).imag() << endl;
+            myfile1 << R.elem(i + 3, j).real() << endl;
+            myfile1 << R.elem(i + 3, j).imag() << endl;
         }
     }
 
@@ -77,6 +76,17 @@ void writeFile(ComplexMatrix<T>& A, std::string filename0, std::string filename1
             myfile1 << A.elem(i + 2, j).imag() << endl;
             myfile1 << A.elem(i + 3, j).real() << endl;
             myfile1 << A.elem(i + 3, j).imag() << endl;
+        }
+        for (int i = 0; i < A.N; i += 4) {
+            myfile0 << T(0.0) << endl;
+            myfile0 << T(0.0) << endl;
+            myfile0 << T(0.0) << endl;
+            myfile0 << T(0.0) << endl;
+
+            myfile1 << T(0.0) << endl;
+            myfile1 << T(0.0) << endl;
+            myfile1 << T(0.0) << endl;
+            myfile1 << T(0.0) << endl;
         }
     }
     myfile0.close();

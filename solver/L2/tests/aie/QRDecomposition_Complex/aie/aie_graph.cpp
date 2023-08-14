@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
     }
 
     // compare and check
-    int num = col_num * row_num * 2;
+    int num = col_num * row_num + col_num * col_num;
     std::cout << "checking Res0 againt Golden" << std::endl;
     int err_n0 = golden_check("data/Res0.txt", "data/Gld0.txt", num);
     std::cout << "checking Res1 againt Golden" << std::endl;

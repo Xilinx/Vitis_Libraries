@@ -22,10 +22,71 @@
 
 namespace xf {
 namespace solver {
+namespace internal {
+class alongCascade {
+   public:
+    alongCascade(unsigned int start_column_id, unsigned int start_row_id) {
+        s_row = start_row_id;
+        s_col = start_column_id;
+        c_row = s_row;
+        c_col = s_col;
+        if (s_row % 2 == 0) {
+            dir_inc_c = true;
+        } else {
+            dir_inc_c = false;
+        }
+    }
+
+    void next(unsigned int& row_id, unsigned int& col_id, bool if_print = false) {
+        if (dir_inc_c) {
+            if (c_col == (num_columns - 1)) {
+                c_row++;
+                dir_inc_c = false;
+            } else {
+                c_col++;
+            }
+        } else {
+            if (c_col == 0) {
+                c_row++;
+                dir_inc_c = true;
+            } else {
+                c_col--;
+            }
+        }
+
+        curr(row_id, col_id);
+
+        if (if_print) {
+            print();
+        }
+    }
+
+    void curr(unsigned int& row_id, unsigned int& col_id, bool if_print = false) {
+        row_id = c_row;
+        col_id = c_col;
+
+        if (if_print) {
+            print();
+        }
+    }
+
+   private:
+    unsigned int s_row;
+    unsigned int s_col;
+    unsigned int c_row;
+    unsigned int c_col;
+    bool dir_inc_c;
+
+    static const unsigned int num_rows = 8;
+    static const unsigned int num_columns = 50;
+
+    void print() { std::cout << "current tile stands on [" << c_row << "][" << c_col << "]." << std::endl; }
+};
+}
 
 using namespace adf;
 
-template <int column_num, int row_num>
+template <int column_num, int row_num, int k_rep = 1>
 class QRDComplexFloat : public adf::graph {
    public:
     kernel m_k[column_num];
@@ -36,7 +97,7 @@ class QRDComplexFloat : public adf::graph {
 
     QRDComplexFloat() {
         for (int i = 0; i < column_num; i++) {
-            m_k[i] = kernel::create_object<GramSchmidtKernelComplexFloat>(column_num, row_num, i);
+            m_k[i] = kernel::create_object<GramSchmidtKernelComplexFloat<row_num, column_num, k_rep> >(i);
             headers(m_k[i]) = {"qrd_kernel.hpp"};
             source(m_k[i]) = "qrd_kernel.cpp";
             runtime<ratio>(m_k[i]) = 1.0;
@@ -45,9 +106,59 @@ class QRDComplexFloat : public adf::graph {
             if (i == 0) {
                 connect<stream> net0(in_0, m_k[i].in[0]);
                 connect<stream> net1(in_1, m_k[i].in[1]);
+                fifo_depth(net0) = 16;
+                fifo_depth(net1) = 16;
             } else {
                 connect<stream> net0(m_k[i - 1].out[0], m_k[i].in[0]);
                 connect<stream> net1(m_k[i - 1].out[1], m_k[i].in[1]);
+                fifo_depth(net0) = 16;
+                fifo_depth(net1) = 16;
+            }
+            if (i == column_num - 1) {
+                connect<stream> net2(m_k[i].out[0], out_0);
+                connect<stream> net3(m_k[i].out[1], out_1);
+                fifo_depth(net2) = 16;
+                fifo_depth(net3) = 16;
+            }
+        }
+    }
+};
+
+template <int column_num, int row_num, int k_rep = 1>
+class QRDComplexFloat_CASC : public adf::graph {
+   public:
+    kernel m_k[column_num];
+    input_port in_0;
+    input_port in_1;
+    output_port out_0;
+    output_port out_1;
+
+    QRDComplexFloat_CASC() {
+        internal::alongCascade walker(44, 0);
+        unsigned int r_id, c_id;
+
+        for (int i = 0; i < column_num; i++) {
+            if (i == 0) {
+                m_k[i] = kernel::create_object<GramSchmidtKernelComplexFloat_Start<k_rep> >(column_num, row_num, i);
+                walker.curr(r_id, c_id);
+            } else if (i == column_num - 1) {
+                m_k[i] = kernel::create_object<GramSchmidtKernelComplexFloat_End<k_rep> >(column_num, row_num, i);
+                walker.next(r_id, c_id);
+            } else {
+                m_k[i] = kernel::create_object<GramSchmidtKernelComplexFloat_Mid<k_rep> >(column_num, row_num, i);
+                walker.next(r_id, c_id);
+            }
+            headers(m_k[i]) = {"qrd_kernel.hpp"};
+            source(m_k[i]) = "qrd_kernel.cpp";
+            runtime<ratio>(m_k[i]) = 1.0;
+            stack_size(m_k[i]) = 22000;
+            location<kernel>(m_k[i]) = tile(c_id, r_id);
+
+            if (i == 0) {
+                connect<stream> net0(in_0, m_k[i].in[0]);
+                connect<stream> net1(in_1, m_k[i].in[1]);
+            } else {
+                connect<cascade> net0(m_k[i - 1].out[0], m_k[i].in[0]);
             }
             if (i == column_num - 1) {
                 connect<stream> net2(m_k[i].out[0], out_0);

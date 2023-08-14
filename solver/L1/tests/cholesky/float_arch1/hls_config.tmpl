@@ -1,0 +1,18 @@
+[hls]
+
+clock=300MHz
+flow_target=vivado
+syn.file=${XF_PROJ_ROOT}/L1/tests/cholesky/kernel/kernel_cholesky_0.cpp
+syn.file_cflags=${XF_PROJ_ROOT}/L1/tests/cholesky/kernel/kernel_cholesky_0.cpp,-DMATRIX_DIM=3 -DMATRIX_LOWER_TRIANGULAR=0 -DSEL_ARCH=1 -D_DATA_PATH=${XF_PROJ_ROOT}/L1/tests/cholesky/datas/ -I./ -I${XF_PROJ_ROOT}/L1/tests/cholesky/host/ -I${XF_PROJ_ROOT}/L1/tests/cholesky/kernel/ -I${XF_PROJ_ROOT}/L1/tests/cholesky/ -I${XF_PROJ_ROOT}/L1/tests/ -I${XF_PROJ_ROOT}/L1/include/ -I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include -I${XF_PROJ_ROOT}/../utils/L1/include/
+syn.top=kernel_cholesky_0
+tb.file=${XF_PROJ_ROOT}/L1/tests/cholesky/host/test_cholesky.cpp
+tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/cholesky/host/test_cholesky.cpp,-DMATRIX_DIM=3 -DMATRIX_LOWER_TRIANGULAR=0 -DSEL_ARCH=1 -D_DATA_PATH=${XF_PROJ_ROOT}/L1/tests/cholesky/datas/ -I./ -I${XF_PROJ_ROOT}/L1/tests/cholesky/host/ -I${XF_PROJ_ROOT}/L1/tests/cholesky/kernel/ -I${XF_PROJ_ROOT}/L1/tests/cholesky/ -I${XF_PROJ_ROOT}/L1/tests/ -I${XF_PROJ_ROOT}/L1/include/ -I${XF_PROJ_ROOT}/L1/include/hw -I ./host -I${XF_PROJ_ROOT}/../utils/L1/include/
+
+
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog
+
+

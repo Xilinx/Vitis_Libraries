@@ -1,0 +1,144 @@
+{
+    "name": "QR decomposition on comlex float", 
+    "description": [
+        ""
+    ],
+    "flow": "versal",
+    "keywords": [
+        "aiecompiler", 
+        "aiesimulator",
+        "stream_connect"
+    ], 
+    "key_concepts": [
+        "AI Engine", 
+        "Adaptive Data Flow", 
+        "Graph"
+    ],
+    "platform_allowlist": [
+        "vck190"
+    ],
+    "platform_blocklist": [
+
+    ],
+    "os": [
+        "Linux"
+    ], 
+    "runtime": [
+        "OpenCL"
+    ],
+    "pre_build" : [
+        {
+            "build_cmd": "cd tv && make tv -f tv.mk"
+        }
+    ],
+    "aiecompiler": {
+        "compiler": {
+            "includepaths": [
+                "./aie",
+                "LIB_DIR/L1/include/aie",
+                "LIB_DIR/L2/include/aie",
+                "LIB_DIR/L1/src/aie"
+            ]
+        }
+    },
+    "aiecontainers": [
+        {
+            "accelerators": [
+                {
+                    "location": "./aie/aie_graph.cpp",
+                    "pl-freq": 250,
+                    "workdir": "./Work",
+                    "name": "libadf.a",
+                    "aie_kernel_files":["./aie/aie_adder.cc"]
+                }
+            ]
+        }
+    ],
+    "launch": [
+        {
+            "cmd_args": "BUILD/test_harness.xclbin PROJECT/data/A0.txt PROJECT/data/A1.txt PROJECT/data/Gld0.txt PROJECT/data/Gld1.txt",
+            "name": "generic launch for all flows"
+        },
+        {
+            "target": "aiesim",
+            "sim_options": "--input-dir=./ --output-dir=./"
+        },
+        {
+            "target": "x86sim",
+            "sim_options": "--input-dir=./ --output-dir=./"
+        }
+    ],
+    "host": {
+        "host_exe": "host.exe",
+        "compiler": {
+            "sources": [
+                "./ps/host.cpp",
+                "./Work/ps/c_rts/aie_control_xrt.cpp"
+            ],
+            "includepaths": [
+                "./ps",
+                "./aie",
+                "$(SYSROOT)/usr/include/xrt/",
+                "LIB_DIR/L1/include/aie",
+                "LIB_DIR/L2/include/aie"
+
+            ],
+            "options": "--sysroot=$(SYSROOT)"
+        }
+    },
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "./pl"
+            ]
+        },
+        "linker": {
+            "cflags": [
+                "--config PROJECT/cfg/system.cfg"
+            ]
+        },
+        "package": {
+            "cflags": [
+                "--package.defer_aie_run"
+            ]
+        }
+    },
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "name": "vck190_test_harness",
+                    "location": "./pl/test_harness.cpp",
+                    "frequency": 250.0
+                }
+            ],
+            "name": "test_harness",
+            "frequency": 250.0
+        }
+    ],
+    "match_makefile" : "true",
+    "contributors": [
+        {
+            "url": "http://www.xilinx.com", 
+            "group": "Xilinx"
+        }
+    ],
+    "testinfo": {
+        "disable": false,
+        "jobs": [
+            {
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
+                "max_memory_MB": 32768,
+                "max_time_min": 300
+            }
+        ],
+        "targets": [
+            "vitis_aie_sim",
+            "vitis_aie_x86sim"
+        ],
+        "category": "canary"
+    }
+}

@@ -1,0 +1,1858 @@
+{
+    "schema": "vitis_libraries_api_list_schema-1.0",
+    "api_list": [
+        {
+            "api_name": "xf::solver::back_substitute_recip",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::back_substitute_recip",
+                "display_name": "back_substitute_recip",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "back_substitute.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "T",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::backSubstituteBasic",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::backSubstituteBasic",
+                "display_name": "backSubstituteBasic",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "back_substitute.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "RowsColsA",
+                        "type": "int"
+                    },
+                    {
+                        "name": "BackSubstituteTraits",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "InputType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::backSubstituteAlt",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::backSubstituteAlt",
+                "display_name": "backSubstituteAlt",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "back_substitute.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "RowsColsA",
+                        "type": "int"
+                    },
+                    {
+                        "name": "BackSubstituteTraits",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "InputType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::backSubstituteTop",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::backSubstituteTop",
+                "display_name": "backSubstituteTop",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "back_substitute.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "RowsColsA",
+                        "type": "int"
+                    },
+                    {
+                        "name": "BackSubstituteTraits",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "InputType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::backSubstitute",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::backSubstitute",
+                "display_name": "backSubstitute",
+                "brief": "backSubstitute",
+                "target_domain": "",
+                "header_file_name": [
+                    "back_substitute.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "RowsColsA",
+                        "type": "int",
+                        "description": "Row and column dimensions"
+                    },
+                    {
+                        "name": "InputType",
+                        "type": "typename",
+                        "description": "Input data type"
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "typename",
+                        "description": "Output data type"
+                    },
+                    {
+                        "name": "TRAITS",
+                        "type": "typename"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "matrixAStrm",
+                        "direction": "",
+                        "type": "hls::stream< InputType > &"
+                    },
+                    {
+                        "name": "matrixBStrm",
+                        "direction": "",
+                        "type": "hls::stream< OutputType > &"
+                    },
+                    {
+                        "name": "is_singular",
+                        "direction": "",
+                        "type": "int &"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::solver::cholesky_sqrt_op",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::cholesky_sqrt_op",
+                "display_name": "cholesky_sqrt_op",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "cholesky.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "T_IN",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "T_OUT",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::cholesky_rsqrt",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::cholesky_rsqrt",
+                "display_name": "cholesky_rsqrt",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "cholesky.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "InputType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::cholesky_prod_sum_mult",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::cholesky_prod_sum_mult",
+                "display_name": "cholesky_prod_sum_mult",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "cholesky.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "AType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "BType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "CType",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::choleskyBasic",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::choleskyBasic",
+                "display_name": "choleskyBasic",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "cholesky.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "LowerTriangularL",
+                        "type": "bool"
+                    },
+                    {
+                        "name": "RowsColsA",
+                        "type": "int"
+                    },
+                    {
+                        "name": "CholeskyTraits",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "InputType",
+                        "type": "class"
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "class"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::choleskyAlt",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::choleskyAlt",
+                "display_name": "choleskyAlt",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "cholesky.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "LowerTriangularL",
+                        "type": "bool"
+                    },
+                    {
+                        "name": "RowsColsA",
+                        "type": "int"
+                    },
+                    {
+                        "name": "CholeskyTraits",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "InputType",
+                        "type": "class"
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "class"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::choleskyAlt2",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::choleskyAlt2",
+                "display_name": "choleskyAlt2",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "cholesky.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "LowerTriangularL",
+                        "type": "bool"
+                    },
+                    {
+                        "name": "RowsColsA",
+                        "type": "int"
+                    },
+                    {
+                        "name": "CholeskyTraits",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "InputType",
+                        "type": "class"
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "class"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::choleskyTop",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::choleskyTop",
+                "display_name": "choleskyTop",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "cholesky.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "LowerTriangularL",
+                        "type": "bool"
+                    },
+                    {
+                        "name": "RowsColsA",
+                        "type": "int"
+                    },
+                    {
+                        "name": "CholeskyTraits",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "InputType",
+                        "type": "class"
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "class"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::cholesky",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::cholesky",
+                "display_name": "cholesky",
+                "brief": "cholesky",
+                "target_domain": "",
+                "header_file_name": [
+                    "cholesky.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "LowerTriangularL",
+                        "type": "bool",
+                        "description": "When false generates the result in the upper triangle"
+                    },
+                    {
+                        "name": "RowsColsA",
+                        "type": "int",
+                        "description": "Defines the matrix dimensions"
+                    },
+                    {
+                        "name": "InputType",
+                        "type": "class",
+                        "description": "Input data type"
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "class",
+                        "description": "Output data type"
+                    },
+                    {
+                        "name": "TRAITS",
+                        "type": "typename",
+                        "description": "class"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "matrixAStrm",
+                        "direction": "",
+                        "type": "hls::stream< InputType > &"
+                    },
+                    {
+                        "name": "matrixLStrm",
+                        "direction": "",
+                        "type": "hls::stream< OutputType > &"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::solver::choleskyInverse",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::choleskyInverse",
+                "display_name": "choleskyInverse",
+                "brief": "CHOLESKY_INVERSE.",
+                "target_domain": "",
+                "header_file_name": [
+                    "cholesky_inverse.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "RowsColsA",
+                        "type": "int",
+                        "description": "Defines the matrix dimensions"
+                    },
+                    {
+                        "name": "InputType",
+                        "type": "typename",
+                        "description": "Input data type"
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "typename",
+                        "description": "Output data type"
+                    },
+                    {
+                        "name": "CholeskyInverseTraits",
+                        "type": "typename",
+                        "description": "Traits class"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "matrixAStrm",
+                        "direction": "",
+                        "type": "hls::stream< InputType > &"
+                    },
+                    {
+                        "name": "matrixInverseAStrm",
+                        "direction": "",
+                        "type": "hls::stream< OutputType > &"
+                    },
+                    {
+                        "name": "cholesky_success",
+                        "direction": "",
+                        "type": "int &"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::solver::matrixMultiplyDefault",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::matrixMultiplyDefault",
+                "display_name": "matrixMultiplyDefault",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "matrix_multiply.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "TransposeFormA",
+                        "type": "class"
+                    },
+                    {
+                        "name": "TransposeFormB",
+                        "type": "class"
+                    },
+                    {
+                        "name": "RowsA",
+                        "type": "int"
+                    },
+                    {
+                        "name": "ColsA",
+                        "type": "int"
+                    },
+                    {
+                        "name": "RowsB",
+                        "type": "int"
+                    },
+                    {
+                        "name": "ColsB",
+                        "type": "int"
+                    },
+                    {
+                        "name": "RowsC",
+                        "type": "int"
+                    },
+                    {
+                        "name": "ColsC",
+                        "type": "int"
+                    },
+                    {
+                        "name": "MULTIPLIER_TRAITS",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "InputType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::matrixMultiplyAlt1",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::matrixMultiplyAlt1",
+                "display_name": "matrixMultiplyAlt1",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "matrix_multiply.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "TransposeFormA",
+                        "type": "class"
+                    },
+                    {
+                        "name": "TransposeFormB",
+                        "type": "class"
+                    },
+                    {
+                        "name": "RowsA",
+                        "type": "int"
+                    },
+                    {
+                        "name": "ColsA",
+                        "type": "int"
+                    },
+                    {
+                        "name": "RowsB",
+                        "type": "int"
+                    },
+                    {
+                        "name": "ColsB",
+                        "type": "int"
+                    },
+                    {
+                        "name": "RowsC",
+                        "type": "int"
+                    },
+                    {
+                        "name": "ColsC",
+                        "type": "int"
+                    },
+                    {
+                        "name": "MULTIPLIER_TRAITS",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "InputType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::matrixMultiplyAlt2",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::matrixMultiplyAlt2",
+                "display_name": "matrixMultiplyAlt2",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "matrix_multiply.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "TransposeFormA",
+                        "type": "class"
+                    },
+                    {
+                        "name": "TransposeFormB",
+                        "type": "class"
+                    },
+                    {
+                        "name": "RowsA",
+                        "type": "int"
+                    },
+                    {
+                        "name": "ColsA",
+                        "type": "int"
+                    },
+                    {
+                        "name": "RowsB",
+                        "type": "int"
+                    },
+                    {
+                        "name": "ColsB",
+                        "type": "int"
+                    },
+                    {
+                        "name": "RowsC",
+                        "type": "int"
+                    },
+                    {
+                        "name": "ColsC",
+                        "type": "int"
+                    },
+                    {
+                        "name": "MULTIPLIER_TRAITS",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "InputType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::matrixMultiplyAddTree",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::matrixMultiplyAddTree",
+                "display_name": "matrixMultiplyAddTree",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "matrix_multiply.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "TransposeFormA",
+                        "type": "class"
+                    },
+                    {
+                        "name": "TransposeFormB",
+                        "type": "class"
+                    },
+                    {
+                        "name": "RowsA",
+                        "type": "int"
+                    },
+                    {
+                        "name": "ColsA",
+                        "type": "int"
+                    },
+                    {
+                        "name": "RowsB",
+                        "type": "int"
+                    },
+                    {
+                        "name": "ColsB",
+                        "type": "int"
+                    },
+                    {
+                        "name": "RowsC",
+                        "type": "int"
+                    },
+                    {
+                        "name": "ColsC",
+                        "type": "int"
+                    },
+                    {
+                        "name": "MULTIPLIER_TRAITS",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "InputType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::matrixMultiplyFull",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::matrixMultiplyFull",
+                "display_name": "matrixMultiplyFull",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "matrix_multiply.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "TransposeFormA",
+                        "type": "class"
+                    },
+                    {
+                        "name": "TransposeFormB",
+                        "type": "class"
+                    },
+                    {
+                        "name": "RowsA",
+                        "type": "int"
+                    },
+                    {
+                        "name": "ColsA",
+                        "type": "int"
+                    },
+                    {
+                        "name": "RowsB",
+                        "type": "int"
+                    },
+                    {
+                        "name": "ColsB",
+                        "type": "int"
+                    },
+                    {
+                        "name": "RowsC",
+                        "type": "int"
+                    },
+                    {
+                        "name": "ColsC",
+                        "type": "int"
+                    },
+                    {
+                        "name": "MULTIPLIER_TRAITS",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "InputType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::matrixMultiplyTop",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::matrixMultiplyTop",
+                "display_name": "matrixMultiplyTop",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "matrix_multiply.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "TransposeFormA",
+                        "type": "class"
+                    },
+                    {
+                        "name": "TransposeFormB",
+                        "type": "class"
+                    },
+                    {
+                        "name": "RowsA",
+                        "type": "int"
+                    },
+                    {
+                        "name": "ColsA",
+                        "type": "int"
+                    },
+                    {
+                        "name": "RowsB",
+                        "type": "int"
+                    },
+                    {
+                        "name": "ColsB",
+                        "type": "int"
+                    },
+                    {
+                        "name": "RowsC",
+                        "type": "int"
+                    },
+                    {
+                        "name": "ColsC",
+                        "type": "int"
+                    },
+                    {
+                        "name": "MULTIPLIER_TRAITS",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "InputType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::matrixMultiply",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::matrixMultiply",
+                "display_name": "matrixMultiply",
+                "brief": "matrixMultiply entry point function for calculating matrix power.",
+                "target_domain": "",
+                "header_file_name": [
+                    "matrix_multiply.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "TransposeFormA1",
+                        "type": "class",
+                        "description": "Defines if the first matix is transposed before the multiplication. Valid values are: NoTranspose, Transpose, ConjugateTranspose"
+                    },
+                    {
+                        "name": "TransposeFormA2",
+                        "type": "class",
+                        "description": "Defines if the second matix is transposed before the multiplication."
+                    },
+                    {
+                        "name": "RowsA",
+                        "type": "int",
+                        "description": "Defines the number of rows in the A matrix"
+                    },
+                    {
+                        "name": "ColsA",
+                        "type": "int",
+                        "description": "Defines the number of columns in the A matrix"
+                    },
+                    {
+                        "name": "RowsC",
+                        "type": "int",
+                        "description": "Defines the number of rows in the C matrix"
+                    },
+                    {
+                        "name": "ColsC",
+                        "type": "int",
+                        "description": "Defines the number of columns in the C matrix"
+                    },
+                    {
+                        "name": "InputType",
+                        "type": "typename",
+                        "description": "Input data type"
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "typename",
+                        "description": "Output data type"
+                    },
+                    {
+                        "name": "TRAITS",
+                        "type": "typename",
+                        "description": "Traits class"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "matrixAStrm",
+                        "direction": "",
+                        "type": "hls::stream< InputType > &"
+                    },
+                    {
+                        "name": "matrixCStrm",
+                        "direction": "",
+                        "type": "hls::stream< OutputType > &"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::solver::pseudosqrt",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::pseudosqrt",
+                "display_name": "pseudosqrt",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "pseudosqrt.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "T",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "rowTemplate",
+                        "type": "int"
+                    },
+                    {
+                        "name": "unrollNm",
+                        "type": "int"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::pseudosqrtStrm",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::pseudosqrtStrm",
+                "display_name": "pseudosqrtStrm",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "pseudosqrt.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "T",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "rowTemplate",
+                        "type": "int"
+                    },
+                    {
+                        "name": "unrollNm",
+                        "type": "int"
+                    },
+                    {
+                        "name": "TLen",
+                        "type": "int"
+                    },
+                    {
+                        "name": "TO",
+                        "type": "int"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::qrInverse",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::qrInverse",
+                "display_name": "qrInverse",
+                "brief": "qrInverse the entry point function.",
+                "target_domain": "",
+                "header_file_name": [
+                    "qr_inverse.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "RowsColsA",
+                        "type": "int",
+                        "description": "Defines the matrix dimensions"
+                    },
+                    {
+                        "name": "InputType",
+                        "type": "typename",
+                        "description": "Input data type"
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "typename",
+                        "description": "Output data type"
+                    },
+                    {
+                        "name": "QRInverseTraits",
+                        "type": "typename",
+                        "description": "QRInverse Traits class"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "matrixAStrm",
+                        "direction": "",
+                        "type": "hls::stream< InputType > &"
+                    },
+                    {
+                        "name": "matrixInverseAStrm",
+                        "direction": "",
+                        "type": "hls::stream< OutputType > &"
+                    },
+                    {
+                        "name": "A_singular",
+                        "direction": "",
+                        "type": "int &"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::solver::qrf_require_extra_pass",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::qrf_require_extra_pass",
+                "display_name": "qrf_require_extra_pass",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "qrf.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "T",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::is_zero",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::is_zero",
+                "display_name": "is_zero",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "qrf.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "T",
+                        "type": "class"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::is_zero< float >",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::is_zero< float >",
+                "display_name": "is_zero< float >",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "qrf.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::is_zero< double >",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::is_zero< double >",
+                "display_name": "is_zero< double >",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "qrf.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::qrf_vm",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::qrf_vm",
+                "display_name": "qrf_vm",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "qrf.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "T",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::qrf_mm",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::qrf_mm",
+                "display_name": "qrf_mm",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "qrf.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "T",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::qrf_mm_or_mag",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::qrf_mm_or_mag",
+                "display_name": "qrf_mm_or_mag",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "qrf.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "T",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::qrf_magnitude",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::qrf_magnitude",
+                "display_name": "qrf_magnitude",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "qrf.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "T",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::qrf_givens",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::qrf_givens",
+                "display_name": "qrf_givens",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "qrf.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "T",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::qrf_basic",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::qrf_basic",
+                "display_name": "qrf_basic",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "qrf.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "TransposedQ",
+                        "type": "bool"
+                    },
+                    {
+                        "name": "RowsA",
+                        "type": "int"
+                    },
+                    {
+                        "name": "ColsA",
+                        "type": "int"
+                    },
+                    {
+                        "name": "QRF_TRAITS",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "InputType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::qrf_alt",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::qrf_alt",
+                "display_name": "qrf_alt",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "qrf.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "TransposedQ",
+                        "type": "bool"
+                    },
+                    {
+                        "name": "RowsA",
+                        "type": "int"
+                    },
+                    {
+                        "name": "ColsA",
+                        "type": "int"
+                    },
+                    {
+                        "name": "QRF_TRAITS",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "InputType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::qrf",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::qrf",
+                "display_name": "qrf",
+                "brief": "QRF, to computes the full QR factorization (QR decomposition) of input matrix A, A=QR, producing orthogonal output matrix Q and upper-triangular matrix R.",
+                "target_domain": "",
+                "header_file_name": [
+                    "qrf.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "TransposedQ",
+                        "type": "bool",
+                        "description": "Selects whether Q is output in transposed form"
+                    },
+                    {
+                        "name": "RowsA",
+                        "type": "int",
+                        "description": "Number of rows in input matrix A"
+                    },
+                    {
+                        "name": "ColsA",
+                        "type": "int",
+                        "description": "Number of columns in input matrix A"
+                    },
+                    {
+                        "name": "InputType",
+                        "type": "typename",
+                        "description": "Input data type"
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "typename",
+                        "description": "Output data type"
+                    },
+                    {
+                        "name": "QRF_TRAITS",
+                        "type": "typename",
+                        "description": "type with specified values"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "matrixAStrm",
+                        "direction": "",
+                        "type": "hls::stream< InputType > &"
+                    },
+                    {
+                        "name": "matrixQStrm",
+                        "direction": "",
+                        "type": "hls::stream< OutputType > &"
+                    },
+                    {
+                        "name": "matrixRStrm",
+                        "direction": "",
+                        "type": "hls::stream< OutputType > &"
+                    }
+                ]
+            }
+        },
+        {
+            "api_name": "xf::solver::within_precision",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::within_precision",
+                "display_name": "within_precision",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "svd.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "T",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::vm2x1_base",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::vm2x1_base",
+                "display_name": "vm2x1_base",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "svd.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "AType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "BType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "CType",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::vm2x1",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::vm2x1",
+                "display_name": "vm2x1",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "svd.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "T",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::mm2x2",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::mm2x2",
+                "display_name": "mm2x2",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "svd.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "AType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "BType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "CType",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::calc_angle",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::calc_angle",
+                "display_name": "calc_angle",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "svd.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "InType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "CSType",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::svd2x2",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::svd2x2",
+                "display_name": "svd2x2",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "svd.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "AInType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "CSType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "AOutType",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::svdBasic",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::svdBasic",
+                "display_name": "svdBasic",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "svd.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "RowsA",
+                        "type": "int"
+                    },
+                    {
+                        "name": "ColsA",
+                        "type": "int"
+                    },
+                    {
+                        "name": "SVDTraits",
+                        "type": "class"
+                    },
+                    {
+                        "name": "InputType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::svdPairs",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::svdPairs",
+                "display_name": "svdPairs",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "svd.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "RowsA",
+                        "type": "int"
+                    },
+                    {
+                        "name": "ColsA",
+                        "type": "int"
+                    },
+                    {
+                        "name": "SVDTraits",
+                        "type": "class"
+                    },
+                    {
+                        "name": "InputType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::svdTop",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::svdTop",
+                "display_name": "svdTop",
+                "brief": "",
+                "target_domain": "",
+                "header_file_name": [
+                    "svd.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "RowsA",
+                        "type": "int"
+                    },
+                    {
+                        "name": "ColsA",
+                        "type": "int"
+                    },
+                    {
+                        "name": "SVDTraits",
+                        "type": "class"
+                    },
+                    {
+                        "name": "InputType",
+                        "type": "typename"
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "typename"
+                    }
+                ],
+                "ports": []
+            }
+        },
+        {
+            "api_name": "xf::solver::svd",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::svd",
+                "display_name": "svd",
+                "brief": "SVD the entry point function.",
+                "target_domain": "",
+                "header_file_name": [
+                    "svd.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "instance": "function",
+                "parameters": [
+                    {
+                        "name": "RowsA",
+                        "type": "int",
+                        "description": "Row dimension"
+                    },
+                    {
+                        "name": "ColsA",
+                        "type": "int",
+                        "description": "Column dimension"
+                    },
+                    {
+                        "name": "InputType",
+                        "type": "typename",
+                        "description": "Input data type"
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "typename",
+                        "description": "Output data type"
+                    },
+                    {
+                        "name": "SVDTraits",
+                        "type": "typename"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "matrixAStrm",
+                        "direction": "",
+                        "type": "hls::stream< InputType > &"
+                    },
+                    {
+                        "name": "matrixSStrm",
+                        "direction": "",
+                        "type": "hls::stream< OutputType > &"
+                    },
+                    {
+                        "name": "matrixUStrm",
+                        "direction": "",
+                        "type": "hls::stream< OutputType > &"
+                    },
+                    {
+                        "name": "matrixVStrm",
+                        "direction": "",
+                        "type": "hls::stream< OutputType > &"
+                    }
+                ]
+            }
+        }
+    ],
+    "target_domain": ""
+}
