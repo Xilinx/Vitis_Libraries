@@ -1,0 +1,18 @@
+[hls]
+
+clock=3.33
+flow_target=vivado
+syn.file=test.cpp
+syn.file_cflags=test.cpp,-I${XF_PROJ_ROOT}/L1/include -D_XF_SECURITY_GMAC_DEBUG_=1
+syn.top=test
+tb.file=main.cpp
+tb.file=gld.dat
+
+
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog
+
+

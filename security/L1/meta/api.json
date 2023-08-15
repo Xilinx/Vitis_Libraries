@@ -8,7 +8,8 @@
                 "api_name": "xf::security::adler32",
                 "display_name": "adler32",
                 "brief": "adler32 computes the Adler-32 checksum of an input data.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "adler32.hpp"
                 ],
@@ -55,7 +56,8 @@
                         "type": "hls::stream<bool>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::blake2b",
@@ -64,7 +66,8 @@
                 "api_name": "xf::security::blake2b",
                 "display_name": "blake2b",
                 "brief": "Top function of BLAKE2B.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "blake2b.hpp"
                 ],
@@ -115,7 +118,8 @@
                         "type": "hls::stream<bool>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::desCbcEncrypt",
@@ -124,7 +128,8 @@
                 "api_name": "xf::security::desCbcEncrypt",
                 "display_name": "desCbcEncrypt",
                 "brief": "desCbcEncrypt is CBC encryption mode with DES single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cbc.hpp"
                 ],
@@ -165,7 +170,8 @@
                         "type": "hls::stream<bool>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::desCbcDecrypt",
@@ -174,7 +180,8 @@
                 "api_name": "xf::security::desCbcDecrypt",
                 "display_name": "desCbcDecrypt",
                 "brief": "desCbcDecrypt is CBC decryption mode with DES single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cbc.hpp"
                 ],
@@ -215,7 +222,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes128CbcEncrypt",
@@ -224,7 +232,8 @@
                 "api_name": "xf::security::aes128CbcEncrypt",
                 "display_name": "aes128CbcEncrypt",
                 "brief": "aes128CbcEncrypt is CBC encryption mode with AES-128 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cbc.hpp"
                 ],
@@ -265,7 +274,8 @@
                         "type": "hls::stream<bool>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes128CbcDecrypt",
@@ -274,7 +284,8 @@
                 "api_name": "xf::security::aes128CbcDecrypt",
                 "display_name": "aes128CbcDecrypt",
                 "brief": "aes128CbcDecrypt is CBC decryption mode with AES-128 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cbc.hpp"
                 ],
@@ -315,7 +326,8 @@
                         "type": "hls::stream<bool>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes192CbcEncrypt",
@@ -324,7 +336,8 @@
                 "api_name": "xf::security::aes192CbcEncrypt",
                 "display_name": "aes192CbcEncrypt",
                 "brief": "aes192CbcEncrypt is CBC encryption mode with AES-192 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cbc.hpp"
                 ],
@@ -365,7 +378,8 @@
                         "type": "hls::stream<bool>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes192CbcDecrypt",
@@ -374,7 +388,8 @@
                 "api_name": "xf::security::aes192CbcDecrypt",
                 "display_name": "aes192CbcDecrypt",
                 "brief": "aes192CbcDecrypt is CBC decryption mode with AES-192 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cbc.hpp"
                 ],
@@ -415,7 +430,8 @@
                         "type": "hls::stream<bool>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes256CbcEncrypt",
@@ -424,7 +440,8 @@
                 "api_name": "xf::security::aes256CbcEncrypt",
                 "display_name": "aes256CbcEncrypt",
                 "brief": "aes256CbcEncrypt is CBC encryption mode with AES-256 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cbc.hpp"
                 ],
@@ -465,7 +482,8 @@
                         "type": "hls::stream<bool>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes256CbcDecrypt",
@@ -474,7 +492,8 @@
                 "api_name": "xf::security::aes256CbcDecrypt",
                 "display_name": "aes256CbcDecrypt",
                 "brief": "aes256CbcDecrypt is CBC decryption mode with AES-256 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cbc.hpp"
                 ],
@@ -515,7 +534,8 @@
                         "type": "hls::stream<bool>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes128CcmEncrypt",
@@ -524,7 +544,8 @@
                 "api_name": "xf::security::aes128CcmEncrypt",
                 "display_name": "aes128CcmEncrypt",
                 "brief": "aes128CcmEncrypt is CCM encryption mode with AES-128 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ccm.hpp"
                 ],
@@ -601,7 +622,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes128CcmDecrypt",
@@ -610,7 +632,8 @@
                 "api_name": "xf::security::aes128CcmDecrypt",
                 "display_name": "aes128CcmDecrypt",
                 "brief": "aes128CcmDecrypt is CCM decryption mode with AES-128 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ccm.hpp"
                 ],
@@ -687,7 +710,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes192CcmEncrypt",
@@ -696,7 +720,8 @@
                 "api_name": "xf::security::aes192CcmEncrypt",
                 "display_name": "aes192CcmEncrypt",
                 "brief": "aes192CcmEncrypt is CCM encryption mode with AES-192 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ccm.hpp"
                 ],
@@ -773,7 +798,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes192CcmDecrypt",
@@ -782,7 +808,8 @@
                 "api_name": "xf::security::aes192CcmDecrypt",
                 "display_name": "aes192CcmDecrypt",
                 "brief": "aes192CcmDecrypt is CCM decryption mode with AES-192 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ccm.hpp"
                 ],
@@ -859,7 +886,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes256CcmEncrypt",
@@ -868,7 +896,8 @@
                 "api_name": "xf::security::aes256CcmEncrypt",
                 "display_name": "aes256CcmEncrypt",
                 "brief": "aes256CcmEncrypt is CCM encryption mode with AES-256 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ccm.hpp"
                 ],
@@ -945,7 +974,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes256CcmDecrypt",
@@ -954,7 +984,8 @@
                 "api_name": "xf::security::aes256CcmDecrypt",
                 "display_name": "aes256CcmDecrypt",
                 "brief": "aes256CcmDecrypt is CCM decryption mode with AES-256 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ccm.hpp"
                 ],
@@ -1031,7 +1062,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::desCfb1Encrypt",
@@ -1040,7 +1072,8 @@
                 "api_name": "xf::security::desCfb1Encrypt",
                 "display_name": "desCfb1Encrypt",
                 "brief": "desCfb1Encrypt is CFB1 encryption mode with DES single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cfb.hpp"
                 ],
@@ -1081,7 +1114,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::desCfb1Decrypt",
@@ -1090,7 +1124,8 @@
                 "api_name": "xf::security::desCfb1Decrypt",
                 "display_name": "desCfb1Decrypt",
                 "brief": "desCfb1Decrypt is CFB1 decryption mode with DES single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cfb.hpp"
                 ],
@@ -1131,7 +1166,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes128Cfb1Encrypt",
@@ -1140,7 +1176,8 @@
                 "api_name": "xf::security::aes128Cfb1Encrypt",
                 "display_name": "aes128Cfb1Encrypt",
                 "brief": "aes128Cfb1Encrypt is CFB1 encryption mode with AES-128 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cfb.hpp"
                 ],
@@ -1181,7 +1218,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes128Cfb1Decrypt",
@@ -1190,7 +1228,8 @@
                 "api_name": "xf::security::aes128Cfb1Decrypt",
                 "display_name": "aes128Cfb1Decrypt",
                 "brief": "aes128Cfb1Decrypt is CFB1 decryption mode with AES-128 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cfb.hpp"
                 ],
@@ -1231,7 +1270,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes192Cfb1Encrypt",
@@ -1240,7 +1280,8 @@
                 "api_name": "xf::security::aes192Cfb1Encrypt",
                 "display_name": "aes192Cfb1Encrypt",
                 "brief": "aes192Cfb1Encrypt is CFB1 encryption mode with AES-192 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cfb.hpp"
                 ],
@@ -1281,7 +1322,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes192Cfb1Decrypt",
@@ -1290,7 +1332,8 @@
                 "api_name": "xf::security::aes192Cfb1Decrypt",
                 "display_name": "aes192Cfb1Decrypt",
                 "brief": "aes192Cfb1Decrypt is CFB1 decryption mode with AES-192 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cfb.hpp"
                 ],
@@ -1331,7 +1374,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes256Cfb1Encrypt",
@@ -1340,7 +1384,8 @@
                 "api_name": "xf::security::aes256Cfb1Encrypt",
                 "display_name": "aes256Cfb1Encrypt",
                 "brief": "aes256Cfb1Encrypt is CFB1 encryption mode with AES-256 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cfb.hpp"
                 ],
@@ -1381,7 +1426,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes256Cfb1Decrypt",
@@ -1390,7 +1436,8 @@
                 "api_name": "xf::security::aes256Cfb1Decrypt",
                 "display_name": "aes256Cfb1Decrypt",
                 "brief": "aes256Cfb1Decrypt is CFB1 decryption mode with AES-256 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cfb.hpp"
                 ],
@@ -1431,7 +1478,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::desCfb8Encrypt",
@@ -1440,7 +1488,8 @@
                 "api_name": "xf::security::desCfb8Encrypt",
                 "display_name": "desCfb8Encrypt",
                 "brief": "desCfb8Encrypt is CFB8 encryption mode with DES single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cfb.hpp"
                 ],
@@ -1481,7 +1530,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::desCfb8Decrypt",
@@ -1490,7 +1540,8 @@
                 "api_name": "xf::security::desCfb8Decrypt",
                 "display_name": "desCfb8Decrypt",
                 "brief": "desCfb8Decrypt is CFB8 decryption mode with DES single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cfb.hpp"
                 ],
@@ -1531,7 +1582,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes128Cfb8Encrypt",
@@ -1540,7 +1592,8 @@
                 "api_name": "xf::security::aes128Cfb8Encrypt",
                 "display_name": "aes128Cfb8Encrypt",
                 "brief": "aes128Cfb8Encrypt is CFB8 encryption mode with AES-128 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cfb.hpp"
                 ],
@@ -1581,7 +1634,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes128Cfb8Decrypt",
@@ -1590,7 +1644,8 @@
                 "api_name": "xf::security::aes128Cfb8Decrypt",
                 "display_name": "aes128Cfb8Decrypt",
                 "brief": "aes128Cfb8Decrypt is CFB8 decryption mode with AES-128 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cfb.hpp"
                 ],
@@ -1631,7 +1686,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes192Cfb8Encrypt",
@@ -1640,7 +1696,8 @@
                 "api_name": "xf::security::aes192Cfb8Encrypt",
                 "display_name": "aes192Cfb8Encrypt",
                 "brief": "aes192Cfb8Encrypt is CFB8 encryption mode with AES-192 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cfb.hpp"
                 ],
@@ -1681,7 +1738,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes192Cfb8Decrypt",
@@ -1690,7 +1748,8 @@
                 "api_name": "xf::security::aes192Cfb8Decrypt",
                 "display_name": "aes192Cfb8Decrypt",
                 "brief": "aes192Cfb8Decrypt is CFB8 decryption mode with AES-192 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cfb.hpp"
                 ],
@@ -1731,7 +1790,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes256Cfb8Encrypt",
@@ -1740,7 +1800,8 @@
                 "api_name": "xf::security::aes256Cfb8Encrypt",
                 "display_name": "aes256Cfb8Encrypt",
                 "brief": "aes256Cfb8Encrypt is CFB8 encryption mode with AES-256 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cfb.hpp"
                 ],
@@ -1781,7 +1842,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes256Cfb8Decrypt",
@@ -1790,7 +1852,8 @@
                 "api_name": "xf::security::aes256Cfb8Decrypt",
                 "display_name": "aes256Cfb8Decrypt",
                 "brief": "aes256Cfb8Decrypt is CFB8 decryption mode with AES-256 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cfb.hpp"
                 ],
@@ -1831,7 +1894,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::desCfb128Encrypt",
@@ -1840,7 +1904,8 @@
                 "api_name": "xf::security::desCfb128Encrypt",
                 "display_name": "desCfb128Encrypt",
                 "brief": "desCfb128Encrypt is CFB128 encryption mode with DES single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cfb.hpp"
                 ],
@@ -1881,7 +1946,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::desCfb128Decrypt",
@@ -1890,7 +1956,8 @@
                 "api_name": "xf::security::desCfb128Decrypt",
                 "display_name": "desCfb128Decrypt",
                 "brief": "desCfb128Decrypt is CFB128 decryption mode with DES single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cfb.hpp"
                 ],
@@ -1931,7 +1998,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes128Cfb128Encrypt",
@@ -1940,7 +2008,8 @@
                 "api_name": "xf::security::aes128Cfb128Encrypt",
                 "display_name": "aes128Cfb128Encrypt",
                 "brief": "aes128Cfb128Encrypt is CFB128 encryption mode with AES-128 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cfb.hpp"
                 ],
@@ -1981,7 +2050,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes128Cfb128Decrypt",
@@ -1990,7 +2060,8 @@
                 "api_name": "xf::security::aes128Cfb128Decrypt",
                 "display_name": "aes128Cfb128Decrypt",
                 "brief": "aes128Cfb128Decrypt is CFB128 decryption mode with AES-128 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cfb.hpp"
                 ],
@@ -2031,7 +2102,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes192Cfb128Encrypt",
@@ -2040,7 +2112,8 @@
                 "api_name": "xf::security::aes192Cfb128Encrypt",
                 "display_name": "aes192Cfb128Encrypt",
                 "brief": "aes192Cfb128Encrypt is CFB128 encryption mode with AES-192 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cfb.hpp"
                 ],
@@ -2081,7 +2154,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes192Cfb128Decrypt",
@@ -2090,7 +2164,8 @@
                 "api_name": "xf::security::aes192Cfb128Decrypt",
                 "display_name": "aes192Cfb128Decrypt",
                 "brief": "aes192Cfb128Decrypt is CFB128 decryption mode with AES-192 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cfb.hpp"
                 ],
@@ -2131,7 +2206,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes256Cfb128Encrypt",
@@ -2140,7 +2216,8 @@
                 "api_name": "xf::security::aes256Cfb128Encrypt",
                 "display_name": "aes256Cfb128Encrypt",
                 "brief": "aes256Cfb128Encrypt is CFB128 encryption mode with AES-256 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cfb.hpp"
                 ],
@@ -2181,7 +2258,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes256Cfb128Decrypt",
@@ -2190,7 +2268,8 @@
                 "api_name": "xf::security::aes256Cfb128Decrypt",
                 "display_name": "aes256Cfb128Decrypt",
                 "brief": "aes256Cfb128Decrypt is CFB128 decryption mode with AES-256 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cfb.hpp"
                 ],
@@ -2231,7 +2310,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::chacha20",
@@ -2240,7 +2320,8 @@
                 "api_name": "xf::security::chacha20",
                 "display_name": "chacha20",
                 "brief": "chahcha20 is a basic function for stream ciphering when key is \"keylayout-chacha\", its layout in a 256-bit ap_uint<> likes this,",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "chacha20.hpp"
                 ],
@@ -2281,7 +2362,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::xchacha20",
@@ -2290,7 +2372,8 @@
                 "api_name": "xf::security::xchacha20",
                 "display_name": "xchacha20",
                 "brief": "xchahcha20 is variant of original chacha20 to support longer nonce of 192bits.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "chacha20.hpp"
                 ],
@@ -2331,7 +2414,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::crc32",
@@ -2340,7 +2424,8 @@
                 "api_name": "xf::security::crc32",
                 "display_name": "crc32",
                 "brief": "crc32 computes the CRC32 check value of an input data.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "crc32.hpp"
                 ],
@@ -2387,7 +2472,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::crc32c",
@@ -2396,7 +2482,8 @@
                 "api_name": "xf::security::crc32c",
                 "display_name": "crc32c",
                 "brief": "crc32c computes the CRC32 (Castagnoli) check value of an input data.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "crc32c.hpp"
                 ],
@@ -2443,7 +2530,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes128CtrEncrypt",
@@ -2452,7 +2540,8 @@
                 "api_name": "xf::security::aes128CtrEncrypt",
                 "display_name": "aes128CtrEncrypt",
                 "brief": "aes128CtrEncrypt is CTR encryption mode with AES-128 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ctr.hpp"
                 ],
@@ -2493,7 +2582,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes128CtrDecrypt",
@@ -2502,7 +2592,8 @@
                 "api_name": "xf::security::aes128CtrDecrypt",
                 "display_name": "aes128CtrDecrypt",
                 "brief": "aes128CtrDecrypt is CTR decryption mode with AES-128 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ctr.hpp"
                 ],
@@ -2543,7 +2634,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes192CtrEncrypt",
@@ -2552,7 +2644,8 @@
                 "api_name": "xf::security::aes192CtrEncrypt",
                 "display_name": "aes192CtrEncrypt",
                 "brief": "aes192CtrEncrypt is CTR encryption mode with AES-192 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ctr.hpp"
                 ],
@@ -2593,7 +2686,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes192CtrDecrypt",
@@ -2602,7 +2696,8 @@
                 "api_name": "xf::security::aes192CtrDecrypt",
                 "display_name": "aes192CtrDecrypt",
                 "brief": "aes192CtrDecrypt is CTR decryption mode with AES-192 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ctr.hpp"
                 ],
@@ -2643,7 +2738,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes256CtrEncrypt",
@@ -2652,7 +2748,8 @@
                 "api_name": "xf::security::aes256CtrEncrypt",
                 "display_name": "aes256CtrEncrypt",
                 "brief": "aes256CtrEncrypt is CTR encryption mode with AES-256 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ctr.hpp"
                 ],
@@ -2693,7 +2790,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes256CtrDecrypt",
@@ -2702,7 +2800,8 @@
                 "api_name": "xf::security::aes256CtrDecrypt",
                 "display_name": "aes256CtrDecrypt",
                 "brief": "aes256CtrDecrypt is CTR decryption mode with AES-256 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ctr.hpp"
                 ],
@@ -2743,7 +2842,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::desEncrypt",
@@ -2752,7 +2852,8 @@
                 "api_name": "xf::security::desEncrypt",
                 "display_name": "desEncrypt",
                 "brief": "desEncrypt is the basic function for ciphering one block with one cipher key using DES",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "des.hpp"
                 ],
@@ -2778,7 +2879,8 @@
                         "type": "ap_uint<64>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::desDecrypt",
@@ -2787,7 +2889,8 @@
                 "api_name": "xf::security::desDecrypt",
                 "display_name": "desDecrypt",
                 "brief": "desDecrypt is the basic function for decrypt one block with one cipher key using DES",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "des.hpp"
                 ],
@@ -2813,7 +2916,8 @@
                         "type": "ap_uint<64>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::des3Encrypt",
@@ -2822,7 +2926,8 @@
                 "api_name": "xf::security::des3Encrypt",
                 "display_name": "des3Encrypt",
                 "brief": "des3Encrypt is the basic function for ciphering one block with three cipher keys using 3DES",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "des.hpp"
                 ],
@@ -2858,7 +2963,8 @@
                         "type": "ap_uint<64>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::des3Decrypt",
@@ -2867,7 +2973,8 @@
                 "api_name": "xf::security::des3Decrypt",
                 "display_name": "des3Decrypt",
                 "brief": "des3Decrypt is the basic function for decrypt one block with three cipher keys using 3DES",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "des.hpp"
                 ],
@@ -2903,7 +3010,8 @@
                         "type": "ap_uint<64>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::desEcbEncrypt",
@@ -2912,7 +3020,8 @@
                 "api_name": "xf::security::desEcbEncrypt",
                 "display_name": "desEcbEncrypt",
                 "brief": "desEcbEncrypt is ECB encryption mode with DES single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ecb.hpp"
                 ],
@@ -2948,7 +3057,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::desEcbDecrypt",
@@ -2957,7 +3067,8 @@
                 "api_name": "xf::security::desEcbDecrypt",
                 "display_name": "desEcbDecrypt",
                 "brief": "desEcbDecrypt is ECB decryption mode with DES single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ecb.hpp"
                 ],
@@ -2993,7 +3104,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes128EcbEncrypt",
@@ -3002,7 +3114,8 @@
                 "api_name": "xf::security::aes128EcbEncrypt",
                 "display_name": "aes128EcbEncrypt",
                 "brief": "aes128EcbEncrypt is ECB encryption mode with AES-128 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ecb.hpp"
                 ],
@@ -3038,7 +3151,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes128EcbDecrypt",
@@ -3047,7 +3161,8 @@
                 "api_name": "xf::security::aes128EcbDecrypt",
                 "display_name": "aes128EcbDecrypt",
                 "brief": "aes128EcbDecrypt is ECB decryption mode with AES-128 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ecb.hpp"
                 ],
@@ -3083,7 +3198,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes192EcbEncrypt",
@@ -3092,7 +3208,8 @@
                 "api_name": "xf::security::aes192EcbEncrypt",
                 "display_name": "aes192EcbEncrypt",
                 "brief": "aes192EcbEncrypt is ECB encryption mode with AES-192 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ecb.hpp"
                 ],
@@ -3128,7 +3245,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes192EcbDecrypt",
@@ -3137,7 +3255,8 @@
                 "api_name": "xf::security::aes192EcbDecrypt",
                 "display_name": "aes192EcbDecrypt",
                 "brief": "aes192EcbDecrypt is ECB decryption mode with AES-192 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ecb.hpp"
                 ],
@@ -3173,7 +3292,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes256EcbEncrypt",
@@ -3182,7 +3302,8 @@
                 "api_name": "xf::security::aes256EcbEncrypt",
                 "display_name": "aes256EcbEncrypt",
                 "brief": "aes256EcbEncrypt is ECB encryption mode with AES-256 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ecb.hpp"
                 ],
@@ -3218,7 +3339,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes256EcbDecrypt",
@@ -3227,7 +3349,8 @@
                 "api_name": "xf::security::aes256EcbDecrypt",
                 "display_name": "aes256EcbDecrypt",
                 "brief": "aes256EcbDecrypt is ECB decryption mode with AES-256 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ecb.hpp"
                 ],
@@ -3263,7 +3386,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::nistp256Sign",
@@ -3272,7 +3396,8 @@
                 "api_name": "xf::security::nistp256Sign",
                 "display_name": "nistp256Sign",
                 "brief": "signing function. It will return true if input parameters are legal, otherwise return false.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ecdsa_nistp256.hpp"
                 ],
@@ -3308,7 +3433,8 @@
                         "type": "ap_uint< 256 > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::nistp256Verify",
@@ -3317,7 +3443,8 @@
                 "api_name": "xf::security::nistp256Verify",
                 "display_name": "nistp256Verify",
                 "brief": "verifying function. It will return true if verified, otherwise false.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ecdsa_nistp256.hpp"
                 ],
@@ -3353,7 +3480,8 @@
                         "type": "ap_uint< 256 > P"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes128GcmEncrypt",
@@ -3362,7 +3490,8 @@
                 "api_name": "xf::security::aes128GcmEncrypt",
                 "display_name": "aes128GcmEncrypt",
                 "brief": "aes128GcmEncrypt is GCM encryption mode with AES-128 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "gcm.hpp"
                 ],
@@ -3428,7 +3557,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes128GcmDecrypt",
@@ -3437,7 +3567,8 @@
                 "api_name": "xf::security::aes128GcmDecrypt",
                 "display_name": "aes128GcmDecrypt",
                 "brief": "aes128GcmDecrypt is GCM decryption mode with AES-128 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "gcm.hpp"
                 ],
@@ -3503,7 +3634,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes192GcmEncrypt",
@@ -3512,7 +3644,8 @@
                 "api_name": "xf::security::aes192GcmEncrypt",
                 "display_name": "aes192GcmEncrypt",
                 "brief": "aes192GcmEncrypt is GCM encryption mode with AES-192 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "gcm.hpp"
                 ],
@@ -3578,7 +3711,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes192GcmDecrypt",
@@ -3587,7 +3721,8 @@
                 "api_name": "xf::security::aes192GcmDecrypt",
                 "display_name": "aes192GcmDecrypt",
                 "brief": "aes192GcmDecrypt is GCM decryption mode with AES-192 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "gcm.hpp"
                 ],
@@ -3653,7 +3788,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes256GcmEncrypt",
@@ -3662,7 +3798,8 @@
                 "api_name": "xf::security::aes256GcmEncrypt",
                 "display_name": "aes256GcmEncrypt",
                 "brief": "aes256GcmEncrypt is GCM encryption mode with AES-256 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "gcm.hpp"
                 ],
@@ -3728,7 +3865,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes256GcmDecrypt",
@@ -3737,7 +3875,8 @@
                 "api_name": "xf::security::aes256GcmDecrypt",
                 "display_name": "aes256GcmDecrypt",
                 "brief": "aes256GcmDecrypt is GCM decryption mode with AES-2562 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "gcm.hpp"
                 ],
@@ -3803,7 +3942,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes128Gmac",
@@ -3812,7 +3952,8 @@
                 "api_name": "xf::security::aes128Gmac",
                 "display_name": "aes128Gmac",
                 "brief": "GMAC using AES-128 block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "gmac.hpp"
                 ],
@@ -3848,7 +3989,8 @@
                         "type": "hls::stream< ap_uint< 128 > > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes192Gmac",
@@ -3857,7 +3999,8 @@
                 "api_name": "xf::security::aes192Gmac",
                 "display_name": "aes192Gmac",
                 "brief": "GMAC using AES-192 block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "gmac.hpp"
                 ],
@@ -3893,7 +4036,8 @@
                         "type": "hls::stream< ap_uint< 128 > > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes256Gmac",
@@ -3902,7 +4046,8 @@
                 "api_name": "xf::security::aes256Gmac",
                 "display_name": "aes256Gmac",
                 "brief": "GMAC using AES-256 block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "gmac.hpp"
                 ],
@@ -3938,7 +4083,8 @@
                         "type": "hls::stream< ap_uint< 128 > > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::hmac",
@@ -3947,7 +4093,8 @@
                 "api_name": "xf::security::hmac",
                 "display_name": "hmac",
                 "brief": "Compute HMAC value according to specified hash function and input data.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "hmac.hpp"
                 ],
@@ -4019,7 +4166,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::keccak_256",
@@ -4028,7 +4176,8 @@
                 "api_name": "xf::security::keccak_256",
                 "display_name": "keccak_256",
                 "brief": "Top function of KECCAK-256.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "keccak256.hpp"
                 ],
@@ -4064,7 +4213,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::md4",
@@ -4073,7 +4223,8 @@
                 "api_name": "xf::security::md4",
                 "display_name": "md4",
                 "brief": "Top function of MD4.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "md4.hpp"
                 ],
@@ -4109,7 +4260,8 @@
                         "type": ""
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::md5",
@@ -4118,7 +4270,8 @@
                 "api_name": "xf::security::md5",
                 "display_name": "md5",
                 "brief": "Top function of MD5.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "md5.hpp"
                 ],
@@ -4154,7 +4307,8 @@
                         "type": ""
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::desOfbEncrypt",
@@ -4163,7 +4317,8 @@
                 "api_name": "xf::security::desOfbEncrypt",
                 "display_name": "desOfbEncrypt",
                 "brief": "desOfbEncrypt is OFB encryption mode with DES single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ofb.hpp"
                 ],
@@ -4204,7 +4359,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::desOfbDecrypt",
@@ -4213,7 +4369,8 @@
                 "api_name": "xf::security::desOfbDecrypt",
                 "display_name": "desOfbDecrypt",
                 "brief": "desOfbDecrypt is OFB decryption mode with DES single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ofb.hpp"
                 ],
@@ -4254,7 +4411,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes128OfbEncrypt",
@@ -4263,7 +4421,8 @@
                 "api_name": "xf::security::aes128OfbEncrypt",
                 "display_name": "aes128OfbEncrypt",
                 "brief": "aes128OfbEncrypt is OFB encryption mode with AES-128 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ofb.hpp"
                 ],
@@ -4304,7 +4463,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes128OfbDecrypt",
@@ -4313,7 +4473,8 @@
                 "api_name": "xf::security::aes128OfbDecrypt",
                 "display_name": "aes128OfbDecrypt",
                 "brief": "aes128OfbDecrypt is OFB decryption mode with AES-128 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ofb.hpp"
                 ],
@@ -4354,7 +4515,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes192OfbEncrypt",
@@ -4363,7 +4525,8 @@
                 "api_name": "xf::security::aes192OfbEncrypt",
                 "display_name": "aes192OfbEncrypt",
                 "brief": "aes192OfbEncrypt is OFB encryption mode with AES-192 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ofb.hpp"
                 ],
@@ -4404,7 +4567,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes192OfbDecrypt",
@@ -4413,7 +4577,8 @@
                 "api_name": "xf::security::aes192OfbDecrypt",
                 "display_name": "aes192OfbDecrypt",
                 "brief": "aes192OfbDecrypt is OFB decryption mode with AES-192 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ofb.hpp"
                 ],
@@ -4454,7 +4619,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes256OfbEncrypt",
@@ -4463,7 +4629,8 @@
                 "api_name": "xf::security::aes256OfbEncrypt",
                 "display_name": "aes256OfbEncrypt",
                 "brief": "aes256OfbEncrypt is OFB encryption mode with AES-256 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ofb.hpp"
                 ],
@@ -4504,7 +4671,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes256OfbDecrypt",
@@ -4513,7 +4681,8 @@
                 "api_name": "xf::security::aes256OfbDecrypt",
                 "display_name": "aes256OfbDecrypt",
                 "brief": "aes256OfbDecrypt is OFB decryption mode with AES-256 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ofb.hpp"
                 ],
@@ -4554,7 +4723,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::poly1305",
@@ -4563,7 +4733,8 @@
                 "api_name": "xf::security::poly1305",
                 "display_name": "poly1305",
                 "brief": "The poly1305 takes a 32-byte one-time key and a message and produces a 16-byte tag. This tag is used to authenticate the message.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "poly1305.hpp"
                 ],
@@ -4599,7 +4770,8 @@
                         "type": "hls::stream< ap_uint< 128 > > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::poly1305MultiChan",
@@ -4608,7 +4780,8 @@
                 "api_name": "xf::security::poly1305MultiChan",
                 "display_name": "poly1305MultiChan",
                 "brief": "The poly1305MultiChan takes N 32-byte one-time keys and N messages and produces N 16-byte tags. These tags are used to authenticate the corresponding messages.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "poly1305.hpp"
                 ],
@@ -4650,7 +4823,8 @@
                         "type": "hls::stream< ap_uint< 128 > > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::rc4",
@@ -4659,7 +4833,8 @@
                 "api_name": "xf::security::rc4",
                 "display_name": "rc4",
                 "brief": "Rc_4 is the basic function for stream ciphering keyLength defined as the number of bytes in the key and can be in the range 1<= keylength <=256, typically between 5 and 16, corresponding to a key length of 40-128 bits.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "rc4.hpp"
                 ],
@@ -4700,7 +4875,8 @@
                         "type": "hls::stream<bool>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::ripemd160",
@@ -4709,7 +4885,8 @@
                 "api_name": "xf::security::ripemd160",
                 "display_name": "ripemd160",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ripemd.hpp"
                 ],
@@ -4745,7 +4922,8 @@
                         "type": "hls::stream<bool>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::sha1",
@@ -4754,7 +4932,8 @@
                 "api_name": "xf::security::sha1",
                 "display_name": "sha1",
                 "brief": "Top function of SHA-1.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "sha1.hpp"
                 ],
@@ -4796,7 +4975,8 @@
                         "type": "hls::stream<bool>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::sha224",
@@ -4805,7 +4985,8 @@
                 "api_name": "xf::security::sha224",
                 "display_name": "sha224",
                 "brief": "SHA-224 algorithm with ap_uint stream input and output.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "sha224_256.hpp"
                 ],
@@ -4847,7 +5028,8 @@
                         "type": "hls::stream<bool>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::sha256",
@@ -4856,7 +5038,8 @@
                 "api_name": "xf::security::sha256",
                 "display_name": "sha256",
                 "brief": "SHA-256 algorithm with ap_uint stream input and output.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "sha224_256.hpp"
                 ],
@@ -4898,7 +5081,8 @@
                         "type": "hls::stream<bool>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::sha3_224",
@@ -4907,7 +5091,8 @@
                 "api_name": "xf::security::sha3_224",
                 "display_name": "sha3_224",
                 "brief": "Top function of SHA3-224.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "sha3.hpp"
                 ],
@@ -4943,7 +5128,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::sha3_256",
@@ -4952,7 +5138,8 @@
                 "api_name": "xf::security::sha3_256",
                 "display_name": "sha3_256",
                 "brief": "Top function of SHA3-256.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "sha3.hpp"
                 ],
@@ -4988,7 +5175,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::sha3_384",
@@ -4997,7 +5185,8 @@
                 "api_name": "xf::security::sha3_384",
                 "display_name": "sha3_384",
                 "brief": "Top function of SHA3-384.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "sha3.hpp"
                 ],
@@ -5033,7 +5222,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::sha3_512",
@@ -5042,7 +5232,8 @@
                 "api_name": "xf::security::sha3_512",
                 "display_name": "sha3_512",
                 "brief": "Top function of SHA3-512.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "sha3.hpp"
                 ],
@@ -5078,7 +5269,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::shake128",
@@ -5087,7 +5279,8 @@
                 "api_name": "xf::security::shake128",
                 "display_name": "shake128",
                 "brief": "Top function of SHAKE-128.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "sha3.hpp"
                 ],
@@ -5123,7 +5316,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::shake256",
@@ -5132,7 +5326,8 @@
                 "api_name": "xf::security::shake256",
                 "display_name": "shake256",
                 "brief": "Top function of SHAKE-256.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "sha3.hpp"
                 ],
@@ -5168,7 +5363,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::sha384",
@@ -5177,7 +5373,8 @@
                 "api_name": "xf::security::sha384",
                 "display_name": "sha384",
                 "brief": "SHA-384 algorithm with stream input and output.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "sha512_t.hpp"
                 ],
@@ -5219,7 +5416,8 @@
                         "type": "hls::stream<bool>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::sha512",
@@ -5228,7 +5426,8 @@
                 "api_name": "xf::security::sha512",
                 "display_name": "sha512",
                 "brief": "SHA-512 algorithm with stream input and output.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "sha512_t.hpp"
                 ],
@@ -5270,7 +5469,8 @@
                         "type": ""
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::sha512_t",
@@ -5279,7 +5479,8 @@
                 "api_name": "xf::security::sha512_t",
                 "display_name": "sha512_t",
                 "brief": "SHA-512/t algorithm with stream input and output.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "sha512_t.hpp"
                 ],
@@ -5326,7 +5527,8 @@
                         "type": ""
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::sm3",
@@ -5335,7 +5537,8 @@
                 "api_name": "xf::security::sm3",
                 "display_name": "sm3",
                 "brief": "SM3 function to genrate digest value for input messages.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "sm234.hpp"
                 ],
@@ -5371,7 +5574,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::evaluate",
@@ -5380,7 +5584,8 @@
                 "api_name": "xf::security::evaluate",
                 "display_name": "evaluate",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "vdf.hpp"
                 ],
@@ -5437,7 +5642,8 @@
                         "type": "ap_uint<L>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::verifyWesolowski",
@@ -5446,7 +5652,8 @@
                 "api_name": "xf::security::verifyWesolowski",
                 "display_name": "verifyWesolowski",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "vdf.hpp"
                 ],
@@ -5508,7 +5715,8 @@
                         "type": "ap_uint<L>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::verifyPietrzak",
@@ -5517,7 +5725,8 @@
                 "api_name": "xf::security::verifyPietrzak",
                 "display_name": "verifyPietrzak",
                 "brief": "verifyPietrzak verify function of verifiable delay function, its algorithm: if T is even, return (N, x, T/2, y) = (N, x^(r+2^(T/2)), T/2, x^(r*2^(T/2)+2^T)), if T is odd, return (N, x, (T+1)/2, y) = (N, x^(r+2^((T-1)/2)), T/2, x^(r*2^((T+1)/2)+2^T))",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "vdf.hpp"
                 ],
@@ -5564,7 +5773,8 @@
                         "type": "ap_uint< L >"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes128XtsEncrypt",
@@ -5573,7 +5783,8 @@
                 "api_name": "xf::security::aes128XtsEncrypt",
                 "display_name": "aes128XtsEncrypt",
                 "brief": "aes128XtsEncrypt is XTS encryption mode with AES-128 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "xts.hpp"
                 ],
@@ -5619,7 +5830,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes128XtsDecrypt",
@@ -5628,7 +5840,8 @@
                 "api_name": "xf::security::aes128XtsDecrypt",
                 "display_name": "aes128XtsDecrypt",
                 "brief": "aes128XtsDecrypt is XTS decryption mode with AES-128 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "xts.hpp"
                 ],
@@ -5674,7 +5887,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes256XtsEncrypt",
@@ -5683,7 +5897,8 @@
                 "api_name": "xf::security::aes256XtsEncrypt",
                 "display_name": "aes256XtsEncrypt",
                 "brief": "aes256XtsEncrypt is XTS encryption mode with AES-256 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "xts.hpp"
                 ],
@@ -5729,7 +5944,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::security::aes256XtsDecrypt",
@@ -5738,7 +5954,8 @@
                 "api_name": "xf::security::aes256XtsDecrypt",
                 "display_name": "aes256XtsDecrypt",
                 "brief": "aes256XtsDecrypt is XTS decryption mode with AES-256 single block cipher.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "xts.hpp"
                 ],
@@ -5784,7 +6001,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         }
     ]
 }

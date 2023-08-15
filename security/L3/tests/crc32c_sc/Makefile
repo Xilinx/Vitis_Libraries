@@ -89,7 +89,7 @@ CXXFLAGS += -I $(XILINX_VITIS)/system_compiler/include -I $(XILINX_HLS)/include
 LDFLAGS += 
 VPP_FLAGS += -t $(TARGET) --platform $(XPLATFORM) --temp_dir $(TEMP_DIR) --save-temps -g -I $(XILINX_VITIS)/system_compiler/include 
 VPP_LDFLAGS += --optimize 2 -R 2 
-LDFLAGS += -L$(XILINX_XRT)/lib -L$(SYS_COMP_LIB) -lvpp_acc -l$(LIB_XRT) -lxrt_coreutil -Wl,--enable-new-dtags -lpthread
+LDFLAGS += -L$(XILINX_XRT)/lib -L$(SYS_COMP_LIB) -lvpp_acc -l$(LIB_XRT) -lxrt_coreutil  -Wl,-rpath=$(SYS_COMP_LIB):$(XILINX_XRT)/lib:$(GCC_HOME)/lib64  -Wl,--enable-new-dtags -lpthread
 else ifeq ($(HOST_ARCH), aarch64)
 CXXFLAGS += 
 LDFLAGS += 
@@ -98,6 +98,10 @@ VPP_LDFLAGS +=
 endif
 CXXFLAGS += $(EXTRA_CXXFLAGS)
 VPP_FLAGS += $(EXTRA_VPP_FLAGS)
+
+ifneq (,$(shell echo $(XPLATFORM) | tr '[:upper:]' '[:lower:]' |  awk '/u2_|samsung_u2/'))
+VPP_FLAGS += --advanced.param compiler.ignorePlatformCompatibilityCheck=true
+endif
 
 ifeq ($(TARGET),sw)
   $(error Error: The sw target is not supported anymore. Please use sw_emu instead)
