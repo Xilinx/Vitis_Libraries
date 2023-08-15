@@ -8,7 +8,8 @@
                 "api_name": "xf::graph::bfs",
                 "display_name": "bfs",
                 "brief": "bfs Implement the directed graph traversal by breath-first search algorithm",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "bfs.hpp"
                 ],
@@ -75,7 +76,8 @@
                         "type": "ap_uint< 32 > *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::graph::calcuDegree",
@@ -84,7 +86,8 @@
                 "api_name": "xf::graph::calcuDegree",
                 "display_name": "calcuDegree",
                 "brief": "calculate degree algorithm is implemented",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "calc_degree.hpp"
                 ],
@@ -141,7 +144,8 @@
                         "type": "ap_uint< 512 > *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::graph::calcuWeightedDegree",
@@ -150,7 +154,8 @@
                 "api_name": "xf::graph::calcuWeightedDegree",
                 "display_name": "calcuWeightedDegree",
                 "brief": "calculate weighted degree algorithm is implemented",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "calc_degree.hpp"
                 ],
@@ -212,7 +217,8 @@
                         "type": "ap_uint< 512 >"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::graph::connectedComponents",
@@ -221,7 +227,8 @@
                 "api_name": "xf::graph::connectedComponents",
                 "display_name": "connectedComponents",
                 "brief": "connectedComponents Compute the connected component membership of each vertex only for undirected graph",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "connected_components.hpp"
                 ],
@@ -323,7 +330,8 @@
                         "type": "ap_uint< 32 > *component3"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::graph::convertCsrCsc",
@@ -332,7 +340,8 @@
                 "api_name": "xf::graph::convertCsrCsc",
                 "display_name": "convertCsrCsc",
                 "brief": "convert Csr Csc algorithm is implemented",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "convert_csr_csc.hpp"
                 ],
@@ -414,7 +423,8 @@
                         "type": "ap_uint< 512 > *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::graph::denseSimilarityCoeffs",
@@ -423,7 +433,8 @@
                 "api_name": "xf::graph::denseSimilarityCoeffs",
                 "display_name": "denseSimilarityCoeffs",
                 "brief": "similarity function for dense graph. It support both Jaccard and Cosine Similarity.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "dense_similarity_coeffs.hpp"
                 ],
@@ -540,7 +551,8 @@
                         "type": "ap_int< 32 > *resultID, float *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::graph::estimated_diameter",
@@ -549,7 +561,8 @@
                 "api_name": "xf::graph::estimated_diameter",
                 "display_name": "estimated_diameter",
                 "brief": "diameter estimate based on the sssp algorithm",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "diameter.hpp"
                 ],
@@ -600,7 +613,8 @@
                         "type": "unsigned *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::graph::labelPropagation",
@@ -609,7 +623,8 @@
                 "api_name": "xf::graph::labelPropagation",
                 "display_name": "labelPropagation",
                 "brief": "labelPropagation the label propagation algorithm is implemented",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "label_propagation.hpp"
                 ],
@@ -665,7 +680,8 @@
                         "type": "ap_uint< 512 > *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::graph::kernelLouvainTop",
@@ -674,7 +690,8 @@
                 "api_name": "xf::graph::kernelLouvainTop",
                 "display_name": "kernelLouvainTop",
                 "brief": "Level2: louvain kernel implement.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "louvain_coloring.hpp"
                 ],
@@ -785,7 +802,8 @@
                         "type": "Upda"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::graph::mst",
@@ -794,7 +812,8 @@
                 "api_name": "xf::graph::mst",
                 "display_name": "mst",
                 "brief": "minimum spanning tree based on the Prim algorithm",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "mst.hpp"
                 ],
@@ -840,7 +859,8 @@
                         "type": "unsigned *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::graph::pageRankTop",
@@ -849,7 +869,8 @@
                 "api_name": "xf::graph::pageRankTop",
                 "display_name": "pageRankTop",
                 "brief": "pagerank algorithm is implemented",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "pagerank.hpp"
                 ],
@@ -981,7 +1002,8 @@
                         "type": "int"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::graph::renumberCore",
@@ -990,7 +1012,8 @@
                 "api_name": "xf::graph::renumberCore",
                 "display_name": "renumberCore",
                 "brief": "Renumbering recode the categorized graph's table, and it support 64M for input.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "renumber.hpp"
                 ],
@@ -1031,7 +1054,8 @@
                         "type": "ap_int< (32) > *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::graph::singleSourceShortestPath",
@@ -1040,7 +1064,8 @@
                 "api_name": "xf::graph::singleSourceShortestPath",
                 "display_name": "singleSourceShortestPath",
                 "brief": "singleSourceShortestPath the single source shortest path algorithm is implemented, the input is the matrix in CSR format.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "shortest_path.hpp"
                 ],
@@ -1117,7 +1142,8 @@
                         "type": "ap_uint< 8 > *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::graph::stronglyConnectedComponents",
@@ -1126,7 +1152,8 @@
                 "api_name": "xf::graph::stronglyConnectedComponents",
                 "display_name": "stronglyConnectedComponents",
                 "brief": "stronglyConnectedComponents Compute the strongly connected component membership of each vertex only for directed graph, and label each vertex with one value containing the lowest vertex id in the SCC containing that vertex.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "strongly_connected_components.hpp"
                 ],
@@ -1263,7 +1290,8 @@
                         "type": "ap_uint< 32 > *componen"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::graph::preProcessData",
@@ -1272,7 +1300,8 @@
                 "api_name": "xf::graph::preProcessData",
                 "display_name": "preProcessData",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "triangle_count.hpp"
                 ],
@@ -1282,7 +1311,8 @@
                 "instance": "function",
                 "parameters": [],
                 "ports": []
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::graph::triangleCount",
@@ -1291,7 +1321,8 @@
                 "api_name": "xf::graph::triangleCount",
                 "display_name": "triangleCount",
                 "brief": "triangleCount the triangle counting algorithm is implemented, the input is the matrix in CSC format.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "triangle_count.hpp"
                 ],
@@ -1358,7 +1389,8 @@
                         "type": "uint64_t *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::graph::twoHop",
@@ -1367,7 +1399,8 @@
                 "api_name": "xf::graph::twoHop",
                 "display_name": "twoHop",
                 "brief": "twoHop this API can find the how many 2-hop pathes between two vertices. The input graph is the matrix in CSR format. And a list of src and destination pairs whose 2-hop pathes will be counted.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "twoHop.hpp"
                 ],
@@ -1413,7 +1446,8 @@
                         "type": "unsigned *indexTwoHop, unsigned *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         }
     ]
 }

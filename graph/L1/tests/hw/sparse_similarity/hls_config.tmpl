@@ -1,0 +1,20 @@
+[hls]
+
+clock=300MHz
+flow_target=vivado
+syn.file=kernel/sparseSimilarityKernel.cpp
+syn.file_cflags=kernel/sparseSimilarityKernel.cpp,-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L1/tests/hw/sparse_similarity/kernel
+syn.top=sparseSimilarityKernel
+tb.file=host/test_similarity.cpp
+tb.file_cflags=host/test_similarity.cpp,-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L1/tests/hw/sparse_similarity/kernel -I${XF_PROJ_ROOT}/L1/tests/hw/sparse_similarity/host
+
+csim.argv=-similarityType 1 -graphType 0 -dataType 0 -sourceID 3 -offset ${XF_PROJ_ROOT}/L1/tests/hw/sparse_similarity/data/cosine_sparse_offset.csr -indiceWeight ${XF_PROJ_ROOT}/L1/tests/hw/sparse_similarity/data/cosine_sparse_indice_weight.csr -golden ${XF_PROJ_ROOT}/L1/tests/hw/sparse_similarity/data/cosine_sparse.mtx
+
+cosim.argv=-similarityType 1 -graphType 0 -dataType 0 -sourceID 3 -offset ${XF_PROJ_ROOT}/L1/tests/hw/sparse_similarity/data/cosine_sparse_offset.csr -indiceWeight ${XF_PROJ_ROOT}/L1/tests/hw/sparse_similarity/data/cosine_sparse_indice_weight.csr -golden ${XF_PROJ_ROOT}/L1/tests/hw/sparse_similarity/data/cosine_sparse.mtx
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog
+
+

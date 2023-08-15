@@ -8,7 +8,8 @@
                 "api_name": "xf::graph::L3::louvainModularity",
                 "display_name": "louvainModularity",
                 "brief": "louvain algorithm is implemented.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "xf_graph_L3.hpp"
                 ],
@@ -44,7 +45,8 @@
                         "type": "LouvainPara *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "event<int> xf::graph::L3::twoHop",
@@ -53,7 +55,8 @@
                 "api_name": "event<int> xf::graph::L3::twoHop",
                 "display_name": "twoHop",
                 "brief": "twoHop algorithm is implemented.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "xf_graph_L3.hpp"
                 ],
@@ -89,7 +92,8 @@
                         "type": "xf::"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "event<int> xf::graph::L3::pageRankWeight",
@@ -98,7 +102,8 @@
                 "api_name": "event<int> xf::graph::L3::pageRankWeight",
                 "display_name": "pageRankWeight",
                 "brief": "pageRank algorithm is implemented.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "xf_graph_L3.hpp"
                 ],
@@ -139,7 +144,8 @@
                         "type": "float *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "event<int> xf::graph::L3::shortestPath",
@@ -148,7 +154,8 @@
                 "api_name": "event<int> xf::graph::L3::shortestPath",
                 "display_name": "shortestPath",
                 "brief": "The single source shortest path algorithm is implemented, the input is the matrix in CSR format.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "xf_graph_L3.hpp"
                 ],
@@ -194,7 +201,8 @@
                         "type": "uint32_t **"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "event<int> xf::graph::L3::cosineSimilaritySSSparse",
@@ -203,7 +211,8 @@
                 "api_name": "event<int> xf::graph::L3::cosineSimilaritySSSparse",
                 "display_name": "cosineSimilaritySSSparse",
                 "brief": "The single source cosine similarity API for sparse graph.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "xf_graph_L3.hpp"
                 ],
@@ -254,7 +263,8 @@
                         "type": "float *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "event<int> xf::graph::L3::jaccardSimilaritySSSparse",
@@ -263,7 +273,8 @@
                 "api_name": "event<int> xf::graph::L3::jaccardSimilaritySSSparse",
                 "display_name": "jaccardSimilaritySSSparse",
                 "brief": "The single source jaccard similarity API for sparse graph.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "xf_graph_L3.hpp"
                 ],
@@ -314,7 +325,8 @@
                         "type": "float *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "event<int> xf::graph::L3::cosineSimilarityAPSparse",
@@ -323,7 +335,8 @@
                 "api_name": "event<int> xf::graph::L3::cosineSimilarityAPSparse",
                 "display_name": "cosineSimilarityAPSparse",
                 "brief": "The all-pairs cosine similarity API for sparse graph.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "xf_graph_L3.hpp"
                 ],
@@ -359,7 +372,8 @@
                         "type": "float **"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "event<int> xf::graph::L3::jaccardSimilarityAPSparse",
@@ -368,7 +382,8 @@
                 "api_name": "event<int> xf::graph::L3::jaccardSimilarityAPSparse",
                 "display_name": "jaccardSimilarityAPSparse",
                 "brief": "The all-pairs jaccard similarity API for sparse graph.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "xf_graph_L3.hpp"
                 ],
@@ -404,7 +419,8 @@
                         "type": "float **"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "event<int> xf::graph::L3::cosineSimilaritySSDense",
@@ -413,7 +429,8 @@
                 "api_name": "event<int> xf::graph::L3::cosineSimilaritySSDense",
                 "display_name": "cosineSimilaritySSDense",
                 "brief": "The single source cosine similarity API for dense graph.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "xf_graph_L3.hpp"
                 ],
@@ -459,7 +476,8 @@
                         "type": "float *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::graph::L3::cosineSimilaritySSDenseMultiCardBlocking",
@@ -468,7 +486,8 @@
                 "api_name": "xf::graph::L3::cosineSimilaritySSDenseMultiCardBlocking",
                 "display_name": "cosineSimilaritySSDenseMultiCardBlocking",
                 "brief": "The Multi-cards' single source cosine similarity API for dense graph.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "xf_graph_L3.hpp"
                 ],
@@ -519,7 +538,8 @@
                         "type": "float *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "std::vector<event<int> > xf::graph::L3::cosineSimilaritySSDenseMultiCard",
@@ -528,7 +548,8 @@
                 "api_name": "std::vector<event<int> > xf::graph::L3::cosineSimilaritySSDenseMultiCard",
                 "display_name": "cosineSimilaritySSDenseMultiCard",
                 "brief": "The Non-blocking Multi-cards' single source cosine similarity API for dense graph.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "xf_graph_L3.hpp"
                 ],
@@ -579,7 +600,8 @@
                         "type": "float **similarit"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "event<int> xf::graph::L3::jaccardSimilaritySSDense",
@@ -588,7 +610,8 @@
                 "api_name": "event<int> xf::graph::L3::jaccardSimilaritySSDense",
                 "display_name": "jaccardSimilaritySSDense",
                 "brief": "The single source jaccard similarity API for dense graph.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "xf_graph_L3.hpp"
                 ],
@@ -634,7 +657,8 @@
                         "type": "float *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "event<int> xf::graph::L3::cosineSimilarityAPDense",
@@ -643,7 +667,8 @@
                 "api_name": "event<int> xf::graph::L3::cosineSimilarityAPDense",
                 "display_name": "cosineSimilarityAPDense",
                 "brief": "The all-pairs cosine similarity API for dense graph.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "xf_graph_L3.hpp"
                 ],
@@ -679,7 +704,8 @@
                         "type": "float **"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "event<int> xf::graph::L3::jaccardSimilarityAPDense",
@@ -688,7 +714,8 @@
                 "api_name": "event<int> xf::graph::L3::jaccardSimilarityAPDense",
                 "display_name": "jaccardSimilarityAPDense",
                 "brief": "The all-pairs jaccard similarity API for dense graph.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "xf_graph_L3.hpp"
                 ],
@@ -724,7 +751,8 @@
                         "type": "float **"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "event<int> xf::graph::L3::knnSimilaritySSSparse",
@@ -733,7 +761,8 @@
                 "api_name": "event<int> xf::graph::L3::knnSimilaritySSSparse",
                 "display_name": "knnSimilaritySSSparse",
                 "brief": "The single source k-nearest neighbors API for sparse graph. knnSimilarity API is based on the cosine similarity algorithm.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "xf_graph_L3.hpp"
                 ],
@@ -784,7 +813,8 @@
                         "type": "std::string &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "event<int> xf::graph::L3::knnSimilarinyAPSparse",
@@ -793,7 +823,8 @@
                 "api_name": "event<int> xf::graph::L3::knnSimilarinyAPSparse",
                 "display_name": "knnSimilarinyAPSparse",
                 "brief": "The all-pairs k-nearest neighbors API for sparse graph. knnSimilarity API is based on the cosine similarity algorithm.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "xf_graph_L3.hpp"
                 ],
@@ -829,7 +860,8 @@
                         "type": "std::string *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "event<int> xf::graph::L3::knnSimilaritySSDense",
@@ -838,7 +870,8 @@
                 "api_name": "event<int> xf::graph::L3::knnSimilaritySSDense",
                 "display_name": "knnSimilaritySSDense",
                 "brief": "The single source k-nearest neighbors API for dense graph. knnSimilarity API is based on the cosine similarity algorithm.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "xf_graph_L3.hpp"
                 ],
@@ -884,7 +917,8 @@
                         "type": "std::string &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "event<int> xf::graph::L3::knnSimilarityAPDense",
@@ -893,7 +927,8 @@
                 "api_name": "event<int> xf::graph::L3::knnSimilarityAPDense",
                 "display_name": "knnSimilarityAPDense",
                 "brief": "The all-pairs k-nearest neighbors API for dense graph. knnSimilarity API is based on the cosine similarity algorithm.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "xf_graph_L3.hpp"
                 ],
@@ -929,7 +964,8 @@
                         "type": "std::string *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "event<int> xf::graph::L3::knnSimilarityAPSparse",
@@ -938,7 +974,8 @@
                 "api_name": "event<int> xf::graph::L3::knnSimilarityAPSparse",
                 "display_name": "knnSimilarityAPSparse",
                 "brief": "The all-pairs k-nearest neighbors API for sparse graph. knnSimilarity API is based on the cosine similarity algorithm.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "xf_graph_L3.hpp"
                 ],
@@ -974,7 +1011,8 @@
                         "type": "std::string *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "event<int> xf::graph::L3::triangleCount",
@@ -983,7 +1021,8 @@
                 "api_name": "event<int> xf::graph::L3::triangleCount",
                 "display_name": "triangleCount",
                 "brief": "triangleCount the triangle counting algorithm is implemented, the input is the matrix in CSC format.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "xf_graph_L3.hpp"
                 ],
@@ -1009,7 +1048,8 @@
                         "type": "uint64_t &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "event<int> xf::graph::L3::labelPropagation",
@@ -1018,7 +1058,8 @@
                 "api_name": "event<int> xf::graph::L3::labelPropagation",
                 "display_name": "labelPropagation",
                 "brief": "labelPropagation the label propagation algorithm is implemented",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "xf_graph_L3.hpp"
                 ],
@@ -1049,7 +1090,8 @@
                         "type": "uint32_t *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "event<int> xf::graph::L3::bfs",
@@ -1058,7 +1100,8 @@
                 "api_name": "event<int> xf::graph::L3::bfs",
                 "display_name": "bfs",
                 "brief": "bfs Implements the directed graph traversal by breath-first search algorithm",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "xf_graph_L3.hpp"
                 ],
@@ -1094,7 +1137,8 @@
                         "type": "uint32_t *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "event<int> xf::graph::L3::wcc",
@@ -1103,7 +1147,8 @@
                 "api_name": "event<int> xf::graph::L3::wcc",
                 "display_name": "wcc",
                 "brief": "connectedComponents Computes the connected component membership of each vertex only for undirected graph",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "xf_graph_L3.hpp"
                 ],
@@ -1129,7 +1174,8 @@
                         "type": "uint32_t *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "event<int> xf::graph::L3::scc",
@@ -1138,7 +1184,8 @@
                 "api_name": "event<int> xf::graph::L3::scc",
                 "display_name": "scc",
                 "brief": "stronglyConnectedComponents Computes the strongly connected component membership of each vertex only for directed graph, and label each vertex with one value containing the lowest vertex id in the SCC containing that vertex.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "xf_graph_L3.hpp"
                 ],
@@ -1164,7 +1211,8 @@
                         "type": "uint32_t *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "event<int> xf::graph::L3::convertCsrCsc",
@@ -1173,7 +1221,8 @@
                 "api_name": "event<int> xf::graph::L3::convertCsrCsc",
                 "display_name": "convertCsrCsc",
                 "brief": "Convert from CSR to CSC, now it supports only CSR to CSC of unweighted graph.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "xf_graph_L3.hpp"
                 ],
@@ -1199,7 +1248,8 @@
                         "type": "xf::graph::Graph< uint32_t, uint32_t >"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         }
     ]
 }
