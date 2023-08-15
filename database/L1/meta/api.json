@@ -8,12 +8,12 @@
                 "api_name": "xf::database::aggregate",
                 "display_name": "aggregate",
                 "brief": "Overload for most common aggregations.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "aggregate.hpp"
+                    "xf_database/aggregate.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -49,8 +49,10 @@
                         "direction": "",
                         "type": "hls::stream< bool > &"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::bitonicSort",
@@ -59,12 +61,12 @@
                 "api_name": "xf::database::bitonicSort",
                 "display_name": "bitonicSort",
                 "brief": "Bitonic sort is parallel algorithm for sorting.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "bitonic_sort.hpp"
+                    "xf_database/bitonic_sort.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -105,8 +107,10 @@
                         "direction": "",
                         "type": "bool"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::bfGen",
@@ -115,12 +119,12 @@
                 "api_name": "xf::database::bfGen",
                 "display_name": "bfGen",
                 "brief": "Generate the bloomfilter in on-chip RAM blocks.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "bloom_filter.hpp"
+                    "xf_database/bloom_filter.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -166,8 +170,10 @@
                         "direction": "",
                         "type": "ap_uint< IS_BRAM?16:72 > *"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::bfGenStream",
@@ -176,12 +182,12 @@
                 "api_name": "xf::database::bfGenStream",
                 "display_name": "bfGenStream",
                 "brief": "Generate the bloomfilter in on-chip RAM blocks, and emit the vectors upon finish.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "bloom_filter.hpp"
+                    "xf_database/bloom_filter.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -222,8 +228,10 @@
                         "direction": "",
                         "type": "hls::stream< bool > &"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::bfCheck",
@@ -232,12 +240,12 @@
                 "api_name": "xf::database::bfCheck",
                 "display_name": "bfCheck",
                 "brief": "Check existance of value using bloom-filter vectors.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "bloom_filter.hpp"
+                    "xf_database/bloom_filter.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -293,8 +301,10 @@
                         "direction": "",
                         "type": "hls::stream< bool > &"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::combineCol",
@@ -303,12 +313,12 @@
                 "api_name": "xf::database::combineCol",
                 "display_name": "combineCol",
                 "brief": "Combines two columns into one.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "combine_split_col.hpp"
+                    "xf_database/combine_split_col.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -354,8 +364,10 @@
                         "direction": "",
                         "type": "hls::stream< bool > &"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::splitCol",
@@ -364,12 +376,12 @@
                 "api_name": "xf::database::splitCol",
                 "display_name": "splitCol",
                 "brief": "Split previously combined columns into two.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "combine_split_col.hpp"
+                    "xf_database/combine_split_col.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -415,8 +427,10 @@
                         "direction": "",
                         "type": "hls::stream< bool > &"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::compoundSort",
@@ -425,12 +439,12 @@
                 "api_name": "xf::database::compoundSort",
                 "display_name": "compoundSort",
                 "brief": "compoundSort sort the key based on insert sort and merge sort.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "compound_sort.hpp"
+                    "xf_database/compound_sort.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -476,8 +490,10 @@
                         "direction": "",
                         "type": "hls::stream< bool > &"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::directGroupAggregate",
@@ -486,12 +502,12 @@
                 "api_name": "xf::database::directGroupAggregate",
                 "display_name": "directGroupAggregate",
                 "brief": "Group-by aggregation with limited key width.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "direct_group_aggregate.hpp"
+                    "xf_database/direct_group_aggregate.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -547,8 +563,10 @@
                         "direction": "",
                         "type": "hls::stream< ap_uint< DIRECTW > > &"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::duplicateCol",
@@ -557,12 +575,12 @@
                 "api_name": "xf::database::duplicateCol",
                 "display_name": "duplicateCol",
                 "brief": "Duplicate one column into two columns.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "duplicate_col.hpp"
+                    "xf_database/duplicate_col.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -598,8 +616,10 @@
                         "direction": "",
                         "type": "hls::stream< bool > &"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::dynamicEval",
@@ -608,12 +628,12 @@
                 "api_name": "xf::database::dynamicEval",
                 "display_name": "dynamicEval",
                 "brief": "Dynamic expression evaluation.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "dynamic_eval.hpp"
+                    "xf_database/dynamic_eval.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -704,8 +724,10 @@
                         "direction": "",
                         "type": "hls::stream<bool> &"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::dynamicEvalV2",
@@ -714,12 +736,12 @@
                 "api_name": "xf::database::dynamicEvalV2",
                 "display_name": "dynamicEvalV2",
                 "brief": "Dynamic expression evaluation version 2.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "dynamic_eval_v2.hpp"
+                    "xf_database/dynamic_eval_v2.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -770,8 +792,10 @@
                         "direction": "",
                         "type": "hls::stream< bool > &"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::dynamicFilter",
@@ -780,12 +804,12 @@
                 "api_name": "xf::database::dynamicFilter",
                 "display_name": "dynamicFilter",
                 "brief": "Filter payloads according to conditions set during run-time.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "dynamic_filter.hpp"
+                    "xf_database/dynamic_filter.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -846,8 +870,10 @@
                         "direction": "",
                         "type": "hls::stream<bool>&"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::groupAggregate",
@@ -856,12 +882,12 @@
                 "api_name": "xf::database::groupAggregate",
                 "display_name": "groupAggregate",
                 "brief": "group aggregate function that returns same type as input",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "group_aggregate.hpp"
+                    "xf_database/group_aggregate.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -912,8 +938,10 @@
                         "direction": "",
                         "type": "hls::stream< KEY_T > &"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::hashAntiJoin",
@@ -922,12 +950,12 @@
                 "api_name": "xf::database::hashAntiJoin",
                 "display_name": "hashAntiJoin",
                 "brief": "Multi-PU Hash-Anti-Join primitive, using multiple DDR/HBM buffers.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "hash_anti_join.hpp"
+                    "xf_database/hash_anti_join.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -1093,8 +1121,10 @@
                         "direction": "",
                         "type": "hls::stream< bool > &"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::hashGroupAggregate",
@@ -1103,12 +1133,13 @@
                 "api_name": "xf::database::hashGroupAggregate",
                 "display_name": "hashGroupAggregate",
                 "brief": "Generic hash group aggregate primitive.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "hash_group_aggregate.hpp"
+                    "xf_database/hash_group_aggregate.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw",
+                    "../utils/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -1254,8 +1285,10 @@
                         "direction": "",
                         "type": "hls::stream< bool > &"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::hashJoinMPU",
@@ -1264,12 +1297,12 @@
                 "api_name": "xf::database::hashJoinMPU",
                 "display_name": "hashJoinMPU",
                 "brief": "Multi-PU Hash-Join primitive, using multiple DDR/HBM buffers.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "hash_join_v2.hpp"
+                    "xf_database/hash_join_v2.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -1400,8 +1433,10 @@
                         "direction": "",
                         "type": "hls::stream< bool > &"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::hashJoinV3",
@@ -1410,12 +1445,12 @@
                 "api_name": "xf::database::hashJoinV3",
                 "display_name": "hashJoinV3",
                 "brief": "Hash-Join v3 primitive, it takes more resourse than",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "hash_join_v3.hpp"
+                    "xf_database/hash_join_v3.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -1581,8 +1616,10 @@
                         "direction": "",
                         "type": "hls::stream< bool > &"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::hashBuildProbeV3",
@@ -1591,12 +1628,12 @@
                 "api_name": "xf::database::hashBuildProbeV3",
                 "display_name": "hashBuildProbeV3",
                 "brief": "Hash-Build-Probe v3 primitive, it can perform hash build and hash probe separately. It needs two call of kernel to perform build and probe seperately. There is a control flag to decide buld or probe. This primitive supports multiple build and mutiple probe, for example, you can scadule a workflow as: build0->build1->probe0->probe1->build2->build3->probe3...",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "hash_join_v3.hpp"
+                    "xf_database/hash_join_v3.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -1777,8 +1814,10 @@
                         "direction": "",
                         "type": "hls::stream< bool > &"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::hashJoinV4",
@@ -1787,12 +1826,12 @@
                 "api_name": "xf::database::hashJoinV4",
                 "display_name": "hashJoinV4",
                 "brief": "Hash-Join v4 primitive, using bloom filter to enhance performance of hash join.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "hash_join_v4.hpp"
+                    "xf_database/hash_join_v4.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -1973,8 +2012,10 @@
                         "direction": "",
                         "type": "hls::stream< bool > &"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::hashBuildProbeV4",
@@ -1983,12 +2024,12 @@
                 "api_name": "xf::database::hashBuildProbeV4",
                 "display_name": "hashBuildProbeV4",
                 "brief": "Hash-Build-Probe v4 primitive. Compared with",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "hash_join_v4.hpp"
+                    "xf_database/hash_join_v4.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -2174,8 +2215,10 @@
                         "direction": "",
                         "type": "hls::stream< bool > &"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::hashLookup3",
@@ -2184,12 +2227,12 @@
                 "api_name": "xf::database::hashLookup3",
                 "display_name": "hashLookup3",
                 "brief": "lookup3 algorithm, 64-bit hash. II=1 when W<=96, otherwise II=(W/96).",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "hash_lookup3.hpp"
+                    "xf_database/hash_lookup3.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -2210,8 +2253,10 @@
                         "direction": "",
                         "type": "hls::stream< ap_uint< 64 > > &"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::hashMultiJoin",
@@ -2220,12 +2265,12 @@
                 "api_name": "xf::database::hashMultiJoin",
                 "display_name": "hashMultiJoin",
                 "brief": "Multi-PU Hash-Multi-Join primitive, using multiple DDR/HBM buffers.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "hash_multi_join.hpp"
+                    "xf_database/hash_multi_join.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -2396,8 +2441,10 @@
                         "direction": "",
                         "type": "hls::stream< bool > &"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::hashMultiJoinBuildProbe",
@@ -2406,12 +2453,12 @@
                 "api_name": "xf::database::hashMultiJoinBuildProbe",
                 "display_name": "hashMultiJoinBuildProbe",
                 "brief": "Multi-PU Hash-Multi-Join primitive, using multiple DDR/HBM buffers.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "hash_multi_join_build_probe.hpp"
+                    "xf_database/hash_multi_join_build_probe.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -2582,8 +2629,10 @@
                         "direction": "",
                         "type": "hls::stream< bool > &"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::hashMurmur3",
@@ -2592,12 +2641,12 @@
                 "api_name": "xf::database::hashMurmur3",
                 "display_name": "hashMurmur3",
                 "brief": "murmur3 algorithm.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "hash_murmur3.hpp"
+                    "xf_database/hash_murmur3.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -2623,8 +2672,10 @@
                         "direction": "",
                         "type": "hls::stream< ap_uint< H > > &"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::hashMurmur3Hive",
@@ -2633,12 +2684,12 @@
                 "api_name": "xf::database::hashMurmur3Hive",
                 "display_name": "hashMurmur3Hive",
                 "brief": "Murmur3 algorithm in 64-bit version.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "hash_murmur3_hive.hpp"
+                    "xf_database/hash_murmur3_hive.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [],
@@ -2653,8 +2704,10 @@
                         "direction": "",
                         "type": "hls::stream< ap_int< 64 > > &"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::hashPartition",
@@ -2663,12 +2716,13 @@
                 "api_name": "xf::database::hashPartition",
                 "display_name": "hashPartition",
                 "brief": "Hash-Partition primitive.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "hash_partition.hpp"
+                    "xf_database/hash_partition.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw",
+                    "../utils/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -2764,8 +2818,10 @@
                         "direction": "",
                         "type": "hls::stream< ap_uint< EW > >"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::hashSemiJoin",
@@ -2774,12 +2830,12 @@
                 "api_name": "xf::database::hashSemiJoin",
                 "display_name": "hashSemiJoin",
                 "brief": "Multi-PU Hash-Semi-Join primitive, using multiple DDR/HBM buffers.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "hash_semi_join.hpp"
+                    "xf_database/hash_semi_join.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -2900,8 +2956,10 @@
                         "direction": "",
                         "type": "hls::stream< bool > &"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::insertSort",
@@ -2910,12 +2968,12 @@
                 "api_name": "xf::database::insertSort",
                 "display_name": "insertSort",
                 "brief": "Insert sort top function.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "insert_sort.hpp"
+                    "xf_database/insert_sort.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -2956,8 +3014,10 @@
                         "direction": "",
                         "type": "bool"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::mergeJoin",
@@ -2966,12 +3026,12 @@
                 "api_name": "xf::database::mergeJoin",
                 "display_name": "mergeJoin",
                 "brief": "merge join function for sorted tables without duplicated key in the left table",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "merge_join.hpp"
+                    "xf_database/merge_join.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -3052,8 +3112,10 @@
                         "direction": "",
                         "type": "hls::stream< bool > &"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::mergeLeftJoin",
@@ -3062,12 +3124,12 @@
                 "api_name": "xf::database::mergeLeftJoin",
                 "display_name": "mergeLeftJoin",
                 "brief": "merge left join function for sorted table, left table should not have duplicated keys.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "merge_left_join.hpp"
+                    "xf_database/merge_left_join.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -3153,8 +3215,10 @@
                         "direction": "",
                         "type": "hls::stream< bool > &"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::mergeSort",
@@ -3163,12 +3227,12 @@
                 "api_name": "xf::database::mergeSort",
                 "display_name": "mergeSort",
                 "brief": "Merge sort function.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "merge_sort.hpp"
+                    "xf_database/merge_sort.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -3214,8 +3278,10 @@
                         "direction": "",
                         "type": "bool"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::nestedLoopJoin",
@@ -3224,12 +3290,12 @@
                 "api_name": "xf::database::nestedLoopJoin",
                 "display_name": "nestedLoopJoin",
                 "brief": "Nested loop join function.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "nested_loop_join.hpp"
+                    "xf_database/nested_loop_join.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -3310,8 +3376,10 @@
                         "direction": "",
                         "type": "hls::stream< bool >"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::scanCmpStrCol",
@@ -3320,12 +3388,12 @@
                 "api_name": "xf::database::scanCmpStrCol",
                 "display_name": "scanCmpStrCol",
                 "brief": "sacn multiple columns of string in global memory, and compare each of them with constant string",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "scan_cmp_str_col.hpp"
+                    "xf_database/scan_cmp_str_col.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [],
@@ -3360,8 +3428,10 @@
                         "direction": "",
                         "type": "hls::stream< bool > &"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::scanCol",
@@ -3370,12 +3440,12 @@
                 "api_name": "xf::database::scanCol",
                 "display_name": "scanCol",
                 "brief": "Scan 1 column from DDR/HBM buffers.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "scan_col.hpp"
+                    "xf_database/scan_col.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -3416,8 +3486,10 @@
                         "direction": "",
                         "type": "hls::stream< bool > &"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::database::Eval",
@@ -3426,12 +3498,12 @@
                 "api_name": "xf::database::Eval",
                 "display_name": "staticEval",
                 "brief": "One stream input static evaluation.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
-                    "static_eval.hpp"
+                    "xf_database/static_eval.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_database"
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -3472,8 +3544,10 @@
                         "direction": "",
                         "type": "hls::stream<bool>& "
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         }
     ]
 }
