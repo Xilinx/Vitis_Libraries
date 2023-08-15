@@ -96,7 +96,8 @@ void hls_foc_periodic_ap_fixed(
     volatile int& Vc_cmd_stts,
     volatile int& Ialpha_stts, 
     volatile int& Ibeta_stts, 
-    volatile int& Ihomopolar_stts);
+    volatile int& Ihomopolar_stts,
+    volatile int& fixed_angle_args);
 // clang-format on
 
 void hls_foc_oneSample_ap_fixed(
@@ -149,6 +150,7 @@ void hls_foc_oneSample_ap_fixed(
     volatile int& Vc_cmd_stts,
     volatile int& Ialpha_stts,
     volatile int& Ibeta_stts,
-    volatile int& Ihomopolar_stts);
+    volatile int& Ihomopolar_stts,
+    volatile int& fixed_angle_args);
 
 #endif // _IP_FOC_HPP_

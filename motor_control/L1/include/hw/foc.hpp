@@ -347,7 +347,9 @@ enum FOC_Mode {
     MOD_MANUAL_TORQUE_FLUX_FIXED_SPEED,
     MOD_MANUAL_TORQUE_FLUX,
     MOD_MANUAL_TORQUE,
-    MOD_MANUAL_FLUX
+    MOD_MANUAL_FLUX,
+    MOD_MANUAL_TORQUE_FLUX_FIXED_ANGLE,
+    MOD_TOTAL_NUM
 };
 
 } // namespace xf
@@ -424,6 +426,12 @@ void Control_foc_ap_fixed(T_IO& Vd,
             cos_out = cos_gen_angle; // Generated angle cos
             sin_out = sin_gen_angle; // Generated angle sin
             break;
+        case MOD_MANUAL_TORQUE_FLUX_FIXED_ANGLE:
+            Vd = args_vd;            // Sorce Vd from register
+            Vq = args_vq;            // Sorce Vq from register
+            cos_out = cos_in;       //  angle cos from aix register
+            sin_out = sin_in;       //  angle sin from aix register
+            break;
         case MOD_MANUAL_FLUX:
             Vd = args_vd;
             Vq = Torque_out;
@@ -498,7 +506,8 @@ void foc_core_ap_fixed(
     volatile int& angle_stts,
     volatile int& Ialpha_stts,
     volatile int& Ibeta_stts,
-    volatile int& Ihomopolar_stts) {
+    volatile int& Ihomopolar_stts,
+    volatile int& fixed_angle_args  ) {
 #pragma HLS INLINE off
 #pragma HLS BIND_STORAGE variable = sin_table type = RAM_2P impl = BRAM
 #pragma HLS BIND_STORAGE variable = cos_table type = RAM_2P impl = BRAM
@@ -583,6 +592,9 @@ void foc_core_ap_fixed(
     apx_fw_kp_args(31, 0) = fw_kp_args;
     t_glb_q15q16 apx_fw_ki_args;
     apx_fw_ki_args(31, 0) = fw_ki_args;
+    t_glb_q15q16 apx_fixed_angle_args;
+    apx_fixed_angle_args(31, 0) = fixed_angle_args;
+    short fixed_angle_args_short = apx_fixed_angle_args;
     // clang-format on
 
     // static T_Vabc SVM_inv_index = MAX_LIM >> 1;
@@ -659,7 +671,8 @@ void foc_core_ap_fixed(
     // t_sincos sin_gen_angle; sin_gen_angle(15, 0) = sin_table[gen_angle];
 
     t_angle Theta = Angle - angle_sh_args; // Apply angle correction
-    Theta = (FOC_mode == MOD_MANUAL_TORQUE_FLUX_FIXED_SPEED) ? gen_angle : Theta;
+    //Theta = (FOC_mode == MOD_MANUAL_TORQUE_FLUX_FIXED_SPEED) ? gen_angle : Theta;
+    Theta = (FOC_mode == MOD_MANUAL_TORQUE_FLUX_FIXED_SPEED) ? gen_angle : (FOC_mode ==MOD_MANUAL_TORQUE_FLUX_FIXED_ANGLE) ? fixed_angle_args_short : Theta;
     Theta = (Theta < 0) ? (short)(Theta + VALUE_CPR) : Theta;          // Correct negative angle
     Theta = (Theta >= VALUE_CPR) ? (short)(Theta - VALUE_CPR) : Theta; // Correct angle overload to (0, CPR)
     t_angle Q = (Theta / cpr_div_ppr); // Correct angle overload round to (0. cpr_div_ppr)
@@ -907,7 +920,7 @@ void foc_core_ap_fixed(
     t_glb_q15q16 apx_speed_Ihomopolar_stts = Ihomopolar;
 
     t_glb_q15q16 apx_speed_stts = RPM;
-    t_glb_q15q16 apx_angle_stts = Theta;
+    t_glb_q15q16 apx_angle_stts = Angle;
 
     speed_stts = apx_speed_stts.range(31, 0);
     angle_stts = apx_angle_stts.range(31, 0);
@@ -1044,6 +1057,7 @@ void hls_foc_strm_ap_fixed(
     volatile int& Ialpha_stts,
     volatile int& Ibeta_stts,
     volatile int& Ihomopolar_stts,
+    volatile int& fixed_angle_args,
     volatile long& trip_cnt) {
     short cpr_div_ppr = VALUE_CPR / ppr_args;
     unsigned int tab_map_factor = ((COMM_MACRO_TLB_LENTH * (unsigned int)ppr_args) << 16) / VALUE_CPR;
@@ -1082,7 +1096,7 @@ LOOP_FOC_STRM:
             //
             id_stts, flux_acc_stts, flux_err_stts, flux_out_stts, iq_stts, torque_acc_stts, torque_err_stts,
             torque_out_stts, speed_stts, speed_acc_stts, speed_err_stts, speed_out_stts, angle_stts, Ialpha_stts,
-            Ibeta_stts, Ihomopolar_stts);
+            Ibeta_stts, Ihomopolar_stts, fixed_angle_args);
 
         T_IO va = Va_out;
         T_IO vb = Vb_out;
@@ -1154,6 +1168,7 @@ void hls_foc_strm_int(
     volatile int& Ialpha_stts,
     volatile int& Ibeta_stts,
     volatile int& Ihomopolar_stts,
+    volatile int& fixed_angle_args,
     volatile long& trip_cnt) {
     short cpr_div_ppr = VALUE_CPR / ppr_args;
     unsigned int tab_map_factor = ((COMM_MACRO_TLB_LENTH * (unsigned int)ppr_args) << 16) / VALUE_CPR;
@@ -1201,7 +1216,7 @@ LOOP_FOC_STRM:
             //
             id_stts, flux_acc_stts, flux_err_stts, flux_out_stts, iq_stts, torque_acc_stts, torque_err_stts,
             torque_out_stts, speed_stts, speed_acc_stts, speed_err_stts, speed_out_stts, angle_stts, Ialpha_stts,
-            Ibeta_stts, Ihomopolar_stts);
+            Ibeta_stts, Ihomopolar_stts, fixed_angle_args);
 
         t_glb_q15q16 apx_va = Va_out;
         t_glb_q15q16 apx_vb = Vb_out;

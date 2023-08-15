@@ -79,7 +79,8 @@ void hls_foc_periodic_ap_fixed(
     volatile int& Vc_cmd_stts,
     volatile int& Ialpha_stts, 
     volatile int& Ibeta_stts, 
-    volatile int& Ihomopolar_stts) {
+    volatile int& Ihomopolar_stts,
+    volatile int& fixed_angle_args) {
     #pragma HLS interface axis port = Ia
     #pragma HLS interface axis port = Ib
     #pragma HLS interface axis port = Ic
@@ -127,6 +128,7 @@ void hls_foc_periodic_ap_fixed(
     #pragma HLS interface s_axilite port = Ialpha_stts     bundle = foc_args
     #pragma HLS interface s_axilite port = Ibeta_stts      bundle = foc_args
     #pragma HLS interface s_axilite port = Ihomopolar_stts bundle = foc_args
+    #pragma HLS interface s_axilite port = fixed_angle_args bundle = foc_args
 
     #pragma HLS interface s_axilite port = return bundle = foc_args
     long trip_cnt = 0x7fffffffffffffffL;
@@ -141,7 +143,7 @@ void hls_foc_periodic_ap_fixed(
             //
             id_stts, flux_acc_stts, flux_err_stts, flux_out_stts, iq_stts, torque_acc_stts, torque_err_stts,
             torque_out_stts, speed_stts, speed_acc_stts, speed_err_stts, speed_out_stts, angle_stts,
-            Va_cmd_stts, Vb_cmd_stts, Vc_cmd_stts, Ialpha_stts, Ibeta_stts, Ihomopolar_stts, trip_cnt);
+            Va_cmd_stts, Vb_cmd_stts, Vc_cmd_stts, Ialpha_stts, Ibeta_stts, Ihomopolar_stts, fixed_angle_args, trip_cnt);
 }
 // clang-format on
 
@@ -195,7 +197,8 @@ void hls_foc_periodic_int( // used for testing synthesizability of hls_foc_strm_
     volatile int& Vc_cmd_stts,
     volatile int& Ialpha_stts,
     volatile int& Ibeta_stts,
-    volatile int& Ihomopolar_stts) {
+    volatile int& Ihomopolar_stts,
+    volatile int& fixed_angle_args) {
 #pragma HLS interface axis port = Ia
 #pragma HLS interface axis port = Ib
 #pragma HLS interface axis port = Ic
@@ -244,6 +247,7 @@ void hls_foc_periodic_int( // used for testing synthesizability of hls_foc_strm_
 #pragma HLS interface s_axilite port = Ialpha_stts bundle = foc_args
 #pragma HLS interface s_axilite port = Ibeta_stts bundle = foc_args
 #pragma HLS interface s_axilite port = Ihomopolar_stts bundle = foc_args
+#pragma HLS interface s_axilite port = fixed_angle_args bundle = foc_args
 
 #pragma HLS interface s_axilite port = return bundle = foc_args
 
@@ -259,7 +263,7 @@ void hls_foc_periodic_int( // used for testing synthesizability of hls_foc_strm_
         //
         id_stts, flux_acc_stts, flux_err_stts, flux_out_stts, iq_stts, torque_acc_stts, torque_err_stts,
         torque_out_stts, speed_stts, speed_acc_stts, speed_err_stts, speed_out_stts, angle_stts, Va_cmd_stts,
-        Vb_cmd_stts, Vc_cmd_stts, Ialpha_stts, Ibeta_stts, Ihomopolar_stts, trip_cnt);
+        Vb_cmd_stts, Vc_cmd_stts, Ialpha_stts, Ibeta_stts, Ihomopolar_stts, fixed_angle_args, trip_cnt);
 }
 
 // hls_foc_oneSample_ap_fixed is mainly used for generating testing files for cosim
@@ -313,7 +317,8 @@ void hls_foc_oneSample_ap_fixed(
     volatile int& Vc_cmd_stts,
     volatile int& Ialpha_stts,
     volatile int& Ibeta_stts,
-    volatile int& Ihomopolar_stts) {
+    volatile int& Ihomopolar_stts,
+    volatile int& fixed_angle_args) {
 #pragma HLS interface axis port = Ia
 #pragma HLS interface axis port = Ib
 #pragma HLS interface axis port = Ic
@@ -361,6 +366,7 @@ void hls_foc_oneSample_ap_fixed(
 #pragma HLS interface s_axilite port = Ialpha_stts bundle = foc_args
 #pragma HLS interface s_axilite port = Ibeta_stts bundle = foc_args
 #pragma HLS interface s_axilite port = Ihomopolar_stts bundle = foc_args
+#pragma HLS interface s_axilite port = fixed_angle_args bundle = foc_args
 
 // #pragma HLS interface ap_none port = ppr_args
 // #pragma HLS interface ap_none port = control_mode_args
@@ -413,5 +419,5 @@ void hls_foc_oneSample_ap_fixed(
         //
         id_stts, flux_acc_stts, flux_err_stts, flux_out_stts, iq_stts, torque_acc_stts, torque_err_stts,
         torque_out_stts, speed_stts, speed_acc_stts, speed_err_stts, speed_out_stts, angle_stts, Va_cmd_stts,
-        Vb_cmd_stts, Vc_cmd_stts, Ialpha_stts, Ibeta_stts, Ihomopolar_stts, trip_cnt);
+        Vb_cmd_stts, Vc_cmd_stts, Ialpha_stts, Ibeta_stts, Ihomopolar_stts, fixed_angle_args, trip_cnt);
 }

@@ -100,7 +100,8 @@ void call_foc_strm(bool usePeriodic,
                 (volatile int&)AxiPara.Vc_cmd_stts,
                 (volatile int&)AxiPara.Ialpha_stts, 
                 (volatile int&)AxiPara.Ibeta_stts, 
-                (volatile int&)AxiPara.Ihomopolar_stts
+                (volatile int&)AxiPara.Ihomopolar_stts,
+                (volatile int&)AxiPara.fixed_angle_args
             );
         else
             hls_foc_oneSample_ap_fixed(
@@ -146,7 +147,8 @@ void call_foc_strm(bool usePeriodic,
                 (volatile int&)AxiPara.Vc_cmd_stts,
                 (volatile int&)AxiPara.Ialpha_stts, 
                 (volatile int&)AxiPara.Ibeta_stts, 
-                (volatile int&)AxiPara.Ihomopolar_stts
+                (volatile int&)AxiPara.Ihomopolar_stts,
+                (volatile int&)AxiPara.fixed_angle_args
                 );
     // clang-format on
 }
@@ -411,6 +413,8 @@ int main(int argc, char** argv) {
     const char* fname_prefix_manualFlux = "sim_manualFlux";
     const char* fname_prefix_stop = "sim_stop";
     const char* fname_prefix_manualTorqueFluxFixedSpeed1 = "sim_manualTorqueFluxFixedSpeed1";
+    const char* fname_prefix_manualTorqueFluxFixedAngle = "sim_manualTorqueFluxFixedAngle";
+    const char* fname_prefix_manualTorqueFluxFixedAngle1 = "sim_manualTorqueFluxFixedAngle1";
     int nStep_sim_rpm10k = cnt;
     int nStep_sim_rpm16k = cnt;
     int nStep_sim_rpm16kweak = cnt;
@@ -471,6 +475,18 @@ int main(int argc, char** argv) {
     AxiPara.control_fixperiod_args = 1;
     ModelBasedSim(usePeriodic1, motor, AxiPara, t_cur, dt_sim, nStep_sim_manualTorqueFluxFixedSpeed, inteval_print,
                   fp_ModelFoc, fname_prefix_manualTorqueFluxFixedSpeed1);
+
+    //To test addtional mode MOD_MANUAL_TORQUE_FLUX_FIXED_ANGLE
+    AxiPara.control_mode_args = FOC_Mode::MOD_MANUAL_TORQUE_FLUX_FIXED_ANGLE;
+    AxiPara.fixed_angle_args = 50;//50 = w_set * (CPR/PPR) / (2*Pi) = 0.2Pi * 500 / 2*Pi
+
+    ModelBasedSim(usePeriodic1, motor, AxiPara, t_cur, dt_sim, nStep_sim_manualTorqueFluxFixedSpeed, inteval_print,
+                  fp_ModelFoc, fname_prefix_manualTorqueFluxFixedAngle);
+
+    AxiPara.control_mode_args = FOC_Mode::MOD_MANUAL_TORQUE_FLUX_FIXED_ANGLE;
+    AxiPara.fixed_angle_args = 100;//100 = w_set * (CPR/PPR) / (2*Pi) = 0.4Pi * 500 / 2*Pi
+    ModelBasedSim(usePeriodic1, motor, AxiPara, t_cur, dt_sim, nStep_sim_manualTorqueFluxFixedSpeed, inteval_print,
+                  fp_ModelFoc, fname_prefix_manualTorqueFluxFixedAngle1);
 
     bool usePeriodic2 = true;
 
@@ -561,6 +577,8 @@ int main(int argc, char** argv) {
     printf("SIM_FOC_M:  Phase-7 generated files        : %s<.para.foc> <.in.foc> <.out.foc> \n", fname_prefix_manualFlux);
     printf("SIM_FOC_M:  Phase-8 generated files        : %s<.para.foc> <.in.foc> <.out.foc> \n", fname_prefix_stop);
     printf("SIM_FOC_M:  Phase-9 generated files        : %s<.para.foc> <.in.foc> <.out.foc> \n", fname_prefix_manualTorqueFluxFixedSpeed1);
+    printf("SIM_FOC_M:  Phase-10 generated files        : %s<.para.foc> <.in.foc> <.out.foc> \n", fname_prefix_manualTorqueFluxFixedAngle);
+    printf("SIM_FOC_M:  Phase-11 generated files        : %s<.para.foc> <.in.foc> <.out.foc> \n", fname_prefix_manualTorqueFluxFixedAngle1);
     printf("SIM_FOC_F:  ------ Summary for File-based simulation based on Model-based outputs -------------------------------\n");
     printf("SIM_FOC_F:  Kernel sampling mode           : %s \n", usePeriodic2? "one calling multi-sample" : "one calling one sample"); 
     t0 = t1; 

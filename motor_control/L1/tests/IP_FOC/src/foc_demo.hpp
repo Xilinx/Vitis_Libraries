@@ -103,16 +103,16 @@ void foc_demo(
     // Inout for parameters
     int args[FOC_ARGS_SIZE]);
 // clang-format off
-static const char* string_FOC_Mode[MOD_MANUAL_FLUX + 1] = {
+static const char* string_FOC_Mode[MOD_TOTAL_NUM] = {
     "MOD_STOPPED                       ", 
     "MOD_SPEED_WITH_TORQUE             ",
     "MOD_TORQUE_WITHOUT_SPEED          ",
     "MOD_FLUX                          ",
-    // expert modes
     "MOD_MANUAL_TORQUE_FLUX_FIXED_SPEED",
     "MOD_MANUAL_TORQUE_FLUX            ",
     "MOD_MANUAL_TORQUE                 ",
-    "MOD_MANUAL_FLUX                   "};
+    "MOD_MANUAL_FLUX                   ",
+    "MOD_MANUAL_TORQUE_FLUX_FIXED_ANGLE"};
 
 static const char* string_FOC_PARA[FOC_ARGS_SIZE] = {
     "PPR       ",
@@ -208,6 +208,7 @@ struct FocAxiParameters {
     T Ialpha_stts;
     T Ibeta_stts;
     T Ihomopolar_stts;
+    T fixed_angle_args;
     long trip_cnt;
     FocAxiParameters() { Init(); }
     void Init() {
@@ -216,6 +217,7 @@ struct FocAxiParameters {
         sample_interval_minus1_args = 0;
         control_mode_args = FOC_Mode::MOD_STOPPED;
         control_fixperiod_args = 0;
+        fixed_angle_args = 0;
         flux_sp_args = 0;
         flux_kp_args = 0;
         flux_ki_args = 0;
@@ -296,6 +298,7 @@ struct FocAxiParameters {
         fprintf(fp, "\tIbeta");
         fprintf(fp, "\tIhomopolar");
         fprintf(fp, "\trip_cnt");
+        fprintf(fp, "\tfixed_angle_args");
     }
     void printParameters(FILE* fp) {
         assert(fp);
@@ -344,6 +347,7 @@ struct FocAxiParameters {
         fprintf(fp, "\t%5.6f", Ibeta_stts.to_float());
         fprintf(fp, "\t%5.6f", Ihomopolar_stts.to_float());
         fprintf(fp, "\t%d", trip_cnt);
+        fprintf(fp, "\t%d", fixed_angle_args);
     }
     void sprintParameters(char* strm, int idx) {
         assert(strm);
@@ -467,7 +471,8 @@ struct FocAxiParameters {
         fout << Va_cmd_stts << ' ';
         fout << Vb_cmd_stts << ' ';
         fout << Vc_cmd_stts << ' ';
-        fout << trip_cnt << ' ' << std::endl;
+        fout << trip_cnt << ' ' ;
+        fout << fixed_angle_args << ' ' << std::endl;
         fout.close();
     }
 
@@ -519,6 +524,7 @@ struct FocAxiParameters {
         istr >> Vb_cmd_stts;
         istr >> Vc_cmd_stts;
         istr >> trip_cnt;
+        istr >> fixed_angle_args;
         fin.close();
     }
     void printPIDs(const char* head) {

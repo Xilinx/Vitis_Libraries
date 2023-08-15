@@ -8,7 +8,8 @@
                 "api_name": "hls_foc_periodic_ap_fixed",
                 "display_name": "SensorBasedFOC",
                 "brief": "Level 1 : IP for Sensor Based FOC.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "foc.hpp"
                 ],
@@ -249,7 +250,8 @@
                         "type": "volatile int&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "hls_qei",
@@ -258,7 +260,8 @@
                 "api_name": "hls_qei",
                 "display_name": "hls_qei_axi",
                 "brief": "Level 1: IP for Quadrature Encoder Interface",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "qei.hpp"
                 ],
@@ -324,7 +327,8 @@
                         "type": "volatile int&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "hls_pwm_gen",
@@ -333,12 +337,13 @@
                 "api_name": "hls_pwm_gen_axi",
                 "display_name": "hls_pwm_gen",
                 "brief": "Pulse wave modulation generator",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "ip_svpwm.hpp"
                 ],
                 "search_paths": [
-                    "/L1/tests/IP_PWM_GEN"
+                    "L1/tests/IP_SVPWM/src"
                 ],
                 "instance": "function",
                 "parameters": [],
@@ -429,7 +434,8 @@
                         "type": "volatile int&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         }
     ]
 }

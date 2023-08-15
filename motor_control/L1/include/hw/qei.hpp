@@ -430,10 +430,10 @@ LOOP_QEI_COUNTEDGE:
 #endif
                     tmp_rpm = tmp_rpm / div;
 
-                    if (dir)
-                        speed_rpm = tmp_rpm; //-tmp_rpm;
+                    if (dir == Dirction_QEI::clockwise_p)
+                        speed_rpm = tmp_rpm; //clockwise_p
                     else
-                        speed_rpm = tmp_rpm;
+                        speed_rpm = -tmp_rpm;//clockwise_n
                     ap_uint<32> tmp;
                     tmp.range(15, 0) = speed_rpm;
                     tmp.range(31, 16) = counter >> 2; // 4X mode : using any type of edges of A or B
