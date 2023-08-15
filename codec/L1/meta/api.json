@@ -8,7 +8,8 @@
                 "api_name": "xf::codec::kernelParserDecoderTop",
                 "display_name": "kernelParserDecoderTop",
                 "brief": "Level 2 : kernel for jfif parser + huffman decoder.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "XAcc_jfifparser.hpp"
                 ],
@@ -59,7 +60,8 @@
                         "type": "xf::codec::decOutput*"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "top_order_tokenize",
@@ -68,7 +70,8 @@
                 "api_name": "top_order_tokenize",
                 "display_name": "top_order_tokenize",
                 "brief": "JXL order_tokenize case",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "topOrderTokenize.hpp"
                 ],
@@ -99,7 +102,8 @@
                         "type": "hls::stream<bool> &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         }
     ]
 }

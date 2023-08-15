@@ -9,6 +9,7 @@
                 "display_name": "kernelJpegDecoderTop",
                 "brief": "Level 2 : kernel implement for jfif parser + huffman decoder + iQ_iDCT.",
                 "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "XAcc_idct.hpp"
                 ],
@@ -39,7 +40,8 @@
                         "type": "ap_uint< 32 > *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "hls_ANSclusterHistogram",
@@ -49,11 +51,12 @@
                 "display_name": "hls_ANSclusterHistogram",
                 "brief": "JXL ANS cluster Histogram kernel",
                 "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "hls_cluster_histogram.hpp"
                 ],
                 "search_paths": [
-                    "L2/demos/jxlEnc/acc_cluster_histogram/kernel"
+                    "L2/include/hw/jxlEnc"
                 ],
                 "instance": "function",
                 "parameters": [],
@@ -264,7 +267,8 @@
                         "type": "int32_t*"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "hls_lossy_enc_compute",
@@ -274,11 +278,12 @@
                 "display_name": "hls_lossy_enc_compute",
                 "brief": "Level 2 : kernel implement for JXL lossy frame encode computing",
                 "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "hls_lossy_enc_compute.hpp"
                 ],
                 "search_paths": [
-                    "L2/demos/jxlEnc/acc_lossy_enc_compute/kernel"
+                    "L2/include/hw/jxlEnc/"
                 ],
                 "instance": "function",
                 "parameters": [],
@@ -364,7 +369,8 @@
                         "type": "float*"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "hls_ANSinitHistogram",
@@ -374,11 +380,12 @@
                 "display_name": "hls_ANSinitHistogram",
                 "brief": "",
                 "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "hls_init_histogram.hpp"
                 ],
                 "search_paths": [
-                    "L2/demos/jxlEnc/acc_tokInit_histogram/kernel"
+                    "L2/include/hw/jxlEnc/"
                 ],
                 "instance": "function",
                 "parameters": [],
@@ -544,7 +551,8 @@
                         "type": "uint32_t*"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::image::jpegDecLeptonEnc",
@@ -554,6 +562,7 @@
                 "display_name": "jpegDecLeptonEnc",
                 "brief": "",
                 "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "jpeg_dec_lepton_enc.hpp"
                 ],
@@ -584,7 +593,8 @@
                         "type": "ap_uint<8>*"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "kernel1Top",
@@ -594,6 +604,7 @@
                 "display_name": "kernel1Top",
                 "brief": "",
                 "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "XAccPIKKernel1.hpp"
                 ],
@@ -629,7 +640,8 @@
                         "type": "ap_uint<32>*"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "kernel2Top",
@@ -639,6 +651,7 @@
                 "display_name": "kernel2Top",
                 "brief": "",
                 "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "XAccPIKKernel2.hpp"
                 ],
@@ -699,7 +712,8 @@
                         "type": "ap_uint<AXI_SZ>"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "kernel3Top",
@@ -709,6 +723,7 @@
                 "display_name": "kernel3Top",
                 "brief": "",
                 "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "XAccPIKKernel3.hpp"
                 ],
@@ -779,7 +794,8 @@
                         "type": "ap_uint<32>*"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "kernel_resize",
@@ -789,6 +805,7 @@
                 "display_name": "kernel_resize",
                 "brief": "",
                 "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "kernel_resize.hpp"
                 ],
@@ -814,7 +831,8 @@
                         "type": "ap_uint<64>*"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "kernel_IntraPredLoop2_NoOut_1",
@@ -824,6 +842,7 @@
                 "display_name": "kernel_IntraPredLoop2_NoOut_1",
                 "brief": "",
                 "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "vp8_hls_syn.h"
                 ],
@@ -864,7 +883,8 @@
                         "type": "uint8_t* "
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "kernel_2_ArithmeticCoding_8",
@@ -874,6 +894,7 @@
                 "display_name": "kernel_2_ArithmeticCoding_8",
                 "brief": "",
                 "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "vp8_hls_syn.h"
                 ],
@@ -909,7 +930,8 @@
                         "type": "uint32_t*"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         }
     ]
 }

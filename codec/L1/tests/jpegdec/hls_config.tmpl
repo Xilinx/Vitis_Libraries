@@ -1,0 +1,24 @@
+[hls]
+
+clock=3.33
+flow_target=vivado
+syn.file=test_decoder.cpp
+syn.file_cflags=test_decoder.cpp,-I${XF_PROJ_ROOT}/L1/include -std=c++0x
+syn.file=${XF_PROJ_ROOT}/L1/src/XAcc_jfifparser.cpp
+syn.file_cflags=${XF_PROJ_ROOT}/L1/src/XAcc_jfifparser.cpp,-I${XF_PROJ_ROOT}/L1/include -std=c++0x
+syn.file=${XF_PROJ_ROOT}/L1/src/XAcc_jpegdecoder.cpp
+syn.file_cflags=${XF_PROJ_ROOT}/L1/src/XAcc_jpegdecoder.cpp,-I${XF_PROJ_ROOT}/L1/include -std=c++0x
+syn.top=kernel_parser_decoder
+tb.file=test_decoder.cpp
+tb.file_cflags=test_decoder.cpp,-I${XF_PROJ_ROOT}/L1/include -std=c++0x
+
+csim.argv=-JPEGFile ${XF_PROJ_ROOT}/L1/images/t0.jpg
+
+cosim.argv=-JPEGFile ${XF_PROJ_ROOT}/L1/images/t0.jpg
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog
+
+
