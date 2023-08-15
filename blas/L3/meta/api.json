@@ -8,7 +8,7 @@
                 "api_name": "xf::blas::buildConfigDict",
                 "display_name": "buildConfigDict",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "CPU",
                 "header_file_name": [
                     "helper.hpp"
                 ],
@@ -17,8 +17,10 @@
                 ],
                 "instance": "function",
                 "parameters": [],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "CPU"
         },
         {
             "api_name": "xf::blas::getPaddedSize",
@@ -27,7 +29,7 @@
                 "api_name": "xf::blas::getPaddedSize",
                 "display_name": "getPaddedSize",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "CPU",
                 "header_file_name": [
                     "helper.hpp"
                 ],
@@ -36,8 +38,10 @@
                 ],
                 "instance": "function",
                 "parameters": [],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "CPU"
         },
         {
             "api_name": "xf::blas::getTypeSize",
@@ -46,7 +50,7 @@
                 "api_name": "xf::blas::getTypeSize",
                 "display_name": "getTypeSize",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "CPU",
                 "header_file_name": [
                     "helper.hpp"
                 ],
@@ -55,8 +59,10 @@
                 ],
                 "instance": "function",
                 "parameters": [],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "CPU"
         },
         {
             "api_name": "xf::blas::xfblasCreate",
@@ -65,7 +71,7 @@
                 "api_name": "xf::blas::xfblasCreate",
                 "display_name": "xfblasCreate",
                 "brief": "This function initializes the XFBLAS library and creates a handle for the specific engine. It must be called prior to any other XFBLAS library calls.",
-                "target_domain": "",
+                "target_domain": "CPU",
                 "header_file_name": [
                     "wrapper.hpp"
                 ],
@@ -100,8 +106,10 @@
                         "direction": "",
                         "type": "unsigned int"
                     }
-                ]
-            }
+                ],
+                "visible": true
+            },
+            "target_domain": "CPU"
         },
         {
             "api_name": "xf::blas::xfblasMalloc",
@@ -110,7 +118,7 @@
                 "api_name": "xf::blas::xfblasMalloc",
                 "display_name": "xfblasMalloc",
                 "brief": "This function allocates memory on the FPGA device.",
-                "target_domain": "",
+                "target_domain": "CPU",
                 "header_file_name": [
                     "wrapper.hpp"
                 ],
@@ -150,8 +158,10 @@
                         "direction": "",
                         "type": "unsigned int"
                     }
-                ]
-            }
+                ],
+                "visible": true
+            },
+            "target_domain": "CPU"
         },
         {
             "api_name": "xf::blas::xfblasMallocRestricted",
@@ -160,7 +170,7 @@
                 "api_name": "xf::blas::xfblasMallocRestricted",
                 "display_name": "xfblasMallocRestricted",
                 "brief": "This function allocates memory for host row-major format matrix on the FPGA device.",
-                "target_domain": "",
+                "target_domain": "CPU",
                 "header_file_name": [
                     "wrapper.hpp"
                 ],
@@ -205,8 +215,10 @@
                         "direction": "",
                         "type": "unsigned int"
                     }
-                ]
-            }
+                ],
+                "visible": true
+            },
+            "target_domain": "CPU"
         },
         {
             "api_name": "xf::blas::xfblasMallocManaged",
@@ -215,7 +227,7 @@
                 "api_name": "xf::blas::xfblasMallocManaged",
                 "display_name": "xfblasMallocManaged",
                 "brief": "This function allocates memory on the FPGA device, rewrites the leading dimension size after padding.",
-                "target_domain": "",
+                "target_domain": "CPU",
                 "header_file_name": [
                     "wrapper.hpp"
                 ],
@@ -260,8 +272,10 @@
                         "direction": "",
                         "type": "unsigned int"
                     }
-                ]
-            }
+                ],
+                "visible": true
+            },
+            "target_domain": "CPU"
         },
         {
             "api_name": "xf::blas::xfblasSetMatrix",
@@ -270,7 +284,7 @@
                 "api_name": "xf::blas::xfblasSetMatrix",
                 "display_name": "xfblasSetMatrix",
                 "brief": "This function copies a matrix in host memory to FPGA device memory.",
-                "target_domain": "",
+                "target_domain": "CPU",
                 "header_file_name": [
                     "wrapper.hpp"
                 ],
@@ -320,8 +334,10 @@
                         "direction": "",
                         "type": "unsigned int"
                     }
-                ]
-            }
+                ],
+                "visible": true
+            },
+            "target_domain": "CPU"
         },
         {
             "api_name": "xf::blas::xfblasSetMatrixRestricted",
@@ -330,7 +346,7 @@
                 "api_name": "xf::blas::xfblasSetMatrixRestricted",
                 "display_name": "xfblasSetMatrixRestricted",
                 "brief": "This function copies a matrix in host memory to FPGA device memory.",
-                "target_domain": "",
+                "target_domain": "CPU",
                 "header_file_name": [
                     "wrapper.hpp"
                 ],
@@ -355,8 +371,10 @@
                         "direction": "",
                         "type": "unsigned int"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "CPU"
         },
         {
             "api_name": "xf::blas::xfblasSetVectorRestricted",
@@ -365,7 +383,7 @@
                 "api_name": "xf::blas::xfblasSetVectorRestricted",
                 "display_name": "xfblasSetVectorRestricted",
                 "brief": "This function copies a vector in host memory to FPGA device memory.",
-                "target_domain": "",
+                "target_domain": "CPU",
                 "header_file_name": [
                     "wrapper.hpp"
                 ],
@@ -390,8 +408,10 @@
                         "direction": "",
                         "type": "=0"
                     }
-                ]
-            }
+                ],
+                "visible": true
+            },
+            "target_domain": "CPU"
         },
         {
             "api_name": "xf::blas::xfblasDeviceSynchronize",
@@ -400,7 +420,7 @@
                 "api_name": "xf::blas::xfblasDeviceSynchronize",
                 "display_name": "xfblasDeviceSynchronize",
                 "brief": "This function will synchronize all the device memory to host memory.",
-                "target_domain": "",
+                "target_domain": "CPU",
                 "header_file_name": [
                     "wrapper.hpp"
                 ],
@@ -420,8 +440,10 @@
                         "direction": "",
                         "type": "unsigned int"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "CPU"
         },
         {
             "api_name": "xf::blas::xfblasGetMatrix",
@@ -430,7 +452,7 @@
                 "api_name": "xf::blas::xfblasGetMatrix",
                 "display_name": "xfblasGetMatrix",
                 "brief": "This function copies a matrix in FPGA device memory to host memory.",
-                "target_domain": "",
+                "target_domain": "CPU",
                 "header_file_name": [
                     "wrapper.hpp"
                 ],
@@ -480,8 +502,10 @@
                         "direction": "",
                         "type": "unsigned int"
                     }
-                ]
-            }
+                ],
+                "visible": true
+            },
+            "target_domain": "CPU"
         },
         {
             "api_name": "xf::blas::xfblasGetMatrixRestricted",
@@ -490,7 +514,7 @@
                 "api_name": "xf::blas::xfblasGetMatrixRestricted",
                 "display_name": "xfblasGetMatrixRestricted",
                 "brief": "This function copies a matrix in FPGA device memory to host memory.",
-                "target_domain": "",
+                "target_domain": "CPU",
                 "header_file_name": [
                     "wrapper.hpp"
                 ],
@@ -515,8 +539,10 @@
                         "direction": "",
                         "type": "unsigned int"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "CPU"
         },
         {
             "api_name": "xf::blas::xfblasGetVectorRestricted",
@@ -525,7 +551,7 @@
                 "api_name": "xf::blas::xfblasGetVectorRestricted",
                 "display_name": "xfblasGetVectorRestricted",
                 "brief": "This function copies a matrix in FPGA device memory to host memory.",
-                "target_domain": "",
+                "target_domain": "CPU",
                 "header_file_name": [
                     "wrapper.hpp"
                 ],
@@ -550,8 +576,10 @@
                         "direction": "",
                         "type": "=0"
                     }
-                ]
-            }
+                ],
+                "visible": true
+            },
+            "target_domain": "CPU"
         },
         {
             "api_name": "xf::blas::xfblasFree",
@@ -560,7 +588,7 @@
                 "api_name": "xf::blas::xfblasFree",
                 "display_name": "xfblasFree",
                 "brief": "This function frees memory in FPGA device.",
-                "target_domain": "",
+                "target_domain": "CPU",
                 "header_file_name": [
                     "wrapper.hpp"
                 ],
@@ -585,8 +613,10 @@
                         "direction": "",
                         "type": "unsigned int"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "CPU"
         },
         {
             "api_name": "xf::blas::xfblasFreeInstr",
@@ -595,7 +625,7 @@
                 "api_name": "xf::blas::xfblasFreeInstr",
                 "display_name": "xfblasFreeInstr",
                 "brief": "This function frees instrution.",
-                "target_domain": "",
+                "target_domain": "CPU",
                 "header_file_name": [
                     "wrapper.hpp"
                 ],
@@ -615,8 +645,10 @@
                         "direction": "",
                         "type": "unsigned int"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "CPU"
         },
         {
             "api_name": "xf::blas::xfblasDestroy",
@@ -625,7 +657,7 @@
                 "api_name": "xf::blas::xfblasDestroy",
                 "display_name": "xfblasDestroy",
                 "brief": "This function releases handle used by the XFBLAS library.",
-                "target_domain": "",
+                "target_domain": "CPU",
                 "header_file_name": [
                     "wrapper.hpp"
                 ],
@@ -645,8 +677,10 @@
                         "direction": "",
                         "type": "unsigned int"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "CPU"
         },
         {
             "api_name": "xf::blas::xfblasGemm",
@@ -655,7 +689,7 @@
                 "api_name": "xf::blas::xfblasGemm",
                 "display_name": "xfblasGemm",
                 "brief": "This function performs the matrix-matrix multiplication C = alpha*op(A)op(B) + beta*C.",
-                "target_domain": "",
+                "target_domain": "CPU",
                 "header_file_name": [
                     "wrapper.hpp"
                 ],
@@ -740,8 +774,10 @@
                         "direction": "",
                         "type": "dex=0"
                     }
-                ]
-            }
+                ],
+                "visible": true
+            },
+            "target_domain": "CPU"
         },
         {
             "api_name": "xf::blas::xfblasGemmByAddress",
@@ -750,7 +786,7 @@
                 "api_name": "xf::blas::xfblasGemmByAddress",
                 "display_name": "xfblasGemmByAddress",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "CPU",
                 "header_file_name": [
                     "wrapper.hpp"
                 ],
@@ -759,8 +795,10 @@
                 ],
                 "instance": "function",
                 "parameters": [],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "CPU"
         },
         {
             "api_name": "xf::blas::xfblasGetByPointer",
@@ -769,7 +807,7 @@
                 "api_name": "xf::blas::xfblasGetByPointer",
                 "display_name": "xfblasGetByPointer",
                 "brief": "This function copies a matrix in FPGA device memory to host memory by pointer.",
-                "target_domain": "",
+                "target_domain": "CPU",
                 "header_file_name": [
                     "wrapper.hpp"
                 ],
@@ -794,8 +832,10 @@
                         "direction": "",
                         "type": "unsigned int"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "CPU"
         },
         {
             "api_name": "xf::blas::xfblasGetByAddress",
@@ -804,7 +844,7 @@
                 "api_name": "xf::blas::xfblasGetByAddress",
                 "display_name": "xfblasGetByAddress",
                 "brief": "This function copies a matrix in FPGA device memory to host memory by its address in device memory.",
-                "target_domain": "",
+                "target_domain": "CPU",
                 "header_file_name": [
                     "wrapper.hpp"
                 ],
@@ -839,8 +879,10 @@
                         "direction": "",
                         "type": "unsigned int"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "CPU"
         },
         {
             "api_name": "xf::blas::xfblasExecute",
@@ -849,7 +891,7 @@
                 "api_name": "xf::blas::xfblasExecute",
                 "display_name": "xfblasExecute",
                 "brief": "This function starts the kernel and wait until it finishes.",
-                "target_domain": "",
+                "target_domain": "CPU",
                 "header_file_name": [
                     "wrapper.hpp"
                 ],
@@ -869,8 +911,10 @@
                         "direction": "",
                         "type": "unsigned int"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "CPU"
         },
         {
             "api_name": "xf::blas::xfblasExecuteAsync",
@@ -879,7 +923,7 @@
                 "api_name": "xf::blas::xfblasExecuteAsync",
                 "display_name": "xfblasExecuteAsync",
                 "brief": "This asynchronous function starts all kernels and wait until them finish.",
-                "target_domain": "",
+                "target_domain": "CPU",
                 "header_file_name": [
                     "wrapper.hpp"
                 ],
@@ -899,8 +943,10 @@
                         "direction": "",
                         "type": "unsigned int"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "CPU"
         }
     ]
 }

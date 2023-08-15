@@ -72,22 +72,22 @@ HLS cases can only be found in `L1/tests` folder, and are created to test module
 Setup and build envrionment using the Vitis and XRT scripts:
 
 ```
-    source <install path>/Vitis/2022.2/settings64.sh
+    source <install path>/Vitis/2023.2/settings64.sh
     source /opt/xilinx/xrt/setup.sh
 ```
 
 ### HLS Cases Command Line Flow
 
 ```console
-cd L1/tests/
-python ./run_test.py --operator amax amin --csim
+cd L1/tests/case_folder/
+make run TARGET=<cosim/csim/csynth/vivado_syn/vivado_impl> PLATFORM=/path/to/xilinx_u250_gen3x16_xdma_3_1_202020_1.xpfm
 ```
 
-Test control variables are:
-
-- `csim` for high level simulation.
-- `csynth` for high level synthesis to RTL.
-- `cosim` for co-simulation between software test bench and generated RTL.
+- `csim` (high level simulation),
+- `csynth` (high level synthesis to RTL),
+- `cosim` (cosimulation between software testbench and generated RTL),
+- `vivado_syn` (synthesis by Vivado) and
+- `vivado_impl` (implementation by Vivado).
 
 ### Vitis Cases Command Line Flow
 

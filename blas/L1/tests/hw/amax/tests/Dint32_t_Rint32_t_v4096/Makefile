@@ -12,60 +12,70 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis hls makefile-generator v2.0.0
 
-MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
-CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
-XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L1/*}')
-
-# MK_INC_BEGIN hls_common.mk
-
+############################## Help Section ##############################
 .PHONY: help
 
 help::
 	@echo ""
 	@echo "Makefile Usage:"
 	@echo ""
-	@echo "  make run CSIM=1 CSYNTH=1 COSIM=1 PLATFORM=<FPGA platform> PLATFORM_REPO_PATHS=<path to platform directories>"
+	@echo "  make run TARGET=<cosim/csim/csynth/vivado_syn/vivado_impl> PLATFORM=<FPGA platform> PLATFORM_REPO_PATHS=<path to platform directories>"
 	@echo "      Command to run the selected tasks for specified device."
 	@echo ""
-	@echo "      Valid tasks are CSIM, CSYNTH, COSIM, VIVADO_SYN, VIVADO_IMPL"
+	@echo "      Valid tasks are cosim, csynth, csim, vivado_syn, vivadp_impl"
 	@echo ""
 	@echo "      PLATFORM is case-insensitive and support awk regex."
-	@echo "      For example, \`make run PLATFORM='u200.*xdma' COSIM=1\`"
+	@echo "      For example, \`make run PLATFORM='u200.*xdma' TARGET=cosim\`"
 	@echo "      It can also be an absolute path to platform file."
 	@echo ""
 	@echo "      PLATFORM_REPO_PATHS variable is used to specify the paths in which the platform files will be"
 	@echo "      searched for."
 	@echo ""
-	@echo "  make run CSIM=1 CSYNTH=1 COSIM=1 XPART=<FPGA part name>"
+	@echo "  make run TARGET=cosim/csim/csynth/vivado_syn/vivado_impl XPART=<FPGA part name>"
 	@echo "      Alternatively, the FPGA part can be speficied via XPART."
-	@echo "      For example, \`make run XPART='xcu200-fsgd2104-2-e' COSIM=1\`"
+	@echo "      For example, \`make run XPART='xcu200-fsgd2104-2-e' TARGET=cosim\`"
 	@echo "      When XPART is set, PLATFORM will be ignored."
 	@echo ""
 	@echo "  make clean "
 	@echo "      Command to remove the generated files."
 	@echo ""
 
-# MK_INC_END hls_common.mk
+############################## Setting up Project Variables ##############################
+MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
+export CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
+export XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L1/*}')
 
-# MK_INC_BEGIN vivado.mk
+# setting default value
+PLATFORM ?= xilinx_u200_gen3x16_xdma_2_202110_1 
+export PATH := $(XILINX_VIVADO)/bin:$(PATH)
+WORK_DIR ?= hls
+TARGET ?= csim
+CONFIG_FILE ?= $(CUR_DIR)/hls_config.cfg
+CONFIG_TMPL ?= $(CUR_DIR)/hls_config.tmpl
 
+ifneq (,$(wildcard $(XILINX_VITIS)/bin/ldlibpath.sh))
+export LD_LIBRARY_PATH := $(shell $(XILINX_VITIS)/bin/ldlibpath.sh $(XILINX_VITIS)/lib/lnx64.o):$(LD_LIBRARY_PATH)
+endif
+
+ifeq ($(TARGET), vivado_syn)
+TARGET_REL = impl
+export VIVADO_FLOW := syn
+else
+export VIVADO_FLOW := impl
+ifeq ($(TARGET), vivado_impl)
+TARGET_REL = impl
+else
+TARGET_REL = $(TARGET)
+endif
+endif
+
+############################## Checking value ##############################
 .PHONY: check_vivado
 check_vivado:
 ifeq (,$(wildcard $(XILINX_VIVADO)/bin/vivado))
 	@echo "Cannot locate Vivado installation. Please set XILINX_VIVADO variable." && false
 endif
-
-export PATH := $(XILINX_VIVADO)/bin:$(PATH)
-
-# MK_INC_END vivado.mk
-
-PLATFORM ?= xilinx_u280_gen3x16_xdma_1_202211_1
-
-# MK_INC_BEGIN vitis_set_part.mk
-
-# MK_INC_BEGIN vitis.mk
 
 .PHONY: check_vpp
 check_vpp:
@@ -73,28 +83,7 @@ ifeq (,$(wildcard $(XILINX_VITIS)/bin/v++))
 	@echo "Cannot locate Vitis installation. Please set XILINX_VITIS variable." && false
 endif
 
-.PHONY: check_xrt
-check_xrt:
-ifeq (,$(wildcard $(XILINX_XRT)/lib/libxilinxopencl.so))
-	@echo "Cannot locate XRT installation. Please set XILINX_XRT variable." && false
-endif
-
-
-export PATH := $(XILINX_VITIS)/bin:$(XILINX_XRT)/bin:$(PATH)
-
-ifeq (,$(LD_LIBRARY_PATH))
-LD_LIBRARY_PATH := $(XILINX_XRT)/lib
-else
-LD_LIBRARY_PATH := $(XILINX_XRT)/lib:$(LD_LIBRARY_PATH)
-endif
-ifneq (,$(wildcard $(XILINX_VITIS)/bin/ldlibpath.sh))
-export LD_LIBRARY_PATH := $(shell $(XILINX_VITIS)/bin/ldlibpath.sh $(XILINX_VITIS)/lib/lnx64.o):$(LD_LIBRARY_PATH)
-endif
-
-# MK_INC_END vitis.mk
-
 .PHONY: check_part
-
 ifeq (,$(XPART))
 # MK_INC_BEGIN vitis_set_platform.mk
 
@@ -144,121 +133,51 @@ XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ 
 endif # 3.2
 endif # 3
 endif
+XPLATFORM := $(firstword $(XPLATFORM))
 
-define MSG_PLATFORM
-No platform matched pattern '$(PLATFORM)'.
-Available platforms are: $(XPLATFORMS)
-To add more platform directories, set the PLATFORM_REPO_PATHS variable or point PLATFORM variable to the full path of platform .xpfm file.
-endef
-export MSG_PLATFORM
+XDEVICE := $(basename $(notdir $(XPLATFORM)))
 
-define MSG_DEVICE
-More than one platform matched: $(XPLATFORM)
-Please set PLATFORM variable more accurately to select only one platform file, or set PLATFORM variable to the full path of the platform .xpfm file.
-endef
-export MSG_DEVICE
-
-.PHONY: check_platform
-check_platform:
-ifeq (,$(XPLATFORM))
-	@echo "$${MSG_PLATFORM}" && false
-endif
-ifneq (,$(word 2,$(XPLATFORM)))
-	@echo "$${MSG_DEVICE}" && false
-endif
-
-XDEVICE := $(basename $(notdir $(firstword $(XPLATFORM))))
-
-# MK_INC_END vitis_set_platform.mk
 ifeq (1, $(words $(XPLATFORM)))
 # Query the part name of device
 ifneq (,$(wildcard $(XILINX_VITIS)/bin/platforminfo))
-override XPART := $(shell $(XILINX_VITIS)/bin/platforminfo --json="hardwarePlatform.devices[0].fpgaPart" --platform $(firstword $(XPLATFORM)) | sed 's/^[^:]*://g' | sed 's/[^a-zA-Z0-9]/-/g' | sed 's/-\+/-/g')
+override XPART := $(shell $(XILINX_VITIS)/bin/platforminfo --json="hardwarePlatform.devices[0].fpgaPart" --platform $(XPLATFORM) | sed 's/^[^:]*://g' | sed 's/[^a-zA-Z0-9]/-/g' | sed 's/-\+/-/g')
 endif
+else
+PART_ERROR := "To add more platform directories, set the PLATFORM_REPO_PATHS variable or point PLATFORM variable to the full path of platform .xpfm file."
 endif
-check_part: check_platform check_vpp
+
+check_part: check_vpp
 ifeq (,$(XPART))
+	@echo "$(PART_ERROR)"
 	@echo "XPART is not set and cannot be inferred. Please run \`make help\` for usage info." && false
 endif
 else # XPART
 check_part:
-	@echo "XPART is directly set to $(XPART)"
+	@echo "Using part $(XPART)"
 endif # XPART
 
-# MK_INC_END vitis_set_part.mk
+define CONFIG_GEN_PY
+import os, string
+with open('$(CONFIG_TMPL)', 'r') as fr:
+	t = fr.read()
+with open('$(CONFIG_FILE)', 'w') as f:
+	f.write(string.Template(t).substitute(**dict(os.environ)))
+endef
+export CONFIG_GEN_PY
 
-# MK_INC_BEGIN hls_test_rules.mk
-#
-
-gen_instances: $(INSTANCE_FILES)
-	@echo "Nothing to generate."
-
-valid_params:
-	@echo "Nothing to validate."
-
-
-.PHONY: run setup runhls clean cleanall check
-
-# Alias to run, for legacy test script
-check: run
-
-CSIM ?= 0
-CSYNTH ?= 0
-COSIM ?= 0
-VIVADO_SYN ?= 0
-VIVADO_IMPL ?= 0
-QOR_CHECK ?= 0
-
-# at least RTL synthesis before check QoR
-ifeq (1,$(QOR_CHECK))
-ifeq (0,$(VIVADO_IMPL))
-override VIVADO_SYN := 1
-endif
+$(CONFIG_FILE): $(CONFIG_TMPL)
+	@echo "$${CONFIG_GEN_PY}" | python3
+	
+all: check_vivado check_part $(CONFIG_FILE)
+ifneq ($(TARGET_REL), csim)
+	v++ -c --mode hls --config $(CONFIG_FILE) --work_dir $(WORK_DIR) --part $(XPART)
 endif
 
-# need synthesis before cosim or vivado
-ifeq (1,$(VIVADO_IMPL))
-override CSYNTH := 1
+run: all
+ifneq ($(TARGET_REL), csynth)
+	@echo $(TARGET_REL)
+	vitis-run --mode hls --config $(CONFIG_FILE) --$(TARGET_REL) --work_dir $(WORK_DIR)  --part $(XPART)
 endif
-
-ifeq (1,$(VIVADO_SYN))
-override CSYNTH := 1
-endif
-
-ifeq (1,$(COSIM))
-override CSYNTH := 1
-endif
-
-# From testbench.data_recipe of description.json
-data:
-	@true
-
-run: gen_instances data setup runhls
-
-setup: | check_part
-	@rm -f ./settings.tcl
-	@if [ -n "$$CLKP" ]; then echo 'set CLKP $(CLKP)' >> ./settings.tcl ; fi
-	@echo 'set XPART $(XPART)' >> ./settings.tcl
-	@echo 'set CSIM $(CSIM)' >> ./settings.tcl
-	@echo 'set CSYNTH $(CSYNTH)' >> ./settings.tcl
-	@echo 'set COSIM $(COSIM)' >> ./settings.tcl
-	@echo 'set VIVADO_SYN $(VIVADO_SYN)' >> ./settings.tcl
-	@echo 'set VIVADO_IMPL $(VIVADO_IMPL)' >> ./settings.tcl
-	@echo 'set XF_PROJ_ROOT "$(XF_PROJ_ROOT)"' >> ./settings.tcl
-	@echo 'set CUR_DIR "$(CUR_DIR)"' >> ./settings.tcl
-	@echo "Configured: settings.tcl"
-	@echo "----"
-	@cat ./settings.tcl
-	@echo "----"
-
-HLS ?= vitis_hls
-runhls: data setup | check_vivado check_vpp
-	$(HLS) -f run_hls.tcl;
 
 clean:
-	rm -rf settings.tcl *_hls.log amax_Dint32_t_Rint32_t_v4096_test.prj $(INSTANCE_FILES)
-
-# Used by Jenkins test
-cleanall: clean
-
-# MK_INC_END hls_test_rules.mk
+	rm -rf $(CONFIG_FILE) *_hls.log $(WORK_DIR)

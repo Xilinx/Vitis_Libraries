@@ -8,7 +8,7 @@
                 "api_name": "blasKernel",
                 "display_name": "blasKernel",
                 "brief": "blasKernel is the uniform top function for blas function kernels with interfaces to DDR/HBM memories",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "kernel.hpp"
                 ],
@@ -28,8 +28,10 @@
                         "direction": "",
                         "type": "DdrIntType *"
                     }
-                ]
-            }
+                ],
+                "visible": true
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "krnl_gemv",
@@ -38,7 +40,7 @@
                 "api_name": "krnl_gemv",
                 "display_name": "krnl_gemv",
                 "brief": "krnl_gemv kernel function to compute A * p",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "gemvMultKernel.hpp"
                 ],
@@ -73,8 +75,10 @@
                         "direction": "",
                         "type": "BLAS_interface *"
                     }
-                ]
-            }
+                ],
+                "visible": true
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::blas::GemmKernel",
@@ -83,7 +87,7 @@
                 "api_name": "xf::blas::GemmKernel",
                 "display_name": "GemmKernel",
                 "brief": "class, implement C = A*B+X t_aColMemWords defines number of memwords in the columns of one row of buffer_A. Due to the reusability, the height of buffer_A is only one memwords. For buffer_B, t_aColMemWords defines number of memwords in the rows of one column in buffer_B, t_bColMemWords defines number of memwords in the cols of one row in buffer_B. t_aRowMemWords and t_bColMemWords define the height and width of buffer_C in terms of memwords.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "gemmKernel.hpp"
                 ],
@@ -128,8 +132,10 @@
                         "description": "number of memory words in one row of the matrix B buffer"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "PL"
         }
     ]
 }

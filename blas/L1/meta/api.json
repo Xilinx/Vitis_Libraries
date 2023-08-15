@@ -8,7 +8,7 @@
                 "api_name": "xf::blas::amax",
                 "display_name": "amax",
                 "brief": "amax function that returns the position of the vector element that has the maximum magnitude.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "amax.hpp"
                 ],
@@ -50,8 +50,10 @@
                         "direction": "",
                         "type": "t_IndexType &"
                     }
-                ]
-            }
+                ],
+                "visible": true
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::blas::amin",
@@ -60,7 +62,7 @@
                 "api_name": "xf::blas::amin",
                 "display_name": "amin",
                 "brief": "amin function that returns the position of the vector element that has the minimum magnitude.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "amin.hpp"
                 ],
@@ -102,8 +104,10 @@
                         "direction": "",
                         "type": "t_IndexType &"
                     }
-                ]
-            }
+                ],
+                "visible": true
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::blas::asum",
@@ -112,7 +116,7 @@
                 "api_name": "xf::blas::asum",
                 "display_name": "asum",
                 "brief": "asum function that returns the sum of the magnitude of vector elements.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "asum.hpp"
                 ],
@@ -154,8 +158,10 @@
                         "direction": "",
                         "type": "t_DataType &"
                     }
-                ]
-            }
+                ],
+                "visible": true
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::blas::axpy",
@@ -164,7 +170,7 @@
                 "api_name": "xf::blas::axpy",
                 "display_name": "axpy",
                 "brief": "axpy function that compute Y = alpha*X + Y.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "axpy.hpp"
                 ],
@@ -216,8 +222,10 @@
                         "direction": "",
                         "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
                     }
-                ]
-            }
+                ],
+                "visible": true
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::blas::copy",
@@ -226,7 +234,7 @@
                 "api_name": "xf::blas::copy",
                 "display_name": "copy",
                 "brief": "copy function that compute Y = X",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "copy.hpp"
                 ],
@@ -268,8 +276,10 @@
                         "direction": "",
                         "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
                     }
-                ]
-            }
+                ],
+                "visible": true
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::blas::dot",
@@ -278,7 +288,7 @@
                 "api_name": "xf::blas::dot",
                 "display_name": "dot",
                 "brief": "dot function that returns the dot product of vector x and y.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "dot.hpp"
                 ],
@@ -325,8 +335,10 @@
                         "direction": "",
                         "type": "t_DataType &"
                     }
-                ]
-            }
+                ],
+                "visible": true
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::blas::gbmv",
@@ -335,7 +347,7 @@
                 "api_name": "xf::blas::gbmv",
                 "display_name": "gbmv",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "gbmv.hpp"
                 ],
@@ -407,8 +419,10 @@
                         "direction": "",
                         "type": "hls::stream<typename WideType<t_MacType, t_ParEntries>::t_TypeInt>&"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::blas::gbmv",
@@ -417,7 +431,7 @@
                 "api_name": "xf::blas::gbmv",
                 "display_name": "gbmv",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "gbmv.hpp"
                 ],
@@ -504,8 +518,10 @@
                         "direction": "",
                         "type": "hls::stream<typename WideType<t_DataType, t_ParEntries>::t_TypeInt>&"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::blas::gemm",
@@ -514,7 +530,7 @@
                 "api_name": "xf::blas::gemm",
                 "display_name": "gemm",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "gemm.hpp"
                 ],
@@ -571,8 +587,10 @@
                         "direction": "",
                         "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::blas::gemv",
@@ -581,7 +599,7 @@
                 "api_name": "xf::blas::gemv",
                 "display_name": "gemv",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "gemv.hpp"
                 ],
@@ -648,8 +666,10 @@
                         "direction": "",
                         "type": "hls::stream<typename WideType<t_DataType, 1>::t_TypeInt>&"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::blas::nrm2",
@@ -658,7 +678,7 @@
                 "api_name": "xf::blas::nrm2",
                 "display_name": "nrm2",
                 "brief": "nrm2 function that returns the Euclidean norm of the vector x.",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "nrm2.hpp"
                 ],
@@ -700,8 +720,10 @@
                         "direction": "",
                         "type": "t_DataType &"
                     }
-                ]
-            }
+                ],
+                "visible": true
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::blas::scal",
@@ -710,7 +732,7 @@
                 "api_name": "xf::blas::scal",
                 "display_name": "scal",
                 "brief": "scal function that compute X = alpha * X",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "scal.hpp"
                 ],
@@ -757,8 +779,10 @@
                         "direction": "",
                         "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
                     }
-                ]
-            }
+                ],
+                "visible": true
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::blas::swap",
@@ -767,7 +791,7 @@
                 "api_name": "xf::blas::swap",
                 "display_name": "swap",
                 "brief": "swap function that swap vector x and y",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "swap.hpp"
                 ],
@@ -819,8 +843,10 @@
                         "direction": "",
                         "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
                     }
-                ]
-            }
+                ],
+                "visible": true
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::blas::symv",
@@ -829,7 +855,7 @@
                 "api_name": "xf::blas::symv",
                 "display_name": "symv",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "symv.hpp"
                 ],
@@ -891,8 +917,10 @@
                         "direction": "",
                         "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::blas::trmv",
@@ -901,7 +929,7 @@
                 "api_name": "xf::blas::trmv",
                 "display_name": "trmv",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
                 "header_file_name": [
                     "trmv.hpp"
                 ],
@@ -968,8 +996,10 @@
                         "direction": "",
                         "type": "hls::stream<typename WideType<t_DataType, (1 << t_LogParEntries)>::t_TypeInt>&"
                     }
-                ]
-            }
+                ],
+                "visible": false
+            },
+            "target_domain": "PL"
         }
     ]
 }
