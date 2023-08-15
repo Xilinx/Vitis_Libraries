@@ -56,6 +56,8 @@
 // 1 - Bilinear Interpolation
 // 2 - AREA Interpolation
 
+#define XF_USE_URAM 1
+
 /* Input image Dimensions */
 
 #define INPUT_PTR_WIDTH 32

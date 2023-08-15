@@ -314,9 +314,12 @@ void xf_ir_bilinear_multi(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN_0>& _
                           unsigned short bformat,
                           int slice_id,
                           int stream_id,
-                          XF_TNAME(TYPE, NPPC) rgbir_ir_buffs[STREAMS][2][COLS >> XF_BITSHIFT(NPPC)]) {
+                          XF_TNAME(TYPE, NPPC) rgbir_ir_buffs[STREAMS][2][COLS >> XF_BITSHIFT(NPPC)],
+                          uint16_t slice_rows) {
 #ifndef __SYNTHESIS__
 
+    assert(((bformat == XF_BAYER_BG) || (bformat == XF_BAYER_GR)) && ("Unsupported Bayer pattern. Use one from:"
+                                                                      "XF_BAYER_BG;XF_BAYER_GR"));
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert(((NPPC == 1) || (NPPC == 2) || (NPPC == 4)) && "Only 1, 2 and 4 pixel-parallelism are supported");
     assert(
@@ -493,8 +496,11 @@ Row_Loop:
                     for (int loop = 0; loop < NPPC; loop++) {
                         candidateCol = j * NPPC - (_ECPR * NPPC) + loop;
 
+                        if ((SLICES > 1) && (slice_id != 0)) {
+                            candidateRow = slice_rows - FSIZE + i;
+                        }
                         if (bformat == XF_BAYER_GR) {
-                            candidateRow = i + 1;
+                            candidateRow = candidateRow + 1;
                             candidateCol = j * NPPC - (_ECPR * NPPC) + 2 + loop;
                         }
 
@@ -669,7 +675,8 @@ void weightedSub_multi(const char weights[4],
                        unsigned short height,
                        unsigned short bformat,
                        int slice_id,
-                       int stream_id) {
+                       int stream_id,
+                       uint16_t slice_rows) {
     ap_uint<4> wgts[4] = {0};
     for (int i = 0; i < 4; i++) {
         wgts[i] = weights[i];
@@ -684,6 +691,7 @@ void weightedSub_multi(const char weights[4],
     // and last row to be stored back
     if (SLICES > 1 && slice_id != SLICES - 1 && slice_id != 0) {
         strm_rows = height + 1;
+
     }
 
     // Last slice will have rggb produce 1 extra row
@@ -711,14 +719,17 @@ ROW_LOOP_COPYR:
 
             // For all slices excpet last slice, store
             // last row of rggb output, as IR output has 1 less row
-            if ((SLICES > 1) && (slice_id != SLICES - 1) && (row == _src1.rows - 1)) {
+
+            if ((SLICES > 1) && (slice_id != SLICES - 1) && (row == strm_rows - 1)) {
                 rgbir_wgt_buffs[stream_id][col] = _src1.read(rd_index_str++);
+
             } else {
                 XF_TNAME(INTYPE, NPPC) inVal1 = 0;
                 // Read first row from stored buffer for all
                 // slices except first
                 if ((slice_id != 0) && (row == 0)) {
                     inVal1 = rgbir_wgt_buffs[stream_id][col];
+
                 } else {
                     inVal1 = _src1.read(rd_index1++);
                 }
@@ -735,36 +746,43 @@ ROW_LOOP_COPYR:
                     XF_CTUNAME(INTYPE, NPPC) extractVal2 = inVal2.range(step * iter + step - 1, step * iter);
                     XF_CTUNAME(INTYPE, NPPC) extractVal1 = inVal1.range(step * iter + step - 1, step * iter);
                     unsigned short col_wnpc = col * NPPC + iter;
+                    unsigned short candidateRow = row;
+
+                    if ((SLICES > 1) && (slice_id != 0)) {
+                        candidateRow = slice_rows - 3 + row;
+                    }
 
                     if (bformat == XF_BAYER_GR) {
-                        if ((((row & 0x0001) == 0) && ((col_wnpc & 0x0001) == 0)) ||
-                            (((row & 0x0001) == 1) && ((col_wnpc & 0x0001) == 1))) { // G Pixel
+                        if ((((candidateRow & 0x0001) == 0) && ((col_wnpc & 0x0001) == 0)) ||
+                            (((candidateRow & 0x0001) == 1) && ((col_wnpc & 0x0001) == 1))) { // G Pixel
                             tmp1 = extractVal2 >> wgts[0]; // G has medium level of reduced weight
-                        } else if ((((row & 0x0001) == 0) && ((col_wnpc & 0x0001) == 1))) { // R Pixel
+                        } else if ((((candidateRow & 0x0001) == 0) && ((col_wnpc & 0x0001) == 1))) { // R Pixel
                             tmp1 = extractVal2 >> wgts[1]; // R has lowest level of reduced weight
-                        } else if (((((row - 1) % 4) == 0) && ((col_wnpc % 4) == 0)) ||
-                                   ((((row + 1) % 4) == 0) && (((col_wnpc - 2) % 4) == 0))) { // B Pixel
+                        } else if (((((candidateRow - 1) % 4) == 0) && ((col_wnpc % 4) == 0)) ||
+                                   ((((candidateRow + 1) % 4) == 0) && (((col_wnpc - 2) % 4) == 0))) { // B Pixel
                             tmp1 = extractVal2 >> wgts[2]; // B has low level of reduced weight
-                        } else if ((((((row - 1) % 4)) == 0) && (((col_wnpc - 2) % 4) == 0)) ||
-                                   (((((row + 1) % 4)) == 0) && (((col_wnpc) % 4) == 0))) { // Calculated B Pixel
-                            tmp1 = extractVal2 >> wgts[3]; // B has highest level of reduced weight
+                        } else if ((((((candidateRow - 1) % 4)) == 0) && (((col_wnpc - 2) % 4) == 0)) ||
+                                   (((((candidateRow + 1) % 4)) == 0) &&
+                                    (((col_wnpc) % 4) == 0))) { // Calculated B Pixel
+                            tmp1 = extractVal2 >> wgts[3];      // B has highest level of reduced weight
                         }
                         if ((wgts[0] == 6) || (wgts[1] == 6) || (wgts[2] == 6) || (wgts[3] == 6)) {
                             tmp1 = 0;
                         }
                     }
                     if (bformat == XF_BAYER_BG) {
-                        if ((((row & 0x0001) == 0) && ((col_wnpc & 0x0001) == 1)) ||
-                            (((row & 0x0001) == 1) && ((col_wnpc & 0x0001) == 0))) { // G Pixel
+                        if ((((candidateRow & 0x0001) == 0) && ((col_wnpc & 0x0001) == 1)) ||
+                            (((candidateRow & 0x0001) == 1) && ((col_wnpc & 0x0001) == 0))) { // G Pixel
                             tmp1 = extractVal2 >> wgts[0]; // G has medium level of reduced weight
-                        } else if ((((row & 0x0001) == 1) && ((col_wnpc & 0x0001) == 1))) { // R Pixel
+                        } else if ((((candidateRow & 0x0001) == 1) && ((col_wnpc & 0x0001) == 1))) { // R Pixel
                             tmp1 = extractVal2 >> wgts[1]; // R has lowest level of reduced weight
-                        } else if (((((row) % 4) == 0) && (((col_wnpc) % 4) == 0)) ||
-                                   ((((row - 2) % 4) == 0) && (((col_wnpc - 2) % 4) == 0))) { // B Pixel
+                        } else if (((((candidateRow) % 4) == 0) && (((col_wnpc) % 4) == 0)) ||
+                                   ((((candidateRow - 2) % 4) == 0) && (((col_wnpc - 2) % 4) == 0))) { // B Pixel
                             tmp1 = extractVal2 >> wgts[2]; // B has low level of reduced weight
-                        } else if ((((((row) % 4)) == 0) && (((col_wnpc - 2) % 4) == 0)) ||
-                                   (((((row - 2) % 4)) == 0) && (((col_wnpc) % 4) == 0))) { // Calculated B Pixel
-                            tmp1 = extractVal2 >> wgts[3]; // B has highest level of reduced weight
+                        } else if ((((((candidateRow) % 4)) == 0) && (((col_wnpc - 2) % 4) == 0)) ||
+                                   (((((candidateRow - 2) % 4)) == 0) &&
+                                    (((col_wnpc) % 4) == 0))) { // Calculated B Pixel
+                            tmp1 = extractVal2 >> wgts[3];      // B has highest level of reduced weight
                         }
                     }
                     tmp2 = extractVal1 - tmp1;

@@ -399,8 +399,8 @@ void ISPpipeline(unsigned short height,
         fifo_copy<OUT_TYPE, XF_LTM_T, XF_HEIGHT, XF_WIDTH, NPPCX, XF_CV_DEPTH_LTM_IN, XF_CV_DEPTH_AEC_IN>(
             ltm_in, aecin, height, width);
     } else {
-        xf::cv::xf_QuatizationDithering<OUT_TYPE, XF_LTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, NPPCX, XF_CV_DEPTH_LTM_IN,
-                                        XF_CV_DEPTH_AEC_IN>(ltm_in, aecin);
+        xf::cv::xf_QuatizationDithering<OUT_TYPE, XF_LTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, NPPCX, XF_USE_URAM,
+                                        XF_CV_DEPTH_LTM_IN, XF_CV_DEPTH_AEC_IN>(ltm_in, aecin);
     }
     xf::cv::gammacorrection<XF_LTM_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, NPPCX, XF_CV_DEPTH_AEC_IN, XF_CV_DEPTH_DST>(
         aecin, _dst, gamma_lut);

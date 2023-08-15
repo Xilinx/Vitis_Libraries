@@ -1,0 +1,24 @@
+[hls]
+
+clock=3.3
+flow_target=vivado
+syn.file=${XF_PROJ_ROOT}/L1/examples/3dlut/xf_3dlut_accel.cpp
+syn.file_cflags=${XF_PROJ_ROOT}/L1/examples/3dlut/xf_3dlut_accel.cpp, -I ${XF_PROJ_ROOT}/L1/examples/3dlut/config -I${XF_PROJ_ROOT}/L1/include -I ./ 
+syn.file_csimflags=${XF_PROJ_ROOT}/L1/examples/3dlut/xf_3dlut_accel.cpp, -I ${XF_PROJ_ROOT}/L1/examples/3dlut/config -I${XF_PROJ_ROOT}/L1/include -I ./ 
+syn.top=lut3d_accel
+tb.file=${XF_PROJ_ROOT}/L1/examples/3dlut/xf_3dlut_tb.cpp
+tb.file_cflags=${XF_PROJ_ROOT}/L1/examples/3dlut/xf_3dlut_tb.cpp, -I ${XF_PROJ_ROOT}/L1/examples/3dlut/config -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ 
+tb.file_csimflags=${XF_PROJ_ROOT}/L1/examples/3dlut/xf_3dlut_tb.cpp, -I ${XF_PROJ_ROOT}/L1/examples/3dlut/config -I${XF_PROJ_ROOT}/L1/include -I ./
+
+csim.argv= ${XF_PROJ_ROOT}/data/HD.jpg ${XF_PROJ_ROOT}/data/input-lut-33.txt
+csim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core
+
+cosim.argv= ${XF_PROJ_ROOT}/data/HD.jpg ${XF_PROJ_ROOT}/data/input-lut-33.txt
+cosim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog
+
+

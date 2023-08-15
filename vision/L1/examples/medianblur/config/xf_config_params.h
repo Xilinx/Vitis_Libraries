@@ -35,7 +35,7 @@
 
 #define RGB 0
 #define GRAY 1
-
+#define XF_USE_URAM 0
 #define NPPCX XF_NPPC1
 #define IN_TYPE XF_8UC1
 #define OUT_TYPE XF_8UC1

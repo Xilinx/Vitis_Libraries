@@ -163,6 +163,7 @@ template <int SRC_ROWS,
           int PLANES,
           int DEPTH,
           int NPC,
+          bool USE_URAM = false,
           int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH,
@@ -177,8 +178,30 @@ void xFResizeAreaUpScale(xf::cv::Mat<DEPTH, SRC_ROWS, SRC_COLS, NPC, XFCVDEPTH_I
     XF_TNAME(DEPTH, NPC) lbuf_in1[DEPTH_LBUF];        // input buffers (ping pong)
     XF_TNAME(DEPTH, NPC) lbuf_in2[DEPTH_LBUF];        // input buffers (ping pong)
     ap_uint<13> Hoffset[DST_COLS], Voffset[DST_ROWS]; // offset buffers which indicate from where the data is to be read
+
     uint32_t Hweight[DST_COLS],
         Vweight[DST_ROWS + 1]; // buffers which hold the weights for each corresponding input pixels
+
+    if (USE_URAM) {
+// clang-format off
+        #pragma HLS bind_storage variable=Hoffset type=RAM_T2P impl=URAM
+        #pragma HLS bind_storage variable=Voffset type=RAM_T2P impl=URAM
+        #pragma HLS bind_storage variable=Hweight type=RAM_T2P impl=URAM
+        #pragma HLS bind_storage variable=lbuf_in0 type=RAM_T2P impl=URAM
+        #pragma HLS bind_storage variable=lbuf_in1 type=RAM_T2P impl=URAM
+        #pragma HLS bind_storage variable=lbuf_in2 type=RAM_T2P impl=URAM
+        // clang-format on
+    } else {
+// clang-format off
+        #pragma HLS bind_storage variable=Hoffset type=RAM_T2P impl=BRAM
+        #pragma HLS bind_storage variable=Voffset type=RAM_T2P impl=BRAM
+        #pragma HLS bind_storage variable=Hweight type=RAM_T2P impl=BRAM
+        #pragma HLS bind_storage variable=lbuf_in0 type=RAM_T2P impl=BRAM
+        #pragma HLS bind_storage variable=lbuf_in1 type=RAM_T2P impl=BRAM
+        #pragma HLS bind_storage variable=lbuf_in2 type=RAM_T2P impl=BRAM
+        // clang-format on
+    }
+
     if (NPC == XF_NPPC8) {
 // clang-format off
         #pragma HLS ARRAY_PARTITION variable=Hoffset cyclic factor=8 dim=1
@@ -219,6 +242,18 @@ void xFResizeAreaUpScale(xf::cv::Mat<DEPTH, SRC_ROWS, SRC_COLS, NPC, XFCVDEPTH_I
                                        #pragma HLS ARRAY_PARTITION variable=D0 dim=1
                                        #pragma HLS ARRAY_PARTITION variable=D1 dim=1
                                        // clang-format on
+
+    if (USE_URAM) {
+// clang-format off
+        #pragma HLS bind_storage variable=D0 type=RAM_T2P impl=URAM
+        #pragma HLS bind_storage variable=D1 type=RAM_T2P impl=URAM
+        // clang-format on
+    } else {
+// clang-format off
+        #pragma HLS bind_storage variable=D0 type=RAM_T2P impl=BRAM
+        #pragma HLS bind_storage variable=D1 type=RAM_T2P impl=BRAM
+        // clang-format on
+    }
 
 //	Xscale_float = (width<<XF_BITSHIFT(NPC))/(float)(out_width<<XF_BITSHIFT(NPC));
 //	Yscale_float = height/(float)out_height;

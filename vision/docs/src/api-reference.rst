@@ -15859,7 +15859,7 @@ up-scaling.
 
 .. code:: c
 
-   template<int INTERPOLATION_TYPE, int TYPE, int SRC_ROWS, int SRC_COLS, int DST_ROWS, int DST_COLS, int NPC, int MAX_DOWN_SCALE, int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT, int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT> 
+   template<int INTERPOLATION_TYPE, int TYPE, int SRC_ROWS, int SRC_COLS, int DST_ROWS, int DST_COLS, int NPC, bool USE_URAM, int MAX_DOWN_SCALE, int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT, int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT> 
    void resize (xf::cv::Mat<TYPE, SRC_ROWS, SRC_COLS, NPC, XFCVDEPTH_IN> & _src, xf::cv::Mat<TYPE, DST_ROWS, DST_COLS, NPC, XFCVDEPTH_OUT> & _dst)
 
 
@@ -15897,8 +15897,9 @@ The following table describes the template and the function parameters.
    |              | kernel would be built (must be a multiple of 8).      |
    +--------------+-------------------------------------------------------+
    | NPC          | Number of pixels to be processed per cycle. Possible  |
-   |              | options are XF_NPPC1 (1 pixel per cycle) and XF_NPPC8 |
-   |              | (8 pixel per cycle).                                  |
+   |              | options are NPPC1, NPPC2, NPPC4, and NPPC8            |
+   +--------------+-------------------------------------------------------+
+   | USE_URAM     | Enable to map storage structures to UltraRAM.         |   
    +--------------+-------------------------------------------------------+
    | MAX_DOWN_SCA | Set to 2 for all 1 pixel modes, and for upscale in x  |
    | LE           | direction. When down scaling in x direction in        |

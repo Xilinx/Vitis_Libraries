@@ -275,6 +275,7 @@ template <int SRC_TYPE,
           int INHEIGHT,
           int INWIDTH,
           int NPPC,
+          bool USE_URAM = false,
           int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
           int OUTHEIGHT,
@@ -331,9 +332,21 @@ void resizeNNBilinear(xf::cv::Mat<SRC_TYPE, INHEIGHT, INWIDTH, NPPC, XFCVDEPTH_I
     scaleMult<NPPC, SCALE_WIDTH, SCALE_INT, COMP_INDEX_WIDTH, COMP_INDEX_INT>(scalex, scaleXParallel);
 
     XF_TNAME(SRC_TYPE, NPPC) line_buffer[3][BUFFER_DUP_FACTOR][(INWIDTH + NPPC - 1) >> (XF_BITSHIFT(NPPC))];
+    // clang-format off
+
+    if (USE_URAM) {
 // clang-format off
-    #pragma HLS ARRAY_PARTITION variable=line_buffer complete dim=1
-    #pragma HLS ARRAY_PARTITION variable=line_buffer complete dim=2
+        #pragma HLS bind_storage variable=line_buffer type=RAM_T2P impl=URAM
+        // clang-format on
+    } else {
+// clang-format off
+        #pragma HLS bind_storage variable=line_buffer type=RAM_T2P impl=BRAM
+        // clang-format on
+    }
+
+#pragma HLS ARRAY_PARTITION variable = line_buffer complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = line_buffer complete dim = 2
+
     // clang-format on
     int input_read_pointer = 0;
     int read_rows_count = 0;

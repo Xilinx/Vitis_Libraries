@@ -59,7 +59,7 @@ apply_row:
     apply_col:
         for (int fc = 0; fc < F_COLS; fc++) {
             //				#pragma HLS UNROLL
-            if (wgt[fr][fc] > 0) {
+            if (wgt[fr][fc] >= 0) {
                 if (wgt[fr][fc] == 7) { // wgt is -1
                     partial_sum[fr] -= patch[fr][fc + loop];
                 } else if (wgt[fr][fc] == 6) { // wgt is 0
@@ -99,7 +99,9 @@ void coreProcess(XF_DTUNAME(TYPE, NPPC) imgblock[5][BSIZE1],
                  int loop) {
     if (((((i - 2) % 4) == 0) && ((j % 4) == 0)) || (((i % 4) == 0) && (((j - 2) % 4) == 0))) {
         apply_filter<TYPE, NPPC, BSIZE1>(imgblock, B_at_R_wgts, loop, out_pix); // B at R
+
     } else if (((i - 1) % 4) == 0) { // BG Mode - This is odd row, IR location. Compute R here with 5x5 filter
+
         if (((j - 1) % 4) == 0) {
             apply_filter<TYPE, NPPC, BSIZE1>(imgblock, R_IR_C2_wgts, loop,
                                              out_pix); // B at IR - Constellation-1 (Red on the top left)
@@ -108,6 +110,7 @@ void coreProcess(XF_DTUNAME(TYPE, NPPC) imgblock[5][BSIZE1],
                                              out_pix); // B at IR - Constellation-2 (Blue on the top left)
         }
     } else if (((i + 1) % 4) == 0) { // BG Mode - This is odd row, IR location. Compute R here with 5x5 filter
+
         if (((j - 1) % 4) == 0) {
             apply_filter<TYPE, NPPC, BSIZE1>(imgblock, R_IR_C1_wgts, loop,
                                              out_pix); // B at IR - Constellation-1 (Red on the top left)
@@ -440,9 +443,12 @@ void xf_form_mosaic_multi(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN>& _sr
                           int stream_id,
                           xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT_0>& _dst_rggb,
                           xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT_1>& _half_ir,
-                          XF_TNAME(TYPE, NPPC) rgbir_buffs[STREAMS][4][COLS >> XF_BITSHIFT(NPPC)]) {
+                          XF_TNAME(TYPE, NPPC) rgbir_buffs[STREAMS][4][COLS >> XF_BITSHIFT(NPPC)],
+                          uint16_t slice_rows) {
 #ifndef __SYNTHESIS__
 
+    assert(((bformat == XF_BAYER_BG) || (bformat == XF_BAYER_GR)) && ("Unsupported Bayer pattern. Use one from: "
+                                                                      "XF_BAYER_BG;XF_BAYER_GR"));
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert(((NPPC == 1) || (NPPC == 2) || (NPPC == 4)) && "Only 1, 2 and 4 pixel-parallelism are supported");
     assert(
@@ -509,6 +515,7 @@ FILTER2_ROW:
 
     int lineStore = 3, read_index = 0, write_index = 0, write_index_ir = 0;
     int demo_row_cnt_rd = 0, demo_row_cnt_wr = 0, demo_col_cnt_rd = 0, demo_col_cnt_wr = 0;
+
 LineBuffer:
     for (int i = 0; i < 2; i++) {
 // clang-format off
@@ -608,14 +615,17 @@ Row_Loop:
             // clang-format on
 
             unsigned short candidateRow = i;
+
             unsigned short candidateCol = 0;
 
             if (slice_id == 0) { // First slice
                 if ((i < _src.rows - 2) && (j < ((_src.cols) >> XF_BITSHIFT(NPPC)))) {
                     tmp = _src.read(read_index++); // Reading 5th row element
                     // Condition when last 4 rows need to be stored for next slice
-                    if ((i > _src.rows - 7) && (j < ((_src.cols) >> XF_BITSHIFT(NPPC)))) {
+
+                    if ((i >= _src.rows - 6) && (j < ((_src.cols) >> XF_BITSHIFT(NPPC)))) {
                         rgbir_buffs[stream_id][demo_row_cnt_wr][demo_col_cnt_wr++] = tmp;
+
                         if (demo_col_cnt_wr == ((_src.cols) >> XF_BITSHIFT(NPPC))) {
                             demo_col_cnt_wr = 0;
                             demo_row_cnt_wr++;
@@ -630,6 +640,7 @@ Row_Loop:
                     // Condition when last 4 rows need to be stored for next slice
                     if (i >= _src.rows - 4) {
                         rgbir_buffs[stream_id][demo_row_cnt_wr][demo_col_cnt_wr++] = tmp;
+
                         if (demo_col_cnt_wr == ((_src.cols) >> XF_BITSHIFT(NPPC))) {
                             demo_col_cnt_wr = 0;
                             demo_row_cnt_wr++;
@@ -641,6 +652,7 @@ Row_Loop:
             } else { //	Last slice
                 if ((i < _src.rows) && (j < ((_src.cols) >> XF_BITSHIFT(NPPC)))) {
                     tmp = _src.read(read_index++);
+
                 } else {
                     tmp = 0;
                 }
@@ -670,14 +682,17 @@ Row_Loop:
                     for (int loop = 0; loop < NPPC; loop++) {
                         candidateCol = j * NPPC - (_ECPR * NPPC) + loop;
 
-                        if (bformat == XF_BAYER_GR) {
-                            candidateRow = i + 1;
-                            candidateCol = j * NPPC - (_ECPR * NPPC) + 2 + loop;
-                        }
-
                         XF_DTUNAME(TYPE, NPPC) out_pix = imgblock[FSIZE1 >> 1][(FSIZE1 >> 1) + loop];
                         XF_DTUNAME(TYPE, NPPC) ir_out_pix = IR_imgblock[FSIZE2 >> 1][(FSIZE2 >> 1) + loop];
 
+                        if ((SLICES > 1) && (slice_id != 0)) {
+                            candidateRow = slice_rows - (FSIZE1 >> 1) + i;
+                        }
+                        if (bformat == XF_BAYER_GR) {
+                            candidateRow = candidateRow + 1;
+
+                            candidateCol = j * NPPC - (_ECPR * NPPC) + 2 + loop;
+                        }
                         coreProcess<__BWIDTH, __IR_BWIDTH, TYPE, ROWS, COLS, NPPC>(
                             imgblock, IR_imgblock, candidateRow, candidateCol, B_at_R_wgts_loc, R_IR_C1_wgts_loc,
                             R_IR_C2_wgts_loc, IR_at_B_wgts_loc, IR_at_R_wgts_loc, out_pix, ir_out_pix, loop);
@@ -835,9 +850,12 @@ void rgbir2bayer_multi(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN>& _src,
                        xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT_1>& _dst_ir,
                        XF_TNAME(TYPE, NPPC) rgbir_buffs[STREAMS][4][COLS >> XF_BITSHIFT(NPPC)],
                        XF_TNAME(TYPE, NPPC) rgbir_ir_buffs[STREAMS][2][COLS >> XF_BITSHIFT(NPPC)],
-                       XF_TNAME(TYPE, NPPC) rgbir_wgt_buffs[STREAMS][COLS >> XF_BITSHIFT(NPPC)]) {
+                       XF_TNAME(TYPE, NPPC) rgbir_wgt_buffs[STREAMS][COLS >> XF_BITSHIFT(NPPC)],
+                       uint16_t slice_rows) {
 #ifndef __SYNTHESIS__
 
+    assert(((bformat == XF_BAYER_BG) || (bformat == XF_BAYER_GR)) && ("Unsupported Bayer pattern. Use one from: "
+                                                                      "XF_BAYER_BG;XF_BAYER_GR"));
     assert(((_src.rows <= ROWS) && (_src.cols <= COLS)) && "ROWS and COLS should be greater than input image");
     assert(((NPPC == 1) || (NPPC == 2) || (NPPC == 4)) && "Only 1, 2 and 4 pixel-parallelism are supported");
     assert(
@@ -846,48 +864,45 @@ void rgbir2bayer_multi(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN>& _src,
 #endif
 
 #pragma HLS DATAFLOW
-    xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT_2> rggbOutput(_src.rows, _src.cols);
-    xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT_1> halfIrOutput(_src.rows, _src.cols);
-    xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT_1> fullIrOutput(_src.rows, _src.cols);
-    xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT_1> fullIrOutput_copy1(_src.rows, _src.cols);
 
-    unsigned short height = _src.rows;
+    unsigned short rggbout_height, halfirout_height, fullirout_height;
+
     if (SLICES > 1) {
         if (slice_id == 0) {
-            rggbOutput.rows = _src.rows - 2;
-            halfIrOutput.rows = _src.rows - 2;
-            fullIrOutput.rows = halfIrOutput.rows - 1;
-            /*    	fullIrOutput_copy1.rows = fullIrOutput.rows;
-                    _dst_ir.rows = fullIrOutput.rows;
-                    _dst_rggb.rows = fullIrOutput.rows;
-                    height = fullIrOutput_copy1.rows;*/
+            rggbout_height = _src.rows - 2;
+            halfirout_height = _src.rows - 2;
+            fullirout_height = halfirout_height - 1;
+
         } else if (slice_id == SLICES - 1) {
-            rggbOutput.rows = _src.rows + 2;
-            halfIrOutput.rows = _src.rows + 2;
-            fullIrOutput.rows = halfIrOutput.rows + 1;
-        } /*
-         else{
-             rggbOutput.rows = _src.rows - 2;
-             halfIrOutput.rows = _src.rows - 2;
-             fullIrOutput.rows = halfIrOutput.rows - 1;
-         }*/
-        fullIrOutput_copy1.rows = fullIrOutput.rows;
-        _dst_ir.rows = fullIrOutput.rows;
-        _dst_rggb.rows = fullIrOutput.rows;
-        height = rggbOutput.rows;
+            rggbout_height = _src.rows + 2;
+            halfirout_height = _src.rows + 2;
+            fullirout_height = halfirout_height + 1;
+        }
     }
+    if (((SLICES > 1) && (slice_id != 0) && (slice_id != SLICES - 1)) || (SLICES == 1)) {
+        rggbout_height = _src.rows;
+        halfirout_height = _src.rows;
+        fullirout_height = _src.rows;
+    }
+
+    xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT_2> rggbOutput(rggbout_height, _src.cols);
+    xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT_1> halfIrOutput(halfirout_height, _src.cols);
+    xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT_1> fullIrOutput(fullirout_height, _src.cols);
+    xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT_1> fullIrOutput_copy1(fullirout_height, _src.cols);
 
     xf_form_mosaic_multi<FSIZE1, FSIZE2, TYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN, XFCVDEPTH_OUT_2, XFCVDEPTH_OUT_1,
                          BORDER_T, USE_URAM, STREAMS, SLICES>(_src, R_IR_C1_wgts, R_IR_C2_wgts, B_at_R_wgts,
                                                               IR_at_R_wgts, IR_at_B_wgts, bformat, slice_id, stream_id,
-                                                              rggbOutput, halfIrOutput, rgbir_buffs);
+                                                              rggbOutput, halfIrOutput, rgbir_buffs, slice_rows);
 
     xf::cv::xf_ir_bilinear_multi<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT_1, XFCVDEPTH_OUT_1, USE_URAM, STREAMS, SLICES>(
-        halfIrOutput, fullIrOutput, bformat, slice_id, stream_id, rgbir_ir_buffs);
+        halfIrOutput, fullIrOutput, bformat, slice_id, stream_id, rgbir_ir_buffs, slice_rows);
+
     xf::cv::duplicateMat(fullIrOutput, fullIrOutput_copy1, _dst_ir);
+
     xf::cv::weightedSub_multi<TYPE, ROWS, COLS, NPPC, STREAMS, SLICES, XFCVDEPTH_OUT_2, XFCVDEPTH_OUT_1,
                               XFCVDEPTH_OUT_0>(sub_wgts, rggbOutput, fullIrOutput_copy1, _dst_rggb, rgbir_wgt_buffs,
-                                               height, bformat, slice_id, stream_id);
+                                               rggbout_height, bformat, slice_id, stream_id, slice_rows);
 }
 
 template <int FSIZE1 = 5,
@@ -919,7 +934,8 @@ void rgbir2bayer_multi_wrap(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN>& _
                             XF_TNAME(TYPE, NPPC) rgbir_ir_buffs[STREAMS][2][COLS >> XF_BITSHIFT(NPPC)],
                             XF_TNAME(TYPE, NPPC) rgbir_wgt_buffs[STREAMS][COLS >> XF_BITSHIFT(NPPC)],
                             int strm_id,
-                            int slice_id) {
+                            int slice_id,
+                            uint16_t slice_rows) {
 // clang-format off
 #pragma HLS ARRAY_PARTITION variable=R_IR_C1_wgts dim=1 complete 
 #pragma HLS ARRAY_PARTITION variable=R_IR_C2_wgts dim=1 complete   
@@ -933,10 +949,13 @@ void rgbir2bayer_multi_wrap(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN>& _
 #pragma HLS ARRAY_PARTITION variable=bformat dim=1 complete
 
    // clang-format on 
-   
+  
    rgbir2bayer_multi<FSIZE1, FSIZE2, TYPE, ROWS, COLS, NPPC, BORDER_T, USE_URAM, STREAMS, SLICES, XFCVDEPTH_IN, XFCVDEPTH_OUT_0, 
          XFCVDEPTH_OUT_1, XFCVDEPTH_OUT_2>(_src, R_IR_C1_wgts[strm_id], R_IR_C2_wgts[strm_id], B_at_R_wgts[strm_id], 
-            IR_at_R_wgts[strm_id], IR_at_B_wgts[strm_id], sub_wgts[strm_id], bformat[strm_id], slice_id, strm_id, _dst_rggb, _dst_ir, rgbir_buffs, rgbir_ir_buffs, rgbir_wgt_buffs);
+            IR_at_R_wgts[strm_id], IR_at_B_wgts[strm_id], sub_wgts[strm_id], bformat[strm_id], slice_id, strm_id, 
+            _dst_rggb, _dst_ir, rgbir_buffs, rgbir_ir_buffs, rgbir_wgt_buffs, slice_rows);
+         
+   
 }         
 
 } // namespace cv

@@ -32,6 +32,7 @@ template <int INTERPOLATION_TYPE,
           int DST_ROWS,
           int DST_COLS,
           int NPC,
+          bool USE_URAM = false,
           int MAX_DOWN_SCALE,
           int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
@@ -57,18 +58,18 @@ void resize(xf::cv::Mat<TYPE, SRC_ROWS, SRC_COLS, NPC, XFCVDEPTH_IN>& _src,
                "& output image-150x80 is not supported");
 
         if ((_src.rows < _dst.rows) && (_src.cols < _dst.cols)) {
-            xFResizeAreaUpScale<SRC_ROWS, SRC_COLS, XF_CHANNELS(TYPE, NPC), TYPE, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT,
-                                XF_WORDWIDTH(TYPE, NPC), DST_ROWS, DST_COLS, (SRC_COLS >> XF_BITSHIFT(NPC)),
-                                (DST_COLS >> XF_BITSHIFT(NPC))>(_src, _dst);
+            xFResizeAreaUpScale<SRC_ROWS, SRC_COLS, XF_CHANNELS(TYPE, NPC), TYPE, NPC, USE_URAM, XFCVDEPTH_IN,
+                                XFCVDEPTH_OUT, XF_WORDWIDTH(TYPE, NPC), DST_ROWS, DST_COLS,
+                                (SRC_COLS >> XF_BITSHIFT(NPC)), (DST_COLS >> XF_BITSHIFT(NPC))>(_src, _dst);
         } else if ((_src.rows >= _dst.rows) && (_src.cols >= _dst.cols)) {
-            xFResizeAreaDownScale<SRC_ROWS, SRC_COLS, XF_CHANNELS(TYPE, NPC), TYPE, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT,
-                                  XF_WORDWIDTH(TYPE, NPC), DST_ROWS, DST_COLS, (SRC_COLS >> XF_BITSHIFT(NPC)),
-                                  (DST_COLS >> XF_BITSHIFT(NPC))>(_src, _dst);
+            xFResizeAreaDownScale<SRC_ROWS, SRC_COLS, XF_CHANNELS(TYPE, NPC), TYPE, NPC, USE_URAM, XFCVDEPTH_IN,
+                                  XFCVDEPTH_OUT, XF_WORDWIDTH(TYPE, NPC), DST_ROWS, DST_COLS,
+                                  (SRC_COLS >> XF_BITSHIFT(NPC)), (DST_COLS >> XF_BITSHIFT(NPC))>(_src, _dst);
         }
 
         return;
     } else {
-        resizeNNBilinear<TYPE, SRC_ROWS, SRC_COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT, DST_ROWS, DST_COLS,
+        resizeNNBilinear<TYPE, SRC_ROWS, SRC_COLS, NPC, USE_URAM, XFCVDEPTH_IN, XFCVDEPTH_OUT, DST_ROWS, DST_COLS,
                          INTERPOLATION_TYPE, MAX_DOWN_SCALE>(_src, _dst);
     }
 }

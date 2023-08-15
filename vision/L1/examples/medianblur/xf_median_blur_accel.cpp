@@ -38,7 +38,7 @@ void median_blur_accel(ap_uint<INPUT_PTR_WIDTH>* img_in, int rows, int cols, ap_
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN>(img_in, imgInput);
 
     // Run xfOpenCV kernel:
-    xf::cv::medianBlur<WINDOW_SIZE, XF_BORDER_REPLICATE, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN,
+    xf::cv::medianBlur<WINDOW_SIZE, XF_BORDER_REPLICATE, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_USE_URAM, XF_CV_DEPTH_IN,
                        XF_CV_DEPTH_OUT>(imgInput, imgOutput);
 
     // Convert _dst xf::cv::Mat object to output array:

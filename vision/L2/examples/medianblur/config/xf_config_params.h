@@ -39,7 +39,7 @@
 #define NPPCX XF_NPPC1
 #define IN_TYPE XF_8UC1
 #define OUT_TYPE XF_8UC1
-
+#define XF_USE_URAM 0
 #define CV_IN_TYPE CV_8UC1
 #define CV_OUT_TYPE CV_8UC1
 

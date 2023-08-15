@@ -198,6 +198,75 @@ static void remapPreproc(::cv::Mat& mapy, int& num_of_lines) {
     num_of_lines = 2 * max;
     std::cout << "\tNumber of lines to be stored = " << num_of_lines << std::endl;
 }
+
+static void analyzeTransformation_matrix(
+    float transform_matrix[9], int src_points[8], int transform_type, int rows, int cols) {
+    float tran1 = 0.0f, tran2 = 0.0f, tran3 = 0.0f, tran4 = 0.0f, tran5 = 0.0f;
+    int dst[4];
+    // std::cout<<rows<<"  "<<cols<<std::endl;
+    for (int x = 0; x < rows; x++) {
+        for (int y = 0; y < cols; y++) {
+            tran1 = (transform_matrix[0] * x) + (transform_matrix[1] * y) + transform_matrix[2];
+            tran2 = (transform_matrix[3] * x) + (transform_matrix[4] * y) + transform_matrix[5];
+            if (transform_type == 1) {
+                tran3 = (transform_matrix[6] * x) + (transform_matrix[7] * y) + transform_matrix[8];
+            } else {
+                tran3 = 1;
+            }
+            tran4 = tran1 / tran3;
+            tran5 = tran2 / tran3;
+            if (round(tran4) == src_points[0] && round(tran5) == src_points[1]) {
+                dst[0] = y;
+                // std::cout<<"dst_point a ="<< x <<","<<dst[0]<<std::endl;
+            }
+            if (round(tran4) == src_points[2] && round(tran5) == src_points[3]) {
+                dst[1] = y;
+                // std::cout<<"dst_point b ="<< x <<","<<dst[1]<<std::endl;
+            }
+            if (transform_type == 1) {
+                if (round(tran4) == src_points[4] && round(tran5) == src_points[5]) {
+                    dst[2] = y;
+                    // std::cout<<"dst_point c ="<< x <<","<<dst[2]<<std::endl;
+                }
+                if (round(tran4) == src_points[6] && round(tran5) == src_points[7]) {
+                    dst[3] = y;
+                    // std::cout<<"dst_point d ="<< x <<","<<dst[3]<<std::endl;
+                }
+            } else {
+                if (round(tran4) == src_points[4] && round(tran5) == src_points[5]) {
+                    dst[3] = y;
+                    // std::cout<<"dst_point d ="<< x <<","<<dst[3]<<std::endl;
+                }
+            }
+        }
+    }
+    if (transform_type == 0) {
+        dst[2] = dst[1] + (dst[3] - dst[0]);
+    }
+    int top_pix_max = 0, btm_pix_min = 0;
+    if (dst[0] >= dst[1]) {
+        top_pix_max = dst[0];
+    } else if (dst[0] < dst[1]) {
+        top_pix_max = dst[1];
+    }
+
+    if (dst[2] >= dst[3]) {
+        btm_pix_min = src_points[7] - dst[3];
+    } else if (dst[2] < dst[3]) {
+        btm_pix_min = src_points[5] - dst[2];
+    }
+
+    int min_store_rows = 0, min_start_proc = 0;
+    if (((top_pix_max + btm_pix_min) % 4) != 0) {
+        min_store_rows = (top_pix_max + btm_pix_min) + (4 - ((top_pix_max + btm_pix_min) % 4));
+    } else {
+        min_store_rows = (top_pix_max + btm_pix_min);
+    }
+    min_start_proc = btm_pix_min;
+    std::cout << "NUM_STORE_ROWS should be set to " << min_store_rows << " in  xf_config_params.h " << std::endl;
+    std::cout << "START_PROC should be set to " << min_start_proc << " in  xf_config_params.h " << std::endl;
+    // assert((NUM_STORE_ROWS >= min_store_rows) && (START_PROC >= min_start_proc));
+}
 } // namespace cv
 } // namespace xf
 

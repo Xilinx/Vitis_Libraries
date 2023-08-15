@@ -1,0 +1,24 @@
+[hls]
+
+clock=3.3
+flow_target=vivado
+syn.file=${XF_PROJ_ROOT}/L1/examples/accumulate/xf_rgbir_accel.cpp
+syn.file_cflags=${XF_PROJ_ROOT}/L1/examples/accumulate/xf_rgbir_accel.cpp, -I ${XF_PROJ_ROOT}/L1/tests/rgbirbayer/rgbirbayer_NPPC1_8UC1_8UC1 -I${XF_PROJ_ROOT}/L1/include -I ./ 
+syn.file_csimflags=${XF_PROJ_ROOT}/L1/examples/accumulate/xf_rgbir_accel.cpp, -I ${XF_PROJ_ROOT}/L1/tests/rgbirbayer/rgbirbayer_NPPC1_8UC1_8UC1 -I${XF_PROJ_ROOT}/L1/include -I ./ 
+syn.top=rgbir_accel
+tb.file=${XF_PROJ_ROOT}/L1/examples/accumulate/xf_rgbir_tb.cpp
+tb.file_cflags=${XF_PROJ_ROOT}/L1/examples/accumulate/xf_rgbir_tb.cpp, -I ${XF_PROJ_ROOT}/L1/tests/rgbirbayer/rgbirbayer_NPPC1_8UC1_8UC1 -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ 
+tb.file_csimflags=${XF_PROJ_ROOT}/L1/examples/accumulate/xf_rgbir_tb.cpp, -I ${XF_PROJ_ROOT}/L1/tests/rgbirbayer/rgbirbayer_NPPC1_8UC1_8UC1 -I${XF_PROJ_ROOT}/L1/include -I ./
+
+csim.argv= 
+csim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core
+
+cosim.argv= 
+cosim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog
+
+

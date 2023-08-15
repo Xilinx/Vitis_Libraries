@@ -36,7 +36,7 @@
 #define MAXREPRESENTEDVALUE 65536
 
 #define NPPCX XF_NPPC1
-
+#define XF_USE_URAM 0
 #define IN_TYPE XF_16UC3
 #define OUT_TYPE XF_8UC3
 

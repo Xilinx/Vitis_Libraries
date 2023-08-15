@@ -71,12 +71,12 @@ void blobfromimage_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,  // Input image poin
                                                                                       in_img_linestride);
 #if BGR2RGB
     xf::cv::bgr2rgb<IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPC, XF_CV_DEPTH_IN, XF_CV_DEPTH_CH_SWAP>(imgInput, ch_swap_mat);
-    xf::cv::resize<INTERPOLATION, IN_TYPE, HEIGHT, WIDTH, NEWHEIGHT, NEWWIDTH, NPC, MAXDOWNSCALE, XF_CV_DEPTH_CH_SWAP,
-                   XF_CV_DEPTH_RESIZE_OUT>(ch_swap_mat, resize_out_mat);
+    xf::cv::resize<INTERPOLATION, IN_TYPE, HEIGHT, WIDTH, NEWHEIGHT, NEWWIDTH, NPC, XF_USE_URAM, MAXDOWNSCALE,
+                   XF_CV_DEPTH_CH_SWAP, XF_CV_DEPTH_RESIZE_OUT>(ch_swap_mat, resize_out_mat);
 #else
 
-    xf::cv::resize<INTERPOLATION, IN_TYPE, HEIGHT, WIDTH, NEWHEIGHT, NEWWIDTH, NPC, MAXDOWNSCALE, XF_CV_DEPTH_IN,
-                   XF_CV_DEPTH_RESIZE_OUT>(imgInput, resize_out_mat);
+    xf::cv::resize<INTERPOLATION, IN_TYPE, HEIGHT, WIDTH, NEWHEIGHT, NEWWIDTH, NPC, XF_USE_URAM, MAXDOWNSCALE,
+                   XF_CV_DEPTH_IN, XF_CV_DEPTH_RESIZE_OUT>(imgInput, resize_out_mat);
 #endif
 
 #if CROP

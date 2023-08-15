@@ -46,6 +46,8 @@
 #define IN_TYPE XF_8UC3
 #define OUT_TYPE XF_8UC3
 
+#define XF_USE_URAM 0
+
 /* Input/output port width */
 #define INPUT_PTR_WIDTH 128
 #define OUTPUT_PTR_WIDTH 128

@@ -45,7 +45,7 @@ void resize_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     // clang-format on
 
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN>(img_inp, in_mat);
-    xf::cv::resize<INTERPOLATION, IN_TYPE, HEIGHT, WIDTH, NEWHEIGHT, NEWWIDTH, NPPCX, MAXDOWNSCALE, XF_CV_DEPTH_IN,
-                   XF_CV_DEPTH_OUT>(in_mat, out_mat);
+    xf::cv::resize<INTERPOLATION, IN_TYPE, HEIGHT, WIDTH, NEWHEIGHT, NEWWIDTH, NPPCX, XF_USE_URAM, MAXDOWNSCALE,
+                   XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(in_mat, out_mat);
     xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, NEWHEIGHT, NEWWIDTH, NPPCX, XF_CV_DEPTH_OUT>(out_mat, img_out);
 }

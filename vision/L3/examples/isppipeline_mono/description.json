@@ -7,6 +7,7 @@
     "platform_allowlist": [
         "u200", 
         "zcu102", 
+	"vck190",
         "zcu104", 
         "u50"
     ], 
@@ -27,6 +28,14 @@
                         "$(OPENCV_LIB)"
                     ]
                 }
+            },
+            "v++": {
+                "linker": {
+                    "ldclflags": [
+                        "--vivado.impl.strategies Performance_Explore"
+                    ]
+                }
+
             }
         }, 
         "u50": {
@@ -67,6 +76,14 @@
                         "$(OPENCV_LIB)"
                     ]
                 }
+            },
+            "v++": {
+                "linker": {
+                    "ldclflags": [
+                        "--vivado.impl.strategies Performance_Explore"
+                    ]
+                }
+
             }
         }, 
         "zcu104": {
@@ -164,10 +181,10 @@
                 {
                     "name": "ISPPipeline_accel", 
                     "location": "LIB_DIR/L3/examples/isppipeline_mono/xf_isp_accel.cpp",
-                    "frequency": 200.0
+                    "frequency": 300.0
                 }
             ],
-            "frequency": 200.0
+            "frequency": 300.0
         }
     ], 
     "check_env": [

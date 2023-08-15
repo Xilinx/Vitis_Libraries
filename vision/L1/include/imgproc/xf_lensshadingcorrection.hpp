@@ -147,7 +147,8 @@ template <int SRC_T,
           int COLS,
           int NPC = 1,
           int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
-          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
+          int SLICES = 2>
 void Lscdistancebased_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
                             xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& dst,
                             unsigned short height,
@@ -157,7 +158,6 @@ void Lscdistancebased_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& s
     int rows = src.rows;
     int cols = src.cols >> XF_BITSHIFT(NPC);
     unsigned short org_rows = height;
-
     unsigned short org_cols = width;
 
     assert(((rows <= ROWS) && (cols <= COLS)) && "ROWS and COLS should be greater than input image");
@@ -187,9 +187,12 @@ void Lscdistancebased_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& s
 #pragma HLS pipeline II=1
 #pragma HLS LOOP_FLATTEN OFF
             // clang-format on
-            // float y_dist = center_pixel_pos_y - i;
 
             float y_dist = center_pixel_pos_y - i - slc_id * strm_row;
+
+            if ((SLICES > 1) && (slc_id != 0)) {
+                y_dist = center_pixel_pos_y - i - ((slc_id * strm_row) - 5);
+            }
             float y_dist_2 = y_dist * y_dist;
 
             in_pix = src.read(i * (cols) + j);

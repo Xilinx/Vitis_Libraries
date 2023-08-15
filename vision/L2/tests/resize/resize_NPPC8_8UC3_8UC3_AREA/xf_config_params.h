@@ -58,6 +58,8 @@
 // 1 - Bilinear Interpolation
 // 2 - AREA Interpolation
 
+#define XF_USE_URAM 1
+
 // port widths
 #define INPUT_PTR_WIDTH 256
 #define OUTPUT_PTR_WIDTH 256

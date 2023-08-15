@@ -171,7 +171,7 @@ void function_aec(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_rggb_out_aec>& r
                   xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_aec_out>& aec_out,
                   unsigned short height,
                   unsigned short width,
-                  uint16_t aec_pawb,
+                  float aec_pawb,
                   uint32_t aec_hist0[AEC_HIST_SIZE],
                   uint32_t aec_hist1[AEC_HIST_SIZE]) {
 // clang-format off
@@ -230,8 +230,8 @@ void function_tm(xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_ltm_in>& ltm_in,
         xf::cv::gtm<OUT_TYPE, XF_GTM_T, IN_TYPE, SIN_CHANNEL_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XFCVDEPTH_ltm_in,
                     XFCVDEPTH_aecin>(ltm_in, aecin, mean1, mean2, L_max1, L_max2, L_min1, L_min2, c1, c2);
     } else if (USE_QND) {
-        xf::cv::xf_QuatizationDithering<OUT_TYPE, XF_GTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPCX, XFCVDEPTH_ltm_in,
-                                        XFCVDEPTH_aecin>(ltm_in, aecin);
+        xf::cv::xf_QuatizationDithering<OUT_TYPE, XF_GTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPCX, XF_USE_URAM,
+                                        XFCVDEPTH_ltm_in, XFCVDEPTH_aecin>(ltm_in, aecin);
 
     } else {
         fifo_copy<OUT_TYPE, XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XFCVDEPTH_ltm_in, XFCVDEPTH_aecin>(ltm_in, aecin,

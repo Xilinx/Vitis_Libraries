@@ -21,7 +21,9 @@
 #include "ap_int.h"
 #include "common/xf_common.hpp"
 #include "hls_stream.h"
-
+#include "imgproc/xf_duplicateimage.hpp"
+#include <iostream>
+using namespace std;
 /**Utility macros and functions**/
 
 #define MAXVAL(pixeldepth) ((1 << pixeldepth) - 1)
@@ -497,7 +499,8 @@ void demosaicing_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& src_
                        unsigned short& bformat,
                        unsigned char slice_id,
                        unsigned char stream_id,
-                       XF_TNAME(SRC_T, NPC) demo_buffs[STREAMS][4][COLS >> XF_BITSHIFT(NPC)]) {
+                       XF_TNAME(SRC_T, NPC) demo_buffs[STREAMS][4][COLS >> XF_BITSHIFT(NPC)],
+                       uint16_t slice_rows) {
 #ifndef __SYNTHESIS__
 
     assert(((src_mat.rows <= ROWS) && (src_mat.cols <= COLS)) && "ROWS and COLS should be greater than input image");
@@ -743,7 +746,9 @@ Row_Loop:
             if ((SLICES == 1) || (!((slice_id == 0) && (i > (src_mat.rows - 3))))) {
                 for (int loop = 0; loop < NPC; loop++) {
                     candidateCol = j * NPC + loop;
-
+                    if ((SLICES > 1) && (slice_id != 0)) {
+                        candidateRow = slice_rows - 7 + i;
+                    }
                     if (bformat == XF_BAYER_GB) {
                         candidateCol += 1;
                     }
@@ -797,13 +802,14 @@ void demosaicing_multi_wrap(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>&
                             unsigned short bformat[STREAMS],
                             int stream_id,
                             unsigned char slice_id,
-                            XF_TNAME(SRC_T, NPC) demo_buffs[STREAMS][4][COLS >> XF_BITSHIFT(NPC)]) {
+                            XF_TNAME(SRC_T, NPC) demo_buffs[STREAMS][4][COLS >> XF_BITSHIFT(NPC)],
+                            uint16_t slice_rows) {
 // clang-format off
 #pragma HLS ARRAY_PARTITION variable= bformat dim=1 complete
    // clang-format on	
     demosaicing_multi<SRC_T, DST_T, ROWS, COLS, NPC, USE_URAM, STREAMS, SLICES, XFCVDEPTH_IN_1,XFCVDEPTH_OUT_1>(
-        src_mat, dst_mat, bformat[stream_id], slice_id, stream_id, demo_buffs);   
-        
+        src_mat, dst_mat, bformat[stream_id], slice_id, stream_id, demo_buffs, slice_rows);
+    
 }        
 
 } // namespace cv

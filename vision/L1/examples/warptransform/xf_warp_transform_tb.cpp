@@ -46,6 +46,7 @@ int main(int argc, char* argv[]) {
     cv::Mat _transformation_matrix(TRMAT_DIM1, TRMAT_DIM2, CV_32FC1);
     cv::Mat _transformation_matrix_2(TRMAT_DIM1, TRMAT_DIM2, CV_32FC1);
 
+#if BUILD_TRANSFORM_MATRIX == 1
 #if TRANSFORM_TYPE == 1
     cv::Point2f src_p[4];
     cv::Point2f dst_p[4];
@@ -53,7 +54,7 @@ int main(int argc, char* argv[]) {
     src_p[1] = cv::Point2f(WIDTH - 1, 0.0f);
     src_p[2] = cv::Point2f(WIDTH - 1, HEIGHT - 1);
     src_p[3] = cv::Point2f(0.0f, HEIGHT - 1);
-    //	  to points
+    //  to points
     dst_p[0] = cv::Point2f(rng.uniform(int(M_NUMI1), int(M_NUMI2)), rng.uniform(int(M_NUMI1), int(M_NUMI2)));
     dst_p[1] = cv::Point2f(WIDTH - rng.uniform(int(M_NUMI1), int(M_NUMI2)), rng.uniform(int(M_NUMI1), int(M_NUMI2)));
     dst_p[2] =
@@ -68,6 +69,7 @@ int main(int argc, char* argv[]) {
     src_p[0] = cv::Point2f(0.0f, 0.0f);
     src_p[1] = cv::Point2f(WIDTH - 1, 0.0f);
     src_p[2] = cv::Point2f(0.0f, HEIGHT - 1);
+
     //	  to points
     dst_p[0] = cv::Point2f(rng.uniform(int(M_NUMI1), int(M_NUMI2)), rng.uniform(int(M_NUMI1), int(M_NUMI2)));
     dst_p[1] = cv::Point2f(WIDTH - rng.uniform(int(M_NUMI1), int(M_NUMI2)), rng.uniform(int(M_NUMI1), int(M_NUMI2)));
@@ -76,9 +78,15 @@ int main(int argc, char* argv[]) {
     _transformation_matrix = cv::getAffineTransform(dst_p, src_p);
     cv::Mat transform_mat = _transformation_matrix;
 #endif
+#else
+#if TRANSFORM_TYPE == 1
+// Prespective Transformation matrix
+#else
+// Affine Transformation matrix
+#endif
+#endif
 
     int i = 0, j = 0;
-
     std::cout << "INFO: Transformation Matrix is:";
     for (i = 0; i < 3; i++) {
         for (j = 0; j < 3; j++) {
@@ -110,11 +118,37 @@ int main(int argc, char* argv[]) {
         fprintf(stderr, "ERROR: Cannot open image %s\n ", argv[1]);
         return EXIT_FAILURE;
     }
+    int src_point[8];
+    if (TRANSFORM_TYPE == 1) {
+        int point_0_x = 0, point_0_y = 0;
+        int point_1_x = image_input.cols - 1, point_1_y = 0;
+        int point_2_x = image_input.cols - 1, point_2_y = image_input.rows - 1;
+        int point_3_x = 0, point_3_y = image_input.rows - 1;
+
+        src_point[0] = point_0_x;
+        src_point[1] = point_0_y;
+        src_point[2] = point_1_x;
+        src_point[3] = point_1_y;
+        src_point[4] = point_2_x;
+        src_point[5] = point_2_y;
+        src_point[6] = point_3_x;
+        src_point[7] = point_3_y;
+    } else {
+        int point_0_x = 0, point_0_y = 0;
+        int point_1_x = image_input.cols - 1, point_1_y = 0;
+        int point_2_x = 0, point_2_y = image_input.rows - 1;
+        src_point[0] = point_0_x;
+        src_point[1] = point_0_y;
+        src_point[2] = point_1_x;
+        src_point[3] = point_1_y;
+        src_point[4] = point_2_x;
+        src_point[5] = point_2_y;
+    }
+    xf::cv::analyzeTransformation_matrix(R, src_point, TRANSFORM_TYPE, image_input.rows, image_input.cols);
 
     // Allocate memory for the output images:
     image_output.create(image_input.rows, image_input.cols, image_input.type());
     diff_img.create(image_input.rows, image_input.cols, image_input.type());
-
     // Call the top function
     warp_transform_accel((ap_uint<INPUT_PTR_WIDTH>*)image_input.data, R, (ap_uint<OUTPUT_PTR_WIDTH>*)image_output.data,
                          image_input.rows, image_input.cols);

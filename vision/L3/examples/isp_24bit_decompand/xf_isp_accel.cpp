@@ -284,7 +284,7 @@ void function_tm(xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_ltm_out>& ltm_in,
         xf::cv::gtm<XF_DST_T, XF_GTM_T, XF_SRC_T, SIN_CHANNEL_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XFCVDEPTH_ltm_out,
                     XFCVDEPTH_aecin>(ltm_in, aecin, mean1, mean2, L_max1, L_max2, L_min1, L_min2, c1, c2);
     } else if (USE_QnD) {
-        xf::cv::xf_QuatizationDithering<XF_DST_T, XF_GTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPCX,
+        xf::cv::xf_QuatizationDithering<XF_DST_T, XF_GTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPCX, XF_USE_URAM,
                                         XFCVDEPTH_ltm_out, XFCVDEPTH_aecin>(ltm_in, aecin);
     }
 }

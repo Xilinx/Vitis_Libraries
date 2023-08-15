@@ -38,7 +38,7 @@ void quantizationdithering_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
 
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN>(img_inp, in_mat);
     xf::cv::xf_QuatizationDithering<IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, SCALEFACTOR, MAXREPRESENTEDVALUE, NPPCX,
-                                    XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(in_mat, out_mat);
+                                    XF_USE_URAM, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(in_mat, out_mat);
     xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT>(out_mat, img_out);
 }
 }

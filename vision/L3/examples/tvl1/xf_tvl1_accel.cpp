@@ -80,7 +80,7 @@ _MBFUNCT_TPLT_DEC void medianBlurFunct_1inst(ap_uint<PTR_WIDTH>* _U1, unsigned s
 
     xf::cv::Array2xfMat<PTR_WIDTH, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1_in>(_U1, U1_in);
 
-    xf::cv::medianBlur<MEDIANFILTERING, XF_BORDER_REPLICATE, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1_in,
+    xf::cv::medianBlur<MEDIANFILTERING, XF_BORDER_REPLICATE, FLOW_T, ROWS, COLS, NPC, XF_USE_URAM, XF_CV_DEPTH_U1_in,
                        XF_CV_DEPTH_U1_out>(U1_in, U1_out);
 
     xf::cv::xfMat2Array<PTR_WIDTH, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1_out>(U1_out, _U1);
@@ -116,10 +116,10 @@ _MBFUNCT_TPLT_DEC void medianBlurFunct(ap_uint<PTR_WIDTH>* _U1,
         xf::cv::Array2xfMat<PTR_WIDTH, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1_in>(_U1, U1_in);
         xf::cv::Array2xfMat<PTR_WIDTH, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U2_in>(_U2, U2_in);
 
-        xf::cv::medianBlur<MEDIANFILTERING, XF_BORDER_REPLICATE, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1_in,
-                           XF_CV_DEPTH_U1_out>(U1_in, U1_out);
-        xf::cv::medianBlur<MEDIANFILTERING, XF_BORDER_REPLICATE, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U2_in,
-                           XF_CV_DEPTH_U2_out>(U2_in, U2_out);
+        xf::cv::medianBlur<MEDIANFILTERING, XF_BORDER_REPLICATE, FLOW_T, ROWS, COLS, NPC, XF_USE_URAM,
+                           XF_CV_DEPTH_U1_in, XF_CV_DEPTH_U1_out>(U1_in, U1_out);
+        xf::cv::medianBlur<MEDIANFILTERING, XF_BORDER_REPLICATE, FLOW_T, ROWS, COLS, NPC, XF_USE_URAM,
+                           XF_CV_DEPTH_U2_in, XF_CV_DEPTH_U2_out>(U2_in, U2_out);
 
         xf::cv::xfMat2Array<PTR_WIDTH, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1_out>(U1_out, _U1);
         xf::cv::xfMat2Array<PTR_WIDTH, FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U2_out>(U2_out, _U2);
@@ -486,9 +486,9 @@ _RSFUNCT_TPLT_DEC void resizeScale_flow(ap_uint<FLOW_PTRWIDTH>* _U1_in,
 
     // resize<XF_INTERPOLATION_BILINEAR, FLOW_T, ROWS, COLS, ROWS, COLS,NPC,  2>(U1_in, U1_resize);
     // resize<XF_INTERPOLATION_BILINEAR, FLOW_T, ROWS, COLS, ROWS, COLS,NPC,  2>(U2_in, U2_resize);
-    resizeNNBilinear<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U1_in, XF_CV_DEPTH_U1_resize, ROWS, COLS,
+    resizeNNBilinear<FLOW_T, ROWS, COLS, NPC, 1, XF_CV_DEPTH_U1_in, XF_CV_DEPTH_U1_resize, ROWS, COLS,
                      XF_INTERPOLATION_BILINEAR, 2>(U1_in, U1_resize);
-    resizeNNBilinear<FLOW_T, ROWS, COLS, NPC, XF_CV_DEPTH_U2_in, XF_CV_DEPTH_U2_resize, ROWS, COLS,
+    resizeNNBilinear<FLOW_T, ROWS, COLS, NPC, 1, XF_CV_DEPTH_U2_in, XF_CV_DEPTH_U2_resize, ROWS, COLS,
                      XF_INTERPOLATION_BILINEAR, 2>(U2_in, U2_resize);
 
     multiplyU<FLOW_T, FLOW_FB, ROWS, COLS, NPC, XF_CV_DEPTH_U1_resize, XF_CV_DEPTH_U2_resize, XF_CV_DEPTH_U1_out,

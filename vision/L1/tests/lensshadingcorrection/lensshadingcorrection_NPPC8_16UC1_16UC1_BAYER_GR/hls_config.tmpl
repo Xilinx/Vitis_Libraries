@@ -1,0 +1,24 @@
+[hls]
+
+clock=3.3
+flow_target=vivado
+syn.file=${XF_PROJ_ROOT}/L1/examples/lensshadingcorrection/xf_lensshading_accel.cpp
+syn.file_cflags=${XF_PROJ_ROOT}/L1/examples/lensshadingcorrection/xf_lensshading_accel.cpp, -I ${XF_PROJ_ROOT}/L1/tests/lensshadingcorrection/lensshadingcorrection_NPPC8_16UC1_16UC1_BAYER_GR -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
+syn.file_csimflags=${XF_PROJ_ROOT}/L1/examples/lensshadingcorrection/xf_lensshading_accel.cpp, -I ${XF_PROJ_ROOT}/L1/tests/lensshadingcorrection/lensshadingcorrection_NPPC8_16UC1_16UC1_BAYER_GR -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
+syn.top=lensshading_accel
+tb.file=${XF_PROJ_ROOT}/L1/examples/lensshadingcorrection/xf_lensshading_tb.cpp
+tb.file_cflags=${XF_PROJ_ROOT}/L1/examples/lensshadingcorrection/xf_lensshading_tb.cpp, -I ${XF_PROJ_ROOT}/L1/tests/lensshadingcorrection/lensshadingcorrection_NPPC8_16UC1_16UC1_BAYER_GR -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
+tb.file_csimflags=${XF_PROJ_ROOT}/L1/examples/lensshadingcorrection/xf_lensshading_tb.cpp, -I ${XF_PROJ_ROOT}/L1/tests/lensshadingcorrection/lensshadingcorrection_NPPC8_16UC1_16UC1_BAYER_GR -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
+
+csim.argv=  ${XF_PROJ_ROOT}/data/ltm_input.png
+csim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d
+
+cosim.argv=  ${XF_PROJ_ROOT}/data/ltm_input.png
+cosim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog
+
+

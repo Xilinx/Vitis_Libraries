@@ -279,8 +279,8 @@ void letterbox(xf::cv::Mat<TYPE, SRC_ROWS, SRC_COLS, NPC, XFCVDEPTH_IN>& _src,
 // clang-format off
 #pragma HLS DATAFLOW
     // clang-format on
-    xf::cv::resize<INTERPOLATION_TYPE, TYPE, SRC_ROWS, SRC_COLS, DST_ROWS, DST_COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT,
-                   MAX_DOWN_SCALE>(_src, out_mat_resize);
+    xf::cv::resize<INTERPOLATION_TYPE, TYPE, SRC_ROWS, SRC_COLS, DST_ROWS, DST_COLS, NPC, 1, XFCVDEPTH_IN,
+                   XFCVDEPTH_OUT, MAX_DOWN_SCALE>(_src, out_mat_resize);
     xf::cv::insertBorder<TYPE, DST_ROWS, DST_COLS, DST_ROWS, DST_COLS, NPC, 128, XFCVDEPTH_IN, XFCVDEPTH_OUT>(
         out_mat_resize, _dst);
 }

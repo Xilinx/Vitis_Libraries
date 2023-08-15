@@ -19,7 +19,7 @@ void preprocessing ()
 	xf::cv::Mat<OUT_TYPE, NEWHEIGHT, NEWWIDTH, NPC, XF_CV_DEPTH_RESIZE_OUT> resize_out_mat(resize_height, resize_width);
 	
         xf::cv::Array2xfMat<INPUT_PTR_WIDTH,XF_8UC3,HEIGHT, WIDTH, NPC1>  (img_inp, imgInput0);
-        xf::cv::resize<INTERPOLATION,TYPE,HEIGHT,WIDTH,NEWHEIGHT,NEWWIDTH,NPC_T,MAXDOWNSCALE> (imgInput0, resize_out_mat);
+        xf::cv::resize<INTERPOLATION,TYPE,HEIGHT,WIDTH,NEWHEIGHT,NEWWIDTH,NPC_T,XF_USE_URAM,MAXDOWNSCALE> (imgInput0, resize_out_mat);
         xf::cv::preProcess<IN_TYPE, OUT_TYPE, NEWHEIGHT, NEWWIDTH, NPC, WIDTH_A, IBITS_A, WIDTH_B, IBITS_B, WIDTH_OUT,
                        IBITS_OUT, XF_CV_DEPTH_RESIZE_OUT, XF_CV_DEPTH_OUT>(resize_out_mat, out_mat, params);
 

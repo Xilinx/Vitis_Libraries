@@ -45,6 +45,7 @@
 #define TRANSFORM_TYPE 0
 #define XF_USE_URAM 1
 
+#define BUILD_TRANSFORM_MATRIX 1
 // Set the pixel depth:
 
 #define RGB 1

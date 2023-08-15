@@ -56,7 +56,7 @@ void letterbox_accel(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     #pragma HLS DATAFLOW
 // clang-format on	
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH,XF_8UC3,HEIGHT, WIDTH, XF_NPPCX, XF_CV_DEPTH_IN_0>  (img_inp, imgInput0);
-    xf::cv::resize<INTERPOLATION,IN_TYPE,HEIGHT,WIDTH,NEWHEIGHT,NEWWIDTH,XF_NPPCX, MAXDOWNSCALE, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_1> (imgInput0, out_mat_resize);
+    xf::cv::resize<INTERPOLATION,IN_TYPE,HEIGHT,WIDTH,NEWHEIGHT,NEWWIDTH,XF_NPPCX, XF_USE_URAM, MAXDOWNSCALE, XF_CV_DEPTH_IN_0, XF_CV_DEPTH_OUT_1> (imgInput0, out_mat_resize);
     xf::cv::insertBorder<OUT_TYPE, NEWHEIGHT, NEWWIDTH, NEWHEIGHT, NEWWIDTH, XF_NPPCX, XF_CV_DEPTH_OUT_1, XF_CV_DEPTH_OUT_2>(out_mat_resize, out_mat, insert_pad_value);
     xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, NEWHEIGHT, NEWWIDTH, XF_NPPCX, XF_CV_DEPTH_OUT_2>(out_mat, img_out);
     return;

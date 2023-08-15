@@ -109,8 +109,8 @@ void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     xf::cv::blackLevelCorrection<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, 16, 15, 1, XF_CV_DEPTH_IN_1, XF_CV_DEPTH_IN_2>(
         imgInput1, imgInput2, BLACK_LEVEL, mul_fact);
 
-    xf::cv::medianBlur<WINDOW_SIZE, XF_BORDER_REPLICATE, IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_IN_2,
-                       XF_CV_DEPTH_DPC_OUT>(imgInput2, dpc_out);
+    xf::cv::medianBlur<WINDOW_SIZE, XF_BORDER_REPLICATE, IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_USE_URAM,
+                       XF_CV_DEPTH_IN_2, XF_CV_DEPTH_DPC_OUT>(imgInput2, dpc_out);
     xf::cv::gaincontrol_mono<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_DPC_OUT, XF_CV_DEPTH_GAIN_OUT>(
         dpc_out, gain_out, lgain);
 
@@ -118,7 +118,7 @@ void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
         fifo_copy<OUT_TYPE, XF_LTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_GAIN_OUT, XF_CV_DEPTH_AEC_IN>(
             gain_out, aecin, height, width);
     } else {
-        xf::cv::xf_QuatizationDithering<OUT_TYPE, XF_LTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPCX,
+        xf::cv::xf_QuatizationDithering<OUT_TYPE, XF_LTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPCX, XF_USE_URAM,
                                         XF_CV_DEPTH_GAIN_OUT, XF_CV_DEPTH_AEC_IN>(gain_out, aecin);
     }
 

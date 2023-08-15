@@ -390,8 +390,8 @@ void ISPpipeline(InVideoStrm_t& s_axis_video,
         fifo_copy<OUT_TYPE, XF_LTM_T, XF_HEIGHT, XF_WIDTH, NPPCX, XF_CV_DEPTH_LSC_OUT, XF_CV_DEPTH_AEC_IN>(
             lsc_out, aecin, height, width);
     } else {
-        xf::cv::xf_QuatizationDithering<OUT_TYPE, XF_LTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, NPPCX, XF_CV_DEPTH_LSC_OUT,
-                                        XF_CV_DEPTH_AEC_IN>(lsc_out, aecin);
+        xf::cv::xf_QuatizationDithering<OUT_TYPE, XF_LTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, NPPCX, XF_USE_URAM,
+                                        XF_CV_DEPTH_LSC_OUT, XF_CV_DEPTH_AEC_IN>(lsc_out, aecin);
     }
     xf::cv::gammacorrection<XF_LTM_T, XF_LTM_T, XF_HEIGHT, XF_WIDTH, NPPCX, XF_CV_DEPTH_AEC_IN, XF_CV_DEPTH_DST>(
         aecin, _dst, gamma_lut);

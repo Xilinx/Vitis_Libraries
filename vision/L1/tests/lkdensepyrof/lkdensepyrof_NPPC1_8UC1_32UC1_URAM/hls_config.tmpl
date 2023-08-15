@@ -1,0 +1,24 @@
+[hls]
+
+clock=3.3
+flow_target=vivado
+syn.file=${XF_PROJ_ROOT}/L1/examples/lkdensepyrof/xf_pyr_dense_optical_flow_accel.cpp
+syn.file_cflags=${XF_PROJ_ROOT}/L1/examples/lkdensepyrof/xf_pyr_dense_optical_flow_accel.cpp, -I ${XF_PROJ_ROOT}/L1/tests/lkdensepyrof/lkdensepyrof_NPPC1_8UC1_32UC1_URAM -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
+syn.file_csimflags=${XF_PROJ_ROOT}/L1/examples/lkdensepyrof/xf_pyr_dense_optical_flow_accel.cpp, -I ${XF_PROJ_ROOT}/L1/tests/lkdensepyrof/lkdensepyrof_NPPC1_8UC1_32UC1_URAM -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
+syn.top=pyr_dense_optical_flow_accel
+tb.file=${XF_PROJ_ROOT}/L1/examples/lkdensepyrof/xf_pyr_dense_optical_flow_tb.cpp
+tb.file_cflags=${XF_PROJ_ROOT}/L1/examples/lkdensepyrof/xf_pyr_dense_optical_flow_tb.cpp, -I ${XF_PROJ_ROOT}/L1/tests/lkdensepyrof/lkdensepyrof_NPPC1_8UC1_32UC1_URAM -I${OPENCV_INCLUDE} -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
+tb.file_csimflags=${XF_PROJ_ROOT}/L1/examples/lkdensepyrof/xf_pyr_dense_optical_flow_tb.cpp, -I ${XF_PROJ_ROOT}/L1/tests/lkdensepyrof/lkdensepyrof_NPPC1_8UC1_32UC1_URAM -I${XF_PROJ_ROOT}/L1/include -I ./ -D__SDSVHLS__ -std=c++0x
+
+csim.argv=  ${XF_PROJ_ROOT}/data/im0.png  ${XF_PROJ_ROOT}/data/im1.png
+csim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d -lopencv_videoio -lopencv_video -lopencv_calib3d -l opencv_objdetect
+
+cosim.argv=  ${XF_PROJ_ROOT}/data/im0.png  ${XF_PROJ_ROOT}/data/im1.png
+cosim.ldflags=-L ${OPENCV_LIB} -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_flann -lopencv_features2d -lopencv_videoio -lopencv_video -lopencv_calib3d -l opencv_objdetect
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog
+
+

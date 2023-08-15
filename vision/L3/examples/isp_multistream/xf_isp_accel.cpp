@@ -46,7 +46,7 @@ static bool flag_awb[NUM_STREAMS] = {0};
 static bool flag_tm[NUM_STREAMS] = {0};
 static bool flag_aec[NUM_STREAMS] = {0};
 
-static XF_TNAME(IN_TYPE, XF_NPPC) bpc_buff[NUM_STREAMS][5][XF_WIDTH >> XF_BITSHIFT(XF_NPPC)] = {0};
+static XF_TNAME(IN_TYPE, XF_NPPC) bpc_buff[NUM_STREAMS][4][XF_WIDTH >> XF_BITSHIFT(XF_NPPC)] = {0};
 static XF_TNAME(IN_TYPE, XF_NPPC) demo_buffs[NUM_STREAMS][4][XF_WIDTH >> XF_BITSHIFT(XF_NPPC)];
 static XF_TNAME(IN_TYPE, XF_NPPC) rgbir_buffs[NUM_STREAMS][4][XF_WIDTH >> XF_BITSHIFT(XF_NPPC)];
 static XF_TNAME(IN_TYPE, XF_NPPC) rgbir_ir_buffs[NUM_STREAMS][2][XF_WIDTH >> XF_BITSHIFT(XF_NPPC)];
@@ -111,7 +111,8 @@ void function_rgbir(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& hdr_out
                     int slice_id,
                     XF_TNAME(SRC_T, NPC) rgbir_buffs[STREAMS][4][COLS >> XF_BITSHIFT(NPC)],
                     XF_TNAME(SRC_T, NPC) rgbir_ir_buffs[STREAMS][2][COLS >> XF_BITSHIFT(NPC)],
-                    XF_TNAME(SRC_T, NPC) rgbir_wgt_buffs[STREAMS][COLS >> XF_BITSHIFT(NPC)]) {
+                    XF_TNAME(SRC_T, NPC) rgbir_wgt_buffs[STREAMS][COLS >> XF_BITSHIFT(NPC)],
+                    uint16_t strm_rows) {
 // clang-format off
  #pragma HLS INLINE OFF
     // clang-format on
@@ -125,7 +126,7 @@ void function_rgbir(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& hdr_out
                                        XF_BORDER_CONSTANT, USE_URAM, NUM_STREAMS, NUM_SLICES, XFCVDEPTH_IN_1,
                                        XFCVDEPTH_OUT_1, XFCVDEPTH_OUT_IR, XFCVDEPTH_3XWIDTH>(
             hdr_out, R_IR_C1_wgts, R_IR_C2_wgts, B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts, sub_wgts, bayer_form,
-            rggb_out, fullir_out, rgbir_buffs, rgbir_ir_buffs, rgbir_wgt_buffs, stream_id, slice_id);
+            rggb_out, fullir_out, rgbir_buffs, rgbir_ir_buffs, rgbir_wgt_buffs, stream_id, slice_id, strm_rows);
 
         xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, XFCVDEPTH_OUT_IR>(fullir_out,
                                                                                                            img_out_ir);
@@ -244,8 +245,8 @@ void function_tm(xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& awb_out,
                                                                                                    stream_id);
 
     } else if (USE_QnD) {
-        xf::cv::xf_QuatizationDithering<OUT_TYPE, XF_LTM_T, SLICE_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPC, XFCVDEPTH_IN_1,
-                                        XFCVDEPTH_OUT_1>(awb_out, aecin);
+        xf::cv::xf_QuatizationDithering<OUT_TYPE, XF_LTM_T, SLICE_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPC, XF_USE_URAM,
+                                        XFCVDEPTH_IN_1, XFCVDEPTH_OUT_1>(awb_out, aecin);
     }
 }
 
@@ -480,53 +481,35 @@ void Streampipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     } else {
         xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_0_2>(img_inp,
                                                                                                            imgInput2);
-
         xf::cv::hdr_decompand_multi<IN_TYPE, IN_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_0_2,
                                     XF_CV_DEPTH_IN_1, NUM_STREAMS>(imgInput2, hdr_out, dcp_params_12to16, bayer_p,
                                                                    stream_id);
     }
-
-    xf::cv::Mat<IN_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_2> rggb_out(height, width);
-
-    function_rgbir<IN_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, XF_USE_URAM, NUM_STREAMS, NUM_SLICES, XF_CV_DEPTH_IN_1,
-                   XF_CV_DEPTH_IN_2, XF_CV_DEPTH_OUT_IR, XF_CV_DEPTH_3XWIDTH>(
-        hdr_out, rggb_out, img_out_ir, R_IR_C1_wgts, R_IR_C2_wgts, B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts, sub_wgts,
-        bayer_p, height, width, stream_id, slice_id, rgbir_buffs, rgbir_ir_buffs, rgbir_wgt_buffs);
-
-    //////AEC/////////
-    if (NUM_SLICES > 1) {
-        if (slice_id == 0) {
-            height = height - 3;
-        } else if (slice_id == NUM_SLICES - 1) {
-            height = height + 3;
+    if (USE_RGBIR) {
+        if (NUM_SLICES > 1) {
+            if (slice_id == 0) {
+                height = height - 3;
+            } else if (slice_id == NUM_SLICES - 1) {
+                height = height + 3;
+            }
         }
     }
 
-    xf::cv::Mat<IN_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_3> aec_out(height, width);
+    xf::cv::Mat<IN_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_2> rggb_out(height, width);
+    function_rgbir<IN_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, XF_USE_URAM, NUM_STREAMS, NUM_SLICES, XF_CV_DEPTH_IN_1,
+                   XF_CV_DEPTH_IN_2, XF_CV_DEPTH_OUT_IR, XF_CV_DEPTH_3XWIDTH>(
+        hdr_out, rggb_out, img_out_ir, R_IR_C1_wgts, R_IR_C2_wgts, B_at_R_wgts, IR_at_R_wgts, IR_at_B_wgts, sub_wgts,
+        bayer_p, height, width, stream_id, slice_id, rgbir_buffs, rgbir_ir_buffs, rgbir_wgt_buffs, strm_rows);
 
+    xf::cv::Mat<IN_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_3> aec_out(height, width);
     function_aec<IN_TYPE, IN_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_2, XF_CV_DEPTH_IN_3, NUM_STREAMS>(
         rggb_out, aec_out, aec_hist0, aec_hist1, height, width, aec_flg, eof_aec, paec, stream_id, slice_id,
         full_height);
 
     xf::cv::Mat<IN_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_4> blc_out(height, width);
-
     xf::cv::blackLevelCorrection_multi<IN_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, 16, 15, 1, NUM_STREAMS,
                                        XF_CV_DEPTH_IN_3, XF_CV_DEPTH_IN_4>(aec_out, blc_out, black_level, stream_id);
-    xf::cv::Mat<IN_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_5> bpc_out(height, width);
 
-    if (NUM_SLICES > 1) {
-        if (slice_id == 0) {
-            bpc_out.rows = height - 2;
-        } else if (slice_id == NUM_SLICES - 1) {
-            bpc_out.rows = height + 2;
-        }
-    }
-
-    xf::cv::badpixelcorrection_multi<IN_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, 0, 0, NUM_STREAMS, NUM_SLICES,
-                                     XF_CV_DEPTH_IN_4, XF_CV_DEPTH_IN_5>(blc_out, bpc_out, stream_id, slice_id,
-                                                                         bpc_buff);
-
-    //////BPC/////////
     if (NUM_SLICES > 1) {
         if (slice_id == 0) {
             height = height - 2;
@@ -534,34 +517,27 @@ void Streampipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
             height = height + 2;
         }
     }
-    xf::cv::Mat<IN_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_6> dgamma_out(height, width);
 
+    xf::cv::Mat<IN_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_5> bpc_out(height, width);
+
+    xf::cv::badpixelcorrection_multi<IN_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, 0, 0, NUM_STREAMS, NUM_SLICES,
+                                     XF_CV_DEPTH_IN_4, XF_CV_DEPTH_IN_5>(blc_out, bpc_out, stream_id, slice_id,
+                                                                         bpc_buff);
+
+    xf::cv::Mat<IN_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_6> dgamma_out(height, width);
     function_degamma<IN_TYPE, IN_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_5, XF_CV_DEPTH_IN_6, DGAMMA_KP,
                      NUM_STREAMS>(bpc_out, dgamma_out, dgam_params, bayer_p, height, width, stream_id);
 
     xf::cv::Mat<IN_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_7> LscOut(height, width);
-
     xf::cv::Lscdistancebased_multi<IN_TYPE, IN_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_6,
-                                   XF_CV_DEPTH_IN_7>(dgamma_out, LscOut, full_height, width, slice_id, strm_rows);
+                                   XF_CV_DEPTH_IN_7, NUM_SLICES>(dgamma_out, LscOut, full_height, width, slice_id,
+                                                                 strm_rows);
 
     xf::cv::Mat<IN_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_IN_8> gain_out(height, width);
 
     xf::cv::gaincontrol_multi_wrap<IN_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, NUM_STREAMS, XF_CV_DEPTH_IN_7,
                                    XF_CV_DEPTH_IN_8>(LscOut, gain_out, rgain, bgain, ggain, bayer_p, stream_id);
 
-    xf::cv::Mat<OUT_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_0> demosaic_out(height, width);
-
-    if (NUM_SLICES != 1) {
-        if (slice_id == 0) {
-            demosaic_out.rows = height - 2;
-        } else if (slice_id == NUM_SLICES - 1) {
-            demosaic_out.rows = height + 2;
-        }
-    }
-
-    xf::cv::demosaicing_multi_wrap<IN_TYPE, OUT_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, 0, NUM_STREAMS, NUM_SLICES,
-                                   XF_CV_DEPTH_IN_8, XF_CV_DEPTH_OUT_0>(gain_out, demosaic_out, bayer_p, stream_id,
-                                                                        slice_id, demo_buffs);
     if (NUM_SLICES != 1) {
         if (slice_id == 0) {
             height = height - 2;
@@ -570,15 +546,18 @@ void Streampipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
         }
     }
 
+    xf::cv::Mat<OUT_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_0> demosaic_out(height, width);
+    xf::cv::demosaicing_multi_wrap<IN_TYPE, OUT_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, 0, NUM_STREAMS, NUM_SLICES,
+                                   XF_CV_DEPTH_IN_8, XF_CV_DEPTH_OUT_0>(gain_out, demosaic_out, bayer_p, stream_id,
+                                                                        slice_id, demo_buffs, strm_rows);
+
     xf::cv::Mat<OUT_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_1> impop(height, width);
     xf::cv::Mat<OUT_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_2> awb_out(height, width);
-
     function_awb<OUT_TYPE, OUT_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, NUM_STREAMS, XF_CV_DEPTH_OUT_0,
                  XF_CV_DEPTH_OUT_2>(demosaic_out, awb_out, awb_hist0, awb_hist1, awb_gain0, awb_gain1, height, width,
                                     awb_flg, eof_awb, pawb, stream_id, slice_id, full_height);
 
     xf::cv::Mat<OUT_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_3> ccm_out(height, width);
-
     xf::cv::colorcorrectionmatrix<XF_CCM_TYPE, OUT_TYPE, OUT_TYPE, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_2,
                                   XF_CV_DEPTH_OUT_3>(awb_out, ccm_out);
 
@@ -595,12 +574,10 @@ void Streampipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,
     }
 
     xf::cv::Mat<XF_LTM_T, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_5> _dst(height, width);
-
     xf::cv::gammacorrection_multi<XF_LTM_T, XF_LTM_T, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, NUM_STREAMS, XF_CV_DEPTH_OUT_4,
                                   XF_CV_DEPTH_OUT_5>(aecin, _dst, gamma_lut, stream_id);
 
     xf::cv::Mat<XF_LTM_T, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, XF_CV_DEPTH_OUT_6> lut_out(height, width);
-
     function_3dlut<XF_LTM_T, XF_LTM_T, SLICE_HEIGHT, XF_WIDTH, XF_NPPC, NUM_STREAMS, XF_CV_DEPTH_OUT_5,
                    XF_CV_DEPTH_OUT_6, XF_CV_DEPTH_3dlut>(_dst, lut_out, lut, lutDim, height, width, stream_id);
 
@@ -883,8 +860,7 @@ WR_HLS_INIT_LOOP:
 
     uint32_t rd_offset1 = 0, rd_offset2 = 0, rd_offset3 = 0, rd_offset4 = 0;
     uint32_t wr_offset1 = 0, wr_offset2 = 0, wr_offset3 = 0, wr_offset4 = 0;
-    uint32_t wr_offset1_rgb = 0, wr_offset2_rgb = 0, wr_offset3_rgb = 0, wr_offset4_rgb = 0;
-    uint32_t wr_offset1_rgb8 = 0, wr_offset2_rgb8 = 0, wr_offset3_rgb8 = 0, wr_offset4_rgb8 = 0;
+    uint32_t wr_offset1_ir = 0, wr_offset2_ir = 0, wr_offset3_ir = 0, wr_offset4_ir = 0;
 
 TOTAL_ROWS_LOOP:
     for (int r = 0; r < tot_rows;) {
@@ -908,7 +884,7 @@ TOTAL_ROWS_LOOP:
         strm_id = stream_idx;
 
         if (stream_idx == 0 && num_rows > 0) {
-            Streampipeline(img_inp1 + rd_offset1, img_out1 + wr_offset1, img_out_ir1 + wr_offset1, lut1, num_rows,
+            Streampipeline(img_inp1 + rd_offset1, img_out1 + wr_offset1, img_out_ir1 + wr_offset1_ir, lut1, num_rows,
                            height_arr[stream_idx], width_arr[stream_idx], STRM1_ROWS, dgam_params_tmp, hist0_awb,
                            hist1_awb, igain_0, igain_1, flag_awb, eof_awb, array_params, gamma_lut_tmp, wr_hls_tmp,
                            R_IR_C1_wgts_tmp, R_IR_C2_wgts_tmp, B_at_R_wgts_tmp, IR_at_R_wgts_tmp, IR_at_B_wgts_tmp,
@@ -918,13 +894,17 @@ TOTAL_ROWS_LOOP:
                            acc_sum);
 
             rd_offset1 += (RD_MULT * num_rows * ((width_arr[stream_idx] + RD_ADD) >> XF_BITSHIFT(XF_NPPC))) / 4;
+
             if (NUM_SLICES != 1 && slice_idx == 0) {
                 wr_offset1 += (((num_rows - 7) * (width_arr[stream_idx] >> XF_BITSHIFT(XF_NPPC))) / OUT_PORT) * CH_TYPE;
+                wr_offset1_ir += (((num_rows - 3) * (width_arr[stream_idx] >> XF_BITSHIFT(XF_NPPC))) / 4) * 1;
             } else {
                 wr_offset1 += ((num_rows * (width_arr[stream_idx] >> XF_BITSHIFT(XF_NPPC))) / OUT_PORT) * CH_TYPE;
+                wr_offset1_ir += ((num_rows * (width_arr[stream_idx] >> XF_BITSHIFT(XF_NPPC))) / 4) * 1;
             }
+
         } else if (stream_idx == 1 && num_rows > 0) {
-            Streampipeline(img_inp2 + rd_offset2, img_out2 + wr_offset2, img_out_ir2 + wr_offset2, lut2, num_rows,
+            Streampipeline(img_inp2 + rd_offset2, img_out2 + wr_offset2, img_out_ir2 + wr_offset2_ir, lut2, num_rows,
                            height_arr[stream_idx], width_arr[stream_idx], STRM2_ROWS, dgam_params_tmp, hist0_awb,
                            hist1_awb, igain_0, igain_1, flag_awb, eof_awb, array_params, gamma_lut_tmp, wr_hls_tmp,
                            R_IR_C1_wgts_tmp, R_IR_C2_wgts_tmp, B_at_R_wgts_tmp, IR_at_R_wgts_tmp, IR_at_B_wgts_tmp,
@@ -937,12 +917,14 @@ TOTAL_ROWS_LOOP:
 
             if (NUM_SLICES != 1 && slice_idx == 0) {
                 wr_offset2 += (((num_rows - 7) * (width_arr[stream_idx] >> XF_BITSHIFT(XF_NPPC))) / OUT_PORT) * CH_TYPE;
+                wr_offset2_ir += (((num_rows - 3) * (width_arr[stream_idx] >> XF_BITSHIFT(XF_NPPC))) / 4) * 1;
             } else {
                 wr_offset2 += ((num_rows * (width_arr[stream_idx] >> XF_BITSHIFT(XF_NPPC))) / OUT_PORT) * CH_TYPE;
+                wr_offset2_ir += ((num_rows * (width_arr[stream_idx] >> XF_BITSHIFT(XF_NPPC))) / 4) * 1;
             }
 
         } else if (stream_idx == 2 && num_rows > 0) {
-            Streampipeline(img_inp3 + rd_offset3, img_out3 + wr_offset3, img_out_ir3 + wr_offset3, lut3, num_rows,
+            Streampipeline(img_inp3 + rd_offset3, img_out3 + wr_offset3, img_out_ir3 + wr_offset3_ir, lut3, num_rows,
                            height_arr[stream_idx], width_arr[stream_idx], STRM3_ROWS, dgam_params_tmp, hist0_awb,
                            hist1_awb, igain_0, igain_1, flag_awb, eof_awb, array_params, gamma_lut_tmp, wr_hls_tmp,
                            R_IR_C1_wgts_tmp, R_IR_C2_wgts_tmp, B_at_R_wgts_tmp, IR_at_R_wgts_tmp, IR_at_B_wgts_tmp,
@@ -955,13 +937,15 @@ TOTAL_ROWS_LOOP:
 
             if (NUM_SLICES != 1 && slice_idx == 0) {
                 wr_offset3 += (((num_rows - 7) * (width_arr[stream_idx] >> XF_BITSHIFT(XF_NPPC))) / OUT_PORT) * CH_TYPE;
+                wr_offset3_ir += (((num_rows - 3) * (width_arr[stream_idx] >> XF_BITSHIFT(XF_NPPC))) / 4) * 1;
 
             } else {
                 wr_offset3 += ((num_rows * (width_arr[stream_idx] >> XF_BITSHIFT(XF_NPPC))) / OUT_PORT) * CH_TYPE;
+                wr_offset3_ir += ((num_rows * (width_arr[stream_idx] >> XF_BITSHIFT(XF_NPPC))) / 4) * 1;
             }
 
         } else if (stream_idx == 3 && num_rows > 0) {
-            Streampipeline(img_inp4 + rd_offset4, img_out4 + wr_offset4, img_out_ir4 + wr_offset4, lut4, num_rows,
+            Streampipeline(img_inp4 + rd_offset4, img_out4 + wr_offset4, img_out_ir4 + wr_offset4_ir, lut4, num_rows,
                            height_arr[stream_idx], width_arr[stream_idx], STRM4_ROWS, dgam_params_tmp, hist0_awb,
                            hist1_awb, igain_0, igain_1, flag_awb, eof_awb, array_params, gamma_lut_tmp, wr_hls_tmp,
                            R_IR_C1_wgts_tmp, R_IR_C2_wgts_tmp, B_at_R_wgts_tmp, IR_at_R_wgts_tmp, IR_at_B_wgts_tmp,
@@ -971,10 +955,13 @@ TOTAL_ROWS_LOOP:
                            acc_sum);
 
             rd_offset4 += (RD_MULT * num_rows * ((width_arr[stream_idx] + RD_ADD) >> XF_BITSHIFT(XF_NPPC))) / 4;
+
             if (NUM_SLICES != 1 && slice_idx == 0) {
                 wr_offset4 += (((num_rows - 7) * (width_arr[stream_idx] >> XF_BITSHIFT(XF_NPPC))) / OUT_PORT) * CH_TYPE;
+                wr_offset4_ir += (((num_rows - 3) * (width_arr[stream_idx] >> XF_BITSHIFT(XF_NPPC))) / 4) * 1;
             } else {
                 wr_offset4 += ((num_rows * (width_arr[stream_idx] >> XF_BITSHIFT(XF_NPPC))) / OUT_PORT) * CH_TYPE;
+                wr_offset4_ir += ((num_rows * (width_arr[stream_idx] >> XF_BITSHIFT(XF_NPPC))) / 4) * 1;
             }
         }
         // Update remaining rows to process

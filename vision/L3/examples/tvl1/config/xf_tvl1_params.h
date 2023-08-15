@@ -44,7 +44,7 @@
 ///////Debug macro
 #define LOOP_DEBUG 0
 #define LOOP1_CNT 2
-
+#define XF_USE_URAM 0
 // Resize macro
 #define MAXDOWNSCALE 2
 #define INTERPOLATION 1

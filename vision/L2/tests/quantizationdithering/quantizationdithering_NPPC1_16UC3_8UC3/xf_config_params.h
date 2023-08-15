@@ -30,6 +30,7 @@
 
 #define XF_CV_DEPTH_IN 2
 #define XF_CV_DEPTH_OUT 2
+#define XF_USE_URAM 0
 
 /* SCALEFACTOR & MAXREPRESENTEDVALUE should power of 2 */
 #define SCALEFACTOR 256

@@ -65,10 +65,10 @@
 
 //#define XF_BAYER_PATTERN XF_BAYER_RG // bayer pattern
 
-#define T_8U 1
+#define T_8U 0
 #define T_10U 0
 #define T_12U 0
-#define T_16U 0
+#define T_16U 1
 
 #define WINDOW_SIZE 3
 

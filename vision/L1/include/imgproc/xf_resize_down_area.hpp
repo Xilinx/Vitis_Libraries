@@ -547,6 +547,7 @@ template <int SRC_ROWS,
           int PLANES,
           int DEPTH,
           int NPC,
+          bool USE_URAM = false,
           int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH,
@@ -630,6 +631,17 @@ void xFResizeAreaDownScale(xf::cv::Mat<DEPTH, SRC_ROWS, SRC_COLS, NPC, XFCVDEPTH
 
     //## output buffer
     ap_uint<AREADOWN_PARTIAL_RESULT_BITS> ouput_buffer[PLANES][NUM_PB][DEPTH_OUTBUFFER];
+
+    if (USE_URAM) {
+// clang-format off
+        #pragma HLS bind_storage variable=ouput_buffer type=RAM_T2P impl=URAM
+        // clang-format on
+    } else {
+// clang-format off
+        #pragma HLS bind_storage variable=ouput_buffer type=RAM_T2P impl=BRAM
+        // clang-format on
+    }
+
 // clang-format off
     #pragma HLS ARRAY_PARTITION variable=ouput_buffer complete dim=1
     #pragma HLS ARRAY_PARTITION variable=ouput_buffer complete dim=2

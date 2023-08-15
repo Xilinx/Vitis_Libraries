@@ -49,6 +49,7 @@ template <int IN_TYPE,
           int SCALE_FACTOR,
           int MAX_REPRESENTED_VALUE,
           int NPC,
+          int USE_URAM = 0,
           int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
 void xf_QuatizationDithering(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>& stream_in,
@@ -114,9 +115,16 @@ void xf_QuatizationDithering(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>
 
     //## offset buffer
     ap_int<BITDEPTH_IN> offset_buffer[PLANES][NPC][DEPTH_OFFSETBUFFER];
-// clang-format off
-#pragma HLS ARRAY_PARTITION variable = offset_buffer complete dim = 1
-#pragma HLS ARRAY_PARTITION variable = offset_buffer complete dim = 2
+    // clang-format off
+    if(USE_URAM){
+        #pragma HLS ARRAY_PARTITION variable = offset_buffer complete dim = 1
+        #pragma HLS ARRAY_PARTITION variable = offset_buffer complete dim = 2
+        #pragma HLS bind_storage variable=offset_buffer type=RAM_S2P impl=URAM
+    }else{
+        #pragma HLS ARRAY_PARTITION variable = offset_buffer complete dim = 1
+        #pragma HLS ARRAY_PARTITION variable = offset_buffer complete dim = 2
+        #pragma HLS bind_storage variable=offset_buffer type=RAM_S2P impl=BRAM
+    }
     // clang-format on
 
     for (int col_index = 0; col_index < imgInput_ncpr; col_index++) {

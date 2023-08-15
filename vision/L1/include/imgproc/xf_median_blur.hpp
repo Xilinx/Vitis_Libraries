@@ -368,6 +368,7 @@ template <int ROWS,
           int PLANES,
           int TYPE,
           int NPC,
+          int USE_URAM,
           int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
           int WORDWIDTH,
@@ -400,9 +401,15 @@ void xFMedianNxN(xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src,
     XF_TNAME(TYPE, NPC) P0;
 
     XF_TNAME(TYPE, NPC) buf[WIN_SZ][(COLS >> XF_BITSHIFT(NPC))];
-// clang-format off
-    #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
-    #pragma HLS bind_storage variable=buf type=RAM_S2P impl=BRAM
+    // clang-format off
+    if(USE_URAM){
+        #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
+        #pragma HLS bind_storage variable=buf type=RAM_S2P impl=URAM
+    }else{
+        #pragma HLS ARRAY_PARTITION variable=buf complete dim=1
+        #pragma HLS bind_storage variable=buf type=RAM_S2P impl=BRAM
+    }
+
     // clang-format on
 
     // initializing row index
@@ -477,6 +484,7 @@ template <int FILTER_SIZE,
           int ROWS,
           int COLS,
           int NPC = 1,
+          int USE_URAM = 0,
           int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
           int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
 void medianBlur(xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src,
@@ -492,7 +500,7 @@ void medianBlur(xf::cv::Mat<TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN>& _src,
 
     assert(((imgheight <= ROWS) && (imgwidth <= COLS)) && "ROWS and COLS should be greater than input image");
 
-    xFMedianNxN<ROWS, COLS, XF_CHANNELS(TYPE, NPC), TYPE, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT, 0,
+    xFMedianNxN<ROWS, COLS, XF_CHANNELS(TYPE, NPC), TYPE, NPC, USE_URAM, XFCVDEPTH_IN, XFCVDEPTH_OUT, 0,
                 (COLS >> XF_BITSHIFT(NPC)) + (FILTER_SIZE >> 1), FILTER_SIZE, FILTER_SIZE * FILTER_SIZE>(
         _src, _dst, FILTER_SIZE, imgheight, imgwidth);
 

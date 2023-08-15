@@ -255,8 +255,8 @@ void function_tm(xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_ltm_in>& ltm_in,
         xf::cv::gtm<OUT_TYPE, XF_GTM_T, IN_TYPE, SIN_CHANNEL_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XFCVDEPTH_ltm_in,
                     XFCVDEPTH_aecin>(ltm_in, aecin, mean1, mean2, L_max1, L_max2, L_min1, L_min2, c1, c2);
     } else if (mode_qnd) {
-        xf::cv::xf_QuatizationDithering<OUT_TYPE, XF_GTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPCX, XFCVDEPTH_ltm_in,
-                                        XFCVDEPTH_aecin>(ltm_in, aecin);
+        xf::cv::xf_QuatizationDithering<OUT_TYPE, XF_GTM_T, XF_HEIGHT, XF_WIDTH, 256, Q_VAL, XF_NPPCX, XF_USE_URAM,
+                                        XFCVDEPTH_ltm_in, XFCVDEPTH_aecin>(ltm_in, aecin);
 
     } else {
         fifo_copy<OUT_TYPE, XF_GTM_T, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XFCVDEPTH_ltm_in, XFCVDEPTH_aecin>(ltm_in, aecin,

@@ -30,6 +30,7 @@
 #define XF_CV_DEPTH_IN 2
 #define XF_CV_DEPTH_OUT 2
 /* Filter window size*/
+#define XF_USE_URAM 0
 
 #define WINDOW_SIZE 7
 

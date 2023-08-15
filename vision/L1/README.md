@@ -27,6 +27,6 @@ export OPENCV_LIB=< path-to-opencv-lib-folder >
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:< path-to-opencv-lib-folder >
 
-make run CSIM=< 1/0 > CSYNTH=< 1/0 > COSIM=< 1/0 > VIVADO_IMPL=< 1/0 >
+make run TARGET=<csim / csynth / cosim / vivado_impl >
 
 Note : Please read "Getting started with HLS" section of [Vitis Vision documentation](https://docs.xilinx.com/r/en-US/Vitis_Libraries/vision/index.html) for special cases, constraints and other full details.

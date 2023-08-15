@@ -74,6 +74,7 @@ _GENERIC_BPC_TPLT_DEC class GenericBPC {
     xf::cv::Window<K_ROWS, XF_NPIXPERCYCLE(NPPC) + (K_COLS - 1), XF_DTUNAME(SRC_T, NPPC)>
         src_blk;                                 // Kernel sized image block with pixel parallelism
     xf::cv::Scalar<K_ROWS, K_ROW_IDX_T> row_idx; // To store row index for circular buffer access
+
     xf::cv::LineBuffer<K_ROWS,
                        (COLS >> _NPPC_SHIFT_VAL),
                        XF_TNAME(SRC_T, NPPC),
@@ -114,13 +115,13 @@ _GENERIC_BPC_TPLT_DEC class GenericBPC {
                            xf::cv::Mat<SRC_T, ROWS, COLS, NPPC, XFCVDEPTH_IN_1>& _src,
                            xf::cv::Mat<SRC_T, ROWS, COLS, NPPC, XFCVDEPTH_OUT_1>& _dst,
                            int sl_id,
-                           XF_TNAME(SRC_T, NPPC) str_buff[5][COLS >> XF_BITSHIFT(NPPC)]);
+                           XF_TNAME(SRC_T, NPPC) str_buff[4][COLS >> XF_BITSHIFT(NPPC)]);
     void process_image(xf::cv::Mat<SRC_T, ROWS, COLS, NPPC, XFCVDEPTH_IN_1>& _src,
                        xf::cv::Mat<SRC_T, ROWS, COLS, NPPC, XFCVDEPTH_OUT_1>& _dst);
     void process_image_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPPC, XFCVDEPTH_IN_1>& _src,
                              xf::cv::Mat<SRC_T, ROWS, COLS, NPPC, XFCVDEPTH_OUT_1>& _dst,
                              int sl_id,
-                             XF_TNAME(SRC_T, NPPC) str_buff[5][COLS >> XF_BITSHIFT(NPPC)]);
+                             XF_TNAME(SRC_T, NPPC) str_buff[4][COLS >> XF_BITSHIFT(NPPC)]);
 };
 
 // -----------------------------------------------------------------------------------
@@ -206,10 +207,13 @@ COL_LOOP:
             XF_TNAME(SRC_T, NPPC) tmp_rd_buff;
 
             // Read packed data
-            tmp_rd_buff = buff.val[row_idx.val[kr]][c]; // tmp_rd_buff = (c < num_clks_per_row)
-                                                        // ? buff.val[row_idx.val[kr]][c] :
-                                                        // (XF_TNAME(SRC_T, NPPC))0;
-
+            if (c < num_clks_per_row) {
+                tmp_rd_buff = buff.val[row_idx.val[kr]][c]; // tmp_rd_buff = (c < num_clks_per_row)
+                                                            // ? buff.val[row_idx.val[kr]][c] :
+                                                            // (XF_TNAME(SRC_T, NPPC))0;
+            } else {
+                tmp_rd_buff = 0;
+            }
             // Extract pixels from packed data and store in 'src_blk'
             xfExtractPixels<NPPC, XF_WORDWIDTH(SRC_T, NPPC), XF_DEPTH(SRC_T, NPPC)>(src_blk.val[kr], tmp_rd_buff,
                                                                                     (K_COLS - 1));
@@ -290,7 +294,7 @@ _GENERIC_BPC_TPLT void _GENERIC_BPC::process_row_multi(ROW_IDX_T r,
                                                        xf::cv::Mat<SRC_T, ROWS, COLS, NPPC, XFCVDEPTH_IN_1>& _src,
                                                        xf::cv::Mat<SRC_T, ROWS, COLS, NPPC, XFCVDEPTH_OUT_1>& _dst,
                                                        int sl_id,
-                                                       XF_TNAME(SRC_T, NPPC) str_buff[5][COLS >> XF_BITSHIFT(NPPC)]) {
+                                                       XF_TNAME(SRC_T, NPPC) str_buff[4][COLS >> XF_BITSHIFT(NPPC)]) {
 #pragma HLS INLINE OFF
 
     // --------------------------------------
@@ -333,10 +337,11 @@ COL_LOOP:
         // .........................................................
         if ((r < _src.rows) && (c < num_clks_per_row)) {
             buff.val[row_idx.val[K_ROWS - 1]][c] = _src.read(rd_ptr++);
+            str_buff1.val[row_idx.val[K_ROWS - 1]][c] = buff.val[row_idx.val[K_ROWS - 1]][c];
         }
 
-        if ((r > _src.rows - 5) && sl_id < SLICES - 1) {
-            str_buff[r - _src.rows + 4][c] = buff.val[row_idx.val[K_ROWS - 1]][c];
+        if ((r > _src.rows - 5) && (sl_id < SLICES - 1) && (c < num_clks_per_row)) {
+            str_buff[r - _src.rows + 4][c] = str_buff1.val[row_idx.val[K_ROWS - 1]][c];
         }
 
     // Fetch data from RAMs and store in 'src_blk' for processing
@@ -345,12 +350,18 @@ COL_LOOP:
     BUFF_RD_LOOP:
         for (K_ROW_IDX_T kr = 0; kr < K_ROWS; kr++) {
 #pragma HLS UNROLL
+
             XF_TNAME(SRC_T, NPPC) tmp_rd_buff;
 
             // Read packed data
-            tmp_rd_buff = buff.val[row_idx.val[kr]][c]; // tmp_rd_buff = (c < num_clks_per_row)
-                                                        // ? buff.val[row_idx.val[kr]][c] :
-                                                        // (XF_TNAME(SRC_T, NPPC))0;
+            if (c < num_clks_per_row) {
+                tmp_rd_buff = buff.val[row_idx.val[kr]][c]; // tmp_rd_buff = (c < num_clks_per_row)
+                                                            // ? buff.val[row_idx.val[kr]][c] :
+                                                            // (XF_TNAME(SRC_T, NPPC))0;
+
+            } else {
+                tmp_rd_buff = 0;
+            }
 
             // Extract pixels from packed data and store in 'src_blk'
             xfExtractPixels<NPPC, XF_WORDWIDTH(SRC_T, NPPC), XF_DEPTH(SRC_T, NPPC)>(src_blk.val[kr], tmp_rd_buff,
@@ -386,6 +397,7 @@ COL_LOOP:
             // Apply the filter on the NxM_src_blk
             F oper;
             oper.apply(NxM_src_blk, &out_pix);
+
             // Start packing the out pixel value every clock of NPPC
             out_pixels.range(((pix_idx + 1) * _DST_PIX_WIDTH) - 1, (pix_idx * _DST_PIX_WIDTH)) = out_pix;
         }
@@ -505,7 +517,7 @@ ROW_LOOP:
 _GENERIC_BPC_TPLT void _GENERIC_BPC::process_image_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPPC, XFCVDEPTH_IN_1>& _src,
                                                          xf::cv::Mat<SRC_T, ROWS, COLS, NPPC, XFCVDEPTH_OUT_1>& _dst,
                                                          int sl_id,
-                                                         XF_TNAME(SRC_T, NPPC) str_buff[5][COLS >> XF_BITSHIFT(NPPC)]) {
+                                                         XF_TNAME(SRC_T, NPPC) str_buff[4][COLS >> XF_BITSHIFT(NPPC)]) {
 #pragma HLS INLINE OFF
     // Constant declaration
     const uint32_t _TC =
@@ -733,7 +745,7 @@ void badpixelcorrection_multi(xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN_1
                               xf::cv::Mat<TYPE, ROWS, COLS, NPPC, XFCVDEPTH_OUT_1>& _dst,
                               int stream_id,
                               int sl_id,
-                              XF_TNAME(TYPE, NPPC) str_buff[STREAMS][5][COLS >> XF_BITSHIFT(NPPC)]) {
+                              XF_TNAME(TYPE, NPPC) str_buff[STREAMS][4][COLS >> XF_BITSHIFT(NPPC)]) {
 // clang-format off
 #pragma HLS INLINE OFF
     // clang-format on

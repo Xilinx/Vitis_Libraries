@@ -40,6 +40,7 @@
 #define NEWHEIGHT 512
 #define WIDTH 512
 #define HEIGHT 512
+#define XF_USE_URAM 1
 #define XF_CV_DEPTH_in_mat 2
 #define XF_CV_DEPTH_out_mat 2
 
