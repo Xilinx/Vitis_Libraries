@@ -29,7 +29,7 @@
                         "type": "DdrIntType *"
                     }
                 ],
-                "visible": true
+                "visible": false
             },
             "target_domain": "PL"
         },
@@ -76,7 +76,7 @@
                         "type": "BLAS_interface *"
                     }
                 ],
-                "visible": true
+                "visible": false
             },
             "target_domain": "PL"
         },

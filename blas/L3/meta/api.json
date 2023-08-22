@@ -107,7 +107,7 @@
                         "type": "unsigned int"
                     }
                 ],
-                "visible": true
+                "visible": false
             },
             "target_domain": "CPU"
         },
@@ -159,7 +159,7 @@
                         "type": "unsigned int"
                     }
                 ],
-                "visible": true
+                "visible": false
             },
             "target_domain": "CPU"
         },
@@ -216,7 +216,7 @@
                         "type": "unsigned int"
                     }
                 ],
-                "visible": true
+                "visible": false
             },
             "target_domain": "CPU"
         },
@@ -273,7 +273,7 @@
                         "type": "unsigned int"
                     }
                 ],
-                "visible": true
+                "visible": false
             },
             "target_domain": "CPU"
         },
@@ -335,7 +335,7 @@
                         "type": "unsigned int"
                     }
                 ],
-                "visible": true
+                "visible": false
             },
             "target_domain": "CPU"
         },
@@ -409,7 +409,7 @@
                         "type": "=0"
                     }
                 ],
-                "visible": true
+                "visible": false
             },
             "target_domain": "CPU"
         },
@@ -503,7 +503,7 @@
                         "type": "unsigned int"
                     }
                 ],
-                "visible": true
+                "visible": false
             },
             "target_domain": "CPU"
         },
@@ -577,7 +577,7 @@
                         "type": "=0"
                     }
                 ],
-                "visible": true
+                "visible": false
             },
             "target_domain": "CPU"
         },
@@ -775,7 +775,7 @@
                         "type": "dex=0"
                     }
                 ],
-                "visible": true
+                "visible": false
             },
             "target_domain": "CPU"
         },

@@ -51,7 +51,7 @@
                         "type": "t_IndexType &"
                     }
                 ],
-                "visible": true
+                "visible": false
             },
             "target_domain": "PL"
         },
@@ -105,7 +105,7 @@
                         "type": "t_IndexType &"
                     }
                 ],
-                "visible": true
+                "visible": false
             },
             "target_domain": "PL"
         },
@@ -159,7 +159,7 @@
                         "type": "t_DataType &"
                     }
                 ],
-                "visible": true
+                "visible": false
             },
             "target_domain": "PL"
         },
@@ -223,7 +223,7 @@
                         "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
                     }
                 ],
-                "visible": true
+                "visible": false
             },
             "target_domain": "PL"
         },
@@ -277,7 +277,7 @@
                         "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
                     }
                 ],
-                "visible": true
+                "visible": false
             },
             "target_domain": "PL"
         },
@@ -336,7 +336,7 @@
                         "type": "t_DataType &"
                     }
                 ],
-                "visible": true
+                "visible": false
             },
             "target_domain": "PL"
         },
@@ -721,7 +721,7 @@
                         "type": "t_DataType &"
                     }
                 ],
-                "visible": true
+                "visible": false
             },
             "target_domain": "PL"
         },
@@ -780,7 +780,7 @@
                         "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
                     }
                 ],
-                "visible": true
+                "visible": false
             },
             "target_domain": "PL"
         },
@@ -844,7 +844,7 @@
                         "type": "hls::stream< typename WideType< t_DataType, t_ParEntries >::t_TypeInt > &"
                     }
                 ],
-                "visible": true
+                "visible": false
             },
             "target_domain": "PL"
         },
