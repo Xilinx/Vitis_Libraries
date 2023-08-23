@@ -1,0 +1,20 @@
+[hls]
+
+clock=3.3333
+flow_target=vivado
+syn.file=${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_rbc/tests/RTM_x36_y60_z40_t4_p2/../../forward.cpp
+syn.file_cflags=${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_rbc/tests/RTM_x36_y60_z40_t4_p2/../../forward.cpp,-I${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_rbc/tests/RTM_x36_y60_z40_t4_p2 -I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include/hw/rtm3d -I${XF_PROJ_ROOT}/../blas/L1/include/hw
+syn.top=top
+tb.file=${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_rbc/tests/RTM_x36_y60_z40_t4_p2/../../main.cpp
+tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_rbc/tests/RTM_x36_y60_z40_t4_p2/../../main.cpp,-std=c++14 -I${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_rbc/tests/RTM_x36_y60_z40_t4_p2 -I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/../blas/L1/include/hw -I${XF_PROJ_ROOT}/../blas/L1/tests/sw/include
+
+csim.argv=${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_rbc/tests/RTM_x36_y60_z40_t4_p2/data/
+
+cosim.argv=${XF_PROJ_ROOT}/L1/tests/hw/rtm3d/forward_rbc/tests/RTM_x36_y60_z40_t4_p2/data/
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog
+
+

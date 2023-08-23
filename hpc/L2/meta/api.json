@@ -8,7 +8,8 @@
                 "api_name": "krnl_control",
                 "display_name": "krnl_control",
                 "brief": "krnl_control kernel function to load instructions and control the cg solver",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "krnl_control.hpp"
                 ],
@@ -24,7 +25,8 @@
                         "type": "CG_interface *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "krnl_duplicate",
@@ -33,7 +35,8 @@
                 "api_name": "krnl_duplicate",
                 "display_name": "krnl_duplicate",
                 "brief": "krnl_duplicate kernel function to compute A * p",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "krnl_duplicate.hpp"
                 ],
@@ -69,7 +72,8 @@
                         "type": "hls::stream< ap_uint< CG_tkStrWidth > > &p_tokenX, hls::stream< ap_uint< CG_tkStrWidth > > &p_token"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "krnl_gemv",
@@ -78,7 +82,8 @@
                 "api_name": "krnl_gemv",
                 "display_name": "krnl_gemv",
                 "brief": "krnl_gemv kernel function to compute A * p",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "krnl_gemv.hpp"
                 ],
@@ -114,7 +119,8 @@
                         "type": "hls::stream< ap_uint< CG_tkStrWidth > > &p_tokenO"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "krnl_timer",
@@ -123,7 +129,8 @@
                 "api_name": "krnl_timer",
                 "display_name": "krnl_timer",
                 "brief": "krnl_timer kernel function to count clock cycles",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "krnl_timer.hpp"
                 ],
@@ -144,7 +151,8 @@
                         "type": "hls::stream< xf::hpc::Clock_t > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "krnl_update_pk",
@@ -153,7 +161,8 @@
                 "api_name": "krnl_update_pk",
                 "display_name": "krnl_update_pk",
                 "brief": "krnl_update_pk kernel function to update vector pk",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "krnl_update_pk.hpp"
                 ],
@@ -189,7 +198,8 @@
                         "type": "hls::stream< ap_uint< CG_tkStrWidth > > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "krnl_update_rk",
@@ -198,7 +208,8 @@
                 "api_name": "krnl_update_rk",
                 "display_name": "krnl_update_rk",
                 "brief": "krnl_update_xr kernel function to update the vector xk and rk",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "krnl_update_rk.hpp"
                 ],
@@ -234,7 +245,8 @@
                         "type": "hls::stream< ap_uint< CG_tkStrWidth > > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "krnl_update_rk_jacobi",
@@ -243,7 +255,8 @@
                 "api_name": "krnl_update_rk_jacobi",
                 "display_name": "krnl_update_rk_jacobi",
                 "brief": "krnl_update_xr kernel function to update the vector xk and rk",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "krnl_update_rk_jacobi.hpp"
                 ],
@@ -279,7 +292,8 @@
                         "type": "hls::stream< ap_uint< CG_tkStrWidth > > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "krnl_update_xr",
@@ -288,7 +302,8 @@
                 "api_name": "krnl_update_xr",
                 "display_name": "krnl_update_xr",
                 "brief": "krnl_update_xr kernel function to update the vector xk and rk",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "krnl_update_xr.hpp"
                 ],
@@ -334,7 +349,8 @@
                         "type": "hls::stream< ap_uint< CG_tkStrWidth > > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "fcnKernel",
@@ -343,7 +359,8 @@
                 "api_name": "fcnKernel",
                 "display_name": "fcnKernel",
                 "brief": "fcnKernel defines the kernel top function, with DDR/HBM as an interface",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "fcnKernel.hpp"
                 ],
@@ -364,7 +381,8 @@
                         "type": "DdrIntType *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "backward",
@@ -373,7 +391,8 @@
                 "api_name": "backward",
                 "display_name": "backward",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "rtmbackward.hpp"
                 ],
@@ -383,7 +402,8 @@
                 "instance": "function",
                 "parameters": [],
                 "ports": []
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "rtmbackward",
@@ -392,7 +412,8 @@
                 "api_name": "rtmbackward",
                 "display_name": "rtmbackward",
                 "brief": "rfmbackward kernel function",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "rtmbackward.hpp"
                 ],
@@ -488,7 +509,8 @@
                         "type": "RTM_interface *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "rtmforward",
@@ -497,7 +519,8 @@
                 "api_name": "rtmforward",
                 "display_name": "rtmforward",
                 "brief": "rfmforward kernel function",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "rtmforward_hbc.hpp"
                 ],
@@ -628,7 +651,8 @@
                         "type": "RTM_upbType *p_up"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         }
     ]
 }

@@ -1,0 +1,20 @@
+[hls]
+
+clock=3.3333
+flow_target=vivado
+syn.file=${XF_PROJ_ROOT}/L1/tests/hw/rtm2d/forward/tests/data_h128_w128_t15_pe4/../../forward.cpp
+syn.file_cflags=${XF_PROJ_ROOT}/L1/tests/hw/rtm2d/forward/tests/data_h128_w128_t15_pe4/../../forward.cpp,-I${XF_PROJ_ROOT}/L1/tests/hw/rtm2d/forward/tests/data_h128_w128_t15_pe4 -I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/../blas/L1/include/hw
+syn.top=top
+tb.file=${XF_PROJ_ROOT}/L1/tests/hw/rtm2d/forward/tests/data_h128_w128_t15_pe4/../../main.cpp
+tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/hw/rtm2d/forward/tests/data_h128_w128_t15_pe4/../../main.cpp,-std=c++14 -I${XF_PROJ_ROOT}/L1/tests/hw/rtm2d/forward/tests/data_h128_w128_t15_pe4 -I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/../blas/L1/include/hw -I${XF_PROJ_ROOT}/../blas/L1/tests/sw/include
+
+csim.argv=${XF_PROJ_ROOT}/L1/tests/hw/rtm2d/forward/tests/data_h128_w128_t15_pe4/data/
+
+cosim.argv=${XF_PROJ_ROOT}/L1/tests/hw/rtm2d/forward/tests/data_h128_w128_t15_pe4/data/
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog
+
+
