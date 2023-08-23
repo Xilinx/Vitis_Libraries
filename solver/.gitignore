@@ -33,6 +33,6 @@
 
 # tmp files
 *~
-prj
+*.prj
 vivado_hls.log
 xrt.ini
