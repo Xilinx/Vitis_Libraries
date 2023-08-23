@@ -3,7 +3,6 @@
     "description": "Xilinx Shared Host Utility Test", 
     "flow": "vitis", 
     "gui": true, 
-    "platform_type": "", 
     "platform_allowlist": [
         "u280", 
         "u200", 

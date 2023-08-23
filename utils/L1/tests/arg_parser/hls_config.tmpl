@@ -1,0 +1,19 @@
+[hls]
+
+clock=2.5
+flow_target=vivado
+syn.file=test.cpp
+syn.file_cflags=test.cpp,-I${XF_PROJ_ROOT}/L1/include
+syn.top=dut
+tb.file=test.cpp
+tb.file_cflags=test.cpp,-I${XF_PROJ_ROOT}/L1/include
+
+csim.argv=--xclbin vadd.xclbin -q 0 -v -i 2
+
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog
+
+

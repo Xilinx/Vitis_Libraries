@@ -8,7 +8,8 @@
                 "api_name": "xf::common::utils_hw::axiToMultiStream",
                 "display_name": "axiToMultiStream",
                 "brief": "Loading multiple categories of data from one AXI master to streams.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "axi_to_multi_stream.hpp"
                 ],
@@ -90,7 +91,8 @@
                         "type": "const int"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::common::utils_hw::axiToStream",
@@ -99,7 +101,8 @@
                 "api_name": "xf::common::utils_hw::axiToStream",
                 "display_name": "axiToStream",
                 "brief": "Loading data elements from AXI master to stream.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "axi_to_stream.hpp"
                 ],
@@ -146,7 +149,8 @@
                         "type": "hls::stream<bool>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::common::utils_hw::axiToCharStream",
@@ -155,7 +159,8 @@
                 "api_name": "xf::common::utils_hw::axiToCharStream",
                 "display_name": "axiToCharStream",
                 "brief": "Loading char data from AXI master to stream.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "axi_to_stream.hpp"
                 ],
@@ -207,7 +212,8 @@
                         "type": "const int"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "Multiplexer<S, W> xf::common::utils_hw::makeMux",
@@ -216,7 +222,8 @@
                 "api_name": "Multiplexer<S, W> xf::common::utils_hw::makeMux",
                 "display_name": "makeMux",
                 "brief": "Create",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "multiplexer.hpp"
                 ],
@@ -243,7 +250,8 @@
                         "type": "stream<ap_uint<W> >&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::common::utils_hw::streamCombine",
@@ -252,7 +260,8 @@
                 "api_name": "xf::common::utils_hw::streamCombine",
                 "display_name": "streamCombine",
                 "brief": "Combine multiple streams into one, shift selected streams to LSB side.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "stream_combine.hpp"
                 ],
@@ -304,7 +313,8 @@
                         "type": "LSBSideT"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::common::utils_hw::streamDiscard",
@@ -313,7 +323,8 @@
                 "api_name": "xf::common::utils_hw::streamDiscard",
                 "display_name": "streamDiscard",
                 "brief": "Discard multiple streams with end flag helper for each.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "stream_discard.hpp"
                 ],
@@ -345,7 +356,8 @@
                         "type": "hls::stream<bool>"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::common::utils_hw::streamDup",
@@ -354,7 +366,8 @@
                 "api_name": "xf::common::utils_hw::streamDup",
                 "display_name": "streamDup",
                 "brief": "Duplicate stream.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "stream_dup.hpp"
                 ],
@@ -396,7 +409,8 @@
                         "type": "hls::stream<bool>"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::common::utils_hw::streamNToOne",
@@ -405,7 +419,8 @@
                 "api_name": "xf::common::utils_hw::streamNToOne",
                 "display_name": "streamNToOne",
                 "brief": "stream distribute, skip to read the empty input streams.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "load_balance.hpp"
                 ],
@@ -457,7 +472,8 @@
                         "type": "LoadBalanceT"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::common::utils_hw::streamOneToN",
@@ -466,7 +482,8 @@
                 "api_name": "xf::common::utils_hw::streamOneToN",
                 "display_name": "streamOneToN",
                 "brief": "stream distribute, using load-balancing algorithm.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "load_balance.hpp"
                 ],
@@ -518,7 +535,8 @@
                         "type": "LoadBalanceT"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::common::utils_hw::streamReorder",
@@ -527,7 +545,8 @@
                 "api_name": "xf::common::utils_hw::streamReorder",
                 "display_name": "streamReorder",
                 "brief": "Window-reorder in a stream.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "stream_reorder.hpp"
                 ],
@@ -574,7 +593,8 @@
                         "type": "hls::stream<bool>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::common::utils_hw::streamShuffle",
@@ -583,7 +603,8 @@
                 "api_name": "xf::common::utils_hw::streamShuffle",
                 "display_name": "streamShuffle",
                 "brief": "Shuffle the contents from an array of streams to another.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "stream_shuffle.hpp"
                 ],
@@ -635,7 +656,8 @@
                         "type": "hls::stream<bool>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::common::utils_hw::streamSplit",
@@ -644,7 +666,8 @@
                 "api_name": "xf::common::utils_hw::streamSplit",
                 "display_name": "streamSplit",
                 "brief": "split one wide stream into multiple streams, start from the LSB.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "stream_split.hpp"
                 ],
@@ -696,7 +719,8 @@
                         "type": "LSBSideT"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::common::utils_hw::streamSync",
@@ -705,7 +729,8 @@
                 "api_name": "xf::common::utils_hw::streamSync",
                 "display_name": "streamSync",
                 "brief": "Synchronize streams for successor module.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "stream_sync.hpp"
                 ],
@@ -747,7 +772,8 @@
                         "type": "hls::stream<bool>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::common::utils_hw::streamToAxi",
@@ -756,7 +782,8 @@
                 "api_name": "xf::common::utils_hw::streamToAxi",
                 "display_name": "streamToAxi",
                 "brief": "Write elements in burst to AXI master port.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "stream_to_axi.hpp"
                 ],
@@ -798,32 +825,8 @@
                         "type": "hls::stream<bool>&"
                     }
                 ]
-            }
-        },
-        {
-            "api_name": "char* xf::common::utils_sw::clErrorToString",
-            "spec": {
-                "schema": "vitis_libraries_api_list_schema-1.0",
-                "api_name": "char* xf::common::utils_sw::clErrorToString",
-                "display_name": "clErrorToString",
-                "brief": "",
-                "target_domain": "",
-                "header_file_name": [
-                    "logger.hpp"
-                ],
-                "search_paths": [
-                    "L1/include/xf_utils_sw"
-                ],
-                "instance": "function",
-                "parameters": [],
-                "ports": [
-                    {
-                        "name": "err",
-                        "direction": "",
-                        "type": "int"
-                    }
-                ]
-            }
+            },
+            "target_domain": "PL"
         }
     ]
 }
