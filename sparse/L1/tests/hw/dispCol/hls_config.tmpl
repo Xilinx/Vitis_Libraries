@@ -1,0 +1,18 @@
+[hls]
+
+clock=3.3333
+flow_target=vivado
+syn.file=${XF_PROJ_ROOT}/L1/tests/hw/dispCol/uut_top.cpp
+syn.file_cflags=${XF_PROJ_ROOT}/L1/tests/hw/dispCol/uut_top.cpp,-I ${XF_PROJ_ROOT}/../blas/L1/include/hw -I ${XF_PROJ_ROOT}/L1/tests/hw -I ${XF_PROJ_ROOT}/L1/include/hw -g -O0 -std=c++11 -DSPARSE_maxColParBlocks=256 -DSPARSE_hbmChannels=4 -DSPARSE_dataType=float -DSPARSE_logParEntries=2 -DSPARSE_parEntries=4 -DSPARSE_dataBits=32 -DSPARSE_printWidth=6
+syn.top=uut_top
+tb.file=${XF_PROJ_ROOT}/L1/tests/hw/dispCol/test.cpp
+tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/hw/dispCol/test.cpp,-I ${XF_PROJ_ROOT}/../blas/L1/include/hw -I ${XF_PROJ_ROOT}/L1/tests/hw -I ${XF_PROJ_ROOT}/L1/include/hw -g -O0 -std=c++11 -DSPARSE_maxColParBlocks=256 -DSPARSE_hbmChannels=4 -DSPARSE_dataType=float -DSPARSE_logParEntries=2 -DSPARSE_parEntries=4 -DSPARSE_dataBits=32 -DSPARSE_printWidth=6 -I ${XF_PROJ_ROOT}/L1/include/sw
+
+
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog
+
+

@@ -8,7 +8,8 @@
                 "api_name": "xf::sparse::xBarCol",
                 "display_name": "xBarCol",
                 "brief": "xBarCol function that distributes input col values to the dedicated banks according to their col index pointers",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cscmv.hpp"
                 ],
@@ -70,7 +71,8 @@
                         "type": "hls::stream< ap_uint< t_DataBits *(1<< t_LogParEntries)> > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::sparse::xBarRow",
@@ -79,7 +81,8 @@
                 "api_name": "xf::sparse::xBarRow",
                 "display_name": "xBarRow",
                 "brief": "xBarRow function that multiplies input NNZs' values with input vectors and distributes the results to the dedicated banks according to their row indices",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cscmv.hpp"
                 ],
@@ -146,7 +149,8 @@
                         "type": "hls::stream< ap_uint< 1 > >"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::sparse::rowAgg",
@@ -155,7 +159,8 @@
                 "api_name": "xf::sparse::rowAgg",
                 "display_name": "rowAgg",
                 "brief": "rowAgg function that aggregates multiple row entry streams into one row entry stream",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cscmv.hpp"
                 ],
@@ -207,7 +212,8 @@
                         "type": "hls::stream<ap_uint<t_DataBits * t_ParEntries> >&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::sparse::cscRow",
@@ -216,7 +222,8 @@
                 "api_name": "xf::sparse::cscRow",
                 "display_name": "cscRow",
                 "brief": "cscRow function that returns the multiplication results of a sparse matrix and a dense vector",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cscmv.hpp"
                 ],
@@ -293,7 +300,8 @@
                         "type": "hls::stream< ap_uint< t_DataBits *(1<< t_LogParEntries)> > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::sparse::dispColVec",
@@ -302,7 +310,8 @@
                 "api_name": "xf::sparse::dispColVec",
                 "display_name": "dispColVec",
                 "brief": "dispColVec function that forward and copy input column vector and parameters",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "moverL1.hpp"
                 ],
@@ -359,7 +368,8 @@
                         "type": "hls::stream< ap_uint< t_DataBits *t_ParEntries > > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::sparse::dispCol",
@@ -368,7 +378,8 @@
                 "api_name": "xf::sparse::dispCol",
                 "display_name": "dispCol",
                 "brief": "dispCol function that dispatchs input column vectors accross parallel CUs for computing SpMV simultaneously",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "moverL1.hpp"
                 ],
@@ -415,7 +426,8 @@
                         "type": "hls::stream< ap_uint< t_DataBits *t_ParEntries > >"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::sparse::dispNnzCol",
@@ -424,7 +436,8 @@
                 "api_name": "xf::sparse::dispNnzCol",
                 "display_name": "dispNnzCol",
                 "brief": "dispNnzCol function that dispatchs NNZ Col pointer entries accross parallel compute CUs",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "moverL1.hpp"
                 ],
@@ -471,7 +484,8 @@
                         "type": "hls::stream< ap_uint< t_DataBits *t_ParEntries > >"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         }
     ]
 }
