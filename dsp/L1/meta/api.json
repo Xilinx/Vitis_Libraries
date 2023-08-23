@@ -40,7 +40,7 @@
                         "type": "hls::stream< typename FFTOutputTraits< ssr_fft_param_struct::N, ssr_fft_param_struct::R, ssr_fft_param_struct::scaling_mode, ssr_fft_param_struct::transform_direction, ssr_fft_param_struct::butterfly_rnd_mode, typename FFTInputTraits< T_in >::T_castedType >::T_FFTOutType >[ssr_fft_param_struct::R]"
                     }
                 ],
-                "visible": true
+                "visible": false
             },
             "target_domain": "PL"
         },
@@ -88,7 +88,7 @@
                         "type": "hls::stream< typename FFTOutputTraits< ssr_fft_param_struct::N, ssr_fft_param_struct::R, ssr_fft_param_struct::scaling_mode, ssr_fft_param_struct::transform_direction, ssr_fft_param_struct::butterfly_rnd_mode, typename FFTInputTraits< T_in >::T_castedType >::T_FFTOutType >[ssr_fft_param_struct::R]"
                     }
                 ],
-                "visible": true
+                "visible": false
             },
             "target_domain": "PL"
         },
@@ -131,7 +131,7 @@
                         "type": "hls::stream< typename FFTOutputTraits< ssr_fft_param_struct::N, ssr_fft_param_struct::R, ssr_fft_param_struct::scaling_mode, ssr_fft_param_struct::transform_direction, ssr_fft_param_struct::butterfly_rnd_mode, typename FFTInputTraits< T_in >::T_castedType >::T_FFTOutType >[ssr_fft_param_struct::R]"
                     }
                 ],
-                "visible": true
+                "visible": false
             },
             "target_domain": "PL"
         },
@@ -179,7 +179,7 @@
                         "type": "hls::stream< typename FFTOutputTraits< ssr_fft_param_struct::N, ssr_fft_param_struct::R, ssr_fft_param_struct::scaling_mode, ssr_fft_param_struct::transform_direction, ssr_fft_param_struct::butterfly_rnd_mode, typename FFTInputTraits< T_in >::T_castedType >::T_FFTOutType >[ssr_fft_param_struct::R]"
                     }
                 ],
-                "visible": true
+                "visible": false
             },
             "target_domain": "PL"
         },
@@ -257,7 +257,7 @@
                         "type": "typename WideTypeDefs< t_memWidth, typename FFTIOTypes< t_ssrFFTParamsColProc, typename FFTIOTypes< t_ssrFFTParamsRowProc, T_elemType >::T_outType >::T_outType >::WideIFStreamType &"
                     }
                 ],
-                "visible": true
+                "visible": false
             },
             "target_domain": "PL"
         },
@@ -335,10 +335,10 @@
                         "type": "typename WideTypeDefs< t_memWidth, typename FFTIOTypes< t_ssrFFTParamsColProc, typename FFTIOTypes< t_ssrFFTParamsRowProc, T_elemType >::T_outType >::T_outType >::WideIFStreamType &"
                     }
                 ],
-                "visible": true
+                "visible": false
             },
             "target_domain": "PL"
         }
     ],
-    "target_domain": ""
+    "target_domain": "PL"
 }
