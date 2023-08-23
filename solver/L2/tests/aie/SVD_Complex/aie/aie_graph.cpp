@@ -54,26 +54,21 @@ int golden_check(std::string output_file, std::string golden_file, int num) {
     char c = 'T';
     string str_gld, str_out;
 
-    for (int j = 0; j < num; j += 4) {
-#if defined(__AIESIM__)
-        getline(f_out, str_out);
-#endif
-        for (int i = 0; i < 4; i++) {
-            getline(f_gld, str_gld, ' ');
-            getline(f_out, str_out, ' ');
+    for (int j = 0; j < num; j++) {
+        getline(f_gld, str_gld, '\n');
+        gld = atof(str_gld.c_str());
 
-            gld = atof(str_gld.c_str());
-            out = atof(str_out.c_str());
-            if (0 != compare(out, gld)) {
-                checked++;
-                std::cout << "Golden check mis-matched, error_num=" << checked << ", element id=" << j + i
-                          << ", out=" << out << ", gld=" << gld << std::endl;
-            } else {
-                //std::cout << "Golden matched,  element id=" << j + i << ", out=" << out << ", gld=" << gld << std::endl;
+        while (getline(f_out, str_out, '\n')) {
+            if (str_out.front() != c) {
+                break;
             }
         }
-
-        getline(f_out, str_out);
+        out = atof(str_out.c_str());
+        if (0 != compare(out, gld)) {
+            checked++;
+            std::cout << "Golden check mis-matched, error_num=" << checked << ", element id=" << j << ", out=" << out
+                      << ", gld=" << gld << std::endl;
+        }
     }
     return checked;
 }
@@ -95,7 +90,7 @@ int main(int argc, char** argv) {
     }
 
     // compare and check
-    int num = test_param::col_num * test_param::row_num * 2;
+    int num = col_num * row_num * 2;
     std::cout << "checking Res0 againt Golden" << std::endl;
     int err_n0 = golden_check("data/Res0.txt", "data/Gld0.txt", num);
     std::cout << "checking Res1 againt Golden" << std::endl;

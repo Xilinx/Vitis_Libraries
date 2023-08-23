@@ -1944,6 +1944,143 @@
                 "visible": true
             },
             "target_domain": "PL"
+        },
+        {
+            "api_name": "xf::solver::cholesky_float",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::cholesky_float",
+                "display_name": "cholesky_float",
+                "brief": "cholesky decomposition for float data type.",
+                "target_domain": "AIE",
+                "header_file_name": [
+                    "cholesky_float_decomposition.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/aie"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "matA",
+                        "direction": "in",
+                        "type": "input_stream<float>* "
+                    },
+                    {
+                        "name": "matL",
+                        "direction": "out",
+                        "type": "output_stream<float>* "
+                    }
+                ],
+                "visible": false 
+            },
+            "target_domain": "AIE"
+        },
+        {
+            "api_name": "xf::solver::cholesky_complex",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::cholesky_complex",
+                "display_name": "cholesky_complex",
+                "brief": "cholesky decomposition for complex data type.",
+                "target_domain": "AIE",
+                "header_file_name": [
+                    "cholesky_complex_decomposition.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/aie"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "matA_real",
+                        "direction": "in",
+                        "type": "input_stream<float>* "
+                    },
+                    {
+                        "name": "matA_imag",
+                        "direction": "in",
+                        "type": "input_stream<float>* "
+                    },
+                    {
+                        "name": "matL_real",
+                        "direction": "out",
+                        "type": "output_stream<float>* "
+                    },
+                    {
+                        "name": "matL_imag",
+                        "direction": "out",
+                        "type": "output_stream<float>* "
+                    }
+                ],
+                "visible":  false
+            },
+            "target_domain": "AIE"
+        },
+        {
+            "api_name": "xf::solver::GramSchmidtKernelComplexFloat",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::GramSchmidtKernelComplexFloat",
+                "display_name": "cholesky_complex",
+                "brief": "QR decomposition.",
+                "target_domain": "AIE",
+                "header_file_name": [
+                    "qrd_kernel.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/aie"
+                ],
+                "instance": "class",
+                "parameters": [
+                    {
+                        "name": "ROW",
+                        "type": "int",
+                        "description": "Row dimension"
+                    },
+                    {
+                        "name": "COL",
+                        "type": "int",
+                        "description": "Column dimension"
+                    },
+                    {
+                        "name": "KN",
+                        "type": "int",
+                        "description": ""
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "current_column",
+                        "direction": "in",
+                        "type": "int"
+                    },
+                    {
+                        "name": "in_0",
+                        "direction": "in",
+                        "type": "input_stream_cfloat* "
+                    },
+                    {
+                        "name": "in_1",
+                        "direction": "in",
+                        "type": "input_stream_cfloat* "
+                    },
+                    {
+                        "name": "out_0",
+                        "direction": "out",
+                        "type": "output_stream_cfloat* "
+                    },
+                    {
+                        "name": "out_1",
+                        "direction": "out",
+                        "type": "output_stream_cfloat* "
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "AIE"
         }
     ],
     "target_domain": ""

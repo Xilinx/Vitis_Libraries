@@ -1,5 +1,6 @@
 ..
-  copyright 2019 Xilinx, Inc.
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
   
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -27,9 +28,12 @@
 Library Overview
 =================
 
-Vitis Solver Library provides a collection of matrix decomposition operations, linear solvers and eigenvalue solvers on PL.
+AMD Vitis Solver Library provides a collection of matrix decomposition operations, linear solvers and eigenvalue solvers on PL and AI Engine：
  
-Currently this includes the following operations for dense matrix
+PL Solver library
+-----------------
+
+Currently the AMD Vitis PL Solver library includes the following operations for dense matrix
  
 * Matrix decomposition
    * Cholesky decomposition for symmetric positive definite matrix
@@ -46,9 +50,11 @@ Currently this includes the following operations for dense matrix
 * Eigenvalue solver
    * Jacobi eigenvalue solver for symmetric matrix
 
-Vitis Solver Library also provides matrix decomposition operations on AI Engine.
 
-Currently this includes the following operations for dense matrix
+AI Engine Solver library
+------------
+
+Currently the AMD Vitis AIE Solver Library provides the following operations on AI Engine.
 
 * Matrix decomposition
    * Cholesky decomposition for symmetric positive definite matrix
@@ -64,15 +70,21 @@ Software requirements
 
 Hardware requirements
 ~~~~~~~~~~~~~~~~~~~~~
-* `Alveo U200 <https://www.xilinx.com/products/boards-and-kits/alveo/u200.html>`_
-* `Alveo U250 <https://www.xilinx.com/products/boards-and-kits/alveo/u250.html>`_
+* For PL Solver library
+   * `Alveo U200 <https://www.xilinx.com/products/boards-and-kits/alveo/u200.html>`_
+   * `Alveo U250 <https://www.xilinx.com/products/boards-and-kits/alveo/u250.html>`_
+* For AI Engine Solver library
+   * `VCK190 <https://www.xilinx.com/products/boards-and-kits/vck190.html>`_
+
 
 License
 -------
 
     Licensed using the `Apache 2.0 license <https://www.apache.org/licenses/LICENSE-2.0>`_::
 
-    Copyright 2019-2020 Xilinx, Inc.
+    Copyright (C) 2019-2022, Xilinx, Inc.
+    
+    Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
     
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.

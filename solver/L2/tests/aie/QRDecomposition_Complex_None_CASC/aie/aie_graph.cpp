@@ -69,7 +69,7 @@ int golden_check(std::string output_file, std::string golden_file, int num) {
                 std::cout << "Golden check mis-matched, error_num=" << checked << ", element id=" << j + i
                           << ", out=" << out << ", gld=" << gld << std::endl;
             } else {
-                std::cout << "Golden matched,  element id=" << j + i << ", out=" << out << ", gld=" << gld << std::endl;
+                //std::cout << "Golden matched,  element id=" << j + i << ", out=" << out << ", gld=" << gld << std::endl;
             }
         }
 

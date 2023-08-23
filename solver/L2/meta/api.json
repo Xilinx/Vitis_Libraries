@@ -921,6 +921,310 @@
                 "visible": false
             },
             "target_domain": "PL"
+        },
+        {
+            "api_name": "xf::solver::CholeskyGraph",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::CholeskyGraph",
+                "display_name": "cholesky_float_decomposition",
+                "brief": "cholesky decomposition with float data type",
+                "target_domain": "AIE",
+                "header_file_name": [
+                    "cholesky_float_decomposition_graph.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/aie",
+                    "L1/include/aie",
+                    "L1/src/aie"
+                ],
+                "instance": "class",
+                "parameters": [
+                    {
+                        "name": "NUM",
+                        "description": "number of AIE cores used",
+                        "type": "int",
+                        "minimum": 1,
+                        "maximum": 256
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "matA_data",
+                        "direction": "in",
+                        "type": "adf::input_plio",
+                        "data_type": "float"
+                    },
+                    {
+                        "name": "matL_data",
+                        "direction": "out",
+                        "type": "adf::output_plio",
+                        "data_type": "float"
+                    }
+                ],
+                "visible": true
+            },
+            "target_domain": "AIE"
+        },
+        {
+            "api_name": "xf::solver::CholeskyGraph",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::CholeskyGraph",
+                "display_name": "cholesky_complex_decomposition",
+                "brief": "cholesky decomposition with complex data type",
+                "target_domain": "AIE",
+                "header_file_name": [
+                    "cholesky_complex_decomposition_graph.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/aie",
+                    "L1/include/aie",
+                    "L1/src/aie"
+                ],
+                "instance": "class",
+                "parameters": [
+                    {
+                        "name": "NUM",
+                        "description": "number of AIE cores used",
+                        "type": "int",
+                        "minimum": 1,
+                        "maximum": 256
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "matA_real_data",
+                        "direction": "in",
+                        "type": "adf::input_plio",
+                        "data_type": "float"
+                    },
+                    {
+                        "name": "matA_imag_data",
+                        "direction": "in",
+                        "type": "adf::input_plio",
+                        "data_type": "float"
+                    },
+                    {
+                        "name": "matL_real_data",
+                        "direction": "out",
+                        "type": "adf::output_plio",
+                        "data_type": "float"
+                    },
+                    {
+                        "name": "matL_imag_data",
+                        "direction": "out",
+                        "type": "adf::output_plio",
+                        "data_type": "float"
+                    }
+                ],
+                "visible": true
+            },
+            "target_domain": "AIE"
+        },
+        {
+            "api_name": "xf::solver::QRDComplexFloat",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::QRDComplexFloat",
+                "display_name": "QRDComplexFloat",
+                "brief": "QR decomposition ",
+                "target_domain": "AIE",
+                "header_file_name": [
+                    "qrd_graph.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/aie",
+                    "L1/include/aie",
+                    "L1/src/aie"
+                ],
+                "instance": "class",
+                "parameters": [
+                    {
+                        "name": "column_num",
+                        "description": "",
+                        "type": "int",
+                        "minimum": 16,
+                        "maximum": 256
+                    },
+                    {
+                        "name": "row_num",
+                        "description": "",
+                        "type": "int",
+                        "minimum": 16,
+                        "maximum": 1024
+                    },
+                    {
+                        "name": "k_rep",
+                        "description": "",
+                        "type": "int"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "in_0",
+                        "direction": "in",
+                        "type": "adf::input_plio",
+                        "data_type": "cfloat"
+                    },
+                    {
+                        "name": "in_1",
+                        "direction": "in",
+                        "type": "adf::input_plio",
+                        "data_type": "cfloat"
+                    },
+                    {
+                        "name": "out_0",
+                        "direction": "out",
+                        "type": "adf::output_plio",
+                        "data_type": "cfloat"
+                    },
+                    {
+                        "name": "out_1",
+                        "direction": "out",
+                        "type": "adf::output_plio",
+                        "data_type": "cfloat"
+                    }
+                ],
+                "visible": true
+            },
+            "target_domain": "AIE"
+        },
+        {
+            "api_name": "xf::solver::QRDComplexFloat_CASC",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::QRDComplexFloat_CASC",
+                "display_name": "QRDComplexFloat_CASC",
+                "brief": "QR decomposition ",
+                "target_domain": "AIE",
+                "header_file_name": [
+                    "qrd_graph.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/aie",
+                    "L1/include/aie",
+                    "L1/src/aie"
+                ],
+                "instance": "class",
+                "parameters": [
+                    {
+                        "name": "column_num",
+                        "description": "",
+                        "type": "int",
+                        "minimum": 16,
+                        "maximum": 256
+                    },
+                    {
+                        "name": "row_num",
+                        "description": "",
+                        "type": "int",
+                        "minimum": 16,
+                        "maximum": 1024
+                    },
+                    {
+                        "name": "k_rep",
+                        "description": "",
+                        "type": "int"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "in_0",
+                        "direction": "in",
+                        "type": "adf::input_plio",
+                        "data_type": "cfloat"
+                    },
+                    {
+                        "name": "in_1",
+                        "direction": "in",
+                        "type": "adf::input_plio",
+                        "data_type": "cfloat"
+                    },
+                    {
+                        "name": "out_0",
+                        "direction": "out",
+                        "type": "adf::output_plio",
+                        "data_type": "cfloat"
+                    },
+                    {
+                        "name": "out_1",
+                        "direction": "out",
+                        "type": "adf::output_plio",
+                        "data_type": "cfloat"
+                    }
+                ],
+                "visible": true
+            },
+            "target_domain": "AIE"
+        },
+        {
+            "api_name": "xf::solver::QRDComplexFloat",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::QRDComplexFloat",
+                "display_name": "QRDComplexFloat_None_CASC",
+                "brief": "QR decomposition ",
+                "target_domain": "AIE",
+                "header_file_name": [
+                    "qrd_graph.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/aie",
+                    "L1/include/aie",
+                    "L1/src/aie"
+                ],
+                "instance": "class",
+                "parameters": [
+                    {
+                        "name": "column_num",
+                        "description": "",
+                        "type": "int",
+                        "minimum": 16,
+                        "maximum": 256
+                    },
+                    {
+                        "name": "row_num",
+                        "description": "",
+                        "type": "int",
+                        "minimum": 16,
+                        "maximum": 1024
+                    },
+                    {
+                        "name": "k_rep",
+                        "description": "",
+                        "type": "int"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "in_0",
+                        "direction": "in",
+                        "type": "adf::input_plio",
+                        "data_type": "cfloat"
+                    },
+                    {
+                        "name": "in_1",
+                        "direction": "in",
+                        "type": "adf::input_plio",
+                        "data_type": "cfloat"
+                    },
+                    {
+                        "name": "out_0",
+                        "direction": "out",
+                        "type": "adf::output_plio",
+                        "data_type": "cfloat"
+                    },
+                    {
+                        "name": "out_1",
+                        "direction": "out",
+                        "type": "adf::output_plio",
+                        "data_type": "cfloat"
+                    }
+                ],
+                "visible": true
+            },
+            "target_domain": "AIE"
         }
     ]
 }
