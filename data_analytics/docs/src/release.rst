@@ -22,6 +22,12 @@ Release Note
 .. toctree::
    :hidden:
    :maxdepth: 1
+2023.2
+------
+There are some known issues for this release.
+
+* knn_sc in L2 tests fails hardware run with 2023.2 Vitis and XRT. Please use 2023.1 Vitis and XRT for it.
+
 
 2023.1
 ------

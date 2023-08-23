@@ -99,6 +99,10 @@ endif
 CXXFLAGS += $(EXTRA_CXXFLAGS)
 VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 
+ifneq (,$(shell echo $(XPLATFORM) | tr '[:upper:]' '[:lower:]' |  awk '/u2_|samsung_u2/'))
+VPP_FLAGS += --advanced.param compiler.ignorePlatformCompatibilityCheck=true
+endif
+
 ifeq ($(TARGET),sw)
   $(error Error: The sw target is not supported anymore. Please use sw_emu instead)
 else ifeq ($(TARGET),sw_emu)

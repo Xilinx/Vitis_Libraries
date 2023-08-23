@@ -8,7 +8,8 @@
                 "api_name": "xf::data_analytics::text::load_csv",
                 "display_name": "load_csv",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "CPU",
+                "visible": false,
                 "header_file_name": [
                     "aml_checker.hpp"
                 ],
@@ -18,7 +19,8 @@
                 "instance": "function",
                 "parameters": [],
                 "ports": []
-            }
+            },
+            "target_domain": "CPU"
         }
     ]
 }

@@ -8,7 +8,8 @@
                 "api_name": "xf::data_analytics::classification::decisionTreePredict",
                 "display_name": "decisionTreePredict",
                 "brief": "decisionTreePredict, Top function of Decision Tree Predict.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "decision_tree_predict.hpp"
                 ],
@@ -75,7 +76,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::data_analytics::classification::axiVarColToStreams",
@@ -84,7 +86,8 @@
                 "api_name": "xf::data_analytics::classification::axiVarColToStreams",
                 "display_name": "axiVarColToStreams",
                 "brief": "Loading table from AXI master to stream. Table should be row based storage of identical datawidth.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "decision_tree_train.hpp"
                 ],
@@ -136,7 +139,8 @@
                         "type": "hls::stream<ap_uint<_WAxi> >& "
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::data_analytics::classification::naiveBayesTrain",
@@ -145,7 +149,8 @@
                 "api_name": "xf::data_analytics::classification::naiveBayesTrain",
                 "display_name": "naiveBayesTrain",
                 "brief": "naiveBayesTrain, top function of multinomial Naive Bayes Training.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "naive_bayes.hpp"
                 ],
@@ -207,7 +212,8 @@
                         "type": "hls::stream< ap_uint< 64 > >[1<< WL]"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::data_analytics::classification::naiveBayesPredict",
@@ -216,7 +222,8 @@
                 "api_name": "xf::data_analytics::classification::naiveBayesPredict",
                 "display_name": "naiveBayesPredict",
                 "brief": "naiveBayesPredict, top function of multinomial Naive Bayes Prediction",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "naive_bayes.hpp"
                 ],
@@ -278,7 +285,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::data_analytics::classification::svmPredict",
@@ -287,7 +295,8 @@
                 "api_name": "xf::data_analytics::classification::svmPredict",
                 "display_name": "svmPredict",
                 "brief": "svmPredict, Top function of svm Predict.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "svm_predict.hpp"
                 ],
@@ -354,7 +363,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::data_analytics::clustering::kMeansPredict",
@@ -363,7 +373,8 @@
                 "api_name": "xf::data_analytics::clustering::kMeansPredict",
                 "display_name": "kMeansPredict",
                 "brief": "kMeansPredict predicts cluster index for each sample. In order to achive to acceleration, please make sure partition 1-dim of centers.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "kmeansPredict.hpp"
                 ],
@@ -440,7 +451,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::data_analytics::dataframe::csvParser",
@@ -449,7 +461,8 @@
                 "api_name": "xf::data_analytics::dataframe::csvParser",
                 "display_name": "csvParser",
                 "brief": "read one standard CSV file from DDR and parse into object stream with schma defination",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "csv_parser.hpp"
                 ],
@@ -481,7 +494,8 @@
                         "type": "hls::stream< Object > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::data_analytics::dataframe::jsonParser",
@@ -490,7 +504,8 @@
                 "api_name": "xf::data_analytics::dataframe::jsonParser",
                 "display_name": "jsonParser",
                 "brief": "read one standard JSON file from DDR and parse into object stream with schma defination",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "json_parser.hpp"
                 ],
@@ -552,7 +567,8 @@
                         "type": "hls::stream<ObjectEx>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::data_analytics::dataframe::readFromDataFrame",
@@ -561,7 +577,8 @@
                 "api_name": "xf::data_analytics::dataframe::readFromDataFrame",
                 "display_name": "readFromDataFrame",
                 "brief": "read the data frame format data from DDR and pack into object streams",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "read_from_dataframe.hpp"
                 ],
@@ -587,7 +604,8 @@
                         "type": "hls::stream<Object>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::data_analytics::dataframe::writeToDataFrame",
@@ -596,7 +614,8 @@
                 "api_name": "xf::data_analytics::dataframe::writeToDataFrame",
                 "display_name": "writeToDataFrame",
                 "brief": "write object stream data to DDR",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "write_to_dataframe.hpp"
                 ],
@@ -617,7 +636,8 @@
                         "type": "ap_uint< 64 > *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::data_analytics::dataframe::writeToParquetSupport",
@@ -626,7 +646,8 @@
                 "api_name": "xf::data_analytics::dataframe::writeToParquetSupport",
                 "display_name": "writeToParquetSupport",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "write_to_parquet.hpp"
                 ],
@@ -652,7 +673,8 @@
                         "type": "ap_uint<64>*"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::data_analytics::text::editDistance",
@@ -661,7 +683,8 @@
                 "api_name": "xf::data_analytics::text::editDistance",
                 "display_name": "editDistance",
                 "brief": "Levenshtein distance implementation.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "editDistance.hpp"
                 ],
@@ -728,7 +751,8 @@
                         "type": "hls::stream< bool > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::data_analytics::text::regexVM",
@@ -737,7 +761,8 @@
                 "api_name": "xf::data_analytics::text::regexVM",
                 "display_name": "regexVM",
                 "brief": "Implementation for regular expression VM (1 instruction per iteration).",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "regexVM.hpp"
                 ],
@@ -784,7 +809,8 @@
                         "type": "ap_uint< 16 > *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::data_analytics::text::regexVM_opt",
@@ -793,7 +819,8 @@
                 "api_name": "xf::data_analytics::text::regexVM_opt",
                 "display_name": "regexVM_opt",
                 "brief": "Implementation for regular expression VM (2 instructions per iteration).",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "regexVM.hpp"
                 ],
@@ -840,7 +867,8 @@
                         "type": "ap_uint< 16 > *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         }
     ]
 }
