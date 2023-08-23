@@ -106,7 +106,7 @@ void hlsStream2axiu(hls::stream<IntVectorStream_dt<8, OUT_DWIDTH / 8> >& inputSt
     t1.strb = cntr;
     t1.keep = cntr;
     t1.last = 0;
-    if (TUSR_DWIDTH != 0) t1.user = 0;
+    if constexpr (TUSR_DWIDTH != 0) t1.user = 0;
     if (strb == 0) {
         t1.last = 1;
         outAxiStream << t1;
@@ -120,7 +120,7 @@ HLS2AXIS:
         strb = inVal.strobe;
         if (strb == 0) {
             t1.last = 1;
-            if (TUSR_DWIDTH != 0) t1.user = outSize;
+            if constexpr(TUSR_DWIDTH != 0) t1.user = outSize;
         }
         outAxiStream << t1;
         for (auto i = 0, j = 0; i < OUT_DWIDTH; i += c_maxByteCnt) {
@@ -623,7 +623,7 @@ void streamK2Dm(hls::stream<ap_uint<PARALLEL_BYTES * 8> >& out,
 
         cntr += incr;
         dataSize << cntr;
-        if (TUSR_DWIDTH != 0) dataSize << inValue.user;
+        if constexpr(TUSR_DWIDTH != 0) dataSize << inValue.user;
         outEoS << 1;
         out << 0;
     }
@@ -706,7 +706,7 @@ dmLeftSize:
 
     cntr += incr;
     dataSize << cntr;
-    if (TUSR_DWIDTH != 0) dataSize << inValue.user;
+    if constexpr (TUSR_DWIDTH != 0) dataSize << inValue.user;
     outEoS << 1;
     out << 0;
 }

@@ -18,7 +18,7 @@
             "$XF_PROJ_ROOT/common/libs/cmdparser/cmdlineparser.cpp",
             "zlib_decompress_test.cpp"
         ],
-        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -DMULTIPLE_BYTES=8 -I${XF_PROJ_ROOT}/common/libs/cmdparser -I${XF_PROJ_ROOT}/common/libs/logger -I${XF_PROJ_ROOT}/../security/L1/include -DGZIP_DECOMPRESS_CHECKSUM"
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -DMULTIPLE_BYTES=4 -I${XF_PROJ_ROOT}/common/libs/cmdparser -I${XF_PROJ_ROOT}/common/libs/logger -I${XF_PROJ_ROOT}/../security/L1/include -DGZIP_DECOMPRESS_CHECKSUM"
     },
     "testbench": {
         "source": [
@@ -26,11 +26,11 @@
             "$XF_PROJ_ROOT/common/libs/cmdparser/cmdlineparser.cpp",
             "zlib_decompress_test.cpp"
         ],
-        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -DMULTIPLE_BYTES=8 -I${XF_PROJ_ROOT}/common/libs/cmdparser -I${XF_PROJ_ROOT}/common/libs/logger -I${XF_PROJ_ROOT}/../security/L1/include -DGZIP_DECOMPRESS_CHECKSUM",
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -DMULTIPLE_BYTES=4 -I${XF_PROJ_ROOT}/common/libs/cmdparser -I${XF_PROJ_ROOT}/common/libs/logger -I${XF_PROJ_ROOT}/../security/L1/include -DGZIP_DECOMPRESS_CHECKSUM",
         "ldflags": "",
         "argv": {
-            "hls_csim": "-l ${DESIGN_PATH}/test.list -p ${DESIGN_PATH}",
-            "hls_cosim": "-f ${DESIGN_PATH}/sample.txt.zlib -o ${DESIGN_PATH}/sample.txt"
+            "hls_csim": "-l ${XF_PROJ_ROOT}/L1/tests/zlib_decompress_checksum/test.list -p ${XF_PROJ_ROOT}/L1/tests/zlib_decompress_checksum",
+            "hls_cosim": "-f ${XF_PROJ_ROOT}/L1/tests/zlib_decompress_checksum/sample.txt.zlib -o ${XF_PROJ_ROOT}/L1/tests/zlib_decompress_checksum/sample.txt"
         }
     },
     "testinfo": {

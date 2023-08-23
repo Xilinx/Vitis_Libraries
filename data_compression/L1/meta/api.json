@@ -8,7 +8,8 @@
                 "api_name": "xf::compression::blockPacker",
                 "display_name": "blockPacker",
                 "brief": "Compression Packer module packs the compressed data.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "block_packer.hpp"
                 ],
@@ -50,7 +51,8 @@
                         "type": "hls::stream< uint32_t > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::adler32_mm",
@@ -59,7 +61,8 @@
                 "api_name": "xf::compression::adler32_mm",
                 "display_name": "adler32_mm",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "checksum_wrapper.hpp"
                 ],
@@ -90,7 +93,8 @@
                         "type": "ap_uint<32>"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::crc32_mm",
@@ -99,7 +103,8 @@
                 "api_name": "xf::compression::crc32_mm",
                 "display_name": "crc32_mm",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "checksum_wrapper.hpp"
                 ],
@@ -130,7 +135,8 @@
                         "type": "ap_uint<32>"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::checksum32",
@@ -139,7 +145,8 @@
                 "api_name": "xf::compression::checksum32",
                 "display_name": "checksum32",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "checksum_wrapper.hpp"
                 ],
@@ -190,7 +197,8 @@
                         "type": "bool"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::checksum32_mm",
@@ -199,7 +207,8 @@
                 "api_name": "xf::compression::checksum32_mm",
                 "display_name": "checksum32_mm",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "checksum_wrapper.hpp"
                 ],
@@ -235,7 +244,8 @@
                         "type": "const bool"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::huffmanDecoderLL",
@@ -244,7 +254,8 @@
                 "api_name": "xf::compression::huffmanDecoderLL",
                 "display_name": "huffmanDecoderLL",
                 "brief": "This module is ZLIB/GZIP Fixed, Dynamic and Stored block supported decoder. It takes ZLIB/GZIP Huffman encoded data as input and generates decoded data in LZ77 format (Literal, Length, Offset).",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "huffman_decoder.hpp"
                 ],
@@ -286,7 +297,8 @@
                         "type": "hls::stream<ap_uint<32> >&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::huffmanDecoder",
@@ -295,7 +307,8 @@
                 "api_name": "xf::compression::huffmanDecoder",
                 "display_name": "huffmanDecoder",
                 "brief": "This module is ZLIB/GZIP Fixed, Dynamic and Stored block supported decoder. It takes ZLIB/GZIP Huffman encoded data as input and generates decoded data in LZ77 format (Literal, Length, Offset).",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "huffman_decoder.hpp"
                 ],
@@ -327,7 +340,8 @@
                         "type": "hls::stream< ap_uint< 17 > > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::huffmanEncoderStatic",
@@ -336,7 +350,8 @@
                 "api_name": "xf::compression::huffmanEncoderStatic",
                 "display_name": "huffmanEncoderStatic",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "huffman_encoder.hpp"
                 ],
@@ -357,7 +372,8 @@
                         "type": "hls::stream< DSVectorStream_dt< HuffmanCode_dt< c_maxBits >, 1 > > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::huffmanEncoderStream",
@@ -366,7 +382,8 @@
                 "api_name": "xf::compression::huffmanEncoderStream",
                 "display_name": "huffmanEncoderStream",
                 "brief": "This module does zlib/gzip dynamic huffman encoding.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "huffman_encoder.hpp"
                 ],
@@ -392,7 +409,8 @@
                         "type": "hls::stream< DSVectorStream_dt< HuffmanCode_dt< c_maxBits >, 1 > > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::zstdTreegenStream",
@@ -401,7 +419,8 @@
                 "api_name": "xf::compression::zstdTreegenStream",
                 "display_name": "zstdTreegenStream",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "huffman_treegen.hpp"
                 ],
@@ -441,7 +460,8 @@
                         "type": "hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> >&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::inflateMultiCores",
@@ -450,7 +470,8 @@
                 "api_name": "xf::compression::inflateMultiCores",
                 "display_name": "inflateMultiCores",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "inflate.hpp"
                 ],
@@ -496,7 +517,8 @@
                         "type": "hls::stream<ap_axiu<64, 0, 0, 0> >&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::inflateMultiByte",
@@ -505,7 +527,8 @@
                 "api_name": "xf::compression::inflateMultiByte",
                 "display_name": "inflateMultiByte",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "inflate.hpp"
                 ],
@@ -547,7 +570,8 @@
                         "type": "hls::stream<ap_axiu<PARALLEL_BYTES * 8, 0, 0, 0> >&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::inflate",
@@ -556,7 +580,8 @@
                 "api_name": "xf::compression::inflate",
                 "display_name": "inflate",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "inflate.hpp"
                 ],
@@ -598,7 +623,8 @@
                         "type": "hls::stream<ap_axiu<PARALLEL_BYTES * 8, TUSER_WIDTH, 0, 0> >&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::inflateMultiByteMM",
@@ -607,7 +633,8 @@
                 "api_name": "xf::compression::inflateMultiByteMM",
                 "display_name": "inflateMultiByteMM",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "inflate.hpp"
                 ],
@@ -667,7 +694,8 @@
                         "type": "uint32_t"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::lz4Compress",
@@ -676,7 +704,8 @@
                 "api_name": "xf::compression::lz4Compress",
                 "display_name": "lz4Compress",
                 "brief": "This is the core compression module which seperates the input stream into two output streams, one literal stream and other offset stream, then lz4 encoding is done.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "lz4_compress.hpp"
                 ],
@@ -733,7 +762,8 @@
                         "type": "uint32_t"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::hlsLz4Core",
@@ -742,7 +772,8 @@
                 "api_name": "xf::compression::hlsLz4Core",
                 "display_name": "hlsLz4Core",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "lz4_compress.hpp"
                 ],
@@ -833,7 +864,8 @@
                         "type": "uint32_t"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::hlsLz4",
@@ -842,7 +874,8 @@
                 "api_name": "xf::compression::hlsLz4",
                 "display_name": "hlsLz4",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "lz4_compress.hpp"
                 ],
@@ -933,7 +966,8 @@
                         "type": "const uint32_t[NUM_BLOCK]"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::lz4CompressMM",
@@ -942,7 +976,8 @@
                 "api_name": "xf::compression::lz4CompressMM",
                 "display_name": "lz4CompressMM",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "lz4_compress.hpp"
                 ],
@@ -1018,7 +1053,8 @@
                         "type": "const uint32_t"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::reg",
@@ -1027,7 +1063,8 @@
                 "api_name": "xf::compression::reg",
                 "display_name": "reg",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "lz4_decompress.hpp"
                 ],
@@ -1048,7 +1085,8 @@
                         "type": "T"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::lz4HeaderProcessing",
@@ -1057,7 +1095,8 @@
                 "api_name": "xf::compression::lz4HeaderProcessing",
                 "display_name": "lz4HeaderProcessing",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "lz4_decompress.hpp"
                 ],
@@ -1093,7 +1132,8 @@
                         "type": "const uint32_t"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::lz4Decompress",
@@ -1102,7 +1142,8 @@
                 "api_name": "xf::compression::lz4Decompress",
                 "display_name": "lz4Decompress",
                 "brief": "This module reads the compressed data from input stream and decodes the offset, match length and literals by processing in various decompress states.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "lz4_decompress.hpp"
                 ],
@@ -1128,7 +1169,8 @@
                         "type": "uint32_t"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::lz4DecompressSimple",
@@ -1137,7 +1179,8 @@
                 "api_name": "xf::compression::lz4DecompressSimple",
                 "display_name": "lz4DecompressSimple",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "lz4_decompress.hpp"
                 ],
@@ -1168,7 +1211,8 @@
                         "type": "bool"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::lz4MultiByteDecompress",
@@ -1177,7 +1221,8 @@
                 "api_name": "xf::compression::lz4MultiByteDecompress",
                 "display_name": "lz4MultiByteDecompress",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "lz4_decompress.hpp"
                 ],
@@ -1227,7 +1272,8 @@
                         "type": "hls::stream<dt_lz4BlockInfo>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::lz4CoreDecompressEngine",
@@ -1236,7 +1282,8 @@
                 "api_name": "xf::compression::lz4CoreDecompressEngine",
                 "display_name": "lz4CoreDecompressEngine",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "lz4_decompress.hpp"
                 ],
@@ -1271,7 +1318,8 @@
                         "type": "hls::stream<uint32_t>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::lz4DecompressEngine",
@@ -1280,7 +1328,8 @@
                 "api_name": "xf::compression::lz4DecompressEngine",
                 "display_name": "lz4DecompressEngine",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "lz4_decompress.hpp"
                 ],
@@ -1315,7 +1364,8 @@
                         "type": "const uint32_t"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::mm2slz4Packer",
@@ -1324,7 +1374,8 @@
                 "api_name": "xf::compression::mm2slz4Packer",
                 "display_name": "mm2slz4Packer",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "lz4_packer.hpp"
                 ],
@@ -1394,7 +1445,8 @@
                         "type": "uint32_t"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::lz4PackerMM",
@@ -1403,7 +1455,8 @@
                 "api_name": "xf::compression::lz4PackerMM",
                 "display_name": "lz4PackerMM",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "lz4_packer.hpp"
                 ],
@@ -1473,7 +1526,8 @@
                         "type": "uint32_t"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::lzDecompress",
@@ -1482,7 +1536,8 @@
                 "api_name": "xf::compression::lzDecompress",
                 "display_name": "lzDecompress",
                 "brief": "This module writes the literals to the output stream as it is and when match length and offset are read, the literals will be read from the local dictionary based on offset until match length.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "lz_decompress.hpp"
                 ],
@@ -1519,7 +1574,8 @@
                         "type": "uint32_t"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::lzMultiByteDecompress",
@@ -1528,7 +1584,8 @@
                 "api_name": "xf::compression::lzMultiByteDecompress",
                 "display_name": "lzMultiByteDecompress",
                 "brief": "This module writes the literals to the output stream as it is and when match length and offset are read, the literals will be read from the local dictionary based on offset until match length. This module can process data in parallel defined by PARALLEL_BYTES template argument.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "lz_decompress.hpp"
                 ],
@@ -1585,7 +1642,8 @@
                         "type": "hls::stream< ap_uint<(PARALLEL_BYTES *8)+PARALLEL_BYTES > > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::lzMultiByteDecompressLL",
@@ -1594,7 +1652,8 @@
                 "api_name": "xf::compression::lzMultiByteDecompressLL",
                 "display_name": "lzMultiByteDecompressLL",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "lz_decompress.hpp"
                 ],
@@ -1641,7 +1700,8 @@
                         "type": "hls::stream< ap_uint<(PARALLEL_BYTES *8)+PARALLEL_BYTES > > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::lzMultiByteDecoder",
@@ -1650,7 +1710,8 @@
                 "api_name": "xf::compression::lzMultiByteDecoder",
                 "display_name": "lzMultiByteDecoder",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "lz_decompress.hpp"
                 ],
@@ -1704,7 +1765,8 @@
                         "type": "hls::stream<ap_uint<PARALLEL_BYTES> >&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::lzDecompressZlibEos",
@@ -1713,7 +1775,8 @@
                 "api_name": "xf::compression::lzDecompressZlibEos",
                 "display_name": "lzDecompressZlibEos",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "lz_decompress.hpp"
                 ],
@@ -1758,7 +1821,8 @@
                         "type": "hls::stream<uint64_t>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::lzDecompressZlibEosStream",
@@ -1767,7 +1831,8 @@
                 "api_name": "xf::compression::lzDecompressZlibEosStream",
                 "display_name": "lzDecompressZlibEosStream",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "lz_decompress.hpp"
                 ],
@@ -1817,7 +1882,8 @@
                         "type": "hls::stream<uint32_t>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::lz77Divide",
@@ -1826,7 +1892,8 @@
                 "api_name": "xf::compression::lz77Divide",
                 "display_name": "lz77Divide",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "lz_optional.hpp"
                 ],
@@ -1867,7 +1934,8 @@
                         "type": "uint32_t"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::lz77DivideStream",
@@ -1876,7 +1944,8 @@
                 "api_name": "xf::compression::lz77DivideStream",
                 "display_name": "lz77DivideStream",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "lz_optional.hpp"
                 ],
@@ -1911,7 +1980,8 @@
                         "type": "hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> >&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::lz77DivideStatic",
@@ -1920,7 +1990,8 @@
                 "api_name": "xf::compression::lz77DivideStatic",
                 "display_name": "lz77DivideStatic",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "lz_optional.hpp"
                 ],
@@ -1941,7 +2012,8 @@
                         "type": "hls::stream<IntVectorStream_dt<9, 1> >&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::lzBestMatchFilter",
@@ -1950,7 +2022,8 @@
                 "api_name": "xf::compression::lzBestMatchFilter",
                 "display_name": "lzBestMatchFilter",
                 "brief": "Objective of this module is to pick character with higher match length in the offset window range.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "lz_optional.hpp"
                 ],
@@ -1987,7 +2060,8 @@
                         "type": "uint32_t"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::lzBooster",
@@ -1996,7 +2070,8 @@
                 "api_name": "xf::compression::lzBooster",
                 "display_name": "lzBooster",
                 "brief": "This module helps in improving the compression ratio. Finds a better match length by performing more character matches with supported max match, while maintaining an offset window. Booster offset Window template argument (default value is 16K) internally consume BRAM memory to implement history window. Higher the booster value can give better compression ratio but will consume more BRAM resources.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "lz_optional.hpp"
                 ],
@@ -2037,7 +2112,8 @@
                         "type": "hls::stream< IntVectorStream_dt< 32, 1 > > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::lzFilter",
@@ -2046,7 +2122,8 @@
                 "api_name": "xf::compression::lzFilter",
                 "display_name": "lzFilter",
                 "brief": "This module checks if match length exists, and if match length exists it filters the match length -1 characters writing to output stream.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "lz_optional.hpp"
                 ],
@@ -2077,7 +2154,8 @@
                         "type": "uint32_t"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::lzxDecompressEngine",
@@ -2086,7 +2164,8 @@
                 "api_name": "xf::compression::lzxDecompressEngine",
                 "display_name": "lzxDecompressEngine",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "lzx_decompress.hpp"
                 ],
@@ -2131,7 +2210,8 @@
                         "type": "const uint32_t"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::snappyCompress",
@@ -2140,7 +2220,8 @@
                 "api_name": "xf::compression::snappyCompress",
                 "display_name": "snappyCompress",
                 "brief": "This is the core compression module which seperates the input stream into two output streams, one literal stream and other offset stream, then encoding is done based on the snappy algorithm.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "snappy_compress.hpp"
                 ],
@@ -2202,7 +2283,8 @@
                         "type": "uint32_t"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::snappyDecompress",
@@ -2211,7 +2293,8 @@
                 "api_name": "xf::compression::snappyDecompress",
                 "display_name": "snappyDecompress",
                 "brief": "This module decodes the compressed data based on the snappy decompression format.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "snappy_decompress.hpp"
                 ],
@@ -2237,7 +2320,8 @@
                         "type": "uint32_t"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::snappyMultiByteDecompress",
@@ -2246,7 +2330,8 @@
                 "api_name": "xf::compression::snappyMultiByteDecompress",
                 "display_name": "snappyMultiByteDecompress",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "snappy_decompress.hpp"
                 ],
@@ -2300,7 +2385,8 @@
                         "type": "hls::stream<dt_blockInfo>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::snappyBlockDecoder",
@@ -2309,7 +2395,8 @@
                 "api_name": "xf::compression::snappyBlockDecoder",
                 "display_name": "snappyBlockDecoder",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "snappy_decompress_details.hpp"
                 ],
@@ -2356,7 +2443,8 @@
                         "type": "hls::stream<ap_uint<(PARALLEL_BYTES * 8) + 8> >&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::snappyMultiCoreDecompress",
@@ -2365,7 +2453,8 @@
                 "api_name": "xf::compression::snappyMultiCoreDecompress",
                 "display_name": "snappyMultiCoreDecompress",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "snappy_decompress_details.hpp"
                 ],
@@ -2412,7 +2501,8 @@
                         "type": "hls::stream<ap_uint<(PARALLEL_BYTES * 8) + 8> >&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::snappyDecompressEngine",
@@ -2421,7 +2511,8 @@
                 "api_name": "xf::compression::snappyDecompressEngine",
                 "display_name": "snappyDecompressEngine",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "snappy_decompress_details.hpp"
                 ],
@@ -2460,7 +2551,8 @@
                         "type": "const uint32_t"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::snappyDecompressCoreEngine",
@@ -2469,7 +2561,8 @@
                 "api_name": "xf::compression::snappyDecompressCoreEngine",
                 "display_name": "snappyDecompressCoreEngine",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "snappy_decompress_details.hpp"
                 ],
@@ -2508,7 +2601,8 @@
                         "type": "hls::stream<uint32_t>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::lz77Compress",
@@ -2517,7 +2611,8 @@
                 "api_name": "xf::compression::lz77Compress",
                 "display_name": "lz77Compress",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "zlib_compress.hpp"
                 ],
@@ -2572,7 +2667,8 @@
                         "type": "hls::stream<IntVectorStream_dt<MAX_FREQ_DWIDTH, 1> >&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::lz77CompressStatic",
@@ -2581,7 +2677,8 @@
                 "api_name": "xf::compression::lz77CompressStatic",
                 "display_name": "lz77CompressStatic",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "zlib_compress.hpp"
                 ],
@@ -2627,7 +2724,8 @@
                         "type": "hls::stream<IntVectorStream_dt<9, 1> >&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::zlibHuffmanEncoder",
@@ -2636,7 +2734,8 @@
                 "api_name": "xf::compression::zlibHuffmanEncoder",
                 "display_name": "zlibHuffmanEncoder",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "zlib_compress.hpp"
                 ],
@@ -2662,7 +2761,8 @@
                         "type": "hls::stream<IntVectorStream_dt<8, 2> >&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::zlibHuffmanEncoderStatic",
@@ -2671,7 +2771,8 @@
                 "api_name": "xf::compression::zlibHuffmanEncoderStatic",
                 "display_name": "zlibHuffmanEncoderStatic",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "zlib_compress.hpp"
                 ],
@@ -2692,7 +2793,8 @@
                         "type": "hls::stream<IntVectorStream_dt<8, 2> >&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::gzipMulticoreCompression",
@@ -2701,7 +2803,8 @@
                 "api_name": "xf::compression::gzipMulticoreCompression",
                 "display_name": "gzipMulticoreCompression",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "zlib_compress.hpp"
                 ],
@@ -2761,7 +2864,8 @@
                         "type": "hls::stream<ap_uint<2> >&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::gzipMulticoreStaticCompressStream",
@@ -2770,7 +2874,8 @@
                 "api_name": "xf::compression::gzipMulticoreStaticCompressStream",
                 "display_name": "gzipMulticoreStaticCompressStream",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "zlib_compress.hpp"
                 ],
@@ -2804,7 +2909,8 @@
                         "type": "hls::stream<IntVectorStream_dt<8, 8> >&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::gzipMulticoreCompressStream",
@@ -2813,7 +2919,8 @@
                 "api_name": "xf::compression::gzipMulticoreCompressStream",
                 "display_name": "gzipMulticoreCompressStream",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "zlib_compress.hpp"
                 ],
@@ -2847,7 +2954,8 @@
                         "type": "hls::stream<IntVectorStream_dt<8, 8> >&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::gzipMulticoreCompressAxiStream",
@@ -2856,7 +2964,8 @@
                 "api_name": "xf::compression::gzipMulticoreCompressAxiStream",
                 "display_name": "gzipMulticoreCompressAxiStream",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "zlib_compress.hpp"
                 ],
@@ -2894,7 +3003,8 @@
                         "type": "hls::stream<ap_axiu<64, TUSR_DWIDTH, 0, 0> >&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::zstdCompressCore",
@@ -2903,7 +3013,8 @@
                 "api_name": "xf::compression::zstdCompressCore",
                 "display_name": "zstdCompressCore",
                 "brief": "This module compresses the input file read from input stream. It produces the ZSTD compressed data at the output stream.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "zstd_compress.hpp"
                 ],
@@ -2955,7 +3066,8 @@
                         "type": "hls::stream< IntVectorStream_dt< 8, 4 > > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::zstdCompressStreaming",
@@ -2964,7 +3076,8 @@
                 "api_name": "xf::compression::zstdCompressStreaming",
                 "display_name": "zstdCompressStreaming",
                 "brief": "This module is top level wrapper for zstd compression core module It compresses the input file read from input axi stream. It produces the ZSTD compressed data at the output axi stream.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "zstd_compress.hpp"
                 ],
@@ -3011,7 +3124,8 @@
                         "type": "hls::stream< ap_axiu< OUT_DWIDTH, 0, 0, 0 > > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::zstdCompressQuadCore",
@@ -3020,7 +3134,8 @@
                 "api_name": "xf::compression::zstdCompressQuadCore",
                 "display_name": "zstdCompressQuadCore",
                 "brief": "This module compresses the input file read from input stream using multiple lz77 modules. It produces the ZSTD compressed data at the output stream.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "zstd_compress_multicore.hpp"
                 ],
@@ -3067,7 +3182,8 @@
                         "type": "hls::stream< IntVectorStream_dt< 8, 8 > > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::zstdCompressMultiCoreStreaming",
@@ -3076,7 +3192,8 @@
                 "api_name": "xf::compression::zstdCompressMultiCoreStreaming",
                 "display_name": "zstdCompressMultiCoreStreaming",
                 "brief": "This module is top level wrapper for zstd compression core module It compresses the input file read from input axi stream. It produces the ZSTD compressed data at the output axi stream.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "zstd_compress_multicore.hpp"
                 ],
@@ -3127,7 +3244,8 @@
                         "type": "hls::stream< ap_axiu< OUT_DWIDTH, 0, 0, 0 > > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::zstdDecompressStream",
@@ -3136,7 +3254,8 @@
                 "api_name": "xf::compression::zstdDecompressStream",
                 "display_name": "zstdDecompressStream",
                 "brief": "This module decompresses the ZStd compressed file read from input stream. It reads the input stream till valid strobe input is provided. It produces the decompressed data at the output stream.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "zstd_decompress.hpp"
                 ],
@@ -3194,7 +3313,8 @@
                         "type": "hls::stream< ap_uint<(OUT_BYTES *8)+OUT_BYTES > > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::compression::zstdDecompressCore",
@@ -3203,7 +3323,8 @@
                 "api_name": "xf::compression::zstdDecompressCore",
                 "display_name": "zstdDecompressCore",
                 "brief": "This module decompresses the ZStd compressed file read from input stream. It reads the input stream till the given input size. It produces the decompressed data at the output stream.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "zstd_decompress.hpp"
                 ],
@@ -3256,7 +3377,8 @@
                         "type": "hls::stream< ap_axiu< OUT_BYTES *8, 0, 0, 0 > > &"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         }
     ]
 }

@@ -1,0 +1,28 @@
+[hls]
+
+clock=3.3
+flow_target=vivado
+syn.file=$XF_PROJ_ROOT/common/libs/logger/logger.cpp
+syn.file_cflags=$XF_PROJ_ROOT/common/libs/logger/logger.cpp,-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include -I${XF_PROJ_ROOT}/common/libs/cmdparser -I${XF_PROJ_ROOT}/common/libs/logger
+syn.file=$XF_PROJ_ROOT/common/libs/cmdparser/cmdlineparser.cpp
+syn.file_cflags=$XF_PROJ_ROOT/common/libs/cmdparser/cmdlineparser.cpp,-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include -I${XF_PROJ_ROOT}/common/libs/cmdparser -I${XF_PROJ_ROOT}/common/libs/logger
+syn.file=zstd_compress_test.cpp
+syn.file_cflags=zstd_compress_test.cpp,-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include -I${XF_PROJ_ROOT}/common/libs/cmdparser -I${XF_PROJ_ROOT}/common/libs/logger
+syn.top=compressFile
+tb.file=$XF_PROJ_ROOT/common/libs/logger/logger.cpp
+tb.file_cflags=$XF_PROJ_ROOT/common/libs/logger/logger.cpp,-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include -I${XF_PROJ_ROOT}/common/libs/cmdparser -I${XF_PROJ_ROOT}/common/libs/logger
+tb.file=$XF_PROJ_ROOT/common/libs/cmdparser/cmdlineparser.cpp
+tb.file_cflags=$XF_PROJ_ROOT/common/libs/cmdparser/cmdlineparser.cpp,-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include -I${XF_PROJ_ROOT}/common/libs/cmdparser -I${XF_PROJ_ROOT}/common/libs/logger
+tb.file=zstd_compress_test.cpp
+tb.file_cflags=zstd_compress_test.cpp,-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include -I${XF_PROJ_ROOT}/common/libs/cmdparser -I${XF_PROJ_ROOT}/common/libs/logger
+
+csim.argv=-f ${XF_PROJ_ROOT}/L1/tests/zstd_quadcore_compress/sample.txt -o ${XF_PROJ_ROOT}/L1/tests/zstd_quadcore_compress/sample.txt.zst
+
+cosim.argv=-f ${XF_PROJ_ROOT}/L1/tests/zstd_quadcore_compress/sample.txt -o -f ${XF_PROJ_ROOT}/L1/tests/zstd_quadcore_compress/sample.txt.zst
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog
+
+

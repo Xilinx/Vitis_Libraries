@@ -28,11 +28,11 @@
             "$XF_PROJ_ROOT/common/libs/cmdparser/cmdlineparser.cpp", 
             "zstd_compress_test.cpp"
         ], 
-        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include -I${XF_PROJ_ROOT}/common/libs/cmdparser", 
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include -I${XF_PROJ_ROOT}/common/libs/cmdparser -I${XF_PROJ_ROOT}/common/libs/logger", 
         "ldflags": "", 
         "argv": {
-            "hls_csim": "-f ${DESIGN_PATH}/sample.txt -o ${DESIGN_PATH}/sample.txt.zst", 
-            "hls_cosim": "-f ${DESIGN_PATH}/sample.txt -o -f ${DESIGN_PATH}/sample.txt.zst"
+            "hls_csim": "-f sample.txt -o sample.txt.zst", 
+            "hls_cosim": "-f sample.txt -o -f sample.txt.zst"
         }
     }, 
     "testinfo": {

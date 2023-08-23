@@ -1,0 +1,24 @@
+[hls]
+
+clock=3.3
+flow_target=vivado
+syn.file=adler32_test.cpp
+syn.file_cflags=adler32_test.cpp,-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/../security/L1/include -I${XF_PROJ_ROOT}/common/thirdParty/zlib
+syn.file=${XF_PROJ_ROOT}/common/thirdParty/zlib-1.2.7/adler32.c
+syn.file_cflags=${XF_PROJ_ROOT}/common/thirdParty/zlib-1.2.7/adler32.c,-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/../security/L1/include -I${XF_PROJ_ROOT}/common/thirdParty/zlib
+syn.top=hls_adler32MM
+tb.file=adler32_test.cpp
+tb.file_cflags=adler32_test.cpp,-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/../security/L1/include -I${XF_PROJ_ROOT}/common/thirdParty/zlib
+
+syn.compile.pragma_strict_mode=1
+
+csim.argv=${XF_PROJ_ROOT}/L1/tests/adler32MM/sample.txt
+
+cosim.argv=${XF_PROJ_ROOT}/L1/tests/adler32MM/sample.txt
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog
+
+

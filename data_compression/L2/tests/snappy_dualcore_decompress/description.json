@@ -26,7 +26,6 @@
     "platform_allowlist": [
         "u200",
         "u250",
-        "u50",
         "vck190",
         "aws-vu9p-f1"
     ],
@@ -84,7 +83,9 @@
             ]
         }
     ],
-    "output_files": ["data/sample.txt.snappy.*"],
+    "output_files": [
+        "data/sample.txt.snappy.*"
+    ],
     "testinfo": {
         "disable": false,
         "jobs": [

@@ -83,6 +83,7 @@
     "output_files": ["data/sample.txt.*"],
     "testinfo": {
         "disable": false,
+        "stacksize":16384,
         "jobs": [
             {
                 "index": 0,

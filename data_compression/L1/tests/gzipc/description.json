@@ -29,7 +29,7 @@
             "${XF_PROJ_ROOT}/../security/L1/include", 
             "gzip_compress_test.cpp"
         ], 
-        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include -I${XF_PROJ_ROOT}/common/libs/cmdparser -I${XF_PROJ_ROOT}/../security/L1/include", 
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include -I${XF_PROJ_ROOT}/common/libs/cmdparser -I${XF_PROJ_ROOT}/../security/L1/include -I${XF_PROJ_ROOT}/common/libs/logger", 
         "argv": {
             "hls_csim": "sample.txt sample.txt.gz", 
             "hls_cosim": "sample.txt samlple.txt.gz"

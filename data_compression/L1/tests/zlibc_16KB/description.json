@@ -18,7 +18,7 @@
         "source": [
             "$XF_PROJ_ROOT/common/libs/logger/logger.cpp", 
             "$XF_PROJ_ROOT/common/libs/cmdparser/cmdlineparser.cpp", 
-            "gzip_compress_test.cpp"
+            "zlib_compress_test.cpp"
         ], 
         "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include -I${XF_PROJ_ROOT}/common/libs/cmdparser -I${XF_PROJ_ROOT}/common/libs/logger"
     }, 
@@ -27,7 +27,7 @@
             "$XF_PROJ_ROOT/common/libs/logger/logger.cpp", 
             "$XF_PROJ_ROOT/common/libs/cmdparser/cmdlineparser.cpp", 
             "${XF_PROJ_ROOT}/../security/L1/include", 
-            "gzip_compress_test.cpp"
+            "zlib_compress_test.cpp"
         ], 
         "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include -I${XF_PROJ_ROOT}/common/libs/cmdparser -I${XF_PROJ_ROOT}/../security/L1/include", 
         "argv": {

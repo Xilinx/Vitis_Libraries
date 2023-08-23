@@ -26,8 +26,7 @@
     ],
     "platform_allowlist": [
         "u200",
-        "u250",
-        "u50"
+        "u250"
     ],
     "host": {
         "host_exe": "xil_gzip",

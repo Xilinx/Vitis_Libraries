@@ -18,16 +18,16 @@
         "source": [
             "lz4_decompress_test.cpp"
         ], 
-        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw"
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/../security/L1/include"
     }, 
     "testbench": {
         "source": [
             "lz4_decompress_test.cpp"
         ], 
-        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw", 
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/../security/L1/include", 
         "argv": {
-            "hls_csim": "${DESIGN_PATH}/sample.txt.encoded ${DESIGN_PATH}/sample.txt.encoded.out ${DESIGN_PATH}/sample.txt", 
-            "hls_cosim": "${DESIGN_PATH}/sample.txt.encoded $${DESIGN_PATH}/sample.txt.encoded.out {DESIGN_PATH}/sample.txt"
+            "hls_csim": "sample.txt.encoded sample.txt.encoded.out sample.txt", 
+            "hls_cosim": "sample.txt.encoded sample.txt.encoded.out sample.txt"
         }
     }, 
     "testinfo": {

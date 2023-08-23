@@ -304,7 +304,7 @@ lzProcessing:
         nextValue = inStream.read();
         eosFlag = (nextValue == 0xFFFF);
 
-        bool outFlag, outStreamFlag;
+        bool outFlag = false, outStreamFlag=false;
         if ((inValue.range(15, 8) == 0xFE) || (inValue.range(15, 8) == 0xFD)) {
             // ignore invalid byte
             outFlag = false;
