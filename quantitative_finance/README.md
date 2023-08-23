@@ -258,9 +258,9 @@ Licensed using the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-
 Welcome! Guidelines to be published soon.
 
 ## Deprecation Notification 
-**The L3 of this library and some of its L2 APIs will be deprecated soon.**
+**The original L3 of this library has been deprecated.**
 
 **If you have a dependency, please access [forum](https://support.xilinx.com) for help.**
 
-**For known issues, please kindly refer to L2/README.md and L3/README.md.**
+**For L2 known issues, please kindly refer to L2/README.md**
 

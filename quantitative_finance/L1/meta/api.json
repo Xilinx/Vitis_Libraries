@@ -8,7 +8,8 @@
                 "api_name": "xf::fintech::bernoulliPMF",
                 "display_name": "bernoulliPMF",
                 "brief": "bernoulliPMF it implement a probability mass function for bernoulli distribution",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "bernoulli_distribution.hpp"
                 ],
@@ -35,7 +36,8 @@
                         "type": "DT"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::bernoulliCDF",
@@ -44,7 +46,8 @@
                 "api_name": "xf::fintech::bernoulliCDF",
                 "display_name": "bernoulliCDF",
                 "brief": "bernoulliCDF it implement a cumulative distribution function for bernoulli distribution",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "bernoulli_distribution.hpp"
                 ],
@@ -71,7 +74,8 @@
                         "type": "DT"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::covCoreMatrix",
@@ -80,7 +84,8 @@
                 "api_name": "xf::fintech::covCoreMatrix",
                 "display_name": "covCoreMatrix",
                 "brief": "covCoreMatrix calculate the covariance of the input matrix.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "covariance.hpp"
                 ],
@@ -137,7 +142,8 @@
                         "type": "DT[N][N]"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::covCoreStrm",
@@ -146,7 +152,8 @@
                 "api_name": "xf::fintech::covCoreStrm",
                 "display_name": "covCoreStrm",
                 "brief": "covCoreStrm calculate the covariance of the input matrix, the input matrix input in the order of the columns by stream, the output covariance matrix output in the order of the rows by stream.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "covariance.hpp"
                 ],
@@ -208,7 +215,8 @@
                         "type": "hls::stream<ap_uint<DTLEN * TO> >&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::covReHardThreshold",
@@ -217,7 +225,8 @@
                 "api_name": "xf::fintech::covReHardThreshold",
                 "display_name": "covReHardThreshold",
                 "brief": "covReHardThreshold hard-thresholding Covariance Regularization",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "covariance_regularization.hpp"
                 ],
@@ -254,7 +263,8 @@
                         "type": "hls::stream<DT>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::covReSoftThreshold",
@@ -263,7 +273,8 @@
                 "api_name": "xf::fintech::covReSoftThreshold",
                 "display_name": "covReSoftThreshold",
                 "brief": "covReSoftThreshold soft-thresholding Covariance Regularization",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "covariance_regularization.hpp"
                 ],
@@ -300,7 +311,8 @@
                         "type": "hls::stream<DT>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::covReBand",
@@ -309,7 +321,8 @@
                 "api_name": "xf::fintech::covReBand",
                 "display_name": "covReBand",
                 "brief": "covReBand banding Covariance Regularization",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "covariance_regularization.hpp"
                 ],
@@ -346,7 +359,8 @@
                         "type": "hls::stream< DT > &outMatStrm"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::covReTaper",
@@ -355,7 +369,8 @@
                 "api_name": "xf::fintech::covReTaper",
                 "display_name": "covReTaper",
                 "brief": "covReTaper tapering Covariance Regularization",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "covariance_regularization.hpp"
                 ],
@@ -397,7 +412,8 @@
                         "type": "hls::stream<DT>&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::gammaCDF",
@@ -406,7 +422,8 @@
                 "api_name": "xf::fintech::gammaCDF",
                 "display_name": "gammaCDF",
                 "brief": "gammaCDF it implement a cumulative distribution function for gamma distribution",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "gamma_distribution.hpp"
                 ],
@@ -433,7 +450,8 @@
                         "type": "DT"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::svd",
@@ -442,7 +460,8 @@
                 "api_name": "xf::fintech::svd",
                 "display_name": "svd",
                 "brief": "Jacobi Singular Value Decomposition (SVD).",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "jacobi_svd.hpp"
                 ],
@@ -484,7 +503,8 @@
                         "type": "dataType[diagSize][diagSize]"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::linearImpl",
@@ -493,7 +513,8 @@
                 "api_name": "xf::fintech::linearImpl",
                 "display_name": "linearImpl",
                 "brief": "linearImpl 1D linear interpolation",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "linear_interpolation.hpp"
                 ],
@@ -530,7 +551,8 @@
                         "type": "DT*"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::mcSimulation",
@@ -539,7 +561,8 @@
                 "api_name": "xf::fintech::mcSimulation",
                 "display_name": "mcSimulation",
                 "brief": "Monte Carlo Framework implementation.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "mc_simulation.hpp"
                 ],
@@ -626,7 +649,8 @@
                         "type": "RNGSeqT[UN][1]"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::normalPDF",
@@ -635,7 +659,8 @@
                 "api_name": "xf::fintech::normalPDF",
                 "display_name": "normalPDF",
                 "brief": "normalPDF it implement a probability density function for normal distribution",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "normal_distribution.hpp"
                 ],
@@ -667,7 +692,8 @@
                         "type": "DT"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::normalCDF",
@@ -676,7 +702,8 @@
                 "api_name": "xf::fintech::normalCDF",
                 "display_name": "normalCDF",
                 "brief": "normalCDF it implement a cumulative distribution function for normal distribution",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "normal_distribution.hpp"
                 ],
@@ -708,7 +735,8 @@
                         "type": "DT"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::normalICDF",
@@ -717,7 +745,8 @@
                 "api_name": "xf::fintech::normalICDF",
                 "display_name": "normalICDF",
                 "brief": "normalICDF it implement a inverse cumulative distribution function for normal distribution",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "normal_distribution.hpp"
                 ],
@@ -749,7 +778,8 @@
                         "type": "DT"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::logNormalPDF",
@@ -758,7 +788,8 @@
                 "api_name": "xf::fintech::logNormalPDF",
                 "display_name": "logNormalPDF",
                 "brief": "logNormalPDF it implement a probability density function for log-normal distribution",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "normal_distribution.hpp"
                 ],
@@ -790,7 +821,8 @@
                         "type": "DT"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::logNormalCDF",
@@ -799,7 +831,8 @@
                 "api_name": "xf::fintech::logNormalCDF",
                 "display_name": "logNormalCDF",
                 "brief": "logNormalCDF it implement a cumulative distribution function for log-normal distribution",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "normal_distribution.hpp"
                 ],
@@ -831,7 +864,8 @@
                         "type": "DT"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::logNormalICDF",
@@ -840,7 +874,8 @@
                 "api_name": "xf::fintech::logNormalICDF",
                 "display_name": "logNormalICDF",
                 "brief": "logNormalICDF it implement a inverse cumulative distribution function for log-normal distribution",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "normal_distribution.hpp"
                 ],
@@ -872,7 +907,8 @@
                         "type": "DT"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::pentadiagCr",
@@ -881,7 +917,8 @@
                 "api_name": "xf::fintech::pentadiagCr",
                 "display_name": "pentadiagCr",
                 "brief": "Solves for u in linear system Pu = r",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "pentadiag_cr.hpp"
                 ],
@@ -943,7 +980,8 @@
                         "type": "T[P_SIZE]"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::poissonPMF",
@@ -952,7 +990,8 @@
                 "api_name": "xf::fintech::poissonPMF",
                 "display_name": "poissonPMF",
                 "brief": "poissonPMF it implement a probability mass function for poisson distribution",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "poisson_distribution.hpp"
                 ],
@@ -979,7 +1018,8 @@
                         "type": "DT"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::poissonCDF",
@@ -988,7 +1028,8 @@
                 "api_name": "xf::fintech::poissonCDF",
                 "display_name": "poissonCDF",
                 "brief": "poissonCDF it implement a cumulative distribution function for poisson distribution",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "poisson_distribution.hpp"
                 ],
@@ -1015,7 +1056,8 @@
                         "type": "DT"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::poissonICDF",
@@ -1024,7 +1066,8 @@
                 "api_name": "xf::fintech::poissonICDF",
                 "display_name": "poissonICDF",
                 "brief": "poissonICDF it implement a inverse cumulative distribution function for poisson distribution",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "poisson_distribution.hpp"
                 ],
@@ -1051,7 +1094,8 @@
                         "type": "DT"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::polyfit",
@@ -1060,7 +1104,8 @@
                 "api_name": "xf::fintech::polyfit",
                 "display_name": "polyfit",
                 "brief": "Calculates the polynomial fitting to the D degree of the discrete set of points in 'evalPoints'.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "polyfit.hpp"
                 ],
@@ -1107,7 +1152,8 @@
                         "type": "DT[D]"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::polyval",
@@ -1116,7 +1162,8 @@
                 "api_name": "xf::fintech::polyval",
                 "display_name": "polyval",
                 "brief": "Calculates the polynomial evaluation of a set of coefficients at the point 'x'.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "polyfit.hpp"
                 ],
@@ -1148,7 +1195,8 @@
                         "type": "const DT"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::polyint",
@@ -1157,7 +1205,8 @@
                 "api_name": "xf::fintech::polyint",
                 "display_name": "polyint",
                 "brief": "Performs the definite integral of a polynomial fitted function defined by its coefficients.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "polyfit.hpp"
                 ],
@@ -1194,7 +1243,8 @@
                         "type": "DT"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::polyder",
@@ -1203,7 +1253,8 @@
                 "api_name": "xf::fintech::polyder",
                 "display_name": "polyder",
                 "brief": "Performs the first derivate of a polynomial fitted function defined by its coefficients.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "polyfit.hpp"
                 ],
@@ -1235,7 +1286,8 @@
                         "type": "Der[D-1]"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::trap_integrate",
@@ -1244,7 +1296,8 @@
                 "api_name": "xf::fintech::trap_egrate",
                 "display_name": "trap_integrate",
                 "brief": "integration function using the adaptive trapezoidal technique",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "quadrature.hpp"
                 ],
@@ -1286,7 +1339,8 @@
                         "type": "XF_USER_DATA_TYPE*"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::simp_integrate",
@@ -1295,7 +1349,8 @@
                 "api_name": "xf::fintech::simp_egrate",
                 "display_name": "simp_integrate",
                 "brief": "integration function using the adaptive simpson 1/3 technique",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "quadrature.hpp"
                 ],
@@ -1337,7 +1392,8 @@
                         "type": "XF_USER_DATA_TYPE*"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::romberg_integrate",
@@ -1346,7 +1402,8 @@
                 "api_name": "xf::fintech::romberg_egrate",
                 "display_name": "romberg_integrate",
                 "brief": "integration function using the romberg technique Based on",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "quadrature.hpp"
                 ],
@@ -1388,7 +1445,8 @@
                         "type": "XF_USER_DATA_TYPE*"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::boxMullerTransform",
@@ -1397,7 +1455,8 @@
                 "api_name": "xf::fintech::boxMullerTransform",
                 "display_name": "boxMullerTransform",
                 "brief": "Box-Muller transform from uniform random number to normal random number.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "rng.hpp"
                 ],
@@ -1434,7 +1493,8 @@
                         "type": "mType&"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::inverseCumulativeNormalPPND7",
@@ -1443,7 +1503,8 @@
                 "api_name": "xf::fintech::inverseCumulativeNormalPPND7",
                 "display_name": "inverseCumulativeNormalPPND7",
                 "brief": "Inverse Cumulative transform from random number to normal random number.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "rng.hpp"
                 ],
@@ -1465,7 +1526,8 @@
                         "type": "mType"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::inverseCumulativeNormalAcklam",
@@ -1474,7 +1536,8 @@
                 "api_name": "xf::fintech::inverseCumulativeNormalAcklam",
                 "display_name": "inverseCumulativeNormalAcklam",
                 "brief": "Inverse CumulativeNormal using Acklam's approximation to transform uniform random number to normal random number.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "rng.hpp"
                 ],
@@ -1496,7 +1559,8 @@
                         "type": "mType"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::trsvCore",
@@ -1505,7 +1569,8 @@
                 "api_name": "xf::fintech::trsvCore",
                 "display_name": "trsvCore",
                 "brief": "Tridiagonal linear solver It solves tridiagonal linear system of equations by eliminating upper and lower diagonals To get result (U) divide each element of",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "trsv.hpp"
                 ],
@@ -1557,7 +1622,8 @@
                         "type": "T[N]"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         }
     ]
 }

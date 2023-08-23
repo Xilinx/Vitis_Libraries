@@ -8,7 +8,8 @@
                 "api_name": "xf::fintech::binomialTreeEngine",
                 "display_name": "binomialTreeEngine",
                 "brief": "BinomialTree Engine using CRR (Cox, Ross & Rubinstein)",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "bt_engine.hpp"
                 ],
@@ -35,7 +36,8 @@
                         "type": "int"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::cfB76Engine",
@@ -44,7 +46,8 @@
                 "api_name": "xf::fintech::cfB76Engine",
                 "display_name": "cfB76Engine",
                 "brief": "Single option price plus associated Greeks.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cf_b76.hpp"
                 ],
@@ -126,7 +129,8 @@
                         "type": "h"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::cfBSMEngine",
@@ -135,7 +139,8 @@
                 "api_name": "xf::fintech::cfBSMEngine",
                 "display_name": "cfBSMEngine",
                 "brief": "Single option price plus associated Greeks.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "cf_bsm.hpp"
                 ],
@@ -217,7 +222,8 @@
                         "type": ""
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::FdBsLvSolver",
@@ -226,7 +232,8 @@
                 "api_name": "xf::fintech::FdBsLvSolver",
                 "display_name": "FdBsLvSolver",
                 "brief": "Entry point to Fd1D Solver.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "fd_bs_local_volatility_solver.hpp"
                 ],
@@ -308,7 +315,8 @@
                         "type": "ap_uint< 512 > *solutio"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::FdDouglas",
@@ -317,7 +325,8 @@
                 "api_name": "xf::fintech::FdDouglas",
                 "display_name": "FdDouglas",
                 "brief": "Top level callable function to perform the Douglas ADI method.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "fd_solver.hpp"
                 ],
@@ -439,7 +448,8 @@
                         "type": "DT"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::hcfEngine",
@@ -448,7 +458,8 @@
                 "api_name": "xf::fintech::hcfEngine",
                 "display_name": "hcfEngine",
                 "brief": "Engine for Heston Closed Form Solution.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "hcf_engine.hpp"
                 ],
@@ -470,7 +481,8 @@
                         "type": "struct hcfEngineInputDataType< DT > *"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::hjmPcaEngine",
@@ -479,7 +491,8 @@
                 "api_name": "xf::fintech::hjmPcaEngine",
                 "display_name": "hjmPcaEngine",
                 "brief": "Analyses raw historical data and calculates the input vectors for a Heath-Jarrow-Morton Monte-Carlo simulation.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "hjm_engine.hpp"
                 ],
@@ -541,7 +554,8 @@
                         "type": "DT"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::hjmMcEngine",
@@ -550,7 +564,8 @@
                 "api_name": "xf::fintech::hjmMcEngine",
                 "display_name": "hjmMcEngine",
                 "brief": "Prepares and runs a Monte-Carlo simulation and pricing for the Heath-Jarrow-Morton framework.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "hjm_engine.hpp"
                 ],
@@ -627,7 +642,8 @@
                         "type": "hls::stream< DT > &output"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::hjmEngine",
@@ -636,7 +652,8 @@
                 "api_name": "xf::fintech::hjmEngine",
                 "display_name": "hjmEngine",
                 "brief": "Prepares and runs a Monte-Carlo simulation and pricing for the Heath-Jarrow-Morton framework from historical data. Combines",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "hjm_engine.hpp"
                 ],
@@ -718,7 +735,8 @@
                         "type": "hls::stream< DT > &outPr"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::lmmEngine",
@@ -727,7 +745,8 @@
                 "api_name": "xf::fintech::lmmEngine",
                 "display_name": "lmmEngine",
                 "brief": "Prepares and runs a Monte-Carlo simulation and pricing for the LIBOR Market Model framework from a given correlation and volatility matrix.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "lmm_engine.hpp"
                 ],
@@ -809,7 +828,8 @@
                         "type": "DT *outputPr"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::M76Engine",
@@ -818,7 +838,8 @@
                 "api_name": "xf::fintech::M76Engine",
                 "display_name": "M76Engine",
                 "brief": "Engine for the Merton Jump Diffusion Model.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "m76_engine.hpp"
                 ],
@@ -845,7 +866,8 @@
                         "type": "rice"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::MCEuropeanEngine",
@@ -854,7 +876,8 @@
                 "api_name": "xf::fintech::MCEuropeanEngine",
                 "display_name": "MCEuropeanEngine",
                 "brief": "European Option Pricing Engine using Monte Carlo Method. This implementation uses Black-Scholes valuation model.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "mc_engine.hpp"
                 ],
@@ -946,7 +969,8 @@
                         "type": "unsigned int"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::MCEuropeanPriBypassEngine",
@@ -955,7 +979,8 @@
                 "api_name": "xf::fintech::MCEuropeanPriBypassEngine",
                 "display_name": "MCEuropeanPriBypassEngine",
                 "brief": "path pricer bypass variant (interface compatible with standard MCEuropeanEngine)",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "mc_engine.hpp"
                 ],
@@ -1042,7 +1067,8 @@
                         "type": "unsigned int"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::MCEuropeanHestonEngine",
@@ -1051,7 +1077,8 @@
                 "api_name": "xf::fintech::MCEuropeanHestonEngine",
                 "display_name": "MCEuropeanHestonEngine",
                 "brief": "European Option Pricing Engine using Monte Carlo Method based on Heston valuation model.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "mc_engine.hpp"
                 ],
@@ -1168,7 +1195,8 @@
                         "type": "unsigned int"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::MCMultiAssetEuropeanHestonEngine",
@@ -1177,7 +1205,8 @@
                 "api_name": "xf::fintech::MCMultiAssetEuropeanHestonEngine",
                 "display_name": "MCMultiAssetEuropeanHestonEngine",
                 "brief": "Multiple Asset European Option Pricing Engine using Monte Carlo Method based on Heston valuation model.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "mc_engine.hpp"
                 ],
@@ -1299,7 +1328,8 @@
                         "type": "ap_uint< 32 > maxSampl"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::MCAmericanEnginePreSamples",
@@ -1308,7 +1338,8 @@
                 "api_name": "xf::fintech::MCAmericanEnginePreSamples",
                 "display_name": "MCAmericanEnginePreSamples",
                 "brief": "American Option Pricing Engine using Monte Carlo Method. PreSample kernel: this kernel samples some amount of path and store them to external memory.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "mc_engine.hpp"
                 ],
@@ -1390,7 +1421,8 @@
                         "type": "unsigned int"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::MCAmericanEngineCalibrate",
@@ -1399,7 +1431,8 @@
                 "api_name": "xf::fintech::MCAmericanEngineCalibrate",
                 "display_name": "MCAmericanEngineCalibrate",
                 "brief": "American Option Pricing Engine using Monte Carlo Method. Calibrate kernel: this kernel reads the sample price data from external memory and use them to calculate the coefficient.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "mc_engine.hpp"
                 ],
@@ -1471,7 +1504,8 @@
                         "type": "unsigned int"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::MCAmericanEnginePricing",
@@ -1480,7 +1514,8 @@
                 "api_name": "xf::fintech::MCAmericanEnginePricing",
                 "display_name": "MCAmericanEnginePricing",
                 "brief": "American Option Pricing Engine using Monte Carlo Method. Pricing kernel.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "mc_engine.hpp"
                 ],
@@ -1572,7 +1607,8 @@
                         "type": "unsigned int"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::MCAmericanEngine",
@@ -1581,7 +1617,8 @@
                 "api_name": "xf::fintech::MCAmericanEngine",
                 "display_name": "MCAmericanEngine",
                 "brief": "American Option Pricing Engine using Monte Carlo Method. calibration process and pricing process all in one kernel.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "mc_engine.hpp"
                 ],
@@ -1693,7 +1730,8 @@
                         "type": "unsigned int"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::MCAsianGeometricAPEngine",
@@ -1702,7 +1740,8 @@
                 "api_name": "xf::fintech::MCAsianGeometricAPEngine",
                 "display_name": "MCAsianGeometricAPEngine",
                 "brief": "Asian Arithmetic Average Price Engine using Monte Carlo Method Based on Black-Scholes Model. The settlement price of the underlying asset at expiry time is the geomertic average of asset price during the option lifetime.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "mc_engine.hpp"
                 ],
@@ -1789,7 +1828,8 @@
                         "type": "unsigned int"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::MCAsianArithmeticAPEngine",
@@ -1798,7 +1838,8 @@
                 "api_name": "xf::fintech::MCAsianArithmeticAPEngine",
                 "display_name": "MCAsianArithmeticAPEngine",
                 "brief": "Asian Arithmetic Average Price Engine using Monte Carlo Method Based on Black-Scholes Model. The settlement price of the underlying asset at expiry time is the arithmetic average of asset price during the option lifetime.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "mc_engine.hpp"
                 ],
@@ -1885,7 +1926,8 @@
                         "type": "unsigned int"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::MCAsianArithmeticASEngine",
@@ -1894,7 +1936,8 @@
                 "api_name": "xf::fintech::MCAsianArithmeticASEngine",
                 "display_name": "MCAsianArithmeticASEngine",
                 "brief": "Asian Arithmetic Average Strike Engine using Monte Carlo Method Based on Black-Scholes Model. The settlement price of the underlying asset at expiry time is the asset price at expiry time, but the stock price is the arithmetic average of asset price during the option lifetime.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "mc_engine.hpp"
                 ],
@@ -1981,7 +2024,8 @@
                         "type": "unsigned int"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::MCBarrierNoBiasEngine",
@@ -1990,7 +2034,8 @@
                 "api_name": "xf::fintech::MCBarrierNoBiasEngine",
                 "display_name": "MCBarrierNoBiasEngine",
                 "brief": "Barrier Option Pricing Engine using Monte Carlo Simulation. Using brownian bridge to generate the non-biased result.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "mc_engine.hpp"
                 ],
@@ -2092,7 +2137,8 @@
                         "type": "unsigned int"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::MCBarrierEngine",
@@ -2101,7 +2147,8 @@
                 "api_name": "xf::fintech::MCBarrierEngine",
                 "display_name": "MCBarrierEngine",
                 "brief": "Barrier Option Pricing Engine using Monte Carlo Simulation.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "mc_engine.hpp"
                 ],
@@ -2203,7 +2250,8 @@
                         "type": "unsigned int"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::MCCliquetEngine",
@@ -2212,7 +2260,8 @@
                 "api_name": "xf::fintech::MCCliquetEngine",
                 "display_name": "MCCliquetEngine",
                 "brief": "Cliquet Option Pricing Engine using Monte Carlo Simulation. The B-S model used to describe the dynamics of undelying asset.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "mc_engine.hpp"
                 ],
@@ -2304,7 +2353,8 @@
                         "type": "unsigned int"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::MCDigitalEngine",
@@ -2313,7 +2363,8 @@
                 "api_name": "xf::fintech::MCDigitalEngine",
                 "display_name": "MCDigitalEngine",
                 "brief": "Digital Option Pricing Engine using Monte Carlo Simulation. The B-S model is used to describe dynamics of undelying asset price.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "mc_engine.hpp"
                 ],
@@ -2410,7 +2461,8 @@
                         "type": "unsigned int"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::MCEuropeanHestonGreeksEngine",
@@ -2419,7 +2471,8 @@
                 "api_name": "xf::fintech::MCEuropeanHestonGreeksEngine",
                 "display_name": "MCEuropeanHestonGreeksEngine",
                 "brief": "European Option Greeks Calculating Engine using Monte Carlo Method based on Heston valuation model.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "mc_engine.hpp"
                 ],
@@ -2531,7 +2584,8 @@
                         "type": "unsigned int"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::MCHullWhiteCapFloorEngine",
@@ -2540,7 +2594,8 @@
                 "api_name": "xf::fintech::MCHullWhiteCapFloorEngine",
                 "display_name": "MCHullWhiteCapFloorEngine",
                 "brief": "Cap/Floor Pricing Engine using Monte Carlo Simulation. The Hull-White model is used to describe dynamics of short-term interest. This engine assume a flat term structure.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "mc_engine.hpp"
                 ],
@@ -2627,7 +2682,8 @@
                         "type": "unsigned int"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::McmcCore",
@@ -2636,7 +2692,8 @@
                 "api_name": "xf::fintech::McmcCore",
                 "display_name": "McmcCore",
                 "brief": "Top level Kernel function. Consists of INIT_LOOP and main sample loop: SAMPLES_LOOP",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "pop_mcmc.hpp"
                 ],
@@ -2683,7 +2740,8 @@
                         "type": "DT[NSAMPLES_MAX],"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::treeSwaptionEngine",
@@ -2692,7 +2750,8 @@
                 "api_name": "xf::fintech::treeSwaptionEngine",
                 "display_name": "treeSwaptionEngine",
                 "brief": "Tree Swaption Pricing Engine using Trinomial Tree based 1D Lattice method.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "tree_engine.hpp"
                 ],
@@ -2809,7 +2868,8 @@
                         "type": "DT *NP"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::treeSwapEngine",
@@ -2818,7 +2878,8 @@
                 "api_name": "xf::fintech::treeSwapEngine",
                 "display_name": "treeSwapEngine",
                 "brief": "Tree Swap Pricing Engine using Trinomial Tree based 1D Lattice method.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "tree_engine.hpp"
                 ],
@@ -2930,7 +2991,8 @@
                         "type": "DT *NP"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::treeCapFloorEngine",
@@ -2939,7 +3001,8 @@
                 "api_name": "xf::fintech::treeCapFloorEngine",
                 "display_name": "treeCapFloorEngine",
                 "brief": "Tree CapFloor Pricing Engine using Trinomial Tree based 1D Lattice method.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "tree_engine.hpp"
                 ],
@@ -3051,7 +3114,8 @@
                         "type": "DT *NP"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         },
         {
             "api_name": "xf::fintech::treeCallableEngine",
@@ -3060,7 +3124,8 @@
                 "api_name": "xf::fintech::treeCallableEngine",
                 "display_name": "treeCallableEngine",
                 "brief": "Tree Callable Fixed Rate Bond Pricing Engine using Trinomial Tree based 1D Lattice method.",
-                "target_domain": "",
+                "target_domain": "PL",
+                "visible": false,
                 "header_file_name": [
                     "tree_engine.hpp"
                 ],
@@ -3172,7 +3237,8 @@
                         "type": "DT *NP"
                     }
                 ]
-            }
+            },
+            "target_domain": "PL"
         }
     ]
 }

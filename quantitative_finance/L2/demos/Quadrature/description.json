@@ -6,7 +6,6 @@
     "flow": "vitis",
     "platform_allowlist": [
         "u250",
-        "u50",
         "u200"
     ],
     "platform_blocklist": [],

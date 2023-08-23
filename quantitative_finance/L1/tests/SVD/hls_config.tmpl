@@ -1,0 +1,18 @@
+[hls]
+
+clock=300MHz
+flow_target=vivado
+syn.file=svd_top.cpp
+syn.file_cflags=svd_top.cpp,-I${XF_PROJ_ROOT}/L1/include/xf_fintech -std=c++11
+syn.top=svd_top
+tb.file=main.cpp
+tb.file_cflags=main.cpp,-I${XF_PROJ_ROOT}/L1/include/xf_fintech -std=c++11
+
+
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog
+
+

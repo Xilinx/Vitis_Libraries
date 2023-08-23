@@ -1,0 +1,20 @@
+[hls]
+
+clock=300MHz
+flow_target=vivado
+syn.file=dut.cpp
+syn.file_cflags=dut.cpp,-DDPRAGMA -I${XF_PROJ_ROOT}/L1/include
+syn.top=dut
+tb.file=tb.cpp
+tb.file_cflags=tb.cpp,-DDPRAGMA -I${XF_PROJ_ROOT}/L1/include
+
+csim.argv=1
+
+cosim.argv=0
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog
+
+
