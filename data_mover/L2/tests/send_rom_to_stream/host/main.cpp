@@ -54,10 +54,10 @@ int main(int argc, const char* argv[]) {
     std::cout << "Starting test.\n";
 
     const ap_uint<WIDTH_CH1> hb_in1[NUM] = {
-#include "din0.inc"
+#include "d_int64.txt.inc"
     };
     const ap_uint<WIDTH_CH2> hb_in2[NUM] = {
-#include "din1.inc"
+#include "d_int32.txt.inc"
     };
 
     // Host buffers

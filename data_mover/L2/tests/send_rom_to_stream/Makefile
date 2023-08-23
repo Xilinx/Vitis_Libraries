@@ -101,11 +101,11 @@ VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 #Inclue Required Host Source Files
 ifeq ($(ps_on_x86), on)
 HOST_SRCS += host/main.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I host -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L1/include
+CXXFLAGS +=  -I host -I kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L1/include
 CXXFLAGS += -std=c++14
 else
 HOST_SRCS += host/main.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I host -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L1/include
+CXXFLAGS +=  -I host -I kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L1/include
 CXXFLAGS += -std=c++14
 endif
 
@@ -124,7 +124,7 @@ PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args
 endif
 
 ########################## Kernel compiler global settings ##########################
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/hw -I $(XFLIB_DIR)/L1/include
+VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/hw -I kernel -I $(XFLIB_DIR)/L1/include
 
 ######################### binary container global settings ##########################
 VPP_LDFLAGS_data_mover_temp := --config $(CUR_DIR)/conn.cfg

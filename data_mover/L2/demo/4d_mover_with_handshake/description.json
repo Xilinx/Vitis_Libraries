@@ -102,6 +102,7 @@
     ], 
     "testinfo": {
         "disable": false, 
+        "stacksize": 16384, 
         "jobs": [
             {
                 "index": 0, 

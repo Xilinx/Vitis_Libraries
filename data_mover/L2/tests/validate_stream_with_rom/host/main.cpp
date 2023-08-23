@@ -57,11 +57,11 @@ int main(int argc, const char* argv[]) {
 
     ap_uint<WIDTH_CH1>* hb_in1 = aligned_alloc<ap_uint<WIDTH_CH1> >(NUM);
     const ap_uint<WIDTH_CH1> in1[] = {
-#include "din0.inc"
+#include "d_double.txt.inc"
     };
     ap_uint<WIDTH_CH2>* hb_in2 = aligned_alloc<ap_uint<WIDTH_CH2> >(NUM);
     const ap_uint<WIDTH_CH2> in2[] = {
-#include "din1.inc"
+#include "d_half.txt.inc"
     };
     for (int i = 0; i < NUM; i++) {
         hb_in1[i] = in1[i];

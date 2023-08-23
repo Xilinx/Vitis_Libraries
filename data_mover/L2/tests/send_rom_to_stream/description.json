@@ -25,6 +25,7 @@
             ], 
             "includepaths": [
                 "host", 
+                "kernel",
                 "LIB_DIR/ext/xcl2",
                 "LIB_DIR/../utils/L1/include"
             ], 
@@ -34,7 +35,8 @@
     "v++": {
         "compiler": {
             "includepaths": [
-                "LIB_DIR/L1/include/hw"
+                "LIB_DIR/L1/include/hw",
+                "kernel"
             ]
         }
     }, 
