@@ -77,9 +77,9 @@
             "accelerators": [
                 {
                     "location": "LIB_DIR/L3/tests/plane_wave/aie_graph/graph.cpp",
-                    "pl-freq": 100,
                     "workdir": "./Work",
-                    "name": "libadf.a"
+                    "name": "libadf.a",
+                    "config": "aie.cfg"
                 }
             ]
         }

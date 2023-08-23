@@ -2,13 +2,40 @@
     "schema": "vitis_libraries_api_list_schema-1.0",
     "api_list": [
         {
+            "api_name": "us::L3::scanline_AllinAIE",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "us::L3::scanline_AllinAIE",
+                "display_name": "scanline_AllinAIE",
+                "brief": "",
+                "target_domain": "CPU",
+                "header_file_name": [
+                    "scanline_AllinAIE.hpp"
+                ],
+                "search_paths": [
+                    "L3/include"
+                ],
+                "instance": "function",
+                "parameters": [],
+                "ports": [
+                    {
+                        "name": "num_invoking",
+                        "direction": "input",
+                        "type": "int"
+                    }
+                ],
+                "visible": false
+            },
+            "target_domain": "CPU"
+        },
+        {
             "api_name": "us::L3::plane_wave",
             "spec": {
                 "schema": "vitis_libraries_api_list_schema-1.0",
                 "api_name": "us::L3::plane_wave",
                 "display_name": "plane_wave",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "CPU",
                 "header_file_name": [
                     "plane_wave.hpp"
                 ],
@@ -19,11 +46,45 @@
                 "parameters": [
                     {
                         "name": "TIER",
+                        "description": "Iteration times of AIE graph, default is enough",
+                        "type": "int",
+                        "minimum": "1",
+                        "maximum": "1",
+                        "enum": [
+                            "1"
+                        ]
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "xclbin_path",
+                        "direction": "input",
+                        "type": "std::string"
+                    },
+                    {
+                        "name": "data_path",
+                        "direction": "input",
+                        "type": "std::string"
+                    },
+                    {
+                        "name": "res_out",
+                        "direction": "input",
+                        "type": "float*"
+                    },
+                    {
+                        "name": "res_out_size",
+                        "direction": "input",
+                        "type": "float"
+                    },
+                    {
+                        "name": "ITER",
+                        "direction": "input",
                         "type": "int"
                     }
                 ],
-                "ports": []
-            }
+                "visible": false
+            },
+            "target_domain": "CPU"
         },
         {
             "api_name": "us::L3::scanline",
@@ -32,7 +93,7 @@
                 "api_name": "us::L3::scanline",
                 "display_name": "scanline",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "CPU",
                 "header_file_name": [
                     "scanline.hpp"
                 ],
@@ -43,11 +104,45 @@
                 "parameters": [
                     {
                         "name": "TIER",
+                        "description": "Iteration times of AIE graph, default is enough",
+                        "type": "int",
+                        "minimum": "1",
+                        "maximum": "1",
+                        "enum": [
+                            "1"
+                        ]
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "xclbin_path",
+                        "direction": "input",
+                        "type": "std::string"
+                    },
+                    {
+                        "name": "data_path",
+                        "direction": "input",
+                        "type": "std::string"
+                    },
+                    {
+                        "name": "res_out",
+                        "direction": "input",
+                        "type": "float*"
+                    },
+                    {
+                        "name": "res_out_size",
+                        "direction": "input",
+                        "type": "float"
+                    },
+                    {
+                        "name": "ITER",
+                        "direction": "input",
                         "type": "int"
                     }
                 ],
-                "ports": []
-            }
+                "visible": false
+            },
+            "target_domain": "CPU"
         },
         {
             "api_name": "us::L3::synthetic_aperture",
@@ -56,7 +151,7 @@
                 "api_name": "us::L3::synthetic_aperture",
                 "display_name": "synthetic_aperture",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "CPU",
                 "header_file_name": [
                     "synthetic_aperture.hpp"
                 ],
@@ -67,11 +162,45 @@
                 "parameters": [
                     {
                         "name": "TIER",
+                        "description": "Iteration times of AIE graph, default is enough",
+                        "type": "int",
+                        "minimum": "1",
+                        "maximum": "1",
+                        "enum": [
+                            "1"
+                        ]
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "xclbin_path",
+                        "direction": "input",
+                        "type": "std::string"
+                    },
+                    {
+                        "name": "data_path",
+                        "direction": "input",
+                        "type": "std::string"
+                    },
+                    {
+                        "name": "res_out",
+                        "direction": "input",
+                        "type": "float*"
+                    },
+                    {
+                        "name": "res_out_size",
+                        "direction": "input",
+                        "type": "float"
+                    },
+                    {
+                        "name": "ITER",
+                        "direction": "input",
                         "type": "int"
                     }
                 ],
-                "ports": []
-            }
+                "visible": false
+            },
+            "target_domain": "CPU"
         }
     ]
 }

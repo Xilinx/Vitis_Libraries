@@ -1,5 +1,6 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
   
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -28,6 +29,92 @@ Ultrasound Library - Level 2 (L2)
 As stated in the introduction, the L2 level of the Ultrasound Library is composed of the mathematical components needed for the beamformation of the rf-data. Those components, on the other hand of the L1 APIs, are AIE graphs, and no longer just single kernels.
 As introduced in the dedicated section, the AIE graphs are a compositions of AIE kernels presents in L1 library. For these reasons the level of abstraction is increased with respect to the previous level.
 It is going now to be detailed every components of the L2 library with a connection to the already explained theory to bind the concepts with their actual implementation.
+
+### Graph name: `graph_imagepoints`
+
+The graph_imagepoints graph is used to create an array(specific coordinate direction) which represents the part of investigation made by the specific emission of the Ultrasound Probe. 
+It is dependent on the investigation depth and the incremental investigation which we want to perform (based on our sampling frquency).
+
+- **Graph Inputs**:
+	- `para_const`: Graph_imagepoints self-used structural parameters include step(the distance between adjacent points), iter_line(record number of lines that have been processed) and so on.
+	- `para_start`: The position which we start the investigation in cartesian coordinate;
+- **Graph Outputs**:
+	- `dataout1`: An array which represents our points(specific coordinate direction) to analyze;
+
+### Graph name: `graph_focusing`
+
+This graph is used to compute the distance of our reference apodization point for the dynamic apodization with respect to the transducers position. It returns an array of values which represent the magnitude per transducer.
+
+- **Graph Inputs**:
+	- `p_para_const`: Graph_focusing self-used structural parameters include iter_line and iter_element and so on. It's definition could be seen in L1/include/kernel_focusing.hpp;
+	- `p_para_pos`: X and Y component of the vector which represent the transducer positions;
+- **Graph Outputs**:
+	- `dataout1`: An array which represents apodization distance per transducer;
+
+### Graph name: `graph_delay`
+
+This graph is used to compute the transmit delay. It returns an array of values which represent the transmission time for every incremental point of the investigation.
+
+- **Graph Inputs**:
+	- `para_const`: Graph_delay self-used structural parameters include focal coordinates 'focal_point_x' and 'focal_point_z', inverse speed of sound 'inverse_speed_of_sound' and so on. It's definition could be seen in L1/include/kernel_delay.hpp;
+	- `para_t_start`: Input array, where each element corresponds to the emission starting time of each scanline;
+	- `img_x`: The result of graph_imagepoints in x-dimension;
+	- `img_z`: The result of graph_imagepoints in z-dimension;
+- **Graph Outputs**:
+	- `delay`: An array which represents our time delay per point to analyze;
+
+### Graph name: `graph_samples`
+
+This graph is used to compute the delay in reception for every transducer. It sums also the delay in transmission to obtain the valid samples for the interpolation.
+
+- **Graph Inputs**:
+	- `para_const`: Graph_samples self-used structural parameter include sampling frequency, inverse speed of sound and so on. It's definition could be seen in L1/include/kernel_sample.hpp.
+	- `para_rfdim`: Input array, used to filter whether the input rf-data of each scanline is in the region of interest;
+	- `para_elem`: X-Y-Z vector which represents the positions of our transducers in the probe;
+	- `img_x`: The result of graph_imagepoints in x-dimension;
+	- `img_z`: The result of graph_imagepoints in z-dimension;
+	- `delay`: Result of graph_delay;
+- **Graph Outputs**:
+	- `sample`: A vector which represents our valid entries in the rf-data vector;
+	- `inside`: A vector with only 0 and 1 values, which represents whether each element of our rf-data vector is in the region of interest;
+
+### Graph name: `graph_mult`
+
+This graph is used to compute the final result. It multiply the results of apodization and the interpolation and accumulates the results of each transducer.
+
+- **Graph Inputs**:
+	- `para_const_pre`: Graph_mult's kernel kfun_mult_pre self-used structural parameter include iter_line, iter_element to record the number of lines processed. It's definition could be seen in L1/include/kernel_mult.hpp.
+	- `para_const_0`: Graph_mult's kernel kfun_mult_0 self-used structural parameter include iter_line, iter_element to record the number of lines processed;
+	- `para_const_1`: Graph_mult's kernel kfun_mult_1 self-used structural parameter include iter_line, iter_element to record the number of lines processed;
+	- `para_const_2`: Graph_mult's kernel kfun_mult_2 self-used structural parameter include iter_line, iter_element to record the number of lines processed;
+	- `para_const_3`: Graph_mult's kernel kfun_mult_3 self-used structural parameter include iter_line, iter_element to record the number of lines processed;
+	- `para_const_0_0`: Graph_mult's kernel kfun_mult_0 self-used local array, used to store accumulated temporary results;
+	- `para_const_0_1`: Graph_mult's kernel kfun_mult_1 self-used local array, used to store accumulated temporary results;
+	- `para_const_0_2`: Graph_mult's kernel kfun_mult_2 self-used local array, used to store accumulated temporary results;
+	- `para_const_0_3`: Graph_mult's kernel kfun_mult_3 self-used local array, used to store accumulated temporary results;
+	- `para_const_1_0`: Graph_mult's kernel kfun_mult_0 self-used local array, used to store accumulated temporary results. To avoid bank conflict, this data memory is applied;
+	- `para_const_1_1`: Graph_mult's kernel kfun_mult_1 self-used local array, used to store accumulated temporary results. To avoid bank conflict, this data memory is applied;
+	- `para_const_1_2`: Graph_mult's kernel kfun_mult_2 self-used local array, used to store accumulated temporary results. To avoid bank conflict, this data memory is applied;
+	- `para_const_1_3`: Graph_mult's kernel kfun_mult_3 self-used local array, used to store accumulated temporary results. To avoid bank conflict, this data memory is applied;
+	- `interp`: Results of interpolation.
+	- `apod`: Results of apodization.
+- **Graph Outputs**:
+	- `mult_0`: Output first segment of final result;
+	- `mult_1`: Output second segment of final result;
+	- `mult_2`: Output third segment of final result;
+	- `mult_3`: Output last segment of final result;
+
+### Graph name: `graph_scanline`
+
+This graph is conmbination of graph_imagepoints, graph_delay, graph_focsing, graph_samples, graph_interpolation, graph_apodization, graph_mult.
+
+- **Graph Inputs**:
+	- `input_rfd_file_name`: Graph_scanline's input rf-data path, used in x86sim and aiesim.
+- **Graph Outputs**:
+	- `mult_0`: Output first segment of final result;
+	- `mult_1`: Output second segment of final result;
+	- `mult_2`: Output third segment of final result;
+	- `mult_3`: Output last segment of final result;
 
 ### Graph name: `Image Points`
 

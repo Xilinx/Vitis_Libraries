@@ -8,7 +8,7 @@
                 "api_name": "us::L1::ones",
                 "display_name": "ones",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -19,23 +19,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
+                        "description": "",
                         "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
+                        "description": "",
                         "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::outer",
@@ -44,7 +50,7 @@
                 "api_name": "us::L1::outer",
                 "display_name": "outer",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -55,23 +61,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
+                        "description": "",
                         "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
+                        "description": "",
                         "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::outerStream",
@@ -80,7 +92,7 @@
                 "api_name": "us::L1::outerStream",
                 "display_name": "outerStream",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -91,23 +103,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
+                        "description": "",
                         "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
+                        "description": "",
                         "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::sumMM",
@@ -116,7 +134,7 @@
                 "api_name": "us::L1::sumMM",
                 "display_name": "sumMM",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -127,23 +145,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
+                        "description": "",
                         "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
+                        "description": "",
                         "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::tileVApo",
@@ -152,7 +176,7 @@
                 "api_name": "us::L1::tileVApo",
                 "display_name": "tileVApo",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -163,23 +187,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::diffMV",
@@ -188,7 +218,7 @@
                 "api_name": "us::L1::diffMV",
                 "display_name": "diffMV",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -199,23 +229,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::mulMM",
@@ -224,7 +260,7 @@
                 "api_name": "us::L1::mulMM",
                 "display_name": "mulMM",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -235,23 +271,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::sum_axis_1",
@@ -260,7 +302,7 @@
                 "api_name": "us::L1::sum_axis_1",
                 "display_name": "sum_axis_1",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -271,23 +313,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::absV",
@@ -296,7 +344,7 @@
                 "api_name": "us::L1::absV",
                 "display_name": "absV",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -307,23 +355,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::diffVS",
@@ -332,7 +386,7 @@
                 "api_name": "us::L1::diffVS",
                 "display_name": "diffVS",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -343,23 +397,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::mulVV",
@@ -368,7 +428,7 @@
                 "api_name": "us::L1::mulVV",
                 "display_name": "mulVV",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -379,23 +439,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::norm_axis_1",
@@ -404,7 +470,7 @@
                 "api_name": "us::L1::norm_axis_1",
                 "display_name": "norm_axis_1",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -415,23 +481,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::divVSSpeedOfSound",
@@ -440,7 +512,7 @@
                 "api_name": "us::L1::divVSSpeedOfSound",
                 "display_name": "divVSSpeedOfSound",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -451,23 +523,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::sumVSStream",
@@ -476,7 +554,7 @@
                 "api_name": "us::L1::sumVSStream",
                 "display_name": "sumVSStream",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -487,23 +565,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::diffVSStreamOut",
@@ -512,7 +596,7 @@
                 "api_name": "us::L1::diffVSStreamOut",
                 "display_name": "diffVSStreamOut",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -523,23 +607,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::sumVOne",
@@ -548,7 +638,7 @@
                 "api_name": "us::L1::sumVOne",
                 "display_name": "sumVOne",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -559,23 +649,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::sumVVStreamIn1",
@@ -584,7 +680,7 @@
                 "api_name": "us::L1::sumVVStreamIn1",
                 "display_name": "sumVVStreamIn1",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -595,23 +691,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::diffSV",
@@ -620,7 +722,7 @@
                 "api_name": "us::L1::diffSV",
                 "display_name": "diffSV",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -631,23 +733,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::squareV",
@@ -656,7 +764,7 @@
                 "api_name": "us::L1::squareV",
                 "display_name": "squareV",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -667,23 +775,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::sumVV",
@@ -692,7 +806,7 @@
                 "api_name": "us::L1::sumVV",
                 "display_name": "sumVV",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -703,23 +817,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::sqrtV",
@@ -728,7 +848,7 @@
                 "api_name": "us::L1::sqrtV",
                 "display_name": "sqrtV",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -739,23 +859,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::mulVSCRS",
@@ -764,7 +890,7 @@
                 "api_name": "us::L1::mulVSCRS",
                 "display_name": "mulVSCRS",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -775,19 +901,24 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
+                        "description": "",
                         "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::mulLinSCRStreamIn",
@@ -796,7 +927,7 @@
                 "api_name": "us::L1::mulLinSCRStreamIn",
                 "display_name": "mulLinSCRStreamIn",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -807,19 +938,24 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
+                        "description": "",
                         "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::diffOneLin",
@@ -828,7 +964,7 @@
                 "api_name": "us::L1::diffOneLin",
                 "display_name": "diffOneLin",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -839,19 +975,24 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
+                        "description": "",
                         "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::diffTwoLin",
@@ -860,7 +1001,7 @@
                 "api_name": "us::L1::diffTwoLin",
                 "display_name": "diffTwoLin",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -871,19 +1012,24 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
+                        "description": "",
                         "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::diffLinOne",
@@ -892,7 +1038,7 @@
                 "api_name": "us::L1::diffLinOne",
                 "display_name": "diffLinOne",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -903,19 +1049,24 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
+                        "description": "",
                         "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::diffLinTwo",
@@ -924,7 +1075,7 @@
                 "api_name": "us::L1::diffLinTwo",
                 "display_name": "diffLinTwo",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -935,19 +1086,24 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
+                        "description": "",
                         "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::mulVHalfInt",
@@ -956,7 +1112,7 @@
                 "api_name": "us::L1::mulVHalfInt",
                 "display_name": "mulVHalfInt",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -967,19 +1123,24 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
+                        "description": "",
                         "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::mulLinHalf",
@@ -988,7 +1149,7 @@
                 "api_name": "us::L1::mulLinHalf",
                 "display_name": "mulLinHalf",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -999,19 +1160,24 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
+                        "description": "",
                         "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::dataMover",
@@ -1020,7 +1186,7 @@
                 "api_name": "us::L1::dataMover",
                 "display_name": "dataMover",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -1031,19 +1197,24 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
+                        "description": "",
                         "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::diffThreeLin",
@@ -1052,7 +1223,7 @@
                 "api_name": "us::L1::diffThreeLin",
                 "display_name": "diffThreeLin",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -1063,19 +1234,24 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
+                        "description": "",
                         "type": "const unsigned int"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::equalS",
@@ -1084,7 +1260,7 @@
                 "api_name": "us::L1::equalS",
                 "display_name": "equalS",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -1095,27 +1271,34 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
+                        "description": "",
                         "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
+                        "description": "",
                         "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     },
                     {
                         "name": "SCALAR",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::lessOrEqualThanS",
@@ -1124,7 +1307,7 @@
                 "api_name": "us::L1::lessOrEqualThanS",
                 "display_name": "lessOrEqualThanS",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -1135,27 +1318,34 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
+                        "description": "",
                         "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
+                        "description": "",
                         "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     },
                     {
                         "name": "SCALAR",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::mulVPi",
@@ -1164,7 +1354,7 @@
                 "api_name": "us::L1::mulVPi",
                 "display_name": "mulVPi",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -1175,23 +1365,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
+                        "description": "",
                         "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
+                        "description": "",
                         "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::mulV1e_16",
@@ -1200,7 +1396,7 @@
                 "api_name": "us::L1::mulV1e_16",
                 "display_name": "mulV1e_16",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -1211,23 +1407,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
+                        "description": "",
                         "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
+                        "description": "",
                         "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::mulVS",
@@ -1236,7 +1438,7 @@
                 "api_name": "us::L1::mulVS",
                 "display_name": "mulVS",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -1247,23 +1449,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
+                        "description": "",
                         "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
+                        "description": "",
                         "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::mulVSWS",
@@ -1272,7 +1480,7 @@
                 "api_name": "us::L1::mulVSWS",
                 "display_name": "mulVSWS",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -1283,23 +1491,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
+                        "description": "",
                         "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
+                        "description": "",
                         "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::absVSW",
@@ -1308,7 +1522,7 @@
                 "api_name": "us::L1::absVSW",
                 "display_name": "absVSW",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -1319,23 +1533,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
+                        "description": "",
                         "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
+                        "description": "",
                         "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::reciprocalV",
@@ -1344,7 +1564,7 @@
                 "api_name": "us::L1::reciprocalV",
                 "display_name": "reciprocalV",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -1355,23 +1575,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
+                        "description": "",
                         "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
+                        "description": "",
                         "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::cosV",
@@ -1380,7 +1606,7 @@
                 "api_name": "us::L1::cosV",
                 "display_name": "cosV",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -1391,23 +1617,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
+                        "description": "",
                         "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
+                        "description": "",
                         "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::absVWS",
@@ -1416,7 +1648,7 @@
                 "api_name": "us::L1::absVWS",
                 "display_name": "absVWS",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -1427,23 +1659,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
+                        "description": "",
                         "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
+                        "description": "",
                         "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::mulVHalf",
@@ -1452,7 +1690,7 @@
                 "api_name": "us::L1::mulVHalf",
                 "display_name": "mulVHalf",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -1463,23 +1701,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::sumVOneSW",
@@ -1488,7 +1732,7 @@
                 "api_name": "us::L1::sumVOneSW",
                 "display_name": "sumVOneSW",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -1499,23 +1743,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::mulVVStreamOut",
@@ -1524,7 +1774,7 @@
                 "api_name": "us::L1::mulVVStreamOut",
                 "display_name": "mulVVStreamOut",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -1535,23 +1785,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::diffOneVWW",
@@ -1560,7 +1816,7 @@
                 "api_name": "us::L1::diffOneVWW",
                 "display_name": "diffOneVWW",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -1571,23 +1827,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         },
         {
             "api_name": "us::L1::sign",
@@ -1596,7 +1858,7 @@
                 "api_name": "us::L1::sign",
                 "display_name": "sign",
                 "brief": "",
-                "target_domain": "",
+                "target_domain": "AIE",
                 "header_file_name": [
                     "kernels.hpp"
                 ],
@@ -1607,23 +1869,29 @@
                 "parameters": [
                     {
                         "name": "T",
+                        "description": "",
                         "type": "typename"
                     },
                     {
                         "name": "LEN",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "INCREMENT",
-                        "type": "const unsigned int"
+                        "description": "",
+                        "type": "const unsigned"
                     },
                     {
                         "name": "VECDIM",
+                        "description": "",
                         "type": "const unsigned"
                     }
                 ],
-                "ports": []
-            }
+                "ports": [],
+                "visible": false
+            },
+            "target_domain": "AIE"
         }
     ]
 }

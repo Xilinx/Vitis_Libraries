@@ -1,5 +1,6 @@
 .. 
-   Copyright 2019-2020 Xilinx, Inc.
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
   
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -23,8 +24,27 @@
 Vitis Ultrasound Library Tutorial
 ==================================
 
-Get and setup the Vitis Ultrasound Library
-==========================================
+This tutorial will show how to achieve better ultrasound image quality, speed, and accuracy using AMD technology. The tutorial includes four labs:
+
+* Lab-1: How does Vitis ultrasound Library work
+
+* Lab-2: L1/L2 Graph based algorithm acceleration and evaluation for ultrasound tool box case
+
+* Lab-3: L2 Graph based algorithm acceleration and evaluation for ultrasound All in AIE case
+
+* Lab-4: L3 Graph based acceleration for ultrasound All in AIE, intergrated with PL and xrt case
+
+
+Lab-1: How does Vitis ultrasound Library work
+===============================================
+
+Vitis ultrasound library provides three levels of APIs, L1, L2 and L3. 
+The APIs in L1 are 2 sets, tool box APIs and All in AIE APIs (naming with kernel_*). 
+The APIs in L2 are 2 sets, tool box Graphs and All in AIE Graphs (naming with graph_*). 
+The APIs in L1/L2 support x86sim/aiesim flow and are oriented to module-level design that test in L2/tests.
+Meanwhile, L2 cases of tool box (apodization/delay/focusing/image-points/interpolator/samples/_sa) also support board-level acceleratins.
+The APIs in L3 are based on Vitis flow and are designed for board-level accelerations. 
+There are 4 L3 cases. Scanline_AllinAIE is developed with All in AIE method. PW/SA/Scanline are developed with tool box method.
 
 Setup Environment
 ------------------------------------
@@ -34,14 +54,14 @@ Setup Environment
    #!/bin/bash
 
    # setup vitis env
-   source <Vitis_install_path>/Vitis/2023.1/settings64.sh 
-   source <XRT_install_path>/2023.1/xbb/xrt/packages/setenv.sh
+   source <Vitis_install_path>/Vitis/2023.2/settings64.sh 
+   source <XRT_install_path>/2023.2/xbb/xrt/packages/setenv.sh
    export PLATFORM_REPO_PATHS=<path_to_platforms>
 
    # set petalinux related env
-   export SYSROOT=<path_to_platforms>/sw/versal/xilinx-versal-common-v2023.1/sysroots/aarch64-xilinx-linux/
-   export ROOTFS=<path_to_platforms>/sw/versal/xilinx-versal-common-v2023.1/rootfs.ext4
-   export K_IMAGE=<path_to_platforms>/sw/versal/xilinx-versal-common-v2023.1/Image
+   export SYSROOT=<path_to_platforms>/sw/versal/xilinx-versal-common-v2023.2/sysroots/aarch64-xilinx-linux/
+   export ROOTFS=<path_to_platforms>/sw/versal/xilinx-versal-common-v2023.2/rootfs.ext4
+   export K_IMAGE=<path_to_platforms>/sw/versal/xilinx-versal-common-v2023.2/Image
 
 Download the Vitis Ultrasound Library
 --------------------------------------
@@ -52,8 +72,18 @@ Download the Vitis Ultrasound Library
    git clone https://github.com/Xilinx/Vitis_Libraries.git
    cd Vitis_Libraries/ultrasound
 
+Lab-2: L1/L2 Graph based algorithm acceleration and evaluation for ultrasound tool box case
+============================================================================================
+
+Lab purpose
+------------------------------------
+Before using Vitis flow to build a full-function kernel running on hardware, users may want to use a relative simple flow to
+estimate performance and resource consumption for some key modules in a complex algorithm. In this lab, users will estimate
+a easy module called 'absV ' which return a new vector composed of the absolute value corresponding to each element of the input vector.
+Users may finally get a libadf.a of module instead of a kernel can run on hardware, but it is the first step to successful design.
+
 Run a L1 Example
-=================
+------------------------------------
 
 .. code-block:: bash
 
@@ -63,7 +93,7 @@ Run a L1 Example
    make run TARGET=aiesim  # run the aiesim
 
 Run a L2 Example
-=================
+------------------------------------
 
 .. code-block:: bash
 
@@ -75,29 +105,219 @@ Run a L2 Example
    make run TARGET=hw_emu  # run hw_emu. Build host and run hardware emulation, this step would lauch petalinux
    make all TARGET=hw      # build hw
 
-L2 APIs Input Arguments:
+L2 APIs Input Arguments
+------------------------------------
 
 .. code-block:: bash
 
    Usage: host.exe -[xclbin  data]
           -xclbin: the kernel name
           -data: the path to the input data
-          
 
-Run a L3 Example
-=================
+Lab-3: L2 Graph based algorithm acceleration and evaluation for ultrasound All in AIE case
+============================================================================================
+
+Run a L2 graph_scanline case
+------------------------------------
 
 .. code-block:: bash
 
    #!/bin/bash
-   cd L3/demos/plane_wave  # plane_wave is an example case. Please change directory to any other cases in L3/test if interested.
+   cd L2/tests/graph_scanline # scanline is an example case. Please change directory to any other cases in L2/test if interested.
    make run TARGET=x86sim  # run the x86sim
    make run TARGET=aiesim  # run the aiesim
+
+Example logs of graph_scanline
+------------------------------------
+
+1. List for all the scanline parameters of Example 1 that defined by user.
+
+.. code-block:: shell 
+
+   Scanline L2 Graph initialization by using init_img_foc()
+   : Example 1 for scanline parameters
+   : speed_sound     = 1540.0      m/s
+   : freq_sound      = 5000000     Hz
+   : Wave Length     = 0.000308000         m
+   : freq_sampling   = 100000000   Hz
+   : num_sample      = 2048                sample / line
+   : num_line        = 41          line / image
+   : num_element     = 128                 elemments on transducer
+   : Sampling Length = 0.000007700         m
+   : Sampling Depth  = 0.007884800         m
+   : Sampling Cycle  = 0.000020480         s
+   : Sampling Input  = 12800.000   MSps
+   : Imaging output  = 256.250     MPps
+   : Imaging spf     = 83968       Pixel per frame
+   : Imaging fps     = 1190.930    fps
+
+2. List for all the 4 sets of intermediate results of the evolution from algorithm models to hardware.
+
+   * module by module mode scanline (shown below)
+
+   * line by line mode scanline
+
+   * element by element mode scanline
+
+   * data-unit-by data-unit mode scanline
+
+   The intermediate results of each mode are distinguished by file naming. 
+   For example, MbyM_L1_E128_S2048.int.col is the result of interpolation. 
+   In MbyM_L1_S2048.mul.col, L1 means 1 lines result which is used for smoking test.
+   In MbyM_L41_S2048.mul.col, L41 means 41 lines result which is used for full test to show the png.
+   All files is column format.
+
+.. code-block:: shell 
+
+   ************************ Now performacing a scanline testing in data-unit-by data-unit mode ************************
+   MODEL_TEST_SCANLINE_UbyU:  ____________________________________________________________________
+   MODEL_TEST_SCANLINE_UbyU:   Algorithm | Data unit pattern |        Invoking times
+   MODEL_TEST_SCANLINE_UbyU:    Modules  |  Dim1-seg-sample  | [segment] x [element] x [line]
+   MODEL_TEST_SCANLINE_UbyU:  --------------------------------------------------------------------
+   MODEL_TEST_SCANLINE_UbyU:    obj_img  |       [ 512]      |
+   MODEL_TEST_SCANLINE_UbyU:    obj_foc  |       [ 128]      |
+   MODEL_TEST_SCANLINE_UbyU:    obj_dly  |       [ 512]      |
+   MODEL_TEST_SCANLINE_UbyU:    obj_apo  |       [ 512]      | x [4] x [128] x [41]
+   MODEL_TEST_SCANLINE_UbyU:    obj_smp  |       [ 512]      |
+   MODEL_TEST_SCANLINE_UbyU:    obj_int  |       [2048]      |
+   MODEL_TEST_SCANLINE_UbyU:    obj_mul  |       [2048]      |
+   MODEL_TEST_SCANLINE_UbyU:  ____________________________________________________________________
+   MODEL_TEST_SCANLINE: Saving img data in file data_model/UbyU_L1_S2048_Dim0.img.col
+   MODEL_TEST_SCANLINE: Saving img data in file data_model/UbyU_L1_S2048_Dim2.img.col
+   MODEL_TEST_SCANLINE: Saving focusing data in file data_model/UbyU_L1_E128.foc.col
+   MODEL_TEST_SCANLINE: Saving dly data in file data_model/UbyU_L1_S2048.dly.col
+   MODEL_TEST_SCANLINE: Saving smp data in file data_model/UbyU_L1_E128_S2048.smp.col
+   MODEL_TEST_SCANLINE: Saving inside data in file data_model/UbyU_L1_E128_S2048.ins.col
+   MODEL_TEST_SCANLINE: Saving int data in file data_model/UbyU_L1_E128_S2048.int.col
+   MODEL_TEST_SCANLINE: Saving apo data in file data_model/UbyU_L1_E128_S2048.apo.col
+   MODEL_TEST_SCANLINE: Saving mult data in file data_model/UbyU_L1_S2048.mul.col
+
+3. List for all for AIE graph Static Parameters to check whether the AIE hardware or design restrictions are met.
+   For example, num_invoking is the invoking times of AIE graph.  
+
+.. code-block:: shell 
+
+   ********** Static Parameter ********************
+   Const: NUM_LINE_t              = 41
+   Const: NUM_ELEMENT_t           = 128
+   Const: NUM_SAMPLE_t            = 2048
+   Const: VECDIM_foc_t            = 8
+   Const: NUM_SEG_t               = 4
+   Const: num_invoking            = 20992
+   Const: VECDIM_img_t            = 8
+   Const: LEN_OUT_img_t           = 512
+   Const: LEN32b_PARA_img_t       = 7
+   Const: LEN_OUT_foc_t           = 512
+   Const: LEN32b_PARA_foc_t       = 6
+   Const: LEN32b_PARA_delay_t     = 17
+   Const: LEN_IN_delay_t          = 512
+   Const: LEN_OUT_delay_t         = 512
+   Const: VECDIM_delay_t          = 8
+   Const: LEN_OUT_apodi_t         = 512
+   Const: LEN_IN_apodi_t          = 512
+   Const: LEN32b_PARA_apodi_t     = 12
+   Const: VECDIM_apodi_t          = 8
+   Const: LEN_IN_apodi_f_t        = 128
+   Const: LEN_IN_apodi_d_t        = 512
+   Const: NUM_UPSample_t          = 4
+   Const: LEN_OUT_interp_t        = 2048
+   Const: LEN_IN_interp_t         = 512
+   Const: LEN_IN_interp_rf_t      = 2048
+   Const: LEN32b_PARA_interp_t    = 9
+   Const: VECDIM_interp_t         = 8
+   Const: VECDIM_sample_t         = 8
+   Const: LEN_IN_sample_t         = 512
+   Const: LEN_OUT_sample_t        = 512
+   Const: LEN32b_PARA_sample_t    = 12
+   Const: VECDIM_mult_t           = 8
+   Const: LEN_IN_mult_t           = 2048
+   Const: LEN_OUT_mult_t          = 2048
+   Const: LEN32b_PARA_mult_t      = 8
+
+4. List for all for AIE graph RTP Parameters to check whether design restrictions are met.
+
+.. code-block:: shell 
+
+   ********** RTP Parameter ********************
+   RTP: para_mult_const           size = 32 Bytes
+   RTP: para_interp_const         size = 36 Bytes
+   RTP: para_amain_const          size = 48 Bytes
+   RTP: para_apodi_const          size = 48 Bytes
+   RTP: g_sam_para_const          size = 48 Bytes
+   RTP: g_sam_para_rfdim          size = 164 Bytes
+   RTP: g_sam_para_elem           size = 8 Bytes
+   RTP: g_delay_para_const        size = 68 Bytes
+   RTP: g_delay_t_start           size = 164 Bytes
+   RTP: para_foc_const            size = 24 Bytes
+   RTP: example_1_xdc_def_pos_xz  size = 2048 Bytes
+
+1. List for the comparison result with model output.
+   Only values that meet both conditions of Error judgement are considered computational errors.
+   User can also open the macro #define ENABLE_DEBUGGING in L2/include/graph_scanline.hpp to generate all the intermediate results, and it will also be automatically checked. 
+
+.. code-block:: shell 
+
+   ***********     Comparison   ************
+   *********** File 1                           : x86simulator_output/data/mult_All.txt
+   *********** File 2                           : data_model/UbyU_L41_S2048.mul.col
+   *********** Error judgement                  : diff_abs > 1.000000e-06 && diff_ratio > 1.000000e-04
+   *********** Total tested data number         : 8192
+   *********** Total passed data number         : 8192      100.00%
+   ***********       complete same data number  : 4327      52.82%
+   ***********       complete zero data number  : 4226      51.59%
+   *********** Absolute Errors distributions   ************
+   *********** Checked data range of First file : [-2.935699e+05, 3.438067e+05]
+   *********** Checked data range of Second file: [-2.935699e+05, 3.438067e+05]
+   Differences range from [ 10^-6 to 10^-5 )    :   494     6.03%
+   Differences range from [ 10^-5 to 10^-4 )    :   1651    20.15%
+   Differences range from [ 10^-4 to 10^-3 )    :   1028    12.55%
+   Differences range from [ 10^-3 to 10^-2 )    :   251     3.06%
+   Differences range from [ 10^-2 to 10^-1 )    :   172     2.10%
+   Differences range from [ 10^-1 to 10^ 0 )    :   52      0.63%
+   Differences range from [ 10^ 0 to 10^ 1 )    :   0       0.00%
+   Differences range from [ 10^ 1 to 10^ 2 )    :   0       0.00%
+   Differences range from [ 10^ 2 to 10^ 3 )    :   0       0.00%
+   Differences range from [ 10^ 3 to 10^ 4 )    :   0       0.00%
+   Differences range from [ 10^ 4 to 10^ 5 )    :   0       0.00%
+   Differences range from [ 10^ 5 to 10^ 6 )    :   0       0.00%
+   Differences range from [ 10^ 6 to 10^ 7 )    :   0       0.00%
+   Differences range from [ 10^ 7 to 10^ 8 )    :   0       0.00%
+   Differences range from [ 10^ 8 to 10^ 9 )    :   0       0.00%
+   Differences range from [ 10^ 9 to 10^10 )    :   0       0.00%
+   Differences range from [ 10^10 to 10^11 )    :   0       0.00%
+   Differences range from [ 10^11 to 10^12 )    :   0       0.00%
+   Differences range from [ 10^12 to 10^13 )    :   0       0.00%
+   INFO [HLS SIM]: The maximum depth reached by any hls::stream() instance in the design is 2048
+   Simulation completed successfully returning zero
+         
+
+Lab-4: L3 Graph based acceleration for ultrasound All in AIE, intergrated with PL and xrt case
+===============================================================================================
+
+Lab purpose
+------------------------------------
+The user's ultrasound may be based on an open source project. This lab will show an accelerated process based on an open 
+source project, the classic Scanline mothed. Scanline mothed is not only more complex, but also involves AIE/PL/SW partition.
+Scanline mothed is all in AIE in this case.
+To learn:
+
+- How to run L3 cases
+- How to map customerized parameters to this L3 to get board-level cases.
+- L3 accelerated process intergrated with AIE, PL and xrt
+
+Run L3 All in AIE cases
+------------------------------------
+
+.. code-block:: bash
+
+   #!/bin/bash
+   cd L3/demos/scanline_AllinAIE  # 1. scanline_AllinAIE 2. plane_wave are example cases. Please change directory to any other cases in L3/test if interested.
    make run TARGET=sw_emu  # run sw_emu
    make run TARGET=hw_emu  # run hw_emu
    make all TARGET=hw      # build hw
 
-L3 APIs Input Arguments:
+L3 APIs Input Arguments
+------------------------------------
 
 .. code-block:: bash
 
@@ -105,7 +325,179 @@ L3 APIs Input Arguments:
           -xclbin: the kernel name
           -data: the path to the input data
 
-Example logs
+Example logs of scanline_AllinAIE
+------------------------------------
+
+1. List for all the scanline parameters of Example 1 that defined by user.
+
+- Users can easily set or modify the parameters of their target case in L1/include/us_example_parameter.hpp
+- Then generate corresponding board-level cases through L3.
+
+
+.. code-block:: shell 
+
+   : Example 1 for scanline parameters
+   : speed_sound     = 1540.0      m/s
+   : freq_sound      = 5000000     Hz
+   : Wave Length     = 0.000308000 m
+   : freq_sampling   = 100000000   Hz
+   : num_sample      = 2048        sample / line
+   : num_line        = 41          line / image
+   : num_element     = 128         elemments on transducer
+   : Sampling Length = 0.000007700 m
+   : Sampling Depth  = 0.007884800 m
+   : Sampling Cycle  = 0.000020480 s
+   : Sampling Input  = 12800.000   MSps
+   : Imaging output  = 256.250     MPps
+   : Imaging spf     = 83968       Pixel per frame
+   : Imaging fps     = 1190.930    fps
+
+2. List for all the 4 sets of intermediate results of the evolution from algorithm models to hardware.
+
+   * module by module mode scanline (shown below)
+
+   * line by line mode scanline
+
+   * element by element mode scanline
+
+   * data-unit-by data-unit mode scanline
+
+   The intermediate results of each mode are distinguished by file naming. 
+   For example, MbyM_L1_E128_S2048.int.col is the result of interpolation. 
+   In MbyM_L1_S2048.mul.col, L1 means 1 lines result which is used for smoking test.
+   In MbyM_L41_S2048.mul.col, L41 means 41 lines result which is used for full test to show the png.
+   All files is column format.
+
+.. code-block:: shell 
+
+   ************************ Now performacing a scanline testing in module by module mode ************************
+   MODEL_TEST_SCANLINE_MbyM:  ______________________________________________________________________
+   MODEL_TEST_SCANLINE_MbyM:   Algorithm |               Data unit pattern           | Invoking times
+   MODEL_TEST_SCANLINE_MbyM:    Modules  |  Dim1-element   Dim2-sample   Dim3-line   |
+   MODEL_TEST_SCANLINE_MbyM:  ---------------------------------------------------------------------
+   MODEL_TEST_SCANLINE_MbyM:    obj_img  |                     [2048]     x    [41]  |
+   MODEL_TEST_SCANLINE_MbyM:    obj_foc  |  [ 128]                                   |
+   MODEL_TEST_SCANLINE_MbyM:    obj_dly  |              x      [2048]     x    [41]  |
+   MODEL_TEST_SCANLINE_MbyM:    obj_apo  |  [ 128]      x      [2048]     x    [41]  |   x [1]
+   MODEL_TEST_SCANLINE_MbyM:    obj_smp  |  [ 128]      x      [2048]     x    [41]  |
+   MODEL_TEST_SCANLINE_MbyM:    obj_int  |  [ 128]      x      [8192]     x    [41]  |
+   MODEL_TEST_SCANLINE_MbyM:    obj_mul  |  [ 128]      x      [8192]     x    [41]  |
+   MODEL_TEST_SCANLINE_MbyM:  ______________________________________________________________________
+   MODEL_TEST_SCANLINE: Saving img data in file data_model/MbyM_L1_S2048_Dim0.img.col
+   MODEL_TEST_SCANLINE: Saving img data in file data_model/MbyM_L1_S2048_Dim2.img.col
+   MODEL_TEST_SCANLINE: Saving focusing data in file data_model/MbyM_L1_E128.foc.col
+   MODEL_TEST_SCANLINE: Saving dly data in file data_model/MbyM_L1_S2048.dly.col
+   MODEL_TEST_SCANLINE: Saving smp data in file data_model/MbyM_L1_E128_S2048.smp.col
+   MODEL_TEST_SCANLINE: Saving inside data in file data_model/MbyM_L1_E128_S2048.ins.col
+   MODEL_TEST_SCANLINE: Saving int data in file data_model/MbyM_L1_E128_S2048.int.col
+   MODEL_TEST_SCANLINE: Saving apo data in file data_model/MbyM_L1_E128_S2048.apo.col
+   MODEL_TEST_SCANLINE: Saving mult data in file data_model/MbyM_L1_S2048.mul.col
+   MODEL_TEST_SCANLINE: Saving mult data in file data_model/MbyM_L41_S2048.mul.col
+
+3. List for all for AIE graph Static Parameters to check whether the AIE hardware or design restrictions are met.
+   For example, num_invoking is the invoking times of AIE graph.  
+
+.. code-block:: shell 
+
+   ********** Static Parameter ********************
+   Const: NUM_LINE_t              = 41
+   Const: NUM_ELEMENT_t           = 128
+   Const: NUM_SAMPLE_t            = 2048
+   Const: VECDIM_foc_t            = 8
+   Const: NUM_SEG_t               = 4
+   Const: num_invoking            = 20992
+   Const: VECDIM_img_t            = 8
+   Const: LEN_OUT_img_t           = 512
+   Const: LEN32b_PARA_img_t       = 7
+   Const: LEN_OUT_foc_t           = 512
+   Const: LEN32b_PARA_foc_t       = 6
+   Const: LEN32b_PARA_delay_t     = 17
+   Const: LEN_IN_delay_t          = 512
+   Const: LEN_OUT_delay_t         = 512
+   Const: VECDIM_delay_t          = 8
+   Const: LEN_OUT_apodi_t         = 512
+   Const: LEN_IN_apodi_t          = 512
+   Const: LEN32b_PARA_apodi_t     = 12
+   Const: VECDIM_apodi_t          = 8
+   Const: LEN_IN_apodi_f_t        = 128
+   Const: LEN_IN_apodi_d_t        = 512
+   Const: NUM_UPSample_t          = 4
+   Const: LEN_OUT_interp_t        = 2048
+   Const: LEN_IN_interp_t         = 512
+   Const: LEN_IN_interp_rf_t      = 2048
+   Const: LEN32b_PARA_interp_t    = 9
+   Const: VECDIM_interp_t         = 8
+   Const: VECDIM_sample_t         = 8
+   Const: LEN_IN_sample_t         = 512
+   Const: LEN_OUT_sample_t        = 512
+   Const: LEN32b_PARA_sample_t    = 12
+   Const: VECDIM_mult_t           = 8
+   Const: LEN_IN_mult_t           = 2048
+   Const: LEN_OUT_mult_t          = 2048
+   Const: LEN32b_PARA_mult_t      = 8
+
+4. List for all for AIE graph RTP Parameters to check whether design restrictions are met.
+
+.. code-block:: shell 
+
+   ********** RTP Parameter ********************
+   RTP: para_mult_const           size = 32 Bytes
+   RTP: para_interp_const         size = 36 Bytes
+   RTP: para_amain_const          size = 48 Bytes
+   RTP: para_apodi_const          size = 48 Bytes
+   RTP: g_sam_para_const          size = 48 Bytes
+   RTP: g_sam_para_rfdim          size = 164 Bytes
+   RTP: g_sam_para_elem           size = 8 Bytes
+   RTP: g_delay_para_const        size = 68 Bytes
+   RTP: g_delay_t_start           size = 164 Bytes
+   RTP: para_foc_const            size = 24 Bytes
+   RTP: example_1_xdc_def_pos_xz  size = 2048 Bytes
+
+5. List for the md5sum of result and the comparison result with model output.
+   Only values that meet both conditions of Error judgement are considered computational errors.
+
+.. code-block:: shell 
+
+   8fce71b2b4cab289c1b12ab841f05aac  data/xf_output_res.bin
+   e93ae81a2de1a855b2a82e22159e4005  data/xf_output_res.txt
+   [HOST]: model result in data_model/UbyU_L41_S2048.mul.col
+   ***********     Comparison   ************
+   *********** File 1                           : data/xf_output_res.txt
+   *********** File 2                           : data_model/UbyU_L41_S2048.mul.col
+   *********** Error judgement                  : diff_abs > 1.000000e-05 && diff_ratio > 1.000000e-03
+   *********** Total tested data number         : 335872
+   *********** Total passed data number         : 335872    100.00%
+   ***********       complete same data number  : 231982    69.07%
+   ***********       complete zero data number  : 229454    68.32%
+   *********** Absolute Errors distributions   ************
+   *********** Checked data range of First file : [-6.625977e+06, 8.221938e+06]
+   *********** Checked data range of Second file: [-6.625977e+06, 8.221938e+06]
+   Differences range from [ 10^-5 to 10^-4 )    :   29375   8.75%
+   Differences range from [ 10^-4 to 10^-3 )    :   30489   9.08%
+   Differences range from [ 10^-3 to 10^-2 )    :   12572   3.74%
+   Differences range from [ 10^-2 to 10^-1 )    :   9427    2.81%
+   Differences range from [ 10^-1 to 10^ 0 )    :   5144    1.53%
+   Differences range from [ 10^ 0 to 10^ 1 )    :   1682    0.50%
+   Differences range from [ 10^ 1 to 10^ 2 )    :   0   0.00%
+   Differences range from [ 10^ 2 to 10^ 3 )    :   0   0.00%
+   Differences range from [ 10^ 3 to 10^ 4 )    :   0   0.00%
+   Differences range from [ 10^ 4 to 10^ 5 )    :   0   0.00%
+   Differences range from [ 10^ 5 to 10^ 6 )    :   0   0.00%
+   Differences range from [ 10^ 6 to 10^ 7 )    :   0   0.00%
+   Differences range from [ 10^ 7 to 10^ 8 )    :   0   0.00%
+   Differences range from [ 10^ 8 to 10^ 9 )    :   0   0.00%
+   Differences range from [ 10^ 9 to 10^10 )    :   0   0.00%
+   Differences range from [ 10^10 to 10^11 )    :   0   0.00%
+   Differences range from [ 10^11 to 10^12 )    :   0   0.00%
+   Differences range from [ 10^12 to 10^13 )    :   0   0.00%
+   Differences range from [ 10^13 to 10^14 )    :   0   0.00%
+   [HOST]: total error 0
+   Releasing remaining XRT objects...
+   [HOST]: success!
+
+
+Example logs of plane_wave
+------------------------------------
 
 .. code-block:: shell 
 

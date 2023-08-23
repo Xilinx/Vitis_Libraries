@@ -32,9 +32,9 @@
             "accelerators": [
                 {
                     "location": "LIB_DIR/L2/tests/cosV/test.cpp",
-                    "pl-freq": 100,
                     "workdir": "./Work",
-                    "name": "libadf.a"
+                    "name": "libadf.a",
+                    "config": "aie.cfg"
                 }
             ]
         }

@@ -1,5 +1,6 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
+   Copyright (C) 2019-2022, Xilinx, Inc.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
   
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -27,10 +28,12 @@ Vitis Ultrasound library provides implementation of different L1/L2/L3 APIs Tool
 Code structures enhancement
 ----------------------------
 
-- L1: all L1 BLAS apis could be referenced by including "L1/include/", different apis sources files (AIE kernel code) locate in separated directory.
-- L2: all L2 ultrasound component apis could be reference by including "L1/include/", different apis shareing golbal settings from "L1/include/kernels.hpp".
-- L3, all 3 example of connected beamformer (PW/SA/Scanline) are located in separated directory under "L3/demos", each contain self contain data and source code.
-- Design code structure enahancement: for L2/L3 cases, source code for differenct device are well orgnized. The structure is showed as bellow:
+- L1: all L1 kernel apis (all in AIE) files locate in separated directory beginning with "kernel_".
+- L2: all L2 ultrasound all in AIE component apis beginning with "graph_" are separated settings from "L1/include/kernel_*.hpp".
+- L1: all L1 BLAS apis (tool box) files locate in separated directory.
+- L2: all L2 ultrasound tool box component apis are shareing golbal settings from "L1/include/kernels.hpp".
+- L3, all 4 example of connected beamformer (Scanline_AllinAIE/PW/SA/Scanline) are located in separated directory under "L3/tests", each contain self contain data and source code.
+- For L2/L3 cases, source code for differenct device are well orgnized. The structure is showed as bellow:
 
 .. code-block:: txt
 

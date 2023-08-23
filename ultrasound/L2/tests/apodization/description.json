@@ -73,9 +73,9 @@
             "accelerators": [
                 {
                     "location": "LIB_DIR/L2/tests/apodization/aie_graph/graph.cpp",
-                    "pl-freq": 100,
                     "workdir": "./Work",
-                    "name": "libadf.a"
+                    "name": "libadf.a",
+                    "config": "aie.cfg"
                 }
             ]
         }
@@ -126,12 +126,12 @@
                 "env": "",
                 "cmd": "",
                 "max_memory_MB": {
-		    "vitis_aie_sim": 32768,
-		    "vitis_aie_x86sim": 32768,
-		    "vitis_sw_emu": 32768,
-		    "vitis_hw_emu": 32768,
-		    "vitis_hw_build": 40960
-		},
+                    "vitis_aie_sim": 32768,
+                    "vitis_aie_x86sim": 32768,
+                    "vitis_sw_emu": 32768,
+                    "vitis_hw_emu": 32768,
+                    "vitis_hw_build": 40960
+                },
                 "max_time_min": 300
             }
         ],

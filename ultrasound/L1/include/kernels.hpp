@@ -1,5 +1,6 @@
 /*
- * Copyright 2022 Xilinx, Inc.
+ * Copyright (C) 2019-2022, Xilinx, Inc.
+ * Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -216,6 +217,28 @@ void diffOneVWW(adf::input_buffer<T>& __restrict in, adf::output_buffer<T>& __re
 
 template <typename T, const unsigned int LEN, const unsigned int INCREMENT, const unsigned VECDIM>
 void sign(adf::input_buffer<T>& __restrict in1, adf::output_buffer<T>& __restrict out);
+
+// debug L2 under L1 level
+
+// template <typename T,
+//           const unsigned int LEN,
+//           const unsigned int VECDIM>
+// void UpdatingImagePoints_line_1d(T start_in,
+//          T step_in,
+//          adf::input_buffer<T>& __restrict idx_in,
+//          adf::output_buffer<T>& __restrict des_out);
+
+template <typename T, const unsigned int LEN, const unsigned int VECDIM>
+void UpdatingImagePoints_line_1d(adf::input_buffer<T>& __restrict start_in,
+                                 adf::input_buffer<T>& __restrict step_in,
+                                 adf::input_buffer<T>& __restrict idx_in,
+                                 adf::output_buffer<T>& __restrict des_out);
+
+template <typename T, const unsigned int LEN, const unsigned int VECDIM>
+void UpdatingImagePoints_line_1d_1(adf::input_buffer<T>& __restrict start_in,
+                                   adf::input_buffer<T>& __restrict step_in,
+                                   adf::input_buffer<T>& __restrict idx_in,
+                                   adf::output_buffer<T>& __restrict des_out);
 
 } // namespace L1
 
