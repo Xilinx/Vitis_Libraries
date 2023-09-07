@@ -90,11 +90,6 @@ static float Sqrt2(float x) {
 #pragma HLS INLINE
 
     float xhalf, res, x2, x3, x4;
-#pragma HLS BIND_OP variable = xhalf op = fmul impl = dsp
-#pragma HLS BIND_OP variable = x2 op = fmul impl = dsp
-#pragma HLS BIND_OP variable = x3 op = fmul impl = dsp
-#pragma HLS BIND_OP variable = x4 op = sub impl = dsp
-#pragma HLS BIND_OP variable = res op = frecip impl = dsp
 
     xhalf = 0.5f * x;
     int i = *(int*)&x;         // get bits for floating VALUE
@@ -142,7 +137,6 @@ void Field_Weakening_T(
 
     ap_fixed<48, 32> squareSum = Vd_decoup * Vd_decoup + Vq_decoup * Vq_decoup;
     float temp;
-#pragma HLS BIND_OP variable = temp op = fsqrt impl = dsp
     temp = std::sqrt(squareSum.to_float());
     Modulation = temp;
 

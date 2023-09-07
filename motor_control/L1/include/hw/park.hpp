@@ -58,12 +58,6 @@ void Park_Direct_ap_fixed(
     T_MID cos_theta = (T_MID)cos_theta_in;
     T_MID sin_theta = (T_MID)sin_theta_in;
     T_MID Ia_cos, Ib_sin, Ib_cos, Ia_sin, Id, Iq;
-#pragma HLS BIND_OP variable = Ia_cos op = mul impl = dsp
-#pragma HLS BIND_OP variable = Ib_sin op = mul impl = dsp
-#pragma HLS BIND_OP variable = Ib_cos op = mul impl = dsp
-#pragma HLS BIND_OP variable = Ia_sin op = mul impl = dsp
-#pragma HLS BIND_OP variable = Id op = add impl = dsp
-#pragma HLS BIND_OP variable = Iq op = sub impl = dsp
 
     Ia_cos = (T_MID)Ialpha * cos_theta;
     Ib_sin = (T_MID)Ibeta * sin_theta;
@@ -92,12 +86,6 @@ void Park_Inverse_ap_fixed(
     T_MID cos_theta = (T_MID)cos_theta_in;
     T_MID sin_theta = (T_MID)sin_theta_in;
     T_MID Vd_cos, Vq_sin, Vq_cos, Vd_sin, va_inv, vb_inv;
-#pragma HLS BIND_OP variable = Vd_cos op = mul impl = dsp
-#pragma HLS BIND_OP variable = Vq_sin op = mul impl = dsp
-#pragma HLS BIND_OP variable = Vq_cos op = mul impl = dsp
-#pragma HLS BIND_OP variable = Vd_sin op = mul impl = dsp
-#pragma HLS BIND_OP variable = va_inv op = sub impl = dsp
-#pragma HLS BIND_OP variable = vb_inv op = add impl = dsp
     Vd_cos = (T_MID)Vd * cos_theta;
     Vq_sin = (T_MID)Vq * sin_theta;
     Vq_cos = (T_MID)Vq * cos_theta;

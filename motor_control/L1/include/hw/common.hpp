@@ -63,7 +63,7 @@ from Advanced Micro Devices, Inc.
 
 #define COMM_MOTOR_PARA_TL_TH (0)
 
-#define COMM_MOTOR_PARA_DT_SIM (0.0000001)
+#define COMM_MOTOR_PARA_DT_SIM (0.0000005)
 
 #define COMM_MOTOR_PARA_UMAX (24) // to be uniformed with MAX_VAL_PWM
 
@@ -86,6 +86,9 @@ typedef ap_uint<32> t_glb_speed_theta;
 
 /// Data Type for the data buffer in calculation.
 typedef ap_fixed<32, 16> t_glb_q15q16;
+
+/// Data Type for the smo discrete sample time
+typedef ap_fixed<32, 1> t_glb_smo_time;
 
 template <class T>
 struct RangeDef {

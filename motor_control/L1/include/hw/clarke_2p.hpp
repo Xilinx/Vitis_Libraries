@@ -60,8 +60,6 @@ void Clarke_Inverse_2p_ap_fixed(T_IO& va_out,
     T_MID Valpha = valpha_in;
     T_MID Vbeta = vbeta_in;
     va_out = Valpha;
-#pragma HLS BIND_OP variable = vb_out op = mul impl = dsp
-#pragma HLS BIND_OP variable = vc_out op = mul impl = dsp
     vb_out = (0 - Valpha + Vbeta * sqrt3) / 2;
     vc_out = (0 - Valpha - Vbeta * sqrt3) / 2;
 };

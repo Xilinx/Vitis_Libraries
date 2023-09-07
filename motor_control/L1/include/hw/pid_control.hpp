@@ -67,11 +67,9 @@ void PID_Control_ap_fixed(T_IO& Res_out,
                           bool mode_change) {
 #pragma HLS INLINE
     T_ERR err;
-#pragma HLS BIND_OP variable = err op = add impl = dsp
     err = Sp - in_Measured;
 
     T_ACC acc;
-#pragma HLS BIND_OP variable = acc op = add impl = dsp
     // acc = mode_change==true ? (T_ACC)0 : I_err_prev + err;
     if (mode_change == true)
         acc = 0;
@@ -79,23 +77,18 @@ void PID_Control_ap_fixed(T_IO& Res_out,
         acc = I_err_prev + err;
 
     T_ERR diff;
-#pragma HLS BIND_OP variable = diff op = add impl = dsp
     diff = err - Error_prev;
 
     T_ERR P;
-#pragma HLS BIND_OP variable = P op = mul impl = dsp
     P = Kp * err;
 
     T_ERR I;
-#pragma HLS BIND_OP variable = I op = mul impl = dsp
     I = Ki * acc;
 
     T_ERR D;
-#pragma HLS BIND_OP variable = D op = mul impl = dsp
     D = Kd * diff;
 
     T_ACC sum;
-#pragma HLS BIND_OP variable = sum op = add impl = dsp
     sum = (P + I + D);
     Res_out = (T_IO)sum;
     Error_prev = err;

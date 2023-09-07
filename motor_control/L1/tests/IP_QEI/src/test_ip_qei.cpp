@@ -102,7 +102,7 @@ unsigned int qei_inverse_new(hls::stream<ap_uint<1> >& A,
     } // cycle_AB_run
 
     printf("SIM_QEI: CLK: %ldM  CPR: %d  dir: %d  rmp: %5d  angle_start: %3.1f\t  run(%4d): %3.1f ", freq_clk / 1000000,
-           cpr, dir, rpm, angle_start, cycle_AB_run, angle_run);
+           cpr, dir, rpm * (dir ? -1 : 1), angle_start, cycle_AB_run, angle_run);
 
     angle_start = (float)start_off * 360.0 / (float)cpr;
     float time_used = (float)num_write / (float)freq_clk;
@@ -113,11 +113,14 @@ unsigned int qei_inverse_new(hls::stream<ap_uint<1> >& A,
            time_used, angle_run / 360.0 / time_used * 60);
     return num_write;
 }
-
+Dirction_QEI getDir(int rpm) {
+    return rpm > 0 ? clockwise_p : clockwise_n;
+}
 void Setting_3(hls::stream<ap_uint<1> >& strm_in_qei_A,
                hls::stream<ap_uint<1> >& strm_in_qei_B,
                hls::stream<ap_uint<1> >& strm_in_qei_I,
-               AxiParameters_QEI& qei_args) {
+               AxiParameters_QEI& qei_args,
+               int* golden_rpms) {
     // test_PPR_ = 500; // pulses per revolution
     int test_CPR_ = 1000; //(test_PPR_ * Encoding_Type::X4);
     int test_CLK_FQ_ = 100 * 1000 * 1000;
@@ -146,20 +149,20 @@ void Setting_3(hls::stream<ap_uint<1> >& strm_in_qei_A,
         total++;
     }
     float start = 355;
-    total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, clockwise_p, mode, start, 60, 3000, test_CPR_,
-                             test_CLK_FQ_);
-    total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, clockwise_n, mode, start, 10, 1000, test_CPR_,
-                             test_CLK_FQ_);
-    total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, clockwise_n, mode, start, 20, 2000, test_CPR_,
-                             test_CLK_FQ_);
-    total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, clockwise_n, mode, start, 20, 5000, test_CPR_,
-                             test_CLK_FQ_);
-    total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, clockwise_p, mode, start, 2, 100, test_CPR_,
-                             test_CLK_FQ_);
-    total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, clockwise_p, mode, start, 3, 300, test_CPR_,
-                             test_CLK_FQ_);
-    total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, clockwise_p, mode, start, 5, 500, test_CPR_,
-                             test_CLK_FQ_);
+    total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, getDir(golden_rpms[0]), mode, start, 60,
+                             abs(golden_rpms[0]), test_CPR_, test_CLK_FQ_);
+    total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, getDir(golden_rpms[1]), mode, start, 10,
+                             abs(golden_rpms[1]), test_CPR_, test_CLK_FQ_);
+    total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, getDir(golden_rpms[2]), mode, start, 20,
+                             abs(golden_rpms[2]), test_CPR_, test_CLK_FQ_);
+    total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, getDir(golden_rpms[3]), mode, start, 20,
+                             abs(golden_rpms[3]), test_CPR_, test_CLK_FQ_);
+    total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, getDir(golden_rpms[4]), mode, start, 2,
+                             abs(golden_rpms[4]), test_CPR_, test_CLK_FQ_);
+    total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, getDir(golden_rpms[5]), mode, start, 3,
+                             abs(golden_rpms[5]), test_CPR_, test_CLK_FQ_);
+    total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, getDir(golden_rpms[6]), mode, start, 5,
+                             abs(golden_rpms[6]), test_CPR_, test_CLK_FQ_);
     assert(TESTNUMBER > total);
     printf("QEI_GEN total writing =%ld < %d\n", total, TESTNUMBER);
 }
@@ -215,7 +218,8 @@ int testBench() {
     printf(
         "SIM_QEI: *****************************  Generating Input "
         "********************************************************\n");
-    Setting_3(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, qei_args);
+    int golden_rpms[10] = {3000, -1000, -2000, -5000, 100, 300, 500};
+    Setting_3(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, qei_args, golden_rpms);
 
     hls_qei(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, strm_out_qei_RPM_THETA_m, strm_out_qei_dir, strm_out_qei_err,
             (volatile int&)qei_args.qei_args_cpr, (volatile int&)qei_args.qei_args_ctrl,
@@ -230,7 +234,6 @@ int testBench() {
     int cpr = qei_args.qei_args_cpr;
     long cnt_trip = qei_args.qei_args_cnt_trip;
     double cnt_trip_sec = (double)cnt_trip / 100000000.0;
-    int golden_rpms[10] = {3000, 1000, 2000, 5000, 100, 300, 500};
 
     FILE* fp = fopen("qei.log", "w");
     assert(fp);
@@ -238,7 +241,7 @@ int testBench() {
     fprintf(fp, "No.\tspeed\tangle\tdir\terr\t\n");
 
     int err;
-    int speed;
+    short speed;
     int angle;
     int dir; // default Clockwise
 
