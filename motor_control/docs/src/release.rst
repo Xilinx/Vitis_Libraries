@@ -45,3 +45,9 @@ The 2023.1 release covers a range of key algorithms, includes:
 2. SVPWM_DUTY: the API is the front-end for Space Vector Pulse Width Modulation (SVPWM) to calculate ratios.
 3. PWM_GEN: the API is the back-end for Space Vector Pulse Width Modulation (SVPWM) to generate output signals based on ratios.
 4. QEI: the API is for quadrature encoder interface(QEI).
+
+Additional updates for 2023.1 happened, including:
+
+1. The sensor-based FOC IP has been updated by adding a new control mode ‘MOD_MANUAL_TORQUE_FLUX_FIXED_ANGLE’. 
+2. The QEI IP has bee updated for output signed RPM value.
+3. The constrains for resource usage have been adjusted for better timing convergences on varies platforms.
