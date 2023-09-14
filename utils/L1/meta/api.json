@@ -14,7 +14,7 @@
                     "axi_to_multi_stream.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/xf_utils_hw"
+                    "L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -47,47 +47,47 @@
                 "ports": [
                     {
                         "name": "rbuf",
-                        "direction": "",
+                        "direction": "in",
                         "type": "ap_uint< _WAxi > *"
                     },
                     {
                         "name": "ostrm0",
-                        "direction": "",
+                        "direction": "out",
                         "type": "hls::stream< _TStrm0 > &"
                     },
                     {
                         "name": "e_ostrm0",
-                        "direction": "",
+                        "direction": "out",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "ostrm1",
-                        "direction": "",
+                        "direction": "out",
                         "type": "hls::stream< _TStrm1 > &"
                     },
                     {
                         "name": "e_ostrm1",
-                        "direction": "",
+                        "direction": "out",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "ostrm2",
-                        "direction": "",
+                        "direction": "out",
                         "type": "hls::stream< _TStrm2 > &"
                     },
                     {
                         "name": "e_ostrm2",
-                        "direction": "",
+                        "direction": "out",
                         "type": "const int len[3], const int offset[3]"
                     },
                     {
                         "name": "len",
-                        "direction": "",
+                        "direction": "in",
                         "type": "const int[3],"
                     },
                     {
                         "name": "offset",
-                        "direction": "",
+                        "direction": "in",
                         "type": "const int"
                     }
                 ]
@@ -107,7 +107,7 @@
                     "axi_to_stream.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/xf_utils_hw"
+                    "L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -165,7 +165,7 @@
                     "axi_to_stream.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/xf_utils_hw"
+                    "L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -188,27 +188,27 @@
                 "ports": [
                     {
                         "name": "rbuf",
-                        "direction": "",
+                        "direction": "in",
                         "type": "ap_uint< _WAxi > *"
                     },
                     {
                         "name": "ostrm",
-                        "direction": "",
+                        "direction": "out",
                         "type": "hls::stream< _TStrm > &"
                     },
                     {
                         "name": "e_ostrm",
-                        "direction": "",
+                        "direction": "out",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "len",
-                        "direction": "",
+                        "direction": "out",
                         "type": "const int"
                     },
                     {
                         "name": "offset",
-                        "direction": "",
+                        "direction": "in",
                         "type": "const int"
                     }
                 ]
@@ -228,9 +228,9 @@
                     "multiplexer.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/xf_utils_hw"
+                    "L1/include"
                 ],
-                "instance": "function",
+                "instance": "class",
                 "parameters": [
                     {
                         "name": "S",
@@ -246,7 +246,7 @@
                 "ports": [
                     {
                         "name": "p",
-                        "direction": "",
+                        "direction": "inout",
                         "type": "stream<ap_uint<W> >&"
                     }
                 ]
@@ -266,7 +266,7 @@
                     "stream_combine.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/xf_utils_hw"
+                    "L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -284,32 +284,32 @@
                 "ports": [
                     {
                         "name": "select_cfg",
-                        "direction": "",
+                        "direction": "in",
                         "type": "hls::stream< ap_uint< _NStrm > > &"
                     },
                     {
                         "name": "istrms",
-                        "direction": "",
+                        "direction": "in",
                         "type": "hls::stream<ap_uint<_WIn> >"
                     },
                     {
                         "name": "e_istrm",
-                        "direction": "",
+                        "direction": "in",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "ostrm",
-                        "direction": "",
+                        "direction": "out",
                         "type": "hls::stream<ap_uint<_WIn * _NStrm> >&"
                     },
                     {
                         "name": "e_ostrm",
-                        "direction": "",
+                        "direction": "out",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "alg",
-                        "direction": "",
+                        "direction": "in",
                         "type": "LSBSideT"
                     }
                 ]
@@ -329,7 +329,7 @@
                     "stream_discard.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/xf_utils_hw"
+                    "L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -347,12 +347,12 @@
                 "ports": [
                     {
                         "name": "istrms",
-                        "direction": "",
+                        "direction": "in",
                         "type": "hls::stream< _TIn >"
                     },
                     {
                         "name": "e_istrms",
-                        "direction": "",
+                        "direction": "in",
                         "type": "hls::stream<bool>"
                     }
                 ]
@@ -372,7 +372,7 @@
                     "stream_dup.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/xf_utils_hw"
+                    "L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -390,22 +390,22 @@
                 "ports": [
                     {
                         "name": "istrm",
-                        "direction": "",
+                        "direction": "in",
                         "type": "hls::stream< _TIn > &"
                     },
                     {
                         "name": "e_istrm",
-                        "direction": "",
+                        "direction": "in",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "ostrms",
-                        "direction": "",
+                        "direction": "out",
                         "type": "hls::stream< _TIn >"
                     },
                     {
                         "name": "e_ostrms",
-                        "direction": "",
+                        "direction": "out",
                         "type": "hls::stream<bool>"
                     }
                 ]
@@ -425,7 +425,7 @@
                     "load_balance.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/xf_utils_hw/stream_n_to_one"
+                    "L1/include/stream_n_to_one"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -448,27 +448,27 @@
                 "ports": [
                     {
                         "name": "istrms",
-                        "direction": "",
+                        "direction": "in",
                         "type": "hls::stream<ap_uint<_WInStrm> >"
                     },
                     {
                         "name": "e_istrms",
-                        "direction": "",
+                        "direction": "in",
                         "type": "hls::stream<bool>"
                     },
                     {
                         "name": "ostrm",
-                        "direction": "",
+                        "direction": "out",
                         "type": "hls::stream<ap_uint<_WOutStrm> >&"
                     },
                     {
                         "name": "e_ostrm",
-                        "direction": "",
+                        "direction": "out",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "alg",
-                        "direction": "",
+                        "direction": "in",
                         "type": "LoadBalanceT"
                     }
                 ]
@@ -488,7 +488,7 @@
                     "load_balance.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/xf_utils_hw/stream_one_to_n"
+                    "L1/include/stream_one_to_n"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -511,27 +511,27 @@
                 "ports": [
                     {
                         "name": "istrm",
-                        "direction": "",
+                        "direction": "in",
                         "type": "hls::stream< ap_uint< _WInStrm > > &"
                     },
                     {
                         "name": "e_istrm",
-                        "direction": "",
+                        "direction": "in",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "ostrms",
-                        "direction": "",
+                        "direction": "out",
                         "type": "hls::stream<ap_uint<_WOutStrm> >"
                     },
                     {
                         "name": "e_ostrms",
-                        "direction": "",
+                        "direction": "out",
                         "type": "hls::stream<bool>"
                     },
                     {
                         "name": "alg",
-                        "direction": "",
+                        "direction": "in",
                         "type": "LoadBalanceT"
                     }
                 ]
@@ -551,7 +551,7 @@
                     "stream_reorder.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/xf_utils_hw"
+                    "L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -569,27 +569,27 @@
                 "ports": [
                     {
                         "name": "order_cfg",
-                        "direction": "",
+                        "direction": "in",
                         "type": "hls::stream< int > &"
                     },
                     {
                         "name": "istrm",
-                        "direction": "",
+                        "direction": "in",
                         "type": "hls::stream< _TIn > &"
                     },
                     {
                         "name": "e_istrm",
-                        "direction": "",
+                        "direction": "in",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "ostrm",
-                        "direction": "",
+                        "direction": "out",
                         "type": "hls::stream< _TIn > &"
                     },
                     {
                         "name": "e_ostrm",
-                        "direction": "",
+                        "direction": "out",
                         "type": "hls::stream<bool>&"
                     }
                 ]
@@ -609,7 +609,7 @@
                     "stream_shuffle.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/xf_utils_hw"
+                    "L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -632,27 +632,27 @@
                 "ports": [
                     {
                         "name": "order_cfg",
-                        "direction": "",
+                        "direction": "in",
                         "type": "hls::stream< ap_uint< 8 *_ONstrm > > &"
                     },
                     {
                         "name": "istrms",
-                        "direction": "",
+                        "direction": "in",
                         "type": "hls::stream<_TIn>"
                     },
                     {
                         "name": "e_istrm",
-                        "direction": "",
+                        "direction": "in",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "ostrms",
-                        "direction": "",
+                        "direction": "out",
                         "type": "hls::stream<_TIn>"
                     },
                     {
                         "name": "e_ostrm",
-                        "direction": "",
+                        "direction": "out",
                         "type": "hls::stream<bool>&"
                     }
                 ]
@@ -672,7 +672,7 @@
                     "stream_split.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/xf_utils_hw"
+                    "L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -695,27 +695,27 @@
                 "ports": [
                     {
                         "name": "istrm",
-                        "direction": "",
+                        "direction": "in",
                         "type": "hls::stream< ap_uint< _WIn > > &"
                     },
                     {
                         "name": "e_istrm",
-                        "direction": "",
+                        "direction": "in",
                         "type": "hls::stream<bool>&"
                     },
                     {
                         "name": "ostrms",
-                        "direction": "",
+                        "direction": "out",
                         "type": "hls::stream<ap_uint<_WOut> >"
                     },
                     {
                         "name": "e_ostrm",
-                        "direction": "",
+                        "direction": "out",
                         "type": "hls::stream< bool > &"
                     },
                     {
                         "name": "alg",
-                        "direction": "",
+                        "direction": "in",
                         "type": "LSBSideT"
                     }
                 ]
@@ -735,7 +735,7 @@
                     "stream_sync.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/xf_utils_hw"
+                    "L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -753,22 +753,22 @@
                 "ports": [
                     {
                         "name": "istrms",
-                        "direction": "",
+                        "direction": "in",
                         "type": "hls::stream<_TIn>"
                     },
                     {
                         "name": "e_istrms",
-                        "direction": "",
+                        "direction": "in",
                         "type": "hls::stream<bool>"
                     },
                     {
                         "name": "ostrms",
-                        "direction": "",
+                        "direction": "out",
                         "type": "hls::stream<_TIn>"
                     },
                     {
                         "name": "e_ostrm",
-                        "direction": "",
+                        "direction": "out",
                         "type": "hls::stream<bool>&"
                     }
                 ]
@@ -788,7 +788,7 @@
                     "stream_to_axi.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/xf_utils_hw"
+                    "L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -811,17 +811,17 @@
                 "ports": [
                     {
                         "name": "wbuf",
-                        "direction": "",
+                        "direction": "out",
                         "type": "ap_uint< _WAxi > *"
                     },
                     {
                         "name": "istrm",
-                        "direction": "",
+                        "direction": "in",
                         "type": "hls::stream< ap_uint< _WStrm > > &"
                     },
                     {
                         "name": "e_istrm",
-                        "direction": "",
+                        "direction": "in",
                         "type": "hls::stream<bool>&"
                     }
                 ]
