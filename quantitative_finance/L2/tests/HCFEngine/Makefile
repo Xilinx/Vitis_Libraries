@@ -108,32 +108,32 @@ VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
 HOST_SRCS += $(CUR_DIR)/src/host/hcf_host.cpp $(CUR_DIR)/src/host/hcf_cpu.cpp $(CUR_DIR)/src/host/hcf_parser.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -D USE_DDR -D TEST_DT=float -D DEVICE_PART=u50
-CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(CUR_DIR)/src/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/include/models -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/include/models -I $(XFLIB_DIR)/../utils/L1/include
+CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(CUR_DIR)/src/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng   -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng   -I $(XFLIB_DIR)/../utils/L1/include
 CXXFLAGS += -O3  -I$(XILINX_HLS)/include
 LDFLAGS +=  -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
 HOST_SRCS += $(CUR_DIR)/src/host/hcf_host.cpp $(CUR_DIR)/src/host/hcf_cpu.cpp $(CUR_DIR)/src/host/hcf_parser.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -D USE_DDR -D TEST_DT=float -D DEVICE_PART=u200
-CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(CUR_DIR)/src/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/include/models -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/include/models -I $(XFLIB_DIR)/../utils/L1/include
+CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(CUR_DIR)/src/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng   -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng   -I $(XFLIB_DIR)/../utils/L1/include
 CXXFLAGS += -O3  -I$(XILINX_HLS)/include
 LDFLAGS +=  -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
 HOST_SRCS += $(CUR_DIR)/src/host/hcf_host.cpp $(CUR_DIR)/src/host/hcf_cpu.cpp $(CUR_DIR)/src/host/hcf_parser.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -D USE_DDR -D TEST_DT=float -D DEVICE_PART=u250
-CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(CUR_DIR)/src/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/include/models -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/include/models -I $(XFLIB_DIR)/../utils/L1/include
+CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(CUR_DIR)/src/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng   -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng   -I $(XFLIB_DIR)/../utils/L1/include
 CXXFLAGS += -O3  -I$(XILINX_HLS)/include
 LDFLAGS +=  -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel
 else 
 ifeq ($(ps_on_x86), on)
 HOST_SRCS += $(CUR_DIR)/src/host/hcf_host.cpp $(CUR_DIR)/src/host/hcf_cpu.cpp $(CUR_DIR)/src/host/hcf_parser.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -D TEST_DT=float -D DEVICE_PART=u250
-CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(CUR_DIR)/src/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/include/models -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/include/models -I $(XFLIB_DIR)/../utils/L1/include
+CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(CUR_DIR)/src/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng   -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng   -I $(XFLIB_DIR)/../utils/L1/include
 CXXFLAGS += -O3  -I$(XILINX_HLS)/include
 LDFLAGS +=  -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel
 else
 HOST_SRCS += $(CUR_DIR)/src/host/hcf_host.cpp $(CUR_DIR)/src/host/hcf_cpu.cpp $(CUR_DIR)/src/host/hcf_parser.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -D TEST_DT=float -D DEVICE_PART=u250
-CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(CUR_DIR)/src/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/include/models -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/include/models -I $(XFLIB_DIR)/../utils/L1/include
+CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(CUR_DIR)/src/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng   -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng   -I $(XFLIB_DIR)/../utils/L1/include
 CXXFLAGS += -O3  -I$(XILINX_HLS)/include
 LDFLAGS +=  -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel
 endif

@@ -14,8 +14,6 @@
                 "LIB_DIR/ext/xcl2",
                 "LIB_DIR/ext/quantlib",
                 "LIB_DIR/ext/rng",
-                "LIB_DIR/L3/include",
-                "LIB_DIR/L3/include/models",
                 "LIB_DIR/../utils/L1/include"
             ]
         }

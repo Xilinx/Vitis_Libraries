@@ -33,7 +33,6 @@ The Vitis Quantitative Finance Library provides extensive APIs at three levels o
 
 * L2, the APIs provided at the level of pricing engines. Various pricing engines are provided to evaluate different financial derivatives, including equity products, interest-rate products, foreign exchange (FX) products, and credit products. At this level, each pricing engine API can be seen as a kernel. The customers may write their own CPU code to call different pricing engines under the framework of OpenCL.  
 
-* L3, the software level APIs. APIs of this level hide the details of data transfer, kernel related resources configuration, and task scheduling in OpenCL. Software application programmers may quickly use L3 high-level APIs to run various pricing options without touching the dependency of OpenCL tasks and hardware configurations. 
   
 Library Contents
 ================
@@ -142,16 +141,6 @@ Library Contents
 |                                                                                                | difference methods based  |       |
 |                                                                                                | on two-additive-factor    |       |
 |                                                                                                | gaussian model            |       |
-+------------------------------------------------------------------------------------------------+---------------------------+-------+
-| :ref:`DeviceManager <cid-xf::fintech::devicemanager>`                                          | Used to enumerate         | L3    |
-|                                                                                                | available Xilinx devices  |       |
-+------------------------------------------------------------------------------------------------+---------------------------+-------+
-| :ref:`Device <cid-xf::fintech::device>`                                                        | A class representing an   | L3    |
-|                                                                                                | individual accelerator    |       |
-|                                                                                                | card                      |       |
-+------------------------------------------------------------------------------------------------+---------------------------+-------+
-| :ref:`Trace <cid-xf::fintech::trace>`                                                          | Used to control debug     | L3    |
-|                                                                                                | trace output              |       |
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
 
 +------------------------------------------------------------------------------------------------+---------------------------+-------+
@@ -405,7 +394,6 @@ Recommended design flows are categorized by the target level:
 
 * L1
 * L2
-* L3
 
 The common tool and library prerequisites that apply across all design flows are documented in the requirements section above.
 
@@ -461,39 +449,6 @@ The outputs of this flow are packaged kernel binaries (xclbin files) that can be
 This flow can be used to verify functional correctness in hardware and enable real world performance to be measured.
 
 
-L3
---
-
-L3 provides the high level software APIs to deploy and run pricing engine kernels whilst abstracting the low level details of data transfer, kernel related resources configuration, and task scheduling.
-
-The flow for L3 is the only one where access to an FPGA platform is required.
-
-A prerequisite of this flow is that the packaged pricing engine kernel binaries (xclbin files) for the target FPGA platform target have been made available for download or have been custom built using the L2 flow described above.
-
-This flow is makefile driven from the console to initially generate a shared object (``L3/src/output/libxilinxfintech.so``).
-
-.. code-block:: bash
-
-   cd L3/src
-   source env.sh
-   make
-
-
-The shared object file is written to the example location as shown below::
-
-    Library: L3/src/output/libxilinxfintech.so
-
-User applications can subsequently be built against this library as in the example provided
-
-.. code-block:: bash
-
-   cd L3/examples/MonteCarlo
-   make all
-   cd output
-
-   # manual step to copy or create symlinks to xclbin files in current directory
-
-   ./mc_example
 
 
 .. toctree::
@@ -515,7 +470,6 @@ User applications can subsequently be built against this library as in the examp
    Pricing Models and Numerical Methods <models_and_methods.rst>
    L1 Module User Guide <guide_L1/L1.rst>
    L2 Kernel User Guide <guide_L2/L2.rst>
-   L3 Overlay User Guide <guide_L3/L3.rst>
 
 
 .. toctree::

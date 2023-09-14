@@ -23,6 +23,13 @@
 Release Note
 ============
 
+2023.2
+-----------
+
+The L3 of this library are deprecated and removed. 
+
+If you are still using the L3 of this library please reach us through [forum](https://support.xilinx.com) for help.
+
 2023.1
 -----------
 

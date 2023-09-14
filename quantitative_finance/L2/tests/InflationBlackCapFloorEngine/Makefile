@@ -107,28 +107,28 @@ VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 #Inclue Required Host Source Files
 ifneq (,$(shell echo $(XPLATFORM) | awk '/u200/'))
 HOST_SRCS += host/main.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L2/tests/InflationBlackCapFloorEngine/host -I $(XFLIB_DIR)/L2/tests/InflationBlackCapFloorEngine/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/include/models -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/include/models -I $(XFLIB_DIR)/../utils/L1/include
+CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L2/tests/InflationBlackCapFloorEngine/host -I $(XFLIB_DIR)/L2/tests/InflationBlackCapFloorEngine/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng   -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng   -I $(XFLIB_DIR)/../utils/L1/include
 CXXFLAGS += -O3  -I$(XILINX_HLS)/include
 LDFLAGS +=  -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/u250/'))
 HOST_SRCS += host/main.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L2/tests/InflationBlackCapFloorEngine/host -I $(XFLIB_DIR)/L2/tests/InflationBlackCapFloorEngine/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/include/models -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/include/models -I $(XFLIB_DIR)/../utils/L1/include
+CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L2/tests/InflationBlackCapFloorEngine/host -I $(XFLIB_DIR)/L2/tests/InflationBlackCapFloorEngine/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng   -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng   -I $(XFLIB_DIR)/../utils/L1/include
 CXXFLAGS += -O3  -I$(XILINX_HLS)/include
 LDFLAGS +=  -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel
 else ifneq (,$(shell echo $(XPLATFORM) | awk '/u50/'))
 HOST_SRCS += host/main.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L2/tests/InflationBlackCapFloorEngine/host -I $(XFLIB_DIR)/L2/tests/InflationBlackCapFloorEngine/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/include/models -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/include/models -I $(XFLIB_DIR)/../utils/L1/include
+CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L2/tests/InflationBlackCapFloorEngine/host -I $(XFLIB_DIR)/L2/tests/InflationBlackCapFloorEngine/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng   -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng   -I $(XFLIB_DIR)/../utils/L1/include
 CXXFLAGS += -O3  -I$(XILINX_HLS)/include
 LDFLAGS +=  -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel
 else 
 ifeq ($(ps_on_x86), on)
 HOST_SRCS += host/main.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L2/tests/InflationBlackCapFloorEngine/host -I $(XFLIB_DIR)/L2/tests/InflationBlackCapFloorEngine/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/include/models -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/include/models -I $(XFLIB_DIR)/../utils/L1/include
+CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L2/tests/InflationBlackCapFloorEngine/host -I $(XFLIB_DIR)/L2/tests/InflationBlackCapFloorEngine/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng   -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng   -I $(XFLIB_DIR)/../utils/L1/include
 CXXFLAGS += -O3  -I$(XILINX_HLS)/include
 LDFLAGS +=  -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel
 else
 HOST_SRCS += host/main.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
-CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L2/tests/InflationBlackCapFloorEngine/host -I $(XFLIB_DIR)/L2/tests/InflationBlackCapFloorEngine/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/include/models -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/include/models -I $(XFLIB_DIR)/../utils/L1/include
+CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L2/tests/InflationBlackCapFloorEngine/host -I $(XFLIB_DIR)/L2/tests/InflationBlackCapFloorEngine/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng   -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng   -I $(XFLIB_DIR)/../utils/L1/include
 CXXFLAGS += -O3  -I$(XILINX_HLS)/include
 LDFLAGS +=  -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel
 endif

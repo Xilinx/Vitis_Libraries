@@ -47,7 +47,8 @@ export CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 export XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L1/*}')
 
 # setting default value
-PLATFORM ?= xilinx_u200_gen3x16_xdma_2_202110_1 
+PLATFORM ?= xilinx_u250_gen3x16_xdma_4_1_202210_1
+
 export PATH := $(XILINX_VIVADO)/bin:$(PATH)
 WORK_DIR ?= hls
 TARGET ?= csim
@@ -165,8 +166,10 @@ with open('$(CONFIG_FILE)', 'w') as f:
 endef
 export CONFIG_GEN_PY
 
+VITIS_PYTHON3 = LD_LIBRARY_PATH=$(XILINX_VITIS)/tps/lnx64/python-3.8.3/lib $(XILINX_VITIS)/tps/lnx64/python-3.8.3/bin/python3
+
 $(CONFIG_FILE): $(CONFIG_TMPL)
-	@echo "$${CONFIG_GEN_PY}" | python3
+	@echo "$${CONFIG_GEN_PY}" | (${VITIS_PYTHON3})
 	
 all: check_vivado check_part $(CONFIG_FILE)
 ifneq ($(TARGET_REL), csim)

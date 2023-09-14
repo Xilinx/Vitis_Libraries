@@ -9,7 +9,6 @@ The Vitis Quantitative Finance Library provides comprehensive tools from the bot
 
 * In the middle level (L2), pricing engines are provided as kernel to evaluate common finance derivatives, such as equity products, interest-rate products, foreign exchange (FX) products, and credit products.
 
-* The software API level (L3) wraps the details of offloading acceleration with pre-built binary (overlay) and allow users to accelerate supported pricing tasks on Alveo cards without engaging hardware development.
 
 Check the [comprehensive HTML documentation](https://docs.xilinx.com/r/en-US/Vitis_Libraries/quantitative_finance/index.html) for more details.
 
@@ -45,9 +44,6 @@ Check the [comprehensive HTML documentation](https://docs.xilinx.com/r/en-US/Vit
 | InflationCapFloorEngine | Pricing inflation using cap/floor methods | L2 |
 | FdHullWhiteEngine | Bermudan swaption pricing engine using finite-difference methods based on Hull-White model | L2 |
 | FdG2SwaptionEngine | Bermudan swaption pricing engine using finite-difference methods based on two-additive-factor gaussian model | L2 |
-| DeviceManager | Used to enumerate available Xilinx devices | L3 |
-| Device | A class representing an individual accelerator card | L3 |
-| Trace | Used to control debug trace output | L3 |
 
 
 | Library Function | Description | Layer |
@@ -115,7 +111,7 @@ Setup the build environment using the Vitis and XRT scripts, and set the PLATFOR
 ```
 
 ## Source Files and Application Development
-Vitis libraries are organized into L1, L2, and L3 folders, each relating to a different stage of application development.
+Vitis libraries are organized into L1 and L2 folders, each relating to a different stage of application development.
 
 **L1** :
       Makefiles and sources in L1 facilitate HLS based flow for quick checks. Tasks at this level include:
@@ -134,8 +130,6 @@ Vitis libraries are organized into L1, L2, and L3 folders, each relating to a di
 * Hardware emulation to check RTL level simulation
 * Build and test on hardware
 
-**L3** :
-       Makefiles and sources in L3 demonstrate applications developed involving multiple kernels in pipeline. These Makefiles can be used for executing tasks, as with the L2 Makefiles.
 
 ## Design Flows
 
@@ -143,7 +137,6 @@ Recommended design flows are categorized by the target level:
 
 * L1
 * L2
-* L3
 
 The common tool and library prerequisites that apply across all design flows are documented in the requirements section above.
 
@@ -196,37 +189,6 @@ The outputs of this flow are packaged kernel binaries (xclbin files) that can be
 
 This flow can be used to verify functional correctness in hardware and enable real world performance to be measured.
 
-### L3
-
-L3 provides the high level software APIs to deploy and run pricing engine kernels whilst abstracting the low level details of data transfer, kernel related resources configuration, and task scheduling.
-
-The flow for L3 is the only one where access to an FPGA platform is required.
-
-A prerequisite of this flow is that the packaged pricing engine kernel binaries (xclbin files) for the target FPGA platform target have been made available for download or have been custom built using the L2 flow described above.
-
-This flow is makefile driven from the console to initially generate a shared object (`L3/src/output/libxilinxfintech.so`).
-
-```console
-$ cd L3/src
-$ source env.sh
-$ make
-```
-
-The shared object file is written to the location examples as below:
-
-    Library: L3/src/output/libxilinxfintech.so
-
-User applications can subsequently be built against this library as in the example provided:
-
-```console
-$ cd L3/examples/MonteCarlo
-$ make all
-$ cd output
-
-# manual step to copy or create symlinks to xclbin files in current directory
-
-$ ./mc_example
-```
 ## Benchmark Result
 In `L2/benchmarks`, Kernels are built into xclbins targeting Alveo U200/U250. We achieved a good performance. For more details about the benchmarks, please kindly find them in [benchmark results](https://docs.xilinx.com/r/en-US/Vitis_Libraries/quantitative_finance/benchmark.html).
 ## Documentations

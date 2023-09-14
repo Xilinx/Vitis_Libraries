@@ -38,10 +38,9 @@ install: .stamp/sphinx
 		 build/html/ $(HTML_DEST_DIR) 1>/dev/null
 
 .stamp/doxygen:
-	rm -rf xml_L1 xml_L2 xml_L3
+	rm -rf xml_L1 xml_L2
 	doxygen Doxyfile_L1
 	doxygen Doxyfile_L2
-	doxygen Doxyfile_L3
 	mkdir -p .stamp
 	touch .stamp/doxygen
 
@@ -65,11 +64,6 @@ endif
 	doxyrest xml_L2/index.xml -o src/rst_L2/index.rst \
 		-F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
 	rm -f src/rst_L2/index.rst src/rst_L2/global.rst
-	rm -rf src/rst_L3
-	mkdir src/rst_L3
-	doxyrest xml_L3/index.xml -o src/rst_L3/index.rst \
-		-F $(DOXYREST_FRAME) -f c_index.rst.in -Dg_verbatimToCodeBlock
-	rm -f src/rst_L3/index.rst src/rst_L3/global.rst
 	touch .stamp/doxyrest
 
 .stamp/sphinx: .stamp/doxyrest Makefile.sphinx
@@ -95,4 +89,4 @@ cleanhtml:
 	rm -rf .stamp/sphinx build/html build/doctrees
 
 cleanall:
-	rm -rf .stamp xml_L1 xml_L2 xml_L3 src/rst_L1 src/rst_L2 src/rst_L3 build/html build/doctrees
+	rm -rf .stamp xml_L1 xml_L2 src/rst_L1 src/rst_L2 build/html build/doctrees

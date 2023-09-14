@@ -108,13 +108,13 @@ VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 ifeq ($(ps_on_x86), on)
 HOST_SRCS += $(XFLIB_DIR)/L2/tests/FdEuropeanHestonEngine/src/host/fd_test.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -D FD_DATA_TYPE=double -D FD_DATA_EQ_TYPE=int64_t -D FD_M_SIZE=8192 -D FD_DATA_WORDS_IN_DDR=8 -D FD_NUM_PCR=2
-CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L2/tests/FdEuropeanHestonEngine/src/host -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L2/tests/FdEuropeanHestonEngine/src/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/include/models -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/include/models -I $(XFLIB_DIR)/../utils/L1/include
+CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L2/tests/FdEuropeanHestonEngine/src/host -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L2/tests/FdEuropeanHestonEngine/src/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng   -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng   -I $(XFLIB_DIR)/../utils/L1/include
 CXXFLAGS += -O3  -I$(XILINX_HLS)/include
 LDFLAGS +=  -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel
 else
 HOST_SRCS += $(XFLIB_DIR)/L2/tests/FdEuropeanHestonEngine/src/host/fd_test.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
 CXXFLAGS +=  -D FD_DATA_TYPE=double -D FD_DATA_EQ_TYPE=int64_t -D FD_M_SIZE=8192 -D FD_DATA_WORDS_IN_DDR=8 -D FD_NUM_PCR=2
-CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L2/tests/FdEuropeanHestonEngine/src/host -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L2/tests/FdEuropeanHestonEngine/src/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/include/models -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/include/models -I $(XFLIB_DIR)/../utils/L1/include
+CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L2/tests/FdEuropeanHestonEngine/src/host -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L2/tests/FdEuropeanHestonEngine/src/kernel -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng   -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng   -I $(XFLIB_DIR)/../utils/L1/include
 CXXFLAGS += -O3  -I$(XILINX_HLS)/include
 LDFLAGS +=  -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel
 endif

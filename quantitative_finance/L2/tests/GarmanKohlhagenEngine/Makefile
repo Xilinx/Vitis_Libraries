@@ -107,12 +107,12 @@ VPP_FLAGS += $(EXTRA_VPP_FLAGS)
 #Inclue Required Host Source Files
 ifeq ($(ps_on_x86), on)
 HOST_SRCS += $(XFLIB_DIR)/ext/xcl2/xcl2.cpp $(CUR_DIR)/src/host/gk_test.cpp $(CUR_DIR)/src/host/gk_parser.cpp $(CUR_DIR)/src/host/gk_cpu.cpp 
-CXXFLAGS +=  -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/include/models -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/include/models -I $(XFLIB_DIR)/../utils/L1/include
+CXXFLAGS +=  -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng   -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng   -I $(XFLIB_DIR)/../utils/L1/include
 CXXFLAGS +=  -I$(XILINX_HLS)/include
 LDFLAGS +=  -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel
 else
 HOST_SRCS += $(XFLIB_DIR)/ext/xcl2/xcl2.cpp $(CUR_DIR)/src/host/gk_test.cpp $(CUR_DIR)/src/host/gk_parser.cpp $(CUR_DIR)/src/host/gk_cpu.cpp 
-CXXFLAGS +=  -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/include/models -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng -I $(XFLIB_DIR)/L3/include -I $(XFLIB_DIR)/L3/include/models -I $(XFLIB_DIR)/../utils/L1/include
+CXXFLAGS +=  -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng   -I $(XFLIB_DIR)/../utils/L1/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/ext/quantlib -I $(XFLIB_DIR)/ext/rng   -I $(XFLIB_DIR)/../utils/L1/include
 CXXFLAGS +=  -I$(XILINX_HLS)/include
 LDFLAGS +=  -L$(XILINX_HLS)/lnx64/tools/fpo_v7_1 -lgmp -lmpfr -lIp_floating_point_v7_1_bitacc_cmodel
 endif
