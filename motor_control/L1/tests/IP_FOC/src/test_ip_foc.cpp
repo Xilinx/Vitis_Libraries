@@ -476,15 +476,15 @@ int main(int argc, char** argv) {
     ModelBasedSim(usePeriodic1, motor, AxiPara, t_cur, dt_sim, nStep_sim_manualTorqueFluxFixedSpeed, inteval_print,
                   fp_ModelFoc, fname_prefix_manualTorqueFluxFixedSpeed1);
 
-    //To test addtional mode MOD_MANUAL_TORQUE_FLUX_FIXED_ANGLE
+    // To test addtional mode MOD_MANUAL_TORQUE_FLUX_FIXED_ANGLE
     AxiPara.control_mode_args = FOC_Mode::MOD_MANUAL_TORQUE_FLUX_FIXED_ANGLE;
-    AxiPara.fixed_angle_args = 50;//50 = w_set * (CPR/PPR) / (2*Pi) = 0.2Pi * 500 / 2*Pi
+    AxiPara.fixed_angle_args = 50; // 50 = w_set * (CPR/PPR) / (2*Pi) = 0.2Pi * 500 / 2*Pi
 
     ModelBasedSim(usePeriodic1, motor, AxiPara, t_cur, dt_sim, nStep_sim_manualTorqueFluxFixedSpeed, inteval_print,
                   fp_ModelFoc, fname_prefix_manualTorqueFluxFixedAngle);
 
     AxiPara.control_mode_args = FOC_Mode::MOD_MANUAL_TORQUE_FLUX_FIXED_ANGLE;
-    AxiPara.fixed_angle_args = 100;//100 = w_set * (CPR/PPR) / (2*Pi) = 0.4Pi * 500 / 2*Pi
+    AxiPara.fixed_angle_args = 100; // 100 = w_set * (CPR/PPR) / (2*Pi) = 0.4Pi * 500 / 2*Pi
     ModelBasedSim(usePeriodic1, motor, AxiPara, t_cur, dt_sim, nStep_sim_manualTorqueFluxFixedSpeed, inteval_print,
                   fp_ModelFoc, fname_prefix_manualTorqueFluxFixedAngle1);
 

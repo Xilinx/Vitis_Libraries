@@ -1,0 +1,18 @@
+[hls]
+
+clock=10
+flow_target=vivado
+syn.file=${CUR_DIR}/src/ip_qei.cpp
+syn.file_cflags=${CUR_DIR}/src/ip_qei.cpp,-DSIM_FINITE -I${XF_PROJ_ROOT}/L1/include/hw -I${CUR_DIR}/src
+syn.top=hls_qei
+tb.file=${CUR_DIR}/src/test_ip_qei.cpp
+tb.file_cflags=${CUR_DIR}/src/test_ip_qei.cpp,-I${XF_PROJ_ROOT}/L1/include/hw -I${CUR_DIR}/src
+
+
+
+
+
+vivado.flow=${VIVADO_FLOW}
+vivado.rtl=verilog
+
+

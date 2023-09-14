@@ -241,12 +241,12 @@ Profiling
 
 The hardware resource utilizations are listed in the following table.
 Different tool versions may result slightly different resource.
-The max throughput is 20M/s by 22.2 and 23.1 .
+The max throughput is 20M/s by 22.2 and 23.2 .
 
 * Important: Change the sine and cosine tables in the file foc.h accordingly when changing this CPR(COMM_MACRO_CPR) in the commen.hpp .
 
 
-.. table:: Table 3 IP resources for Sensor based field-orientated control in 23.1 
+.. table:: Table 3 IP resources for Sensor based field-orientated control in 23.2 
     :align: center
 
     +------------+----------+----------+----------+----------+---------+-----------------+

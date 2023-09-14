@@ -471,7 +471,7 @@ struct FocAxiParameters {
         fout << Va_cmd_stts << ' ';
         fout << Vb_cmd_stts << ' ';
         fout << Vc_cmd_stts << ' ';
-        fout << trip_cnt << ' ' ;
+        fout << trip_cnt << ' ';
         fout << fixed_angle_args << ' ' << std::endl;
         fout.close();
     }

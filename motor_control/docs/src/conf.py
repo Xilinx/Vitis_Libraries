@@ -56,9 +56,9 @@ copyright = '2022-2023, Xilinx'
 author = 'Xilinx'
 
 # The short X.Y version
-version = '2023.1'
+version = '2023.2'
 # The full version, including alpha/beta/rc tags
-release = 'v2023.1'
+release = 'v2023.2'
 
 # For bottom-left nav
 try:

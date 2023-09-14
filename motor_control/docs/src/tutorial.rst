@@ -144,7 +144,7 @@ CSIM verification flow
 
    .. code-block:: shell
 
-      source <Vitis_install_path>/Vitis/2023.1/settings64.sh
+      source <Vitis_install_path>/Vitis/2023.2/settings64.sh
       git clone https://github.com/Xilinx/Vitis_Libraries.git
       cd ./motor_control/
       git checkout next 
@@ -282,7 +282,7 @@ Export IP flow
 
    .. code-block:: shell
 
-      source <Vitis_install_path>/Vitis/2023.1/settings64.sh
+      source <Vitis_install_path>/Vitis/2023.2/settings64.sh
       git clone https://github.com/Xilinx/Vitis_Libraries.git
       cd ./motor_control/
       git checkout next 
@@ -303,7 +303,7 @@ CSIM verification flow
 
    .. code-block:: shell
 
-      source <Vitis_install_path>/Vitis/2023.1/settings64.sh
+      source <Vitis_install_path>/Vitis/2023.2/settings64.sh
       git clone https://github.com/Xilinx/Vitis_Libraries.git
       cd motor_control/
       git checkout next 
@@ -450,7 +450,7 @@ CSIM verification flow
 
    .. code-block:: shell
 
-      source <Vitis_install_path>/Vitis/2023.1/settings64.sh
+      source <Vitis_install_path>/Vitis/2023.2/settings64.sh
       git clone https://github.com/Xilinx/Vitis_Libraries.git
       cd ./motor_control/
       git checkout next 

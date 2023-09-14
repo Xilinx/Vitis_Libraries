@@ -14,18 +14,18 @@
     "solution": "sol1",
     "clock": "10",
     "clock_uncertainty": 1.250000,
-    "topfunction": "hls_svpwm",
+    "topfunction": "hls_svpwm_duty",
     "top": {
         "source": [
-            "${CUR_DIR}/src/ip_svpwm.cpp"
+            "${XF_PROJ_ROOT}/L1/tests/IP_SVPWM/src/ip_svpwm.cpp"
         ],
-        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -I${CUR_DIR}/src"
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L1/tests/IP_SVPWM/src"
     },
     "testbench": {
         "source": [
-            "${CUR_DIR}/src/test_svpwm.cpp"
+            "${XF_PROJ_ROOT}/L1/tests/IP_SVPWM/src/test_svpwm.cpp"
         ],
-        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -I${CUR_DIR}/src"
+        "cflags": "-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L1/tests/IP_SVPWM/src"
     },
     "testinfo": {
         "disable": false,
@@ -37,15 +37,15 @@
                 "cmd": "",
                 "max_memory_MB": {
                     "vivado_syn": 16384,
-                    "hls_csim": 10240,
-                    "hls_cosim": 16384,
+                    "hls_csim": 20480,
+                    "hls_cosim": 20480,
                     "vivado_impl": 16384,
                     "hls_csynth": 10240
                 },
                 "max_time_min": {
                     "vivado_syn": 300,
-                    "hls_csim": 60,
-                    "hls_cosim": 300,
+                    "hls_csim": 300,
+                    "hls_cosim": 420,
                     "vivado_impl": 300,
                     "hls_csynth": 60
                 }

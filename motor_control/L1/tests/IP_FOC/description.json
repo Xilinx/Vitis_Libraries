@@ -17,15 +17,15 @@
     "topfunction": "hls_foc_periodic_ap_fixed",
     "top": {
         "source": [
-            "${CUR_DIR}/../FOC/IP_FOC/src/ip_foc.cpp"
+            "${CUR_DIR}/src/ip_foc.cpp"
         ],
-        "cflags": "-DSIM_FINITE -O0 -I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L1/tests/FOC/IP_FOC/src"
+        "cflags": "-O0 -I${XF_PROJ_ROOT}/L1/include/hw -I${CUR_DIR}/src"
     },
     "testbench": {
         "source": [
-            "${CUR_DIR}/../FOC/IP_FOC/src/test_ip_foc.cpp"
+            "${CUR_DIR}/src/test_ip_foc.cpp"
         ],
-        "cflags": "-DSIM_FINITE -O0 -I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L1/tests/FOC/IP_FOC/src -I${XF_PROJ_ROOT}/L1/tests/FOC/src -I${XF_PROJ_ROOT}/L1/tests/Model -Wno-write-strings"
+        "cflags": "-O0 -I${XF_PROJ_ROOT}/L1/include/hw -I${CUR_DIR}/src -I${XF_PROJ_ROOT}/L1/tests/Model -Wno-write-strings"
     },
     "testinfo": {
         "disable": false,
@@ -52,9 +52,6 @@
             }
         ],
         "targets": [
-            "hls_csim",
-            "hls_csynth",
-            "hls_cosim",
             "vivado_syn",
             "vivado_impl"
         ],

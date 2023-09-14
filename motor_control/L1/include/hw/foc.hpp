@@ -427,10 +427,10 @@ void Control_foc_ap_fixed(T_IO& Vd,
             sin_out = sin_gen_angle; // Generated angle sin
             break;
         case MOD_MANUAL_TORQUE_FLUX_FIXED_ANGLE:
-            Vd = args_vd;            // Sorce Vd from register
-            Vq = args_vq;            // Sorce Vq from register
-            cos_out = cos_in;       //  angle cos from aix register
-            sin_out = sin_in;       //  angle sin from aix register
+            Vd = args_vd;     // Sorce Vd from register
+            Vq = args_vq;     // Sorce Vq from register
+            cos_out = cos_in; //  angle cos from aix register
+            sin_out = sin_in; //  angle sin from aix register
             break;
         case MOD_MANUAL_FLUX:
             Vd = args_vd;
@@ -507,7 +507,7 @@ void foc_core_ap_fixed(
     volatile int& Ialpha_stts,
     volatile int& Ibeta_stts,
     volatile int& Ihomopolar_stts,
-    volatile int& fixed_angle_args  ) {
+    volatile int& fixed_angle_args) {
 #pragma HLS INLINE off
 #pragma HLS BIND_STORAGE variable = sin_table type = RAM_2P impl = BRAM
 #pragma HLS BIND_STORAGE variable = cos_table type = RAM_2P impl = BRAM
@@ -671,8 +671,10 @@ void foc_core_ap_fixed(
     // t_sincos sin_gen_angle; sin_gen_angle(15, 0) = sin_table[gen_angle];
 
     t_angle Theta = Angle - angle_sh_args; // Apply angle correction
-    //Theta = (FOC_mode == MOD_MANUAL_TORQUE_FLUX_FIXED_SPEED) ? gen_angle : Theta;
-    Theta = (FOC_mode == MOD_MANUAL_TORQUE_FLUX_FIXED_SPEED) ? gen_angle : (FOC_mode ==MOD_MANUAL_TORQUE_FLUX_FIXED_ANGLE) ? fixed_angle_args_short : Theta;
+    // Theta = (FOC_mode == MOD_MANUAL_TORQUE_FLUX_FIXED_SPEED) ? gen_angle : Theta;
+    Theta = (FOC_mode == MOD_MANUAL_TORQUE_FLUX_FIXED_SPEED)
+                ? gen_angle
+                : (FOC_mode == MOD_MANUAL_TORQUE_FLUX_FIXED_ANGLE) ? fixed_angle_args_short : Theta;
     Theta = (Theta < 0) ? (short)(Theta + VALUE_CPR) : Theta;          // Correct negative angle
     Theta = (Theta >= VALUE_CPR) ? (short)(Theta - VALUE_CPR) : Theta; // Correct angle overload to (0, CPR)
     t_angle Q = (Theta / cpr_div_ppr); // Correct angle overload round to (0. cpr_div_ppr)
@@ -1002,6 +1004,7 @@ void foc_core_ap_fixed(
  * @param  Ialpha_stts      Output status to monitor Ialpha (output of Clarke_Direct) 
  * @param  Ibeta_stts       Output status to monitor Ibeta (output of Clarke_Direct) 
  * @param  Ihomopolar_stts  Output status to monitor Ihomopolar (output of Clarke_Direct) 
+ * @param  fixed_angle_args Input Args for fixed angle value in CPR range by Q15Q16 format 
  * @param  trip_cnt         Input Args to set the trip count of foc loop
  */
 // clang-format on
