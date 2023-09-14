@@ -14,7 +14,14 @@
 # limitations under the License.
 # vitis hls makefile-generator v2.0.0
 
-source settings.tcl
+set CSIM 1
+set CSYNTH 1
+set COSIM 1
+set VIVADO_SYN 1
+set VIVADO_IMPL 1
+set CUR_DIR [pwd]
+set XF_PROJ_ROOT $CUR_DIR/../../../../../..
+set XPART xcu280-fsvh2892-2L-e
 
 set PROJ "sbmv_Ddouble_m4096_k2_lower_test.prj"
 set SOLN "sol"
