@@ -39,12 +39,13 @@ Lab-1: How does Vitis ultrasound Library work
 ===============================================
 
 Vitis ultrasound library provides three levels of APIs, L1, L2 and L3. 
-The APIs in L1 are 2 sets, tool box APIs and All in AIE APIs (naming with kernel_*). 
-The APIs in L2 are 2 sets, tool box Graphs and All in AIE Graphs (naming with graph_*). 
-The APIs in L1/L2 support x86sim/aiesim flow and are oriented to module-level design that test in L2/tests.
-Meanwhile, L2 cases of tool box (apodization/delay/focusing/image-points/interpolator/samples/_sa) also support board-level acceleratins.
-The APIs in L3 are based on Vitis flow and are designed for board-level accelerations. 
-There are 4 L3 cases. Scanline_AllinAIE is developed with All in AIE method. PW/SA/Scanline are developed with tool box method.
+
+- The APIs in L1 are 2 sets, tool box APIs and All in AIE APIs (naming with kernel_*). 
+- The APIs in L2 are 2 sets, tool box Graphs and All in AIE Graphs (naming with graph_*). 
+- The APIs in L1/L2 support x86sim/aiesim flow and are oriented to module-level design that test in L2/tests.
+- Meanwhile, L2 cases of tool box (apodization/delay/focusing/image-points/interpolator/samples/_sa) also support board-level acceleratins.
+- The APIs in L3 are based on Vitis flow and are designed for board-level accelerations. 
+- There are 4 L3 cases. Scanline_AllinAIE is developed with All in AIE method. PW/SA/Scanline are developed with tool box method.
 
 Setup Environment
 ------------------------------------
@@ -71,6 +72,7 @@ Download the Vitis Ultrasound Library
    #!/bin/bash
    git clone https://github.com/Xilinx/Vitis_Libraries.git
    cd Vitis_Libraries/ultrasound
+
 
 Lab-2: L1/L2 Graph based algorithm acceleration and evaluation for ultrasound tool box case
 ============================================================================================
@@ -114,6 +116,7 @@ L2 APIs Input Arguments
           -xclbin: the kernel name
           -data: the path to the input data
 
+
 Lab-3: L2 Graph based algorithm acceleration and evaluation for ultrasound All in AIE case
 ============================================================================================
 
@@ -138,14 +141,14 @@ Example logs of graph_scanline
    : Example 1 for scanline parameters
    : speed_sound     = 1540.0      m/s
    : freq_sound      = 5000000     Hz
-   : Wave Length     = 0.000308000         m
+   : Wave Length     = 0.000308000 m
    : freq_sampling   = 100000000   Hz
-   : num_sample      = 2048                sample / line
+   : num_sample      = 2048        sample / line
    : num_line        = 41          line / image
-   : num_element     = 128                 elemments on transducer
-   : Sampling Length = 0.000007700         m
-   : Sampling Depth  = 0.007884800         m
-   : Sampling Cycle  = 0.000020480         s
+   : num_element     = 128         elemments on transducer
+   : Sampling Length = 0.000007700 m
+   : Sampling Depth  = 0.007884800 m
+   : Sampling Cycle  = 0.000020480 s
    : Sampling Input  = 12800.000   MSps
    : Imaging output  = 256.250     MPps
    : Imaging spf     = 83968       Pixel per frame
@@ -161,11 +164,11 @@ Example logs of graph_scanline
 
    * data-unit-by data-unit mode scanline
 
-   The intermediate results of each mode are distinguished by file naming. 
-   For example, MbyM_L1_E128_S2048.int.col is the result of interpolation. 
-   In MbyM_L1_S2048.mul.col, L1 means 1 lines result which is used for smoking test.
-   In MbyM_L41_S2048.mul.col, L41 means 41 lines result which is used for full test to show the png.
-   All files is column format.
+   - The intermediate results of each mode are distinguished by file naming. 
+   - For example, MbyM_L1_E128_S2048.int.col is the result of interpolation. 
+   - In MbyM_L1_S2048.mul.col, L1 means 1 lines result which is used for smoking test.
+   - In MbyM_L41_S2048.mul.col, L41 means 41 lines result which is used for full test to show the png.
+   - All files is column format.
 
 .. code-block:: shell 
 
@@ -362,11 +365,11 @@ Example logs of scanline_AllinAIE
 
    * data-unit-by data-unit mode scanline
 
-   The intermediate results of each mode are distinguished by file naming. 
-   For example, MbyM_L1_E128_S2048.int.col is the result of interpolation. 
-   In MbyM_L1_S2048.mul.col, L1 means 1 lines result which is used for smoking test.
-   In MbyM_L41_S2048.mul.col, L41 means 41 lines result which is used for full test to show the png.
-   All files is column format.
+   - The intermediate results of each mode are distinguished by file naming. 
+   - For example, MbyM_L1_E128_S2048.int.col is the result of interpolation. 
+   - In MbyM_L1_S2048.mul.col, L1 means 1 lines result which is used for smoking test.
+   - In MbyM_L41_S2048.mul.col, L41 means 41 lines result which is used for full test to show the png.
+   - All files is column format.
 
 .. code-block:: shell 
 
@@ -455,6 +458,8 @@ Example logs of scanline_AllinAIE
 
 5. List for the md5sum of result and the comparison result with model output.
    Only values that meet both conditions of Error judgement are considered computational errors.
+   Also the output of mult could be converted to png format use the command like 
+   "python L3/models/data2png.py L3/tests/scanline_AllinAIE/package_sw_emu/sd_card/data/xf_output_res.txt".
 
 .. code-block:: shell 
 
@@ -495,6 +500,8 @@ Example logs of scanline_AllinAIE
    Releasing remaining XRT objects...
    [HOST]: success!
 
+
+The log below shows the log generated by the Planewave method, using tool box modules.
 
 Example logs of plane_wave
 ------------------------------------

@@ -23,17 +23,21 @@ Features for Vitis Ultrasound Library
    :hidden:
    :maxdepth: 1
 
-Vitis Ultrasound library provides implementation of different L1/L2/L3 APIs Toolbox for ultrasound image processing. For library users, these APIs contains source code for AIE & PL kernels. The testbench is also provided for simulation and verification for each stand alone cases.
+Before 23.2 release, the provied toolbox-style APIs focus on providing extreme performance but rely on many PL modules for sub-graph connection and parameter generation. In 23.2 release, the library provides an all-in-AIE scanline implementation. Thus, users can not only combinate algorithms in bottom-to-top way by using toolbox-style APIs, but also start from the all-in-AIE scanline implementation to obtain the final design by modifying some graphs.
+
+A set of C-models of scanline are provided which can be seen as a step-by-step flow from algorithm-end to AIE-end. The C-model functions can also be used to generate input and verify output simultaneously and conveniently. 
 
 Code structures enhancement
 ----------------------------
 
-- L1: all L1 kernel apis (all in AIE) files locate in separated directory beginning with "kernel_".
-- L2: all L2 ultrasound all in AIE component apis beginning with "graph_" are separated settings from "L1/include/kernel_*.hpp".
-- L1: all L1 BLAS apis (tool box) files locate in separated directory.
-- L2: all L2 ultrasound tool box component apis are shareing golbal settings from "L1/include/kernels.hpp".
-- L3, all 4 example of connected beamformer (Scanline_AllinAIE/PW/SA/Scanline) are located in separated directory under "L3/tests", each contain self contain data and source code.
-- For L2/L3 cases, source code for differenct device are well orgnized. The structure is showed as bellow:
+- L1: all L1 BLAS kernel APIs (toolbox) files locate in separated directories with their orinal name.
+- L1: all L1 algorithm kernel APIs (all-in-AIE) files locate in separated directories beginning with "kernel_".
+- L2: all L2 ultrasound toolbox graph APIs are shareing global settings from "L1/include/kernels.hpp".
+- L2: all L2 ultrasound all-in-AIE graph APIs beginning with "graph_" are shareing global settings from "L1/include/kernel_*.hpp".
+- L3: all 4 L3 example (Scanline_AllinAIE/PW/SA/Scanline) are located in separated directory under "L3/tests", each contain self contain data and source code.
+- L3: the scanline algorithm C-models are located in separated directory under "L3/models".
+
+For L2/L3 cases, source code for differenct device are well orgnized. The structure is showed as bellow:
 
 .. code-block:: txt
 

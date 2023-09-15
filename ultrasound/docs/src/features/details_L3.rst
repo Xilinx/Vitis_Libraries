@@ -28,7 +28,7 @@ Ultrasound Library - Level 3 (L3)
 
 The last level of abstraction is a complete beamformer composed of the units provided in L2. There are three types of beamformer provided: SA, PW and ScanLine.
 
-	Scanline_AllinAIE Beamformer
+**Scanline_AllinAIE Beamformer**
 ---------------------------------
 
 This beamformer is a variant of the one used in PW where the difference consists in the receiver delay computation. As the graph is obtained by the composition of L2 libraries, it will have the summation of the components in I/O of the L2 libraries:
@@ -41,7 +41,18 @@ This beamformer is a variant of the one used in PW where the difference consists
 	- `mult2`: 1/4 of result data to form the png;
 	- `mult3`: 1/4 of result data to form the png;
 
-	ScanLine Beamformer
+
+The details design of the graph_scanline graph is shown blow:
+
+.. image:: /images/graph_scanline_L3.jpg
+   :alt: Block Design of graph_scanline_L3
+   :scale: 90%
+   :align: center
+
+- A set of C-models of scanline are provided which can be seen as a step-by-step flow from algorithm-end to AIE-end. The C-model functions can also be used to generate input and verify output simultaneously and conveniently.
+- Also the output of mult could be converted to png format, details please reference to tutorial.
+
+**ScanLine Beamformer**
 ---------------------------------
 
 This beamformer is a variant of the one used in PW where the difference consists in the receiver delay computation. As the graph is obtained by the composition of L2 libraries, it will have the summation of the components in I/O of the L2 libraries:
@@ -83,7 +94,7 @@ This beamformer is a variant of the one used in PW where the difference consists
 	- `apodization`: A vector which represents our Hanning Window for the reference point chosen;
 	- `C`: A vector with the result of the interpolation
 
-	PW Beamformer
+**PW Beamformer**
 ---------------------------------
 
 This beamformer is the one used to compute PW beamformation. As the graph is obtained by the composition of L2 libraries, it will have the summation of the components in I/O of the L2 libraries:
@@ -121,7 +132,7 @@ This beamformer is the one used to compute PW beamformation. As the graph is obt
 	- `apodization`: A vector which represents our Hanning Window for the reference point chosen;
 	- `C`: A vector with the result of the interpolation
 
-	SA Beamformer
+**SA Beamformer**
 ---------------------------------
 
 This beamformer is the one used to compute SA beamformation. As the graph is obtained by the composition of L2 libraries, it will have the summation of the components in I/O of the L2 libraries:

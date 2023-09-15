@@ -21,7 +21,7 @@
 // 1.setup simulator
 PLIO* in1 = new PLIO("Datain1", plio_32_bits, "data/p_sample.txt");
 PLIO* in2 = new PLIO("Datain2", plio_32_bits, "data/p_inside.txt");
-PLIO* in3 = new PLIO("Datain3", plio_32_bits, "data/p_rf.txt");
+PLIO* in3 = new PLIO("Datain3", plio_32_bits, "data/rf_2e.txt");
 PLIO* out = new PLIO("Dataout", plio_32_bits, "data/output.txt");
 simulation::platform<3, 1> plat(in1, in2, in3, out);
 
@@ -38,7 +38,7 @@ const int LEN_IN_interp_rf_t = NUM_SAMPLE_t;
 const int LEN32b_PARA_interp_t = 9;
 
 #if defined(__X86SIM__)
-const int test_n_ele = NUM_ELEMENT_t * 2; // NUM_ELEMENT_t*41 line could test in x86sim
+const int test_n_ele = 20;
 #else
 const int test_n_ele = 1;
 #endif

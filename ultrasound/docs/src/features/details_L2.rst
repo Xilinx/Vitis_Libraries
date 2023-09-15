@@ -30,7 +30,8 @@ As stated in the introduction, the L2 level of the Ultrasound Library is compose
 As introduced in the dedicated section, the AIE graphs are a compositions of AIE kernels presents in L1 library. For these reasons the level of abstraction is increased with respect to the previous level.
 It is going now to be detailed every components of the L2 library with a connection to the already explained theory to bind the concepts with their actual implementation.
 
-### Graph name: `graph_imagepoints`
+Graph name: `graph_imagepoints`
+###################################
 
 The graph_imagepoints graph is used to create an array(specific coordinate direction) which represents the part of investigation made by the specific emission of the Ultrasound Probe. 
 It is dependent on the investigation depth and the incremental investigation which we want to perform (based on our sampling frquency).
@@ -41,7 +42,8 @@ It is dependent on the investigation depth and the incremental investigation whi
 - **Graph Outputs**:
 	- `dataout1`: An array which represents our points(specific coordinate direction) to analyze;
 
-### Graph name: `graph_focusing`
+Graph name: `graph_focusing`
+###################################
 
 This graph is used to compute the distance of our reference apodization point for the dynamic apodization with respect to the transducers position. It returns an array of values which represent the magnitude per transducer.
 
@@ -51,7 +53,32 @@ This graph is used to compute the distance of our reference apodization point fo
 - **Graph Outputs**:
 	- `dataout1`: An array which represents apodization distance per transducer;
 
-### Graph name: `graph_delay`
+Graph name: `graph_apodization_preprocess`
+###########################################
+
+This graph is the preprocess used to compute a dynamic Hanning Window for every transducer.
+
+- **Graph Inputs**:
+	- `para_amain_const`: Graph_apodization_preprocess self-used structural parameters include iter_line and iter_element and so on. It's definition could be seen in L1/include/kernel_apodization_pre.hpp;
+	- `img_x`: The result of graph_imagepoints in x-dimension;
+	- `img_z`: The result of graph_imagepoints in z-dimension;
+- **Graph Outputs**:
+	- `out`: A vector which represents the distance of x&z dimension;
+
+Graph name: `graph_apodization`
+###########################################
+
+This graph is used to compute a dynamic Hanning Window for every transducer. So, this graph is used to calculate the apodization for the reception.
+
+- **Graph Inputs**:
+	- `para_amain_const`: Graph_apodization_main self-used structural parameters include iter_line and iter_element and so on. It's definition could be seen in L1/include/kernel_apodization_main.hpp;
+	- `p_focal`: Result of Focusing;
+	- `p_invD`: The result of graph_apodization_preprocess output;
+- **Graph Outputs**:
+	- `out`: A vector which represents our Hanning Window for the reference point chosen;
+
+Graph name: `graph_delay`
+###########################################
 
 This graph is used to compute the transmit delay. It returns an array of values which represent the transmission time for every incremental point of the investigation.
 
@@ -63,7 +90,8 @@ This graph is used to compute the transmit delay. It returns an array of values 
 - **Graph Outputs**:
 	- `delay`: An array which represents our time delay per point to analyze;
 
-### Graph name: `graph_samples`
+Graph name: `graph_samples`
+###################################
 
 This graph is used to compute the delay in reception for every transducer. It sums also the delay in transmission to obtain the valid samples for the interpolation.
 
@@ -78,7 +106,21 @@ This graph is used to compute the delay in reception for every transducer. It su
 	- `sample`: A vector which represents our valid entries in the rf-data vector;
 	- `inside`: A vector with only 0 and 1 values, which represents whether each element of our rf-data vector is in the region of interest;
 
-### Graph name: `graph_mult`
+Graph name: `graph_interpolation`
+###########################################
+
+This graph is used to compute the chordal version of the Catmull-Rom. It is also called *bSpline* as generally we refer to the Catmull-Rom as the centripetal one.
+
+- **Graph Inputs**:
+	- `para_interp_const`: Graph_interpolation self-used structural parameters include iter_line and iter_element and so on. It's definition could be seen in L1/include/kernel_interpolation.hpp;
+	- `p_sample_in`: The result of graph_sample output;
+	- `p_inside_in`: The result of graph_sample output;
+	- `p_rfdata_in`: Input rf points to be interpolated;
+- **Graph Outputs**:
+	- `out`: A vector with the result of the interpolation;
+
+Graph name: `graph_mult`
+###########################################
 
 This graph is used to compute the final result. It multiply the results of apodization and the interpolation and accumulates the results of each transducer.
 
@@ -104,7 +146,8 @@ This graph is used to compute the final result. It multiply the results of apodi
 	- `mult_2`: Output third segment of final result;
 	- `mult_3`: Output last segment of final result;
 
-### Graph name: `graph_scanline`
+Graph name: `graph_scanline`
+###################################
 
 This graph is conmbination of graph_imagepoints, graph_delay, graph_focsing, graph_samples, graph_interpolation, graph_apodization, graph_mult.
 
@@ -116,9 +159,17 @@ This graph is conmbination of graph_imagepoints, graph_delay, graph_focsing, gra
 	- `mult_2`: Output third segment of final result;
 	- `mult_3`: Output last segment of final result;
 
-### Graph name: `Image Points`
+The details design of the graph_scanline graph is shown blow:
 
-![imagePoints Demo](images/imagePointsDemo.png)
+.. image:: /images/graph_scanline_L2.jpg
+   :alt: Block Design of graph_scanline_L2
+   :scale: 90%
+   :align: center
+
+- Details please reference to L2 or L3 tutorial.
+
+Graph name: `Image Points`
+###################################
 
 The Image Points graph is used to create a matrix which represents the part of investigation made by the specific emission of the Ultrasound Probe. The rows of this matrix have incremental values which represents our values used to compute delay for the **virtual sources**. It is dependent on the investigation depth and the incremental investigation which we want to perform (based on our sampling frquency).
 
@@ -129,7 +180,8 @@ The Image Points graph is used to create a matrix which represents the part of i
 - **Graph Outputs**:
 	- `Image Points`: A Nx4 matrix which represents our points to analyze;
 
-### Graph name: `Delay`
+Graph name: `Delay`
+###################################
 
 This graph is used to compute the transmit delay. It returns an array of values which represent the transmission time for every incremental point of the investigation. *This graph is used in ScanLine and SA applications*.
 
@@ -144,7 +196,8 @@ This graph is used to compute the transmit delay. It returns an array of values 
 - **Graph Outputs**:
 	- `delay_to_PL`: A vector which represents our time delay per point to analyze;
 	
-### Graph name: `Delay_PW`
+Graph name: `Delay_PW`
+###################################
 
 This graph is used to compute the transmit delay. It returns an array of values which represent the transmission time for every incremental point of the investigation. *This graph is used in PW  application*.
 
@@ -155,7 +208,8 @@ This graph is used to compute the transmit delay. It returns an array of values 
 - **Graph Outputs**:
 	- `delay_to_PL`: A vector which represents our time delay per point to analyze;
 
-### Graph name: `Focusing`
+Graph name: `Focusing`
+###################################
 
 This graph is used to compute the distance of our reference apodization point for the dynamic apodization with respect to the transducers position. It returns an array of values which represent the magnitude per transducer.
 
@@ -167,7 +221,8 @@ This graph is used to compute the distance of our reference apodization point fo
 - **Graph Outputs**:
 	- `focusing_output`: A vector which represents apodization distance per transducer;
 	
-### Graph name: `Focusing_SA`
+Graph name: `Focusing_SA`
+###################################
 
 This graph is used to compute the distance of our reference apodization point for the dynamic apodization with respect to the image points. This version is used in SA to create a dynamic apodization also in transmission and not only in reception.
 
@@ -179,7 +234,8 @@ This graph is used to compute the distance of our reference apodization point fo
 - **Graph Outputs**:
 	- `focusing_output`: A vector which represents apodization distance in transmission;
 	
-### Graph name: `Samples`
+Graph name: `Samples`
+###################################
 
 This graph is used to compute the delay in reception for every transducer. It sums also the delay in transmission to obtain the valid samples for the interpolation.
 
@@ -191,7 +247,8 @@ This graph is used to compute the delay in reception for every transducer. It su
 - **Graph Outputs**:
 	- `samples_to_PL`: A vector which represents our valid entries in the rf-data vector;
 
-### Graph name: `Apodization`
+Graph name: `Apodization`
+###################################
 
 This graph is used to compute a dynamic Hanning Window for every transducer. So, this graph is used to calculate the apodization for the reception.
 
@@ -203,7 +260,8 @@ This graph is used to compute a dynamic Hanning Window for every transducer. So,
 - **Graph Outputs**:
 	- `apodization`: A vector which represents our Hanning Window for the reference point chosen;
 
-### Graph name: `Apodization_SA`
+Graph name: `Apodization_SA`
+###################################
 
 This graph is used to compute a dynamic Hanning Window for the transmission. *For this reason this graph is computed every line only in SA*
 
@@ -215,7 +273,8 @@ This graph is used to compute a dynamic Hanning Window for the transmission. *Fo
 - **Graph Outputs**:
 	- `apodization`: A vector which represents our Hanning Window for the reference point chosen;
 
-### Graph name: `bSpline`
+Graph name: `bSpline`
+###################################
 
 This graph is used to compute the chordal version of the Catmull-Rom. It is called *bSpline* as generally we refer to the Catmull-Rom as the centripetal one.
 
