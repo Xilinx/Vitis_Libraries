@@ -14,7 +14,8 @@
                     "axi_to_multi_stream.hpp"
                 ],
                 "search_paths": [
-                    "L1/include"
+                    "L1/include",
+                    "L1/include/xf_utils_hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -107,7 +108,8 @@
                     "axi_to_stream.hpp"
                 ],
                 "search_paths": [
-                    "L1/include"
+                    "L1/include",
+                    "L1/include/xf_utils_hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -165,7 +167,8 @@
                     "axi_to_stream.hpp"
                 ],
                 "search_paths": [
-                    "L1/include"
+                    "L1/include",
+                    "L1/include/xf_utils_hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -228,7 +231,8 @@
                     "multiplexer.hpp"
                 ],
                 "search_paths": [
-                    "L1/include"
+                    "L1/include",
+                    "L1/include/xf_utils_hw"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -266,7 +270,8 @@
                     "stream_combine.hpp"
                 ],
                 "search_paths": [
-                    "L1/include"
+                    "L1/include",
+                    "L1/include/xf_utils_hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -329,7 +334,8 @@
                     "stream_discard.hpp"
                 ],
                 "search_paths": [
-                    "L1/include"
+                    "L1/include",
+                    "L1/include/xf_utils_hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -372,7 +378,8 @@
                     "stream_dup.hpp"
                 ],
                 "search_paths": [
-                    "L1/include"
+                    "L1/include",
+                    "L1/include/xf_utils_hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -425,7 +432,9 @@
                     "load_balance.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/stream_n_to_one"
+                    "L1/include",
+                    "L1/include/xf_utils_hw",
+                    "L1/include/xf_utils_hw/stream_n_to_one"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -488,7 +497,9 @@
                     "load_balance.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/stream_one_to_n"
+                    "L1/include",
+                    "L1/include/xf_utils_hw",
+                    "L1/include/xf_utils_hw/stream_one_to_n"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -551,7 +562,8 @@
                     "stream_reorder.hpp"
                 ],
                 "search_paths": [
-                    "L1/include"
+                    "L1/include",
+                    "L1/include/xf_utils_hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -609,7 +621,8 @@
                     "stream_shuffle.hpp"
                 ],
                 "search_paths": [
-                    "L1/include"
+                    "L1/include",
+                    "L1/include/xf_utils_hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -672,7 +685,8 @@
                     "stream_split.hpp"
                 ],
                 "search_paths": [
-                    "L1/include"
+                    "L1/include",
+                    "L1/include/xf_utils_hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -735,7 +749,8 @@
                     "stream_sync.hpp"
                 ],
                 "search_paths": [
-                    "L1/include"
+                    "L1/include",
+                    "L1/include/xf_utils_hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -788,7 +803,8 @@
                     "stream_to_axi.hpp"
                 ],
                 "search_paths": [
-                    "L1/include"
+                    "L1/include",
+                    "L1/include/xf_utils_hw"
                 ],
                 "instance": "function",
                 "parameters": [
