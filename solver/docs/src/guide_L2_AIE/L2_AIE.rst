@@ -1,5 +1,6 @@
 .. 
    Copyright 2019 Xilinx, Inc.
+   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
   
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,13 +20,14 @@
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
 
-*****************
-L2 AIE User Guide
-*****************
+**********************************
+L2 AIE Solver Library User Guide
+**********************************
 
 .. toctree::
    :maxdepth: 2
 
-   L2 AIE APIs Design Information <L2_AIE_design.rst>
-   L2 AIE APIs <L2_AIE_api.rst>
+   Introduction <L2_AIE_introduction.rst>
+   AIE APIs Design Information <L2_AIE_design.rst>
+   AIE APIs <L2_AIE_api.rst>
 

@@ -19,7 +19,7 @@
 #define __GRAPH_H__
 
 #include <adf.h>
-#include "qrd_graph.hpp"
+#include "svd_graph.hpp"
 #include "aie_graph_params.h"
 
 using namespace adf;

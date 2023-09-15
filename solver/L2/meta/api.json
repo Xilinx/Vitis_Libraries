@@ -944,7 +944,7 @@
                         "name": "NUM",
                         "description": "number of AIE cores used",
                         "type": "int",
-                        "minimum": 1,
+                        "minimum": 4,
                         "maximum": 256
                     }
                 ],
@@ -988,7 +988,7 @@
                         "name": "NUM",
                         "description": "number of AIE cores used",
                         "type": "int",
-                        "minimum": 1,
+                        "minimum": 4,
                         "maximum": 256
                     }
                 ],

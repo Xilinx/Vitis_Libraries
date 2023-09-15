@@ -14,6 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * @file cholesky_float_decomposition_graph.hpp
+ * @brief This file captures the definition of the `L2` graph level class for the Cholesky Decomposition with float data type.
+ **/
+
 #ifndef __CHOLESKY_FLOAT_GRAPHS_HPP__
 #define __CHOLESKY_FLOAT_GRAPHS_HPP__
 
@@ -23,15 +29,42 @@ namespace xf {
 namespace solver {
 using namespace adf;
 
+/**
+ * @class CholeskyGraph
+ * @brief CholeksyDecomposition transform a Hermitian positive-definite matrix into the product of a lower triangular
+ *matrix and its conjugate transpose
+ *
+ * These are the templates to configure the function.
+ * @tparam NUM describes the number of AIE cores used.
+ **/
+
 template <int NUM>
 class CholeskyGraph : public adf::graph {
    private:
+    /**
+     * kernel instance.
+     * The chain of kernels that will be created and mapped on AIE tiles.
+     * Number of kernels (`NUM`) will be connected with each other in series.
+     **/
     kernel k[NUM];
 
    public:
+    /**
+     * The input data to the function.
+     **/
     input_plio matA_data;
+    /**
+     * The output data to the function.
+     **/
     output_plio matL_data;
 
+    /**
+     * @brief This is the constructor function for the CholeskyGraph.
+     * @param[in] matA_data_name: specifies the attributes of port name
+     * @param[in] matA_data_file_name: specifies the input data file path;
+     * @param[out] matL_data_name: specifies the attributes of port name
+     * @param[out] matL_data_file_name: specifies the output data file path;
+     **/
     CholeskyGraph(std::string matA_data_name,
                   std::string matA_data_file_name,
                   std::string matL_data_name,
@@ -41,6 +74,7 @@ class CholeskyGraph : public adf::graph {
 
         for (int i = 0; i < NUM; i++) {
             k[i] = kernel::create(cholesky_float);
+            // source file
             source(k[i]) = "aie/cholesky_float_decomposition.cpp";
             runtime<ratio>(k[i]) = 1.0;
         }

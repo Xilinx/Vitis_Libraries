@@ -25,6 +25,7 @@ Core Utility
 .. toctree::
    :maxdepth: 1
 
+   QRD (QR Decomposition) <kernel/qrd.rst>
    QRF (QR Factorization) <kernel/qrf.rst>
    QR_Inverse <kernel/qr_inverse.rst>
    SVD (Singular Value Decomposition) <kernel/svd.rst>

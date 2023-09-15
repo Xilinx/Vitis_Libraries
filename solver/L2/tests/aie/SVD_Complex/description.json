@@ -1,5 +1,5 @@
 {
-    "name": "SVD on comlex float", 
+    "name": "SVD on complex float", 
     "description": [
         ""
     ],
@@ -14,10 +14,10 @@
         "Adaptive Data Flow", 
         "Graph"
     ],
-    "platform_whitelist": [
+    "platform_allowlist": [
         "vck190"
     ],
-    "platform_blacklist": [
+    "platform_blocklist": [
 
     ],
     "os": [

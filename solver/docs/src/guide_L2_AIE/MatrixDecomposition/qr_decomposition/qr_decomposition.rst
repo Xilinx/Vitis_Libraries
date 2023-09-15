@@ -15,17 +15,17 @@
    limitations under the License.
 
 .. meta::
-   :keywords: Cholesky Decomposition
-   :description: This function computes the Cholesky decomposition of matrix.
+   :keywords: QR Decomposition
+   :description: This function computes the QR decomposition of matrix.
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
 
 ***********************
-QR Decomposition on AIE
+QR Decomposition 
 ***********************
 
-Overview
-========
+Introduction
+==============
 
 This function computes the QR decomposition of matrix :math:`A`
 
@@ -36,10 +36,31 @@ where :math:`A` is a matrix of size :math:`m \times n`, :math:`Q` is orthogonal 
 If instead A is a complex square matrix, then there is a decomposition A = QR where Q is a unitary matrix.
 
 
-Implementation
+Entry Point 
 ==============
 
-Specifications
+The graph entry point is the following:
+
+.. code::
+    xf::solver::internal::QRDComplexFloat
+
+Template Parameters
+---------------------
+* `column_num`: the number of columns;
+* `row_num`: the number of rows;
+* `k_rep`: the number of input matrix;
+
+To access more details, see :ref:`AIE APIs Overview`.
+
+Ports
+-------
+To access more details, see :ref:`AIE APIs Overview`.
+
+
+AIE Kernel
+===============
+
+Design Notes
 --------------------
 * Target: :math:`A=QR`, :math:`A[M*N]` is input matrix, :math:`Q[M*M]` and  :math:`R[M*N]` are the output matrix via QR decomposition. 
 * DataType supported: `cfloat`.

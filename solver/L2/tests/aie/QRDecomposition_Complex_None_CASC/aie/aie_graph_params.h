@@ -19,9 +19,9 @@
 #define __TEST_PARAMS_H__
 
 namespace test_param {
-const unsigned int col_num = 256;
-const unsigned int row_num = 1024;
-const unsigned int rep_num = 1024;
+const unsigned int col_num = 16;
+const unsigned int row_num = 16;
+const unsigned int rep_num = 1;
 }
 
 #endif

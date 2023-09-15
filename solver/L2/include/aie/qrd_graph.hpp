@@ -15,6 +15,11 @@
  * limitations under the License.
  */
 
+/**
+ * @file qrd_graph.hpp
+ * @brief This file captures the definition of the `L2` graph level class for the QR Decomposition with cfloat data type.
+ **/
+
 #ifndef _XF_SOLVER_QRD_GRAPH_HPP_
 #define _XF_SOLVER_QRD_GRAPH_HPP_
 
@@ -86,19 +91,42 @@ class alongCascade {
 
 using namespace adf;
 
+/**
+ * @class QRDComplexFloat 
+ * @brief QR decomposition is a decomposition of a matrix A into a product A = QR of an orthonormal matrix Q and an upper triangular matrix R.
+ *
+ * These are the templates to configure the function.
+ * @tparam column_num describes the number of columns.
+ * @tparam row_num describes the number of rows.
+ * @tparam k_rep descripbes the number of input matrix.
+ **/
 template <int column_num, int row_num, int k_rep = 1>
 class QRDComplexFloat : public adf::graph {
    public:
+    /**
+     * kernel instance.
+     * The chain of kernels that will be created and mapped on AIE tiles.
+     **/
     kernel m_k[column_num];
+    /**
+     * The input data to the function.
+     **/
     input_port in_0;
     input_port in_1;
+    /**
+     * The output data to the function.
+     **/
     output_port out_0;
     output_port out_1;
 
+    /**
+     * @brief This is the constructor function for the QRDComplexFloat.
+     **/
     QRDComplexFloat() {
         for (int i = 0; i < column_num; i++) {
             m_k[i] = kernel::create_object<GramSchmidtKernelComplexFloat<row_num, column_num, k_rep> >(i);
             headers(m_k[i]) = {"qrd_kernel.hpp"};
+            // source file
             source(m_k[i]) = "qrd_kernel.cpp";
             runtime<ratio>(m_k[i]) = 1.0;
             stack_size(m_k[i]) = 22000;
@@ -124,15 +152,36 @@ class QRDComplexFloat : public adf::graph {
     }
 };
 
+/**
+ * @class QRDComplexFloat_CASC
+ *
+ * These are the templates to configure the function.
+ * @tparam column_num describes the number of columns.
+ * @tparam row_num describes the number of rows.
+ * @tparam k_rep descripbes the number of input matrix.
+ **/
 template <int column_num, int row_num, int k_rep = 1>
 class QRDComplexFloat_CASC : public adf::graph {
    public:
+    /**
+     * kernel instance.
+     * The chain of kernels that will be created and mapped on AIE tiles.
+     **/
     kernel m_k[column_num];
+    /**
+     * The input data to the function.
+     **/
     input_port in_0;
     input_port in_1;
+    /**
+     * The output data to the function.
+     **/
     output_port out_0;
     output_port out_1;
 
+    /**
+     * @brief This is the constructor function for the QRDComplexFloat_CASC.
+     **/
     QRDComplexFloat_CASC() {
         internal::alongCascade walker(44, 0);
         unsigned int r_id, c_id;

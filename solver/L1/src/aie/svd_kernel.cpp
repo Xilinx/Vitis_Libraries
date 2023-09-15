@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#include "qrd_kernel.hpp"
+#include "svd_kernel.hpp"
 #include "aie_api/utils.hpp"
 #include "aie_api/adf/stream.hpp"
 #include "aie_api/aie_adf.hpp"

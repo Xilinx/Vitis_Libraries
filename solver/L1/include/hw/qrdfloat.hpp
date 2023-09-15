@@ -610,7 +610,7 @@ void qrd_col_dataflow_wrapper_vector(T A[NCU][(RowsA + NCU - 1) / NCU][ColsA],
 }
 
 //---------------------------------core min fanout version  ---------------------------------//
-/*
+/**
  * @brief Level 1 : high throughput version for Complex Float QR decompression 1024*256
  *
  * @tparam RowsA Row numbers of matrix A. "enum":["1024","512","256"].
@@ -621,13 +621,17 @@ void qrd_col_dataflow_wrapper_vector(T A[NCU][(RowsA + NCU - 1) / NCU][ColsA],
  * @tparam PowFoldRow Power2 of fold Rows Size. "enum":["2"].
  *                   Set the appropriate input matrix rows and columns,
  *                   kernel top will automatically deduce the right configuration.
- * @tparam PowNCU Power2 of compute unit(CU) number.
+ * @tparam NCU Number of Compute Unit. "enum":["32","4","1"].
  *                   Set the appropriate input matrix rows and columns,
  *                   kernel top will automatically deduce the right configuration.
+ * @tparam PowNCU Power2 of compute unit(CU) number. "enum":["5","2","1"].
+ *                   Set the appropriate input matrix rows and columns,
+ *                   kernel top will automatically deduce the right configuration.
+ * @tparam T Input/output data type.
  *
- * @param dataA inout port, Matrix A as input and output matrix Q.
+ * @param dataA Inout port, Matrix A as input and output matrix Q.
  *              For multi-cu design, expand Row into 2 dimensions[NCU][RowsA / NCU], NCU is related to PowNCU.
- * @param R_strm output port, Matrix R, non-zero numbers in the upper triangular matrix.
+ * @param R_strm Output port, Matrix R, non-zero numbers in the upper triangular matrix.
  *              The effective numbers can be placed in appropriate position of the 0 matrix to restore the R matrix.
  */
 template <int RowsA, int ColsA, int PowUnroll, int PowFoldRow, int NCU, int PowNCU, class T>

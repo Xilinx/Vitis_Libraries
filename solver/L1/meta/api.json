@@ -1208,7 +1208,7 @@
                         "type": "hls::stream< OutputType > &"
                     }
                 ],
-                "visible": true
+                "visible": false
             },
             "target_domain": "PL"
         },

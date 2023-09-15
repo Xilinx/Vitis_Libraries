@@ -33,7 +33,7 @@ from Advanced Micro Devices, Inc.
 #include <cmath>
 #include <string>
 #include "matrix.hpp"
-#include "qrd.hpp"
+#include "hw/qrd.hpp"
 using namespace std;
 
 //////////////////////////////////////////
