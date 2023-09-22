@@ -20,13 +20,7 @@
 
 using namespace adf;
 
-// 1.setup simulator
-PLIO* in1 = new PLIO("Datain1", plio_32_bits, "data/p_focal.txt");
-PLIO* in2 = new PLIO("Datain2", plio_32_bits, "data/p_invD.txt");
-PLIO* out = new PLIO("Dataout", plio_32_bits, "data/m_p_apodization.txt");
-simulation::platform<2, 1> plat(in1, in2, out);
-
-// 2.setup parameters
+// 1.setup parameters
 const int NUM_LINE_t = example_1_num_line;
 const int NUM_ELEMENT_t = example_1_num_element;
 const int NUM_SAMPLE_t = example_1_num_sample;
@@ -62,23 +56,43 @@ void setup_para_amain_const(us::L1::para_Apodization<float>& para_amain_const) {
     para_amain_const.ref_point_z = example_1_ref_pos_z;
 }
 
-// 3.setup graph
-//<typename T, int LEN_OUT, int LEN_IN_F, int LEN_IN_D, int VECDIM, int APODI_PRE_LEN32b_PARA>
-us::L2::apodi_main_graph<float,
-                         NUM_LINE_t,
-                         NUM_ELEMENT_t,
-                         NUM_SAMPLE_t,
-                         NUM_SEG_t,
-                         LEN_OUT_apodi_t,
-                         LEN_IN_apodi_f_t,
-                         LEN_IN_apodi_d_t,
-                         VECDIM_apodi_t,
-                         LEN32b_PARA_apodi_t>
-    g;
+// 2.setup test graph and PLIO/GMIO
+class apodization_test : public adf::graph {
+   public:
+    // input and output port
+    output_plio plio_apodization;
+    input_plio plio_focal;
+    input_plio plio_invD;
+    port<input> para_amain_const;
 
-connect<> net1(plat.src[0], g.p_focal);
-connect<> net2(plat.src[1], g.p_invD);
-connect<> net3(g.out, plat.sink[0]);
+    //<typename T, int LEN_OUT, int LEN_IN_F, int LEN_IN_D, int VECDIM, int APODI_PRE_LEN32b_PARA>
+    us::L2::apodi_main_graph<float,
+                             NUM_LINE_t,
+                             NUM_ELEMENT_t,
+                             NUM_SAMPLE_t,
+                             NUM_SEG_t,
+                             LEN_OUT_apodi_t,
+                             LEN_IN_apodi_f_t,
+                             LEN_IN_apodi_d_t,
+                             VECDIM_apodi_t,
+                             LEN32b_PARA_apodi_t>
+        g_top;
+
+    apodization_test() {
+        // input & output plio
+        plio_focal = adf::input_plio::create("Datain0", adf::plio_32_bits, "data/p_focal.txt");
+        plio_invD = adf::input_plio::create("Datain1", adf::plio_32_bits, "data/p_invD.txt");
+        plio_apodization = adf::output_plio::create("Dataout", adf::plio_32_bits, "data/m_p_apodization.txt");
+
+        // connections
+        adf::connect<adf::parameter>(para_amain_const, g_top.para_amain_const);
+        adf::connect<>(plio_focal.out[0], g_top.p_focal);
+        adf::connect<>(plio_invD.out[0], g_top.p_invD);
+        adf::connect<>(g_top.out, plio_apodization.in[0]);
+    }
+};
+
+apodization_test g;
 
 // support 1 line now
 const int invoking = test_n_ele * NUM_SEG_t;

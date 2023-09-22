@@ -13,7 +13,10 @@
                     "scanline_AllinAIE.hpp"
                 ],
                 "search_paths": [
-                    "L3/include"
+                    "L1/include",
+                    "L2/include",
+                    "L3/include",
+                    "L3/models/include"
                 ],
                 "instance": "function",
                 "parameters": [],
@@ -40,7 +43,12 @@
                     "plane_wave.hpp"
                 ],
                 "search_paths": [
-                    "L3/include"
+                    "L1/include",
+                    "L2/include",
+                    "L3/include",
+                    "L2/tests/graph_mult/aie_graph",
+                    "L2/include",
+                    "L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -98,7 +106,12 @@
                     "scanline.hpp"
                 ],
                 "search_paths": [
-                    "L3/include"
+                    "L1/include",
+                    "L2/include",
+                    "L3/include",
+                    "L2/tests/graph_mult/aie_graph",
+                    "L2/include",
+                    "L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -156,7 +169,12 @@
                     "synthetic_aperture.hpp"
                 ],
                 "search_paths": [
-                    "L3/include"
+                    "L1/include",
+                    "L2/include",
+                    "L3/include",
+                    "L2/tests/graph_mult/aie_graph",
+                    "L2/include",
+                    "L1/include"
                 ],
                 "instance": "function",
                 "parameters": [

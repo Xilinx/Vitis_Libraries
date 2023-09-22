@@ -18,14 +18,7 @@
 #include "graph_interpolation.hpp"
 #include "us_example_parameter.hpp"
 
-// 1.setup simulator
-PLIO* in1 = new PLIO("Datain1", plio_32_bits, "data/p_sample.txt");
-PLIO* in2 = new PLIO("Datain2", plio_32_bits, "data/p_inside.txt");
-PLIO* in3 = new PLIO("Datain3", plio_32_bits, "data/rf_2e.txt");
-PLIO* out = new PLIO("Dataout", plio_32_bits, "data/output.txt");
-simulation::platform<3, 1> plat(in1, in2, in3, out);
-
-// 2.setup parameters
+// 1.setup parameters
 const int NUM_LINE_t = example_1_num_line;
 const int NUM_ELEMENT_t = example_1_num_element;
 const int NUM_SAMPLE_t = example_1_num_sample;
@@ -59,37 +52,68 @@ void setup_para(us::L1::para_Interpolation<float>& para_interp_const) {
     para_interp_const.num_upSamp = NUM_UPSample_t;
 }
 
-// 3.setup graph
+// 2.setup test graph and PLIO/GMIO
+class interpolation_test : public adf::graph {
+   public:
+    // input and output port
+    output_plio plio_interpolation;
+    input_plio plio_sample;
+    input_plio plio_inside;
+    input_plio plio_rfdata;
+    port<input> para_interp_const_0;
+    port<input> para_interp_const_1;
+    port<input> para_interp_const_2;
+    port<input> para_interp_const_3;
+    port<input> para_local;
+
+// setup graph
 #ifdef _USING_SHELL_
-us::L2::interpolation_graph_scaler_shell<float,
-                                         NUM_LINE_t,
-                                         NUM_ELEMENT_t,
-                                         NUM_SAMPLE_t,
-                                         NUM_SEG_t,
-                                         LEN_OUT_interp_t,
-                                         NUM_SAMPLE_t,
-                                         NUM_SAMPLE_t,
-                                         VECDIM_interp_t,
-                                         LEN32b_PARA_interp_t>
-    g;
+    us::L2::interpolation_graph_scaler_shell<float,
+                                             NUM_LINE_t,
+                                             NUM_ELEMENT_t,
+                                             NUM_SAMPLE_t,
+                                             NUM_SEG_t,
+                                             LEN_OUT_interp_t,
+                                             NUM_SAMPLE_t,
+                                             NUM_SAMPLE_t,
+                                             VECDIM_interp_t,
+                                             LEN32b_PARA_interp_t>
+        g_top;
 #else
-us::L2::interpolation_graph<float,
-                            NUM_LINE_t,
-                            NUM_ELEMENT_t,
-                            NUM_SAMPLE_t,
-                            NUM_SEG_t,
-                            LEN_OUT_interp_t,
-                            LEN_IN_interp_t,
-                            LEN_IN_interp_rf_t,
-                            VECDIM_interp_t,
-                            LEN32b_PARA_interp_t>
-    g;
+    us::L2::interpolation_graph<float,
+                                NUM_LINE_t,
+                                NUM_ELEMENT_t,
+                                NUM_SAMPLE_t,
+                                NUM_SEG_t,
+                                LEN_OUT_interp_t,
+                                LEN_IN_interp_t,
+                                LEN_IN_interp_rf_t,
+                                VECDIM_interp_t,
+                                LEN32b_PARA_interp_t>
+        g_top;
 #endif
 
-connect<> net1(plat.src[0], g.p_sample_in);
-connect<> net2(plat.src[1], g.p_inside_in);
-connect<> net3(plat.src[2], g.p_rfdata_in);
-connect<> net4(g.out, plat.sink[0]);
+    interpolation_test() {
+        // input & output plio
+        plio_sample = adf::input_plio::create("Datain0", adf::plio_32_bits, "data/p_sample.txt");
+        plio_inside = adf::input_plio::create("Datain1", adf::plio_32_bits, "data/p_inside.txt");
+        plio_rfdata = adf::input_plio::create("Datain2", adf::plio_32_bits, "data/rf_2e.txt");
+        plio_interpolation = adf::output_plio::create("Dataout", adf::plio_32_bits, "data/output.txt");
+
+        // connections
+        adf::connect<adf::parameter>(para_interp_const_0, g_top.para_interp_const_0);
+        adf::connect<adf::parameter>(para_interp_const_1, g_top.para_interp_const_1);
+        adf::connect<adf::parameter>(para_interp_const_2, g_top.para_interp_const_2);
+        adf::connect<adf::parameter>(para_interp_const_3, g_top.para_interp_const_3);
+        adf::connect<adf::parameter>(para_local, g_top.para_local);
+        adf::connect<>(plio_sample.out[0], g_top.p_sample_in);
+        adf::connect<>(plio_inside.out[0], g_top.p_inside_in);
+        adf::connect<>(plio_rfdata.out[0], g_top.p_rfdata_in);
+        adf::connect<>(g_top.out, plio_interpolation.in[0]);
+    }
+};
+
+interpolation_test g;
 
 // support 1 line now
 const int invoking = test_n_ele * NUM_SEG_t;

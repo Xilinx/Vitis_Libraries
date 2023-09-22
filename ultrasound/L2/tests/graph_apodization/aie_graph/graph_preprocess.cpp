@@ -15,18 +15,12 @@
  * limitations under the License.
  */
 
-#include "apodization.hpp"
+#include "graph_apodization.hpp"
 #include "us_example_parameter.hpp"
 
 using namespace adf;
 
-// 1.setup simulator
-PLIO* in1 = new PLIO("Datain1", plio_32_bits, "data/p_points_x.txt");
-PLIO* in2 = new PLIO("Datain2", plio_32_bits, "data/p_points_z.txt");
-PLIO* out = new PLIO("Dataout", plio_32_bits, "data/output.txt");
-simulation::platform<2, 1> plat(in1, in2, out);
-
-// 2.setup parameters
+// 1.setup parameters
 const int NUM_LINE_t = example_1_num_line;
 const int NUM_ELEMENT_t = example_1_num_element;
 const int NUM_SAMPLE_t = example_1_num_sample;
@@ -57,24 +51,42 @@ void setup_para_apodi_const(us::L1::para_Apodization<float>& para_apodi_const) {
     para_apodi_const.ref_point_z = example_1_ref_pos_z;
 }
 
-// 3.setup graph
-// template <typename T, int LEN_OUT, int LEN_IN, int VECDIM, int APODI_PRE_LEN32b_PARA>
-us::L2::apodi_pre_graph<float,
-                        NUM_LINE_t,
-                        NUM_ELEMENT_t,
-                        NUM_SAMPLE_t,
-                        NUM_SEG_t,
-                        LEN_OUT_apodi_t,
-                        LEN_IN_apodi_t,
-                        VECDIM_apodi_t,
-                        LEN32b_PARA_apodi_t>
-    g;
+// 2.setup test graph and PLIO/GMIO
+class preprocess_test : public adf::graph {
+   public:
+    // input and output port
+    output_plio preprocess_out;
+    input_plio img_x_in;
+    input_plio img_z_in;
+    port<input> para_apodi_const;
 
-connect<> net1(plat.src[0], g.img_x_in);
-connect<> net2(plat.src[1], g.img_z_in);
-connect<> net3(g.out, plat.sink[0]);
+    // L2 graph
+    us::L2::apodi_pre_graph<float,
+                            NUM_LINE_t,
+                            NUM_ELEMENT_t,
+                            NUM_SAMPLE_t,
+                            NUM_SEG_t,
+                            LEN_OUT_apodi_t,
+                            LEN_IN_apodi_t,
+                            VECDIM_apodi_t,
+                            LEN32b_PARA_apodi_t>
+        g;
 
-// 4.setup test
+    preprocess_test() {
+        // input & output plio
+        in1 = adf::input_plio::create("Datain0", adf::plio_32_bits, "data/p_points_x.txt");
+        in2 = adf::input_plio::create("Datain1", adf::plio_32_bits, "data/p_points_z.txt");
+        out = adf::output_plio::create("Dataout", adf::plio_32_bits, "data/output.txt");
+
+        // connections
+        adf::connect<adf::parameter>(para_apodi_const, g.para_apodi_const);
+        adf::connect<>(img_x_in.out[0], g.img_x);
+        adf::connect<>(img_z_in.out[0], g.img_z);
+        adf::connect<>(g.delay, preprocess_out.in[0]);
+    }
+};
+
+// 3.setup test
 #if defined(__AIESIM__) || defined(__X86SIM__)
 int main() {
     us::L1::para_Apodization<float> para_apodi_const;
