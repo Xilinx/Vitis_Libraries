@@ -130,7 +130,8 @@
                     "activations.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/mlp"
+                    "L1/include/hw/mlp",
+                    "../blas/L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -163,7 +164,8 @@
                     "activations.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/mlp"
+                    "L1/include/hw/mlp",
+                    "../blas/L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -196,7 +198,8 @@
                     "activations.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/mlp"
+                    "L1/include/hw/mlp",
+                    "../blas/L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [

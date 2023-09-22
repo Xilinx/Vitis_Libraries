@@ -14,7 +14,8 @@
                     "krnl_control.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/hw/cgSolver"
+                    "L2/include/hw/cgSolver",
+                    "../blas/L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [],
@@ -41,7 +42,8 @@
                     "krnl_duplicate.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/hw/cgSolver"
+                    "L2/include/hw/cgSolver",
+                    "../blas/L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [],
@@ -88,7 +90,8 @@
                     "krnl_gemv.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/hw/cgSolver"
+                    "L2/include/hw/cgSolver",
+                    "../blas/L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [],
@@ -135,7 +138,9 @@
                     "krnl_timer.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/hw/cgSolver"
+                    "L1/include/hw",
+                    "L2/include/hw/cgSolver",
+                    "../blas/L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [],
@@ -167,7 +172,8 @@
                     "krnl_update_pk.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/hw/cgSolver"
+                    "L2/include/hw/cgSolver",
+                    "../blas/L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [],
@@ -214,7 +220,8 @@
                     "krnl_update_rk.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/hw/cgSolver"
+                    "L2/include/hw/cgSolver",
+                    "../blas/L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [],
@@ -261,7 +268,8 @@
                     "krnl_update_rk_jacobi.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/hw/cgSolver"
+                    "L2/include/hw/cgSolver",
+                    "../blas/L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [],
@@ -308,7 +316,8 @@
                     "krnl_update_xr.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/hw/cgSolver"
+                    "L2/include/hw/cgSolver",
+                    "../blas/L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [],
@@ -365,7 +374,15 @@
                     "fcnKernel.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/hw/mlp"
+                    "L2/include/hw/mlp",
+                    "L1/include/hw",
+                    "L1/include/hw/mlp",
+                    "../blas/L1/include/hw",
+                    "../blas/L1/include/hw/xf_blas",
+                    "../blas/L1/include/hw/xf_blas/gemm",
+                    "../blas/L1/include/hw/xf_blas/helpers/utils",
+                    "../blas/L2/include/memKernel",
+                    "../blas/L2/include/memKernel/hw/xf_blas"
                 ],
                 "instance": "function",
                 "parameters": [],
@@ -397,7 +414,9 @@
                     "rtmbackward.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/hw/rtm2d"
+                    "L1/include/hw/",
+                    "L2/include/hw/rtm2d",
+                    "../blas/L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [],
@@ -418,7 +437,9 @@
                     "rtmbackward.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/hw/rtm2d"
+                    "L1/include/hw/",
+                    "L2/include/hw/rtm2d",
+                    "../blas/L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [],
@@ -525,7 +546,9 @@
                     "rtmforward_hbc.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/hw/rtm3d"
+                    "L2/include/hw/rtm3d",
+                    "L1/include/hw",
+                    "../blas/L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [],
