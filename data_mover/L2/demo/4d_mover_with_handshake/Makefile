@@ -169,9 +169,10 @@ $(TEMP_DIR)/mm2s_mp.xo: pl/mm2s_mp.cpp
 	$(VPP) -c $(VPP_FLAGS_mm2s_mp) $(VPP_FLAGS) -k mm2s_mp -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
 BINARY_CONTAINER_data_mover_OBJS += $(TEMP_DIR)/mm2s_mp.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_data_mover_OBJS)
+BINARY_CONTAINERS_DEPS += system.cfg
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	mkdir -p $(BUILD_DIR)
-	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/data_mover $(VPP_LDFLAGS)  $(VPP_LDFLAGS_data_mover) $(AIE_LDFLAGS)   -o $@ $^
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/data_mover $(VPP_LDFLAGS)  $(VPP_LDFLAGS_data_mover) $(AIE_LDFLAGS)   -o $@ $(filter %.xo,$^)
 
 ############################## Setting Rules for Host (Building Host Executable) ##############################
 $(EXE_FILE): $(EXE_FILE_DEPS)
@@ -251,7 +252,7 @@ endif
 sd_card: $(SD_CARD)
 endif
 ############################## Setting Essential Checks and Building Rules ##############################
-RUN_DEPS += host gen_instances xclbin $(EMCONFIG)
+RUN_DEPS += host xclbin $(EMCONFIG)
 RUN_DEPS += $(SD_CARD)
 
 .PHONY: mkflag all run
@@ -330,9 +331,9 @@ endif
 
 .PHONY: xclbin
 ifeq ($(HOST_ARCH), x86)
-xclbin: check_vpp check_xrt  $(BINARY_CONTAINERS)
+xclbin: check_vpp check_xrt $(BINARY_CONTAINERS)
 else
-xclbin: check_vpp check_sysroot  $(BINARY_CONTAINERS)
+xclbin: check_vpp check_sysroot $(BINARY_CONTAINERS)
 endif
 
 #################### Parameterized File Generation ##########################
