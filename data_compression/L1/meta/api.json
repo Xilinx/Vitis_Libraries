@@ -67,7 +67,8 @@
                     "checksum_wrapper.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -109,7 +110,8 @@
                     "checksum_wrapper.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -151,7 +153,8 @@
                     "checksum_wrapper.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -213,7 +216,8 @@
                     "checksum_wrapper.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -356,7 +360,8 @@
                     "huffman_encoder.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [],
@@ -388,7 +393,8 @@
                     "huffman_encoder.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [],
@@ -425,7 +431,8 @@
                     "huffman_treegen.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -476,7 +483,8 @@
                     "inflate.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -533,7 +541,8 @@
                     "inflate.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -586,7 +595,8 @@
                     "inflate.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -639,7 +649,8 @@
                     "inflate.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -1069,7 +1080,8 @@
                     "lz4_decompress.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -1101,7 +1113,8 @@
                     "lz4_decompress.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -1148,7 +1161,8 @@
                     "lz4_decompress.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [],
@@ -1185,7 +1199,8 @@
                     "lz4_decompress.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [],
@@ -1227,7 +1242,8 @@
                     "lz4_decompress.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -1288,7 +1304,8 @@
                     "lz4_decompress.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -1334,7 +1351,8 @@
                     "lz4_decompress.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -2170,7 +2188,8 @@
                     "lzx_decompress.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -2401,7 +2420,8 @@
                     "snappy_decompress_details.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -2459,7 +2479,8 @@
                     "snappy_decompress_details.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -2517,7 +2538,8 @@
                     "snappy_decompress_details.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -2567,7 +2589,8 @@
                     "snappy_decompress_details.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -2617,7 +2640,8 @@
                     "zlib_compress.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -2683,7 +2707,8 @@
                     "zlib_compress.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -2740,7 +2765,8 @@
                     "zlib_compress.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [],
@@ -2777,7 +2803,8 @@
                     "zlib_compress.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [],
@@ -2809,7 +2836,8 @@
                     "zlib_compress.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -2880,7 +2908,8 @@
                     "zlib_compress.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -2925,7 +2954,8 @@
                     "zlib_compress.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -2970,7 +3000,8 @@
                     "zlib_compress.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -3260,7 +3291,8 @@
                     "zstd_decompress.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -3329,7 +3361,8 @@
                     "zstd_decompress.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "../security/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
