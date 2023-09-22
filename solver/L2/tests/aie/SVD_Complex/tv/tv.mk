@@ -19,7 +19,7 @@ CXX = g++
 
 HOST_SRCS += main.cpp
 
-CXXFLAGS += -I./ -g
+CXXFLAGS += -I./ -I../aie -g
 
 LDFLAGS += -pthread
 
@@ -37,6 +37,7 @@ tv: run
 	mv A1.txt ../data
 	mv Gld0.txt ../data
 	mv Gld1.txt ../data
+	rm -rf $(EXE_FILE)
 clean:
 	rm -rf $(EXE_FILE)
 cleanall: clean

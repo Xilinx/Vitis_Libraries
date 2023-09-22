@@ -19,6 +19,7 @@
 #include <cmath>
 #include <fstream>
 #include <string>
+#include <cstring>
 #include "matrix.hpp"
 #include "aie_graph_params.h"
 using namespace std;
@@ -27,8 +28,8 @@ template <typename T>
 void writeGLD(ComplexMatrix<T>& Q, ComplexMatrix<T>& R, std::string filename0, std::string filename1) {
     ofstream myfile0;
     ofstream myfile1;
-    myfile0.open(filename0);
-    myfile1.open(filename1);
+    myfile0.open(filename0.c_str());
+    myfile1.open(filename1.c_str());
     for (int j = 0; j < Q.N; j++) {
         for (int i = 0; i < Q.M; i += 4) {
             myfile0 << Q.elem(i, j).real() << " ";
@@ -63,8 +64,8 @@ template <typename T>
 void writeFile(ComplexMatrix<T>& A, std::string filename0, std::string filename1) {
     ofstream myfile0;
     ofstream myfile1;
-    myfile0.open(filename0);
-    myfile1.open(filename1);
+    myfile0.open(filename0.c_str());
+    myfile1.open(filename1.c_str());
     for (int j = 0; j < A.N; j++) {
         for (int i = 0; i < A.M; i += 4) {
             myfile0 << A.elem(i, j).real() << " ";
@@ -97,8 +98,8 @@ template <typename T>
 void writeFilebyRow(ComplexMatrix<T>& A, std::string filename0, std::string filename1) {
     ofstream myfile0;
     ofstream myfile1;
-    myfile0.open(filename0);
-    myfile1.open(filename1);
+    myfile0.open(filename0.c_str());
+    myfile1.open(filename1.c_str());
     for (int i = 0; i < A.M; i++) {
         for (int j = 0; j < A.N; j += 4) {
             myfile0 << A.elem(i, j).real() << endl;

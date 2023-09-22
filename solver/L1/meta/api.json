@@ -26,7 +26,11 @@
                         "description": "Row numbers of matrix A",
                         "minimum": "8",
                         "maximum": "1024",
-                        "enum":["1024","512","256"]
+                        "enum": [
+                            "1024",
+                            "512",
+                            "256"
+                        ]
                     },
                     {
                         "name": "ColsA",
@@ -34,7 +38,11 @@
                         "description": "Column numbers of matrix A",
                         "minimum": "2",
                         "maximum": "256",
-                        "enum":["256","128","64"]
+                        "enum": [
+                            "256",
+                            "128",
+                            "64"
+                        ]
                     },
                     {
                         "name": "PowUnroll",
@@ -42,14 +50,20 @@
                         "description": "Power2 of RowsA Size, default power2(10) = 1024",
                         "minimum": "1",
                         "maximum": "10",
-                        "enum":["10","9","8"]
+                        "enum": [
+                            "10",
+                            "9",
+                            "8"
+                        ]
                     },
                     {
                         "name": "PowFoldRow",
                         "type": "int",
                         "minimum": "2",
                         "maximum": "2",
-                        "enum":["2"],
+                        "enum": [
+                            "2"
+                        ],
                         "description": "Power2 of fold Rows Size, default power2(2) = 4"
                     },
                     {
@@ -57,26 +71,32 @@
                         "type": "int",
                         "minimum": "1",
                         "maximum": "5",
-                        "enum":["5","2","1"],
+                        "enum": [
+                            "5",
+                            "2",
+                            "1"
+                        ],
                         "description": "Power2 of compute unit(CU) number, default power2(5) = 32"
                     },
                     {
                         "name": "T",
                         "type": "typename",
-                        "enum": ["float"],
+                        "enum": [
+                            "float"
+                        ],
                         "description": "the data type of the complex<type> matrix entries"
                     }
                 ],
                 "ports": [
                     {
-                    "name": "A",
-                    "direction": "inout",
-                    "type": "hls::x_complex<T>*"
+                        "name": "A",
+                        "direction": "inout",
+                        "type": "hls::x_complex<T>*"
                     },
                     {
-                    "name": "R_strm",
-                    "direction": "out",
-                    "type": "hls::stream<hls::x_complex<T> >&"
+                        "name": "R_strm",
+                        "direction": "out",
+                        "type": "hls::stream<hls::x_complex<T> >&"
                     }
                 ],
                 "visible": true
@@ -107,7 +127,11 @@
                         "description": "Row numbers of matrix A",
                         "minimum": "8",
                         "maximum": "1024",
-                        "enum":["1024","512","256"]
+                        "enum": [
+                            "1024",
+                            "512",
+                            "256"
+                        ]
                     },
                     {
                         "name": "ColsA",
@@ -115,7 +139,11 @@
                         "description": "Column numbers of matrix A",
                         "minimum": "2",
                         "maximum": "256",
-                        "enum":["256","128","64"]
+                        "enum": [
+                            "256",
+                            "128",
+                            "64"
+                        ]
                     },
                     {
                         "name": "PowUnroll",
@@ -123,14 +151,20 @@
                         "description": "Power2 of RowsA Size, default power2(10) = 1024",
                         "minimum": "1",
                         "maximum": "10",
-                        "enum":["10","9","8"]
+                        "enum": [
+                            "10",
+                            "9",
+                            "8"
+                        ]
                     },
                     {
                         "name": "PowFoldRow",
                         "type": "int",
                         "minimum": "2",
                         "maximum": "2",
-                        "enum":["2"],
+                        "enum": [
+                            "2"
+                        ],
                         "description": "Power2 of fold Rows Size, default power2(2) = 4"
                     },
                     {
@@ -138,26 +172,32 @@
                         "type": "int",
                         "minimum": "1",
                         "maximum": "5",
-                        "enum":["5","2","1"],
+                        "enum": [
+                            "5",
+                            "2",
+                            "1"
+                        ],
                         "description": "Power2 of compute unit(CU) number, default power2(5) = 32"
                     },
                     {
                         "name": "T",
                         "type": "typename",
-                        "enum": ["float"],
+                        "enum": [
+                            "float"
+                        ],
                         "description": "the data type of the complex<type> matrix entries"
                     }
                 ],
                 "ports": [
                     {
-                    "name": "A",
-                    "direction": "inout",
-                    "type": "T"
+                        "name": "A",
+                        "direction": "inout",
+                        "type": "T"
                     },
                     {
-                    "name": "R_strm",
-                    "direction": "out",
-                    "type": "hls::stream<T >&"
+                        "name": "R_strm",
+                        "direction": "out",
+                        "type": "hls::stream<T >&"
                     }
                 ],
                 "visible": true
@@ -626,57 +666,64 @@
             "api_name": "xf::solver::cholesky",
             "target_domain": "PL",
             "spec": {
-              "schema": "vitis_library_api_spec_schema-1.0",
-              "api_name": "xf::solver::cholesky",
-              "display_name": "cholesky",
-              "brief": "PL kernel for cholesky decomposition.",
-              "lifecycle_status": "production",
-              "header_file_name": [
-                "cholesky.hpp"
-              ],
-              "search_paths": [
-                "L1/include",
-                "L1/include/hw"
-              ],
-              "source_file_name": "L1/tests/cholesky/kernel/kernel_cholesky_0.cpp",
-              "parameters": [
-                {
-                    "name": "LowerTriangularL",
-                    "type": "bool",
-                    "description": "When false generates the result in the upper triangle"
-                },
-                {
-                    "name": "RowsColsA",
-                    "type": "int",
-                    "description": "Defines the matrix dimensions",
-                    "minimum": "3",
-                    "maximum": "64"
-                },
-                {
-                    "name": "InputType",
-                    "type": "class",
-                    "description": "Input data type",
-                    "enum": ["float", "hls::x_complex<float>", "ap_fixed<16,1>"]
-                },
-                {
-                    "name": "OutputType",
-                    "type": "class",
-                    "description": "Output data type",
-                    "enum": ["float", "hls::x_complex<float>", "ap_fixed<16,1>"]
-                }
-              ],
-              "ports": [
-                {
-                  "name": "matrixAStrm",
-                  "direction": "input",
-                  "type": "hls::stream<InputType>&"
-                },
-                {
-                  "name": "matrixLStrm",
-                  "direction": "output",
-                  "type": "hls::stream<OutputType>&"
-                }
-            ],
+                "schema": "vitis_library_api_spec_schema-1.0",
+                "api_name": "xf::solver::cholesky",
+                "display_name": "cholesky",
+                "brief": "PL kernel for cholesky decomposition.",
+                "lifecycle_status": "production",
+                "header_file_name": [
+                    "cholesky.hpp"
+                ],
+                "search_paths": [
+                    "L1/include/hw"
+                ],
+                "source_file_name": "L1/tests/cholesky/kernel/kernel_cholesky_0.cpp",
+                "parameters": [
+                    {
+                        "name": "LowerTriangularL",
+                        "type": "bool",
+                        "description": "When false generates the result in the upper triangle"
+                    },
+                    {
+                        "name": "RowsColsA",
+                        "type": "int",
+                        "description": "Defines the matrix dimensions",
+                        "minimum": "3",
+                        "maximum": "64"
+                    },
+                    {
+                        "name": "InputType",
+                        "type": "class",
+                        "description": "Input data type",
+                        "enum": [
+                            "float",
+                            "hls::x_complex<float>",
+                            "ap_fixed<16,1>"
+                        ]
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "class",
+                        "description": "Output data type",
+                        "enum": [
+                            "float",
+                            "hls::x_complex<float>",
+                            "ap_fixed<16,1>"
+                        ]
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "matrixAStrm",
+                        "direction": "input",
+                        "type": "hls::stream<InputType>&"
+                    },
+                    {
+                        "name": "matrixLStrm",
+                        "direction": "output",
+                        "type": "hls::stream<OutputType>&"
+                    }
+                ],
                 "visible": true
             }
         },
@@ -684,57 +731,65 @@
             "api_name": "xf::solver::choleskyInverse",
             "target_domain": "PL",
             "spec": {
-              "schema": "vitis_library_api_spec_schema-1.0",
-              "api_name": "xf::solver::choleskyInverse",
-              "display_name": "choleskyInverse",
-              "brief": "PL kernel for choleskyInverse.",
-              "lifecycle_status": "production",
-              "header_file_name": [
-                "cholesky_inverse.hpp"
-              ],
-              "search_paths": [
-                "L1/include",
-                "L1/include/hw"
-              ],
-              "source_file_name": "L1/tests/cholesky_inverse/kernel/kernel_cholesky_inverse_0.cpp",
-              "parameters": [
-                {
-                    "name": "RowsColsA",
-                    "type": "int",
-                    "description": "Defines the matrix dimensions",
-                    "minimum": "3",
-                    "maximum": "64"
-                },
-                {
-                    "name": "InputType",
-                    "type": "class",
-                    "description": "Input data type",
-                    "enum": ["float", "hls::x_complex<float>", "ap_fixed<16,1>"]
-                },
-                {
-                    "name": "OutputType",
-                    "type": "class",
-                    "description": "Output data type",
-                    "enum": ["float", "hls::x_complex<float>", "ap_fixed<16,1>"]
-                }
-              ],
-              "ports": [
-                {
-                  "name": "matrixAStrm",
-                  "direction": "input",
-                  "type": "hls::stream<InputType>&"
-                },
-                {
-                  "name": "matrixLStrm",
-                  "direction": "output",
-                  "type": "hls::stream<OutputType>&"
-                },
-                {
-                  "name": "cholesky_success",
-                  "direction": "output",
-                  "type": "int&"
-                }
-              ],
+                "schema": "vitis_library_api_spec_schema-1.0",
+                "api_name": "xf::solver::choleskyInverse",
+                "display_name": "choleskyInverse",
+                "brief": "PL kernel for choleskyInverse.",
+                "lifecycle_status": "production",
+                "header_file_name": [
+                    "cholesky_inverse.hpp"
+                ],
+                "search_paths": [
+                    "L1/include",
+                    "L1/include/hw"
+                ],
+                "source_file_name": "L1/tests/cholesky_inverse/kernel/kernel_cholesky_inverse_0.cpp",
+                "parameters": [
+                    {
+                        "name": "RowsColsA",
+                        "type": "int",
+                        "description": "Defines the matrix dimensions",
+                        "minimum": "3",
+                        "maximum": "64"
+                    },
+                    {
+                        "name": "InputType",
+                        "type": "class",
+                        "description": "Input data type",
+                        "enum": [
+                            "float",
+                            "hls::x_complex<float>",
+                            "ap_fixed<16,1>"
+                        ]
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "class",
+                        "description": "Output data type",
+                        "enum": [
+                            "float",
+                            "hls::x_complex<float>",
+                            "ap_fixed<16,1>"
+                        ]
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "matrixAStrm",
+                        "direction": "input",
+                        "type": "hls::stream<InputType>&"
+                    },
+                    {
+                        "name": "matrixLStrm",
+                        "direction": "output",
+                        "type": "hls::stream<OutputType>&"
+                    },
+                    {
+                        "name": "cholesky_success",
+                        "direction": "output",
+                        "type": "int&"
+                    }
+                ],
                 "visible": true
             }
         },
@@ -1224,7 +1279,8 @@
                     "pseudosqrt.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "L2/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -1258,7 +1314,8 @@
                     "pseudosqrt.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw"
+                    "L1/include/hw",
+                    "L2/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -1292,58 +1349,64 @@
             "api_name": "xf::solver::qrInverse",
             "target_domain": "PL",
             "spec": {
-              "schema": "vitis_library_api_spec_schema-1.0",
-              "api_name": "xf::solver::qrInverse",
-              "display_name": "qrInverse",
-              "brief": "PL kernel for qrInverse.",
-              "lifecycle_status": "production",
-              "header_file_name": [
-                "qr_inverse.hpp"
-              ],
-              "search_paths": [
-                "L1/include",
-                "L1/include/hw"
-              ],
-              "source_file_name": "L1/tests/qr_inverse/kernel/kernel_qr_inverse_0.cpp",
-              "parameters": [
-                {
-                    "name": "RowsColsA",
-                    "type": "int",
-                    "description": "Defines the matrix dimensions",
-                    "minimum": "3",
-                    "maximum": "64"
-                },
-                {
-                    "name": "InputType",
-                    "type": "class",
-                    "description": "Input data type",
-                    "enum": ["float", "hls::x_complex<float>"]
-                },
-                {
-                    "name": "OutputType",
-                    "type": "class",
-                    "description": "Output data type",
-                    "enum": ["float", "hls::x_complex<float>"]
-                }
-              ],
-              "ports": [
-                {
-                  "name": "matrixAStrm",
-                  "direction": "input",
-                  "type": "hls::stream<InputType>&"
-                },
-                {
-                  "name": "matrixLStrm",
-                  "direction": "output",
-                  "type": "hls::stream<OutputType>&"
-                },
-                {
-                  "name": "A_singular",
-                  "direction": "output",
-                  "type": "int&"
-                }
-              ],
-              "visible": true
+                "schema": "vitis_library_api_spec_schema-1.0",
+                "api_name": "xf::solver::qrInverse",
+                "display_name": "qrInverse",
+                "brief": "PL kernel for qrInverse.",
+                "lifecycle_status": "production",
+                "header_file_name": [
+                    "qr_inverse.hpp"
+                ],
+                "search_paths": [
+                    "L1/include",
+                    "L1/include/hw"
+                ],
+                "source_file_name": "L1/tests/qr_inverse/kernel/kernel_qr_inverse_0.cpp",
+                "parameters": [
+                    {
+                        "name": "RowsColsA",
+                        "type": "int",
+                        "description": "Defines the matrix dimensions",
+                        "minimum": "3",
+                        "maximum": "64"
+                    },
+                    {
+                        "name": "InputType",
+                        "type": "class",
+                        "description": "Input data type",
+                        "enum": [
+                            "float",
+                            "hls::x_complex<float>"
+                        ]
+                    },
+                    {
+                        "name": "OutputType",
+                        "type": "class",
+                        "description": "Output data type",
+                        "enum": [
+                            "float",
+                            "hls::x_complex<float>"
+                        ]
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "matrixAStrm",
+                        "direction": "input",
+                        "type": "hls::stream<InputType>&"
+                    },
+                    {
+                        "name": "matrixLStrm",
+                        "direction": "output",
+                        "type": "hls::stream<OutputType>&"
+                    },
+                    {
+                        "name": "A_singular",
+                        "direction": "output",
+                        "type": "int&"
+                    }
+                ],
+                "visible": true
             }
         },
         {
@@ -2052,7 +2115,6 @@
                     "svd.hpp"
                 ],
                 "search_paths": [
-                    "L1/include",
                     "L1/include/hw"
                 ],
                 "source_file_name": "L1/tests/svd/kernel/kernel_svd_0.cpp",
@@ -2065,45 +2127,53 @@
                         "maximum": "64"
                     },
                     {
-                      "name": "ColsA",
-                      "type": "int",
-                      "description": "Defines the matrix Column dimension",
-                      "minimum": "3",
-                      "maximum": "64"
+                        "name": "ColsA",
+                        "type": "int",
+                        "description": "Defines the matrix Column dimension",
+                        "minimum": "3",
+                        "maximum": "64"
                     },
                     {
                         "name": "InputType",
                         "type": "class",
                         "description": "Input data type",
-                        "enum": ["float", "hls::x_complex<float>", "ap_fixed<16,1>"]
+                        "enum": [
+                            "float",
+                            "hls::x_complex<float>",
+                            "ap_fixed<16,1>"
+                        ]
                     },
                     {
                         "name": "OutputType",
                         "type": "class",
                         "description": "Output data type",
-                        "enum": ["float", "hls::x_complex<float>", "ap_fixed<16,1>"]
+                        "enum": [
+                            "float",
+                            "hls::x_complex<float>",
+                            "ap_fixed<16,1>"
+                        ]
                     }
                 ],
                 "ports": [
                     {
-                      "name": "matrixAStrm",
-                      "direction": "input",
-                      "type": "hls::stream<InputType>&"
+                        "name": "matrixAStrm",
+                        "direction": "input",
+                        "type": "hls::stream<InputType>&"
                     },
                     {
-                      "name": "matrixSStrm",
-                      "direction": "output",
-                      "type": "hls::stream<OutputType>&"
+                        "name": "matrixSStrm",
+                        "direction": "output",
+                        "type": "hls::stream<OutputType>&"
                     },
                     {
-                      "name": "matrixUStrm",
-                      "direction": "output",
-                      "type": "hls::stream<OutputType>&"
+                        "name": "matrixUStrm",
+                        "direction": "output",
+                        "type": "hls::stream<OutputType>&"
                     },
                     {
-                      "name": "matrixVStrm",
-                      "direction": "output",
-                      "type": "hls::stream<OutputType>&"
+                        "name": "matrixVStrm",
+                        "direction": "output",
+                        "type": "hls::stream<OutputType>&"
                     }
                 ],
                 "visible": true
@@ -2138,7 +2208,7 @@
                         "type": "output_stream<float>* "
                     }
                 ],
-                "visible": false 
+                "visible": false
             },
             "target_domain": "AIE"
         },
@@ -2180,7 +2250,7 @@
                         "type": "output_stream<float>* "
                     }
                 ],
-                "visible":  false
+                "visible": false
             },
             "target_domain": "AIE"
         },

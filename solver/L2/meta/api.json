@@ -13,6 +13,7 @@
                     "geqrf.hpp"
                 ],
                 "search_paths": [
+                    "L2/include",
                     "L2/include/hw/MatrixDecomposition"
                 ],
                 "instance": "function",
@@ -81,6 +82,7 @@
                     "gesvdj.hpp"
                 ],
                 "search_paths": [
+                    "L2/include",
                     "L2/include/hw/MatrixDecomposition"
                 ],
                 "instance": "function",
@@ -123,6 +125,7 @@
                     "gesvdj.hpp"
                 ],
                 "search_paths": [
+                    "L2/include",
                     "L2/include/hw/MatrixDecomposition"
                 ],
                 "instance": "function",
@@ -201,6 +204,7 @@
                     "gesvj.hpp"
                 ],
                 "search_paths": [
+                    "L2/include",
                     "L2/include/hw/MatrixDecomposition"
                 ],
                 "instance": "function",
@@ -279,6 +283,7 @@
                     "getrf.hpp"
                 ],
                 "search_paths": [
+                    "L2/include",
                     "L2/include/hw/MatrixDecomposition"
                 ],
                 "instance": "function",
@@ -342,6 +347,7 @@
                     "getrf_nopivot.hpp"
                 ],
                 "search_paths": [
+                    "L2/include",
                     "L2/include/hw/MatrixDecomposition"
                 ],
                 "instance": "function",
@@ -400,6 +406,7 @@
                     "potrf.hpp"
                 ],
                 "search_paths": [
+                    "L2/include",
                     "L2/include/hw/MatrixDecomposition"
                 ],
                 "instance": "function",
@@ -458,6 +465,7 @@
                     "gelinearsolver.hpp"
                 ],
                 "search_paths": [
+                    "L2/include",
                     "L2/include/hw/LinearSolver"
                 ],
                 "instance": "function",
@@ -531,6 +539,7 @@
                     "gematrixinverse.hpp"
                 ],
                 "search_paths": [
+                    "L2/include",
                     "L2/include/hw/LinearSolver"
                 ],
                 "instance": "function",
@@ -589,6 +598,7 @@
                     "gtsv_pcr.hpp"
                 ],
                 "search_paths": [
+                    "L2/include",
                     "L2/include/hw/LinearSolver"
                 ],
                 "instance": "function",
@@ -662,6 +672,7 @@
                     "polinearsolver.hpp"
                 ],
                 "search_paths": [
+                    "L2/include",
                     "L2/include/hw/LinearSolver"
                 ],
                 "instance": "function",
@@ -735,6 +746,7 @@
                     "pomatrixinverse.hpp"
                 ],
                 "search_paths": [
+                    "L2/include",
                     "L2/include/hw/LinearSolver"
                 ],
                 "instance": "function",
@@ -793,6 +805,7 @@
                     "trtrs.hpp"
                 ],
                 "search_paths": [
+                    "L2/include",
                     "L2/include/hw/LinearSolver"
                 ],
                 "instance": "function",
@@ -866,6 +879,7 @@
                     "syevj.hpp"
                 ],
                 "search_paths": [
+                    "L2/include",
                     "L2/include/hw/EigenSolver"
                 ],
                 "instance": "function",
@@ -936,7 +950,8 @@
                 "search_paths": [
                     "L2/include/aie",
                     "L1/include/aie",
-                    "L1/src/aie"
+                    "L1/src/aie",
+                    "L1/include"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -980,7 +995,8 @@
                 "search_paths": [
                     "L2/include/aie",
                     "L1/include/aie",
-                    "L1/src/aie"
+                    "L1/src/aie",
+                    "L1/include"
                 ],
                 "instance": "class",
                 "parameters": [
@@ -1194,6 +1210,69 @@
                         "name": "k_rep",
                         "description": "",
                         "type": "int"
+                    }
+                ],
+                "ports": [
+                    {
+                        "name": "in_0",
+                        "direction": "in",
+                        "type": "adf::input_plio",
+                        "data_type": "cfloat"
+                    },
+                    {
+                        "name": "in_1",
+                        "direction": "in",
+                        "type": "adf::input_plio",
+                        "data_type": "cfloat"
+                    },
+                    {
+                        "name": "out_0",
+                        "direction": "out",
+                        "type": "adf::output_plio",
+                        "data_type": "cfloat"
+                    },
+                    {
+                        "name": "out_1",
+                        "direction": "out",
+                        "type": "adf::output_plio",
+                        "data_type": "cfloat"
+                    }
+                ],
+                "visible": true
+            },
+            "target_domain": "AIE"
+        },
+        {
+            "api_name": "xf::solver::SVDComplexFloat",
+            "spec": {
+                "schema": "vitis_libraries_api_list_schema-1.0",
+                "api_name": "xf::solver::SVDComplexFloat",
+                "display_name": "SVDComplexFloat",
+                "brief": "Singular Value Decomposition ",
+                "target_domain": "AIE",
+                "header_file_name": [
+                    "svd_graph.hpp"
+                ],
+                "search_paths": [
+                    "L2/include/aie",
+                    "L1/include/aie",
+                    "L1/src/aie"
+                ],
+                "instance": "class",
+                "parameters": [
+                    {
+                        "name": "col_num",
+                        "description": "",
+                        "type": "int",
+                        "minimum": 4,
+                        "maximum": 256
+                    },
+                    {
+                        "name": "row_num",
+                        "description": "",
+                        "type": "int",
+                        "minimum": 4,
+                        "maximum": 512
                     }
                 ],
                 "ports": [

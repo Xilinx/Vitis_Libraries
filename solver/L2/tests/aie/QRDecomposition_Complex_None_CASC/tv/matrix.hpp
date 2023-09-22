@@ -21,6 +21,7 @@
 #include <cmath>
 #include <cstring>
 #include <complex>
+#include <cstdlib>
 
 template <typename T>
 std::complex<T> complex_sqrt(std::complex<T> in) {
