@@ -13,6 +13,7 @@
                     "helper.hpp"
                 ],
                 "search_paths": [
+                    "L3/include/sw/utility/",
                     "L3/include/sw/xf_blas"
                 ],
                 "instance": "function",
@@ -34,6 +35,7 @@
                     "helper.hpp"
                 ],
                 "search_paths": [
+                    "L3/include/sw/utility/",
                     "L3/include/sw/xf_blas"
                 ],
                 "instance": "function",
@@ -55,6 +57,7 @@
                     "helper.hpp"
                 ],
                 "search_paths": [
+                    "L3/include/sw/utility/",
                     "L3/include/sw/xf_blas"
                 ],
                 "instance": "function",
@@ -76,6 +79,7 @@
                     "wrapper.hpp"
                 ],
                 "search_paths": [
+                    "L3/include/sw/utility/",
                     "L3/include/sw/xf_blas"
                 ],
                 "instance": "function",
@@ -123,6 +127,7 @@
                     "wrapper.hpp"
                 ],
                 "search_paths": [
+                    "L3/include/sw/utility/",
                     "L3/include/sw/xf_blas"
                 ],
                 "instance": "function",
@@ -175,6 +180,7 @@
                     "wrapper.hpp"
                 ],
                 "search_paths": [
+                    "L3/include/sw/utility/",
                     "L3/include/sw/xf_blas"
                 ],
                 "instance": "function",
@@ -232,6 +238,7 @@
                     "wrapper.hpp"
                 ],
                 "search_paths": [
+                    "L3/include/sw/utility/",
                     "L3/include/sw/xf_blas"
                 ],
                 "instance": "function",
@@ -289,6 +296,7 @@
                     "wrapper.hpp"
                 ],
                 "search_paths": [
+                    "L3/include/sw/utility/",
                     "L3/include/sw/xf_blas"
                 ],
                 "instance": "function",
@@ -351,6 +359,7 @@
                     "wrapper.hpp"
                 ],
                 "search_paths": [
+                    "L3/include/sw/utility/",
                     "L3/include/sw/xf_blas"
                 ],
                 "instance": "function",
@@ -388,6 +397,7 @@
                     "wrapper.hpp"
                 ],
                 "search_paths": [
+                    "L3/include/sw/utility/",
                     "L3/include/sw/xf_blas"
                 ],
                 "instance": "function",
@@ -425,6 +435,7 @@
                     "wrapper.hpp"
                 ],
                 "search_paths": [
+                    "L3/include/sw/utility/",
                     "L3/include/sw/xf_blas"
                 ],
                 "instance": "function",
@@ -457,6 +468,7 @@
                     "wrapper.hpp"
                 ],
                 "search_paths": [
+                    "L3/include/sw/utility/",
                     "L3/include/sw/xf_blas"
                 ],
                 "instance": "function",
@@ -519,6 +531,7 @@
                     "wrapper.hpp"
                 ],
                 "search_paths": [
+                    "L3/include/sw/utility/",
                     "L3/include/sw/xf_blas"
                 ],
                 "instance": "function",
@@ -556,6 +569,7 @@
                     "wrapper.hpp"
                 ],
                 "search_paths": [
+                    "L3/include/sw/utility/",
                     "L3/include/sw/xf_blas"
                 ],
                 "instance": "function",
@@ -593,6 +607,7 @@
                     "wrapper.hpp"
                 ],
                 "search_paths": [
+                    "L3/include/sw/utility/",
                     "L3/include/sw/xf_blas"
                 ],
                 "instance": "function",
@@ -630,6 +645,7 @@
                     "wrapper.hpp"
                 ],
                 "search_paths": [
+                    "L3/include/sw/utility/",
                     "L3/include/sw/xf_blas"
                 ],
                 "instance": "function",
@@ -662,6 +678,7 @@
                     "wrapper.hpp"
                 ],
                 "search_paths": [
+                    "L3/include/sw/utility/",
                     "L3/include/sw/xf_blas"
                 ],
                 "instance": "function",
@@ -694,6 +711,7 @@
                     "wrapper.hpp"
                 ],
                 "search_paths": [
+                    "L3/include/sw/utility/",
                     "L3/include/sw/xf_blas"
                 ],
                 "instance": "function",
@@ -791,6 +809,7 @@
                     "wrapper.hpp"
                 ],
                 "search_paths": [
+                    "L3/include/sw/utility/",
                     "L3/include/sw/xf_blas"
                 ],
                 "instance": "function",
@@ -812,6 +831,7 @@
                     "wrapper.hpp"
                 ],
                 "search_paths": [
+                    "L3/include/sw/utility/",
                     "L3/include/sw/xf_blas"
                 ],
                 "instance": "function",
@@ -849,6 +869,7 @@
                     "wrapper.hpp"
                 ],
                 "search_paths": [
+                    "L3/include/sw/utility/",
                     "L3/include/sw/xf_blas"
                 ],
                 "instance": "function",
@@ -896,6 +917,7 @@
                     "wrapper.hpp"
                 ],
                 "search_paths": [
+                    "L3/include/sw/utility/",
                     "L3/include/sw/xf_blas"
                 ],
                 "instance": "function",
@@ -928,6 +950,7 @@
                     "wrapper.hpp"
                 ],
                 "search_paths": [
+                    "L3/include/sw/utility/",
                     "L3/include/sw/xf_blas"
                 ],
                 "instance": "function",

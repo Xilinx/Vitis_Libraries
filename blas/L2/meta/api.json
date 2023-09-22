@@ -13,6 +13,12 @@
                     "kernel.hpp"
                 ],
                 "search_paths": [
+                    "L1/include",
+                    "L1/include/hw",
+                    "L1/include/hw/xf_blas",
+                    "L1/include/hw/xf_blas/helpers/utils/",
+                    "L1/include/hw/xf_blas/gemm/",
+                    "L2/include/memKernel",
                     "L2/include/memKernel/hw/xf_blas"
                 ],
                 "instance": "function",
@@ -45,6 +51,11 @@
                     "gemvMultKernel.hpp"
                 ],
                 "search_paths": [
+                    "L1/include",
+                    "L1/include/hw",
+                    "L1/include/hw/xf_blas",
+                    "L1/include/hw/xf_blas/gemm",
+                    "L2/include/memKernel",
                     "L2/include/memKernel/hw/xf_blas"
                 ],
                 "instance": "function",
@@ -92,6 +103,10 @@
                     "gemmKernel.hpp"
                 ],
                 "search_paths": [
+                    "L1/include",
+                    "L1/include/hw",
+                    "L1/include/hw/xf_blas/gemm",
+                    "L1/include/hw/xf_blas/helpers/utils",
                     "L2/include/memKernel/hw/xf_blas"
                 ],
                 "instance": "class",
