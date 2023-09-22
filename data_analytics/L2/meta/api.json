@@ -14,7 +14,10 @@
                     "kmeansTrain.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/hw/xf_data_analytics/clustering"
+                    "../utils/L1/include",
+                    "L2/tests/clustering/kmeans/kernel",
+                    "L2/include/hw/xf_data_analytics/clustering",
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -72,7 +75,8 @@
                     "linearRegressionTrain.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/hw/xf_data_analytics/regression"
+                    "L2/include/hw/xf_data_analytics/regression",
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -125,7 +129,8 @@
                     "linearRegressionTrain.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/hw/xf_data_analytics/regression"
+                    "L2/include/hw/xf_data_analytics/regression",
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -178,7 +183,8 @@
                     "linearRegressionTrain.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/hw/xf_data_analytics/regression"
+                    "L2/include/hw/xf_data_analytics/regression",
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -231,7 +237,8 @@
                     "re_engine.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/hw/xf_data_analytics/text"
+                    "L2/include/hw/xf_data_analytics/text",
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [

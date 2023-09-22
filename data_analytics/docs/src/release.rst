@@ -26,8 +26,10 @@ Release Note
 ------
 There are some known issues for this release.
 
-* knn_sc in L2 tests fails hardware run with 2023.2 Vitis and XRT. Please use 2023.1 Vitis and XRT for it.
+- Following cases fail hardware run with 2023.1 Vitis and XRT. Please use 2022.2 Vitis and XRT for it.
 
+  - L2/tests/knn_sc
+  - L3/tests/gunzip_csv_sc_test
 
 2023.1
 ------

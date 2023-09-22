@@ -14,7 +14,8 @@
                     "decision_tree_predict.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_data_analytics/classification"
+                    "L1/include/hw/xf_data_analytics/classification",
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -92,7 +93,8 @@
                     "decision_tree_train.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_data_analytics/classification"
+                    "L1/include/hw/xf_data_analytics/classification",
+                    "../utils/L1/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -155,7 +157,8 @@
                     "naive_bayes.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_data_analytics/classification"
+                    "L1/include/hw/xf_data_analytics/classification",
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -228,7 +231,8 @@
                     "naive_bayes.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_data_analytics/classification"
+                    "L1/include/hw/xf_data_analytics/classification",
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -301,7 +305,8 @@
                     "svm_predict.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_data_analytics/classification"
+                    "L1/include/hw/xf_data_analytics/classification",
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -467,7 +472,8 @@
                     "csv_parser.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_data_analytics/dataframe"
+                    "L1/include/hw/xf_data_analytics/dataframe",
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -510,7 +516,8 @@
                     "json_parser.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_data_analytics/dataframe"
+                    "L1/include/hw/xf_data_analytics/dataframe",
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -583,7 +590,8 @@
                     "read_from_dataframe.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_data_analytics/dataframe"
+                    "L1/include/hw/xf_data_analytics/dataframe",
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [],
@@ -620,7 +628,8 @@
                     "write_to_dataframe.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_data_analytics/dataframe"
+                    "L1/include/hw/xf_data_analytics/dataframe",
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [],
@@ -652,7 +661,8 @@
                     "write_to_parquet.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_data_analytics/dataframe"
+                    "L1/include/hw/xf_data_analytics/dataframe",
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [],
@@ -767,7 +777,8 @@
                     "regexVM.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_data_analytics/text"
+                    "L1/include/hw/xf_data_analytics/text",
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -825,7 +836,8 @@
                     "regexVM.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_data_analytics/text"
+                    "L1/include/hw/xf_data_analytics/text",
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
