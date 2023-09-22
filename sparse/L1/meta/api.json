@@ -14,7 +14,8 @@
                     "cscmv.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_sparse"
+                    "L1/include/hw/xf_sparse",
+                    "../blas/L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -87,7 +88,8 @@
                     "cscmv.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_sparse"
+                    "L1/include/hw/xf_sparse",
+                    "../blas/L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -165,7 +167,8 @@
                     "cscmv.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_sparse"
+                    "L1/include/hw/xf_sparse",
+                    "../blas/L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -228,7 +231,8 @@
                     "cscmv.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_sparse"
+                    "L1/include/hw/xf_sparse",
+                    "../blas/L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -316,7 +320,8 @@
                     "moverL1.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_sparse"
+                    "L1/include/hw/xf_sparse",
+                    "../blas/L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -384,7 +389,8 @@
                     "moverL1.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_sparse"
+                    "L1/include/hw/xf_sparse",
+                    "../blas/L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -442,7 +448,8 @@
                     "moverL1.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/hw/xf_sparse"
+                    "L1/include/hw/xf_sparse",
+                    "../blas/L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [
