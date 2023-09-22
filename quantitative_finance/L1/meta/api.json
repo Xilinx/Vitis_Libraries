@@ -1110,7 +1110,8 @@
                     "polyfit.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/xf_fintech"
+                    "L1/include/xf_fintech",
+                    "../solver/L2/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -1168,7 +1169,8 @@
                     "polyfit.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/xf_fintech"
+                    "L1/include/xf_fintech",
+                    "../solver/L2/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -1211,7 +1213,8 @@
                     "polyfit.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/xf_fintech"
+                    "L1/include/xf_fintech",
+                    "../solver/L2/include"
                 ],
                 "instance": "function",
                 "parameters": [
@@ -1259,7 +1262,8 @@
                     "polyfit.hpp"
                 ],
                 "search_paths": [
-                    "L1/include/xf_fintech"
+                    "L1/include/xf_fintech",
+                    "../solver/L2/include"
                 ],
                 "instance": "function",
                 "parameters": [
