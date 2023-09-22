@@ -25,6 +25,7 @@
 #define _XACC_IDCT_HPP_
 
 #include "XAcc_jpegdecoder.hpp"
+#include "XAcc_jfifparser.hpp"
 
 namespace xf {
 namespace codec {

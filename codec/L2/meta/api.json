@@ -14,7 +14,8 @@
                     "XAcc_idct.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/hw/jpegDec"
+                    "L2/include/hw/jpegDec",
+                    "L1/include/"
                 ],
                 "instance": "function",
                 "parameters": [],
@@ -568,7 +569,11 @@
                 ],
                 "instance": "function",
                 "search_paths": [
-                    "L2/include/hw/leptonEnc/lepton"
+                    "L2/include/hw/leptonEnc/lepton",
+                    "L2/include/hw/leptonEnc/jpegDec",
+                    "L1/include",
+                    "../utils/L1/include/xf_utils_hw",
+                    "../utils/L1/include/"
                 ],
                 "parameters": [],
                 "ports": [
@@ -609,7 +614,8 @@
                     "XAccPIKKernel1.hpp"
                 ],
                 "search_paths": [
-                    "L2/include/hw/pikEnc"
+                    "L2/include/hw/pikEnc",
+                    "../utils/L1/include/"
                 ],
                 "instance": "function",
                 "parameters": [],
