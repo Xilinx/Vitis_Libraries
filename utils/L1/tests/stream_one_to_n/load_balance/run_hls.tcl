@@ -38,7 +38,7 @@ set_top test_core_1_n
 
 open_solution -reset $SOLN
 
-
+set_param hls.add_register_in_block_condition false
 
 set_part $XPART
 create_clock -period $CLKP

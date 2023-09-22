@@ -32,8 +32,3 @@ Vitis Utility Library
    :maxdepth: 3
 
    Utility API User Guide <guide/toc.rst>
-
-.. toctree::
-   :caption: Data-Mover User Guide
-
-   PL Data-Mover Kernels <datamover/kernel_gen_guide.rst>
