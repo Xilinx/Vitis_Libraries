@@ -217,7 +217,7 @@ endif
 $(TEMP_DIR)/box_filter_accel.xo: $(XFLIB_DIR)/L2/examples/boxfilter/xf_box_filter_accel.cpp 
 	$(ECHO) "Compiling Kernel: box_filter_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_box_filter_accel) $(VPP_FLAGS) -k box_filter_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_box_filter_accel) $(VPP_FLAGS) -k box_filter_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/box_filter_accel_write_ini.tcl
 BINARY_CONTAINER_krnl_box_filter_OBJS += $(TEMP_DIR)/box_filter_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_box_filter_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

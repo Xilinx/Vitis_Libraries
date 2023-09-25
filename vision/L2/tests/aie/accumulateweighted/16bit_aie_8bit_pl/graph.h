@@ -28,18 +28,22 @@ class myGraph : public adf::graph {
     kernel k1;
 
    public:
-    port<input> inprt1;
-    port<input> inprt2;
+    input_plio inprt1;
+    input_plio inprt2;
     port<input> alpha;
-    port<output> outprt;
+    output_plio outprt;
 
     myGraph() {
         k1 = kernel::create(accumulate_weighted);
 
-        connect<>(inprt1, k1.in[0]);
-        connect<>(inprt2, k1.in[1]);
+        inprt1 = input_plio::create("DataIn1", adf::plio_128_bits, "data/input1.txt");
+        inprt2 = input_plio::create("DataIn2", adf::plio_128_bits, "data/input2.txt");
+        outprt = output_plio::create("DataOut1", adf::plio_128_bits, "data/output.txt");
+
+        connect<>(inprt1.out[0], k1.in[0]);
+        connect<>(inprt2.out[0], k1.in[1]);
         connect<parameter>(alpha, async(k1.in[2]));
-        connect<>(k1.out[0], outprt);
+        connect<>(k1.out[0], outprt.in[0]);
 
         adf::dimensions(k1.in[0]) = {ELEM_WITH_METADATA};
         adf::dimensions(k1.in[1]) = {ELEM_WITH_METADATA};

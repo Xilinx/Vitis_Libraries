@@ -231,7 +231,7 @@ endif
 $(TEMP_DIR)/cvtcolor_bgr2hsv.xo: $(XFLIB_DIR)/L2/examples/cvtcolor/xf_cvt_color_accel.cpp 
 	$(ECHO) "Compiling Kernel: cvtcolor_bgr2hsv"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_cvtcolor_bgr2hsv) $(VPP_FLAGS) -k cvtcolor_bgr2hsv -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_cvtcolor_bgr2hsv) $(VPP_FLAGS) -k cvtcolor_bgr2hsv -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/cvtcolor_bgr2hsv_write_ini.tcl
 BINARY_CONTAINER_krnl_cvt_color_OBJS += $(TEMP_DIR)/cvtcolor_bgr2hsv.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_cvt_color_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

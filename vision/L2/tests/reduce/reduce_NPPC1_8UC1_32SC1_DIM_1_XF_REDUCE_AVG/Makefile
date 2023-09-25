@@ -231,7 +231,7 @@ endif
 $(TEMP_DIR)/reduce_accel.xo: $(XFLIB_DIR)/L2/examples/reduce/xf_reduce_accel.cpp 
 	$(ECHO) "Compiling Kernel: reduce_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_reduce_accel) $(VPP_FLAGS) -k reduce_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_reduce_accel) $(VPP_FLAGS) -k reduce_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/reduce_accel_write_ini.tcl
 BINARY_CONTAINER_krnl_reduce_OBJS += $(TEMP_DIR)/reduce_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_reduce_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

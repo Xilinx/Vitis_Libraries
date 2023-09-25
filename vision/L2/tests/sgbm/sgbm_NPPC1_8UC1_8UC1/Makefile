@@ -258,7 +258,7 @@ endif
 $(TEMP_DIR)/sgbm_accel.xo: $(XFLIB_DIR)/L2/examples/sgbm/xf_sgbm_accel.cpp 
 	$(ECHO) "Compiling Kernel: sgbm_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_sgbm_accel) $(VPP_FLAGS) -k sgbm_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_sgbm_accel) $(VPP_FLAGS) -k sgbm_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/sgbm_accel_write_ini.tcl
 BINARY_CONTAINER_krnl_sgbm_OBJS += $(TEMP_DIR)/sgbm_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_sgbm_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

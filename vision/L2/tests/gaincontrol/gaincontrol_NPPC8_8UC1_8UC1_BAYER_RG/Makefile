@@ -235,7 +235,7 @@ endif
 $(TEMP_DIR)/gaincontrol_accel.xo: $(XFLIB_DIR)/L2/examples/gaincontrol/xf_gaincontrol_accel.cpp 
 	$(ECHO) "Compiling Kernel: gaincontrol_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_gaincontrol_accel) $(VPP_FLAGS) -k gaincontrol_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_gaincontrol_accel) $(VPP_FLAGS) -k gaincontrol_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/gaincontrol_accel_write_ini.tcl
 BINARY_CONTAINER_krnl_gaincontrol_OBJS += $(TEMP_DIR)/gaincontrol_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_gaincontrol_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

@@ -217,7 +217,7 @@ endif
 $(TEMP_DIR)/dense_non_pyr_of_accel.xo: $(XFLIB_DIR)/L2/examples/lknpyroflow/xf_dense_npyr_optical_flow_accel.cpp 
 	$(ECHO) "Compiling Kernel: dense_non_pyr_of_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_dense_non_pyr_of_accel) $(VPP_FLAGS) -k dense_non_pyr_of_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_dense_non_pyr_of_accel) $(VPP_FLAGS) -k dense_non_pyr_of_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/dense_non_pyr_of_accel_write_ini.tcl
 BINARY_CONTAINER_krnl_lknpyrof_OBJS += $(TEMP_DIR)/dense_non_pyr_of_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_lknpyrof_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

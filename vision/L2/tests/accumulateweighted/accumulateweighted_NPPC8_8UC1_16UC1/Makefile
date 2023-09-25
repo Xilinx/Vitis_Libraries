@@ -231,7 +231,7 @@ endif
 $(TEMP_DIR)/accumulateweighted.xo: $(XFLIB_DIR)/L2/examples/accumulateweighted/xf_accumulate_weighted_accel.cpp 
 	$(ECHO) "Compiling Kernel: accumulateweighted"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_accumulateweighted) $(VPP_FLAGS) -k accumulateweighted -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_accumulateweighted) $(VPP_FLAGS) -k accumulateweighted -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/accumulateweighted_write_ini.tcl
 BINARY_CONTAINER_krnl_accumulateweighted_OBJS += $(TEMP_DIR)/accumulateweighted.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_accumulateweighted_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

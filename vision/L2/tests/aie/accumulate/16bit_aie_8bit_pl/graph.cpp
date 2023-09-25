@@ -16,18 +16,7 @@
 
 #include "graph.h"
 
-PLIO* in1 = new PLIO("DataIn1", adf::plio_128_bits, "data/input1.txt");
-PLIO* in2 = new PLIO("DataIn2", adf::plio_128_bits, "data/input2.txt");
-PLIO* out1 = new PLIO("DataOut1", adf::plio_128_bits, "data/output.txt");
-
-simulation::platform<2, 1> platform(in1, in2, out1);
-
 myGraph accum_graph;
-
-connect<> net0(platform.src[0], accum_graph.inprt1);
-connect<> net1(platform.src[1], accum_graph.inprt2);
-
-connect<> net2(accum_graph.outprt, platform.sink[0]);
 
 #if defined(__AIESIM__) || defined(__X86SIM__)
 int main(int argc, char** argv) {

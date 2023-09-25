@@ -16,17 +16,8 @@
 
 #include "graph.h"
 
-GMIO gmioIn[1] = {GMIO("gmioIn1", 256, 1000)};
-GMIO gmioOut[1] = {GMIO("gmioOut1", 256, 1000)};
-
-// connect dataflow graph to simulation platform
-simulation::platform<1, 1> platform(&gmioIn[0], &gmioOut[0]);
-
 // instantiate adf dataflow graph
 convertscaleabsGraph scaleabs;
-
-connect<> net0(platform.src[0], scaleabs.in1);
-connect<> net1(scaleabs.out, platform.sink[0]);
 
 // initialize and run the dataflow graph
 #if defined(__AIESIM__) || defined(__X86SIM__)
@@ -52,9 +43,9 @@ int main(int argc, char** argv) {
     scaleabs.update(scaleabs.alpha, alpha);
     scaleabs.update(scaleabs.beta, beta);
     scaleabs.run(1);
-    gmioIn[0].gm2aie_nb(inputData, BLOCK_SIZE_in_Bytes);
-    gmioOut[0].aie2gm_nb(outputData, BLOCK_SIZE_in_Bytes);
-    gmioOut[0].wait();
+    scaleabs.in1.gm2aie_nb(inputData, BLOCK_SIZE_in_Bytes);
+    scaleabs.out.aie2gm_nb(outputData, BLOCK_SIZE_in_Bytes);
+    scaleabs.out.wait();
 
     // Compare the results
     int acceptableError = 1;

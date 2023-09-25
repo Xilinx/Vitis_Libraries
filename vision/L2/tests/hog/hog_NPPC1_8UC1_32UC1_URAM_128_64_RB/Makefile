@@ -224,7 +224,7 @@ endif
 $(TEMP_DIR)/hog_descriptor_accel.xo: $(XFLIB_DIR)/L2/examples/hog/xf_hog_descriptor_accel.cpp 
 	$(ECHO) "Compiling Kernel: hog_descriptor_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_hog_descriptor_accel) $(VPP_FLAGS) -k hog_descriptor_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_hog_descriptor_accel) $(VPP_FLAGS) -k hog_descriptor_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/hog_descriptor_accel_write_ini.tcl
 BINARY_CONTAINER_krnl_hog_OBJS += $(TEMP_DIR)/hog_descriptor_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_hog_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

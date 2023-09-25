@@ -231,7 +231,7 @@ endif
 $(TEMP_DIR)/bfmatcher_accel.xo: $(XFLIB_DIR)/L2/examples/bfmatcher/xf_bfmatcher_accel.cpp 
 	$(ECHO) "Compiling Kernel: bfmatcher_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_bfmatcher_accel) $(VPP_FLAGS) -k bfmatcher_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_bfmatcher_accel) $(VPP_FLAGS) -k bfmatcher_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/bfmatcher_accel_write_ini.tcl
 BINARY_CONTAINER_krnl_bfmatcher_OBJS += $(TEMP_DIR)/bfmatcher_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_bfmatcher_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

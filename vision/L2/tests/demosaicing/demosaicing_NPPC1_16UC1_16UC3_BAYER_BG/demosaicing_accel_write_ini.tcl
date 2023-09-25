@@ -1,0 +1,1 @@
+write_ini hls_config_demosaicing_accel.cfg

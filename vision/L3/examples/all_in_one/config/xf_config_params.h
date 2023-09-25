@@ -84,22 +84,28 @@
 
 #define XF_BAYER_PATTERN XF_BAYER_GR // bayer pattern Used in gaincontrol, demosaicing, rgbir2bayer
 
+#define DEBUG 0
+
 #define T_8U 0
 #define T_10U 0
 #define T_12U 0
 #define T_16U 1
 
+#define USE_HDR 1
 #define USE_HDR_FUSION 0
 #define USE_RGBIR 0
-#define USE_DEGAMMA 1
 #define USE_AEC 1
+#define USE_DEGAMMA 1
 #define USE_AWB 1
 #define USE_CCM 1
-#define USE_LTM 1
-#define USE_GTM 0
+#define USE_LTM 0
+#define USE_GTM 1
 #define USE_QND 0
-#define USE_3DLUT 1
+#define USE_3DLUT 0
 #define USE_CSC 0
+
+#define SCALEFACTOR 256 // used in ref
+#define MAXREPRESENTEDVALUE 65536
 
 #define DEGAMMA_KP 8
 
@@ -125,19 +131,31 @@
 
 #define SIN_CHANNEL_TYPE XF_8UC1 /* Used in gtm */
 #define AEC_SIN_CHANNEL_TYPE XF_16UC1
+static constexpr int ERROR_THRESHOLD = 5;
 
 #if T_8U
 #define CVTYPE unsigned char
 #define CV_IN_TYPE CV_8UC1
+#define CV_OUT_TYPE CV_8UC3
+#define CV_GTM_IN_TYPE CV_8UC3
+
+#define CV_GTM_TYPE CV_8UC3
+#define MAX_PIX 255.0
 #else
 #define CVTYPE unsigned short
 #define CV_IN_TYPE CV_16UC1
+#define CV_OUT_TYPE CV_16UC3
+#define CV_GTM_IN_TYPE CV_16UC3
+
+#define CV_GTM_TYPE CV_8UC3
+#define MAX_PIX 65535.0
+
 #endif
 
-#define WB_TYPE XF_WB_SIMPLE /* Used in function_awb */
+#define WB_TYPE XF_WB_GRAY /*"0" for GRAY,"1" for SIMPLE*/
 
-#define INPUT_PTR_WIDTH 64
-#define OUTPUT_PTR_WIDTH 64
+#define INPUT_PTR_WIDTH 128
+#define OUTPUT_PTR_WIDTH 128
 #define LUT_PTR_WIDTH 128
 
 #define NUM_V_BLANK_LINES 8 /* Used in HDR */

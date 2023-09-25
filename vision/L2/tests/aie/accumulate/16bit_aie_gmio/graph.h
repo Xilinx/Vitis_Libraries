@@ -28,17 +28,19 @@ class myGraph : public adf::graph {
     kernel k1;
 
    public:
-    port<input> inprt1;
-    port<input> inprt2;
+    input_gmio inprt1;
+    input_gmio inprt2;
 
-    port<output> outprt;
+    output_gmio outprt;
 
     myGraph() {
         k1 = kernel::create(accumulate);
-
-        connect<>(inprt1, k1.in[0]);
-        connect<>(inprt2, k1.in[1]);
-        connect<>(k1.out[0], outprt);
+        inprt1 = input_gmio::create("gmioIn1", 256, 1000);
+        inprt2 = input_gmio::create("gmioIn2", 256, 1000);
+        outprt = output_gmio::create("gmioOut1", 256, 1000);
+        connect<>(inprt1.out[0], k1.in[0]);
+        connect<>(inprt2.out[0], k1.in[1]);
+        connect<>(k1.out[0], outprt.in[0]);
 
         adf::dimensions(k1.in[0]) = {ELEM_WITH_METADATA};
         adf::dimensions(k1.in[1]) = {ELEM_WITH_METADATA};

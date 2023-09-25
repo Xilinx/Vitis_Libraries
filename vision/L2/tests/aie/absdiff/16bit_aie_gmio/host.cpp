@@ -108,17 +108,17 @@ int main(int argc, char** argv) {
 
         //@{
         START_TIMER
-        auto tiles_sz = tiler1.host2aie_nb(srcData1.data(), srcImage1.size(), {"gmioIn[0]"});
-        tiler2.host2aie_nb(srcData2.data(), srcImage2.size(), {"gmioIn[1]"});
-        stitcher.aie2host_nb(dstData.data(), dst.size(), tiles_sz, {"gmioOut[0]"});
+        auto tiles_sz = tiler1.host2aie_nb(srcData1.data(), srcImage1.size(), {"absdiff_graph.inprt1"});
+        tiler2.host2aie_nb(srcData2.data(), srcImage2.size(), {"absdiff_graph.inprt2"});
+        stitcher.aie2host_nb(dstData.data(), dst.size(), tiles_sz, {"absdiff_graph.outprt"});
 
         absdiff_graph.run(tiles_sz[0] * tiles_sz[1]);
         absdiff_graph.wait();
 
-        tiler1.wait({"gmioIn[0]"});
-        tiler2.wait({"gmioIn[1]"});
+        tiler1.wait({"absdiff_graph.inprt1"});
+        tiler2.wait({"absdiff_graph.inprt2"});
 
-        stitcher.wait({"gmioOut[0]"});
+        stitcher.wait({"absdiff_graph.outprt"});
         STOP_TIMER("Total time to process frame")
         //@}
 

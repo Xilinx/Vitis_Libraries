@@ -18,6 +18,7 @@
 #define ERROR_THRESHOLD 2
 
 #include "xf_cvt_color_tb_config.h"
+#include "xf_rgb2yuyv_ref.hpp"
 
 int main(int argc, char** argv) {
     cv::Mat imgInput0, imgInput1, imgInput2;
@@ -557,13 +558,16 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Can't open image %s !!.\n ", argv[1]);
         return -1;
     }
+    cv::Mat yuyv_out_ref(HEIGHT, WIDTH, CV_16UC1);
+
+    bgr2yuyv_ref(imgInput0, yuyv_out_ref);
     ap_uint<32 * NPC1>* _imgInput0 = (ap_uint<32 * NPC1>*)imgInput0.data;
 
-    refOutput0 = cv::imread(argv[2], -1);
-    if (!refOutput0.data) {
-        fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
-        return -1;
-    }
+    // refOutput0 = cv::imread(argv[2], -1);
+    // if (!refOutput0.data) {
+    //     fprintf(stderr, "Can't open image %s !!.\n ", argv[2]);
+    //     return -1;
+    // }
     ap_uint<16 * NPC1>* _imgOutput0 = (ap_uint<16 * NPC1>*)malloc(HEIGHT * WIDTH * 16);
 
     cv::Mat imgOutput0(HEIGHT, WIDTH, CV_16UC1);
@@ -573,12 +577,14 @@ int main(int argc, char** argv) {
     imgOutput0.data = (unsigned char*)_imgOutput0;
 
     cv::imwrite("out_YUYV.png", imgOutput0);
+    cv::imwrite("yuyv_out_ref.png", yuyv_out_ref);
+
     cv::Size S0(WIDTH, HEIGHT);
     errImg0.create(S0, CV_16UC1);
 
-    cv::absdiff(refOutput0, imgOutput0, errImg0);
+    cv::absdiff(yuyv_out_ref, imgOutput0, errImg0);
 
-    cv::imwrite("err_YUYV.png", imgOutput0);
+    cv::imwrite("err_YUYV.png", errImg0);
 #endif
 #if BGR2RGB
     imgInput0 = cv::imread(argv[1], 1);

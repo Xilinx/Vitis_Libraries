@@ -235,7 +235,7 @@ endif
 $(TEMP_DIR)/ccm_accel.xo: $(XFLIB_DIR)/L2/examples/colorcorrectionmatrix/xf_ccm_accel.cpp 
 	$(ECHO) "Compiling Kernel: ccm_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_ccm_accel) $(VPP_FLAGS) -k ccm_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_ccm_accel) $(VPP_FLAGS) -k ccm_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/ccm_accel_write_ini.tcl
 BINARY_CONTAINER_krnl_ccm_OBJS += $(TEMP_DIR)/ccm_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_ccm_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

@@ -36,13 +36,17 @@ class two_node_pipeline : public graph {
     kernel gauss2;
 
    public:
-    port<input> in;
-    port<output> out;
+    input_plio in;
+    output_plio out;
 
     two_node_pipeline() {
         // tiler    = kernel::create(gauss2_tiler);
         gauss1 = kernel::create(filter2D);
         gauss2 = kernel::create(filter2D);
+
+        in = input_plio::create("DataIn1", adf::plio_32_bits, "data/input.txt");
+        out = output_plio::create("DataOut1", adf::plio_32_bits, "data/output.txt");
+
         // stitcher = kernel::create(gauss2_stitcher);
 
         // fabric<fpga>(tiler);
@@ -51,16 +55,16 @@ class two_node_pipeline : public graph {
         // connect< stream >(in,tiler.in[0]);
 
         // gauss1 processes 4096 32b blocks or 16384 byte blocks
-        connect<>(in, gauss1.in[0]);
+        connect<>(in.out[0], gauss1.in[0]);
         // connect< stream, window<16384> >(tiler.out[0], gauss1.in[0]);
 
         // gauss1 window passsed directly to gauss2
         connect<>(gauss1.out[0], gauss2.in[0]);
         // gauss2 window passed to output
-        connect<>(gauss2.out[0], out);
+        connect<>(gauss2.out[0], out.in[0]);
         // connect< window<16384>, stream >(gauss2.out[0], stitcher.in[0]);
 
-        // connect< stream >(stitcher.out[0],out);
+        // connect< stream >(stitcher.out[0],out.in[0]);
 
         // Pull the source from previous lab
         // source(tiler)    = "kernels/gauss2_tiler.cpp";

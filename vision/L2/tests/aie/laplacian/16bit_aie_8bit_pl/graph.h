@@ -30,17 +30,20 @@ class laplacianGraph : public adf::graph {
     kernel k1;
 
    public:
-    port<input> inprt;
-    port<output> outprt;
+    input_plio inprt;
+    output_plio outprt;
 
     port<input> kernelCoefficients;
 
     laplacianGraph() {
         k1 = kernel::create(laplacian);
 
-        connect<>(inprt, k1.in[0]);
+        inprt = input_plio::create("DataIn1", adf::plio_128_bits, "data/input.txt");
+        outprt = output_plio::create("DataOut1", adf::plio_128_bits, "data/output.txt");
+
+        connect<>(inprt.out[0], k1.in[0]);
         adf::connect<parameter>(kernelCoefficients, async(k1.in[1]));
-        connect<>(k1.out[0], outprt);
+        connect<>(k1.out[0], outprt.in[0]);
 
         adf::dimensions(k1.in[0]) = {ELEM_WITH_METADATA};
         adf::dimensions(k1.out[0]) = {ELEM_WITH_METADATA};

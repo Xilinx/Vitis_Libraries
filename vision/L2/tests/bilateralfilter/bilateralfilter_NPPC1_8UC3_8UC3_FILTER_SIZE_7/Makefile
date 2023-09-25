@@ -231,7 +231,7 @@ endif
 $(TEMP_DIR)/bilateralfilter.xo: $(XFLIB_DIR)/L2/examples/bilateralfilter/xf_bilateral_filter_accel.cpp 
 	$(ECHO) "Compiling Kernel: bilateralfilter"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_bilateralfilter) $(VPP_FLAGS) -k bilateralfilter -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_bilateralfilter) $(VPP_FLAGS) -k bilateralfilter -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/bilateralfilter_write_ini.tcl
 BINARY_CONTAINER_krnl_bilateralfilter_OBJS += $(TEMP_DIR)/bilateralfilter.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_bilateralfilter_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

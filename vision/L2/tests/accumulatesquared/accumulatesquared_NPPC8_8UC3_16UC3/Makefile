@@ -231,7 +231,7 @@ endif
 $(TEMP_DIR)/accumulatesquared.xo: $(XFLIB_DIR)/L2/examples/accumulatesquared/xf_accumulate_squared_accel.cpp 
 	$(ECHO) "Compiling Kernel: accumulatesquared"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_accumulatesquared) $(VPP_FLAGS) -k accumulatesquared -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_accumulatesquared) $(VPP_FLAGS) -k accumulatesquared -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/accumulatesquared_write_ini.tcl
 BINARY_CONTAINER_krnl_accumulatesquared_OBJS += $(TEMP_DIR)/accumulatesquared.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_accumulatesquared_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

@@ -120,15 +120,15 @@ int main(int argc, char** argv) {
             //@{
             std::cout << "Iteration : " << (i + 1) << std::endl;
             START_TIMER
-            auto tiles_sz = tiler.host2aie_nb(srcImageR, {"gmioIn[0]"});
-            stitcher.aie2host_nb(dst, tiles_sz, {"gmioOut[0]"});
+            auto tiles_sz = tiler.host2aie_nb(srcImageR, {"scaleabs.in1"});
+            stitcher.aie2host_nb(dst, tiles_sz, {"scaleabs.out"});
 
             std::cout << "Graph run(" << (tiles_sz[0] * tiles_sz[1]) << ")\n";
             scaleabs.run(tiles_sz[0] * tiles_sz[1]);
 
             scaleabs.wait();
-            tiler.wait({"gmioIn[0]"});
-            stitcher.wait({"gmioOut[0]"});
+            tiler.wait({"scaleabs.in1"});
+            stitcher.wait({"scaleabs.out"});
 
             STOP_TIMER("convertscaleabs function")
             tt += tdiff;

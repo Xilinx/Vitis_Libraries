@@ -22,6 +22,7 @@
 #include <map>
 #include "common/xf_headers.hpp"
 #include "xf_extract_eframes_tb_config.h"
+#include "xf_extract_eframes_ref.hpp"
 using namespace std;
 
 static void Mat2MultiBayerAXIvideo(cv::Mat& img, InVideoStrm_t_e_s& AXI_video_strm, unsigned char InColorFormat) {
@@ -124,29 +125,37 @@ int main(int argc, char** argv) {
     int height, width;
 
     cv::Mat img1, img2, interleaved_img, lef_img, sef_img;
-
+#if T_8U
     img1 = cv::imread(argv[1], 0);
     img2 = cv::imread(argv[2], 0);
+#else
+    img1 = cv::imread(argv[1], -1);
+    img2 = cv::imread(argv[2], -1);
+#endif
 
     height = img1.rows;
     width = img1.cols;
 #if T_8U
-    interleaved_img.create(cv::Size(img1.cols + NUM_H_BLANK, img1.rows * 2), img1.type());
+    interleaved_img.create(cv::Size(img1.cols + NUM_H_BLANK, img1.rows * 2), CV_8UC1);
     lef_img.create(img1.rows, img1.cols, CV_8U);
     sef_img.create(img1.rows, img1.cols, CV_8U);
-#else
-    interleaved_img.create(cv::Size(img1.cols + NUM_H_BLANK, img1.rows * 2), img1.type());
-    lef_img.create(img1.rows, img1.cols, CV_16U);
-    sef_img.create(img1.rows, img1.cols, CV_16U);
-
-#endif
-
     for (int r = 0; r < height; r++) {
         for (int c = 0; c < width; c++) {
             img1.at<unsigned char>(r, c) = 0;
             img2.at<unsigned char>(r, c) = 255;
         }
     }
+#else
+    interleaved_img.create(cv::Size(img1.cols + NUM_H_BLANK, img1.rows * 2), CV_16UC1);
+    lef_img.create(img1.rows, img1.cols, CV_16U);
+    sef_img.create(img1.rows, img1.cols, CV_16U);
+    for (int r = 0; r < height; r++) {
+        for (int c = 0; c < width; c++) {
+            img1.at<unsigned short>(r, c) = 0;
+            img2.at<unsigned short>(r, c) = 255;
+        }
+    }
+#endif
 
     cv::imwrite("img1.png", img1);
     cv::imwrite("img2.png", img2);
@@ -233,6 +242,18 @@ int main(int argc, char** argv) {
     }
 #endif
 
+    cv::Mat lef_img_ref, sef_img_ref;
+#if T_8U
+    lef_img_ref.create(img1.rows, img1.cols, CV_8U);
+    sef_img_ref.create(img2.rows, img2.cols, CV_8U);
+#else
+    lef_img_ref.create(img1.rows, img1.cols, CV_16U);
+    sef_img_ref.create(img2.rows, img2.cols, CV_16U);
+#endif
+
+    extractExposureFrames_ref(interleaved_img, lef_img_ref, sef_img_ref, img1.rows, img1.cols, NUM_V_BLANK_LINES,
+                              NUM_H_BLANK);
+
     unsigned char InColorFormat = 0;
     unsigned char OutColorFormat = 0;
 
@@ -249,8 +270,43 @@ int main(int argc, char** argv) {
     MultiPixelAXIvideo2Mat_gray(dst_axi1, lef_img, OutColorFormat);
     MultiPixelAXIvideo2Mat_gray(dst_axi2, sef_img, OutColorFormat);
 
+    // FILE* fp7 = fopen("lef_img.csv", "w");
+    // FILE* fp8 = fopen("lef_img_ref.csv", "w");
+    // for (int i = 0; i < img1.rows; i++) {
+    //     for (int j = 0; j < img1.cols; j++) {
+    //         fprintf(fp7, "(%d %d %d) ",i,j,lef_img.at<unsigned short>(i,j));
+    //         fprintf(fp8, "(%d %d %d) ",i,j,lef_img_ref.at<unsigned short>(i,j));
+
+    //     }
+    //     fprintf(fp7, "\n");
+    //     fprintf(fp8, "\n");
+    // }
+    // fclose(fp7);
+    // fclose(fp8);
+
     cv::imwrite("lef_img.png", lef_img);
     cv::imwrite("sef_img.png", sef_img);
+
+    cv::imwrite("lef_img_ref.png", lef_img_ref);
+    cv::imwrite("sef_img_ref.png", sef_img_ref);
+
+    cv::Mat diff, diff1;
+    cv::absdiff(lef_img, lef_img_ref, diff);
+    cv::absdiff(sef_img, sef_img_ref, diff1);
+
+    // Save the difference image for debugging purpose:
+    cv::imwrite("error.png", diff);
+    cv::imwrite("error1.png", diff1);
+
+    float err_per, err_per1;
+    xf::cv::analyzeDiff(diff, 1, err_per);
+    xf::cv::analyzeDiff(diff1, 1, err_per1);
+
+    if ((err_per > 1) || (err_per1 > 1)) {
+        std::cerr << "ERROR: Test Failed." << std::endl;
+        return 1;
+    } else
+        std::cout << "Test Passed " << std::endl;
 
     return 0;
 }

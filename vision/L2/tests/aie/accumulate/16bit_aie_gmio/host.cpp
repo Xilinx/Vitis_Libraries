@@ -110,20 +110,20 @@ int main(int argc, char** argv) {
 
         //@{
         START_TIMER
-        auto tiles_sz = tiler1.host2aie_nb(srcData1.data(), srcImage1.size(), {"gmioIn[0]"});
-        tiler2.host2aie_nb(srcData2.data(), srcImage2.size(), {"gmioIn[1]"});
-        stitcher.aie2host_nb(dstData.data(), dst.size(), tiles_sz, {"gmioOut[0]"});
+        auto tiles_sz = tiler1.host2aie_nb(srcData1.data(), srcImage1.size(), {"accum_graph.inprt1"});
+        tiler2.host2aie_nb(srcData2.data(), srcImage2.size(), {"accum_graph.inprt2"});
+        stitcher.aie2host_nb(dstData.data(), dst.size(), tiles_sz, {"accum_graph.outprt"});
 
         std::cout << "Graph run(" << (tiles_sz[0] * tiles_sz[1]) << ")\n";
         accum_graph.run(tiles_sz[0] * tiles_sz[1]);
         accum_graph.wait();
         std::cout << "Graph run complete\n";
 
-        tiler1.wait({"gmioIn[0]"});
-        tiler2.wait({"gmioIn[1]"});
+        tiler1.wait({"accum_graph.inprt1"});
+        tiler2.wait({"accum_graph.inprt2"});
         std::cout << "Data transfer complete (Tiler)\n";
 
-        stitcher.wait({"gmioOut[0]"});
+        stitcher.wait({"accum_graph.outprt"});
         STOP_TIMER("Total time to process frame")
 
         std::cout << "Data transfer complete (Stitcher)\n";

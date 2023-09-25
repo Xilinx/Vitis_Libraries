@@ -231,7 +231,7 @@ endif
 $(TEMP_DIR)/remap_accel.xo: $(XFLIB_DIR)/L2/examples/remap/xf_remap_accel.cpp 
 	$(ECHO) "Compiling Kernel: remap_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_remap_accel) $(VPP_FLAGS) -k remap_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_remap_accel) $(VPP_FLAGS) -k remap_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/remap_accel_write_ini.tcl
 BINARY_CONTAINER_krnl_remap_OBJS += $(TEMP_DIR)/remap_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_remap_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

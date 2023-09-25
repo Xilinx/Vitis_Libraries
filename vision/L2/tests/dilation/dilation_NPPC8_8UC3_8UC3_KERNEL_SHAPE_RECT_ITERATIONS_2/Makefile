@@ -231,7 +231,7 @@ endif
 $(TEMP_DIR)/dilation_accel.xo: $(XFLIB_DIR)/L2/examples/dilation/xf_dilation_accel.cpp 
 	$(ECHO) "Compiling Kernel: dilation_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_dilation_accel) $(VPP_FLAGS) -k dilation_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_dilation_accel) $(VPP_FLAGS) -k dilation_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/dilation_accel_write_ini.tcl
 BINARY_CONTAINER_krnl_dilation_OBJS += $(TEMP_DIR)/dilation_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_dilation_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

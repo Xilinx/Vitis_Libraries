@@ -231,7 +231,7 @@ endif
 $(TEMP_DIR)/convertbitdepth.xo: $(XFLIB_DIR)/L2/examples/convertbitdepth/xf_convertbitdepth_accel.cpp 
 	$(ECHO) "Compiling Kernel: convertbitdepth"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_convertbitdepth) $(VPP_FLAGS) -k convertbitdepth -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_convertbitdepth) $(VPP_FLAGS) -k convertbitdepth -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/convertbitdepth_write_ini.tcl
 BINARY_CONTAINER_krnl_convertbitdepth_OBJS += $(TEMP_DIR)/convertbitdepth.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_convertbitdepth_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

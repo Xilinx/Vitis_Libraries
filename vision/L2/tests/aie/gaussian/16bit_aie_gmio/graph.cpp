@@ -16,20 +16,8 @@
 
 #include "graph.h"
 
-GMIO gmioIn[1] = {
-    GMIO("gmioIn1", 256, 1000),
-};
-GMIO gmioOut[1] = {GMIO("gmioOut1", 256, 1000)};
-
-// connect dataflow graph to simulation platform
-simulation::platform<1, 1> platform(&gmioIn[0], &gmioOut[0]);
-
 // Graph object
 myGraph gaussian_graph;
-
-// Virtual platform connectivity
-connect<> net0(platform.src[0], gaussian_graph.inptr);
-connect<> net1(gaussian_graph.outptr, platform.sink[0]);
 
 #define SRS_SHIFT 10
 float kData[9] = {0.01134, 0.08382, 0.01134, 0.08382, 0.61932, 0.08382, 0.01134, 0.08382, 0.01134};
@@ -72,8 +60,8 @@ int main(int argc, char** argv) {
     gaussian_graph.init();
     gaussian_graph.update(gaussian_graph.kernelCoefficients, float2fixed_coeff<10, 16>(kData).data(), 16);
     gaussian_graph.run(1);
-    gmioIn[0].gm2aie_nb(inputData, BLOCK_SIZE_in_Bytes);
-    gmioOut[0].aie2gm_nb(outputData, BLOCK_SIZE_in_Bytes);
+    gaussian_graph.inptr.gm2aie_nb(inputData, BLOCK_SIZE_in_Bytes);
+    gaussian_graph.outptr.aie2gm_nb(outputData, BLOCK_SIZE_in_Bytes);
     gaussian_graph.end();
     return 0;
 }

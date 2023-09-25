@@ -16,17 +16,8 @@
 
 #include "graph.h"
 
-PLIO* in1 = new PLIO("DataIn1", adf::plio_128_bits, "data/input.txt");
-PLIO* out1 = new PLIO("DataOut1", adf::plio_128_bits, "data/output.txt");
-
-// connect dataflow graph to simulation platform
-simulation::platform<1, 1> platform(in1, out1);
-
 // instantiate adf dataflow graph
 convertscaleabsGraph scaleabs;
-
-connect<> net0(platform.src[0], scaleabs.in1);
-connect<> net1(scaleabs.out, platform.sink[0]);
 
 // initialize and run the dataflow graph
 #if defined(__AIESIM__) || defined(__X86SIM__)

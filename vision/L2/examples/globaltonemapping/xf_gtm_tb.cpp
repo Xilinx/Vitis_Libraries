@@ -60,20 +60,24 @@ int main(int argc, char** argv) {
     float c1 = 3.0;
     float c2 = 1.5;
 
-    float maxL = 0, minL = 100;
-    float mean = 0;
-
+    double maxL = 0, minL = 100;
+    double mean = 0;
+    float pxl_val;
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
-            float pxl_val = log10(xyzchannel[1].at<ushort>(i, j));
+            if (xyzchannel[1].at<unsigned short>(i, j) == 0) {
+                pxl_val = std::numeric_limits<float>::epsilon();
+            } else
+                pxl_val = log10(xyzchannel[1].at<unsigned short>(i, j));
+
             mean = mean + pxl_val;
             maxL = (maxL > pxl_val) ? maxL : pxl_val;
             minL = (minL < pxl_val) ? minL : pxl_val;
         }
     }
-    mean = mean / (height * width);
+    mean = (float)(mean / (float)(height * width));
 
-    double maxLd, minLd;
+    float maxLd, minLd;
     maxLd = 2.4;
     minLd = 0;
 
@@ -87,10 +91,15 @@ int main(int argc, char** argv) {
 
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
-            val = log10(xyzchannel[1].at<ushort>(i, j));
-
-            K2 = (1 - K1) * exp(-((val - mean) * (val - mean)) * sigma_sq) + K1;
-            out_val = exp(c2 * K2 * (val - mean) + mean);
+            if (xyzchannel[1].at<ushort>(i, j) == 0) {
+                val = std::numeric_limits<float>::epsilon();
+            } else
+                val = log10(xyzchannel[1].at<ushort>(i, j));
+            // if (i == 5) std::cout<<"2: "<<val<<" ";
+            val = val - mean;
+            float exp_val = exp(-(val * val * sigma_sq));
+            float K2 = (1 - K1) * exp_val + K1;
+            out_val = exp(c2 * K2 * val + mean);
 
             int x_val = xyzchannel[0].at<ushort>(i, j);
             int y_val = xyzchannel[1].at<ushort>(i, j);

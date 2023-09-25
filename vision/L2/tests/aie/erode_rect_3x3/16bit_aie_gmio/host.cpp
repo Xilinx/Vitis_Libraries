@@ -116,15 +116,15 @@ int main(int argc, char** argv) {
             //@{
             std::cout << "Iteration : " << (i + 1) << std::endl;
             START_TIMER
-            auto tiles_sz = tiler.host2aie_nb(srcData.data(), srcImageR.size(), {"gmioIn[0]"});
-            stitcher.aie2host_nb(dstData.data(), dst.size(), tiles_sz, {"gmioOut[0]"});
+            auto tiles_sz = tiler.host2aie_nb(srcData.data(), srcImageR.size(), {"ec.in1"});
+            stitcher.aie2host_nb(dstData.data(), dst.size(), tiles_sz, {"ec.out"});
 
             std::cout << "Graph run(" << (tiles_sz[0] * tiles_sz[1]) << ")\n";
             ec.run(tiles_sz[0] * tiles_sz[1]);
 
             ec.wait();
-            tiler.wait({"gmioIn[0]"});
-            stitcher.wait({"gmioOut[0]"});
+            tiler.wait({"ec.in1"});
+            stitcher.wait({"ec.out"});
 
             STOP_TIMER("erode function")
             tt += tdiff;

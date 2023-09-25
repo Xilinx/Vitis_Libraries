@@ -231,7 +231,7 @@ endif
 $(TEMP_DIR)/tonemapping_accel.xo: $(XFLIB_DIR)/L2/examples/tonemapping/xf_tonemapping_accel.cpp 
 	$(ECHO) "Compiling Kernel: tonemapping_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_tonemapping_accel) $(VPP_FLAGS) -k tonemapping_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_tonemapping_accel) $(VPP_FLAGS) -k tonemapping_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/tonemapping_accel_write_ini.tcl
 BINARY_CONTAINER_krnl_tonemapping_OBJS += $(TEMP_DIR)/tonemapping_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_tonemapping_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

@@ -233,12 +233,12 @@ endif
 $(TEMP_DIR)/canny_accel.xo: $(XFLIB_DIR)/L2/examples/canny/xf_canny_accel.cpp 
 	$(ECHO) "Compiling Kernel: canny_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_canny_accel) $(VPP_FLAGS) -k canny_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_canny_accel) $(VPP_FLAGS) -k canny_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/canny_accel_write_ini.tcl
 BINARY_CONTAINER_krnl_canny_OBJS += $(TEMP_DIR)/canny_accel.xo
 $(TEMP_DIR)/edgetracing_accel.xo: $(XFLIB_DIR)/L2/examples/canny/xf_edgetracing_accel.cpp 
 	$(ECHO) "Compiling Kernel: edgetracing_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_edgetracing_accel) $(VPP_FLAGS) -k edgetracing_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_edgetracing_accel) $(VPP_FLAGS) -k edgetracing_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/edgetracing_accel_write_ini.tcl
 BINARY_CONTAINER_krnl_canny_OBJS += $(TEMP_DIR)/edgetracing_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_canny_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

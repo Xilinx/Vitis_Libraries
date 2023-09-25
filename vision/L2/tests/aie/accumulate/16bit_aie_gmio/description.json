@@ -90,12 +90,12 @@
             "accelerators": [
                 {
                     "location": "LIB_DIR/L2/tests/aie/accumulate/16bit_aie_gmio/graph.cpp",
-                    "pl-freq": 300,
                     "workdir": "./Work",
                     "name": "libadf.a",
                     "files": [
                         "xf_accumulate.cc"
-                    ]
+                    ],
+                    "config": "aie.cfg"
                 }
             ]
         }

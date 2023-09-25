@@ -1,0 +1,1 @@
+write_ini hls_config_equalizeHist_accel.cfg

@@ -344,3 +344,5 @@ RMDIR = rm -rf
 MV = mv -f
 CP = cp -rf
 ECHO:= @echo
+PYTHON3 ?= python3
+VITIS_PYTHON3 = LD_LIBRARY_PATH=$(XILINX_VITIS)/tps/lnx64/python-3.8.3/lib $(XILINX_VITIS)/tps/lnx64/python-3.8.3/bin/python3

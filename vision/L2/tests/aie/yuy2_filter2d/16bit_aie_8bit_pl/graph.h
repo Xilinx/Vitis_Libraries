@@ -26,15 +26,19 @@ using namespace adf;
 class myGraph : public adf::graph {
    public:
     kernel k1;
-    port<input> inptr;
-    port<output> outptr;
+    input_plio inptr;
+    output_plio outptr;
     port<input> kernelCoefficients;
 
     myGraph() {
         k1 = kernel::create(filter2D);
-        adf::connect<>(inptr, k1.in[0]);
+
+        inptr = input_plio::create("DataIn1", adf::plio_128_bits, "data/input_128x16.txt");
+        outptr = output_plio::create("DataOut1", adf::plio_128_bits, "data/output.txt");
+
+        adf::connect<>(inptr.out[0], k1.in[0]);
         adf::connect<parameter>(kernelCoefficients, async(k1.in[1]));
-        adf::connect<>(k1.out[0], outptr);
+        adf::connect<>(k1.out[0], outptr.in[0]);
 
         adf::dimensions(k1.in[0]) = {ELEM_WITH_METADATA};
         adf::dimensions(k1.out[0]) = {ELEM_WITH_METADATA};

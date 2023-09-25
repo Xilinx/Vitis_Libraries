@@ -145,6 +145,22 @@ CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/
 LDFLAGS +=  -L $(SYSROOT)/usr/lib -L ${SYSROOT}/opt/xilinx/xrt/lib
 LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
 endif
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
+ifeq ($(ps_on_x86), on)
+HOST_SRCS += $(XFLIB_DIR)/L3/examples/isppipeline_mono/xf_isp_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
+CXXFLAGS +=  -D __SDSVHLS__
+CXXFLAGS +=  -I $(OPENCV_INCLUDE) -I $(XFLIB_DIR)/L3/examples/isppipeline_mono/config -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
+LDFLAGS +=  -L $(OPENCV_LIB)
+LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
+else
+HOST_SRCS += $(XFLIB_DIR)/L3/examples/isppipeline_mono/xf_isp_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
+CXXFLAGS +=  -D __SDSVHLS__
+CXXFLAGS +=  -I $(SYSROOT)/usr/include -I $(SYSROOT)/usr/include/opencv4 -I $(XFLIB_DIR)/L3/examples/isppipeline_mono/config -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/ext/xcl2/ -I $(XFLIB_DIR)/L1/include
+CXXFLAGS += -O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include
+LDFLAGS +=  -L $(SYSROOT)/usr/lib -L ${SYSROOT}/opt/xilinx/xrt/lib
+LDFLAGS +=  -l opencv_videoio -l opencv_imgcodecs -l opencv_core -l opencv_imgproc -l opencv_features2d -l opencv_flann -l opencv_video -l opencv_calib3d -l opencv_highgui
+endif
 else 
 ifeq ($(ps_on_x86), on)
 HOST_SRCS += $(XFLIB_DIR)/L3/examples/isppipeline_mono/xf_isp_tb.cpp $(XFLIB_DIR)/ext/xcl2/xcl2.cpp 
@@ -234,7 +250,7 @@ $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 ############################## Setting Rules for Host (Building Host Executable) ##############################
 $(EXE_FILE): $(EXE_FILE_DEPS)
 	mkdir -p $(BUILD_DIR)
-	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
+	$(CXX) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^) $(CXXFLAGS) $(LDFLAGS)
 
 $(EMCONFIG):
 	emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
@@ -376,7 +392,7 @@ endif
 
 ############################## Setting Targets ##############################
 
-.PHONY: clean cleanall emconfig gen_instances valid_params
+.PHONY: clean cleanall emconfig valid_params
 emconfig: $(EMCONFIG)
 
 .PHONY: host
@@ -393,11 +409,9 @@ else
 xclbin: check_vpp check_sysroot check_env $(BINARY_CONTAINERS)
 endif
 
-gen_instances: $(INSTANCE_FILES)
-	@echo "Nothing to generate."
+#################### Parameterized File Generation ##########################
 
-valid_params:
-	@echo "Nothing to validate."
+gen_instances: $(GENERATED_FILES)
 
 .PHONY: check_env
 check_env:
@@ -414,6 +428,6 @@ cleank:
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR)  emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
 	-$(RMDIR)  $(AIE_WORK_DIR) $(AIE_PKG_DIR) $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
-	-$(RMDIR)  *.html $(INSTANCE_FILES)
+	-$(RMDIR)  *.html $(GENERATED_FILES)
 
 clean: cleanh

@@ -181,7 +181,7 @@ void function_degamma(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_bpc_in>& bpc
 #pragma HLS INLINE OFF
     // clang-format on
     if (USE_DEGAMMA) {
-        degamma<XF_SRC_T, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XFCVDEPTH_bpc_in, XF_CV_DEPTH_bpc_out, DEGAMMA_KP>(
+        degamma<XF_SRC_T, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPCX, DEGAMMA_KP, XFCVDEPTH_bpc_in, XF_CV_DEPTH_bpc_out>(
             bpc_out, dgamma_out, params, bayerp);
     } else {
         fifo_copy<XF_SRC_T, XF_SRC_T, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XFCVDEPTH_bpc_in, XF_CV_DEPTH_bpc_out>(

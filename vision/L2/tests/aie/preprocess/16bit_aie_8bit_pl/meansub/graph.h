@@ -29,8 +29,8 @@ class preprocessgraph : public adf::graph {
     kernel k1;
 
    public:
-    port<input> in1;
-    port<output> out;
+    input_plio in1;
+    output_plio out;
     port<input> alpha;
 #if OP_MODE == 1 || OP_MODE == 2
     port<input> beta;
@@ -42,9 +42,12 @@ class preprocessgraph : public adf::graph {
     preprocessgraph() {
         k1 = kernel::create(pp_top);
 
+        in1 = input_plio::create("DataIn1", adf::plio_128_bits, "data/input.txt");
+        out = output_plio::create("DataOut1", adf::plio_128_bits, "data/output_meansub.txt");
+
         // blob window passsed directly to output
-        adf::connect<>(in1, k1.in[0]);
-        adf::connect<>(k1.out[0], out);
+        adf::connect<>(in1.out[0], k1.in[0]);
+        adf::connect<>(k1.out[0], out.in[0]);
 
         adf::dimensions(k1.in[0]) = {ELEM_WITH_METADATA};
         adf::dimensions(k1.out[0]) = {ELEM_WITH_METADATA};

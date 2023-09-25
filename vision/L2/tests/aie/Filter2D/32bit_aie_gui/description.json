@@ -77,13 +77,12 @@
             "accelerators": [
                 {
                     "location": "LIB_DIR/L2/tests/aie/Filter2D/32bit_aie_gui/graph.cpp",
-                    "pl-freq": 100,
                     "workdir": "./Work",
-                    "options": "-pl-axi-lite=true",
                     "name": "libadf.a",
                     "files": [
                         "xf_filter2d.cc"
-                    ]
+                    ],
+                    "config": "aie.cfg"
                 }
             ]
         }

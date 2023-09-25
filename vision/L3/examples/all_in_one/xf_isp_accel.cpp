@@ -320,7 +320,7 @@ void function_degamma(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_bpc_in>& bpc
 #pragma HLS INLINE OFF
     // clang-format on
     if (USE_DEGAMMA) {
-        degamma<IN_TYPE, IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XFCVDEPTH_bpc_in, XF_CV_DEPTH_bpc_out, DEGAMMA_KP>(
+        degamma<IN_TYPE, IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, DEGAMMA_KP, XFCVDEPTH_bpc_in, XF_CV_DEPTH_bpc_out>(
             bpc_out, dgamma_out, params, bayerp);
     } else {
         fifo_copy<IN_TYPE, IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XFCVDEPTH_bpc_in, XF_CV_DEPTH_bpc_out>(
@@ -412,7 +412,7 @@ void function_csc(xf::cv::Mat<GTM_T, ROWS, COLS, NPC, XFCVDEPTH_csc>& csc_out,
 #pragma HLS DATAFLOW
     // clang-format on
 
-    xf::cv::rgb2yuyv<XF_GTM_T, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XFCVDEPTH_csc>(csc_out, _imgOutput);
+    xf::cv::bgr2yuyv<XF_GTM_T, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XFCVDEPTH_csc>(csc_out, _imgOutput);
     xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, XF_16UC1, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XFCVDEPTH_csc>(_imgOutput, img_out);
 }
 
@@ -509,22 +509,27 @@ void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,     /* Array2xfMat */
 #pragma HLS DATAFLOW
     // clang-format on
 
-    float thresh = (float)pawb / 256;
+    float thresh_aec = (float)pawb / 256;
+    float thresh = 0.9;
 
     float inputMax = (1 << (XF_DTPIXELDEPTH(IN_TYPE, XF_NPPCX))) - 1; // 65535.0f;
 
-    float mul_fact = (inputMax / (inputMax - BLACK_LEVEL));
-
-    if (USE_HDR_FUSION) {
-        xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, MAX_HEIGHT, MAX_WIDTH, XF_NPPCX, XF_CV_DEPTH_imgInput>(img_inp,
-                                                                                                             imgInput1);
-        HDR_extract_merge<IN_TYPE, IN_TYPE, MAX_HEIGHT, MAX_WIDTH, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_imgInput,
-                          XF_CV_DEPTH_hdr_out>(imgInput1, hdr_out, wr_hls, height, width);
+    float mul_fact = (float)(inputMax / (inputMax - BLACK_LEVEL));
+    if (USE_HDR) {
+        if (USE_HDR_FUSION) {
+            xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, MAX_HEIGHT, MAX_WIDTH, XF_NPPCX, XF_CV_DEPTH_imgInput>(
+                img_inp, imgInput1);
+            HDR_extract_merge<IN_TYPE, IN_TYPE, MAX_HEIGHT, MAX_WIDTH, XF_HEIGHT, XF_WIDTH, XF_NPPCX,
+                              XF_CV_DEPTH_imgInput, XF_CV_DEPTH_hdr_out>(imgInput1, hdr_out, wr_hls, height, width);
+        } else {
+            xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_imgInput1>(
+                img_inp, imgInput2);
+            xf::cv::hdr_decompand<IN_TYPE, IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_imgInput1,
+                                  XF_CV_DEPTH_hdr_out>(imgInput2, hdr_out, params_decompand, bayerp);
+        }
     } else {
         xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_imgInput1>(img_inp,
-                                                                                                            imgInput2);
-        xf::cv::hdr_decompand<IN_TYPE, IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_imgInput1,
-                              XF_CV_DEPTH_hdr_out>(imgInput2, hdr_out, params_decompand, bayerp);
+                                                                                                            hdr_out);
     }
 
     function_rgbir_or_fifo<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_hdr_out, XF_CV_DEPTH_rggb_out,
@@ -533,7 +538,7 @@ void ISPpipeline(ap_uint<INPUT_PTR_WIDTH>* img_inp,     /* Array2xfMat */
                                                                         IR_at_B_wgts, sub_wgts, height, width);
 
     function_aec<IN_TYPE, IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, XF_CV_DEPTH_rggb_out_aec, XF_CV_DEPTH_aec_out>(
-        rggb_out, aec_out, height, width, thresh, aec_hist0, aec_hist1);
+        rggb_out, aec_out, height, width, thresh_aec, aec_hist0, aec_hist1);
 
     xf::cv::blackLevelCorrection<IN_TYPE, XF_HEIGHT, XF_WIDTH, XF_NPPCX, 16, 15, 1, XF_CV_DEPTH_aec_out,
                                  XF_CV_DEPTH_blc_out>(aec_out, blc_out, BLACK_LEVEL, mul_fact);

@@ -235,7 +235,7 @@ endif
 $(TEMP_DIR)/lensshading_accel.xo: $(XFLIB_DIR)/L2/examples/lensshadingcorrection/xf_lensshading_accel.cpp 
 	$(ECHO) "Compiling Kernel: lensshading_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_lensshading_accel) $(VPP_FLAGS) -k lensshading_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_lensshading_accel) $(VPP_FLAGS) -k lensshading_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/lensshading_accel_write_ini.tcl
 BINARY_CONTAINER_krnl_lensshading_OBJS += $(TEMP_DIR)/lensshading_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_lensshading_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

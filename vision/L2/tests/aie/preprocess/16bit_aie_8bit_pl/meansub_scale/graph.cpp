@@ -16,15 +16,7 @@
 
 #include "graph.h"
 
-PLIO* in1 = new PLIO("DataIn1", adf::plio_128_bits, "data/input.txt");
-PLIO* out1 = new PLIO("DataOut1", adf::plio_128_bits, "data/output_meansub_scale.txt");
-
-simulation::platform<1, 1> platform(in1, out1);
-
 preprocessgraph ppgraph;
-
-connect<> net0(platform.src[0], ppgraph.in1);
-connect<> net1(ppgraph.out, platform.sink[0]);
 
 #if defined(__AIESIM__) || defined(__X86SIM__)
 int main(int argc, char** argv) {

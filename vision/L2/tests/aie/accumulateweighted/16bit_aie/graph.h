@@ -36,10 +36,10 @@ class accumulateWeightedGraph : public adf::graph {
     kernel k1;
 
    public:
-    port<input> in1;
-    port<input> in2;
+    input_plio in1;
+    input_plio in2;
     port<input> alpha;
-    port<output> out;
+    output_plio out;
 
     accumulateWeightedGraph() {
         /////////////////////////////////////////////////////1st core//////////////////////////////////////////////////
@@ -47,13 +47,17 @@ class accumulateWeightedGraph : public adf::graph {
 
         k1 = kernel::create(accumulateweighted);
 
+        in1 = input_plio::create("DataIn1", adf::plio_64_bits, "data/input1.txt");
+        in2 = input_plio::create("DataIn2", adf::plio_64_bits, "data/input2.txt");
+        out = output_plio::create("DataOut1", adf::plio_64_bits, "data/output.txt");
+
         // For 16-bit window size is 4096=2048*2, for 32-bit window size is 8192=2048*4
         // create nets to connect kernels and IO ports
         // create nets to connect kernels and IO ports
-        connect<>(in1, k1.in[0]);
-        connect<>(in2, k1.in[1]);
+        connect<>(in1.out[0], k1.in[0]);
+        connect<>(in2.out[0], k1.in[1]);
         connect<parameter>(alpha, async(k1.in[2]));
-        connect<>(k1.out[0], out);
+        connect<>(k1.out[0], out.in[0]);
 
         adf::dimensions(k1.in[0]) = {ELEM_WITH_METADATA};
         adf::dimensions(k1.in[1]) = {ELEM_WITH_METADATA};

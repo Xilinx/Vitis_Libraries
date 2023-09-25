@@ -217,7 +217,7 @@ endif
 $(TEMP_DIR)/kalmanfilter_accel.xo: $(XFLIB_DIR)/L2/examples/kalmanfilter/xf_kalmanfilter_accel.cpp 
 	$(ECHO) "Compiling Kernel: kalmanfilter_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_kalmanfilter_accel) $(VPP_FLAGS) -k kalmanfilter_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_kalmanfilter_accel) $(VPP_FLAGS) -k kalmanfilter_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/kalmanfilter_accel_write_ini.tcl
 BINARY_CONTAINER_krnl_kalmanfilter_OBJS += $(TEMP_DIR)/kalmanfilter_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_kalmanfilter_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

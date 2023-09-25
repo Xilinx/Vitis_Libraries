@@ -235,7 +235,7 @@ endif
 $(TEMP_DIR)/badpixelcorrection_accel.xo: $(XFLIB_DIR)/L2/examples/badpixelcorrection/xf_badpixelcorrection_accel.cpp 
 	$(ECHO) "Compiling Kernel: badpixelcorrection_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_badpixelcorrection_accel) $(VPP_FLAGS) -k badpixelcorrection_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_badpixelcorrection_accel) $(VPP_FLAGS) -k badpixelcorrection_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/badpixelcorrection_accel_write_ini.tcl
 BINARY_CONTAINER_krnl_badpixelcorrection_OBJS += $(TEMP_DIR)/badpixelcorrection_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_badpixelcorrection_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

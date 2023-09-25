@@ -153,8 +153,10 @@ rowLoop1:
                 XF_DTUNAME(SIN_CHANNEL_IN_TYPE, NPC) pxl_val;
                 pxl_val =
                     val_src1.range((k + 1) * PXL_WIDTH - 1, k * PXL_WIDTH); // Get bits from certain range of positions.
-
-                logarithm(pxl_val, log_out);
+                if (pxl_val == 0)
+                    log_out = 0;
+                else
+                    logarithm(pxl_val, log_out);
 
                 tmp_sum[k] = tmp_sum[k] + log_out;
 
@@ -310,9 +312,6 @@ void xFcompute_xyzmapped(xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC, XFCVD
 		
 		ap_ufixed<16, 4> ld_nume = 2.4;
 		ap_ufixed<16, 4> ld_dinom = L_max-L_min;
-	
-        
-     
         
 		ap_ufixed<16, 1> inv_L_range =  (ap_ufixed<16, 1>)1/ld_dinom;	
 		
@@ -321,7 +320,7 @@ void xFcompute_xyzmapped(xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC, XFCVD
 		
 		ap_ufixed<16, 4> c1_fixed = (ap_ufixed<16, 8>) c1;
 		
-		ap_ufixed<16, 4> ld_dinom_sq = (ld_dinom * ld_dinom);
+		ap_ufixed<16, 8> ld_dinom_sq = (ld_dinom * ld_dinom);
 		ap_ufixed<16, 1> inv_comp = (ap_ufixed<16, 1>)1/(ap_ufixed<16, 8>)(2 * ld_dinom_sq);
 		
 		ap_ufixed<16, 4> c1_sq = (c1_fixed * c1_fixed);
@@ -368,16 +367,19 @@ void xFcompute_xyzmapped(xf::cv::Mat<SIN_CHANNEL_IN_TYPE, ROWS, COLS, NPC, XFCVD
                 pxl_valy = val_yin.range((k + 1) * PXL_WIDTH_IN - 1, k * PXL_WIDTH_IN);
                 pxl_valz = val_zin.range((k + 1) * PXL_WIDTH_IN - 1, k * PXL_WIDTH_IN);
 
-                logarithm(pxl_valy, log_out);
+                if (pxl_valy == 0)
+                    log_out = 0;
+                else
+                    logarithm(pxl_valy, log_out);
 
                 ap_fixed<16, 4> pxl_val = log_out - mean;
 
                 ap_fixed<16, 4> pxl_val_sq = pxl_val * pxl_val;
-                ap_fixed<16, 4> exp_in1 = -pxl_val_sq * sigma_sq;
+                ap_fixed<16, 4> exp_in1 = -(pxl_val_sq * sigma_sq);
 
                 exponential(exp_in1, exp_out1);
 
-                ap_ufixed<16, 4> K2 = _k1 * exp_out1 + K1;
+                ap_ufixed<16, 4> K2 = _k1 * (ap_fixed<16, 1>)(exp_out1) + K1;
                 ap_ufixed<16, 4> prod = c2_fixed * K2;
                 ap_fixed<16, 4> exp_in2 = (prod * pxl_val + mean);
 

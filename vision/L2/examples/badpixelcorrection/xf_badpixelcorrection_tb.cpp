@@ -25,7 +25,7 @@ void BadPixelCorrection(cv::Mat input, cv::Mat& output) {
     typedef unsigned short int Pixel_t;
 #endif
     const Pixel_t MINVAL = 0;
-    const Pixel_t MAXVAL = -1;
+    const Pixel_t MAXVAL = 0;
     cv::Mat mask =
         (cv::Mat_<unsigned char>(5, 5) << 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1);
     output = input.clone(); // Not cloning saves memory

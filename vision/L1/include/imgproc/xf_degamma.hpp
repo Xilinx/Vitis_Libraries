@@ -158,9 +158,9 @@ template <int SRC_T,
           int ROWS,
           int COLS,
           int NPC,
+          int N,
           int XFCVDEPTH_IN = _XFCVDEPTH_DEFAULT,
-          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT,
-          int N>
+          int XFCVDEPTH_OUT = _XFCVDEPTH_DEFAULT>
 void degamma(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
              xf::cv::Mat<DST_T, ROWS, COLS, NPC, XFCVDEPTH_OUT>& dst,
              ap_ufixed<32, 18> params[3][N][3],
@@ -217,7 +217,7 @@ void degamma_multi(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN>& src,
 #pragma HLS ARRAY_PARTITION variable= dgam_params dim=1 complete
 #pragma HLS ARRAY_PARTITION variable= dgam_bayer dim=1 complete
    // clang-format on                
-   degamma<SRC_T, DST_T, ROWS, COLS, NPC, XFCVDEPTH_IN, XFCVDEPTH_OUT, N>(src, dst, dgam_params[strm_id],
+   degamma<SRC_T, DST_T, ROWS, COLS, NPC, N, XFCVDEPTH_IN, XFCVDEPTH_OUT>(src, dst, dgam_params[strm_id],
                                           dgam_bayer[strm_id]);             
 
 }

@@ -1,5 +1,5 @@
-#
-# Copyright 2019-2022 Xilinx, Inc.
+# Copyright (C) 2019-2022, Xilinx, Inc.
+# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# vitis makefile-generator v2.0.8
+# vitis makefile-generator v2.0.9
 #
 #+-------------------------------------------------------------------------------
 # The following parameters are assigned with default values. These parameters can
@@ -69,9 +69,69 @@ check_device:
 	    then echo "[ERROR]: The device $(PLATFORM_NAME) in blocklist."; exit 1;\
 	fi;
 
+ifneq (,$(wildcard $(PLATFORM)))
+# Use PLATFORM as a file path
+XPLATFORM := $(PLATFORM)
+else
+# Use PLATFORM as a file name pattern
+# 1. search paths specified by variable
+ifneq (,$(PLATFORM_REPO_PATHS))
+# 1.1 as exact name
+XPLATFORM := $(strip $(foreach p, $(subst :, ,$(PLATFORM_REPO_PATHS)), $(wildcard $(p)/$(PLATFORM)/$(PLATFORM).xpfm)))
+# 1.2 as a pattern
+ifeq (,$(XPLATFORM))
+XPLATFORMS := $(foreach p, $(subst :, ,$(PLATFORM_REPO_PATHS)), $(wildcard $(p)/*/*.xpfm))
+XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(PLATFORM)/')))
+endif # 1.2
+endif # 1
+# 2. search Vitis installation
+ifeq (,$(XPLATFORM))
+# 2.1 as exact name vitis < 2022.2
+XPLATFORM := $(strip $(wildcard $(XILINX_VITIS)/platforms/$(PLATFORM)/$(PLATFORM).xpfm))
+ifeq (,$(XPLATFORM))
+# 2.2 as exact name vitis >= 2022.2
+XPLATFORM := $(strip $(wildcard $(XILINX_VITIS)/base_platforms/$(PLATFORM)/$(PLATFORM).xpfm))
+# 2.3 as a pattern vitis < 2022.2
+ifeq (,$(XPLATFORM))
+XPLATFORMS := $(wildcard $(XILINX_VITIS)/platforms/*/*.xpfm)
+XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(PLATFORM)/')))
+# 2.4 as a pattern vitis >= 2022.2
+ifeq (,$(XPLATFORM))
+XPLATFORMS := $(wildcard $(XILINX_VITIS)/base_platforms/*/*.xpfm)
+XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(PLATFORM)/')))
+endif # 2.4
+endif # 2.3
+endif # 2.2
+endif # 2
+# 3. search default locations
+ifeq (,$(XPLATFORM))
+# 3.1 as exact name
+XPLATFORM := $(strip $(wildcard /opt/xilinx/platforms/$(PLATFORM)/$(PLATFORM).xpfm))
+# 3.2 as a pattern
+ifeq (,$(XPLATFORM))
+XPLATFORMS := $(wildcard /opt/xilinx/platforms/*/*.xpfm)
+XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(PLATFORM)/')))
+endif # 3.2
+endif # 3
+endif
+XPLATFORM := $(firstword $(XPLATFORM))
+
+define MSG_PLATFORM
+No platform matched pattern '$(PLATFORM)'.
+Available platforms are: $(XPLATFORMS)
+To add more platform directories, set the PLATFORM_REPO_PATHS variable or point PLATFORM variable to the full path of platform .xpfm file.
+endef
+export MSG_PLATFORM
+
+.PHONY: check_platform
+check_platform:
+ifeq (,$(XPLATFORM))
+	@echo "$${MSG_PLATFORM}" && false
+endif
+#Check ends
+
 #get HOST_ARCH by PLATFORM
-ifneq (,$(PLATFORM))
-HOST_ARCH_temp = $(shell platforminfo -p $(PLATFORM) | grep 'CPU Type' | sed 's/.*://' | sed '/ai_engine/d' | sed 's/^[[:space:]]*//')
+HOST_ARCH_temp = $(shell platforminfo -p $(XPLATFORM) | grep 'CPU Type' | sed 's/.*://' | sed '/ai_engine/d' | sed 's/^[[:space:]]*//')
 ifeq ($(HOST_ARCH_temp), x86)
 HOST_ARCH := x86
 else ifeq ($(HOST_ARCH_temp), cortex-a9)
@@ -79,13 +139,10 @@ HOST_ARCH := aarch32
 else ifneq (,$(findstring cortex-a, $(HOST_ARCH_temp)))
 HOST_ARCH := aarch64
 endif
-endif
-
-
 
 # Special processing for tool version/platform type
 VITIS_VER = $(shell v++ --version | grep 'v++' | sed 's/^[[:space:]]*//' | sed -e 's/^[*]* v++ v//g' | cut -d " " -f1)
-AIE_TYPE := $(shell platforminfo $(PLATFORM) -f -j | grep "arch.:" | sed 's|"arch":||g' | sed 's|["|,]||g')
+AIE_TYPE := $(shell platforminfo $(XPLATFORM) -f -j | grep "arch.:" | sed 's|"arch":||g' | sed 's|["|,]||g')
 ifeq (AIE ,$(findstring AIE, $(AIE_TYPE)))
 HAS_AIE := on
 else
@@ -280,58 +337,6 @@ LD_LIBRARY_PATH := $(XILINX_XRT)/lib:$(LD_LIBRARY_PATH)
 endif
 endif
 
-ifneq (,$(wildcard $(PLATFORM)))
-# Use PLATFORM as a file path
-XPLATFORM := $(PLATFORM)
-else
-# Use PLATFORM as a file name pattern
-# 1. search paths specified by variable
-ifneq (,$(PLATFORM_REPO_PATHS))
-# 1.1 as exact name
-XPLATFORM := $(strip $(foreach p, $(subst :, ,$(PLATFORM_REPO_PATHS)), $(wildcard $(p)/$(PLATFORM)/$(PLATFORM).xpfm)))
-# 1.2 as a pattern
-ifeq (,$(XPLATFORM))
-XPLATFORMS := $(foreach p, $(subst :, ,$(PLATFORM_REPO_PATHS)), $(wildcard $(p)/*/*.xpfm))
-XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(PLATFORM)/')))
-endif # 1.2
-endif # 1
-# 2. search Vitis installation
-ifeq (,$(XPLATFORM))
-# 2.1 as exact name
-XPLATFORM := $(strip $(wildcard $(XILINX_VITIS)/platforms/$(PLATFORM)/$(PLATFORM).xpfm))
-# 2.2 as a pattern
-ifeq (,$(XPLATFORM))
-XPLATFORMS := $(wildcard $(XILINX_VITIS)/platforms/*/*.xpfm)
-XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(PLATFORM)/')))
-endif # 2.2
-endif # 2
-# 3. search default locations
-ifeq (,$(XPLATFORM))
-# 3.1 as exact name
-XPLATFORM := $(strip $(wildcard /opt/xilinx/platforms/$(PLATFORM)/$(PLATFORM).xpfm))
-# 3.2 as a pattern
-ifeq (,$(XPLATFORM))
-XPLATFORMS := $(wildcard /opt/xilinx/platforms/*/*.xpfm)
-XPLATFORM := $(strip $(foreach p, $(XPLATFORMS), $(shell echo $(p) | awk '$$1 ~ /$(PLATFORM)/')))
-endif # 3.2
-endif # 3
-endif
-
-define MSG_PLATFORM
-No platform matched pattern '$(PLATFORM)'.
-Available platforms are: $(XPLATFORMS)
-To add more platform directories, set the PLATFORM_REPO_PATHS variable or point PLATFORM variable to the full path of platform .xpfm file.
-endef
-export MSG_PLATFORM
-
-
-.PHONY: check_platform
-check_platform:
-ifeq (,$(XPLATFORM))
-	@echo "$${MSG_PLATFORM}" && false
-endif
-#Check ends
-
 # Cleaning stuff
 RM = rm -f
 RMDIR = rm -rf
@@ -339,3 +344,5 @@ RMDIR = rm -rf
 MV = mv -f
 CP = cp -rf
 ECHO:= @echo
+PYTHON3 ?= python3
+VITIS_PYTHON3 = LD_LIBRARY_PATH=$(XILINX_VITIS)/tps/lnx64/python-3.8.3/lib $(XILINX_VITIS)/tps/lnx64/python-3.8.3/bin/python3

@@ -33,15 +33,18 @@ class gaussianGraph : public graph {
     kernel gauss1;
 
    public:
-    port<input> in;
-    port<output> out;
+    input_plio in;
+    output_plio out;
     port<input> kernelCoefficients;
 
     gaussianGraph() {
         gauss1 = kernel::create(gaussian);
 
-        adf::connect<>(in, gauss1.in[0]);
-        adf::connect<>(gauss1.out[0], out);
+        in = input_plio::create("DataIn1", adf::plio_64_bits, "data/input.txt");
+        out = output_plio::create("DataOut1", adf::plio_64_bits, "data/output.txt");
+
+        adf::connect<>(in.out[0], gauss1.in[0]);
+        adf::connect<>(gauss1.out[0], out.in[0]);
 
         adf::dimensions(gauss1.in[0]) = {ELEM_WITH_METADATA};
         adf::dimensions(gauss1.out[0]) = {ELEM_WITH_METADATA};

@@ -86,12 +86,12 @@
             "accelerators": [
                 {
                     "location": "LIB_DIR/L2/tests/aie/threshold/16bit_aie_gmio/graph.cpp",
-                    "pl-freq": 300,
                     "workdir": "./Work",
                     "name": "libadf.a",
                     "files": [
                         "xf_threshold.cc"
-                    ]
+                    ],
+                    "config": "aie.cfg"
                 }
             ]
         }

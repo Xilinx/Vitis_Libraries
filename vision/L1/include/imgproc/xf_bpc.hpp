@@ -207,7 +207,7 @@ COL_LOOP:
             XF_TNAME(SRC_T, NPPC) tmp_rd_buff;
 
             // Read packed data
-            if (c < num_clks_per_row) {
+            if (c < num_clks_per_row && ((r + kr) < _src.rows + K_ROWS - 1)) {
                 tmp_rd_buff = buff.val[row_idx.val[kr]][c]; // tmp_rd_buff = (c < num_clks_per_row)
                                                             // ? buff.val[row_idx.val[kr]][c] :
                                                             // (XF_TNAME(SRC_T, NPPC))0;
@@ -354,7 +354,7 @@ COL_LOOP:
             XF_TNAME(SRC_T, NPPC) tmp_rd_buff;
 
             // Read packed data
-            if (c < num_clks_per_row) {
+            if ((c < num_clks_per_row) && ((r + kr) < _src.rows + K_ROWS - 1)) {
                 tmp_rd_buff = buff.val[row_idx.val[kr]][c]; // tmp_rd_buff = (c < num_clks_per_row)
                                                             // ? buff.val[row_idx.val[kr]][c] :
                                                             // (XF_TNAME(SRC_T, NPPC))0;

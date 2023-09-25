@@ -29,6 +29,10 @@ typedef unsigned char uchar;
  * This file is part of Vitis Vision Library.
  */
 
+#include "common/xf_common.hpp"
+#include "common/xf_utility.hpp"
+#include "hls_stream.h"
+
 const ap_fixed<32, 4> bt2020_bt709_arr_hls_1[3][3] = {
     {1.6605, -0.5876, -0.0728}, {-0.1246, 1.1329, -0.0083}, {-0.0182, -0.1006, 1.1187}};
 
@@ -78,10 +82,6 @@ const ap_fixed<32, 4> full_from_16_235_arr_hls_1[3][3] = {
     {1.167808, 0.000000, 0.000000}, {0.000000, 1.167808, 0.000000}, {0.000000, 0.000000, 1.167808}};
 
 const ap_fixed<32, 4> full_from_16_235_off_hls_1[3] = {-0.0729880, -0.0729880, -0.0729880};
-
-#include "common/xf_common.hpp"
-#include "common/xf_utility.hpp"
-#include "hls_stream.h"
 
 template <typename T>
 T xf_satcast_ccm(int in_val){};

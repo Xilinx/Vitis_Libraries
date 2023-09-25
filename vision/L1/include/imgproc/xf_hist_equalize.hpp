@@ -265,9 +265,9 @@ void xFEqualize_norm_sin(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& sr
     int pval = 0, read_index = 0, write_index = 0;
     ap_uint<13> row, col;
 
-    ap_fixed<STEP + 16, 2> inv_val;
+    ap_fixed<STEP + 18, 2> inv_val;
 
-    if (maxmin_diff != 0) inv_val = ((ap_fixed<STEP + 16, 2>)1 / maxmin_diff);
+    if (maxmin_diff != 0) inv_val = ((ap_fixed<STEP + 18, 2>)1 / maxmin_diff);
 
 NORMALISE_ROW_LOOP:
     for (row = 0; row < height; row++) {

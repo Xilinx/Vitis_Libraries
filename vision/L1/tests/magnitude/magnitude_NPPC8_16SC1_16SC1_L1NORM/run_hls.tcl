@@ -14,7 +14,16 @@
 # limitations under the License.
 # vitis hls makefile-generator v2.0.0
 
-source settings.tcl
+set CSIM 0
+set CSYNTH 0
+set COSIM 0
+set VIVADO_SYN 0
+set VIVADO_IMPL 0
+set CUR_DIR [pwd]
+set OPENCV_INCLUDE $::env(OPENCV_INCLUDE)
+set OPENCV_LIB $::env(OPENCV_LIB)
+set XF_PROJ_ROOT $CUR_DIR/../../../..
+set XPART xcu200-fsgd2104-2-e
 
 set PROJ "magnitude.prj"
 set SOLN "sol1"

@@ -217,7 +217,7 @@ endif
 $(TEMP_DIR)/scharr_accel.xo: $(XFLIB_DIR)/L2/examples/scharrfilter/xf_scharr_accel.cpp 
 	$(ECHO) "Compiling Kernel: scharr_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_scharr_accel) $(VPP_FLAGS) -k scharr_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_scharr_accel) $(VPP_FLAGS) -k scharr_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/scharr_accel_write_ini.tcl
 BINARY_CONTAINER_krnl_scharr_OBJS += $(TEMP_DIR)/scharr_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_scharr_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

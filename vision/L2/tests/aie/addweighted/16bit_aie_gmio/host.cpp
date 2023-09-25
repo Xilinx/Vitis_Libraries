@@ -114,17 +114,17 @@ int main(int argc, char** argv) {
 
         //@{
         START_TIMER
-        auto tiles_sz = tiler1.host2aie_nb(srcData1.data(), srcImage1.size(), {"gmioIn[0]"});
-        tiler2.host2aie_nb(srcData2.data(), srcImage2.size(), {"gmioIn[1]"});
-        stitcher.aie2host_nb(dstData.data(), dst.size(), tiles_sz, {"gmioOut[0]"});
+        auto tiles_sz = tiler1.host2aie_nb(srcData1.data(), srcImage1.size(), {"mygraph.in1"});
+        tiler2.host2aie_nb(srcData2.data(), srcImage2.size(), {"mygraph.in2"});
+        stitcher.aie2host_nb(dstData.data(), dst.size(), tiles_sz, {"mygraph.out"});
 
         mygraph.run(tiles_sz[0] * tiles_sz[1]);
         mygraph.wait();
 
-        tiler1.wait({"gmioIn[0]"});
-        tiler2.wait({"gmioIn[1]"});
+        tiler1.wait({"mygraph.in1"});
+        tiler2.wait({"mygraph.in2"});
 
-        stitcher.wait({"gmioOut[0]"});
+        stitcher.wait({"mygraph.out"});
         STOP_TIMER("Total time to process frame")
         std::cout << "Data transfer complete (Stitcher)\n";
         //@}

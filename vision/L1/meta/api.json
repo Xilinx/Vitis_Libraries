@@ -536,15 +536,15 @@
                                                                           {
                                                                                             "name": "SRC_T",
                                                                                             "type": "int",
-                                                                                            "description": " Input pixel type. Only 8-bit, unsigned, 1 and 3 channels are supported (XF_16UC3 and XF_8UC3) ",
-                                                                                            "enum": ["XF_16UC3", "XF_8UC3"]
+                                                                                            "description": " Input pixel type. Only 8-bit, unsigned, 1 and 3 channels are supported XF_8UC3 ",
+                                                                                            "enum": ["XF_8UC3"]
 
                                                                           },
                                                                           {
                                                                                             "name": "DST_T",
                                                                                             "type": "int",
-                                                                                            "description": " Output pixel type. Only 8-bit, unsigned, 1 and 3 channels are supported (XF_16UC3 and XF_8UC3) ",
-                                                                                            "enum": ["XF_16UC3", "XF_8UC3"]
+                                                                                            "description": " Output pixel type. Only 8-bit, unsigned, 1 and 3 channels are supported XF_8UC3 ",
+                                                                                            "enum": ["XF_8UC3"]
 
                                                                           },
                                                                           {
@@ -1010,12 +1010,12 @@
                                                             {
                                                                               "name": "_Src",
                                                                               "direction": "",
-                                                                              "type": "xf::cv::Mat<TYPE, ROWS, COLS, NPC>& "
+                                                                              "type": "xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPC>& "
                                                             },
                                                             {
                                                                               "name": "_Dst",
                                                                               "direction": "",
-                                                                              "type": "xf::cv::Mat<TYPE, ROWS, COLS, NPC>& "
+                                                                              "type": "xf::cv::Mat<SRC_T, MAX_ROWS, MAX_COLS, NPC>& "
                                                             },
                                                             {
                                                                               "name": "black_level",
@@ -1529,7 +1529,8 @@
                                                                           {
                                                                                             "name": "DST_T",
                                                                                             "type": "int",
-                                                                                            "description": " Output pixel type. Only XF_2UC1 is supported. The output in case of NPC=XF_NPPC1 is 8-bit and packing four 2-bit pixel values into 8-bit. The output in case of NPC=XF_NPPC8 is 16-bit, 8-bit, 2-bit pixel values are packing into 16-bit. "
+                                                                                            "description": " Output pixel type. Only XF_2UC1 is supported. The output in case of NPC=XF_NPPC1 is 8-bit and packing four 2-bit pixel values into 8-bit. The output in case of NPC=XF_NPPC8 is 16-bit, 8-bit, 2-bit pixel values are packing into 16-bit. ",
+                                                                                            "enum":["XF_2UC1"]
                                                                           },
                                                                           {
                                                                                             "name": "ROWS",
@@ -1886,7 +1887,7 @@
                                                         ]
                                       }
                     },
-  {
+                    {
                                       "api_name": "xf::cv::convertScaleAbs",
                                       "target_domain": "PL",
                                       "spec": {
@@ -2041,85 +2042,6 @@
                                       }
                     },
                     {
-                                        "api_name": "xf::cv::convertScaleAbs",
-                                      "target_domain": "PL",
-                                        "spec": {
-                                                        "schema": "vitis_libraries_api_list_schema-1.0",
-                                                        "api_name": "xf::cv::convertScaleAbs",
-                                                        "target_domain": "PL",
-                                                        "display_name": "convertScaleAbs",
-                                                        "brief": "The convertScaleAbs function converts an input image src with optional linear transformation, save the result as image dst. dst(x,y)= src1(x,y)*scale+shift",
-                                                        
-                                                        "header_file_name": [
-                                                                            "imgproc/xf_harris.hpp"
-                                                        ],
-                                                        "search_paths": [
-                                                                            "L1/include/"
-                                                        ],
-                                                        "instance": "function",
-                                                        "parameters": [
-                                                                            {
-                                                                                            "name": "SRC_T",
-                                                                                            "type": "int",
-                                                                                            "description": "Input pixel type. Only 8-bit, unsigned, 1 channel is supported (XF_8UC1).",
-                                                                                            "enum": ["XF_8UC1"]
-
-                                                                            },
-                                                                            {
-                                                                                            "name": "DST_T",
-                                                                                            "type": "int",
-                                                                                            "description": "Output pixel type. Only 8-bit, unsigned, 1 channel is supported (XF_8UC1).",
-                                                                                            "enum": ["XF_8UC1"]
-
-                                                                            },
-                                                                            {
-                                                                                            "name": "ROWS",
-                                                                                            "type": "int",
-                                                                                            "minimum": 16,
-                                                                                            "maximum": 2160,
-                                                                                            "description": "Maximum height of input and output image. "
-                                                                            },
-                                                                            {
-                                                                                            "name": "COLS",
-                                                                                            "type": "int",
-                                                                                            "minimum": 16,
-                                                                                            "maximum": 3840,
-                                                                                            "description": " Maximum width of input and output image. In case of N-pixel parallelism, width should be multiple of N."
-                                                                            },
-                                                                            {
-                                                                                            "name": "NPC",
-                                                                                            "type": "int",
-                                                                                            "description": " Number of pixels to be processed per cycle; possible options are XF_NPPC1 and XF_NPPC8 for 1 pixel and 8 pixel operations respectively. ",
-                                                                                            "enum": ["XF_NPPC1", "XF_NPPC8"]
-
-                                                                            }
-                                                        ],
-                                                        "ports": [
-                                                                            {
-                                                                                            "name": "src1",
-                                                                                            "direction": "",
-                                                                                            "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
-                                                                            },
-                                                                            {
-                                                                                            "name": "scale",
-                                                                                            "direction": "",
-                                                                                            "type": "float"
-                                                                            },
-                                                                            {
-                                                                                            "name": "shift",
-                                                                                            "direction": "",
-                                                                                            "type": "float"
-                                                                            },
-                                                                            {
-                                                                                            "name": "dst",
-                                                                                            "direction": "",
-                                                                                            "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
-                                                                            }
-                                                                            
-                                                            ]
-                                                }
-                    },
-  {
                                       "api_name": "xf::cv::cornerHarris",
                                       "target_domain": "PL",
                                       "spec": {
@@ -2424,7 +2346,7 @@
                                                                         {
                                                                                         "name": "_dst_mat",
                                                                                         "direction": "",
-                                                                                        "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>  &"
+                                                                                        "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC>  &"
                                                                         },
                                                                         {
                                                                                         "name": "params",
@@ -3583,7 +3505,7 @@
                                                                           {
                                                                                             "name": "DESC_SIZE",
                                                                                             "type": "int",
-                                                                                            "description": " The size of the output descriptor. "
+                                                                                            "description": " The size of the output descriptor.                                 If we select 'OUTPUT_VARIANT' as XF_HOG_RB then                               DESC_SIZE = (((((ROWS - WIN_HEIGHT) / WIN_STRIDE) + 1) * (((COLS - WIN_WIDTH) / WIN_STRIDE) + 1) * ((NOB * (BLOCK_HEIGHT / CELL_HEIGHT) * (BLOCK_WIDTH / CELL_WIDTH)) *((WIN_HEIGHT / CELL_HEIGHT) - 1) * ((WIN_WIDTH / CELL_WIDTH) - 1))) >> 1)                                                                                 else if we select 'OUTPUT_VARIANT' as XF_HOG_NRB then                          DESC_SIZE = ((((ROWS / CELL_HEIGHT) - 1) * ((COLS / CELL_WIDTH) - 1) * (NOB * (BLOCK_HEIGHT / CELL_HEIGHT) * (BLOCK_WIDTH / CELL_WIDTH))) >> 1)"
                                                                           },
                                                                           {
                                                                                             "name": "IMG_COLOR",
@@ -3788,6 +3710,13 @@
 
                                                                           },
                                                                           {
+                                                                                            "name": "DST_T",
+                                                                                            "type": "int",
+                                                                                            "description": " Input Pixel Type. 8-bit, unsigned, 1 and 3 channels    are supported (XF_8UC1 and XF_8UC3). ",
+                                                                                            "enum": ["XF_8UC1", "XF_8UC3"]
+
+                                                                          },
+                                                                          {
                                                                                             "name": "ROWS",
                                                                                             "type": "int",
                                                                                             "minimum": 16,
@@ -3831,7 +3760,7 @@
                                                                           {
                                                                                             "name": "dst",
                                                                                             "direction": "",
-                                                                                            "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
+                                                                                            "type": "xf::cv::Mat<DST_T, ROWS, COLS, NPC> & "
                                                                           }
                                                         ]
                                       }
@@ -3980,17 +3909,17 @@
                                                                         {
                                                                                         "name": "stats",
                                                                                         "direction": "",
-                                                                                        "type": "uint32_t"
+                                                                                        "type": "uint32_t*"
                                                                         },
                                                                         {
                                                                                         "name": "max_bins_list",
                                                                                         "direction": "",
-                                                                                        "type": "ap_uint<13>"
+                                                                                        "type": "ap_uint<13>*"
                                                                         },
                                                                         {
                                                                                         "name": "roi_tlx",
                                                                                         "direction": "",
-                                                                                        "type": "uint16_t short"
+                                                                                        "type": "uint16_t "
                                                                         },
                                                                         {
                                                                                         "name": "roi_tly",
@@ -4336,11 +4265,11 @@
                                       }
                     },
   {
-                                      "api_name": "xf::cv::maxS",
+                                      "api_name": "xf::cv::max",
                                       "target_domain": "PL",
                                       "spec": {
                                                         "schema": "vitis_libraries_api_list_schema-1.0",
-                                                        "api_name": "xf::cv::maxS",
+                                                        "api_name": "xf::cv::max",
                                                         "target_domain": "PL",
                                                         "display_name": "maxS",
                                                         "brief": "The MaxS function calculates the maximum elements between src and given scalar value scl and stores the result in dst. dst(I)=maxS( src(I) ,scl )",
@@ -4389,7 +4318,8 @@
                                                                           {
                                                                                             "name": "_scl",
                                                                                             "direction": "",
-                                                                                            "type": "unsigned char"
+                                                                                            "type": "unsigned char",
+                                                                                            "array":[""]
                                                                           },
                                                                           {
                                                                                             "name": "_dst",
@@ -4886,11 +4816,11 @@
                                       }
                     },
   {
-                                      "api_name": "xf::cv::minS",
+                                      "api_name": "xf::cv::min",
                                       "target_domain": "PL",
                                       "spec": {
                                                         "schema": "vitis_libraries_api_list_schema-1.0",
-                                                        "api_name": "xf::cv::minS",
+                                                        "api_name": "xf::cv::min",
                                                         "target_domain": "PL",
                                                         "display_name": "minS",
                                                         "brief": "The MinS function calculates the minimum elements between src and given scalar value scl and stores the result in dst. dst(x,y)=minS( src(x,y) ,scl )",
@@ -4939,7 +4869,8 @@
                                                                           {
                                                                                             "name": "_scl",
                                                                                             "direction": "",
-                                                                                            "type": "unsigned char"
+                                                                                            "type": "unsigned char",
+                                                                                            "array":[""]
                                                                           },
                                                                           {
                                                                                             "name": "_dst",
@@ -5084,7 +5015,7 @@
                                                                           {
                                                                                             "name": "dst",
                                                                                             "direction": "",
-                                                                                            "type": "xf::cv::Mat<SRC_T ROWS, COLS, NPC>& "
+                                                                                            "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC>& "
                                                                           },
                                                                           {
                                                                                             "name": "scale",
@@ -5677,6 +5608,11 @@
                                                                                             "enum": ["XF_NPPC1", "XF_NPPC8"]
                                                                           },
                                                                           {
+                                                                                            "name": "USE_URAM",
+                                                                                            "type": "bool",
+                                                                                            "description": " Enable to map storage structures to UltraRAM "
+                                                                          },
+                                                                          {
                                                                                             "name": "MAX_DOWN_SCALE",
                                                                                             "type": "int",
                                                                                             "description": "For Nearest Neighbor & Bilinear Interpolation, max down scale factor 2 for all 1-pixel modes, and for upscale in x direction"
@@ -5760,12 +5696,12 @@
                                                                         {
                                                                                         "name": "src_ptr",
                                                                                         "direction": "",
-                                                                                        "type": "ap_uint<INPUT_PTR_WIDTH>"
+                                                                                        "type": "ap_uint<INPUT_PTR_WIDTH>*"
                                                                         },
                                                                         {
                                                                                         "name": "dst_ptr",
                                                                                         "direction": "",
-                                                                                        "type": "ap_uint<OUTPUT_PTR_WIDTH>"
+                                                                                        "type": "ap_uint<OUTPUT_PTR_WIDTH>*"
                                                                         },
                                                                         {
                                                                                         "name": "rows",
@@ -5909,6 +5845,12 @@
                                                                                         "type": "int",
                                                                                         "description": " Number of Pixels to be processed per cycle. NPPC1 and NPPC2 are supported.",
                                                                                         "enum": ["XF_NPPC1", "XF_NPPC8"]
+                                                                        },
+                                                                        {
+                                                                                          "name": "N",
+                                                                                          "type": "int",
+                                                                                          "description": " Configurable number of knee points",
+                                                                                          "enum": ["8"]
                                                                         }
                                                     ],
                                                     "ports": [
@@ -5925,7 +5867,8 @@
                                                                         {
                                                                                         "name": "params",
                                                                                         "direction": "",
-                                                                                        "type": "ap_ufixed<32, 16>"
+                                                                                        "type": "ap_ufixed<32, 18>",
+                                                                                        "array":["3","N","3"]
                                                                         },
                                                                         {
                                                                                         "name": "bayerp",
@@ -6907,22 +6850,26 @@
                                                                         {
                                                                                         "name": "omin_r",
                                                                                         "direction": "",
-                                                                                        "type": "XF_CTUNAME(IN_TYPE, NPC) "
+                                                                                        "type": "XF_CTUNAME(IN_TYPE, NPC) ",
+                                                                                        "array":[" "," "]
                                                                         },
                                                                         {
                                                                                         "name": "omax_r",
                                                                                         "direction": "",
-                                                                                        "type": "XF_CTUNAME(IN_TYPE, NPC) "
+                                                                                        "type": "XF_CTUNAME(IN_TYPE, NPC) ",
+                                                                                        "array":[" "," "]
                                                                         },
                                                                         {
                                                                                         "name": "omin_w",
                                                                                         "direction": "",
-                                                                                        "type": "XF_CTUNAME(IN_TYPE, NPC) "
+                                                                                        "type": "XF_CTUNAME(IN_TYPE, NPC) ",
+                                                                                        "array":[" "," "]
                                                                         },
                                                                         {
                                                                                         "name": "omax_w",
                                                                                         "direction": "",
-                                                                                        "type": "XF_CTUNAME(IN_TYPE, NPC)"
+                                                                                        "type": "XF_CTUNAME(IN_TYPE, NPC)",
+                                                                                        "array":[" "," "]
                                                                         },
                                                                         {
                                                                                         "name": "out",
@@ -7006,17 +6953,17 @@
                                                                           {
                                                                                             "name": "_src_mat",
                                                                                             "direction": "",
-                                                                                            "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
+                                                                                            "type": "xf::cv::Mat<TYPE, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "_dst_mat",
                                                                                             "direction": "",
-                                                                                            "type": "xf::cv::Mat<SRC_T, ROWS, COLS, NPC> & "
+                                                                                            "type": "xf::cv::Mat<TYPE, ROWS, COLS, NPC> & "
                                                                           },
                                                                           {
                                                                                             "name": "P_matrix",
                                                                                             "direction": "",
-                                                                                            "type": "float *",
+                                                                                            "type": "float",
                                                                                             "array":["9"]
                                                                           }
                                                         ]

@@ -217,7 +217,7 @@ endif
 $(TEMP_DIR)/warptransform_accel.xo: $(XFLIB_DIR)/L2/examples/warptransform/xf_warp_transform_accel.cpp 
 	$(ECHO) "Compiling Kernel: warptransform_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_warptransform_accel) $(VPP_FLAGS) -k warptransform_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_warptransform_accel) $(VPP_FLAGS) -k warptransform_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/warptransform_accel_write_ini.tcl
 BINARY_CONTAINER_krnl_warptransform_OBJS += $(TEMP_DIR)/warptransform_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_warptransform_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

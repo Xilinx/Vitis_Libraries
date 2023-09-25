@@ -32,18 +32,22 @@ class addweightedGraph : public adf::graph {
     kernel k1;
 
    public:
-    port<input> in1;
-    port<input> in2;
+    input_gmio in1;
+    input_gmio in2;
     port<input> alpha;
     port<input> beta;
     port<input> gamma;
-    port<output> out;
+    output_gmio out;
 
     addweightedGraph() {
         /////////////////////////////////////////////////////1st core//////////////////////////////////////////////////
         // create kernels
 
         k1 = kernel::create(addweighted);
+
+        in1 = input_gmio::create("gmioIn1", 256, 1000);
+        in2 = input_gmio::create("gmioIn2", 256, 1000);
+        out = output_gmio::create("gmioOut1", 256, 1000);
 
         // For 16-bit window size is 4096=2048*2, for 32-bit window size is 8192=2048*4
         // create nets to connect kernels and IO ports
@@ -52,9 +56,9 @@ class addweightedGraph : public adf::graph {
         connect<parameter>(beta, async(k1.in[3]));
         connect<parameter>(gamma, async(k1.in[4]));
 
-        adf::connect<>(in1, k1.in[0]);
-        adf::connect<>(in2, k1.in[1]);
-        adf::connect<>(k1.out[0], out);
+        adf::connect<>(in1.out[0], k1.in[0]);
+        adf::connect<>(in2.out[0], k1.in[1]);
+        adf::connect<>(k1.out[0], out.in[0]);
 
         adf::dimensions(k1.in[0]) = {ELEM_WITH_METADATA};
         adf::dimensions(k1.in[1]) = {ELEM_WITH_METADATA};

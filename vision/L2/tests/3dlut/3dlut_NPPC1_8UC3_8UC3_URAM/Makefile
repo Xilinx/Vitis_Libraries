@@ -217,7 +217,7 @@ endif
 $(TEMP_DIR)/lut3d_accel.xo: $(XFLIB_DIR)/L2/examples/3dlut/xf_3dlut_accel.cpp 
 	$(ECHO) "Compiling Kernel: lut3d_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_lut3d_accel) $(VPP_FLAGS) -k lut3d_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_lut3d_accel) $(VPP_FLAGS) -k lut3d_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/lut3d_accel_write_ini.tcl
 BINARY_CONTAINER_krnl_3dlut_OBJS += $(TEMP_DIR)/lut3d_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_3dlut_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

@@ -1,0 +1,1 @@
+write_ini hls_config_degamma_accel.cfg

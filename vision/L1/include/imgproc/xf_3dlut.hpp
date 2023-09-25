@@ -264,10 +264,10 @@ z_loop:
 ROW_LOOP:
     for (short i = 0; i < in_img.rows; ++i) {
 #pragma HLS LOOP_TRIPCOUNT min = ROWS max = ROWS
-#pragma HLS PIPELINE II = 1
     COL_LOOP:
         for (short j = 0; j < in_img.cols; ++j) {
 #pragma HLS LOOP_TRIPCOUNT min = COLS max = COLS
+#pragma HLS PIPELINE II = 1
             XF_TNAME(INTYPE, NPPC) inPix = in_img.read(i * in_img.cols + j);
             ap_uint<step> inPixR = inPix.range(step - 1, 0);
             ap_uint<step> inPixG = inPix.range(step * 2 - 1, step);

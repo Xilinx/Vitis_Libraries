@@ -241,7 +241,7 @@ endif
 $(TEMP_DIR)/clahe_accel.xo: $(XFLIB_DIR)/L2/examples/clahe/xf_clahe_accel.cpp 
 	$(ECHO) "Compiling Kernel: clahe_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_clahe_accel) $(VPP_FLAGS) -k clahe_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_clahe_accel) $(VPP_FLAGS) -k clahe_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/clahe_accel_write_ini.tcl
 BINARY_CONTAINER_krnl_clahe_OBJS += $(TEMP_DIR)/clahe_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_clahe_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

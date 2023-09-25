@@ -231,7 +231,7 @@ endif
 $(TEMP_DIR)/demosaicing_accel.xo: $(XFLIB_DIR)/L2/examples/demosaicing/xf_demosaicing_accel.cpp 
 	$(ECHO) "Compiling Kernel: demosaicing_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_demosaicing_accel) $(VPP_FLAGS) -k demosaicing_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_demosaicing_accel) $(VPP_FLAGS) -k demosaicing_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/demosaicing_accel_write_ini.tcl
 BINARY_CONTAINER_krnl_demosaicing_OBJS += $(TEMP_DIR)/demosaicing_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_demosaicing_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

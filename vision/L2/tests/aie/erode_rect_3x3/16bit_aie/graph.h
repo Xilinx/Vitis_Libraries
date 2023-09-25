@@ -32,16 +32,18 @@ class erodeGraph : public adf::graph {
     kernel k1;
 
    public:
-    port<input> in1;
-    port<output> out;
+    input_plio in1;
+    output_plio out;
 
     erodeGraph() {
         // create kernels
         k1 = kernel::create(erode_rect_3x3);
+        in1 = input_plio::create("DataIn1", adf::plio_64_bits, "data/input.txt");
+        out = output_plio::create("DataOut1", adf::plio_64_bits, "data/output.txt");
 
         // create nets to connect kernels and IO ports
-        connect<>(in1, k1.in[0]);
-        connect<>(k1.out[0], out);
+        connect<>(in1.out[0], k1.in[0]);
+        connect<>(k1.out[0], out.in[0]);
 
         adf::dimensions(k1.in[0]) = {ELEM_WITH_METADATA};
         adf::dimensions(k1.out[0]) = {ELEM_WITH_METADATA};

@@ -44,7 +44,7 @@ void degamma_accel(ap_uint<INPUT_PTR_WIDTH>* in_ptr,
 
     xf::cv::Array2xfMat<INPUT_PTR_WIDTH, IN_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN>(in_ptr, imgInput);
 
-    degamma<IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT, NUM>(imgInput, imgOutput, params,
+    degamma<IN_TYPE, OUT_TYPE, HEIGHT, WIDTH, NPPCX, NUM, XF_CV_DEPTH_IN, XF_CV_DEPTH_OUT>(imgInput, imgOutput, params,
                                                                                            bayerp);
 
     xf::cv::xfMat2Array<OUTPUT_PTR_WIDTH, OUT_TYPE, HEIGHT, WIDTH, NPPCX, XF_CV_DEPTH_OUT>(imgOutput, out_ptr);

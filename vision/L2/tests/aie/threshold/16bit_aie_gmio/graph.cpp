@@ -16,17 +16,8 @@
 
 #include "graph.h"
 
-GMIO gmioIn[1] = {GMIO("gmioIn1", 256, 1000)};
-GMIO gmioOut[1] = {GMIO("gmioOut1", 256, 1000)};
-
-// connect dataflow graph to simulation platform
-simulation::platform<1, 1> platform(&gmioIn[0], &gmioOut[0]);
-
 // instantiate cardano dataflow graph
 thresholdGraph mygraph;
-
-connect<> net0(platform.src[0], mygraph.in1);
-connect<> net1(mygraph.out1, platform.sink[0]);
 
 // initialize and run mygraphe dataflow graph
 #if defined(__AIESIM__) || defined(__X86SIM__)
@@ -53,9 +44,9 @@ int main(int argc, char** argv) {
     mygraph.update(mygraph.maxVal, max_val);
     mygraph.run(1);
 
-    gmioIn[0].gm2aie_nb(inputData, BLOCK_SIZE_in_Bytes);
-    gmioOut[0].aie2gm_nb(outputData, BLOCK_SIZE_in_Bytes);
-    gmioOut[0].wait();
+    mygraph.in1.gm2aie_nb(inputData, BLOCK_SIZE_in_Bytes);
+    mygraph.out1.aie2gm_nb(outputData, BLOCK_SIZE_in_Bytes);
+    mygraph.out1.wait();
 
     // Compare the results
     int acceptableError = 1;

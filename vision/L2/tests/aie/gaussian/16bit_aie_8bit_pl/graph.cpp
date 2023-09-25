@@ -16,17 +16,8 @@
 
 #include "graph.h"
 
-// Virtual platform ports
-PLIO* in1 = new PLIO("DataIn1", adf::plio_128_bits, "data/input.txt");
-PLIO* out1 = new PLIO("DataOut1", adf::plio_128_bits, "data/output.txt");
-simulation::platform<1, 1> platform(in1, out1);
-
 // Graph object
 myGraph gaussian_graph;
-
-// Virtual platform connectivity
-connect<> net0(platform.src[0], gaussian_graph.inptr);
-connect<> net1(gaussian_graph.outptr, platform.sink[0]);
 
 #define SRS_SHIFT 10
 float kData[9] = {0.01134, 0.08382, 0.01134, 0.08382, 0.61932, 0.08382, 0.01134, 0.08382, 0.01134};

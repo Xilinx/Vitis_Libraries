@@ -27,14 +27,18 @@ using namespace adf;
 class myGraph : public adf::graph {
    public:
     kernel k1;
-    port<input> inptr;
-    port<output> outptr;
+    input_gmio inptr;
+    output_gmio outptr;
     port<input> kernelCoefficients;
 
     myGraph() {
         k1 = kernel::create(gaussian);
-        adf::connect<>(inptr, k1.in[0]);
-        adf::connect<>(k1.out[0], outptr);
+
+        inptr = input_gmio::create("gmioIn1", 256, 1000);
+        outptr = output_gmio::create("gmioOut1", 256, 1000);
+
+        adf::connect<>(inptr.out[0], k1.in[0]);
+        adf::connect<>(k1.out[0], outptr.in[0]);
 
         adf::dimensions(k1.in[0]) = {ELEM_WITH_METADATA};
         adf::dimensions(k1.out[0]) = {ELEM_WITH_METADATA};

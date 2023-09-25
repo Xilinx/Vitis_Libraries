@@ -16,18 +16,8 @@
 
 #include "graph.h"
 
-PLIO* in_0 = new PLIO("DataIn1", adf::plio_128_bits, "data/input.txt");
-PLIO* out_0 = new PLIO("DataOut1", adf::plio_128_bits, "data/output.txt");
-
-// connect dataflow graph to simulation platform
-simulation::platform<1, 1> platform(in_0, out_0);
-
 // instantiate adf dataflow graph
 thresholdGraph mygraph;
-
-connect<> net0(platform.src[0], mygraph.in1);
-
-connect<> net1(mygraph.out1, platform.sink[0]);
 
 // initialize and run the dataflow graph
 #if defined(__AIESIM__) || defined(__X86SIM__)

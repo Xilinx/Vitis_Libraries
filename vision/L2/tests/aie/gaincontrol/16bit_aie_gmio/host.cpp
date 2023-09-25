@@ -161,15 +161,15 @@ int main(int argc, char** argv) {
             //@{
             std::cout << "Iteration : " << (i + 1) << std::endl;
             START_TIMER
-            auto tiles_sz = tiler.host2aie_nb(srcData.data(), srcImageR.size(), {"gmioIn[0]"});
-            stitcher.aie2host_nb(dstData.data(), dst.size(), tiles_sz, {"gmioOut[0]"});
+            auto tiles_sz = tiler.host2aie_nb(srcData.data(), srcImageR.size(), {"gc.in1"});
+            stitcher.aie2host_nb(dstData.data(), dst.size(), tiles_sz, {"gc.out"});
 
             std::cout << "Graph run(" << (tiles_sz[0] * tiles_sz[1]) << ")\n";
             gc.run(tiles_sz[0] * tiles_sz[1]);
 
             gc.wait();
-            tiler.wait({"gmioIn[0]"});
-            stitcher.wait({"gmioOut[0]"});
+            tiler.wait({"gc.in1"});
+            stitcher.wait({"gc.out"});
 
             STOP_TIMER("gaincontrol function")
             tt += tdiff;

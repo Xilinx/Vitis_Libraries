@@ -231,7 +231,7 @@ endif
 $(TEMP_DIR)/equalizeHist_accel.xo: $(XFLIB_DIR)/L2/examples/histequalize/xf_hist_equalize_accel.cpp 
 	$(ECHO) "Compiling Kernel: equalizeHist_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_equalizeHist_accel) $(VPP_FLAGS) -k equalizeHist_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_equalizeHist_accel) $(VPP_FLAGS) -k equalizeHist_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/equalizeHist_accel_write_ini.tcl
 BINARY_CONTAINER_krnl_hist_equalize_OBJS += $(TEMP_DIR)/equalizeHist_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_hist_equalize_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

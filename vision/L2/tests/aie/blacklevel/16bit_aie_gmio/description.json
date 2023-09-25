@@ -86,12 +86,12 @@
             "accelerators": [
                 {
                     "location": "LIB_DIR/L2/tests/aie/blacklevel/16bit_aie_gmio/graph.cpp",
-                    "pl-freq": 300,
                     "workdir": "./Work",
                     "name": "libadf.a",
                     "aie_kernel_files": [
                         "xf_blacklevel.cc"
-                    ]
+                    ],
+                    "config": "aie.cfg"
                 }
             ]
         }

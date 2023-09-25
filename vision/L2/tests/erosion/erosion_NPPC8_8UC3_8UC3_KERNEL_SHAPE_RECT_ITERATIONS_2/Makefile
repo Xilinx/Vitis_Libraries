@@ -231,7 +231,7 @@ endif
 $(TEMP_DIR)/erosion.xo: $(XFLIB_DIR)/L2/examples/erosion/xf_erosion_accel.cpp 
 	$(ECHO) "Compiling Kernel: erosion"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_erosion) $(VPP_FLAGS) -k erosion -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_erosion) $(VPP_FLAGS) -k erosion -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/erosion_write_ini.tcl
 BINARY_CONTAINER_krnl_erosion_OBJS += $(TEMP_DIR)/erosion.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_erosion_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

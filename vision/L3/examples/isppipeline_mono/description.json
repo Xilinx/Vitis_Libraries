@@ -7,7 +7,7 @@
     "platform_allowlist": [
         "u200", 
         "zcu102", 
-	"vck190",
+	    "vck190",
         "zcu104", 
         "u50"
     ], 
@@ -87,6 +87,32 @@
             }
         }, 
         "zcu104": {
+            "host": {
+                "compiler": {
+                    "includepaths": [
+                        "$(SYSROOT)/usr/include", 
+                        "$(SYSROOT)/usr/include/opencv4"
+                    ]
+                }, 
+                "linker": {
+                    "librarypaths": [
+                        "$(SYSROOT)/usr/lib", 
+                        "${SYSROOT}/opt/xilinx/xrt/lib"
+                    ]
+                }, 
+                "compiler_x86": {
+                    "includepaths": [
+                        "$(OPENCV_INCLUDE)"
+                    ]
+                }, 
+                "linker_x86": {
+                    "librarypaths": [
+                        "$(OPENCV_LIB)"
+                    ]
+                }
+            }
+        }, 
+        "vck190": {
             "host": {
                 "compiler": {
                     "includepaths": [

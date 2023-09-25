@@ -16,17 +16,8 @@
 
 #include "graph.h"
 
-GMIO gmioIn[1] = {GMIO("gmioIn1", 256, 1000)};
-GMIO gmioOut[1] = {GMIO("gmioOut1", 256, 1000)};
-
-// connect dataflow graph to simulation platform
-simulation::platform<1, 1> platform(&gmioIn[0], &gmioOut[0]);
-
 // instantiate adf dataflow graph
 gaincontrolGraph gc;
-
-connect<> net0(platform.src[0], gc.in1);
-connect<> net1(gc.out, platform.sink[0]);
 
 // initialize and run the dataflow graph
 #if defined(__AIESIM__) || defined(__X86SIM__)
@@ -54,9 +45,9 @@ int main(int argc, char** argv) {
     gc.update(gc.bgain, bgain);
     gc.run(1);
 
-    gmioIn[0].gm2aie_nb(inputData, BLOCK_SIZE_in_Bytes);
-    gmioOut[0].aie2gm_nb(outputData, BLOCK_SIZE_in_Bytes);
-    gmioOut[0].wait();
+    gc.in1.gm2aie_nb(inputData, BLOCK_SIZE_in_Bytes);
+    gc.out.aie2gm_nb(outputData, BLOCK_SIZE_in_Bytes);
+    gc.out.wait();
 
     // Compare the results
     typedef uint8_t realSize;

@@ -124,16 +124,16 @@ int main(int argc, char** argv) {
             // {"gmioIn[0]"});
             // stitcher.aie2host_nb(dstData.data(), dst.size(), tiles_sz,
             // {"gmioOut[0]"});
-            auto tiles_sz = tiler.host2aie_nb(srcData.data(), srcImageR.size(), {"gmioIn[0]"});
-            stitcher.aie2host_nb(dstData.data(), dst.size(), tiles_sz, {"gmioOut[0]"});
+            auto tiles_sz = tiler.host2aie_nb(srcData.data(), srcImageR.size(), {"mygraph.in1"});
+            stitcher.aie2host_nb(dstData.data(), dst.size(), tiles_sz, {"mygraph.out1"});
 
             std::cout << "Graph run(" << (tiles_sz[0] * tiles_sz[1]) << ")\n";
 
             mygraph.run(tiles_sz[0] * tiles_sz[1]);
 
             mygraph.wait();
-            tiler.wait({"gmioIn[0]"});
-            stitcher.wait({"gmioOut[0]"});
+            tiler.wait({"mygraph.in1"});
+            stitcher.wait({"mygraph.out1"});
 
             STOP_TIMER("threshold function")
             tt += tdiff;

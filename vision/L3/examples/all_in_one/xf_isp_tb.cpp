@@ -19,6 +19,7 @@
 #include "xcl2.hpp"
 #include <bitset>
 #include <iostream>
+#include "all_in_one_reference/xf_all_in_one_ref.hpp"
 using namespace std;
 
 void bayerizeImage(cv::Mat img, cv::Mat& cfa_output, int code) {
@@ -178,7 +179,8 @@ void wr_ocv_gen(float& alpha,
                 float& rho,
                 float& imax,
                 float* t,
-                short wr_ocv[NO_EXPS][W_B_SIZE]) {
+                short wr_ocv[NO_EXPS][W_B_SIZE],
+                double wr[NO_EXPS][W_B_SIZE]) {
     int m = NO_EXPS;
 
     float gamma_out[NO_EXPS] = {0.0, 0.0};
@@ -206,7 +208,7 @@ void wr_ocv_gen(float& alpha,
 
     float c_inters = -(log(intersec) / (std::pow((gamma_out[0] - mu_h[0]), 2)));
 
-    double wr[NO_EXPS][W_B_SIZE];
+    // double wr[NO_EXPS][W_B_SIZE];
 
     FILE* fp = fopen("weights.txt", "w");
     for (int i = 0; i < NO_EXPS; i++) {
@@ -280,6 +282,9 @@ int main(int argc, char** argv) {
     unsigned short in_width, in_height;
 
     unsigned short bformat = XF_BAYER_PATTERN; // Bayer format BG-0; GB-1; GR-2; RG-3
+    cv::Mat cfa_bayer_output_org(in_img.rows, in_img.cols, CV_16UC1);
+    cv::Mat gamma_img;
+    gamma_img.create(in_img.rows, in_img.cols, CV_16UC1);
     if (USE_HDR_FUSION) {
         cv::imwrite("in_img1.png", in_img1);
         cv::imwrite("in_img2.png", in_img2);
@@ -299,31 +304,33 @@ int main(int argc, char** argv) {
             for (int c = 0; c < width + NUM_H_BLANK; c++) {
                 if (r < NUM_V_BLANK_LINES) {
                     if (c >= NUM_H_BLANK)
-                        interleaved_img.at<CVTYPE>(r, c) = cfa_bayer_output_sef.at<CVTYPE>(r, c - NUM_H_BLANK);
+                        interleaved_img.at<unsigned short>(r, c) =
+                            cfa_bayer_output_lef.at<unsigned short>(r, c - NUM_H_BLANK);
                     else
-                        interleaved_img.at<CVTYPE>(r, c) = 0;
+                        interleaved_img.at<unsigned short>(r, c) = 0;
                 }
 
                 if (r >= NUM_V_BLANK_LINES && r <= ((2 * height) - NUM_V_BLANK_LINES)) {
                     if (r % 2 == 0) {
                         if (c >= NUM_H_BLANK)
-                            interleaved_img.at<CVTYPE>(r, c) = cfa_bayer_output_lef.at<CVTYPE>(cnt, c - NUM_H_BLANK);
+                            interleaved_img.at<unsigned short>(r, c) =
+                                cfa_bayer_output_sef.at<unsigned short>(cnt, c - NUM_H_BLANK);
                         else
-                            interleaved_img.at<CVTYPE>(r, c) = 0;
+                            interleaved_img.at<unsigned short>(r, c) = 0;
                     } else {
                         if (c >= NUM_H_BLANK)
-                            interleaved_img.at<CVTYPE>(r, c) =
-                                cfa_bayer_output_sef.at<CVTYPE>(cnt1 + NUM_V_BLANK_LINES - 1, c - NUM_H_BLANK);
+                            interleaved_img.at<unsigned short>(r, c) =
+                                cfa_bayer_output_lef.at<unsigned short>(cnt1 + NUM_V_BLANK_LINES - 1, c - NUM_H_BLANK);
                         else
-                            interleaved_img.at<CVTYPE>(r, c) = 0;
+                            interleaved_img.at<unsigned short>(r, c) = 0;
                     }
                 }
-
                 if (r >= ((2 * height) - NUM_V_BLANK_LINES)) {
                     if (c >= NUM_H_BLANK)
-                        interleaved_img.at<CVTYPE>(r, c) = cfa_bayer_output_lef.at<CVTYPE>(cnt, c - NUM_H_BLANK);
+                        interleaved_img.at<unsigned short>(r, c) =
+                            cfa_bayer_output_sef.at<unsigned short>(cnt, c - NUM_H_BLANK);
                     else
-                        interleaved_img.at<CVTYPE>(r, c) = 0;
+                        interleaved_img.at<unsigned short>(r, c) = 0;
                 }
             }
             if (r % 2 == 0 && r >= NUM_V_BLANK_LINES) {
@@ -338,12 +345,8 @@ int main(int argc, char** argv) {
 
     } else {
         cv::imwrite("in_img.png", in_img);
-        cv::Mat cfa_bayer_output_org(in_img.rows, in_img.cols, CV_16UC1);
         bayerizeImage(in_img, cfa_bayer_output_org, bformat);
         cv::imwrite("cfa_output_org.png", cfa_bayer_output_org);
-
-        cv::Mat gamma_img;
-        gamma_img.create(in_img.rows, in_img.cols, CV_16UC1);
 
         int out_val1;
         int pxl_val1;
@@ -456,8 +459,10 @@ int main(int argc, char** argv) {
     float imax = (W_B_SIZE - 1);
     float t[NO_EXPS] = {1.0f, 0.25f}; //{1.0f,0.25f,0.0625f};
     short wr_ocv[NO_EXPS][W_B_SIZE];
+    double wr[NO_EXPS][W_B_SIZE];
+
     // wr_ocv_gen() function call
-    wr_ocv_gen(alpha, optical_black_value, intersec, rho, imax, t, wr_ocv);
+    wr_ocv_gen(alpha, optical_black_value, intersec, rho, imax, t, wr_ocv, wr);
 
     short wr_hls[NO_EXPS * XF_NPPCX * W_B_SIZE];
 
@@ -608,7 +613,75 @@ int main(int argc, char** argv) {
 
 #endif
 
-    /////////////////////////////////////// CL ////////////////////////
+    ///////////////////////////all in one reference section//////////////
+    cv::Mat final_ocv;
+
+#if USE_CSC
+    final_ocv.create(height, width, CV_16UC1);
+#else
+    final_ocv.create(height, width, CV_8UC3);
+#endif
+
+#if DEBUG
+    cv::Mat HDR_ref_out;
+    HDR_ref_out.create(height, width, CV_IN_TYPE);
+
+    cv::Mat rggb_out_ref;
+    rggb_out_ref.create(height, width, CV_IN_TYPE);
+
+    cv::Mat aec_ref_out;
+    aec_ref_out.create(height, width, CV_IN_TYPE);
+
+    cv::Mat blacklevel_out_ref;
+    blacklevel_out_ref.create(height, width, CV_IN_TYPE);
+
+    cv::Mat bpc_ref;
+    bpc_ref.create(height, width, CV_IN_TYPE);
+
+    cv::Mat degamma_out_ref;
+    degamma_out_ref.create(height, width, CV_IN_TYPE);
+
+    cv::Mat lsc_out_ref;
+    lsc_out_ref.create(height, width, CV_IN_TYPE);
+
+    cv::Mat demosaic_out_ref(height, width, CV_OUT_TYPE);
+
+    cv::Mat awb_out_ref;
+    awb_out_ref.create(height, width, CV_OUT_TYPE);
+
+    cv::Mat gaincontrol_out_ref;
+    gaincontrol_out_ref.create(height, width, CV_IN_TYPE);
+
+    cv::Mat ccm_out_ref(height, width, CV_OUT_TYPE);
+
+    cv::Mat tm_out_ref;
+    tm_out_ref.create(height, width, CV_GTM_TYPE);
+
+    cv::Mat gamma_out_ref;
+    gamma_out_ref.create(height, width, CV_GTM_TYPE);
+
+    cv::Mat lut3d_out_ref;
+    lut3d_out_ref.create(height, width, CV_GTM_TYPE);
+
+    cv::Mat yuyv_out_ref;
+
+#if USE_CSC
+    yuyv_out_ref.create(height, width, CV_16UC1);
+#else
+    yuyv_out_ref.create(height, width, CV_8UC3);
+#endif
+
+    all_in_one_ref(out_img_12bit, wr, params_decomand, height, width, pawb, rgain, bgain, blk_height, blk_width,
+                   lut_dim, lut, final_ocv, HDR_ref_out, rggb_out_ref, aec_ref_out, blacklevel_out_ref, bpc_ref,
+                   degamma_out_ref, lsc_out_ref, gaincontrol_out_ref, demosaic_out_ref, awb_out_ref, ccm_out_ref,
+                   tm_out_ref, gamma_out_ref, lut3d_out_ref, yuyv_out_ref);
+
+#else
+    all_in_one_ref(out_img_12bit, wr, params_decomand, height, width, pawb, rgain, bgain, blk_height, blk_width,
+                   lut_dim, lut, final_ocv);
+#endif
+
+    ///////////////////////////////////// CL ////////////////////////
     size_t filter1_in_size_bytes = 25 * sizeof(unsigned char);
     size_t filter2_in_size_bytes = 9 * sizeof(unsigned char);
     size_t sub_wgts_in_size_bytes = 4 * sizeof(unsigned char);
@@ -808,6 +881,14 @@ int main(int argc, char** argv) {
     if (USE_RGBIR) {
         imwrite("hls_out_ir.png", out_img_ir);
     }
+    cv::Mat diff_testing;
+    diff_testing.create(height, width, out_img.type());
+
+    std::cout << "testing kernel error" << std::endl;
+    cv::absdiff(out_img, final_ocv, diff_testing);
+
+    float err_per_testing;
+    xf::cv::analyzeDiff(diff_testing, ERROR_THRESHOLD, err_per_testing);
 
     std::cout << "Test Finished" << std::endl;
     return 0;

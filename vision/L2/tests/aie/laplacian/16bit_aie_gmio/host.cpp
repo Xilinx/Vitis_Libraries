@@ -114,8 +114,8 @@ int main(int argc, char** argv) {
             std::cout << "Iteration : " << (i + 1) << std::endl;
 
             START_TIMER
-            auto tiles_sz = tiler.host2aie_nb(srcData.data(), srcImageR.size(), {"gmioIn[0]"});
-            stitcher.aie2host_nb(dstData.data(), dst.size(), tiles_sz, {"gmioOut[0]"});
+            auto tiles_sz = tiler.host2aie_nb(srcData.data(), srcImageR.size(), {"mygraph.inprt"});
+            stitcher.aie2host_nb(dstData.data(), dst.size(), tiles_sz, {"mygraph.outprt"});
             // auto tiles_sz = tiler.host2aie_nb(src);
             // stitcher.aie2host_nb(dst, tiles_sz);
 
@@ -124,8 +124,8 @@ int main(int argc, char** argv) {
             mygraph.run(tiles_sz[0] * tiles_sz[1]);
 
             mygraph.wait();
-            tiler.wait({"gmioIn[0]"});
-            stitcher.wait({"gmioOut[0]"});
+            tiler.wait({"mygraph.inprt"});
+            stitcher.wait({"mygraph.outprt"});
 
             STOP_TIMER("laplacian function")
             tt += tdiff;

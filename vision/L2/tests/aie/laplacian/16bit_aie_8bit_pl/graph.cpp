@@ -16,15 +16,7 @@
 
 #include "graph.h"
 
-PLIO* in1 = new PLIO("DataIn1", adf::plio_128_bits, "data/input.txt");
-PLIO* out1 = new PLIO("DataOut1", adf::plio_128_bits, "data/output.txt");
-
-simulation::platform<1, 1> platform(in1, out1);
-
 laplacianGraph mygraph;
-
-connect<> net0(platform.src[0], mygraph.inprt);
-connect<> net1(mygraph.outprt, platform.sink[0]);
 
 #define SRS_SHIFT 0
 float kData[9] = {2, 0, 2, 0, -8, 0, 2, 0, 2};

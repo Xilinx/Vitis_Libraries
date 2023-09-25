@@ -231,7 +231,7 @@ endif
 $(TEMP_DIR)/resize_accel.xo: $(XFLIB_DIR)/L2/examples/resize/xf_resize_accel.cpp 
 	$(ECHO) "Compiling Kernel: resize_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_resize_accel) $(VPP_FLAGS) -k resize_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_resize_accel) $(VPP_FLAGS) -k resize_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/resize_accel_write_ini.tcl
 BINARY_CONTAINER_krnl_resize_OBJS += $(TEMP_DIR)/resize_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_resize_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

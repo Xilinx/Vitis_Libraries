@@ -231,7 +231,7 @@ endif
 $(TEMP_DIR)/otsuthreshold_accel.xo: $(XFLIB_DIR)/L2/examples/otsuthreshold/xf_otsuthreshold_accel.cpp 
 	$(ECHO) "Compiling Kernel: otsuthreshold_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_otsuthreshold_accel) $(VPP_FLAGS) -k otsuthreshold_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_otsuthreshold_accel) $(VPP_FLAGS) -k otsuthreshold_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/otsuthreshold_accel_write_ini.tcl
 BINARY_CONTAINER_krnl_otsuthreshold_OBJS += $(TEMP_DIR)/otsuthreshold_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_otsuthreshold_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

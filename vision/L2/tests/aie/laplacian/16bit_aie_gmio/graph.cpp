@@ -16,15 +16,7 @@
 
 #include "graph.h"
 
-GMIO gmioIn[1] = {GMIO("gmioIn1", 256, 1000)};
-GMIO gmioOut[1] = {GMIO("gmioOut1", 256, 1000)};
-
-simulation::platform<1, 1> platform(&gmioIn[0], &gmioOut[0]);
-
 laplacianGraph mygraph;
-
-connect<> net0(platform.src[0], mygraph.inprt);
-connect<> net1(mygraph.outprt, platform.sink[0]);
 
 float kData[9] = {2, 0, 2, 0, -8, 0, 2, 0, 2};
 
@@ -68,9 +60,9 @@ int main(int argc, char** argv) {
     mygraph.update(mygraph.kernelCoefficients, float2fixed_coeff<0, 16>(kData).data(), 16);
 
     mygraph.run(1);
-    gmioIn[0].gm2aie_nb(inputData, BLOCK_SIZE_in_Bytes);
-    gmioOut[0].aie2gm_nb(outputData, BLOCK_SIZE_in_Bytes);
-    gmioOut[0].wait();
+    mygraph.inprt.gm2aie_nb(inputData, BLOCK_SIZE_in_Bytes);
+    mygraph.outprt.aie2gm_nb(outputData, BLOCK_SIZE_in_Bytes);
+    mygraph.outprt.wait();
 
     // compare the results
     int window[9];

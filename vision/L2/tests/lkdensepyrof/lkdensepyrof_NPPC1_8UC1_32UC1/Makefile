@@ -261,12 +261,12 @@ endif
 $(TEMP_DIR)/pyr_dense_optical_flow_accel.xo: $(XFLIB_DIR)/L2/examples/lkdensepyrof/xf_pyr_dense_optical_flow_accel.cpp 
 	$(ECHO) "Compiling Kernel: pyr_dense_optical_flow_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_pyr_dense_optical_flow_accel) $(VPP_FLAGS) -k pyr_dense_optical_flow_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_pyr_dense_optical_flow_accel) $(VPP_FLAGS) -k pyr_dense_optical_flow_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/pyr_dense_optical_flow_accel_write_ini.tcl
 BINARY_CONTAINER_krnl_pyr_dense_optical_flow_OBJS += $(TEMP_DIR)/pyr_dense_optical_flow_accel.xo
 $(TEMP_DIR)/pyr_down_accel.xo: $(XFLIB_DIR)/L2/examples/lkdensepyrof/xf_pyr_down_accel.cpp 
 	$(ECHO) "Compiling Kernel: pyr_down_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_pyr_down_accel) $(VPP_FLAGS) -k pyr_down_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_pyr_down_accel) $(VPP_FLAGS) -k pyr_down_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/pyr_down_accel_write_ini.tcl
 BINARY_CONTAINER_krnl_pyr_dense_optical_flow_OBJS += $(TEMP_DIR)/pyr_down_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_pyr_dense_optical_flow_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

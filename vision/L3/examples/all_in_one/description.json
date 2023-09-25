@@ -132,6 +132,8 @@
     "data": [
         "LIB_DIR/data/ltm_input_HD_sef.png",
         "LIB_DIR/data/ltm_input_HD_lef.png",
+        "LIB_DIR/data/ltm_input_lef_128x128.png",
+        "LIB_DIR/data/ltm_input_sef_128x128.png",
         "LIB_DIR/data/input-lut-33.txt"
     ], 
     "host": {
@@ -142,7 +144,8 @@
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
             ], 
             "includepaths": [
-                "LIB_DIR/L3/examples/all_in_one/config"
+                "LIB_DIR/L3/examples/all_in_one/config",
+                "LIB_DIR/L3/examples/all_in_one/"
             ], 
             "options": "-O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include", 
             "symbols": [
@@ -154,7 +157,8 @@
         "compiler": {
             "symbols": [], 
             "includepaths": [
-                "LIB_DIR/L3/examples/all_in_one/config"
+                "LIB_DIR/L3/examples/all_in_one/config",
+                "LIB_DIR/L3/examples/all_in_one/"
             ], 
             "clflags": []
         }

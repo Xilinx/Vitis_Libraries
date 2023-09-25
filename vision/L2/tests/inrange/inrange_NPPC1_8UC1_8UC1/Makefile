@@ -231,7 +231,7 @@ endif
 $(TEMP_DIR)/inrange_accel.xo: $(XFLIB_DIR)/L2/examples/inrange/xf_inrange_accel.cpp 
 	$(ECHO) "Compiling Kernel: inrange_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_inrange_accel) $(VPP_FLAGS) -k inrange_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_inrange_accel) $(VPP_FLAGS) -k inrange_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/inrange_accel_write_ini.tcl
 BINARY_CONTAINER_krnl_inrange_OBJS += $(TEMP_DIR)/inrange_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_inrange_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

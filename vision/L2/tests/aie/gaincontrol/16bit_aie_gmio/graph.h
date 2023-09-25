@@ -30,18 +30,21 @@ class gaincontrolGraph : public adf::graph {
     kernel k1;
 
    public:
-    port<input> in1;
+    input_gmio in1;
     port<input> rgain;
     port<input> bgain;
-    port<output> out;
+    output_gmio out;
 
     gaincontrolGraph() {
         // create kernels
         k1 = kernel::create(gaincontrol<CODE>);
 
+        in1 = input_gmio::create("gmioIn1", 256, 1000);
+        out = output_gmio::create("gmioOut1", 256, 1000);
+
         // create nets to connect kernels and IO ports
-        adf::connect<>(in1, k1.in[0]);
-        adf::connect<>(k1.out[0], out);
+        adf::connect<>(in1.out[0], k1.in[0]);
+        adf::connect<>(k1.out[0], out.in[0]);
 
         adf::dimensions(k1.in[0]) = {ELEM_WITH_METADATA};
         adf::dimensions(k1.out[0]) = {ELEM_WITH_METADATA};

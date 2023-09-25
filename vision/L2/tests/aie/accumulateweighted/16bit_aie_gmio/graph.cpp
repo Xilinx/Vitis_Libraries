@@ -16,18 +16,7 @@
 
 #include "graph.h"
 
-GMIO gmioIn[2] = {GMIO("gmioIn1", 256, 1000), GMIO("gmioIn2", 256, 1000)};
-GMIO gmioOut[1] = {GMIO("gmioOut1", 256, 1000)};
-
-// connect dataflow graph to simulation platform
-simulation::platform<2, 1> platform(&gmioIn[0], &gmioIn[1], &gmioOut[0]);
-
 myGraph accumw_graph;
-
-connect<> net0(platform.src[0], accumw_graph.inprt1);
-connect<> net1(platform.src[1], accumw_graph.inprt2);
-
-connect<> net2(accumw_graph.outprt, platform.sink[0]);
 
 #if defined(__AIESIM__) || defined(__X86SIM__)
 #include <common/xf_aie_utils.hpp>
@@ -57,10 +46,10 @@ int main(int argc, char** argv) {
     accumw_graph.update(accumw_graph.alpha, alpha);
     accumw_graph.run(1);
 
-    gmioIn[0].gm2aie_nb(inputData, BLOCK_SIZE_in_Bytes);
-    gmioIn[1].gm2aie_nb(inputData1, BLOCK_SIZE_in_Bytes);
-    gmioOut[0].aie2gm_nb(outputData, BLOCK_SIZE_in_Bytes);
-    gmioOut[0].wait();
+    accumw_graph.inprt1.gm2aie_nb(inputData, BLOCK_SIZE_in_Bytes);
+    accumw_graph.inprt2.gm2aie_nb(inputData1, BLOCK_SIZE_in_Bytes);
+    accumw_graph.outprt.aie2gm_nb(outputData, BLOCK_SIZE_in_Bytes);
+    accumw_graph.outprt.wait();
 
     // Compare the results
     int acceptableError = 1;

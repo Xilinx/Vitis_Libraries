@@ -35,17 +35,21 @@ class thresholdGraph : public adf::graph {
     kernel k1;
 
    public:
-    port<input> in1;
-    port<output> out1;
+    input_plio in1;
+    output_plio out1;
     port<input> threshVal;
     port<input> maxVal;
 
     thresholdGraph() {
         // create kernels
         k1 = kernel::create(threshold);
+
+        in1 = input_plio::create("DataIn1", adf::plio_128_bits, "data/input.txt");
+        out1 = output_plio::create("DataOut1", adf::plio_128_bits, "data/output.txt");
+
         // create nets to connect kernels and IO ports
-        adf::connect<>(in1, k1.in[0]);
-        adf::connect<>(k1.out[0], out1);
+        adf::connect<>(in1.out[0], k1.in[0]);
+        adf::connect<>(k1.out[0], out1.in[0]);
 
         adf::dimensions(k1.in[0]) = {ELEM_WITH_METADATA};
         adf::dimensions(k1.out[0]) = {ELEM_WITH_METADATA};

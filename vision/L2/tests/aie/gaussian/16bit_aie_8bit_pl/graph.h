@@ -27,16 +27,20 @@ using namespace adf;
 class myGraph : public adf::graph {
    public:
     kernel k1;
-    port<input> inptr;
-    port<output> outptr;
+    input_plio inptr;
+    output_plio outptr;
     port<input> kernelCoefficients;
 
     myGraph() {
         k1 = kernel::create(gaussian);
+
+        inptr = input_plio::create("DataIn1", adf::plio_128_bits, "data/input.txt");
+        outptr = output_plio::create("DataOut1", adf::plio_128_bits, "data/output.txt");
+
         location<kernel>(k1) = tile(25, 0);
 
-        adf::connect<>(inptr, k1.in[0]);
-        adf::connect<>(k1.out[0], outptr);
+        adf::connect<>(inptr.out[0], k1.in[0]);
+        adf::connect<>(k1.out[0], outptr.in[0]);
 
         adf::dimensions(k1.in[0]) = {ELEM_WITH_METADATA};
         adf::dimensions(k1.out[0]) = {ELEM_WITH_METADATA};

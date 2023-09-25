@@ -235,7 +235,7 @@ endif
 $(TEMP_DIR)/modefilter_accel.xo: $(XFLIB_DIR)/L2/examples/modefilter/xf_modefilter_accel.cpp 
 	$(ECHO) "Compiling Kernel: modefilter_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_modefilter_accel) $(VPP_FLAGS) -k modefilter_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_modefilter_accel) $(VPP_FLAGS) -k modefilter_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/modefilter_accel_write_ini.tcl
 BINARY_CONTAINER_krnl_modefilter_OBJS += $(TEMP_DIR)/modefilter_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_modefilter_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

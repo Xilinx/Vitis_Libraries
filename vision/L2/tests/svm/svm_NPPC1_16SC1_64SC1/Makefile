@@ -231,7 +231,7 @@ endif
 $(TEMP_DIR)/svm_accel.xo: $(XFLIB_DIR)/L2/examples/svm/xf_svm_accel.cpp 
 	$(ECHO) "Compiling Kernel: svm_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_svm_accel) $(VPP_FLAGS) -k svm_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_svm_accel) $(VPP_FLAGS) -k svm_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/svm_accel_write_ini.tcl
 BINARY_CONTAINER_krnl_svm_OBJS += $(TEMP_DIR)/svm_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_svm_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

@@ -231,7 +231,7 @@ endif
 $(TEMP_DIR)/customconv.xo: $(XFLIB_DIR)/L2/examples/customconv/xf_custom_convolution_accel.cpp 
 	$(ECHO) "Compiling Kernel: customconv"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_customconv) $(VPP_FLAGS) -k customconv -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_customconv) $(VPP_FLAGS) -k customconv -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/customconv_write_ini.tcl
 BINARY_CONTAINER_krnl_customconv_OBJS += $(TEMP_DIR)/customconv.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_customconv_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

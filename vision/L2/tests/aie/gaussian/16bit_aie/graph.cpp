@@ -16,15 +16,7 @@
 
 #include "graph.h"
 
-PLIO* in1 = new PLIO("DataIn1", adf::plio_64_bits, "data/input.txt");
-PLIO* out1 = new PLIO("DataOut1", adf::plio_64_bits, "data/output.txt");
-
-simulation::platform<1, 1> platform(in1, out1);
-
 gaussianGraph gauss2_graph;
-
-connect<> net0(platform.src[0], gauss2_graph.in);
-connect<> net1(gauss2_graph.out, platform.sink[0]);
 
 #define SRS_SHIFT 10
 float kData[9] = {0.01134, 0.08382, 0.01134, 0.08382, 0.61932, 0.08382, 0.01134, 0.08382, 0.01134};

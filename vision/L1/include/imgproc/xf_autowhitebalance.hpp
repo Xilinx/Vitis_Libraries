@@ -366,11 +366,11 @@ void AWBNormalizationkernel(xf::cv::Mat<SRC_T, ROWS, COLS, NPC, XFCVDEPTH_IN_1>&
     int pval = 0, read_index = 0, write_index = 0;
     ap_uint<13> row, col;
 
-    ap_fixed<STEP + 16, 2> inv_val[3];
+    ap_fixed<STEP + 18, 2> inv_val[3];
 
-    if (maxmin_diff[0] != 0) inv_val[0] = ((ap_fixed<STEP + 16, 2>)1 / maxmin_diff[0]);
-    if (maxmin_diff[1] != 0) inv_val[1] = ((ap_fixed<STEP + 16, 2>)1 / maxmin_diff[1]);
-    if (maxmin_diff[2] != 0) inv_val[2] = ((ap_fixed<STEP + 16, 2>)1 / maxmin_diff[2]);
+    if (maxmin_diff[0] != 0) inv_val[0] = ((ap_fixed<STEP + 18, 2>)1 / maxmin_diff[0]);
+    if (maxmin_diff[1] != 0) inv_val[1] = ((ap_fixed<STEP + 18, 2>)1 / maxmin_diff[1]);
+    if (maxmin_diff[2] != 0) inv_val[2] = ((ap_fixed<STEP + 18, 2>)1 / maxmin_diff[2]);
 
 Row_Loop1:
     for (row = 0; row < height; row++) {

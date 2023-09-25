@@ -92,13 +92,12 @@
             "accelerators": [
                 {
                     "location": "LIB_DIR/L2/tests/aie/demosaicing/16bit_aie_8bit_pl_RGGB_RGBA/graph.cpp",
-                    "pl-freq": 400,
                     "workdir": "./Work",
-                    "options": "-pl-axi-lite=true",
                     "name": "libadf.a",
                     "files": [
                         "xf_demosaicing.cc"
-                    ]
+                    ],
+                    "config": "aie.cfg"
                 }
             ]
         }

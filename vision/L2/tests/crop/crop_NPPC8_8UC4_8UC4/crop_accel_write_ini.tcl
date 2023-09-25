@@ -1,0 +1,1 @@
+write_ini hls_config_crop_accel.cfg

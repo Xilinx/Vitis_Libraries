@@ -232,7 +232,7 @@ endif
 $(TEMP_DIR)/autowhitebalance_accel.xo: $(XFLIB_DIR)/L2/examples/autowhitebalance/xf_autowhitebalance_accel.cpp 
 	$(ECHO) "Compiling Kernel: autowhitebalance_accel"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_autowhitebalance_accel) $(VPP_FLAGS) -k autowhitebalance_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+	$(VPP) -c $(VPP_FLAGS_autowhitebalance_accel) $(VPP_FLAGS) -k autowhitebalance_accel -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^ --hls.pre_tcl $(CUR_DIR)/autowhitebalance_accel_write_ini.tcl
 BINARY_CONTAINER_krnl_autowhitebalance_OBJS += $(TEMP_DIR)/autowhitebalance_accel.xo
 BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_krnl_autowhitebalance_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)

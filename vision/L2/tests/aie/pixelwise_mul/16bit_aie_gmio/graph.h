@@ -33,9 +33,9 @@ class pixelwiseMulGraph : public adf::graph {
     kernel k1;
 
    public:
-    port<input> in1;
-    port<input> in2;
-    port<output> out;
+    input_gmio in1;
+    input_gmio in2;
+    output_gmio out;
     port<input> scale;
 
     pixelwiseMulGraph() {
@@ -44,13 +44,17 @@ class pixelwiseMulGraph : public adf::graph {
 
         k1 = kernel::create(pixelwise_mul);
 
+        in1 = input_gmio::create("gmioIn1", 256, 1000);
+        in2 = input_gmio::create("gmioIn2", 256, 1000);
+        out = output_gmio::create("gmioOut1", 256, 1000);
+
         // For 16-bit window size is 4096=2048*2, for 32-bit window size is
         // 8192=2048*4
         // create nets to connect kernels and IO ports
         // create nets to connect kernels and IO ports
-        connect<>(in1, k1.in[0]);
-        connect<>(in2, k1.in[1]);
-        connect<>(k1.out[0], out);
+        connect<>(in1.out[0], k1.in[0]);
+        connect<>(in2.out[0], k1.in[1]);
+        connect<>(k1.out[0], out.in[0]);
         connect<parameter>(scale, async(k1.in[2]));
 
         // specify dimensions

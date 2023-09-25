@@ -78,13 +78,12 @@
             "accelerators": [
                 {
                     "location": "LIB_DIR/L2/tests/aie/addweighted/16bit_aie/graph.cpp",
-                    "pl-freq": 300,
                     "workdir": "./Work",
-                    "options": "-pl-axi-lite=true",
                     "name": "libadf.a",
                     "files": [
                         "xf_addweighted.cc"
-                    ]
+                    ],
+                    "config": "aie.cfg"
                 }
             ]
         }

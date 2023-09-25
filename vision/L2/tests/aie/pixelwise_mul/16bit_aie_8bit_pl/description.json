@@ -92,13 +92,12 @@
             "accelerators": [
                 {
                     "location": "LIB_DIR/L2/tests/aie/pixelwise_mul/16bit_aie_8bit_pl/graph.cpp",
-                    "pl-freq": 400,
                     "workdir": "./Work",
-                    "options": "-pl-axi-lite=true",
                     "name": "libadf.a",
                     "files": [
                         "xf_multiplication.cc"
-                    ]
+                    ],
+                    "config": "aie.cfg"
                 }
             ]
         }

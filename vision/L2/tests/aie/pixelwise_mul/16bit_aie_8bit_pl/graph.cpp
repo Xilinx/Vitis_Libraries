@@ -16,19 +16,8 @@
 
 #include "graph.h"
 
-PLIO* in1 = new PLIO("DataIn1", adf::plio_128_bits, "data/input1.txt");
-PLIO* in2 = new PLIO("DataIn2", adf::plio_128_bits, "data/input2.txt");
-PLIO* out1 = new PLIO("DataOut1", adf::plio_128_bits, "data/output.txt");
-
-// connect dataflow graph to simulation platform
-simulation::platform<2, 1> platform(in1, in2, out1);
-
 // instantiate adf dataflow graph to compute weighted moving average
 pixelwiseMulGraph mygraph;
-
-connect<> net0(platform.src[0], mygraph.in1);
-connect<> net1(platform.src[1], mygraph.in2);
-connect<> net2(mygraph.out, platform.sink[0]);
 
 // initialize and run the dataflow graph
 #if defined(__AIESIM__) || defined(__X86SIM__)

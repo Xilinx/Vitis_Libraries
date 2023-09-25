@@ -16,18 +16,8 @@
 
 #include "graph.h"
 
-// Virtual platform ports
-GMIO gmioIn[1] = {GMIO("gmioIn1", 256, 1000)};
-GMIO gmioOut[1] = {GMIO("gmioOut1", 256, 1000)};
-
-simulation::platform<1, 1> platform(&gmioIn[0], &gmioOut[0]);
-
 // Graph object
 myGraph filter_graph;
-
-// Virtual platform connectivity
-connect<> net0(platform.src[0], filter_graph.inptr);
-connect<> net1(filter_graph.outptr, platform.sink[0]);
 
 #define SRS_SHIFT 10
 // float kData[9] = {0,0,0,0,1,0,0,0,0};
@@ -108,9 +98,9 @@ int main(int argc, char** argv) {
 
     filter_graph.run(1);
 
-    gmioIn[0].gm2aie_nb(inputData, ELEM_WITH_METADATA * sizeof(int16_t));
-    gmioOut[0].aie2gm_nb(outputData, ELEM_WITH_METADATA * sizeof(int16_t));
-    gmioOut[0].wait();
+    filter_graph.inptr.gm2aie_nb(inputData, ELEM_WITH_METADATA * sizeof(int16_t));
+    filter_graph.outptr.aie2gm_nb(outputData, ELEM_WITH_METADATA * sizeof(int16_t));
+    filter_graph.outptr.wait();
 
     printf("after graph wait\n");
     filter_graph.end();

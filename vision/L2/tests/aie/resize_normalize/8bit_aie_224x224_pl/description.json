@@ -90,13 +90,12 @@
             "accelerators": [
                 {
                     "location": "LIB_DIR/L2/tests/aie/resize_normalize/8bit_aie_224x224_pl/graph.cpp",
-                    "pl-freq": 400,
                     "workdir": "./Work",
-                    "options": "-pl-axi-lite=true",
                     "name": "libadf.a",
                     "aie_kernel_files": [
                         "xf_resize.cc"
-                    ]
+                    ],
+                    "config": "aie.cfg"
                 }
             ]
         }
