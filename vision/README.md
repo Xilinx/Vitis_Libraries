@@ -6,7 +6,7 @@ The Vitis Vision library is designed to work with Zynq™, Zynq Ultrascale+™, 
 
 ### Prerequisites
 
-* Valid installation of [Vitis™ 2023.1](https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installing-the-Vitis-Software-Platform) or later version and the corresponding licenses.
+* Valid installation of [Vitis™ 2023.2](https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installing-the-Vitis-Software-Platform) or later version and the corresponding licenses.
 * Xilinx® Runtime ([XRT](https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installing-Xilinx-Runtime-and-Platforms)) must be installed. XRT provides software interface to Xilinx FPGAs.
 * Install [OpenCV-4.4.0]((https://github.com/opencv/opencv/tree/4.4.0)) x86 libraries(with compatible libjpeg.so). x86 libs have to be used for
 
@@ -16,7 +16,7 @@ The Vitis Vision library is designed to work with Zynq™, Zynq Ultrascale+™, 
 		
 	For L2/L3 flow targeting embedded platforms (for hardware emulationa and hardware build), aarch32/aarch64 version OpenCV shipped within their *sysroot* should be used.	
 * libOpenCL.so must be [installed](https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/OpenCL-Installable-Client-Driver-Loader) if not present.
-* [Install the card](https://www.xilinx.com/support/documentation/boards_and_kits/accelerator-cards/1_9/ug1301-getting-started-guide-alveo-accelerator-cards.pdf) for which the platform is supported in Vitis 2023.1 or later versions.
+* [Install the card](https://docs.xilinx.com/r/en-US/ug1301-getting-started-guide-alveo-accelerator-cards) for which the platform is supported in Vitis 2023.2 or later versions.
 * If targeting an embedded platform, [install]((https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installing-Embedded-Platforms?tocId=hfE7LFeS8mU4dexvgPL31Q)) it and set up the [evaluation board](https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/444006775/Zynq+UltraScale+MPSoC).
 
 ##### OpenCV Installation Guidance:
@@ -176,32 +176,24 @@ This library is written by developers at
 
 **PL additions/enhancements**:
 	
-    • New functions:
-    	• Added 24 bit L3 ISP pipeline	
-    	• Added all-in-one L3 ISP pipeline
-    	• Pin-cushion, Barrel distortion support added in L1, L2 Remap testbench.
-	
     • Updates:
-    	• Added new functions in ISP-Multistream pipeline
-    	• Added NPPC 2,4,8 support for RGBIR function
-    	• Added URAM support for AWB, AEC, 3DLUT, Otsu-Threshold, HDRMerge, Histogram, Equalization	
-    	• Improved performance and utilization for ISP Stats
-    	• Fixed the missing template parameters issue in 'axiStrm2xfMat' and 'xfMat2axiStrm' functions
+    	• Added reference functions for extractExposureFrames, autoexposurecorrection_sin, LTM, bgr2yuyv.
+    	• Added reference function for all-in-one L3 ISP pipeline.
+    	• Fixed border rows issue in Bad Pixel Correction function.
+    	• Fixed divide-by-zero condition in GTM.
+    	• Improved accuracy of AWB and AEC functions.
+    	• Optimized resource utilization of 3DLUT function.	
+    	• Other minor bug fixes.	
 	
     • Lib Infra Changes:
-    	• Renamed all existing testcases and added new cases in tests directory of L1, L2.
-    	• Replaced 'xf_<algoName>_config.h' with 'xf_<algoName>_accel_config.h', 'xf_<algoName>_tb_config.h' 
-			files which are included in 'accel.cpp' and 'tb.cpp' respectively.
-    	• All configurable parameters moved to 'xf_config_params.h'
-    	• Renamed 'build' folder in the function directories under 'examples' directory to 'config'
-    	• Standardized few variable names across 'accel' and 'testbench' files
-	
+    	• Added L1 api.json to autofill the function APIs in Vitis HLS GUI.
+    	• Updated APIs in L2 api.json
+    	• Updated Makefiles of L1 examples and testcases to new template.	
 
 **AIE additions/enhancements:** :
 	
     • Updates:
-    	• Improved RTL Data movers 
-    	• Miscellaneous bug fixes
+    	• Host code of all AIE1 cases modified to use new graph coding methodology.
 
 **Known issues**
 

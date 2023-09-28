@@ -16,14 +16,14 @@ C-synthesis, C/RTL co-simulation, and exporting the RTL as an IP.
 All the functions under L1 folder of the Vitis Vision library can be built through Vitis HLS flow
 in the following two modes:
 
-#. Tcl Script Mode
+#. Command line Mode
 #. GUI Mode
 
 
-.. rubric:: Tcl Script Mode
+.. rubric:: Command line Mode
 
-Each configuration of all functions in L1 are provided with TCL script which can be run through the
-available Makefile.
+Each configuration of all functions in L1 are provided with a Makefile which can be run to create
+HLS project.
 
 Open a terminal and run the following commands to set the environment and build :
 
@@ -41,7 +41,7 @@ Open a terminal and run the following commands to set the environment and build 
 
    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:< path-to-opencv-lib-folder >
 
-   make run CSIM=< 1/0 > CSYNTH=< 1/0 > COSIM=< 1/0 > VIVADO_IMPL=< 1/0 >
+   make run TARGET=< csim / csynth / cosim/ vivado-impl >
 
 .. rubric:: GUI Mode
 

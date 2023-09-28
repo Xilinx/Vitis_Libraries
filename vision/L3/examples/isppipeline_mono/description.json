@@ -207,10 +207,10 @@
                 {
                     "name": "ISPPipeline_accel", 
                     "location": "LIB_DIR/L3/examples/isppipeline_mono/xf_isp_accel.cpp",
-                    "frequency": 300.0
+                    "frequency": 200.0
                 }
             ],
-            "frequency": 300.0
+            "frequency": 200.0
         }
     ], 
     "check_env": [

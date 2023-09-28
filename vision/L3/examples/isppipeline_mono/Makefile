@@ -222,11 +222,11 @@ VPP_FLAGS +=  -I $(XFLIB_DIR)/L3/examples/isppipeline_mono/config -I $(XFLIB_DIR
 endif
 
 ######################### binary container global settings ##########################
-VPP_FLAGS_ISPPipeline_accel += --hls.clock 300000000:ISPPipeline_accel
+VPP_FLAGS_ISPPipeline_accel += --hls.clock 200000000:ISPPipeline_accel
 ifneq ($(HOST_ARCH_temp), x86)
-VPP_LDFLAGS_krnl_ISPPipeline += --clock.defaultFreqHz 300000000
+VPP_LDFLAGS_krnl_ISPPipeline += --clock.defaultFreqHz 200000000
 else
-VPP_LDFLAGS_krnl_ISPPipeline += --kernel_frequency 300
+VPP_LDFLAGS_krnl_ISPPipeline += --kernel_frequency 200
 endif
 
 ifneq ($(SD_CARD_NEEDED), on)

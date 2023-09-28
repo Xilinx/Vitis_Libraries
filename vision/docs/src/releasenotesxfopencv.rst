@@ -29,25 +29,24 @@ New features and functions
 		• Pin-cushion, Barrel distortion support added in L1, L2 Remap testbench.
 
 	• Updates:
-		• Added new functions in ISP-Multistream pipeline
-		• Added NPPC 2,4,8 support for RGBIR function
-		• Added URAM support for AWB, AEC, 3DLUT, Otsu-Threshold, HDRMerge, Histogram, Equalization
-		• Improved performance and utilization for ISP Stats
-		• Fixed the missing template parameters issue in 'axiStrm2xfMat' and 'xfMat2axiStrm' functions
-
+		• Added reference functions for extractExposureFrames, autoexposurecorrection_sin, LTM, bgr2yuyv.
+		• Added reference function for all-in-one L3 ISP pipeline.
+		• Fixed border rows issue in Bad Pixel Correction function.
+		• Fixed divide-by-zero condition in GTM.
+		• Improved accuracy of AWB and AEC functions.
+		• Optimized resource utilization of 3DLUT function.	
+		• Other minor bug fixes.
+		
 	• Lib Infra Changes:
-		• Renamed all existing testcases and added new cases in tests directory of L1, L2.
-		• Replaced 'xf_<algoName>_config.h' with 'xf_<algoName>_accel_config.h', 'xf_<algoName>_tb_config.h' 
-			files which are included in 'accel.cpp' and 'tb.cpp' respectively.
-		• All configurable parameters moved to 'xf_config_params.h'
-		• Renamed 'build' folder in the function directories under 'examples' directory to 'config'
-		• Standardized few variable names across 'accel' and 'testbench' files
+		
+		• Added L1 api.json to autofill the function APIs in Vitis HLS GUI.
+		• Updated APIs in L2 api.json
+		• Updated Makefiles of L1 examples and testcases to a new template.
 		    
 **AIE additions/enhancements:** :
 
 	• Updates:
-		• Improved RTL Data movers 
-		• Miscellaneous bug fixes
+		• Host code of all AIE1 cases modified to use new graph coding methodology.
 
 .. _known-issues:
 

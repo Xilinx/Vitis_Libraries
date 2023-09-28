@@ -15722,13 +15722,13 @@ The following table describes the template parameters.
    | N_TYPE              | (nearest neighbor) or XF_INTERPOLATION_BILINEAR       |
    |                     | (linear interpolation)                                |
    +---------------------+-------------------------------------------------------+
-   | SRC_T               | Input and Output pixel type. Only 8-bit, unsigned, 1  |
+   | SRC_T               | Input image pixel type. Only 8-bit, unsigned, 1       |
    |                     | and 3 channels are supported (XF_8UC1 and XF_8UC3)    |
    +---------------------+-------------------------------------------------------+
    | MAP_T               | Map type. Single channel float type. XF_32FC1.        |
    +---------------------+-------------------------------------------------------+
-   | DST_T               | Output image type. Grayscale image of type 8-bits and |
-   |                     | single channel. XF_8UC1.                              |
+   | DST_T               | Output image pixel type. Only 8-bit, unsigned, 1      |
+   |                     | and 3 channels are supported (XF_8UC1 and XF_8UC3)    |
    +---------------------+-------------------------------------------------------+
    | ROWS                | Height of input and output images                     |
    +---------------------+-------------------------------------------------------+

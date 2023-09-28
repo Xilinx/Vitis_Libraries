@@ -6851,25 +6851,25 @@
                                                                                         "name": "omin_r",
                                                                                         "direction": "",
                                                                                         "type": "XF_CTUNAME(IN_TYPE, NPC) ",
-                                                                                        "array":[" "," "]
+                                                                                        "array":["LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxVArrSize","LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxHArrSize"]
                                                                         },
                                                                         {
                                                                                         "name": "omax_r",
                                                                                         "direction": "",
                                                                                         "type": "XF_CTUNAME(IN_TYPE, NPC) ",
-                                                                                        "array":[" "," "]
+                                                                                        "array":["LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxVArrSize","LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxHArrSize"]
                                                                         },
                                                                         {
                                                                                         "name": "omin_w",
                                                                                         "direction": "",
                                                                                         "type": "XF_CTUNAME(IN_TYPE, NPC) ",
-                                                                                        "array":[" "," "]
+                                                                                        "array":["LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxVArrSize","LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxHArrSize"]
                                                                         },
                                                                         {
                                                                                         "name": "omax_w",
                                                                                         "direction": "",
                                                                                         "type": "XF_CTUNAME(IN_TYPE, NPC)",
-                                                                                        "array":[" "," "]
+                                                                                        "array":["LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxVArrSize","LTMTile<BLK_ROWS, BLK_COLS, ROWS, COLS, NPC>::MinMaxHArrSize"]
                                                                         },
                                                                         {
                                                                                         "name": "out",

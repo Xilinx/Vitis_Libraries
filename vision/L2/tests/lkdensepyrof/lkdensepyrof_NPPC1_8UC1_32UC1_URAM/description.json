@@ -208,7 +208,7 @@
                     "vitis_hw_run": 10240
                 },
                 "max_time_min": {
-                    "vitis_hw_build": 1200,
+                    "vitis_hw_build": 1500,
                     "vitis_hw_emu": 600,
                     "vitis_sw_emu": 60,
                     "vitis_hw_run": 30

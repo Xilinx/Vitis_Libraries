@@ -128,6 +128,10 @@ void lut3d(xf::cv::Mat<INTYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN_1>& in_img,
 
     if (URAM) {
 // clang-format off
+#pragma HLS array_reshape variable=lutGrid_r dim=1 cyclic factor=2
+#pragma HLS array_reshape variable=lutGrid_g dim=1 cyclic factor=2
+#pragma HLS array_reshape variable=lutGrid_b dim=1 cyclic factor=2
+
 #pragma HLS bind_storage variable=lutGrid_r type=ram_t2p impl=uram
 #pragma HLS bind_storage variable=lutGrid_g type=ram_t2p impl=uram
 #pragma HLS bind_storage variable=lutGrid_b type=ram_t2p impl=uram
@@ -164,17 +168,13 @@ void lut3d(xf::cv::Mat<INTYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN_1>& in_img,
         // clang-format on
     }
 // clang-format off
-#pragma HLS ARRAY_PARTITION variable=lutGrid_r dim=1 cyclic factor=2
-#pragma HLS ARRAY_PARTITION variable=lutGrid_g dim=1 cyclic factor=2
-#pragma HLS ARRAY_PARTITION variable=lutGrid_b dim=1 cyclic factor=2
+ #pragma HLS ARRAY_PARTITION variable=lutGrid_r dim=1 cyclic factor=2
+ #pragma HLS ARRAY_PARTITION variable=lutGrid_g dim=1 cyclic factor=2
+ #pragma HLS ARRAY_PARTITION variable=lutGrid_b dim=1 cyclic factor=2
 
-#pragma HLS ARRAY_PARTITION variable=lutGrid_r dim=2 cyclic factor=2
-#pragma HLS ARRAY_PARTITION variable=lutGrid_g dim=2 cyclic factor=2
-#pragma HLS ARRAY_PARTITION variable=lutGrid_b dim=2 cyclic factor=2
-
- #pragma HLS ARRAY_PARTITION variable=lutGrid_r dim=3 cyclic factor=2
- #pragma HLS ARRAY_PARTITION variable=lutGrid_g dim=3 cyclic factor=2
- #pragma HLS ARRAY_PARTITION variable=lutGrid_b dim=3 cyclic factor=2
+ #pragma HLS ARRAY_PARTITION variable=lutGrid_r dim=2 cyclic factor=2
+ #pragma HLS ARRAY_PARTITION variable=lutGrid_g dim=2 cyclic factor=2
+ #pragma HLS ARRAY_PARTITION variable=lutGrid_b dim=2 cyclic factor=2
 
 #pragma HLS ARRAY_PARTITION variable=borderLutRX dim=1 cyclic factor=2
 #pragma HLS ARRAY_PARTITION variable=borderLutRY dim=1 cyclic factor=2
@@ -188,17 +188,6 @@ void lut3d(xf::cv::Mat<INTYPE, ROWS, COLS, NPPC, XFCVDEPTH_IN_1>& in_img,
 #pragma HLS ARRAY_PARTITION variable=borderLutBY dim=1 cyclic factor=2
 #pragma HLS ARRAY_PARTITION variable=borderLutBZ dim=1 cyclic factor=2
 
- #pragma HLS ARRAY_PARTITION variable=borderLutRX dim=2 cyclic factor=2
- #pragma HLS ARRAY_PARTITION variable=borderLutRY dim=2 cyclic factor=2
- #pragma HLS ARRAY_PARTITION variable=borderLutRZ dim=2 cyclic factor=2
-
- #pragma HLS ARRAY_PARTITION variable=borderLutGX dim=2 cyclic factor=2
- #pragma HLS ARRAY_PARTITION variable=borderLutGY dim=2 cyclic factor=2
- #pragma HLS ARRAY_PARTITION variable=borderLutGZ dim=2 cyclic factor=2
-
- #pragma HLS ARRAY_PARTITION variable=borderLutBX dim=2 cyclic factor=2
- #pragma HLS ARRAY_PARTITION variable=borderLutBY dim=2 cyclic factor=2
- #pragma HLS ARRAY_PARTITION variable=borderLutBZ dim=2 cyclic factor=2
     // clang-format on
 
     _FIXED_LUT_TYPE stmp_r, stmp_g, stmp_b;
