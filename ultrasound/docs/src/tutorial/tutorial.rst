@@ -26,7 +26,7 @@ Vitis Ultrasound Library Tutorial
 
 This tutorial will show how to achieve better ultrasound image quality, speed, and accuracy using AMD technology. The tutorial includes four labs:
 
-* Lab-1: How does Vitis ultrasound Library work
+* Lab-1: How does Vitis Ultrasound Library work
 
 * Lab-2: L1/L2 Graph based algorithm acceleration and evaluation for ultrasound tool box case
 
@@ -38,7 +38,7 @@ This tutorial will show how to achieve better ultrasound image quality, speed, a
 Lab-1: How does Vitis ultrasound Library work
 ===============================================
 
-Vitis ultrasound library provides three levels of APIs, L1, L2 and L3. 
+Vitis Ultrasound Library provides three levels of APIs, L1, L2 and L3. 
 
 - The APIs in L1 are 2 sets, tool box APIs and All in AIE APIs (naming with kernel_*). 
 - The APIs in L2 are 2 sets, tool box Graphs and All in AIE Graphs (naming with graph_*). 

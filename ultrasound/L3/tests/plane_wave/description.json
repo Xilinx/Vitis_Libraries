@@ -32,7 +32,7 @@
         "PROJECT/data"
     ],
     "os": [
-        "centos8"
+        "rhel8"
     ],
     "launch": [
         {
