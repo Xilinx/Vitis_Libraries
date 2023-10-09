@@ -153,7 +153,7 @@ VPP_FLAGS_readWriteHbmKernel += --hls.clock 300000000:readWriteHbmKernel
 ifneq ($(HOST_ARCH_temp), x86)
 VPP_LDFLAGS_cscmv += --clock.defaultFreqHz 300000000
 else
-VPP_LDFLAGS_cscmv += --kernel_frequency 300
+VPP_LDFLAGS_cscmv += --kernel_frequency 250
 endif
 VPP_LDFLAGS_cscmv_temp := --config $(CUR_DIR)/opts.cfg
 VPP_LDFLAGS_cscmv += $(VPP_LDFLAGS_cscmv_temp)
