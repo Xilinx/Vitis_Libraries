@@ -40,7 +40,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 void fir_sr_sym_ref<TT_DATA,
                     TT_COEFF,
                     TP_FIR_LEN,
@@ -49,7 +50,8 @@ void fir_sr_sym_ref<TT_DATA,
                     TP_INPUT_WINDOW_VSIZE,
                     TP_USE_COEFF_RELOAD,
                     TP_NUM_OUTPUTS,
-                    TP_API>::filter(input_circular_buffer<TT_DATA,
+                    TP_API,
+                    TP_SAT>::filter(input_circular_buffer<TT_DATA,
                                                           extents<inherited_extent>,
                                                           margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
                                     output_circular_buffer<TT_DATA>& outWindow) {
@@ -66,6 +68,7 @@ void fir_sr_sym_ref<TT_DATA,
     printf("TP_SHIFT = %lu\n", TP_SHIFT);
     printf("TP_RND = %d\n", TP_RND);
     printf("TP_WINDOW_SIZE = %d\n", TP_INPUT_WINDOW_VSIZE);
+    printf("TP_SAT = %d\n", TP_SAT);
     const unsigned int kFirMarginOffset = fnFirMargin<TP_FIR_LEN, TT_DATA>() - TP_FIR_LEN + 1; // FIR Margin Offset.
     inWindowPtr += kFirMarginOffset;
 
@@ -86,7 +89,7 @@ void fir_sr_sym_ref<TT_DATA,
         inWindowPtr -= TP_FIR_LEN - 1;
 
         roundAcc(TP_RND, shift, accum);
-        saturateAcc(accum);
+        saturateAcc(accum, TP_SAT);
         accumSrs = castAcc(accum);
         *outWindowPtr++ = accumSrs;
         // printf("Wrote to and incremented output window\n");
@@ -102,7 +105,8 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_NUM_OUTPUTS,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 void fir_sr_sym_ref<TT_DATA,
                     TT_COEFF,
                     TP_FIR_LEN,
@@ -111,7 +115,8 @@ void fir_sr_sym_ref<TT_DATA,
                     TP_INPUT_WINDOW_VSIZE,
                     USE_COEFF_RELOAD_TRUE,
                     TP_NUM_OUTPUTS,
-                    TP_API>::filter(input_circular_buffer<TT_DATA,
+                    TP_API,
+                    TP_SAT>::filter(input_circular_buffer<TT_DATA,
                                                           extents<inherited_extent>,
                                                           margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
                                     output_circular_buffer<TT_DATA>& outWindow,
@@ -130,6 +135,7 @@ void fir_sr_sym_ref<TT_DATA,
     printf("TP_SHIFT = %lu\n", TP_SHIFT);
     printf("TP_RND = %d\n", TP_RND);
     printf("TP_WINDOW_SIZE = %d\n", TP_INPUT_WINDOW_VSIZE);
+    printf("TP_SAT = %d\n", TP_SAT);
     const unsigned int kFirMarginOffset = fnFirMargin<TP_FIR_LEN, TT_DATA>() - TP_FIR_LEN + 1; // FIR Margin Offset.
     inWindowPtr += kFirMarginOffset;
 
@@ -150,7 +156,7 @@ void fir_sr_sym_ref<TT_DATA,
         inWindowPtr -= TP_FIR_LEN - 1;
 
         roundAcc(TP_RND, shift, accum);
-        saturateAcc(accum);
+        saturateAcc(accum, TP_SAT);
         accumSrs = castAcc(accum);
         *outWindowPtr++ = accumSrs;
     }

@@ -34,14 +34,29 @@ namespace mixer {
 namespace dds_mixer {
 using namespace adf;
 
+struct no_port {};
+class empty {};
+
 template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_MIXER_MODE,
           unsigned int TP_API = 0,
           unsigned int TP_SSR = 1, // ignored
-          unsigned int TP_SFDR = 90>
+          unsigned int TP_RND = 4,
+          unsigned int TP_SAT = 1,
+          unsigned int TP_SFDR = 90
+
+          >
 
 class dds_mixer_ref_graph : public graph {
+   private:
+    template <class dir>
+    using port_array = std::array<port<dir>, 1>;
+
+    using input_port1 =
+        typename std::conditional_t<(TP_MIXER_MODE == 1 || TP_MIXER_MODE == 2), port_array<input>, no_port>;
+    using input_port2 = typename std::conditional_t<TP_MIXER_MODE == 2, port_array<input>, no_port>;
+
    public:
     std::array<port<input>, 1> in1;
     std::array<port<input>, 1> in2;
@@ -50,7 +65,6 @@ class dds_mixer_ref_graph : public graph {
     // DDS Kernel
     kernel m_ddsKernel;
 
-    static constexpr unsigned int KINPUT_WINDOW_VSIZE = TP_INPUT_WINDOW_VSIZE / TP_SSR;
     // Constructor
     dds_mixer_ref_graph(uint32_t phaseInc, uint32_t initialPhaseOffset = 0) {
         printf("========================\n");
@@ -60,107 +74,24 @@ class dds_mixer_ref_graph : public graph {
         // Create DDS_MIXER_REF kernel
         // IO_API is ignored because it's basically just a implementation detail
         static constexpr unsigned int tp_num_luts = TP_SFDR <= 60 ? 1 : TP_SFDR <= 120 ? 2 : 3;
-        m_ddsKernel = kernel::create_object<
-            dds_mixer_ref<TT_DATA, KINPUT_WINDOW_VSIZE, TP_MIXER_MODE, USE_INBUILT_SINCOS, tp_num_luts> >(
-            phaseInc, initialPhaseOffset);
-
-        // Make connections
-        // Size of window in Bytes.
-        connect<>(in1[0], m_ddsKernel.in[0]);
-        dimensions(m_ddsKernel.in[0]) = {KINPUT_WINDOW_VSIZE};
-        connect<>(in2[0], m_ddsKernel.in[1]);
-        dimensions(m_ddsKernel.in[1]) = {KINPUT_WINDOW_VSIZE};
-        connect<>(m_ddsKernel.out[0], out[0]);
-        dimensions(m_ddsKernel.out[0]) = {KINPUT_WINDOW_VSIZE};
-        // Specify mapping constraints
-        runtime<ratio>(m_ddsKernel) = 0.4;
-
-        // Source files
-        source(m_ddsKernel) = "dds_mixer_ref.cpp";
-    };
-};
-
-//--------------------------------------------------------------------------------------------------
-// SPECIALIZATION for TP_MIXER_MODE = 1  (dds plus single input mixer configuration)
-//--------------------------------------------------------------------------------------------------
-
-template <typename TT_DATA,
-          unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_API,
-          unsigned int TP_SSR,
-          unsigned int TP_SFDR>
-
-class dds_mixer_ref_graph<TT_DATA, TP_INPUT_WINDOW_VSIZE, 1, TP_API, TP_SSR, TP_SFDR> : public graph {
-   public:
-    std::array<port<input>, 1> in1;
-    std::array<port<output>, 1> out;
-
-    static constexpr unsigned int KINPUT_WINDOW_VSIZE = TP_INPUT_WINDOW_VSIZE / TP_SSR;
-    // DDS Kernel
-    kernel m_ddsKernel;
-
-    // Constructor
-    dds_mixer_ref_graph(uint32_t phaseInc, uint32_t initialPhaseOffset = 0) {
-        printf("======================================\n");
-        printf("== DDS_MIXER_REF Graph MIXER MODE = 1 \n");
-        printf("======================================\n");
-
-        // Create DDS_MIXER_REF kernel
-        // IO_API is ignored because it's basically just a implementation detail
-        static constexpr unsigned int tp_num_luts = TP_SFDR <= 60 ? 1 : TP_SFDR <= 120 ? 2 : 3;
         m_ddsKernel =
-            kernel::create_object<dds_mixer_ref<TT_DATA, KINPUT_WINDOW_VSIZE, 1, USE_INBUILT_SINCOS, tp_num_luts> >(
-                phaseInc, initialPhaseOffset);
+            kernel::create_object<dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, USE_INBUILT_SINCOS,
+                                                tp_num_luts, TP_RND, TP_SAT> >(phaseInc, initialPhaseOffset);
 
         // Make connections
         // Size of window in Bytes.
-        connect<>(in1[0], m_ddsKernel.in[0]);
-        dimensions(m_ddsKernel.in[0]) = {KINPUT_WINDOW_VSIZE};
+        if
+            constexpr(TP_MIXER_MODE == 1 || TP_MIXER_MODE == 2) {
+                connect<>(in1[0], m_ddsKernel.in[0]);
+                dimensions(m_ddsKernel.in[0]) = {TP_INPUT_WINDOW_VSIZE};
+            }
+        if
+            constexpr(TP_MIXER_MODE == 2) {
+                connect<>(in2[0], m_ddsKernel.in[1]);
+                dimensions(m_ddsKernel.in[1]) = {TP_INPUT_WINDOW_VSIZE};
+            }
         connect<>(m_ddsKernel.out[0], out[0]);
-        dimensions(m_ddsKernel.out[0]) = {KINPUT_WINDOW_VSIZE};
-        // Specify mapping constraints
-        runtime<ratio>(m_ddsKernel) = 0.4;
-
-        // Source files
-        source(m_ddsKernel) = "dds_mixer_ref.cpp";
-    };
-};
-
-//--------------------------------------------------------------------------------------------------
-// SPECIALIZATION for TP_MIXER_MODE = 0  (dds only configuration)
-//--------------------------------------------------------------------------------------------------
-
-template <typename TT_DATA,
-          unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_API,
-          unsigned int TP_SSR,
-          unsigned int TP_SFDR>
-
-class dds_mixer_ref_graph<TT_DATA, TP_INPUT_WINDOW_VSIZE, 0, TP_API, TP_SSR, TP_SFDR> : public graph {
-   public:
-    std::array<port<output>, 1> out;
-
-    static constexpr unsigned int KINPUT_WINDOW_VSIZE = TP_INPUT_WINDOW_VSIZE / TP_SSR;
-    // DDS Kernel
-    kernel m_ddsKernel;
-
-    // Constructor
-    dds_mixer_ref_graph(uint32_t phaseInc, uint32_t initialPhaseOffset = 0) {
-        printf("======================================\n");
-        printf("== DDS_MIXER_REF Graph MIXER MODE = 0 \n");
-        printf("======================================\n");
-
-        // Create DDS_MIXER_REF kernel
-        // IO_API is ignored because it's basically just a implementation detail
-        static constexpr unsigned int tp_num_luts = TP_SFDR <= 60 ? 1 : TP_SFDR <= 120 ? 2 : 3;
-        m_ddsKernel =
-            kernel::create_object<dds_mixer_ref<TT_DATA, KINPUT_WINDOW_VSIZE, 0, USE_INBUILT_SINCOS, tp_num_luts> >(
-                phaseInc, initialPhaseOffset);
-
-        // Make connections
-        // Size of window in Bytes.
-        connect<>(m_ddsKernel.out[0], out[0]);
-        dimensions(m_ddsKernel.out[0]) = {KINPUT_WINDOW_VSIZE};
+        dimensions(m_ddsKernel.out[0]) = {TP_INPUT_WINDOW_VSIZE};
         // Specify mapping constraints
         runtime<ratio>(m_ddsKernel) = 0.4;
 

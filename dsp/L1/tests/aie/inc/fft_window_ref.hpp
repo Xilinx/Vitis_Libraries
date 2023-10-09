@@ -72,7 +72,9 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_SHIFT,
           unsigned int TP_API,
-          unsigned int TP_DYN_PT_SIZE>
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 class fft_window_ref_base { // base class with all features except interface which is left to inherited
    private:
    public:
@@ -110,13 +112,29 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_API,
           unsigned int TP_SSR,
-          unsigned int TP_DYN_PT_SIZE>
-class fft_window_ref
-    : public fft_window_ref_base<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, TP_API, TP_DYN_PT_SIZE> {
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+class fft_window_ref : public fft_window_ref_base<TT_DATA,
+                                                  TT_COEFF,
+                                                  TP_POINT_SIZE,
+                                                  TP_WINDOW_VSIZE,
+                                                  TP_SHIFT,
+                                                  TP_API,
+                                                  TP_DYN_PT_SIZE,
+                                                  TP_RND,
+                                                  TP_SAT> {
    private:
    public:
-    using baseKernel =
-        fft_window_ref_base<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, TP_API, TP_DYN_PT_SIZE>;
+    using baseKernel = fft_window_ref_base<TT_DATA,
+                                           TT_COEFF,
+                                           TP_POINT_SIZE,
+                                           TP_WINDOW_VSIZE,
+                                           TP_SHIFT,
+                                           TP_API,
+                                           TP_DYN_PT_SIZE,
+                                           TP_RND,
+                                           TP_SAT>;
     unsigned int kLogSSR = fnLogSSRref<TP_SSR>();
     // Constructor
     fft_window_ref(const std::array<TT_COEFF, TP_POINT_SIZE*(1 + TP_DYN_PT_SIZE)>& kernel_weights)
@@ -134,14 +152,39 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_SHIFT,
           unsigned int TP_SSR,
-          unsigned int TP_DYN_PT_SIZE>
-class fft_window_ref<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SSR, TP_DYN_PT_SIZE>
-    : public fft_window_ref_base<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_DYN_PT_SIZE> {
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+class fft_window_ref<TT_DATA,
+                     TT_COEFF,
+                     TP_POINT_SIZE,
+                     TP_WINDOW_VSIZE,
+                     TP_SHIFT,
+                     1,
+                     TP_SSR,
+                     TP_DYN_PT_SIZE,
+                     TP_RND,
+                     TP_SAT> : public fft_window_ref_base<TT_DATA,
+                                                          TT_COEFF,
+                                                          TP_POINT_SIZE,
+                                                          TP_WINDOW_VSIZE,
+                                                          TP_SHIFT,
+                                                          1,
+                                                          TP_DYN_PT_SIZE,
+                                                          TP_RND,
+                                                          TP_SAT> {
    private:
    public:
     // Constructor
-    using baseKernel =
-        fft_window_ref_base<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_DYN_PT_SIZE>;
+    using baseKernel = fft_window_ref_base<TT_DATA,
+                                           TT_COEFF,
+                                           TP_POINT_SIZE,
+                                           TP_WINDOW_VSIZE,
+                                           TP_SHIFT,
+                                           1,
+                                           TP_DYN_PT_SIZE,
+                                           TP_RND,
+                                           TP_SAT>;
     unsigned int kLogSSR = fnLogSSRref<TP_SSR>();
     fft_window_ref(const std::array<TT_COEFF, TP_POINT_SIZE*(1 + TP_DYN_PT_SIZE)>& kernel_weights)
         : baseKernel(kernel_weights) {}

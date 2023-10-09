@@ -47,8 +47,8 @@ template <typename TT_DATA,
 NOINLINE_DECL // This function is the hook for QoR profiling, so must be identifiable after compilation.
     void
     sample_delay<TT_DATA, TP_WINDOW_VSIZE, TP_API, TP_MAX_DELAY>::sampleDelayMain(
-        input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<bufMargin> >& inBuff,
-        output_circular_buffer<TT_DATA>& outBuff,
+        input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<bufMargin> >& __restrict inBuff,
+        output_circular_buffer<TT_DATA>& __restrict outBuff,
         const unsigned int sampleDelayValue) {
     constexpr int vecSize = 256 / 8 / sizeof(TT_DATA);
     constexpr int stepSize = TP_WINDOW_VSIZE / vecSize;
@@ -114,7 +114,7 @@ NOINLINE_DECL // This function is the hook for QoR profiling, so must be identif
 
     // check if the sampleDelayValue is within the range (0, MAX_DELAY)
     if (sampleDelayValue > TP_MAX_DELAY) {
-        sampleDelayValueTemp = TP_MAX_DELAY;
+        sampleDelayValueTemp = TP_MAX_DELAY -1;
     } else {
         sampleDelayValueTemp = sampleDelayValue;
     }

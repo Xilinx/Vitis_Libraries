@@ -44,7 +44,8 @@ template <typename TT_DATA,  // type of data input and output
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_USE_COEFF_RELOAD = 0, // 1 = use coeff reload, 0 = don't use coeff reload
           unsigned int TP_NUM_OUTPUTS = 1,
-          unsigned int TP_API = 0>
+          unsigned int TP_API = 0,
+          unsigned int TP_SAT = 1>
 class fir_decimate_sym_ref {
    public:
     // Constructor
@@ -75,7 +76,8 @@ template <typename TT_DATA,  // type of data input and output
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_NUM_OUTPUTS,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned TP_SAT>
 class fir_decimate_sym_ref<TT_DATA,
                            TT_COEFF,
                            TP_FIR_LEN,
@@ -85,7 +87,8 @@ class fir_decimate_sym_ref<TT_DATA,
                            TP_INPUT_WINDOW_VSIZE,
                            USE_COEFF_RELOAD_TRUE,
                            TP_NUM_OUTPUTS,
-                           TP_API> {
+                           TP_API,
+                           TP_SAT> {
    public:
     // Constructor
     fir_decimate_sym_ref() {}

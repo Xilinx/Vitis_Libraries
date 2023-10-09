@@ -34,6 +34,8 @@ Coding conventions
 #include "fft_window_utils.hpp"
 #include "kernel_api_utils.hpp"
 
+//#define _DSPLIB_FFT_WINDOW_HPP_DEBUG_
+
 namespace xf {
 namespace dsp {
 namespace aie {
@@ -72,10 +74,20 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_API,
           unsigned int TP_SSR,
-          unsigned int TP_DYN_PT_SIZE>
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 NOINLINE_DECL
-fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, TP_API, TP_SSR, TP_DYN_PT_SIZE>::fft_window(
-    const std::array<TT_COEFF, TP_POINT_SIZE*(1 + TP_DYN_PT_SIZE)>& kernel_weights) {
+fft_window<TT_DATA,
+           TT_COEFF,
+           TP_POINT_SIZE,
+           TP_WINDOW_VSIZE,
+           TP_SHIFT,
+           TP_API,
+           TP_SSR,
+           TP_DYN_PT_SIZE,
+           TP_RND,
+           TP_SAT>::fft_window(const std::array<TT_COEFF, TP_POINT_SIZE*(1 + TP_DYN_PT_SIZE)>& kernel_weights) {
     // copy the primary table raw/
     memcpy(weights, &kernel_weights[0], TP_POINT_SIZE * (1 + TP_DYN_PT_SIZE) * sizeof(TT_COEFF));
     tableStarts[0] = 0;
@@ -97,10 +109,12 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_SHIFT,
           unsigned int TP_SSR,
-          unsigned int TP_DYN_PT_SIZE>
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 NOINLINE_DECL
-fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SSR, TP_DYN_PT_SIZE>::fft_window(
-    const std::array<TT_COEFF, TP_POINT_SIZE*(1 + TP_DYN_PT_SIZE)>& kernel_weights) {
+fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SSR, TP_DYN_PT_SIZE, TP_RND, TP_SAT>::
+    fft_window(const std::array<TT_COEFF, TP_POINT_SIZE*(1 + TP_DYN_PT_SIZE)>& kernel_weights) {
     // The situation here is that samples arrive on stream 0 as samples 0, 2, 4, 6 and on
     // stream 1 as 1, 3, 5, 7, so we want window samples arranged as 0(msb), 2, 4, 6, 1, 3, 5, 7.
     // What this achieves is that the data samples do not need to be interleaved before
@@ -153,15 +167,23 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_API,
           unsigned int TP_SSR,
-          unsigned int TP_DYN_PT_SIZE>
-NOINLINE_DECL void
-fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, TP_API, TP_SSR, TP_DYN_PT_SIZE>::
-    fft_window_main(input_buffer<TT_DATA>& __restrict inWindow, output_buffer<TT_DATA>& __restrict outWindow) {
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+NOINLINE_DECL void fft_window<TT_DATA,
+                              TT_COEFF,
+                              TP_POINT_SIZE,
+                              TP_WINDOW_VSIZE,
+                              TP_SHIFT,
+                              TP_API,
+                              TP_SSR,
+                              TP_DYN_PT_SIZE,
+                              TP_RND,
+                              TP_SAT>::fft_window_main(input_buffer<TT_DATA>& __restrict inWindow,
+                                                       output_buffer<TT_DATA>& __restrict outWindow) {
     using dataVect_t = ::aie::vector<TT_DATA, kSamplesInVect>;
     using coeffVect_t = ::aie::vector<TT_COEFF, kSamplesInVect>;
-    using accVect_t = ::aie::detail::accum<fnAccClass<TT_DATA>(),          // int, cint, FP or CFP
-                                           fnAccSize<TT_DATA, TT_COEFF>(), // acc80 or acc48
-                                           kSamplesInVect>;
+    using accVect_t = ::aie::accum<typename tAccBaseType<TT_DATA, TT_COEFF>::type, kSamplesInVect>;
     dataVect_t dataVect;
     coeffVect_t* coeffVectPtr;
     coeffVect_t coeffVect;
@@ -170,8 +192,8 @@ fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, TP_API, 
     dataVect_t* inPtr = (dataVect_t*)inWindow.data();
     dataVect_t* outPtr = (dataVect_t*)outWindow.data();
 
-    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
-    set_sat();            // do saturate.
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     for (int frame = 0; frame < TP_WINDOW_VSIZE / TP_POINT_SIZE; frame++)
         chess_prepare_for_pipelining chess_loop_range(TP_WINDOW_VSIZE / TP_POINT_SIZE, ) {
@@ -183,7 +205,6 @@ fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, TP_API, 
                 coeffVect = *coeffVectPtr++;
                 acc = ::aie::mul(dataVect, coeffVect);
                 outVect = acc.template to_vector<TT_DATA>(TP_SHIFT);
-                // window_writeincr(outWindow, outVect);
                 *outPtr++ = outVect;
             }
         }
@@ -197,15 +218,23 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_API,
           unsigned int TP_SSR,
-          unsigned int TP_DYN_PT_SIZE>
-NOINLINE_DECL void
-fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, TP_API, TP_SSR, TP_DYN_PT_SIZE>::
-    fft_window_main_dyn(input_buffer<TT_DATA>& __restrict inWindow, output_buffer<TT_DATA>& __restrict outWindow) {
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+NOINLINE_DECL void fft_window<TT_DATA,
+                              TT_COEFF,
+                              TP_POINT_SIZE,
+                              TP_WINDOW_VSIZE,
+                              TP_SHIFT,
+                              TP_API,
+                              TP_SSR,
+                              TP_DYN_PT_SIZE,
+                              TP_RND,
+                              TP_SAT>::fft_window_main_dyn(input_buffer<TT_DATA>& __restrict inWindow,
+                                                           output_buffer<TT_DATA>& __restrict outWindow) {
     using dataVect_t = ::aie::vector<TT_DATA, kSamplesInVect>;
     using coeffVect_t = ::aie::vector<TT_COEFF, kSamplesInVect>;
-    using accVect_t = ::aie::detail::accum<fnAccClass<TT_DATA>(),          // int, cint, FP or CFP
-                                           fnAccSize<TT_DATA, TT_COEFF>(), // acc80 or acc48
-                                           kSamplesInVect>;
+    using accVect_t = ::aie::accum<typename tAccBaseType<TT_DATA, TT_COEFF>::type, kSamplesInVect>;
     dataVect_t blankVect = ::aie::zeros<TT_DATA, kSamplesInVect>();
     dataVect_t dataVect;
     coeffVect_t* coeffVectPtr;
@@ -222,8 +251,8 @@ fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, TP_API, 
     dataVect_t* inPtr = (dataVect_t*)inWindow.data();
     dataVect_t* outPtr = (dataVect_t*)outWindow.data();
 
-    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
-    set_sat();            // do saturate.
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     // header = window_readincr_256b(inWindow);
     header = *inPtr++;
@@ -282,18 +311,18 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_SHIFT,
           unsigned int TP_SSR,
-          unsigned int TP_DYN_PT_SIZE>
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 NOINLINE_DECL void
-fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SSR, TP_DYN_PT_SIZE>::fft_window_main(
-    input_stream<TT_DATA>* __restrict inStream0,
-    input_stream<TT_DATA>* __restrict inStream1,
-    output_stream<TT_DATA>* __restrict outStream0,
-    output_stream<TT_DATA>* __restrict outStream1) {
+fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SSR, TP_DYN_PT_SIZE, TP_RND, TP_SAT>::
+    fft_window_main(input_stream<TT_DATA>* __restrict inStream0,
+                    input_stream<TT_DATA>* __restrict inStream1,
+                    output_stream<TT_DATA>* __restrict outStream0,
+                    output_stream<TT_DATA>* __restrict outStream1) {
     using dataVect_t = ::aie::vector<TT_DATA, kSamplesInVect>;
     using coeffVect_t = ::aie::vector<TT_COEFF, kSamplesInVect>;
-    using accVect_t = ::aie::detail::accum<fnAccClass<TT_DATA>(),          // int, cint, FP or CFP
-                                           fnAccSize<TT_DATA, TT_COEFF>(), // acc80 or acc48
-                                           kSamplesInVect>;
+    using accVect_t = ::aie::accum<typename tAccBaseType<TT_DATA, TT_COEFF>::type, kSamplesInVect>;
     dataVect_t dataVect;
     T_buff_128b<TT_DATA> strm0data, strm1data;
     T_buff_128b<TT_DATA> out0data, out1data;
@@ -302,8 +331,8 @@ fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SS
     accVect_t acc;
     dataVect_t outVect;
 
-    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
-    set_sat();            // do saturate.
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     for (int frame = 0; frame < TP_WINDOW_VSIZE / TP_POINT_SIZE; frame++)
         chess_prepare_for_pipelining chess_loop_range(TP_WINDOW_VSIZE / TP_POINT_SIZE, ) {
@@ -337,18 +366,18 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_SHIFT,
           unsigned int TP_SSR,
-          unsigned int TP_DYN_PT_SIZE>
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 NOINLINE_DECL void
-fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SSR, TP_DYN_PT_SIZE>::fft_window_main_dyn(
-    input_stream<TT_DATA>* __restrict inStream0,
-    input_stream<TT_DATA>* __restrict inStream1,
-    output_stream<TT_DATA>* __restrict outStream0,
-    output_stream<TT_DATA>* __restrict outStream1) {
+fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SSR, TP_DYN_PT_SIZE, TP_RND, TP_SAT>::
+    fft_window_main_dyn(input_stream<TT_DATA>* __restrict inStream0,
+                        input_stream<TT_DATA>* __restrict inStream1,
+                        output_stream<TT_DATA>* __restrict outStream0,
+                        output_stream<TT_DATA>* __restrict outStream1) {
     using dataVect_t = ::aie::vector<TT_DATA, kSamplesInVect>;
     using coeffVect_t = ::aie::vector<TT_COEFF, kSamplesInVect>;
-    using accVect_t = ::aie::detail::accum<fnAccClass<TT_DATA>(),          // int, cint, FP or CFP
-                                           fnAccSize<TT_DATA, TT_COEFF>(), // acc80 or acc48
-                                           kSamplesInVect>;
+    using accVect_t = ::aie::accum<typename tAccBaseType<TT_DATA, TT_COEFF>::type, kSamplesInVect>;
     dataVect_t dataVect;
     T_buff_128b<TT_DATA> strm0data, strm1data;
     T_buff_128b<TT_DATA> out0data, out1data;
@@ -364,8 +393,8 @@ fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SS
     TT_DATA headerVal;
     T_buff_128b<TT_DATA> blankData;
 
-    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
-    set_sat();            // do saturate.
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     blankData.val = ::aie::zeros<TT_DATA, 16 / sizeof(TT_DATA)>();
     header = stream_readincr_128b(inStream1, 1);
@@ -438,15 +467,15 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_SHIFT,
           unsigned int TP_SSR,
-          unsigned int TP_DYN_PT_SIZE>
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 NOINLINE_DECL void
-fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SSR, TP_DYN_PT_SIZE>::fft_window_main(
-    input_stream<TT_DATA>* __restrict inStream0, output_stream<TT_DATA>* __restrict outStream0) {
+fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SSR, TP_DYN_PT_SIZE, TP_RND, TP_SAT>::
+    fft_window_main(input_stream<TT_DATA>* __restrict inStream0, output_stream<TT_DATA>* __restrict outStream0) {
     using dataVect_t = ::aie::vector<TT_DATA, kSamplesInVect>;
     using coeffVect_t = ::aie::vector<TT_COEFF, kSamplesInVect>;
-    using accVect_t = ::aie::detail::accum<fnAccClass<TT_DATA>(),          // int, cint, FP or CFP
-                                           fnAccSize<TT_DATA, TT_COEFF>(), // acc80 or acc48
-                                           kSamplesInVect>;
+    using accVect_t = ::aie::accum<typename tAccBaseType<TT_DATA, TT_COEFF>::type, kSamplesInVect>;
     constexpr int kSamplesIn128b = 128 / 8 / sizeof(TT_DATA);
     using t128VectorType = ::aie::vector<TT_DATA, kSamplesIn128b>;
 
@@ -458,8 +487,8 @@ fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SS
     accVect_t acc;
     dataVect_t outVect;
 
-    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
-    set_sat();            // do saturate.
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     for (int frame = 0; frame < TP_WINDOW_VSIZE / TP_POINT_SIZE; frame++)
         chess_prepare_for_pipelining chess_loop_range(TP_WINDOW_VSIZE / TP_POINT_SIZE, ) {
@@ -496,15 +525,15 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_SHIFT,
           unsigned int TP_SSR,
-          unsigned int TP_DYN_PT_SIZE>
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 NOINLINE_DECL void
-fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SSR, TP_DYN_PT_SIZE>::fft_window_main_dyn(
-    input_stream<TT_DATA>* __restrict inStream0, output_stream<TT_DATA>* __restrict outStream0) {
+fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SSR, TP_DYN_PT_SIZE, TP_RND, TP_SAT>::
+    fft_window_main_dyn(input_stream<TT_DATA>* __restrict inStream0, output_stream<TT_DATA>* __restrict outStream0) {
     using dataVect_t = ::aie::vector<TT_DATA, kSamplesInVect>;
     using coeffVect_t = ::aie::vector<TT_COEFF, kSamplesInVect>;
-    using accVect_t = ::aie::detail::accum<fnAccClass<TT_DATA>(),          // int, cint, FP or CFP
-                                           fnAccSize<TT_DATA, TT_COEFF>(), // acc80 or acc48
-                                           kSamplesInVect>;
+    using accVect_t = ::aie::accum<typename tAccBaseType<TT_DATA, TT_COEFF>::type, kSamplesInVect>;
     constexpr int kSamplesIn128b = 128 / 8 / sizeof(TT_DATA);
     using t128VectorType = ::aie::vector<TT_DATA, kSamplesIn128b>;
 
@@ -523,8 +552,8 @@ fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SS
     TT_DATA headerVal;
     t128VectorType blankData;
 
-    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
-    set_sat();            // do saturate.
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     blankData = ::aie::zeros<TT_DATA, 16 / sizeof(TT_DATA)>();
     header = readincr_v<kSamplesInVect / 2>(inStream0); // 0? refers to physical stream number on tile.

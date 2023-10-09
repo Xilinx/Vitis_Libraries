@@ -112,7 +112,8 @@ AIE_WORK_DIR ?= Work
 AIE_PKG_DIR ?= Work
 
 # Setting customized_params in aiecompiler
-GRAPHNAME ?= FFT_f369cd05
+
+GRAPHNAME ?= FFT_54bb8b57
 VMC_GRAPHDIR ?= xmc_aie_lib/$(GRAPHNAME)
 VMC_KERNEL ?= vmc_fft
 
@@ -123,14 +124,14 @@ else
 AIETARGET := x86sim
 endif
 
-AIE_CXXFLAGS += --target=$(AIETARGET) --platform=$(XPLATFORM) --pl-freq=1000 
+AIE_CXXFLAGS += --target=$(AIETARGET) --platform=$(XPLATFORM)   --aie.pl-freq 1000 
 AIE_CXXFLAGS += $(AIE_CXXFLAGS_INC)
 AIE_CONTAINER = $(TEMP_DIR)/libadf.a
 AIE_WORK_DIR = $(CUR_DIR)/Work
 AIE_PKG_DIR = $(AIE_WORK_DIR)
 
 AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L1/tests/aie/inc -I $(XFLIB_DIR)/L1/tests/aie/src -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L2/meta/vmc/vmc_test/DDS/$(VMC_GRAPHDIR) -I $(XFLIB_DIR)/L2/tests/aie/common/inc -I $(CUR_DIR)
-AIE_CXXFLAGS += -Xchess=llvm.xargs=-std=c++2a -Xx86sim=-client=vmc -v -output=graph
+AIE_CXXFLAGS += --aie.Xchess=llvm.xargs=-std=c++2a --aie.Xx86sim=-client=vmc --aie.verbose
 
 $(AIE_WORK_DIR)/ps/c_rts/aie_control_xrt.cpp: $(AIE_CONTAINER)
 
@@ -174,8 +175,7 @@ endif
 $(AIE_CONTAINER): pre_build $(VMC_GRAPHDIR)/$(GRAPHNAME).cpp $(XFLIB_DIR)/L1/src/aie/fft_ifft_dit_1ch.cpp 
 	$(ECHO) "Compiling: libadf.a"
 	mkdir -p $(dir $@)
-	$(AIECXX) $(AIE_CXXFLAGS) $(filter %.s %.c %.cc %.cpp %cxx, $^)
-	mv ./libadf.a $(AIE_CONTAINER)
+	$(VPP) -c --mode aie $(AIE_CXXFLAGS) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^)
 
 ############################## Setting Rules for Host (Building Host Executable) ##############################
 $(EXE_FILE): $(EXE_FILE_DEPS)
@@ -289,24 +289,29 @@ ifeq ($(pcie_aie), on)
 	cp $(AIE_WORK_DIR)/ps/c_rts/aie_control_config.json ./
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) $(BINARY_CONTAINERS_PKG)
+	
 endif
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
+	
 else
 	@echo $(RUN_DEPS)
 	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
 	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
+	
 endif
 endif
 #sw_emu
 ifneq (,$(filter sw_emu, $(TARGET)))
 ifeq ($(HOST_ARCH), x86)
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
-	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) 
+	
 else
 	@echo $(RUN_DEPS)
 	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
 	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
+	
 endif
 endif
 #hw
@@ -314,6 +319,7 @@ ifeq ($(TARGET), hw)
 ifeq ($(HOST_ARCH), x86)
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	$(EXE_FILE) $(HOST_ARGS)
+	
 else
 	$(ECHO) "Please copy the content of sd_card folder and data to an SD Card and run on the board"
 endif
@@ -343,6 +349,8 @@ xclbin: check_vpp check_sysroot  pre_build $(BINARY_CONTAINERS)
 endif
 
 #################### Parameterized File Generation ##########################
+
+gen_instances: $(GENERATED_FILES)
 
 ############################## Cleaning Rules ##############################
 cleanh:

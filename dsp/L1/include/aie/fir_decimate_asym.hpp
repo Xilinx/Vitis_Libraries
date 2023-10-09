@@ -232,7 +232,8 @@ class kernelFilterClass {
         fnDataLoadsInRegDecAsym<TT_DATA>(); // 4;  //ratio of sbuff to init load size.
     static constexpr unsigned int m_kInitLoadVsize =
         fnDataLoadVsizeDecAsym<TT_DATA>(); // number of samples in 256-bit init upd_w loads
-    static constexpr unsigned int m_kDataLoadSize = fnLoadSizeDecAsym<TT_DATA, TT_COEFF>(); // 256-bit or 128-bit loads
+    static constexpr unsigned int m_kDataLoadSize =
+        m_kPermuteSupport == 1 ? fnLoadSizeDecAsym<TT_DATA, TT_COEFF>() : 256; // 256-bit or 128-bit loads
     static constexpr unsigned int m_kDataLoadVsize =
         m_kDataLoadSize /
         (8 * sizeof(TT_DATA)); // 8 samples when 256-bit loads are in use, 4 samples when 128-bit loads are used.
@@ -461,23 +462,31 @@ class kernelFilterClass {
     }
 
     void firReload(TT_COEFF* taps) {
-        // Loads taps/coefficients
-        for (int i = 0; i < TP_FIR_RANGE_LEN; i++) {
-            unsigned int tapsAddress =
-                TP_FIR_LEN - 1 - fnFirRangeOffset<TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TP_DECIMATE_FACTOR>() -
-                i;
-            m_internalTaps[i] = taps[tapsAddress];
-        }
-        for (int phase = 0; phase < TP_DECIMATE_FACTOR; ++phase) {
-            for (int i = 0; i < tapsArraySize; i++) { // ceiled to columns.
-                int tapIndex = i * TP_DECIMATE_FACTOR + TP_DECIMATE_FACTOR - 1 - phase;
-                int tapsAddress = TP_FIR_LEN - 1 -
-                                  fnFirRangeOffset<TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TP_DECIMATE_FACTOR>() -
-                                  tapIndex;
-                if (tapsAddress < 0 || tapIndex >= TP_FIR_RANGE_LEN) {
-                    m_internalTaps2[phase][i] = nullElem<TT_COEFF>();
-                } else {
-                    m_internalTaps2[phase][i] = taps[tapsAddress];
+        if
+            constexpr(m_kPermuteSupport == 1) {
+                // Loads taps/coefficients
+                for (int i = 0; i < TP_FIR_RANGE_LEN; i++) {
+                    unsigned int tapsAddress =
+                        TP_FIR_LEN - 1 -
+                        fnFirRangeOffset<TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TP_DECIMATE_FACTOR>() - i;
+                    m_internalTaps[i] = taps[tapsAddress];
+                }
+            }
+        else {
+            //  Scalar loads and stores are 32-bit granularity, using int16 directly causes read-modify-write which is
+            //  inefficient.
+            // TODO: Stick 2 int16 into an int32 to avoid it, for an example, look at fir_resampler kernel's firReload
+            for (int phase = 0; phase < TP_DECIMATE_FACTOR; ++phase) {
+                for (int i = 0; i < tapsArraySize; i++) { // ceiled to columns.
+                    int tapIndex = i * TP_DECIMATE_FACTOR + TP_DECIMATE_FACTOR - 1 - phase;
+                    int tapsAddress =
+                        TP_FIR_LEN - 1 -
+                        fnFirRangeOffset<TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TP_DECIMATE_FACTOR>() - tapIndex;
+                    if (tapsAddress < 0 || tapIndex >= TP_FIR_RANGE_LEN) {
+                        m_internalTaps2[phase][i] = nullElem<TT_COEFF>();
+                    } else {
+                        m_internalTaps2[phase][i] = taps[tapsAddress];
+                    }
                 }
             }
         }

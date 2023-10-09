@@ -33,15 +33,18 @@ namespace aie {
 namespace mixer {
 namespace dds_mixer {
 using namespace adf;
+
 struct no_port {};
 class empty {};
+
 template <typename TT_DATA,
           unsigned int TP_MIXER_MODE,
           unsigned int TP_SFDR = 90,
           unsigned int TP_API = 0,
           unsigned int TP_INPUT_WINDOW_VSIZE = 256,
-          unsigned int TP_SSR = 1 // ignored
-          >
+          unsigned int TP_SSR = 1, // ignored
+          unsigned int TP_RND = 0,
+          unsigned int TP_SAT = 1>
 
 class dds_mixer_lut_ref_graph : public graph {
    private:
@@ -63,14 +66,14 @@ class dds_mixer_lut_ref_graph : public graph {
     // Constructor
     dds_mixer_lut_ref_graph(uint32_t phaseInc, uint32_t initialPhaseOffset = 0) {
         printf("========================\n");
-        printf("== DDS_MIXER_REF Graph  \n");
+        printf("== DDS_MIXER_LUT_REF Graph  \n");
         printf("========================\n");
 
         // Create DDS_MIXER_REF kernel
         // IO_API is ignored because it's basically just a implementation detail
         static constexpr unsigned int tp_num_luts = TP_SFDR <= 60 ? 1 : TP_SFDR <= 120 ? 2 : 3;
         m_ddsKernel = kernel::create_object<
-            dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, USE_LUT_SINCOS, tp_num_luts> >(
+            dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, USE_LUT_SINCOS, tp_num_luts, TP_RND, TP_SAT> >(
             phaseInc, initialPhaseOffset);
 
         // Make connections

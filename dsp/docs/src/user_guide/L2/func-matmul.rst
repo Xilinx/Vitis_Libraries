@@ -1,13 +1,13 @@
-..
+.. 
    Copyright (C) 2019-2022, Xilinx, Inc.
    Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-
+    
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-
+    
        http://www.apache.org/licenses/LICENSE-2.0
-
+    
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,7 +22,7 @@
 Matrix Multiply
 ===============
 
-The DSPLib contains one Matrix Multiply/GEMM (General Matrix Multiply) solution. The GEMM has two input ports connected to two windows of data. The inputs are denoted as Matrix A (inA) and Matrix B (inB). Matrix A has a template parameter TP_DIM_A to describe the number of rows of A. The number of columns of inA must be equal to the number of rows of inB. This is denoted with the template parameter TP_DIM_AB. The number of columns of B is denoted by TP_DIM_B.
+The DSPLib contains one Matrix Multiply/GEMM (General Matrix Multiply) solution for AIE and AIE-ML. The GEMM has two input ports connected to two windows of data. The inputs are denoted as Matrix A (inA) and Matrix B (inB). Matrix A has a template parameter TP_DIM_A to describe the number of rows of A. The number of columns of inA must be equal to the number of rows of inB. This is denoted with the template parameter TP_DIM_AB. The number of columns of B is denoted by TP_DIM_B.
 
 An output port connects to a window, where the data for the output matrix will be stored. The output matrix will have rows = inA rows (TP_DIM_A) and columns = inB (TP_DIM_B) columns. The data type of both input matrices can be configured and the data type of the output is derived from the inputs.
 
@@ -43,6 +43,8 @@ Supported Types
 The Matrix Multiply supports a matrix of elements of integer type (int16, cint16, int32 or cint32) multiplied by a matrix of elements of
 integer type. It also supports a matrix of elements of float type (float, cfloat) multiplied by a matrix of elements of float type.
 However, a mix of integer types and float types is not supported.
+
+The Matrix Multiply for AIE-ML has support of integer types (int16, int32, cint16, and cint32) but does not support floating-point types (float, cfloat).
 
 ~~~~~~~~~~~~~~~~~~~
 Template Parameters
@@ -193,10 +195,14 @@ This is stored contiguously in memory like:
 
 Multiplying a 16x16 matrix (with 4x4 tiling) with a 16x16 matrix (with 4x2 tiling) will result in a 16x16 matrix with 4x2 tiling.
 
-The following table specifies the tiling scheme used for a given data type combination and the corresponding output data type:
 
-.. _table-tile-pattern:
-.. table:: Matrix Multiply tiling pattern combination
+Tiling Schemes and Data Type Combinations
+-----------------------------------------
+   
+The following table specifies the tiling scheme used for a given data type combination and the corresponding output data type for AIE devices:
+
+.. _table-tile-pattern-AIE:
+.. table:: Matrix Multiply tiling pattern combination for AIE
    :align: center
 
    +------------------------+----------------+--------------+
@@ -244,12 +250,45 @@ The following table specifies the tiling scheme used for a given data type combi
    +---------+--------------+--------+-------+--------------+
    |cfloat   |       cfloat |   4x2  |  2x2  |  cfloat      |
    +---------+--------------+--------+-------+--------------+
+   
 
+The following table specifies the tiling scheme used for a given data type combination and the corresponding output data type for AIE-ML devices:
+
+   .. _table-tile-pattern-AIE-ML:
+.. table:: Matrix Multiply tiling pattern combination for AIE-ML
+   :align: center
+
+   +------------------------+----------------+--------------+
+   |Input Type Combination  |  Tiling Scheme |  Output Type |
+   +=========+==============+========+=======+==============+
+   | A       |        B     |    A   |    B  |              |
+   +---------+--------------+--------+-------+--------------+
+   |int16    |       int16  |    4x4 |   4x4 |   int16      |
+   +---------+--------------+--------+-------+--------------+
+   |int16    |       int32  |     4x4|   4x4 |   int32      |
+   +---------+--------------+--------+-------+--------------+
+   |cint16   |       int16  |     4x4|  4x4  |  cint16      |
+   +---------+--------------+--------+-------+--------------+
+   |cint16   |       cint16 |     1x4|  4x8  |  cint16      |
+   +---------+--------------+--------+-------+--------------+
+   |int32    |       int16  |   4x4  |   4x4 |   int32      |
+   +---------+--------------+--------+-------+--------------+
+   |int32    |       int32  |    4x4 |  4x4  |    int32     |
+   +---------+--------------+--------+-------+--------------+
+   |cint32   |       cint16 |    2x4 |  4x8  |  cint32      |
+   +---------+--------------+--------+-------+--------------+
+   |cint32   |       cint32 |   1x2  |   2x8 |   cint32     |
+   +---------+--------------+--------+-------+--------------+
+   
+   
+Tiling Parameters
+-----------------
+   
 The parameters TP_ADD_TILING_A, TP_ADD_TILING_B, and TP_ADD_DETILING_OUT control the inclusion of an additional pre-processing / post-processing kernel to perform the required data data storage re-ordering. When used with TP_DIM_A_LEADING, TP_DIM_B_LEADING, or TP_DIM_OUT_LEADING, the matrix is also transposed in the tiling kernel.
 
 If the additional kernels are not selected, then the matrix multiply kernels assume incoming data is in the correct format, as specified above.
 
-The tiling imposes a restriction that the matrix dimensions need to be multiples of the tile dimensions. If you require dimensions that do not satisfy these requirements, please pad the matrices up to the closet multiple of the tile dimensions in table :ref:`table-tile-pattern` with zeros.
+The tiling imposes a restriction that the matrix dimensions need to be multiples of the tile dimensions. If you require dimensions that do not satisfy these requirements, please pad the matrices up to the closet multiple of the tile dimensions in table :ref:`table-tile-pattern-AIE` or :ref:`table-tile-pattern-AIE-ML` with zeros for AIE and AIE-ML respectively.
 
 Cascaded kernels
 ----------------
@@ -379,7 +418,7 @@ The following code example shows how the matrix_multiply_graph class may be used
 
 .. literalinclude:: ../../../../L2/examples/docs_examples/test_matmul.hpp
     :language: cpp
-    :lines: 15-73
+    :lines: 17-75
 
 
 

@@ -23,6 +23,8 @@
 Fractional interpolator asymetric FIR filter reference model
 */
 
+// #define _DSPLIB_FIR_RESAMPLER_REF_DEBUG_
+
 namespace xf {
 namespace dsp {
 namespace aie {
@@ -37,7 +39,8 @@ template <typename TT_DATA,  // type of data input and output
           unsigned int TP_DECIMATE_FACTOR,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE>
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SAT>
 void filter_ref(
     input_circular_buffer<
         TT_DATA,
@@ -53,6 +56,7 @@ void filter_ref(
 
     auto inItr = ::aie::begin_random_circular(inWindow);
     auto outItr = ::aie::begin_random_circular(outWindow);
+    int q = 0;
 
     unsigned int dataIndex, coefIndex;
     const unsigned int kFirMarginOffset = fnFirMargin<kPolyLen, TT_DATA>() - kPolyLen + 1; // FIR Margin Offset.
@@ -81,7 +85,7 @@ void filter_ref(
             }
 
             roundAcc(TP_RND, shift, accum);
-            saturateAcc(accum);
+            saturateAcc(accum, TP_SAT);
             accumSrs = castAcc(accum);
 
             *outItr++ = accumSrs;
@@ -101,7 +105,8 @@ template <typename TT_DATA,  // type of data input and output
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_USE_COEFF_RELOAD,
-          unsigned int TP_NUM_OUTPUTS>
+          unsigned int TP_NUM_OUTPUTS,
+          unsigned int TP_SAT>
 void fir_resampler_ref<TT_DATA,
                        TT_COEFF,
                        TP_FIR_LEN,
@@ -111,7 +116,8 @@ void fir_resampler_ref<TT_DATA,
                        TP_RND,
                        TP_INPUT_WINDOW_VSIZE,
                        TP_USE_COEFF_RELOAD,
-                       TP_NUM_OUTPUTS>::
+                       TP_NUM_OUTPUTS,
+                       TP_SAT>::
     filter(input_circular_buffer<
                TT_DATA,
                extents<inherited_extent>,
@@ -121,7 +127,7 @@ void fir_resampler_ref<TT_DATA,
     //    firHeaderReload<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_USE_COEFF_RELOAD>(inWindow,
     //    m_internalTaps); //coeff reload from header is no longer supported
     filter_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
-               TP_INPUT_WINDOW_VSIZE>(inWindow, outWindow, m_internalTaps);
+               TP_INPUT_WINDOW_VSIZE, TP_SAT>(inWindow, outWindow, m_internalTaps);
 };
 
 // specialization for reload coeffs, single output
@@ -134,7 +140,8 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_USE_COEFF_RELOAD,
-          unsigned int TP_NUM_OUTPUTS>
+          unsigned int TP_NUM_OUTPUTS,
+          unsigned int TP_SAT>
 void fir_resampler_ref<TT_DATA,
                        TT_COEFF,
                        TP_FIR_LEN,
@@ -144,7 +151,8 @@ void fir_resampler_ref<TT_DATA,
                        TP_RND,
                        TP_INPUT_WINDOW_VSIZE,
                        TP_USE_COEFF_RELOAD,
-                       TP_NUM_OUTPUTS>::
+                       TP_NUM_OUTPUTS,
+                       TP_SAT>::
     filterRtp(input_circular_buffer<
                   TT_DATA,
                   extents<inherited_extent>,
@@ -157,7 +165,7 @@ void fir_resampler_ref<TT_DATA,
         m_internalTaps[i] = inTaps[i];
     }
     filter_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
-               TP_INPUT_WINDOW_VSIZE>(inWindow, outWindow, m_internalTaps);
+               TP_INPUT_WINDOW_VSIZE, TP_SAT>(inWindow, outWindow, m_internalTaps);
 };
 }
 }

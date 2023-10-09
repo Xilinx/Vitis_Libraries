@@ -1,5 +1,5 @@
 {
-    "test_0_fir_sr_sym": {
+    "test_0_tool_canary_aie":{
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "199",
@@ -23,7 +23,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     },
     "test_1_fir_sr_sym": {
         "DATA_TYPE": "cint16",
@@ -35,7 +36,7 @@
         "AIE_VARIANT": "1",
         "NITER": "16",
         "COEFF_SIZE": "2",
-        "ROUND_MODE": "0",
+        "ROUND_MODE": "1",
         "CASC_LEN": "1",
         "PORT_API": "0",
         "USE_COEFF_RELOAD": "0",
@@ -49,7 +50,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"1"
     },
     "test_2_fir_sr_sym": {
         "DATA_TYPE": "cint16",
@@ -61,7 +63,7 @@
         "AIE_VARIANT": "1",
         "NITER": "16",
         "COEFF_SIZE": "2",
-        "ROUND_MODE": "0",
+        "ROUND_MODE": "2",
         "CASC_LEN": "1",
         "PORT_API": "0",
         "USE_COEFF_RELOAD": "0",
@@ -75,7 +77,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"3"
     },
     "test_3_fir_sr_sym": {
         "DATA_TYPE": "cint16",
@@ -87,7 +90,7 @@
         "AIE_VARIANT": "1",
         "NITER": "16",
         "COEFF_SIZE": "2",
-        "ROUND_MODE": "0",
+        "ROUND_MODE": "3",
         "CASC_LEN": "1",
         "PORT_API": "0",
         "USE_COEFF_RELOAD": "0",
@@ -101,7 +104,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     },
     "test_4_fir_sr_sym": {
         "DATA_TYPE": "cint16",
@@ -114,7 +118,7 @@
         "CASC_LEN": "3",
         "AIE_VARIANT": "1",
         "NITER": "16",
-        "ROUND_MODE": "0",
+        "ROUND_MODE": "4",
         "PORT_API": "0",
         "USE_COEFF_RELOAD": "0",
         "INTERPOLATE_FACTOR": "1",
@@ -127,7 +131,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"1"
     },
     "test_5_fir_sr_sym": {
         "DATA_TYPE": "cint16",
@@ -139,7 +144,7 @@
         "INPUT_WINDOW_VSIZE": "256",
         "AIE_VARIANT": "1",
         "NITER": "16",
-        "ROUND_MODE": "0",
+        "ROUND_MODE": "5",
         "CASC_LEN": "1",
         "PORT_API": "0",
         "USE_COEFF_RELOAD": "0",
@@ -153,7 +158,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"3"
     },
     "test_6_fir_sr_sym": {
         "DATA_TYPE": "cint16",
@@ -166,7 +172,7 @@
         "CASC_LEN": "2",
         "AIE_VARIANT": "1",
         "NITER": "16",
-        "ROUND_MODE": "0",
+        "ROUND_MODE": "6",
         "PORT_API": "0",
         "USE_COEFF_RELOAD": "0",
         "INTERPOLATE_FACTOR": "1",
@@ -179,7 +185,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     },
     "test_7_fir_16t_reload": {
         "DATA_TYPE": "cint16",
@@ -191,7 +198,7 @@
         "AIE_VARIANT": "1",
         "NITER": "16",
         "COEFF_SIZE": "2",
-        "ROUND_MODE": "0",
+        "ROUND_MODE": "7",
         "CASC_LEN": "1",
         "DUAL_IP": "0",
         "PORT_API": "0",
@@ -205,7 +212,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"1"
     },
     "test_8_fir_96t_int16_int16": {
         "DATA_TYPE": "int16",
@@ -231,7 +239,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     },
     "test_9_fir_1024t": {
         "DATA_TYPE": "cint16",
@@ -257,7 +266,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     },
     "test_10_fir_32t_int32_int32_stream": {
         "DATA_TYPE": "int32",
@@ -283,7 +293,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     },
     "test_11_fir_32t_cint32_cint32_stream": {
         "DATA_TYPE": "cint32",
@@ -309,7 +320,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     },
     "test_12_int32_dual_ip_streams": {
         "DATA_TYPE": "int32",
@@ -335,7 +347,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     },
     "test_13_cint32_dual_ip_window": {
         "DATA_TYPE": "int32",
@@ -361,7 +374,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     },
     "test_14_cint16_ssr": {
         "DATA_TYPE": "cint16",
@@ -387,7 +401,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     },
     "test_15_cint16_ssr_reload": {
         "DATA_TYPE": "cint16",
@@ -413,7 +428,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     },
     "test_16_fir_48t_int16_int32_stream": {
         "DATA_TYPE": "int16",
@@ -439,7 +455,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     },
     "test_17_fir_32t_cint16_int32_stream": {
         "DATA_TYPE": "cint16",
@@ -465,7 +482,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     },
     "test_18_fir_32t_cint16_cint32_stream": {
         "DATA_TYPE": "cint16",
@@ -491,7 +509,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     },
     "test_18_fir_16t_float": {
         "DATA_TYPE": "float",
@@ -517,7 +536,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     },
     "test_19_fir_16t_cfloat": {
         "DATA_TYPE": "cfloat",
@@ -543,9 +563,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     },
-    "mltest_0_fir_sr_sym": {
+    "test_0_aieml_fir_sr_sym": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "199",
@@ -569,9 +590,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     },
-    "mltest_1_fir_sr_sym": {
+    "test_1_aieml_fir_sr_sym": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "129",
@@ -595,9 +617,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     },
-    "mltest_2_fir_sr_sym": {
+    "test_2_aieml_fir_sr_sym": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "24",
@@ -621,9 +644,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     },
-    "mltest_3_fir_sr_sym": {
+    "test_3_aieml_fir_sr_sym": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "63",
@@ -647,9 +671,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     },
-    "mltest_4_fir_sr_sym": {
+    "test_4_aieml_fir_sr_sym": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
         "COEFF_SIZE": "4",
@@ -673,9 +698,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     },
-    "mltest_5_fir_sr_sym": {
+    "test_5_aieml_fir_sr_sym": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
         "COEFF_SIZE": "4",
@@ -699,9 +725,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     },
-    "mltest_6_fir_sr_sym": {
+    "test_6_aieml_fir_sr_sym": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
         "COEFF_SIZE": "4",
@@ -725,9 +752,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     },
-    "mltest_7_fir_16t_reload": {
+    "test_7_aieml_fir_16t_reload": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "16",
@@ -751,9 +779,10 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     },
-    "mltest_9_fir_768t": {
+    "test_9_aieml_fir_768t": {
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "cint16",
         "FIR_LEN": "36",
@@ -777,6 +806,7 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     }
 }

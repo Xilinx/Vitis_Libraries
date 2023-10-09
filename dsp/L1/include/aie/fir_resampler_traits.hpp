@@ -50,7 +50,7 @@ struct firParamsTrait {
     unsigned int rangeOffset;
 };
 
-enum eArchType { kArchBasic, kArchStream };
+enum eArchType { kArchBasic, kArchStream, kArchPhaseParallel, kArchStreamPhaseParallel };
 
 // function to return the number of lanes for a type combo
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_API = 0>
@@ -84,11 +84,13 @@ INLINE_DECL constexpr unsigned int fnDataLoadVsizeResampler() {
     return (kUpdWSize / sizeof(TT_DATA));
 }
 
-// Function returns window access size, the memory data path is either 128-bits or 256-bits wide for vector operations.
-template <typename TT_DATA, typename TT_COEFF>
-INLINE_DECL constexpr unsigned int fnWinAccessByteSize() {
-    return 16;
-};
+// // Function returns window access size, the memory data path is either 128-bits or 256-bits wide for vector
+// operations.
+// template<typename TT_DATA, typename TT_COEFF>
+// INLINE_DECL constexpr unsigned int fnWinAccessByteSize()
+// {
+//   return 16;
+// };
 
 // function to return the number of samples in an output vector for a type combo
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_API>
@@ -269,6 +271,8 @@ constexpr std::array<unsigned int, polyphaseLaneAlias> getXOffsets(unsigned int 
                                                                    unsigned int I,
                                                                    unsigned int nLanes) {
     std::array<unsigned int, polyphaseLaneAlias> acc = {0};
+#if __HAS_ACCUM_PERMUTES__ == 1
+    // static_assert(nLanes<=8, "ERROR: Unsupported data type. Exceeding 32-bit offset range.");
     // int minSampleNeeded,maxSampleNeeded;
     // A negative dec would indicate an incr
     for (unsigned int phase = 0; phase < polyphaseLaneAlias; phase++) {
@@ -278,12 +282,16 @@ constexpr std::array<unsigned int, polyphaseLaneAlias> getXOffsets(unsigned int 
                           << 4 * lane; // left shift in order to have values at 4b offset
         }
     }
+#endif
     return acc;
 }
 // 4b coeff offset for each lane
 template <unsigned int polyphaseLaneAlias>
 constexpr std::array<unsigned int, polyphaseLaneAlias> getZOffsets(unsigned int I, unsigned int nLanes) {
     std::array<unsigned int, polyphaseLaneAlias> acc = {0};
+#if __HAS_ACCUM_PERMUTES__ == 1
+    // static_assert(nLanes<=8, "ERROR: Unsupported data type. Exceeding 32-bit offset range.");
+
     unsigned int alreadyAccounted = I > nLanes ? 0 : 1; // simple hack to enable/disable phase alias on coeff offsets.
     for (unsigned int phase = 0; phase < polyphaseLaneAlias; phase++) {
         for (unsigned int lane = 0; lane < nLanes; lane++) {
@@ -291,6 +299,8 @@ constexpr std::array<unsigned int, polyphaseLaneAlias> getZOffsets(unsigned int 
                           << 4 * lane; // left shift in order to have values at 4b offset
         }
     }
+#endif
+
     return acc;
 }
 

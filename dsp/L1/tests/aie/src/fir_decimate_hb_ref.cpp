@@ -40,7 +40,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 fir_decimate_hb_ref<TT_DATA,
                     TT_COEFF,
                     TP_FIR_LEN,
@@ -49,7 +50,8 @@ fir_decimate_hb_ref<TT_DATA,
                     TP_INPUT_WINDOW_VSIZE,
                     TP_USE_COEFF_RELOAD,
                     TP_NUM_OUTPUTS,
-                    TP_API>::fir_decimate_hb_ref(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / 4 + 1]) {
+                    TP_API,
+                    TP_SAT>::fir_decimate_hb_ref(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / 4 + 1]) {
     int inputIndex = 0;
     for (int i = 0; i < TP_FIR_LEN; ++i) {
         if (i == m_kCentreTapInternalPos) {
@@ -74,7 +76,8 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_NUM_OUTPUTS,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 fir_decimate_hb_ref<TT_DATA,
                     TT_COEFF,
                     TP_FIR_LEN,
@@ -83,7 +86,8 @@ fir_decimate_hb_ref<TT_DATA,
                     TP_INPUT_WINDOW_VSIZE,
                     USE_COEFF_RELOAD_TRUE,
                     TP_NUM_OUTPUTS,
-                    TP_API>::fir_decimate_hb_ref(){};
+                    TP_API,
+                    TP_SAT>::fir_decimate_hb_ref(){};
 
 // REF FIR function for static coefficients, single output
 template <typename TT_DATA,
@@ -94,7 +98,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 void fir_decimate_hb_ref<TT_DATA,
                          TT_COEFF,
                          TP_FIR_LEN,
@@ -103,7 +108,8 @@ void fir_decimate_hb_ref<TT_DATA,
                          TP_INPUT_WINDOW_VSIZE,
                          TP_USE_COEFF_RELOAD,
                          TP_NUM_OUTPUTS,
-                         TP_API>::
+                         TP_API,
+                         TP_SAT>::
     filter(input_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
            output_buffer<TT_DATA>& outWindow) {
     const unsigned int shift = TP_SHIFT;
@@ -148,7 +154,7 @@ void fir_decimate_hb_ref<TT_DATA,
         }
 
         roundAcc(TP_RND, shift, accum);
-        saturateAcc(accum);
+        saturateAcc(accum, TP_SAT);
         accumSrs = castAcc(accum);
         *outItr++ = accumSrs;
 
@@ -165,7 +171,8 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_NUM_OUTPUTS,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 void fir_decimate_hb_ref<TT_DATA,
                          TT_COEFF,
                          TP_FIR_LEN,
@@ -174,7 +181,8 @@ void fir_decimate_hb_ref<TT_DATA,
                          TP_INPUT_WINDOW_VSIZE,
                          USE_COEFF_RELOAD_TRUE,
                          TP_NUM_OUTPUTS,
-                         TP_API>::
+                         TP_API,
+                         TP_SAT>::
     filter(input_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
            output_buffer<TT_DATA>& outWindow,
            const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 4 + 1]) {
@@ -235,7 +243,7 @@ void fir_decimate_hb_ref<TT_DATA,
         }
 
         roundAcc(TP_RND, shift, accum);
-        saturateAcc(accum);
+        saturateAcc(accum, TP_SAT);
         accumSrs = castAcc(accum);
         *outItr++ = accumSrs;
 

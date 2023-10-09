@@ -11,6 +11,18 @@
     ],
     "platform_properties": {
         "vck190": {
+            "param_set": [
+                    "test_0_tool_canary_aie",
+                    "test_1_mrfft_cint32",
+                    "test_2_mrfft_fwd",
+                    "test_3_mrfft_r5",
+                    "test_4_mrfft_r5_cint32",
+                    "test_5_mrfft_r5_r3",
+                    "test_6_mrfft_r5_r3_multi",
+                    "test_7_mrfft_r5_casc2",
+                    "test_8_mrfft_r3_casc3",
+                    "test_9_mrfft_r5_cint32_strm",
+                    "test_10_mrfft_r5_r3_strm_multi"],
             "v++": {
                 "compiler": {
                     "clflags": []
@@ -77,7 +89,7 @@
                 "./"
             ],
             "customized_params": {
-                "params": "-v  $($(TAG)_TARGET_COMPILE_ARGS)  -Xpreproc=\"$($(TAG)_PREPROC_ARGS)\"",
+                "params": "--aie.verbose  $($(TAG)_TARGET_COMPILE_ARGS) $($(TAG)_PREPROC_ARGS)",
                 "default": {
                     "TAG": "UUT",
                     "UUT_KERNEL": "mixed_radix_fft",
@@ -88,11 +100,11 @@
                     "UUT_SIM_FILE": "./data/uut_output.txt",
                     "REF_SIM_FILE": "./data/ref_output.txt",
                     "INPUT_FILE": "./data/input.txt",
-                    "UUT_TARGET_COMPILE_ARGS": "-Xchess=llvm.xargs=\"-std=c++2a\" -Xchess=main:backend.mist2.xargs=\"+NOdra\" -Xchess=main:backend.mist2.pnll=\"off\" -stacksize=$(STACKSIZE_VAL)",
+                    "UUT_TARGET_COMPILE_ARGS": "--aie.Xchess=llvm.xargs=\"-std=c++2a\" --aie.Xchess=main:backend.mist2.xargs=\"+NOdra\" --aie.Xchess=main:backend.mist2.pnll=\"off\" --aie.stacksize=$(STACKSIZE_VAL)",
                     "REF_TARGET_COMPILE_ARGS": "",
-                    "PREPROC_ARGS": "-DINPUT_FILE=$(INPUT_FILE)",
-                    "REF_PREPROC_ARGS": "-DUUT_GRAPH=$(REF_GRAPH) -DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS) ",
-                    "UUT_PREPROC_ARGS": "-DUUT_GRAPH=$(UUT_GRAPH) -DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) -DUSING_UUT=1"
+                    "PREPROC_ARGS": "--aie.Xpreproc=-DINPUT_FILE=$(INPUT_FILE)",
+                    "REF_PREPROC_ARGS": "--aie.Xpreproc=-DUUT_GRAPH=$(REF_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS) ",
+                    "UUT_PREPROC_ARGS": "--aie.Xpreproc=-DUUT_GRAPH=$(UUT_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) --aie.Xpreproc=-DUSING_UUT=1"
                 }
             }
         }

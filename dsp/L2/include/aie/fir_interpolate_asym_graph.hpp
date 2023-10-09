@@ -64,7 +64,7 @@ using namespace adf;
  * @tparam TP_SHIFT describes power of 2 shift down applied to the accumulation of
  *         FIR terms before output. \n TP_SHIFT must be in the range 0 to 61.
  * @tparam TP_RND describes the selection of rounding to be applied during the
- *         shift down stage of processing. Although, TP_RND accepts unsignedinteger values
+ *         shift down stage of processing. Although, TP_RND accepts unsigned integer values
  *         descriptive macros are recommended where
  *         - rnd_floor      = Truncate LSB, always round down (towards negative infinity).
  *         - rnd_ceil       = Always round up (towards positive infinity).
@@ -136,7 +136,7 @@ using namespace adf;
  *         An SSR of 1 means just one input path, and is the backwards compatible option.
  * @tparam TP_PARA_INTERP_POLY sets the number of interpolator polyphases over which the coefficients will be split to
  enable parallel computation of the outputs. \n
- *         The polyphases are executed parallelly, output data is produced by each polyphase directly. \n
+ *         The polyphases are executed in parallel, output data is produced by each polyphase directly. \n
  *         TP_PARA_INTERP_POLY does not affect the number of input data paths. \n
  *         There will be TP_SSR input phases irrespective of the value of TP_PARA_INTERP_POLY. \n
  *         TP_PARA_INTERP_POLY = TP_INTERPOLATE_FACTOR will result in an interpolate factor of polyphases,
@@ -144,6 +144,13 @@ using namespace adf;
  *          TP_PARA_INTERP_POLY < TP_INTERPOLATE_FACTOR will result in the kernels in the polyphase branches operating
  as
  * independent interpolators. \n
+ * @tparam TP_SAT describes the selection of saturation to be applied during the
+ *         shift down stage of processing. TP_SAT accepts unsigned integer values, where:
+ *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
+ *         - 1: saturate       = Default. Saturation rounds an n-bit signed value in the range [- ( 2^(n-1) ) : +2^(n-1)
+ - 1 ].
+ *         - 3: symmetric      = Controls symmetric saturation. Symmetric saturation rounds an n-bit signed value in the
+ range [- ( 2^(n-1) -1 ) : +2^(n-1) - 1 ]. \n
  *         TP_PARA_INTERP_POLY can be used in combination with TP_SSR.
  *         The number of AIEs used is given by TP_PARA_INTERP_POLY*TP_SSR^2 * TP_CASC_LEN. \n
  *
@@ -162,23 +169,10 @@ template <typename TT_DATA,
           unsigned int TP_NUM_OUTPUTS = 1,
           unsigned int TP_API = 0,
           unsigned int TP_SSR = 1,
-          unsigned int TP_PARA_INTERP_POLY = 1>
+          unsigned int TP_PARA_INTERP_POLY = 1,
+          unsigned int TP_SAT = 1>
 class fir_interpolate_asym_graph : public graph {
    private:
-#ifndef TP_COMBINE_POLYPHASES
-#define TP_COMBINE_POLYPHASES 0
-#endif
-
-#if (__HAS_ACCUM_PERMUTES__ == 1)
-    static constexpr unsigned int para_interp_poly = TP_PARA_INTERP_POLY;
-#else
-    // Decompose into a set of single rate FIRs, that don't require full permute capability.
-    // TP_COMBINE_POLYPHASES directs the graph to put all kernels in one tile and add a widget to combine the outputs
-    // into a single memory bufer.
-    // TP_COMBINE_POLYPHASES is currently passed through a #define macro.
-    static constexpr unsigned int para_interp_poly =
-        TP_COMBINE_POLYPHASES == 1 ? TP_INTERPOLATE_FACTOR : TP_PARA_INTERP_POLY;
-#endif
 #if (__STREAMS_PER_TILE__ == 1)
     // Note: TP_SSR decomposition uses more tiles than TP_PARA_INTERP_POLY decomposition to offer equivalent gain in
     // input/output bandwidth increase. Please use parallel polyphases decomposition in the first instance.
@@ -234,17 +228,18 @@ class fir_interpolate_asym_graph : public graph {
     static_assert(TP_API == 1 || TP_SSR == 1,
                   "ERROR: SSR > 1 is only supported for streaming API. Set TP_API = 1 to enable streaming API");
 
-    // static_assert(((TP_INTERPOLATE_FACTOR / para_interp_poly) != TP_SSR) || TP_SSR == 1,
-    //               "ERROR: Currently, we do not support SSR=(INTERPOLATE_FACTOR/para_interp_poly). Please set SSR to "
+    // static_assert(((TP_INTERPOLATE_FACTOR / TP_PARA_INTERP_POLY) != TP_SSR) || TP_SSR == 1,
+    //               "ERROR: Currently, we do not support SSR=(INTERPOLATE_FACTOR/TP_PARA_INTERP_POLY). Please set SSR
+    //               to "
     //               "the next higher value "
     //               "to get as high a performance");
 
-    // static_assert(para_interp_poly == 1 || TP_USE_COEFF_RELOAD == 0,
+    // static_assert(TP_PARA_INTERP_POLY == 1 || TP_USE_COEFF_RELOAD == 0,
     //               "ERROR: Reloadable coefficients not supported with multiple parallel interpolation polyphases.");
     using casc_net_array = std::array<connect<stream, stream>*, TP_CASC_LEN>;
     using ssr_net_array = std::array<std::array<casc_net_array, TP_SSR>, TP_SSR>;
     // a 2-D array for decimator and interpolator polyphases.
-    using polyphase_net_array = std::array<std::array<ssr_net_array, 1>, para_interp_poly>;
+    using polyphase_net_array = std::array<std::array<ssr_net_array, 1>, TP_PARA_INTERP_POLY>;
 
     polyphase_net_array net;
     polyphase_net_array net2;
@@ -306,8 +301,9 @@ class fir_interpolate_asym_graph : public graph {
         static constexpr unsigned int BTP_SSR = TP_SSR;
         static constexpr unsigned int BTP_COEFF_PHASES = TP_SSR;
         static constexpr unsigned int BTP_COEFF_PHASES_LEN = TP_FIR_LEN;
-        static constexpr unsigned int BTP_PARA_INTERP_POLY = para_interp_poly;
+        static constexpr unsigned int BTP_PARA_INTERP_POLY = TP_PARA_INTERP_POLY;
         static constexpr int BTP_MODIFY_MARGIN_OFFSET = 0;
+        static constexpr unsigned int BTP_SAT = TP_SAT;
     };
 
     // src file might not be interpolate_asym - use decomposer utility to get sourcefile.
@@ -359,22 +355,7 @@ class fir_interpolate_asym_graph : public graph {
      **/
     port_conditional_array<output, (TP_CASC_IN == CASC_IN_TRUE), TP_SSR> casc_in;
 
-    /**
-     * The array of kernels that will be created and mapped onto AIE tiles.
-     * Number of kernels (``TP_CASC_LEN * TP_SSR``) will be connected with each other by cascade interface.
-     **/
-    kernel m_firKernels[TP_CASC_LEN * TP_SSR * TP_SSR * para_interp_poly];
-
-    /**
-     * OUT_SSR defines the number of output paths, equal to ``TP_SSR * para_interp_poly``.
-     * When Polyphases are combined,
-     **/
-
-    static constexpr unsigned int OUT_SSR_INT = TP_SSR * para_interp_poly;
-    static constexpr unsigned int OUT_SSR =
-        (TP_COMBINE_POLYPHASES == 1 && TP_API == 0 && para_interp_poly == TP_INTERPOLATE_FACTOR)
-            ? TP_SSR
-            : TP_SSR * para_interp_poly;
+    static constexpr unsigned int OUT_SSR_INT = TP_SSR * TP_PARA_INTERP_POLY;
 
    private:
     /**
@@ -392,36 +373,18 @@ class fir_interpolate_asym_graph : public graph {
      * @brief Connect decomposed polyphases through a widget that interleaves data onto a single output port.
      **/
     void connectOutput() {
-        // When IO bufer interface is used and graph is decomposed to single-rate FIR polyphases, kernels can be mapped
-        // on a single tile.
-        // To allow consistency in the interface, polyphases get combined back to single output port using a widget.
-        if
-            constexpr(TP_COMBINE_POLYPHASES == 1 && TP_API == 0 && para_interp_poly == TP_INTERPOLATE_FACTOR) {
-                // combine with a widget when parallel polyphases, otherwise do nothing as output is already combined
-                kernel m_inWidgetKernel;
-                m_inWidgetKernel = kernel::create_object<widget::api_cast::widget_api_cast<
-                    TT_DATA, USE_WINDOW_API, USE_WINDOW_API, para_interp_poly, TP_INPUT_WINDOW_VSIZE, 1, 0> >();
-                printParams<ssr_params>();
-                for (int i = 0; i < para_interp_poly; i++) {
-                    connect(out_int[i], m_inWidgetKernel.in[i]);
-                    dimensions(m_inWidgetKernel.in[i]) = {TP_INPUT_WINDOW_VSIZE};
-
-                    runtime<ratio>(m_firKernels[i]) = 0.9 / (para_interp_poly + 1);
-                }
-                connect<>(m_inWidgetKernel.out[0], out[0]);
-                dimensions(m_firKernels[0].in[0]) = {TP_INPUT_WINDOW_VSIZE};
-                dimensions(m_inWidgetKernel.out[0]) = {TP_INPUT_WINDOW_VSIZE * para_interp_poly};
-                source(m_inWidgetKernel) = "widget_api_cast.cpp";
-                headers(m_inWidgetKernel) = {"widget_api_cast.hpp"};
-                runtime<ratio>(m_inWidgetKernel) = 0.9 / (para_interp_poly + 1);
-            }
-        else {
-            out = out_int;
-            out2 = out2_int;
-        }
+        out = out_int;
+        out2 = out2_int;
     }
 
    public:
+    /**
+     * OUT_SSR defines the number of output paths, equal to ``TP_SSR * TP_PARA_INTERP_POLY``.
+     * When Polyphases are combined,
+     **/
+    static constexpr unsigned int OUT_SSR =
+        (TP_API == 0 && TP_PARA_INTERP_POLY == TP_INTERPOLATE_FACTOR) ? TP_SSR : TP_SSR * TP_PARA_INTERP_POLY;
+
     /**
      * The input data to the function. This input is either a window API of
      * samples of TT_DATA type or stream API (depending on TP_API).
@@ -454,7 +417,7 @@ class fir_interpolate_asym_graph : public graph {
      *defined by TP_SSR.
      * Each port in the array holds a duplicate of the coefficient array, required to connect to each SSR input path.
      **/
-    port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), TP_SSR * para_interp_poly> coeff;
+    port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), TP_SSR * TP_PARA_INTERP_POLY> coeff;
 
     /**
      * The output data from the function.
@@ -464,6 +427,11 @@ class fir_interpolate_asym_graph : public graph {
      **/
     port_conditional_array<output, (TP_NUM_OUTPUTS == 2), OUT_SSR> out2;
 
+    /**
+     * The array of kernels that will be created and mapped onto AIE tiles.
+     * Number of kernels (``TP_CASC_LEN * TP_SSR``) will be connected with each other by cascade interface.
+     **/
+    kernel m_firKernels[TP_CASC_LEN * TP_SSR * TP_SSR * TP_PARA_INTERP_POLY];
     /**
      * Access function to get pointer to kernel (or first kernel in a chained configuration).
      **/
@@ -521,7 +489,7 @@ class fir_interpolate_asym_graph : public graph {
         // best.
         return fir_interpolate_asym<TT_DATA, TT_COEFF, firLenPerSSR, TP_INTERPOLATE_FACTOR, TP_SHIFT, TP_RND,
                                     (TP_INPUT_WINDOW_VSIZE / TP_SSR), false, true, firRange, 0, TP_CASC_LEN,
-                                    TP_USE_COEFF_RELOAD, TP_DUAL_IP, TP_NUM_OUTPUTS, TP_API>::get_m_kArch();
+                                    TP_USE_COEFF_RELOAD, TP_DUAL_IP, TP_NUM_OUTPUTS, TP_API, TP_SAT>::get_m_kArch();
     };
 
     /**

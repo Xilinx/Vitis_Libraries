@@ -63,6 +63,9 @@ def validate_TP_CASC_LEN(args):
   
   return fn_validate_casc_len(TP_POINT_SIZE, TP_NUM_FRAMES, TP_CASC_LEN)
 
+def validate_TP_SAT(args):
+  TP_SAT = args["TP_SAT"]
+  return fn_validate_satMode(TP_SAT)
 
 
   ######### Finished Validation ###########
@@ -109,6 +112,8 @@ def generate_graph(graphname, args):
   TP_SHIFT = args["TP_SHIFT"]
   TP_CASC_LEN = args["TP_CASC_LEN"]
   TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
+  TP_RND = args["TP_RND"]
+  TP_SAT = args["TP_SAT"]
 
 
   code = (
@@ -129,7 +134,9 @@ public:
     {TP_FFT_NIFFT}, // TP_FFT_NIFFT
     {TP_SHIFT}, // TP_SHIFT
     {TP_CASC_LEN}, // TP_CASC_LEN
-    {TP_NUM_FRAMES} //TP_NUM_FRAMES
+    {TP_NUM_FRAMES}, //TP_NUM_FRAMES
+    {TP_RND}, //TP_RND
+    {TP_SAT} //TP_SAT
 
   > dft_graph;
 

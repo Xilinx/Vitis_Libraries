@@ -142,7 +142,5 @@
     "generator": {
         "file": "mixed_radix_fft.py",
         "function": "generate_graph"
-    },
-    "target_domain": "AIE",
-    "visible": true
+    }
 }

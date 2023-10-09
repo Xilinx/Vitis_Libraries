@@ -47,14 +47,13 @@ template <typename TT_DATA_A,
           unsigned int TP_ADD_DETILING_OUT = 1, // not used - just to match UUT.
           unsigned int TP_INPUT_WINDOW_VSIZE_A = TP_DIM_A* TP_DIM_AB,
           unsigned int TP_INPUT_WINDOW_VSIZE_B = TP_DIM_B* TP_DIM_AB,
-          unsigned int TP_CASC_LEN = 1 // not used - just to match UUT.
-          >
+          unsigned int TP_CASC_LEN = 1, // not used - just to match UUT.
+          unsigned int TP_SAT = 1>
 class matrix_mult_ref_graph : public graph {
    public:
-    // port<input> in[2];
-    port<input> inA;
-    port<input> inB;
-    port<output> out;
+    port<input> inA[1];
+    port<input> inB[1];
+    port<output> out[1];
 
     // FIR Kernel
     kernel m_firKernel;
@@ -66,17 +65,18 @@ class matrix_mult_ref_graph : public graph {
         printf("===========================\n");
 
         // Create FIR class
-        m_firKernel = kernel::create_object<
-            matrix_mult_ref<TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_AB, TP_DIM_B, TP_SHIFT, TP_RND, TP_DIM_A_LEADING,
-                            TP_DIM_B_LEADING, TP_DIM_OUT_LEADING, TP_INPUT_WINDOW_VSIZE_A, TP_INPUT_WINDOW_VSIZE_B> >();
+        m_firKernel =
+            kernel::create_object<matrix_mult_ref<TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_AB, TP_DIM_B, TP_SHIFT, TP_RND,
+                                                  TP_SAT, TP_DIM_A_LEADING, TP_DIM_B_LEADING, TP_DIM_OUT_LEADING,
+                                                  TP_INPUT_WINDOW_VSIZE_A, TP_INPUT_WINDOW_VSIZE_B> >();
         printf("Created object");
         // Make connections
         // Size of window in Bytes.
-        connect<>(inA, m_firKernel.in[0]);
+        connect<>(inA[0], m_firKernel.in[0]);
         dimensions(m_firKernel.in[0]) = {TP_INPUT_WINDOW_VSIZE_A};
-        connect<>(inB, m_firKernel.in[1]);
+        connect<>(inB[0], m_firKernel.in[1]);
         dimensions(m_firKernel.in[1]) = {TP_INPUT_WINDOW_VSIZE_B};
-        connect<>(m_firKernel.out[0], out);
+        connect<>(m_firKernel.out[0], out[0]);
         dimensions(m_firKernel.out[0]) = {(TP_INPUT_WINDOW_VSIZE_A / TP_DIM_AB) *
                                           (TP_INPUT_WINDOW_VSIZE_B / TP_DIM_AB)};
         printf("connected window");

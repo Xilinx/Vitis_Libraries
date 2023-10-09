@@ -4,13 +4,43 @@
     "gui": false,
     "flow": "versal",
     "platform_allowlist": [
-        "vck190"
-    ],
-    "data": [
-        "PROJECT/data/"
+        "vck190",
+        "vek280"
     ],
     "platform_properties": {
         "vck190": {
+            "param_set": [  "test_0_tool_canary_aie",
+                            "test_1_dft_aie",
+                            "test_2_dft_aie",
+                            "test_3_dft_aie",
+                            "test_4_dft_aie",
+                            "test_5_dft_aie",
+                            "test_6_dft_aie",
+                            "test_7_dft_aie",
+                            "test_8_dft_aie",
+                            "test_9_dft_aie",
+                            "test_10_dft_aie",
+                            "test_11_dft_aie"],
+            "v++": {
+                "compiler": {
+                    "clflags": []
+                },
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/system.cfg"
+                    ]
+                }
+            }
+        },
+        "vek280": {
+            "param_set": [  "test_0_tool_canary_aieml",
+                            "test_1_dft_aieml",
+                            "test_2_dft_aieml",
+                            "test_3_dft_aieml",
+                            "test_4_dft_aieml",
+                            "test_5_dft_aieml",
+                            "test_6_dft_aieml",
+                            "test_7_dft_aieml"],
             "v++": {
                 "compiler": {
                     "clflags": []
@@ -73,7 +103,7 @@
                 "./"
             ],
             "customized_params": {
-                "params": "-v  $($(TAG)_TARGET_COMPILE_ARGS)  -Xpreproc=\"$($(TAG)_PREPROC_ARGS)\"",
+                "params": "--aie.verbose  $($(TAG)_TARGET_COMPILE_ARGS)  $($(TAG)_PREPROC_ARGS)",
                 "default": {
                     "TAG": "UUT",
                     "UUT_KERNEL": "dft",
@@ -85,11 +115,11 @@
                     "REF_SIM_FILE": "./data/ref_output.txt",
                     "LOC_INPUT_FILE": "./data/input.txt",
                     "REF_INPUT_FILE": "./data/input_ref.txt",
-                    "UUT_TARGET_COMPILE_ARGS": "-Xchess=llvm.xargs=\"-std=c++2a\" -Xchess=main:backend.mist2.xargs=\"+NOdra\" -Xchess=main:backend.mist2.pnll=\"off\"",
+                    "UUT_TARGET_COMPILE_ARGS": "--aie.Xchess=llvm.xargs=\"-std=c++2a\" --aie.Xchess=main:backend.mist2.xargs=\"+NOdra\" --aie.Xchess=main:backend.mist2.pnll=\"off\"",
                     "REF_TARGET_COMPILE_ARGS": "",
                     "PREPROC_ARGS": "",
-                    "REF_PREPROC_ARGS": "-DUUT_GRAPH=$(REF_GRAPH) -DINPUT_FILE=$(REF_INPUT_FILE) -DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS) ",
-                    "UUT_PREPROC_ARGS": "-DUUT_GRAPH=$(UUT_GRAPH) -DINPUT_FILE=$(LOC_INPUT_FILE) -DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) -DUSING_UUT=1"
+                    "REF_PREPROC_ARGS": "--aie.Xpreproc=-DUUT_GRAPH=$(REF_GRAPH) --aie.Xpreproc=-DINPUT_FILE=$(REF_INPUT_FILE) --aie.Xpreproc=-DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS) ",
+                    "UUT_PREPROC_ARGS": "--aie.Xpreproc=-DUUT_GRAPH=$(UUT_GRAPH) --aie.Xpreproc=-DINPUT_FILE=$(LOC_INPUT_FILE) --aie.Xpreproc=-DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) --aie.Xpreproc=-DUSING_UUT=1"
                 }
             }
         }

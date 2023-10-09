@@ -9,23 +9,24 @@
     ],
     "platform_properties": {
         "vck190": {
-            "param_set": [  "test_0_fft_ifft_dit_1ch_aie1",
-                            "test_1_fft_ifft_dit_1ch_aie1",
-                            "test_2_fft_ifft_dit_1ch_aie1",
-                            "test_3_fft_ifft_dit_1ch_aie1",
-                            "test_4_fft_ifft_dit_1ch_aie1",
-                            "test_5_fft_ifft_dit_1ch_aie1",
-                            "test_6_fft_ifft_dit_1ch_aie1",
-                            "test_7_fft_ifft_dit_1ch_aie1",
-                            "test_8_fft_ifft_dit_1ch_aie1",
-                            "test_9_fft_ifft_dit_1ch_aie1",
-                            "test_10_fft_ifft_dit_1ch_aie1",
-                            "test_11_fft_ifft_dit_1ch_aie1",
-                            "test_12_fft_ifft_dit_1ch_aie1",
-                            "test_13_fft_8k_aie1",
-                            "test_14_fft_16k_aie1",
-                            "test_17_fft_dyn_pt_size_aie1",
-                            "test_18_fft_widgets_aie1"],
+            "param_set": [  "test_0_tool_canary_aie",
+                            "test_1_fft_ifft_dit_1ch_aie",
+                            "test_2_fft_ifft_dit_1ch_aie",
+                            "test_3_fft_ifft_dit_1ch_aie",
+                            "test_4_fft_ifft_dit_1ch_aie",
+                            "test_5_fft_ifft_dit_1ch_aie",
+                            "test_6_fft_ifft_dit_1ch_aie",
+                            "test_7_fft_ifft_dit_1ch_aie",
+                            "test_8_fft_ifft_dit_1ch_aie",
+                            "test_9_fft_ifft_dit_1ch_aie",
+                            "test_10_fft_ifft_dit_1ch_aie",
+                            "test_11_fft_ifft_dit_1ch_aie",
+                            "test_12_fft_ifft_dit_1ch_aie",
+                            "test_13_fft_8k_aie",
+                            "test_14_fft_16k_aie",
+                            "test_17_fft_dyn_pt_size_aie",
+                            "test_18_fft_widgets_aie",
+                            "test_19_fft_rnd_sat_aie"],
             "v++": {
                 "compiler": {
                     "clflags": []
@@ -38,21 +39,22 @@
             }
         },
         "vek280": {
-            "param_set": [  "test_0_fft_ifft_dit_1ch_aie2",
-                            "test_1_fft_ifft_dit_1ch_aie2",
-                            "test_2_fft_ifft_dit_1ch_aie2",
-                            "test_3_fft_ifft_dit_1ch_aie2",
-                            "test_4_fft_ifft_dit_1ch_aie2",
-                            "test_5_fft_ifft_dit_1ch_aie2",
-                            "test_6_fft_ifft_dit_1ch_aie2",
-                            "test_7_fft_ifft_dit_1ch_aie2",
-                            "test_8_fft_ifft_dit_1ch_aie2",
-                            "test_9_fft_ifft_dit_1ch_aie2",
-                            "test_10_fft_ifft_dit_1ch_aie2",
-                            "test_12_fft_ifft_dit_1ch_aie2",
-                            "test_13_fft_8k_aie2",
-                            "test_14_fft_16k_aie2",
-                            "test_17_fft_dyn_pt_size_aie2"],
+            "param_set": [  "test_0_tool_canary_aieml",
+                            "test_1_fft_ifft_dit_1ch_aieml",
+                            "test_2_fft_ifft_dit_1ch_aieml",
+                            "test_3_fft_ifft_dit_1ch_aieml",
+                            "test_4_fft_ifft_dit_1ch_aieml",
+                            "test_5_fft_ifft_dit_1ch_aieml",
+                            "test_6_fft_ifft_dit_1ch_aieml",
+                            "test_7_fft_ifft_dit_1ch_aieml",
+                            "test_8_fft_ifft_dit_1ch_aieml",
+                            "test_9_fft_ifft_dit_1ch_aieml",
+                            "test_10_fft_ifft_dit_1ch_aieml",
+                            "test_12_fft_ifft_dit_1ch_aieml",
+                            "test_13_fft_8k_aieml",
+                            "test_14_fft_16k_aieml",
+                            "test_17_fft_dyn_pt_size_aieml",
+                            "test_18_fft_rnd_sat_aieml"],
             "v++": {
                 "compiler": {
                     "clflags": []
@@ -116,7 +118,7 @@
                 "./"
             ],
             "customized_params": {
-                "params": "-v  $($(TAG)_TARGET_COMPILE_ARGS)  -Xpreproc=\"$($(TAG)_PREPROC_ARGS)\"",
+                "params": "--aie.verbose  $($(TAG)_TARGET_COMPILE_ARGS)  $($(TAG)_PREPROC_ARGS)",
                 "default": {
                     "TAG": "UUT",
                     "UUT_KERNEL": "fft_ifft_dit_1ch",
@@ -127,11 +129,11 @@
                     "UUT_SIM_FILE": "./data/uut_output.txt",
                     "REF_SIM_FILE": "./data/ref_output.txt",
                     "INPUT_FILE": "./data/input.txt",
-                    "UUT_TARGET_COMPILE_ARGS": "-Xchess=llvm.xargs=\"-std=c++2a\" -Xchess=main:backend.mist2.xargs=\"+NOdra\" -Xchess=main:backend.mist2.pnll=\"off\" -stacksize=$(STACKSIZE_VAL)",
+                    "UUT_TARGET_COMPILE_ARGS": "--aie.Xchess=llvm.xargs=\"-std=c++2a\" --aie.Xchess=main:backend.mist2.xargs=\"+NOdra\" --aie.Xchess=main:backend.mist2.pnll=\"off\" --aie.stacksize=$(STACKSIZE_VAL)",
                     "REF_TARGET_COMPILE_ARGS": "",
-                    "PREPROC_ARGS": "-DINPUT_FILE=$(INPUT_FILE)",
-                    "REF_PREPROC_ARGS": "-DUUT_GRAPH=$(REF_GRAPH) -DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS) ",
-                    "UUT_PREPROC_ARGS": "-DUUT_GRAPH=$(UUT_GRAPH) -DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) -DUSING_UUT=1"
+                    "PREPROC_ARGS": "--aie.Xpreproc=-DINPUT_FILE=$(INPUT_FILE)",
+                    "REF_PREPROC_ARGS": "--aie.Xpreproc=-DUUT_GRAPH=$(REF_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS) ",
+                    "UUT_PREPROC_ARGS": "--aie.Xpreproc=-DUUT_GRAPH=$(UUT_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) --aie.Xpreproc=-DUSING_UUT=1"
                 }
             }
         }

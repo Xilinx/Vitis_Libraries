@@ -29,7 +29,7 @@ Coding conventions
 #include <adf.h>
 
 #ifdef __X86SIM__
-// #define _DSPLIB_FIR_INTERPOLATE_ASYM_HPP_DEBUG_
+//#define _DSPLIB_FIR_INTERPOLATE_ASYM_HPP_DEBUG_
 #endif
 
 #define __AIE_API_USE_NATIVE_1024B_VECTOR__
@@ -142,30 +142,31 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
-INLINE_DECL void
-kernelFilterClass<TT_DATA,
-                  TT_COEFF,
-                  TP_FIR_LEN,
-                  TP_INTERPOLATE_FACTOR,
-                  TP_SHIFT,
-                  TP_RND,
-                  TP_INPUT_WINDOW_VSIZE,
-                  TP_CASC_IN,
-                  TP_CASC_OUT,
-                  TP_FIR_RANGE_LEN,
-                  TP_KERNEL_POSITION,
-                  TP_CASC_LEN,
-                  TP_USE_COEFF_RELOAD,
-                  TP_DUAL_IP,
-                  TP_NUM_OUTPUTS,
-                  TP_API,
-                  TP_MODIFY_MARGIN_OFFSET,
-                  TP_COEFF_PHASE,
-                  TP_COEFF_PHASE_OFFSET,
-                  TP_COEFF_PHASES,
-                  TP_COEFF_PHASES_LEN>::filterKernel(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
-                                                     T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
+INLINE_DECL void kernelFilterClass<TT_DATA,
+                                   TT_COEFF,
+                                   TP_FIR_LEN,
+                                   TP_INTERPOLATE_FACTOR,
+                                   TP_SHIFT,
+                                   TP_RND,
+                                   TP_INPUT_WINDOW_VSIZE,
+                                   TP_CASC_IN,
+                                   TP_CASC_OUT,
+                                   TP_FIR_RANGE_LEN,
+                                   TP_KERNEL_POSITION,
+                                   TP_CASC_LEN,
+                                   TP_USE_COEFF_RELOAD,
+                                   TP_DUAL_IP,
+                                   TP_NUM_OUTPUTS,
+                                   TP_API,
+                                   TP_MODIFY_MARGIN_OFFSET,
+                                   TP_COEFF_PHASE,
+                                   TP_COEFF_PHASE_OFFSET,
+                                   TP_COEFF_PHASES,
+                                   TP_COEFF_PHASES_LEN,
+                                   TP_SAT>::filterKernel(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                                         T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
     windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE + fnFirMargin<TP_FIR_LEN / TP_INTERPOLATE_FACTOR, TT_DATA>(),
                     TP_API>(inInterface, outInterface);
     filterSelectArch(inInterface, outInterface);
@@ -193,31 +194,32 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
-INLINE_DECL void
-kernelFilterClass<TT_DATA,
-                  TT_COEFF,
-                  TP_FIR_LEN,
-                  TP_INTERPOLATE_FACTOR,
-                  TP_SHIFT,
-                  TP_RND,
-                  TP_INPUT_WINDOW_VSIZE,
-                  TP_CASC_IN,
-                  TP_CASC_OUT,
-                  TP_FIR_RANGE_LEN,
-                  TP_KERNEL_POSITION,
-                  TP_CASC_LEN,
-                  TP_USE_COEFF_RELOAD,
-                  TP_DUAL_IP,
-                  TP_NUM_OUTPUTS,
-                  TP_API,
-                  TP_MODIFY_MARGIN_OFFSET,
-                  TP_COEFF_PHASE,
-                  TP_COEFF_PHASE_OFFSET,
-                  TP_COEFF_PHASES,
-                  TP_COEFF_PHASES_LEN>::filterKernel(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
-                                                     T_outputIF<TP_CASC_OUT, TT_DATA> outInterface,
-                                                     const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]) {
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
+INLINE_DECL void kernelFilterClass<TT_DATA,
+                                   TT_COEFF,
+                                   TP_FIR_LEN,
+                                   TP_INTERPOLATE_FACTOR,
+                                   TP_SHIFT,
+                                   TP_RND,
+                                   TP_INPUT_WINDOW_VSIZE,
+                                   TP_CASC_IN,
+                                   TP_CASC_OUT,
+                                   TP_FIR_RANGE_LEN,
+                                   TP_KERNEL_POSITION,
+                                   TP_CASC_LEN,
+                                   TP_USE_COEFF_RELOAD,
+                                   TP_DUAL_IP,
+                                   TP_NUM_OUTPUTS,
+                                   TP_API,
+                                   TP_MODIFY_MARGIN_OFFSET,
+                                   TP_COEFF_PHASE,
+                                   TP_COEFF_PHASE_OFFSET,
+                                   TP_COEFF_PHASES,
+                                   TP_COEFF_PHASES_LEN,
+                                   TP_SAT>::filterKernel(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                                         T_outputIF<TP_CASC_OUT, TT_DATA> outInterface,
+                                                         const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]) {
     windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE + fnFirMargin<TP_FIR_LEN / TP_INTERPOLATE_FACTOR, TT_DATA>(),
                     TP_API>(inInterface, outInterface);
     isUpdateRequired = rtpCompare<TT_COEFF, TP_COEFF_PHASES_LEN>(inTaps, m_rawInTaps);
@@ -252,30 +254,31 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
-INLINE_DECL void
-kernelFilterClass<TT_DATA,
-                  TT_COEFF,
-                  TP_FIR_LEN,
-                  TP_INTERPOLATE_FACTOR,
-                  TP_SHIFT,
-                  TP_RND,
-                  TP_INPUT_WINDOW_VSIZE,
-                  TP_CASC_IN,
-                  TP_CASC_OUT,
-                  TP_FIR_RANGE_LEN,
-                  TP_KERNEL_POSITION,
-                  TP_CASC_LEN,
-                  TP_USE_COEFF_RELOAD,
-                  TP_DUAL_IP,
-                  TP_NUM_OUTPUTS,
-                  TP_API,
-                  TP_MODIFY_MARGIN_OFFSET,
-                  TP_COEFF_PHASE,
-                  TP_COEFF_PHASE_OFFSET,
-                  TP_COEFF_PHASES,
-                  TP_COEFF_PHASES_LEN>::filterKernelRtp(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
-                                                        T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
+INLINE_DECL void kernelFilterClass<TT_DATA,
+                                   TT_COEFF,
+                                   TP_FIR_LEN,
+                                   TP_INTERPOLATE_FACTOR,
+                                   TP_SHIFT,
+                                   TP_RND,
+                                   TP_INPUT_WINDOW_VSIZE,
+                                   TP_CASC_IN,
+                                   TP_CASC_OUT,
+                                   TP_FIR_RANGE_LEN,
+                                   TP_KERNEL_POSITION,
+                                   TP_CASC_LEN,
+                                   TP_USE_COEFF_RELOAD,
+                                   TP_DUAL_IP,
+                                   TP_NUM_OUTPUTS,
+                                   TP_API,
+                                   TP_MODIFY_MARGIN_OFFSET,
+                                   TP_COEFF_PHASE,
+                                   TP_COEFF_PHASE_OFFSET,
+                                   TP_COEFF_PHASES,
+                                   TP_COEFF_PHASES_LEN,
+                                   TP_SAT>::filterKernelRtp(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                                            T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
     windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE + fnFirMargin<TP_FIR_LEN / TP_INTERPOLATE_FACTOR, TT_DATA>(),
                     TP_API>(inInterface, outInterface);
     isUpdateRequired = getRtpTrigger(); // 0 - equal, 1 - not equal
@@ -309,32 +312,33 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
-INLINE_DECL void
-kernelFilterClass<TT_DATA,
-                  TT_COEFF,
-                  TP_FIR_LEN,
-                  TP_INTERPOLATE_FACTOR,
-                  TP_SHIFT,
-                  TP_RND,
-                  TP_INPUT_WINDOW_VSIZE,
-                  TP_CASC_IN,
-                  TP_CASC_OUT,
-                  TP_FIR_RANGE_LEN,
-                  TP_KERNEL_POSITION,
-                  TP_CASC_LEN,
-                  TP_USE_COEFF_RELOAD,
-                  TP_DUAL_IP,
-                  TP_NUM_OUTPUTS,
-                  TP_API,
-                  TP_MODIFY_MARGIN_OFFSET,
-                  TP_COEFF_PHASE,
-                  TP_COEFF_PHASE_OFFSET,
-                  TP_COEFF_PHASES,
-                  TP_COEFF_PHASES_LEN>::filterSelectArch(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
-                                                         T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
-    set_rnd(TP_RND);
-    set_sat();
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
+INLINE_DECL void kernelFilterClass<TT_DATA,
+                                   TT_COEFF,
+                                   TP_FIR_LEN,
+                                   TP_INTERPOLATE_FACTOR,
+                                   TP_SHIFT,
+                                   TP_RND,
+                                   TP_INPUT_WINDOW_VSIZE,
+                                   TP_CASC_IN,
+                                   TP_CASC_OUT,
+                                   TP_FIR_RANGE_LEN,
+                                   TP_KERNEL_POSITION,
+                                   TP_CASC_LEN,
+                                   TP_USE_COEFF_RELOAD,
+                                   TP_DUAL_IP,
+                                   TP_NUM_OUTPUTS,
+                                   TP_API,
+                                   TP_MODIFY_MARGIN_OFFSET,
+                                   TP_COEFF_PHASE,
+                                   TP_COEFF_PHASE_OFFSET,
+                                   TP_COEFF_PHASES,
+                                   TP_COEFF_PHASES_LEN,
+                                   TP_SAT>::filterSelectArch(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                                             T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     // This function hides exposure of the implementation choice from the user.
     if
@@ -373,32 +377,34 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
-INLINE_DECL void
-kernelFilterClass<TT_DATA,
-                  TT_COEFF,
-                  TP_FIR_LEN,
-                  TP_INTERPOLATE_FACTOR,
-                  TP_SHIFT,
-                  TP_RND,
-                  TP_INPUT_WINDOW_VSIZE,
-                  TP_CASC_IN,
-                  TP_CASC_OUT,
-                  TP_FIR_RANGE_LEN,
-                  TP_KERNEL_POSITION,
-                  TP_CASC_LEN,
-                  TP_USE_COEFF_RELOAD,
-                  TP_DUAL_IP,
-                  TP_NUM_OUTPUTS,
-                  TP_API,
-                  TP_MODIFY_MARGIN_OFFSET,
-                  TP_COEFF_PHASE,
-                  TP_COEFF_PHASE_OFFSET,
-                  TP_COEFF_PHASES,
-                  TP_COEFF_PHASES_LEN>::filterStream(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
-                                                     T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
-    set_rnd(TP_RND);
-    set_sat();
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
+INLINE_DECL void kernelFilterClass<TT_DATA,
+                                   TT_COEFF,
+                                   TP_FIR_LEN,
+                                   TP_INTERPOLATE_FACTOR,
+                                   TP_SHIFT,
+                                   TP_RND,
+                                   TP_INPUT_WINDOW_VSIZE,
+                                   TP_CASC_IN,
+                                   TP_CASC_OUT,
+                                   TP_FIR_RANGE_LEN,
+                                   TP_KERNEL_POSITION,
+                                   TP_CASC_LEN,
+                                   TP_USE_COEFF_RELOAD,
+                                   TP_DUAL_IP,
+                                   TP_NUM_OUTPUTS,
+                                   TP_API,
+                                   TP_MODIFY_MARGIN_OFFSET,
+                                   TP_COEFF_PHASE,
+                                   TP_COEFF_PHASE_OFFSET,
+                                   TP_COEFF_PHASES,
+                                   TP_COEFF_PHASES_LEN,
+                                   TP_SAT>::filterStream(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                                         T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
+
     TT_COEFF* coeff = (TT_COEFF*)m_internalTaps;
 
     T_buff_256b<TT_COEFF> coe0;                                       // register for coeff values.
@@ -707,32 +713,34 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
-INLINE_DECL void kernelFilterClass<
-    TT_DATA,
-    TT_COEFF,
-    TP_FIR_LEN,
-    TP_INTERPOLATE_FACTOR,
-    TP_SHIFT,
-    TP_RND,
-    TP_INPUT_WINDOW_VSIZE,
-    TP_CASC_IN,
-    TP_CASC_OUT,
-    TP_FIR_RANGE_LEN,
-    TP_KERNEL_POSITION,
-    TP_CASC_LEN,
-    TP_USE_COEFF_RELOAD,
-    TP_DUAL_IP,
-    TP_NUM_OUTPUTS,
-    TP_API,
-    TP_MODIFY_MARGIN_OFFSET,
-    TP_COEFF_PHASE,
-    TP_COEFF_PHASE_OFFSET,
-    TP_COEFF_PHASES,
-    TP_COEFF_PHASES_LEN>::filterStreamPhaseParallel(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
-                                                    T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
-    set_rnd(TP_RND);
-    set_sat();
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
+INLINE_DECL void
+kernelFilterClass<TT_DATA,
+                  TT_COEFF,
+                  TP_FIR_LEN,
+                  TP_INTERPOLATE_FACTOR,
+                  TP_SHIFT,
+                  TP_RND,
+                  TP_INPUT_WINDOW_VSIZE,
+                  TP_CASC_IN,
+                  TP_CASC_OUT,
+                  TP_FIR_RANGE_LEN,
+                  TP_KERNEL_POSITION,
+                  TP_CASC_LEN,
+                  TP_USE_COEFF_RELOAD,
+                  TP_DUAL_IP,
+                  TP_NUM_OUTPUTS,
+                  TP_API,
+                  TP_MODIFY_MARGIN_OFFSET,
+                  TP_COEFF_PHASE,
+                  TP_COEFF_PHASE_OFFSET,
+                  TP_COEFF_PHASES,
+                  TP_COEFF_PHASES_LEN,
+                  TP_SAT>::filterStreamPhaseParallel(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                                     T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     T_buff_1024b<TT_DATA>* ptr_delay = (T_buff_1024b<TT_DATA>*)delay; // heap storage pointer
 
@@ -831,8 +839,9 @@ INLINE_DECL void kernelFilterClass<
 #pragma unroll(kParallelPhases)
                             for (int phase = 0; phase < kParallelPhases; ++phase) {
                                 if ((m_kColumns * op) % m_kCoeffRegVsize == 0) {
-                                    T_buff_256b<TT_COEFF>* coeff = ((T_buff_256b<TT_COEFF>*)m_internalTaps2[phase] +
-                                                                    (m_kColumns * op) / m_kCoeffRegVsize);
+                                    chess_protect_access T_buff_256b<TT_COEFF>* coeff =
+                                        ((T_buff_256b<TT_COEFF>*)m_internalTaps2[phase] +
+                                         (m_kColumns * op) / m_kCoeffRegVsize);
                                     coe[phase] = *coeff;
                                 }
                                 xstart = kXStart + m_dataStarts[0] + m_kColumns * op +
@@ -890,7 +899,8 @@ INLINE_DECL void kernelFilterClass<
                 for (int phase = 0; phase < kSerialPhases; ++phase) {
 #pragma unroll(kParallelPhases)
                     for (int phase = 0; phase < kParallelPhases; ++phase) {
-                        T_buff_256b<TT_COEFF>* coeff = ((T_buff_256b<TT_COEFF>*)m_internalTaps2[phase]);
+                        chess_protect_access T_buff_256b<TT_COEFF>* coeff =
+                            ((T_buff_256b<TT_COEFF>*)m_internalTaps2[phase]);
                         coe[phase] = *coeff;
                     }
 
@@ -977,32 +987,33 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
-INLINE_DECL void
-kernelFilterClass<TT_DATA,
-                  TT_COEFF,
-                  TP_FIR_LEN,
-                  TP_INTERPOLATE_FACTOR,
-                  TP_SHIFT,
-                  TP_RND,
-                  TP_INPUT_WINDOW_VSIZE,
-                  TP_CASC_IN,
-                  TP_CASC_OUT,
-                  TP_FIR_RANGE_LEN,
-                  TP_KERNEL_POSITION,
-                  TP_CASC_LEN,
-                  TP_USE_COEFF_RELOAD,
-                  TP_DUAL_IP,
-                  TP_NUM_OUTPUTS,
-                  TP_API,
-                  TP_MODIFY_MARGIN_OFFSET,
-                  TP_COEFF_PHASE,
-                  TP_COEFF_PHASE_OFFSET,
-                  TP_COEFF_PHASES,
-                  TP_COEFF_PHASES_LEN>::filterPhaseSeries(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
-                                                          T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
-    set_rnd(TP_RND);
-    set_sat();
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
+INLINE_DECL void kernelFilterClass<TT_DATA,
+                                   TT_COEFF,
+                                   TP_FIR_LEN,
+                                   TP_INTERPOLATE_FACTOR,
+                                   TP_SHIFT,
+                                   TP_RND,
+                                   TP_INPUT_WINDOW_VSIZE,
+                                   TP_CASC_IN,
+                                   TP_CASC_OUT,
+                                   TP_FIR_RANGE_LEN,
+                                   TP_KERNEL_POSITION,
+                                   TP_CASC_LEN,
+                                   TP_USE_COEFF_RELOAD,
+                                   TP_DUAL_IP,
+                                   TP_NUM_OUTPUTS,
+                                   TP_API,
+                                   TP_MODIFY_MARGIN_OFFSET,
+                                   TP_COEFF_PHASE,
+                                   TP_COEFF_PHASE_OFFSET,
+                                   TP_COEFF_PHASES,
+                                   TP_COEFF_PHASES_LEN,
+                                   TP_SAT>::filterPhaseSeries(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                                              T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     TT_COEFF* m_internalTapsCopy = (TT_COEFF*)m_internalTaps; // points to m_internalTaps[0][0][0][0]
     T_buff_256b<TT_COEFF> coe0;                               // register for coeff values.
@@ -1146,35 +1157,35 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
-INLINE_DECL void
-kernelFilterClass<TT_DATA,
-                  TT_COEFF,
-                  TP_FIR_LEN,
-                  TP_INTERPOLATE_FACTOR,
-                  TP_SHIFT,
-                  TP_RND,
-                  TP_INPUT_WINDOW_VSIZE,
-                  TP_CASC_IN,
-                  TP_CASC_OUT,
-                  TP_FIR_RANGE_LEN,
-                  TP_KERNEL_POSITION,
-                  TP_CASC_LEN,
-                  TP_USE_COEFF_RELOAD,
-                  TP_DUAL_IP,
-                  TP_NUM_OUTPUTS,
-                  TP_API,
-                  TP_MODIFY_MARGIN_OFFSET,
-                  TP_COEFF_PHASE,
-                  TP_COEFF_PHASE_OFFSET,
-                  TP_COEFF_PHASES,
-                  TP_COEFF_PHASES_LEN>::filterPhaseParallel(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
-                                                            T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
-    set_rnd(TP_RND);
-    set_sat();
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
+INLINE_DECL void kernelFilterClass<TT_DATA,
+                                   TT_COEFF,
+                                   TP_FIR_LEN,
+                                   TP_INTERPOLATE_FACTOR,
+                                   TP_SHIFT,
+                                   TP_RND,
+                                   TP_INPUT_WINDOW_VSIZE,
+                                   TP_CASC_IN,
+                                   TP_CASC_OUT,
+                                   TP_FIR_RANGE_LEN,
+                                   TP_KERNEL_POSITION,
+                                   TP_CASC_LEN,
+                                   TP_USE_COEFF_RELOAD,
+                                   TP_DUAL_IP,
+                                   TP_NUM_OUTPUTS,
+                                   TP_API,
+                                   TP_MODIFY_MARGIN_OFFSET,
+                                   TP_COEFF_PHASE,
+                                   TP_COEFF_PHASE_OFFSET,
+                                   TP_COEFF_PHASES,
+                                   TP_COEFF_PHASES_LEN,
+                                   TP_SAT>::filterPhaseParallel(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                                                T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     TT_COEFF* m_internalTapsCopy = (TT_COEFF*)m_internalTaps; // points to m_internalTaps[0][0][0][0]
-    T_buff_256b<TT_COEFF> coe0;                               // register for coeff values.
     T_buff_1024b<TT_DATA> sbuff;                              // cache register for data values entering MAC
     T_outValIntAsym<TT_DATA, TT_COEFF> outVal;
     T_buff_256b<TT_DATA> readData;
@@ -1195,7 +1206,7 @@ kernelFilterClass<TT_DATA,
         CEIL(m_kDataBuffXOffset + m_kLanes + m_kColumns - 1, m_kDataLoadVsize) / m_kDataLoadVsize;
     std::array<T_accIntAsym<TT_DATA, TT_COEFF>, kParallelPhases> acc;
     std::array<T_buff_256b<TT_COEFF>, kParallelPhases> coe;
-    std::array<T_outValIntAsym<TT_DATA, TT_COEFF>, kParallelPhases> outArray;
+    std::array<T_outVal<TT_DATA, TT_COEFF>, kParallelPhases> outArray;
     constexpr int k128Vsize = 128 / 8 / sizeof(TT_DATA);
     using t_128vect = ::aie::vector<TT_DATA, k128Vsize>;
     t_128vect* read128Ptr;
@@ -1222,7 +1233,8 @@ kernelFilterClass<TT_DATA,
             for (int phase = 0; phase < kSerialPhases; ++phase) {
 #pragma unroll(kParallelPhases)
                 for (int phase = 0; phase < kParallelPhases; ++phase) {
-                    T_buff_256b<TT_COEFF>* coeff = ((T_buff_256b<TT_COEFF>*)m_internalTaps2[phase]);
+                    chess_protect_access T_buff_256b<TT_COEFF>* coeff =
+                        ((T_buff_256b<TT_COEFF>*)m_internalTaps2[phase]);
                     coe[phase] = *coeff;
                 }
 
@@ -1261,7 +1273,7 @@ kernelFilterClass<TT_DATA,
 #pragma unroll(kParallelPhases)
                     for (int phase = 0; phase < kParallelPhases; ++phase) {
                         if ((m_kColumns * op) % m_kCoeffRegVsize == 0) {
-                            T_buff_256b<TT_COEFF>* coeff =
+                            chess_protect_access T_buff_256b<TT_COEFF>* coeff =
                                 ((T_buff_256b<TT_COEFF>*)m_internalTaps2[phase] + (m_kColumns * op) / m_kCoeffRegVsize);
                             coe[phase] = *coeff;
                         }
@@ -1330,32 +1342,33 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
-INLINE_DECL void
-kernelFilterClass<TT_DATA,
-                  TT_COEFF,
-                  TP_FIR_LEN,
-                  TP_INTERPOLATE_FACTOR,
-                  TP_SHIFT,
-                  TP_RND,
-                  TP_INPUT_WINDOW_VSIZE,
-                  TP_CASC_IN,
-                  TP_CASC_OUT,
-                  TP_FIR_RANGE_LEN,
-                  TP_KERNEL_POSITION,
-                  TP_CASC_LEN,
-                  TP_USE_COEFF_RELOAD,
-                  TP_DUAL_IP,
-                  TP_NUM_OUTPUTS,
-                  TP_API,
-                  TP_MODIFY_MARGIN_OFFSET,
-                  TP_COEFF_PHASE,
-                  TP_COEFF_PHASE_OFFSET,
-                  TP_COEFF_PHASES,
-                  TP_COEFF_PHASES_LEN>::filterIncr(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
-                                                   T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
-    set_rnd(TP_RND);
-    set_sat();
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
+INLINE_DECL void kernelFilterClass<TT_DATA,
+                                   TT_COEFF,
+                                   TP_FIR_LEN,
+                                   TP_INTERPOLATE_FACTOR,
+                                   TP_SHIFT,
+                                   TP_RND,
+                                   TP_INPUT_WINDOW_VSIZE,
+                                   TP_CASC_IN,
+                                   TP_CASC_OUT,
+                                   TP_FIR_RANGE_LEN,
+                                   TP_KERNEL_POSITION,
+                                   TP_CASC_LEN,
+                                   TP_USE_COEFF_RELOAD,
+                                   TP_DUAL_IP,
+                                   TP_NUM_OUTPUTS,
+                                   TP_API,
+                                   TP_MODIFY_MARGIN_OFFSET,
+                                   TP_COEFF_PHASE,
+                                   TP_COEFF_PHASE_OFFSET,
+                                   TP_COEFF_PHASES,
+                                   TP_COEFF_PHASES_LEN,
+                                   TP_SAT>::filterIncr(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                                       T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     T_buff_256b<TT_COEFF>* __restrict coeff = (T_buff_256b<TT_COEFF>*)m_internalTaps;
     T_buff_256b<TT_COEFF> coe0;  // register for coeff values.
@@ -1490,7 +1503,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -1511,7 +1525,8 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::
     filter(
         input_circular_buffer<TT_DATA,
                               extents<inherited_extent>,
@@ -1540,7 +1555,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -1561,7 +1577,8 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::
     filter(
         input_circular_buffer<TT_DATA,
                               extents<inherited_extent>,
@@ -1592,7 +1609,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -1613,7 +1631,8 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::
     filter(
         input_circular_buffer<TT_DATA,
                               extents<inherited_extent>,
@@ -1643,7 +1662,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -1664,7 +1684,8 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::
     filter(
         input_circular_buffer<TT_DATA,
                               extents<inherited_extent>,
@@ -1695,7 +1716,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -1716,10 +1738,10 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::filter(input_async_buffer<TT_DATA, extents<inherited_extent> >&
-                                                           inWindow,
-                                                       input_stream_cacc48* inCascade,
-                                                       output_circular_buffer<TT_DATA>& __restrict outWindow) {
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::filter(input_async_buffer<TT_DATA, extents<inherited_extent> >& inWindow,
+                                          input_stream_cacc48* inCascade,
+                                          output_circular_buffer<TT_DATA>& __restrict outWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
@@ -1743,7 +1765,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -1764,11 +1787,11 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::filter(input_async_buffer<TT_DATA, extents<inherited_extent> >&
-                                                           inWindow,
-                                                       input_stream_cacc48* inCascade,
-                                                       output_circular_buffer<TT_DATA>& __restrict outWindow,
-                                                       output_circular_buffer<TT_DATA>& __restrict outWindow2) {
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::filter(input_async_buffer<TT_DATA, extents<inherited_extent> >& inWindow,
+                                          input_stream_cacc48* inCascade,
+                                          output_circular_buffer<TT_DATA>& __restrict outWindow,
+                                          output_circular_buffer<TT_DATA>& __restrict outWindow2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
@@ -1793,7 +1816,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -1814,10 +1838,10 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::filter(input_async_buffer<TT_DATA, extents<inherited_extent> >&
-                                                           inWindow,
-                                                       input_stream_cacc48* inCascade,
-                                                       output_circular_buffer<TT_DATA>& __restrict outWindow) {
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::filter(input_async_buffer<TT_DATA, extents<inherited_extent> >& inWindow,
+                                          input_stream_cacc48* inCascade,
+                                          output_circular_buffer<TT_DATA>& __restrict outWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
@@ -1841,7 +1865,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -1862,11 +1887,11 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::filter(input_async_buffer<TT_DATA, extents<inherited_extent> >&
-                                                           inWindow,
-                                                       input_stream_cacc48* inCascade,
-                                                       output_circular_buffer<TT_DATA>& __restrict outWindow,
-                                                       output_circular_buffer<TT_DATA>& __restrict outWindow2) {
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::filter(input_async_buffer<TT_DATA, extents<inherited_extent> >& inWindow,
+                                          input_stream_cacc48* inCascade,
+                                          output_circular_buffer<TT_DATA>& __restrict outWindow,
+                                          output_circular_buffer<TT_DATA>& __restrict outWindow2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
@@ -1892,7 +1917,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -1913,7 +1939,8 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::
     filter(input_circular_buffer<TT_DATA,
                                  extents<inherited_extent>,
                                  margin<fnFirMargin<TP_FIR_LEN / TP_INTERPOLATE_FACTOR, TT_DATA>()> >& inWindow,
@@ -1945,7 +1972,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -1966,7 +1994,8 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::
     filter(input_circular_buffer<TT_DATA,
                                  extents<inherited_extent>,
                                  margin<fnFirMargin<TP_FIR_LEN / TP_INTERPOLATE_FACTOR, TT_DATA>()> >& inWindow,
@@ -1999,7 +2028,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -2020,10 +2050,11 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::filter(input_async_buffer<TT_DATA>& inWindow,
-                                                       input_stream_cacc48* inCascade,
-                                                       output_stream_cacc48* outCascade,
-                                                       output_async_buffer<TT_DATA>& broadcastWindow) {
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::filter(input_async_buffer<TT_DATA>& inWindow,
+                                          input_stream_cacc48* inCascade,
+                                          output_stream_cacc48* outCascade,
+                                          output_async_buffer<TT_DATA>& broadcastWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
@@ -2051,7 +2082,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -2072,10 +2104,11 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::filter(input_async_buffer<TT_DATA>& inWindow,
-                                                       input_stream_cacc48* inCascade,
-                                                       output_stream_cacc48* outCascade,
-                                                       output_async_buffer<TT_DATA>& broadcastWindow) {
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::filter(input_async_buffer<TT_DATA>& inWindow,
+                                          input_stream_cacc48* inCascade,
+                                          output_stream_cacc48* outCascade,
+                                          output_async_buffer<TT_DATA>& broadcastWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
@@ -2104,7 +2137,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -2125,8 +2159,8 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::filter(input_stream<TT_DATA>* inStream,
-                                                       output_stream<TT_DATA>* outStream) {
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::filter(input_stream<TT_DATA>* inStream, output_stream<TT_DATA>* outStream) {
     T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -2147,7 +2181,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -2168,9 +2203,10 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::filter(input_stream<TT_DATA>* inStream,
-                                                       output_stream<TT_DATA>* outStream,
-                                                       output_stream<TT_DATA>* outStream2) {
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                          output_stream<TT_DATA>* outStream,
+                                          output_stream<TT_DATA>* outStream2) {
     T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -2192,7 +2228,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -2213,9 +2250,10 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::filter(input_stream<TT_DATA>* inStream,
-                                                       output_stream<TT_DATA>* outStream,
-                                                       const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]) {
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                          output_stream<TT_DATA>* outStream,
+                                          const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]) {
     T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -2236,7 +2274,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -2257,10 +2296,11 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::filter(input_stream<TT_DATA>* inStream,
-                                                       output_stream<TT_DATA>* outStream,
-                                                       output_stream<TT_DATA>* outStream2,
-                                                       const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]) {
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                          output_stream<TT_DATA>* outStream,
+                                          output_stream<TT_DATA>* outStream2,
+                                          const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]) {
     T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -2284,7 +2324,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -2305,9 +2346,10 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::filter(input_stream<TT_DATA>* inStream,
-                                                       input_stream_cacc48* inCascade,
-                                                       output_stream<TT_DATA>* outStream) {
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                          input_stream_cacc48* inCascade,
+                                          output_stream<TT_DATA>* outStream) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -2331,7 +2373,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -2352,10 +2395,11 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::filter(input_stream<TT_DATA>* inStream,
-                                                       input_stream_cacc48* inCascade,
-                                                       output_stream<TT_DATA>* outStream,
-                                                       output_stream<TT_DATA>* outStream2) {
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                          input_stream_cacc48* inCascade,
+                                          output_stream<TT_DATA>* outStream,
+                                          output_stream<TT_DATA>* outStream2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -2381,7 +2425,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -2402,8 +2447,8 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::filter(input_stream<TT_DATA>* inStream,
-                                                       output_stream_cacc48* outCascade) {
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::filter(input_stream<TT_DATA>* inStream, output_stream_cacc48* outCascade) {
     T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -2427,7 +2472,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -2448,9 +2494,10 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::filter(input_stream<TT_DATA>* inStream,
-                                                       input_stream_cacc48* inCascade,
-                                                       output_stream_cacc48* outCascade) {
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                          input_stream_cacc48* inCascade,
+                                          output_stream_cacc48* outCascade) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -2474,7 +2521,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -2495,9 +2543,10 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::filter(input_stream<TT_DATA>* inStream,
-                                                       input_stream_cacc48* inCascade,
-                                                       output_stream<TT_DATA>* outStream) {
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                          input_stream_cacc48* inCascade,
+                                          output_stream<TT_DATA>* outStream) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -2521,7 +2570,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -2542,10 +2592,11 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::filter(input_stream<TT_DATA>* inStream,
-                                                       input_stream_cacc48* inCascade,
-                                                       output_stream<TT_DATA>* outStream,
-                                                       output_stream<TT_DATA>* outStream2) {
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                          input_stream_cacc48* inCascade,
+                                          output_stream<TT_DATA>* outStream,
+                                          output_stream<TT_DATA>* outStream2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -2571,7 +2622,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -2592,9 +2644,10 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::filter(input_stream<TT_DATA>* inStream,
-                                                       output_stream_cacc48* outCascade,
-                                                       const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]) {
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                          output_stream_cacc48* outCascade,
+                                          const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]) {
     T_inputIF<CASC_IN_FALSE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -2618,7 +2671,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -2639,9 +2693,10 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::filter(input_stream<TT_DATA>* inStream,
-                                                       input_stream_cacc48* inCascade,
-                                                       output_stream_cacc48* outCascade) {
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                          input_stream_cacc48* inCascade,
+                                          output_stream_cacc48* outCascade) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -2666,7 +2721,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -2687,9 +2743,10 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::filter(input_stream<TT_DATA>* inStream,
-                                                       input_stream<TT_DATA>* inStream2,
-                                                       output_stream<TT_DATA>* outStream) {
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                          input_stream<TT_DATA>* inStream2,
+                                          output_stream<TT_DATA>* outStream) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -2711,7 +2768,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -2732,10 +2790,11 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::filter(input_stream<TT_DATA>* inStream,
-                                                       input_stream<TT_DATA>* inStream2,
-                                                       output_stream<TT_DATA>* outStream,
-                                                       output_stream<TT_DATA>* outStream2) {
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                          input_stream<TT_DATA>* inStream2,
+                                          output_stream<TT_DATA>* outStream,
+                                          output_stream<TT_DATA>* outStream2) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -2758,7 +2817,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -2779,10 +2839,11 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::filter(input_stream<TT_DATA>* inStream,
-                                                       input_stream<TT_DATA>* inStream2,
-                                                       output_stream<TT_DATA>* outStream,
-                                                       const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]) {
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                          input_stream<TT_DATA>* inStream2,
+                                          output_stream<TT_DATA>* outStream,
+                                          const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -2804,7 +2865,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -2825,11 +2887,12 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::filter(input_stream<TT_DATA>* inStream,
-                                                       input_stream<TT_DATA>* inStream2,
-                                                       output_stream<TT_DATA>* outStream,
-                                                       output_stream<TT_DATA>* outStream2,
-                                                       const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]) {
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                          input_stream<TT_DATA>* inStream2,
+                                          output_stream<TT_DATA>* outStream,
+                                          output_stream<TT_DATA>* outStream2,
+                                          const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -2854,7 +2917,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -2875,10 +2939,11 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::filter(input_stream<TT_DATA>* inStream,
-                                                       input_stream<TT_DATA>* inStream2,
-                                                       input_stream_cacc48* inCascade,
-                                                       output_stream<TT_DATA>* outStream) {
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                          input_stream<TT_DATA>* inStream2,
+                                          input_stream_cacc48* inCascade,
+                                          output_stream<TT_DATA>* outStream) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -2903,7 +2968,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -2924,11 +2990,12 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::filter(input_stream<TT_DATA>* inStream,
-                                                       input_stream<TT_DATA>* inStream2,
-                                                       input_stream_cacc48* inCascade,
-                                                       output_stream<TT_DATA>* outStream,
-                                                       output_stream<TT_DATA>* outStream2) {
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                          input_stream<TT_DATA>* inStream2,
+                                          input_stream_cacc48* inCascade,
+                                          output_stream<TT_DATA>* outStream,
+                                          output_stream<TT_DATA>* outStream2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -2955,7 +3022,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -2976,9 +3044,10 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::filter(input_stream<TT_DATA>* inStream,
-                                                       input_stream<TT_DATA>* inStream2,
-                                                       output_stream_cacc48* outCascade) {
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                          input_stream<TT_DATA>* inStream2,
+                                          output_stream_cacc48* outCascade) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -3003,7 +3072,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -3024,10 +3094,11 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::filter(input_stream<TT_DATA>* inStream,
-                                                       input_stream<TT_DATA>* inStream2,
-                                                       input_stream_cacc48* inCascade,
-                                                       output_stream_cacc48* outCascade) {
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                          input_stream<TT_DATA>* inStream2,
+                                          input_stream_cacc48* inCascade,
+                                          output_stream_cacc48* outCascade) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -3052,7 +3123,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -3073,10 +3145,11 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::filter(input_stream<TT_DATA>* inStream,
-                                                       input_stream<TT_DATA>* inStream2,
-                                                       input_stream_cacc48* inCascade,
-                                                       output_stream<TT_DATA>* outStream) {
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                          input_stream<TT_DATA>* inStream2,
+                                          input_stream_cacc48* inCascade,
+                                          output_stream<TT_DATA>* outStream) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -3101,7 +3174,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -3122,11 +3196,12 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::filter(input_stream<TT_DATA>* inStream,
-                                                       input_stream<TT_DATA>* inStream2,
-                                                       input_stream_cacc48* inCascade,
-                                                       output_stream<TT_DATA>* outStream,
-                                                       output_stream<TT_DATA>* outStream2) {
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                          input_stream<TT_DATA>* inStream2,
+                                          input_stream_cacc48* inCascade,
+                                          output_stream<TT_DATA>* outStream,
+                                          output_stream<TT_DATA>* outStream2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -3153,7 +3228,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -3174,10 +3250,11 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::filter(input_stream<TT_DATA>* inStream,
-                                                       input_stream<TT_DATA>* inStream2,
-                                                       output_stream_cacc48* outCascade,
-                                                       const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]) {
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                          input_stream<TT_DATA>* inStream2,
+                                          output_stream_cacc48* outCascade,
+                                          const TT_COEFF (&inTaps)[TP_COEFF_PHASES_LEN]) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -3202,7 +3279,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 void fir_interpolate_asym<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -3223,10 +3301,11 @@ void fir_interpolate_asym<TT_DATA,
                           TP_COEFF_PHASE,
                           TP_COEFF_PHASE_OFFSET,
                           TP_COEFF_PHASES,
-                          TP_COEFF_PHASES_LEN>::filter(input_stream<TT_DATA>* inStream,
-                                                       input_stream<TT_DATA>* inStream2,
-                                                       input_stream_cacc48* inCascade,
-                                                       output_stream_cacc48* outCascade) {
+                          TP_COEFF_PHASES_LEN,
+                          TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                          input_stream<TT_DATA>* inStream2,
+                                          input_stream_cacc48* inCascade,
+                                          output_stream_cacc48* outCascade) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inStream = inStream;

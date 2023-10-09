@@ -104,6 +104,15 @@
             "minimum": 0
         },
         {
+            "name": "TP_SAT",
+            "description": "Saturation mode.",
+            "type": "uint",
+            "validator": {
+              "file": "matrix_mult.py",
+              "function": "validate_TP_SAT" 
+            }
+        },
+        {
             "name": "TP_DIM_A_LEADING",
             "type": "uint",
             "description": "describes the scheme in which the data should be stored in memory. ROW_MAJOR = 0, COL_MAJOR = 1. Note, a COL_MAJOR matrix can be transposed to become a ROW_MAJOR matrix."
@@ -215,7 +224,5 @@
     "generator": {
         "file": "matrix_mult.py",
         "function": "generate_graph"
-    },
-    "target_domain": "AIE",
-    "visible": true
+    }
 }

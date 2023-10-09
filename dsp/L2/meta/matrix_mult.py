@@ -1,6 +1,6 @@
 
 import aie_common as com
-from aie_common import fn_is_complex, fn_size_by_byte, isError,isValid
+from aie_common import fn_is_complex, fn_size_by_byte, isError,isValid, fn_validate_satMode
 #import aie_common_fir as fir
 
 def validate_data_type_combination(TT_DATA_A, TT_DATA_B):
@@ -197,6 +197,9 @@ def validate_TP_SHIFT(args):
   TP_SHIFT = args["TP_SHIFT"]
   return com.fn_validate_shift(TT_DATA_A, TP_SHIFT)
 
+def validate_TP_SAT(args):
+  TP_SAT = args["TP_SAT"]
+  return fn_validate_satMode(TP_SAT)
 
 def validate_tiling_scheme(TT_DATA_A, TT_DATA_B, TP_DIM_A=None, TP_DIM_AB=None, TP_DIM_B=None, TP_CASC_LEN=None):
   ATile,ABTile,BTile = getTilingScheme(TT_DATA_A, TT_DATA_B)
@@ -337,6 +340,7 @@ def generate_graph(graphname, args):
   TP_DIM_B = args["TP_DIM_B"]
   TP_SHIFT = args["TP_SHIFT"]
   TP_RND = args["TP_RND"]
+  TP_SAT = args["TP_SAT"]
   TP_DIM_A_LEADING = args["TP_DIM_A_LEADING"]
   TP_DIM_B_LEADING = args["TP_DIM_B_LEADING"]
   TP_DIM_OUT_LEADING = args["TP_DIM_OUT_LEADING"]
@@ -364,6 +368,7 @@ public:
     {TP_DIM_B}, // TP_DIM_B
     {TP_SHIFT}, // TP_SHIFT
     {TP_RND}, // TP_RND
+    {TP_SAT}, //TP_SAT
     {TP_DIM_A_LEADING}, // TP_DIM_A_LEADING
     {TP_DIM_B_LEADING}, // TP_DIM_B_LEADING
     {TP_DIM_OUT_LEADING}, // TP_DIM_OUT_LEADING
@@ -371,8 +376,8 @@ public:
     {TP_ADD_TILING_B}, // TP_ADD_TILING_B
     {TP_ADD_DETILING_OUT}, // TP_ADD_DETILING_OUT
     {TP_INPUT_WINDOW_VSIZE_A}, // TP_INPUT_WINDOW_VSIZE_A
-    {TP_INPUT_WINDOW_VSIZE_B}, // TP_INPUT_WINDOW_VSIZE_B
-    TP_CASC_LEN // TP_CASC_LEN
+    {TP_INPUT_WINDOW_VSIZE_B} // TP_INPUT_WINDOW_VSIZE_B
+    {TP_CASC_LEN} // TP_CASC_LEN
   > mmult;
   
   {graphname}() : mmult() {{

@@ -68,7 +68,8 @@ class test_graph : public graph {
                                                   NUM_OUTPUTS,
                                                   DUAL_IP,
                                                   PORT_API,
-                                                  P_SSR>; // Note P_SSR forced to 1 for REF
+                                                  P_SSR, // Note P_SSR forced to 1 for REF
+                                                  SAT_MODE>;
 
     COEFF_TYPE m_taps[2][FIR_LEN];
     std::vector<COEFF_TYPE> m_taps_v;
@@ -208,7 +209,7 @@ class test_graph : public graph {
 
         const int MAX_PING_PONG_SIZE = 16384;
         const int MEMORY_MODULE_SIZE = 32768;
-        const int bufferSize = (PORT_API == 1 ? 0 : (FIR_LEN + INPUT_WINDOW_VSIZE) * sizeof(DATA_TYPE));
+        const int bufferSize = (PORT_API == 1 ? 0 : (FIR_LEN + INPUT_WINDOW_VSIZE / P_SSR) * sizeof(DATA_TYPE));
         if (bufferSize > MAX_PING_PONG_SIZE) {
             single_buffer(firGraph.getKernels()->in[0]);
             single_buffer(firGraph.getKernels()[CASC_LEN - 1].out[0]);

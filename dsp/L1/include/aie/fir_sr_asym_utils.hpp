@@ -49,8 +49,7 @@ INLINE_DECL T_acc<TT_DATA, TT_COEFF> mulSrAsym(T_acc<TT_DATA, TT_COEFF> acc,
                                                unsigned int zstart) {
     T_acc<TT_DATA, TT_COEFF> retVal;
     retVal.val = ::aie::sliding_mul<fnNumLanes<TT_DATA, TT_COEFF>(), fnNumCols<TT_DATA, TT_COEFF>(), 1, 1, 1,
-                                    accClassTag_t<fnAccClass<TT_DATA>(), fnAccSizeSrAsym<TT_DATA, TT_COEFF>()> >(
-        zbuff.val, (zstart), xbuff.val, (xstart));
+                                    tAccBaseType_t<TT_DATA, TT_COEFF> >(zbuff.val, (zstart), xbuff.val, (xstart));
     return retVal;
 }
 
@@ -96,8 +95,7 @@ INLINE_DECL T_acc384<TT_DATA, TT_COEFF> mulSrAsym(T_acc384<TT_DATA, TT_COEFF> ac
                                                   unsigned int zstart) {
     T_acc384<TT_DATA, TT_COEFF> retVal;
     retVal.val = ::aie::sliding_mul<fnNumLanes384<TT_DATA, TT_COEFF>(), fnNumCols384<TT_DATA, TT_COEFF>(), 1, 1, 1,
-                                    accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >(
-        zbuff.val, zstart, xbuff.val, xstart);
+                                    tAccBaseType_t<TT_DATA, TT_COEFF> >(zbuff.val, zstart, xbuff.val, xstart);
     return retVal;
 }
 

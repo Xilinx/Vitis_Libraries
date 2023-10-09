@@ -19,8 +19,9 @@ FFT Window reference model
 */
 #include "device_defs.h"
 #include "fft_window_ref.hpp"
-//#include "fir_ref_utils.hpp"
+#include "fir_ref_utils.hpp"
 #include "fft_ref_utils.hpp"
+//#define _DSPLIB_FFT_WINDOW_REF_DEBUG_
 
 namespace xf {
 namespace dsp {
@@ -78,38 +79,25 @@ constexpr cfloat blankVector<cfloat>() {
 };
 
 template <typename T_D, typename T_C>
-T_D scalar_mult(T_D d, T_C k, const int shift) {
+T_D scalar_mult(T_D d, T_C k, const int shift, unsigned int t_rnd, unsigned int t_sat) {
     T_D retVal;
     int64 temp;
-    int64 roundConst = shift > 0 ? ((int64)1 << (shift - 1)) : 0;
-    // printf ("d = %lld, %lld\n", d.real, d.imag);
-    temp = (int64)d.real * (int64)k + roundConst;
-    // printf ("temp = %lld\n", temp);
-    temp >>= shift;
-    // printf ("temp = %lld\n", temp);
-    if (temp > std::numeric_limits<T_C>::max()) {
-        temp = std::numeric_limits<T_C>::max();
-    }
-    if (temp < std::numeric_limits<T_C>::min()) {
-        temp = std::numeric_limits<T_C>::min();
-    }
-    retVal.real = temp;
-    temp = (int64)d.imag * (int64)k + roundConst;
-    temp >>= shift;
-    if (temp > std::numeric_limits<T_C>::max()) {
-        temp = std::numeric_limits<T_C>::max();
-    }
-    if (temp < std::numeric_limits<T_C>::min()) {
-        //  printf ("temp = %lld\n", temp);
-        temp = std::numeric_limits<T_C>::min();
-        //  printf ("temp = %lld\n", temp);
-    }
-    retVal.imag = temp;
+    T_accRef<T_D> acc;
+
+    acc.real = (int64)d.real * (int64)k;
+    acc.imag = (int64)d.imag * (int64)k;
+
+    roundAcc(t_rnd, shift, acc);
+    saturateAcc(acc, t_sat);
+
+    retVal.real = acc.real;
+    retVal.imag = acc.imag;
+
     return retVal;
 }
 
 template <>
-cfloat scalar_mult<cfloat, float>(cfloat d, float k, const int shift) {
+cfloat scalar_mult<cfloat, float>(cfloat d, float k, const int shift, unsigned int t_rnd, unsigned int t_sat) {
     cfloat retVal;
     retVal.real = (float)d.real * (float)k; // no rounding or shift for floats
     retVal.imag = (float)d.imag * (float)k;
@@ -124,9 +112,19 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_API,
           unsigned int TP_SSR,
-          unsigned int TP_DYN_PT_SIZE>
-void fft_window_ref<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, TP_API, TP_SSR, TP_DYN_PT_SIZE>::
-    fft_window_main(input_buffer<TT_DATA>& inWindow0, output_buffer<TT_DATA>& outWindow0) {
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+void fft_window_ref<TT_DATA,
+                    TT_COEFF,
+                    TP_POINT_SIZE,
+                    TP_WINDOW_VSIZE,
+                    TP_SHIFT,
+                    TP_API,
+                    TP_SSR,
+                    TP_DYN_PT_SIZE,
+                    TP_RND,
+                    TP_SAT>::fft_window_main(input_buffer<TT_DATA>& inWindow0, output_buffer<TT_DATA>& outWindow0) {
     TT_DATA d_in;
     TT_DATA d_out;
     TT_COEFF* coeff_base = &this->weights[0];
@@ -179,7 +177,7 @@ void fft_window_ref<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT,
             // d_in = window_readincr(inWindow0);  //read input data
             d_in = *inPtr++;
             coeff = coeff_base[i];
-            d_out = scalar_mult<TT_DATA, TT_COEFF>(d_in, coeff, TP_SHIFT);
+            d_out = scalar_mult<TT_DATA, TT_COEFF>(d_in, coeff, TP_SHIFT, TP_RND, TP_SAT);
             // window_writeincr(outWindow0, d_out) ;
             *outPtr++ = d_out;
         }
@@ -201,12 +199,22 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_SHIFT,
           unsigned int TP_SSR,
-          unsigned int TP_DYN_PT_SIZE>
-void fft_window_ref<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SSR, TP_DYN_PT_SIZE>::
-    fft_window_main(input_stream<TT_DATA>* inStream0,
-                    input_stream<TT_DATA>* inStream1,
-                    output_stream<TT_DATA>* outStream0,
-                    output_stream<TT_DATA>* outStream1) {
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+void fft_window_ref<TT_DATA,
+                    TT_COEFF,
+                    TP_POINT_SIZE,
+                    TP_WINDOW_VSIZE,
+                    TP_SHIFT,
+                    1,
+                    TP_SSR,
+                    TP_DYN_PT_SIZE,
+                    TP_RND,
+                    TP_SAT>::fft_window_main(input_stream<TT_DATA>* inStream0,
+                                             input_stream<TT_DATA>* inStream1,
+                                             output_stream<TT_DATA>* outStream0,
+                                             output_stream<TT_DATA>* outStream1) {
     TT_DATA d_in0;
     TT_DATA d_out0;
     TT_DATA d_in1;
@@ -265,8 +273,8 @@ void fft_window_ref<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT,
             d_in1 = readincr(inStream1);                // read input data
             coeff0 = coeff_base[i * 2];
             coeff1 = coeff_base[(i * 2 + 1)];
-            d_out0 = scalar_mult<TT_DATA, TT_COEFF>(d_in0, coeff0, TP_SHIFT);
-            d_out1 = scalar_mult<TT_DATA, TT_COEFF>(d_in1, coeff1, TP_SHIFT);
+            d_out0 = scalar_mult<TT_DATA, TT_COEFF>(d_in0, coeff0, TP_SHIFT, TP_RND, TP_SAT);
+            d_out1 = scalar_mult<TT_DATA, TT_COEFF>(d_in1, coeff1, TP_SHIFT, TP_RND, TP_SAT);
             writeincr(outStream0, d_out0);
             writeincr(outStream1, d_out1);
         }
@@ -289,9 +297,19 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_SHIFT,
           unsigned int TP_SSR,
-          unsigned int TP_DYN_PT_SIZE>
-void fft_window_ref<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SSR, TP_DYN_PT_SIZE>::
-    fft_window_main(input_stream<TT_DATA>* inStream0, output_stream<TT_DATA>* outStream0) {
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+void fft_window_ref<TT_DATA,
+                    TT_COEFF,
+                    TP_POINT_SIZE,
+                    TP_WINDOW_VSIZE,
+                    TP_SHIFT,
+                    1,
+                    TP_SSR,
+                    TP_DYN_PT_SIZE,
+                    TP_RND,
+                    TP_SAT>::fft_window_main(input_stream<TT_DATA>* inStream0, output_stream<TT_DATA>* outStream0) {
     TT_DATA d_in0;
     TT_DATA d_out0;
     TT_DATA d_in1;
@@ -346,8 +364,8 @@ void fft_window_ref<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT,
             d_in1 = readincr(inStream0);                // read input data
             coeff0 = coeff_base[i * 2];
             coeff1 = coeff_base[(i * 2 + 1)];
-            d_out0 = scalar_mult<TT_DATA, TT_COEFF>(d_in0, coeff0, TP_SHIFT);
-            d_out1 = scalar_mult<TT_DATA, TT_COEFF>(d_in1, coeff1, TP_SHIFT);
+            d_out0 = scalar_mult<TT_DATA, TT_COEFF>(d_in0, coeff0, TP_SHIFT, TP_RND, TP_SAT);
+            d_out1 = scalar_mult<TT_DATA, TT_COEFF>(d_in1, coeff1, TP_SHIFT, TP_RND, TP_SAT);
             writeincr(outStream0, d_out0);
             writeincr(outStream0, d_out1);
         }

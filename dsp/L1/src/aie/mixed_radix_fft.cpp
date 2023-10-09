@@ -276,7 +276,7 @@ INLINE_DECL void kernel_MixedRadixFFTClass<TT_IN_DATA,
         constexpr(m_kR4Stages > 4) opt_r4_stage<TT_IN_DATA, TT_OUT_DATA, T_internalDataType, TT_TWIDDLE, TP_START_RANK,
                                                 TP_END_RANK, m_kR5Stages + m_kR3Stages + m_kR2Stages + 4, TP_POINT_SIZE,
                                                 m_kR5factor * m_kR3factor * m_kR2factor * k6R2 * kR4 * kR4, kr4shift4,
-                                                kR4twbase + kR4twinc * 3>(inbuff, outbuff, tmp_bufs, pingPong, inv,
+                                                kR4twbase + kR4twinc * 4>(inbuff, outbuff, tmp_bufs, pingPong, inv,
                                                                           m_twTable, m_twiddlePtrPtr);
 }
 

@@ -94,7 +94,7 @@
                 "./"
             ],
             "customized_params": {
-                "params": "-v $($(TAG)_TARGET_COMPILE_ARGS) -Xpreproc=\"$(TAG_PREPROC_ARGS)\"",
+                "params": "--aie.verbose $($(TAG)_TARGET_COMPILE_ARGS) $(TAG_PREPROC_ARGS)",
                 "default": {
                     "TAG": "UUT",
                     "UUT_KERNEL":"widget_real2complex",
@@ -108,12 +108,12 @@
                     "LOC_INPUT_FILE": "./data/input.txt",
                     "UUT_SIM_FILE": "./data/uut_output.txt",
                     "REF_SIM_FILE": "./data/ref_output.txt",
-                    "UUT_TARGET_COMPILE_ARGS": "-Xchess=llvm.xargs=\"-std=c++2a\" -Xchess=main:backend.mist2.xargs=\"+NOdra\"  -Xchess=main:backend.mist2.pnll=\"off\" ",
+                    "UUT_TARGET_COMPILE_ARGS": "--aie.Xchess=llvm.xargs=\"-std=c++2a\" --aie.Xchess=main:backend.mist2.xargs=\"+NOdra\"  --aie.Xchess=main:backend.mist2.pnll=\"off\" ",
                     "REF_TARGET_COMPILE_ARGS": "",
-                    "PREPROC_ARGS": "-DINPUT_FILE=$(LOC_INPUT_FILE)",
+                    "PREPROC_ARGS": "--aie.Xpreproc=-DINPUT_FILE=$(LOC_INPUT_FILE)",
                     "USING_REF": "",
-                    "USING_UUT": "-DUSING_UUT=1",
-                    "TAG_PREPROC_ARGS": "-DUUT_GRAPH=$($(TAG)_GRAPH) -DOUTPUT_FILE=$($(TAG)_SIM_FILE) $(PREPROC_ARGS) $(USING_$(TAG))"
+                    "USING_UUT": "--aie.Xpreproc=-DUSING_UUT=1",
+                    "TAG_PREPROC_ARGS": "--aie.Xpreproc=-DUUT_GRAPH=$($(TAG)_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$($(TAG)_SIM_FILE) $(PREPROC_ARGS) $(USING_$(TAG))"
                 }
             }
         }

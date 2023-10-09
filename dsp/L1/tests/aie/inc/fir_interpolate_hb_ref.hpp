@@ -48,7 +48,8 @@ template <typename TT_DATA,  // type of data input and output
           unsigned int TP_USE_COEFF_RELOAD = 0, // 1 = use coeff reload, 0 = don't use coeff reload
           unsigned int TP_NUM_OUTPUTS = 1,
           unsigned int TP_UPSHIFT_CT = 0,
-          unsigned int TP_API = 0>
+          unsigned int TP_API = 0,
+          unsigned int TP_SAT = 1>
 class fir_interpolate_hb_ref {
    private:
     TT_COEFF m_internalTaps[TP_FIR_LEN];
@@ -155,7 +156,8 @@ template <typename TT_DATA,  // type of data input and output
           unsigned TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_NUM_OUTPUTS,
           unsigned int TP_UPSHIFT_CT,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 class fir_interpolate_hb_ref<TT_DATA,
                              TT_COEFF,
                              TP_FIR_LEN,
@@ -165,7 +167,8 @@ class fir_interpolate_hb_ref<TT_DATA,
                              USE_COEFF_RELOAD_TRUE,
                              TP_NUM_OUTPUTS,
                              TP_UPSHIFT_CT,
-                             TP_API> {
+                             TP_API,
+                             TP_SAT> {
    private:
     TT_COEFF m_internalTaps[TP_FIR_LEN];
     static constexpr unsigned int m_kCentreTapInputPos =

@@ -33,6 +33,7 @@ the Single Rate Asymmetrical FIR library element.
 #include "fir_sr_asym.hpp"
 #include "fir_common_traits.hpp"
 #include "fir_utils.hpp"
+#include <adf/arch/aie_arch_properties.hpp>
 
 namespace xf {
 namespace dsp {
@@ -65,7 +66,7 @@ using namespace adf;
  * @tparam TP_SHIFT describes power of 2 shift down applied to the accumulation of
  *         FIR terms before output. \n TP_SHIFT must be in the range 0 to 61.
  * @tparam TP_RND describes the selection of rounding to be applied during the
- *         shift down stage of processing. Although, TP_RND accepts unsignedinteger values
+ *         shift down stage of processing. Although, TP_RND accepts unsigned integer values
  *         descriptive macros are recommended where
  *         - rnd_floor      = Truncate LSB, always round down (towards negative infinity).
  *         - rnd_ceil       = Always round up (towards positive infinity).
@@ -127,10 +128,15 @@ using namespace adf;
  *         Therefore, dual input ports are only supported with streams and not windows.
  * @tparam TP_API specifies if the input/output interface should be window-based or stream-based.  \n
  *         The values supported are 0 (window API) or 1 (stream API).
- * @tparam TP_SSR specifies the number of parallel input/output paths where samples are interleaved between paths,
- *         giving an overall higher throughput.   \n
- *         A TP_SSR of 1 means just one output leg and 1 input phase, and is the backwards compatible option. \n
+ *        A TP_SSR of 1 means just one output leg and 1 input phase, and is the backwards compatible option. \n
  *         The number of AIEs used is given by ``TP_SSR^2 * TP_CASC_LEN``. \n
+ * @tparam TP_SAT describes the selection of saturation to be applied during the
+ *         shift down stage of processing. TP_SAT accepts unsigned integer values, where:
+ *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
+ *         - 1: saturate       = Default. Saturation rounds an n-bit signed value in the range [- ( 2^(n-1) ) : +2^(n-1)
+ - 1 ].
+ *         - 3: symmetric      = Controls symmetric saturation. Symmetric saturation rounds an n-bit signed value in the
+ range [- ( 2^(n-1) -1 ) : +2^(n-1) - 1 ]. \n
 
  **/
 
@@ -145,7 +151,8 @@ template <typename TT_DATA,
           unsigned int TP_NUM_OUTPUTS = 1,
           unsigned int TP_DUAL_IP = 0,
           unsigned int TP_API = 0,
-          unsigned int TP_SSR = 1>
+          unsigned int TP_SSR = 1,
+          unsigned int TP_SAT = 1>
 /**
  **/
 class fir_sr_asym_graph : public graph {
@@ -215,6 +222,7 @@ class fir_sr_asym_graph : public graph {
         static constexpr int BTP_CASC_IN = TP_CASC_IN;
         static constexpr int BTP_CASC_OUT = TP_CASC_OUT;
         static constexpr int BTP_FIR_RANGE_LEN = 1;
+        static constexpr int BTP_SAT = TP_SAT;
     };
     template <int ssr_dim>
     using ssrKernelLookup = ssr_kernels<ssr_params<ssr_dim>, fir_sr_asym_tl>;
@@ -229,6 +237,10 @@ class fir_sr_asym_graph : public graph {
 
     using first_casc_kernel_in_first_ssr = fir_sr_asym_tl<first_casc_params>;
 
+    static_assert(!(get_input_streams_core_module() == 1 && (TP_DUAL_IP == 1)),
+                  "This device does not have dual ports. Please set TP_DUAL_IP to 0.");
+    static_assert(!(get_input_streams_core_module() == 1 && (TP_NUM_OUTPUTS == 2)),
+                  "This device does not have dual ports. Please set TP_NUM_OUTPUTS to 1.");
     static_assert(TP_SSR >= 1, "ERROR: TP_SSR must be 1 or higher");
 
     static_assert(TP_FIR_LEN % TP_SSR == 0, "TP_FIR LEN must be divisble by TP_SSR"); //
@@ -276,13 +288,6 @@ class fir_sr_asym_graph : public graph {
     static_assert(TP_API != 0 || bufferSize < kMemoryModuleSize,
                   "ERROR: Input Window size (based on requrested window size and FIR length margin) exceeds Memory "
                   "Module size of 32kB");
-
-#if (__AIE_ARCH__ == 20) || (__AIE_ARCH__ == 21) || (__AIE_ARCH__ == 22) || (__AIEARCH__ == 20) || \
-    (__AIEARCH__ == 21) || (__AIEARCH__ == 22)
-    static_assert(!(std::is_same<TT_DATA, cint32>::value || std::is_same<TT_DATA, int32>::value ||
-                    std::is_same<TT_COEFF, cint32>::value || std::is_same<TT_COEFF, int32>::value),
-                  "ERROR: FIRs currently do not support 32 bit data or coefficient types on AIE-ML");
-#endif
 
     template <unsigned int CL>
     struct tmp_ssr_params : public ssr_params<0> {

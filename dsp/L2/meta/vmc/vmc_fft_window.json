@@ -11,7 +11,7 @@
       "name": "data_type",
       "default": "cint16",
       "blockgui":{
-            "label": "Input/Output data type",
+            "label": "Input/Output data type:",
             "tablabel": "Main",
             "parameterType":"popup"
       }
@@ -26,7 +26,7 @@
         "args": [ "data_type" ]
       },
       "blockgui":{
-            "label": "Function coefficient type",
+            "label": "Function coefficient data type:",
             "tablabel": "Main",
             "parameterType":"popup"
       }
@@ -42,7 +42,7 @@
         "args": ["point_size","is_dyn_pt_size"]
       },
       "blockgui":{
-            "label": "Function coefficients",
+            "label": "Function coefficients:",
             "tablabel": "Main",
             "parameterType":"edit"
       }
@@ -70,7 +70,7 @@
       "validator": {
         "file": "vmc_fft_window.py",
         "function": "vmc_validate_is_dyn_pt_size",
-        "args": [ "point_size", "ssr" ]
+        "args": [ "point_size" ]
       },
       "blockgui":{
             "label": "Use dynamic point size",
@@ -88,7 +88,7 @@
         "args": [ "point_size" ]
       },
       "blockgui":{
-            "label": "Input window size (Number of Samples)",
+            "label": "Input window size (Number of Samples):",
             "tablabel": "Main",
             "parameterType":"edit"
       }
@@ -104,27 +104,11 @@
         "args": [ "data_type" ]
       },
       "blockgui":{
-            "label": "Scale output down by 2^",
+            "label": "Scale output down by 2^:",
             "tablabel": "Main",
             "parameterType":"edit"
       }
-    },
-      {
-      "key" :"TP_SSR",
-      "name": "ssr",
-      "description": "Specify number of data input/output in parallel",
-      "default": 2,
-      "validator": {
-        "file": "vmc_stream_fft_window.py",
-        "function": "vmc_validate_ssr",
-        "args": [ "data_type", "point_size"]
-      },
-      "blockgui":{
-            "label": "SSR: ",
-            "tablabel": "Main",
-            "parameterType":"edit"
-      }
-      }
+    }
     
   ],
   "generator": {

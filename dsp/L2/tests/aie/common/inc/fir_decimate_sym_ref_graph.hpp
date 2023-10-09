@@ -49,8 +49,8 @@ template <typename TT_DATA,
           unsigned int TP_USE_COEFF_RELOAD = 0,
           unsigned int TP_NUM_OUTPUTS = 1,
           unsigned int TP_API = 0,
-          unsigned int TP_SSR = 1 // just ignored in reference model
-          >
+          unsigned int TP_SSR = 1, // just ignored in reference model
+          unsigned TP_SAT = 1>
 class fir_decimate_sym_ref_graph : public graph {
    private:
     template <class dir>
@@ -77,14 +77,14 @@ class fir_decimate_sym_ref_graph : public graph {
     fir_decimate_sym_ref_graph(const std::vector<TT_COEFF>& taps) {
         m_firKernel = kernel::create_object<
             fir_decimate_sym_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
-                                 TP_INPUT_WINDOW_VSIZE, USE_COEFF_RELOAD_FALSE, TP_NUM_OUTPUTS, TP_API> >(taps);
+                                 TP_INPUT_WINDOW_VSIZE, USE_COEFF_RELOAD_FALSE, TP_NUM_OUTPUTS, TP_API, TP_SAT> >(taps);
         create_connections();
     }
 
     fir_decimate_sym_ref_graph() {
         m_firKernel = kernel::create_object<
             fir_decimate_sym_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_SHIFT, TP_RND,
-                                 TP_INPUT_WINDOW_VSIZE, USE_COEFF_RELOAD_TRUE, TP_NUM_OUTPUTS, TP_API> >();
+                                 TP_INPUT_WINDOW_VSIZE, USE_COEFF_RELOAD_TRUE, TP_NUM_OUTPUTS, TP_API, TP_SAT> >();
         create_connections();
     }
 

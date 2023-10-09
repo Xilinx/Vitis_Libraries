@@ -72,6 +72,21 @@ TP_CASC_LEN_min = 1
 TP_CASC_LEN_max = 40
 TP_FIR_LEN_min = 4
 TP_FIR_LEN_max = 8192
+TP_SHIFT_min = 0
+TP_SHIFT_max = 61
+#TP_API_min=0
+#TP_API_max=1
+#TP_RND_min=0
+#TP_RND_max=7
+#AIE_VARIANT_min=1
+#AIE_VARIANT_max=2
+#TP_DUAL_IP_min=0
+#TP_DUAL_IP_max=1
+#TP_NUM_OUTPUTS_min=1
+#TP_NUM_OUTPUTS_max=2
+#TP_USE_COEF_RELOAD_min=0
+#TP_USE_COEF_RELOAD_max=2
+
 
 def fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1):
   # CAUTION: this constant overlaps many factors. The main need is a "strobe" concept that means we unroll until xbuff is back to starting conditions.
@@ -147,14 +162,24 @@ def fn_data_needed_within_buffer_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN,
               )
     return isValid
 
-def fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD):
+def fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD, AIE_VARIANT):
     if TP_FIR_LEN < TP_FIR_LEN_min or TP_FIR_LEN > TP_FIR_LEN_max :
         return isError(f"Minimum and maximum value for Filter length is {TP_FIR_LEN_min} and {TP_FIR_LEN_max}, respectively, but got {TP_FIR_LEN}.")
-    minLenCheck =  fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR)
-    # apprently this is what the graph does, but i think we should be taking into account the rate change factors here.
-    maxLenCheck = fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR, TP_API, 1)
 
-    dataNeededCheck = fn_data_needed_within_buffer_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN,TP_API, TP_SSR, TP_DECIMATE_FACTOR )
+    minLenCheck =  fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR)
+    if AIE_VARIANT == 2:
+        if (TP_FIR_LEN / TP_CASC_LEN) <  (TP_DECIMATE_FACTOR):
+            return isError(
+                f"FIR computation is decomposed into multiple (interpolation * decimation factors) parallel polyphases. Make sure that FIR length {TP_FIR_LEN} is greater or equal to TP_DECIMATE_FACTOR {TP_DECIMATE_FACTOR} * TP_CASC_LEN {TP_CASC_LEN}."
+            )
+
+    if AIE_VARIANT == 2:
+       firLenPerPhaseDivider = TP_DECIMATE_FACTOR
+    else:
+       firLenPerPhaseDivider = 1
+    maxLenCheck = fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR, TP_API, firLenPerPhaseDivider)
+
+    dataNeededCheck = fn_data_needed_within_buffer_size(TT_DATA, TT_COEF, TP_FIR_LEN / firLenPerPhaseDivider, TP_CASC_LEN,TP_API, TP_SSR, TP_DECIMATE_FACTOR)
     firMultipleCheck = fn_multiple_decimation(TP_FIR_LEN,TP_DECIMATE_FACTOR, TP_CASC_LEN)
     for check in (minLenCheck,maxLenCheck,dataNeededCheck, firMultipleCheck):
       if check["is_valid"] == False :
@@ -228,7 +253,6 @@ def fn_validate_dual_ip(TP_API, TP_DUAL_IP, AIE_VARIANT):
       return isError("Dual input ports not supported on this device.")
     if TP_DUAL_IP == 1 and TP_API == 0 and AIE_VARIANT == 1:
       return isError("Dual input ports only supported when port is a stream.")
-
     return isValid
 
 def fn_validate_num_outputs(TP_API, TP_NUM_OUTPUTS, AIE_VARIANT):
@@ -244,14 +268,14 @@ def fn_type_support(TT_DATA, TT_COEF, AIE_VARIANT):
 
 def fn_validate_ssr(TP_SSR, TP_API, TP_DECIMATE_FACTOR, TP_PARA_DECI_POLY, AIE_VARIANT):
     # Only supported for streams
-    if TP_SSR < TP_SSR_min:
-	    return isError(f"Minimum value for SSR is {TP_SSR_min}, but got {TP_SSR}.")
-    ssrPolyCheck = fn_ssr_poly(AIE_VARIANT, TP_DECIMATE_FACTOR, TP_SSR, TP_PARA_DECI_POLY)
-    return ssrPolyCheck
+  if TP_SSR < TP_SSR_min:
+    return isError(f"Minimum value for SSR is {TP_SSR_min}, but got {TP_SSR}.")
+  ssrPolyCheck = fn_ssr_poly(AIE_VARIANT, TP_DECIMATE_FACTOR, TP_SSR, TP_PARA_DECI_POLY)
+  return ssrPolyCheck
 
 def fn_validate_deci_poly(TP_PARA_DECI_POLY):
     if TP_PARA_DECI_POLY < TP_PARA_DECI_POLY_min :
-        return isError(f"Minimum value for Decimator polyphases is {TP_PARA_DECI_POLY_min}, but got {TP_PARA_DECI_POLY}.")
+        return isError(f"Minimum value for Decimation poly phase is {TP_PARA_DECI_POLY_min}, but got {TP_PARA_DECI_POLY}.")
     return isValid
 
 def fn_validate_casc_len(TP_CASC_LEN):
@@ -279,6 +303,11 @@ def validate_TP_SHIFT(args):
 def validate_TP_SAT(args):
   TP_SAT = args["TP_SAT"]
   return fn_validate_satMode(TP_SAT)
+
+def validate_TP_RND(args):
+  TP_RND = args["TP_RND"]
+  AIE_VARIANT = args["AIE_VARIANT"]
+  return fn_validate_roundMode(TP_RND, AIE_VARIANT)
 
 def validate_TP_INPUT_WINDOW_VSIZE(args):
   check_valid_decompose = poly.fn_validate_decomposer_TP_INPUT_WINDOW_VSIZE(args)
@@ -330,7 +359,8 @@ def validate_TP_FIR_LEN(args):
   TP_SSR = args["TP_SSR"]
   TP_API = args["TP_API"]
   TP_USE_COEF_RELOAD = args["TP_USE_COEF_RELOAD"]
-  return fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD)
+  AIE_VARIANT = args["AIE_VARIANT"]
+  return fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_DECIMATE_FACTOR, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD, AIE_VARIANT)
 
 def validate_TP_DECIMATE_FACTOR(args):
   TT_DATA = args["TT_DATA"]
@@ -374,7 +404,6 @@ def validate_TP_SSR(args):
     TP_DECIMATE_FACTOR = args["TP_DECIMATE_FACTOR"]
     TP_PARA_DECI_POLY = args["TP_PARA_DECI_POLY"]
     AIE_VARIANT = args["AIE_VARIANT"]
-
     return  fn_validate_ssr(TP_SSR, TP_API, TP_DECIMATE_FACTOR, TP_PARA_DECI_POLY, AIE_VARIANT)
 
 def validate_TP_PARA_DECI_POLY(args):
@@ -431,19 +460,24 @@ def info_ports(args):
     TP_SSR = args["TP_SSR"]
     TP_DECIMATE_FACTOR = args["TP_DECIMATE_FACTOR"]
     TP_PARA_DECI_POLY = args["TP_PARA_DECI_POLY"]
+    TP_API = args["TP_API"]
+    TP_DUAL_IP = args["TP_DUAL_IP"]
+    TP_NUM_OUTPUTS = args["TP_NUM_OUTPUTS"]
+    TP_INTERPOLATE_FACTOR = 1
+
     margin_size = sr_asym.fn_margin_size(TP_FIR_LEN, TT_DATA)
     num_in_ports = TP_SSR * TP_PARA_DECI_POLY
-    in_win_size = TP_INPUT_WINDOW_VSIZE//num_in_ports
     num_out_ports = TP_SSR
-    out_win_size = (TP_INPUT_WINDOW_VSIZE//TP_DECIMATE_FACTOR) // num_out_ports
+    in_win_size = get_input_window_size(TP_INPUT_WINDOW_VSIZE, num_in_ports, TP_API, TP_DUAL_IP)
+    out_win_size = get_output_window_size(TP_INPUT_WINDOW_VSIZE, num_out_ports, TP_API, TP_NUM_OUTPUTS, TP_DECIMATE_FACTOR, TP_INTERPOLATE_FACTOR)
 
-    in_ports = get_port_info("in", "in", TT_DATA, TP_INPUT_WINDOW_VSIZE//TP_SSR, TP_SSR, marginSize=margin_size, TP_API=args["TP_API"])
-    in2_ports = (get_port_info("in2", "in", TT_DATA, TP_INPUT_WINDOW_VSIZE//TP_SSR, TP_SSR, marginSize=margin_size, TP_API=args["TP_API"]) if (args["TP_DUAL_IP"] == 1) else [])
+    in_ports = get_port_info("in", "in", TT_DATA, in_win_size, num_in_ports, marginSize=margin_size, TP_API=TP_API)
+    in2_ports = (get_port_info("in2", "in", TT_DATA, in_win_size, num_in_ports, marginSize=margin_size, TP_API=TP_API) if (TP_DUAL_IP == 1) else [])
     coeff_ports = (get_parameter_port_info("coeff", "in", TT_COEF, TP_SSR, TP_FIR_LEN, "async") if (args["TP_USE_COEF_RELOAD"] == 1) else [])
 
     # decimate by 2 for halfband
-    out_ports = get_port_info("out", "out", TT_DATA, TP_INPUT_WINDOW_VSIZE//TP_SSR//TP_DECIMATE_FACTOR, TP_SSR, TP_API=args["TP_API"])
-    out2_ports = (get_port_info("out2", "out", TT_DATA, TP_INPUT_WINDOW_VSIZE//TP_SSR//TP_DECIMATE_FACTOR, TP_SSR, TP_API=args["TP_API"]) if (args["TP_NUM_OUTPUTS"] == 2) else [])
+    out_ports = get_port_info("out", "out", TT_DATA, out_win_size, TP_SSR, TP_API=args["TP_API"])
+    out2_ports = (get_port_info("out2", "out", TT_DATA, out_win_size, TP_SSR, TP_API=args["TP_API"]) if (args["TP_NUM_OUTPUTS"] == 2) else [])
     return in_ports + in2_ports + coeff_ports + out_ports + out2_ports
 
 
@@ -470,6 +504,7 @@ def generate_graph(graphname, args):
   TP_SSR = args["TP_SSR"]
   TP_PARA_DECI_POLY = args["TP_PARA_DECI_POLY"]
   coeff_list = args["coeff"]
+  TP_SAT = args["TP_SAT"]
 
   taps = sr_asym.fn_get_taps_vector(TT_COEF, coeff_list)
   constr_args_str = f"taps" if TP_USE_COEF_RELOAD == 0 else ""
@@ -510,7 +545,8 @@ public:
     {TP_DUAL_IP}, //TP_DUAL_IP
     {TP_API}, //TP_API
     {TP_SSR}, //TP_SSR
-    {TP_PARA_DECI_POLY} //TP_PARA_DECI_POLY
+    {TP_PARA_DECI_POLY}, //TP_PARA_DECI_POLY
+    {TP_SAT} //TP_SAT
   > filter;
 
   {graphname}() : filter({constr_args_str}) {{

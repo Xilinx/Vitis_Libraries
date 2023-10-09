@@ -52,7 +52,7 @@ XFLIB_DIR = $(XF_PROJ_ROOT)
 # setting default value
 TARGET ?= aiesim
 HOST_ARCH ?= aarch64
-PARAMS ?= test_0_fir_9t_if3
+PARAMS ?= test_0_tool_canary_aie
 
 #setting PLATFORM
 ifeq ($(PLATFORM),)
@@ -63,7 +63,7 @@ PLATFORM := xilinx_vck190_base_202310_1
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST +=  vck190
+PLATFORM_ALLOWLIST +=  vck190 vek280
 PLATFORM_BLOCKLIST += 
 
 include ./utils.mk
@@ -113,8 +113,8 @@ AIE_WORK_DIR ?= Work
 AIE_PKG_DIR ?= Work
 
 # Setting customized_params in aiecompiler
+
 TAG ?= UUT
-AIE_VARIANT ?= 1
 UUT_KERNEL ?= fir_interpolate_asym
 REF_KERNEL ?= fir_interpolate_asym_ref
 UUT_GRAPH ?= fir_interpolate_asym_graph
@@ -131,11 +131,11 @@ LOC_COEFF_FILE ?= ./data/coeff.txt
 LOC_INPUT_FILE ?= ./data/input.txt
 REF_INPUT_FILE ?= ./data/input_ref.txt
 MAX_FIR_PER_KERNEL ?= 256
-UUT_TARGET_COMPILE_ARGS ?= --Xrouter=DMAFIFOsInFreeBankOnly  -stacksize=$(shell $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramset.py multi_params.json $(PARAMS))  -Xchess=llvm.xargs="-std=c++2a" -Xchess=main:backend.mist2.xargs="+NOdra" -Xchess=main:backend.mist2.pnll="off" 
+UUT_TARGET_COMPILE_ARGS ?= --aie.Xrouter=DMAFIFOsInFreeBankOnly  --aie.stacksize=$(shell $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramset.py multi_params.json $(PARAMS))  --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra" --aie.Xchess=main:backend.mist2.pnll="off" 
 REF_TARGET_COMPILE_ARGS ?= 
-PREPROC_ARGS ?=  -DCOEFF_FILE=$(LOC_COEFF_FILE)
-REF_PREPROC_ARGS ?= -DUUT_GRAPH=$(REF_GRAPH) -DINPUT_FILE=$(REF_INPUT_FILE) -DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS)
-UUT_PREPROC_ARGS ?= -DUUT_GRAPH=$(UUT_GRAPH) -DINPUT_FILE=$(LOC_INPUT_FILE) -DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) -DUSING_UUT=1
+PREPROC_ARGS ?= --aie.Xpreproc=-DCOEFF_FILE=$(LOC_COEFF_FILE)
+REF_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(REF_GRAPH) --aie.Xpreproc=-DINPUT_FILE=$(REF_INPUT_FILE) --aie.Xpreproc=-DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS)
+UUT_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(UUT_GRAPH) --aie.Xpreproc=-DINPUT_FILE=$(LOC_INPUT_FILE) --aie.Xpreproc=-DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) --aie.Xpreproc=-DUSING_UUT=1
 
 ############################ setting AIE Compiler ###########################
 ifneq ($(filter aiesim hw_emu hw, $(TARGET)),)
@@ -144,14 +144,14 @@ else
 AIETARGET := x86sim
 endif
 
-AIE_CXXFLAGS += --target=$(AIETARGET) --platform=$(XPLATFORM) --pl-freq=1000 
+AIE_CXXFLAGS += --target=$(AIETARGET) --platform=$(XPLATFORM)   --aie.pl-freq 1000 
 AIE_CXXFLAGS += $(AIE_CXXFLAGS_INC)
 AIE_CONTAINER = $(TEMP_DIR)/libadf.a
 AIE_WORK_DIR = $(CUR_DIR)/Work
 AIE_PKG_DIR = $(AIE_WORK_DIR)
 
 AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L1/tests/aie/inc -I $(XFLIB_DIR)/L1/tests/aie/src -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L2/tests/aie/common/inc -I $(CUR_DIR)
-AIE_CXXFLAGS += -v $($(TAG)_TARGET_COMPILE_ARGS) -Xpreproc="$($(TAG)_PREPROC_ARGS)"
+AIE_CXXFLAGS += --aie.verbose $($(TAG)_TARGET_COMPILE_ARGS) $($(TAG)_PREPROC_ARGS)
 
 $(AIE_WORK_DIR)/ps/c_rts/aie_control_xrt.cpp: $(AIE_CONTAINER)
 
@@ -184,6 +184,10 @@ ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/hw
 VPP_LDFLAGS +=   --config $(CUR_DIR)/system.cfg
 
+else ifneq (,$(shell echo $(XPLATFORM) | awk '/vek280/'))
+VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/hw
+VPP_LDFLAGS +=   --config $(CUR_DIR)/system.cfg
+
 else 
 VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include/hw
 
@@ -195,8 +199,7 @@ endif
 $(AIE_CONTAINER): pre_build $(XFLIB_DIR)/L2/tests/aie/fir_interpolate_asym/test.cpp $(XFLIB_DIR)/L1/src/aie/fir_interpolate_asym.cpp uut_config.h 
 	$(ECHO) "Compiling: libadf.a"
 	mkdir -p $(dir $@)
-	$(AIECXX) $(AIE_CXXFLAGS) $(filter %.s %.c %.cc %.cpp %cxx, $^)
-	mv ./libadf.a $(AIE_CONTAINER)
+	$(VPP) -c --mode aie $(AIE_CXXFLAGS) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^)
 
 ############################## Setting Rules for Host (Building Host Executable) ##############################
 $(EXE_FILE): $(EXE_FILE_DEPS)
@@ -326,24 +329,29 @@ ifeq ($(pcie_aie), on)
 	cp $(AIE_WORK_DIR)/ps/c_rts/aie_control_config.json ./
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) $(BINARY_CONTAINERS_PKG)
+	
 endif
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
+	
 else
 	@echo $(RUN_DEPS)
 	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
 	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
+	
 endif
 endif
 #sw_emu
 ifneq (,$(filter sw_emu, $(TARGET)))
 ifeq ($(HOST_ARCH), x86)
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
-	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) 
+	
 else
 	@echo $(RUN_DEPS)
 	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
 	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
+	
 endif
 endif
 #hw
@@ -351,6 +359,7 @@ ifeq ($(TARGET), hw)
 ifeq ($(HOST_ARCH), x86)
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	$(EXE_FILE) $(HOST_ARGS)
+	
 else
 	$(ECHO) "Please copy the content of sd_card folder and data to an SD Card and run on the board"
 endif
@@ -359,7 +368,7 @@ endif
 ############################## Setting Targets ##############################
 .PHONY: pre_build
 pre_build:
-	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command "tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL)"  --connector " " --var "DATA_TYPE:COEFF_TYPE:FIR_LEN:SHIFT:ROUND_MODE:INPUT_WINDOW_VSIZE:CASC_LEN:USE_COEFF_RELOAD:NUM_OUTPUTS:PORT_API:DUAL_IP:UUT_SSR:INTERPOLATE_FACTOR:UUT_PARA_INTERP_POLY:AIE_VARIANT")
+	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command "tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL)"  --connector " " --var "DATA_TYPE:COEFF_TYPE:FIR_LEN:SHIFT:ROUND_MODE:INPUT_WINDOW_VSIZE:CASC_LEN:USE_COEFF_RELOAD:NUM_OUTPUTS:PORT_API:DUAL_IP:UUT_SSR:INTERPOLATE_FACTOR:UUT_PARA_INTERP_POLY:AIE_VARIANT:SAT_MODE")
 	$(if $(filter-out REF,$(TAG)), vitis --classic -exec ipmetadata_config_checker $(XFLIB_DIR)/L2/meta/$(UUT_KERNEL).json ./config.json -newflow)
 	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command "make -f $(XFLIB_DIR)/L2/tests/aie/common/scripts/fir_helper.mk gen_input HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) INPUT_FILE=$(LOC_INPUT_FILE)")
 	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command "make -f $(XFLIB_DIR)/L2/tests/aie/common/scripts/fir_helper.mk ssr_split HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) SPLIT_ZIP_FILE=$(LOC_INPUT_FILE) TAG=$(TAG)")
@@ -391,7 +400,11 @@ GENERATED_FILES += uut_config.h
 uut_config.h: $(XFLIB_DIR)/L2/tests/aie/common/scripts/tb_gen.py 
 	$(VITIS_PYTHON3) $(XFLIB_DIR)/scripts/instance_generator.py -o uut_config.h --param-set $(PARAMS) --param-file multi_params.json --file "$(XFLIB_DIR)/L2/tests/aie/common/scripts/tb_gen.py" --func "generate_testbench"
 
+.PHONY: valid_params gen_instances
+
 valid_params:
+
+gen_instances: $(GENERATED_FILES)
 
 ############################## Cleaning Rules ##############################
 cleanh:

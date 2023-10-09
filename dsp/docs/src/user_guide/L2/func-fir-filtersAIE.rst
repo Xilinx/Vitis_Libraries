@@ -1,13 +1,13 @@
 ..
    Copyright (C) 2019-2022, Xilinx, Inc.
    Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-
+    
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-
+    
        http://www.apache.org/licenses/LICENSE-2.0
-
+    
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,9 +17,12 @@
 
 .. _FILTERS_AIE:
 
-==============
-Filters on AIE
-==============
+=======
+Filters
+=======
+
+The DSPLib contains several variants of Finite Impulse Response (FIR) filters.
+These include single-rate FIRs, half-band interpolation/decimation FIRs, as well as integer and fractional interpolation/decimation FIRs for AIE and AIE_ML devices.
 
 .. _FILTER_ENTRY:
 
@@ -75,29 +78,32 @@ The following table lists the supported combinations of data type and coefficien
 .. table:: Supported Combinations of Data Type and Coefficient Type
    :align: center
 
-   +-------------------------------+--------------------------------------------------------------------------+
-   |                               |                                 **Data Type**                            |
-   |                               +-----------+------------+-----------+------------+-----------+------------+
-   |                               | **Int16** | **Cint16** | **Int32** | **Cint32** | **Float** | **Cfloat** |
-   +----------------------+--------+-----------+------------+-----------+------------+-----------+------------+
-   | **Coefficient type** | Int16  | Supported | Supported  | Supported | Supported  | note 2    | note 2     |
-   |                      |        | (note 3)  |            |           |            |           |            |
-   |                      +--------+-----------+------------+-----------+------------+-----------+------------+
-   |                      | Cint16 | note 1    | Supported  | note 1    | Supported  | note 2    | note 2     |
-   |                      +--------+-----------+------------+-----------+------------+-----------+------------+
-   |                      | Int32  | Supported | Supported  | Supported | Supported  | note 2    | note 2     |
-   |                      +--------+-----------+------------+-----------+------------+-----------+------------+
-   |                      | Cint32 | note 1    | Supported  | note 1    | Supported  | note 2    | note 2     |
-   |                      +--------+-----------+------------+-----------+------------+-----------+------------+
-   |                      | Float  | note 2    | note 2     | note 2    | note 2     | Supported | Supported  |
-   |                      +--------+-----------+------------+-----------+------------+-----------+------------+
-   |                      | Cfloat | note 2    | note 2     | note 2    | note 2     | note 1    | Supported  |
-   +----------------------+--------+-----------+------------+-----------+------------+-----------+------------+
-   | 1. Complex coefficients are not supported for real-only data types.                                      |
-   | 2. A mix of float and integer types is not supported.                                                    |
-   | 3. The rate-changing FIR variants, i.e. fir_decimate_asym, fir_decimate_sym,                             |
-   |    fir_interpolate_asym and fir_resampler do not support int16 data and int16 coeff type combination.    |
-   +----------------------------------------------------------------------------------------------------------+
+   +-----------------------------------+--------------------------------------------------------------------------+
+   |                                   |                                 **Data Type**                            |
+   |                                   +-----------+------------+-----------+------------+-----------+------------+
+   |                                   | **Int16** | **Cint16** | **Int32** | **Cint32** | **Float** | **Cfloat** |
+   |                                   |           |            |           |            |           | (note 4)   |
+   +----------------------+------------+-----------+------------+-----------+------------+-----------+------------+
+   | **Coefficient type** | **Int16**  | Supported | Supported  | Supported | Supported  | note 2    | note 2     |
+   |                      |            | (note 3)  |            |           |            |           |            |
+   |                      +------------+-----------+------------+-----------+------------+-----------+------------+
+   |                      | **Cint16** | note 1    | Supported  | note 1    | Supported  | note 2    | note 2     |
+   |                      +------------+-----------+------------+-----------+------------+-----------+------------+
+   |                      | **Int32**  | Supported | Supported  | Supported | Supported  | note 2    | note 2     |
+   |                      +------------+-----------+------------+-----------+------------+-----------+------------+
+   |                      | **Cint32** | note 1    | Supported  | note 1    | Supported  | note 2    | note 2     |
+   |                      +------------+-----------+------------+-----------+------------+-----------+------------+
+   |                      | **Float**  | note 2    | note 2     | note 2    | note 2     | Supported | Supported  |
+   |                      +------------+-----------+------------+-----------+------------+-----------+------------+
+   |                      | **Cfloat** | note 2    | note 2     | note 2    | note 2     | note 1    | Supported  |
+   |                      | (note 4)   | note 2    | note 2     | note 2    | note 2     | note 1    | Supported  |
+   +----------------------+------------+-----------+------------+-----------+------------+-----------+------------+
+   | 1. Complex coefficients are not supported for real-only data types.                                          |
+   | 2. A mix of float and integer types is not supported.                                                        |
+   | 3. The rate-changing FIR variants, i.e. fir_decimate_asym, fir_decimate_sym, fir_interpolate_asym            |
+   | and fir_resampler only support int16 data and int16 coeff type combination on AIE-ML device.                 |
+   | 4. Cfloat data type is not supported on AIE-ML device.                                                       |
+   +--------------------------------------------------------------------------------------------------------------+
 
 ~~~~~~~~~~~~~~~~~~~
 Template Parameters
@@ -114,226 +120,218 @@ The following table lists parameters for all the FIR filters.
 .. table:: Parameters Supported by FIR Filters
    :align: center
 
-   +------------------------+----------------+-----------------+---------------------------------+
-   | Parameter Name         |    Type        |  Description    |    Range                        |
-   +========================+================+=================+=================================+
-   |    TT_DATA             |    Typename    | Data Type       |    int16,                       |
-   |                        |                |                 |    cint16,                      |
-   |                        |                |                 |    int32,                       |
-   |                        |                |                 |    cint32,                      |
-   |                        |                |                 |    float,                       |
-   |                        |                |                 |    cfloat                       |
-   +------------------------+----------------+-----------------+---------------------------------+
-   |    TT_COEFF            |    Typename    | Coefficient     |    int16,                       |
-   |                        |                | type            |    cint16,                      |
-   |                        |                |                 |    int32,                       |
-   |                        |                |                 |    cint32,                      |
-   |                        |                |                 |    float,                       |
-   |                        |                |                 |    cfloat                       |
-   +------------------------+----------------+-----------------+---------------------------------+
-   |    TP_FIR_LEN          |    Unsigned    | The number of   | Min - 4,                        |
-   |                        |    int         | taps            |                                 |
-   |                        |                |                 | Max - see :ref:`MAX_FIR_LENGTH` |
-   +------------------------+----------------+-----------------+---------------------------------+
-   |   TP_INTERPOLATE_FACTOR|    Unsigned    | Ratio of output |   1 (default) to 7              |
-   |                        |    int         | samples to input|   (interpolating variants only) |
-   |                        |                | samples         |                                 |
-   +------------------------+----------------+-----------------+---------------------------------+
-   |   TP_DECIMATE_FACTOR   |    Unsigned    | Ratio of input  |   1 (default) to 7              |
-   |                        |    int         | samples to      |   (decimating variants only)    |
-   |                        |                | output samples  |                                 |
-   +------------------------+----------------+-----------------+---------------------------------+
-   |    TP_SHIFT            |    Unsigned    | The number of   |    0 to 61                      |
-   |                        |    int         | bits to shift   |                                 |
-   |                        |                | unscaled        |                                 |
-   |                        |                | result          |                                 |
-   |                        |                | down by before  |                                 |
-   |                        |                | output.         |                                 |
-   +------------------------+----------------+-----------------+---------------------------------+
-   |    TP_RND              |    Unsigned    | Round mode      |    0 = ``rnd_floor``            |
-   |                        |    int         |                 |    truncate or                  |
-   |                        |                |                 |    floor                        |
-   |                        |                |                 |                                 |
-   |                        |                |                 |    1 = ``rnd_ceil``             |
-   |                        |                |                 |    ceiling                      |
-   |                        |                |                 |                                 |
-   |                        |                |                 |    2 = ``rnd_pos_inf``          |
-   |                        |                |                 |    positive                     |
-   |                        |                |                 |    infinity                     |
-   |                        |                |                 |                                 |
-   |                        |                |                 |    3 = ``rnd_neg_inf``          |
-   |                        |                |                 |    negative                     |
-   |                        |                |                 |    infinity                     |
-   |                        |                |                 |                                 |
-   |                        |                |                 |    4 = ``rnd_sym_inf``          |
-   |                        |                |                 |    symmetrical                  |
-   |                        |                |                 |    to infinity                  |
-   |                        |                |                 |                                 |
-   |                        |                |                 |    5 = ``rnd_sym_zero``         |
-   |                        |                |                 |    symmetrical                  |
-   |                        |                |                 |    to zero                      |
-   |                        |                |                 |                                 |
-   |                        |                |                 |    6 = ``rnd_conv_even``        |
-   |                        |                |                 |    convergent                   |
-   |                        |                |                 |    to even                      |
-   |                        |                |                 |                                 |
-   |                        |                |                 |    7 = ``rnd_conv_odd``         |
-   |                        |                |                 |    convergent                   |
-   |                        |                |                 |    to odd                       |
-   +------------------------+----------------+-----------------+---------------------------------+
-   | TP_INPUT_WINDOW_VSIZE  |    Unsigned    | The number      |  Must be a                      |
-   |                        |    int         | of samples      |  multiple of                    |
-   |                        |                | processed by    |  the 256-bits                   |
-   |                        |                | the graph in a  |  In addition, must by           |
-   |                        |                | single          |  divisible by:                  |
-   |                        |                | iteration run.  |  ``TP_SSR`` and                 |
-   |                        |                | For windows,    |  ``TP_DECIMATE_FACTOR``.        |
-   |                        |                | defines the     |                                 |
-   |                        |                | size of input   |  No                             |
-   |                        |                | window. For     |  enforced                       |
-   |                        |                | streams, it     |  range, but                     |
-   |                        |                | impacts the     |  large                          |
-   |                        |                | number of input |  windows                        |
-   |                        |                | samples operated|  will result                    |
-   |                        |                | on in a single  |  in mapper                      |
-   |                        |                | iteration       |  errors due                     |
-   |                        |                | of the kernel.  |  to                             |
-   |                        |                |                 |  excessive                      |
-   |                        |                |                 |  RAM use, for windowed          |
-   |                        |                |                 |  API implementations.           |
-   |                        |                |                 |                                 |
-   +------------------------+----------------+-----------------+---------------------------------+
-   |    TP_CASC_LEN         |    Unsigned    | The number      |    1 to 9.                      |
-   |                        |    int         | of cascaded     |                                 |
-   |                        |                | kernels to      |    Defaults to                  |
-   |                        |                | use for         |    1 if not                     |
-   |                        |                | this FIR.       |    set.                         |
-   |                        |                |                 |                                 |
-   +------------------------+----------------+-----------------+---------------------------------+
-   |    TP_DUAL_IP          |    Unsigned    | Use dual        |    Range 0                      |
-   |                        |    int         | inputs ports.   |    (single                      |
-   |                        |                |                 |    input), 1                    |
-   |                        |                | An additional   |    (dual                        |
-   |                        |                | 'in2' input     |    input).                      |
-   |                        |                | port will       |                                 |
-   |                        |                | appear on       |    Defaults to                  |
-   |                        |                | the graph       |    0 if not                     |
-   |                        |                | when set to 1.  |    set.                         |
-   |                        |                |                 |                                 |
-   |                        |                |                 |                                 |
-   +------------------------+----------------+-----------------+---------------------------------+
-   | TP_USE_COEFF_RELOAD    |    Unsigned    | Enable          |    0 (no                        |
-   |                        |    int         | reloadable      |    reload), 1                   |
-   |                        |                | coefficient     |    (use                         |
-   |                        |                | feature.        |    reloads).                    |
-   |                        |                |                 |                                 |
-   |                        |                | An additional   |    Defaults to                  |
-   |                        |                | 'coeff'         |    0 if not                     |
-   |                        |                | port will       |    set.                         |
-   |                        |                | appear on       |                                 |
-   |                        |                | the graph.      |                                 |
-   +------------------------+----------------+-----------------+---------------------------------+
-   | TP_NUM_OUTPUTS         |    Unsigned    | Number of       |                                 |
-   |                        |    int         | FIR output      |    1 to 2                       |
-   |                        |                | ports           |                                 |
-   |                        |                |                 |                                 |
-   |                        |                | An additional   |    Defaults to                  |
-   |                        |                | 'out2' output   |    1 if not                     |
-   |                        |                | port will       |    set.                         |
-   |                        |                | appear on       |                                 |
-   |                        |                | the graph       |                                 |
-   |                        |                | when set to 2.  |                                 |
-   +------------------------+----------------+-----------------+---------------------------------+
-   |  TP_UPSHIFT_CT         |    Unsigned    | Center tap coeff| 0 = center tap operates like    |
-   |                        |    int         | form            |     all other coefficients      |
-   |                        |                |                 | 1 = center tap coeff is a       |
-   |                        |                |                 |     power of 2 shift.           |
-   |                        |                |                 |     (interpolate half-band only)|
-   +------------------------+----------------+-----------------+---------------------------------+
-   |  TP_API                |    Unsigned    | I/O interface   |  0 = Window                     |
-   |                        |    int         | port type       |                                 |
-   |                        |                |                 |  1 = Stream                     |
-   +------------------------+----------------+-----------------+---------------------------------+
-   |  TP_SSR                |    Unsigned    | Parallelism     |  min=1                          |
-   |                        |    int         | factor          |                                 |
-   |                        |                |                 |  Defaults to                    |
-   |                        |                |                 |  1 if not                       |
-   |                        |                |                 |  set.                           |
-   |                        |                |                 |                                 |
-   |                        |                |                 |  Max = limited by resource      |
-   |                        |                |                 |  availability                   |
-   +------------------------+----------------+-----------------+---------------------------------+
-   | TP_PARA_INTERP_POLY    | Unsigned int   | Number of       | min = 1                         |
-   |                        |                | interpolation   | max = ``TP_INTERPOLATE_FACTOR`` |
-   |                        |                | polyphases that |                                 |
-   |                        |                | produce output  | must be a factor of             |
-   |                        |                | data in         | interpolate factor              |
-   |                        |                | parallel        |                                 |
-   +------------------------+----------------+-----------------+---------------------------------+
-   | TP_PARA_DECI_POLY      | Unsigned int   | Number of       | min = 1                         |
-   |                        |                | decimation      | max = ``TP_DECIMATE_FACTOR``    |
-   |                        |                | polyphases into |                                 |
-   |                        |                | which data is   | must be a factor of             |
-   |                        |                | split into for  | decimation factor               |
-   |                        |                | parallel        |                                 |
-   |                        |                | computation     |                                 |
-   +------------------------+----------------+-----------------+---------------------------------+
+
+   +------------------------+----------------+---------------------------+---------------------------------+
+   | Parameter Name         |    Type        |  Description              |    Range                        |
+   +========================+================+===========================+=================================+
+   |    TT_DATA             |    Typename    | Data Type                 |    int16,                       |
+   |                        |                |                           |    cint16,                      |
+   |                        |                |                           |    int32,                       |
+   |                        |                |                           |    cint32,                      |
+   |                        |                |                           |    float,                       |
+   |                        |                |                           |    cfloat                       |
+   +------------------------+----------------+---------------------------+---------------------------------+
+   |    TT_COEFF            |    Typename    | Coefficient               |    int16,                       |
+   |                        |                | type                      |    cint16,                      |
+   |                        |                |                           |    int32,                       |
+   |                        |                |                           |    cint32,                      |
+   |                        |                |                           |    float,                       |
+   |                        |                |                           |    cfloat                       |
+   +------------------------+----------------+---------------------------+---------------------------------+
+   |    TP_FIR_LEN          |    Unsigned    | The number of             | Min - 4,                        |
+   |                        |    int         | taps                      |                                 |
+   |                        |                |                           | Max - see :ref:`MAX_FIR_LENGTH` |
+   +------------------------+----------------+---------------------------+---------------------------------+
+   |   TP_INTERPOLATE_FACTOR|    Unsigned    | Ratio of output           |   1 (default) to 7              |
+   |                        |    int         | samples to input          |   (interpolating variants only) |
+   |                        |                | samples                   |                                 |
+   +------------------------+----------------+---------------------------+---------------------------------+
+   |   TP_DECIMATE_FACTOR   |    Unsigned    | Ratio of input            |   1 (default) to 7              |
+   |                        |    int         | samples to                |   (decimating variants only)    |
+   |                        |                | output samples            |                                 |
+   +------------------------+----------------+---------------------------+---------------------------------+
+   |    TP_SHIFT            |    Unsigned    | The number of             |    0 to 61                      |
+   |                        |    int         | bits to shift             |                                 |
+   |                        |                | unscaled                  |                                 |
+   |                        |                | result                    |                                 |
+   |                        |                | down by before            |                                 |
+   |                        |                | output.                   |                                 |
+   +------------------------+----------------+---------------------------+---------------------------------+
+   |    TP_RND              |    Unsigned    | Round mode                |    ``rnd_floor``                |
+   |                        |    int         |                           |    truncate or                  |
+   |                        |                |                           |    floor                        |
+   |                        |                |                           |                                 |
+   |                        |                |                           |    ``rnd_ceil``                 |
+   |                        |                |                           |    ceiling                      |
+   |                        |                |                           |                                 |
+   |                        |                |                           |    ``rnd_sym_floor``            |
+   |                        |                |                           |    floor to zero                |
+   |                        |                |                           |                                 |
+   |                        |                |                           |    ``rnd_sym_ceil``             |
+   |                        |                |                           |    ceil to                      |
+   |                        |                |                           |    infinity                     |
+   |                        |                |                           |                                 |
+   |                        |                |                           |    ``rnd_neg_inf``              |
+   |                        |                |                           |    round to negative            |
+   |                        |                |                           |    infinity                     |
+   |                        |                |                           |                                 |
+   |                        |                |                           |    ``rnd_pos_inf``              |
+   |                        |                |                           |    round to positive            |
+   |                        |                |                           |    infinity                     |
+   |                        |                |                           |                                 |
+   |                        |                |                           |    ``rnd_sym_zero``             |
+   |                        |                |                           |    symmetrical                  |
+   |                        |                |                           |    to zero                      |
+   |                        |                |                           |                                 |
+   |                        |                |                           |    ``rnd_sym_inf``              |
+   |                        |                |                           |    symmetrical                  |
+   |                        |                |                           |    to infinity                  |
+   |                        |                |                           |                                 |
+   |                        |                |                           |    ``rnd_conv_even``            |
+   |                        |                |                           |    convergent                   |
+   |                        |                |                           |    to even                      |
+   |                        |                |                           |                                 |
+   |                        |                |                           |    ``rnd_conv_odd``             |
+   |                        |                |                           |    convergent                   |
+   |                        |                |                           |    to odd                       |
+   |                        |                |                           |                                 |
+   |                        |                |                           |    Note: Rounding modes:        |
+   |                        |                |                           |    ``rnd_sym_floor`` and        |
+   |                        |                |                           |    ``rnd_sym_ceil`` are only    |
+   |                        |                |                           |    supported on AIE-ML device.  |
+   |                        |                |                           |                                 |
+   +------------------------+----------------+---------------------------+---------------------------------+
+   | TP_INPUT_WINDOW_VSIZE  |    Unsigned    | The number                |  Must be a                      |
+   |                        |    int         | of samples                |  multiple of                    |
+   |                        |                | processed by              |  the 256-bits                   |
+   |                        |                | the graph in a            |  In addition, must by           |
+   |                        |                | single                    |  divisible by:                  |
+   |                        |                | iteration run.            |  ``TP_SSR`` and                 |
+   |                        |                | For windows,              |  ``TP_DECIMATE_FACTOR``.        |
+   |                        |                | defines the               |                                 |
+   |                        |                | size of input             |  No                             |
+   |                        |                | window. For               |  enforced                       |
+   |                        |                | streams, it               |  range, but                     |
+   |                        |                | impacts the               |  large                          |
+   |                        |                | number of input           |  windows                        |
+   |                        |                | samples operated          |  will result                    |
+   |                        |                | on in a single            |  in mapper                      |
+   |                        |                | iteration                 |  errors due                     |
+   |                        |                | of the kernel.            |  to                             |
+   |                        |                |                           |  excessive                      |
+   |                        |                |                           |  RAM use, for windowed          |
+   |                        |                |                           |  API implementations.           |
+   |                        |                |                           |                                 |
+   +------------------------+----------------+---------------------------+---------------------------------+
+   |    TP_CASC_LEN         |    Unsigned    | The number                |    1 to 40.                     |
+   |                        |    int         | of cascaded               |                                 |
+   |                        |                | kernels to                |    Defaults to                  |
+   |                        |                | use for                   |    1 if not                     |
+   |                        |                | this FIR.                 |    set.                         |
+   |                        |                |                           |                                 |
+   +------------------------+----------------+---------------------------+---------------------------------+
+   |    TP_DUAL_IP          |    Unsigned    | Use dual                  |    Range 0                      |
+   |                        |    int         | inputs ports.             |    (single                      |
+   |                        |                |                           |    input), 1                    |
+   |                        |                | An additional             |    (dual                        |
+   |                        |                | 'in2' input               |    input).                      |
+   |                        |                | port will                 |                                 |
+   |                        |                | appear on                 |    Defaults to                  |
+   |                        |                | the graph                 |    0 if not                     |
+   |                        |                | when set to 1.            |    set.                         |
+   |                        |                |                           |                                 |
+   |                        |                | Its function              |                                 |
+   |                        |                | depends on API            |                                 |
+   |                        |                | configuration.            |                                 |
+   |                        |                | see                       |                                 |
+   |                        |                | :ref:`WINDOW_API_FIRS`,   |                                 |
+   |                        |                | :ref:`STREAM_API_FIRS`.   |                                 |
+   +------------------------+----------------+---------------------------+---------------------------------+
+   | TP_USE_COEFF_RELOAD    |    Unsigned    | Enable                    |    0 (no                        |
+   |                        |    int         | reloadable                |    reload), 1                   |
+   |                        |                | coefficient               |    (use                         |
+   |                        |                | feature.                  |    reloads).                    |
+   |                        |                |                           |                                 |
+   |                        |                | An additional             |    Defaults to                  |
+   |                        |                | 'coeff'                   |    0 if not                     |
+   |                        |                | port will                 |    set.                         |
+   |                        |                | appear on                 |                                 |
+   |                        |                | the graph.                |                                 |
+   |                        |                |                           |                                 |
+   |                        |                | Ports dimention           |                                 |
+   |                        |                | depends on SSR            |                                 |
+   |                        |                | configuration,            |                                 |
+   |                        |                | see                       |                                 |
+   |                        |                | :ref:`COEFFS_FOR_FIRS`,   |                                 |
+   +------------------------+----------------+---------------------------+---------------------------------+
+   | TP_NUM_OUTPUTS         |    Unsigned    | Number of                 |                                 |
+   |                        |    int         | FIR output                |    1 to 2                       |
+   |                        |                | ports                     |                                 |
+   |                        |                |                           |                                 |
+   |                        |                | An additional             |    Defaults to                  |
+   |                        |                | 'out2' output             |    1 if not                     |
+   |                        |                | port will                 |    set.                         |
+   |                        |                | appear on                 |                                 |
+   |                        |                | the graph                 |                                 |
+   |                        |                | when set to 2.            |                                 |
+   |                        |                |                           |                                 |
+   |                        |                | Its function              |                                 |
+   |                        |                | depends on API            |                                 |
+   |                        |                | configuration.            |                                 |
+   |                        |                | see                       |                                 |
+   |                        |                | :ref:`WINDOW_API_FIRS`,   |                                 |
+   |                        |                | :ref:`STREAM_API_FIRS`.   |                                 |
+   +------------------------+----------------+---------------------------+---------------------------------+
+   |  TP_UPSHIFT_CT         |    Unsigned    | Center tap coeff          | 0 = center tap operates like    |
+   |                        |    int         | form                      |     all other coefficients      |
+   |                        |                |                           | 1 = center tap coeff is a       |
+   |                        |                |                           |     power of 2 shift.           |
+   |                        |                |                           |     (interpolate half-band only)|
+   +------------------------+----------------+---------------------------+---------------------------------+
+   |  TP_API                |    Unsigned    | I/O interface             |  0 = Window                     |
+   |                        |    int         | port type                 |                                 |
+   |                        |                |                           |  1 = Stream                     |
+   +------------------------+----------------+---------------------------+---------------------------------+
+   |  TP_SSR                |    Unsigned    | Parallelism               |  min=1                          |
+   |                        |    int         | factor.                   |                                 |
+   |                        |                | SSR stands for Super      |  Defaults to                    |
+   |                        |                | Sample Rate and allows    |  1 if not                       |
+   |                        |                | for higher throughput     |  set.                           |
+   |                        |                |                           |                                 |
+   |                        |                | For more details, refer   |  Max = limited by resource      |
+   |                        |                | to :ref:`SSR_OPERATION`.  |  availability                   |
+   +------------------------+----------------+---------------------------+---------------------------------+
+   | TP_PARA_INTERP_POLY    | Unsigned int   | Number of                 | min = 1                         |
+   |                        |                | interpolation             | max = ``TP_INTERPOLATE_FACTOR`` |
+   |                        |                | polyphases that           |                                 |
+   |                        |                | produce output            | must be a factor of             |
+   |                        |                | data in                   | interpolate factor              |
+   |                        |                | parallel.                 |                                 |
+   |                        |                |                           |                                 |
+   |                        |                | For more details, refer   |                                 |
+   |                        |                | to :ref:`SSR_OPERATION`.  |                                 |
+   +------------------------+----------------+---------------------------+---------------------------------+
+   | TP_PARA_DECI_POLY      | Unsigned int   | Number of                 | min = 1                         |
+   |                        |                | decimation                | max = ``TP_DECIMATE_FACTOR``    |
+   |                        |                | polyphases into           |                                 |
+   |                        |                | which data is             | must be a factor of             |
+   |                        |                | split into for            | decimation factor               |
+   |                        |                | parallel                  |                                 |
+   |                        |                | computation.              |                                 |
+   |                        |                |                           |                                 |
+   |                        |                | For more details, refer   |                                 |
+   |                        |                | to :ref:`SSR_OPERATION`.  |                                 |
+   +------------------------+----------------+---------------------------+---------------------------------+
+   | TP_SAT                 | Unsigned int   | Saturation mode           | 0: 'none'                       |
+   |                        |                |                           |                                 |
+   |                        |                |                           | 1: 'saturate'                   |
+   |                        |                |                           |                                 |
+   |                        |                |                           | 3: 'symmetric saturate'         |
+   +------------------------+----------------+---------------------------+---------------------------------+
 
 
 For a list of template parameters for each FIR variant, see :ref:`API_REFERENCE`.
 
-**TP_CASC_LEN** describes the number of AIE processors to split the operation over, which allows resources to be traded for higher performance. ``TP_CASC_LEN`` must be in the range 1 (default) to 9.
-FIR graph instance creates ``TP_CASC_LEN`` kernels. Computation workload of the FIR (defined by its length parameter ``TP_FIR_LEN``) is divided and each kernel in the graph is then assigned a fraction of the workload, i.e. each kernel performs ``TP_FIR_LEN / TP_CASC_LEN``.
-Kernels are connected with cascade ports, which pass partial accumulation products downstream until last kernel in chain produces the output.
-
-**TP_DUAL_IP** is an implementation trade-off between performance and resource utilization.
-Symmetric FIRs may be instanced with 2 input ports to alleviate the potential for memory read contention, which would otherwise result in stall cycles and therefore lower throughput.
-In addition, FIRs with streaming interface may utilize the second input port to maximize the available throughput.
-
-* When set to 0, the FIR is created with a single input port.
-
-* When set to 1, two input ports will be created.
-
-  .. note:: When used, port ``port<input> in2;`` will be added to the FIR.
-
-**TP_USE_COEFF_RELOAD**  allows the user to select if runtime coefficient reloading should be used.
-When defining the parameter:
-
-* 0 = static coefficients, defined in filter constructor
-
-* 1 = reloadable coefficients, passed as argument to runtime function.
-
-  .. note:: When used, port ``port<input> coeff;`` will be added to the FIR.
-
-
-**TP_NUM_OUTPUTS** sets the number of output ports to send the output data to. Supported range: 1 to 2.
-
-For Windows API, additional output provides flexibility in connecting FIR output with multiple destinations.
-Additional output ``out2`` is an exact copy of the data of the output port ``out``.
-
-Stream API uses the additional output port to increase the FIR's throughput. Please refer to :ref:`FIR_STREAM_OUTPUT` for more details.
-
-.. note:: When used, port ``port<output> out2;`` will be added to the FIR.
-
-.. _SSR_PORTS_EXPLANATION:
-
-**TP_SSR** sets a parallelism factor. SSR stands for Super Sample Rate. This setting allows for higher throughput at the expense of more tiles or kernels.
-
-For more details about the internals of the graph with SSR operation, refer to :ref:`SSR_OPERATION`.
-
-| **TP_PARA_INTERP_POLY** sets the number of interpolator polyphases which are executed in parallel with output data produced by each polyphase output directly its own output port (or ports when TP_SSR>1).
-| ``TP_PARA_INTERP_POLY`` does not affect the number of input data ports.
-| ``TP_PARA_INTERP_POLY`` can be used in combination with ``TP_SSR``.
-| The number of AIEs used is given by ``TP_PARA_INTERP_POLY * TP_SSR^2 * TP_CASC_LEN``.
-
-For more details about the internals of the graph with SSR operation, refer to :ref:`SSR_OPERATION`.
-
-| **TP_PARA_DECI_POLY** specifies the number of distinct input data polyphases over which the input stream will be split.
-| The polyphase computations are performed in a series and the outputs are combined into a single output stream.
-| ``TP_PARA_DECI_POLY`` does not affect the number of output data ports.
-| The number of AIEs used is given by ``TP_PARA_DECI_POLY * TP_SSR^2 * TP_CASC_LEN``.
-
-For more details about how to configure the various parameters to meet various performance metrics, see :ref:`SSR_OPERATION_MODES`
 
 ~~~~~~~~~~~~~~~~
 Access functions
@@ -351,7 +349,7 @@ To see the ports for each FIR variants, see :ref:`API_REFERENCE`.
 Design Notes
 ~~~~~~~~~~~~
 
-.. _COEFF_ARRAY_FOR_FIRS:
+.. _COEFFS_FOR_FIRS:
 
 Coefficient array for Filters
 -------------------------------
@@ -485,10 +483,10 @@ In each iteration run, the kernel operates on a set number of samples from the w
 
 **Maximizing Throughput**
 
-The above requirements introduce a fixed overhead when a kernel is triggered.
+Buffer synchronization requirements introduce a fixed overhead when a kernel is triggered.
 Therefore, to maximize throughput, the window size should be set to the maximum that the system will allow.
 
-For example, a 4 tap single-rate symmetric FIR with a `2560` sample input/output window operating on ``int32`` data with ``int16`` can produce an output window buffer in `357` clock cycles, which - taking into account kernel's startup overhead (`40` lock cycles) - equates to throughput of up to `6448 MSa/s` (based on 1 GHz AIE clock).
+For example, a 4 tap single-rate symmetric FIR with a `2560` sample input/output window operating on ``int32`` data with ``int16`` implemented on AIE can produce an output window buffer in `354` clock cycles, which - taking into account kernel's startup overhead (around `40` lock cycles) - equates to throughput of close to `6500 MSa/s` (based on 1 GHz AIE clock).
 
 .. note:: To achieve maximum performance, producer and consumer kernels should be placed in adjacent AIE tiles, so the window buffers can be accessed without a requirement for MM2S/S2MM DMA stream conversions.
 
@@ -496,8 +494,46 @@ For example, a 4 tap single-rate symmetric FIR with a `2560` sample input/output
 
 Latency of a window-based FIR is predominantly due to the buffering in the input and output windows. Other factors which affect latency are data and type and FIR length, though these tend to have a lesser effect.
 
-For example, a 16 tap single-rate symmetric FIR with a `512` sample input/output window operating on ``cint16`` data with ``int16`` coefficients will need around `2.56 us` (based on 1 GHz AIE clock) before a full window of output samples is available for the consumer to read.
+For example, a 16 tap single-rate symmetric FIR with a `512` sample input/output window operating on ``cint16`` data with ``int16`` coefficients implemented on AIE will need around `2.56 us` (based on 1 GHz AIE clock) before first full window of output samples is available for the consumer to read.
+Subsequent iterations will produce output data with reduced latency, due to the nature of ping-pong buffering and pipelined operations.
 
+To minimize the latency, the bffer size should be set to the minimum size that meets the required throughput.
+
+.. _FIR_MULTPILE_BUFFER_PORTS:
+
+Multiple Buffer Ports
+/////////////////////
+
+.. note:: AIE-ML devices only support single input/output port.
+
+**Multiple input ports**
+
+Symmetric FIRs, including half-band FIRs, can be configured with 2 input buffers. Such implementation is a trade-off between performance and resource utilization.
+Symmetric FIRs with 2 input ports avoid the potential for memory read contention, which would otherwise result in stall cycles and therefore lower throughput.
+
+Set ``TP_DUAL_IP`` template parameter to 1, to create a FIR kernel with 2 input buffer ports.
+In this scenario, FIR kernel with 2 input ports will be created where FIR kernel expects each buffer to contain exact copy of the same data.
+Both input ports should be connected to the same data source through the FIR's graph.
+
+**Multiple output ports**
+
+All FIRs can be configured with 2 output buffers. Such design allows greater routing flexibility that offers buffers to be connected directly to downstream components for further processing avoiding a costly and limiting broadcast with a stream.
+
+Set ``TP_NUM_OUTPUTS`` template parameter to 2, to create a FIR kernel with 2 output buffer ports.
+In this scenario, two exact copies of output data will be produced in two independent memory buffers.
+
+For example, a single-rate FIR with a `512` input sample buffer will produce 2 output buffers, where each buffer is `512` samples.
+
+
+Stream Input for Asymmetric FIRs
+////////////////////////////////
+
+Stream input allows data samples to be written directly from the input stream to one of the Input Vector Registers without the requirement for a ping-pong window buffer.
+As a result, memory requirements and latency are reduced.
+
+To maximize the throughput, FIRs can be configured with 2 input stream ports. Although this may not improve performance if the throughput is limited by other factors, i.e., the output stream bandwidth or the vector processor.
+Set ``TP_DUAL_IP`` to 1, to create a FIR instance with 2 input stream ports.
+In such a case the input data will be merged from the two ports in 128 bit chunks, onto one data stream internally, e.g.:
 
 .. _MAX_WINDOW_SIZE:
 
@@ -505,7 +541,7 @@ Maximum Window size
 ///////////////////
 
 | Window buffer is mapped into a local memory in the area surrounding the kernel that accesses it.
-| A local memory storage is 32 kB, and the maximum size of the `ping-pong` window buffer should not exceed this limit.
+| A local memory storage is 32 kB (64 kB for AIE-ML devices), and the maximum size of the `ping-pong` window buffer should not exceed this limit.
 
 .. _SINGLE_BUFFER_CONSTRAINT:
 
@@ -529,7 +565,11 @@ Streaming interfaces are now supported by all FIRs. Streaming interfaces are bas
 When ``TP_API = 1`` the FIR will have stream API input and output ports, allowing greater interoperability and flexibility in placement of the design.
 Streaming interfaces may be configured to connect a single or dual stream inputs (driven by ``TP_DUAL_IP``) or one or two stream outputs (driven by ``TP_NUM_OUTPUTS``).
 
-In general, stream based filters require less ot no data buffering and therefore have lesser memory requirements and lower latency than window API filters.
+In general, stream based filters require less or no data buffering and therefore have lesser memory requirements and lower latency than window API filters.
+
+.. note:: AIE-ML devices only support single input/output port.
+
+.. note:: AIE-ML devices cannot take adtanvage of the symmetry of FIRS, therefore FIRs implementation is always based on Asymmetric design.
 
 **Asymmetric FIRs**
 
@@ -537,7 +577,7 @@ Asymmetric FIRs (single-rate, as well as rate-changing FIRs) will use input and 
 As a result, there is no need for input/output buffering, hence Asymmetric FIRs offer very low latency and very low memory footprint.
 In addition, due to the lack of memory requirements, such designs may operate on very large number of samples within each kernel iteration (``TP_INPUT_WINDOW_VSIZE`` is limited to ``2^31 - 1``) achieving maximum performance and maximum throughput.
 
-For example, a single kernel (``TP_CASC_LEN = 1``), 16 tap single-rate asymmetric FIR, using ``cint16`` data with frame size of `25600` and ``int16`` coefficients, is offering throughput of `998 MSa/s` (based on 1 GHz AIE clock) and latency as low as tens of nanoseconds.
+For example, a single kernel (``TP_CASC_LEN = 1``), 16 tap single-rate asymmetric FIR implemented on AIE, that is using ``cint16`` data with frame size of `25600` and ``int16`` coefficients, is offering throughput of `998 MSa/s` (based on 1 GHz AIE clock) and latency as low as tens of nanoseconds.
 
 **Hybrid Streaming interface for Symmetric and Half-band FIRs in non-SSR mode**
 
@@ -547,13 +587,14 @@ Output data will be sent directly out through a stream port.
 Such designs allow a more flexible connection and mapping onto AIE tiles.
 Latency is reduced, when compared to a window based equivalent, but is much greater than compared with an asymmetric design. Lack of an output buffer also reduces the memory requirements.
 
-For example, a 16 tap single-rate symmetric FIR with a `512` sample input/output window operating on ``cint16`` data and ``int16`` coefficients achieves throughput of `978 MSa/s` (based on 1 GHz AIE clock) and will need around `1.4 us` before a full window of output samples is available for the consumer to read.
+For example, a 16 tap single-rate symmetric FIR implemented on AIE with a `512` sample input/output window operating on ``cint16`` data and ``int16`` coefficients achieves throughput of `978 MSa/s` (based on 1 GHz AIE clock) and will need around `1.4 us` before a full window of
+ samples is available for the consumer to read.
 
 **Symmetric and Half-band FIRs in SSR mode**
 
 When operating in an SSR mode, i.e. ``TP_SSR``, ``TP_PARA_INTERP_POLY`` or ``TP_PARA_DECI_POLY`` are greater than 1, all Symmetric and Half-band FIRs, in addition to all Asymmetric FIRs, will operate on input and output streams directly, offering very low latency and minimal memory footprint.
 
-For example, a 32 tap, single-rate symmetric FIR with a SSR set to 2 (``TP_SSR = 2``), using ``cint16`` data with frame size of `25600` and ``int16`` coefficients achieves throughput of `1998 MSa/s` (based on 1 GHz AIE clock) and latency as low as tens of nanoseconds.
+For example, a 32 tap, single-rate symmetric FIR implemented on AIE with a SSR set to 2 (``TP_SSR = 2``), using ``cint16`` data with frame size of `25600` and ``int16`` coefficients achieves throughput of `1998 MSa/s` (based on 1 GHz AIE clock) and latency as low as tens of nanoseconds.
 
 
 .. _FIR_STREAM_OUTPUT:
@@ -604,7 +645,7 @@ Setting FIR Frame Size
 
 FIR Frame size selection, through FIR Graph's template parameter ``TP_INPUT_WINDOW_VSIZE`` is limited by a variety of factors, including FIR variant or input interface type.
 FIR kernels operate on the frame size provided using heavy pipelining and code repetition to schedule vector multiply-accumulate (VMAC) operations as frequently as possible.
-As a result, FIRs architectures may use a ``repetition_factor`` of up to 16 to achieve best scheduling and therefore performance.
+As a result, FIRs architectures may use a ``repetition_factor`` of up to 8 to achieve best scheduling and therefore performance.
 Taking into account that each vector operation may calculate 4 or 8 output samples at a time, the selection of ``TP_INPUT_WINDOW_VSIZE`` may be allowed in increments of, e.g.: 64.
 
 Furthermore, rate-changing FIRs require frame size to be divisible by ``TP_DECIMATION_FACTOR`` in order to fully process input data samples within the optimized loop.
@@ -620,14 +661,16 @@ Invalid selection will report a message to the User in a form of Metadata error 
 Setting FIR Length
 ------------------
 
-Minimum FIR length is set to 4.
+Minimum FIR length is set to 1.
 
 Single Rate FIRs have no restriction placed on the FIR length selection.
 
 However, rate-changing FIRs require each of the individual kernels to operate on a FIR length divisible by Decimation or Interpolation factor, imposing limits on the FIR length, e.g.: ``TP_FIR_LEN % TP_DECIMATE_FACTOR == 0`` or ``TP_FIR_LEN % TP_INTERPOLATE_FACTOR == 0``.
 
-In SSR mode, see :ref:`SSR_OPERATION_MODES`, coefficients are distributed equally across all output paths. As a result, total number of FIRs coefficients must be divisible by number of paths, i.e. ``TP_FIR_LEN % TP_SSR == 0``.
-For rate-changing FIRs this raises additional limits on the FIR length, where FIR length can be described by e.g.: ``TP_FIR_LEN % (TP_DECIMATE_FACTOR * TP_SSR) == 0`` or ``TP_FIR_LEN % (TP_INTERPOLATE_FACTOR * TP_SSR) == 0``.
+In SSR modes, see :ref:`SSR_OPERATION_MODES`, coefficients are distributed equally across all output paths. As a result, total number of FIRs coefficients must be divisible by number of paths, i.e. ``TP_FIR_LEN % (TP_SSR) == 0``.
+For rate-changing FIRs this raises additional limits on the FIR length, where FIR length can be described by e.g.: ``TP_FIR_LEN % (TP_SSR * TP_PARA_INTERP_POLY * TP_PARA_DECI_POLY) == 0``.
+
+note
 
 Invalid selection will report a message to the User in a form of Metadata error or a `static_assert()` with rule violation details and suggestion how to fix it.
 
@@ -741,8 +784,8 @@ Super Sample Rate - Operation Modes
 In the FIR, SSR operation can be achieved using one of the following modes:
 
 - :ref:`SSR_OPERATION_COEFF_DATA_DISTRO` - driven by template parameter: ``TP_SSR``. Mode will create an array of ``TP_SSR^2`` kernels and create ``TP_SSR`` amount of **input** and **output** ports.
-- :ref:`SSR_OPERATION_PARA_DECI_POLY` - driven by template parameter: ``TP_PARA_DECI_POLY``. Mode will create an array of ``TP_PARA_DECI_POLY`` kernels and create ``TP_PARA_DECI_POLY`` amount of **input** ports.
-- :ref:`SSR_OPERATION_PARA_INTERP_POLY` - driven by template parameter: ``TP_PARA_INTERP_POLY``. Mode will create an array of ``TP_PARA_INTERP_POLY`` kernels and create data ``TP_PARA_INTERP_POLY`` amount of **output** ports.
+- :ref:`SSR_OPERATION_PARA_DECI_POLY` - driven by template parameter: ``TP_PARA_DECI_POLY``. Mode will create a vector of ``TP_PARA_DECI_POLY`` kernels and create ``TP_PARA_DECI_POLY`` amount of **input** ports.
+- :ref:`SSR_OPERATION_PARA_INTERP_POLY` - driven by template parameter: ``TP_PARA_INTERP_POLY``. Mode will create a vector of ``TP_PARA_INTERP_POLY`` kernels and create data ``TP_PARA_INTERP_POLY`` amount of **output** ports.
 
 .. _SSR_OPERATION_RESOURCE_UTILIZATION:
 
@@ -814,6 +857,26 @@ Therefore, the maximum throughput achievable for a given data type, e.g. cint16,
 * maximum theoretical sample rate at input: ``THROUGHPUT_IN  = NUM_INPUT_PORTS x 1 GSa/s``,
 
 * maximum theoretical sample rate at output = ``THROUGHPUT_OUT  = NUM_OUTPUT_PORTS x 1 GSa/s``.
+
+
+**AIE Tile Utilization Ratio**
+
+Super Sample Rate operation creates multiple computation paths that are used to produce the output samples.
+Having multiple computation paths reduces the amount of computation required by each kernel.
+
+Total number of FIR computation paths can be described with the below formula
+
+.. code-block::
+
+  NUMBER_OF_COMPUTATION_PATHS = TP_CASC_LEN  * TP_SSR * TP_PARA_INTERP_POLY * TP_PARA_DECI_POLY
+
+FIR graph will try to split the requested FIR workload among the FIR kernels equally, which may mean that each kernel is tasked with a comparatively low computational effort.
+
+In such scenario, bandwidth will be limited by the amound of ports, but AIE tile utilization ratio (often defined as ratio of VMAC operations to cycles without VMAC operation) may be reduced.
+
+For example, a 32 tap Single Rate FIR operating on ``cint16`` data type and ``int16`` coefficients with ``TP_SSR`` set to 2 and cascade length ``TP_CASC_LEN`` set to 2 will perform at the bandwidth close to `2 GSa/s` (2 output stream paths). Each of the kernels will be tasked with computing only 8 coefficients. The design will use 8 FIR kernels mapped to 8 AIE tiles to achieve that.
+However, a similarly configured FIR, a 32 tap Single Rate FIR operating on ``cint16`` data type and ``int16`` coefficients with ``TP_SSR`` set to 2, but without further cascade configuration (``TP_CASC_LEN`` set to 1) would also perform at the bandwidth close to `2 GSa/s` but only consume 4 kernels to achieve that.
+
 
 **Rate-changing FIR Throughput**
 
@@ -1061,7 +1124,7 @@ The least resource-expensive method to obtain higher performance is to use the d
 | ``TP_SSR`` is the parameter that enables finer control over the throughput and AIE tiles use.
 | The number of tiles used will be ``TP_CASC_LEN * TP_SSR * TP_SSR``, i.e. SSR is a 2-dimensional expansion. Both methods may work in addition to the ``TP_CASC_LEN`` parameter which also increases the number of tiles. ``TP_SSR`` can take any positive integer value and its maximum is only limited by the number of AIE tiles available. This can be used to prevent over-utilization of kernels if the throughput requirement is not as high as the one offered by the ``TP_PARA_X_POLY``.
 
-``TP_CASC_LEN`` indicates the number of kernels to be cascaded together to distribute the calculation of the ``TP_FIR_LEN`` parameter. It works in addition to ``TP_SSR`` and ``TP_PARA_X_POLY`` to overcome any bottlenecks posed by the vector processor. The library provides access functions to determine the value of ``TP_CASC_LEN`` that gives us the optimum performance, i.e., the minimum number of kernels that can provide the maximum performance. These are documented here (insert link here to API reference docs here).
+``TP_CASC_LEN`` indicates the number of kernels to be cascaded together to distribute the calculation of the ``TP_FIR_LEN`` parameter. It works in addition to ``TP_SSR`` and ``TP_PARA_X_POLY`` to overcome any bottlenecks posed by the vector processor. The library provides access functions to determine the value of ``TP_CASC_LEN`` that gives us the optimum performance, i.e., the minimum number of kernels that can provide the maximum performance. More details can be found in :ref:`API_REFERENCE`.
 
 If there is no constraint on the number of AIE tiles, the easiest way to get the required performance is to set the ``TP_PARA_X_POLY`` to the closest factor of the interpolation/decimation rate that is higher than the throughput needed. If, however, the goal is to obtain a performance using the least number of tiles, ``TP_SSR`` may need to be used as a finer tuning parameter to get the throughput we want.
 

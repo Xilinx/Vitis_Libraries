@@ -1,4 +1,6 @@
 from fir_decimate_sym import *
+from aie_common import *
+from vmc_fir_utils import *
 
 #### VMC validators ####
 def vmc_validate_coef_type(args):
@@ -19,18 +21,18 @@ def vmc_validate_input_window_size(args):
 	coeff = args["coeff"]
 	decimate_factor = args["decimate_factor"]
 	api = 0
-	ssr = args["ssr"]
+	ssr = 1
 	fir_length = args["fir_length"]
 	return fn_validate_input_window_size(data_type, coef_type, fir_length, decimate_factor, input_window_size, api, ssr)
 
 def vmc_validate_casc_length(args):
     casc_length = args["casc_length"]
-    #if not use_casc_length:
-	# TODO : Talk to DSP lib team/sumanta about how 
-	# cascade validation works - confirm its just fir length related
-	#return fn_validate_casc_length(fir_length, casc_length, use_coeff_reload)
     return fn_validate_casc_len(casc_length);
     
+def validate_sat_mode(args):
+    sat_mode = args["sat_mode"]
+    return fn_validate_satMode(sat_mode);
+
 
 def vmc_validate_coeff(args):
 	use_coeff_reload = args["use_coeff_reload"]
@@ -39,10 +41,9 @@ def vmc_validate_coeff(args):
 	data_type = args["data_type"]
 	casc_length = args["casc_length"]
 	decimate_factor = args["decimate_factor"]
-	ssr = args["ssr"]
+	ssr = 1
 	api = 0
 	fir_length = args["fir_length"]
-	#TODO: Talk to DSP Lib team about separating casc length from fir_length API
 	return fn_validate_fir_len(data_type, coef_type, fir_length, decimate_factor, casc_length, ssr, api, use_coeff_reload )
 
 def vmc_validate_shift_val(args):
@@ -58,7 +59,7 @@ def vmc_validate_decimate_factor(args):
 	return fn_validate_decimate_factor(data_type, coef_type, decimate_factor, api)
 
 def vmc_validate_ssr(args):
-    ssr = args["ssr"]
+    ssr = 1
     decimate_factor = args["decimate_factor"]
     api = 0
     return fn_validate_ssr(ssr, decimate_factor, api)
@@ -81,10 +82,11 @@ def vmc_generate_graph(name, args):
     tmpargs["TP_INPUT_WINDOW_VSIZE"] = args["input_window_size"]
     tmpargs["TP_CASC_LEN"] = args["casc_length"]
     tmpargs["TP_USE_COEF_RELOAD"] = 1 if args["use_coeff_reload"] else 0
-    tmpargs["TP_NUM_OUTPUTS"] = 2 if args["num_outputs"] else 1
+    tmpargs["TP_NUM_OUTPUTS"] = fn_get_num_outputs(args)
     tmpargs["TP_DUAL_IP"] = 1 if args["dual_ip"] else 0
     tmpargs["TP_API"] = 0
-    tmpargs["TP_SSR"] = args["ssr"]
+    tmpargs["TP_SSR"] = 1
     tmpargs["coeff"] = args["coeff"]
+    tmpargs["TP_SAT"] = args["sat_mode"]
    
     return generate_graph(name, tmpargs)

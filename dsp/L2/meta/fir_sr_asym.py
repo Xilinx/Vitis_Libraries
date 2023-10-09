@@ -32,7 +32,20 @@ TP_CASC_LEN_min = 1
 TP_CASC_LEN_max = 40
 TP_FIR_LEN_min = 4
 TP_FIR_LEN_max = 8192
-
+TP_SHIFT_min = 0
+TP_SHIFT_max = 61
+#TP_API_min=0
+#TP_API_max=1
+#TP_RND_min=0
+#TP_RND_max=7
+#AIE_VARIANT_min=1
+#AIE_VARIANT_max=2
+#TP_DUAL_IP_min=0
+#TP_DUAL_IP_max=1
+#TP_NUM_OUTPUTS_min=1
+#TP_NUM_OUTPUTS_max=2
+#TP_USE_COEF_RELOAD_min=0
+#TP_USE_COEF_RELOAD_max=2
 
 def fnNumLanesStream(*args):
     return fnNumLanes(*args, TP_API=1)
@@ -348,6 +361,14 @@ def validate_TP_SHIFT(args):
     TP_SHIFT = args["TP_SHIFT"]
     return fn_validate_shift(TT_DATA, TP_SHIFT)
 
+def validate_TP_RND(args):
+  TP_RND = args["TP_RND"]
+  AIE_VARIANT = args["AIE_VARIANT"]
+  return fn_validate_roundMode(TP_RND, AIE_VARIANT)
+
+def validate_TP_SAT(args):
+  TP_SAT = args["TP_SAT"]
+  return fn_validate_satMode(TP_SAT)
 
 def validate_TP_CASC_LEN(args):
     TP_CASC_LEN = args["TP_CASC_LEN"]
@@ -426,57 +447,24 @@ def info_ports(args):
     TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
     TP_SSR = args["TP_SSR"]
+    TP_API = args["TP_API"]
+    TP_DUAL_IP = args["TP_DUAL_IP"]
+    TP_NUM_OUTPUTS = args["TP_NUM_OUTPUTS"]
+    TP_DECIMATE_FACTOR = 1
+    TP_INTERPOLATE_FACTOR = 1
     margin_size = fn_margin_size(TP_FIR_LEN // TP_SSR, TT_DATA)
+    num_in_ports = TP_SSR
+    num_out_ports = TP_SSR
+    in_win_size = get_input_window_size(TP_INPUT_WINDOW_VSIZE, num_in_ports, TP_API, TP_DUAL_IP)
+    out_win_size = get_output_window_size(TP_INPUT_WINDOW_VSIZE, num_out_ports, TP_API, TP_NUM_OUTPUTS, TP_DECIMATE_FACTOR, TP_INTERPOLATE_FACTOR)
 
-    in_ports = get_port_info(
-        "in",
-        "in",
-        TT_DATA,
-        TP_INPUT_WINDOW_VSIZE // TP_SSR,
-        TP_SSR,
-        marginSize=margin_size,
-        TP_API=args["TP_API"],
-    )
-    in2_ports = (
-        get_port_info(
-            "in2",
-            "in",
-            TT_DATA,
-            TP_INPUT_WINDOW_VSIZE // TP_SSR,
-            TP_SSR,
-            marginSize=margin_size,
-            TP_API=args["TP_API"],
-        )
-        if (args["TP_DUAL_IP"] == 1)
-        else []
-    )
-    coeff_ports = (
-        get_parameter_port_info("coeff", "in", TT_COEF, TP_SSR, TP_FIR_LEN, "async")
-        if (args["TP_USE_COEF_RELOAD"] == 1)
-        else []
-    )
+    in_ports = get_port_info( "in", "in", TT_DATA, in_win_size, num_in_ports, marginSize=margin_size, TP_API=TP_API)
+    in2_ports = (get_port_info( "in2", "in", TT_DATA, in_win_size, num_in_ports, marginSize=margin_size, TP_API=TP_API, ) if (args["TP_DUAL_IP"] == 1) else [])
+    coeff_ports = (get_parameter_port_info("coeff", "in", TT_COEF, TP_SSR, TP_FIR_LEN, "async") if (args["TP_USE_COEF_RELOAD"] == 1) else [] )
 
     # decimate by 2 for halfband
-    out_ports = get_port_info(
-        "out",
-        "out",
-        TT_DATA,
-        TP_INPUT_WINDOW_VSIZE // TP_SSR,
-        TP_SSR,
-        TP_API=args["TP_API"],
-    )
-    out2_ports = (
-        get_port_info(
-            "out2",
-            "out",
-            TT_DATA,
-            TP_INPUT_WINDOW_VSIZE // TP_SSR,
-            TP_SSR,
-            TP_API=args["TP_API"],
-        )
-        if (args["TP_NUM_OUTPUTS"] == 2)
-        else []
-    )
+    out_ports = get_port_info( "out", "out", TT_DATA, out_win_size, num_out_ports, TP_API=TP_API,)
+    out2_ports = (get_port_info( "out2", "out", TT_DATA, out_win_size, num_out_ports, TP_API=TP_API, ) if (args["TP_NUM_OUTPUTS"] == 2) else [])
     return in_ports + in2_ports + coeff_ports + out_ports + out2_ports
 
 
@@ -524,6 +512,7 @@ def generate_graph(graphname, args):
     TP_API = args["TP_API"]
     TP_SSR = args["TP_SSR"]
     coeff_list = args["coeff"]
+    TP_SAT = args["TP_SAT"]
 
     taps = fn_get_taps_vector(TT_COEF, coeff_list)
     constr_args_str = f"taps" if TP_USE_COEF_RELOAD == 0 else ""
@@ -581,7 +570,8 @@ public:
     {TP_NUM_OUTPUTS}, //TP_NUM_OUTPUTS
     {TP_DUAL_IP}, //TP_DUAL_IP
     {TP_API}, //TP_API
-    {TP_SSR} //TP_SSR
+    {TP_SSR}, //TP_SSR
+    {TP_SAT} //TP_SAT
   > filter;
 
   {graphname}() : filter({constr_args_str}) {{

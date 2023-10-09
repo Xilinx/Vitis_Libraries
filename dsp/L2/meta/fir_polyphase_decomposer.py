@@ -72,12 +72,16 @@ def fn_validate_decomposer_TP_FIR_LEN(args):
   TP_PARA_DECI_POLY = dargs["TP_PARA_DECI_POLY"]
   if TP_FIR_LEN % TP_PARA_INTERP_POLY != 0:
     return isError(
-      f"Filter length ({ TP_FIR_LEN }) must be a mutliple of TP_PARA_INTERP_POLY ({ TP_PARA_INTERP_POLY })"
+      f"Filter length ({ TP_FIR_LEN }) must be a multiple of TP_PARA_INTERP_POLY ({ TP_PARA_INTERP_POLY })"
     )
   if TP_FIR_LEN % TP_PARA_DECI_POLY != 0:
     return isError(
-      f"Filter length ({ TP_FIR_LEN }) must be a mutliple of TP_PARA_DECI_POLY ({ TP_PARA_DECI_POLY })"
+      f"Filter length ({ TP_FIR_LEN }) must be a multiple of TP_PARA_DECI_POLY ({ TP_PARA_DECI_POLY })"
     )
+  if TP_FIR_LEN % (TP_PARA_DECI_POLY * TP_PARA_INTERP_POLY) != 0:
+    return isError(
+      f"Filter length ({ TP_FIR_LEN }) must be a multiple of TP_PARA_DECI_POLY ({ TP_PARA_DECI_POLY }) x TP_PARA_INTERP_POLY ({ TP_PARA_INTERP_POLY }). Please increase FIR length and pad coefficients with zeros to achieve the same functionality."
+    )    
 
   return isValid
 

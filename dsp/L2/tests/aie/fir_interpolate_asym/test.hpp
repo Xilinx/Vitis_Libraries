@@ -27,7 +27,6 @@
 // Tmp workaround to avoid adding a template argument just yet.
 #include "uut_config.h"
 #include "uut_static_config.h"
-#define TP_COMBINE_POLYPHASES 0
 #include "test_utils.hpp"
 #include "fir_common_traits.hpp"
 
@@ -56,10 +55,7 @@ class test_graph : public graph {
 
    public:
     static constexpr unsigned int RTP_SSR = P_SSR * P_PARA_INTERP_POLY;
-    static constexpr unsigned int OUT_SSR =
-        (TP_COMBINE_POLYPHASES == 1 && PORT_API == 0 && P_PARA_INTERP_POLY == INTERPOLATE_FACTOR)
-            ? P_SSR
-            : P_SSR * P_PARA_INTERP_POLY;
+    static constexpr unsigned int OUT_SSR = P_SSR * P_PARA_INTERP_POLY;
     // static constexpr unsigned int OUT_SSR = P_SSR * P_PARA_INTERP_POLY;
     std::array<input_plio, P_SSR*(DUAL_INPUT_SAMPLES + 1)> in;
     std::array<output_plio, OUT_SSR * NUM_OUTPUTS> out;
@@ -85,7 +81,8 @@ class test_graph : public graph {
                                                            NUM_OUTPUTS,
                                                            PORT_API,
                                                            P_SSR,
-                                                           P_PARA_INTERP_POLY>;
+                                                           P_PARA_INTERP_POLY,
+                                                           SAT_MODE>;
 
     // Constructor
     test_graph() {

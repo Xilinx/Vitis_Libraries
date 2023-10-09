@@ -26,8 +26,8 @@ HELPER:= $(HELPER_CUR_DIR)/.helper
 
 WINDOW_VSIZE_A 	= $(shell echo $$(( $(DIM_A) * $(DIM_B) * $(NUM_FRAMES))))
 WINDOW_VSIZE_B 	= $(shell echo $$(( $(DIM_B) * $(NUM_FRAMES))))
-PARAM_MAP = DATA_A $(DATA_A) DATA_B $(DATA_B) DIM_A $(DIM_A) DIM_B $(DIM_B) SHIFT $(SHIFT) ROUND_MODE $(ROUND_MODE) NUM_FRAMES $(NUM_FRAMES) CASC_LEN $(CASC_LEN)
-UUT_FILE_SUFFIX = $(UUT_KERNEL)_$(DATA_A)_$(DATA_B)_$(DIM_A)_$(DIM_B)_$(NUM_FRAMES)_$(SHIFT)_$(ROUND_MODE)_$(WINDOW_VSIZE_A)_$(WINDOW_VSIZE_B)_$(CASC_LEN)_$(STIM_TYPE_A)_$(STIM_TYPE_B)
+PARAM_MAP = DATA_A $(DATA_A) DATA_B $(DATA_B) DIM_A $(DIM_A) DIM_B $(DIM_B) SHIFT $(SHIFT) ROUND_MODE $(ROUND_MODE) SAT_MODE $(SAT_MODE) NUM_FRAMES $(NUM_FRAMES) CASC_LEN $(CASC_LEN)
+UUT_FILE_SUFFIX = $(UUT_KERNEL)_$(DATA_A)_$(DATA_B)_$(DIM_A)_$(DIM_B)_$(NUM_FRAMES)_$(SHIFT)_$(ROUND_MODE)_$(SAT_MODE)_$(WINDOW_VSIZE_A)_$(WINDOW_VSIZE_B)_$(CASC_LEN)_$(STIM_TYPE_A)_$(STIM_TYPE_B)
 LOG_FILE =./logs/log.txt
 STATUS_LOG_FILE = ./logs/status.txt
 STATUS_FILE = $(STATUS_LOG_FILE)
@@ -35,6 +35,8 @@ STATUS_FILE = $(STATUS_LOG_FILE)
 $(HELPER):
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_A) $(WINDOW_VSIZE_A) $(NITER) 0 $(STIM_TYPE_A) 0 0 $(DATA_A) 0 1;\
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(LOC_INPUT_FILE_B) $(WINDOW_VSIZE_B) $(NITER) 0 $(STIM_TYPE_B) 0 0 $(DATA_B) 0 1;\
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/matrix_mult_partition_shuffle.pl --inFile $(LOC_INPUT_FILE_A) --inRow $(DIM_A)  --inCol $(DIM_B) --T_DATA_A $(DATA_A) --T_DATA_B $(DATA_A) --cascLen $(CASC_LEN) --colMajor 1 --isTiled 1 --tileInPlace    |& tee -a $(LOG_FILE);\
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/matrix_mult_partition_shuffle.pl --inFile $(LOC_INPUT_FILE_B) --inRow 1         --inCol $(DIM_B) --T_DATA_A $(DATA_B) --T_DATA_B $(DATA_B) --cascLen $(CASC_LEN) --colMajor 1 --isTiled 1 --tileInPlace    |& tee -a $(LOG_FILE);\
 	TARGET=x86sim UUT_KERNEL=matrix_vector_mul_ref UUT_SIM_FILE=./data/ref_output.txt make run TARGET=x86sim TAG=REF
 	make cleanall
 

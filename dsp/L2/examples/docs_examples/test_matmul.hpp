@@ -62,7 +62,7 @@ class test_mm : public adf::graph {
     test_mm() {
         connect<>(inA, matrixMult.inA[0]);
         connect<>(inB, matrixMult.inB[0]);
-        connect<>(matrixMult.out, out);
+        connect<>(matrixMult.out[0], out);
         kernel* kernels = matrixMult.getKernels();
         for (int i = 0; i < P_CASC_LEN; i++) {
             runtime<ratio>(kernels[i]) = 0.7;

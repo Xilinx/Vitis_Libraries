@@ -105,6 +105,20 @@
             "description": "specifies the device type",
             "maximum": 2,
             "minimum": 1
+        },
+        {
+            "name": "TP_RND",
+            "description": "The rounding to be applied during the shift down stage of processing.",
+            "type": "uint"
+        },
+        {
+            "name": "TP_SAT",
+            "description": "Saturation mode.",
+            "type": "uint",
+            "validator": {
+                "file": "dft.py",
+                "function": "validate_TP_SAT"
+            }
         }
     ],
     "ports": {
@@ -114,7 +128,5 @@
     "generator": {
         "file": "dft.py",
         "function": "generate_graph"
-    },
-    "target_domain": "AIE",
-    "visible": true
+    }
 }

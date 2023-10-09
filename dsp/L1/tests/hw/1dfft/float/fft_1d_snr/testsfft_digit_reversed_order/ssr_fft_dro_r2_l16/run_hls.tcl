@@ -14,7 +14,14 @@
 # limitations under the License.
 # vitis hls makefile-generator v2.0.0
 
-source settings.tcl
+set CSIM 1
+set CSYNTH 1
+set COSIM 1
+set VIVADO_SYN 1
+set VIVADO_IMPL 1
+set CUR_DIR [pwd]
+set XF_PROJ_ROOT $CUR_DIR/../../../../../../../..
+set XPART xcu200-fsgd2104-2-e
 
 set PROJ "prj_ssr_fft_dro_reg_test_r2_l16.prj"
 set SOLN "solution1"

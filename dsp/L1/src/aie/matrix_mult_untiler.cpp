@@ -36,7 +36,7 @@
 #define COL_MAJOR 1
 #endif
 
-//#define MATMUL_DEBUG
+// #define MATMUL_DEBUG
 
 namespace xf {
 namespace dsp {
@@ -118,11 +118,14 @@ template <unsigned M, unsigned N, unsigned inRow, unsigned inCol, unsigned leadi
 static void doUnTile(T_D* __restrict inPtr, T_D* outPtr) {
     constexpr unsigned minGranularity = (128 / 8) / sizeof(T_D);
     constexpr unsigned loadSize = (N >= minGranularity) ? N : minGranularity;
+    // constexpr unsigned loadSize = (N >= minGranularity && (N < 8)) ? N : minGranularity;
     constexpr unsigned hasMulLoadsPerRow = (loadSize <= N && leadingDim == ROW_MAJOR);
-    constexpr unsigned vectorSize = getVecSize<T_D, inRow, inCol, hasMulLoadsPerRow>();
-    static_assert((vectorSize * sizeof(T_D) < 128),
-                  "Error: This DATA_TYPE combination does not support the given matrix sizes. Consider padding up the "
-                  "matrices to the closest multiples of tiling sizes.");
+    // constexpr unsigned vectorSize = getVecSize<T_D, inRow, inCol, hasMulLoadsPerRow>();
+    constexpr unsigned minVBuffSizeforType = (512 / 8) / sizeof(T_D);
+    constexpr unsigned vectorSize = (minVBuffSizeforType < (M * N)) ? 2 * minVBuffSizeforType : minVBuffSizeforType;
+    //
+    // static_assert((vectorSize * sizeof(T_D) < 128), "Error: This DATA_TYPE combination does not support the given
+    // matrix sizes. Consider padding up the matrices to the closest multiples of tiling sizes.");
 
     // static_assert(N >= minGranularity, "Granularity is awkward");
     static_assert(vectorSize <= (1024 / 8) / sizeof(T_D), "calculated vector size too large for vector register.");
@@ -163,10 +166,10 @@ static void doUnTile(T_D* __restrict inPtr, T_D* outPtr) {
     const unsigned outerDimStoreIncr = (leadingDim == ROW_MAJOR) ? inCol : inRow;
     const unsigned innerDimStoreIncr = storeSize;
 
-    const bool shuffleIsNeeded = (leadingDim == COL_MAJOR) || ((leadingDim == ROW_MAJOR) && (loadSize > N));
-    const int shuffleVSizeAllowed = (512 / 8) / sizeof(T_D);
-    static_assert(!(shuffleIsNeeded && vectorSize != shuffleVSizeAllowed),
-                  "Untiling does not support these matrix dimensions for this data type combination.");
+    const bool shuffleIsNeeded = ((leadingDim == COL_MAJOR) || ((leadingDim == ROW_MAJOR) && (loadSize > N)));
+    const int shuffleVSizeAllowed = (1024 / 8) / sizeof(T_D);
+    // static_assert(!(shuffleIsNeeded && vectorSize != shuffleVSizeAllowed), "Untiling does not support these matrix
+    // dimensions for this data type combination.");
 
     for (unsigned outerDimIdx = 0; outerDimIdx < outerLoopCount; ++outerDimIdx)
         chess_loop_count((outerLoopCount)) chess_prepare_for_pipelining {
@@ -181,6 +184,8 @@ static void doUnTile(T_D* __restrict inPtr, T_D* outPtr) {
                     const unsigned ptrInnerBase = innerDimIdx * innerLoopIncr;
 
                     aie::vector<T_D, vectorSize> vec;
+                    using vType = aie::vector<T_D, vectorSize>;
+                    using vTypeHalf = aie::vector<T_D, vectorSize / 2>;
 
 #pragma unroll((loadsPerVector))
                     for (unsigned loadIdx = 0; loadIdx < loadsPerVector; ++loadIdx) {
@@ -208,7 +213,29 @@ static void doUnTile(T_D* __restrict inPtr, T_D* outPtr) {
                     }
 
                     if
-                        constexpr(shuffleIsNeeded) { vec = doShuffle(vec, 0, offsets); }
+                        constexpr(shuffleIsNeeded) {
+#ifdef __SUPPORTS_ACC64__
+                            if
+                                constexpr(leadingDim == ROW_MAJOR) {
+                                    // Interleave zip needed for ROW_MAJOR when there are two tiles per vector (int16
+                                    // 4x4 tile)
+                                    vTypeHalf vecA = vec.template extract<vectorSize / 2>(0);
+                                    vTypeHalf vecB = vec.template extract<vectorSize / 2>(1);
+                                    std::pair<vTypeHalf, vTypeHalf> vecZip = aie::interleave_zip(vecA, vecB, N);
+                                    vec = aie::concat(vecZip.first, vecZip.second);
+                                }
+                            else {
+                                // vTypeHalf vecA = aie::filter_even(vec, 1);
+                                // vTypeHalf vecB = aie::filter_odd(vec, 1);
+                                // myprint(vecA, true, "vecA: ");
+                                // myprint(vecB, true, "vecB: ");
+                                // vec = aie::concat(vecA, vecB);
+                                vec = aie::transpose(vec, M, N);
+                            }
+#else
+                            vec = doShuffle(vec, 0, offsets);
+#endif //__SUPPORTS_ACC64__
+                        }
 #pragma unroll((outerDimPerVector))
                     for (unsigned outerStoreIdx = 0; outerStoreIdx < outerDimPerVector; ++outerStoreIdx) {
                         const unsigned storeOuterPtr = outerStoreIdx * outerDimStoreIncr;

@@ -86,7 +86,8 @@ template <typename T_ACC_TYPE,
           unsigned int TP_NUM_LANES,
           unsigned int TP_SC_MODE = USE_INBUILT_SINCOS,
           unsigned int TP_NUM_LUTS = 1,
-          typename T_LUT_DTYPE = cint32_t>
+          typename T_LUT_DTYPE = cint32_t,
+          unsigned int TP_RND = 0>
 class ddsMixerHelper {
    private:
     static constexpr unsigned int lookupBits = 20;
@@ -103,8 +104,9 @@ template <typename T_ACC_TYPE,
           typename T_DDS_TYPE,
           unsigned int TP_NUM_LANES,
           unsigned int TP_NUM_LUTS,
-          typename T_LUT_DTYPE>
-class ddsMixerHelper<T_ACC_TYPE, T_DDS_TYPE, TP_NUM_LANES, USE_LUT_SINCOS, TP_NUM_LUTS, T_LUT_DTYPE> {
+          typename T_LUT_DTYPE,
+          unsigned int TP_RND>
+class ddsMixerHelper<T_ACC_TYPE, T_DDS_TYPE, TP_NUM_LANES, USE_LUT_SINCOS, TP_NUM_LUTS, T_LUT_DTYPE, TP_RND> {
    private:
     static constexpr unsigned int kNumLUTBits = 10;
     static constexpr unsigned int kLUTSize = 1 << kNumLUTBits;
@@ -143,12 +145,14 @@ class ddsMixerHelper<T_ACC_TYPE, T_DDS_TYPE, TP_NUM_LANES, USE_LUT_SINCOS, TP_NU
     };
 };
 //-----------------------------------------------------------------------------------------------------
-// dds_mixer_ref class
+// dds_mixer_ref class MIXER-MODE 2 : USE_INBUILT_SINCOS
 template <typename TT_DATA, // type of data input and output
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_MIXER_MODE,
           unsigned int TP_SC_MODE = USE_INBUILT_SINCOS,
-          unsigned int TP_NUM_LUTS = 1>
+          unsigned int TP_NUM_LUTS = 1,
+          unsigned int TP_RND = 0,
+          unsigned int TP_SAT = 1>
 class dds_mixer_ref {
    private:
     static constexpr unsigned int kNumLanes = fnDDSLanes<TT_DATA, USE_INBUILT_SINCOS>();
@@ -182,12 +186,14 @@ class dds_mixer_ref {
     void ddsMix(input_buffer<TT_DATA>& inWindowA, input_buffer<TT_DATA>& inWindowB, output_buffer<TT_DATA>& outWindow);
 };
 
-// dds_mixer_ref class MIXER-MODE 2 : LUT Based Implementation
+// dds_mixer_ref class MIXER-MODE 2 : USE_LUT_SINCOS
 template <typename TT_DATA, // type of data input and output
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_MIXER_MODE,
-          unsigned int TP_NUM_LUTS>
-class dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, USE_LUT_SINCOS, TP_NUM_LUTS> {
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+class dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, USE_LUT_SINCOS, TP_NUM_LUTS, TP_RND, TP_SAT> {
    private:
     static constexpr unsigned int kNumLanes = fnDDSLanes<TT_DATA, USE_LUT_SINCOS>();
     unsigned int m_samplePhaseInc;
@@ -223,12 +229,15 @@ class dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, USE_LUT_SINCO
 };
 
 //===========================================================
-// SPECIALIZATION for mixer_mode = 1
+// SPECIALIZATION for mixer_mode = 1:  USE_INBUILT_SINCOS
 //===========================================================
 template <typename TT_DATA, // type of data input and output
           unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_NUM_LUTS>
-class dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, 1, USE_INBUILT_SINCOS, TP_NUM_LUTS> {
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+
+class dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, 1, USE_INBUILT_SINCOS, TP_NUM_LUTS, TP_RND, TP_SAT> {
    private:
     static constexpr unsigned int kNumLanes = fnDDSLanes<TT_DATA, USE_INBUILT_SINCOS>();
     unsigned int m_samplePhaseInc;
@@ -256,12 +265,15 @@ class dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, 1, USE_INBUILT_SINCOS, TP_NU
 };
 
 //===========================================================
-// SPECIALIZATION for mixer_mode = 1 :  LUT Based Implementation
+// SPECIALIZATION for mixer_mode = 1 :  USE_LUT_SINCOS
 //===========================================================
 template <typename TT_DATA, // type of data input and output
           unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_NUM_LUTS>
-class dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, 1, USE_LUT_SINCOS, TP_NUM_LUTS> {
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+
+class dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, 1, USE_LUT_SINCOS, TP_NUM_LUTS, TP_RND, TP_SAT> {
    private:
     static constexpr unsigned int kNumLanes = fnDDSLanes<TT_DATA, USE_LUT_SINCOS>();
     unsigned int m_samplePhaseInc;
@@ -293,12 +305,15 @@ class dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, 1, USE_LUT_SINCOS, TP_NUM_LU
 };
 
 //===========================================================
-// SPECIALIZATION for mixer_mode = 0
+// SPECIALIZATION for mixer_mode = 0: USE_INBUILT_SINCOS
 //===========================================================
 template <typename TT_DATA, // type of data input and output
           unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_NUM_LUTS>
-class dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, 0, USE_INBUILT_SINCOS, TP_NUM_LUTS> {
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+
+class dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, 0, USE_INBUILT_SINCOS, TP_NUM_LUTS, TP_RND, TP_SAT> {
    private:
     static constexpr unsigned int kNumLanes = fnDDSLanes<TT_DATA, USE_INBUILT_SINCOS>();
     unsigned int m_samplePhaseInc;
@@ -326,12 +341,14 @@ class dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, 0, USE_INBUILT_SINCOS, TP_NU
 };
 
 //===========================================================
-// SPECIALIZATION for mixer_mode = 0 : LUT Based Implementation
+// SPECIALIZATION for mixer_mode = 0 : USE_LUT_SINCOS
 //===========================================================
 template <typename TT_DATA, // type of data input and output
           unsigned int TP_INPUT_WINDOW_VSIZE,
-          unsigned int TP_NUM_LUTS>
-class dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, 0, USE_LUT_SINCOS, TP_NUM_LUTS> {
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+class dds_mixer_ref<TT_DATA, TP_INPUT_WINDOW_VSIZE, 0, USE_LUT_SINCOS, TP_NUM_LUTS, TP_RND, TP_SAT> {
    private:
     static constexpr unsigned int kNumLanes = fnDDSLanes<TT_DATA, USE_LUT_SINCOS>();
     unsigned int m_samplePhaseInc;

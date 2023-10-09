@@ -64,10 +64,14 @@ INLINE_DECL void set_rnd_mode() {
     // conv_odd: Round to the nearest integer, with preference to the odd number.
     if
         constexpr(rndMode == rnd_conv_odd) { ::aie::set_rounding(::aie::rounding_mode::conv_odd); }
+#ifdef __SUPPORTS_ML_ROUND_MODES__
     // symmetric_floor: Always round towards zero. (AIE-2 additional mode)
-    // if constexpr(rndMode == rnd_sym_floor) {::aie::set_rounding(::aie::rounding_mode::symmetric_floor);}
+    if
+        constexpr(rndMode == rnd_sym_floor) { ::aie::set_rounding(::aie::rounding_mode::symmetric_floor); }
     // symmetric_ceil: Always round away from zero.(AIE-2 additional mode)
-    // if constexpr(rndMode == rnd_sym_ceil) {::aie::set_rounding(::aie::rounding_mode::symmetric_ceil);}
+    if
+        constexpr(rndMode == rnd_sym_ceil) { ::aie::set_rounding(::aie::rounding_mode::symmetric_ceil); }
+#endif
 }
 
 // saturation modes
@@ -86,119 +90,30 @@ INLINE_DECL void set_sat_mode() {
         constexpr(satMode == 3) { ::aie::set_saturation(::aie::saturation_mode::symmetric); }
 }
 
-// function to return ::aie::detail:AccumClass enum based on input data type
-template <typename TT_DATA>
-INLINE_DECL constexpr::aie::detail::AccumClass fnAccClass() {
-    return ::aie::detail::AccumClass::Int; // ::aie::AccumClass -no need to go to detail
-};
-template <>
-INLINE_DECL constexpr::aie::detail::AccumClass fnAccClass<int16>() {
-    return ::aie::detail::AccumClass::Int;
-};
-template <>
-INLINE_DECL constexpr::aie::detail::AccumClass fnAccClass<cint16>() {
-    return ::aie::detail::AccumClass::CInt;
-};
-template <>
-INLINE_DECL constexpr::aie::detail::AccumClass fnAccClass<int32>() {
-    return ::aie::detail::AccumClass::Int;
-};
-template <>
-INLINE_DECL constexpr::aie::detail::AccumClass fnAccClass<cint32>() {
-    return ::aie::detail::AccumClass::CInt;
-};
-template <>
-INLINE_DECL constexpr::aie::detail::AccumClass fnAccClass<float>() {
-    return ::aie::detail::AccumClass::FP;
-};
-template <>
-INLINE_DECL constexpr::aie::detail::AccumClass fnAccClass<cfloat>() {
-    return ::aie::detail::AccumClass::CFP;
-};
-
-template < ::aie::detail::AccumClass Accum, unsigned Size>
-struct accClassTag {};
-#ifdef __SUPPORTS_ACC48__
-// function to return ::aie::detail:AccumClass enum based on input data type
-template <>
-struct accClassTag< ::aie::detail::AccumClass::Int, 48> {
-    using type = acc48;
-};
-template <>
-struct accClassTag< ::aie::detail::AccumClass::Int, 80> {
-    using type = acc80;
-};
-template <>
-struct accClassTag< ::aie::detail::AccumClass::CInt, 48> {
-    using type = cacc48;
-};
-template <>
-struct accClassTag< ::aie::detail::AccumClass::CInt, 80> {
-    using type = cacc80;
-};
-template <>
-struct accClassTag< ::aie::detail::AccumClass::FP, 32> {
-    using type = accfloat;
-};
-template <>
-struct accClassTag< ::aie::detail::AccumClass::CFP, 32> {
-    using type = caccfloat;
-};
-#endif //__SUPPORTS_ACC48__
-#ifdef __SUPPORTS_ACC64__
-template <>
-struct accClassTag< ::aie::detail::AccumClass::Int, 32> {
-    using type = acc32;
-};
-template <>
-struct accClassTag< ::aie::detail::AccumClass::Int, 64> {
-    using type = acc64;
-};
-template <>
-struct accClassTag< ::aie::detail::AccumClass::CInt, 32> {
-    using type = cacc32;
-};
-template <>
-struct accClassTag< ::aie::detail::AccumClass::CInt, 64> {
-    using type = cacc64;
-};
-template <>
-struct accClassTag< ::aie::detail::AccumClass::FP, 32> {
-    using type = accfloat;
-};
-template <>
-struct accClassTag< ::aie::detail::AccumClass::CFP, 32> {
-    using type = caccfloat;
-};
-#endif //__SUPPORTS_ACC64__
-
-template < ::aie::detail::AccumClass Acc, unsigned Size>
-using accClassTag_t = typename accClassTag<Acc, Size>::type;
-
 // T_buff structs with ::aie::vectors
 template <typename T>
-struct T_buff_128b {
+struct __attribute__((chess_behave_as_fundamental_type)) T_buff_128b {
     using v_type = ::aie::vector<T, 128 / 8 / sizeof(T)>;
     v_type val;
     static constexpr unsigned int size = 128;
     static constexpr unsigned getLanes() { return 128 / 8 / sizeof(T); };
 };
 template <typename T>
-struct T_buff_256b {
+struct __attribute__((chess_behave_as_fundamental_type)) T_buff_256b {
     using v_type = ::aie::vector<T, 256 / 8 / sizeof(T)>;
     v_type val;
     static constexpr unsigned int size = 256;
     static constexpr unsigned getLanes() { return 256 / 8 / sizeof(T); };
 };
 template <typename T>
-struct T_buff_512b {
+struct __attribute__((chess_behave_as_fundamental_type)) T_buff_512b {
     using v_type = ::aie::vector<T, 512 / 8 / sizeof(T)>;
     v_type val;
     static constexpr unsigned int size = 512;
     static constexpr unsigned getLanes() { return 512 / 8 / sizeof(T); };
 };
 template <typename T>
-struct T_buff_1024b {
+struct __attribute__((chess_behave_as_fundamental_type)) T_buff_1024b {
     using v_type = ::aie::vector<T, 1024 / 8 / sizeof(T)>;
     v_type val;
     static constexpr unsigned int size = 1024;
@@ -428,8 +343,7 @@ inline namespace fir_api {
 // T_acc struct with ::aie::accum
 template <typename TT_DATA, typename TT_COEFF>
 struct T_acc {
-    using v_type =
-        ::aie::detail::accum<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>(), fnNumLanes<TT_DATA, TT_COEFF>()>;
+    using v_type = ::aie::accum<tAccBaseType_t<TT_DATA, TT_COEFF>, fnNumLanes<TT_DATA, TT_COEFF>()>;
     v_type val, uval;
     static constexpr unsigned getLanes() { return fnNumLanes<TT_DATA, TT_COEFF>(); };
     static constexpr unsigned getSize() { return fnAccSize<TT_DATA, TT_COEFF>(); };
@@ -438,8 +352,7 @@ struct T_acc {
 // T_acc384 struct with ::aie::accum
 template <typename TT_DATA, typename TT_COEFF>
 struct T_acc384 {
-    using v_type =
-        ::aie::detail::accum<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>(), fnNumLanes384<TT_DATA, TT_COEFF>()>;
+    using v_type = ::aie::accum<tAccBaseType_t<TT_DATA, TT_COEFF>, fnNumLanes384<TT_DATA, TT_COEFF>()>;
     static constexpr unsigned getLanes() { return fnNumLanes384<TT_DATA, TT_COEFF>(); };
     static constexpr unsigned getSize() { return fnAccSize<TT_DATA, TT_COEFF>(); };
     v_type val, uval;
@@ -449,7 +362,8 @@ struct T_acc384 {
 template <typename TT_DATA, typename TT_COEFF>
 T_acc<TT_DATA, TT_COEFF> INLINE_DECL null_acc() {
     T_acc<TT_DATA, TT_COEFF> ret;
-    using accTag = accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>;
+    //    using accTag = accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>;
+    using accTag = tAccBaseType_t<TT_DATA, TT_COEFF>;
     ret.val = ::aie::zeros<accTag, ret.val.size()>();
     return ret;
 };
@@ -710,7 +624,8 @@ INLINE_DECL void writeCascade(T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface, 
 // Overloaded function to write to cascade output.
 template <typename TT_DATA, typename TT_COEFF>
 INLINE_DECL void writeCascade(T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface, T_acc<TT_DATA, TT_COEFF> acc) {
-    using accTag = accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>;
+    //    using accTag = accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>;
+    using accTag = tAccBaseType_t<TT_DATA, TT_COEFF>;
     writeincr<accTag, fnNumLanes<TT_DATA, TT_COEFF>()>((output_stream<accTag>*)outInterface.outCascade, acc.val);
 }
 
@@ -723,7 +638,8 @@ INLINE_DECL void writeCascade(T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface, 
 // Overloaded function to write to cascade output.
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_DUAL_IP = 0>
 INLINE_DECL void writeCascade(T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface, T_acc384<TT_DATA, TT_COEFF> acc) {
-    using accTag = accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>;
+    // using accTag = accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>;
+    using accTag = tAccBaseType_t<TT_DATA, TT_COEFF>;
     writeincr<accTag, fnNumLanes384<TT_DATA, TT_COEFF>()>((output_stream<accTag>*)outInterface.outCascade, acc.val);
 }
 
@@ -733,7 +649,8 @@ INLINE_DECL T_acc<TT_DATA, TT_COEFF> readCascade(T_inputIF<false, TT_DATA, TP_DU
                                                  T_acc<TT_DATA, TT_COEFF> acc) {
     // Do nothing
     T_acc<TT_DATA, TT_COEFF> ret;
-    using accTag = accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>;
+    // using accTag = accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>;
+    using accTag = tAccBaseType_t<TT_DATA, TT_COEFF>;
     ret.val = ::aie::zeros<accTag, ret.val.size()>();
     return ret;
 };
@@ -743,7 +660,8 @@ template <typename TT_DATA, typename TT_COEFF, unsigned int TP_DUAL_IP = 0>
 INLINE_DECL T_acc<TT_DATA, TT_COEFF> readCascade(T_inputIF<true, TT_DATA, TP_DUAL_IP> inInterface,
                                                  T_acc<TT_DATA, TT_COEFF> acc) {
     T_acc<TT_DATA, TT_COEFF> ret;
-    using accTag = accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>;
+    // using accTag = accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>;
+    using accTag = tAccBaseType_t<TT_DATA, TT_COEFF>;
     ret.val = readincr_v<fnNumLanes<TT_DATA, TT_COEFF>(), accTag>((input_stream<accTag>*)inInterface.inCascade);
     return ret;
 };
@@ -754,7 +672,8 @@ INLINE_DECL T_acc384<TT_DATA, TT_COEFF> readCascade(T_inputIF<false, TT_DATA, TP
                                                     T_acc384<TT_DATA, TT_COEFF> acc) {
     // Do nothing
     T_acc384<TT_DATA, TT_COEFF> ret;
-    using accTag = accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>;
+    // using accTag = accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>;
+    using accTag = tAccBaseType_t<TT_DATA, TT_COEFF>;
     ret.val = ::aie::zeros<accTag, ret.val.size()>();
     return ret;
 };
@@ -764,7 +683,8 @@ template <typename TT_DATA, typename TT_COEFF, unsigned int TP_DUAL_IP = 0>
 INLINE_DECL T_acc384<TT_DATA, TT_COEFF> readCascade(T_inputIF<true, TT_DATA, TP_DUAL_IP> inInterface,
                                                     T_acc384<TT_DATA, TT_COEFF> acc) {
     T_acc384<TT_DATA, TT_COEFF> ret;
-    using accTag = accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>;
+    // using accTag = accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>;
+    using accTag = tAccBaseType_t<TT_DATA, TT_COEFF>;
     ret.val = readincr_v<fnNumLanes384<TT_DATA, TT_COEFF>(), accTag>((input_stream<accTag>*)inInterface.inCascade);
     return ret;
 };

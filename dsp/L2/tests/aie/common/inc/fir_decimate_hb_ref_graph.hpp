@@ -53,7 +53,8 @@ template <typename TT_DATA,
           unsigned int TP_NUM_OUTPUTS = 1,
           unsigned int TP_API = 0,
           unsigned int TP_SSR = 1,
-          unsigned int TP_PARA_DECI_POLY = 1>
+          unsigned int TP_PARA_DECI_POLY = 1,
+          unsigned int TP_SAT = 1>
 class fir_decimate_hb_ref_graph : public graph {
    public:
     template <class dir>
@@ -80,7 +81,7 @@ class fir_decimate_hb_ref_graph : public graph {
     fir_decimate_hb_ref_graph(const std::vector<TT_COEFF>& taps) {
         m_firKernel = kernel::create_object<
             fir_decimate_hb_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
-                                TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_API> >(taps);
+                                TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_API, TP_SAT> >(taps);
         create_connections();
     }
 
@@ -88,7 +89,7 @@ class fir_decimate_hb_ref_graph : public graph {
     fir_decimate_hb_ref_graph() {
         m_firKernel = kernel::create_object<
             fir_decimate_hb_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
-                                TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_API> >();
+                                TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_API, TP_SAT> >();
         create_connections();
     }
 

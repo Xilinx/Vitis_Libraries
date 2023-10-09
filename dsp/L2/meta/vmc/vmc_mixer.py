@@ -10,7 +10,7 @@ def vmc_validate_output_window_size(args):
     return validate_TP_WINDOW_VSIZE(tempargs)
 
 def vmc_validate_ssr(args):
-    ssr = args["ssr"]
+    ssr = 1
     return fn_validate_ssr(ssr);
 
 #### VMC graph generator ####
@@ -20,8 +20,10 @@ def vmc_generate_graph(name, args):
     tmpargs["TP_MIXER_MODE"] = args["mixer_mode"] 
     tmpargs["TP_INPUT_WINDOW_VSIZE"] = args["input_window_size"]
     tmpargs["TP_NUM_OUTPUTS"] = 1
-    tmpargs["TP_SSR"] = args["ssr"]
+    tmpargs["TP_SSR"] = 1
     tmpargs["TP_API"] = 0
     tmpargs["phaseInc"] = args["phase_increment"]
     tmpargs["initialPhaseOffset"] = 0
+    tmpargs["TP_RND"] = args["rnd_mode"]
+    tmpargs["TP_SAT"] = args["sat_mode"]
     return generate_graph(name, tmpargs)

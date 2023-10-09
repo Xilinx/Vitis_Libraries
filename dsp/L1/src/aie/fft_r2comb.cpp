@@ -246,7 +246,9 @@ template <typename TT_DATA,
           unsigned int TP_INDEX,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_API_IN,
-          unsigned int TP_API_OUT>
+          unsigned int TP_API_OUT,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 NOINLINE_DECL void fft_r2comb<TT_DATA,
                               TT_TWIDDLE,
                               TP_POINT_SIZE,
@@ -258,12 +260,14 @@ NOINLINE_DECL void fft_r2comb<TT_DATA,
                               TP_INDEX,
                               TP_ORIG_PAR_POWER,
                               TP_API_IN,
-                              TP_API_OUT>::fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
-                                                           input_stream<TT_DATA>* __restrict inStream1,
-                                                           output_stream<TT_DATA>* __restrict outStream0,
-                                                           output_stream<TT_DATA>* __restrict outStream1) {
-    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
-    set_sat();            // do saturate.
+                              TP_API_OUT,
+                              TP_RND,
+                              TP_SAT>::fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
+                                                       input_stream<TT_DATA>* __restrict inStream1,
+                                                       output_stream<TT_DATA>* __restrict outStream0,
+                                                       output_stream<TT_DATA>* __restrict outStream1) {
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     // TP_POINT_SIZE and PARALLEL_POWER go down by a power of 2 at each level of recursive hierarchy
     readStreamIn<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(inStream0, inStream1, inBuff);
@@ -283,7 +287,9 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_PARALLEL_POWER,
           unsigned int TP_INDEX,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 NOINLINE_DECL void fft_r2comb<TT_DATA,
                               TT_TWIDDLE,
                               TP_POINT_SIZE,
@@ -295,11 +301,13 @@ NOINLINE_DECL void fft_r2comb<TT_DATA,
                               TP_INDEX,
                               TP_ORIG_PAR_POWER,
                               kCascStreamAPI,
-                              kStreamAPI>::fft_r2comb_main(input_stream_cacc64* __restrict inStream0, // cascade
-                                                           input_stream<TT_DATA>* __restrict inStream1,
-                                                           output_stream<TT_DATA>* __restrict outStream0) {
-    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
-    set_sat();            // do saturate.
+                              kStreamAPI,
+                              TP_RND,
+                              TP_SAT>::fft_r2comb_main(input_stream_cacc64* __restrict inStream0, // cascade
+                                                       input_stream<TT_DATA>* __restrict inStream1,
+                                                       output_stream<TT_DATA>* __restrict outStream0) {
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     // TP_POINT_SIZE and PARALLEL_POWER go down by a power of 2 at each level of recursive hierarchy
     readCascStreamIn<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(inStream0, inStream1, inBuff);
@@ -319,7 +327,9 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_PARALLEL_POWER,
           unsigned int TP_INDEX,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 NOINLINE_DECL void fft_r2comb<TT_DATA,
                               TT_TWIDDLE,
                               TP_POINT_SIZE,
@@ -331,12 +341,14 @@ NOINLINE_DECL void fft_r2comb<TT_DATA,
                               TP_INDEX,
                               TP_ORIG_PAR_POWER,
                               kCascStreamAPI,
-                              kCascStreamAPI>::fft_r2comb_main(input_stream_cacc64* __restrict inStream0, // cascade
-                                                               input_stream<TT_DATA>* __restrict inStream1,
-                                                               output_stream_cacc64* __restrict outStream0, // cascade
-                                                               output_stream<TT_DATA>* __restrict outStream1) {
-    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
-    set_sat();            // do saturate.
+                              kCascStreamAPI,
+                              TP_RND,
+                              TP_SAT>::fft_r2comb_main(input_stream_cacc64* __restrict inStream0, // cascade
+                                                       input_stream<TT_DATA>* __restrict inStream1,
+                                                       output_stream_cacc64* __restrict outStream0, // cascade
+                                                       output_stream<TT_DATA>* __restrict outStream1) {
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     // TP_POINT_SIZE and PARALLEL_POWER go down by a power of 2 at each level of recursive hierarchy
     readCascStreamIn<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(inStream0, inStream1, inBuff);
@@ -356,7 +368,9 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_PARALLEL_POWER,
           unsigned int TP_INDEX,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 NOINLINE_DECL void fft_r2comb<TT_DATA,
                               TT_TWIDDLE,
                               TP_POINT_SIZE,
@@ -368,13 +382,15 @@ NOINLINE_DECL void fft_r2comb<TT_DATA,
                               TP_INDEX,
                               TP_ORIG_PAR_POWER,
                               kCascStreamAPI,
-                              kStreamCascAPI>::fft_r2comb_main(input_stream_cacc64* __restrict inStream0, // cascade
-                                                               input_stream<TT_DATA>* __restrict inStream1,
-                                                               output_stream<TT_DATA>* __restrict outStream0,
-                                                               output_stream_cacc64* __restrict outStream1 // cascade
-                                                               ) {
-    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
-    set_sat();            // do saturate.
+                              kStreamCascAPI,
+                              TP_RND,
+                              TP_SAT>::fft_r2comb_main(input_stream_cacc64* __restrict inStream0, // cascade
+                                                       input_stream<TT_DATA>* __restrict inStream1,
+                                                       output_stream<TT_DATA>* __restrict outStream0,
+                                                       output_stream_cacc64* __restrict outStream1 // cascade
+                                                       ) {
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     // TP_POINT_SIZE and PARALLEL_POWER go down by a power of 2 at each level of recursive hierarchy
     readCascStreamIn<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(inStream0, inStream1, inBuff);
@@ -394,7 +410,9 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_PARALLEL_POWER,
           unsigned int TP_INDEX,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 NOINLINE_DECL void fft_r2comb<TT_DATA,
                               TT_TWIDDLE,
                               TP_POINT_SIZE,
@@ -406,11 +424,13 @@ NOINLINE_DECL void fft_r2comb<TT_DATA,
                               TP_INDEX,
                               TP_ORIG_PAR_POWER,
                               kStreamCascAPI,
-                              kStreamAPI>::fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
-                                                           input_stream_cacc64* __restrict inStream1, // cascade
-                                                           output_stream<TT_DATA>* __restrict outStream0) {
-    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
-    set_sat();            // do saturate.
+                              kStreamAPI,
+                              TP_RND,
+                              TP_SAT>::fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
+                                                       input_stream_cacc64* __restrict inStream1, // cascade
+                                                       output_stream<TT_DATA>* __restrict outStream0) {
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     // TP_POINT_SIZE and PARALLEL_POWER go down by a power of 2 at each level of recursive hierarchy
     readStreamCascIn<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(inStream0, inStream1, inBuff);
@@ -430,7 +450,9 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_PARALLEL_POWER,
           unsigned int TP_INDEX,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 NOINLINE_DECL void fft_r2comb<TT_DATA,
                               TT_TWIDDLE,
                               TP_POINT_SIZE,
@@ -442,12 +464,14 @@ NOINLINE_DECL void fft_r2comb<TT_DATA,
                               TP_INDEX,
                               TP_ORIG_PAR_POWER,
                               kStreamCascAPI,
-                              kCascStreamAPI>::fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
-                                                               input_stream_cacc64* __restrict inStream1,   // cascade
-                                                               output_stream_cacc64* __restrict outStream0, // cascade
-                                                               output_stream<TT_DATA>* __restrict outStream1) {
-    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
-    set_sat();            // do saturate.
+                              kCascStreamAPI,
+                              TP_RND,
+                              TP_SAT>::fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
+                                                       input_stream_cacc64* __restrict inStream1,   // cascade
+                                                       output_stream_cacc64* __restrict outStream0, // cascade
+                                                       output_stream<TT_DATA>* __restrict outStream1) {
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     // TP_POINT_SIZE and PARALLEL_POWER go down by a power of 2 at each level of recursive hierarchy
     readStreamCascIn<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(inStream0, inStream1, inBuff);
@@ -467,7 +491,9 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_PARALLEL_POWER,
           unsigned int TP_INDEX,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 NOINLINE_DECL void fft_r2comb<TT_DATA,
                               TT_TWIDDLE,
                               TP_POINT_SIZE,
@@ -479,13 +505,15 @@ NOINLINE_DECL void fft_r2comb<TT_DATA,
                               TP_INDEX,
                               TP_ORIG_PAR_POWER,
                               kStreamCascAPI,
-                              kStreamCascAPI>::fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
-                                                               input_stream_cacc64* __restrict inStream1, // cascade
-                                                               output_stream<TT_DATA>* __restrict outStream0,
-                                                               output_stream_cacc64* __restrict outStream1 // cascade
-                                                               ) {
-    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
-    set_sat();            // do saturate.
+                              kStreamCascAPI,
+                              TP_RND,
+                              TP_SAT>::fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
+                                                       input_stream_cacc64* __restrict inStream1, // cascade
+                                                       output_stream<TT_DATA>* __restrict outStream0,
+                                                       output_stream_cacc64* __restrict outStream1 // cascade
+                                                       ) {
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     // TP_POINT_SIZE and PARALLEL_POWER go down by a power of 2 at each level of recursive hierarchy
     readStreamCascIn<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(inStream0, inStream1, inBuff);
@@ -505,7 +533,9 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_PARALLEL_POWER,
           unsigned int TP_INDEX,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 NOINLINE_DECL void fft_r2comb<TT_DATA,
                               TT_TWIDDLE,
                               TP_POINT_SIZE,
@@ -517,12 +547,14 @@ NOINLINE_DECL void fft_r2comb<TT_DATA,
                               TP_INDEX,
                               TP_ORIG_PAR_POWER,
                               kStreamAPI,
-                              kWindowAPI>::fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
-                                                           input_stream<TT_DATA>* __restrict inStream1,
-                                                           output_buffer<TT_DATA>& __restrict outWindow0) {
+                              kWindowAPI,
+                              TP_RND,
+                              TP_SAT>::fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
+                                                       input_stream<TT_DATA>* __restrict inStream1,
+                                                       output_buffer<TT_DATA>& __restrict outWindow0) {
     TT_DATA* outPtr = outWindow0.data();
-    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
-    set_sat();            // do saturate.
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     // TP_POINT_SIZE and PARALLEL_POWER go down by a power of 2 at each level of recursive hierarchy
     readStreamIn<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(inStream0, inStream1, inBuff);
@@ -540,7 +572,9 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_PARALLEL_POWER,
           unsigned int TP_INDEX,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 NOINLINE_DECL void fft_r2comb<TT_DATA,
                               TT_TWIDDLE,
                               TP_POINT_SIZE,
@@ -552,12 +586,14 @@ NOINLINE_DECL void fft_r2comb<TT_DATA,
                               TP_INDEX,
                               TP_ORIG_PAR_POWER,
                               kCascStreamAPI,
-                              kWindowAPI>::fft_r2comb_main(input_stream_cacc64* __restrict inStream0,
-                                                           input_stream<TT_DATA>* __restrict inStream1,
-                                                           output_buffer<TT_DATA>& __restrict outWindow0) {
+                              kWindowAPI,
+                              TP_RND,
+                              TP_SAT>::fft_r2comb_main(input_stream_cacc64* __restrict inStream0,
+                                                       input_stream<TT_DATA>* __restrict inStream1,
+                                                       output_buffer<TT_DATA>& __restrict outWindow0) {
     TT_DATA* outPtr = outWindow0.data();
-    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
-    set_sat();            // do saturate.
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     // TP_POINT_SIZE and PARALLEL_POWER go down by a power of 2 at each level of recursive hierarchy
     readCascStreamIn<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(inStream0, inStream1, inBuff);
@@ -575,7 +611,9 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_PARALLEL_POWER,
           unsigned int TP_INDEX,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 NOINLINE_DECL void fft_r2comb<TT_DATA,
                               TT_TWIDDLE,
                               TP_POINT_SIZE,
@@ -587,12 +625,14 @@ NOINLINE_DECL void fft_r2comb<TT_DATA,
                               TP_INDEX,
                               TP_ORIG_PAR_POWER,
                               kStreamCascAPI,
-                              kWindowAPI>::fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
-                                                           input_stream_cacc64* __restrict inStream1,
-                                                           output_buffer<TT_DATA>& __restrict outWindow0) {
+                              kWindowAPI,
+                              TP_RND,
+                              TP_SAT>::fft_r2comb_main(input_stream<TT_DATA>* __restrict inStream0,
+                                                       input_stream_cacc64* __restrict inStream1,
+                                                       output_buffer<TT_DATA>& __restrict outWindow0) {
     TT_DATA* outPtr = outWindow0.data();
-    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
-    set_sat();            // do saturate.
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     // TP_POINT_SIZE and PARALLEL_POWER go down by a power of 2 at each level of recursive hierarchy
     readStreamCascIn<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(inStream0, inStream1, inBuff);
@@ -610,7 +650,9 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_PARALLEL_POWER,
           unsigned int TP_INDEX,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 NOINLINE_DECL void fft_r2comb<TT_DATA,
                               TT_TWIDDLE,
                               TP_POINT_SIZE,
@@ -622,12 +664,14 @@ NOINLINE_DECL void fft_r2comb<TT_DATA,
                               TP_INDEX,
                               TP_ORIG_PAR_POWER,
                               kWindowAPI,
-                              kWindowAPI>::fft_r2comb_main(input_buffer<TT_DATA>& __restrict inWindow0,
-                                                           output_buffer<TT_DATA>& __restrict outWindow0) {
+                              kWindowAPI,
+                              TP_RND,
+                              TP_SAT>::fft_r2comb_main(input_buffer<TT_DATA>& __restrict inWindow0,
+                                                       output_buffer<TT_DATA>& __restrict outWindow0) {
     TT_DATA* inPtr = inWindow0.data();
     TT_DATA* outPtr = outWindow0.data();
-    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
-    set_sat();            // do saturate.
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     this->calcR2Comb(inPtr, outPtr);
 };

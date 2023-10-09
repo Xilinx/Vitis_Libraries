@@ -50,8 +50,8 @@ template <typename TT_DATA,
           unsigned int TP_NUM_OUTPUTS = 1,
           unsigned int TP_DUAL_IP = 0,
           unsigned int TP_API = 0,
-          unsigned int TP_SSR = 1 // just ignored in reference model
-          >
+          unsigned int TP_SSR = 1, // just ignored in reference model
+          unsigned int TP_SAT = 1>
 class fir_sr_asym_ref_graph : public graph {
    private:
     static_assert(TP_SSR == 1, "ERROR: Reference Model only deals with SSR = 1");
@@ -86,7 +86,8 @@ class fir_sr_asym_ref_graph : public graph {
                                              TP_USE_COEFF_RELOAD,
                                              TP_NUM_OUTPUTS,
                                              TP_DUAL_IP,
-                                             TP_API>;
+                                             TP_API,
+                                             TP_SAT>;
 
     ssr_port_array<input> in;
     ssr_port_array<output> out;

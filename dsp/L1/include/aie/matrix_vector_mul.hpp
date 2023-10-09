@@ -39,7 +39,7 @@ included in aie graph level compilation.
 #include <adf.h>
 #include <vector>
 
-// #include "matrix_vector_mul_traits.hpp"
+#include "matrix_vector_mul_traits.hpp"
 #include "fir_utils.hpp"
 #include "aie_api/aie.hpp"
 #ifndef _DSPLIB_MATRIX_VECTOR_MUL_HPP_DEBUG_
@@ -49,6 +49,7 @@ included in aie graph level compilation.
 namespace xf {
 namespace dsp {
 namespace aie {
+namespace blas {
 namespace matrix_vector_mul {
 
 struct no_port {};
@@ -265,13 +266,14 @@ struct T_outputIF<CASC_OUT_TRUE, T_A, T_B> {
 
 //-----------------------------------------------------------------------------------------------------
 // Base class
-// TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_SHIFT, TP_RND, TP_NUM_FRAMES, TP_CASC_LEN
+// TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_SHIFT, TP_RND, TP_NUM_FRAMES, TP_CASC_LEN, TP_SAT
 template <typename TT_DATA_A,
           typename TT_DATA_B,
           unsigned int TP_DIM_A,
           unsigned int TP_DIM_B,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
+          unsigned int TP_SAT,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_CASC_LEN,
           unsigned int TP_KERNEL_POSITION,
@@ -281,11 +283,45 @@ class kernelMatVecMulClass {
    private:
     // Parameter value defensive and legality checks
     // TODO - Add static asserts for matrix_vector_mul
+    static_assert(TP_RND >= ROUND_MIN && TP_RND <= ROUND_MAX, "ERROR: TP_RND is out of the supported range.");
+    static_assert(TP_SAT >= SAT_MODE_MIN && TP_SAT <= SAT_MODE_MAX, "ERROR: TP_SAT is out of supported range");
+    static_assert(TP_SAT != 2, "ERROR: TT_DATA_A is not currently supported");
+    static_assert(TP_SHIFT >= SHIFT_MIN && TP_SHIFT <= SHIFT_MAX, "ERROR: SHIFT is out of the supported range.");
+    // static_assert(TP_DIM_A_LEADING == 1, "ERROR: Matrix-vector multiplication currently only supports matrix data
+    // stored in a column major format. Row major matrices must be transposed to column major");
+    static_assert((TP_DIM_A % (256 / 8 / sizeof(TT_DATA_A))) == 0,
+                  "ERROR: TP_DIM_A must be a multiple of (256 / 8 / sizeof(TT_DATA_A). The input matrix data can be "
+                  "zero-padded as required");
+    static_assert((TP_DIM_B % (TP_CASC_LEN * 256 / 8 / sizeof(TT_DATA_B))) == 0,
+                  "ERROR: TP_DIM_B must be a multiple of (256 / 8 / sizeof(TT_DATA_B) and TP_CASC_LEN. The input "
+                  "vector data can be zero-padded as required ");
+    static_assert(!(std::is_same<TT_DATA_A, cfloat>::value || std::is_same<TT_DATA_A, float>::value) || (TP_SHIFT == 0),
+                  "ERROR: TP_SHIFT cannot be performed for TT_DATA=cfloat, so must be set to 0"); // only necessary to
+                                                                                                  // check TT_DATA_A as
+                                                                                                  // TT_DATA_B will also
+                                                                                                  // be float or integer
+                                                                                                  // to match TT_DATA_A.
+    // Currently unsupported data combinations
+    static_assert(!(std::is_same<TT_DATA_A, cint32>::value && std::is_same<TT_DATA_B, int16>::value),
+                  "Matrix-vector mutliplcation of a cint32 matrix (TT_DATA_A=cint32) and an int16 vector "
+                  "(TT_DATA_B=int16) is currently unsupported");
+    static_assert(!(std::is_same<TT_DATA_A, int16>::value && std::is_same<TT_DATA_B, cint32>::value),
+                  "Matrix-vector mutliplcation of an int16 matrix (TT_DATA_A=int16) and a cint32 vector "
+                  "(TT_DATA_B=cint32) is currently unsupported");
+    static_assert(!(std::is_same<TT_DATA_A, int32>::value && std::is_same<TT_DATA_B, cint16>::value),
+                  "Matrix-vector mutliplcation of an int32 matrix (TT_DATA_A=int32) and a cint16 vector "
+                  "(TT_DATA_B=cint16) is currently unsupported");
 
     using TT_OUT = outType_t<TT_DATA_A, TT_DATA_B>;
-    static constexpr int kSamplesDataA = 256 / 8 / sizeof(TT_DATA_A);
-    static constexpr int kSamplesDataB = 256 / 8 / sizeof(TT_DATA_B);
-    static constexpr int kSamplesDataOut = 256 / 8 / sizeof(TT_OUT);
+    static constexpr int kSamplesVecA = 256 / 8 / sizeof(TT_DATA_A);
+    static constexpr int kSamplesVecB = 256 / 8 / sizeof(TT_DATA_B);
+    static constexpr int kSamplesVecOut = 256 / 8 / sizeof(TT_OUT);
+
+    static constexpr int loadsPerCol = TP_DIM_A / kSamplesVecA;
+    static constexpr int loadsPerMatrix = loadsPerCol * (TP_DIM_B / TP_CASC_LEN);
+    static constexpr int loadsPerVectorB = (TP_DIM_B / TP_CASC_LEN) / kSamplesVecB;
+
+    static constexpr int doubleAccPerCol = (kSamplesVecA / kSamplesVecOut == 2);
     static constexpr int shift = TP_SHIFT;
 
    public:
@@ -307,6 +343,7 @@ template <typename TT_DATA_A,
           unsigned int TP_DIM_B,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
+          unsigned int TP_SAT,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_CASC_LEN,
           unsigned int TP_KERNEL_POSITION,
@@ -320,8 +357,10 @@ class matrix_vector_mul {
                          TP_DIM_B,
                          TP_SHIFT,
                          TP_RND,
+                         TP_SAT,
                          TP_NUM_FRAMES,
                          TP_CASC_LEN,
+                         TP_KERNEL_POSITION,
                          TP_CASC_IN,
                          TP_CASC_OUT>
         m_mat_vec_mulKernel;
@@ -329,7 +368,6 @@ class matrix_vector_mul {
 
    public:
     matrix_vector_mul() {}
-
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(matrix_vector_mul::matVecMulMain); }
     // DFT
@@ -337,6 +375,156 @@ class matrix_vector_mul {
                        input_buffer<TT_DATA_B>& __restrict inWindowB,
                        output_buffer<TT_OUT>& __restrict outWindow);
 };
+//-----------------------------------------------------------------------------------------------------
+// Partially specialized classes for cascaded interafce - FIRST kernel in cascade
+
+template <typename TT_DATA_A,
+          typename TT_DATA_B,
+          unsigned int TP_DIM_A,
+          unsigned int TP_DIM_B,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_NUM_FRAMES,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_KERNEL_POSITION>
+class matrix_vector_mul<TT_DATA_A,
+                        TT_DATA_B,
+                        TP_DIM_A,
+                        TP_DIM_B,
+                        TP_SHIFT,
+                        TP_RND,
+                        TP_SAT,
+                        TP_NUM_FRAMES,
+                        TP_CASC_LEN,
+                        TP_KERNEL_POSITION,
+                        CASC_IN_FALSE,
+                        CASC_OUT_TRUE> {
+   private:
+    kernelMatVecMulClass<TT_DATA_A,
+                         TT_DATA_B,
+                         TP_DIM_A,
+                         TP_DIM_B,
+                         TP_SHIFT,
+                         TP_RND,
+                         TP_SAT,
+                         TP_NUM_FRAMES,
+                         TP_CASC_LEN,
+                         TP_KERNEL_POSITION,
+                         CASC_IN_FALSE,
+                         CASC_OUT_TRUE>
+        m_mat_vec_mulKernel;
+    using TT_OUT = outType_t<TT_DATA_A, TT_DATA_B>;
+
+   public:
+    matrix_vector_mul() {}
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(matrix_vector_mul::matVecMulMain); }
+    void matVecMulMain(input_buffer<TT_DATA_A>& __restrict inWindowA,
+                       input_buffer<TT_DATA_B>& __restrict inWindowB,
+                       output_stream<accType_t<TT_DATA_A, TT_DATA_B> >* outCascade);
+};
+//-----------------------------------------------------------------------------------------------------
+// Partially specialized classes for cascaded interafce - MIDDLE kernel in cascade
+
+template <typename TT_DATA_A,
+          typename TT_DATA_B,
+          unsigned int TP_DIM_A,
+          unsigned int TP_DIM_B,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_NUM_FRAMES,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_KERNEL_POSITION>
+class matrix_vector_mul<TT_DATA_A,
+                        TT_DATA_B,
+                        TP_DIM_A,
+                        TP_DIM_B,
+                        TP_SHIFT,
+                        TP_RND,
+                        TP_SAT,
+                        TP_NUM_FRAMES,
+                        TP_CASC_LEN,
+                        TP_KERNEL_POSITION,
+                        CASC_IN_TRUE,
+                        CASC_OUT_TRUE> {
+   private:
+    kernelMatVecMulClass<TT_DATA_A,
+                         TT_DATA_B,
+                         TP_DIM_A,
+                         TP_DIM_B,
+                         TP_SHIFT,
+                         TP_RND,
+                         TP_SAT,
+                         TP_NUM_FRAMES,
+                         TP_CASC_LEN,
+                         TP_KERNEL_POSITION,
+                         CASC_IN_TRUE,
+                         CASC_OUT_TRUE>
+        m_mat_vec_mulKernel;
+    using TT_OUT = outType_t<TT_DATA_A, TT_DATA_B>;
+
+   public:
+    matrix_vector_mul() {}
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(matrix_vector_mul::matVecMulMain); }
+    void matVecMulMain(input_buffer<TT_DATA_A>& __restrict inWindowA,
+                       input_buffer<TT_DATA_B>& __restrict inWindowB,
+                       input_stream<accType_t<TT_DATA_A, TT_DATA_B> >* inCascade,
+                       output_stream<accType_t<TT_DATA_A, TT_DATA_B> >* outCascade);
+};
+//-----------------------------------------------------------------------------------------------------
+// Partially specialized classes for cascaded interafce - MIDDLE kernel in cascade
+
+template <typename TT_DATA_A,
+          typename TT_DATA_B,
+          unsigned int TP_DIM_A,
+          unsigned int TP_DIM_B,
+          unsigned int TP_SHIFT,
+          unsigned int TP_RND,
+          unsigned int TP_SAT,
+          unsigned int TP_NUM_FRAMES,
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_KERNEL_POSITION>
+class matrix_vector_mul<TT_DATA_A,
+                        TT_DATA_B,
+                        TP_DIM_A,
+                        TP_DIM_B,
+                        TP_SHIFT,
+                        TP_RND,
+                        TP_SAT,
+                        TP_NUM_FRAMES,
+                        TP_CASC_LEN,
+                        TP_KERNEL_POSITION,
+                        CASC_IN_TRUE,
+                        CASC_OUT_FALSE> {
+   private:
+    kernelMatVecMulClass<TT_DATA_A,
+                         TT_DATA_B,
+                         TP_DIM_A,
+                         TP_DIM_B,
+                         TP_SHIFT,
+                         TP_RND,
+                         TP_SAT,
+                         TP_NUM_FRAMES,
+                         TP_CASC_LEN,
+                         TP_KERNEL_POSITION,
+                         CASC_IN_TRUE,
+                         CASC_OUT_FALSE>
+        m_mat_vec_mulKernel;
+    using TT_OUT = outType_t<TT_DATA_A, TT_DATA_B>;
+
+   public:
+    matrix_vector_mul() {}
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(matrix_vector_mul::matVecMulMain); }
+    void matVecMulMain(input_buffer<TT_DATA_A>& __restrict inWindowA,
+                       input_buffer<TT_DATA_B>& __restrict inWindowB,
+                       input_stream<accType_t<TT_DATA_A, TT_DATA_B> >* inCascade,
+                       output_buffer<TT_OUT>& __restrict outWindow);
+};
+}
 }
 }
 }

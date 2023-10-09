@@ -144,6 +144,20 @@
             }
         },
         {
+            "name": "TP_RND",
+            "description": "The rounding to be applied during the shift down stage of processing.",
+            "type": "uint"
+        },
+        {
+            "name": "TP_SAT",
+            "description": "Saturation mode.",
+            "type": "uint",
+            "validator": {
+                "file": "fft_window.py",
+                "function": "validate_TP_SAT" 
+            }
+        },
+        {
             "name": "AIE_VARIANT",
             "type": "uint",
             "description": "specifies the device type"
@@ -170,7 +184,5 @@
     "generator": {
         "file": "fft_window.py",
         "function": "generate_graph"
-    },
-    "target_domain": "AIE",
-    "visible": true
+    }
 }

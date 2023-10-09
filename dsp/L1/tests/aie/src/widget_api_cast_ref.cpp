@@ -669,10 +669,11 @@ void widget_api_cast_ref<TT_DATA, kCascStreamAPI, kWindowAPI, 2, TP_WINDOW_VSIZE
     constexpr unsigned int Lsize = TP_WINDOW_VSIZE * kSampleSize / (kWriteSize);
     constexpr unsigned int kCascadeWidth = 4; // samples.
 
-    using accVect_t = ::aie::detail::accum< ::aie::detail::AccumClass::CInt,
-                                            // fnAccClass<TT_DATA>(), //int, cint, FP or CFP
-                                            64,             // acc sample width
-                                            kCascadeWidth>; // both cint16 and cint32 use 4 * cacc64kVectSize>;
+    using accVect_t = ::aie::accum<cacc64, kCascadeWidth>;
+    //  using accVect_t   = ::aie::detail::accum<::aie::detail::AccumClass::CInt,
+    //                                         //fnAccClass<TT_DATA>(), //int, cint, FP or CFP
+    //                                         64, //acc sample width
+    //                                         kCascadeWidth>; //both cint16 and cint32 use 4 * cacc64kVectSize>;
     using dataVect_t = ::aie::vector<TT_DATA, kCascadeWidth>;
     accVect_t cascAcc;
     dataVect_t cascData;
@@ -728,10 +729,11 @@ void widget_api_cast_ref<TT_DATA, kStreamCascAPI, kWindowAPI, 2, TP_WINDOW_VSIZE
     constexpr unsigned int Lsize = TP_WINDOW_VSIZE * kSampleSize / (kWriteSize);
     constexpr unsigned int kCascadeWidth = 4; // samples.
 
-    using accVect_t = ::aie::detail::accum< ::aie::detail::AccumClass::CInt,
-                                            // fnAccClass<TT_DATA>(), //int, cint, FP or CFP
-                                            64,             // acc sample width
-                                            kCascadeWidth>; // both cint16 and cint32 use 4 * cacc64kVectSize>;
+    using accVect_t = ::aie::accum<cacc64, kCascadeWidth>;
+    //  using accVect_t   = ::aie::detail::accum<::aie::detail::AccumClass::CInt,
+    //                                         //fnAccClass<TT_DATA>(), //int, cint, FP or CFP
+    //                                         64, //acc sample width
+    //                                         kCascadeWidth>; //both cint16 and cint32 use 4 * cacc64kVectSize>;
     using dataVect_t = ::aie::vector<TT_DATA, kCascadeWidth>;
     accVect_t cascAcc;
     dataVect_t cascData;
@@ -780,10 +782,11 @@ void widget_api_cast_ref<TT_DATA, kWindowAPI, kCascStreamAPI, 1, TP_WINDOW_VSIZE
                  output_stream<TT_DATA>* outStream1) {
     constexpr unsigned int kCascadeWidth = 4;                        // samples.
     constexpr unsigned int kStreamWidth = 128 / 8 / sizeof(TT_DATA); // samples.
-    using accVect_t = ::aie::detail::accum< ::aie::detail::AccumClass::CInt,
-                                            // fnAccClass<TT_DATA>(), //int, cint, FP or CFP
-                                            64,             // acc sample width
-                                            kCascadeWidth>; // both cint16 and cint32 use 4 * cacc64kVectSize>;
+    using accVect_t = ::aie::accum<cacc64, kCascadeWidth>;
+    //  using accVect_t   = ::aie::detail::accum<::aie::detail::AccumClass::CInt,
+    //                                         //fnAccClass<TT_DATA>(), //int, cint, FP or CFP
+    //                                         64, //acc sample width
+    //                                         kCascadeWidth>; //both cint16 and cint32 use 4 * cacc64kVectSize>;
     using dataVect_t = ::aie::vector<TT_DATA, kCascadeWidth>;
     using streamVect_t = ::aie::vector<TT_DATA, kStreamWidth>;
 
@@ -849,10 +852,11 @@ void widget_api_cast_ref<TT_DATA, kWindowAPI, kStreamCascAPI, 1, TP_WINDOW_VSIZE
                  output_stream<cacc64>* outStream1) {
     constexpr unsigned int kCascadeWidth = 4;                        // samples.
     constexpr unsigned int kStreamWidth = 128 / 8 / sizeof(TT_DATA); // samples.
-    using accVect_t = ::aie::detail::accum< ::aie::detail::AccumClass::CInt,
-                                            // fnAccClass<TT_DATA>(), //int, cint, FP or CFP
-                                            64,             // acc sample width
-                                            kCascadeWidth>; // both cint16 and cint32 use 4 * cacc64kVectSize>;
+    using accVect_t = ::aie::accum<cacc64, kCascadeWidth>;
+    //  using accVect_t   = ::aie::detail::accum<::aie::detail::AccumClass::CInt,
+    //                                         //fnAccClass<TT_DATA>(), //int, cint, FP or CFP
+    //                                         64, //acc sample width
+    //                                         kCascadeWidth>; //both cint16 and cint32 use 4 * cacc64kVectSize>;
     using dataVect_t = ::aie::vector<TT_DATA, kCascadeWidth>;
     using streamVect_t = ::aie::vector<TT_DATA, kStreamWidth>;
 

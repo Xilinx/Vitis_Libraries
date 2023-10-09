@@ -54,7 +54,7 @@
                 "LIB_DIR/L2/include/aie",
                 "./"
             ],
-            "clflags":["-Xchess=llvm.xargs=-std=c++2a "]
+            "clflags":["--aie.Xchess=llvm.xargs=-std=c++2a "]
         }
     },
     "aiecontainers": [

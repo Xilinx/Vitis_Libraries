@@ -1,4 +1,6 @@
 from fir_sr_sym import *
+from aie_common import *
+from vmc_fir_utils import *
 
 #### VMC validators ####
 def vmc_validate_coef_type(args):
@@ -13,7 +15,7 @@ def vmc_validate_input_window_size(args):
 	coef_type = args["coef_type"]
 	coeff = args["coeff"]
 	api = 0
-	ssr = args["ssr"]
+	ssr = 1
 	fir_length = args["fir_length"]
 	return fn_validate_input_window_size(data_type, coef_type, fir_length, input_window_size, api, ssr)
 
@@ -23,10 +25,9 @@ def vmc_validate_coeff(args):
 	coeff = args["coeff"]
 	data_type = args["data_type"]
 	casc_length = args["casc_length"]
-	ssr = args["ssr"]
+	ssr = 1
 	api = 0
 	fir_length = args["fir_length"]
-	#TODO: Talk to DSP Lib team about separating casc length from fir_length API
 	return fn_validate_fir_len(data_type, coef_type, fir_length, casc_length, ssr, api, use_coeff_reload)
 
 def vmc_validate_shift_val(args):
@@ -35,8 +36,8 @@ def vmc_validate_shift_val(args):
 	return fn_validate_shift(data_type, shift_val)
 
 def vmc_validate_ssr(args):
-    ssr = args["ssr"]
-    api = 1
+    ssr = 1
+    api = 0
     return fn_validate_ssr(api, ssr);
 
 def vmc_validate_casc_len(args):
@@ -44,10 +45,14 @@ def vmc_validate_casc_len(args):
 	return fn_validate_casc_len(casc_length);
 
 def vmc_validate_out_ports(args):
-	num_outputs = args["num_outputs"]
-	ssr = args["ssr"]
+	num_outputs = fn_get_num_outputs(args)
+	ssr = 1
 	dual_ip = args["dual_ip"]
 	return fn_validate_num_outputs(ssr, dual_ip, num_outputs)
+
+def validate_sat_mode(args):
+    sat_mode = args["sat_mode"]
+    return fn_validate_satMode(sat_mode);
 
 #### VMC graph generator ####
 def vmc_generate_graph(name, args):
@@ -60,10 +65,12 @@ def vmc_generate_graph(name, args):
     tmpargs["TP_INPUT_WINDOW_VSIZE"] = args["input_window_size"]
     tmpargs["TP_CASC_LEN"] = args["casc_length"]
     tmpargs["TP_USE_COEF_RELOAD"] = 1 if args["use_coeff_reload"] else 0
-    tmpargs["TP_NUM_OUTPUTS"] = 2 if args["num_outputs"] else 1
+    tmpargs["TP_NUM_OUTPUTS"] = fn_get_num_outputs(args)
     tmpargs["TP_DUAL_IP"] = 1 if args["dual_ip"] else 0
     tmpargs["TP_API"] = 0
-    tmpargs["TP_SSR"] = args["ssr"]
+    tmpargs["TP_SSR"] = 1
     tmpargs["coeff"] = args["coeff"]
+    tmpargs["TP_SAT"] = args["sat_mode"]
    
     return generate_graph(name, tmpargs)
+

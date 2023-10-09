@@ -49,19 +49,16 @@ namespace testcase {
 class test_graph : public graph {
    private:
    public:
-#ifdef USING_UUT
 #ifdef USING_PL_MOVER
     port<input> inA[1];
     port<input> inB[1];
+//    port<output> out;
 #else
-    port<input> inA[P_CASC_LEN];
-    port<input> inB[P_CASC_LEN];
+    std::array<input_plio, P_CASC_LEN> inA;
+    std::array<input_plio, P_CASC_LEN> inB;
+//    std::array<output_plio, 1> out;
 #endif
-#else
-    port<input> inA;
-    port<input> inB;
-#endif
-    port<output> out;
+    std::array<output_plio, 1> out;
 
     // Constructor
     test_graph() {
@@ -77,6 +74,8 @@ class test_graph : public graph {
         printf("Output samples  = %d \n", P_OUTPUT_SAMPLES);
         printf("Shift           = %d \n", P_SHIFT);
         printf("P_ROUND_MODE      = %d \n", P_ROUND_MODE);
+        printf("P_SAT_MODE      = %d \n", P_SAT_MODE);
+
         printf("Data type       = ");
         printf(QUOTE(T_DATA_A) QUOTE(T_DATA_B));
         printf("\n");
@@ -86,28 +85,48 @@ class test_graph : public graph {
         dsplib::blas::matrix_mult::UUT_GRAPH<T_DATA_A, T_DATA_B, P_DIM_A, P_DIM_AB, P_DIM_B, P_SHIFT, P_ROUND_MODE,
                                              P_DIM_A_LEADING, P_DIM_B_LEADING, P_DIM_OUT_LEADING, P_ADD_TILING_A,
                                              P_ADD_TILING_B, P_ADD_DETILING_OUT, P_INPUT_WINDOW_VSIZE_A,
-                                             P_INPUT_WINDOW_VSIZE_B, P_CASC_LEN>
+                                             P_INPUT_WINDOW_VSIZE_B, P_CASC_LEN, P_SAT_MODE>
             mmultGraph;
 
 // Make connections
 // Size of window in Bytes.
 // broadcast
-#ifdef USING_UUT
+
 #ifdef USING_PL_MOVER
         connect<>(inA[0], mmultGraph.inA[0]);
         connect<>(inB[0], mmultGraph.inB[0]);
+        connect<>(mmultGraph.out, out);
 #else
+#ifdef USING_UUT
         for (int i = 0; i < P_CASC_LEN; i++) {
-            connect<>(inA[i], mmultGraph.inA[i]);
-            connect<>(inB[i], mmultGraph.inB[i]);
+            std::string filenameA = QUOTE(INPUT_FILE_A);
+            std::string filenameB = QUOTE(INPUT_FILE_B);
+            filenameA.insert(filenameA.length() - 4, ("_" + std::to_string(i)));
+            filenameB.insert(filenameB.length() - 4, ("_" + std::to_string(i)));
+
+            inA[i] = input_plio::create("PLIO_in_A" + std::to_string(i), adf::plio_32_bits, filenameA);
+            inB[i] = input_plio::create("PLIO_in_B" + std::to_string(i), adf::plio_32_bits, filenameB);
+
+            connect<>(inA[i].out[0], mmultGraph.inA[i]);
+            connect<>(inB[i].out[0], mmultGraph.inB[i]);
         }
-#endif
-#else
-        connect<>(inA, mmultGraph.inA);
-        connect<>(inB, mmultGraph.inB);
+#else // using ref
+        std::string filenameA = QUOTE(INPUT_FILE_A);
+        std::string filenameB = QUOTE(INPUT_FILE_B);
+        // filenameA.insert(filenameA.length()-4, ("_0"));
+        // filenameB.insert(filenameB.length()-4, ("_0"));
+        // Make connections
+        inA[0] = input_plio::create("PLIO_in_A" + std::to_string(0), adf::plio_32_bits, filenameA);
+        inB[0] = input_plio::create("PLIO_in_B" + std::to_string(0), adf::plio_32_bits, filenameB);
+        connect<>(inA[0].out[0], mmultGraph.inA[0]);
+        connect<>(inB[0].out[0], mmultGraph.inB[0]);
 #endif
 
-        connect<>(mmultGraph.out, out);
+        std::string filenameOut = QUOTE(OUTPUT_FILE);
+        // filenameOut.insert(filenameOut.length()-4, ("_0_0"));
+        out[0] = output_plio::create("PLIO_out_" + std::to_string(0), adf::plio_32_bits, filenameOut);
+        connect<>(mmultGraph.out[0], out[0].in[0]);
+#endif
 
         printf("========================\n");
     };

@@ -74,7 +74,8 @@ class test_graph : public graph {
         printf("P_API              = %d \n", P_API);
         printf("INPUT_WINDOW_VSIZE = %d \n", INPUT_WINDOW_VSIZE);
         printf("P_SSR              = %d \n", P_SSR);
-
+        printf("ROUND_MODE         = %d \n", ROUND_MODE);
+        printf("SAT_MODE           = %d \n", SAT_MODE);
         printf("Mixer Mode      = %d \n", MIXER_MODE);
         if (MIXER_MODE == 0) printf(" ( DDS Only Mode ) \n");
         if (MIXER_MODE == 1) printf(" ( DDS Plus Mixer (1 data input) Mode ) \n");
@@ -84,8 +85,9 @@ class test_graph : public graph {
         printf("initialPhaseOffset is %u or 0x%08X \n", initialPhaseOffset, initialPhaseOffset);
 
         namespace dsplib = xf::dsp::aie;
-        dsplib::mixer::dds_mixer::UUT_GRAPH<DATA_TYPE, MIXER_MODE, SFDR, P_API, INPUT_WINDOW_VSIZE, P_SSR> ddsGraph(
-            phaseInc, initialPhaseOffset);
+        dsplib::mixer::dds_mixer::UUT_GRAPH<DATA_TYPE, MIXER_MODE, SFDR, P_API, INPUT_WINDOW_VSIZE, P_SSR, ROUND_MODE,
+                                            SAT_MODE>
+            ddsGraph(phaseInc, initialPhaseOffset);
 
         for (unsigned int i = 0; i < P_SSR; ++i) {
             std::string filenameOut = QUOTE(OUTPUT_FILE);

@@ -81,7 +81,7 @@ class mixed_radix_fft_ref_graph : public graph {
         // Create MIXED_RADIX_FFT class
         m_mixed_radix_fftKernel =
             kernel::create_object<dft_ref<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT,
-                                          TP_WINDOW_VSIZE / TP_POINT_SIZE /*NUM_FRAMES*/> >();
+                                          TP_WINDOW_VSIZE / TP_POINT_SIZE /*NUM_FRAMES*/, TP_RND, TP_SAT> >();
 
         // Make connections
         // Size of window in Bytes. Dynamic point size adds a 256 bit (32 byte) header. This is larger than required,

@@ -69,7 +69,8 @@ class test_graph : public graph {
                                                  USE_COEFF_RELOAD,
                                                  NUM_OUTPUTS,
                                                  PORT_API,
-                                                 P_SSR>;
+                                                 P_SSR,
+                                                 SAT_MODE>;
 
 #if (USE_COEFF_RELOAD == 1)
     port_conditional_array<input, USE_COEFF_RELOAD == 1, P_SSR> coeff;

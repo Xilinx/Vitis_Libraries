@@ -78,12 +78,38 @@ using namespace adf;
  * @tparam TP_SSR specifies the super sample rate, ie how much data input/output in parallel for a single channel.  \n
  *         There will be a TP_SSR number of kernels, with a TP_SSR number of each port used on the interface. \n
  *         A default value of 1 corresponds to the typical single kernel case.
+ * @tparam TP_RND describes the selection of rounding to be applied during the
+ *         shift down stage of processing. Although, TP_RND accepts unsigned integer values
+ *         descriptive macros are recommended where
+ *         0: rnd_floor      = Truncate LSB, always round down (towards negative infinity).
+ *         1: rnd_ceil       = Always round up (towards positive infinity).
+ *         2: rnd_sym_floor  = Truncate LSB, always round towards 0.
+ *         3: rnd_sym_ceil   = Always round up towards infinity.
+ *         4: rnd_pos_inf    = Round halfway towards positive infinity.
+ *         5: rnd_neg_inf    = Round halfway towards negative infinity.
+ *         6: rnd_sym_inf    = Round halfway towards infinity (away from zero).
+ *         7: rnd_sym_zero   = Round halfway towards zero (away from infinity).
+ *         8: rnd_conv_even  = Round halfway towards nearest even number.
+ *         9: rnd_conv_odd   = Round halfway towards nearest odd number. \n
+ *         No rounding is performed on ceil or floor mode variants. \n
+ *         Other modes round to the nearest integer. They differ only in how
+ *         they round for values of 0.5. \n
+ *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
+ * @tparam TP_SAT describes the selection of saturation to be applied during the
+ *         shift down stage of processing. TP_SAT accepts unsigned integer values, where:
+ *         0: none           = No saturation is performed and the value is truncated on the MSB side.
+ *         1: saturate       = Default. Saturation rounds an n-bit signed value in the range [- ( 2^(n-1) ) : +2^(n-1) -
+ *1 ].
+ *         3: symmetric      = Controls symmetric saturation. Symmetric saturation rounds an n-bit signed value in the
+ *range [- ( 2^(n-1) -1 ) : +2^(n-1) - 1 ]. \n
  **/
 template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_MIXER_MODE,
           unsigned int TP_API = IO_API::WINDOW,
-          unsigned int TP_SSR = 1>
+          unsigned int TP_SSR = 1,
+          unsigned int TP_RND = 4,
+          unsigned int TP_SAT = 1>
 class dds_mixer_graph : public graph {
    private:
    public:
@@ -119,7 +145,9 @@ class dds_mixer_graph : public graph {
     kernel* getKernels() { return m_ddsKernel; };
 
     static constexpr unsigned int KINPUT_WINDOW_VSIZE = TP_INPUT_WINDOW_VSIZE / TP_SSR;
-    using kernelClass = dds_mixer<TT_DATA, KINPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_INBUILT_SINCOS>;
+    static constexpr unsigned int TP_NUM_LUTS = 1;
+    using kernelClass =
+        dds_mixer<TT_DATA, KINPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_INBUILT_SINCOS, TP_NUM_LUTS, TP_RND, TP_SAT>;
 
     /**
      * @brief This is the constructor function for the dds_mixer graph.

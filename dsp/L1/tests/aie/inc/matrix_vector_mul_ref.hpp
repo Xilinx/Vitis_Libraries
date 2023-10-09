@@ -33,6 +33,7 @@ using namespace adf;
 namespace xf {
 namespace dsp {
 namespace aie {
+namespace blas {
 namespace matrix_vector_mul {
 
 template <typename T_A, typename T_B>
@@ -130,6 +131,7 @@ template <typename TT_DATA_A,
           unsigned int TP_DIM_B,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
+          unsigned int TP_SAT,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_CASC_LEN>
 class matrix_vector_mul_ref {
@@ -148,6 +150,7 @@ class matrix_vector_mul_ref {
                            input_buffer<TT_DATA_B>& inWindowB,
                            output_buffer<outType_t<TT_DATA_A, TT_DATA_B> >& outWindow);
 };
+}
 }
 }
 }

@@ -428,6 +428,9 @@ void kernelFilterClass<TT_DATA,
                     coe_type CHESS_STORAGE_DEF coe_h = coeff->val;
                     coeff++;
                     coe0.val = coe_h;
+                    if (m_kDFX == kHighDF) {
+                        chess_separator_scheduler();
+                    }
                 }
                 xstart += m_kColumns;
                 xstartUpper += m_kColumns;
@@ -435,9 +438,9 @@ void kernelFilterClass<TT_DATA,
                 acc = macDecAsym<TT_DATA, TT_COEFF, m_kDFX, TP_DECIMATE_FACTOR>(
                     acc, sbuff, xstart, coe0, (op % m_kCoeffRegVsize), m_kDecimateOffsets, xstartUpper);
             }
-            if (m_kDFX == kHighDF) {
-                chess_separator_scheduler();
-            }
+            // if (m_kDFX == kHighDF) {
+            //     chess_separator_scheduler();
+            // }
 
             // Go back by the number of input samples loaded minus  (i.e forward) by the number of samples consumed
             inItr -= (initNumDataLoads * m_kInitLoadVsize + m_kDataLoadVsize * numDataLoads -
@@ -629,9 +632,7 @@ void kernelFilterClass<TT_DATA,
 
                 for (int phase = 0; phase < kParallelPhases; ++phase) {
                     if ((op) % m_kCoeffRegVsize == 0) {
-                        // T_buff_256b<TT_COEFF>*      __restrict coeff   =  ((T_buff_256b<TT_COEFF>
-                        // *)m_internalTaps2[fnCoeffPhase(phase,kParallelPhases)] + (op) / m_kCoeffRegVsize);
-                        T_buff_256b<TT_COEFF>* coeff =
+                        chess_protect_access T_buff_256b<TT_COEFF>* coeff =
                             ((T_buff_256b<TT_COEFF>*)m_internalTaps2[fnCoeffPhase(phase, kParallelPhases)] +
                              (op) / m_kCoeffRegVsize);
                         coe[phase] = *coeff;
@@ -1213,7 +1214,7 @@ void kernelFilterClass<TT_DATA,
             for (int op = m_kColumns; op < kFirLenCeilCols; op += m_kColumns) {
                 for (int phase = 0; phase < kParallelPhases; ++phase) {
                     if ((op) % m_kCoeffRegVsize == 0) {
-                        T_buff_256b<TT_COEFF>* coeff =
+                        chess_protect_access T_buff_256b<TT_COEFF>* coeff =
                             ((T_buff_256b<TT_COEFF>*)m_internalTaps2[fnCoeffPhase(phase, kParallelPhases)] +
                              (op) / m_kCoeffRegVsize);
                         coe[phase] = *coeff;
@@ -1283,7 +1284,7 @@ void kernelFilterClass<TT_DATA,
                 for (int op = m_kColumns; op < kFirLenCeilCols; op += m_kColumns) {
                     for (int phase = 0; phase < kParallelPhases; ++phase) {
                         if ((op) % m_kCoeffRegVsize == 0) {
-                            T_buff_256b<TT_COEFF>* coeff =
+                            chess_protect_access T_buff_256b<TT_COEFF>* coeff =
                                 ((T_buff_256b<TT_COEFF>*)m_internalTaps2[fnCoeffPhase(phase, kParallelPhases)] +
                                  (op) / m_kCoeffRegVsize);
                             coe[phase] = *coeff;

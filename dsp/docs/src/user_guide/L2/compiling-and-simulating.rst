@@ -1,13 +1,13 @@
 ..
    Copyright (C) 2019-2022, Xilinx, Inc.
    Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-
+    
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-
+    
        http://www.apache.org/licenses/LICENSE-2.0
-
+    
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,62 +16,91 @@
 
 .. _COMPILING_AND_SIMULATING:
 
-*******************************************
-Compiling and Simulating Using the Makefile
-*******************************************
+************************
+Compiling and Simulating
+************************
 
-A Makefile is included with each library element. It is located in the `L2/tests/aie/<library_element>` directory. Each Makefile holds default values for each of the library element parameters. These values can be edited as required to configure the library element for your needs. Alternatively, these defaults may be overridden by arguments to the make command as described below.
-
-In addition, example design(s) located in: `L2/examples/<example_design>` contain a Makefile that offers similar functionality.
-Example design(s) are not parametrizable.
-
-Prerequisites:
+**Prerequisites**:
 
 .. code-block::
 
         source <your-Vitis-install-path>/lin64/Vitis/HEAD/settings64.csh
         setenv PLATFORM_REPO_PATHS <your-platform-repo-install-path>
         source <your-XRT-install-path>/xbb/xrt/packages/xrt-2.1.0-centos/opt/xilinx/xrt/setup.csh
-        setenv DSPLIB_ROOT <your-Vitis-libraries-install-path/dsp>
 
 
-Use the following steps to compile and simulate the reference model with the x86sim target, then to compile and simulate the library element graph using the AIE emulation platform. The output of the reference model ( `logs/ref_output.txt` ) is verified against the output of the AIE graphs ( `logs/uut_output.txt` ).
+Library Element Unit Test
+--------------------------
+
+Each library element category comes supplied with a test harness. It is located in the `L2/tests/aie/<library_element>` directory.
+Test harness consists of JSON, C++ files, as well as a Makefile.
+
+JSON description of the test harness, defined in `L2/tests/aie/<library_element>/description.json` has been used to generate Makefile. In addition, `description.json` file defines parameters of of the test harness, e.g. list of supported platforms.
+
+Each Makefile uses a set of values for each of the library element parameters that are stored in in a JSON file, in `L2/tests/aie/<library_element>/multi_params.json`. Set of parameters are combined in a form of a named testcase, with default name being: `test_0_tool_canary_aie`.
+Set of parameters can be edited as required to configure the library element for your needs.
+
+C++ files serve as an example of how to use the library element subgraph in the context of a super-graph. These test harnesses (graphs) can be found in the `L2/tests/aie/<library_element>/test.hpp` and `L2/tests/aie/<library_element>/test.cpp` file.
+
+Although it is recommended that only L2 (graphs) library elements are instantiated directly in user code, the kernels underlying the graphs can be found in the `L1/include/aie/<library_element>.hpp` and the `L1/src/aie/<library_element>.cpp` files.
+
+Test harness run consists of several steps that result in a simulated and validated design. These include:
+- input generation
+- validate configuration with metadata
+- ref model compilation & simulation, in order to produce `golden output`.
+- uut design compilation & simulation
+- output post-processing (e.g. timestamps processing to produce throughput figures).
+  The output of the reference model ( `logs/ref_output.txt` ) is verified against the output of the AIE graphs ( `logs/uut_output.txt` ).
+- status generation
+  On completion of the make, the file `L2/tests/aie/<library_element>/logs/status_<config_details>.txt` will contain the result of compilation, simulation and an indication of whether the reference model and AIE model outputs match.
+
+Compiing using Makefile
+-----------------------
+
+Use the following steps to compile and simulate the reference model with the x86sim target, then to compile and simulate the library element graph as described in the above section.
 
 .. code-block::
 
-        make run
+        make cleanall run PLATFORM=vck190
 
-To overwrite the default parameters, add desired parameters as arguments to the make command, for example:
+.. note:: It is recommended to run a ``cleanall`` stage before compiling design, to ensue no stale objects interfere with the compilation process.
+
+.. note:: PLATFORM information (e.g.: PLATFORM=vck190) is a requirement of a make build process. List of supported platforms can be found in `L2/tests/aie/<library_element>/description.json`.
+
+
+To overwrite the default set of parameter, please edit multi_params.json file and add a dedicated named testcase or edit one of the existing ones, e.g.:
+
+.. code-block::
+    "test_my_design":{
+        "DATA_TYPE": "cint32",
+        "COEFF_TYPE": "int32",
+        (...)
+        }
+
+
+To run a testcase, please specify the testcase name passed to the PARAMS argument, e.g.:
 
 .. code-block::
 
-        make run DATA_TYPE=cint16 SHIFT=16
+        make cleanall run PLATFORM=vck190 PARAMS=test_my_design
 
 For list of all the configurable parameters, see the :ref:`CONFIGURATION_PARAMETERS`.
+
+To perform a x86 compilation/simulation, run:
+
+.. code-block::
+
+    make run TARGET=x86sim.
 
 List of all Makefile targets:
 
 .. code-block::
 
-    make all TARGET=<x86sim/aiesim/> PLATFORM=<FPGA platform>
+    make all TARGET=<aiesim/x86sim/hw_emu/hw> PLATFORM=<FPGA platform>
         Command to generate the design for specified Target and Shell.
 
-
-    make sd_card TARGET=<x86sim/aiesim/> PLATFORM=<FPGA platform>
-        Command to prepare sd_card files.
-
-
-    make run TARGET=<x86sim/aiesim/> PLATFORM=<FPGA platform>
+    make run TARGET=<aiesim/x86sim/hw_emu/hw> PLATFORM=<FPGA platform>
         Command to run application in emulation.
-
-
-    make xclbin TARGET=<x86sim/aiesim/> PLATFORM=<FPGA platform>
-        Command to build xclbin application.
-
-
-    make host
-        Command to build host application.
-
 
     make clean
         Command to remove the generated non-hardware files.
@@ -80,26 +109,21 @@ List of all Makefile targets:
         Command to remove all the generated files.
 
 .. note:: For embedded devices like vck190, env variable SYSROOT, EDGE_COMMON_SW and PERL need to be set first. For example,
-
+        a.If the platform and common-image are downloaded from Xilinx Download Center(Suggested):
+            Run the sdk.sh script from the common-image directory to install sysroot using the command : ./sdk.sh -y -d ./ -p
+            Unzip the rootfs file : gunzip ./rootfs.ext4.gz
+            export SYSROOT=< path-to-platform-sysroot >
+        b.User could also define SYSROOT, K_IMAGE and ROOTFS by themselves:
             .. code-block::
 
                 export SYSROOT=< path-to-platform-sysroot >
-                export EDGE_COMMON_SW=< path-to-rootfs-and-Image-files >
-                export PERL=<path-to-perl-installation-location >
+                export K_IMAGE=< path-to-Image-files >
+                export ROOTFS=< path-to-rootfs >
 
-On completion of the make, the file `L2/tests/aie/<library_element>/logs/status.txt` will contain the result of compilation, simulation and an indication of whether the reference model and AIE model outputs match.
 
-To perform a x86 compilation/simulation, run:
 
-.. code-block::
 
-    make run TARGET=x86sim.
 
-It is also possible to randomly generate coefficient and input data, or to generate specific stimulus patterns like ALL_ONES, IMPULSE, etc. by running:
-
-.. code-block::
-
-      make run STIM_TYPE=4.
 
 Troubleshooting Compilation
 ---------------------------
@@ -108,23 +132,15 @@ The Makefiles supplied with the library allow each library unit to be compiled a
 Stack size error. Search the Makefile provided for STACK_SIZE. This has a suggested formula for the library unit.
 Other errors. Search the Makefile provided for UUT_TARGET_COMPILE_ARGS. For each library element there may be compile arguments used to avoid errors or to improve performance, e.g. specifying memories to be on separate banks to avoid wait states. These arguments will likely change with each release as the compile tool changes with each release.
 
-L2 Library Element Unit Test
-----------------------------
-Each library element category comes supplied with a test harness which is an example of how to use the library element subgraph in the context of a super-graph. These test harnesses (graphs) can be found in the `L2/tests/aie/<library_element>/test.hpp` and `L2/tests/aie/<library_element>/test.cpp` file.
-
-Although it is recommended that only L2 (graphs) library elements are instantiated directly in user code, the kernels underlying the graphs can be found in the `L1/include/aie/<library_element>.hpp` and the `L1/src/aie/<library_element>.cpp` files.
-
-An example of how a library element may be configured by a parent graph is provided in the `L2/examples/fir_129t_sym` folder. The example graph, test.h, in the `L2/examples/fir_129t_sym` folder instantiates the fir_sr_sym graph configured to be a 129-tap filter. This example exposes the ports such that the parent graph can be used to replace an existing 129-tap symmetric filter point solution design.
-
 .. _CONFIGURATION_PARAMETERS:
 
-L2 Library Element Configuration Parameters
--------------------------------------------
+Library Element Configuration Parameters
+----------------------------------------
 
 .. _CONFIGURATION_PARAMETERS_DDS_MIXER:
 
-L2 DDS/Mixer Configuration Parameters
--------------------------------------
+DDS/Mixer Configuration Parameters
+----------------------------------
 
 For the DDS/Mixer library element, the list of configurable parameters and default values is presented below.
 
@@ -189,11 +205,17 @@ For the DDS/Mixer library element, the list of configurable parameters and defau
     |                        |                |                | 8 - sine wave                        |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
+    | SAT_MODE               | Unsigned int   | Saturation     | 0: 'none'                            |
+    |                        |                | mode           |                                      |
+    |                        |                |                | 1: 'saturate'                        |
+    |                        |                |                |                                      |
+    |                        |                |                | 3: 'symmetric saturate'              |
+    +------------------------+----------------+----------------+--------------------------------------+
 
 
 .. _CONFIGURATION_PARAMETERS_FFT:
 
-L2 FFT configuration parameters
+FFT configuration parameters
 -------------------------------
 
 For the FFT/iFFT library element the list of configurable parameters and default values is presented below.
@@ -247,12 +269,6 @@ For the FFT/iFFT library element the list of configurable parameters and default
     |                        |                |                | e.g. 0.0025 for floats and cfloats.  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | GEN_INPUT_DATA         |    bool        |    true        | Generate random input data samples.  |
-    |                        |                |                |                                      |
-    |                        |                |                | When false, use the input file       |
-    |                        |                |                | defined in: INPUT_FILE               |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
     | STIM_TYPE              |    unsigned    |    0           | Supported types:                     |
     |                        |                |                |                                      |
     |                        |                |                | 0 - random                           |
@@ -268,17 +284,18 @@ For the FFT/iFFT library element the list of configurable parameters and default
     |                        |                |                | 8 - sine wave                        |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | INPUT_FILE             |    string      | data/input.txt | Input data samples file.             |
+    | SAT_MODE               | Unsigned int   | Saturation     | 0: 'none'                            |
+    |                        |                | mode           |                                      |
+    |                        |                |                | 1: 'saturate'                        |
     |                        |                |                |                                      |
-    |                        |                |                | Only used when GEN_INPUT_DATA=false. |
-    |                        |                |                |                                      |
+    |                        |                |                | 3: 'symmetric saturate'              |
     +------------------------+----------------+----------------+--------------------------------------+
 
 .. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
 
 .. _CONFIGURATION_PARAMETERS_FFT_WINDOW:
 
-L2 FFT Window configuration parameters
+FFT Window configuration parameters
 --------------------------------------
 
 For the FFT Window library element the list of configurable parameters and default values is presented below.
@@ -291,7 +308,7 @@ For the FFT Window library element the list of configurable parameters and defau
     | DATA_TYPE              |    typename    |    cint16      | Data Type.                           |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | TWIDDLE_TYPE           |    typename    |    cint16      | Twiddle Type.                        |
+    | COEFF_TYPE             |    typename    |    cint16      | Coeff Type.                          |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | POINT_SIZE             |    unsigned    |    1024        | FFT point size.                      |
@@ -333,12 +350,18 @@ For the FFT Window library element the list of configurable parameters and defau
     |                        |                |                | e.g. 0.0025 for floats and cfloats.  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
+    | SAT_MODE               | Unsigned int   | Saturation     | 0: 'none'                            |
+    |                        |                | mode           |                                      |
+    |                        |                |                | 1: 'saturate'                        |
+    |                        |                |                |                                      |
+    |                        |                |                | 3: 'symmetric saturate'              |
+    +------------------------+----------------+----------------+--------------------------------------+
 
 .. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
 
 .. _CONFIGURATION_PARAMETERS_FILTERS:
 
-L2 FIR configuration parameters
+FIR configuration parameters
 -------------------------------
 
 The list below consists of configurable parameters for FIR library elements with their default values.
@@ -406,24 +429,6 @@ The list below consists of configurable parameters for FIR library elements with
     |                        |                |                | e.g. 0.0025 for floats and cfloats.  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | GEN_INPUT_DATA         |    bool        |    true        | Generate input data samples.         |
-    |                        |                |                |                                      |
-    |                        |                |                | When true, generate stimulus data    |
-    |                        |                |                | as defined in: DATA_STIM_TYPE.       |
-    |                        |                |                |                                      |
-    |                        |                |                | When false, use the input file       |
-    |                        |                |                | defined in: INPUT_FILE               |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | GEN_COEFF_DATA         |    bool        |    true        | Generate random coefficients.        |
-    |                        |                |                |                                      |
-    |                        |                |                | When true, generate stimulus data    |
-    |                        |                |                | as defined in: COEFF_STIM_TYPE.      |
-    |                        |                |                |                                      |
-    |                        |                |                | When false, use the coefficient file |
-    |                        |                |                | defined in: COEFF_FILE               |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
     | DATA_STIM_TYPE         |    unsigned    |    0           | Supported types:                     |
     |                        |                |                |                                      |
     |                        |                |                | 0 - random                           |
@@ -454,25 +459,6 @@ The list below consists of configurable parameters for FIR library elements with
     |                        |                |                | 8 - sine wave                        |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | INPUT_FILE             |    string      | data/input.txt | Input data samples file.             |
-    |                        |                |                |                                      |
-    |                        |                |                | Only used when GEN_INPUT_DATA=false. |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | COEFF_FILE             |    string      | data/coeff.txt | Coefficient data file.               |
-    |                        |                |                |                                      |
-    |                        |                |                | Only used when GEN_COEFF_DATA=false. |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | USE_CHAIN              |    unsigned    |    0           | Connect 2 FIRs back-to-back.         |
-    |                        |                |                |                                      |
-    |                        |                |                | 0 - connect single FIR               |
-    |                        |                |                |                                      |
-    |                        |                |                | 1 - connect second FIR back-to-back. |
-    |                        |                |                | In/Out interfaces must be            |
-    |                        |                |                | compatible.                          |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
     | USE_CUSTOM_CONSTRAINT  |    unsigned    |    0           | Overwrite default or non-existent.   |
     |                        |                |                |                                      |
     |                        |                |                | 0 - no action                        |
@@ -483,6 +469,12 @@ The list below consists of configurable parameters for FIR library elements with
     |                        |                |                | see also :ref:`FIR_CONSTRAINTS`      |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
+    | SAT_MODE               | Unsigned int   | Saturation     | 0: 'none'                            |
+    |                        |                | mode           |                                      |
+    |                        |                |                | 1: 'saturate'                        |
+    |                        |                |                |                                      |
+    |                        |                |                | 3: 'symmetric saturate'              |
+    +------------------------+----------------+----------------+--------------------------------------+
 
 .. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
 
@@ -490,7 +482,7 @@ The list below consists of configurable parameters for FIR library elements with
 
 .. _CONFIGURATION_PARAMETERS_GEMM:
 
-L2 Matrix Multiply Configuration Parameters
+Matrix Multiply Configuration Parameters
 -------------------------------------------
 
 For the Matrix Multiply (GeMM) library element the list of configurable parameters and default values is presented below.
@@ -586,13 +578,19 @@ For the Matrix Multiply (GeMM) library element the list of configurable paramete
     |                        |                |                | 8 - sine wave                        |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
+    | P_SAT_MODE             | Unsigned int   | Saturation     | 0: 'none'                            |
+    |                        |                | mode           |                                      |
+    |                        |                |                | 1: 'saturate'                        |
+    |                        |                |                |                                      |
+    |                        |                |                | 3: 'symmetric saturate'              |
+    +------------------------+----------------+----------------+--------------------------------------+
 
 .. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
 
 
 .. _CONFIGURATION_PARAMETERS_WIDGETS:
 
-L2 Widgets Configuration Parameters
+Widgets Configuration Parameters
 -----------------------------------
 
 For the Widgets library elements the list of configurable parameters and default values is presented below.

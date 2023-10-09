@@ -68,6 +68,30 @@ using namespace adf;
  *         function.
  * @tparam TP_DYN_PT_SIZE describes whether to support run-time selectable point size for
  *         the frames of data within the AIE window to be processed.
+ * @tparam TP_RND describes the selection of rounding to be applied during the
+ *         shift down stage of processing. Although, TP_RND accepts unsigned integer values
+ *         descriptive macros are recommended where
+ *         - rnd_floor      = Truncate LSB, always round down (towards negative infinity).
+ *         - rnd_ceil       = Always round up (towards positive infinity).
+ *         - rnd_sym_floor  = Truncate LSB, always round towards 0.
+ *         - rnd_sym_ceil   = Always round up towards infinity.
+ *         - rnd_pos_inf    = Round halfway towards positive infinity.
+ *         - rnd_neg_inf    = Round halfway towards negative infinity.
+ *         - rnd_sym_inf    = Round halfway towards infinity (away from zero).
+ *         - rnd_sym_zero   = Round halfway towards zero (away from infinity).
+ *         - rnd_conv_even  = Round halfway towards nearest even number.
+ *         - rnd_conv_odd   = Round halfway towards nearest odd number. \n
+ *         No rounding is performed on ceil or floor mode variants. \n
+ *         Other modes round to the nearest integer. They differ only in how
+ *         they round for values of 0.5. \n
+ *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
+ * @tparam TP_SAT describes the selection of saturation to be applied during the
+ *         shift down stage of processing. TP_SAT accepts unsigned integer values, where:
+ *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
+ *         - 1: saturate       = Default. Saturation rounds an n-bit signed value in the range [- ( 2^(n-1) ) : +2^(n-1)
+ *- 1 ].
+ *         - 3: symmetric      = Controls symmetric saturation. Symmetric saturation rounds an n-bit signed value in the
+ *range [- ( 2^(n-1) -1 ) : +2^(n-1) - 1 ]. \n
  **/
 template <typename TT_DATA,
           typename TT_COEFF,
@@ -76,7 +100,9 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_API,
           unsigned int TP_SSR,
-          unsigned int TP_DYN_PT_SIZE = 0>
+          unsigned int TP_DYN_PT_SIZE = 0,
+          unsigned int TP_RND = 0,
+          unsigned int TP_SAT = 1>
 /**
  **/
 class fft_window_graph : public graph {
@@ -156,7 +182,7 @@ class fft_window_graph : public graph {
         for (int i = 0; i < TP_SSR; i++) {
             m_kernels[i] =
                 kernel::create_object<fft_window<TT_DATA, TT_COEFF, kKernelPtSize, kKernelWindowVsize, TP_SHIFT, TP_API,
-                                                 TP_SSR, TP_DYN_PT_SIZE> >(kernel_weights[i]);
+                                                 TP_SSR, TP_DYN_PT_SIZE, TP_RND, TP_SAT> >(kernel_weights[i]);
             // Specify mapping constraints
             runtime<ratio>(m_kernels[i]) = 0.1; // Nominal figure. The real figure requires knowledge of the sample
                                                 // rate.

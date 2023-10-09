@@ -53,6 +53,21 @@ TP_CASC_LEN_min = 1
 TP_CASC_LEN_max = 40
 TP_FIR_LEN_min = 4
 TP_FIR_LEN_max = 8192
+TP_SHIFT_min = 0
+TP_SHIFT_max = 61
+#TP_API_min=0
+#TP_API_max=1
+#TP_RND_min=0
+#TP_RND_max=7
+#AIE_VARIANT_min=1
+#AIE_VARIANT_max=2
+#TP_DUAL_IP_min=0
+#TP_DUAL_IP_max=1
+#TP_NUM_OUTPUTS_min=1
+#TP_NUM_OUTPUTS_max=2
+#TP_USE_COEF_RELOAD_min=0
+#TP_USE_COEF_RELOAD_max=2
+
 
 def fn_halfband_len(TP_FIR_LEN):
   return isValid if ((TP_FIR_LEN + 1) % 4 == 0) else isError("Filter length must be 4N-1 where N is a positive integer.")
@@ -110,7 +125,7 @@ def fn_stream_api_poly(TP_PARA_INTERP_POLY, TP_API):
 
 def fn_validate_para_interp_poly(TP_API, TP_PARA_INTERP_POLY, TP_SSR):
     if TP_PARA_INTERP_POLY < TP_PARA_INTERP_POLY_min :
-        return isError(f"Minimum value for Interpolation polyphases is {TP_PARA_INTERP_POLY_min}, but got {TP_PARA_INTERP_POLY}.")
+        return isError(f"Minimum value for Interpolation poly phase is {TP_PARA_INTERP_POLY_min}, but got {TP_PARA_INTERP_POLY}.")
     checkParaPolyVal = fn_parapoly_value(TP_PARA_INTERP_POLY)
     checkSSRPoly     = fn_ssr_for_para_poly(TP_PARA_INTERP_POLY, TP_SSR)
     checkStreamsPoly = fn_stream_api_poly(TP_PARA_INTERP_POLY, TP_API)
@@ -146,6 +161,15 @@ def validate_TP_SHIFT(args):
   TT_DATA = args["TT_DATA"]
   TP_SHIFT = args["TP_SHIFT"]
   return fn_validate_shift(TT_DATA, TP_SHIFT)
+
+def validate_TP_RND(args):
+  TP_RND = args["TP_RND"]
+  AIE_VARIANT = args["AIE_VARIANT"]
+  return fn_validate_roundMode(TP_RND, AIE_VARIANT)
+
+def validate_TP_SAT(args):
+  TP_SAT = args["TP_SAT"]
+  return fn_validate_satMode(TP_SAT)
 
 def fn_validate_upshift_ct(TT_DATA, TP_UPSHIFT_CT, AIE_VARIANT):
   #implied restriction that TT_DATA restricts TT_COEF, ie, we don't support int16,int32 or int16,cint32
@@ -274,22 +298,26 @@ def info_ports(args):
     TP_PARA_INTERP_POLY = args["TP_PARA_INTERP_POLY"]
     TP_DUAL_IP = args["TP_DUAL_IP"]
     TP_USE_COEF_RELOAD = args["TP_USE_COEF_RELOAD"]
+    TP_DECIMATE_FACTOR = 1
+    TP_INTERPOLATE_FACTOR = 2
     margin_size = sr_asym.fn_margin_size(TP_FIR_LEN//2, TT_DATA)
     num_in_ports = TP_SSR
-    in_win_size = TP_INPUT_WINDOW_VSIZE//num_in_ports
-    num_out_ports = TP_SSR*TP_PARA_INTERP_POLY
-    out_win_size = (TP_INPUT_WINDOW_VSIZE*2)//num_out_ports
+    num_tot_out_ports = TP_SSR*TP_PARA_INTERP_POLY
+    num_out_ports_per_poly = TP_SSR
 
-    in_ports = get_port_info("in", "in", TT_DATA, in_win_size, TP_SSR, margin_size, TP_API)
-    in2_ports = (get_port_info("in2", "in", TT_DATA, in_win_size, TP_SSR, margin_size, TP_API) if (TP_DUAL_IP == 1) else [])
+    in_win_size = get_input_window_size(TP_INPUT_WINDOW_VSIZE, num_in_ports, TP_API, TP_DUAL_IP)
+    out_win_size = get_output_window_size(TP_INPUT_WINDOW_VSIZE, num_tot_out_ports, TP_API, TP_NUM_OUTPUTS, TP_DECIMATE_FACTOR, TP_INTERPOLATE_FACTOR)
+
+    in_ports = get_port_info("in", "in", TT_DATA, in_win_size, num_in_ports, margin_size, TP_API=TP_API)
+    in2_ports = (get_port_info("in2", "in", TT_DATA, in_win_size, num_in_ports, margin_size, TP_API=TP_API) if (TP_DUAL_IP == 1) else [])
     coeff_ports = (get_parameter_port_info("coeff", "in", TT_COEF, TP_SSR, ((TP_FIR_LEN+1)/4+1), "async") if (TP_USE_COEF_RELOAD == 1) else [])
     coeffCT_ports = (get_parameter_port_info("coeffCT", "in", TT_COEF, TP_SSR, ((TP_FIR_LEN+1)/4+1), "async") if (TP_USE_COEF_RELOAD == 1 and TP_PARA_INTERP_POLY > 1) else [])
 
     # interp by 2 for halfband
-    out_ports = get_port_info("out", "out", TT_DATA, out_win_size, TP_SSR, TP_API=args["TP_API"])
-    out2_ports = (get_port_info("out2", "out", TT_DATA, out_win_size, TP_SSR, TP_API=args["TP_API"]) if (TP_NUM_OUTPUTS == 2) else [])
-    out3_ports = (get_port_info("out3", "out", TT_DATA, out_win_size, TP_SSR, TP_API=args["TP_API"]) if (TP_PARA_INTERP_POLY > 1) else [])
-    out4_ports = (get_port_info("out4", "out", TT_DATA, out_win_size, TP_SSR, TP_API=args["TP_API"]) if (TP_PARA_INTERP_POLY > 1 and TP_NUM_OUTPUTS == 2) else [])
+    out_ports = get_port_info("out", "out", TT_DATA, out_win_size, num_out_ports_per_poly, TP_API=TP_API)
+    out2_ports = (get_port_info("out2", "out", TT_DATA, out_win_size, num_out_ports_per_poly, TP_API=TP_API) if (TP_NUM_OUTPUTS == 2) else [])
+    out3_ports = (get_port_info("out3", "out", TT_DATA, out_win_size, num_out_ports_per_poly, TP_API=TP_API) if (TP_PARA_INTERP_POLY > 1) else [])
+    out4_ports = (get_port_info("out4", "out", TT_DATA, out_win_size, num_out_ports_per_poly, TP_API=TP_API) if (TP_PARA_INTERP_POLY > 1 and TP_NUM_OUTPUTS == 2) else [])
     return in_ports + in2_ports + coeff_ports + coeffCT_ports + out_ports + out2_ports + out3_ports + out4_ports
 
 
@@ -316,6 +344,7 @@ def generate_graph(graphname, args):
   TP_SSR = args["TP_SSR"]
   TP_PARA_INTERP_POLY = args["TP_PARA_INTERP_POLY"]
   coeff_list = args["coeff"]
+  TP_SAT = args["TP_SAT"]
 
   taps = sr_asym.fn_get_taps_vector(TT_COEF, coeff_list)
   constr_args_str = f"taps" if TP_USE_COEF_RELOAD == 0 else ""
@@ -366,7 +395,9 @@ public:
     {TP_UPSHIFT_CT}, //TP_UPSHIFT_CT
     {TP_API}, //TP_API
     {TP_SSR}, //TP_SSR
-    {TP_PARA_INTERP_POLY} //TP_PARA_INTERP_POLY
+    {TP_PARA_INTERP_POLY}, //TP_PARA_INTERP_POLY
+    {TP_SAT} //TP_SAT
+
   > filter;
 
   {graphname}() : filter({constr_args_str}) {{

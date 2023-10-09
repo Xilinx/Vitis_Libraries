@@ -17,12 +17,12 @@
 
 #include "test.h"
 
-simulation::platform<1, 1> platform("data/input.txt", "data/output.txt");
+//simulation::platform<1, 1> platform("data/input.txt", "data/output.txt");
 
 testcase::test_kernel filter;
 
-connect<> net0(platform.src[0], filter.in);
-connect<> net1(filter.out, platform.sink[0]);
+//connect<> net0(platform.src[0], filter.in);
+//connect<> net1(filter.out, platform.sink[0]);
 
 int main(void) {
     filter.init();

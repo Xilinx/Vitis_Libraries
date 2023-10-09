@@ -34,6 +34,7 @@ template <typename TT_DATA_A,
           size_t TP_DIM_B,
           size_t TP_SHIFT,
           unsigned int TP_RND,
+          unsigned int TP_SAT,
           unsigned int TP_DIM_A_LEADING, // = ROW_MAJOR,
           unsigned int TP_DIM_B_LEADING, // = COL_MAJOR,
           unsigned int TP_DIM_OUT_LEADING,
@@ -47,6 +48,7 @@ void matrix_mult_ref<TT_DATA_A,
                      TP_DIM_B,
                      TP_SHIFT,
                      TP_RND,
+                     TP_SAT,
                      TP_DIM_A_LEADING,
                      TP_DIM_B_LEADING,
                      TP_DIM_OUT_LEADING,
@@ -105,6 +107,7 @@ void matrix_mult_ref<TT_DATA_A,
     printf("Ref model params:\n");
     printf("TP_SHIFT = %lu\n", TP_SHIFT);
     printf("TP_RND = %d\n", TP_RND);
+    printf("TP_SAT = %d\n", TP_SAT);
     printf("TP_INPUT_WINDOW_VSIZE_A = %d\n", TP_INPUT_WINDOW_VSIZE_A);
     printf("TP_INPUT_WINDOW_VSIZE_B = %d\n", TP_INPUT_WINDOW_VSIZE_B);
 
@@ -138,7 +141,7 @@ void matrix_mult_ref<TT_DATA_A,
                 // prior to output, the final accumulated value must be downsized to the same type
                 // as was input. To do this, the final result is rounded, saturated and shifted down
                 roundAcc(TP_RND, shift, accum);
-                saturateAcc(accum);
+                saturateAcc(accum, TP_SAT);
                 accum_srs = castAcc(accum);
 
                 *outPtr = accum_srs;

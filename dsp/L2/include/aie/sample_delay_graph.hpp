@@ -37,20 +37,27 @@ namespace sample_delay {
 //--------------------------------------------------------------------------------------------------
 // sample_delay_graph template
 //--------------------------------------------------------------------------------------------------
+
 /**
- * @brief sample_delay is an implementataion of vectorised circular buffer for adding a delay to the input data. The
- *delay value is a run time parameter.
+ * @defgroup sample_delay_graph Sample Delay
+ *
+ * Vectorised Sample Delay
+**/
+
+/**
+ * @brief sample_delay introduces delay to the input data. The numSampledelay is a Run Time Parameter (RTP) for setting
+ *the value of delay.
  *
  * @ingroup sample_delay_graph
  *
- * These are the templates to configure the function.
- * @tparam TT_DATA describes the type of individual data samples input to the function.
- *         This is a typename and must be one of the following: \n
+ * These are the templates parameters:
+ * @tparam TT_DATA describes the type of individual data samples input to the function. This is a typename and must be
+ *one of the following: \n
  *         unit8, int8, int16, int32, float, cint16, cint32, cfloat.
  * @tparam TP_WINDOW_VSIZE describes the number of samples in the window API. It is only applicable when TP_API = 0.
- * @tparam TP_API describes if the interface is WINDOW (0) or AXI-4 stream (1)
- * @tparam TP_MAX_DELAY describes the maximum delay required. If RTP sampleDelayValue > TP_MAX_DELAY then delay value is
- *reverted to TP_MAX_DELAY.
+ * @tparam TP_API describes if the interface is IOBuf/Window (0) or stream (1)
+ * @tparam TP_MAX_DELAY sets the max threshold on the delay.
+ *
  **/
 
 template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_API, unsigned int TP_MAX_DELAY>
@@ -65,19 +72,20 @@ class sample_delay_graph : public graph {
                       (std::is_same<TT_DATA, float>::value),
                   "ERROR: TT_DATA is not a supported data type");
     /**
+     * Input data
      **/
     input_port in;
+
     /**
-      * The input data to the function.
-      **/
+      * This is a Run Time Parameter (RTP) and sets the requested delay in terms of number of samples. The allowed range
+      *is [0, TP_MAX_DELAY -1].
+     **/
     input_port numSampleDelay;
+
     /**
-      * This is Run Time Parameter (RTP) and sets the requested delay. The unit is number of samples.
-      **/
+      * Output data.
+     **/
     output_port out;
-    /**
-      * This is output data. Data type is same as input data.
-      **/
 
     /**
       * The kernel that will be created and mapped onto the AIE tile.
@@ -85,7 +93,7 @@ class sample_delay_graph : public graph {
     kernel m_kernel;
 
     /**
-      * @brief This is the constructor function for the sample_delay graph.
+      * @brief Constructor function for the sample_delay graph.
       **/
     // constructor
     sample_delay_graph() {
@@ -101,13 +109,10 @@ class sample_delay_graph : public graph {
 
     void create_port_connections(unsigned int api) {
         if (api == 1) { // axi stream
-            // printf("Call to create_port_connections as TP_API: %d \n", TP_API);
             connect<stream>(in, m_kernel.in[0]);
             connect<stream>(m_kernel.out[0], out);
             connect<parameter>(numSampleDelay, async(m_kernel.in[1])); // RTP
-            // placeholder for axi stream interface
-        } else { // io buffer
-            // printf("Call to create_port_connections as TP_API: %d \n", TP_API);
+        } else {                                                       // io buffer
             connect<>(in, m_kernel.in[0]);
             connect<>(m_kernel.out[0], out);
             dimensions(m_kernel.in[0]) = {TP_WINDOW_VSIZE};

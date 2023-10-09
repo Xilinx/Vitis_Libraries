@@ -20,6 +20,8 @@
 #include <adf.h>
 #include <vector>
 #include "dft_ref.hpp"
+#include "device_defs.h"
+
 using namespace adf;
 namespace xf {
 namespace dsp {
@@ -33,7 +35,9 @@ template <typename TT_DATA,
           unsigned int TP_FFT_NIFFT,
           unsigned int TP_SHIFT,
           unsigned int TP_CASC_LEN = 1, // necessary to match UUT, but unused by ref model
-          unsigned int TP_NUM_FRAMES = 1>
+          unsigned int TP_NUM_FRAMES = 1,
+          unsigned int TP_RND = 0,
+          unsigned int TP_SAT = 1>
 class dft_ref_graph : public graph {
    public:
     port<input> in[1];
@@ -47,7 +51,12 @@ class dft_ref_graph : public graph {
                            std::conditional_t<std::is_same<TT_DATA, float>::value, cfloat, TT_DATA> > >
         T_outDataType;
 
+#ifdef __SUPPORTS_ACC64__
+    static constexpr int kSamplesInVectOutData = 8;
+#else
     static constexpr int kSamplesInVectOutData = 256 / 8 / sizeof(T_outDataType);
+#endif //__SUPPORTS_ACC64__
+
     static constexpr int windowSize = CEIL(TP_POINT_SIZE, kSamplesInVectOutData) * TP_NUM_FRAMES;
     // FIR Kernel
     kernel m_dftKernel;
@@ -63,6 +72,8 @@ class dft_ref_graph : public graph {
         printf("FFT/nIFFT            = %d \n", TP_FFT_NIFFT);
         printf("Final scaling Shift  = %d \n", TP_SHIFT);
         printf("Number of kernels    = %d \n", TP_CASC_LEN);
+        printf("Rounding mode    = %d \n", TP_RND);
+        printf("Saturation mode    = %d \n", TP_SAT);
         printf("Window Size (ref)         = %d \n", windowSize);
         printf("Data type            = ");
         printf(QUOTE(TT_DATA_TYPE));
@@ -73,7 +84,7 @@ class dft_ref_graph : public graph {
 
         // Create DFT class
         m_dftKernel = kernel::create_object<
-            dft_ref<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_NUM_FRAMES> >();
+            dft_ref<TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, TP_NUM_FRAMES, TP_RND, TP_SAT> >();
 
         // Make connections
         // Size of window in Bytes. Dynamic point size adds a 256 bit (32 byte) header. This is larger than required,

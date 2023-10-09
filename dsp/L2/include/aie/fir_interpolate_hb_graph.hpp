@@ -31,6 +31,7 @@
 #include "fir_utils.hpp"
 #include "fir_sr_asym_graph.hpp"
 #include "fir_common_traits.hpp"
+#include <adf/arch/aie_arch_properties.hpp>
 
 using namespace adf;
 using namespace xf::dsp::aie::widget::api_cast;
@@ -61,12 +62,16 @@ class ct_kernels {
    public:
     static void create_and_recurse(kernel firKernels[SSR],
                                    const std::vector<typename ct_kernel_params::BTT_COEFF>& taps) {
+        // printf("in the create ct kernels %d %d %d %d\n ", dim, modifyMarginOffset, ct_kernel_params::BTP_FIR_LEN,
+        // SSR);
         firKernels[dim] = kernel::create_object<kernelClass>(taps);
         if
             constexpr(dim != 0) { recurseClass::create_and_recurse(firKernels, taps); }
     }
 
     static void create_and_recurse(kernel firKernels[SSR]) {
+        // printf("in the create ct kernels %d %d %d %d\n ", dim, modifyMarginOffset, ct_kernel_params::BTP_FIR_LEN,
+        // SSR);
         firKernels[dim] = kernel::create_object<kernelClass>();
         if
             constexpr(dim != 0) { recurseClass::create_and_recurse(firKernels); }
@@ -98,7 +103,7 @@ class ct_kernels {
  * @tparam TP_SHIFT describes power of 2 shift down applied to the accumulation of
  *         FIR terms before output. \n TP_SHIFT must be in the range 0 to 61.
  * @tparam TP_RND describes the selection of rounding to be applied during the
- *         shift down stage of processing. Although, TP_RND accepts unsignedinteger values
+ *         shift down stage of processing. Although, TP_RND accepts unsigned integer values
  *         descriptive macros are recommended where
  *         - rnd_floor      = Truncate LSB, always round down (towards negative infinity).
  *         - rnd_ceil       = Always round up (towards positive infinity).
@@ -186,7 +191,7 @@ class ct_kernels {
  *         The number of AIEs used is given by ``TP_SSR^2 * TP_CASC_LEN``. \n
  * @tparam TP_PARA_INTERP_POLY sets the number of interpolator polyphases over which the coefficients will be split to
  *enable parallel computation of the outputs.
- *         The polyphases are executed parallelly, output data is produced by each polyphase directly. \n
+ *         The polyphases are executed in parallel, output data is produced by each polyphase directly. \n
  *         TP_PARA_INTERP_POLY does not affect the number of input data paths.
  *         There will be TP_SSR input phases irrespective of the value of TP_PARA_INTERP_POLY.
  *         Currently, only TP_PARA_INTERP_POLY=2 is supported for the halfband interpolators with SSR>1. SSR = 1
@@ -195,7 +200,7 @@ class ct_kernels {
  *         Input data is broadcast to the two polyphases and each polyphase produces half of the total output data.
  *Their output data can be interleaved to produce a single output stream. \n
  *         The first polyphase is implemented using a single rate asymmetric filter that is configured to produce and
- *consume data parallelly in
+ *consume data in parallel in
  *         TP_SSR phases, each phase can operate at maximum throughput depending on the configuration.
  *         The first polyphase uses TP_SSR ^ 2* TP_CASC_LEN kernels. \n
  *         The second polyphase simplifies into a single kernel that does a single tap because halfband interpolators
@@ -204,6 +209,13 @@ class ct_kernels {
  *throughput.
  *         The overall theoretical output data rate is TP_SSR * TP_PARA_INTERP_POLY * TP_NUM_OUTPUTS * 1 GSa/s.
  *         The overall theoretical input data rate is TP_SSR * (TP_DUAL_IP + 1) * 1GSa/s
+ * @tparam TP_SAT describes the selection of saturation to be applied during the
+ *         shift down stage of processing. TP_SAT accepts unsigned integer values, where:
+ *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
+ *         - 1: saturate       = Default. Saturation rounds an n-bit signed value in the range [- ( 2^(n-1) ) : +2^(n-1)
+ *- 1 ].
+ *         - 3: symmetric      = Controls symmetric saturation. Symmetric saturation rounds an n-bit signed value in the
+ *range [- ( 2^(n-1) -1 ) : +2^(n-1) - 1 ]. \n
  *
  **/
 
@@ -220,7 +232,8 @@ template <typename TT_DATA,
           unsigned int TP_UPSHIFT_CT = 0,
           unsigned int TP_API = 0,
           unsigned int TP_SSR = 1,
-          unsigned int TP_PARA_INTERP_POLY = 1>
+          unsigned int TP_PARA_INTERP_POLY = 1,
+          unsigned int TP_SAT = 1>
 /**
  **/
 class fir_interpolate_hb_graph : public graph {
@@ -260,7 +273,15 @@ class fir_interpolate_hb_graph : public graph {
     static_assert(TP_SSR == 1 || (((TP_FIR_LEN + 1) / 2 % TP_SSR) == 0),
                   "Please set TP_SSR such that it is divisible by (TP_FIR_LEN+1)/2. You could also pad the fir with "
                   "appropriate number of zero-ed taps to satisfy this condition.");
-
+#if __HAS_SYM_PREADD__ == 0
+    static_assert(TP_UPSHIFT_CT == 0,
+                  "UPSHIFT_CT cannot be set to 1 for AIE-ML devices since the hardware does not offer any optimisated "
+                  "upshift operation.");
+#endif
+    static_assert(!(get_input_streams_core_module() == 1 && (TP_DUAL_IP == 1)),
+                  "This device does not have dual ports. Please set TP_DUAL_IP to 0.");
+    static_assert(!(get_input_streams_core_module() == 1 && (TP_NUM_OUTPUTS == 2)),
+                  "This device does not have dual ports. Please set TP_NUM_OUTPUTS to 1.");
     // 3d array for storing net information.
     // address[inPhase][outPath][cascPos]
     using net_type = typename std::array<std::array<std::array<connect<stream, stream>*, TP_CASC_LEN>, TP_SSR>, TP_SSR>;
@@ -398,14 +419,18 @@ class fir_interpolate_hb_graph : public graph {
                 // Source files
                 source(m_ct_firKernels[i]) = "fir_sr_asym.cpp";
 
+                std::array<connect<stream, stream>*, 2> net_ct;
+
                 unsigned int CT_SSROutputPath = (i + ((TP_FIR_LEN + 1) / 4 - 1)) % TP_SSR;
                 // printf("For CT phase, connecting input path %d to output path %d\n", i, CT_SSROutputPath);
                 if
                     constexpr(TP_API == 1) {
-                        connect<stream>(in[i], m_ct_firKernels[i].in[0]);
+                        net_ct[0] = new connect<stream, stream>(in[i], m_ct_firKernels[i].in[0]);
+                        fifo_depth(*net_ct[0]) = 1;
                         if
                             constexpr(TP_DUAL_IP == 1) { connect<stream>(in2[i], m_ct_firKernels[i].in[1]); }
-                        connect<stream>(m_ct_firKernels[i].out[0], out3[CT_SSROutputPath]);
+                        net_ct[1] = new connect<stream, stream>(m_ct_firKernels[i].out[0], out3[CT_SSROutputPath]);
+                        fifo_depth(*net_ct[1]) = 1;
                         if
                             constexpr(TP_NUM_OUTPUTS == 2) {
                                 connect<stream>(m_ct_firKernels[i].out[1], out4[CT_SSROutputPath]);
@@ -451,6 +476,7 @@ class fir_interpolate_hb_graph : public graph {
         static constexpr int BTP_COEFF_PHASES = TP_SSR;
         static constexpr int BTP_COEFF_PHASES_LEN = BTP_FIR_LEN;
         static constexpr int BTP_POLY_SSR = TP_PARA_INTERP_POLY;
+        static constexpr int BTP_SAT = TP_SAT;
     };
 
     template <int ssr_dim>
@@ -480,6 +506,7 @@ class fir_interpolate_hb_graph : public graph {
         static constexpr int BTP_POLY_SSR = TP_PARA_INTERP_POLY;
         static constexpr int BTP_SYM_FACTOR = IS_ASYM;
         static constexpr int BTP_INTERPOLATE_FACTOR = kInterpolateFactor;
+        static constexpr int BTP_SAT = TP_SAT;
     };
 
     template <int ssr_dim>
@@ -509,6 +536,7 @@ class fir_interpolate_hb_graph : public graph {
         static constexpr int BTP_COEFF_PHASES = 1;
         static constexpr int BTP_COEFF_PHASES_LEN = 1;
         static constexpr int BTP_MODIFY_MARGIN_OFFSET = -1 * ((TP_FIR_LEN / 4 - 1 + dim) / TP_SSR);
+        static constexpr int BTP_SAT = TP_SAT;
     };
 
     // call sr aym graph constructor
@@ -530,6 +558,7 @@ class fir_interpolate_hb_graph : public graph {
         static constexpr int BTP_COEFF_PHASES = TP_SSR;
         static constexpr int BTP_COEFF_PHASES_LEN = (TP_FIR_LEN + 1) / 2;
         static constexpr int BTP_POLY_SSR = TP_PARA_INTERP_POLY;
+        static constexpr int BTP_SAT = TP_SAT;
     };
 
     template <int ssr_dim>
@@ -654,7 +683,7 @@ class fir_interpolate_hb_graph : public graph {
         // best.
         return fir_interpolate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, (TP_INPUT_WINDOW_VSIZE / TP_SSR),
                                   false, true, firRange, 0, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD,
-                                  TP_NUM_OUTPUTS, TP_UPSHIFT_CT, TP_API>::get_m_kArch();
+                                  TP_NUM_OUTPUTS, TP_UPSHIFT_CT, TP_API, TP_SAT>::get_m_kArch();
     };
 
     /**

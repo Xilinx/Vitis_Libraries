@@ -27,14 +27,19 @@
 #define __AIE_API_USE_NATIVE_1024B_VECTOR__
 #endif
 #include "aie_api/aie_adf.hpp"
-
+#include "device_defs.h"
 #ifndef INLINE_DECL
 #define INLINE_DECL inline __attribute__((always_inline))
 #endif
 #ifndef NOINLINE_DECL
 #define NOINLINE_DECL inline __attribute__((noinline))
 #endif
-
+#ifndef ROW_MAJOR
+#define ROW_MAJOR 0
+#endif
+#ifndef COL_MAJOR
+#define COL_MAJOR 1
+#endif
 namespace xf {
 namespace dsp {
 namespace aie {
@@ -49,6 +54,7 @@ struct loHi {
     unsigned int hi = 0;
     unsigned int square = 0x3210; // default to no permute.
 };
+#ifndef __SUPPORTS_ACC64__
 
 // We might need to take a const reference to offsets to avoid implicit copy.
 template <typename T_D, unsigned Elems>
@@ -94,6 +100,7 @@ INLINE_DECL aie::vector<cfloat, 8> doShuffle(aie::vector<cfloat, 8> data, const 
     // This only works for N=4
     return fpshuffle8(data, start, offsets.lo);
 }
+#endif //__SUPPORTS_ACC64__
 
 // shuffle8()  //cint32
 // shuffle16() //int32 cint16

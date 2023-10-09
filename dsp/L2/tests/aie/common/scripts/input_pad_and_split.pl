@@ -55,6 +55,7 @@ my $type = "cint16";
 my $pointSize = 0;
 my $cascLen = 1;
 my $numFrames = 1;
+my $variant = 1;
 my $dual = 0;
 my $help = 0;
 
@@ -67,6 +68,7 @@ GetOptions (
     "p|pointSize=i" =>\$pointSize,
     "c|cascLen=i"  => \$cascLen,
     "numFrames=i"  => \$numFrames,
+    "variant=i"    => \$variant,
     "d|dual=i" => \$dual,
     "h|help" => \$help)
 or die("Error in command line arguments\n");
@@ -130,8 +132,12 @@ if ( $type eq "cint16") {
     $kSamplesInVectData = 256 / 8 / 4;
 
 } elsif ( $type eq "cint32") {
-    $kSamplesInVectData = 256 / 8 / 8;
-
+    if ($variant eq 2) {
+        # QoR improvement when using 512 bit vectors for cint32 on AIE-ML
+        $kSamplesInVectData = 8;
+    } else {
+        $kSamplesInVectData = 256 / 8 / 8;
+    }
 } elsif ( $type eq "cfloat") {
     $kSamplesInVectData = 256 / 8 / 8;
 
@@ -142,6 +148,7 @@ if ( $type eq "cint16") {
 my $paddedPointSize = ceil($pointSize, $kSamplesInVectData);
 # Padding needed to split nicely across kernels
 my $paddedWindowSize = $numFrames*ceil($paddedPointSize, $kSamplesInVectData*$cascLen);
+print("paddedPointSize - $paddedPointSize\n");
 print("paddedWindowSize = $paddedWindowSize\n");
 #############################################################################################
 my $headerVsize = 0;

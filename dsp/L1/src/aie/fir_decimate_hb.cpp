@@ -39,6 +39,8 @@ Coding conventions
 #include "aie_api/aie_adf.hpp"
 
 #ifdef __X86SIM__
+// #define _DSPLIB_FIR_DECIMATE_HB_HPP_DEBUG_
+// #define _DSPLIB_FIR_SR_SYM_DEBUG_
 #endif
 
 #include "kernel_api_utils.hpp"
@@ -67,7 +69,8 @@ template <typename TT_DATA,
           unsigned int TP_DUAL_IP,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 INLINE_DECL void kernelFilterClass<TT_DATA,
                                    TT_COEFF,
                                    TP_FIR_LEN,
@@ -82,7 +85,8 @@ INLINE_DECL void kernelFilterClass<TT_DATA,
                                    TP_DUAL_IP,
                                    TP_USE_COEFF_RELOAD,
                                    TP_NUM_OUTPUTS,
-                                   TP_API>::filterKernel(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                   TP_API,
+                                   TP_SAT>::filterKernel(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                                                          T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
     constexpr int TP_CASC_API = TP_API == 0 ? 0 : (TP_DUAL_IP == DUAL_IP_DUAL ? 0 : 1);
     windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE + fnFirMargin<TP_FIR_LEN, TT_DATA>(), TP_CASC_API>(inInterface,
@@ -105,7 +109,8 @@ template <typename TT_DATA,
           unsigned int TP_DUAL_IP,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 INLINE_DECL void kernelFilterClass<TT_DATA,
                                    TT_COEFF,
                                    TP_FIR_LEN,
@@ -120,7 +125,8 @@ INLINE_DECL void kernelFilterClass<TT_DATA,
                                    TP_DUAL_IP,
                                    TP_USE_COEFF_RELOAD,
                                    TP_NUM_OUTPUTS,
-                                   TP_API>::filterKernel(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                   TP_API,
+                                   TP_SAT>::filterKernel(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                                                          T_outputIF<TP_CASC_OUT, TT_DATA> outInterface,
                                                          const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 4 + 1]) {
     constexpr int TP_CASC_API = TP_API == 0 ? 0 : (TP_DUAL_IP == DUAL_IP_DUAL ? 0 : 1);
@@ -154,7 +160,8 @@ template <typename TT_DATA,
           unsigned int TP_DUAL_IP,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 INLINE_DECL void kernelFilterClass<TT_DATA,
                                    TT_COEFF,
                                    TP_FIR_LEN,
@@ -169,7 +176,8 @@ INLINE_DECL void kernelFilterClass<TT_DATA,
                                    TP_DUAL_IP,
                                    TP_USE_COEFF_RELOAD,
                                    TP_NUM_OUTPUTS,
-                                   TP_API>::filterKernelRtp(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                   TP_API,
+                                   TP_SAT>::filterKernelRtp(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                                                             T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
     constexpr int TP_CASC_API = TP_API == 0 ? 0 : (TP_DUAL_IP == DUAL_IP_DUAL ? 0 : 1);
     windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE + fnFirMargin<TP_FIR_LEN, TT_DATA>(), TP_CASC_API>(inInterface,
@@ -201,7 +209,8 @@ template <typename TT_DATA,
           unsigned int TP_DUAL_IP,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 INLINE_DECL void kernelFilterClass<TT_DATA,
                                    TT_COEFF,
                                    TP_FIR_LEN,
@@ -216,10 +225,11 @@ INLINE_DECL void kernelFilterClass<TT_DATA,
                                    TP_DUAL_IP,
                                    TP_USE_COEFF_RELOAD,
                                    TP_NUM_OUTPUTS,
-                                   TP_API>::filterSelectArch(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                   TP_API,
+                                   TP_SAT>::filterSelectArch(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                                                              T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
-    set_rnd(TP_RND);
-    set_sat();
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     // windowAcquire(inInterface);
     // 3 possible architectures depending on size of data/coef types, fir_len and input window size
@@ -254,7 +264,8 @@ template <typename TT_DATA,
           unsigned int TP_DUAL_IP,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 INLINE_DECL void kernelFilterClass<TT_DATA,
                                    TT_COEFF,
                                    TP_FIR_LEN,
@@ -269,7 +280,8 @@ INLINE_DECL void kernelFilterClass<TT_DATA,
                                    TP_DUAL_IP,
                                    TP_USE_COEFF_RELOAD,
                                    TP_NUM_OUTPUTS,
-                                   TP_API>::filter2buff(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                   TP_API,
+                                   TP_SAT>::filter2buff(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                                                         T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
     // Pointers to coefficient storage and explicit registers to hold values
     T_buff_256b<TT_COEFF>* __restrict coeff = (T_buff_256b<TT_COEFF>*)m_phaseOneTaps;
@@ -449,7 +461,8 @@ template <typename TT_DATA,
           unsigned int TP_DUAL_IP,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 INLINE_DECL void kernelFilterClass<TT_DATA,
                                    TT_COEFF,
                                    TP_FIR_LEN,
@@ -464,7 +477,8 @@ INLINE_DECL void kernelFilterClass<TT_DATA,
                                    TP_DUAL_IP,
                                    TP_USE_COEFF_RELOAD,
                                    TP_NUM_OUTPUTS,
-                                   TP_API>::filter2buffzigzag(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                   TP_API,
+                                   TP_SAT>::filter2buffzigzag(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                                                               T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
     // Pointers to coefficient storage and explicit registers to hold values
     T_buff_256b<TT_COEFF>* __restrict coeff = (T_buff_256b<TT_COEFF>*)m_phaseOneTaps;
@@ -822,7 +836,8 @@ template <typename TT_DATA,
           unsigned int TP_DUAL_IP,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 INLINE_DECL void kernelFilterClass<TT_DATA,
                                    TT_COEFF,
                                    TP_FIR_LEN,
@@ -837,7 +852,8 @@ INLINE_DECL void kernelFilterClass<TT_DATA,
                                    TP_DUAL_IP,
                                    TP_USE_COEFF_RELOAD,
                                    TP_NUM_OUTPUTS,
-                                   TP_API>::filter1buff(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                   TP_API,
+                                   TP_SAT>::filter1buff(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                                                         T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
     // Pointers to coefficient storage and explicit registers to hold values
     T_buff_256b<TT_COEFF>* __restrict coeff = (T_buff_256b<TT_COEFF>*)m_phaseOneTaps;
@@ -961,7 +977,8 @@ template <typename TT_DATA,
           unsigned int TP_DUAL_IP,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 void fir_decimate_hb<
     TT_DATA,
     TT_COEFF,
@@ -977,7 +994,8 @@ void fir_decimate_hb<
     TP_DUAL_IP,
     TP_USE_COEFF_RELOAD,
     TP_NUM_OUTPUTS,
-    TP_API>::filter(input_circular_buffer<TT_DATA,
+    TP_API,
+    TP_SAT>::filter(input_circular_buffer<TT_DATA,
                                           extents<inherited_extent>,
                                           margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
                     output_circular_buffer<TT_DATA>& __restrict outWindow) {
@@ -994,7 +1012,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_LEN,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE>
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SAT>
 void fir_decimate_hb<
     TT_DATA,
     TT_COEFF,
@@ -1010,11 +1029,12 @@ void fir_decimate_hb<
     DUAL_IP_SINGLE,
     USE_COEFF_RELOAD_FALSE,
     2,
-    USE_WINDOW_API>::filter(input_circular_buffer<TT_DATA,
-                                                  extents<inherited_extent>,
-                                                  margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
-                            output_circular_buffer<TT_DATA>& __restrict outWindow,
-                            output_circular_buffer<TT_DATA>& __restrict outWindow2) {
+    USE_WINDOW_API,
+    TP_SAT>::filter(input_circular_buffer<TT_DATA,
+                                          extents<inherited_extent>,
+                                          margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
+                    output_circular_buffer<TT_DATA>& __restrict outWindow,
+                    output_circular_buffer<TT_DATA>& __restrict outWindow2) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, DUAL_IP_SINGLE> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<16> >*)&inWindow;
@@ -1029,7 +1049,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_LEN,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE>
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -1044,11 +1065,12 @@ void fir_decimate_hb<TT_DATA,
                      DUAL_IP_SINGLE,
                      USE_COEFF_RELOAD_TRUE,
                      1,
-                     USE_WINDOW_API>::
-    filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
-               inWindow,
-           output_circular_buffer<TT_DATA>& outWindow,
-           const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 4 + 1]) {
+                     USE_WINDOW_API,
+                     TP_SAT>::filter(input_circular_buffer<TT_DATA,
+                                                           extents<inherited_extent>,
+                                                           margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
+                                     output_circular_buffer<TT_DATA>& outWindow,
+                                     const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 4 + 1]) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, DUAL_IP_SINGLE> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<16> >*)&inWindow;
@@ -1062,7 +1084,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_LEN,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE>
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -1077,12 +1100,13 @@ void fir_decimate_hb<TT_DATA,
                      DUAL_IP_SINGLE,
                      USE_COEFF_RELOAD_TRUE,
                      2,
-                     USE_WINDOW_API>::
-    filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
-               inWindow,
-           output_circular_buffer<TT_DATA>& outWindow,
-           output_circular_buffer<TT_DATA>& outWindow2,
-           const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 4 + 1]) {
+                     USE_WINDOW_API,
+                     TP_SAT>::filter(input_circular_buffer<TT_DATA,
+                                                           extents<inherited_extent>,
+                                                           margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
+                                     output_circular_buffer<TT_DATA>& outWindow,
+                                     output_circular_buffer<TT_DATA>& outWindow2,
+                                     const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 4 + 1]) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, DUAL_IP_SINGLE> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<16> >*)&inWindow;
@@ -1097,7 +1121,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_LEN,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE>
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -1112,7 +1137,8 @@ void fir_decimate_hb<TT_DATA,
                      DUAL_IP_DUAL,
                      USE_COEFF_RELOAD_FALSE,
                      1,
-                     USE_WINDOW_API>::
+                     USE_WINDOW_API,
+                     TP_SAT>::
     filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
                inWindow,
            input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
@@ -1133,7 +1159,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_LEN,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE>
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -1148,7 +1175,8 @@ void fir_decimate_hb<TT_DATA,
                      DUAL_IP_DUAL,
                      USE_COEFF_RELOAD_FALSE,
                      2,
-                     USE_WINDOW_API>::
+                     USE_WINDOW_API,
+                     TP_SAT>::
     filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
                inWindow,
            input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
@@ -1171,7 +1199,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_LEN,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE>
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -1186,7 +1215,8 @@ void fir_decimate_hb<TT_DATA,
                      DUAL_IP_DUAL,
                      USE_COEFF_RELOAD_TRUE,
                      1,
-                     USE_WINDOW_API>::
+                     USE_WINDOW_API,
+                     TP_SAT>::
     filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
                inWindow,
            input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
@@ -1208,7 +1238,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_LEN,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE>
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -1223,7 +1254,8 @@ void fir_decimate_hb<TT_DATA,
                      DUAL_IP_DUAL,
                      USE_COEFF_RELOAD_TRUE,
                      2,
-                     USE_WINDOW_API>::
+                     USE_WINDOW_API,
+                     TP_SAT>::
     filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
                inWindow,
            input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
@@ -1252,7 +1284,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_DUAL_IP>
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -1267,9 +1300,10 @@ void fir_decimate_hb<TT_DATA,
                      TP_DUAL_IP,
                      USE_COEFF_RELOAD_FALSE,
                      1,
-                     USE_WINDOW_API>::filter(input_async_buffer<TT_DATA>& inWindow,
-                                             input_stream_cacc48* inCascade,
-                                             output_circular_buffer<TT_DATA>& __restrict outWindow) {
+                     USE_WINDOW_API,
+                     TP_SAT>::filter(input_async_buffer<TT_DATA>& inWindow,
+                                     input_stream_cacc48* inCascade,
+                                     output_circular_buffer<TT_DATA>& __restrict outWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
@@ -1289,7 +1323,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_DUAL_IP>
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -1304,10 +1339,11 @@ void fir_decimate_hb<TT_DATA,
                      TP_DUAL_IP,
                      USE_COEFF_RELOAD_FALSE,
                      2,
-                     USE_WINDOW_API>::filter(input_async_buffer<TT_DATA>& inWindow,
-                                             input_stream_cacc48* inCascade,
-                                             output_circular_buffer<TT_DATA>& __restrict outWindow,
-                                             output_circular_buffer<TT_DATA>& __restrict outWindow2) {
+                     USE_WINDOW_API,
+                     TP_SAT>::filter(input_async_buffer<TT_DATA>& inWindow,
+                                     input_stream_cacc48* inCascade,
+                                     output_circular_buffer<TT_DATA>& __restrict outWindow,
+                                     output_circular_buffer<TT_DATA>& __restrict outWindow2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
@@ -1328,7 +1364,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_DUAL_IP>
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -1343,9 +1380,10 @@ void fir_decimate_hb<TT_DATA,
                      TP_DUAL_IP,
                      USE_COEFF_RELOAD_TRUE,
                      1,
-                     USE_WINDOW_API>::filter(input_async_buffer<TT_DATA>& inWindow,
-                                             input_stream_cacc48* inCascade,
-                                             output_circular_buffer<TT_DATA>& __restrict outWindow) {
+                     USE_WINDOW_API,
+                     TP_SAT>::filter(input_async_buffer<TT_DATA>& inWindow,
+                                     input_stream_cacc48* inCascade,
+                                     output_circular_buffer<TT_DATA>& __restrict outWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
@@ -1365,7 +1403,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_DUAL_IP>
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -1380,10 +1419,11 @@ void fir_decimate_hb<TT_DATA,
                      TP_DUAL_IP,
                      USE_COEFF_RELOAD_TRUE,
                      2,
-                     USE_WINDOW_API>::filter(input_async_buffer<TT_DATA>& inWindow,
-                                             input_stream_cacc48* inCascade,
-                                             output_circular_buffer<TT_DATA>& __restrict outWindow,
-                                             output_circular_buffer<TT_DATA>& __restrict outWindow2) {
+                     USE_WINDOW_API,
+                     TP_SAT>::filter(input_async_buffer<TT_DATA>& inWindow,
+                                     input_stream_cacc48* inCascade,
+                                     output_circular_buffer<TT_DATA>& __restrict outWindow,
+                                     output_circular_buffer<TT_DATA>& __restrict outWindow2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
@@ -1403,7 +1443,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_DUAL_IP>
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -1418,11 +1459,12 @@ void fir_decimate_hb<TT_DATA,
                      TP_DUAL_IP,
                      USE_COEFF_RELOAD_FALSE,
                      1,
-                     USE_WINDOW_API>::
-    filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
-               inWindow,
-           output_stream_cacc48* outCascade,
-           output_async_buffer<TT_DATA>& broadcastWindow) {
+                     USE_WINDOW_API,
+                     TP_SAT>::filter(input_circular_buffer<TT_DATA,
+                                                           extents<inherited_extent>,
+                                                           margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
+                                     output_stream_cacc48* outCascade,
+                                     output_async_buffer<TT_DATA>& broadcastWindow) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<16> >*)&inWindow;
@@ -1440,7 +1482,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -1455,7 +1498,8 @@ void fir_decimate_hb<TT_DATA,
                      DUAL_IP_DUAL,
                      USE_COEFF_RELOAD_FALSE,
                      1,
-                     USE_WINDOW_API>::
+                     USE_WINDOW_API,
+                     TP_SAT>::
     filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
                inWindow,
            input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
@@ -1482,7 +1526,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_DUAL_IP>
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -1497,12 +1542,13 @@ void fir_decimate_hb<TT_DATA,
                      TP_DUAL_IP,
                      USE_COEFF_RELOAD_TRUE,
                      1,
-                     USE_WINDOW_API>::
-    filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
-               inWindow,
-           output_stream_cacc48* outCascade,
-           output_async_buffer<TT_DATA>& broadcastWindow,
-           const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 4 + 1]) {
+                     USE_WINDOW_API,
+                     TP_SAT>::filter(input_circular_buffer<TT_DATA,
+                                                           extents<inherited_extent>,
+                                                           margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
+                                     output_stream_cacc48* outCascade,
+                                     output_async_buffer<TT_DATA>& broadcastWindow,
+                                     const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 4 + 1]) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<16> >*)&inWindow;
@@ -1520,7 +1566,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -1535,7 +1582,8 @@ void fir_decimate_hb<TT_DATA,
                      DUAL_IP_DUAL,
                      USE_COEFF_RELOAD_TRUE,
                      1,
-                     USE_WINDOW_API>::
+                     USE_WINDOW_API,
+                     TP_SAT>::
     filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
                inWindow,
            input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
@@ -1564,7 +1612,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_DUAL_IP>
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -1579,10 +1628,11 @@ void fir_decimate_hb<TT_DATA,
                      TP_DUAL_IP,
                      USE_COEFF_RELOAD_FALSE,
                      1,
-                     USE_WINDOW_API>::filter(input_async_buffer<TT_DATA>& inWindow,
-                                             input_stream_cacc48* inCascade,
-                                             output_stream_cacc48* outCascade,
-                                             output_async_buffer<TT_DATA>& broadcastWindow) {
+                     USE_WINDOW_API,
+                     TP_SAT>::filter(input_async_buffer<TT_DATA>& inWindow,
+                                     input_stream_cacc48* inCascade,
+                                     output_stream_cacc48* outCascade,
+                                     output_async_buffer<TT_DATA>& broadcastWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
@@ -1603,7 +1653,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_DUAL_IP>
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -1618,10 +1669,11 @@ void fir_decimate_hb<TT_DATA,
                      TP_DUAL_IP,
                      USE_COEFF_RELOAD_TRUE,
                      1,
-                     USE_WINDOW_API>::filter(input_async_buffer<TT_DATA>& inWindow,
-                                             input_stream_cacc48* inCascade,
-                                             output_stream_cacc48* outCascade,
-                                             output_async_buffer<TT_DATA>& broadcastWindow) {
+                     USE_WINDOW_API,
+                     TP_SAT>::filter(input_async_buffer<TT_DATA>& inWindow,
+                                     input_stream_cacc48* inCascade,
+                                     output_stream_cacc48* outCascade,
+                                     output_async_buffer<TT_DATA>& broadcastWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
@@ -1643,7 +1695,8 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
-          unsigned int TP_DUAL_IP>
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -1658,10 +1711,11 @@ void fir_decimate_hb<TT_DATA,
                      TP_DUAL_IP,
                      USE_COEFF_RELOAD_FALSE,
                      1,
-                     USE_STREAM_API>::
-    filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
-               inWindow,
-           output_stream<TT_DATA>* outStream) {
+                     USE_STREAM_API,
+                     TP_SAT>::filter(input_circular_buffer<TT_DATA,
+                                                           extents<inherited_extent>,
+                                                           margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
+                                     output_stream<TT_DATA>* outStream) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<16> >*)&inWindow;
@@ -1679,7 +1733,8 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
-          unsigned int TP_DUAL_IP>
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -1694,11 +1749,12 @@ void fir_decimate_hb<TT_DATA,
                      TP_DUAL_IP,
                      USE_COEFF_RELOAD_FALSE,
                      2,
-                     USE_STREAM_API>::
-    filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
-               inWindow,
-           output_stream<TT_DATA>* outStream,
-           output_stream<TT_DATA>* outStream2) {
+                     USE_STREAM_API,
+                     TP_SAT>::filter(input_circular_buffer<TT_DATA,
+                                                           extents<inherited_extent>,
+                                                           margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
+                                     output_stream<TT_DATA>* outStream,
+                                     output_stream<TT_DATA>* outStream2) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<16> >*)&inWindow;
@@ -1717,7 +1773,8 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
-          unsigned int TP_DUAL_IP>
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -1732,11 +1789,12 @@ void fir_decimate_hb<TT_DATA,
                      TP_DUAL_IP,
                      USE_COEFF_RELOAD_TRUE,
                      1,
-                     USE_STREAM_API>::
-    filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
-               inWindow,
-           output_stream<TT_DATA>* outStream,
-           const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 4 + 1]) {
+                     USE_STREAM_API,
+                     TP_SAT>::filter(input_circular_buffer<TT_DATA,
+                                                           extents<inherited_extent>,
+                                                           margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
+                                     output_stream<TT_DATA>* outStream,
+                                     const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 4 + 1]) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<16> >*)&inWindow;
@@ -1754,7 +1812,8 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
-          unsigned int TP_DUAL_IP>
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -1769,12 +1828,13 @@ void fir_decimate_hb<TT_DATA,
                      TP_DUAL_IP,
                      USE_COEFF_RELOAD_TRUE,
                      2,
-                     USE_STREAM_API>::
-    filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
-               inWindow,
-           output_stream<TT_DATA>* outStream,
-           output_stream<TT_DATA>* outStream2,
-           const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 4 + 1]) {
+                     USE_STREAM_API,
+                     TP_SAT>::filter(input_circular_buffer<TT_DATA,
+                                                           extents<inherited_extent>,
+                                                           margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
+                                     output_stream<TT_DATA>* outStream,
+                                     output_stream<TT_DATA>* outStream2,
+                                     const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 4 + 1]) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<16> >*)&inWindow;
@@ -1795,7 +1855,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_DUAL_IP>
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -1810,11 +1871,12 @@ void fir_decimate_hb<TT_DATA,
                      TP_DUAL_IP,
                      USE_COEFF_RELOAD_FALSE,
                      1,
-                     USE_STREAM_API>::
-    filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
-               inWindow,
-           input_stream_cacc48* inCascade,
-           output_stream<TT_DATA>* outStream) {
+                     USE_STREAM_API,
+                     TP_SAT>::filter(input_circular_buffer<TT_DATA,
+                                                           extents<inherited_extent>,
+                                                           margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
+                                     input_stream_cacc48* inCascade,
+                                     output_stream<TT_DATA>* outStream) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<16> >*)&inWindow;
@@ -1834,7 +1896,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -1849,9 +1912,10 @@ void fir_decimate_hb<TT_DATA,
                      DUAL_IP_DUAL,
                      USE_COEFF_RELOAD_FALSE,
                      1,
-                     USE_STREAM_API>::filter(input_async_buffer<TT_DATA>& inWindow,
-                                             input_stream_cacc48* inCascade,
-                                             output_stream<TT_DATA>* outStream) {
+                     USE_STREAM_API,
+                     TP_SAT>::filter(input_async_buffer<TT_DATA>& inWindow,
+                                     input_stream_cacc48* inCascade,
+                                     output_stream<TT_DATA>* outStream) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
@@ -1872,7 +1936,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_DUAL_IP>
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -1887,12 +1952,13 @@ void fir_decimate_hb<TT_DATA,
                      TP_DUAL_IP,
                      USE_COEFF_RELOAD_FALSE,
                      2,
-                     USE_STREAM_API>::
-    filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
-               inWindow,
-           input_stream_cacc48* inCascade,
-           output_stream<TT_DATA>* outStream,
-           output_stream<TT_DATA>* outStream2) {
+                     USE_STREAM_API,
+                     TP_SAT>::filter(input_circular_buffer<TT_DATA,
+                                                           extents<inherited_extent>,
+                                                           margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
+                                     input_stream_cacc48* inCascade,
+                                     output_stream<TT_DATA>* outStream,
+                                     output_stream<TT_DATA>* outStream2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<16> >*)&inWindow;
@@ -1913,7 +1979,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -1928,10 +1995,11 @@ void fir_decimate_hb<TT_DATA,
                      DUAL_IP_DUAL,
                      USE_COEFF_RELOAD_FALSE,
                      2,
-                     USE_STREAM_API>::filter(input_async_buffer<TT_DATA>& inWindow,
-                                             input_stream_cacc48* inCascade,
-                                             output_stream<TT_DATA>* outStream,
-                                             output_stream<TT_DATA>* outStream2) {
+                     USE_STREAM_API,
+                     TP_SAT>::filter(input_async_buffer<TT_DATA>& inWindow,
+                                     input_stream_cacc48* inCascade,
+                                     output_stream<TT_DATA>* outStream,
+                                     output_stream<TT_DATA>* outStream2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
@@ -1952,7 +2020,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_DUAL_IP>
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -1967,10 +2036,11 @@ void fir_decimate_hb<TT_DATA,
                      TP_DUAL_IP,
                      USE_COEFF_RELOAD_FALSE,
                      1,
-                     USE_STREAM_API>::
-    filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
-               inWindow,
-           output_stream_cacc48* outCascade) {
+                     USE_STREAM_API,
+                     TP_SAT>::filter(input_circular_buffer<TT_DATA,
+                                                           extents<inherited_extent>,
+                                                           margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
+                                     output_stream_cacc48* outCascade) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<16> >*)&inWindow;
@@ -1988,7 +2058,8 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -2003,11 +2074,12 @@ void fir_decimate_hb<TT_DATA,
                      DUAL_IP_DUAL,
                      USE_COEFF_RELOAD_FALSE,
                      1,
-                     USE_STREAM_API>::
-    filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
-               inWindow,
-           output_stream_cacc48* outCascade,
-           output_async_buffer<TT_DATA>& broadcastWindow) {
+                     USE_STREAM_API,
+                     TP_SAT>::filter(input_circular_buffer<TT_DATA,
+                                                           extents<inherited_extent>,
+                                                           margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
+                                     output_stream_cacc48* outCascade,
+                                     output_async_buffer<TT_DATA>& broadcastWindow) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<16> >*)&inWindow;
@@ -2028,7 +2100,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_DUAL_IP>
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -2043,11 +2116,12 @@ void fir_decimate_hb<TT_DATA,
                      TP_DUAL_IP,
                      USE_COEFF_RELOAD_FALSE,
                      1,
-                     USE_STREAM_API>::
-    filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
-               inWindow,
-           input_stream_cacc48* inCascade,
-           output_stream_cacc48* outCascade) {
+                     USE_STREAM_API,
+                     TP_SAT>::filter(input_circular_buffer<TT_DATA,
+                                                           extents<inherited_extent>,
+                                                           margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
+                                     input_stream_cacc48* inCascade,
+                                     output_stream_cacc48* outCascade) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<16> >*)&inWindow;
@@ -2067,7 +2141,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -2082,10 +2157,11 @@ void fir_decimate_hb<TT_DATA,
                      DUAL_IP_DUAL,
                      USE_COEFF_RELOAD_FALSE,
                      1,
-                     USE_STREAM_API>::filter(input_async_buffer<TT_DATA>& inWindow,
-                                             input_stream_cacc48* inCascade,
-                                             output_stream_cacc48* outCascade,
-                                             output_async_buffer<TT_DATA>& broadcastWindow) {
+                     USE_STREAM_API,
+                     TP_SAT>::filter(input_async_buffer<TT_DATA>& inWindow,
+                                     input_stream_cacc48* inCascade,
+                                     output_stream_cacc48* outCascade,
+                                     output_async_buffer<TT_DATA>& broadcastWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
@@ -2107,7 +2183,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_DUAL_IP>
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -2122,11 +2199,12 @@ void fir_decimate_hb<TT_DATA,
                      TP_DUAL_IP,
                      USE_COEFF_RELOAD_TRUE,
                      1,
-                     USE_STREAM_API>::
-    filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
-               inWindow,
-           input_stream_cacc48* inCascade,
-           output_stream<TT_DATA>* outStream) {
+                     USE_STREAM_API,
+                     TP_SAT>::filter(input_circular_buffer<TT_DATA,
+                                                           extents<inherited_extent>,
+                                                           margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
+                                     input_stream_cacc48* inCascade,
+                                     output_stream<TT_DATA>* outStream) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<16> >*)&inWindow;
@@ -2146,7 +2224,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -2161,9 +2240,10 @@ void fir_decimate_hb<TT_DATA,
                      DUAL_IP_DUAL,
                      USE_COEFF_RELOAD_TRUE,
                      1,
-                     USE_STREAM_API>::filter(input_async_buffer<TT_DATA>& inWindow,
-                                             input_stream_cacc48* inCascade,
-                                             output_stream<TT_DATA>* outStream) {
+                     USE_STREAM_API,
+                     TP_SAT>::filter(input_async_buffer<TT_DATA>& inWindow,
+                                     input_stream_cacc48* inCascade,
+                                     output_stream<TT_DATA>* outStream) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
@@ -2184,7 +2264,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_DUAL_IP>
+          unsigned int TP_DUAL_IP,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -2199,12 +2280,13 @@ void fir_decimate_hb<TT_DATA,
                      TP_DUAL_IP,
                      USE_COEFF_RELOAD_TRUE,
                      2,
-                     USE_STREAM_API>::
-    filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
-               inWindow,
-           input_stream_cacc48* inCascade,
-           output_stream<TT_DATA>* outStream,
-           output_stream<TT_DATA>* outStream2) {
+                     USE_STREAM_API,
+                     TP_SAT>::filter(input_circular_buffer<TT_DATA,
+                                                           extents<inherited_extent>,
+                                                           margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
+                                     input_stream_cacc48* inCascade,
+                                     output_stream<TT_DATA>* outStream,
+                                     output_stream<TT_DATA>* outStream2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<16> >*)&inWindow;
@@ -2225,7 +2307,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -2240,10 +2323,11 @@ void fir_decimate_hb<TT_DATA,
                      DUAL_IP_DUAL,
                      USE_COEFF_RELOAD_TRUE,
                      2,
-                     USE_STREAM_API>::filter(input_async_buffer<TT_DATA>& inWindow,
-                                             input_stream_cacc48* inCascade,
-                                             output_stream<TT_DATA>* outStream,
-                                             output_stream<TT_DATA>* outStream2) {
+                     USE_STREAM_API,
+                     TP_SAT>::filter(input_async_buffer<TT_DATA>& inWindow,
+                                     input_stream_cacc48* inCascade,
+                                     output_stream<TT_DATA>* outStream,
+                                     output_stream<TT_DATA>* outStream2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
@@ -2263,7 +2347,8 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -2278,11 +2363,12 @@ void fir_decimate_hb<TT_DATA,
                      DUAL_IP_SINGLE,
                      USE_COEFF_RELOAD_TRUE,
                      1,
-                     USE_STREAM_API>::
-    filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
-               inWindow,
-           output_stream_cacc48* outCascade,
-           const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 4 + 1]) {
+                     USE_STREAM_API,
+                     TP_SAT>::filter(input_circular_buffer<TT_DATA,
+                                                           extents<inherited_extent>,
+                                                           margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
+                                     output_stream_cacc48* outCascade,
+                                     const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 4 + 1]) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, DUAL_IP_SINGLE> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<16> >*)&inWindow;
@@ -2300,7 +2386,8 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_SAT>
 void fir_decimate_hb<
     TT_DATA,
     TT_COEFF,
@@ -2316,12 +2403,13 @@ void fir_decimate_hb<
     DUAL_IP_DUAL,
     USE_COEFF_RELOAD_TRUE,
     1,
-    USE_STREAM_API>::filter(input_circular_buffer<TT_DATA,
-                                                  extents<inherited_extent>,
-                                                  margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
-                            output_stream_cacc48* outCascade,
-                            output_async_buffer<TT_DATA>& broadcastWindow,
-                            const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 4 + 1]) {
+    USE_STREAM_API,
+    TP_SAT>::filter(input_circular_buffer<TT_DATA,
+                                          extents<inherited_extent>,
+                                          margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& __restrict inWindow,
+                    output_stream_cacc48* outCascade,
+                    output_async_buffer<TT_DATA>& broadcastWindow,
+                    const TT_COEFF (&inTaps)[(TP_FIR_LEN + 1) / 4 + 1]) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<16> >*)&inWindow;
@@ -2341,7 +2429,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -2356,11 +2445,12 @@ void fir_decimate_hb<TT_DATA,
                      DUAL_IP_SINGLE,
                      USE_COEFF_RELOAD_TRUE,
                      1,
-                     USE_STREAM_API>::
-    filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >&
-               inWindow,
-           input_stream_cacc48* inCascade,
-           output_stream_cacc48* outCascade) {
+                     USE_STREAM_API,
+                     TP_SAT>::filter(input_circular_buffer<TT_DATA,
+                                                           extents<inherited_extent>,
+                                                           margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
+                                     input_stream_cacc48* inCascade,
+                                     output_stream_cacc48* outCascade) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_SINGLE> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<16> >*)&inWindow;
@@ -2380,7 +2470,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_SAT>
 void fir_decimate_hb<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -2395,10 +2486,11 @@ void fir_decimate_hb<TT_DATA,
                      DUAL_IP_DUAL,
                      USE_COEFF_RELOAD_TRUE,
                      1,
-                     USE_STREAM_API>::filter(input_async_buffer<TT_DATA>& inWindow,
-                                             input_stream_cacc48* inCascade,
-                                             output_stream_cacc48* outCascade,
-                                             output_async_buffer<TT_DATA>& broadcastWindow) {
+                     USE_STREAM_API,
+                     TP_SAT>::filter(input_async_buffer<TT_DATA>& inWindow,
+                                     input_stream_cacc48* inCascade,
+                                     output_stream_cacc48* outCascade,
+                                     output_async_buffer<TT_DATA>& broadcastWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_DUAL> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;

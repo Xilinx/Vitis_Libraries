@@ -1,5 +1,5 @@
 {
-    "test_0_dds_mixer_lut_aie1": {
+    "test_0_tool_canary_aie":{
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "0",
         "INPUT_WINDOW_VSIZE": "256",
@@ -11,9 +11,11 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "1"
+        "AIE_VARIANT": "1",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
-    "test_1_dds_mixer_lut_aie1": {
+    "test_1_dds_mixer_lut_aie": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
         "INPUT_WINDOW_VSIZE": "768",
@@ -25,9 +27,11 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "1"
+        "AIE_VARIANT": "1",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
-    "test_2_dds_mixer_lut_aie1": {
+    "test_2_dds_mixer_lut_aie": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "2",
         "INPUT_WINDOW_VSIZE": "4800",
@@ -39,9 +43,11 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "1"
+        "AIE_VARIANT": "1",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
-    "test_3_dds_mixer_lut_aie1": {
+    "test_3_dds_mixer_lut_aie": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "0",
         "INPUT_WINDOW_VSIZE": "1024",
@@ -53,9 +59,11 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "1"
+        "AIE_VARIANT": "1",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
-    "test_4_dds_mixer_lut_aie1": {
+    "test_4_dds_mixer_lut_aie": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
         "INPUT_WINDOW_VSIZE": "768",
@@ -67,9 +75,11 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "1"
+        "AIE_VARIANT": "1",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
-    "test_5_dds_mixer_lut_aie1": {
+    "test_5_dds_mixer_lut_aie": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "2",
         "INPUT_WINDOW_VSIZE": "2048",
@@ -81,9 +91,11 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "1"
+        "AIE_VARIANT": "1",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
-    "test_6_dds_mixer_lut_aie1": {
+    "test_6_dds_mixer_lut_aie": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "2",
         "INPUT_WINDOW_VSIZE": "5120",
@@ -95,9 +107,11 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "1"
+        "AIE_VARIANT": "1",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
-    "test_7_dds_mixer_lut_aie1": {
+    "test_7_dds_mixer_lut_aie": {
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "0",
         "INPUT_WINDOW_VSIZE": "256",
@@ -109,9 +123,11 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "1"
+        "AIE_VARIANT": "1",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
-    "test_8_dds_mixer_lut_aie1": {
+    "test_8_dds_mixer_lut_aie": {
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "1",
         "INPUT_WINDOW_VSIZE": "768",
@@ -123,9 +139,11 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "1"
+        "AIE_VARIANT": "1",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
-    "test_9_dds_mixer_lut_aie1": {
+    "test_9_dds_mixer_lut_aie": {
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "2",
         "INPUT_WINDOW_VSIZE": "1024",
@@ -137,9 +155,11 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "1"
+        "AIE_VARIANT": "1",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
-    "test_10_dds_mixer_lut_aie1": {
+    "test_10_dds_mixer_lut_aie": {
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "0",
         "INPUT_WINDOW_VSIZE": "768",
@@ -151,9 +171,11 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "1"
+        "AIE_VARIANT": "1",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
-    "test_11_dds_mixer_lut_aie1": {
+    "test_11_dds_mixer_lut_aie": {
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "1",
         "INPUT_WINDOW_VSIZE": "512",
@@ -165,9 +187,11 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "1"
+        "AIE_VARIANT": "1",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
-    "test_12_dds_mixer_lut_aie1": {
+    "test_12_dds_mixer_lut_aie": {
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "2",
         "INPUT_WINDOW_VSIZE": "1024",
@@ -179,9 +203,11 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "1"
+        "AIE_VARIANT": "1",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
-    "test_13_dds_mixer_lut_aie1": {
+    "test_13_dds_mixer_lut_aie": {
         "DATA_TYPE": "cfloat",
         "MIXER_MODE": "0",
         "INPUT_WINDOW_VSIZE": "256",
@@ -193,9 +219,11 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "1"
+        "AIE_VARIANT": "1",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
-    "test_14_dds_mixer_lut_aie1": {
+    "test_14_dds_mixer_lut_aie": {
         "DATA_TYPE": "cfloat",
         "MIXER_MODE": "1",
         "INPUT_WINDOW_VSIZE": "512",
@@ -207,9 +235,11 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "1"
+        "AIE_VARIANT": "1",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
-    "test_15_dds_mixer_lut_aie1": {
+    "test_15_dds_mixer_lut_aie": {
         "DATA_TYPE": "cfloat",
         "MIXER_MODE": "2",
         "INPUT_WINDOW_VSIZE": "768",
@@ -221,9 +251,11 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "1"
+        "AIE_VARIANT": "1",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
-    "test_16_dds_mixer_lut_aie1": {
+    "test_16_dds_mixer_lut_aie": {
         "DATA_TYPE": "cfloat",
         "MIXER_MODE": "0",
         "INPUT_WINDOW_VSIZE": "256",
@@ -235,9 +267,11 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "1"
+        "AIE_VARIANT": "1",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
-    "test_17_dds_mixer_lut_aie1": {
+    "test_17_dds_mixer_lut_aie": {
         "DATA_TYPE": "cfloat",
         "MIXER_MODE": "1",
         "INPUT_WINDOW_VSIZE": "1536",
@@ -249,9 +283,11 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "1"
+        "AIE_VARIANT": "1",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
-    "test_18_dds_mixer_lut_aie1": {
+    "test_18_dds_mixer_lut_aie": {
         "DATA_TYPE": "cfloat",
         "MIXER_MODE": "2",
         "INPUT_WINDOW_VSIZE": "1280",
@@ -263,9 +299,11 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "1"
+        "AIE_VARIANT": "1",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
-    "test_0_dds_mixer_lut_aie2": {
+    "test_0_tool_canary_aieml":{
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "0",
         "INPUT_WINDOW_VSIZE": "256",
@@ -277,9 +315,11 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "2"
+        "AIE_VARIANT": "2",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
-    "test_1_dds_mixer_lut_aie2": {
+    "test_1_dds_mixer_lut_aieml": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
         "INPUT_WINDOW_VSIZE": "768",
@@ -291,9 +331,11 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "2"
+        "AIE_VARIANT": "2",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
-    "test_2_dds_mixer_lut_aie2": {
+    "test_2_dds_mixer_lut_aieml": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "2",
         "INPUT_WINDOW_VSIZE": "1024",
@@ -305,9 +347,11 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "2"
+        "AIE_VARIANT": "2",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
-    "test_3_dds_mixer_lut_aie2": {
+    "test_3_dds_mixer_lut_aieml": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "0",
         "INPUT_WINDOW_VSIZE": "1280",
@@ -319,9 +363,11 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "2"
+        "AIE_VARIANT": "2",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
-    "test_4_dds_mixer_lut_aie2": {
+    "test_4_dds_mixer_lut_aieml": {
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "1",
         "INPUT_WINDOW_VSIZE": "1536",
@@ -333,9 +379,11 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "2"
+        "AIE_VARIANT": "2",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
-    "test_6_dds_mixer_lut_aie2": {
+    "test_6_dds_mixer_lut_aieml": {
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "0",
         "INPUT_WINDOW_VSIZE": "1024",
@@ -347,9 +395,11 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "2"
+        "AIE_VARIANT": "2",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
-    "test_7_dds_mixer_lut_aie2": {
+    "test_7_dds_mixer_lut_aieml": {
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "1",
         "INPUT_WINDOW_VSIZE": "256",
@@ -361,9 +411,11 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "2"
+        "AIE_VARIANT": "2",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
-    "test_8_dds_mixer_lut_aie2": {
+    "test_8_dds_mixer_lut_aieml": {
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "2",
         "INPUT_WINDOW_VSIZE": "256",
@@ -375,9 +427,11 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "2"
+        "AIE_VARIANT": "2",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
-    "test_9_dds_mixer_lut_aie2": {
+    "test_9_dds_mixer_lut_aieml": {
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "0",
         "INPUT_WINDOW_VSIZE": "1024",
@@ -389,9 +443,11 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "2"
+        "AIE_VARIANT": "2",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
-    "test_10_dds_mixer_lut_aie2": {
+    "test_10_dds_mixer_lut_aieml": {
         "DATA_TYPE": "cint32",
         "MIXER_MODE": "1",
         "INPUT_WINDOW_VSIZE": "1792",
@@ -403,6 +459,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "SFDR": "90",
-        "AIE_VARIANT": "2"
+        "AIE_VARIANT": "2",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     }
 }

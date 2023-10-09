@@ -40,6 +40,8 @@ namespace aie {
 namespace fir {
 namespace resampler {
 
+#if (__HAS_ACCUM_PERMUTES__ == 1)
+
 //-----------------------------------------------------------------------------------------------------
 //------------------------- 768-bit MAC calls
 //-----------------------------------------------------------------------------------------------------
@@ -490,6 +492,21 @@ inline T_acc384<cfloat, cfloat> macResampler(T_acc384<cfloat, cfloat> acc,
     retVal.val = fpmac(acc.val, xbuff.val, xstart, xoffsets, zbuff.val, zstart, zoffsets);
     return retVal;
 }
+
+#else  // __HAS_ACCUM_PERMUTES__ = 0
+
+// Do nothing when permute is not supported
+template <typename TT_DATA, typename TT_COEFF>
+INLINE_DECL T_acc<TT_DATA, TT_COEFF> macResampler(T_acc<TT_DATA, TT_COEFF> acc,
+                                                  T_buff_1024b<TT_DATA> xbuff,
+                                                  unsigned int xstart,
+                                                  unsigned int xoffsets,
+                                                  T_buff_256b<TT_COEFF> zbuff,
+                                                  unsigned int zstart,
+                                                  unsigned int zoffsets) {
+    return acc;
+};
+#endif //__HAS_ACCUM_PERMUTES__
 
 // Initial MAC/MUL operation. Long, 768-bit accs
 template <typename TT_DATA, typename TT_COEFF, bool TP_CASC_IN, unsigned int TP_DUAL_IP>

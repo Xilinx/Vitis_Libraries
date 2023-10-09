@@ -27,7 +27,12 @@
         {
             "name": "TP_WINDOW_VSIZE",
             "type": "uint",
-            "description": "Size of I/O window in IOBUFF interface. Not used when the IO interface is AXI-4 streams"
+            "description": "Size of I/O window in IOBUFF interface. Not used when the IO interface is AXI-4 streams",
+            "validator": {
+            "file": "sample_delay.py",
+            "function": "validate_TP_WINDOW_VSIZE",
+            "args": ["TT_DATA", "TP_MAX_DELAY","TP_API"]
+            }
         },
         {
             "name": "TP_API",
@@ -39,7 +44,12 @@
         {
             "name": "TP_MAX_DELAY",
             "type": "uint",
-            "description": "Upper bound of the the requested sample delay on RTP port"
+            "description": "Upper bound of the the requested sample delay on RTP port",
+            "validator": {
+            "file": "sample_delay.py",
+            "function": "validate_TP_MAX_DELAY",
+            "args": ["TT_DATA", "TP_API"]
+            }
         }
     ],
     "ports": {
@@ -49,7 +59,5 @@
     "generator": {
         "file": "sample_delay.py",
         "function": "generate_graph"
-    },
-    "target_domain": "AIE",
-    "visible": true
+    }
 }

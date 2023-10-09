@@ -43,8 +43,8 @@
             "launch_cmd": [
                 "mkdir -p logs",
                 "grep -ve '[XT]' ./aiesimulator_output/data/uut_output.txt > ./logs/uut_output.txt",
-                "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE) abs",
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_diff HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_latency HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_stats HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
                 "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_theoretical_min HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR  UUT_KERNEL=$(UUT_KERNEL)\"",
@@ -58,9 +58,8 @@
                 "mkdir -p logs",
                 "$(if $(filter-out REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/uut_output.txt > ./logs/uut_output.txt)",
                 "$(if $(filter REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./logs/ref_output.txt)",
-                "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE) abs)",                
+                "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_diff HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\")",
                 "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\")",
-                "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f PROJECT/helper.mk get_stats HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\")",
                 "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./)"
             ]
         }
@@ -88,7 +87,7 @@
                 "./"
             ],
             "customized_params": {
-                "params": "-v $($(TAG)_TARGET_COMPILE_ARGS) -Xpreproc=\"$($(TAG)_PREPROC_ARGS)\"",
+                "params": "--aie.verbose $($(TAG)_TARGET_COMPILE_ARGS) $($(TAG)_PREPROC_ARGS)",
                 "default": {
                     "TAG": "UUT",
                     "UUT_KERNEL":"matrix_vector_mul",
@@ -100,11 +99,11 @@
                     "REF_SIM_FILE": "./data/ref_output.txt",
                     "LOC_INPUT_FILE_A": "./data/inputA.txt",
                     "LOC_INPUT_FILE_B": "./data/inputB.txt",
-                    "UUT_TARGET_COMPILE_ARGS": "-Xchess=llvm.xargs=\"-std=c++2a\" -Xchess=main:backend.mist2.xargs=\"+NOdra\"  -Xchess=main:backend.mist2.pnll=\"off\" ",
+                    "UUT_TARGET_COMPILE_ARGS": "--aie.Xchess=llvm.xargs=\"-std=c++2a\" --aie.Xchess=main:backend.mist2.xargs=\"+NOdra\"  --aie.Xchess=main:backend.mist2.pnll=\"off\" ",
                     "REF_TARGET_COMPILE_ARGS": "",
-                    "PREPROC_ARGS": " -DINPUT_FILE_A=$(LOC_INPUT_FILE_A) -DINPUT_FILE_B=$(LOC_INPUT_FILE_B)",
-                    "REF_PREPROC_ARGS": "-DUUT_GRAPH=$(REF_GRAPH) -DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS)",
-                    "UUT_PREPROC_ARGS": "-DUUT_GRAPH=$(UUT_GRAPH) -DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) -DUSING_UUT=1"
+                    "PREPROC_ARGS": "--aie.Xpreproc=-DINPUT_FILE_A=$(LOC_INPUT_FILE_A) --aie.Xpreproc=-DINPUT_FILE_B=$(LOC_INPUT_FILE_B)",
+                    "REF_PREPROC_ARGS": "--aie.Xpreproc=-DUUT_GRAPH=$(REF_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS)",
+                    "UUT_PREPROC_ARGS": "--aie.Xpreproc=-DUUT_GRAPH=$(UUT_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) --aie.Xpreproc=-DUSING_UUT=1"
                 }
             }
         }

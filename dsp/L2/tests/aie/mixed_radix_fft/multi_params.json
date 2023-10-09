@@ -1,11 +1,11 @@
 {
-    "test_default_mrfft": {
+    "test_0_tool_canary_aie": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "48",
         "FFT_NIFFT": "0",
         "SHIFT": "6",
-        "ROUND_MODE": "0",
+        "ROUND_MODE": "2",
         "SAT_MODE": "1",
         "WINDOW_VSIZE": "48",
         "CASC_LEN": "1",
@@ -17,13 +17,13 @@
         "DIFF_TOLERANCE": "4",
         "CC_TOLERANCE": "0"
     },
-    "test_cint32_mrfft": {
+    "test_1_mrfft_cint32": {
         "DATA_TYPE": "cint32",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "96",
         "FFT_NIFFT": "0",
         "SHIFT": "7",
-        "ROUND_MODE": "0",
+        "ROUND_MODE": "2",
         "SAT_MODE": "1",
         "WINDOW_VSIZE": "96",
         "CASC_LEN": "1",
@@ -35,13 +35,13 @@
         "DIFF_TOLERANCE": "4",
         "CC_TOLERANCE": "0"
     },
-    "test_fwd_mrfft": {
+    "test_2_mrfft_fwd": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "48",
         "FFT_NIFFT": "1",
         "SHIFT": "6",
-        "ROUND_MODE": "0",
+        "ROUND_MODE": "2",
         "SAT_MODE": "1",
         "WINDOW_VSIZE": "48",
         "CASC_LEN": "1",
@@ -53,13 +53,13 @@
         "DIFF_TOLERANCE": "4",
         "CC_TOLERANCE": "0"
     },
-    "test_r5_mrfft": {
+    "test_3_mrfft_r5": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "80",
         "FFT_NIFFT": "0",
         "SHIFT": "6",
-        "ROUND_MODE": "0",
+        "ROUND_MODE": "2",
         "SAT_MODE": "1",
         "WINDOW_VSIZE": "80",
         "CASC_LEN": "1",
@@ -71,13 +71,13 @@
         "DIFF_TOLERANCE": "4",
         "CC_TOLERANCE": "0"
     },
-    "test_r5_cint32_mrfft": {
+    "test_4_mrfft_r5_cint32": {
         "DATA_TYPE": "cint32",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "80",
         "FFT_NIFFT": "0",
         "SHIFT": "6",
-        "ROUND_MODE": "0",
+        "ROUND_MODE": "2",
         "SAT_MODE": "1",
         "WINDOW_VSIZE": "80",
         "CASC_LEN": "1",
@@ -89,13 +89,13 @@
         "DIFF_TOLERANCE": "4",
         "CC_TOLERANCE": "0"
     },
-    "test_r5_r3_mrfft": {
+    "test_5_mrfft_r5_r3": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "240",
         "FFT_NIFFT": "0",
         "SHIFT": "6",
-        "ROUND_MODE": "0",
+        "ROUND_MODE": "2",
         "SAT_MODE": "1",
         "WINDOW_VSIZE": "240",
         "CASC_LEN": "1",
@@ -107,13 +107,13 @@
         "DIFF_TOLERANCE": "4",
         "CC_TOLERANCE": "0"
     },
-    "test_r5_r3_multi_mrfft": {
+    "test_6_mrfft_r5_r3_multi": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "240",
         "FFT_NIFFT": "0",
         "SHIFT": "6",
-        "ROUND_MODE": "0",
+        "ROUND_MODE": "2",
         "SAT_MODE": "1",
         "WINDOW_VSIZE": "1200",
         "CASC_LEN": "1",
@@ -125,13 +125,13 @@
         "DIFF_TOLERANCE": "4",
         "CC_TOLERANCE": "0"
     },
-    "test_r5_casc2_mrfft": {
+    "test_7_mrfft_r5_casc2": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "80",
         "FFT_NIFFT": "0",
         "SHIFT": "6",
-        "ROUND_MODE": "0",
+        "ROUND_MODE": "2",
         "SAT_MODE": "1",
         "WINDOW_VSIZE": "80",
         "CASC_LEN": "2",
@@ -143,13 +143,13 @@
         "DIFF_TOLERANCE": "4",
         "CC_TOLERANCE": "0"
     },
-    "test_r3_casc3_mrfft": {
+    "test_8_mrfft_r3_casc3": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "96",
         "FFT_NIFFT": "0",
         "SHIFT": "6",
-        "ROUND_MODE": "0",
+        "ROUND_MODE": "2",
         "SAT_MODE": "1",
         "WINDOW_VSIZE": "96",
         "CASC_LEN": "3",
@@ -161,13 +161,13 @@
         "DIFF_TOLERANCE": "4",
         "CC_TOLERANCE": "0"
     },
-    "test_r5_cint32_strm_mrfft": {
+    "test_9_mrfft_r5_cint32_strm": {
         "DATA_TYPE": "cint32",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "80",
         "FFT_NIFFT": "0",
         "SHIFT": "6",
-        "ROUND_MODE": "0",
+        "ROUND_MODE": "2",
         "SAT_MODE": "1",
         "WINDOW_VSIZE": "80",
         "CASC_LEN": "1",
@@ -179,13 +179,13 @@
         "DIFF_TOLERANCE": "4",
         "CC_TOLERANCE": "0"
     },
-    "test_r5_r3_strm_multi_mrfft": {
+    "test_10_mrfft_r5_r3_strm_multi": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "240",
         "FFT_NIFFT": "0",
         "SHIFT": "6",
-        "ROUND_MODE": "0",
+        "ROUND_MODE": "2",
         "SAT_MODE": "1",
         "WINDOW_VSIZE": "1200",
         "CASC_LEN": "1",

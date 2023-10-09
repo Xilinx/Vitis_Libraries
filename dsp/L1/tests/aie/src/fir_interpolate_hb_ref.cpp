@@ -65,7 +65,8 @@ template <typename TT_DATA,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
           unsigned int TP_UPSHIFT_CT,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 fir_interpolate_hb_ref<TT_DATA,
                        TT_COEFF,
                        TP_FIR_LEN,
@@ -75,7 +76,8 @@ fir_interpolate_hb_ref<TT_DATA,
                        TP_USE_COEFF_RELOAD,
                        TP_NUM_OUTPUTS,
                        TP_UPSHIFT_CT,
-                       TP_API>::fir_interpolate_hb_ref(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / 4 + 1]) {
+                       TP_API,
+                       TP_SAT>::fir_interpolate_hb_ref(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / 4 + 1]) {
     int inputIndex = 0;
     for (int i = 0; i < TP_FIR_LEN; ++i) {
         if (i == m_kCentreTapInternalPos) {
@@ -106,7 +108,8 @@ template <typename TT_DATA,
           unsigned TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_NUM_OUTPUTS,
           unsigned int TP_UPSHIFT_CT,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 fir_interpolate_hb_ref<TT_DATA,
                        TT_COEFF,
                        TP_FIR_LEN,
@@ -116,7 +119,8 @@ fir_interpolate_hb_ref<TT_DATA,
                        USE_COEFF_RELOAD_TRUE,
                        TP_NUM_OUTPUTS,
                        TP_UPSHIFT_CT,
-                       TP_API>::fir_interpolate_hb_ref(){};
+                       TP_API,
+                       TP_SAT>::fir_interpolate_hb_ref(){};
 //------------------------------------------------------------------------
 // reload, single output
 template <typename TT_DATA,
@@ -127,7 +131,8 @@ template <typename TT_DATA,
           unsigned TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_NUM_OUTPUTS,
           unsigned int TP_UPSHIFT_CT,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 void fir_interpolate_hb_ref<TT_DATA,
                             TT_COEFF,
                             TP_FIR_LEN,
@@ -137,7 +142,8 @@ void fir_interpolate_hb_ref<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             TP_NUM_OUTPUTS,
                             TP_UPSHIFT_CT,
-                            TP_API>::firReload(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / 4 + 1]) {
+                            TP_API,
+                            TP_SAT>::firReload(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / 4 + 1]) {
     int inputIndex = 0;
     for (int i = 0; i < TP_FIR_LEN; ++i) {
         if (i == m_kCentreTapInternalPos) {
@@ -170,7 +176,8 @@ template <typename TT_DATA,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
           unsigned int TP_UPSHIFT_CT,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 void fir_interpolate_hb_ref<TT_DATA,
                             TT_COEFF,
                             TP_FIR_LEN,
@@ -180,7 +187,8 @@ void fir_interpolate_hb_ref<TT_DATA,
                             TP_USE_COEFF_RELOAD,
                             TP_NUM_OUTPUTS,
                             TP_UPSHIFT_CT,
-                            TP_API>::
+                            TP_API,
+                            TP_SAT>::
     filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN / 2, TT_DATA>()> >&
                inWindow,
            output_circular_buffer<TT_DATA>& outWindow) {
@@ -244,12 +252,12 @@ void fir_interpolate_hb_ref<TT_DATA,
         // 0 0 0 5 0 0 0      - Odd polyphase only has 7 coefficients
 
         roundAcc(TP_RND, shift, accum);
-        saturateAcc(accum);
+        saturateAcc(accum, TP_SAT);
         accumSrs = castAcc(accum);
         *outItr++ = accumSrs;
 
         roundAcc(TP_RND, shift, accum2);
-        saturateAcc(accum2);
+        saturateAcc(accum2, TP_SAT);
         accumSrs = castAcc(accum2);
         *outItr++ = accumSrs;
 
@@ -268,7 +276,8 @@ template <typename TT_DATA,
           unsigned TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_NUM_OUTPUTS,
           unsigned int TP_UPSHIFT_CT,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 void fir_interpolate_hb_ref<TT_DATA,
                             TT_COEFF,
                             TP_FIR_LEN,
@@ -278,7 +287,8 @@ void fir_interpolate_hb_ref<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             TP_NUM_OUTPUTS,
                             TP_UPSHIFT_CT,
-                            TP_API>::
+                            TP_API,
+                            TP_SAT>::
     filter(input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<fnFirMargin<TP_FIR_LEN / 2, TT_DATA>()> >&
                inWindow,
            output_circular_buffer<TT_DATA>& outWindow,
@@ -337,14 +347,14 @@ void fir_interpolate_hb_ref<TT_DATA,
         }
 
         roundAcc(TP_RND, shift, accum);
-        saturateAcc(accum);
+        saturateAcc(accum, TP_SAT);
         accumSrs = castAcc(accum);
         *outItr++ = accumSrs;
 
         // The centre tap is in the second polyphase. Due to the reversal of coefficients in the aie
         // processor it is necessary to read out the polyphases in reverse order.
         roundAcc(TP_RND, shift, accum2);
-        saturateAcc(accum2);
+        saturateAcc(accum2, TP_SAT);
         accumSrs = castAcc(accum2);
         *outItr++ = accumSrs;
 

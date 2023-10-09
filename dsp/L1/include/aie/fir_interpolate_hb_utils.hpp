@@ -39,7 +39,7 @@ because they are purely for kernel use, not graph level compilation.
 template <typename T_D, typename T_C>
 struct T_accIntHb : T_acc<T_D, T_C> {
 #if __HAS_SYM_PREADD__ == 0
-    using v_type = ::aie::detail::accum<fnAccClass<T_D>(), fnAccSize<T_D, T_C>(), 2 * fnNumLanes384<T_D, T_C>()>;
+    using v_type = ::aie::accum<typename tAccBaseType<T_D, T_C>::type, 2 * fnNumLanes384<T_D, T_C>()>;
     v_type val, uval;
     static constexpr unsigned getLanes() { return fnNumLanes384<T_D, T_C>(); };
     static constexpr unsigned getSize() { return fnAccSize<T_D, T_C>(); };
@@ -58,12 +58,52 @@ struct T_accAsymIntHb<int16, int16, 1> : T_acc384<int16, int16> {
     using T_acc384<int16, int16>::operator=;
 };
 template <>
+struct T_accAsymIntHb<int16, int32, 1> : T_acc384<int16, int32> {
+    using T_acc384<int16, int32>::operator=;
+};
+template <>
+struct T_accAsymIntHb<int32, int16, 1> : T_acc384<int32, int16> {
+    using T_acc384<int32, int16>::operator=;
+};
+template <>
+struct T_accAsymIntHb<int32, int32, 1> : T_acc384<int32, int32> {
+    using T_acc384<int32, int32>::operator=;
+};
+template <>
 struct T_accAsymIntHb<cint16, int16, 1> : T_acc384<cint16, int16> {
     using T_acc384<cint16, int16>::operator=;
 };
 template <>
+struct T_accAsymIntHb<cint16, int32, 1> : T_acc384<cint16, int32> {
+    using T_acc384<cint16, int32>::operator=;
+};
+template <>
 struct T_accAsymIntHb<cint16, cint16, 1> : T_acc384<cint16, cint16> {
     using T_acc384<cint16, cint16>::operator=;
+};
+template <>
+struct T_accAsymIntHb<cint16, cint32, 1> : T_acc384<cint16, cint32> {
+    using T_acc384<cint16, cint32>::operator=;
+};
+template <>
+struct T_accAsymIntHb<cint32, int16, 1> : T_acc384<cint32, int16> {
+    using T_acc384<cint32, int16>::operator=;
+};
+template <>
+struct T_accAsymIntHb<cint32, cint16, 1> : T_acc384<cint32, cint16> {
+    using T_acc384<cint32, cint16>::operator=;
+};
+template <>
+struct T_accAsymIntHb<cint32, int32, 1> : T_acc384<cint32, int32> {
+    using T_acc384<cint32, int32>::operator=;
+};
+template <>
+struct T_accAsymIntHb<cint32, cint32, 1> : T_acc384<cint32, cint32> {
+    using T_acc384<cint32, cint32>::operator=;
+};
+template <>
+struct T_accAsymIntHb<float, float, 1> : T_acc384<float, float> {
+    using T_acc384<float, float>::operator=;
 };
 
 template <typename T_D, typename T_C, unsigned int T_API = 0>
@@ -271,9 +311,14 @@ INLINE_DECL void writeOutputIntHb(T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterfa
                                   auto& outItr) {
     using acc_type = typename T_accAsymIntHb<TT_DATA, TT_COEFF, TP_API>::v_type;
     using out_type = typename T_outValIntHbAsym<TT_DATA, TT_COEFF, TP_API>::out_type;
-    typedef TT_DATA T_OutType;
+    typedef typename std::conditional_t<
+        std::is_same<TT_DATA, int16>::value && std::is_same<TT_COEFF, int32>::value, int32_t,
+        std::conditional_t<
+            std::is_same<TT_DATA, cint16>::value && std::is_same<TT_COEFF, int32>::value, cint32_t,
+            std::conditional_t<std::is_same<TT_DATA, cint16>::value && std::is_same<TT_COEFF, cint32>::value, cint32_t,
+                               TT_DATA> > >
+        T_OutType;
     T_outValIntHbAsym<TT_DATA, TT_COEFF, TP_API> outVal;
-    T_accIntHb<TT_DATA, TT_COEFF> acc;
     if
         constexpr((std::is_same<TT_DATA, int16>::value && std::is_same<TT_COEFF, int16>::value) ||
                   (std::is_same<TT_DATA, cint16>::value && std::is_same<TT_COEFF, int16>::value) ||
@@ -300,42 +345,29 @@ INLINE_DECL void writeOutputIntHb(T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterfa
                 auto tmpExtract1 = tmpAcc.template extract<tmpAcc.size() / 2>(0);
                 auto tmpExtract2 = tmpAcc.template extract<tmpAcc.size() / 2>(1);
                 auto[tmpIlv1, tmpIlv2] = ::aie::interleave_zip(tmpExtract1, tmpExtract2, 1);
-                outVal.val = tmpIlv1;
-                writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0, outItr);
-                outVal.val = tmpIlv2;
-                writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 1, outItr);
+                outVal.val = ::aie::concat(tmpIlv1, tmpIlv2);
+                writeOutputHbAsym<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0, outItr);
             }
         else if
             constexpr(std::is_same<TT_DATA, T_OutType>::value) {
                 // accLow & accHigh are long 768-bit accums, acc is an 768-bit long acc.
-                acc.val = ::aie::interleave_zip(accLow.val.template extract<accLow.getLanes() / 2>(0),
-                                                accHigh.val.template extract<accHigh.getLanes() / 2>(0));
-                outVal.val = acc.val.template to_vector<TT_DATA>(shift);
-                writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0, outItr);
-                acc.val = ::aie::interleave_zip(accLow.val.template extract<accLow.getLanes() / 2>(1),
-                                                accHigh.val.template extract<accHigh.getLanes() / 2>(1));
-                outVal.val = acc.val.template to_vector<TT_DATA>(shift);
-                writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0, outItr);
+                auto accLowShifted = accLow.val.template to_vector<TT_DATA>(shift);
+                auto accHighShifted = accHigh.val.template to_vector<TT_DATA>(shift);
+
+                outVal.val = ::aie::concat(::aie::interleave_zip(accLowShifted, accHighShifted, 1).first,
+                                           ::aie::interleave_zip(accLowShifted, accHighShifted, 1).second);
+                writeOutputHbAsym<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0, outItr);
             }
         else {
             // Special case for 16-bit data and 32-bit coeffs.
             // 80-bit accs shifted down to 16-bit output type require a 2-stage srs.
             // First, shift and interleave.
             // Then, shift down further to 16-bit output
-            T_outValIntHbAsym<T_OutType, int16, TP_API> outIntermediateVal;
-            T_accIntHb<T_OutType, int16> accIntermediate;
-            acc.val = ::aie::interleave_zip(accLow.val.template extract<accLow.getLanes() / 2>(0),
-                                            accHigh.val.template extract<accHigh.getLanes() / 2>(0));
-            outIntermediateVal.val = acc.val.template to_vector<TT_DATA>(shift);
-            accIntermediate.val.from_vector(outIntermediateVal.val, 0); // upshift back to 48-bit acc
-            outVal.val = accIntermediate.val.template to_vector<TT_DATA>(0);
-            writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0, outItr);
-            acc.val = ::aie::interleave_zip(accLow.val.template extract<accLow.getLanes() / 2>(0),
-                                            accHigh.val.template extract<accHigh.getLanes() / 2>(0));
-            outIntermediateVal.val = acc.val.template to_vector<TT_DATA>(shift);
-            accIntermediate.val.from_vector(outIntermediateVal.val, 0); // upshift back to 48-bit acc
-            outVal.val = accIntermediate.val.template to_vector<TT_DATA>(0);
-            writeOutput<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 1, outItr);
+            auto accHighShifted = accHigh.val.template to_vector<TT_DATA>(shift);
+            auto accLowShifted = accLow.val.template to_vector<TT_DATA>(shift);
+            outVal.val = ::aie::concat(::aie::interleave_zip(accLowShifted, accHighShifted, 1).first,
+                                       ::aie::interleave_zip(accLowShifted, accHighShifted, 1).second);
+            writeOutputHbAsym<TT_DATA, TT_COEFF, TP_NUM_OUTPUTS, TP_API>(outInterface, outVal, 0, outItr);
         }
     }
 }
@@ -621,13 +653,6 @@ INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> mulSlidingSym2buff(
                     retVal.val, zbuff.val, zstart, ybuff.val, ystart);
         }
     else {
-// tmp = ::aie::sliding_mul_sym_ops<Lanes,
-//                         Points,
-//                         CoeffStep, DataStepX, DataStepY,
-//                         TT_COEFF, TT_DATA,
-//                         accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>
-//                         >::mul_sym
-//             (zbuff.val, zstart, xbuff.val, xstart, ybuff.val, ystart);
 #if __HAS_SYM_PREADD__ == 1
         tmp = ::aie::sliding_mul_sym<Lanes, Points, CoeffStep, DataStep>(zbuff.val, zstart, xbuff.val, xstart,
                                                                          ybuff.val, ystart);
@@ -671,11 +696,10 @@ INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> mulSym1buffIntHb(
                 }
             else {
 #if __HAS_SYM_PREADD__ == 1
-                retVal.val = ::aie::sliding_mul_sym_ops<
-                    Lanes, Points, CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
-                    accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >::mul_sym(zbuff.val, zstart,
-                                                                                                    xbuff.val, xstart,
-                                                                                                    ystart);
+                retVal.val =
+                    ::aie::sliding_mul_sym_ops<Lanes, Points, CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
+                                               tAccBaseType_t<TT_DATA, TT_COEFF> >::mul_sym(zbuff.val, zstart,
+                                                                                            xbuff.val, xstart, ystart);
 #else
                 retVal.val =
                     ::aie::sliding_mul<Lanes, Points, CoeffStep, DataStepX>(zbuff.val, zstart, xbuff.val, xstart);
@@ -783,9 +807,9 @@ INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> mulCentreTap2buffInt
     if
         constexpr(TP_UPSHIFT_CT == 0) {
             // Call overloaded low level function which uses native vectors
-            retVal.val = ::aie::sliding_mul<fnNumLanes384<TT_DATA, TT_COEFF>(), fnNumCols384<TT_DATA, TT_COEFF>(), 1, 1,
-                                            1, accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >(
-                zbuff.val, zstart, xbuff.val, xstart);
+            retVal.val =
+                ::aie::sliding_mul<fnNumLanes384<TT_DATA, TT_COEFF>(), fnNumCols384<TT_DATA, TT_COEFF>(), 1, 1, 1,
+                                   tAccBaseType_t<TT_DATA, TT_COEFF> >(zbuff.val, zstart, xbuff.val, xstart);
         }
     else {
         // return undef vector. Nothing to do here.
@@ -850,30 +874,6 @@ INLINE_DECL T_accSymIntHb<TT_DATA, TT_COEFF, TP_UPSHIFT_CT> initMacIntHb(
     }
 };
 
-/*
-template<typename TT_DATA, typename TT_COEFF, unsigned int TP_UPSHIFT_CT>
-INLINE_DECL T_acc<TT_DATA, TT_COEFF> mulCentreTap1buffIntHb(
-    T_buff_1024b<TT_DATA> xbuff, unsigned int xstart,
-    T_buff_256b<TT_COEFF> zbuff)
-{
-    unsigned int zstart = 0;
-    T_acc<TT_DATA, TT_COEFF> retVal;
-    if constexpr (TP_UPSHIFT_CT == 0){
-        // Call overloaded low level function which uses native vectors
-        retVal.val      = ::aie::sliding_mul<fnNumLanes<TT_DATA, TT_COEFF>(),
-                                fnNumCols<TT_DATA, TT_COEFF>(),
-                                1, 1, 1,
-                                accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>
-                                >
-                            (zbuff.val, zstart, xbuff.val, xstart);
-
-    } else {
-    // return undef vector. Nothing to do here.
-    }
-
-    return retVal;
-};*/
-
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_UPSHIFT_CT, unsigned int TP_API = 0>
 INLINE_DECL auto mulCentreTap1buffIntHb(T_buff_1024b<TT_DATA> xbuff, unsigned int xstart, T_buff_256b<TT_COEFF> zbuff) {
     unsigned int zstart = 0;
@@ -883,13 +883,11 @@ INLINE_DECL auto mulCentreTap1buffIntHb(T_buff_1024b<TT_DATA> xbuff, unsigned in
     static constexpr unsigned int lanes =
         TP_API == 0 ? fnNumLanes<TT_DATA, TT_COEFF>() : fnNumLanes384<TT_DATA, TT_COEFF>();
 #endif
-    // T_acc384<TT_DATA, TT_COEFF> retVal;
     if
         constexpr(TP_UPSHIFT_CT == 0) {
             // Call overloaded low level function which uses native vectors
             return ::aie::sliding_mul<lanes, fnNumCols384<TT_DATA, TT_COEFF>(), 1, 1, 1,
-                                      accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >(
-                zbuff.val, zstart, xbuff.val, xstart);
+                                      tAccBaseType_t<TT_DATA, TT_COEFF> >(zbuff.val, zstart, xbuff.val, xstart);
         }
     else {
         // return undef vector. Nothing to do here.

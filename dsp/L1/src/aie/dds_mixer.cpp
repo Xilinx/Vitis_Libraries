@@ -25,8 +25,8 @@ Coding conventions
 
 #include <adf.h>
 #include "device_defs.h"
+
 #define __AIE_API_USE_NATIVE_1024B_VECTOR__
-// Include for AIE API items
 #include "aie_api/aie_adf.hpp"
 
 #include "dds_mixer_traits.hpp"
@@ -34,7 +34,6 @@ Coding conventions
 #include "dds_mixer_utils.hpp"
 #include "kernel_api_utils.hpp"
 #include "aie_api/utils.hpp"
-//#define _DSPLIB_DDS_MIXER_HPP_DEBUG_
 
 namespace xf {
 namespace dsp {
@@ -86,8 +85,10 @@ template <typename TT_DATA,
           unsigned int TP_MIXER_MODE,
           unsigned int TP_API,
           unsigned int TP_SC_MODE,
-          unsigned int TP_NUM_LUTS>
-kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, TP_SC_MODE, TP_NUM_LUTS>::
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, TP_SC_MODE, TP_NUM_LUTS, TP_RND, TP_SAT>::
     kernelDdsMixerClass(uint32_t phaseInc) {
     m_phaseIndex = 0;
     m_perCyclePhaseInc = phaseInc * m_kNumLanes;
@@ -103,14 +104,24 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_MIXER_MODE,
           unsigned int TP_API,
-          unsigned int TP_NUM_LUTS>
-kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_LUT_SINCOS, TP_NUM_LUTS>::
-    kernelDdsMixerClass(uint32_t phaseInc) {
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+kernelDdsMixerClass<TT_DATA,
+                    TP_INPUT_WINDOW_VSIZE,
+                    TP_MIXER_MODE,
+                    TP_API,
+                    USE_LUT_SINCOS,
+                    TP_NUM_LUTS,
+                    TP_RND,
+                    TP_SAT>::kernelDdsMixerClass(uint32_t phaseInc) {
     if
         constexpr(!((std::is_same<TT_DATA, cint16>::value) || (std::is_same<TT_DATA, cint32>::value))) {
 #if __SUPPORTS_CFLOAT__ == 1
             m_phaseIndex = 0;
             set_rnd(rnd_sym_inf); // round to symmetric infinity
+            // set_rnd_mode<TP_RND>();
+            // set_sat_mode<TP_SAT>();
             aie::vector<TT_DATA, m_kNumLanes> sincosVal[TP_NUM_LUTS];
             aie::vector<TT_DATA, m_kNumLanes> tempOut;
 
@@ -166,9 +177,10 @@ kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_L
     else {
         m_phaseIndex = 0;
         set_rnd(rnd_sym_inf); // round to symmetric infinity
+        // set_sat_mode<TP_SAT>();
         using T_LUT_TYPE = cint32;
         aie::vector<T_LUT_TYPE, m_kNumLanes> sincosVal[TP_NUM_LUTS];
-        ::aie::detail::accum< ::aie::detail::AccumClass::CInt, 64, m_kNumLanes> tempVal;
+        ::aie::accum<cacc64, m_kNumLanes> tempVal;
         aie::vector<TT_DATA, m_kNumLanes> tempOut;
 
         sincosLUT[0] = (T_LUT_TYPE*)sincosLUTCoarse32;
@@ -254,8 +266,10 @@ template <typename TT_DATA,
           unsigned int TP_MIXER_MODE,
           unsigned int TP_API,
           unsigned int TP_SC_MODE,
-          unsigned int TP_NUM_LUTS>
-kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, TP_SC_MODE, TP_NUM_LUTS>::
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, TP_SC_MODE, TP_NUM_LUTS, TP_RND, TP_SAT>::
     kernelDdsMixerClass(uint32_t phaseInc, uint32_t initialPhaseOffset)
     : kernelDdsMixerClass(phaseInc) {
     // initialise phase accumulator index to offset.
@@ -267,9 +281,17 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_MIXER_MODE,
           unsigned int TP_API,
-          unsigned int TP_NUM_LUTS>
-kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_LUT_SINCOS, TP_NUM_LUTS>::
-    kernelDdsMixerClass(uint32_t phaseInc, uint32_t initialPhaseOffset)
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+kernelDdsMixerClass<TT_DATA,
+                    TP_INPUT_WINDOW_VSIZE,
+                    TP_MIXER_MODE,
+                    TP_API,
+                    USE_LUT_SINCOS,
+                    TP_NUM_LUTS,
+                    TP_RND,
+                    TP_SAT>::kernelDdsMixerClass(uint32_t phaseInc, uint32_t initialPhaseOffset)
     : kernelDdsMixerClass(phaseInc) {
     // initialise phase accumulator index to offset.
     // enhancement? if initialPhaseOffset was a template argument, then we could just set this at initialisation without
@@ -284,10 +306,12 @@ template <typename TT_DATA,
           unsigned int TP_MIXER_MODE,
           unsigned int TP_API,
           unsigned int TP_SC_MODE,
-          unsigned int TP_NUM_LUTS>
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 INLINE_DECL void
-kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, TP_SC_MODE, TP_NUM_LUTS>::ddsKernel(
-    void* __restrict in0, void* __restrict in1, void* __restrict out0) {
+kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, TP_SC_MODE, TP_NUM_LUTS, TP_RND, TP_SAT>::
+    ddsKernel(void* __restrict in0, void* __restrict in1, void* __restrict out0) {
 #if __SINCOS_IN_HW__ == 1
     aie::vector<TT_DATA, m_kNumLanes> mixer_vdata;
     input_stream<TT_DATA>* __restrict in0Strm = (input_stream<TT_DATA>*)in0;
@@ -297,9 +321,10 @@ kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, TP_SC
     aie::vector<TT_DATA, m_kNumLanes>* __restrict in1Ptr = (aie::vector<TT_DATA, m_kNumLanes>*)in1;
     aie::vector<TT_DATA, m_kNumLanes>* __restrict out0Ptr = (aie::vector<TT_DATA, m_kNumLanes>*)out0;
     aie::vector<TT_DATA, m_kNumLanes> ddsOutConj;
-    set_sat();
     aie::vector<T_DDS_TYPE, m_kNumLanes> dds_out;
     aie::vector<T_DDS_TYPE, m_kNumLanes> rot_vec; // load rotation values in rot_vec
+    set_sat_mode<TP_SAT>();
+    set_rnd_mode<TP_RND>();
     // pointer ww to m_phRot array
     const aie::vector<T_DDS_TYPE, m_kNumLanes>* ww = (const aie::vector<T_DDS_TYPE, m_kNumLanes>*)m_phRot;
     // AIE API declarations
@@ -313,14 +338,12 @@ kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, TP_SC
     using T_accVect1 =
         typename std::conditional<std::is_same<TT_DATA, cint16>::value, T_accint16Vect1, T_accint32Vect1>::type;
     using T_accint16Vect2 = typename ::aie::accum<cacc48, m_kNumLanes> chess_storage(bm2);
-    using T_accint32Vect2 =
-        typename ::aie::detail::accum< ::aie::detail::AccumClass::CInt, 80, m_kNumLanes> chess_storage(bm2);
+    using T_accint32Vect2 = typename ::aie::accum<cacc80, m_kNumLanes> chess_storage(bm2);
     using T_accVect2 =
         typename std::conditional<std::is_same<TT_DATA, cint16>::value, T_accint16Vect2, T_accint32Vect2>::type;
     T_accVect0 dds_acc;
     T_accVect2 mixer_acc;
     T_accVect1 dds_conj_acc;
-    set_rnd(kRoundMode);
     rot_vec = *(ww + 0);
     for (unsigned l = 0; l < m_kLoopCount; ++l) chess_prepare_for_pipelining chess_loop_count(m_kLoopCount) {
 #if __SINCOS_IN_HW__ == 1
@@ -339,17 +362,26 @@ kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, TP_SC
 #endif
 };
 
-// DDS_Mixer run-time function
+// DDS_Mixer run-time function - USE_LUT_SINCOS
 // Overload for TP_MIXER_MODE=2
 //----------------------------------------------------------------------------------------------------------------------
 template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_MIXER_MODE,
           unsigned int TP_API,
-          unsigned int TP_NUM_LUTS>
-INLINE_DECL void
-kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_LUT_SINCOS, TP_NUM_LUTS>::ddsKernel(
-    void* __restrict in0, void* __restrict in1, void* __restrict out0) {
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+INLINE_DECL void kernelDdsMixerClass<TT_DATA,
+                                     TP_INPUT_WINDOW_VSIZE,
+                                     TP_MIXER_MODE,
+                                     TP_API,
+                                     USE_LUT_SINCOS,
+                                     TP_NUM_LUTS,
+                                     TP_RND,
+                                     TP_SAT>::ddsKernel(void* __restrict in0,
+                                                        void* __restrict in1,
+                                                        void* __restrict out0) {
     aie::vector<TT_DATA, m_kNumLanes> mixer_vdata;
     input_stream<TT_DATA>* __restrict in0Strm = (input_stream<TT_DATA>*)in0;
     input_stream<TT_DATA>* __restrict in1Strm = (input_stream<TT_DATA>*)in1;
@@ -358,18 +390,17 @@ kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_L
     aie::vector<TT_DATA, m_kNumLanes>* __restrict in1Ptr = (aie::vector<TT_DATA, m_kNumLanes>*)in1;
     aie::vector<TT_DATA, m_kNumLanes>* __restrict out0Ptr = (aie::vector<TT_DATA, m_kNumLanes>*)out0;
     aie::vector<TT_DATA, m_kNumLanes> ddsOutConj;
-    set_sat();
-
-    using T_accint16Vect0 = typename ::aie::detail::accum< ::aie::detail::AccumClass::CInt, 32, m_kNumLanes>;
-    using T_accint32Vect0 = typename ::aie::detail::accum< ::aie::detail::AccumClass::CInt, 64, m_kNumLanes>;
+    set_sat_mode<TP_SAT>();
+    using T_accint16Vect0 = typename ::aie::accum<cacc32, m_kNumLanes>;
+    using T_accint32Vect0 = typename ::aie::accum<cacc64, m_kNumLanes>;
     using T_accVect0 =
         typename std::conditional<std::is_same<TT_DATA, cint16>::value, T_accint16Vect0, T_accint32Vect0>::type;
-    using T_accint16Vect1 = typename ::aie::detail::accum< ::aie::detail::AccumClass::CInt, 32, m_kNumLanes>;
-    using T_accint32Vect1 = typename ::aie::detail::accum< ::aie::detail::AccumClass::CInt, 64, m_kNumLanes>;
+    using T_accint16Vect1 = typename ::aie::accum<cacc32, m_kNumLanes>;
+    using T_accint32Vect1 = typename ::aie::accum<cacc64, m_kNumLanes>;
     using T_accVect1 =
         typename std::conditional<std::is_same<TT_DATA, cint16>::value, T_accint16Vect1, T_accint32Vect1>::type;
-    using T_accint16Vect2 = typename ::aie::detail::accum< ::aie::detail::AccumClass::CInt, 32, m_kNumLanes>;
-    using T_accint32Vect2 = typename ::aie::detail::accum< ::aie::detail::AccumClass::CInt, 64, m_kNumLanes>;
+    using T_accint16Vect2 = typename ::aie::accum<cacc32, m_kNumLanes>;
+    using T_accint32Vect2 = typename ::aie::accum<cacc64, m_kNumLanes>;
     using T_accVect2 =
         typename std::conditional<std::is_same<TT_DATA, cint16>::value, T_accint16Vect2, T_accint32Vect2>::type;
     T_accVect0 dds_acc;
@@ -380,12 +411,12 @@ kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_L
     aie::vector<TT_DATA, m_kNumLanes> sRotVec;
     aie::vector<TT_DATA, m_kNumLanes> sRotVecConj;
     aie::vector<TT_DATA, m_kNumLanes> bRotVec;
-    ::aie::detail::accum< ::aie::detail::AccumClass::CInt, 64, 4> ddsOutLUT;
+    ::aie::accum<cacc64, 4> ddsOutLUT;
     TT_DATA sincos;
     aie::vector<TT_DATA, m_kNumLanes> ddsOutInter;
     sRotVec = *(sFan + 0);
     bRotVec = *(bFan + 0);
-    set_rnd(rnd_sym_inf); // round to symmetric infinity
+    set_rnd_mode<rnd_sym_inf>(); // round to symmetric infinity
     for (unsigned l = 0; l < m_kLoopCount; ++l) chess_prepare_for_pipelining chess_loop_count(m_kLoopCount) {
             ddsOutLUT =
                 computeDDSOut<TP_NUM_LUTS, m_kLUTRes, m_kLUTMask, m_kNumLanes, TT_DATA>(m_phaseIndex, sincosLUT);
@@ -414,19 +445,22 @@ template <typename TT_DATA,
           unsigned int TP_MIXER_MODE,
           unsigned int TP_API,
           unsigned int TP_SC_MODE,
-          unsigned int TP_NUM_LUTS>
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 INLINE_DECL void
-kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, TP_SC_MODE, TP_NUM_LUTS>::ddsKernel(
-    void* __restrict in0, void* __restrict out0) {
+kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, TP_SC_MODE, TP_NUM_LUTS, TP_RND, TP_SAT>::
+    ddsKernel(void* __restrict in0, void* __restrict out0) {
 #if __SINCOS_IN_HW__ == 1
     aie::vector<TT_DATA, m_kNumLanes> mixer_vdata;
     input_stream<TT_DATA>* __restrict inStrm = (input_stream<TT_DATA>*)in0;
     output_stream<TT_DATA>* __restrict outStrm = (output_stream<TT_DATA>*)out0;
     aie::vector<TT_DATA, m_kNumLanes>* __restrict in0Ptr = (aie::vector<TT_DATA, m_kNumLanes>*)in0;
     aie::vector<TT_DATA, m_kNumLanes>* __restrict out0Ptr = (aie::vector<TT_DATA, m_kNumLanes>*)out0;
-    set_sat();
     aie::vector<T_DDS_TYPE, m_kNumLanes> dds_out;
     aie::vector<T_DDS_TYPE, m_kNumLanes> rot_vec;
+    set_sat_mode<TP_SAT>();
+    set_rnd_mode<TP_RND>();
     // pointer ww to m_phRot array as data type v8cint16
     const aie::vector<T_DDS_TYPE, m_kNumLanes>* ww = (const aie::vector<T_DDS_TYPE, m_kNumLanes>*)m_phRot;
     rot_vec = *(ww + 0);
@@ -436,14 +470,13 @@ kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, TP_SC
     using T_accVect0 =
         typename std::conditional<std::is_same<TT_DATA, cint16>::value, T_accint16Vect0, T_accint32Vect0>::type;
     using T_accint16Vect2 = typename ::aie::accum<cacc48, m_kNumLanes> chess_storage(bm2);
-    using T_accint32Vect2 =
-        typename ::aie::detail::accum< ::aie::detail::AccumClass::CInt, 80, m_kNumLanes> chess_storage(bm2);
+    using T_accint32Vect2 = typename ::aie::accum<cacc80, m_kNumLanes> chess_storage(bm2);
     using T_accVect2 =
         typename std::conditional<std::is_same<TT_DATA, cint16>::value, T_accint16Vect2, T_accint32Vect2>::type;
     T_accVect0 dds_acc; // Note literal cacc48. This specialization is for int types and dds out for int is always
                         // cint16
     T_accVect2 mixer_acc;
-    set_rnd(kRoundMode);
+    // set_rnd_mode<TP_RND>();
     for (unsigned op = 0; op < m_kLoopCount; ++op) chess_prepare_for_pipelining chess_loop_count(m_kLoopCount) {
 #if __SINCOS_IN_HW__ == 1
             dds_out[0] = aie::sincos_complex(m_phaseIndex);
@@ -457,27 +490,34 @@ kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, TP_SC
 #endif
 };
 
-// Overload for TP_MIXER_MODE = 1  (DDS PLUS 1 data input MIXER MODE)
+// Overload for TP_MIXER_MODE = 1  (DDS PLUS 1 data input MIXER MODE - USE_LUT_SINCOS)
 template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_MIXER_MODE,
           unsigned int TP_API,
-          unsigned int TP_NUM_LUTS>
-INLINE_DECL void
-kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_LUT_SINCOS, TP_NUM_LUTS>::ddsKernel(
-    void* __restrict in0, void* __restrict out0) {
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+INLINE_DECL void kernelDdsMixerClass<TT_DATA,
+                                     TP_INPUT_WINDOW_VSIZE,
+                                     TP_MIXER_MODE,
+                                     TP_API,
+                                     USE_LUT_SINCOS,
+                                     TP_NUM_LUTS,
+                                     TP_RND,
+                                     TP_SAT>::ddsKernel(void* __restrict in0, void* __restrict out0) {
     aie::vector<TT_DATA, m_kNumLanes> mixer_vdata;
     input_stream<TT_DATA>* __restrict inStrm = (input_stream<TT_DATA>*)in0;
     output_stream<TT_DATA>* __restrict outStrm = (output_stream<TT_DATA>*)out0;
     aie::vector<TT_DATA, m_kNumLanes>* __restrict in0Ptr = (aie::vector<TT_DATA, m_kNumLanes>*)in0;
     aie::vector<TT_DATA, m_kNumLanes>* __restrict out0Ptr = (aie::vector<TT_DATA, m_kNumLanes>*)out0;
-    set_sat();
-    using T_accint16Vect0 = typename ::aie::detail::accum< ::aie::detail::AccumClass::CInt, 32, m_kNumLanes>;
-    using T_accint32Vect0 = typename ::aie::detail::accum< ::aie::detail::AccumClass::CInt, 64, m_kNumLanes>;
+    set_sat_mode<TP_SAT>();
+    using T_accint16Vect0 = typename ::aie::accum<cacc32, m_kNumLanes>;
+    using T_accint32Vect0 = typename ::aie::accum<cacc64, m_kNumLanes>;
     using T_accVect0 =
         typename std::conditional<std::is_same<TT_DATA, cint16>::value, T_accint16Vect0, T_accint32Vect0>::type;
-    using T_accint16Vect2 = typename ::aie::detail::accum< ::aie::detail::AccumClass::CInt, 32, m_kNumLanes>;
-    using T_accint32Vect2 = typename ::aie::detail::accum< ::aie::detail::AccumClass::CInt, 64, m_kNumLanes>;
+    using T_accint16Vect2 = typename ::aie::accum<cacc32, m_kNumLanes>;
+    using T_accint32Vect2 = typename ::aie::accum<cacc64, m_kNumLanes>;
     using T_accVect2 =
         typename std::conditional<std::is_same<TT_DATA, cint16>::value, T_accint16Vect2, T_accint32Vect2>::type;
     T_accVect0 dds_acc; // Note literal cacc48. This specialization is for int types and dds out for int is always
@@ -487,12 +527,12 @@ kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_L
     const aie::vector<TT_DATA, m_kNumLanes>* bFan = (const aie::vector<TT_DATA, m_kNumLanes>*)m_phRotBig;
     aie::vector<TT_DATA, m_kNumLanes> sRotVec;
     aie::vector<TT_DATA, m_kNumLanes> bRotVec;
-    ::aie::detail::accum< ::aie::detail::AccumClass::CInt, 64, 4> ddsOutLUT;
+    ::aie::accum<cacc64, 4> ddsOutLUT;
     TT_DATA sincos;
     aie::vector<TT_DATA, m_kNumLanes> ddsOutInter;
     sRotVec = *(sFan + 0);
     bRotVec = *(bFan + 0);
-    set_rnd(rnd_sym_inf); // round to symmetric infinity
+    set_rnd_mode<rnd_sym_inf>(); // round to symmetric infinity
     for (unsigned op = 0; op < m_kLoopCount; ++op) chess_prepare_for_pipelining chess_loop_count(m_kLoopCount) {
             ddsOutLUT =
                 computeDDSOut<TP_NUM_LUTS, m_kLUTRes, m_kLUTMask, m_kNumLanes, TT_DATA>(m_phaseIndex, sincosLUT);
@@ -516,14 +556,17 @@ template <typename TT_DATA,
           unsigned int TP_MIXER_MODE,
           unsigned int TP_API,
           unsigned int TP_SC_MODE,
-          unsigned int TP_NUM_LUTS>
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 INLINE_DECL void
-kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, TP_SC_MODE, TP_NUM_LUTS>::ddsKernel(
-    void* __restrict out0) {
+kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, TP_SC_MODE, TP_NUM_LUTS, TP_RND, TP_SAT>::
+    ddsKernel(void* __restrict out0) {
     output_stream<TT_DATA>* __restrict outStrm = (output_stream<TT_DATA>*)out0;
     aie::vector<TT_DATA, m_kNumLanes>* __restrict out0Ptr = (aie::vector<TT_DATA, m_kNumLanes>*)out0;
-    ::aie::detail::accum< ::aie::detail::AccumClass::CInt, 48, m_kNumLanes> dds_acc;
-    set_sat();
+    ::aie::accum<cacc48, m_kNumLanes> dds_acc;
+    set_sat_mode<TP_SAT>();
+    set_rnd_mode<TP_RND>();
     // m_phRot would ideally be constructor created and constant-persistant after that, hence stored in a register,
     // but kernels lose their registers between calls, so m_phRot has to be retrieved from memory.
     // This indirection of creating a pointer to m_phRot then loading that pointer into rot_vec appears to be
@@ -532,7 +575,6 @@ kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, TP_SC
     aie::vector<T_DDS_TYPE, m_kNumLanes> rot_vec;
     aie::vector<T_DDS_TYPE, m_kNumLanes> dds_out;
     rot_vec = *(ww + 0);
-    set_rnd(kRoundMode);
     for (unsigned op = 0; op < m_kLoopCount; ++op) chess_prepare_for_pipelining chess_loop_count(m_kLoopCount) {
 #if __SINCOS_IN_HW__ == 1
             dds_out[0] = aie::sincos_complex(m_phaseIndex);
@@ -543,29 +585,39 @@ kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, TP_SC
         }
 };
 
-// Overload for TP_MIXER_MODE = 0  (DDS ONLY MODE)
+// Overload for TP_MIXER_MODE = 0  (DDS ONLY MODE - USE_LUT_SINCOS)
 template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_MIXER_MODE,
           unsigned int TP_API,
-          unsigned int TP_NUM_LUTS>
-INLINE_DECL void
-kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_LUT_SINCOS, TP_NUM_LUTS>::ddsKernel(
-    void* __restrict out0) {
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+INLINE_DECL void kernelDdsMixerClass<TT_DATA,
+                                     TP_INPUT_WINDOW_VSIZE,
+                                     TP_MIXER_MODE,
+                                     TP_API,
+                                     USE_LUT_SINCOS,
+                                     TP_NUM_LUTS,
+                                     TP_RND,
+                                     TP_SAT>::ddsKernel(void* __restrict out0) {
     output_stream<TT_DATA>* __restrict outStrm = (output_stream<TT_DATA>*)out0;
     aie::vector<TT_DATA, m_kNumLanes>* __restrict out0Ptr = (aie::vector<TT_DATA, m_kNumLanes>*)out0;
-    ::aie::detail::accum< ::aie::detail::AccumClass::CInt, minAccumBits, m_kNumLanes> dds_acc;
-    set_sat();
+
+    using accType = typename tAccBaseType<TT_DATA, TT_DATA>::type;
+    ::aie::accum<accType, m_kNumLanes> dds_acc;
+
+    set_sat_mode<TP_SAT>();
+    set_rnd_mode<rnd_sym_inf>(); // round to symmetric infinity
     const aie::vector<TT_DATA, m_kNumLanes>* sFan = (const aie::vector<TT_DATA, m_kNumLanes>*)m_phRotSmall;
     const aie::vector<TT_DATA, m_kNumLanes>* bFan = (const aie::vector<TT_DATA, m_kNumLanes>*)m_phRotBig;
     aie::vector<TT_DATA, m_kNumLanes> sRotVec;
     aie::vector<TT_DATA, m_kNumLanes> bRotVec;
     aie::vector<TT_DATA, m_kNumLanes> ddsOutInter;
-    ::aie::detail::accum< ::aie::detail::AccumClass::CInt, 64, 4> ddsOutLUT;
+    ::aie::accum<cacc64, 4> ddsOutLUT;
     TT_DATA sincos;
     sRotVec = *(sFan + 0);
     bRotVec = *(bFan + 0);
-    set_rnd(rnd_sym_inf); // round to symmetric infinity
 
     for (unsigned op = 0; op < m_kLoopCount; ++op) chess_prepare_for_pipelining chess_loop_count(m_kLoopCount) {
             ddsOutLUT =
@@ -587,9 +639,20 @@ kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_L
 //-----------------------------------
 // cfloat specializations
 // Constructor to populate m_phRot array
-template <unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_MIXER_MODE, unsigned int TP_API, unsigned int TP_NUM_LUTS>
-kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_INBUILT_SINCOS, TP_NUM_LUTS>::
-    kernelDdsMixerClass(uint32_t phaseInc) {
+template <unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_MIXER_MODE,
+          unsigned int TP_API,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+kernelDdsMixerClass<cfloat,
+                    TP_INPUT_WINDOW_VSIZE,
+                    TP_MIXER_MODE,
+                    TP_API,
+                    USE_INBUILT_SINCOS,
+                    TP_NUM_LUTS,
+                    TP_RND,
+                    TP_SAT>::kernelDdsMixerClass(uint32_t phaseInc) {
     m_phaseIndex = 0;
     cint16 phRotInt16;
     // Calculate the phase increment for each clock cycle ( = per sample inc * input vector size)
@@ -603,8 +666,13 @@ kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_IN
     }
 }
 
-template <unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_MIXER_MODE, unsigned int TP_API, unsigned int TP_NUM_LUTS>
-kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_LUT_SINCOS, TP_NUM_LUTS>::
+template <unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_MIXER_MODE,
+          unsigned int TP_API,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_LUT_SINCOS, TP_NUM_LUTS, TP_RND, TP_SAT>::
     kernelDdsMixerClass(uint32_t phaseInc) {
     m_phaseIndex = 0;
     set_rnd(rnd_sym_inf); // round to symmetric infinity
@@ -663,9 +731,20 @@ kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_LU
 // making this overload so that the default case doesn't get extra penalty of additions and sets with trivial value of
 // 0.
 // This enables SSR DDS
-template <unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_MIXER_MODE, unsigned int TP_API, unsigned int TP_NUM_LUTS>
-kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_INBUILT_SINCOS, TP_NUM_LUTS>::
-    kernelDdsMixerClass(uint32_t phaseInc, uint32_t initialPhaseOffset)
+template <unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_MIXER_MODE,
+          unsigned int TP_API,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+kernelDdsMixerClass<cfloat,
+                    TP_INPUT_WINDOW_VSIZE,
+                    TP_MIXER_MODE,
+                    TP_API,
+                    USE_INBUILT_SINCOS,
+                    TP_NUM_LUTS,
+                    TP_RND,
+                    TP_SAT>::kernelDdsMixerClass(uint32_t phaseInc, uint32_t initialPhaseOffset)
     : kernelDdsMixerClass(phaseInc) {
     // initialise phase accumulator index to offset.
     // enhancement? if initialPhaseOffset was a template argument, then we could just set this at initialisation without
@@ -676,8 +755,13 @@ kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_IN
 // making this overload so that the default case doesn't get extra penalty of additions and sets with trivial value of
 // 0.
 // This enables SSR DDS
-template <unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_MIXER_MODE, unsigned int TP_API, unsigned int TP_NUM_LUTS>
-kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_LUT_SINCOS, TP_NUM_LUTS>::
+template <unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_MIXER_MODE,
+          unsigned int TP_API,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_LUT_SINCOS, TP_NUM_LUTS, TP_RND, TP_SAT>::
     kernelDdsMixerClass(uint32_t phaseInc, uint32_t initialPhaseOffset)
     : kernelDdsMixerClass(phaseInc) {
     // initialise phase accumulator index to offset.
@@ -689,10 +773,22 @@ kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_LU
 // DDS_Mixer run-time function
 // Overload for TP_MIXER_MODE=2
 //----------------------------------------------------------------------------------------------------------------------
-template <unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_MIXER_MODE, unsigned int TP_API, unsigned int TP_NUM_LUTS>
-INLINE_DECL void
-kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_INBUILT_SINCOS, TP_NUM_LUTS>::ddsKernel(
-    void* __restrict in0, void* __restrict in1, void* __restrict out0) {
+template <unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_MIXER_MODE,
+          unsigned int TP_API,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+INLINE_DECL void kernelDdsMixerClass<cfloat,
+                                     TP_INPUT_WINDOW_VSIZE,
+                                     TP_MIXER_MODE,
+                                     TP_API,
+                                     USE_INBUILT_SINCOS,
+                                     TP_NUM_LUTS,
+                                     TP_RND,
+                                     TP_SAT>::ddsKernel(void* __restrict in0,
+                                                        void* __restrict in1,
+                                                        void* __restrict out0) {
     using TT_DATA = cfloat;
     using T_DDS_TYPE = cfloat;
     const aie::vector<TT_DATA, m_kNumLanes>* ww = (const aie::vector<TT_DATA, m_kNumLanes>*)m_phRot;
@@ -717,7 +813,7 @@ kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_IN
     aie::vector<TT_DATA, m_kNumLanes>* __restrict out0Ptr = (aie::vector<TT_DATA, m_kNumLanes>*)out0;
 
     rot_vec = *(ww + 0);
-    set_sat();
+    set_sat_mode<TP_SAT>();
 
     for (unsigned l = 0; l < m_kLoopCount / kUnrollFactor; ++l)
         chess_prepare_for_pipelining chess_loop_count(m_kLoopCount / kUnrollFactor) {
@@ -741,10 +837,15 @@ kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_IN
 };
 
 // Overload for TP_MIXER_MODE=2 - Using LUT Implementation
-template <unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_MIXER_MODE, unsigned int TP_API, unsigned int TP_NUM_LUTS>
+template <unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_MIXER_MODE,
+          unsigned int TP_API,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 INLINE_DECL void
-kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_LUT_SINCOS, TP_NUM_LUTS>::ddsKernel(
-    void* __restrict in0, void* __restrict in1, void* __restrict out0) {
+kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_LUT_SINCOS, TP_NUM_LUTS, TP_RND, TP_SAT>::
+    ddsKernel(void* __restrict in0, void* __restrict in1, void* __restrict out0) {
     using TT_DATA = cfloat;
     aie::vector<TT_DATA, m_kNumLanes> mixerIpData;
     input_stream<TT_DATA>* __restrict in0Strm = (input_stream<TT_DATA>*)in0;
@@ -754,7 +855,7 @@ kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_LU
     aie::vector<TT_DATA, m_kNumLanes>* __restrict in1Ptr = (aie::vector<TT_DATA, m_kNumLanes>*)in1;
     aie::vector<TT_DATA, m_kNumLanes>* __restrict out0Ptr = (aie::vector<TT_DATA, m_kNumLanes>*)out0;
     aie::vector<TT_DATA, m_kNumLanes> ddsOutConj;
-    set_sat();
+    set_sat_mode<TP_SAT>();
     aie::vector<TT_DATA, m_kNumLanes> dds_acc;
     aie::vector<TT_DATA, m_kNumLanes> mixerAcc;
     aie::vector<TT_DATA, m_kNumLanes> mixerAccInter;
@@ -787,10 +888,20 @@ kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_LU
 };
 
 // Overload for TP_MIXER_MODE = 1
-template <unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_MIXER_MODE, unsigned int TP_API, unsigned int TP_NUM_LUTS>
-INLINE_DECL void
-kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_INBUILT_SINCOS, TP_NUM_LUTS>::ddsKernel(
-    void* __restrict in0, void* __restrict out0) {
+template <unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_MIXER_MODE,
+          unsigned int TP_API,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+INLINE_DECL void kernelDdsMixerClass<cfloat,
+                                     TP_INPUT_WINDOW_VSIZE,
+                                     TP_MIXER_MODE,
+                                     TP_API,
+                                     USE_INBUILT_SINCOS,
+                                     TP_NUM_LUTS,
+                                     TP_RND,
+                                     TP_SAT>::ddsKernel(void* __restrict in0, void* __restrict out0) {
     using TT_DATA = cfloat;
     using T_DDS_TYPE = cfloat;
 
@@ -812,9 +923,9 @@ kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_IN
 
     rot_vec = *(ww + 0);
 
-    set_sat(); // Despite being a float specialization, the DDS output is cint16, so saturation and rounding are
-               // relevant.
-    set_rnd(kRoundMode);
+    set_rnd_mode<TP_RND>(); // Despite being a float specialization, the DDS output is cint16, so saturation and
+                            // rounding are relevant.
+    set_sat_mode<TP_SAT>();
 
     for (unsigned l = 0; l < m_kLoopCount / kUnrollFactor; ++l)
         chess_prepare_for_pipelining chess_loop_count(m_kLoopCount / kUnrollFactor) {
@@ -834,10 +945,15 @@ kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_IN
 };
 
 // Overload for TP_MIXER_MODE = 1 - Using LUT implementation
-template <unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_MIXER_MODE, unsigned int TP_API, unsigned int TP_NUM_LUTS>
+template <unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_MIXER_MODE,
+          unsigned int TP_API,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 INLINE_DECL void
-kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_LUT_SINCOS, TP_NUM_LUTS>::ddsKernel(
-    void* __restrict in0, void* __restrict out0) {
+kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_LUT_SINCOS, TP_NUM_LUTS, TP_RND, TP_SAT>::
+    ddsKernel(void* __restrict in0, void* __restrict out0) {
     using TT_DATA = cfloat;
     aie::vector<TT_DATA, m_kNumLanes> mixer_vdata;
     input_stream<TT_DATA>* __restrict inStrm = (input_stream<TT_DATA>*)in0;
@@ -854,7 +970,9 @@ kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_LU
     TT_DATA sincos;
     sRotVec = *(sFan + 0);
     bRotVec = *(bFan + 0);
-    set_sat();
+    set_sat_mode<TP_SAT>();
+    set_rnd_mode<TP_RND>();
+
     for (unsigned op = 0; op < m_kLoopCount; ++op) chess_prepare_for_pipelining chess_loop_count(m_kLoopCount) {
             sincos =
                 computeDDSOutFloat<TP_NUM_LUTS, m_kLUTRes, m_kLUTMask, m_kNumLanes, TT_DATA>(m_phaseIndex, sincosLUT);
@@ -871,10 +989,20 @@ kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_LU
 };
 
 // Overload for TP_MIXER_MODE = 0  (DDS ONLY MODE)
-template <unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_MIXER_MODE, unsigned int TP_API, unsigned int TP_NUM_LUTS>
-INLINE_DECL void
-kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_INBUILT_SINCOS, TP_NUM_LUTS>::ddsKernel(
-    void* __restrict out0) {
+template <unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_MIXER_MODE,
+          unsigned int TP_API,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+INLINE_DECL void kernelDdsMixerClass<cfloat,
+                                     TP_INPUT_WINDOW_VSIZE,
+                                     TP_MIXER_MODE,
+                                     TP_API,
+                                     USE_INBUILT_SINCOS,
+                                     TP_NUM_LUTS,
+                                     TP_RND,
+                                     TP_SAT>::ddsKernel(void* __restrict out0) {
     using TT_DATA = cfloat;
     using T_DDS_TYPE = cfloat;
 
@@ -898,9 +1026,9 @@ kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_IN
     // load rotation values in rot_vec
     rot_vec = *(ww + 0);
     m_phaseIndex = *phaseIndexPtr;
-    set_sat(); // Despite being a float specialization, the DDS output is cint16, so saturation and rounding are
-               // relevant.
-    set_rnd(kRoundMode);
+    set_sat_mode<TP_SAT>(); // Despite being a float specialization, the DDS output is cint16, so saturation and
+                            // rounding are relevant.
+    set_rnd_mode<TP_RND>();
 
     for (unsigned op = 0; op < m_kLoopCount / kUnrollFactor; ++op)
         chess_prepare_for_pipelining chess_loop_count(m_kLoopCount / kUnrollFactor) {
@@ -919,15 +1047,20 @@ kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_IN
 };
 
 // Overload for TP_MIXER_MODE = 0 - Using LUT Implementation
-template <unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_MIXER_MODE, unsigned int TP_API, unsigned int TP_NUM_LUTS>
+template <unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_MIXER_MODE,
+          unsigned int TP_API,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 INLINE_DECL void
-kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_LUT_SINCOS, TP_NUM_LUTS>::ddsKernel(
-    void* __restrict out0) {
+kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_LUT_SINCOS, TP_NUM_LUTS, TP_RND, TP_SAT>::
+    ddsKernel(void* __restrict out0) {
     using TT_DATA = cfloat;
     output_stream<cfloat>* __restrict outStrm = (output_stream<cfloat>*)out0;
     aie::vector<cfloat, m_kNumLanes>* __restrict out0Ptr = (aie::vector<cfloat, m_kNumLanes>*)out0;
     aie::vector<cfloat, m_kNumLanes> dds_acc;
-    set_sat();
+    set_sat_mode<TP_SAT>();
     const aie::vector<TT_DATA, m_kNumLanes>* sFan = (const aie::vector<TT_DATA, m_kNumLanes>*)m_phRotSmall;
     const aie::vector<TT_DATA, m_kNumLanes>* bFan = (const aie::vector<TT_DATA, m_kNumLanes>*)m_phRotBig;
     aie::vector<TT_DATA, m_kNumLanes> sRotVec;
@@ -962,8 +1095,11 @@ template <typename TT_DATA,
           unsigned int TP_MIXER_MODE,
           unsigned int TP_API,
           unsigned int TP_SC_MODE,
-          unsigned int TP_NUM_LUTS>
-NOINLINE_DECL void dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, TP_SC_MODE, TP_NUM_LUTS>::ddsMix(
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+NOINLINE_DECL void
+dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, TP_SC_MODE, TP_NUM_LUTS, TP_RND, TP_SAT>::ddsMix(
     input_buffer<TT_DATA>& __restrict inWindowA,
     input_buffer<TT_DATA>& __restrict inWindowB,
     output_buffer<TT_DATA>& __restrict outWindow) {
@@ -974,8 +1110,14 @@ NOINLINE_DECL void dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_A
     this->ddsKernel(in0Ptr, in1Ptr, outPtr);
 };
 
-template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_SC_MODE, unsigned int TP_NUM_LUTS>
-NOINLINE_DECL void dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_2, 1, TP_SC_MODE, TP_NUM_LUTS>::ddsMix(
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SC_MODE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+NOINLINE_DECL void
+dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_2, 1, TP_SC_MODE, TP_NUM_LUTS, TP_RND, TP_SAT>::ddsMix(
     input_stream<TT_DATA>* __restrict inWindowA,
     input_stream<TT_DATA>* __restrict inWindowB,
     output_stream<TT_DATA>* __restrict outWindow) {
@@ -988,16 +1130,25 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_API,
           unsigned int TP_SC_MODE,
-          unsigned int TP_NUM_LUTS>
-NOINLINE_DECL void dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_1, TP_API, TP_SC_MODE, TP_NUM_LUTS>::ddsMix(
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+NOINLINE_DECL void
+dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_1, TP_API, TP_SC_MODE, TP_NUM_LUTS, TP_RND, TP_SAT>::ddsMix(
     input_buffer<TT_DATA>& __restrict inWindowA, output_buffer<TT_DATA>& __restrict outWindow) {
     void* inPtr = inWindowA.data();
     void* outPtr = outWindow.data();
     this->ddsKernel(inPtr, outPtr);
 };
 
-template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_SC_MODE, unsigned int TP_NUM_LUTS>
-NOINLINE_DECL void dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_1, 1, TP_SC_MODE, TP_NUM_LUTS>::ddsMix(
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SC_MODE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+NOINLINE_DECL void
+dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_1, 1, TP_SC_MODE, TP_NUM_LUTS, TP_RND, TP_SAT>::ddsMix(
     input_stream<TT_DATA>* __restrict inWindowA, output_stream<TT_DATA>* __restrict outWindow) {
     this->ddsKernel((void*)inWindowA, (void*)outWindow);
 };
@@ -1008,15 +1159,24 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_API,
           unsigned int TP_SC_MODE,
-          unsigned int TP_NUM_LUTS>
-NOINLINE_DECL void dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_0, TP_API, TP_SC_MODE, TP_NUM_LUTS>::ddsMix(
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+NOINLINE_DECL void
+dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_0, TP_API, TP_SC_MODE, TP_NUM_LUTS, TP_RND, TP_SAT>::ddsMix(
     output_buffer<TT_DATA>& __restrict outWindow) {
     void* outPtr = outWindow.data();
     this->ddsKernel(outPtr);
 };
 
-template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_SC_MODE, unsigned int TP_NUM_LUTS>
-NOINLINE_DECL void dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_0, 1, TP_SC_MODE, TP_NUM_LUTS>::ddsMix(
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SC_MODE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+NOINLINE_DECL void
+dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_0, 1, TP_SC_MODE, TP_NUM_LUTS, TP_RND, TP_SAT>::ddsMix(
     output_stream<TT_DATA>* __restrict outWindow) {
     this->ddsKernel((void*)outWindow);
 };

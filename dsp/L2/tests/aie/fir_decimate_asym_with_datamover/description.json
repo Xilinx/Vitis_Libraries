@@ -76,8 +76,8 @@
     "v++": {
         "compiler": {
             "includepaths": [
-                "LIB_DIR/../utils/L1/include/hw",
-                "LIB_DIR/../utils/L2/src/sw/datamvoer",
+                "LIB_DIR/../data_mover/L1/include",
+                "LIB_DIR/../data_mover/L2/src/sw/datamvoer",
                 "PROJECT/kernel",
                 "PROJECT"
             ]
@@ -93,9 +93,6 @@
                 "LIB_DIR/L2/include/aie",
                 "LIB_DIR/L2/tests/aie/common/inc",
                 "./"
-            ],
-            "clflags": [
-                "-Xpreproc=\"-DUUT_GRAPH=fir_decimate_asym_graph -DOUTPUT_FILE=data/uut_output.txt -DINPUT_FILE=data/input.txt  -DUSING_UUT=1 \""
             ]
         }
     },
@@ -107,7 +104,7 @@
                     "files": [
                         "LIB_DIR/L1/src/aie/fir_decimate_asym.cpp"
                     ],
-                    "pl-freq": 1000,
+                    "config": "aie.cfg",
                     "workdir": "./Work",
                     "options": "",
                     "name": "libadf.a",
@@ -122,12 +119,12 @@
         {
             "accelerators": [
                 {
-                    "location": "LIB_DIR/../utils/L2/src/sw/datamover/mm2s.cpp",
+                    "location": "LIB_DIR/../data_mover/L2/src/sw/data_mover/mm2s.cpp",
                     "clflags": " ",
                     "name": "mm2s"
                 },
                 {
-                    "location": "LIB_DIR/../utils/L2/src/sw/datamover/s2mm.cpp",
+                    "location": "LIB_DIR/../data_mover/L2/src/sw/data_mover/s2mm.cpp",
                     "clflags": " ",
                     "name": "s2mm"
                 }

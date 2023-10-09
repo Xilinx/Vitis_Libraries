@@ -20,5 +20,7 @@ def vmc_generate_graph(name, args):
 
     tmpargs["TP_PARALLEL_POWER"] = pp
     tmpargs["TP_FFT_NIFFT"] = 1
+    tmpargs["TP_RND"] = args["rnd_mode"]
+    tmpargs["TP_SAT"] = args["sat_mode"]
 
     return generate_graph(name, tmpargs)

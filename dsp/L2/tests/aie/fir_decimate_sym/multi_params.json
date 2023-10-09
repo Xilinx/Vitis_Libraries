@@ -1,5 +1,5 @@
 {
-    "test_0_fir_9t_sym_3d": {
+    "test_0_tool_canary_aie":{
         "DATA_TYPE": "cint16",
         "COEFF_TYPE": "int16",
         "FIR_LEN": "9",
@@ -23,7 +23,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     },
     "test_1_fir_6t_cint16_cint16": {
         "DATA_TYPE": "cint16",
@@ -36,7 +37,7 @@
         "AIE_VARIANT": "1",
         "NITER": "16",
         "COEFF_SIZE": "2",
-        "ROUND_MODE": "0",
+        "ROUND_MODE": "1",
         "CASC_LEN": "1",
         "DUAL_IP": "0",
         "USE_COEFF_RELOAD": "0",
@@ -49,7 +50,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"1"
     },
     "test_2_fir_6t_int32_int32": {
         "DATA_TYPE": "int32",
@@ -62,7 +64,7 @@
         "AIE_VARIANT": "1",
         "NITER": "16",
         "COEFF_SIZE": "2",
-        "ROUND_MODE": "0",
+        "ROUND_MODE": "2",
         "CASC_LEN": "1",
         "DUAL_IP": "0",
         "USE_COEFF_RELOAD": "0",
@@ -75,7 +77,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"3"
     },
     "test_3_fir_6t_cint32_cint16": {
         "DATA_TYPE": "cint32",
@@ -88,7 +91,7 @@
         "AIE_VARIANT": "1",
         "NITER": "16",
         "COEFF_SIZE": "2",
-        "ROUND_MODE": "0",
+        "ROUND_MODE": "3",
         "CASC_LEN": "1",
         "DUAL_IP": "0",
         "USE_COEFF_RELOAD": "0",
@@ -101,7 +104,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     },
     "test_4_fir_6t_cint32_int32": {
         "DATA_TYPE": "cint32",
@@ -115,7 +119,7 @@
         "AIE_VARIANT": "1",
         "NITER": "16",
         "COEFF_SIZE": "2",
-        "ROUND_MODE": "0",
+        "ROUND_MODE": "4",
         "CASC_LEN": "1",
         "DUAL_IP": "0",
         "USE_COEFF_RELOAD": "0",
@@ -127,7 +131,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"1"
     },
     "test_5_fir_11t_stream": {
         "DATA_TYPE": "cint16",
@@ -142,7 +147,7 @@
         "AIE_VARIANT": "1",
         "NITER": "16",
         "COEFF_SIZE": "2",
-        "ROUND_MODE": "0",
+        "ROUND_MODE": "5",
         "CASC_LEN": "1",
         "USE_COEFF_RELOAD": "0",
         "INTERPOLATE_FACTOR": "1",
@@ -153,7 +158,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"3"
     },
     "test_6_fir_1023t": {
         "DATA_TYPE": "cint16",
@@ -168,7 +174,7 @@
         "AIE_VARIANT": "1",
         "NITER": "16",
         "COEFF_SIZE": "2",
-        "ROUND_MODE": "0",
+        "ROUND_MODE": "6",
         "USE_COEFF_RELOAD": "0",
         "INTERPOLATE_FACTOR": "1",
         "NUM_OUTPUTS": "1",
@@ -179,7 +185,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     },
     "test_7_fir_9t_sym_3d_reload": {
         "DATA_TYPE": "cint16",
@@ -192,7 +199,7 @@
         "AIE_VARIANT": "1",
         "NITER": "16",
         "COEFF_SIZE": "2",
-        "ROUND_MODE": "0",
+        "ROUND_MODE": "7",
         "CASC_LEN": "1",
         "DUAL_IP": "0",
         "PORT_API": "0",
@@ -205,7 +212,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"1"
     },
     "test_8_fir_24t_ssr2": {
         "DATA_TYPE": "cint16",
@@ -231,7 +239,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     },
     "test_9_fir_24t_ssr2_reload": {
         "DATA_TYPE": "cint16",
@@ -257,7 +266,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     },
     "test_10_fir_9t_sym_3d": {
         "DATA_TYPE": "cint16",
@@ -283,7 +293,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     },
     "test_11_fir_6t_cint16_cint32": {
         "DATA_TYPE": "cint16",
@@ -309,7 +320,8 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     },
     "test_12_fir_6t_int16_int32": {
         "DATA_TYPE": "int16",
@@ -335,6 +347,7 @@
         "DATA_SEED": "1",
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
-        "UPSHIFT_CT": "0"
+        "UPSHIFT_CT": "0",
+        "SAT_MODE":"0"
     }
 }

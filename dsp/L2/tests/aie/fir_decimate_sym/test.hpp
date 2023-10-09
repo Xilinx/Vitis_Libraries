@@ -43,7 +43,11 @@ namespace dsplib = xf::dsp::aie;
 
 class test_graph : public graph {
    private:
+#if ((P_SSR > 1) || (USING_UUT == 1 && __HAS_SYM_PREADD__ == 0))
+    static constexpr unsigned int kNumTaps = FIR_LEN;
+#else
     static constexpr unsigned int kNumTaps = (FIR_LEN + 1) / 2;
+#endif
     COEFF_TYPE taps[kNumTaps];
 
    public:
@@ -70,7 +74,8 @@ class test_graph : public graph {
                                                        USE_COEFF_RELOAD,
                                                        NUM_OUTPUTS,
                                                        PORT_API,
-                                                       P_SSR>;
+                                                       P_SSR,
+                                                       SAT_MODE>;
 
     // Constructor
     test_graph() {
@@ -113,6 +118,7 @@ class test_graph : public graph {
 
 // FIR sub-graph
 #if (USE_COEFF_RELOAD == 1) // Reloadable coefficients
+        printf("Error tap: %d", error_tap);
         static_assert(NITER % 2 == 0,
                       "ERROR: Please set NITER to be a multiple of 2 when reloadable coefficients are used");
         uut_g<INPUT_SAMPLES> firGraph;

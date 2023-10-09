@@ -26,6 +26,7 @@ using namespace adf;
 namespace xf {
 namespace dsp {
 namespace aie {
+namespace blas {
 namespace matrix_vector_mul {
 
 template <typename TT_DATA_A,
@@ -35,7 +36,8 @@ template <typename TT_DATA_A,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
           unsigned int TP_NUM_FRAMES,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_SAT>
 class matrix_vector_mul_ref_graph : public graph {
    public:
     // std::array<port<input>, 1> inA[1];
@@ -58,7 +60,7 @@ class matrix_vector_mul_ref_graph : public graph {
         printf("\nMatrix Vector Multiply Ref\n");
         m_matrix_vector_mulKernel =
             kernel::create_object<matrix_vector_mul_ref<TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_SHIFT, TP_RND,
-                                                        TP_NUM_FRAMES, TP_CASC_LEN> >();
+                                                        TP_SAT, TP_NUM_FRAMES, TP_CASC_LEN> >();
 
         connect<>(inA[0], m_matrix_vector_mulKernel.in[0]);
         dimensions(m_matrix_vector_mulKernel.in[0]) = {TP_NUM_FRAMES * TP_DIM_A * TP_DIM_B};
@@ -76,6 +78,7 @@ class matrix_vector_mul_ref_graph : public graph {
         printf("== Graph window specialization exit\n");
     };
 };
+}
 }
 }
 }

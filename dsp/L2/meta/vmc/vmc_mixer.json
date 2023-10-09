@@ -33,6 +33,37 @@
             "parameterType":"edit"
       }
     },
+	{
+      "key": "TP_RND",
+      "name": "rnd_mode",
+      "description": "The rounding to be applied during the shift down stage of processing.",
+      "enum": [0, 1, 2, 3, 4, 5, 6, 7],
+      "enum_str": ["Floor", "Ceiling", "Round to positive infinity", "Round to negative infinity", "Round symmetrical to infinity", "Round symmetrical to zero", "Round convergent to even", "Round convergent to odd"],
+      "default": 2,
+      "blockgui": {
+          "label": "Rounding mode:",
+            "tablabel": "Main",
+          "parameterType": "popup"
+      }
+    },
+	{
+      "key": "TP_SAT",
+	  "name": "sat_mode",
+      "description": "Saturation mode.",
+      "enum": [0, 1, 3],
+      "enum_str": ["0-None", "1-Asymmetric", "3-Symmetric"],
+	  "default": 0,
+      "validator": {
+          "file": "vmc_fft_common.py",
+          "function": "vmc_validate_sat_mode",
+		  "args": []
+		},
+      "blockgui":{
+            "label": "Saturation mode:",
+            "tablabel": "Main",
+            "parameterType":"popup"
+		}
+	},
     {
 	  "key": "TP_MIXER_MODE",
       "name": "mixer_mode",
@@ -44,22 +75,6 @@
             "label": "Mixer mode:",
             "tablabel": "Main",
             "parameterType":"popup"
-      }
-    },
-    {
-	  "key": "TP_SSR",
-      "name": "ssr",
-      "description": "Specify number of data input/output in parallel for a single channel.",
-      "default": 1,
-      "validator": {
-        "file": "vmc_mixer.py",
-        "function": "vmc_validate_ssr",
-        "args": []  
-      },
-      "blockgui":{
-            "label": "Number of parallel input/output ports (SSR):",
-            "tablabel": "Main",
-            "parameterType":"edit"
       }
     },
     {

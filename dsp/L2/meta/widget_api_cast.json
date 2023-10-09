@@ -96,7 +96,5 @@
     "generator": {
         "file": "widget_api_cast.py",
         "function": "generate_graph"
-    },
-    "target_domain": "AIE",
-    "visible": true
+    }
 }

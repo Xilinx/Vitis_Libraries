@@ -8,6 +8,7 @@
       "TP_DIM_B" : 16,
       "TP_SHIFT" : 16,
       "TP_RND" : 0,
+      "TP_SAT" : 0,
       "TP_DIM_A_LEADING" : 0,
       "TP_DIM_B_LEADING" : 1,
       "TP_DIM_OUT_LEADING" : 0,

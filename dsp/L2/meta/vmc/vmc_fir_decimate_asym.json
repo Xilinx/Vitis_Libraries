@@ -25,7 +25,7 @@
       "validator": {
         "file": "vmc_fir_decimate_asym.py",
         "function": "vmc_validate_coef_type",
-        "args": ["data_type"]
+        "args": ["data_type", "AIE_VARIANT"]
       },
       "blockgui":{
           "label": "Filter coefficients data type:",
@@ -39,28 +39,11 @@
       "default": false,
       "type": "bool",
       "blockgui":{
-          "label": "Specify filter coefficients via input port:",
+          "label": "Specify filter coefficients via input port",
             "tablabel": "Main",
             "parameterType":"checkbox",
             "disable":"coeff",
             "enable":"fir_length"
-      }
-    },
-    {
-      "ket": "TP_DUAL_IP",
-      "name": "dual_ip",
-      "description": "TP_DUAL_IP allows 2 stream inputs to be connected to FIR, increasing available throughput. When set to 0, single stream input will be connected to FIR kernel, when set to 1, both input stream ports will be used.",
-      "default": false,
-      "type": "bool",
-      "validator": {
-        "file": "vmc_fir_decimate_asym.py",
-        "function": "vmc_validate_input_ports",
-        "args": []
-      },
-      "blockgui":{
-          "label": "Provide second set of input ports:",
-            "tablabel": "Main",
-            "parameterType":"checkbox"
       }
     },
     {
@@ -72,10 +55,10 @@
       "validator": {
         "file": "vmc_fir_decimate_asym.py",
         "function": "vmc_validate_out_ports",
-        "args": []
+        "args": ["AIE_VARIANT"]
       },
       "blockgui":{
-          "label": "Provide second set of output ports:",
+          "label": "Provide second set of output ports",
             "tablabel": "Main",
             "parameterType":"checkbox"
       }
@@ -89,10 +72,10 @@
       "validator": {
         "file": "vmc_fir_decimate_asym.py",
         "function": "vmc_validate_coeff",
-        "args": ["use_coeff_reload", "coef_type" ,"fir_length", "data_type", "casc_length", "decimate_factor", "ssr"]
+        "args": ["use_coeff_reload", "coef_type" ,"fir_length", "data_type", "casc_length", "decimate_factor","AIE_VARIANT"]
       },
       "blockgui":{
-          "label": "Filter coefficients",
+          "label": "Filter coefficients:",
             "tablabel": "Main",
             "parameterType":"edit"
       }
@@ -116,7 +99,7 @@
 	  "validator": {
         "file": "vmc_fir_decimate_asym.py",
         "function": "vmc_validate_decimate_factor",
-        "args": ["data_type", "coef_type"]
+        "args": ["data_type", "coef_type", "AIE_VARIANT"]
       },
       "blockgui":{
             "label": "Decimation factor:",
@@ -132,10 +115,10 @@
       "validator": {
         "file": "vmc_fir_decimate_asym.py",
         "function": "vmc_validate_input_window_size",
-        "args": ["data_type", "coef_type", "use_coeff_reload", "coeff", "fir_length", "decimate_factor", "ssr"]
+        "args": ["data_type", "coef_type", "use_coeff_reload", "coeff", "fir_length", "decimate_factor"]
       },
       "blockgui":{
-            "label": "Input frame size (Number of samples):",
+            "label": "Input window size (Number of samples):",
             "tablabel": "Main",
             "parameterType":"edit"
       }
@@ -167,25 +150,43 @@
             "label": "Rounding mode:",
             "tablabel": "Main",
             "parameterType":"popup"
-      }
+		}
     },
-    {
-      "key" :"TP_SSR",
-      "name": "ssr",
-      "description": "Specify number of data input/output in parallel for a single channel.",
+	{
+      "key": "TP_SAT",
+	  "name": "sat_mode",
+      "description": "Saturation mode.",
+      "enum": [0, 1, 3],
+      "enum_str": ["0-None", "1-Asymmetric", "3-Symmetric"],
+	  "default": 0,
+      "validator": {
+          "file": "vmc_fir_decimate_asym.py",
+          "function": "validate_sat_mode",
+		  "args": []
+		},
+		"blockgui":{
+            "label": "Saturation mode:",
+            "tablabel": "Main",
+            "parameterType":"popup"
+		}
+	},
+   {
+      "key": "TP_PARA_DECI_POLY",
+      "name": "deci_poly",
+      "description": "The number of parallel polyphases to combine.",
       "default": 1,
       "validator": {
         "file": "vmc_fir_decimate_asym.py",
-        "function": "vmc_validate_ssr",
-        "args": ["decimate_factor"]
+        "function": "vmc_validate_deci_poly",
+        "args": []
       },
       "blockgui":{
-            "label": "Number of parallel paths (SSR):",
-            "tablabel": "Main",
+        "label":"Number of decimator polyphases:",
+	    "tablabel": "Main",
             "parameterType":"edit"
       }
     },
-	{
+    {
       "key": "TP_CASC_LEN",
       "name": "casc_length",
       "description": "The length of cascaded kernels",

@@ -37,7 +37,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_LEN,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE>
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SAT>
 void filter_ref(
     auto& inWindowPtr,
     auto& outWindowPtr,
@@ -65,7 +66,7 @@ void filter_ref(
         inWindowPtr -= TP_FIR_LEN - 1;
 
         roundAcc(TP_RND, TP_SHIFT, accum);
-        saturateAcc(accum);
+        saturateAcc(accum, TP_SAT);
         accumSrs = castAcc(accum);
         *outWindowPtr++ = accumSrs;
     }
@@ -82,7 +83,10 @@ template <typename TT_DATA,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
           unsigned int TP_DUAL_IP,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT
+
+          >
 void fir_sr_asym_ref<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -92,7 +96,8 @@ void fir_sr_asym_ref<TT_DATA,
                      TP_USE_COEFF_RELOAD,
                      TP_NUM_OUTPUTS,
                      TP_DUAL_IP,
-                     TP_API>::filter(input_circular_buffer<TT_DATA,
+                     TP_API,
+                     TP_SAT>::filter(input_circular_buffer<TT_DATA,
                                                            extents<inherited_extent>,
                                                            margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
                                      output_circular_buffer<TT_DATA>& outWindow) {
@@ -101,8 +106,8 @@ void fir_sr_asym_ref<TT_DATA,
     auto outWindowPtr = ::aie::begin_random_circular(outWindow);
     firHeaderReload<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_USE_COEFF_RELOAD>(inWindowPtr, cpWindowPtr,
                                                                                                internalTaps);
-    filter_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE>(inWindowPtr, outWindowPtr,
-                                                                                       internalTaps);
+    filter_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_SAT>(
+        inWindowPtr, outWindowPtr, internalTaps);
 };
 
 // REF FIR function
@@ -117,7 +122,10 @@ template <typename TT_DATA,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
           unsigned int TP_DUAL_IP,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT
+
+          >
 void fir_sr_asym_ref<TT_DATA,
                      TT_COEFF,
                      TP_FIR_LEN,
@@ -127,7 +135,8 @@ void fir_sr_asym_ref<TT_DATA,
                      TP_USE_COEFF_RELOAD,
                      TP_NUM_OUTPUTS,
                      TP_DUAL_IP,
-                     TP_API>::filterRtp(input_circular_buffer<TT_DATA,
+                     TP_API,
+                     TP_SAT>::filterRtp(input_circular_buffer<TT_DATA,
                                                               extents<inherited_extent>,
                                                               margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
                                         output_circular_buffer<TT_DATA>& outWindow,
@@ -138,8 +147,8 @@ void fir_sr_asym_ref<TT_DATA,
     }
     auto inWindowPtr = ::aie::begin_random_circular(inWindow);
     auto outWindowPtr = ::aie::begin_random_circular(outWindow);
-    filter_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE>(inWindowPtr, outWindowPtr,
-                                                                                       internalTaps);
+    filter_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_SAT>(
+        inWindowPtr, outWindowPtr, internalTaps);
 };
 }
 }

@@ -56,7 +56,8 @@ template <typename TT_DATA,
           unsigned int TP_UPSHIFT_CT = 0,
           unsigned int TP_API = 0,
           unsigned int TP_SSR = 1,
-          unsigned int TP_PARA_INTERP_POLY = 1>
+          unsigned int TP_PARA_INTERP_POLY = 1,
+          unsigned int TP_SAT = 1>
 class fir_interpolate_hb_ref_graph : public graph {
    public:
     template <class dir>
@@ -83,7 +84,7 @@ class fir_interpolate_hb_ref_graph : public graph {
     fir_interpolate_hb_ref_graph(const std::vector<TT_COEFF>& taps) {
         m_firKernel = kernel::create_object<
             fir_interpolate_hb_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
-                                   USE_COEFF_RELOAD_FALSE, TP_NUM_OUTPUTS, TP_UPSHIFT_CT, TP_API> >(taps);
+                                   USE_COEFF_RELOAD_FALSE, TP_NUM_OUTPUTS, TP_UPSHIFT_CT, TP_API, TP_SAT> >(taps);
         create_connections();
     }
 
@@ -91,7 +92,7 @@ class fir_interpolate_hb_ref_graph : public graph {
     fir_interpolate_hb_ref_graph() {
         m_firKernel = kernel::create_object<
             fir_interpolate_hb_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE,
-                                   USE_COEFF_RELOAD_TRUE, TP_NUM_OUTPUTS, TP_UPSHIFT_CT, TP_API> >();
+                                   USE_COEFF_RELOAD_TRUE, TP_NUM_OUTPUTS, TP_UPSHIFT_CT, TP_API, TP_SAT> >();
         create_connections();
     }
 

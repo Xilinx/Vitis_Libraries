@@ -36,8 +36,8 @@ endif
 
 PAD_POINT_SIZE 		:=  $(shell echo $$((   (($(POINT_SIZE) + $(SAMPLES_IN_256_VECT) - 1) / $(SAMPLES_IN_256_VECT)) * $(SAMPLES_IN_256_VECT) )))
 WINDOW_VSIZE 	:= $(shell echo $$(( 	$(PAD_POINT_SIZE) * $(NUM_FRAMES)		)))
-PARAM_MAP = DATA_TYPE $(DATA_TYPE) TWIDDLE_TYPE $(TWIDDLE_TYPE) POINT_SIZE $(POINT_SIZE) CASC_LEN $(CASC_LEN) NUM_FRAMES $(NUM_FRAMES) FFT_NIFFT $(FFT_NIFFT) SHIFT $(SHIFT) API_IO $(API_IO) AIE_VARIANT $(AIE_VARIANT)
-UUT_FILE_SUFFIX = $(UUT_KERNEL)_$(DATA_TYPE)_$(TWIDDLE_TYPE)_$(POINT_SIZE)_$(FFT_NIFFT)_$(SHIFT)_$(CASC_LEN)_$(NUM_FRAMES)_$(API_IO)
+PARAM_MAP = DATA_TYPE $(DATA_TYPE) TWIDDLE_TYPE $(TWIDDLE_TYPE) POINT_SIZE $(POINT_SIZE) CASC_LEN $(CASC_LEN) NUM_FRAMES $(NUM_FRAMES) FFT_NIFFT $(FFT_NIFFT) SHIFT $(SHIFT) API_IO $(API_IO) AIE_VARIANT $(AIE_VARIANT) ROUND_MODE $(ROUND_MODE) SAT_MODE $(SAT_MODE)
+UUT_FILE_SUFFIX = $(UUT_KERNEL)_$(DATA_TYPE)_$(TWIDDLE_TYPE)_$(POINT_SIZE)_$(FFT_NIFFT)_$(SHIFT)_$(CASC_LEN)_$(NUM_FRAMES)_$(API_IO)_$(ROUND_MODE)_$(SAT_MODE)
 LOG_FILE = ./logs/log_$(UUT_FILE_SUFFIX).txt
 STATUS_LOG_FILE = ./logs/status_$(UUT_FILE_SUFFIX).txt
 STATUS_FILE = $(STATUS_LOG_FILE)
@@ -57,7 +57,7 @@ validate_config:
 create_input:
 	@echo starting create_input
 	@tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(REF_INPUT_FILE) $(WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(STIM_TYPE) 0 0 $(DATA_TYPE) $(API_IO) 1 0;\
-	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/input_pad_and_split.pl --file $(REF_INPUT_FILE) --newFile $(LOC_INPUT_FILE) --type $(DATA_TYPE) --pointSize $(POINT_SIZE) --cascLen $(CASC_LEN) --numFrames $(NUM_FRAMES);\
+	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/input_pad_and_split.pl --variant $(AIE_VARIANT) --file $(REF_INPUT_FILE) --newFile $(LOC_INPUT_FILE) --type $(DATA_TYPE) --pointSize $(POINT_SIZE) --cascLen $(CASC_LEN) --numFrames $(NUM_FRAMES);\
 	echo Input ready
 
 sim_ref:

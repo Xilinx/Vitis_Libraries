@@ -18,6 +18,7 @@
 #define _DSPLIB_FFT_REF_UTILS_HPP_
 
 #include "fft_ifft_dit_twiddle_lut.h"
+#include "fir_ref_utils.hpp" //for rounding and saturation functions
 
 // Rounding modes
 #ifndef rnd_floor
@@ -46,142 +47,7 @@
 #endif
 
 // Round up to y
-#define CEIL(x, y) (((x + y - 1) / y) * y)
-
-static const int C_PMAX16 = std::numeric_limits<short int>::max();
-static const int C_NMAX16 = std::numeric_limits<short int>::min();
-static const int C_PMAX32 = std::numeric_limits<int32_t>::max();
-static const int C_NMAX32 = std::numeric_limits<int32_t>::min();
-
-// Accumulator types
-template <typename T_D>
-struct T_accRef {};
-template <>
-struct T_accRef<int16> {
-    int64_t real;
-};
-template <>
-struct T_accRef<int32> {
-    int64_t real;
-};
-template <>
-struct T_accRef<cint16> {
-    int64_t real, imag;
-};
-template <>
-struct T_accRef<cint32> {
-    int64_t real, imag;
-};
-template <>
-struct T_accRef<float> {
-    float real;
-};
-template <>
-struct T_accRef<cfloat> {
-    float real, imag;
-};
-
-// Rounding and shift function
-inline int64_t rounding(int rndMode, int shift, int64_t accum) {
-    const unsigned int round_const = shift == 0 ? 0 : (1 << (shift - 1)) - 1; // 0.0111...
-    // Rounding
-    if (shift > 0) {
-        switch (rndMode) {
-            case rnd_floor:
-                // not addition for truncation, just lose the bits during shift.
-                break;
-            case rnd_ceil: // add 0.11111...
-                accum += ((1 << shift) - 1);
-                break;
-            case rnd_pos_inf: // add 0.1000
-                accum += round_const + 1;
-                break;
-            case rnd_neg_inf: // add 0.01111...
-                accum += round_const;
-                break;
-            case rnd_sym_inf:
-                if (accum < 0) {
-                    accum += round_const;
-                } else {
-                    accum += round_const + 1;
-                }
-                break;
-            case rnd_sym_zero:
-                if (accum < 0) {
-                    accum += round_const + 1;
-                } else {
-                    accum += round_const;
-                }
-                break;
-            case rnd_conv_even:
-                if (((accum >> shift) & 1) == 0) { // even
-                    accum += round_const;
-                } else {
-                    accum += round_const + 1;
-                }
-                break;
-            case rnd_conv_odd:
-                if (((accum >> shift) & 1) == 1) { // odd
-                    accum += round_const;
-                } else {
-                    accum += round_const + 1;
-                }
-                break;
-            default:;
-                // unsupported, so error
-                printf("Error: unrecognised value for ROUND_MODE\n");
-                break;
-        }
-    }
-    // intrinsic supports range of -1 to +62
-    if (shift == -1) {
-        accum = accum << 1;
-    } else {
-        accum = accum >> shift;
-    }
-    return accum;
-}
-
-//----------------------------------------------------------------------
-// nullElem
-template <typename T_RDATA>
-inline T_RDATA nullElem() {
-    return 0;
-};
-
-// Null cint16_t element
-template <>
-inline cint16_t nullElem() {
-    cint16_t d;
-    d.real = 0;
-    d.imag = 0;
-    return d;
-};
-
-// Null cint32 element
-template <>
-inline cint32 nullElem() {
-    cint32 d;
-    d.real = 0;
-    d.imag = 0;
-    return d;
-};
-
-// Null float element
-template <>
-inline float nullElem() {
-    return 0.0;
-};
-
-// Null cint32 element
-template <>
-inline cfloat nullElem() {
-    cfloat retVal;
-
-    retVal.real = 0.0;
-    retVal.imag = 0.0;
-    return retVal;
-};
+//#define CEIL(x,y) (((x+y-1)/y)*y)
 
 // namespace xf { namespace dsp { namespace aie { namespace fft {
 /*
@@ -448,8 +314,10 @@ inline T_base_type_struct<cfloat>::T_base_type fnMaxNeg<cfloat>() {
 
 //--------castOutput
 // converts the input type to the type used for internal data processing
+// TODO - castOutput used to perform saturation. This is now performed in saturateAcc, so castOutput is redundant now
+// and is literally an implicit cast so could be removed
 template <typename TT_DATA>
-inline TT_DATA castOutput(T_int_data<TT_DATA> sampleIn, const unsigned shift) {
+inline TT_DATA castOutput(T_int_data<TT_DATA> sampleIn, const unsigned shift = 0) {
     TT_DATA retVal; // default to mute warnings
     return retVal;
 }
@@ -457,13 +325,7 @@ template <>
 inline int16 castOutput<int16>(T_int_data<int16> sampleIn, const unsigned shift) {
     int16 retVal;
     // rounding is performed in the radix stages
-    // retVal = (sampleIn.real + (1 << (shift-1))) >> shift;
     retVal = sampleIn.real;
-    if (sampleIn.real >= C_PMAX16) {
-        retVal = C_PMAX16;
-    } else if (sampleIn.real < C_NMAX16) {
-        retVal = C_NMAX16;
-    }
     return retVal;
 }
 template <>
@@ -472,16 +334,6 @@ inline cint16 castOutput<cint16>(T_int_data<cint16> sampleIn, const unsigned shi
     // rounding is performed in the radix stages
     retVal.real = sampleIn.real;
     retVal.imag = sampleIn.imag;
-    if (sampleIn.real >= C_PMAX16) {
-        retVal.real = C_PMAX16;
-    } else if (sampleIn.real < C_NMAX16) {
-        retVal.real = C_NMAX16;
-    }
-    if (sampleIn.imag >= C_PMAX16) {
-        retVal.imag = C_PMAX16;
-    } else if (sampleIn.imag < C_NMAX16) {
-        retVal.imag = C_NMAX16;
-    }
     return retVal;
 }
 template <>
@@ -489,11 +341,6 @@ inline int32 castOutput<int32>(T_int_data<int32> sampleIn, const unsigned shift)
     int32 retVal;
     // rounding is performed in the radix stages
     retVal = sampleIn.real;
-    if (sampleIn.real >= C_PMAX32) {
-        retVal = C_PMAX32;
-    } else if (sampleIn.real < C_NMAX32) {
-        retVal = C_NMAX32;
-    }
     return retVal;
 }
 template <>
@@ -502,34 +349,19 @@ inline cint32 castOutput<cint32>(T_int_data<cint32> sampleIn, const unsigned shi
     // rounding is performed in the radix stages
     retVal.real = sampleIn.real;
     retVal.imag = sampleIn.imag;
-    if (sampleIn.real >= C_PMAX32) {
-        retVal.real = C_PMAX32;
-    } else if (sampleIn.real < C_NMAX32) {
-        retVal.real = C_NMAX32;
-    }
-    if (sampleIn.imag >= C_PMAX32) {
-        retVal.imag = C_PMAX32;
-    } else if (sampleIn.imag < C_NMAX32) {
-        retVal.imag = C_NMAX32;
-    }
     return retVal;
 }
 template <>
 inline float castOutput<float>(T_int_data<float> sampleIn, const unsigned shift) {
     float retVal;
-    // rounding is performed in the radix stages
-    // retVal = (sampleIn.real + (float)(1<<(shift-1)))/(float)(1 << shift);
     retVal = sampleIn.real;
     return retVal;
 }
 template <>
 inline cfloat castOutput<cfloat>(T_int_data<cfloat> sampleIn, const unsigned shift) {
     cfloat retVal;
-    // rounding is performed in the radix stages
     retVal.real = sampleIn.real;
     retVal.imag = sampleIn.imag;
-    // retVal.real = (sampleIn.real + (float)(1<<(shift-1)))/(float)(1 << shift);
-    // retVal.imag = (sampleIn.imag + (float)(1<<(shift-1)))/(float)(1 << shift);
     return retVal;
 }
 
@@ -696,7 +528,9 @@ inline void btfly(T_int_data<TI_D>& q0,
                   T_int_data<TI_D> d1,
                   T_TW tw,
                   bool inv,
-                  unsigned int shift) {
+                  unsigned int shift,
+                  unsigned int t_rnd,
+                  unsigned int t_sat) {
     printf("wrong\n");
 }; // assumes downshift by weight of twiddle type, e.g. 15 for cint16
 
@@ -707,7 +541,9 @@ inline void btfly<cfloat, cfloat>(T_int_data<cfloat>& q0,
                                   T_int_data<cfloat> d1,
                                   cfloat tw,
                                   bool inv,
-                                  unsigned int shift) {
+                                  unsigned int shift,
+                                  unsigned int t_rnd,
+                                  unsigned int t_sat) {
     cfloat d1up;
     cfloat d1rot;
     d1rot.real = d0.real * tw.real - d0.imag * tw.imag;
@@ -725,19 +561,32 @@ inline void btfly<cint32, cint16>(T_int_data<cint32>& q0,
                                   T_int_data<cint32> d1,
                                   cint16 tw,
                                   bool inv,
-                                  unsigned int shift) {
+                                  unsigned int shift,
+                                  unsigned int t_rnd,
+                                  unsigned int t_sat) {
     cint32 d1up;
     cint32 d1rot;
     cint64 d1rot64;
+    T_accRef<cint32> csum;
     const int64 kRoundConst = ((int64)1 << (shift - 1));
     d1up.real = (int32)d1.real;
     d1up.imag = (int32)d1.imag;
     const unsigned int shft = 15; // from cint16 for twiddle
     d1rot64 = cmpy<cint32, cint16>(d1up, tw, inv);
-    q0.real = (int32)((((int64)d0.real << shft) + d1rot64.real + kRoundConst) >> shift);
-    q0.imag = (int32)((((int64)d0.imag << shft) + d1rot64.imag + kRoundConst) >> shift);
-    q1.real = (int32)((((int64)d0.real << shft) - d1rot64.real + kRoundConst) >> shift);
-    q1.imag = (int32)((((int64)d0.imag << shft) - d1rot64.imag + kRoundConst) >> shift);
+
+    csum.real = ((int64)d0.real << shft) + d1rot64.real;
+    csum.imag = ((int64)d0.imag << shft) + d1rot64.imag;
+    roundAcc(t_rnd, shift, csum);
+    saturateAcc(csum, t_sat);
+    q0.real = (int32)csum.real;
+    q0.imag = (int32)csum.imag;
+
+    csum.real = ((int64)d0.real << shft) - d1rot64.real;
+    csum.imag = ((int64)d0.imag << shft) - d1rot64.imag;
+    roundAcc(t_rnd, shift, csum);
+    saturateAcc(csum, t_sat);
+    q1.real = (int32)csum.real;
+    q1.imag = (int32)csum.imag;
 };
 
 template <>
@@ -747,12 +596,15 @@ inline void btfly<cint16, cint16>(T_int_data<cint16>& q0,
                                   T_int_data<cint16> d1,
                                   cint16 tw,
                                   bool inv,
-                                  unsigned int shift) // the upshift variant
+                                  unsigned int shift,
+                                  unsigned int t_rnd,
+                                  unsigned int t_sat) // the upshift variant
 {
     cint32 d0up;
     cint32 d1up;
     cint64 d1rot64;
     cint32 d1rot;
+    T_accRef<cint32> csum; // internal data type is cint32.
     const int64 kRoundConst = ((int64)1 << (shift - 1));
     const unsigned int shft =
         15; // from cint16 for twiddle.Not to be confused with shift which can include scaling factor
@@ -761,10 +613,20 @@ inline void btfly<cint16, cint16>(T_int_data<cint16>& q0,
     d1up.real = (int32)d1.real;
     d1up.imag = (int32)d1.imag;
     d1rot64 = cmpy<cint32, cint16>(d1up, tw, inv);
-    q0.real = (int32)((((int64)d0up.real << shft) + d1rot64.real + kRoundConst) >> shift);
-    q0.imag = (int32)((((int64)d0up.imag << shft) + d1rot64.imag + kRoundConst) >> shift);
-    q1.real = (int32)((((int64)d0up.real << shft) - d1rot64.real + kRoundConst) >> shift);
-    q1.imag = (int32)((((int64)d0up.imag << shft) - d1rot64.imag + kRoundConst) >> shift);
+
+    csum.real = ((int64)d0up.real << shft) + d1rot64.real;
+    csum.imag = ((int64)d0up.imag << shft) + d1rot64.imag;
+    roundAcc(t_rnd, shift, csum);
+    saturateAcc(csum, t_sat);
+    q0.real = (int32)csum.real;
+    q0.imag = (int32)csum.imag;
+
+    csum.real = ((int64)d0up.real << shft) - d1rot64.real;
+    csum.imag = ((int64)d0up.imag << shft) - d1rot64.imag;
+    roundAcc(t_rnd, shift, csum);
+    saturateAcc(csum, t_sat);
+    q1.real = (int32)csum.real;
+    q1.imag = (int32)csum.imag;
 };
 
 //}}}} //namespace

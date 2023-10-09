@@ -236,9 +236,9 @@ INLINE_DECL constexpr unsigned int getCompMask(const unsigned int size) {
 template <typename TT_DATA, unsigned int buffSize, unsigned int maskElems>
 INLINE_DECL int nEq(::aie::vector<TT_DATA, buffSize / 8 / sizeof(TT_DATA)> xbuff,
                     ::aie::vector<TT_DATA, buffSize / 8 / sizeof(TT_DATA)> ybuff,
-                    ::aie::detail::mask<maskElems> compMask) {
-    ::aie::detail::mask resNeq = ::aie::neq(xbuff, ybuff);
-    ::aie::detail::mask retComp = compMask & ::aie::neq(xbuff, ybuff);
+                    ::aie::mask<maskElems> compMask) {
+    ::aie::mask<maskElems> resNeq = ::aie::neq(xbuff, ybuff);
+    ::aie::mask<maskElems> retComp = compMask & ::aie::neq(xbuff, ybuff);
     unsigned int ret = retComp.to_uint32();
     return ret;
 }
@@ -260,8 +260,8 @@ INLINE_DECL bool rtpCompare(const TT_COEFF (&inTaps)[TP_FIR_LEN], TT_COEFF* oldT
     int coeffnEq = false; //
     static constexpr unsigned int samplesPerBuff = buffSize / 8 / sizeof(TT_COEFF);
     static constexpr unsigned int firLenRemInt16 = (TP_FIR_LEN % samplesPerBuff) * sizeof(TT_COEFF) / sizeof(int16);
-    ::aie::detail::mask fullMask = ::aie::detail::mask<samplesPerBuff>(true);
-    ::aie::detail::mask compMask = ::aie::detail::mask<samplesPerBuff>::from_uint32(getCompMask(firLenRemInt16));
+    ::aie::mask fullMask = ::aie::mask<samplesPerBuff>(true);
+    ::aie::mask compMask = ::aie::mask<samplesPerBuff>::from_uint32(getCompMask(firLenRemInt16));
 
     // #pragma unroll (TP_FIR_LEN/samplesPer512Buff)
     for (int i = 0; i < TP_FIR_LEN; i += samplesPerBuff)

@@ -74,7 +74,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE = 0,
           unsigned int TP_COEFF_PHASE_OFFSET = 0,
           unsigned int TP_COEFF_PHASES = 1,
-          unsigned int TP_COEFF_PHASES_LEN = TP_FIR_LEN* TP_COEFF_PHASES>
+          unsigned int TP_COEFF_PHASES_LEN = TP_FIR_LEN* TP_COEFF_PHASES,
+          unsigned int TP_SAT = 1>
 class fir_sr_asym;
 
 template <typename fp = fir_params_defaults>
@@ -156,7 +157,8 @@ class fir_sr_asym_tl {
                                      fp::BTP_COEFF_PHASE,
                                      fp::BTP_COEFF_PHASE_OFFSET,
                                      fp::BTP_COEFF_PHASES,
-                                     fp::BTP_COEFF_PHASES_LEN>;
+                                     fp::BTP_COEFF_PHASES_LEN,
+                                     fp::BTP_SAT>;
 };
 //-----------------------------------------------------------------------------------------------------
 template <typename TT_DATA,
@@ -178,7 +180,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE = 0,
           unsigned int TP_COEFF_PHASE_OFFSET = 0,
           unsigned int TP_COEFF_PHASES = 1,
-          unsigned int TP_COEFF_PHASES_LEN = TP_FIR_LEN* TP_COEFF_PHASES>
+          unsigned int TP_COEFF_PHASES_LEN = TP_FIR_LEN* TP_COEFF_PHASES,
+          unsigned int TP_SAT = 1>
 class kernelFilterClass {
    private:
     // Parameter value defensive and legality checks
@@ -186,6 +189,9 @@ class kernelFilterClass {
                   "ERROR: Illegal combination of design FIR length and cascade length, resulting in kernel FIR length "
                   "below minimum required value. ");
     static_assert(TP_SHIFT >= SHIFT_MIN && TP_SHIFT <= SHIFT_MAX, "ERROR: TP_SHIFT is out of the supported range.");
+    static_assert(TP_SAT >= SAT_MODE_MIN && TP_SAT <= SAT_MODE_MAX && TP_SAT != 2,
+                  "ERROR: TP_SAT is out of supported range");
+    static_assert(TP_SAT != 2, "ERROR: TP_SAT is invalid. Valid values of TP_SAT are 0, 1, and 3");
     static_assert(TP_RND >= ROUND_MIN && TP_RND <= ROUND_MAX, "ERROR: TP_RND is out of the supported range.");
     static_assert(fnEnumType<TT_DATA>() != enumUnknownType, "ERROR: TT_DATA is not a supported type.");
     static_assert(fnEnumType<TT_COEFF>() != enumUnknownType, "ERROR: TT_COEFF is not a supported type.");
@@ -439,7 +445,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 class fir_sr_asym : public kernelFilterClass<TT_DATA,
                                              TT_COEFF,
                                              TP_FIR_LEN,
@@ -459,7 +466,8 @@ class fir_sr_asym : public kernelFilterClass<TT_DATA,
                                              TP_COEFF_PHASE,
                                              TP_COEFF_PHASE_OFFSET,
                                              TP_COEFF_PHASES,
-                                             TP_COEFF_PHASES_LEN> {
+                                             TP_COEFF_PHASES_LEN,
+                                             TP_SAT> {
    public:
     // Constructor
     using thisKernelFilterClass = kernelFilterClass<TT_DATA,
@@ -481,7 +489,8 @@ class fir_sr_asym : public kernelFilterClass<TT_DATA,
                                                     TP_COEFF_PHASE,
                                                     TP_COEFF_PHASE_OFFSET,
                                                     TP_COEFF_PHASES,
-                                                    TP_COEFF_PHASES_LEN>;
+                                                    TP_COEFF_PHASES_LEN,
+                                                    TP_SAT>;
     fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN]) : thisKernelFilterClass(taps) {}
 
     // Register Kernel Class
@@ -513,7 +522,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -534,26 +544,28 @@ class fir_sr_asym<TT_DATA,
                   TP_COEFF_PHASE,
                   TP_COEFF_PHASE_OFFSET,
                   TP_COEFF_PHASES,
-                  TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                  TT_COEFF,
-                                                                  TP_FIR_LEN,
-                                                                  TP_SHIFT,
-                                                                  TP_RND,
-                                                                  TP_INPUT_WINDOW_VSIZE,
-                                                                  TP_CASC_IN,
-                                                                  TP_CASC_OUT,
-                                                                  TP_FIR_RANGE_LEN,
-                                                                  TP_KERNEL_POSITION,
-                                                                  TP_CASC_LEN,
-                                                                  USE_COEFF_RELOAD_FALSE,
-                                                                  TP_NUM_OUTPUTS,
-                                                                  DUAL_IP_SINGLE,
-                                                                  USE_WINDOW_API,
-                                                                  TP_MODIFY_MARGIN_OFFSET,
-                                                                  TP_COEFF_PHASE,
-                                                                  TP_COEFF_PHASE_OFFSET,
-                                                                  TP_COEFF_PHASES,
-                                                                  TP_COEFF_PHASES_LEN> {
+                  TP_COEFF_PHASES_LEN,
+                  TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                     TT_COEFF,
+                                                     TP_FIR_LEN,
+                                                     TP_SHIFT,
+                                                     TP_RND,
+                                                     TP_INPUT_WINDOW_VSIZE,
+                                                     TP_CASC_IN,
+                                                     TP_CASC_OUT,
+                                                     TP_FIR_RANGE_LEN,
+                                                     TP_KERNEL_POSITION,
+                                                     TP_CASC_LEN,
+                                                     USE_COEFF_RELOAD_FALSE,
+                                                     TP_NUM_OUTPUTS,
+                                                     DUAL_IP_SINGLE,
+                                                     USE_WINDOW_API,
+                                                     TP_MODIFY_MARGIN_OFFSET,
+                                                     TP_COEFF_PHASE,
+                                                     TP_COEFF_PHASE_OFFSET,
+                                                     TP_COEFF_PHASES,
+                                                     TP_COEFF_PHASES_LEN,
+                                                     TP_SAT> {
    public:
     // Constructor
     using thisKernelFilterClass = kernelFilterClass<TT_DATA,
@@ -575,13 +587,17 @@ class fir_sr_asym<TT_DATA,
                                                     TP_COEFF_PHASE,
                                                     TP_COEFF_PHASE_OFFSET,
                                                     TP_COEFF_PHASES,
-                                                    TP_COEFF_PHASES_LEN>;
+                                                    TP_COEFF_PHASES_LEN,
+                                                    TP_SAT>;
     fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN]) : thisKernelFilterClass(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() {
+        // The second part of this condition is needed to recognise if the kernel is used for SSR on halfbands.
+        // They don't have multiple coeff phases in the same way as the other rate changers since their second phase is
+        // just one tap.
         if
-            constexpr(TP_COEFF_PHASES == 1) {
+            constexpr(TP_COEFF_PHASES == 1 && TP_COEFF_PHASES_LEN <= TP_FIR_LEN) {
                 // single kernel
                 if
                     constexpr(TP_CASC_IN == CASC_IN_FALSE && TP_CASC_OUT == CASC_OUT_FALSE) {
@@ -782,8 +798,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
-
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
                   TP_FIR_LEN,
@@ -803,26 +819,28 @@ class fir_sr_asym<TT_DATA,
                   TP_COEFF_PHASE,
                   TP_COEFF_PHASE_OFFSET,
                   TP_COEFF_PHASES,
-                  TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                  TT_COEFF,
-                                                                  TP_FIR_LEN,
-                                                                  TP_SHIFT,
-                                                                  TP_RND,
-                                                                  TP_INPUT_WINDOW_VSIZE,
-                                                                  TP_CASC_IN,
-                                                                  TP_CASC_OUT,
-                                                                  TP_FIR_RANGE_LEN,
-                                                                  TP_KERNEL_POSITION,
-                                                                  TP_CASC_LEN,
-                                                                  USE_COEFF_RELOAD_TRUE,
-                                                                  TP_NUM_OUTPUTS,
-                                                                  DUAL_IP_SINGLE,
-                                                                  USE_WINDOW_API,
-                                                                  TP_MODIFY_MARGIN_OFFSET,
-                                                                  TP_COEFF_PHASE,
-                                                                  TP_COEFF_PHASE_OFFSET,
-                                                                  TP_COEFF_PHASES,
-                                                                  TP_COEFF_PHASES_LEN> {
+                  TP_COEFF_PHASES_LEN,
+                  TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                     TT_COEFF,
+                                                     TP_FIR_LEN,
+                                                     TP_SHIFT,
+                                                     TP_RND,
+                                                     TP_INPUT_WINDOW_VSIZE,
+                                                     TP_CASC_IN,
+                                                     TP_CASC_OUT,
+                                                     TP_FIR_RANGE_LEN,
+                                                     TP_KERNEL_POSITION,
+                                                     TP_CASC_LEN,
+                                                     USE_COEFF_RELOAD_TRUE,
+                                                     TP_NUM_OUTPUTS,
+                                                     DUAL_IP_SINGLE,
+                                                     USE_WINDOW_API,
+                                                     TP_MODIFY_MARGIN_OFFSET,
+                                                     TP_COEFF_PHASE,
+                                                     TP_COEFF_PHASE_OFFSET,
+                                                     TP_COEFF_PHASES,
+                                                     TP_COEFF_PHASES_LEN,
+                                                     TP_SAT> {
    public:
     // Constructor
     using thisKernelFilterClass = kernelFilterClass<TT_DATA,
@@ -844,14 +862,18 @@ class fir_sr_asym<TT_DATA,
                                                     TP_COEFF_PHASE,
                                                     TP_COEFF_PHASE_OFFSET,
                                                     TP_COEFF_PHASES,
-                                                    TP_COEFF_PHASES_LEN>;
+                                                    TP_COEFF_PHASES_LEN,
+                                                    TP_SAT>;
     fir_sr_asym() : thisKernelFilterClass() {}
 
     // Register Kernel Class
     static void registerKernelClass() {
         // single kernel
+        // The second part of this condition is needed to recognise if the kernel is used for SSR on halfbands.
+        // They don't have multiple coeff phases in the same way as the other rate changers since their second phase is
+        // just one tap.
         if
-            constexpr(TP_COEFF_PHASES == 1) {
+            constexpr(TP_COEFF_PHASES == 1 && TP_COEFF_PHASES_LEN <= TP_FIR_LEN) {
                 if
                     constexpr(TP_CASC_IN == CASC_IN_FALSE && TP_CASC_OUT == CASC_OUT_FALSE) {
                         if
@@ -1061,7 +1083,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -1082,26 +1105,28 @@ class fir_sr_asym<TT_DATA,
                   TP_COEFF_PHASE,
                   TP_COEFF_PHASE_OFFSET,
                   TP_COEFF_PHASES,
-                  TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                  TT_COEFF,
-                                                                  TP_FIR_LEN,
-                                                                  TP_SHIFT,
-                                                                  TP_RND,
-                                                                  TP_INPUT_WINDOW_VSIZE,
-                                                                  TP_CASC_IN,
-                                                                  TP_CASC_OUT,
-                                                                  TP_FIR_RANGE_LEN,
-                                                                  TP_KERNEL_POSITION,
-                                                                  TP_CASC_LEN,
-                                                                  TP_USE_COEFF_RELOAD,
-                                                                  TP_NUM_OUTPUTS,
-                                                                  TP_DUAL_IP,
-                                                                  USE_STREAM_API,
-                                                                  TP_MODIFY_MARGIN_OFFSET,
-                                                                  TP_COEFF_PHASE,
-                                                                  TP_COEFF_PHASE_OFFSET,
-                                                                  TP_COEFF_PHASES,
-                                                                  TP_COEFF_PHASES_LEN> {
+                  TP_COEFF_PHASES_LEN,
+                  TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                     TT_COEFF,
+                                                     TP_FIR_LEN,
+                                                     TP_SHIFT,
+                                                     TP_RND,
+                                                     TP_INPUT_WINDOW_VSIZE,
+                                                     TP_CASC_IN,
+                                                     TP_CASC_OUT,
+                                                     TP_FIR_RANGE_LEN,
+                                                     TP_KERNEL_POSITION,
+                                                     TP_CASC_LEN,
+                                                     TP_USE_COEFF_RELOAD,
+                                                     TP_NUM_OUTPUTS,
+                                                     TP_DUAL_IP,
+                                                     USE_STREAM_API,
+                                                     TP_MODIFY_MARGIN_OFFSET,
+                                                     TP_COEFF_PHASE,
+                                                     TP_COEFF_PHASE_OFFSET,
+                                                     TP_COEFF_PHASES,
+                                                     TP_COEFF_PHASES_LEN,
+                                                     TP_SAT> {
    public:
     // Constructor
     using thisKernelFilterClass = kernelFilterClass<TT_DATA,
@@ -1123,7 +1148,8 @@ class fir_sr_asym<TT_DATA,
                                                     TP_COEFF_PHASE,
                                                     TP_COEFF_PHASE_OFFSET,
                                                     TP_COEFF_PHASES,
-                                                    TP_COEFF_PHASES_LEN>;
+                                                    TP_COEFF_PHASES_LEN,
+                                                    TP_SAT>;
     fir_sr_asym(const TT_COEFF (&taps)[TP_FIR_LEN]) : thisKernelFilterClass(taps) {}
 
     // Constructor - Header based Coeff Reload allows to skip coeffs at construction.
@@ -1259,7 +1285,8 @@ template <typename TT_DATA,
           unsigned int TP_COEFF_PHASE,
           unsigned int TP_COEFF_PHASE_OFFSET,
           unsigned int TP_COEFF_PHASES,
-          unsigned int TP_COEFF_PHASES_LEN>
+          unsigned int TP_COEFF_PHASES_LEN,
+          unsigned int TP_SAT>
 
 class fir_sr_asym<TT_DATA,
                   TT_COEFF,
@@ -1280,26 +1307,28 @@ class fir_sr_asym<TT_DATA,
                   TP_COEFF_PHASE,
                   TP_COEFF_PHASE_OFFSET,
                   TP_COEFF_PHASES,
-                  TP_COEFF_PHASES_LEN> : public kernelFilterClass<TT_DATA,
-                                                                  TT_COEFF,
-                                                                  TP_FIR_LEN,
-                                                                  TP_SHIFT,
-                                                                  TP_RND,
-                                                                  TP_INPUT_WINDOW_VSIZE,
-                                                                  TP_CASC_IN,
-                                                                  TP_CASC_OUT,
-                                                                  TP_FIR_RANGE_LEN,
-                                                                  TP_KERNEL_POSITION,
-                                                                  TP_CASC_LEN,
-                                                                  USE_COEFF_RELOAD_TRUE,
-                                                                  TP_NUM_OUTPUTS,
-                                                                  TP_DUAL_IP,
-                                                                  USE_STREAM_API,
-                                                                  TP_MODIFY_MARGIN_OFFSET,
-                                                                  TP_COEFF_PHASE,
-                                                                  TP_COEFF_PHASE_OFFSET,
-                                                                  TP_COEFF_PHASES,
-                                                                  TP_COEFF_PHASES_LEN> {
+                  TP_COEFF_PHASES_LEN,
+                  TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                     TT_COEFF,
+                                                     TP_FIR_LEN,
+                                                     TP_SHIFT,
+                                                     TP_RND,
+                                                     TP_INPUT_WINDOW_VSIZE,
+                                                     TP_CASC_IN,
+                                                     TP_CASC_OUT,
+                                                     TP_FIR_RANGE_LEN,
+                                                     TP_KERNEL_POSITION,
+                                                     TP_CASC_LEN,
+                                                     USE_COEFF_RELOAD_TRUE,
+                                                     TP_NUM_OUTPUTS,
+                                                     TP_DUAL_IP,
+                                                     USE_STREAM_API,
+                                                     TP_MODIFY_MARGIN_OFFSET,
+                                                     TP_COEFF_PHASE,
+                                                     TP_COEFF_PHASE_OFFSET,
+                                                     TP_COEFF_PHASES,
+                                                     TP_COEFF_PHASES_LEN,
+                                                     TP_SAT> {
    public:
     // Constructor
     using thisKernelFilterClass = kernelFilterClass<TT_DATA,
@@ -1321,7 +1350,8 @@ class fir_sr_asym<TT_DATA,
                                                     TP_COEFF_PHASE,
                                                     TP_COEFF_PHASE_OFFSET,
                                                     TP_COEFF_PHASES,
-                                                    TP_COEFF_PHASES_LEN>;
+                                                    TP_COEFF_PHASES_LEN,
+                                                    TP_SAT>;
     fir_sr_asym() : thisKernelFilterClass() {}
 
     // Register Kernel Class

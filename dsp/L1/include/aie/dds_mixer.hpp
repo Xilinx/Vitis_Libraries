@@ -59,7 +59,9 @@ template <typename TT_DATA,
           unsigned int TP_MIXER_MODE,
           unsigned int TP_API = IO_API::WINDOW,
           unsigned int TP_SC_MODE = USE_INBUILT_SINCOS,
-          unsigned int TP_NUM_LUTS = 1>
+          unsigned int TP_NUM_LUTS = 1,
+          unsigned int TP_RND = 0,
+          unsigned int TP_SAT = 1>
 class kernelDdsMixerClass {
    public:
     // 0 = rnd_floor, 1 = rnd_ceil, 2 = rnd_pos_inf, 3 = rnd_neg_inf, 4 = rnd_sym_inf, 5 = rnd_sym_zero, 6 =
@@ -82,6 +84,9 @@ class kernelDdsMixerClass {
     using T_DDS_TYPE = cint16; // true for TT_DATA=cint16 or cint32. Cfloat is handled by a specialization of this
                                // class.
 
+    static_assert(TP_RND >= ROUND_MIN && TP_RND <= ROUND_MAX, "ERROR: TP_RND is out of the supported range.");
+    static_assert(TP_SAT >= SAT_MODE_MIN && TP_SAT <= SAT_MODE_MAX, "ERROR: TP_SAT is out of supported range");
+    static_assert(TP_SAT != 2, "ERROR: TP_SAT is invalid. Valid values of TP_SAT are 0, 1, and 3");
     static_assert(TP_MIXER_MODE <= 2, "ERROR: DDS Mixer Mode must be 0, 1 or 2. ");
     static_assert(fnEnumType<TT_DATA>() != enumUnknownType,
                   "ERROR: DDS Mixer TT_DATA is not a supported type (Must be cint16).");
@@ -115,8 +120,17 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_MIXER_MODE,
           unsigned int TP_API,
-          unsigned int TP_NUM_LUTS>
-class kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_LUT_SINCOS, TP_NUM_LUTS> {
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+class kernelDdsMixerClass<TT_DATA,
+                          TP_INPUT_WINDOW_VSIZE,
+                          TP_MIXER_MODE,
+                          TP_API,
+                          USE_LUT_SINCOS,
+                          TP_NUM_LUTS,
+                          TP_RND,
+                          TP_SAT> {
    public:
     // 0 = rnd_floor, 1 = rnd_ceil, 2 = rnd_pos_inf, 3 = rnd_neg_inf, 4 = rnd_sym_inf, 5 = rnd_sym_zero, 6 =
     // rnd_conv_even, 7 = rnd_conv_odd
@@ -171,8 +185,20 @@ class kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API,
 };
 
 #if __SUPPORTS_CFLOAT__ == 1
-template <unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_MIXER_MODE, unsigned int TP_API, unsigned int TP_NUM_LUTS>
-class kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_INBUILT_SINCOS, TP_NUM_LUTS> {
+template <unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_MIXER_MODE,
+          unsigned int TP_API,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+class kernelDdsMixerClass<cfloat,
+                          TP_INPUT_WINDOW_VSIZE,
+                          TP_MIXER_MODE,
+                          TP_API,
+                          USE_INBUILT_SINCOS,
+                          TP_NUM_LUTS,
+                          TP_RND,
+                          TP_SAT> {
    public:
     using TT_DATA = cfloat;
     static constexpr unsigned int kRoundMode = 0; // mode used in point designs.
@@ -226,8 +252,20 @@ class kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, 
     void ddsKernel(void* __restrict out0);
 };
 
-template <unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_MIXER_MODE, unsigned int TP_API, unsigned int TP_NUM_LUTS>
-class kernelDdsMixerClass<cfloat, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_LUT_SINCOS, TP_NUM_LUTS> {
+template <unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_MIXER_MODE,
+          unsigned int TP_API,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+class kernelDdsMixerClass<cfloat,
+                          TP_INPUT_WINDOW_VSIZE,
+                          TP_MIXER_MODE,
+                          TP_API,
+                          USE_LUT_SINCOS,
+                          TP_NUM_LUTS,
+                          TP_RND,
+                          TP_SAT> {
    public:
     using TT_DATA = cfloat;
     static constexpr unsigned int kRoundMode = 0; // mode used in point designs.
@@ -293,14 +331,29 @@ template <typename TT_DATA,
           unsigned int TP_MIXER_MODE,
           unsigned int TP_API = IO_API::WINDOW,
           unsigned int TP_SC_MODE = USE_LUT_SINCOS,
-          unsigned int TP_NUM_LUTS = 1>
-class dds_mixer
-    : public kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, TP_SC_MODE, TP_NUM_LUTS> {
+          unsigned int TP_NUM_LUTS = 1,
+          unsigned int TP_RND = 6,
+          unsigned int TP_SAT = 1>
+class dds_mixer : public kernelDdsMixerClass<TT_DATA,
+                                             TP_INPUT_WINDOW_VSIZE,
+                                             TP_MIXER_MODE,
+                                             TP_API,
+                                             TP_SC_MODE,
+                                             TP_NUM_LUTS,
+                                             TP_RND,
+                                             TP_SAT> {
    public:
     // Help the compiler deal with dependant names
-    using baseClass =
-        kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, TP_SC_MODE, TP_NUM_LUTS>;
-    using thisClass = dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, TP_SC_MODE, TP_NUM_LUTS>;
+    using baseClass = kernelDdsMixerClass<TT_DATA,
+                                          TP_INPUT_WINDOW_VSIZE,
+                                          TP_MIXER_MODE,
+                                          TP_API,
+                                          TP_SC_MODE,
+                                          TP_NUM_LUTS,
+                                          TP_RND,
+                                          TP_SAT>;
+    using thisClass =
+        dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, TP_SC_MODE, TP_NUM_LUTS, TP_RND, TP_SAT>;
 
     // Constructor
     dds_mixer(unsigned int phaseInc) : baseClass(phaseInc) {}
@@ -318,16 +371,35 @@ class dds_mixer
 };
 
 // Specialization for MODE=2, stream IO
-template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_SC_MODE, unsigned int TP_NUM_LUTS>
-class dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_2, 1, TP_SC_MODE, TP_NUM_LUTS>
-    : public kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_2, 1, TP_SC_MODE, TP_NUM_LUTS> {
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SC_MODE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+class dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_2, 1, TP_SC_MODE, TP_NUM_LUTS, TP_RND, TP_SAT>
+    : public kernelDdsMixerClass<TT_DATA,
+                                 TP_INPUT_WINDOW_VSIZE,
+                                 MIXER_MODE_2,
+                                 1,
+                                 TP_SC_MODE,
+                                 TP_NUM_LUTS,
+                                 TP_RND,
+                                 TP_SAT> {
    public:
     static constexpr unsigned int TP_MIXER_MODE = MIXER_MODE_2;
     static constexpr unsigned int TP_API = 1; // we are om a specialization
     // Help the compiler deal with dependant names
-    using baseClass =
-        kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, TP_SC_MODE, TP_NUM_LUTS>;
-    using thisClass = dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, TP_SC_MODE, TP_NUM_LUTS>;
+    using baseClass = kernelDdsMixerClass<TT_DATA,
+                                          TP_INPUT_WINDOW_VSIZE,
+                                          TP_MIXER_MODE,
+                                          TP_API,
+                                          TP_SC_MODE,
+                                          TP_NUM_LUTS,
+                                          TP_RND,
+                                          TP_SAT>;
+    using thisClass =
+        dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, TP_SC_MODE, TP_NUM_LUTS, TP_RND, TP_SAT>;
 
     // Constructor
     dds_mixer(unsigned int phaseInc) : baseClass(phaseInc) {}
@@ -350,15 +422,31 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_API,
           unsigned int TP_SC_MODE,
-          unsigned int TP_NUM_LUTS>
-class dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_1, TP_API, TP_SC_MODE, TP_NUM_LUTS>
-    : public kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_1, TP_API, TP_SC_MODE, TP_NUM_LUTS> {
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+class dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_1, TP_API, TP_SC_MODE, TP_NUM_LUTS, TP_RND, TP_SAT>
+    : public kernelDdsMixerClass<TT_DATA,
+                                 TP_INPUT_WINDOW_VSIZE,
+                                 MIXER_MODE_1,
+                                 TP_API,
+                                 TP_SC_MODE,
+                                 TP_NUM_LUTS,
+                                 TP_RND,
+                                 TP_SAT> {
    private:
    public:
     // Help the compiler deal with dependant names
-    using baseClass =
-        kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_1, TP_API, TP_SC_MODE, TP_NUM_LUTS>;
-    using thisClass = dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_1, TP_API, TP_SC_MODE, TP_NUM_LUTS>;
+    using baseClass = kernelDdsMixerClass<TT_DATA,
+                                          TP_INPUT_WINDOW_VSIZE,
+                                          MIXER_MODE_1,
+                                          TP_API,
+                                          TP_SC_MODE,
+                                          TP_NUM_LUTS,
+                                          TP_RND,
+                                          TP_SAT>;
+    using thisClass =
+        dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_1, TP_API, TP_SC_MODE, TP_NUM_LUTS, TP_RND, TP_SAT>;
 
     // Constructor
     dds_mixer(unsigned int phaseInc) : baseClass(phaseInc) {}
@@ -375,14 +463,28 @@ class dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_1, TP_API, TP_SC_MODE
 
 // Specialization for mixer_mode = 1, stream IO
 //===============
-template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_SC_MODE, unsigned int TP_NUM_LUTS>
-class dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_1, 1, TP_SC_MODE, TP_NUM_LUTS>
-    : public kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_1, 1, TP_SC_MODE, TP_NUM_LUTS> {
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SC_MODE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+class dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_1, 1, TP_SC_MODE, TP_NUM_LUTS, TP_RND, TP_SAT>
+    : public kernelDdsMixerClass<TT_DATA,
+                                 TP_INPUT_WINDOW_VSIZE,
+                                 MIXER_MODE_1,
+                                 1,
+                                 TP_SC_MODE,
+                                 TP_NUM_LUTS,
+                                 TP_RND,
+                                 TP_SAT> {
    private:
    public:
     // Help the compiler deal with dependant names
-    using baseClass = kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_1, 1, TP_SC_MODE, TP_NUM_LUTS>;
-    using thisClass = dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_1, 1, TP_SC_MODE, TP_NUM_LUTS>;
+    using baseClass =
+        kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_1, 1, TP_SC_MODE, TP_NUM_LUTS, TP_RND, TP_SAT>;
+    using thisClass =
+        dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_1, 1, TP_SC_MODE, TP_NUM_LUTS, TP_RND, TP_SAT>;
 
     // Constructor
     dds_mixer(unsigned int phaseInc) : baseClass(phaseInc) {}
@@ -402,15 +504,31 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_API,
           unsigned int TP_SC_MODE,
-          unsigned int TP_NUM_LUTS>
-class dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_0, TP_API, TP_SC_MODE, TP_NUM_LUTS>
-    : public kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_0, TP_API, TP_SC_MODE, TP_NUM_LUTS> {
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+class dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_0, TP_API, TP_SC_MODE, TP_NUM_LUTS, TP_RND, TP_SAT>
+    : public kernelDdsMixerClass<TT_DATA,
+                                 TP_INPUT_WINDOW_VSIZE,
+                                 MIXER_MODE_0,
+                                 TP_API,
+                                 TP_SC_MODE,
+                                 TP_NUM_LUTS,
+                                 TP_RND,
+                                 TP_SAT> {
    private:
    public:
     // Help the compiler deal with dependant names
-    using baseClass =
-        kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_0, TP_API, TP_SC_MODE, TP_NUM_LUTS>;
-    using thisClass = dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_0, TP_API, TP_SC_MODE, TP_NUM_LUTS>;
+    using baseClass = kernelDdsMixerClass<TT_DATA,
+                                          TP_INPUT_WINDOW_VSIZE,
+                                          MIXER_MODE_0,
+                                          TP_API,
+                                          TP_SC_MODE,
+                                          TP_NUM_LUTS,
+                                          TP_RND,
+                                          TP_SAT>;
+    using thisClass =
+        dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_0, TP_API, TP_SC_MODE, TP_NUM_LUTS, TP_RND, TP_SAT>;
 
     // Constructor
     dds_mixer(unsigned int phaseInc) : baseClass(phaseInc) {}
@@ -426,14 +544,28 @@ class dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_0, TP_API, TP_SC_MODE
 };
 
 // Specialization for mixer_mode = 0 stream IO
-template <typename TT_DATA, unsigned int TP_INPUT_WINDOW_VSIZE, unsigned int TP_SC_MODE, unsigned int TP_NUM_LUTS>
-class dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_0, 1, TP_SC_MODE, TP_NUM_LUTS>
-    : public kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_0, 1, TP_SC_MODE, TP_NUM_LUTS> {
+template <typename TT_DATA,
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SC_MODE,
+          unsigned int TP_NUM_LUTS,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+class dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_0, 1, TP_SC_MODE, TP_NUM_LUTS, TP_RND, TP_SAT>
+    : public kernelDdsMixerClass<TT_DATA,
+                                 TP_INPUT_WINDOW_VSIZE,
+                                 MIXER_MODE_0,
+                                 1,
+                                 TP_SC_MODE,
+                                 TP_NUM_LUTS,
+                                 TP_RND,
+                                 TP_SAT> {
    private:
    public:
     // Help the compiler deal with dependant names
-    using baseClass = kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_0, 1, TP_SC_MODE, TP_NUM_LUTS>;
-    using thisClass = dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_0, 1, TP_SC_MODE, TP_NUM_LUTS>;
+    using baseClass =
+        kernelDdsMixerClass<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_0, 1, TP_SC_MODE, TP_NUM_LUTS, TP_RND, TP_SAT>;
+    using thisClass =
+        dds_mixer<TT_DATA, TP_INPUT_WINDOW_VSIZE, MIXER_MODE_0, 1, TP_SC_MODE, TP_NUM_LUTS, TP_RND, TP_SAT>;
 
     // Constructor
     dds_mixer(unsigned int phaseInc) : baseClass(phaseInc) {}

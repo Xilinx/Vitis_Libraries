@@ -52,7 +52,7 @@ XFLIB_DIR = $(XF_PROJ_ROOT)
 # setting default value
 TARGET ?= aiesim
 HOST_ARCH ?= aarch64
-PARAMS ?= test_0_fft_window_aie1
+PARAMS ?= test_0_tool_canary_aie
 
 #setting PLATFORM
 ifeq ($(PLATFORM),)
@@ -113,11 +113,13 @@ AIE_WORK_DIR ?= Work
 AIE_PKG_DIR ?= Work
 
 # Setting customized_params in aiecompiler
+
 TAG ?= UUT
 UUT_KERNEL ?= fft_window
 REF_KERNEL ?= fft_window_ref
 UUT_GRAPH ?= fft_window_graph
 REF_GRAPH ?= fft_window_ref_graph
+STACKSIZE_VAL ?= 8000
 DYN_PT_SIZE ?= 0
 NUM_PORTS ?= 1
 DYN_PT_HEADER_SIZE ?= 0
@@ -130,13 +132,13 @@ UUT_FILE_SUFFIX ?= $(UUT_KERNEL)_$(PARAMS)
 LOG_FILE ?= ./logs/log_$(UUT_FILE_SUFFIX).txt
 STATUS_LOG_FILE ?= ./logs/status_$(UUT_FILE_SUFFIX).txt
 STATUS_FILE ?= $(STATUS_LOG_FILE)
-UUT_TARGET_COMPILE_ARGS ?= -Xchess=llvm.xargs="-std=c++2a" -Xchess=main:backend.mist2.xargs="+NOdra" -Xchess=main:backend.mist2.pnll="off"  --stacksize=$(shell $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramset.py multi_params.json $(PARAMS))
+UUT_TARGET_COMPILE_ARGS ?= --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra" --aie.Xchess=main:backend.mist2.pnll="off"  --aie.stacksize=$(STACKSIZE_VAL)
 REF_TARGET_COMPILE_ARGS ?= 
 UUT_WORK_DIR ?= ./Work
 REF_WORK_DIR ?= ./Work
-PREPROC_ARGS ?= -DINPUT_FILE=$(INPUT_FILE)
-REF_PREPROC_ARGS ?= -DUUT_GRAPH=$(REF_GRAPH) -DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS) 
-UUT_PREPROC_ARGS ?= -DUUT_GRAPH=$(UUT_GRAPH) -DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) -DUSING_UUT=1
+PREPROC_ARGS ?= --aie.Xpreproc=-DINPUT_FILE=$(INPUT_FILE)
+REF_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(REF_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS) 
+UUT_PREPROC_ARGS ?= --aie.Xpreproc=-DUUT_GRAPH=$(UUT_GRAPH) --aie.Xpreproc=-DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) --aie.Xpreproc=-DUSING_UUT=1
 
 ############################ setting AIE Compiler ###########################
 ifneq ($(filter aiesim hw_emu hw, $(TARGET)),)
@@ -145,14 +147,14 @@ else
 AIETARGET := x86sim
 endif
 
-AIE_CXXFLAGS += --target=$(AIETARGET) --platform=$(XPLATFORM) --pl-freq=1000 
+AIE_CXXFLAGS += --target=$(AIETARGET) --platform=$(XPLATFORM)   --aie.pl-freq 1000 
 AIE_CXXFLAGS += $(AIE_CXXFLAGS_INC)
 AIE_CONTAINER = $(TEMP_DIR)/libadf.a
 AIE_WORK_DIR = $(CUR_DIR)/Work
 AIE_PKG_DIR = $(AIE_WORK_DIR)
 
 AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L1/tests/aie/inc -I $(XFLIB_DIR)/L1/tests/aie/src -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L2/tests/aie/common/inc -I $(CUR_DIR)
-AIE_CXXFLAGS += -v  $($(TAG)_TARGET_COMPILE_ARGS)  -Xpreproc="$($(TAG)_PREPROC_ARGS)"
+AIE_CXXFLAGS += --aie.verbose  $($(TAG)_TARGET_COMPILE_ARGS)  $($(TAG)_PREPROC_ARGS)
 
 $(AIE_WORK_DIR)/ps/c_rts/aie_control_xrt.cpp: $(AIE_CONTAINER)
 
@@ -200,8 +202,7 @@ endif
 $(AIE_CONTAINER): pre_build $(XFLIB_DIR)/L2/tests/aie/fft_window/test.cpp uut_config.h $(XFLIB_DIR)/L1/src/aie/fft_window.cpp 
 	$(ECHO) "Compiling: libadf.a"
 	mkdir -p $(dir $@)
-	$(AIECXX) $(AIE_CXXFLAGS) $(filter %.s %.c %.cc %.cpp %cxx, $^)
-	mv ./libadf.a $(AIE_CONTAINER)
+	$(VPP) -c --mode aie $(AIE_CXXFLAGS) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^)
 
 ############################## Setting Rules for Host (Building Host Executable) ##############################
 $(EXE_FILE): $(EXE_FILE_DEPS)
@@ -301,17 +302,17 @@ run: all
 ifeq ($(TARGET), x86sim)
 	$(X86SIMULATOR) --pkg-dir=$(AIE_PKG_DIR) 
 	mkdir -p logs
-	$(if $(filter-out REF,$(TAG)), make -f $(CUR_DIR)/helper.mk get_status HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) DATA_TYPE=$(DATA_TYPE) POINT_SIZE=$(POINT_SIZE) API_IO=$(API_IO) WINDOW_VSIZE=$(WINDOW_VSIZE) UUT_SSR=$(UUT_SSR) DYN_PT_SIZE=$(DYN_PT_SIZE) AIE_VARIANT=$(AIE_VARIANT) STATUS_FILE=$(STATUS_FILE) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE))
+	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk get_status HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) STATUS_FILE=$(STATUS_FILE) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)")
 	$(if $(filter-out REF,$(TAG)), tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/diff_exit.tcl ./)
 endif
 #aiesim
 ifeq ($(TARGET), aiesim)
 	$(AIESIMULATOR) --pkg-dir=$(AIE_PKG_DIR) --profile --graph-latency $(AIESIMFLAGS)
 	mkdir -p logs
-	$(PYTHONBIN)/python3 paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk get_status HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) STATUS_FILE=$(STATUS_FILE) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)"
-	$(PYTHONBIN)/python3 paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk get_latency HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) STATUS_FILE=$(STATUS_FILE)"
-	$(PYTHONBIN)/python3 paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk get_stats HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) STATUS_FILE=$(STATUS_FILE)"
-	$(PYTHONBIN)/python3 paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk get_qor HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) STATUS_FILE=$(STATUS_FILE) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)"
+	$(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk get_status HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) STATUS_FILE=$(STATUS_FILE) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)"
+	$(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk get_latency HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) STATUS_FILE=$(STATUS_FILE)"
+	$(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk get_stats HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) STATUS_FILE=$(STATUS_FILE)"
+	$(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk get_qor HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) STATUS_FILE=$(STATUS_FILE) UUT_KERNEL=$(UUT_KERNEL) UUT_SIM_FILE=$(UUT_SIM_FILE) REF_SIM_FILE=$(REF_SIM_FILE)"
 	$(XFLIB_DIR)/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) $(XFLIB_DIR)/L2/tests/aie/common/scripts
 	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/diff_exit.tcl ./
 endif
@@ -323,24 +324,29 @@ ifeq ($(pcie_aie), on)
 	cp $(AIE_WORK_DIR)/ps/c_rts/aie_control_config.json ./
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) $(BINARY_CONTAINERS_PKG)
+	
 endif
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
+	
 else
 	@echo $(RUN_DEPS)
 	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
 	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
+	
 endif
 endif
 #sw_emu
 ifneq (,$(filter sw_emu, $(TARGET)))
 ifeq ($(HOST_ARCH), x86)
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
-	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) 
+	
 else
 	@echo $(RUN_DEPS)
 	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
 	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
+	
 endif
 endif
 #hw
@@ -348,6 +354,7 @@ ifeq ($(TARGET), hw)
 ifeq ($(HOST_ARCH), x86)
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	$(EXE_FILE) $(HOST_ARGS)
+	
 else
 	$(ECHO) "Please copy the content of sd_card folder and data to an SD Card and run on the board"
 endif
@@ -356,9 +363,9 @@ endif
 ############################## Setting Targets ##############################
 .PHONY: pre_build
 pre_build:
-	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3)/python3 paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command "tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL)" --connector " " --var "DATA_TYPE:COEFF_TYPE:POINT_SIZE:WINDOW_VSIZE:SHIFT:API_IO:UUT_SSR:DYN_PT_SIZE")
+	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command "tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL)" --connector " " --var "DATA_TYPE:COEFF_TYPE:POINT_SIZE:WINDOW_VSIZE:SHIFT:API_IO:UUT_SSR:ROUND_MODE:SAT_MODE:DYN_PT_SIZE:AIE_VARIANT")
 	$(if $(filter-out REF,$(TAG)), vitis --classic -exec ipmetadata_config_checker $(XFLIB_DIR)/L2/meta/$(UUT_KERNEL).json ./config.json -newflow)
-	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3)/python3 paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) INPUT_FILE=$(INPUT_FILE) ")
+	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command "make -f $(CUR_DIR)/helper.mk HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) INPUT_FILE=$(INPUT_FILE) ")
 
 .PHONY: clean cleanall emconfig valid_params
 emconfig: $(EMCONFIG)
@@ -380,10 +387,14 @@ endif
 #################### Parameterized File Generation ##########################
 
 GENERATED_FILES += uut_config.h
-uut_config.h: tb_gen.py 
-	$(VITIS_PYTHON3) $(XFLIB_DIR)/scripts/instance_generator.py -o uut_config.h --param-set $(PARAMS) --param-file multi_params.json --file "tb_gen.py" --func "generate_testbench"
+uut_config.h: $(XFLIB_DIR)/L2/tests/aie/common/scripts/tb_gen.py 
+	$(VITIS_PYTHON3) $(XFLIB_DIR)/scripts/instance_generator.py -o uut_config.h --param-set $(PARAMS) --param-file multi_params.json --file "$(XFLIB_DIR)/L2/tests/aie/common/scripts/tb_gen.py" --func "generate_testbench"
+
+.PHONY: valid_params gen_instances
 
 valid_params:
+
+gen_instances: $(GENERATED_FILES)
 
 ############################## Cleaning Rules ##############################
 cleanh:

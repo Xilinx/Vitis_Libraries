@@ -26,6 +26,7 @@
 namespace xf {
 namespace dsp {
 namespace aie {
+namespace blas {
 namespace matrix_vector_mul {
 
 // Example test for matrix_vector_mul matrix vector multiply
@@ -36,12 +37,20 @@ template <typename TT_DATA_A,
           unsigned int TP_DIM_B,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
+          unsigned int TP_SAT,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_CASC_LEN>
-void matrix_vector_mul_ref<TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_SHIFT, TP_RND, TP_NUM_FRAMES, TP_CASC_LEN>::
-    matrix_vector_mul(input_buffer<TT_DATA_A>& inWindowA,
-                      input_buffer<TT_DATA_B>& inWindowB,
-                      output_buffer<outType_t<TT_DATA_A, TT_DATA_B> >& outWindow) {
+void matrix_vector_mul_ref<TT_DATA_A,
+                           TT_DATA_B,
+                           TP_DIM_A,
+                           TP_DIM_B,
+                           TP_SHIFT,
+                           TP_RND,
+                           TP_SAT,
+                           TP_NUM_FRAMES,
+                           TP_CASC_LEN>::matrix_vector_mul(input_buffer<TT_DATA_A>& inWindowA,
+                                                           input_buffer<TT_DATA_B>& inWindowB,
+                                                           output_buffer<outType_t<TT_DATA_A, TT_DATA_B> >& outWindow) {
     const unsigned int shift = TP_SHIFT;
     using TT_OUT = outType_t<TT_DATA_A, TT_DATA_B>;
     TT_DATA_A dA_in[TP_DIM_B];
@@ -50,7 +59,7 @@ void matrix_vector_mul_ref<TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_SHIFT, T
     T_accRef<TT_OUT> accum;
 
     TT_DATA_A* inPtrA = (TT_DATA_A*)inWindowA.data();
-    TT_DATA_A* inPtrARow;
+    TT_DATA_A* inRowA;
     TT_DATA_B* inPtrB = (TT_DATA_B*)inWindowB.data();
     TT_OUT* outPtr = (TT_OUT*)outWindow.data();
 
@@ -71,27 +80,26 @@ void matrix_vector_mul_ref<TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_SHIFT, T
 
         // Multiply each row of matrix with the vector
         for (int row = 0; row < TP_DIM_A; row++) {
-            inPtrARow = inPtrA++;
+            inRowA = inPtrA++;
             // Load a row of the the matrix
             for (int elemA = 0; elemA < TP_DIM_B; elemA++) {
-                dA_in[elemA] = *inPtrARow;
-                inPtrARow += TP_DIM_A;
+                dA_in[elemA] = *inRowA;
+                inRowA += TP_DIM_A;
             }
 
             accum = null_accRef<TT_OUT>();
             for (int elemAB = 0; elemAB < TP_DIM_B; elemAB++) {
-                // printf("%d * %d\n", dA_in[elemAB], dB_in[elemAB]);
                 multiplyAcc(accum, dA_in[elemAB], dB_in[elemAB]);
             }
-
             roundAcc(TP_RND, shift, accum);
-            saturateAcc(accum);
+            saturateAcc(accum, TP_SAT);
             outData = castAcc(accum);
             *outPtr++ = outData;
         }
-        // inPtrA = inPtrARow;
+        inPtrA += (TP_DIM_B - 1) * (TP_DIM_A);
     }
 };
+}
 }
 }
 }

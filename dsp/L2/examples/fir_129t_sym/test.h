@@ -43,16 +43,24 @@ class test_kernel : public graph {
             firGraph;
 
    public:
-    port<input> in;
-    port<output> out;
+       input_plio in;
+       output_plio out;
+
+
+    // in = input_plio::create(plio_64_bits,"data/input.txt");
+    // out = output_plio::create(plio_64_bits,"data/output.txt");
+
     // Constructor - with FIR graph class initialization
     test_kernel() : firGraph(m_taps) {
+        in = input_plio::create(plio_32_bits,"data/input.txt");
+        out = output_plio::create(plio_32_bits,"data/output.txt");
+
         // Make connections
         // Size of window in Bytes.
         // Margin gets automatically added within the FIR graph class.
         // Margin equals to FIR length rounded up to nearest multiple of 32 Bytes.
-        connect<>(in, firGraph.in[0]);
-        connect<>(firGraph.out[0], out);
+        connect<>(in.out[0], firGraph.in[0]);
+        connect<>(firGraph.out[0], out.in[0]);
     };
 };
 };

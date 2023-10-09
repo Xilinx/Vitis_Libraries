@@ -1,13 +1,13 @@
-..
+.. 
    Copyright (C) 2019-2022, Xilinx, Inc.
    Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-
+    
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-
+    
        http://www.apache.org/licenses/LICENSE-2.0
-
+    
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -134,7 +134,18 @@ Following table gives results for the Widgets with a wide variety of supported p
    :header-rows: 1
    :widths: auto
 
+Sample Delay
+~~~~~~~
 
+Following table gives results for the Sample Delay  with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_SAMPLE_DELAY`.
+
+:download:`sample_delay_benchmark.csv <../../csv_data_files/L2/sample_delay_benchmark.csv>`
+
+.. csv-table:: Sample Delay benchmark
+   :file: ../../csv_data_files/L2/sample_delay_benchmark.csv
+   :align: center
+   :header-rows: 1
+   :widths: auto
 
 
 

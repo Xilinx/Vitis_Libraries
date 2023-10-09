@@ -1,5 +1,3 @@
-
-
 from aie_common import *
 import json
 import sys
@@ -28,6 +26,16 @@ TP_POINT_SIZE_max = 65536
 TP_WINDOW_VSIZE_min = 16
 TP_CASC_LEN_min = 1
 TP_CASC_LEN_max = 11
+TP_SHIFT_min=0
+TP_SHIFT_max=60
+TP_RND_min = 0
+TP_RND_max = 7
+#TP_FFT_NIFFT_min=0
+#TP_FFT_NIFFT_max=1
+#TP_API_min=0
+#TP_API_max=1
+#AIE_VARIANT_min=2
+#AIE_VARIANT_max=1
 
 def fn_validate_twiddle_type(TT_DATA, TT_TWIDDLE):
   validTypeCombos = [
@@ -108,6 +116,15 @@ def fn_validate_point_size(TP_POINT_SIZE, TP_DYN_PT_SIZE, TT_DATA, TP_PARALLEL_P
       return check
   return isValid
 
+def fn_validate_round_val(TP_RND, AIE_VARIANT):
+  if AIE_VARIANT == 1:
+    if TP_RND == k_rnd_mode_map_aie1["rnd_ceil"] or TP_RND == k_rnd_mode_map_aie1["rnd_floor"]:
+      return isError(f"This value of round mode is not supported for FFT. For the targeted AIE-ML device, supported values are \n2: rnd_pos_inf,\n3: rnd_neg_inf,\n4: rnd_sym_zero,\n5: rnd_sym_inf,\n6: rnd_conv_even,\n7: rnd_conv_odd")
+  elif AIE_VARIANT == 2:
+    if TP_RND == k_rnd_mode_map_aie2["rnd_ceil"] or TP_RND == k_rnd_mode_map_aie2["rnd_floor"] or TP_RND == k_rnd_mode_map_aie2["rnd_sym_floor"] or TP_RND == k_rnd_mode_map_aie2["rnd_sym_ceil"]:
+      return isError(f"This value of round mode is not supported for the FFT. For the targeted AIE device, supported values are \n 8: rnd_neg_inf,\n9: rnd_pos_inf,\n10: rnd_sym_zero,\n11: rnd_sym_inf,\n12: rnd_conv_even,\n13: rnd_conv_odd")
+  return isValid
+
 def validate_TP_POINT_SIZE(args):
   TP_POINT_SIZE = args["TP_POINT_SIZE"]
   TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"]
@@ -120,7 +137,18 @@ def validate_TP_POINT_SIZE(args):
 def validate_TP_SHIFT(args):
   TP_SHIFT = args["TP_SHIFT"]
   TT_DATA = args["TT_DATA"]
-  return fn_validate_shift(TT_DATA, TP_SHIFT)
+  return fn_validate_shift_val(TT_DATA, TP_SHIFT)
+
+def validate_TP_RND(args):
+  TP_RND = args["TP_RND"]
+  AIE_VARIANT = args["AIE_VARIANT"]
+  return fn_validate_round_val(TP_RND, AIE_VARIANT)
+
+def fn_validate_shift_val(TT_DATA, TP_SHIFT):
+  if TP_SHIFT< TP_SHIFT_min or TP_SHIFT > TP_SHIFT_max:
+	    return isError(f"Minimum and Maximum value for parameter Shift is {TP_SHIFT_min} and {TP_SHIFT_max},respectively, but got {TP_SHIFT}. ")
+  return fn_float_no_shift(TT_DATA, TP_SHIFT)
+
 
 #assumes n is a power of 2
 def fn_log2(n):
@@ -195,6 +223,10 @@ def validate_TP_PARALLEL_POWER(args):
   TP_PARALLEL_POWER = args["TP_PARALLEL_POWER"]
   return fn_validate_parallel_power(TP_API, TP_PARALLEL_POWER)
 
+def validate_TP_SAT(args):
+  TP_SAT = args["TP_SAT"]
+  return fn_validate_satMode(TP_SAT)
+
 
 
   ######### Finished Validation ###########
@@ -256,6 +288,9 @@ def generate_graph(graphname, args):
   TP_WINDOW_VSIZE = args["TP_WINDOW_VSIZE"]
   TP_API = args["TP_API"]
   TP_PARALLEL_POWER = args["TP_PARALLEL_POWER"]
+  TP_USE_WIDGETS = 0
+  TP_RND = args["TP_RND"]
+  TP_SAT = args["TP_SAT"]
 
   if TP_API == 0 and TP_DYN_PT_SIZE == 0:
     ssr = 1
@@ -286,7 +321,10 @@ public:
     {TP_DYN_PT_SIZE}, // TP_DYN_PT_SIZE
     {TP_WINDOW_VSIZE}, // TP_WINDOW_VSIZE
     {TP_API}, // TP_API
-    {TP_PARALLEL_POWER} // TP_PARALLEL_POWER
+    {TP_PARALLEL_POWER}, // TP_PARALLEL_POWER
+    {TP_USE_WIDGETS}, // TP_USE_WIDGETS
+    {TP_RND}, // TP_RND
+    {TP_SAT} // TP_SAT
   > fft_graph;
 
   {graphname}() : fft_graph() {{

@@ -42,6 +42,7 @@ using namespace adf;
 #include "device_defs.h"
 #include "fft_ifft_dit_1ch_traits.hpp"
 #include "widget_api_cast.hpp" //for API definitions
+#include "fir_utils.hpp"       //for ROUND_MIN/MAX and SAT_MODE_MIN/MAX
 
 #ifndef __SUPPORTS_ACC64__
 using output_stream_cacc64 = output_stream_cacc80;
@@ -826,7 +827,9 @@ template <typename TT_DATA, // input
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE = TP_POINT_SIZE,
-          unsigned int TP_ORIG_PAR_POWER = 0>
+          unsigned int TP_ORIG_PAR_POWER = 0,
+          unsigned int TP_RND = 0,
+          unsigned int TP_SAT = 1>
 class fft_ifft_dit_1ch_legality {
    public:
     // Parameter value defensive and legality checks
@@ -845,6 +848,10 @@ class fft_ifft_dit_1ch_legality {
     static_assert(TP_WINDOW_VSIZE / TP_POINT_SIZE >= 1, "ERROR: TP_WINDOW_SIZE must be a multiple of TP_POINT_SIZE");
     static_assert((TP_DYN_PT_SIZE == 0) || (TP_POINT_SIZE != 16),
                   "ERROR: Dynamic point size is not supported for only one legal size (16)");
+    static_assert(TP_SAT >= SAT_MODE_MIN && TP_SAT <= SAT_MODE_MAX && TP_SAT != 2,
+                  "ERROR: TP_SAT is out of supported range");
+    static_assert(TP_SAT != 2, "ERROR: TP_SAT is invalid. Valid values of TP_SAT are 0, 1, and 3");
+    static_assert(TP_RND >= ROUND_MIN && TP_RND <= ROUND_MAX, "ERROR: TP_RND is out of the supported range.");
 };
 
 //-----------------------------------------------------------------------------------------------------
@@ -861,7 +868,11 @@ template <typename TT_DATA, // input
           unsigned int TP_WINDOW_VSIZE = TP_POINT_SIZE,
           unsigned int TP_IN_API = 0,
           unsigned int TP_OUT_API = 0,
-          unsigned int TP_ORIG_PAR_POWER = 0>
+          unsigned int TP_ORIG_PAR_POWER = 0,
+          unsigned int TP_RND = 0,
+          unsigned int TP_SAT = 1
+
+          >
 class fft_ifft_dit_1ch : public fft_ifft_dit_1ch_legality<TT_DATA,
                                                           TT_OUT_DATA,
                                                           TT_TWIDDLE,
@@ -872,7 +883,9 @@ class fft_ifft_dit_1ch : public fft_ifft_dit_1ch_legality<TT_DATA,
                                                           TP_END_RANK,
                                                           TP_DYN_PT_SIZE,
                                                           TP_WINDOW_VSIZE,
-                                                          TP_ORIG_PAR_POWER> {
+                                                          TP_ORIG_PAR_POWER,
+                                                          TP_RND,
+                                                          TP_SAT> {
    private:
     kernelFFTClass<TT_DATA,
                    TT_OUT_DATA,
@@ -906,7 +919,9 @@ template <typename TT_DATA, // input
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 class fft_ifft_dit_1ch<TT_DATA,
                        TT_OUT_DATA,
                        TT_TWIDDLE,
@@ -919,17 +934,21 @@ class fft_ifft_dit_1ch<TT_DATA,
                        TP_WINDOW_VSIZE,
                        kStreamAPI,
                        kWindowAPI,
-                       TP_ORIG_PAR_POWER> : public fft_ifft_dit_1ch_legality<TT_DATA,
-                                                                             TT_OUT_DATA,
-                                                                             TT_TWIDDLE,
-                                                                             TP_POINT_SIZE,
-                                                                             TP_FFT_NIFFT,
-                                                                             TP_SHIFT,
-                                                                             TP_START_RANK,
-                                                                             TP_END_RANK,
-                                                                             TP_DYN_PT_SIZE,
-                                                                             TP_WINDOW_VSIZE,
-                                                                             TP_ORIG_PAR_POWER> {
+                       TP_ORIG_PAR_POWER,
+                       TP_RND,
+                       TP_SAT> : public fft_ifft_dit_1ch_legality<TT_DATA,
+                                                                  TT_OUT_DATA,
+                                                                  TT_TWIDDLE,
+                                                                  TP_POINT_SIZE,
+                                                                  TP_FFT_NIFFT,
+                                                                  TP_SHIFT,
+                                                                  TP_START_RANK,
+                                                                  TP_END_RANK,
+                                                                  TP_DYN_PT_SIZE,
+                                                                  TP_WINDOW_VSIZE,
+                                                                  TP_ORIG_PAR_POWER,
+                                                                  TP_RND,
+                                                                  TP_SAT> {
    private:
     kernelFFTClass<TT_DATA,
                    TT_OUT_DATA,
@@ -976,7 +995,9 @@ template <typename TT_DATA, // input
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 class fft_ifft_dit_1ch<TT_DATA,
                        TT_OUT_DATA,
                        TT_TWIDDLE,
@@ -989,17 +1010,21 @@ class fft_ifft_dit_1ch<TT_DATA,
                        TP_WINDOW_VSIZE,
                        kWindowAPI,
                        kStreamAPI,
-                       TP_ORIG_PAR_POWER> : public fft_ifft_dit_1ch_legality<TT_DATA,
-                                                                             TT_OUT_DATA,
-                                                                             TT_TWIDDLE,
-                                                                             TP_POINT_SIZE,
-                                                                             TP_FFT_NIFFT,
-                                                                             TP_SHIFT,
-                                                                             TP_START_RANK,
-                                                                             TP_END_RANK,
-                                                                             TP_DYN_PT_SIZE,
-                                                                             TP_WINDOW_VSIZE,
-                                                                             TP_ORIG_PAR_POWER> {
+                       TP_ORIG_PAR_POWER,
+                       TP_RND,
+                       TP_SAT> : public fft_ifft_dit_1ch_legality<TT_DATA,
+                                                                  TT_OUT_DATA,
+                                                                  TT_TWIDDLE,
+                                                                  TP_POINT_SIZE,
+                                                                  TP_FFT_NIFFT,
+                                                                  TP_SHIFT,
+                                                                  TP_START_RANK,
+                                                                  TP_END_RANK,
+                                                                  TP_DYN_PT_SIZE,
+                                                                  TP_WINDOW_VSIZE,
+                                                                  TP_ORIG_PAR_POWER,
+                                                                  TP_RND,
+                                                                  TP_SAT> {
    private:
     kernelFFTClass<TT_DATA,
                    TT_OUT_DATA,
@@ -1045,7 +1070,9 @@ template <typename TT_DATA, // input
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 class fft_ifft_dit_1ch<TT_DATA,
                        TT_OUT_DATA,
                        TT_TWIDDLE,
@@ -1058,17 +1085,21 @@ class fft_ifft_dit_1ch<TT_DATA,
                        TP_WINDOW_VSIZE,
                        kStreamAPI,
                        kStreamAPI,
-                       TP_ORIG_PAR_POWER> : public fft_ifft_dit_1ch_legality<TT_DATA,
-                                                                             TT_OUT_DATA,
-                                                                             TT_TWIDDLE,
-                                                                             TP_POINT_SIZE,
-                                                                             TP_FFT_NIFFT,
-                                                                             TP_SHIFT,
-                                                                             TP_START_RANK,
-                                                                             TP_END_RANK,
-                                                                             TP_DYN_PT_SIZE,
-                                                                             TP_WINDOW_VSIZE,
-                                                                             TP_ORIG_PAR_POWER> {
+                       TP_ORIG_PAR_POWER,
+                       TP_RND,
+                       TP_SAT> : public fft_ifft_dit_1ch_legality<TT_DATA,
+                                                                  TT_OUT_DATA,
+                                                                  TT_TWIDDLE,
+                                                                  TP_POINT_SIZE,
+                                                                  TP_FFT_NIFFT,
+                                                                  TP_SHIFT,
+                                                                  TP_START_RANK,
+                                                                  TP_END_RANK,
+                                                                  TP_DYN_PT_SIZE,
+                                                                  TP_WINDOW_VSIZE,
+                                                                  TP_ORIG_PAR_POWER,
+                                                                  TP_RND,
+                                                                  TP_SAT> {
    private:
     kernelFFTClass<TT_DATA,
                    TT_OUT_DATA,
@@ -1119,7 +1150,9 @@ template <typename TT_DATA, // input
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 class fft_ifft_dit_1ch<TT_DATA,
                        TT_OUT_DATA,
                        TT_TWIDDLE,
@@ -1132,17 +1165,21 @@ class fft_ifft_dit_1ch<TT_DATA,
                        TP_WINDOW_VSIZE,
                        kStreamAPI,
                        kCascStreamAPI,
-                       TP_ORIG_PAR_POWER> : public fft_ifft_dit_1ch_legality<TT_DATA,
-                                                                             TT_OUT_DATA,
-                                                                             TT_TWIDDLE,
-                                                                             TP_POINT_SIZE,
-                                                                             TP_FFT_NIFFT,
-                                                                             TP_SHIFT,
-                                                                             TP_START_RANK,
-                                                                             TP_END_RANK,
-                                                                             TP_DYN_PT_SIZE,
-                                                                             TP_WINDOW_VSIZE,
-                                                                             TP_ORIG_PAR_POWER> {
+                       TP_ORIG_PAR_POWER,
+                       TP_RND,
+                       TP_SAT> : public fft_ifft_dit_1ch_legality<TT_DATA,
+                                                                  TT_OUT_DATA,
+                                                                  TT_TWIDDLE,
+                                                                  TP_POINT_SIZE,
+                                                                  TP_FFT_NIFFT,
+                                                                  TP_SHIFT,
+                                                                  TP_START_RANK,
+                                                                  TP_END_RANK,
+                                                                  TP_DYN_PT_SIZE,
+                                                                  TP_WINDOW_VSIZE,
+                                                                  TP_ORIG_PAR_POWER,
+                                                                  TP_RND,
+                                                                  TP_SAT> {
    private:
     kernelFFTClass<TT_DATA,
                    TT_OUT_DATA,
@@ -1188,7 +1225,9 @@ template <typename TT_DATA, // input
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 class fft_ifft_dit_1ch<TT_DATA,
                        TT_OUT_DATA,
                        TT_TWIDDLE,
@@ -1201,17 +1240,21 @@ class fft_ifft_dit_1ch<TT_DATA,
                        TP_WINDOW_VSIZE,
                        kWindowAPI,
                        kCascStreamAPI,
-                       TP_ORIG_PAR_POWER> : public fft_ifft_dit_1ch_legality<TT_DATA,
-                                                                             TT_OUT_DATA,
-                                                                             TT_TWIDDLE,
-                                                                             TP_POINT_SIZE,
-                                                                             TP_FFT_NIFFT,
-                                                                             TP_SHIFT,
-                                                                             TP_START_RANK,
-                                                                             TP_END_RANK,
-                                                                             TP_DYN_PT_SIZE,
-                                                                             TP_WINDOW_VSIZE,
-                                                                             TP_ORIG_PAR_POWER> {
+                       TP_ORIG_PAR_POWER,
+                       TP_RND,
+                       TP_SAT> : public fft_ifft_dit_1ch_legality<TT_DATA,
+                                                                  TT_OUT_DATA,
+                                                                  TT_TWIDDLE,
+                                                                  TP_POINT_SIZE,
+                                                                  TP_FFT_NIFFT,
+                                                                  TP_SHIFT,
+                                                                  TP_START_RANK,
+                                                                  TP_END_RANK,
+                                                                  TP_DYN_PT_SIZE,
+                                                                  TP_WINDOW_VSIZE,
+                                                                  TP_ORIG_PAR_POWER,
+                                                                  TP_RND,
+                                                                  TP_SAT> {
    private:
     kernelFFTClass<TT_DATA,
                    TT_OUT_DATA,
@@ -1253,7 +1296,9 @@ template <typename TT_DATA, // input
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 class fft_ifft_dit_1ch<TT_DATA,
                        TT_OUT_DATA,
                        TT_TWIDDLE,
@@ -1266,17 +1311,21 @@ class fft_ifft_dit_1ch<TT_DATA,
                        TP_WINDOW_VSIZE,
                        kStreamAPI,
                        kStreamCascAPI,
-                       TP_ORIG_PAR_POWER> : public fft_ifft_dit_1ch_legality<TT_DATA,
-                                                                             TT_OUT_DATA,
-                                                                             TT_TWIDDLE,
-                                                                             TP_POINT_SIZE,
-                                                                             TP_FFT_NIFFT,
-                                                                             TP_SHIFT,
-                                                                             TP_START_RANK,
-                                                                             TP_END_RANK,
-                                                                             TP_DYN_PT_SIZE,
-                                                                             TP_WINDOW_VSIZE,
-                                                                             TP_ORIG_PAR_POWER> {
+                       TP_ORIG_PAR_POWER,
+                       TP_RND,
+                       TP_SAT> : public fft_ifft_dit_1ch_legality<TT_DATA,
+                                                                  TT_OUT_DATA,
+                                                                  TT_TWIDDLE,
+                                                                  TP_POINT_SIZE,
+                                                                  TP_FFT_NIFFT,
+                                                                  TP_SHIFT,
+                                                                  TP_START_RANK,
+                                                                  TP_END_RANK,
+                                                                  TP_DYN_PT_SIZE,
+                                                                  TP_WINDOW_VSIZE,
+                                                                  TP_ORIG_PAR_POWER,
+                                                                  TP_RND,
+                                                                  TP_SAT> {
    private:
     kernelFFTClass<TT_DATA,
                    TT_OUT_DATA,
@@ -1322,7 +1371,9 @@ template <typename TT_DATA, // input
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 class fft_ifft_dit_1ch<TT_DATA,
                        TT_OUT_DATA,
                        TT_TWIDDLE,
@@ -1335,17 +1386,21 @@ class fft_ifft_dit_1ch<TT_DATA,
                        TP_WINDOW_VSIZE,
                        kWindowAPI,
                        kStreamCascAPI,
-                       TP_ORIG_PAR_POWER> : public fft_ifft_dit_1ch_legality<TT_DATA,
-                                                                             TT_OUT_DATA,
-                                                                             TT_TWIDDLE,
-                                                                             TP_POINT_SIZE,
-                                                                             TP_FFT_NIFFT,
-                                                                             TP_SHIFT,
-                                                                             TP_START_RANK,
-                                                                             TP_END_RANK,
-                                                                             TP_DYN_PT_SIZE,
-                                                                             TP_WINDOW_VSIZE,
-                                                                             TP_ORIG_PAR_POWER> {
+                       TP_ORIG_PAR_POWER,
+                       TP_RND,
+                       TP_SAT> : public fft_ifft_dit_1ch_legality<TT_DATA,
+                                                                  TT_OUT_DATA,
+                                                                  TT_TWIDDLE,
+                                                                  TP_POINT_SIZE,
+                                                                  TP_FFT_NIFFT,
+                                                                  TP_SHIFT,
+                                                                  TP_START_RANK,
+                                                                  TP_END_RANK,
+                                                                  TP_DYN_PT_SIZE,
+                                                                  TP_WINDOW_VSIZE,
+                                                                  TP_ORIG_PAR_POWER,
+                                                                  TP_RND,
+                                                                  TP_SAT> {
    private:
     kernelFFTClass<TT_DATA,
                    TT_OUT_DATA,

@@ -1,5 +1,5 @@
 {
-    "test_0_fft_ifft_dit_1ch_aie1": {
+    "test_0_tool_canary_aie":{
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "128",
@@ -13,12 +13,14 @@
         "API_IO": "0",
         "PARALLEL_POWER": "0",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "2",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "AIE_VARIANT": "1",
         "DIFF_TOLERANCE": "0",
         "CC_TOLERANCE": "0"
     },
-    "test_1_fft_ifft_dit_1ch_aie1": {
+    "test_1_fft_ifft_dit_1ch_aie": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "256",
@@ -32,12 +34,14 @@
         "API_IO": "0",
         "PARALLEL_POWER": "0",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "2",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "AIE_VARIANT": "1",
         "DIFF_TOLERANCE": "0",
         "CC_TOLERANCE": "0"
     },
-    "test_2_fft_ifft_dit_1ch_aie1": {
+    "test_2_fft_ifft_dit_1ch_aie": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "512",
@@ -51,12 +55,14 @@
         "API_IO": "0",
         "PARALLEL_POWER": "0",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "2",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "AIE_VARIANT": "1",
         "DIFF_TOLERANCE": "0",
         "CC_TOLERANCE": "0"
     },
-    "test_3_fft_ifft_dit_1ch_aie1": {
+    "test_3_fft_ifft_dit_1ch_aie": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "1024",
@@ -70,12 +76,14 @@
         "API_IO": "0",
         "PARALLEL_POWER": "0",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "2",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "AIE_VARIANT": "1",
         "DIFF_TOLERANCE": "0",
         "CC_TOLERANCE": "0"
     },
-    "test_4_fft_ifft_dit_1ch_aie1": {
+    "test_4_fft_ifft_dit_1ch_aie": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "2048",
@@ -89,12 +97,14 @@
         "API_IO": "0",
         "PARALLEL_POWER": "0",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "2",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "AIE_VARIANT": "1",
         "DIFF_TOLERANCE": "0",
         "CC_TOLERANCE": "0"
     },
-    "test_5_fft_ifft_dit_1ch_aie1": {
+    "test_5_fft_ifft_dit_1ch_aie": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "128",
@@ -108,12 +118,14 @@
         "API_IO": "0",
         "PARALLEL_POWER": "0",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "2",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "AIE_VARIANT": "1",
         "DIFF_TOLERANCE": "0",
         "CC_TOLERANCE": "0"
     },
-    "test_6_fft_ifft_dit_1ch_aie1": {
+    "test_6_fft_ifft_dit_1ch_aie": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "256",
@@ -127,12 +139,14 @@
         "API_IO": "0",
         "PARALLEL_POWER": "0",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "2",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "AIE_VARIANT": "1",
         "DIFF_TOLERANCE": "0",
         "CC_TOLERANCE": "0"
     },
-    "test_7_fft_ifft_dit_1ch_aie1": {
+    "test_7_fft_ifft_dit_1ch_aie": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "512",
@@ -146,12 +160,14 @@
         "API_IO": "0",
         "PARALLEL_POWER": "0",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "2",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "AIE_VARIANT": "1",
         "DIFF_TOLERANCE": "0",
         "CC_TOLERANCE": "0"
     },
-    "test_8_fft_ifft_dit_1ch_aie1": {
+    "test_8_fft_ifft_dit_1ch_aie": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "1024",
@@ -165,12 +181,14 @@
         "API_IO": "0",
         "PARALLEL_POWER": "0",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "2",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "AIE_VARIANT": "1",
         "DIFF_TOLERANCE": "0",
         "CC_TOLERANCE": "0"
     },
-    "test_9_fft_ifft_dit_1ch_aie1": {
+    "test_9_fft_ifft_dit_1ch_aie": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "2048",
@@ -184,12 +202,14 @@
         "API_IO": "0",
         "PARALLEL_POWER": "0",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "2",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "AIE_VARIANT": "1",
         "DIFF_TOLERANCE": "0",
         "CC_TOLERANCE": "0"
     },
-    "test_10_fft_ifft_dit_1ch_aie1": {
+    "test_10_fft_ifft_dit_1ch_aie": {
         "DATA_TYPE": "cint32",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "2048",
@@ -203,12 +223,14 @@
         "API_IO": "0",
         "PARALLEL_POWER": "0",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "2",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "AIE_VARIANT": "1",
         "DIFF_TOLERANCE": "0",
         "CC_TOLERANCE": "0"
     },
-    "test_11_fft_ifft_dit_1ch_aie1": {
+    "test_11_fft_ifft_dit_1ch_aie": {
         "DATA_TYPE": "cfloat",
         "TWIDDLE_TYPE": "cfloat",
         "POINT_SIZE": "1024",
@@ -224,10 +246,12 @@
         "API_IO": "0",
         "PARALLEL_POWER": "0",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "2",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "AIE_VARIANT": "1"
     },
-    "test_12_fft_ifft_dit_1ch_aie1": {
+    "test_12_fft_ifft_dit_1ch_aie": {
         "DATA_TYPE": "cint32",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "1024",
@@ -241,12 +265,14 @@
         "CASC_LEN": "1",
         "WINDOW_VSIZE": "1024",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "2",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "AIE_VARIANT": "1",
         "DIFF_TOLERANCE": "0",
         "CC_TOLERANCE": "0"
     },
-    "test_13_fft_8k_aie1": {
+    "test_13_fft_8k_aie": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "8192",
@@ -259,13 +285,15 @@
         "CASC_LEN": "1",
         "WINDOW_VSIZE": "8192",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "2",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "STIM_TYPE": "0",
         "AIE_VARIANT": "1",
         "DIFF_TOLERANCE": "0",
         "CC_TOLERANCE": "0"
     },
-    "test_14_fft_16k_aie1": {
+    "test_14_fft_16k_aie": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "16384",
@@ -278,13 +306,15 @@
         "CASC_LEN": "1",
         "WINDOW_VSIZE": "16384",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "2",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "STIM_TYPE": "0",
         "AIE_VARIANT": "1",
         "DIFF_TOLERANCE": "0",
         "CC_TOLERANCE": "0"
     },
-    "test_17_fft_dyn_pt_size_aie1": {
+    "test_17_fft_dyn_pt_size_aie": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "128",
@@ -297,13 +327,15 @@
         "API_IO": "0",
         "PARALLEL_POWER": "0",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "2",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "STIM_TYPE": "0",
         "AIE_VARIANT": "1",
         "DIFF_TOLERANCE": "0",
         "CC_TOLERANCE": "0"
     },
-    "test_18_fft_widgets_aie1": {
+    "test_18_fft_widgets_aie": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "128",
@@ -316,13 +348,36 @@
         "API_IO": "1",
         "PARALLEL_POWER": "2",
         "USE_WIDGETS": "1",
+        "ROUND_MODE": "2",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "STIM_TYPE": "0",
         "AIE_VARIANT": "1",
         "DIFF_TOLERANCE": "0",
         "CC_TOLERANCE": "0"
     },
-    "test_0_fft_ifft_dit_1ch_aie2": {
+    "test_19_fft_widgets_aie": {
+        "DATA_TYPE": "cint16",
+        "TWIDDLE_TYPE": "cint16",
+        "POINT_SIZE": "1024",
+        "FFT_NIFFT": "1",
+        "SHIFT": "0",
+        "DYN_PT_SIZE": "0",
+        "NITER": "4",
+        "CASC_LEN": "1",
+        "WINDOW_VSIZE": "128",
+        "API_IO": "1",
+        "PARALLEL_POWER": "2",
+        "USE_WIDGETS": "1",
+        "ROUND_MODE": "4",
+        "SAT_MODE": "3",
+        "DATA_SEED": "1",
+        "STIM_TYPE": "0",
+        "AIE_VARIANT": "1",
+        "DIFF_TOLERANCE": "0",
+        "CC_TOLERANCE": "0"
+    },
+    "test_0_tool_canary_aieml":{
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "128",
@@ -336,12 +391,14 @@
         "API_IO": "0",
         "PARALLEL_POWER": "0",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "8",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "AIE_VARIANT": "2",
         "DIFF_TOLERANCE": "4",
         "CC_TOLERANCE": "0"
     },
-    "test_1_fft_ifft_dit_1ch_aie2": {
+    "test_1_fft_ifft_dit_1ch_aieml": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "256",
@@ -355,12 +412,14 @@
         "API_IO": "0",
         "PARALLEL_POWER": "0",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "8",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "AIE_VARIANT": "2",
         "DIFF_TOLERANCE": "4",
         "CC_TOLERANCE": "0"
     },
-    "test_2_fft_ifft_dit_1ch_aie2": {
+    "test_2_fft_ifft_dit_1ch_aieml": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "512",
@@ -374,12 +433,14 @@
         "API_IO": "0",
         "PARALLEL_POWER": "0",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "8",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "AIE_VARIANT": "2",
         "DIFF_TOLERANCE": "4",
         "CC_TOLERANCE": "0"
     },
-    "test_3_fft_ifft_dit_1ch_aie2": {
+    "test_3_fft_ifft_dit_1ch_aieml": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "1024",
@@ -393,12 +454,14 @@
         "API_IO": "0",
         "PARALLEL_POWER": "0",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "8",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "AIE_VARIANT": "2",
         "DIFF_TOLERANCE": "4",
         "CC_TOLERANCE": "0"
     },
-    "test_4_fft_ifft_dit_1ch_aie2": {
+    "test_4_fft_ifft_dit_1ch_aieml": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "2048",
@@ -412,12 +475,14 @@
         "API_IO": "0",
         "PARALLEL_POWER": "0",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "8",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "AIE_VARIANT": "2",
         "DIFF_TOLERANCE": "4",
         "CC_TOLERANCE": "0"
     },
-    "test_5_fft_ifft_dit_1ch_aie2": {
+    "test_5_fft_ifft_dit_1ch_aieml": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "128",
@@ -431,12 +496,14 @@
         "API_IO": "0",
         "PARALLEL_POWER": "0",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "8",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "AIE_VARIANT": "2",
         "DIFF_TOLERANCE": "4",
         "CC_TOLERANCE": "0"
     },
-    "test_6_fft_ifft_dit_1ch_aie2": {
+    "test_6_fft_ifft_dit_1ch_aieml": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "256",
@@ -450,12 +517,14 @@
         "API_IO": "0",
         "PARALLEL_POWER": "0",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "8",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "AIE_VARIANT": "2",
         "DIFF_TOLERANCE": "4",
         "CC_TOLERANCE": "0"
     },
-    "test_7_fft_ifft_dit_1ch_aie2": {
+    "test_7_fft_ifft_dit_1ch_aieml": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "512",
@@ -469,12 +538,14 @@
         "API_IO": "0",
         "PARALLEL_POWER": "0",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "8",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "AIE_VARIANT": "2",
         "DIFF_TOLERANCE": "4",
         "CC_TOLERANCE": "0"
     },
-    "test_8_fft_ifft_dit_1ch_aie2": {
+    "test_8_fft_ifft_dit_1ch_aieml": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "1024",
@@ -488,12 +559,14 @@
         "API_IO": "0",
         "PARALLEL_POWER": "0",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "8",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "AIE_VARIANT": "2",
         "DIFF_TOLERANCE": "4",
         "CC_TOLERANCE": "0"
     },
-    "test_9_fft_ifft_dit_1ch_aie2": {
+    "test_9_fft_ifft_dit_1ch_aieml": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "2048",
@@ -507,12 +580,14 @@
         "API_IO": "0",
         "PARALLEL_POWER": "0",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "8",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "AIE_VARIANT": "2",
         "DIFF_TOLERANCE": "4",
         "CC_TOLERANCE": "0"
     },
-    "test_10_fft_ifft_dit_1ch_aie2": {
+    "test_10_fft_ifft_dit_1ch_aieml": {
         "DATA_TYPE": "cint32",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "2048",
@@ -526,12 +601,14 @@
         "API_IO": "0",
         "PARALLEL_POWER": "0",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "8",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "AIE_VARIANT": "2",
         "DIFF_TOLERANCE": "4",
         "CC_TOLERANCE": "0"
     },
-    "test_12_fft_ifft_dit_1ch_aie2": {
+    "test_12_fft_ifft_dit_1ch_aieml": {
         "DATA_TYPE": "cint32",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "1024",
@@ -545,12 +622,14 @@
         "CASC_LEN": "1",
         "WINDOW_VSIZE": "1024",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "8",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "AIE_VARIANT": "2",
         "DIFF_TOLERANCE": "4",
         "CC_TOLERANCE": "0"
     },
-    "test_13_fft_8k_aie2": {
+    "test_13_fft_8k_aieml": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "8192",
@@ -563,13 +642,15 @@
         "CASC_LEN": "1",
         "WINDOW_VSIZE": "8192",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "8",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "STIM_TYPE": "0",
         "AIE_VARIANT": "2",
         "DIFF_TOLERANCE": "4",
         "CC_TOLERANCE": "0"
     },
-    "test_14_fft_16k_aie2": {
+    "test_14_fft_16k_aieml": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "16384",
@@ -582,13 +663,15 @@
         "CASC_LEN": "1",
         "WINDOW_VSIZE": "16384",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "8",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "STIM_TYPE": "0",
         "AIE_VARIANT": "2",
         "DIFF_TOLERANCE": "4",
         "CC_TOLERANCE": "0"
     },
-    "test_17_fft_dyn_pt_size_aie2": {
+    "test_17_fft_dyn_pt_size_aieml": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "128",
@@ -601,6 +684,8 @@
         "API_IO": "0",
         "PARALLEL_POWER": "0",
         "USE_WIDGETS": "0",
+        "ROUND_MODE": "8",
+        "SAT_MODE": "1",
         "DATA_SEED": "1",
         "STIM_TYPE": "0",
         "AIE_VARIANT": "2",

@@ -72,7 +72,9 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_API,
           unsigned int TP_SSR,
-          unsigned int TP_DYN_PT_SIZE>
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 class fft_window {
    private:
     static constexpr unsigned int kSamplesInVect = 256 / 8 / sizeof(TT_DATA);
@@ -113,8 +115,19 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_SHIFT,
           unsigned int TP_SSR,
-          unsigned int TP_DYN_PT_SIZE>
-class fft_window<TT_DATA, TT_COEFF, TP_POINT_SIZE, TP_WINDOW_VSIZE, TP_SHIFT, 1, TP_SSR, TP_DYN_PT_SIZE> {
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
+class fft_window<TT_DATA,
+                 TT_COEFF,
+                 TP_POINT_SIZE,
+                 TP_WINDOW_VSIZE,
+                 TP_SHIFT,
+                 1,
+                 TP_SSR,
+                 TP_DYN_PT_SIZE,
+                 TP_RND,
+                 TP_SAT> {
    private:
     static constexpr unsigned int kSamplesInVect = 256 / 8 / sizeof(TT_DATA);
     static constexpr unsigned int kLogSamplesInVect = std::is_same<TT_DATA, cint16>::value ? 3 : 2;

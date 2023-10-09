@@ -1,13 +1,13 @@
 ..
    Copyright (C) 2019-2022, Xilinx, Inc.
    Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-
+    
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-
+    
        http://www.apache.org/licenses/LICENSE-2.0
-
+    
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -101,12 +101,15 @@ Vitis |trade| AIE DSP Library provides a SSR FFT implementation targeting AIE, a
 
    API Reference Overview <user_guide/L2/api-reference.rst>
    DDS Mixer <rst/group_dds_graph.rst>
+   DFT <rst/group_dft_graph.rst>
    Graph utils <rst/group_graph_utils.rst>
    FFT IFFT <rst/group_fft_graphs.rst>
    FFT Window <rst/group_fft_window.rst>
    FIRs <rst/group_fir_graphs.rst>
    GeMM <rst/group_gemm_graph.rst>
+   GeMV <rst/group_matrix_vector_mul_graph.rst>
    Widgets <rst/group_widget_graph.rst>
+   Sample Delay <rst/group_sample_delay_graph.rst>
 
 .. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
    :ltrim:

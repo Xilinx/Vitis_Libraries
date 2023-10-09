@@ -31,7 +31,8 @@ template <typename TT_DATA,
           unsigned int TP_INTERPOLATE_FACTOR,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
-          unsigned int TP_INPUT_WINDOW_VSIZE>
+          unsigned int TP_INPUT_WINDOW_VSIZE,
+          unsigned int TP_SAT>
 void filter_ref(input_circular_buffer<TT_DATA,
                                       extents<inherited_extent>,
                                       margin<fnFirMargin<TP_FIR_LEN / TP_INTERPOLATE_FACTOR, TT_DATA>()> >& inWindow,
@@ -63,7 +64,7 @@ void filter_ref(input_circular_buffer<TT_DATA,
             // prior to output, the final accumulated value must be downsized to the same type
             // as was input. To do this, the final result is rounded, saturated and shifted down
             roundAcc(TP_RND, shift, accum);
-            saturateAcc(accum);
+            saturateAcc(accum, TP_SAT);
             accum_srs = castAcc(accum);
             *outItr++ = accum_srs;
         }
@@ -82,7 +83,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 void fir_interpolate_asym_ref<TT_DATA,
                               TT_COEFF,
                               TP_FIR_LEN,
@@ -92,14 +94,15 @@ void fir_interpolate_asym_ref<TT_DATA,
                               TP_INPUT_WINDOW_VSIZE,
                               TP_USE_COEFF_RELOAD,
                               TP_NUM_OUTPUTS,
-                              TP_API>::
+                              TP_API,
+                              TP_SAT>::
     filter(input_circular_buffer<TT_DATA,
                                  extents<inherited_extent>,
                                  margin<fnFirMargin<TP_FIR_LEN / TP_INTERPOLATE_FACTOR, TT_DATA>()> >& inWindow,
            output_circular_buffer<TT_DATA>& outWindow) {
     //    firHeaderReload<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_USE_COEFF_RELOAD>(inWindow,
     //    m_internalTaps); //coeffs on header has been dropped.
-    filter_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE>(
+    filter_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_SAT>(
         inWindow, outWindow, m_internalTaps);
 };
 
@@ -113,7 +116,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 void fir_interpolate_asym_ref<TT_DATA,
                               TT_COEFF,
                               TP_FIR_LEN,
@@ -123,7 +127,8 @@ void fir_interpolate_asym_ref<TT_DATA,
                               TP_INPUT_WINDOW_VSIZE,
                               TP_USE_COEFF_RELOAD,
                               TP_NUM_OUTPUTS,
-                              TP_API>::
+                              TP_API,
+                              TP_SAT>::
     filterRtp(input_circular_buffer<TT_DATA,
                                     extents<inherited_extent>,
                                     margin<fnFirMargin<TP_FIR_LEN / TP_INTERPOLATE_FACTOR, TT_DATA>()> >& inWindow,
@@ -133,7 +138,7 @@ void fir_interpolate_asym_ref<TT_DATA,
     for (int i = 0; i < TP_FIR_LEN; i++) {
         m_internalTaps[i] = inTaps[TP_FIR_LEN - 1 - i];
     }
-    filter_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE>(
+    filter_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_SHIFT, TP_RND, TP_INPUT_WINDOW_VSIZE, TP_SAT>(
         inWindow, outWindow, m_internalTaps);
 };
 }

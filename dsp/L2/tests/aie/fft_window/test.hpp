@@ -105,6 +105,8 @@ class test_graph : public graph {
         printf("API_IO            = %d \n", API_IO);
         printf("SSR               = %d \n", UUT_SSR);
         printf("DYN_PT_SIZE       = %d \n", DYN_PT_SIZE);
+        printf("ROUND_MODE        = %d \n", ROUND_MODE);
+        printf("SAT_MODE          = %d \n", SAT_MODE);
 
         if
             constexpr(DYN_PT_SIZE == 0) {
@@ -156,10 +158,8 @@ class test_graph : public graph {
 
         // FFTWindow sub-graph
         dsplib::fft::windowfn::UUT_GRAPH<DATA_TYPE, COEFF_TYPE, POINT_SIZE, WINDOW_VSIZE, SHIFT, API_IO, UUT_SSR,
-                                         DYN_PT_SIZE>
+                                         DYN_PT_SIZE, ROUND_MODE, SAT_MODE>
             fftWindowGraph(weights);
-        // val    dsplib::fft::dit_1ch::fft_ifft_dit_1ch_ref_graph<DATA_TYPE, cint16, POINT_SIZE, 1, 8, 1, 0, 256, 0, 0,
-        // 0 > fftGraph;
 
         // Make connections
         for (int i = 0; i < UUT_SSR * kAPIFactor; i++) {

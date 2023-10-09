@@ -117,7 +117,7 @@ INLINE_DECL T_accDecSym<TT_DATA, TT_COEFF> macDecSym1Buff(T_accDecSym<TT_DATA, T
     //                                 Points,
     //                                 CoeffStep, DataStepX, DataStepY,
     //                                 TT_COEFF, TT_DATA,
-    //                                 accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>
+    //                                 tAccBaseType_t<TT_DATA,TT_COEFF>
     //                                 >::mac_sym
     //                 (acc.val, zbuff.val, zstart, xbuff.val, xstart, ystart);
     // return retVal;
@@ -152,7 +152,7 @@ INLINE_DECL T_accDecSym<TT_DATA, TT_COEFF> macDecSym1Buffct(T_accDecSym<TT_DATA,
     //                                     Points,
     //                                     CoeffStep, DataStepX, DataStepY,
     //                                     TT_COEFF, TT_DATA,
-    //                                     accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>
+    //                                     tAccBaseType_t<TT_DATA,TT_COEFF>
     //                                     >::mac
     //                     (acc.val, zbuff.val, zstart, xbuff.val, xstart);
     //     } else {
@@ -160,7 +160,7 @@ INLINE_DECL T_accDecSym<TT_DATA, TT_COEFF> macDecSym1Buffct(T_accDecSym<TT_DATA,
     //                                     Points,
     //                                     CoeffStep, DataStepX, DataStepY,
     //                                     TT_COEFF, TT_DATA,
-    //                                     accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()>
+    //                                     tAccBaseType_t<TT_DATA,TT_COEFF>
     //                                     >::mac_sym
     //                     (acc.val, zbuff.val, zstart, xbuff.val, xstart);
     //     }
@@ -182,10 +182,9 @@ INLINE_DECL T_accDecSym<TT_DATA, TT_COEFF> macDecSym1Buff(T_accDecSym<TT_DATA, T
 
     // #define _DSPLIB_FIR_DEC_SYM_DEBUG_ 1
 
-    retVal.val = ::aie::sliding_mul_sym_ops<
-        Lanes, Points, CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
-        accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >::mul_sym(zbuff.val, zstart, xbuff.val,
-                                                                                        xstart);
+    retVal.val =
+        ::aie::sliding_mul_sym_ops<Lanes, Points, CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
+                                   tAccBaseType_t<TT_DATA, TT_COEFF> >::mul_sym(zbuff.val, zstart, xbuff.val, xstart);
     // (acc.val, zbuff.val, zstart, xbuff.val, xstart);
 
     return retVal;
@@ -208,16 +207,14 @@ INLINE_DECL T_accDecSym<TT_DATA, TT_COEFF> macDecSym1Buffct(T_accDecSym<TT_DATA,
 
     if
         constexpr(Points == 1) {
-            retVal.val = ::aie::sliding_mul_ops<
-                Lanes, Points, CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
-                accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >::mac(acc.val, zbuff.val, zstart,
-                                                                                            xbuff.val, xstart);
+            retVal.val = ::aie::sliding_mul_ops<Lanes, Points, CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
+                                                tAccBaseType_t<TT_DATA, TT_COEFF> >::mac(acc.val, zbuff.val, zstart,
+                                                                                         xbuff.val, xstart);
         }
     else {
-        retVal.val = ::aie::sliding_mul_sym_ops<
-            Lanes, Points, CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
-            accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >::mac_sym(acc.val, zbuff.val, zstart,
-                                                                                            xbuff.val, xstart);
+        retVal.val = ::aie::sliding_mul_sym_ops<Lanes, Points, CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
+                                                tAccBaseType_t<TT_DATA, TT_COEFF> >::mac_sym(acc.val, zbuff.val, zstart,
+                                                                                             xbuff.val, xstart);
     }
 
     return retVal;
@@ -239,11 +236,10 @@ INLINE_DECL T_accDecSym<TT_DATA, TT_COEFF> macDecSym2Buff(T_accDecSym<TT_DATA, T
     constexpr unsigned int DataStepY = TP_DECIMATE_FACTOR;
     T_accDecSym<TT_DATA, TT_COEFF> retVal;
 
-    retVal.val = ::aie::sliding_mul_sym_ops<
-        Lanes, Points, CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
-        accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >::mac_sym(acc.val, zbuff.val, zstart,
-                                                                                        xbuff.val, xstart, ybuff.val,
-                                                                                        ystart);
+    retVal.val =
+        ::aie::sliding_mul_sym_ops<Lanes, Points, CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
+                                   tAccBaseType_t<TT_DATA, TT_COEFF> >::mac_sym(acc.val, zbuff.val, zstart, xbuff.val,
+                                                                                xstart, ybuff.val, ystart);
 
     return retVal;
 }
@@ -267,17 +263,15 @@ INLINE_DECL T_accDecSym<TT_DATA, TT_COEFF> macDecSym2Buffct(T_accDecSym<TT_DATA,
     T_accDecSym<TT_DATA, TT_COEFF> retVal;
     if
         constexpr(Points == 1) {
-            retVal.val = ::aie::sliding_mul_ops<
-                Lanes, Points, CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
-                accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >::mac(acc.val, zbuff.val, zstart,
-                                                                                            xbuff.val, xstart);
+            retVal.val = ::aie::sliding_mul_ops<Lanes, Points, CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
+                                                tAccBaseType_t<TT_DATA, TT_COEFF> >::mac(acc.val, zbuff.val, zstart,
+                                                                                         xbuff.val, xstart);
         }
     else {
-        retVal.val = ::aie::sliding_mul_sym_ops<
-            Lanes, Points, CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
-            accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >::mac_sym(acc.val, zbuff.val, zstart,
-                                                                                            xbuff.val, xstart,
-                                                                                            ybuff.val, ystart);
+        retVal.val = ::aie::sliding_mul_sym_ops<Lanes, Points, CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
+                                                tAccBaseType_t<TT_DATA, TT_COEFF> >::mac_sym(acc.val, zbuff.val, zstart,
+                                                                                             xbuff.val, xstart,
+                                                                                             ybuff.val, ystart);
     }
     return retVal;
 }

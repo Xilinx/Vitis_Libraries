@@ -12,8 +12,8 @@ from aie_common import *
 ######## traits ############
 
 #shorter accumulator
-def fnNumLanes384b(TT_DATA, TT_COEF):
-
+def fnNumLanes384b(TT_DATA, TT_COEF, AIE_VARIANT=1):
+    if AIE_VARIANT == 1:
         if (
             (TT_DATA == "int16" and TT_COEF == "int16") or
             (TT_DATA == "int16" and TT_COEF == "int32") or
@@ -38,43 +38,59 @@ def fnNumLanes384b(TT_DATA, TT_COEF):
             return 2
         else:
             return 0
+    if AIE_VARIANT == 2:
+        if (
+            (TT_DATA == "int16" and TT_COEF == "int16")
+        ):
+            return 16
+        else:
+            return 8
 
 #### validate input window size ####
-def fnNumLanes(TT_DATA, TT_COEF, TP_API=0):
-    if (TP_API == 1 and not (
-        #Stream defults to short accs except for these typs (defined in traits)
-        (TT_DATA == "int32" and TT_COEF == "int16") or
-        (TT_DATA == "cint32" and TT_COEF == "int16") or
-        (TT_DATA == "cint32" and TT_COEF == "int32") or
-        (TT_DATA == "cint32" and TT_COEF == "cint16") or
-        (TT_DATA == "float" and TT_COEF == "float") or
-        (TT_DATA == "cfloat" and TT_COEF == "float") or
-        (TT_DATA == "cfloat" and TT_COEF == "cfloat")
-        )
-    ):
-        return fnNumLanes384b(TT_DATA, TT_COEF)
-    else:
-        if (TT_DATA == "int16" and TT_COEF == "int16"):
-            return 16
-        elif ((TT_DATA == "cint16" and TT_COEF == "int16")
-                or (TT_DATA == "cint16" and TT_COEF == "cint16")
-                or (TT_DATA == "int16" and TT_COEF == "int32")
-                or (TT_DATA == "int32" and TT_COEF == "int16")
-                or (TT_DATA == "int32" and TT_COEF == "int32")
-                or (TT_DATA == "float" and TT_COEF == "float")):
-            return 8
-        elif ((TT_DATA == "cint32" and TT_COEF == "int16")
-                or (TT_DATA == "cint32" and TT_COEF == "cint16")
-                or (TT_DATA == "cint16" and TT_COEF == "int32")
-                or (TT_DATA == "cint16" and TT_COEF == "cint32")
-                or (TT_DATA == "cint16" and TT_COEF == "cint16")
-                or (TT_DATA == "cint32" and TT_COEF == "int32")
-                or (TT_DATA == "cint32" and TT_COEF == "cint32")
-                or (TT_DATA == "cfloat" and TT_COEF == "float")
-                or (TT_DATA == "cfloat" and TT_COEF == "cfloat")):
-            return 4
+def fnNumLanes(TT_DATA, TT_COEF, TP_API=0, AIE_VARIANT=1):
+    if AIE_VARIANT == 1:
+
+      if (TP_API == 1 and not (
+          #Stream defults to short accs except for these typs (defined in traits)
+          (TT_DATA == "int32" and TT_COEF == "int16") or
+          (TT_DATA == "cint32" and TT_COEF == "int16") or
+          (TT_DATA == "cint32" and TT_COEF == "int32") or
+          (TT_DATA == "cint32" and TT_COEF == "cint16") or
+          (TT_DATA == "float" and TT_COEF == "float") or
+          (TT_DATA == "cfloat" and TT_COEF == "float") or
+          (TT_DATA == "cfloat" and TT_COEF == "cfloat")
+          )
+      ):
+          return fnNumLanes384b(TT_DATA, TT_COEF)
+      else:
+          if (TT_DATA == "int16" and TT_COEF == "int16"):
+              return 16
+          elif ((TT_DATA == "cint16" and TT_COEF == "int16")
+                  or (TT_DATA == "cint16" and TT_COEF == "cint16")
+                  or (TT_DATA == "int16" and TT_COEF == "int32")
+                  or (TT_DATA == "int32" and TT_COEF == "int16")
+                  or (TT_DATA == "int32" and TT_COEF == "int32")
+                  or (TT_DATA == "float" and TT_COEF == "float")):
+              return 8
+          elif ((TT_DATA == "cint32" and TT_COEF == "int16")
+                  or (TT_DATA == "cint32" and TT_COEF == "cint16")
+                  or (TT_DATA == "cint16" and TT_COEF == "int32")
+                  or (TT_DATA == "cint16" and TT_COEF == "cint32")
+                  or (TT_DATA == "cint16" and TT_COEF == "cint16")
+                  or (TT_DATA == "cint32" and TT_COEF == "int32")
+                  or (TT_DATA == "cint32" and TT_COEF == "cint32")
+                  or (TT_DATA == "cfloat" and TT_COEF == "float")
+                  or (TT_DATA == "cfloat" and TT_COEF == "cfloat")):
+              return 4
+          else:
+              return 0
+    if AIE_VARIANT == 2:
+        if (
+            (TT_DATA == "int16" and TT_COEF == "int16")
+        ):
+            return 32
         else:
-            return 0
+            return 16
 
 
 # function to return the number of columns for a tall-narrow atomic intrinsic for a type combo
@@ -115,9 +131,9 @@ def fnNumCols384(TT_DATA, TT_COEF):
 
 ### Common constraints based on traits
 
-def fn_windowsize_multiple_lanes(TT_DATA, TT_COEF, TP_INPUT_WINDOW_VSIZE, TP_API, numLanes=None, TP_SSR=1):
+def fn_windowsize_multiple_lanes(TT_DATA, TT_COEF, TP_INPUT_WINDOW_VSIZE, TP_API, numLanes=None, TP_SSR=1, AIE_VARIANT=1):
     # Use the default nmber of lanes
-    num_lanes = fnNumLanes(TT_DATA, TT_COEF, TP_API) if not numLanes else numLanes
+    num_lanes = fnNumLanes(TT_DATA, TT_COEF, TP_API, AIE_VARIANT) if not numLanes else numLanes
     numLanesMultiple = num_lanes * TP_SSR
     if (((TP_INPUT_WINDOW_VSIZE / TP_SSR) % num_lanes) != 0):
       return isError(
@@ -134,9 +150,12 @@ def fn_windowsize_divisible_by_ssr(TP_INPUT_WINDOW_VSIZE, TP_SSR):
       )
     return isValid
 
-def fn_max_windowsize_for_buffer(TT_DATA, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1, TP_INTERPOLATE_FACTOR=1, TP_DECIMATE_FACTOR=1):
+def fn_max_windowsize_for_buffer(TT_DATA, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1, TP_INTERPOLATE_FACTOR=1, TP_DECIMATE_FACTOR=1, AIE_VARIANT=1):
 
-  kMemoryModuleSize = 32768; #Bytes
+  if AIE_VARIANT == 1:
+      kMemoryModuleSize = 32768; #Bytes
+  if AIE_VARIANT == 2:
+      kMemoryModuleSize = 65536; #Bytes
   TP_FIR_LEN = TP_FIR_LEN // TP_SSR # FIR Length gets reduced by SSR factor
   # Margin + requested window size in bytes
   inBufferSize = ((TP_FIR_LEN + TP_INPUT_WINDOW_VSIZE)* fn_size_by_byte(TT_DATA))
@@ -169,8 +188,6 @@ def fnFirRangeRem( TP_FL,  TP_CL, TP_KP, TP_Rnd=1):
             ((TP_FL - fnTrunc(TP_FL,TP_Rnd * TP_CL)) % TP_Rnd));
 
 
-
-# todo, just pad coefficients so we don't need this.
 def fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR=1, TP_Rnd=1):
   TP_FIR_LEN = TP_FIR_LEN // TP_SSR
   firLengthMin = 1
@@ -226,6 +243,22 @@ def fn_stream_ssr(TP_API, TP_SSR):
   if TP_API == 0 and TP_SSR > 1:
     return isError(f"SSR > 1 is only supported for streaming ports")
   return isValid
+
+def get_input_window_size(TP_INPUT_WINDOW_VSIZE, TP_POLY_SSR, TP_API, TP_DUAL_IP):
+    if TP_API == 0:
+        in_win_size = TP_INPUT_WINDOW_VSIZE / TP_POLY_SSR
+    elif TP_API == 1:
+        num_ports = TP_DUAL_IP + 1
+        in_win_size = TP_INPUT_WINDOW_VSIZE / TP_POLY_SSR / num_ports
+    return in_win_size
+
+def get_output_window_size(TP_INPUT_WINDOW_VSIZE, TP_POLY_SSR, TP_API, TP_NUM_OUTPUTS, TP_DECIMATE_FACTOR, TP_INTERPOLATE_FACTOR):
+    if TP_API == 0:
+        out_win_size = ((TP_INPUT_WINDOW_VSIZE) * TP_INTERPOLATE_FACTOR) / TP_DECIMATE_FACTOR / TP_POLY_SSR
+    elif TP_API == 1:
+        num_ports = TP_NUM_OUTPUTS
+        out_win_size = ((TP_INPUT_WINDOW_VSIZE) * TP_INTERPOLATE_FACTOR ) / TP_DECIMATE_FACTOR / num_ports / TP_POLY_SSR
+    return out_win_size
 
 #### validate coeff reload ####
 def fn_validate_use_coeff_reload(TP_API, TP_USE_COEF_RELOAD, TP_SSR):

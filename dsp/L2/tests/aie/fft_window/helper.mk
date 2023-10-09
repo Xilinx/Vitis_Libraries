@@ -21,7 +21,7 @@
 
 HELPER_CUR_DIR ?= .
 HELPER_ROOT_DIR ?= ./../../../../
-
+SEED ?= 1
 ifeq ($(POINT_SIZE), 16)
 	PT_SIZE_PWR       := 4
 else ifeq ($(POINT_SIZE), 32)
@@ -87,7 +87,7 @@ else
 	DYN_PT_HEADER_MODE = 0
 endif
 
-PARAM_MAP = AIE_VARIANT $(AIE_VARIANT) DATA_TYPE $(DATA_TYPE) COEFF_TYPE $(COEFF_TYPE) POINT_SIZE $(POINT_SIZE) WINDOW_VSIZE $(WINDOW_VSIZE) SHIFT $(SHIFT) DYN_PT_SIZE $(DYN_PT_SIZE)  UUT_SSR $(UUT_SSR) API_IO $(API_IO)
+PARAM_MAP = AIE_VARIANT $(AIE_VARIANT) DATA_TYPE $(DATA_TYPE) COEFF_TYPE $(COEFF_TYPE) POINT_SIZE $(POINT_SIZE) WINDOW_VSIZE $(WINDOW_VSIZE) SHIFT $(SHIFT) DYN_PT_SIZE $(DYN_PT_SIZE)  UUT_SSR $(UUT_SSR) API_IO $(API_IO) ROUND_MODE $(ROUND_MODE) SAT_MODE $(SAT_MODE)
 
 HELPER:= $(HELPER_CUR_DIR)/.HELPER
 
@@ -98,7 +98,8 @@ create_input:
 	@echo starting create_input
 	@echo NUM_PORTS $(NUM_PORTS)
 	@echo INPUT_FILE $(INPUT_FILE)
-	@tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE) $(WINDOW_VSIZE) $(NITER) $(SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(LOG_POINT_SIZE) $(DATA_TYPE) $(API_IO) 1 0 ;\
+	echo tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE) $(WINDOW_VSIZE) $(NITER) $(SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(LOG_POINT_SIZE) $(DATA_TYPE) $(API_IO) 1 0 ;\
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE) $(WINDOW_VSIZE) $(NITER) $(SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(LOG_POINT_SIZE) $(DATA_TYPE) $(API_IO) 1 0 ;\
     perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(INPUT_FILE) --type $(DATA_TYPE) --ssr $(NUM_PORTS) --split --dual 0 -k $(DYN_PT_HEADER_MODE) -w $(WINDOW_VSIZE) ;\
 	echo Input ready
 
@@ -131,4 +132,7 @@ get_qor:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_wgt_theoretical_min.tcl $(DATA_TYPE) $(WINDOW_VSIZE) $(STATUS_FILE) $(UUT_KERNEL) $(API_IO) $(API_IO) $(NUM_PORTS) $(NUM_PORTS)
 
 get_latency:
-    tclsh LIB_DIR/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output $(STATUS_FILE) $(WINDOW_VSIZE) $(NITER)
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output $(STATUS_FILE) $(WINDOW_VSIZE) $(NITER)
+
+get_stats:
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(WINDOW_VSIZE) 1 $(STATUS_FILE) ./aiesimulator_output "fft_window_main" $(NITER)

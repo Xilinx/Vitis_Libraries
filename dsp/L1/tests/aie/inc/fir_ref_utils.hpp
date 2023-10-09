@@ -196,9 +196,9 @@ inline int64_t rounding(int rndMode, int shift, int64_t accum) {
                 break;
             case rnd_sym_ceil:
                 if (accum < 0) {
-                    accum += round_const;
+                    break;
                 } else {
-                    accum += round_const + 1;
+                    accum += ((1 << shift) - 1);
                 }
                 break;
             default:

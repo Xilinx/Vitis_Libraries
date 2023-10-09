@@ -46,6 +46,7 @@ template <typename T_D, typename T_C>
 INLINE_DECL constexpr unsigned int fnNumLanesStream() {
     return fnNumLanes384<T_D, T_C>();
 };
+#if __MIN_REGSIZE__ == 128
 template <>
 INLINE_DECL constexpr unsigned int fnNumLanesStream<int32, int16>() {
     return fnNumLanes<int32, int16>();
@@ -74,7 +75,7 @@ template <>
 INLINE_DECL constexpr unsigned int fnNumLanesStream<cfloat, cfloat>() {
     return fnNumLanes<cfloat, cfloat>();
 };
-
+#endif
 template <typename T_D, typename T_C>
 INLINE_DECL constexpr unsigned int fnNumColsStream() {
     return fnNumCols384<T_D, T_C>();

@@ -49,7 +49,9 @@ template <typename TT_DATA,    // type of data input and output
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE = TP_POINT_SIZE,
           unsigned int TP_PARALLEL_POWER = 1,
-          unsigned int TP_ORIG_PAR_POWER = TP_PARALLEL_POWER>
+          unsigned int TP_ORIG_PAR_POWER = TP_PARALLEL_POWER,
+          unsigned int TP_RND = 0,
+          unsigned int TP_SAT = 1>
 class fft_r2comb_ref {
    private:
     static constexpr unsigned int kSupportedPtSizes = 12; // 16 to 64k.

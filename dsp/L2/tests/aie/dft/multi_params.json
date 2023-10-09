@@ -1,5 +1,5 @@
 {
-    "test_0_dft": {
+    "test_0_tool_canary_aie":{
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "15",
@@ -13,9 +13,11 @@
         "DATA_SEED": "1",
         "AIE_VARIANT": "1",
         "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0"
+        "CC_TOLERANCE": "0",
+        "ROUND_MODE":"0",
+        "SAT_MODE":"1"
     },
-    "test_1_dft": {
+    "test_1_dft_aie": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "15",
@@ -29,9 +31,11 @@
         "DATA_SEED": "1",
         "AIE_VARIANT": "1",
         "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0"
+        "CC_TOLERANCE": "0",
+        "ROUND_MODE":"1",
+        "SAT_MODE":"0"
     },
-    "test_2_dft": {
+    "test_2_dft_aie": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "32",
@@ -45,9 +49,11 @@
         "DATA_SEED": "1",
         "AIE_VARIANT": "1",
         "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0"
+        "CC_TOLERANCE": "0",
+        "ROUND_MODE":"2",
+        "SAT_MODE":"3"
     },
-    "test_3_dft": {
+    "test_3_dft_aie": {
         "DATA_TYPE": "cint16",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "16",
@@ -61,9 +67,11 @@
         "DATA_SEED": "1",
         "AIE_VARIANT": "1",
         "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0"
+        "CC_TOLERANCE": "0",
+        "ROUND_MODE":"3",
+        "SAT_MODE":"0"
     },
-    "test_4_dft": {
+    "test_4_dft_aie": {
         "DATA_TYPE": "cint32",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "15",
@@ -77,9 +85,11 @@
         "DATA_SEED": "1",
         "AIE_VARIANT": "1",
         "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0"
+        "CC_TOLERANCE": "0",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
-    "test_5_dft": {
+    "test_5_dft_aie": {
         "DATA_TYPE": "cint32",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "15",
@@ -93,9 +103,11 @@
         "DATA_SEED": "1",
         "AIE_VARIANT": "1",
         "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0"
+        "CC_TOLERANCE": "0",
+        "ROUND_MODE":"5",
+        "SAT_MODE":"1"
     },
-    "test_6_dft": {
+    "test_6_dft_aie": {
         "DATA_TYPE": "cint32",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "32",
@@ -109,9 +121,11 @@
         "DATA_SEED": "1",
         "AIE_VARIANT": "1",
         "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0"
+        "CC_TOLERANCE": "0",
+        "ROUND_MODE":"6",
+        "SAT_MODE":"1"
     },
-    "test_7_dft": {
+    "test_7_dft_aie": {
         "DATA_TYPE": "cint32",
         "TWIDDLE_TYPE": "cint16",
         "POINT_SIZE": "16",
@@ -125,9 +139,11 @@
         "DATA_SEED": "1",
         "AIE_VARIANT": "1",
         "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0"
+        "CC_TOLERANCE": "0",
+        "ROUND_MODE":"7",
+        "SAT_MODE":"1"
     },
-    "test_8_dft": {
+    "test_8_dft_aie": {
         "DATA_TYPE": "cfloat",
         "TWIDDLE_TYPE": "cfloat",
         "POINT_SIZE": "15",
@@ -141,9 +157,11 @@
         "DATA_SEED": "1",
         "AIE_VARIANT": "1",
         "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0"
+        "CC_TOLERANCE": "0",
+        "ROUND_MODE":"0",
+        "SAT_MODE":"1"
     },
-    "test_9_dft": {
+    "test_9_dft_aie": {
         "DATA_TYPE": "cfloat",
         "TWIDDLE_TYPE": "cfloat",
         "POINT_SIZE": "15",
@@ -157,9 +175,11 @@
         "DATA_SEED": "1",
         "AIE_VARIANT": "1",
         "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0"
+        "CC_TOLERANCE": "0",
+        "ROUND_MODE":"0",
+        "SAT_MODE":"1"
     },
-    "test_10_dft": {
+    "test_10_dft_aie": {
         "DATA_TYPE": "cfloat",
         "TWIDDLE_TYPE": "cfloat",
         "POINT_SIZE": "32",
@@ -173,9 +193,11 @@
         "DATA_SEED": "1",
         "AIE_VARIANT": "1",
         "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0"
+        "CC_TOLERANCE": "0",
+        "ROUND_MODE":"0",
+        "SAT_MODE":"1"
     },
-    "test_11_dft": {
+    "test_11_dft_aie": {
         "DATA_TYPE": "cfloat",
         "TWIDDLE_TYPE": "cfloat",
         "POINT_SIZE": "16",
@@ -189,6 +211,145 @@
         "DATA_SEED": "1",
         "AIE_VARIANT": "1",
         "DIFF_TOLERANCE": "0.01",
-        "CC_TOLERANCE": "0"
+        "CC_TOLERANCE": "0",
+        "ROUND_MODE":"0",
+        "SAT_MODE":"1"
+    },
+    "test_0_tool_canary_aieml":{
+        "DATA_TYPE": "cint16",
+        "TWIDDLE_TYPE": "cint16",
+        "POINT_SIZE": "15",
+        "FFT_NIFFT": "0",
+        "SHIFT": "0",
+        "STIM_TYPE": "0",
+        "NITER": "8",
+        "NUM_FRAMES": "1",
+        "CASC_LEN": "1",
+        "API_IO": "0",
+        "DATA_SEED": "1",
+        "AIE_VARIANT": "2",
+        "DIFF_TOLERANCE": "0.01",
+        "ROUND_MODE":"0",
+        "SAT_MODE":"1"
+    },
+    "test_1_dft_aieml": {
+        "DATA_TYPE": "cint16",
+        "TWIDDLE_TYPE": "cint16",
+        "POINT_SIZE": "15",
+        "FFT_NIFFT": "0",
+        "SHIFT": "0",
+        "STIM_TYPE": "0",
+        "NITER": "8",
+        "NUM_FRAMES": "8",
+        "CASC_LEN": "3",
+        "API_IO": "0",
+        "DATA_SEED": "1",
+        "AIE_VARIANT": "2",
+        "DIFF_TOLERANCE": "0.01",
+        "ROUND_MODE":"0",
+        "SAT_MODE":"1"
+    },
+    "test_2_dft_aieml": {
+        "DATA_TYPE": "cint16",
+        "TWIDDLE_TYPE": "cint16",
+        "POINT_SIZE": "32",
+        "FFT_NIFFT": "1",
+        "SHIFT": "0",
+        "STIM_TYPE": "0",
+        "NITER": "4",
+        "NUM_FRAMES": "8",
+        "CASC_LEN": "3",
+        "API_IO": "0",
+        "DATA_SEED": "1",
+        "AIE_VARIANT": "2",
+        "DIFF_TOLERANCE": "0.01",
+        "ROUND_MODE":"0",
+        "SAT_MODE":"1"
+    },
+    "test_3_dft_aieml": {
+        "DATA_TYPE": "cint16",
+        "TWIDDLE_TYPE": "cint16",
+        "POINT_SIZE": "16",
+        "FFT_NIFFT": "1",
+        "SHIFT": "10",
+        "STIM_TYPE": "0",
+        "NITER": "4",
+        "NUM_FRAMES": "32",
+        "CASC_LEN": "1",
+        "API_IO": "0",
+        "DATA_SEED": "1",
+        "AIE_VARIANT": "2",
+        "DIFF_TOLERANCE": "0.01",
+        "ROUND_MODE":"0",
+        "SAT_MODE":"1"
+    },
+    "test_4_dft_aieml": {
+        "DATA_TYPE": "cint32",
+        "TWIDDLE_TYPE": "cint16",
+        "POINT_SIZE": "24",
+        "FFT_NIFFT": "0",
+        "SHIFT": "0",
+        "STIM_TYPE": "0",
+        "NITER": "8",
+        "NUM_FRAMES": "10",
+        "CASC_LEN": "3",
+        "API_IO": "0",
+        "DATA_SEED": "1",
+        "AIE_VARIANT": "2",
+        "DIFF_TOLERANCE": "0.01",
+        "ROUND_MODE":"0",
+        "SAT_MODE":"1"
+    },
+    "test_5_dft_aieml": {
+        "DATA_TYPE": "cint32",
+        "TWIDDLE_TYPE": "cint16",
+        "POINT_SIZE": "15",
+        "FFT_NIFFT": "0",
+        "SHIFT": "0",
+        "STIM_TYPE": "0",
+        "NITER": "8",
+        "NUM_FRAMES": "8",
+        "CASC_LEN": "3",
+        "API_IO": "0",
+        "DATA_SEED": "1",
+        "AIE_VARIANT": "2",
+        "DIFF_TOLERANCE": "0.01",
+        "ROUND_MODE":"0",
+        "SAT_MODE":"1"
+    },
+    "test_6_dft_aieml": {
+        "DATA_TYPE": "cint32",
+        "TWIDDLE_TYPE": "cint16",
+        "POINT_SIZE": "32",
+        "FFT_NIFFT": "1",
+        "SHIFT": "0",
+        "STIM_TYPE": "0",
+        "NITER": "4",
+        "NUM_FRAMES": "8",
+        "CASC_LEN": "3",
+        "API_IO": "0",
+        "DATA_SEED": "1",
+        "AIE_VARIANT": "2",
+        "DIFF_TOLERANCE": "0.01",
+        "ROUND_MODE":"0",
+        "SAT_MODE":"1"
+    },
+    "test_7_dft_aieml": {
+        "DATA_TYPE": "cint32",
+        "TWIDDLE_TYPE": "cint16",
+        "POINT_SIZE": "16",
+        "FFT_NIFFT": "1",
+        "SHIFT": "10",
+        "STIM_TYPE": "0",
+        "NITER": "4",
+        "NUM_FRAMES": "32",
+        "CASC_LEN": "1",
+        "API_IO": "0",
+        "DATA_SEED": "1",
+        "AIE_VARIANT": "2",
+        "DIFF_TOLERANCE": "0.01",
+        "CC_TOLERANCE": "0",
+        "ROUND_MODE":"0",
+        "SAT_MODE":"1"
     }
 }

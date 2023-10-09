@@ -1,5 +1,5 @@
 import aie_common as com
-from aie_common import isError,isValid
+from aie_common import isError,isValid, fn_validate_satMode
 #dds_mixer.hpp:74:    static_assert(TP_MIXER_MODE <= 2, "ERROR: DDS Mixer Mode must be 0, 1 or 2. ");
 #dds_mixer.hpp:75:    static_assert(fnEnumType<TT_DATA>() != enumUnknownType,
 #dds_mixer.hpp:77:    static_assert((TP_INPUT_WINDOW_VSIZE % m_kNumLanes) == 0,
@@ -11,6 +11,10 @@ from aie_common import isError,isValid
 
 TP_SSR_min = 1
 TP_INPUT_WINDOW_VSIZE_min = 4
+#TP_MIXER_MODE_min=0
+#TP_MIXER_MODE_max=2
+#TP_API_min=0
+#TP_API_max=1
 
 def fn_get_dds_lanes(TT_DATA):
   type_lane_dict = {
@@ -41,6 +45,10 @@ def validate_TP_WINDOW_VSIZE(args):
 def validate_TP_SSR(args):
     TP_SSR = args["TP_SSR"]
     return fn_validate_ssr(TP_SSR)
+    
+def validate_TP_SAT(args):
+  TP_SAT = args["TP_SAT"]
+  return fn_validate_satMode(TP_SAT)
 
   ######### Graph Generator ############
 
@@ -87,6 +95,8 @@ def generate_graph(graphname, args):
   TP_MIXER_MODE = args["TP_MIXER_MODE"]
   TP_API = args["TP_API"]
   TP_SSR = args["TP_SSR"]
+  TP_RND = args["TP_RND"]
+  TP_SAT = args["TP_SAT"]
   code = (
 f"""
 class {graphname} : public adf::graph {{
@@ -98,7 +108,9 @@ public:
     {TP_INPUT_WINDOW_VSIZE}, // TP_INPUT_WINDOW_VSIZE
     {TP_MIXER_MODE}, // TP_MIXER_MODE
     {TP_API}, // TP_API
-    {TP_SSR} // TP_SSR
+    {TP_SSR}, // TP_SSR
+    {TP_RND}, //TP_RND
+    {TP_SAT} //TP_SAT
   > mixer_graph;
   {graphname}() : mixer_graph({args["phaseInc"]}, {args["initialPhaseOffset"]}) {{
     //kernels

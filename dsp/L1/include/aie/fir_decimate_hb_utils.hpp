@@ -138,21 +138,22 @@ INLINE_DECL T_accFirDecHb<TT_DATA, TT_COEFF, TP_ARCH> firDecHbMacSym(T_accFirDec
     // floats datapath doesn't have a pre-adder, need to issue 2 x non-sym calls.
     if
         constexpr((std::is_same_v<TT_DATA, float> || std::is_same_v<TT_DATA, cfloat>)) {
-            retVal.val = ::aie::sliding_mul_ops<
-                Lanes, fnNumColumnsDecHb<TT_DATA, TT_COEFF>(), CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
-                accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >::mac(acc.val, zbuff.val, zstart,
-                                                                                            xbuff.val, xstart);
-            retVal.val = ::aie::sliding_mul_ops<
-                Lanes, fnNumColumnsDecHb<TT_DATA, TT_COEFF>(), CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
-                accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >::mac(retVal.val, zbuff.val,
-                                                                                            zstart, ybuff.val, ystart);
+            retVal.val =
+                ::aie::sliding_mul_ops<Lanes, fnNumColumnsDecHb<TT_DATA, TT_COEFF>(), CoeffStep, DataStepX, DataStepY,
+                                       TT_COEFF, TT_DATA, tAccBaseType_t<TT_DATA, TT_COEFF> >::mac(acc.val, zbuff.val,
+                                                                                                   zstart, xbuff.val,
+                                                                                                   xstart);
+            retVal.val =
+                ::aie::sliding_mul_ops<Lanes, fnNumColumnsDecHb<TT_DATA, TT_COEFF>(), CoeffStep, DataStepX, DataStepY,
+                                       TT_COEFF, TT_DATA, tAccBaseType_t<TT_DATA, TT_COEFF> >::mac(retVal.val,
+                                                                                                   zbuff.val, zstart,
+                                                                                                   ybuff.val, ystart);
         }
     else {
-        retVal.val = ::aie::sliding_mul_sym_ops<
-            Lanes, Points, CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
-            accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >::mac_sym(acc.val, zbuff.val, zstart,
-                                                                                            xbuff.val, xstart,
-                                                                                            ybuff.val, ystart);
+        retVal.val = ::aie::sliding_mul_sym_ops<Lanes, Points, CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
+                                                tAccBaseType_t<TT_DATA, TT_COEFF> >::mac_sym(acc.val, zbuff.val, zstart,
+                                                                                             xbuff.val, xstart,
+                                                                                             ybuff.val, ystart);
     }
 
     return retVal;
@@ -176,20 +177,21 @@ INLINE_DECL T_accFirDecHb<TT_DATA, TT_COEFF, TP_ARCH> firDecHbMacSym1buff(
     // floats datapath doesn't have a pre-adder, need to issue 2 x non-sym calls.
     if
         constexpr((std::is_same_v<TT_DATA, float> || std::is_same_v<TT_DATA, cfloat>)) {
-            retVal.val = ::aie::sliding_mul_ops<
-                Lanes, fnNumColumnsDecHb<TT_DATA, TT_COEFF>(), CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
-                accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >::mac(acc.val, zbuff.val, zstart,
-                                                                                            xbuff.val, xstart);
-            retVal.val = ::aie::sliding_mul_ops<
-                Lanes, fnNumColumnsDecHb<TT_DATA, TT_COEFF>(), CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
-                accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >::mac(retVal.val, zbuff.val,
-                                                                                            zstart, xbuff.val, ystart);
+            retVal.val =
+                ::aie::sliding_mul_ops<Lanes, fnNumColumnsDecHb<TT_DATA, TT_COEFF>(), CoeffStep, DataStepX, DataStepY,
+                                       TT_COEFF, TT_DATA, tAccBaseType_t<TT_DATA, TT_COEFF> >::mac(acc.val, zbuff.val,
+                                                                                                   zstart, xbuff.val,
+                                                                                                   xstart);
+            retVal.val =
+                ::aie::sliding_mul_ops<Lanes, fnNumColumnsDecHb<TT_DATA, TT_COEFF>(), CoeffStep, DataStepX, DataStepY,
+                                       TT_COEFF, TT_DATA, tAccBaseType_t<TT_DATA, TT_COEFF> >::mac(retVal.val,
+                                                                                                   zbuff.val, zstart,
+                                                                                                   xbuff.val, ystart);
         }
     else {
-        retVal.val = ::aie::sliding_mul_sym_ops<
-            Lanes, Points, CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
-            accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >::mac_sym(acc.val, zbuff.val, zstart,
-                                                                                            xbuff.val, xstart, ystart);
+        retVal.val = ::aie::sliding_mul_sym_ops<Lanes, Points, CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
+                                                tAccBaseType_t<TT_DATA, TT_COEFF> >::mac_sym(acc.val, zbuff.val, zstart,
+                                                                                             xbuff.val, xstart, ystart);
     }
 
     return retVal;
@@ -225,32 +227,35 @@ INLINE_DECL T_accFirDecHb<TT_DATA, TT_COEFF, TP_ARCH> firDecHbMacSymCt(
         }
     else if
         constexpr(Points == 1) {
-            retVal.val = ::aie::sliding_mul_ops<
-                Lanes, fnNumColumnsDecHb<TT_DATA, TT_COEFF>(), CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
-                accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >::mac(acc.val, zbuffInt.val,
-                                                                                            zstart, xbuff.val, xstart);
+            retVal.val =
+                ::aie::sliding_mul_ops<Lanes, fnNumColumnsDecHb<TT_DATA, TT_COEFF>(), CoeffStep, DataStepX, DataStepY,
+                                       TT_COEFF, TT_DATA, tAccBaseType_t<TT_DATA, TT_COEFF> >::mac(acc.val,
+                                                                                                   zbuffInt.val, zstart,
+                                                                                                   xbuff.val, xstart);
         }
     else if
         constexpr(Points % 2 == 1 && (std::is_same_v<TT_COEFF, int16> && std::is_same_v<TT_DATA, int16>)) {
             // Int16 data & int16 coeff combo does not offer a CT call.
             // For an odd number of points, we need to spoof it with a non-ct symmetric call followed by asym call.
 
-            retVal.val = ::aie::sliding_mul_sym_ops<
-                Lanes, fnNumColumnsDecHb<TT_DATA, TT_COEFF>(), CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
-                accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >::mac_sym(acc.val, zbuffIntCt.val,
-                                                                                                0, xbuff.val, xstart,
-                                                                                                ybuff.val, ystart);
-            retVal.val = ::aie::sliding_mul_ops<
-                Lanes, fnNumColumnsDecHb<TT_DATA, TT_COEFF>(), CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
-                accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >::mac(retVal.val, zbuffIntCt.val,
-                                                                                            4, xbuff.val, ctDataPos);
+            retVal.val =
+                ::aie::sliding_mul_sym_ops<Lanes, fnNumColumnsDecHb<TT_DATA, TT_COEFF>(), CoeffStep, DataStepX,
+                                           DataStepY, TT_COEFF, TT_DATA,
+                                           tAccBaseType_t<TT_DATA, TT_COEFF> >::mac_sym(acc.val, zbuffIntCt.val, 0,
+                                                                                        xbuff.val, xstart, ybuff.val,
+                                                                                        ystart);
+            retVal.val =
+                ::aie::sliding_mul_ops<Lanes, fnNumColumnsDecHb<TT_DATA, TT_COEFF>(), CoeffStep, DataStepX, DataStepY,
+                                       TT_COEFF, TT_DATA, tAccBaseType_t<TT_DATA, TT_COEFF> >::mac(retVal.val,
+                                                                                                   zbuffIntCt.val, 4,
+                                                                                                   xbuff.val,
+                                                                                                   ctDataPos);
         }
     else {
-        retVal.val = ::aie::sliding_mul_sym_ops<
-            Lanes, Points, CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
-            accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >::mac_sym(acc.val, zbuffInt.val,
-                                                                                            zstart, xbuff.val, xstart,
-                                                                                            ybuff.val, ystart);
+        retVal.val = ::aie::sliding_mul_sym_ops<Lanes, Points, CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
+                                                tAccBaseType_t<TT_DATA, TT_COEFF> >::mac_sym(acc.val, zbuffInt.val,
+                                                                                             zstart, xbuff.val, xstart,
+                                                                                             ybuff.val, ystart);
     }
 
     return retVal;
@@ -286,31 +291,33 @@ INLINE_DECL T_accFirDecHb<TT_DATA, TT_COEFF, TP_ARCH> firDecHbMacSymCt1buff(
         }
     else if
         constexpr(Points == 1) {
-            retVal.val = ::aie::sliding_mul_ops<
-                Lanes, fnNumColumnsDecHb<TT_DATA, TT_COEFF>(), CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
-                accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >::mac(acc.val, zbuffInt.val,
-                                                                                            zstart, xbuff.val, xstart);
+            retVal.val =
+                ::aie::sliding_mul_ops<Lanes, fnNumColumnsDecHb<TT_DATA, TT_COEFF>(), CoeffStep, DataStepX, DataStepY,
+                                       TT_COEFF, TT_DATA, tAccBaseType_t<TT_DATA, TT_COEFF> >::mac(acc.val,
+                                                                                                   zbuffInt.val, zstart,
+                                                                                                   xbuff.val, xstart);
         }
     else if
         constexpr(Points % 2 == 1 && (std::is_same_v<TT_COEFF, int16> && std::is_same_v<TT_DATA, int16>)) {
             // Int16 data & int16 coeff combo does not offer a CT call.
             // For an odd number of points, we need to spoof it with a non-ct symmetric call followed by asym call.
 
-            retVal.val = ::aie::sliding_mul_sym_ops<
-                Lanes, fnNumColumnsDecHb<TT_DATA, TT_COEFF>(), CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
-                accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >::mac_sym(acc.val, zbuffIntCt.val,
-                                                                                                0, xbuff.val, xstart,
-                                                                                                ystart);
-            retVal.val = ::aie::sliding_mul_ops<
-                Lanes, fnNumColumnsDecHb<TT_DATA, TT_COEFF>(), CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
-                accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >::mac(retVal.val, zbuffIntCt.val,
-                                                                                            4, xbuff.val, ctDataPos);
+            retVal.val =
+                ::aie::sliding_mul_sym_ops<Lanes, fnNumColumnsDecHb<TT_DATA, TT_COEFF>(), CoeffStep, DataStepX,
+                                           DataStepY, TT_COEFF, TT_DATA,
+                                           tAccBaseType_t<TT_DATA, TT_COEFF> >::mac_sym(acc.val, zbuffIntCt.val, 0,
+                                                                                        xbuff.val, xstart, ystart);
+            retVal.val =
+                ::aie::sliding_mul_ops<Lanes, fnNumColumnsDecHb<TT_DATA, TT_COEFF>(), CoeffStep, DataStepX, DataStepY,
+                                       TT_COEFF, TT_DATA, tAccBaseType_t<TT_DATA, TT_COEFF> >::mac(retVal.val,
+                                                                                                   zbuffIntCt.val, 4,
+                                                                                                   xbuff.val,
+                                                                                                   ctDataPos);
         }
     else {
-        retVal.val = ::aie::sliding_mul_sym_ops<
-            Lanes, Points, CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
-            accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >::mac_sym(acc.val, zbuffInt.val,
-                                                                                            zstart, xbuff.val, xstart);
+        retVal.val = ::aie::sliding_mul_sym_ops<Lanes, Points, CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
+                                                tAccBaseType_t<TT_DATA, TT_COEFF> >::mac_sym(acc.val, zbuffInt.val,
+                                                                                             zstart, xbuff.val, xstart);
     }
 
     return retVal;

@@ -18,15 +18,15 @@
 #define _DSPLIB_TEST_HPP_
 
 /*
-This file holds the declaraion of the test harness graph class for the
+This file holds the declaration of the test harness graph class for the
 matrix_vector_mul graph class.
 */
 #include <adf.h>
 #include <vector>
 #include "utils.hpp"
 
-#include "uut_config.h"
 #include "uut_static_config.h"
+#include "uut_config.h"
 #include "test_stim.hpp"
 
 #define Q(x) #x
@@ -66,6 +66,7 @@ class test_graph : public graph {
         printf("Output samples  = %d \n", OUTPUT_SAMPLES);
         printf("Shift           = %d \n", SHIFT);
         printf("ROUND_MODE      = %d \n", ROUND_MODE);
+        printf("SAT_MODE      = %d \n", SAT_MODE);
         printf("Data type       = ");
         printf(QUOTE(DATA_A) QUOTE(DATA_B));
         printf("\n");
@@ -76,14 +77,15 @@ class test_graph : public graph {
         printf("========================\n");
 
         namespace dsplib = xf::dsp::aie;
-        dsplib::matrix_vector_mul::UUT_GRAPH<DATA_A, DATA_B, DIM_A, DIM_B, SHIFT, ROUND_MODE, NUM_FRAMES, CASC_LEN>
+        dsplib::blas::matrix_vector_mul::UUT_GRAPH<DATA_A, DATA_B, DIM_A, DIM_B, SHIFT, ROUND_MODE, NUM_FRAMES,
+                                                   CASC_LEN, SAT_MODE>
             matrix_vector_mulGraph;
 #ifdef USING_UUT
         for (int i = 0; i < CASC_LEN; i++) {
             std::string filenameInMatrix = QUOTE(INPUT_FILE_A);
             std::string filenameInVector = QUOTE(INPUT_FILE_B);
-            // filenameInMatrix.insert(filenameInMatrix.length()-4, ("_"+std::to_string(i)+"_0"));
-            // filenameInVector.insert(filenameInVector.length()-4, ("_"+std::to_string(i)+"_0"));
+            filenameInMatrix.insert(filenameInMatrix.length() - 4, ("_" + std::to_string(i)));
+            filenameInVector.insert(filenameInVector.length() - 4, ("_" + std::to_string(i)));
 
             inA[i] = input_plio::create("PLIO_in_A" + std::to_string(i), adf::plio_32_bits, filenameInMatrix);
             inB[i] = input_plio::create("PLIO_in_B" + std::to_string(i), adf::plio_32_bits, filenameInVector);

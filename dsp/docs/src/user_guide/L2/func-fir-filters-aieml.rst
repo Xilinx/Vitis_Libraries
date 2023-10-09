@@ -1,13 +1,13 @@
-..
+.. 
    Copyright (C) 2019-2022, Xilinx, Inc.
    Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-
+    
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-
+    
        http://www.apache.org/licenses/LICENSE-2.0
-
+    
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -192,8 +192,12 @@ The following table lists parameters for the FIR filters on AIE-ML.
    |                        |                | the graph.      |                                 |
    +------------------------+----------------+-----------------+---------------------------------+
    |  TP_API                |    Unsigned    | I/O interface   |  0 = Window                     |
-   |                        |    int         | port type       |                                 |
+   |                        |    int         | port type       |                                 | 
    |                        |                |                 |  1 = Stream                     |
+   +------------------------+----------------+-----------------+---------------------------------+
+   | TP_SAT                 | Unsigned int   | Saturation mode | 0: 'none'                       |
+   |                        |                |                 | 1: 'saturate'                   |
+   |                        |                |                 | 3: 'symmetric saturate'         |
    +------------------------+----------------+-----------------+---------------------------------+
 
 

@@ -1,13 +1,13 @@
 ..
    Copyright (C) 2019-2022, Xilinx, Inc.
    Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-
+    
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-
+    
        http://www.apache.org/licenses/LICENSE-2.0
-
+    
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,6 +22,73 @@ Release Note
 .. toctree::
    :hidden:
    :maxdepth: 1
+2023.2
+------
+
+The below features have been added to the library in this release.
+
+*  **DFT** - new library element
+
++---------------------------------------+-----------------------------------------------------------------------------+
+| **Function**                          | **Namespace and class name**                                                |
++=======================================+=============================================================================+
+| DFT                                   |  xf::dsp::aie::fft::dtf::dft_graph                                          |
++---------------------------------------+-----------------------------------------------------------------------------+
+
+This element adds an implementation of the Discrete Fourier Transform (DFT).
+
+Supports both AIE and AIE-ML devices.
+
+*  **Mixed-Radix FFT ** - new library element
+
++---------------------------------------+-----------------------------------------------------------------------------+
+| **Function**                          | **Namespace and class name**                                                |
++=======================================+=============================================================================+
+| Mixed Radix FFT                       |  xf::dsp::aie::fft::mixed_radix_fft::mixed_radix_fft_graph                  |
++---------------------------------------+-----------------------------------------------------------------------------+
+
+This element adds an implementation of a s a single-channel, decimation-in-time, fixed point size Fast Fourier Transform (FFT) that includes radix3, radix4 and/or radix5 stages.
+
+Supports AIE devices.
+
+*  **GeMV** - new library element
+
++---------------------------------------+-----------------------------------------------------------------------------+
+| **Function**                          | **Namespace and class name**                                                |
++=======================================+=============================================================================+
+| GeMV                                  |  xf::dsp::aie::blas::matrix_vector_mul::matrix_mult_graph                   |
++---------------------------------------+-----------------------------------------------------------------------------+
+
+This element adds an implementation of the General Matrix Vector Multiplier(GeMV).
+
+Supports AIE devices.
+
+*  **Vectorized Sample Delay** - new library element
+
++---------------------------------------+-----------------------------------------------------------------------------+
+| **Function**                          | **Namespace and class name**                                                |
++=======================================+=============================================================================+
+| Sample Delay                          |  xf::dsp::aie::sample_delay::sample_delay_graph                             |
++---------------------------------------+-----------------------------------------------------------------------------+
+
+This element adds an implementation of a delay filter for introducing delay into a time series.
+
+Supports AIE devices.
+
+* **FIR Filters**
+
+The support for AIE-ML devices has been rolled out to all FIR variants.
+
+* **FFT IFFT**
+
+Added a performance optimization that will extract some SSR FFT features onto widget kernels and map these kernels in separate tiles, achieving better performance at a high AIE usage cost.
+
+* **All Library elements**
+
+All library now offer selectable saturation mode, as well as rounding modes.
+
+Test harnesses for all library elements have been expanded to allow parameter configuration through JSON files.
+
 
 2023.1
 ------

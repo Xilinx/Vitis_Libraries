@@ -24,7 +24,7 @@ DFT single channel reference model
 #ifndef _DSPLIB_DFT_REF_DEBUG_
 //#define _DSPLIB_DFT_REF_DEBUG_
 #endif //_DSPLIB_DFT_REF_DEBUG_
-
+#include "device_defs.h"
 #include <adf.h>
 #include <limits>
 
@@ -44,10 +44,11 @@ template <typename TT_DATA,    // type of data input and output
           unsigned int TP_POINT_SIZE,
           unsigned int TP_FFT_NIFFT,
           unsigned int TP_SHIFT,
-          unsigned int TP_NUM_FRAMES>
+          unsigned int TP_NUM_FRAMES,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 class dft_ref {
    private:
-#define PI 3.14159265358979323846e0
     TT_TWIDDLE coeff[TP_POINT_SIZE][TP_POINT_SIZE];
     cfloat tmp[TP_POINT_SIZE][TP_POINT_SIZE];
     typedef typename std::conditional_t<
@@ -65,8 +66,8 @@ class dft_ref {
         double inv = (TP_FFT_NIFFT == 1) ? -1.0 : 1.0;
         for (unsigned int n = 0; n < TP_POINT_SIZE; n++) {
             for (unsigned int k = 0; k < TP_POINT_SIZE; k++) {
-                tmp[n][k].real = (cos(PI * 2.0 * (double)n * (double)k / (double)TP_POINT_SIZE));
-                tmp[n][k].imag = (inv * sin(PI * 2.0 * (double)n * (double)k / (double)TP_POINT_SIZE));
+                tmp[n][k].real = (cos(M_PI * 2.0 * (double)n * (double)k / (double)TP_POINT_SIZE));
+                tmp[n][k].imag = (inv * sin(M_PI * 2.0 * (double)n * (double)k / (double)TP_POINT_SIZE));
                 // to aviod Arithmetic overflow for 32768
                 if (std::is_same<TT_TWIDDLE, cfloat>::value) {
                     coeff[n][k].real = tmp[n][k].real;

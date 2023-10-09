@@ -85,7 +85,12 @@
         {
             "name": "TP_RND",
             "description": "The rounding to be applied during the shift down stage of processing.",
-            "type": "uint"
+            "type": "uint",
+            "validator": {
+                "file": "fir_interpolate_hb.py",
+                "function": "validate_TP_RND",
+                "args": ["AIE_VARIANT"]
+            }
         },
         {
             "name": "TP_INPUT_WINDOW_VSIZE",
@@ -206,20 +211,29 @@
             "minimum": 1
         },
         {
-            "name": "coeff",
-            "description": "The filter coefficients.",
-            "element_type": "TT_COEF",
-            "type": "vector"
+        "name": "coeff",
+        "description": "The filter coefficients.",
+        "element_type": "TT_COEF",
+        "type": "vector"
+        },
+        {
+        "name": "TP_SAT",
+        "description": "Saturation mode.",
+        "type": "uint",
+        "validator": {
+            "file": "fir_interpolate_hb.py",
+            "function": "validate_TP_SAT" 
+            }
         }
-    ],
-    "ports": {
-        "file": "fir_interpolate_hb.py",
-        "function": "info_ports"
-    },
-    "generator": {
-        "file": "fir_interpolate_hb.py",
-        "function": "generate_graph"
-    },
-    "target_domain": "AIE",
-    "visible": true
+  ],
+  
+  "ports": {
+    "file": "fir_interpolate_hb.py",
+    "function": "info_ports"
+  },
+  "generator": {
+    "file": "fir_interpolate_hb.py",
+    "function": "generate_graph"
+    }
 }
+

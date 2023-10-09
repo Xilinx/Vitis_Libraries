@@ -66,7 +66,7 @@ namespace sr_sym {
  * @tparam TP_SHIFT describes power of 2 shift down applied to the accumulation of
  *         FIR terms before output. \n TP_SHIFT must be in the range 0 to 61.
  * @tparam TP_RND describes the selection of rounding to be applied during the
- *         shift down stage of processing. Although, TP_RND accepts unsignedinteger values
+ *         shift down stage of processing. Although, TP_RND accepts unsigned integer values
  *         descriptive macros are recommended where
  *         - rnd_floor      = Truncate LSB, always round down (towards negative infinity).
  *         - rnd_ceil       = Always round up (towards positive infinity).
@@ -147,6 +147,13 @@ namespace sr_sym {
  *         giving an overall higher throughput.   \n
  *         A TP_SSR of 1 means just one output leg and 1 input phase, and is the backwards compatible option. \n
  *         The number of AIEs used is given by ``TP_SSR^2 * TP_CASC_LEN``. \n
+ * @tparam TP_SAT describes the selection of saturation to be applied during the
+ *         shift down stage of processing. TP_SAT accepts unsigned integer values, where:
+ *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
+ *         - 1: saturate       = Default. Saturation rounds an n-bit signed value in the range [- ( 2^(n-1) ) : +2^(n-1)
+ *- 1 ].
+ *         - 3: symmetric      = Controls symmetric saturation. Symmetric saturation rounds an n-bit signed value in the
+ *range [- ( 2^(n-1) -1 ) : +2^(n-1) - 1 ]. \n
  **/
 template <typename TT_DATA,
           typename TT_COEFF,
@@ -159,7 +166,8 @@ template <typename TT_DATA,
           unsigned int TP_USE_COEFF_RELOAD = 0, // 1 = use coeff reload, 0 = don't use coeff reload
           unsigned int TP_NUM_OUTPUTS = 1,
           unsigned int TP_API = 0,
-          unsigned int TP_SSR = 1>
+          unsigned int TP_SSR = 1,
+          unsigned int TP_SAT = 1>
 class fir_sr_sym_graph : public graph {
    private:
     static_assert(TP_CASC_LEN <= 40, "ERROR: Unsupported Cascade length");
@@ -375,6 +383,7 @@ class fir_sr_sym_graph : public graph {
         static constexpr int BTP_COEFF_PHASES_LEN = TP_FIR_LEN;
         static constexpr int BTP_CASC_IN = CASC_IN_FALSE;
         static constexpr int BTP_CASC_OUT = CASC_OUT_FALSE;
+        static constexpr int BTP_SAT = TP_SAT;
     };
 
     using lastSSRKernel = ssr_kernels<ssr_params, fir_sr_sym_tl>;
@@ -471,8 +480,8 @@ class fir_sr_sym_graph : public graph {
         // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
         // best.
         return fir_sr_sym<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, (TP_INPUT_WINDOW_VSIZE / TP_SSR), false,
-                          true, firRange, 0, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS,
-                          TP_API>::get_m_kArch();
+                          true, firRange, 0, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_API,
+                          TP_SAT>::get_m_kArch();
     };
 
     /**

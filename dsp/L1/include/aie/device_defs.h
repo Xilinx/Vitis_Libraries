@@ -190,6 +190,7 @@
     (__AIEARCH__ == 21) || (__AIEARCH__ == 22)
 // AIE-ML variants offers additional rounding modes, restricting some values for future use.
 #define __ROUNDING_MODES__ 13
+#define __SUPPORTS_ML_ROUND_MODES__
 
 #ifndef rnd_floor
 //! @brief No rounding - Truncate LSB, always round down (towards negative infinity)

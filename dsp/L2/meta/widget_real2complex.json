@@ -67,7 +67,5 @@
     "generator": {
         "file": "widget_real2complex.py",
         "function": "generate_graph"
-    },
-    "target_domain": "AIE",
-    "visible": true
+    }
 }

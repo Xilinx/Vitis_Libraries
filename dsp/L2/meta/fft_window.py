@@ -31,10 +31,17 @@ TP_WINDOW_VSIZE_min = 16
 TP_WINDOW_VSIZE_max = 65536
 TP_INPUT_WINDOW_VSIZE_min = 4
 TP_SSR_min = 1
+TP_SSR_max = 32
 TP_SHIFT_min = 0
 TP_SHIFT_max = 60
 TP_CASC_LEN_min = 1
 TP_CASC_LEN_max = 11
+#TP_API_min=0
+#TP_API_max=1
+#TP_DYN_PT_SIZE_min=0
+#TP_DYN_PT_SIZE_max=1
+#AIE_VARIANT_min=2
+#AIE_VARIANT_max=1
 
 def fn_validate_coeff_type(TT_DATA, TT_COEFF):
   if ((TT_DATA=="cint16" and TT_COEFF=="int16") or (TT_DATA=="cint32" and TT_COEFF=="int32") or (TT_DATA=="cfloat" and TT_COEFF=="float")):
@@ -58,7 +65,7 @@ def fn_validate_window_vsize(TP_POINT_SIZE,TP_WINDOW_VSIZE):
   else:
     return isError("Window size must be an integer multiple of point size")
 
-def fn_validate_shift(TT_DATA, TP_SHIFT):
+def fn_validate_shift_val(TT_DATA, TP_SHIFT):
   if TP_SHIFT < TP_SHIFT_min or TP_SHIFT > TP_SHIFT_max :
         return isError(f"Minimum and maximum value for Shift is {TP_SHIFT_min} and {TP_SHIFT_max},respectively, but got {TP_SHIFT}.")
   if (TT_DATA=="cfloat"):
@@ -78,8 +85,8 @@ def fn_validate_shift(TT_DATA, TP_SHIFT):
       return isError("Shift must be in range 0 to 31 for cint16 data type")
 
 def fn_validate_ssr(TT_DATA, TP_POINT_SIZE, TP_API, TP_SSR):
-  if TP_SSR < TP_SSR_min:
-	    return isError(f"Minimum value for SSR is {TP_SSR_min}, but got {TP_SSR}.")
+  if TP_SSR < TP_SSR_min or TP_SSR > TP_SSR_max:
+	    return isError(f"Minimum and maximum value for SSR is {TP_SSR_min} and {TP_SSR_max},respectively, but got {TP_SSR}.")
   if (TP_POINT_SIZE/TP_SSR >=16 and TP_POINT_SIZE/TP_SSR<=4096) :
     if (TP_POINT_SIZE/TP_SSR<=1024 or TP_API==1) :
       return isValid
@@ -122,7 +129,7 @@ def validate_TP_WINDOW_VSIZE(args):
 def validate_TP_SHIFT(args):
     TT_DATA = args["TT_DATA"]
     TP_SHIFT = args["TP_SHIFT"]
-    return fn_validate_shift(TT_DATA, TP_SHIFT)
+    return fn_validate_shift_val(TT_DATA, TP_SHIFT)
 
 def validate_TP_SSR(args):
     TT_DATA = args["TT_DATA"]
@@ -136,6 +143,10 @@ def validate_TP_DYN_PT_SIZE(args):
     TP_SSR = args["TP_SSR"]
     TP_DYN_PT_SIZE = args["TP_DYN_PT_SIZE"]
     return fn_validate_dyn_pt_size(TP_POINT_SIZE, TP_SSR, TP_DYN_PT_SIZE)
+
+def validate_TP_SAT(args):
+    TP_SAT = args["TP_SAT"]
+    return fn_validate_satMode(TP_SAT)
 
 def validate_weights(args):
     weights = args["weights"]

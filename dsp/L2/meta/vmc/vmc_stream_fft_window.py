@@ -21,7 +21,7 @@ def vmc_validate_point_size(args):
 def vmc_validate_shift_val(args):
   data_type = args["data_type"]
   shift_val = args["shift_val"]
-  return fn_validate_shift(data_type, shift_val)
+  return fn_validate_shift_val(data_type, shift_val)
 
 def vmc_validate_input_window_size(args):
   point_size = args["point_size"]

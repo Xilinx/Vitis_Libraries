@@ -21,6 +21,7 @@
 
 #include "device_defs.h"
 #include "fft_r2comb_ref.hpp"
+#include "fir_ref_utils.hpp" //for rounding and saturation
 
 #ifndef _DSPLIB_FFT_R2_COMB_REF_DEBUG_
 //#define _DSPLIB_FFT_R2_COMB_REF_DEBUG_
@@ -61,29 +62,6 @@ namespace r2comb {
   FFT/iFFT DIT r2 combiner  reference model
 */
 
-template <typename T_D>
-T_D saturate(int64 inD){};
-template <>
-int32 saturate<int32>(int64 inD) {
-    int32 retval = inD;
-    if (inD >= C_PMAX32) {
-        retval = C_PMAX32;
-    } else if (inD < C_NMAX32) {
-        retval = C_NMAX32;
-    }
-    return retval;
-};
-template <>
-int16 saturate<int16>(int64 inD) {
-    int32 retval = inD;
-    if (inD >= C_PMAX16) {
-        retval = C_PMAX16;
-    } else if (inD < C_NMAX16) {
-        retval = C_NMAX16;
-    }
-    return retval;
-};
-
 //---------------------------------------------------------
 // templatized Radix2 stage
 // although this has the same name as a function in the overall FFT class, this one is the last rank whereas the other
@@ -96,7 +74,9 @@ template <typename TT_DATA,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_PARALLEL_POWER,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 void fft_r2comb_ref<TT_DATA,
                     TT_TWIDDLE,
                     TP_POINT_SIZE,
@@ -105,13 +85,16 @@ void fft_r2comb_ref<TT_DATA,
                     TP_DYN_PT_SIZE,
                     TP_WINDOW_VSIZE,
                     TP_PARALLEL_POWER,
-                    TP_ORIG_PAR_POWER>::r2StageInt(TT_DATA* samplesA,
-                                                   TT_DATA* samplesB,
-                                                   TT_TWIDDLE* twiddles,
-                                                   int pptSize,
-                                                   bool inv) {
+                    TP_ORIG_PAR_POWER,
+                    TP_RND,
+                    TP_SAT>::r2StageInt(TT_DATA* samplesA,
+                                        TT_DATA* samplesB,
+                                        TT_TWIDDLE* twiddles,
+                                        int pptSize,
+                                        bool inv) {
     int ptSize = TP_DYN_PT_SIZE == 0 ? TP_POINT_SIZE : pptSize;
     int loopSize = (ptSize >> TP_PARALLEL_POWER) >> 1; // each loop calc 2 samples
+    T_accRef<TT_DATA> csum;
 
     constexpr unsigned int kRadix = 2;
     typedef typename T_base_type_struct<TT_DATA>::T_base_type TT_BASE_DATA;
@@ -135,14 +118,19 @@ void fft_r2comb_ref<TT_DATA,
         sam2.imag = (int64)samplesA[inIndex[1]].imag;
         sam2rot.real = (int64)sam2.real * (int64)tw.real - (int64)sam2.imag * (int64)tw.imag;
         sam2rot.imag = (int64)sam2.real * (int64)tw.imag + (int64)sam2.imag * (int64)tw.real;
-        presat = ((int64)sam1.real + (int64)sam2rot.real + (int64)round_const) >> (shift + TP_SHIFT);
-        samplesB[outIndex[0]].real = saturate<TT_BASE_DATA>(presat);
-        presat = ((int64)sam1.imag + (int64)sam2rot.imag + (int64)round_const) >> (shift + TP_SHIFT);
-        samplesB[outIndex[0]].imag = saturate<TT_BASE_DATA>(presat);
-        presat = ((int64)sam1.real - (int64)sam2rot.real + (int64)round_const) >> (shift + TP_SHIFT);
-        samplesB[outIndex[1]].real = saturate<TT_BASE_DATA>(presat);
-        presat = ((int64)sam1.imag - (int64)sam2rot.imag + (int64)round_const) >> (shift + TP_SHIFT);
-        samplesB[outIndex[1]].imag = saturate<TT_BASE_DATA>(presat);
+        csum.real = (int64)sam1.real + (int64)sam2rot.real;
+        csum.imag = (int64)sam1.imag + (int64)sam2rot.imag;
+        roundAcc(TP_RND, shift + TP_SHIFT, csum);
+        saturateAcc(csum, TP_SAT);
+        samplesB[outIndex[0]].real = (TT_BASE_DATA)csum.real;
+        samplesB[outIndex[0]].imag = (TT_BASE_DATA)csum.imag;
+
+        csum.real = (int64)sam1.real - (int64)sam2rot.real;
+        csum.imag = (int64)sam1.imag - (int64)sam2rot.imag;
+        roundAcc(TP_RND, shift + TP_SHIFT, csum);
+        saturateAcc(csum, TP_SAT);
+        samplesB[outIndex[1]].real = (TT_BASE_DATA)csum.real;
+        samplesB[outIndex[1]].imag = (TT_BASE_DATA)csum.imag;
     }
 }
 
@@ -154,7 +142,9 @@ template <typename TT_DATA,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_PARALLEL_POWER,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 void fft_r2comb_ref<TT_DATA,
                     TT_TWIDDLE,
                     TP_POINT_SIZE,
@@ -163,11 +153,13 @@ void fft_r2comb_ref<TT_DATA,
                     TP_DYN_PT_SIZE,
                     TP_WINDOW_VSIZE,
                     TP_PARALLEL_POWER,
-                    TP_ORIG_PAR_POWER>::r2StageFloat(TT_DATA* samplesA,
-                                                     TT_DATA* samplesB,
-                                                     TT_TWIDDLE* twiddles,
-                                                     int pptSize,
-                                                     bool inv) {
+                    TP_ORIG_PAR_POWER,
+                    TP_RND,
+                    TP_SAT>::r2StageFloat(TT_DATA* samplesA,
+                                          TT_DATA* samplesB,
+                                          TT_TWIDDLE* twiddles,
+                                          int pptSize,
+                                          bool inv) {
     unsigned int rank = fnGetPointSizePower<TP_POINT_SIZE>() - 1;
     constexpr unsigned int kRadix = 2;
     int ptSize = TP_DYN_PT_SIZE == 0 ? TP_POINT_SIZE : pptSize;
@@ -206,7 +198,9 @@ template <typename TT_DATA,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_PARALLEL_POWER,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 void fft_r2comb_ref<TT_DATA,
                     TT_TWIDDLE,
                     TP_POINT_SIZE,
@@ -215,8 +209,9 @@ void fft_r2comb_ref<TT_DATA,
                     TP_DYN_PT_SIZE,
                     TP_WINDOW_VSIZE,
                     TP_PARALLEL_POWER,
-                    TP_ORIG_PAR_POWER>::fft_r2comb_ref_main(input_buffer<TT_DATA>& inWindow,
-                                                            output_buffer<TT_DATA>& outWindow) {
+                    TP_ORIG_PAR_POWER,
+                    TP_RND,
+                    TP_SAT>::fft_r2comb_ref_main(input_buffer<TT_DATA>& inWindow, output_buffer<TT_DATA>& outWindow) {
     if
         constexpr(TP_DYN_PT_SIZE == 1) {
             constexpr int kMinPtSizePwr = 4;

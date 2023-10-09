@@ -1,4 +1,6 @@
 from fir_decimate_sym import *
+from aie_common import *
+from vmc_fir_utils import *
 
 #### VMC validators ####
 def vmc_validate_coef_type(args):
@@ -25,12 +27,11 @@ def vmc_validate_input_window_size(args):
 
 def vmc_validate_casc_length(args):
     casc_length = args["casc_length"]
-    #if not use_casc_length:
-	# TODO : Talk to DSP lib team/sumanta about how 
-	# cascade validation works - confirm its just fir length related
-	#return fn_validate_casc_length(fir_length, casc_length, use_coeff_reload)
     return fn_validate_casc_len(casc_length);
     
+def validate_sat_mode(args):
+    sat_mode = args["sat_mode"]
+    return fn_validate_satMode(sat_mode);
 
 def vmc_validate_coeff(args):
 	use_coeff_reload = args["use_coeff_reload"]
@@ -42,7 +43,6 @@ def vmc_validate_coeff(args):
 	ssr = args["ssr"]
 	api = 1
 	fir_length = args["fir_length"]
-	#TODO: Talk to DSP Lib team about separating casc length from fir_length API
 	return fn_validate_fir_len(data_type, coef_type, fir_length, decimate_factor, casc_length, ssr, api, use_coeff_reload )
 
 def vmc_validate_shift_val(args):
@@ -80,10 +80,11 @@ def vmc_generate_graph(name, args):
     tmpargs["TP_INPUT_WINDOW_VSIZE"] = args["input_window_size"]
     tmpargs["TP_CASC_LEN"] = args["casc_length"]
     tmpargs["TP_USE_COEF_RELOAD"] = 1 if args["use_coeff_reload"] else 0
-    tmpargs["TP_NUM_OUTPUTS"] = 2 if args["num_outputs"] else 1
+    tmpargs["TP_NUM_OUTPUTS"] = fn_get_num_outputs(args)
     tmpargs["TP_DUAL_IP"] = 1 if args["dual_ip"] else 0
     tmpargs["TP_API"] = 1
     tmpargs["TP_SSR"] = args["ssr"]
     tmpargs["coeff"] = args["coeff"]
+    tmpargs["TP_SAT"] = args["sat_mode"]
    
     return generate_graph(name, tmpargs)

@@ -64,6 +64,20 @@
             "name": "initialPhaseOffset",
             "type": "uint",
             "description": "specifies the initial value of the phase accumulator, creating a phase offset."
+        },
+        {
+            "name": "TP_RND",
+            "description": "The rounding to be applied during the shift down stage of processing.",
+            "type": "uint"
+        },
+        {
+            "name": "TP_SAT",
+            "description": "Saturation mode.",
+            "type": "uint",
+            "validator": {
+                "file": "dds_mixer.py",
+                "function": "validate_TP_SAT"
+            }
         }
     ],
     "ports": {
@@ -73,7 +87,5 @@
     "generator": {
         "file": "dds_mixer.py",
         "function": "generate_graph"
-    },
-    "target_domain": "AIE",
-    "visible": true
+    }
 }

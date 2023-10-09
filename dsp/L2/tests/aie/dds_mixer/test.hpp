@@ -77,8 +77,9 @@ class test_graph : public graph {
         printf("initialPhaseOffset is %u or 0x%08X \n", initialPhaseOffset, initialPhaseOffset);
 
         namespace dsplib = xf::dsp::aie;
-        dsplib::mixer::dds_mixer::UUT_GRAPH<DATA_TYPE, INPUT_WINDOW_VSIZE, MIXER_MODE, P_API, P_SSR> ddsGraph(
-            phaseInc, initialPhaseOffset);
+        dsplib::mixer::dds_mixer::UUT_GRAPH<DATA_TYPE, INPUT_WINDOW_VSIZE, MIXER_MODE, P_API, P_SSR, ROUND_MODE,
+                                            SAT_MODE>
+            ddsGraph(phaseInc, initialPhaseOffset);
 
         for (unsigned int i = 0; i < P_SSR; ++i) {
             std::string filenameOut = QUOTE(OUTPUT_FILE);

@@ -22,7 +22,7 @@
     },
     "pre_build": [
         {
-            "build_cmd": "vitis --classic -exec ipmetadata_config_checker -newflow LIB_DIR/L2/meta/vmc/$(VMC_KERNEL).json ./config.json"
+            "build_cmd": "vitis --classic -exec ipmetadata_config_checker -newflow -metadata_path LIB_DIR/L2/meta/ LIB_DIR/L2/meta/vmc/$(VMC_KERNEL).json ./config.json"
         },
         {
             "build_cmd": "perl LIB_DIR/L2/tests/aie/common/scripts/compare_json.pl ref_out.json ./xmc_aie_lib/$(GRAPHNAME)/out.json | grep 'Files are identical' || exit 1"
@@ -56,9 +56,9 @@
                 "./"
             ],
         "customized_params": {
-                "params": "-Xchess=llvm.xargs=-std=c++2a -Xx86sim=-client=vmc -v -output=graph",
+                "params": "--aie.Xchess=llvm.xargs=-std=c++2a --aie.Xx86sim=-client=vmc --aie.verbose",
                 "default": {
-                    "GRAPHNAME": "FIR_Symmetric_Decimation_22fc2cad",
+                    "GRAPHNAME": "FIR_Symmetric_Decimation_4be29b05",
                     "VMC_GRAPHDIR": "xmc_aie_lib/$(GRAPHNAME)",
                     "VMC_KERNEL": "vmc_fir_decimate_sym"
                 }
@@ -83,7 +83,7 @@
         }
     ],
     "testinfo": {
-        "disable": true,
+        "disable": false,
         "jobs": [
             {
                 "index": 0,

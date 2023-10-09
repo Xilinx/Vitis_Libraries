@@ -64,8 +64,6 @@ using namespace adf;
  *         - Complex types are only supported when TT_DATA is also complex.
  *         - TT_COEFF must be an integer type if TT_DATA is an integer type
  *         - TT_COEFF must be a float type if TT_DATA is a float type.
- *         Note that the combination TT_DATA=int16, TT_COEFF=int16 is not supported
- *         for the decimate_asym unit.
  * @tparam TP_FIR_LEN is an unsigned integer which describes the number of taps
  *         in the filter. TP_FIR_LEN must be in the range 4 to 240 and
  *         must be an integer multiple of the TP_DECIMATE_FACTOR value.
@@ -153,9 +151,9 @@ using namespace adf;
  * and executed in a series of pipelined cascade stages, resulting in additional input paths. \n
  *         A TP_PARA_DECI_POLY of 1 means just one input leg, and is the backwards compatible option. \n
  *         TP_PARA_DECI_POLY = TP_DECIMATE_FACTOR will result in an decimate factor of polyphases,
- * operating as independant single rate filters connected by cascades.
- *          TP_PARA_DECI_POLY < TP_DECIMATE_FACTOR will result in the polyphase branches operating as
- * independant decimators connected by cascades.
+ * operating as independent single rate filters connected by cascades.
+ *         TP_PARA_DECI_POLY < TP_DECIMATE_FACTOR will result in the polyphase branches operating as
+ * independent decimators connected by cascades.
  *
  *         The number of AIEs used is given by TP_PARA_DECI_POLY * TP_SSR^2 * TP_CASC_LEN. \n
  *

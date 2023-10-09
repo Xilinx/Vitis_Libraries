@@ -77,6 +77,8 @@ class test_graph : public graph {
         printf("API_IO               = %d \n", API_IO);
         printf("PARALLEL_POWER       = %d \n", PARALLEL_POWER);
         printf("Use widgets          = %d \n", USE_WIDGETS);
+        printf("Round mode           = %d \n", ROUND_MODE);
+        printf("Saturation mode      = %d \n", SAT_MODE);
         printf("Data type            = ");
         printf(QUOTE(DATA_TYPE));
         printf("\n");
@@ -91,7 +93,8 @@ class test_graph : public graph {
 
         // FIR sub-graph
         xf::dsp::aie::fft::dit_1ch::UUT_GRAPH<DATA_TYPE, TWIDDLE_TYPE, POINT_SIZE, FFT_NIFFT, SHIFT, CASC_LEN,
-                                              DYN_PT_SIZE, WINDOW_VSIZE, API_IO, PARALLEL_POWER, USE_WIDGETS>
+                                              DYN_PT_SIZE, WINDOW_VSIZE, API_IO, PARALLEL_POWER, USE_WIDGETS,
+                                              ROUND_MODE, SAT_MODE>
             fftGraph;
         for (int i = 0; i < (kPortsPerTile << PARALLEL_POWER); i++) {
             std::string filenameOut = QUOTE(OUTPUT_FILE);

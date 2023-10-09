@@ -77,6 +77,15 @@
             "minimum": 0
         },
         {
+            "name": "TP_SAT",
+            "description": "Saturation mode.",
+            "type": "uint",
+            "validator": {
+                "file": "matrix_vector_mul.py",
+                "function": "validate_TP_SAT"
+            }
+        },
+        {
             "name": "TP_NUM_FRAMES",
             "type": "uint",
             "description": "describes the number matrix-vector multiplications occuring per window of matrix/vector input data",
@@ -96,7 +105,5 @@
     "generator": {
         "file": "matrix_vector_mul.py",
         "function": "generate_graph"
-    },
-    "target_domain": "AIE",
-    "visible": true
+    }
 }

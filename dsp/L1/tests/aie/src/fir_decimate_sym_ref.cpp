@@ -38,7 +38,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 void fir_decimate_sym_ref<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -48,7 +49,8 @@ void fir_decimate_sym_ref<TT_DATA,
                           TP_INPUT_WINDOW_VSIZE,
                           TP_USE_COEFF_RELOAD,
                           TP_NUM_OUTPUTS,
-                          TP_API>::filter(input_circular_buffer<TT_DATA,
+                          TP_API,
+                          TP_SAT>::filter(input_circular_buffer<TT_DATA,
                                                                 extents<inherited_extent>,
                                                                 margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
                                           output_circular_buffer<TT_DATA>& outWindow) {
@@ -87,7 +89,7 @@ void fir_decimate_sym_ref<TT_DATA,
         inItr -= TP_FIR_LEN - TP_DECIMATE_FACTOR;
 
         roundAcc(TP_RND, shift, accum);
-        saturateAcc(accum);
+        saturateAcc(accum, TP_SAT);
         accumSrs = castAcc(accum);
         *outItr++ = accumSrs;
     }
@@ -103,7 +105,8 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_NUM_OUTPUTS,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 void fir_decimate_sym_ref<TT_DATA,
                           TT_COEFF,
                           TP_FIR_LEN,
@@ -113,7 +116,8 @@ void fir_decimate_sym_ref<TT_DATA,
                           TP_INPUT_WINDOW_VSIZE,
                           USE_COEFF_RELOAD_TRUE,
                           TP_NUM_OUTPUTS,
-                          TP_API>::filter(input_circular_buffer<TT_DATA,
+                          TP_API,
+                          TP_SAT>::filter(input_circular_buffer<TT_DATA,
                                                                 extents<inherited_extent>,
                                                                 margin<fnFirMargin<TP_FIR_LEN, TT_DATA>()> >& inWindow,
                                           output_circular_buffer<TT_DATA>& outWindow,
@@ -158,7 +162,7 @@ void fir_decimate_sym_ref<TT_DATA,
         inItr -= TP_FIR_LEN - TP_DECIMATE_FACTOR;
 
         roundAcc(TP_RND, shift, accum);
-        saturateAcc(accum);
+        saturateAcc(accum, TP_SAT);
         accumSrs = castAcc(accum);
         *outItr++ = accumSrs;
     }

@@ -29,8 +29,6 @@ dft graph class.
 #include "uut_config.h"
 #include "test_stim.hpp"
 
-#include "dft_fns.hpp"
-
 #define Q(x) #x
 #define QUOTE(x) Q(x)
 
@@ -64,15 +62,13 @@ class test_graph : public graph {
         printf(QUOTE(UUT_GRAPH));
         printf("\n");
         printf("========================\n");
-        // printf("Input samples         = %d \n", INPUT_SAMPLES);
-        // printf("Input window (bytes)  = %lu\n", INPUT_SAMPLES * sizeof(DATA_TYPE));
-        // printf("Output samples        = %d \n", OUTPUT_SAMPLES);
         printf("Point size            = %d \n", POINT_SIZE);
         printf("FFT/nIFFT             = %d \n", FFT_NIFFT);
         printf("Final scaling Shift   = %d \n", SHIFT);
         printf("Number of kernels     = %d \n", CASC_LEN);
+        printf("Rounding mode     = %d \n", ROUND_MODE);
+        printf("Saturation mode     = %d \n", SAT_MODE);
         printf("Num frames per window = %d \n", NUM_FRAMES);
-        printf("API_IO                = %d \n", API_IO);
         printf("Data type             = ");
         printf(QUOTE(DATA_TYPE));
         printf("\n");
@@ -94,7 +90,8 @@ class test_graph : public graph {
         // constexpr unsigned int kWindowSize = xf::dsp::aie::fft::dft::getWindowSize<T_outDataType,POINT_SIZE,
         // NUM_FRAMES>();
 
-        xf::dsp::aie::fft::dft::UUT_GRAPH<DATA_TYPE, TWIDDLE_TYPE, POINT_SIZE, FFT_NIFFT, SHIFT, CASC_LEN, NUM_FRAMES>
+        xf::dsp::aie::fft::dft::UUT_GRAPH<DATA_TYPE, TWIDDLE_TYPE, POINT_SIZE, FFT_NIFFT, SHIFT, CASC_LEN, NUM_FRAMES,
+                                          ROUND_MODE, SAT_MODE>
             dftGraph;
 
 #ifdef USING_UUT

@@ -74,7 +74,7 @@ using namespace adf;
  * @tparam TP_SHIFT describes power of 2 shift down applied to the accumulation of
  *         product terms before each output. TP_SHIFT must be in the range 0 to 61.
  * @tparam TP_RND describes the selection of rounding to be applied during the
- *         shift down stage of processing. Although, TP_RND accepts unsignedinteger values
+ *         shift down stage of processing. Although, TP_RND accepts unsigned integer values
  *         descriptive macros are recommended where
  *         - rnd_floor      = Truncate LSB, always round down (towards negative infinity).
  *         - rnd_ceil       = Always round up (towards positive infinity).
@@ -146,7 +146,8 @@ template <typename TT_DATA_A,
           unsigned int TP_ADD_DETILING_OUT = 1,
           unsigned int TP_INPUT_WINDOW_VSIZE_A = TP_DIM_A* TP_DIM_AB,
           unsigned int TP_INPUT_WINDOW_VSIZE_B = TP_DIM_B* TP_DIM_AB,
-          unsigned int TP_CASC_LEN = 1>
+          unsigned int TP_CASC_LEN = 1,
+          unsigned int TP_SAT = 1>
 class matrix_mult_graph : public graph {
    public:
     /**
@@ -170,7 +171,7 @@ class matrix_mult_graph : public graph {
      * TP_INPUT_WINDOW_VSIZE_A/TP_DIM_AB * TP_INPUT_WINDOW_VSIZE_B/TP_DIM_AB samples,
      * or simply TP_DIM_A * TP_DIM_B samples of a derived output type.
      **/
-    port<output> out;
+    port<output> out[1];
 
     /**
      * The array of kernels that will be created and mapped onto AIE tiles.
@@ -214,6 +215,7 @@ class matrix_mult_graph : public graph {
                                     TP_DIM_B,
                                     TP_SHIFT,
                                     TP_RND,
+                                    TP_SAT,
                                     TP_DIM_A_LEADING,
                                     TP_DIM_B_LEADING,
                                     TP_DIM_OUT_LEADING,
@@ -221,8 +223,8 @@ class matrix_mult_graph : public graph {
                                     (TP_INPUT_WINDOW_VSIZE_B / TP_CASC_LEN),
                                     cascIn,
                                     cascOut>;
-    // avoid redundant instances of unsued templates -- Fixes x86sim linker error without resorting to recursive
-    // template metaprogramming
+    // avoid redundant instances of unused templates -- Fixes x86sim linker error without resorting to recursive
+    // template meta programming
     using onlyMatMult = typename std::conditional<(TP_CASC_LEN == 1), matMultCasc<false, false>, no_kernel>::type;
     using firstMatMult = typename std::conditional<(TP_CASC_LEN > 1), matMultCasc<false, true>, onlyMatMult>::type;
     using lastMatMult = typename std::conditional<(TP_CASC_LEN > 1), matMultCasc<true, false>, firstMatMult>::type;
@@ -264,7 +266,7 @@ class matrix_mult_graph : public graph {
         ((dimBPerKernel <= tilingScheme.Btile) && (TP_DIM_OUT_LEADING == ROW_MAJOR));
 
     /**
-     * @brief This is the constructor function for the Matric Multiply graph.
+     * @brief This is the constructor function for the Matrix Multiply graph.
      **/
     matrix_mult_graph() {
         if (isRedundantTilerA && TP_ADD_TILING_A == 1) {
@@ -345,11 +347,11 @@ class matrix_mult_graph : public graph {
                 connect<>(m_MatmultKernels[(TP_CASC_LEN - 1)].out[0], untiler.in[0]);
                 dimensions(m_MatmultKernels[(TP_CASC_LEN - 1)].out[0]) = {dimAPerKernel * dimBPerKernel};
                 dimensions(untiler.in[0]) = {dimAPerKernel * dimBPerKernel};
-                connect<>(untiler.out[0], out);
+                connect<>(untiler.out[0], out[0]);
                 dimensions(untiler.out[0]) = {dimAPerKernel * dimBPerKernel};
             }
         else {
-            connect<>(m_MatmultKernels[(TP_CASC_LEN - 1)].out[0], out);
+            connect<>(m_MatmultKernels[(TP_CASC_LEN - 1)].out[0], out[0]);
             dimensions(m_MatmultKernels[(TP_CASC_LEN - 1)].out[0]) = {dimAPerKernel * dimBPerKernel};
         }
         runtime<ratio>(untiler) = 0.4;

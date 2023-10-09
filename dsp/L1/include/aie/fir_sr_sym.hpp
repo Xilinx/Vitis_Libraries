@@ -61,7 +61,8 @@ template <typename TT_DATA,
           unsigned int TP_USE_COEFF_RELOAD = 0,
           unsigned int TP_NUM_OUTPUTS = 1,
           unsigned int TP_API = 0,
-          int TP_MODIFY_MARGIN_OFFSET = 0>
+          int TP_MODIFY_MARGIN_OFFSET = 0,
+          unsigned int TP_SAT = 1>
 class kernelFilterClass {
    private:
     // Parameter value defensive and legality checks
@@ -70,6 +71,8 @@ class kernelFilterClass {
                   "below minimum required value. ");
     static_assert(TP_SHIFT >= SHIFT_MIN && TP_SHIFT <= SHIFT_MAX, "ERROR: TP_SHIFT is out of the supported range.");
     static_assert(TP_RND >= ROUND_MIN && TP_RND <= ROUND_MAX, "ERROR: TP_RND is out of the supported range.");
+    static_assert(TP_SAT >= SAT_MODE_MIN && TP_SAT <= SAT_MODE_MAX, "ERROR: TP_SAT is out of supported range");
+    static_assert(TP_SAT != 2, "ERROR: TP_SAT is invalid. Valid values of TP_SAT are 0, 1, and 3");
     static_assert(fnEnumType<TT_DATA>() != enumUnknownType, "ERROR: TT_DATA is not a supported type.");
     static_assert(fnEnumType<TT_COEFF>() != enumUnknownType, "ERROR: TT_COEFF is not a supported type.");
     static_assert(fnTypeCheckDataCoeffSize<TT_DATA, TT_COEFF>() != 0,
@@ -120,7 +123,7 @@ class kernelFilterClass {
         ((m_kSBuffXOffset + m_kArchFirLen - 1 + m_kDataLoadVsize) <= kBuffSize128Byte / sizeof(TT_DATA))
             ? m_kSmallFirArch
             : kArch2Buff; // will all data fit in a 1024b reg
-    static constexpr int m_kFirLenCeilCols = TRUNC((TP_FIR_RANGE_LEN) / kSymmetryFactor, m_kColumns);
+    static constexpr int m_kFirLenTruncCols = TRUNC((TP_FIR_RANGE_LEN) / kSymmetryFactor, m_kColumns);
     static constexpr unsigned int m_kXbuffByteSize =
         m_kArch == kArch1Buff ? kBuffSize128Byte
                               : kBuffSize64Byte; // 128B buffer for 1buff arch, 2 small 64B buffers for 2buff arch.
@@ -239,7 +242,8 @@ template <typename TT_DATA,
           unsigned int TP_USE_COEFF_RELOAD = 0, // 1 = use coeff reload, 0 = don't use coeff reload
           unsigned int TP_NUM_OUTPUTS = 1,
           unsigned int TP_API = 0,
-          int TP_MODIFY_MARGIN_OFFSET = 0>
+          int TP_MODIFY_MARGIN_OFFSET = 0,
+          unsigned int TP_SAT = 1>
 class fir_sr_sym : public kernelFilterClass<TT_DATA,
                                             TT_COEFF,
                                             TP_FIR_LEN,
@@ -255,7 +259,8 @@ class fir_sr_sym : public kernelFilterClass<TT_DATA,
                                             TP_USE_COEFF_RELOAD,
                                             TP_NUM_OUTPUTS,
                                             TP_API,
-                                            TP_MODIFY_MARGIN_OFFSET> {
+                                            TP_MODIFY_MARGIN_OFFSET,
+                                            TP_SAT> {
    public:
     // Constructor
     fir_sr_sym(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / kSymmetryFactor])
@@ -274,7 +279,8 @@ class fir_sr_sym : public kernelFilterClass<TT_DATA,
                             TP_USE_COEFF_RELOAD,
                             TP_NUM_OUTPUTS,
                             TP_API,
-                            TP_MODIFY_MARGIN_OFFSET>(taps) {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -293,7 +299,8 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -309,22 +316,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_FALSE,
                  1,
                  USE_WINDOW_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_FALSE,
-                                                                     CASC_OUT_FALSE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     0,
-                                                                     1,
-                                                                     DUAL_IP_DUAL,
-                                                                     USE_COEFF_RELOAD_FALSE,
-                                                                     1,
-                                                                     USE_WINDOW_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_FALSE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    0,
+                                                    1,
+                                                    DUAL_IP_DUAL,
+                                                    USE_COEFF_RELOAD_FALSE,
+                                                    1,
+                                                    USE_WINDOW_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / kSymmetryFactor])
@@ -343,7 +352,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             1,
                             USE_WINDOW_API,
-                            TP_MODIFY_MARGIN_OFFSET>(taps) {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -364,7 +374,8 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -380,22 +391,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_FALSE,
                  2,
                  USE_WINDOW_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_FALSE,
-                                                                     CASC_OUT_FALSE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     0,
-                                                                     1,
-                                                                     DUAL_IP_SINGLE,
-                                                                     USE_COEFF_RELOAD_FALSE,
-                                                                     2,
-                                                                     USE_WINDOW_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_FALSE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    0,
+                                                    1,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_COEFF_RELOAD_FALSE,
+                                                    2,
+                                                    USE_WINDOW_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / kSymmetryFactor])
@@ -414,7 +427,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             2,
                             USE_WINDOW_API,
-                            TP_MODIFY_MARGIN_OFFSET>(taps) {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -434,7 +448,8 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -450,22 +465,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_FALSE,
                  2,
                  USE_WINDOW_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_FALSE,
-                                                                     CASC_OUT_FALSE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     0,
-                                                                     1,
-                                                                     DUAL_IP_DUAL,
-                                                                     USE_COEFF_RELOAD_FALSE,
-                                                                     2,
-                                                                     USE_WINDOW_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_FALSE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    0,
+                                                    1,
+                                                    DUAL_IP_DUAL,
+                                                    USE_COEFF_RELOAD_FALSE,
+                                                    2,
+                                                    USE_WINDOW_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / kSymmetryFactor])
@@ -484,7 +501,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             2,
                             USE_WINDOW_API,
-                            TP_MODIFY_MARGIN_OFFSET>(taps) {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -509,7 +527,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -525,22 +544,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_TRUE,
                  1,
                  USE_WINDOW_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_FALSE,
-                                                                     CASC_OUT_FALSE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     DUAL_IP_SINGLE,
-                                                                     USE_COEFF_RELOAD_TRUE,
-                                                                     1,
-                                                                     USE_WINDOW_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_FALSE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    1,
+                                                    USE_WINDOW_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym()
@@ -559,7 +580,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             1,
                             USE_WINDOW_API,
-                            TP_MODIFY_MARGIN_OFFSET>() {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -582,7 +604,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -598,22 +621,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_TRUE,
                  1,
                  USE_WINDOW_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_FALSE,
-                                                                     CASC_OUT_FALSE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     DUAL_IP_DUAL,
-                                                                     USE_COEFF_RELOAD_TRUE,
-                                                                     1,
-                                                                     USE_WINDOW_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_FALSE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    DUAL_IP_DUAL,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    1,
+                                                    USE_WINDOW_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym()
@@ -632,7 +657,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             1,
                             USE_WINDOW_API,
-                            TP_MODIFY_MARGIN_OFFSET>() {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -655,7 +681,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -671,22 +698,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_TRUE,
                  2,
                  USE_WINDOW_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_FALSE,
-                                                                     CASC_OUT_FALSE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     DUAL_IP_SINGLE,
-                                                                     USE_COEFF_RELOAD_TRUE,
-                                                                     2,
-                                                                     USE_WINDOW_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_FALSE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    2,
+                                                    USE_WINDOW_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym()
@@ -705,7 +734,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             2,
                             USE_WINDOW_API,
-                            TP_MODIFY_MARGIN_OFFSET>() {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -728,7 +758,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -744,22 +775,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_TRUE,
                  2,
                  USE_WINDOW_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_FALSE,
-                                                                     CASC_OUT_FALSE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     DUAL_IP_DUAL,
-                                                                     USE_COEFF_RELOAD_TRUE,
-                                                                     2,
-                                                                     USE_WINDOW_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_FALSE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    DUAL_IP_DUAL,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    2,
+                                                    USE_WINDOW_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym()
@@ -778,7 +811,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             2,
                             USE_WINDOW_API,
-                            TP_MODIFY_MARGIN_OFFSET>() {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -804,7 +838,8 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DUAL_IP,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -820,22 +855,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_FALSE,
                  1,
                  USE_WINDOW_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_TRUE,
-                                                                     CASC_OUT_FALSE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     TP_DUAL_IP,
-                                                                     USE_COEFF_RELOAD_FALSE,
-                                                                     1,
-                                                                     USE_WINDOW_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    TP_DUAL_IP,
+                                                    USE_COEFF_RELOAD_FALSE,
+                                                    1,
+                                                    USE_WINDOW_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / kSymmetryFactor])
@@ -854,7 +891,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             1,
                             USE_WINDOW_API,
-                            TP_MODIFY_MARGIN_OFFSET>(taps) {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -876,7 +914,8 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DUAL_IP,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -892,22 +931,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_FALSE,
                  2,
                  USE_WINDOW_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_TRUE,
-                                                                     CASC_OUT_FALSE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     TP_DUAL_IP,
-                                                                     USE_COEFF_RELOAD_FALSE,
-                                                                     2,
-                                                                     USE_WINDOW_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    TP_DUAL_IP,
+                                                    USE_COEFF_RELOAD_FALSE,
+                                                    2,
+                                                    USE_WINDOW_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / kSymmetryFactor])
@@ -926,7 +967,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             2,
                             USE_WINDOW_API,
-                            TP_MODIFY_MARGIN_OFFSET>(taps) {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -949,7 +991,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -965,22 +1008,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_FALSE,
                  1,
                  USE_WINDOW_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_FALSE,
-                                                                     CASC_OUT_TRUE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     DUAL_IP_SINGLE,
-                                                                     USE_COEFF_RELOAD_FALSE,
-                                                                     1,
-                                                                     USE_WINDOW_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_FALSE,
+                                                    CASC_OUT_TRUE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_COEFF_RELOAD_FALSE,
+                                                    1,
+                                                    USE_WINDOW_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / kSymmetryFactor])
@@ -999,7 +1044,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             1,
                             USE_WINDOW_API,
-                            TP_MODIFY_MARGIN_OFFSET>(taps) {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -1022,7 +1068,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -1038,22 +1085,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_FALSE,
                  1,
                  USE_WINDOW_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_FALSE,
-                                                                     CASC_OUT_TRUE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     DUAL_IP_DUAL,
-                                                                     USE_COEFF_RELOAD_FALSE,
-                                                                     1,
-                                                                     USE_WINDOW_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_FALSE,
+                                                    CASC_OUT_TRUE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    DUAL_IP_DUAL,
+                                                    USE_COEFF_RELOAD_FALSE,
+                                                    1,
+                                                    USE_WINDOW_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / kSymmetryFactor])
@@ -1072,7 +1121,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             1,
                             USE_WINDOW_API,
-                            TP_MODIFY_MARGIN_OFFSET>(taps) {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -1098,7 +1148,8 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DUAL_IP,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -1114,22 +1165,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_FALSE,
                  1,
                  USE_WINDOW_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_TRUE,
-                                                                     CASC_OUT_TRUE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     TP_DUAL_IP,
-                                                                     USE_COEFF_RELOAD_FALSE,
-                                                                     1,
-                                                                     USE_WINDOW_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_TRUE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    TP_DUAL_IP,
+                                                    USE_COEFF_RELOAD_FALSE,
+                                                    1,
+                                                    USE_WINDOW_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / kSymmetryFactor])
@@ -1148,7 +1201,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             1,
                             USE_WINDOW_API,
-                            TP_MODIFY_MARGIN_OFFSET>(taps) {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -1173,7 +1227,8 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DUAL_IP,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -1189,22 +1244,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_TRUE,
                  1,
                  USE_WINDOW_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_TRUE,
-                                                                     CASC_OUT_FALSE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     TP_DUAL_IP,
-                                                                     USE_COEFF_RELOAD_TRUE,
-                                                                     1,
-                                                                     USE_WINDOW_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    TP_DUAL_IP,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    1,
+                                                    USE_WINDOW_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym()
@@ -1223,7 +1280,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             1,
                             USE_WINDOW_API,
-                            TP_MODIFY_MARGIN_OFFSET>() {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -1246,7 +1304,8 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DUAL_IP,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -1262,22 +1321,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_TRUE,
                  2,
                  USE_WINDOW_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_TRUE,
-                                                                     CASC_OUT_FALSE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     TP_DUAL_IP,
-                                                                     USE_COEFF_RELOAD_TRUE,
-                                                                     2,
-                                                                     USE_WINDOW_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    TP_DUAL_IP,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    2,
+                                                    USE_WINDOW_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym()
@@ -1296,7 +1357,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             2,
                             USE_WINDOW_API,
-                            TP_MODIFY_MARGIN_OFFSET>() {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -1320,7 +1382,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -1336,22 +1399,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_TRUE,
                  1,
                  USE_WINDOW_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_FALSE,
-                                                                     CASC_OUT_TRUE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     DUAL_IP_SINGLE,
-                                                                     USE_COEFF_RELOAD_TRUE,
-                                                                     1,
-                                                                     USE_WINDOW_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_FALSE,
+                                                    CASC_OUT_TRUE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    1,
+                                                    USE_WINDOW_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym()
@@ -1370,7 +1435,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             1,
                             USE_WINDOW_API,
-                            TP_MODIFY_MARGIN_OFFSET>() {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -1395,7 +1461,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -1411,22 +1478,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_TRUE,
                  1,
                  USE_WINDOW_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_FALSE,
-                                                                     CASC_OUT_TRUE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     DUAL_IP_DUAL,
-                                                                     USE_COEFF_RELOAD_TRUE,
-                                                                     1,
-                                                                     USE_WINDOW_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_FALSE,
+                                                    CASC_OUT_TRUE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    DUAL_IP_DUAL,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    1,
+                                                    USE_WINDOW_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym()
@@ -1445,7 +1514,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             1,
                             USE_WINDOW_API,
-                            TP_MODIFY_MARGIN_OFFSET>() {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -1474,7 +1544,8 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DUAL_IP,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -1490,22 +1561,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_TRUE,
                  1,
                  USE_WINDOW_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_TRUE,
-                                                                     CASC_OUT_TRUE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     TP_DUAL_IP,
-                                                                     USE_COEFF_RELOAD_TRUE,
-                                                                     1,
-                                                                     USE_WINDOW_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_TRUE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    TP_DUAL_IP,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    1,
+                                                    USE_WINDOW_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym()
@@ -1524,7 +1597,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             1,
                             USE_WINDOW_API,
-                            TP_MODIFY_MARGIN_OFFSET>() {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -1551,7 +1625,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_DUAL_IP,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -1567,22 +1642,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_FALSE,
                  1,
                  USE_STREAM_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_FALSE,
-                                                                     CASC_OUT_FALSE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     0,
-                                                                     1,
-                                                                     TP_DUAL_IP,
-                                                                     USE_COEFF_RELOAD_FALSE,
-                                                                     1,
-                                                                     USE_STREAM_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_FALSE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    0,
+                                                    1,
+                                                    TP_DUAL_IP,
+                                                    USE_COEFF_RELOAD_FALSE,
+                                                    1,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / kSymmetryFactor])
@@ -1601,7 +1678,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             1,
                             USE_STREAM_API,
-                            TP_MODIFY_MARGIN_OFFSET>(taps) {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -1622,7 +1700,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_DUAL_IP,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -1638,22 +1717,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_FALSE,
                  2,
                  USE_STREAM_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_FALSE,
-                                                                     CASC_OUT_FALSE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     0,
-                                                                     1,
-                                                                     TP_DUAL_IP,
-                                                                     USE_COEFF_RELOAD_FALSE,
-                                                                     2,
-                                                                     USE_STREAM_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_FALSE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    0,
+                                                    1,
+                                                    TP_DUAL_IP,
+                                                    USE_COEFF_RELOAD_FALSE,
+                                                    2,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / kSymmetryFactor])
@@ -1672,7 +1753,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             2,
                             USE_STREAM_API,
-                            TP_MODIFY_MARGIN_OFFSET>(taps) {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -1697,7 +1779,8 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DUAL_IP,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -1713,22 +1796,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_TRUE,
                  1,
                  USE_STREAM_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_FALSE,
-                                                                     CASC_OUT_FALSE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     TP_DUAL_IP,
-                                                                     USE_COEFF_RELOAD_TRUE,
-                                                                     1,
-                                                                     USE_STREAM_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_FALSE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    TP_DUAL_IP,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    1,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym()
@@ -1747,7 +1832,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             1,
                             USE_STREAM_API,
-                            TP_MODIFY_MARGIN_OFFSET>() {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -1771,7 +1857,8 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DUAL_IP,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -1787,22 +1874,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_TRUE,
                  2,
                  USE_STREAM_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_FALSE,
-                                                                     CASC_OUT_FALSE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     TP_DUAL_IP,
-                                                                     USE_COEFF_RELOAD_TRUE,
-                                                                     2,
-                                                                     USE_STREAM_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_FALSE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    TP_DUAL_IP,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    2,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym()
@@ -1821,7 +1910,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             2,
                             USE_STREAM_API,
-                            TP_MODIFY_MARGIN_OFFSET>() {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -1848,7 +1938,8 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DUAL_IP,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -1864,22 +1955,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_FALSE,
                  1,
                  USE_STREAM_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_TRUE,
-                                                                     CASC_OUT_FALSE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     TP_DUAL_IP,
-                                                                     USE_COEFF_RELOAD_FALSE,
-                                                                     1,
-                                                                     USE_STREAM_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    TP_DUAL_IP,
+                                                    USE_COEFF_RELOAD_FALSE,
+                                                    1,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / kSymmetryFactor])
@@ -1898,7 +1991,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             1,
                             USE_STREAM_API,
-                            TP_MODIFY_MARGIN_OFFSET>(taps) {
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>(taps) {
         printf("final kernel\n");
     }
 
@@ -1925,7 +2019,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -1941,22 +2036,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_FALSE,
                  1,
                  USE_STREAM_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_TRUE,
-                                                                     CASC_OUT_FALSE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     DUAL_IP_DUAL,
-                                                                     USE_COEFF_RELOAD_FALSE,
-                                                                     1,
-                                                                     USE_STREAM_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    DUAL_IP_DUAL,
+                                                    USE_COEFF_RELOAD_FALSE,
+                                                    1,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / kSymmetryFactor])
@@ -1975,7 +2072,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             1,
                             USE_STREAM_API,
-                            TP_MODIFY_MARGIN_OFFSET>(taps) {
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>(taps) {
         printf("final kernel\n");
     }
 
@@ -2000,7 +2098,8 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DUAL_IP,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -2016,22 +2115,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_FALSE,
                  2,
                  USE_STREAM_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_TRUE,
-                                                                     CASC_OUT_FALSE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     TP_DUAL_IP,
-                                                                     USE_COEFF_RELOAD_FALSE,
-                                                                     2,
-                                                                     USE_STREAM_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    TP_DUAL_IP,
+                                                    USE_COEFF_RELOAD_FALSE,
+                                                    2,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / kSymmetryFactor])
@@ -2050,7 +2151,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             2,
                             USE_STREAM_API,
-                            TP_MODIFY_MARGIN_OFFSET>(taps) {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -2075,7 +2177,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -2091,22 +2194,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_FALSE,
                  2,
                  USE_STREAM_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_TRUE,
-                                                                     CASC_OUT_FALSE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     DUAL_IP_DUAL,
-                                                                     USE_COEFF_RELOAD_FALSE,
-                                                                     2,
-                                                                     USE_STREAM_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    DUAL_IP_DUAL,
+                                                    USE_COEFF_RELOAD_FALSE,
+                                                    2,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / kSymmetryFactor])
@@ -2125,7 +2230,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             2,
                             USE_STREAM_API,
-                            TP_MODIFY_MARGIN_OFFSET>(taps) {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -2148,7 +2254,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -2164,22 +2271,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_FALSE,
                  1,
                  USE_STREAM_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_FALSE,
-                                                                     CASC_OUT_TRUE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     DUAL_IP_SINGLE,
-                                                                     USE_COEFF_RELOAD_FALSE,
-                                                                     1,
-                                                                     USE_STREAM_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_FALSE,
+                                                    CASC_OUT_TRUE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_COEFF_RELOAD_FALSE,
+                                                    1,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / kSymmetryFactor])
@@ -2198,7 +2307,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             1,
                             USE_STREAM_API,
-                            TP_MODIFY_MARGIN_OFFSET>(taps) {
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>(taps) {
         printf("first kernel\n");
     }
 
@@ -2223,7 +2333,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -2239,22 +2350,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_FALSE,
                  1,
                  USE_STREAM_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_FALSE,
-                                                                     CASC_OUT_TRUE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     DUAL_IP_DUAL,
-                                                                     USE_COEFF_RELOAD_FALSE,
-                                                                     1,
-                                                                     USE_STREAM_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_FALSE,
+                                                    CASC_OUT_TRUE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    DUAL_IP_DUAL,
+                                                    USE_COEFF_RELOAD_FALSE,
+                                                    1,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / kSymmetryFactor])
@@ -2273,7 +2386,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             1,
                             USE_STREAM_API,
-                            TP_MODIFY_MARGIN_OFFSET>(taps) {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -2296,7 +2410,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -2312,22 +2427,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_FALSE,
                  1,
                  USE_STREAM_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_TRUE,
-                                                                     CASC_OUT_TRUE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     DUAL_IP_SINGLE,
-                                                                     USE_COEFF_RELOAD_FALSE,
-                                                                     1,
-                                                                     USE_STREAM_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_TRUE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_COEFF_RELOAD_FALSE,
+                                                    1,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / kSymmetryFactor])
@@ -2346,7 +2463,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             1,
                             USE_STREAM_API,
-                            TP_MODIFY_MARGIN_OFFSET>(taps) {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -2369,7 +2487,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -2385,22 +2504,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_FALSE,
                  1,
                  USE_STREAM_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_TRUE,
-                                                                     CASC_OUT_TRUE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     DUAL_IP_DUAL,
-                                                                     USE_COEFF_RELOAD_FALSE,
-                                                                     1,
-                                                                     USE_STREAM_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_TRUE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    DUAL_IP_DUAL,
+                                                    USE_COEFF_RELOAD_FALSE,
+                                                    1,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym(const TT_COEFF (&taps)[(TP_FIR_LEN + 1) / kSymmetryFactor])
@@ -2419,7 +2540,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_FALSE,
                             1,
                             USE_STREAM_API,
-                            TP_MODIFY_MARGIN_OFFSET>(taps) {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>(taps) {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -2444,7 +2566,8 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DUAL_IP,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -2460,22 +2583,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_TRUE,
                  1,
                  USE_STREAM_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_TRUE,
-                                                                     CASC_OUT_FALSE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     TP_DUAL_IP,
-                                                                     USE_COEFF_RELOAD_TRUE,
-                                                                     1,
-                                                                     USE_STREAM_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    TP_DUAL_IP,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    1,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym()
@@ -2494,7 +2619,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             1,
                             USE_STREAM_API,
-                            TP_MODIFY_MARGIN_OFFSET>() {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -2519,7 +2645,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -2535,22 +2662,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_TRUE,
                  1,
                  USE_STREAM_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_TRUE,
-                                                                     CASC_OUT_FALSE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     DUAL_IP_DUAL,
-                                                                     USE_COEFF_RELOAD_TRUE,
-                                                                     1,
-                                                                     USE_STREAM_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    DUAL_IP_DUAL,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    1,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym()
@@ -2569,7 +2698,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             1,
                             USE_STREAM_API,
-                            TP_MODIFY_MARGIN_OFFSET>() {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -2592,7 +2722,8 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DUAL_IP,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -2608,22 +2739,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_TRUE,
                  2,
                  USE_STREAM_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_TRUE,
-                                                                     CASC_OUT_FALSE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     TP_DUAL_IP,
-                                                                     USE_COEFF_RELOAD_TRUE,
-                                                                     2,
-                                                                     USE_STREAM_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    TP_DUAL_IP,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    2,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym()
@@ -2642,7 +2775,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             2,
                             USE_STREAM_API,
-                            TP_MODIFY_MARGIN_OFFSET>() {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -2667,7 +2801,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -2683,22 +2818,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_TRUE,
                  2,
                  USE_STREAM_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_TRUE,
-                                                                     CASC_OUT_FALSE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     DUAL_IP_DUAL,
-                                                                     USE_COEFF_RELOAD_TRUE,
-                                                                     2,
-                                                                     USE_STREAM_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_FALSE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    DUAL_IP_DUAL,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    2,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym()
@@ -2717,7 +2854,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             2,
                             USE_STREAM_API,
-                            TP_MODIFY_MARGIN_OFFSET>() {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -2741,7 +2879,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -2757,22 +2896,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_TRUE,
                  1,
                  USE_STREAM_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_FALSE,
-                                                                     CASC_OUT_TRUE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     DUAL_IP_SINGLE,
-                                                                     USE_COEFF_RELOAD_TRUE,
-                                                                     1,
-                                                                     USE_STREAM_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_FALSE,
+                                                    CASC_OUT_TRUE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    1,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym()
@@ -2791,7 +2932,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             1,
                             USE_STREAM_API,
-                            TP_MODIFY_MARGIN_OFFSET>() {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -2815,7 +2957,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -2831,22 +2974,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_TRUE,
                  1,
                  USE_STREAM_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_FALSE,
-                                                                     CASC_OUT_TRUE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     DUAL_IP_DUAL,
-                                                                     USE_COEFF_RELOAD_TRUE,
-                                                                     1,
-                                                                     USE_STREAM_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_FALSE,
+                                                    CASC_OUT_TRUE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    DUAL_IP_DUAL,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    1,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym()
@@ -2865,7 +3010,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             1,
                             USE_STREAM_API,
-                            TP_MODIFY_MARGIN_OFFSET>() {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -2891,7 +3037,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -2907,22 +3054,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_TRUE,
                  1,
                  USE_STREAM_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_TRUE,
-                                                                     CASC_OUT_TRUE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     DUAL_IP_SINGLE,
-                                                                     USE_COEFF_RELOAD_TRUE,
-                                                                     1,
-                                                                     USE_STREAM_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_TRUE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    DUAL_IP_SINGLE,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    1,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym()
@@ -2941,7 +3090,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             1,
                             USE_STREAM_API,
-                            TP_MODIFY_MARGIN_OFFSET>() {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -2966,7 +3116,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          int TP_MODIFY_MARGIN_OFFSET>
+          int TP_MODIFY_MARGIN_OFFSET,
+          unsigned int TP_SAT>
 class fir_sr_sym<TT_DATA,
                  TT_COEFF,
                  TP_FIR_LEN,
@@ -2982,22 +3133,24 @@ class fir_sr_sym<TT_DATA,
                  USE_COEFF_RELOAD_TRUE,
                  1,
                  USE_STREAM_API,
-                 TP_MODIFY_MARGIN_OFFSET> : public kernelFilterClass<TT_DATA,
-                                                                     TT_COEFF,
-                                                                     TP_FIR_LEN,
-                                                                     TP_SHIFT,
-                                                                     TP_RND,
-                                                                     TP_INPUT_WINDOW_VSIZE,
-                                                                     CASC_IN_TRUE,
-                                                                     CASC_OUT_TRUE,
-                                                                     TP_FIR_RANGE_LEN,
-                                                                     TP_KERNEL_POSITION,
-                                                                     TP_CASC_LEN,
-                                                                     DUAL_IP_DUAL,
-                                                                     USE_COEFF_RELOAD_TRUE,
-                                                                     1,
-                                                                     USE_STREAM_API,
-                                                                     TP_MODIFY_MARGIN_OFFSET> {
+                 TP_MODIFY_MARGIN_OFFSET,
+                 TP_SAT> : public kernelFilterClass<TT_DATA,
+                                                    TT_COEFF,
+                                                    TP_FIR_LEN,
+                                                    TP_SHIFT,
+                                                    TP_RND,
+                                                    TP_INPUT_WINDOW_VSIZE,
+                                                    CASC_IN_TRUE,
+                                                    CASC_OUT_TRUE,
+                                                    TP_FIR_RANGE_LEN,
+                                                    TP_KERNEL_POSITION,
+                                                    TP_CASC_LEN,
+                                                    DUAL_IP_DUAL,
+                                                    USE_COEFF_RELOAD_TRUE,
+                                                    1,
+                                                    USE_STREAM_API,
+                                                    TP_MODIFY_MARGIN_OFFSET,
+                                                    TP_SAT> {
    public:
     // Constructor
     fir_sr_sym()
@@ -3016,7 +3169,8 @@ class fir_sr_sym<TT_DATA,
                             USE_COEFF_RELOAD_TRUE,
                             1,
                             USE_STREAM_API,
-                            TP_MODIFY_MARGIN_OFFSET>() {}
+                            TP_MODIFY_MARGIN_OFFSET,
+                            TP_SAT>() {}
 
     // Register Kernel Class
     static void registerKernelClass() { REGISTER_FUNCTION(fir_sr_sym::filter); }
@@ -3044,7 +3198,8 @@ class fir_sr_sym_tl : public fir_sr_sym<typename fp::BTT_DATA,
                                         fp::BTP_USE_COEFF_RELOAD,
                                         fp::BTP_NUM_OUTPUTS,
                                         fp::BTP_API,
-                                        fp::BTP_MODIFY_MARGIN_OFFSET> {
+                                        fp::BTP_MODIFY_MARGIN_OFFSET,
+                                        fp::BTP_SAT> {
    public:
     // Get kernel's FIR range Length
     template <int pos>
@@ -3088,7 +3243,8 @@ class fir_sr_sym_tl : public fir_sr_sym<typename fp::BTT_DATA,
                                     fp::BTP_USE_COEFF_RELOAD,
                                     fp::BTP_NUM_OUTPUTS,
                                     fp::BTP_API,
-                                    fp::BTP_MODIFY_MARGIN_OFFSET>;
+                                    fp::BTP_MODIFY_MARGIN_OFFSET,
+                                    fp::BTP_SAT>;
 };
 }
 }

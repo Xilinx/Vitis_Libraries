@@ -1,6 +1,6 @@
 
 import aie_common as com
-from aie_common import fn_is_complex, fn_size_by_byte, isError,isValid
+from aie_common import fn_is_complex, fn_size_by_byte, isError,isValid, fn_validate_satMode
 #import aie_common_fir as fir
 
 def validate_data_type_combination(TT_DATA_A, TT_DATA_B):
@@ -54,6 +54,10 @@ def validate_TP_SHIFT(args):
     TP_SHIFT = args["TP_SHIFT"]
     return com.fn_validate_shift(TT_DATA_A, TP_SHIFT)
 
+def validate_TP_SAT(args):
+  TP_SAT = args["TP_SAT"]
+  return fn_validate_satMode(TP_SAT)
+
 def info_ports(args):
    
     portsA = com.get_port_info(
@@ -93,6 +97,7 @@ def generate_graph(graphname, args):
   TP_DIM_B = args["TP_DIM_B"]
   TP_SHIFT = args["TP_SHIFT"]
   TP_RND = args["TP_RND"]
+  TP_SAT = args["TP_SAT"]
   TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
   TP_CASC_LEN = args["TP_CASC_LEN"]
 
@@ -113,7 +118,9 @@ public:
     {TP_SHIFT}, // TP_SHIFT
     {TP_RND}, // TP_RND
     {TP_NUM_FRAMES}, // TP_DIM_A_LEADING
-    TP_CASC_LEN // TP_CASC_LEN
+    {TP_CASC_LEN}, // TP_CASC_LEN
+    {TP_SAT} // TP_SAT
+
   > matVecMul;
   
   {graphname}() : matVecMul() {{

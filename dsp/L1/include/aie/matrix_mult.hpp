@@ -40,6 +40,7 @@ The file holds the definition of the Matrix Multiply kernel class.
 // added for stubs in hw flow
 #include "matrix_mult_tiler.hpp"
 #include "matrix_mult_untiler.hpp"
+#include "device_defs.h"
 
 // CEIL rounds x up to the next multiple of y, which may be x itself.
 #define CEIL(x, y) (((x + y - 1) / y) * y)
@@ -62,145 +63,147 @@ namespace matrix_mult {
 
 // TO BE MOVED:
 // IF input type
+
 struct no_port {};
+
 template <typename T_A, typename T_B>
+#ifdef __SUPPORTS_ACC64__
+struct accType {
+    using type = cacc64;
+};
+template <>
+struct accType<int16, int16> {
+    using type = acc64;
+};
+template <>
+struct accType<int16, cint16> {
+    using type = cacc64;
+};
+template <>
+struct accType<int16, cint32> {
+    using type = cacc64;
+};
+template <>
+struct accType<int16, int32> {
+    using type = acc64;
+};
+template <>
+struct accType<cint16, int16> {
+    using type = cacc64;
+};
+template <>
+struct accType<cint16, cint16> {
+    using type = cacc64;
+};
+template <>
+struct accType<cint16, int32> {
+    using type = cacc64;
+};
+template <>
+struct accType<cint16, cint32> {
+    using type = cacc64;
+};
+template <>
+struct accType<int32, int16> {
+    using type = acc64;
+};
+template <>
+struct accType<int32, cint16> {
+    using type = cacc64;
+};
+template <>
+struct accType<int32, int32> {
+    using type = acc64;
+};
+template <>
+struct accType<int32, cint32> {
+    using type = cacc64;
+};
+template <>
+struct accType<cint32, int16> {
+    using type = cacc64;
+};
+template <>
+struct accType<cint32, cint16> {
+    using type = cacc64;
+};
+template <>
+struct accType<cint32, int32> {
+    using type = cacc64;
+};
+template <>
+struct accType<cint32, cint32> {
+    using type = cacc64;
+};
+
+#else
+
 struct accType {
     using type = cacc48;
-};
-template <typename T_A, typename T_B>
-struct outType {
-    using type = cint16;
 };
 template <>
 struct accType<int16, int16> {
     using type = acc48;
 };
 template <>
-struct outType<int16, int16> {
-    using type = int16;
-};
-template <>
 struct accType<int16, cint16> {
     using type = cacc48;
-};
-template <>
-struct outType<int16, cint16> {
-    using type = cint16;
 };
 template <>
 struct accType<int16, cint32> {
     using type = cacc80;
 };
 template <>
-struct outType<int16, cint32> {
-    using type = cint32;
-};
-template <>
 struct accType<int16, int32> {
     using type = acc80;
 };
 template <>
-struct outType<int16, int32> {
-    using type = int32;
-};
-
-template <>
 struct accType<cint16, int16> {
     using type = cacc48;
-};
-template <>
-struct outType<cint16, int16> {
-    using type = cint16;
 };
 template <>
 struct accType<cint16, cint16> {
     using type = cacc48;
 };
 template <>
-struct outType<cint16, cint16> {
-    using type = cint16;
-};
-template <>
 struct accType<cint16, int32> {
     using type = cacc80;
-};
-template <>
-struct outType<cint16, int32> {
-    using type = cint32;
 };
 template <>
 struct accType<cint16, cint32> {
     using type = cacc80;
 };
 template <>
-struct outType<cint16, cint32> {
-    using type = cint32;
-};
-
-template <>
 struct accType<int32, int16> {
     using type = acc80;
-};
-template <>
-struct outType<int32, int16> {
-    using type = int32;
 };
 template <>
 struct accType<int32, cint16> {
     using type = cacc80;
 };
 template <>
-struct outType<int32, cint16> {
-    using type = cint32;
-};
-template <>
 struct accType<int32, int32> {
     using type = acc80;
-};
-template <>
-struct outType<int32, int32> {
-    using type = int32;
 };
 template <>
 struct accType<int32, cint32> {
     using type = cacc80;
 };
 template <>
-struct outType<int32, cint32> {
-    using type = cint32;
-};
-
-template <>
 struct accType<cint32, int16> {
     using type = cacc80;
-};
-template <>
-struct outType<cint32, int16> {
-    using type = cint32;
 };
 template <>
 struct accType<cint32, cint16> {
     using type = cacc80;
 };
 template <>
-struct outType<cint32, cint16> {
-    using type = cint32;
-};
-template <>
 struct accType<cint32, int32> {
     using type = cacc80;
 };
 template <>
-struct outType<cint32, int32> {
-    using type = cint32;
-};
-template <>
 struct accType<cint32, cint32> {
     using type = cacc80;
-};
-template <>
-struct outType<cint32, cint32> {
-    using type = cint32;
 };
 
 template <>
@@ -208,36 +211,112 @@ struct accType<float, float> {
     using type = accfloat;
 };
 template <>
-struct outType<float, float> {
-    using type = float;
-};
-template <>
 struct accType<cfloat, float> {
     using type = caccfloat;
-};
-template <>
-struct outType<cfloat, float> {
-    using type = cfloat;
 };
 template <>
 struct accType<float, cfloat> {
     using type = caccfloat;
 };
 template <>
-struct outType<float, cfloat> {
+struct accType<cfloat, cfloat> {
+    using type = caccfloat;
+};
+#endif //__SUPPORTS_ACC64__
+
+template <typename T_D_A, typename T_D_B>
+using accType_t = typename accType<T_D_A, T_D_B>::type;
+
+template <typename T_A, typename T_B>
+struct outType {
+    using type = cint16;
+};
+
+template <>
+struct outType<int16, int16> {
+    using type = int16;
+};
+template <>
+struct outType<int16, cint16> {
+    using type = cint16;
+};
+template <>
+struct outType<int16, cint32> {
+    using type = cint32;
+};
+template <>
+struct outType<int16, int32> {
+    using type = int32;
+};
+
+template <>
+struct outType<cint16, int16> {
+    using type = cint16;
+};
+template <>
+struct outType<cint16, cint16> {
+    using type = cint16;
+};
+template <>
+struct outType<cint16, int32> {
+    using type = cint32;
+};
+template <>
+struct outType<cint16, cint32> {
+    using type = cint32;
+};
+
+template <>
+struct outType<int32, int16> {
+    using type = int32;
+};
+template <>
+struct outType<int32, cint16> {
+    using type = cint32;
+};
+template <>
+struct outType<int32, int32> {
+    using type = int32;
+};
+template <>
+struct outType<int32, cint32> {
+    using type = cint32;
+};
+
+template <>
+struct outType<cint32, int16> {
+    using type = cint32;
+};
+template <>
+struct outType<cint32, cint16> {
+    using type = cint32;
+};
+template <>
+struct outType<cint32, int32> {
+    using type = cint32;
+};
+template <>
+struct outType<cint32, cint32> {
+    using type = cint32;
+};
+
+template <>
+struct outType<float, float> {
+    using type = float;
+};
+template <>
+struct outType<cfloat, float> {
     using type = cfloat;
 };
 template <>
-struct accType<cfloat, cfloat> {
-    using type = caccfloat;
+struct outType<float, cfloat> {
+    using type = cfloat;
 };
 template <>
 struct outType<cfloat, cfloat> {
     using type = cfloat;
 };
 
-template <typename T_D_A, typename T_D_B>
-using accType_t = typename accType<T_D_A, T_D_B>::type;
 template <typename T_D_A, typename T_D_B>
 using outType_t = typename outType<T_D_A, T_D_B>::type;
 
@@ -298,6 +377,7 @@ template <typename TT_DATA_A,
           unsigned int TP_DIM_B,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
+          unsigned int TP_SAT = 1,
           unsigned int TP_DIM_A_LEADING = ROW_MAJOR,
           unsigned int TP_DIM_B_LEADING = COL_MAJOR,
           unsigned int TP_DIM_OUT_LEADING = ROW_MAJOR,
@@ -344,6 +424,8 @@ class kernelMatMultClass {
                   "below minimum required value. Should have at least TP_DIM_MIN macs. ");
     static_assert(TP_SHIFT >= SHIFT_MIN && TP_SHIFT <= SHIFT_MAX, "ERROR: SHIFT is out of the supported range.");
     static_assert(TP_RND >= ROUND_MIN && TP_RND <= ROUND_MAX, "ERROR: RND is out of the supported range.");
+    static_assert(TP_SAT >= SAT_MODE_MIN && TP_SAT <= SAT_MODE_MAX, "ERROR: TP_SAT is out of supported range");
+    static_assert(TP_SAT != 2, "ERROR: TP_SAT is invalid. Valid values of TP_SAT are 0, 1, and 3");
     static_assert((TP_INPUT_WINDOW_VSIZE_A % (TP_DIM_A * TP_DIM_AB)) == 0,
                   "ERROR: TP_INPUT_WINDOW_VSIZE_A must be an integer multiple of TP_DIM_A*TP_DIM_AB.");
     static_assert((TP_INPUT_WINDOW_VSIZE_B % (TP_DIM_B * TP_DIM_AB)) == 0,
@@ -380,7 +462,34 @@ class kernelMatMultClass {
         unsigned int ABtile;
         unsigned int Btile;
     };
-
+#ifdef __SUPPORTS_ACC64__
+    static INLINE_DECL constexpr tilingStruct getTilingScheme() {
+        using A = TT_DATA_A;
+        using B = TT_DATA_B;
+        // needs to be compatible with c++14 -> so just use plain ifs
+        // int16 or int32 x int16 x int 32
+        if ((std::is_same<A, int16>::value || std::is_same<A, int32>::value) &&
+            (std::is_same<A, int16>::value || std::is_same<A, int32>::value)) {
+            return {4, 4, 4};
+        }
+        // cint16 x int16
+        if (std::is_same<A, cint16>::value && std::is_same<B, int16>::value) {
+            return {4, 4, 4};
+        }
+        // cint16 x cint16
+        if (std::is_same<A, cint16>::value && std::is_same<B, cint16>::value) {
+            return {1, 4, 8};
+        }
+        // cint32 x cint16
+        if (std::is_same<A, cint32>::value && std::is_same<B, cint16>::value) {
+            return {2, 4, 8};
+        }
+        // cint32 x cint32
+        if (std::is_same<A, cint32>::value && std::is_same<B, cint32>::value) {
+            return {1, 2, 8};
+        }
+    };
+#else
     static INLINE_DECL constexpr tilingStruct getTilingScheme() {
         using A = TT_DATA_A;
         using B = TT_DATA_B;
@@ -433,6 +542,8 @@ class kernelMatMultClass {
             return {4, 2, 2};
         }
     };
+#endif //__SUPPORTS_ACC64__
+
     // Putting this into a function so that the static assert error message includes the value of the tiling scheme.
     template <unsigned Atile, unsigned ABtile, unsigned Btile>
     static bool constexpr tilingSchemeMultiples() {
@@ -466,6 +577,7 @@ template <typename TT_DATA_A,
           unsigned int TP_DIM_B,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
+          unsigned int TP_SAT = 1,
           unsigned int TP_DIM_A_LEADING = ROW_MAJOR,
           unsigned int TP_DIM_B_LEADING = COL_MAJOR,
           unsigned int TP_DIM_OUT_LEADING = ROW_MAJOR,
@@ -485,6 +597,7 @@ class matrix_mult : public kernelMatMultClass<TT_DATA_A,
                                               TP_DIM_B,
                                               TP_SHIFT,
                                               TP_RND,
+                                              TP_SAT,
                                               TP_DIM_A_LEADING,
                                               TP_DIM_B_LEADING,
                                               TP_DIM_OUT_LEADING,
@@ -508,6 +621,7 @@ class matrix_mult : public kernelMatMultClass<TT_DATA_A,
                              TP_DIM_B,
                              TP_SHIFT,
                              TP_RND,
+                             TP_SAT,
                              TP_DIM_A_LEADING,
                              TP_DIM_B_LEADING,
                              TP_DIM_OUT_LEADING,
@@ -539,6 +653,7 @@ template <typename TT_DATA_A,
           unsigned int TP_DIM_B,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
+          unsigned int TP_SAT,
           unsigned int TP_DIM_A_LEADING,
           unsigned int TP_DIM_B_LEADING,
           unsigned int TP_DIM_OUT_LEADING,
@@ -556,6 +671,7 @@ class matrix_mult<TT_DATA_A,
                   TP_DIM_B,
                   TP_SHIFT,
                   TP_RND,
+                  TP_SAT,
                   TP_DIM_A_LEADING,
                   TP_DIM_B_LEADING,
                   TP_DIM_OUT_LEADING,
@@ -574,6 +690,7 @@ class matrix_mult<TT_DATA_A,
                                                            TP_DIM_B,
                                                            TP_SHIFT,
                                                            TP_RND,
+                                                           TP_SAT,
                                                            TP_DIM_A_LEADING,
                                                            TP_DIM_B_LEADING,
                                                            TP_DIM_OUT_LEADING,
@@ -597,6 +714,7 @@ class matrix_mult<TT_DATA_A,
                              TP_DIM_B,
                              TP_SHIFT,
                              TP_RND,
+                             TP_SAT,
                              TP_DIM_A_LEADING,
                              TP_DIM_B_LEADING,
                              TP_DIM_OUT_LEADING,
@@ -629,6 +747,7 @@ template <typename TT_DATA_A,
           unsigned int TP_DIM_B,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
+          unsigned int TP_SAT,
           unsigned int TP_DIM_A_LEADING,
           unsigned int TP_DIM_B_LEADING,
           unsigned int TP_DIM_OUT_LEADING,
@@ -646,6 +765,7 @@ class matrix_mult<TT_DATA_A,
                   TP_DIM_B,
                   TP_SHIFT,
                   TP_RND,
+                  TP_SAT,
                   TP_DIM_A_LEADING,
                   TP_DIM_B_LEADING,
                   TP_DIM_OUT_LEADING,
@@ -664,6 +784,7 @@ class matrix_mult<TT_DATA_A,
                                                            TP_DIM_B,
                                                            TP_SHIFT,
                                                            TP_RND,
+                                                           TP_SAT,
                                                            TP_DIM_A_LEADING,
                                                            TP_DIM_B_LEADING,
                                                            TP_DIM_OUT_LEADING,
@@ -687,6 +808,7 @@ class matrix_mult<TT_DATA_A,
                              TP_DIM_B,
                              TP_SHIFT,
                              TP_RND,
+                             TP_SAT,
                              TP_DIM_A_LEADING,
                              TP_DIM_B_LEADING,
                              TP_DIM_OUT_LEADING,
@@ -718,6 +840,7 @@ template <typename TT_DATA_A,
           unsigned int TP_DIM_B,
           unsigned int TP_SHIFT,
           unsigned int TP_RND,
+          unsigned int TP_SAT,
           unsigned int TP_DIM_A_LEADING,
           unsigned int TP_DIM_B_LEADING,
           unsigned int TP_DIM_OUT_LEADING,
@@ -735,6 +858,7 @@ class matrix_mult<TT_DATA_A,
                   TP_DIM_B,
                   TP_SHIFT,
                   TP_RND,
+                  TP_SAT,
                   TP_DIM_A_LEADING,
                   TP_DIM_B_LEADING,
                   TP_DIM_OUT_LEADING,
@@ -753,6 +877,7 @@ class matrix_mult<TT_DATA_A,
                                                            TP_DIM_B,
                                                            TP_SHIFT,
                                                            TP_RND,
+                                                           TP_SAT,
                                                            TP_DIM_A_LEADING,
                                                            TP_DIM_B_LEADING,
                                                            TP_DIM_OUT_LEADING,
@@ -776,6 +901,7 @@ class matrix_mult<TT_DATA_A,
                              TP_DIM_B,
                              TP_SHIFT,
                              TP_RND,
+                             TP_SAT,
                              TP_DIM_A_LEADING,
                              TP_DIM_B_LEADING,
                              TP_DIM_OUT_LEADING,

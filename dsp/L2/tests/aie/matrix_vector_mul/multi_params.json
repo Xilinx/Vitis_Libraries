@@ -1,5 +1,5 @@
 {
-    "test_0_mat_vec_mul": {
+    "test_0_tool_canary_aie":{
         "DATA_A": "int16",
         "DATA_B": "int16",
         "DIM_A": "32",
@@ -12,7 +12,8 @@
         "ROUND_MODE": "0",
         "NUM_FRAMES": "1",
         "DIFF_TOLERANCE": "4",
-        "CC_TOLERANCE": "0"
+        "CC_TOLERANCE": "0",
+        "SAT_MODE": "1"
     },
     "test_1_mat_vec_mul": {
         "DATA_A": "cint16",
@@ -24,10 +25,11 @@
         "CASC_LEN": "1",
         "STIM_TYPE_A": "0",
         "STIM_TYPE_B": "0",
-        "ROUND_MODE": "0",
+        "ROUND_MODE": "1",
         "NUM_FRAMES": "1",
         "DIFF_TOLERANCE": "4",
-        "CC_TOLERANCE": "0"
+        "CC_TOLERANCE": "0",
+        "SAT_MODE": "3"
     },
     "test_2_mat_vec_mul": {
         "DATA_A": "int32",
@@ -39,10 +41,11 @@
         "CASC_LEN": "1",
         "STIM_TYPE_A": "0",
         "STIM_TYPE_B": "0",
-        "ROUND_MODE": "0",
+        "ROUND_MODE": "5",
         "NUM_FRAMES": "1",
         "DIFF_TOLERANCE": "4",
-        "CC_TOLERANCE": "0"
+        "CC_TOLERANCE": "0",
+        "SAT_MODE": "0"
     },
     "test_3_mat_vec_mul": {
         "DATA_A": "cint32",
@@ -57,40 +60,11 @@
         "ROUND_MODE": "0",
         "NUM_FRAMES": "1",
         "DIFF_TOLERANCE": "4",
-        "CC_TOLERANCE": "0"
+        "CC_TOLERANCE": "0",
+        "SAT_MODE": "1"
     },
     "test_4_mat_vec_mul": {
-        "DATA_A": "int16",
-        "DATA_B": "int16",
-        "DIM_A": "32",
-        "DIM_B": "16",
-        "SHIFT": "16",
-        "NITER": "8",
-        "CASC_LEN": "1",
-        "STIM_TYPE_A": "0",
-        "STIM_TYPE_B": "0",
-        "ROUND_MODE": "0",
-        "NUM_FRAMES": "2",
-        "DIFF_TOLERANCE": "4",
-        "CC_TOLERANCE": "0"
-    },
-    "test_5_mat_vec_mul": {
-        "DATA_A": "cint16",
-        "DATA_B": "cint16",
-        "DIM_A": "32",
-        "DIM_B": "16",
-        "SHIFT": "16",
-        "NITER": "8",
-        "CASC_LEN": "1",
-        "STIM_TYPE_A": "0",
-        "STIM_TYPE_B": "0",
-        "ROUND_MODE": "0",
-        "NUM_FRAMES": "2",
-        "DIFF_TOLERANCE": "4",
-        "CC_TOLERANCE": "0"
-    },
-    "test_6_mat_vec_mul": {
-        "DATA_A": "int32",
+        "DATA_A": "cint32",
         "DATA_B": "int32",
         "DIM_A": "32",
         "DIM_B": "16",
@@ -102,7 +76,40 @@
         "ROUND_MODE": "0",
         "NUM_FRAMES": "2",
         "DIFF_TOLERANCE": "4",
-        "CC_TOLERANCE": "0"
+        "CC_TOLERANCE": "0",
+        "SAT_MODE": "1"
+    },
+    "test_5_mat_vec_mul": {
+        "DATA_A": "cint16",
+        "DATA_B": "cint32",
+        "DIM_A": "32",
+        "DIM_B": "16",
+        "SHIFT": "16",
+        "NITER": "8",
+        "CASC_LEN": "1",
+        "STIM_TYPE_A": "0",
+        "STIM_TYPE_B": "0",
+        "ROUND_MODE": "0",
+        "NUM_FRAMES": "2",
+        "DIFF_TOLERANCE": "4",
+        "CC_TOLERANCE": "0",
+        "SAT_MODE": "1"
+    },
+    "test_6_mat_vec_mul": {
+        "DATA_A": "int16",
+        "DATA_B": "int32",
+        "DIM_A": "32",
+        "DIM_B": "16",
+        "SHIFT": "16",
+        "NITER": "8",
+        "CASC_LEN": "1",
+        "STIM_TYPE_A": "0",
+        "STIM_TYPE_B": "0",
+        "ROUND_MODE": "0",
+        "NUM_FRAMES": "2",
+        "DIFF_TOLERANCE": "4",
+        "CC_TOLERANCE": "0",
+        "SAT_MODE": "1"
     },
     "test_7_mat_vec_mul": {
         "DATA_A": "cint32",
@@ -117,6 +124,103 @@
         "ROUND_MODE": "0",
         "NUM_FRAMES": "2",
         "DIFF_TOLERANCE": "4",
-        "CC_TOLERANCE": "0"
+        "CC_TOLERANCE": "0",
+        "SAT_MODE": "1"
+    },
+    "test_8_mat_vec_mul": {
+        "DATA_A": "int32",
+        "DATA_B": "int16",
+        "DIM_A": "16",
+        "DIM_B": "32",
+        "SHIFT": "16",
+        "NITER": "8",
+        "CASC_LEN": "2",
+        "STIM_TYPE_A": "0",
+        "STIM_TYPE_B": "0",
+        "ROUND_MODE": "0",
+        "NUM_FRAMES": "1",
+        "DIFF_TOLERANCE": "4",
+        "CC_TOLERANCE": "0",
+        "SAT_MODE": "1"
+    },
+    "test_9_mat_vec_mul": {
+        "DATA_A": "cint16",
+        "DATA_B": "cint16",
+        "DIM_A": "32",
+        "DIM_B": "64",
+        "SHIFT": "16",
+        "NITER": "8",
+        "CASC_LEN": "4",
+        "STIM_TYPE_A": "0",
+        "STIM_TYPE_B": "0",
+        "ROUND_MODE": "0",
+        "NUM_FRAMES": "4",
+        "DIFF_TOLERANCE": "4",
+        "CC_TOLERANCE": "0",
+        "SAT_MODE": "1"
+    },
+    "test_10_mat_vec_mul": {
+        "DATA_A": "int16",
+        "DATA_B": "cint16",
+        "DIM_A": "32",
+        "DIM_B": "48",
+        "SHIFT": "16",
+        "NITER": "8",
+        "CASC_LEN": "3",
+        "STIM_TYPE_A": "0",
+        "STIM_TYPE_B": "0",
+        "ROUND_MODE": "0",
+        "NUM_FRAMES": "1",
+        "DIFF_TOLERANCE": "4",
+        "CC_TOLERANCE": "0",
+        "SAT_MODE": "1"
+    },
+    "test_11_mat_vec_mul": {
+        "DATA_A": "float",
+        "DATA_B": "float",
+        "DIM_A": "32",
+        "DIM_B": "16",
+        "SHIFT": "0",
+        "NITER": "8",
+        "CASC_LEN": "2",
+        "STIM_TYPE_A": "0",
+        "STIM_TYPE_B": "0",
+        "ROUND_MODE": "0",
+        "NUM_FRAMES": "1",
+        "DIFF_TOLERANCE": "4",
+        "CC_TOLERANCE": "0",
+        "SAT_MODE": "1"
+    },
+    "test_12_mat_vec_mul": {
+        "DATA_A": "cfloat",
+        "DATA_B": "cfloat",
+        "DIM_A": "16",
+        "DIM_B": "32",
+        "SHIFT": "0",
+        "NITER": "8",
+        "CASC_LEN": "4",
+        "STIM_TYPE_A": "0",
+        "STIM_TYPE_B": "0",
+        "ROUND_MODE": "0",
+        "NUM_FRAMES": "4",
+        "DIFF_TOLERANCE": "4",
+        "CC_TOLERANCE": "0",
+        "SAT_MODE": "1"
+    },
+    "test_13_mat_vec_mul": {
+        "DATA_A": "cfloat",
+        "DATA_B": "float",
+        "DIM_A": "8",
+        "DIM_B": "48",
+        "SHIFT": "0",
+        "NITER": "8",
+        "CASC_LEN": "3",
+        "STIM_TYPE_A": "0",
+        "STIM_TYPE_B": "0",
+        "ROUND_MODE": "0",
+        "NUM_FRAMES": "1",
+        "DIFF_TOLERANCE": "4",
+        "CC_TOLERANCE": "0",
+        "SAT_MODE": "1"
     }
 }

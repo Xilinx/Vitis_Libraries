@@ -23,6 +23,7 @@
 #include "graph_utils.hpp"                  //for port_array
 #include "widget_api_cast.hpp"
 #include "mixed_radix_fft.hpp"
+#include "fir_utils.hpp" // for CEIL function outside of L2 flow
 
 using namespace ::xf::dsp::aie::widget::api_cast;
 using namespace adf;
@@ -322,7 +323,7 @@ template <typename TT_DATA,
           unsigned int TP_POINT_SIZE,
           unsigned int TP_FFT_NIFFT,
           unsigned int TP_SHIFT,
-          unsigned int TP_RND,
+          unsigned int TP_RND = 4,
           unsigned int TP_SAT = 1,
           unsigned int TP_WINDOW_VSIZE = TP_POINT_SIZE, // to support multiple frames in an iobuffer
           unsigned int TP_CASC_LEN = 1,                 // single kernel operation only to begin with
@@ -330,6 +331,11 @@ template <typename TT_DATA,
           >
 class mixed_radix_fft_graph : public graph {
    public:
+    static_assert(TP_RND != rnd_sym_floor && TP_RND != rnd_sym_ceil && TP_RND != rnd_floor && TP_RND != rnd_ceil,
+                  "Error: mixed radix FFT does not support TP_RND set to floor, ceil, symmetric floor, and symmetric "
+                  "ceil. Please set TP_RND to any of the other rounding modes. The mapping of integers to rounding "
+                  "modes is device dependent. Please refer to documentation for more information.");
+
     // declare MIXED_RADIX_FFT Kernel array
     kernel m_mixed_radix_fftKernels[TP_CASC_LEN];
     kernel* getKernels() { return m_mixed_radix_fftKernels; };
@@ -360,6 +366,7 @@ class mixed_radix_fft_graph : public graph {
     static constexpr int m_kR2factor = fnGetRadixFactor<(TP_POINT_SIZE >> (2 * m_kR4Stages)), 2>();
 
     static constexpr int m_kTotalStages = m_kR5Stages + m_kR3Stages + m_kR2Stages + m_kR4Stages;
+    static_assert(m_kTotalStages >= TP_CASC_LEN, "Error: TP_CASC_LEN is greater than the number of stages required");
 
     typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
     static constexpr int m_ktwiddleTableSize = fnGetTwiddleTableSize<TT_TWIDDLE, TP_POINT_SIZE>();

@@ -9,7 +9,7 @@
     ],
     "platform_properties": {
         "vck190": {
-            "param_set": ["test_0_fir_24t_casc1_window", "test_1_fir_24t_casc1_window", "test_2_fir_cint16_24t_stream", "test_3_fir_32t_casc4_stream", "test_4_fir_2048t_casc8_window", "test_5_fir_16t_cfloat_stream", "test_6_custom_constraints", "test_7_int16_stream", "test_8_int16_stream_rtp_reload", "test_9_int16_ssr_rtp_reload", "test_12_cint16_ssr_6", "test_13_cint16_ssr_7", "test_14_fir_48t_int16_int32_stream", "test_15_fir_32t_cint16_int32_stream", "test_16_fir_32t_cint16_cint32_stream"],
+            "param_set": ["test_0_tool_canary_aie", "test_1_fir_24t_casc1_window", "test_2_fir_cint16_24t_stream", "test_3_fir_32t_casc4_stream", "test_4_fir_2048t_casc8_window", "test_5_fir_16t_cfloat_stream", "test_6_custom_constraints", "test_7_int16_stream", "test_8_int16_stream_rtp_reload", "test_9_int16_ssr_rtp_reload", "test_12_cint16_ssr_6", "test_13_cint16_ssr_7", "test_14_fir_48t_int16_int32_stream", "test_15_fir_32t_cint16_int32_stream", "test_16_fir_32t_cint16_cint32_stream"],
             "v++": {
                 "compiler": {
                     "clflags": []
@@ -22,7 +22,7 @@
             }
         },
         "vek280": {
-            "param_set": ["aieml_test_0_fir_24t_casc1_window", "aieml_test_1_fir_24t_casc1_stream", "aieml_test_2_fir_cint16_24t_stream", "aieml_test_3_fir_32t_casc4_stream", "aieml_test_4_fir_768t_casc3_window", "aieml_test_5_fir_750t_casc3_window_rtp", "aieml_test_6_int16"],
+            "param_set": ["test_0_tool_canary_aieml", "test_1_aieml_fir_24t_casc1_stream", "test_2_aieml_fir_cint16_24t_stream", "test_3_aieml_fir_32t_casc4_stream", "test_4_aieml_fir_768t_casc3_window", "test_5_aieml_fir_750t_casc3_window_rtp", "test_6_aieml_fir_int16"],
             "v++": {
                 "compiler": {
                     "clflags": []
@@ -37,7 +37,7 @@
     },
     "pre_build": [
         {
-            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"tclsh LIB_DIR/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL)\"  --connector \" \" --var \"DATA_TYPE:COEFF_TYPE:FIR_LEN:SHIFT:ROUND_MODE:INPUT_WINDOW_VSIZE:CASC_LEN:USE_COEFF_RELOAD:NUM_OUTPUTS:PORT_API:DUAL_IP:UUT_SSR\")"
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"tclsh LIB_DIR/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL)\"  --connector \" \" --var \"DATA_TYPE:COEFF_TYPE:FIR_LEN:SHIFT:ROUND_MODE:INPUT_WINDOW_VSIZE:CASC_LEN:USE_COEFF_RELOAD:NUM_OUTPUTS:PORT_API:DUAL_IP:UUT_SSR:SAT_MODE:AIE_VARIANT\")"
         },
         {
             "build_cmd": "$(if $(filter-out REF,$(TAG)), vitis --classic -exec ipmetadata_config_checker LIB_DIR/L2/meta/$(UUT_KERNEL).json ./config.json -newflow)"
@@ -115,7 +115,7 @@
                 "./"
             ],
             "customized_params": {
-                "params": "-v $($(TAG)_TARGET_COMPILE_ARGS) -Xpreproc=\"$($(TAG)_PREPROC_ARGS)\"",
+                "params": "--aie.verbose $($(TAG)_TARGET_COMPILE_ARGS) $($(TAG)_PREPROC_ARGS)",
                 "default": {
                     "TAG": "UUT",
                     "AIE_VARIANT": "1",
@@ -135,11 +135,11 @@
                     "LOC_INPUT_FILE": "./data/input.txt",
                     "REF_INPUT_FILE": "./data/input_ref.txt",
                     "MAX_FIR_PER_KERNEL": "256",
-                    "UUT_TARGET_COMPILE_ARGS": "--Xrouter=DMAFIFOsInFreeBankOnly  -stacksize=$(shell $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramset.py multi_params.json $(PARAMS))  -Xchess=llvm.xargs=\"-std=c++2a\" -Xchess=main:backend.mist2.xargs=\"+NOdra\" -Xchess=main:backend.mist2.pnll=\"off\" ",
+                    "UUT_TARGET_COMPILE_ARGS": "--aie.Xrouter=DMAFIFOsInFreeBankOnly  --aie.stacksize=$(shell $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramset.py multi_params.json $(PARAMS))  --aie.Xchess=llvm.xargs=\"-std=c++2a\" --aie.Xchess=main:backend.mist2.xargs=\"+NOdra\" --aie.Xchess=main:backend.mist2.pnll=\"off\" ",
                     "REF_TARGET_COMPILE_ARGS": "",
-                    "PREPROC_ARGS": " -DCOEFF_FILE=$(LOC_COEFF_FILE)",
-                    "REF_PREPROC_ARGS": "-DUUT_GRAPH=$(REF_GRAPH) -DINPUT_FILE=$(REF_INPUT_FILE) -DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS)",
-                    "UUT_PREPROC_ARGS": "-DUUT_GRAPH=$(UUT_GRAPH) -DINPUT_FILE=$(LOC_INPUT_FILE) -DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) -DUSING_UUT=1"
+                    "PREPROC_ARGS": "--aie.Xpreproc=-DCOEFF_FILE=$(LOC_COEFF_FILE)",
+                    "REF_PREPROC_ARGS": "--aie.Xpreproc=-DUUT_GRAPH=$(REF_GRAPH) --aie.Xpreproc=-DINPUT_FILE=$(REF_INPUT_FILE) --aie.Xpreproc=-DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS)",
+                    "UUT_PREPROC_ARGS": "--aie.Xpreproc=-DUUT_GRAPH=$(UUT_GRAPH) --aie.Xpreproc=-DINPUT_FILE=$(LOC_INPUT_FILE) --aie.Xpreproc=-DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) --aie.Xpreproc=-DUSING_UUT=1"
                 }
             }
         }
@@ -173,7 +173,7 @@
                 "dependency": [],
                 "env": "",
                 "cmd": "",
-                "max_memory_MB": 32768,
+                "max_memory_MB": 40960,
                 "max_time_min": {
                     "vitis_aie_x86sim": 120,
                     "vitis_aie_sim": 470

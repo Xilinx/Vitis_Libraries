@@ -72,7 +72,8 @@ template <typename TT_DATA,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
           unsigned int TP_UPSHIFT_CT,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 INLINE_DECL void kernelFilterClass<TT_DATA,
                                    TT_COEFF,
                                    TP_FIR_LEN,
@@ -88,7 +89,8 @@ INLINE_DECL void kernelFilterClass<TT_DATA,
                                    TP_USE_COEFF_RELOAD,
                                    TP_NUM_OUTPUTS,
                                    TP_UPSHIFT_CT,
-                                   TP_API>::filterKernel(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                   TP_API,
+                                   TP_SAT>::filterKernel(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                                                          T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
     constexpr int TP_CASC_API = TP_API == 0 ? 0 : (TP_DUAL_IP == DUAL_IP_DUAL ? 0 : 1);
     windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE + fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>(),
@@ -113,7 +115,8 @@ template <typename TT_DATA,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
           unsigned int TP_UPSHIFT_CT,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 INLINE_DECL void kernelFilterClass<TT_DATA,
                                    TT_COEFF,
                                    TP_FIR_LEN,
@@ -129,7 +132,8 @@ INLINE_DECL void kernelFilterClass<TT_DATA,
                                    TP_USE_COEFF_RELOAD,
                                    TP_NUM_OUTPUTS,
                                    TP_UPSHIFT_CT,
-                                   TP_API>::filterKernel(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                   TP_API,
+                                   TP_SAT>::filterKernel(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                                                          T_outputIF<TP_CASC_OUT, TT_DATA> outInterface,
                                                          const TT_COEFF (&inTaps)[getHbTaps(TP_FIR_LEN)]) {
     constexpr int TP_CASC_API = TP_API == 0 ? 0 : (TP_DUAL_IP == DUAL_IP_DUAL ? 0 : 1);
@@ -162,7 +166,8 @@ template <typename TT_DATA,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
           unsigned int TP_UPSHIFT_CT,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 INLINE_DECL void kernelFilterClass<TT_DATA,
                                    TT_COEFF,
                                    TP_FIR_LEN,
@@ -178,7 +183,8 @@ INLINE_DECL void kernelFilterClass<TT_DATA,
                                    TP_USE_COEFF_RELOAD,
                                    TP_NUM_OUTPUTS,
                                    TP_UPSHIFT_CT,
-                                   TP_API>::filterKernelRtp(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                   TP_API,
+                                   TP_SAT>::filterKernelRtp(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                                                             T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
     constexpr int TP_CASC_API = TP_API == 0 ? 0 : (TP_DUAL_IP == DUAL_IP_DUAL ? 0 : 1);
     windowBroadcast<TT_DATA, TP_INPUT_WINDOW_VSIZE + fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>(),
@@ -211,7 +217,8 @@ template <typename TT_DATA,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
           unsigned int TP_UPSHIFT_CT,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 INLINE_DECL void kernelFilterClass<TT_DATA,
                                    TT_COEFF,
                                    TP_FIR_LEN,
@@ -227,7 +234,8 @@ INLINE_DECL void kernelFilterClass<TT_DATA,
                                    TP_USE_COEFF_RELOAD,
                                    TP_NUM_OUTPUTS,
                                    TP_UPSHIFT_CT,
-                                   TP_API>::filterSelectArch(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                   TP_API,
+                                   TP_SAT>::filterSelectArch(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                                                              T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
     if
         constexpr(m_kArch == kArchIncLoads) filterIncLoads(inInterface, outInterface);
@@ -252,7 +260,8 @@ template <typename TT_DATA,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
           unsigned int TP_UPSHIFT_CT,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 INLINE_DECL void kernelFilterClass<TT_DATA,
                                    TT_COEFF,
                                    TP_FIR_LEN,
@@ -268,10 +277,11 @@ INLINE_DECL void kernelFilterClass<TT_DATA,
                                    TP_USE_COEFF_RELOAD,
                                    TP_NUM_OUTPUTS,
                                    TP_UPSHIFT_CT,
-                                   TP_API>::filterStream(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                   TP_API,
+                                   TP_SAT>::filterStream(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                                                          T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
-    set_rnd(TP_RND);
-    set_sat();
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
     T_buff_256b<TT_COEFF>* __restrict coeff;
     coeff = (T_buff_256b<TT_COEFF>*)m_internalTaps;
     T_buff_256b<TT_COEFF> coe0, coe1, coe2, coe3;                              // register for coeff values.
@@ -451,7 +461,8 @@ template <typename TT_DATA,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
           unsigned int TP_UPSHIFT_CT,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 INLINE_DECL void kernelFilterClass<TT_DATA,
                                    TT_COEFF,
                                    TP_FIR_LEN,
@@ -467,16 +478,17 @@ INLINE_DECL void kernelFilterClass<TT_DATA,
                                    TP_USE_COEFF_RELOAD,
                                    TP_NUM_OUTPUTS,
                                    TP_UPSHIFT_CT,
-                                   TP_API>::filterBasic(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                   TP_API,
+                                   TP_SAT>::filterBasic(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                                                         T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
-    set_rnd(TP_RND);
-    set_sat();
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
     T_buff_256b<TT_COEFF>* __restrict coeff;
     coeff = (T_buff_256b<TT_COEFF>*)m_internalTaps;
     T_buff_256b<TT_COEFF>* ctCoeffptr = (T_buff_256b<TT_COEFF>*)m_phaseTwoTap; // register for centre tap coeff value.
     T_buff_256b<TT_COEFF> ctCoeff = *ctCoeffptr;
-    T_buff_256b<TT_COEFF> coe0;  // register for coeff values.
-    T_buff_1024b<TT_DATA> sbuff; // input data value cache.
+    T_buff_256b<TT_COEFF> coe0, coe1; // register for coeff values.
+    T_buff_1024b<TT_DATA> sbuff;      // input data value cache.
     T_accAsymIntHb<TT_DATA, TT_COEFF, TP_API> accHighPolyPhase, accLowPolyPhase;
     ::aie::vector<TT_DATA, m_kLanes> tempOutVal;
     unsigned int dataLoaded, numDataLoads;
@@ -591,7 +603,8 @@ template <typename TT_DATA,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
           unsigned int TP_UPSHIFT_CT,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 INLINE_DECL void kernelFilterClass<TT_DATA,
                                    TT_COEFF,
                                    TP_FIR_LEN,
@@ -607,13 +620,14 @@ INLINE_DECL void kernelFilterClass<TT_DATA,
                                    TP_USE_COEFF_RELOAD,
                                    TP_NUM_OUTPUTS,
                                    TP_UPSHIFT_CT,
-                                   TP_API>::filterIncLoads(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
+                                   TP_API,
+                                   TP_SAT>::filterIncLoads(T_inputIF<TP_CASC_IN, TT_DATA, TP_DUAL_IP> inInterface,
                                                            T_outputIF<TP_CASC_OUT, TT_DATA> outInterface) {
-    set_rnd(TP_RND);
-    set_sat();
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
     // const unsigned int     kSamplesInWindow = window_size(inWindow);  //number of samples in window
     T_buff_256b<TT_COEFF>* __restrict coeff = (T_buff_256b<TT_COEFF>*)m_internalTaps;
-    T_buff_256b<TT_COEFF> coe0, coe1;                                          // register for coeff values.
+    T_buff_256b<TT_COEFF> coe0;                                                // register for coeff values.
     T_buff_256b<TT_COEFF>* ctCoeffptr = (T_buff_256b<TT_COEFF>*)m_phaseTwoTap; // register for centre tap coeff value.
     T_buff_256b<TT_COEFF> ctCoeff = *ctCoeffptr;
     T_buff_256b<TT_DATA> readData;
@@ -656,10 +670,6 @@ INLINE_DECL void kernelFilterClass<TT_DATA,
     coeff = ((T_buff_256b<TT_COEFF>*)&m_internalTaps);
     coe0 = *coeff++;
 
-    if (m_kNumOps >= m_kCoeffRegVsize / m_kColumns) {
-        coe1 = *coeff;
-    }
-
     // Loop through window outputting a vector of values each time.
     // Lsize is therefore a ratio of window size to output vector size
     for (unsigned i = 0; i < m_kLsize / m_kDataLoadsInReg; i++)
@@ -670,6 +680,8 @@ INLINE_DECL void kernelFilterClass<TT_DATA,
             dataNeeded = 0;
 #pragma unroll(m_kDataLoadsInReg)
             for (unsigned strobe = 0; strobe < (m_kDataLoadsInReg); strobe++) {
+                coeff = ((T_buff_256b<TT_COEFF>*)&m_internalTaps);
+                coe0 = *coeff++;
                 ctPos = m_kFirMarginLen - m_kXDataLoadInitOffset - (TP_FIR_LEN) / 4 + strobe * m_kLanes;
 
                 if (dataNeeded >= dataLoaded) {
@@ -685,14 +697,16 @@ INLINE_DECL void kernelFilterClass<TT_DATA,
                 dataNeeded += m_kLanes;
                 accHighPolyPhase = readCascade(inInterface, accHighPolyPhase);
                 accLowPolyPhase = readCascade(inInterface, accLowPolyPhase);
-
                 accHighPolyPhase = sr_asym::initMacSrAsym<TT_DATA, TT_COEFF>(
                     inInterface, accHighPolyPhase, sbuff, strobe * m_kLanes + m_kDataBuffXOffset, coe0, 0);
 #pragma unroll(GUARD_ZERO((m_kFirLenCeilCols / (m_kColumns) - 1)))
                 for (int op = m_kColumns; op < m_kFirLenCeilCols; op += m_kColumns) {
+                    if (op % m_kCoeffRegVsize == 0) {
+                        coe0 = *coeff++;
+                    }
                     accHighPolyPhase =
-                        sr_asym::macSrAsym(accHighPolyPhase, sbuff, strobe * m_kLanes + (op + m_kDataBuffXOffset),
-                                           op >= m_kCoeffRegVsize ? coe1 : coe0, (op % m_kCoeffRegVsize));
+                        sr_asym::macSrAsym(accHighPolyPhase, sbuff, strobe * m_kLanes + (op + m_kDataBuffXOffset), coe0,
+                                           (op % m_kCoeffRegVsize));
                 }
 
                 // Write cascade. Do nothing if cascade not present.
@@ -735,7 +749,8 @@ template <typename TT_DATA,
           unsigned int TP_USE_COEFF_RELOAD,
           unsigned int TP_NUM_OUTPUTS,
           unsigned int TP_UPSHIFT_CT,
-          unsigned int TP_API>
+          unsigned int TP_API,
+          unsigned int TP_SAT>
 void fir_interpolate_hb_asym<TT_DATA,
                              TT_COEFF,
                              TP_FIR_LEN,
@@ -751,7 +766,8 @@ void fir_interpolate_hb_asym<TT_DATA,
                              TP_USE_COEFF_RELOAD,
                              TP_NUM_OUTPUTS,
                              TP_UPSHIFT_CT,
-                             TP_API>::
+                             TP_API,
+                             TP_SAT>::
     filter(input_circular_buffer<TT_DATA,
                                  extents<inherited_extent>,
                                  margin<fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()> >& __restrict inWindow,
@@ -771,7 +787,8 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
-          unsigned int TP_UPSHIFT_CT>
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_SAT>
 void fir_interpolate_hb_asym<TT_DATA,
                              TT_COEFF,
                              TP_FIR_LEN,
@@ -787,7 +804,8 @@ void fir_interpolate_hb_asym<TT_DATA,
                              USE_COEFF_RELOAD_FALSE,
                              2,
                              TP_UPSHIFT_CT,
-                             USE_WINDOW_API>::
+                             USE_WINDOW_API,
+                             TP_SAT>::
     filter(input_circular_buffer<TT_DATA,
                                  extents<inherited_extent>,
                                  margin<fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()> >& __restrict inWindow,
@@ -809,7 +827,8 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
-          unsigned int TP_UPSHIFT_CT>
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_SAT>
 void fir_interpolate_hb_asym<TT_DATA,
                              TT_COEFF,
                              TP_FIR_LEN,
@@ -825,7 +844,8 @@ void fir_interpolate_hb_asym<TT_DATA,
                              USE_COEFF_RELOAD_TRUE,
                              1,
                              TP_UPSHIFT_CT,
-                             USE_WINDOW_API>::
+                             USE_WINDOW_API,
+                             TP_SAT>::
     filter(input_circular_buffer<TT_DATA,
                                  extents<inherited_extent>,
                                  margin<fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()> >& __restrict inWindow,
@@ -846,7 +866,8 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
-          unsigned int TP_UPSHIFT_CT>
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_SAT>
 void fir_interpolate_hb_asym<TT_DATA,
                              TT_COEFF,
                              TP_FIR_LEN,
@@ -862,7 +883,8 @@ void fir_interpolate_hb_asym<TT_DATA,
                              USE_COEFF_RELOAD_TRUE,
                              2,
                              TP_UPSHIFT_CT,
-                             USE_WINDOW_API>::
+                             USE_WINDOW_API,
+                             TP_SAT>::
     filter(input_circular_buffer<TT_DATA,
                                  extents<inherited_extent>,
                                  margin<fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()> >& __restrict inWindow,
@@ -885,7 +907,8 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
-          unsigned int TP_UPSHIFT_CT>
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_SAT>
 void fir_interpolate_hb_asym<TT_DATA,
                              TT_COEFF,
                              TP_FIR_LEN,
@@ -901,7 +924,8 @@ void fir_interpolate_hb_asym<TT_DATA,
                              USE_COEFF_RELOAD_FALSE,
                              2,
                              TP_UPSHIFT_CT,
-                             USE_WINDOW_API>::
+                             USE_WINDOW_API,
+                             TP_SAT>::
     filter(input_circular_buffer<TT_DATA,
                                  extents<inherited_extent>,
                                  margin<fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()> >& __restrict inWindow,
@@ -929,7 +953,8 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
-          unsigned int TP_UPSHIFT_CT>
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_SAT>
 void fir_interpolate_hb_asym<TT_DATA,
                              TT_COEFF,
                              TP_FIR_LEN,
@@ -945,7 +970,8 @@ void fir_interpolate_hb_asym<TT_DATA,
                              USE_COEFF_RELOAD_TRUE,
                              1,
                              TP_UPSHIFT_CT,
-                             USE_WINDOW_API>::
+                             USE_WINDOW_API,
+                             TP_SAT>::
     filter(input_circular_buffer<TT_DATA,
                                  extents<inherited_extent>,
                                  margin<fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()> >& __restrict inWindow,
@@ -972,7 +998,8 @@ template <typename TT_DATA,
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
-          unsigned int TP_UPSHIFT_CT>
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_SAT>
 void fir_interpolate_hb_asym<TT_DATA,
                              TT_COEFF,
                              TP_FIR_LEN,
@@ -988,7 +1015,8 @@ void fir_interpolate_hb_asym<TT_DATA,
                              USE_COEFF_RELOAD_TRUE,
                              2,
                              TP_UPSHIFT_CT,
-                             USE_WINDOW_API>::
+                             USE_WINDOW_API,
+                             TP_SAT>::
     filter(input_circular_buffer<TT_DATA,
                                  extents<inherited_extent>,
                                  margin<fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()> >& __restrict inWindow,
@@ -1022,26 +1050,28 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DUAL_IP,
-          unsigned int TP_UPSHIFT_CT>
-void fir_interpolate_hb_asym<
-    TT_DATA,
-    TT_COEFF,
-    TP_FIR_LEN,
-    TP_SHIFT,
-    TP_RND,
-    TP_INPUT_WINDOW_VSIZE,
-    CASC_IN_TRUE,
-    CASC_OUT_FALSE,
-    TP_FIR_RANGE_LEN,
-    TP_KERNEL_POSITION,
-    TP_CASC_LEN,
-    TP_DUAL_IP,
-    USE_COEFF_RELOAD_FALSE,
-    1,
-    TP_UPSHIFT_CT,
-    USE_WINDOW_API>::filter(input_async_buffer<TT_DATA, extents<inherited_extent> >& __restrict inWindow,
-                            input_stream_cacc48* inCascade,
-                            output_circular_buffer<TT_DATA>& __restrict outWindow) {
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_SAT>
+void fir_interpolate_hb_asym<TT_DATA,
+                             TT_COEFF,
+                             TP_FIR_LEN,
+                             TP_SHIFT,
+                             TP_RND,
+                             TP_INPUT_WINDOW_VSIZE,
+                             CASC_IN_TRUE,
+                             CASC_OUT_FALSE,
+                             TP_FIR_RANGE_LEN,
+                             TP_KERNEL_POSITION,
+                             TP_CASC_LEN,
+                             TP_DUAL_IP,
+                             USE_COEFF_RELOAD_FALSE,
+                             1,
+                             TP_UPSHIFT_CT,
+                             USE_WINDOW_API,
+                             TP_SAT>::filter(input_async_buffer<TT_DATA,
+                                                                extents<inherited_extent> >& __restrict inWindow,
+                                             input_stream_cacc48* inCascade,
+                                             output_circular_buffer<TT_DATA>& __restrict outWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
@@ -1062,27 +1092,29 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DUAL_IP,
-          unsigned int TP_UPSHIFT_CT>
-void fir_interpolate_hb_asym<
-    TT_DATA,
-    TT_COEFF,
-    TP_FIR_LEN,
-    TP_SHIFT,
-    TP_RND,
-    TP_INPUT_WINDOW_VSIZE,
-    CASC_IN_TRUE,
-    CASC_OUT_FALSE,
-    TP_FIR_RANGE_LEN,
-    TP_KERNEL_POSITION,
-    TP_CASC_LEN,
-    TP_DUAL_IP,
-    USE_COEFF_RELOAD_FALSE,
-    2,
-    TP_UPSHIFT_CT,
-    USE_WINDOW_API>::filter(input_async_buffer<TT_DATA, extents<inherited_extent> >& __restrict inWindow,
-                            input_stream_cacc48* inCascade,
-                            output_circular_buffer<TT_DATA>& __restrict outWindow,
-                            output_circular_buffer<TT_DATA>& __restrict outWindow2) {
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_SAT>
+void fir_interpolate_hb_asym<TT_DATA,
+                             TT_COEFF,
+                             TP_FIR_LEN,
+                             TP_SHIFT,
+                             TP_RND,
+                             TP_INPUT_WINDOW_VSIZE,
+                             CASC_IN_TRUE,
+                             CASC_OUT_FALSE,
+                             TP_FIR_RANGE_LEN,
+                             TP_KERNEL_POSITION,
+                             TP_CASC_LEN,
+                             TP_DUAL_IP,
+                             USE_COEFF_RELOAD_FALSE,
+                             2,
+                             TP_UPSHIFT_CT,
+                             USE_WINDOW_API,
+                             TP_SAT>::filter(input_async_buffer<TT_DATA,
+                                                                extents<inherited_extent> >& __restrict inWindow,
+                                             input_stream_cacc48* inCascade,
+                                             output_circular_buffer<TT_DATA>& __restrict outWindow,
+                                             output_circular_buffer<TT_DATA>& __restrict outWindow2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
@@ -1104,26 +1136,28 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DUAL_IP,
-          unsigned int TP_UPSHIFT_CT>
-void fir_interpolate_hb_asym<
-    TT_DATA,
-    TT_COEFF,
-    TP_FIR_LEN,
-    TP_SHIFT,
-    TP_RND,
-    TP_INPUT_WINDOW_VSIZE,
-    CASC_IN_TRUE,
-    CASC_OUT_FALSE,
-    TP_FIR_RANGE_LEN,
-    TP_KERNEL_POSITION,
-    TP_CASC_LEN,
-    TP_DUAL_IP,
-    USE_COEFF_RELOAD_TRUE,
-    1,
-    TP_UPSHIFT_CT,
-    USE_WINDOW_API>::filter(input_async_buffer<TT_DATA, extents<inherited_extent> >& __restrict inWindow,
-                            input_stream_cacc48* inCascade,
-                            output_circular_buffer<TT_DATA>& __restrict outWindow) {
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_SAT>
+void fir_interpolate_hb_asym<TT_DATA,
+                             TT_COEFF,
+                             TP_FIR_LEN,
+                             TP_SHIFT,
+                             TP_RND,
+                             TP_INPUT_WINDOW_VSIZE,
+                             CASC_IN_TRUE,
+                             CASC_OUT_FALSE,
+                             TP_FIR_RANGE_LEN,
+                             TP_KERNEL_POSITION,
+                             TP_CASC_LEN,
+                             TP_DUAL_IP,
+                             USE_COEFF_RELOAD_TRUE,
+                             1,
+                             TP_UPSHIFT_CT,
+                             USE_WINDOW_API,
+                             TP_SAT>::filter(input_async_buffer<TT_DATA,
+                                                                extents<inherited_extent> >& __restrict inWindow,
+                                             input_stream_cacc48* inCascade,
+                                             output_circular_buffer<TT_DATA>& __restrict outWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
@@ -1144,27 +1178,29 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DUAL_IP,
-          unsigned int TP_UPSHIFT_CT>
-void fir_interpolate_hb_asym<
-    TT_DATA,
-    TT_COEFF,
-    TP_FIR_LEN,
-    TP_SHIFT,
-    TP_RND,
-    TP_INPUT_WINDOW_VSIZE,
-    CASC_IN_TRUE,
-    CASC_OUT_FALSE,
-    TP_FIR_RANGE_LEN,
-    TP_KERNEL_POSITION,
-    TP_CASC_LEN,
-    TP_DUAL_IP,
-    USE_COEFF_RELOAD_TRUE,
-    2,
-    TP_UPSHIFT_CT,
-    USE_WINDOW_API>::filter(input_async_buffer<TT_DATA, extents<inherited_extent> >& __restrict inWindow,
-                            input_stream_cacc48* inCascade,
-                            output_circular_buffer<TT_DATA>& __restrict outWindow,
-                            output_circular_buffer<TT_DATA>& __restrict outWindow2) {
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_SAT>
+void fir_interpolate_hb_asym<TT_DATA,
+                             TT_COEFF,
+                             TP_FIR_LEN,
+                             TP_SHIFT,
+                             TP_RND,
+                             TP_INPUT_WINDOW_VSIZE,
+                             CASC_IN_TRUE,
+                             CASC_OUT_FALSE,
+                             TP_FIR_RANGE_LEN,
+                             TP_KERNEL_POSITION,
+                             TP_CASC_LEN,
+                             TP_DUAL_IP,
+                             USE_COEFF_RELOAD_TRUE,
+                             2,
+                             TP_UPSHIFT_CT,
+                             USE_WINDOW_API,
+                             TP_SAT>::filter(input_async_buffer<TT_DATA,
+                                                                extents<inherited_extent> >& __restrict inWindow,
+                                             input_stream_cacc48* inCascade,
+                                             output_circular_buffer<TT_DATA>& __restrict outWindow,
+                                             output_circular_buffer<TT_DATA>& __restrict outWindow2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
@@ -1186,7 +1222,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_UPSHIFT_CT>
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_SAT>
 void fir_interpolate_hb_asym<TT_DATA,
                              TT_COEFF,
                              TP_FIR_LEN,
@@ -1202,7 +1239,8 @@ void fir_interpolate_hb_asym<TT_DATA,
                              USE_COEFF_RELOAD_FALSE,
                              1,
                              TP_UPSHIFT_CT,
-                             USE_WINDOW_API>::
+                             USE_WINDOW_API,
+                             TP_SAT>::
     filter(input_circular_buffer<TT_DATA,
                                  extents<inherited_extent>,
                                  margin<fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()> >& __restrict inWindow,
@@ -1229,7 +1267,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_UPSHIFT_CT>
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_SAT>
 void fir_interpolate_hb_asym<TT_DATA,
                              TT_COEFF,
                              TP_FIR_LEN,
@@ -1245,7 +1284,8 @@ void fir_interpolate_hb_asym<TT_DATA,
                              USE_COEFF_RELOAD_FALSE,
                              1,
                              TP_UPSHIFT_CT,
-                             USE_WINDOW_API>::
+                             USE_WINDOW_API,
+                             TP_SAT>::
     filter(input_circular_buffer<TT_DATA,
                                  extents<inherited_extent>,
                                  margin<fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()> >& __restrict inWindow,
@@ -1278,7 +1318,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_UPSHIFT_CT>
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_SAT>
 void fir_interpolate_hb_asym<TT_DATA,
                              TT_COEFF,
                              TP_FIR_LEN,
@@ -1294,7 +1335,8 @@ void fir_interpolate_hb_asym<TT_DATA,
                              USE_COEFF_RELOAD_TRUE,
                              1,
                              TP_UPSHIFT_CT,
-                             USE_WINDOW_API>::
+                             USE_WINDOW_API,
+                             TP_SAT>::
     filter(input_circular_buffer<TT_DATA,
                                  extents<inherited_extent>,
                                  margin<fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()> >& __restrict inWindow,
@@ -1322,7 +1364,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_UPSHIFT_CT>
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_SAT>
 void fir_interpolate_hb_asym<TT_DATA,
                              TT_COEFF,
                              TP_FIR_LEN,
@@ -1338,7 +1381,8 @@ void fir_interpolate_hb_asym<TT_DATA,
                              USE_COEFF_RELOAD_TRUE,
                              1,
                              TP_UPSHIFT_CT,
-                             USE_WINDOW_API>::
+                             USE_WINDOW_API,
+                             TP_SAT>::
     filter(input_circular_buffer<TT_DATA,
                                  extents<inherited_extent>,
                                  margin<fnFirMargin<TP_FIR_LEN / kInterpolateFactor, TT_DATA>()> >& __restrict inWindow,
@@ -1374,7 +1418,8 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DUAL_IP,
-          unsigned int TP_UPSHIFT_CT>
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_SAT>
 void fir_interpolate_hb_asym<TT_DATA,
                              TT_COEFF,
                              TP_FIR_LEN,
@@ -1390,10 +1435,11 @@ void fir_interpolate_hb_asym<TT_DATA,
                              USE_COEFF_RELOAD_FALSE,
                              1,
                              TP_UPSHIFT_CT,
-                             USE_WINDOW_API>::filter(input_async_buffer<TT_DATA>& __restrict inWindow,
-                                                     input_stream_cacc48* inCascade,
-                                                     output_stream_cacc48* outCascade,
-                                                     output_async_buffer<TT_DATA>& __restrict broadcastWindow) {
+                             USE_WINDOW_API,
+                             TP_SAT>::filter(input_async_buffer<TT_DATA>& __restrict inWindow,
+                                             input_stream_cacc48* inCascade,
+                                             output_stream_cacc48* outCascade,
+                                             output_async_buffer<TT_DATA>& __restrict broadcastWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
@@ -1415,7 +1461,8 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DUAL_IP,
-          unsigned int TP_UPSHIFT_CT>
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_SAT>
 void fir_interpolate_hb_asym<TT_DATA,
                              TT_COEFF,
                              TP_FIR_LEN,
@@ -1431,10 +1478,11 @@ void fir_interpolate_hb_asym<TT_DATA,
                              USE_COEFF_RELOAD_TRUE,
                              1,
                              TP_UPSHIFT_CT,
-                             USE_WINDOW_API>::filter(input_async_buffer<TT_DATA>& __restrict inWindow,
-                                                     input_stream_cacc48* inCascade,
-                                                     output_stream_cacc48* outCascade,
-                                                     output_async_buffer<TT_DATA>& __restrict broadcastWindow) {
+                             USE_WINDOW_API,
+                             TP_SAT>::filter(input_async_buffer<TT_DATA>& __restrict inWindow,
+                                             input_stream_cacc48* inCascade,
+                                             output_stream_cacc48* outCascade,
+                                             output_async_buffer<TT_DATA>& __restrict broadcastWindow) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inWindowLin = (input_async_buffer<TT_DATA>*)&inWindow;
@@ -1459,7 +1507,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_DUAL_IP,
-          unsigned int TP_UPSHIFT_CT>
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_SAT>
 void fir_interpolate_hb_asym<TT_DATA,
                              TT_COEFF,
                              TP_FIR_LEN,
@@ -1475,8 +1524,8 @@ void fir_interpolate_hb_asym<TT_DATA,
                              USE_COEFF_RELOAD_FALSE,
                              1,
                              TP_UPSHIFT_CT,
-                             USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream,
-                                                     output_stream<TT_DATA>* outStream) {
+                             USE_STREAM_API,
+                             TP_SAT>::filter(input_stream<TT_DATA>* inStream, output_stream<TT_DATA>* outStream) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -1495,7 +1544,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_DUAL_IP,
-          unsigned int TP_UPSHIFT_CT>
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_SAT>
 void fir_interpolate_hb_asym<TT_DATA,
                              TT_COEFF,
                              TP_FIR_LEN,
@@ -1511,9 +1561,10 @@ void fir_interpolate_hb_asym<TT_DATA,
                              USE_COEFF_RELOAD_FALSE,
                              2,
                              TP_UPSHIFT_CT,
-                             USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream,
-                                                     output_stream<TT_DATA>* outStream,
-                                                     output_stream<TT_DATA>* outStream2) {
+                             USE_STREAM_API,
+                             TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                             output_stream<TT_DATA>* outStream,
+                                             output_stream<TT_DATA>* outStream2) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -1533,7 +1584,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_DUAL_IP,
-          unsigned int TP_UPSHIFT_CT>
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_SAT>
 void fir_interpolate_hb_asym<TT_DATA,
                              TT_COEFF,
                              TP_FIR_LEN,
@@ -1549,9 +1601,10 @@ void fir_interpolate_hb_asym<TT_DATA,
                              USE_COEFF_RELOAD_TRUE,
                              1,
                              TP_UPSHIFT_CT,
-                             USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream,
-                                                     output_stream<TT_DATA>* outStream,
-                                                     const TT_COEFF (&inTaps)[getHbTaps(TP_FIR_LEN)]) {
+                             USE_STREAM_API,
+                             TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                             output_stream<TT_DATA>* outStream,
+                                             const TT_COEFF (&inTaps)[getHbTaps(TP_FIR_LEN)]) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -1570,7 +1623,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_DUAL_IP,
-          unsigned int TP_UPSHIFT_CT>
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_SAT>
 void fir_interpolate_hb_asym<TT_DATA,
                              TT_COEFF,
                              TP_FIR_LEN,
@@ -1586,10 +1640,11 @@ void fir_interpolate_hb_asym<TT_DATA,
                              USE_COEFF_RELOAD_TRUE,
                              2,
                              TP_UPSHIFT_CT,
-                             USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream,
-                                                     output_stream<TT_DATA>* outStream,
-                                                     output_stream<TT_DATA>* outStream2,
-                                                     const TT_COEFF (&inTaps)[getHbTaps(TP_FIR_LEN)]) {
+                             USE_STREAM_API,
+                             TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                             output_stream<TT_DATA>* outStream,
+                                             output_stream<TT_DATA>* outStream2,
+                                             const TT_COEFF (&inTaps)[getHbTaps(TP_FIR_LEN)]) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -1611,7 +1666,8 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DUAL_IP,
-          unsigned int TP_UPSHIFT_CT>
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_SAT>
 void fir_interpolate_hb_asym<TT_DATA,
                              TT_COEFF,
                              TP_FIR_LEN,
@@ -1627,9 +1683,10 @@ void fir_interpolate_hb_asym<TT_DATA,
                              USE_COEFF_RELOAD_FALSE,
                              1,
                              TP_UPSHIFT_CT,
-                             USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream,
-                                                     input_stream_cacc48* inCascade,
-                                                     output_stream<TT_DATA>* outStream) {
+                             USE_STREAM_API,
+                             TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                             input_stream_cacc48* inCascade,
+                                             output_stream<TT_DATA>* outStream) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -1650,7 +1707,8 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DUAL_IP,
-          unsigned int TP_UPSHIFT_CT>
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_SAT>
 void fir_interpolate_hb_asym<TT_DATA,
                              TT_COEFF,
                              TP_FIR_LEN,
@@ -1666,10 +1724,11 @@ void fir_interpolate_hb_asym<TT_DATA,
                              USE_COEFF_RELOAD_FALSE,
                              2,
                              TP_UPSHIFT_CT,
-                             USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream,
-                                                     input_stream_cacc48* inCascade,
-                                                     output_stream<TT_DATA>* outStream,
-                                                     output_stream<TT_DATA>* outStream2) {
+                             USE_STREAM_API,
+                             TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                             input_stream_cacc48* inCascade,
+                                             output_stream<TT_DATA>* outStream,
+                                             output_stream<TT_DATA>* outStream2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -1690,7 +1749,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_UPSHIFT_CT>
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_SAT>
 void fir_interpolate_hb_asym<TT_DATA,
                              TT_COEFF,
                              TP_FIR_LEN,
@@ -1706,8 +1766,8 @@ void fir_interpolate_hb_asym<TT_DATA,
                              USE_COEFF_RELOAD_FALSE,
                              1,
                              TP_UPSHIFT_CT,
-                             USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream,
-                                                     output_stream_cacc48* outCascade) {
+                             USE_STREAM_API,
+                             TP_SAT>::filter(input_stream<TT_DATA>* inStream, output_stream_cacc48* outCascade) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, DUAL_IP_SINGLE> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -1727,7 +1787,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_UPSHIFT_CT>
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_SAT>
 void fir_interpolate_hb_asym<TT_DATA,
                              TT_COEFF,
                              TP_FIR_LEN,
@@ -1743,9 +1804,10 @@ void fir_interpolate_hb_asym<TT_DATA,
                              USE_COEFF_RELOAD_FALSE,
                              1,
                              TP_UPSHIFT_CT,
-                             USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream,
-                                                     input_stream_cacc48* inCascade,
-                                                     output_stream_cacc48* outCascade) {
+                             USE_STREAM_API,
+                             TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                             input_stream_cacc48* inCascade,
+                                             output_stream_cacc48* outCascade) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, DUAL_IP_SINGLE> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -1767,7 +1829,8 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DUAL_IP,
-          unsigned int TP_UPSHIFT_CT>
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_SAT>
 void fir_interpolate_hb_asym<TT_DATA,
                              TT_COEFF,
                              TP_FIR_LEN,
@@ -1783,9 +1846,10 @@ void fir_interpolate_hb_asym<TT_DATA,
                              USE_COEFF_RELOAD_TRUE,
                              1,
                              TP_UPSHIFT_CT,
-                             USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream,
-                                                     input_stream_cacc48* inCascade,
-                                                     output_stream<TT_DATA>* outStream) {
+                             USE_STREAM_API,
+                             TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                             input_stream_cacc48* inCascade,
+                                             output_stream<TT_DATA>* outStream) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -1807,7 +1871,8 @@ template <typename TT_DATA,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
           unsigned int TP_DUAL_IP,
-          unsigned int TP_UPSHIFT_CT>
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_SAT>
 void fir_interpolate_hb_asym<TT_DATA,
                              TT_COEFF,
                              TP_FIR_LEN,
@@ -1823,10 +1888,11 @@ void fir_interpolate_hb_asym<TT_DATA,
                              USE_COEFF_RELOAD_TRUE,
                              2,
                              TP_UPSHIFT_CT,
-                             USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream,
-                                                     input_stream_cacc48* inCascade,
-                                                     output_stream<TT_DATA>* outStream,
-                                                     output_stream<TT_DATA>* outStream2) {
+                             USE_STREAM_API,
+                             TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                             input_stream_cacc48* inCascade,
+                                             output_stream<TT_DATA>* outStream,
+                                             output_stream<TT_DATA>* outStream2) {
     T_inputIF<CASC_IN_TRUE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -1847,7 +1913,8 @@ template <typename TT_DATA,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_UPSHIFT_CT>
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_SAT>
 void fir_interpolate_hb_asym<TT_DATA,
                              TT_COEFF,
                              TP_FIR_LEN,
@@ -1863,9 +1930,10 @@ void fir_interpolate_hb_asym<TT_DATA,
                              USE_COEFF_RELOAD_TRUE,
                              1,
                              TP_UPSHIFT_CT,
-                             USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream,
-                                                     output_stream_cacc48* outCascade,
-                                                     const TT_COEFF (&inTaps)[getHbTaps(TP_FIR_LEN)]) {
+                             USE_STREAM_API,
+                             TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                             output_stream_cacc48* outCascade,
+                                             const TT_COEFF (&inTaps)[getHbTaps(TP_FIR_LEN)]) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, DUAL_IP_SINGLE> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inStream = inStream;
@@ -1885,7 +1953,8 @@ template <typename TT_DATA,
           unsigned int TP_FIR_RANGE_LEN,
           unsigned int TP_KERNEL_POSITION,
           unsigned int TP_CASC_LEN,
-          unsigned int TP_UPSHIFT_CT>
+          unsigned int TP_UPSHIFT_CT,
+          unsigned int TP_SAT>
 void fir_interpolate_hb_asym<TT_DATA,
                              TT_COEFF,
                              TP_FIR_LEN,
@@ -1901,9 +1970,10 @@ void fir_interpolate_hb_asym<TT_DATA,
                              USE_COEFF_RELOAD_TRUE,
                              1,
                              TP_UPSHIFT_CT,
-                             USE_STREAM_API>::filter(input_stream<TT_DATA>* inStream,
-                                                     input_stream_cacc48* inCascade,
-                                                     output_stream_cacc48* outCascade) {
+                             USE_STREAM_API,
+                             TP_SAT>::filter(input_stream<TT_DATA>* inStream,
+                                             input_stream_cacc48* inCascade,
+                                             output_stream_cacc48* outCascade) {
     T_inputIF<CASC_IN_TRUE, TT_DATA> inInterface;
     T_outputIF<CASC_OUT_TRUE, TT_DATA> outInterface;
     inInterface.inStream = inStream;

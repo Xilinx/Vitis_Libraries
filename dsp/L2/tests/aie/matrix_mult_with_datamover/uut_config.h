@@ -43,6 +43,9 @@
 #ifndef P_ROUND_MODE
 #define P_ROUND_MODE 0
 #endif
+#ifndef P_SAT_MODE
+#define P_SAT_MODE 1
+#endif
 #ifndef P_DIM_A_LEADING
 #define P_DIM_A_LEADING 0
 #endif

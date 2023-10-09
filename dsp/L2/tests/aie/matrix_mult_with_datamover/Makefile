@@ -120,15 +120,13 @@ else
 AIETARGET := x86sim
 endif
 
-AIE_CXXFLAGS += --target=$(AIETARGET) --platform=$(XPLATFORM) --pl-freq=1000 
+AIE_CXXFLAGS += --target=$(AIETARGET) --platform=$(XPLATFORM) --config aie.cfg  
 AIE_CXXFLAGS += $(AIE_CXXFLAGS_INC)
 AIE_CONTAINER = $(TEMP_DIR)/libadf.a
 AIE_WORK_DIR = $(CUR_DIR)/Work
 AIE_PKG_DIR = $(AIE_WORK_DIR)
 
 AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/L1/tests/aie/inc -I $(XFLIB_DIR)/L1/tests/aie/src -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L2/tests/aie/common/inc -I $(CUR_DIR)
-
-AIE_CXXFLAGS +=  -Xpreproc="-DUUT_GRAPH=matrix_mult_graph -DOUTPUT_FILE=./data/uut_output.txt -DINPUT_FILE_A=./data/inputA.txt -DINPUT_FILE_B=./data/inputB.txt -DT_DATA_A=cint16 -DT_DATA_B=cint16 -DP_DIM_A=16 -DP_DIM_AB=16 -DP_DIM_B=16 -DP_SHIFT=20 -DP_ROUND_MODE=0 -DP_DIM_A_LEADING=0 -DP_DIM_B_LEADING=1 -DP_DIM_OUT_LEADING=0 -DP_ADD_TILING_A=1 -DP_ADD_TILING_B=1 -DP_ADD_DETILING_OUT=1 -DP_INPUT_WINDOW_VSIZE_A=256 -DP_INPUT_WINDOW_VSIZE_B=256 -DP_CASC_LEN=1 -DSTIM_TYPE_A=0 -DSTIM_TYPE_B=0 -DNITER=16 -DUSING_UUT=1 -DUSING_PL_MOVER=1"
 
 $(AIE_WORK_DIR)/ps/c_rts/aie_control_xrt.cpp: $(AIE_CONTAINER)
 
@@ -166,12 +164,12 @@ EXE_FILE_DEPS := $(HOST_SRCS) $(INSTANCE_FILES)  $(EXE_FILE_DEPS)
 
 ########################## Kernel compiler global settings ##########################
 ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
-VPP_FLAGS +=  -I $(XFLIB_DIR)/../utils/L1/include/hw -I $(XFLIB_DIR)/../utils/L2/src/sw/datamvoer -I kernel -I PROJECT -I $(XFLIB_DIR)/L1/include/hw
+VPP_FLAGS +=  -I $(XFLIB_DIR)/../data_mover/L1/include -I $(XFLIB_DIR)/../data_mover/L2/src/sw/datamover -I kernel -I PROJECT -I $(XFLIB_DIR)/L1/include/hw
 VPP_LDFLAGS +=   --config $(CUR_DIR)/system.cfg
 VPP_PACKAGE +=   --package.defer_aie_run
 
 else 
-VPP_FLAGS +=  -I $(XFLIB_DIR)/../utils/L1/include/hw -I $(XFLIB_DIR)/../utils/L2/src/sw/datamvoer -I kernel -I PROJECT -I $(XFLIB_DIR)/L1/include/hw
+VPP_FLAGS +=  -I $(XFLIB_DIR)/../data_mover/L1/include -I $(XFLIB_DIR)/../data_mover/L2/src/sw/datamover -I kernel -I PROJECT -I $(XFLIB_DIR)/L1/include/hw
 
 endif
 
@@ -188,17 +186,17 @@ BINARY_CONTAINERS_PKG += $(BUILD_DIR)/kernel.xclbin
 endif
 
 # ################ Setting Rules for Binary Containers (Building Kernels) ################
-$(TEMP_DIR)/mm2s.xo: $(XFLIB_DIR)/../utils/L2/src/sw/datamover/mm2s.cpp 
+$(TEMP_DIR)/mm2s.xo: $(XFLIB_DIR)/../data_mover/L2/src/sw/data_mover/mm2s.cpp 
 	$(ECHO) "Compiling Kernel: mm2s"
 	mkdir -p $(TEMP_DIR)
 	$(VPP) -c $(VPP_FLAGS_mm2s) $(VPP_FLAGS) -k mm2s -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
 BINARY_CONTAINER_kernel_OBJS += $(TEMP_DIR)/mm2s.xo
-$(TEMP_DIR)/bmm2s.xo: $(XFLIB_DIR)/../utils/L2/src/sw/datamover/bmm2s.cpp 
+$(TEMP_DIR)/bmm2s.xo: $(XFLIB_DIR)/../data_mover/L2/src/sw/data_mover/bmm2s.cpp 
 	$(ECHO) "Compiling Kernel: bmm2s"
 	mkdir -p $(TEMP_DIR)
 	$(VPP) -c $(VPP_FLAGS_bmm2s) $(VPP_FLAGS) -k bmm2s -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
 BINARY_CONTAINER_kernel_OBJS += $(TEMP_DIR)/bmm2s.xo
-$(TEMP_DIR)/s2mm.xo: $(XFLIB_DIR)/../utils/L2/src/sw/datamover/s2mm.cpp 
+$(TEMP_DIR)/s2mm.xo: $(XFLIB_DIR)/../data_mover/L2/src/sw/data_mover/s2mm.cpp 
 	$(ECHO) "Compiling Kernel: s2mm"
 	mkdir -p $(TEMP_DIR)
 	$(VPP) -c $(VPP_FLAGS_s2mm) $(VPP_FLAGS) -k s2mm -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
@@ -212,8 +210,7 @@ $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 $(AIE_CONTAINER):  test.cpp $(XFLIB_DIR)/L1/src/aie/matrix_mult_untiler.cpp $(XFLIB_DIR)/L1/src/aie/matrix_mult_tiler.cpp $(XFLIB_DIR)/L1/src/aie/matrix_mult.cpp 
 	$(ECHO) "Compiling: libadf.a"
 	mkdir -p $(dir $@)
-	$(AIECXX) $(AIE_CXXFLAGS) $(filter %.s %.c %.cc %.cpp %cxx, $^)
-	mv ./libadf.a $(AIE_CONTAINER)
+	$(VPP) -c --mode aie $(AIE_CXXFLAGS) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^)
 
 ############################## Setting Rules for Host (Building Host Executable) ##############################
 $(EXE_FILE): $(EXE_FILE_DEPS)
@@ -327,24 +324,29 @@ ifeq ($(pcie_aie), on)
 	cp $(AIE_WORK_DIR)/ps/c_rts/aie_control_config.json ./
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) $(BINARY_CONTAINERS_PKG)
+	
 endif
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
+	
 else
 	@echo $(RUN_DEPS)
 	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
 	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
+	
 endif
 endif
 #sw_emu
 ifneq (,$(filter sw_emu, $(TARGET)))
 ifeq ($(HOST_ARCH), x86)
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
-	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS)
+	XCL_EMULATION_MODE=$(TARGET) $(EXE_FILE) $(HOST_ARGS) 
+	
 else
 	@echo $(RUN_DEPS)
 	$(SD_CARD)/launch_$(TARGET).sh -no-reboot -run-app $(notdir $(RUN_SCRIPT)) 
 	grep "TEST PASSED, RC=0" $(SD_CARD)/qemu_output.log || exit 1
+	
 endif
 endif
 #hw
@@ -356,10 +358,12 @@ else
 	$(ECHO) "Running HW using generated .awsxclbin"
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	$(EXE_FILE) $(subst .xclbin,.awsxclbin,$(HOST_ARGS))
+	
 endif
 else ifeq ($(HOST_ARCH), x86)
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	$(EXE_FILE) $(HOST_ARGS)
+	
 else
 	$(ECHO) "Please copy the content of sd_card folder and data to an SD Card and run on the board"
 endif
@@ -385,6 +389,8 @@ xclbin: check_vpp check_sysroot  $(BINARY_CONTAINERS)
 endif
 
 #################### Parameterized File Generation ##########################
+
+gen_instances: $(GENERATED_FILES)
 
 ############################## Cleaning Rules ##############################
 cleanh:

@@ -667,7 +667,7 @@ INLINE_DECL T_accIntAsym<TT_DATA, TT_COEFF> macIntAsym(T_accIntAsym<TT_DATA, TT_
 
 // Interleave
 template <typename TT_DATA, typename TT_COEFF, unsigned int TP_NUM_INPUTS, unsigned int TP_NUM_OUTPUTS>
-INLINE_DECL void bufferInterleaveIntAsym(std::array<T_outValIntAsym<TT_DATA, TT_COEFF>, TP_NUM_INPUTS> outArray,
+INLINE_DECL void bufferInterleaveIntAsym(std::array<T_outVal<TT_DATA, TT_COEFF>, TP_NUM_INPUTS> outArray,
                                          auto& outItr,
                                          auto& outItr2) {
     constexpr int kSamplesIn128b = 16 / sizeof(TT_DATA);
@@ -676,8 +676,8 @@ INLINE_DECL void bufferInterleaveIntAsym(std::array<T_outValIntAsym<TT_DATA, TT_
     using t512v = ::aie::vector<TT_DATA, kSamplesIn512b>;
     using t256v = ::aie::vector<TT_DATA, kSamplesIn256b>;
     using t128v = ::aie::vector<TT_DATA, kSamplesIn128b>;
-    using vec = typename T_outValIntAsym<TT_DATA, TT_COEFF>::v_type;
-    constexpr int kSamplesInVec = T_outValIntAsym<TT_DATA, TT_COEFF>::getLanes();
+    using vec = typename T_outVal<TT_DATA, TT_COEFF>::v_type;
+    constexpr int kSamplesInVec = T_outVal<TT_DATA, TT_COEFF>::getLanes();
     if
         constexpr(TP_NUM_INPUTS == 1) { *outItr++ = outArray[0].val; }
     else if
@@ -697,7 +697,8 @@ INLINE_DECL void bufferInterleaveIntAsym(std::array<T_outValIntAsym<TT_DATA, TT_
                 }
         }
     else if
-        constexpr(TP_NUM_INPUTS == 3 || TP_NUM_INPUTS == 5 || TP_NUM_INPUTS == 6 || TP_NUM_INPUTS == 7) {
+        constexpr(TP_NUM_INPUTS == 3 || TP_NUM_INPUTS == 5 || TP_NUM_INPUTS == 6 || TP_NUM_INPUTS == 7 ||
+                  TP_NUM_INPUTS == 9) {
             vec writeValLoc;
 #pragma unroll(TP_NUM_INPUTS* kSamplesInVec)
             for (int j = 0; j < (TP_NUM_INPUTS * kSamplesInVec); j++) {
@@ -774,18 +775,24 @@ INLINE_DECL void streamInterleaveIntAsym(std::array<T_outVal384<TT_DATA, TT_COEF
                                          T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface) {
     using vec = typename T_outVal384<TT_DATA, TT_COEFF>::v_type;
     constexpr int kSamplesInVec = T_outVal384<TT_DATA, TT_COEFF>::getLanes();
-    T_outVal384<TT_DATA, TT_COEFF> outVal;
-    vec writeValLoc;
-#pragma unroll(TP_NUM_INPUTS* kSamplesInVec)
-    for (int j = 0; j < (TP_NUM_INPUTS * kSamplesInVec); j++) {
-        // writeValLoc[j % kSamplesInVec] = outArray[j % TP_NUM_INPUTS].val.get(j / TP_NUM_INPUTS);
-        TT_DATA outSample = outArray[j % TP_NUM_INPUTS].val.get(j / TP_NUM_INPUTS);
-        writeincr(outInterface.outStream, outSample);
 
-        if ((j - kSamplesInVec + 1) % kSamplesInVec == 0) {
-            // outVal.val = writeValLoc;
-            // writeStream<TT_DATA,TT_COEFF, TP_NUM_OUTPUTS>(outInterface, outVal, 0);
-            // writeincr(outInterface.outStream, writeValLoc);
+    if
+        constexpr(std::is_same<TT_DATA, int16>::value) {
+// Stream IO is 32-bit wide. In order to utilize full BW, stick 2 int16 together for a stream access.
+
+#pragma unroll(TP_NUM_INPUTS* kSamplesInVec / 2)
+            for (int j = 0; j < (TP_NUM_INPUTS * kSamplesInVec); j += 2) {
+                int16 outSample1 = outArray[j % TP_NUM_INPUTS].val.get(j / TP_NUM_INPUTS);
+                int16 outSample2 = outArray[(j + 1) % TP_NUM_INPUTS].val.get((j + 1) / TP_NUM_INPUTS);
+                int32 outSample32 = (outSample2 << 16) | (0xFFFF & outSample1);
+                writeincr((output_stream<int32>*)outInterface.outStream, outSample32);
+            }
+        }
+    else {
+#pragma unroll(TP_NUM_INPUTS* kSamplesInVec)
+        for (int j = 0; j < (TP_NUM_INPUTS * kSamplesInVec); j++) {
+            TT_DATA outSample = outArray[j % TP_NUM_INPUTS].val.get(j / TP_NUM_INPUTS);
+            writeincr(outInterface.outStream, outSample);
         }
     }
 };

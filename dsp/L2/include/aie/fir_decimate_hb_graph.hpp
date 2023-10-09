@@ -32,6 +32,7 @@
 #include "widget_api_cast.hpp"
 #include "fir_common_traits.hpp"
 #include "fir_sr_asym_graph.hpp"
+#include <adf/arch/aie_arch_properties.hpp>
 
 using namespace adf;
 using namespace xf::dsp::aie::widget::api_cast;
@@ -104,7 +105,7 @@ class ct_kernels {
  * @tparam TP_SHIFT describes power of 2 shift down applied to the accumulation of
  *         FIR terms before output. \n TP_SHIFT must be in the range 0 to 61.
  * @tparam TP_RND describes the selection of rounding to be applied during the
- *         shift down stage of processing. Although, TP_RND accepts unsignedinteger values
+ *         shift down stage of processing. Although, TP_RND accepts unsigned integer values
  *         descriptive macros are recommended where
  *         - rnd_floor      = Truncate LSB, always round down (towards negative infinity).
  *         - rnd_ceil       = Always round up (towards positive infinity).
@@ -184,7 +185,7 @@ class ct_kernels {
  *         The number of AIEs used is given by ``TP_SSR^2 * TP_CASC_LEN``. \n
  * @tparam TP_PARA_DECI_POLY specifies the number of distinct input data phases into which the input stream will be
  *split.
- *         In each stream computations are performed parallelly and the outputs are combined into a single output
+ *         In each stream computations are performed in parallel and the outputs are combined into a single output
  *stream. \n
  *         Currently, only TP_PARA_DECI_POLY=2 is supported for the halfband interpolators with SSR>1. SSR = 1 supports
  *TP_PARA_DECI_POLY=1 or 2.
@@ -197,7 +198,7 @@ class ct_kernels {
  *         and produces TP_SSR distinct output data phases. \n
  *
  *         Overall, the first polyphase is implemented using a single rate asymmetric filter that is configured to
- *produce and consume data parallelly in
+ *produce and consume data in parallel in
  *         TP_SSR phases, each phase can operate at maximum throughput depending on the configuration.
  *         The first polyphase uses TP_SSR^2 * TP_CASC_LEN kernels. \n
  *         The second polyphase simplifies into a single kernel that does a single tap because halfband decimators only
@@ -208,6 +209,13 @@ class ct_kernels {
  *supports TP_PARA_INTERP_POLY=1 or 2.
  *         The overall theoretical output data rate is TP_SSR * TP_NUM_OUTPUTS * 1 GSa/s.
  *         The overall theoretical input data rate is TP_SSR * TP_PARA_DECI_POLY * (TP_DUAL_IP + 1) * 1GSa/s
+ * @tparam TP_SAT describes the selection of saturation to be applied during the
+ *         shift down stage of processing. TP_SAT accepts unsigned integer values, where:
+ *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
+ *         - 1: saturate       = Default. Saturation rounds an n-bit signed value in the range [- ( 2^(n-1) ) : +2^(n-1)
+ *- 1 ].
+ *         - 3: symmetric      = Controls symmetric saturation. Symmetric saturation rounds an n-bit signed value in the
+ *range [- ( 2^(n-1) -1 ) : +2^(n-1) - 1 ]. \n
  *
  **/
 template <typename TT_DATA,
@@ -222,7 +230,8 @@ template <typename TT_DATA,
           unsigned int TP_NUM_OUTPUTS = 1,
           unsigned int TP_API = 0,
           unsigned int TP_SSR = 1,
-          unsigned int TP_PARA_DECI_POLY = 1>
+          unsigned int TP_PARA_DECI_POLY = 1,
+          unsigned int TP_SAT = 1>
 class fir_decimate_hb_graph : public graph {
    private:
     static constexpr unsigned int kMaxTapsPerKernel = 1024;
@@ -245,13 +254,11 @@ class fir_decimate_hb_graph : public graph {
                   "length or disable coefficient reload.");
 
     static constexpr unsigned int kMemoryModuleSize = 32768;
-    static constexpr unsigned int inBufferSize = ((TP_FIR_LEN + TP_INPUT_WINDOW_VSIZE) * sizeof(TT_DATA));
+    static constexpr unsigned int inBufferSize = ((TP_FIR_LEN + TP_INPUT_WINDOW_VSIZE / TP_SSR) * sizeof(TT_DATA));
     // Requested Input Window buffer exceeds memory module size
     static_assert(TP_API != 0 || inBufferSize < kMemoryModuleSize,
                   "ERROR: Input Window size (based on requrested window size and FIR length margin) exceeds Memory "
                   "Module size of 32kB");
-    // static_assert(TP_API == 1 || TP_SSR == 1, "ERROR: SSR > 1 is only supported for streaming API");
-    // static_assert(TP_USE_COEFF_RELOAD==0 || TP_SSR == 1, "ERROR: SSR > 1 is only supported for static coefficients");
     static_assert(
         TP_SSR == 1 || TP_PARA_DECI_POLY == 2,
         "Please set TP_PARA_DECI_POLY=2 for SSR>1; SSR>1 and TP_PARA_DECI_POLY=1 are currently not supported");
@@ -259,10 +266,13 @@ class fir_decimate_hb_graph : public graph {
     static_assert(!(((TP_DUAL_IP == 1 && TP_NUM_OUTPUTS == 1) || (TP_DUAL_IP == 0 && TP_NUM_OUTPUTS == 2)) &&
                     TP_PARA_DECI_POLY == 2),
                   "ERROR: if SSR is enabled or TP_PARA_DECI_POLY=2 , DUAL inputs is only supported with DUAL_OUTPUTS");
-
     static constexpr bool TP_CASC_IN =
         TP_PARA_DECI_POLY == 2 ? CASC_IN_TRUE : CASC_IN_FALSE; // should be unsigned int if exposed on graph interface
     static constexpr unsigned int CASC_IN_PORT_POS = (TP_DUAL_IP == DUAL_IP_DUAL) ? 2 : 1;
+    static_assert(!(get_input_streams_core_module() == 1 && (TP_DUAL_IP == 1)),
+                  "This device does not have dual ports. Please set TP_DUAL_IP to 0.");
+    static_assert(!(get_input_streams_core_module() == 1 && (TP_NUM_OUTPUTS == 2)),
+                  "This device does not have dual ports. Please set TP_NUM_OUTPUTS to 1.");
 
     void create_connections() {
         // make input connections
@@ -447,8 +457,10 @@ class fir_decimate_hb_graph : public graph {
         static constexpr int BTP_DUAL_IP = TP_DUAL_IP;
         static constexpr int BTP_API = TP_API;
         static constexpr int BTP_SSR = TP_SSR;
+        static constexpr int BTP_PARA_DECI_POLY = TP_PARA_DECI_POLY;
         static constexpr int BTP_CASC_IN = TP_CASC_IN;
         static constexpr int BTP_POLY_SSR = TP_POLY_SSR;
+        static constexpr int BTP_SAT = TP_SAT;
     };
 
     // call sr aym graph constructor
@@ -470,10 +482,10 @@ class fir_decimate_hb_graph : public graph {
         static constexpr int BTP_COEFF_PHASE_OFFSET =
             1; // disregard the Center tap Coeff (BTP_COEFF_PHASES_LEN = BTP_FIR_LEN + 1)
         static constexpr int BTP_COEFF_PHASES = TP_SSR;
-        // static constexpr int BTP_PARA_DECI_POLY=TP_PARA_DECI_POLY;
         static constexpr int BTP_COEFF_PHASES_LEN = CEIL((TP_FIR_LEN + 1) / 2, TP_SSR) + 1;
         static constexpr int BTP_CASC_IN = TP_CASC_IN;
         static constexpr int BTP_POLY_SSR = TP_POLY_SSR;
+        static constexpr int BTP_SAT = TP_SAT;
     };
 
     // create single tap kernels
@@ -502,6 +514,7 @@ class fir_decimate_hb_graph : public graph {
         static constexpr int BTP_COEFF_PHASES_LEN = CEIL((TP_FIR_LEN + 1) / 2, TP_SSR) + 1;
         static constexpr int BTP_MODIFY_MARGIN_OFFSET =
             -1 * ((TP_FIR_LEN / 4 - 1 + dim) / (TP_SSR * TP_PARA_DECI_POLY));
+        static constexpr int BTP_SAT = TP_SAT;
     };
     template <int ssr_dim>
     using ssrKernelLookupSrAsym =
@@ -535,7 +548,7 @@ class fir_decimate_hb_graph : public graph {
         static constexpr int BTP_COEFF_PHASES = TP_SSR;
         static constexpr int BTP_COEFF_PHASES_LEN = BTP_FIR_LEN;
         static constexpr int BTP_POLY_SSR = TP_PARA_DECI_POLY;
-        static constexpr int BTP_SYM_FACTOR = IS_ASYM;
+        static constexpr int BTP_SAT = TP_SAT;
     };
 
     template <int ssr_dim>
@@ -650,8 +663,8 @@ class fir_decimate_hb_graph : public graph {
         // First kernel will always be the slowest of the kernels and so it will reflect on the designs performance
         // best.
         return fir_decimate_hb<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_SHIFT, TP_RND, (TP_INPUT_WINDOW_VSIZE / TP_SSR), false,
-                               true, firRange, 0, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS,
-                               TP_API>::get_m_kArch();
+                               true, firRange, 0, TP_CASC_LEN, TP_DUAL_IP, TP_USE_COEFF_RELOAD, TP_NUM_OUTPUTS, TP_API,
+                               TP_SAT>::get_m_kArch();
     };
 
     /**
@@ -717,6 +730,28 @@ class fir_decimate_hb_graph : public graph {
         connect_with_ssr();
     }
 
+    template <unsigned int CL>
+    struct tmp_ssr_params : public aieml_ssr_params<0> {
+        static constexpr unsigned int BTP_FIR_LEN = CEIL((TP_FIR_LEN + 1) / 2, TP_SSR) / TP_SSR;
+        static constexpr unsigned int BTP_CASC_LEN = CL;
+    };
+
+    template <int pos, int CLEN, int T_FIR_LEN, typename T_D, typename T_C>
+    static constexpr unsigned int clRecurser() {
+        if
+            constexpr(decimate_hb_asym::fir_decimate_hb_asym_tl<tmp_ssr_params<CLEN> >::template fnCheckIfFits<
+                          pos, CLEN, T_FIR_LEN, T_D, T_C>() == 1) {
+                if
+                    constexpr(pos == 0) { return CLEN; }
+                else {
+                    return clRecurser<pos - 1, CLEN, T_FIR_LEN, T_D, T_C>();
+                }
+            }
+        else {
+            return clRecurser<CLEN, CLEN + 1, T_FIR_LEN, T_D, T_C>();
+        }
+    }
+
     /**
     * @brief Access function to get Graphs minimum cascade length for a given configuration.
     * @tparam T_FIR_LEN tap length of the fir filter
@@ -730,7 +765,18 @@ class fir_decimate_hb_graph : public graph {
         if
             constexpr(SSR == 1) {
                 constexpr int kMaxTaps = getMaxTapsPerKernel<T_D>();
-                return xf::dsp::aie::getMinCascLen<T_FIR_LEN, kMaxTaps>();
+                constexpr int asymFirLen = (T_FIR_LEN + 1) / 2;
+                constexpr int firLenPerSSR = CEIL(asymFirLen, SSR) / SSR;
+                constexpr int cLenMin = xf::dsp::aie::getMinCascLen<firLenPerSSR, kMaxTaps>();
+#if __HAS_SYM_PREADD__ == 1
+                return cLenMin;
+#else
+                if
+                    constexpr(T_API == 0) { return cLenMin; }
+                else {
+                    return clRecurser<cLenMin - 1, cLenMin, firLenPerSSR, T_D, T_C>();
+                }
+#endif
             }
         else {
             using asym_graph =

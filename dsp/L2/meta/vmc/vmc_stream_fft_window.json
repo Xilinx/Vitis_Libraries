@@ -11,7 +11,7 @@
       "name": "data_type",
       "default": "cint16",
       "blockgui":{
-            "label": "Input/Output data type",
+            "label": "Input/Output data type:",
             "tablabel": "Main",
             "parameterType":"popup"
       }
@@ -27,7 +27,7 @@
         "args": [ "data_type" ]
       },
       "blockgui":{
-            "label": "Function coefficient type",
+            "label": "Function coefficient data type:",
             "tablabel": "Main",
             "parameterType":"popup"
       }
@@ -44,7 +44,7 @@
         "args": ["point_size", "is_dyn_pt_size"]
       },
       "blockgui":{
-            "label": "Function coefficients",
+            "label": "Function coefficients:",
             "tablabel": "Main",
             "parameterType":"edit"
       }
@@ -93,7 +93,7 @@
         "args": [ "point_size" ]
       },
       "blockgui":{
-            "label": "Input window size (Number of Samples)",
+            "label": "Input frame size (Number of Samples):",
             "tablabel": "Main",
             "parameterType":"edit"
       }
@@ -109,7 +109,7 @@
         "args": [ "data_type" ]
       },
       "blockgui":{
-            "label": "Scale output down by 2^",
+            "label": "Scale output down by 2^:",
             "tablabel": "Main",
             "parameterType":"edit"
       }

@@ -80,7 +80,8 @@ class test_graph : public graph {
                                                     PORT_API,
                                                     P_SSR,
                                                     P_PARA_INTERP_POLY,
-                                                    P_PARA_DECI_POLY>;
+                                                    P_PARA_DECI_POLY,
+                                                    SAT_MODE>;
     // Constructor
     test_graph() {
         printConfig();

@@ -1,11 +1,28 @@
 
+# Copyright (C) 2019-2022, Xilinx, Inc.
+# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
 UPSHIFT_CT ?= 0
+
 PARAM_MAP = AIE_VARIANT $(AIE_VARIANT) DATA_TYPE $(DATA_TYPE) COEFF_TYPE $(COEFF_TYPE) FIR_LEN $(FIR_LEN) SHIFT $(SHIFT) ROUND_MODE $(ROUND_MODE) INPUT_WINDOW_VSIZE $(INPUT_WINDOW_VSIZE) CASC_LEN $(CASC_LEN) DUAL_IP $(DUAL_IP) USE_COEFF_RELOAD $(USE_COEFF_RELOAD) NUM_OUTPUTS $(NUM_OUTPUTS) UUT_SSR $(UUT_SSR) PORT_API $(PORT_API) INTERPOLATE_FACTOR $(INTERPOLATE_FACTOR) DECIMATE_FACTOR $(DECIMATE_FACTOR) UUT_PARA_DECI_POLY $(UUT_PARA_DECI_POLY) UUT_PARA_INTERP_POLY $(UUT_PARA_INTERP_POLY) UPSHIFT_CT $(UPSHIFT_CT)
 DUAL_INPUT_SAMPLES =  $(shell echo $$(($(PORT_API) * $(DUAL_IP))))
 DUAL_OUTPUT_SAMPLES = $(shell echo $$(( $(PORT_API) * ($(NUM_OUTPUTS)-1) )))
 UUT_COEFF_RELOAD_HEADER_MODE = $(shell echo $$(( $(USE_COEFF_RELOAD) & 2)))
 REF_COEFF_RELOAD_HEADER_MODE = $(shell echo $$(( ($(USE_COEFF_RELOAD) & 2)  * 100 + 99 )))
-OUTPUT_WINDOW_VSIZE = $(shell echo $$(( $(INPUT_WINDOW_VSIZE) * ($(INTERPOLATE_FACTOR)/$(UUT_PARA_INTERP_POLY))  / ($(DECIMATE_FACTOR)/$(UUT_PARA_DECI_POLY))  )))
+OUTPUT_WINDOW_VSIZE = $(shell echo $$(( $(INPUT_WINDOW_VSIZE) * ($(INTERPOLATE_FACTOR))  / ($(DECIMATE_FACTOR))  )))
 
 UUT_FILE_SUFFIX = $(UUT_KERNEL)_$(AIE_VARIANT)_$(DATA_TYPE)_$(COEFF_TYPE)_$(FIR_LEN)_$(SHIFT)_$(ROUND_MODE)_$(INTERPOLATE_FACTOR)_$(DECIMATE_FACTOR)_$(INPUT_WINDOW_VSIZE)_$(CASC_LEN)_$(DUAL_IP)_$(USE_COEFF_RELOAD)_$(NUM_OUTPUTS)_$(PORT_API)_$(UUT_SSR)_$(UUT_PARA_INTERP_POLY)_$(UUT_PARA_DECI_POLY)
 LOG_FILE = ./logs/log_$(UUT_FILE_SUFFIX).txt
@@ -30,7 +47,6 @@ gen_input:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE) $(INPUT_WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(DATA_STIM_TYPE) 0 0 $(DATA_TYPE) $(PORT_API) 1
 
 ssr_split:
-#perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(SPLIT_ZIP_FILE) --type $(DATA_TYPE) --ssr $(TAG_SSR) --split --dual $(TAG_DUAL_INP) -k $(TAG_COEFF_RELOAD_HEADER_MODE) -w ${INPUT_WINDOW_VSIZE} -c $(COEFF_TYPE) -fl $(FIR_LEN)
 	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(SPLIT_ZIP_FILE) --type $(DATA_TYPE) --ssr $(TAG_SSR_IN)    --split --dual $(TAG_DUAL_INP) -k 0 -w ${INPUT_WINDOW_VSIZE} -c $(COEFF_TYPE) -fl $(FIR_LEN)
 
 ssr_zip:

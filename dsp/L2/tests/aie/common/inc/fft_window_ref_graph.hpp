@@ -42,7 +42,9 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_API,
           unsigned int TP_SSR,
-          unsigned int TP_DYN_PT_SIZE>
+          unsigned int TP_DYN_PT_SIZE,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 class fft_window_ref_graph : public graph {
    public:
     static constexpr int kPtSize = TP_POINT_SIZE / TP_SSR;
@@ -67,6 +69,8 @@ class fft_window_ref_graph : public graph {
         printf("TP_API               = %d\n", TP_API);
         printf("TP_SSR               = %d\n", TP_SSR);
         printf("TP_DYN_PT_SIZE       = %d\n", TP_DYN_PT_SIZE);
+        printf("TP_RND               = %d\n", TP_RND);
+        printf("TP_SAT               = %d\n", TP_SAT);
 
         std::array<std::array<TT_COEFF, kPtSize*(1 + TP_DYN_PT_SIZE)>, TP_SSR> kernel_weights;
         for (int k = 0; k < TP_SSR; k++) {
@@ -76,9 +80,9 @@ class fft_window_ref_graph : public graph {
         }
 
         for (int i = 0; i < TP_SSR; i++) {
-            m_kernels[i] = kernel::create_object<
-                fft_window_ref<TT_DATA, TT_COEFF, kPtSize, kWindowVsize, TP_SHIFT, TP_API, TP_SSR, TP_DYN_PT_SIZE> >(
-                kernel_weights[i]);
+            m_kernels[i] =
+                kernel::create_object<fft_window_ref<TT_DATA, TT_COEFF, kPtSize, kWindowVsize, TP_SHIFT, TP_API, TP_SSR,
+                                                     TP_DYN_PT_SIZE, TP_RND, TP_SAT> >(kernel_weights[i]);
             // Specify mapping constraints
             runtime<ratio>(m_kernels[i]) = 0.1; // Nominal figure. The real figure requires knowledge of the sample
                                                 // rate.

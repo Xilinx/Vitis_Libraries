@@ -11,7 +11,7 @@ TP_FFT_NIFFT_max = 1
 TP_SHIFT_min = 0
 TP_SHIFT_max = 61
 
-TP_RND_min = 0
+TP_RND_min = 4
 TP_RND_max = 7
 
 TP_WINDOW_VSIZE_min = 16
@@ -122,7 +122,7 @@ def fn_validate_rnd(TP_RND):
   return (
     isValid if (TP_RND >= TP_RND_min or TP_RND <= TP_RND_max)
     else (
-        isError(f"Invalid rounding mode ({TP_RND}, must be in the range {TP_RND_min} to {TP_RND_max}). ")
+        isError(f"Invalid rounding mode ({TP_RND}, must be in the range {TP_RND_min} to {TP_RND_max}). The mixed radix FFT does not support floor and ceiling modes")
     )
   )
 def validate_TP_RND(args):
@@ -270,9 +270,9 @@ public:
   {graphname}() : mixed_radix_fft_graph() {{
     if (TP_API == 0) {{
       adf::connect<> net_in(in[0], mixed_radix_fft_graph.in[0]);
-      adf::dimensions(mixed_radix_fft_graph.in[0]) = {TP_WINDOW_VSIZE};
+      adf::dimensions(mixed_radix_fft_graph.in[0]) = {{TP_WINDOW_VSIZE}};
       adf::connect<> net_out(mixed_radix_fft_graph.out[0], out[0]);
-      adf::dimensions(mixed_radix_fft_graph.out[0]) = {TP_WINDOW_VSIZE};
+      adf::dimensions(mixed_radix_fft_graph.out[0]) = {{TP_WINDOW_VSIZE}};
     }} else {{
       for (int i = 0; i<m_kNumPorts ; i++) {{
         adf::connect<> net_in(in[i], mixed_radix_fft_graph.in[i]);

@@ -45,7 +45,8 @@ template <typename TT_DATA,  // type of data input and output
           unsigned int TP_USE_COEFF_RELOAD = 0, // 1 = use coeff reload, 0 = don't use coeff reload
           unsigned int TP_NUM_OUTPUTS = 1,
           unsigned int TP_DUAL_IP = 0,
-          unsigned int TP_API = 0>
+          unsigned int TP_API = 0,
+          unsigned int TP_SAT = 1>
 class fir_sr_asym_ref {
    private:
     TT_COEFF internalTaps[TP_FIR_LEN] = {};

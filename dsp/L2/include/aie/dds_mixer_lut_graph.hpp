@@ -101,7 +101,9 @@ template <typename TT_DATA,
           unsigned int TP_SFDR = 90,
           unsigned int TP_API = IO_API::WINDOW,
           unsigned int TP_INPUT_WINDOW_VSIZE = 256,
-          unsigned int TP_SSR = 1>
+          unsigned int TP_SSR = 1,
+          unsigned int TP_RND = 0,
+          unsigned int TP_SAT = 1>
 class dds_mixer_lut_graph : public graph {
    private:
    public:
@@ -149,7 +151,8 @@ class dds_mixer_lut_graph : public graph {
     static constexpr unsigned int KINPUT_WINDOW_VSIZE = TP_INPUT_WINDOW_VSIZE / TP_SSR;
 
     template <unsigned int TP_NUM_TABLES = 1>
-    using kernelClass = dds_mixer<TT_DATA, KINPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_LUT_SINCOS, TP_NUM_TABLES>;
+    using kernelClass =
+        dds_mixer<TT_DATA, KINPUT_WINDOW_VSIZE, TP_MIXER_MODE, TP_API, USE_LUT_SINCOS, TP_NUM_TABLES, TP_RND, TP_SAT>;
 
     /**
      * @brief This is the constructor function for the dds_mixer graph.

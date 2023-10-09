@@ -1,4 +1,5 @@
 from fir_interpolate_hb import *
+from aie_common import *
 from vmc_fir_utils import *
 
 #### VMC validators ####
@@ -23,12 +24,12 @@ def vmc_validate_input_window_size(args):
 
 def vmc_validate_casc_length(args):
     casc_length = args["casc_length"]
-    #if not use_casc_length:
-	# TODO : Talk to DSP lib team/sumanta about how 
-	# cascade validation works - confirm its just fir length related
-	#return fn_validate_casc_length(fir_length, casc_length, use_coeff_reload)
     return fn_validate_casc_len(casc_length);
     
+def validate_sat_mode(args):
+    sat_mode = args["sat_mode"]
+    return fn_validate_satMode(sat_mode);
+
 
 def vmc_validate_coeff(args):
 	use_coeff_reload = args["use_coeff_reload"]
@@ -51,7 +52,7 @@ def vmc_validate_shift_val(args):
 def vmc_validate_upshift_ct(args):
 	data_type = args["data_type"]
 	upshift_ct = args["upshift_ct"]
-	AIE_VARIANT = 1
+	AIE_VARIANT = args["AIE_VARIANT"]
 	return fn_validate_upshift_ct(data_type, upshift_ct, AIE_VARIANT)
 
 def vmc_validate_interp_poly(args):
@@ -77,14 +78,14 @@ def vmc_validate_interpolate_factor(args):
 
 def vmc_validate_input_ports(args):
     dual_ip = args["dual_ip"]
-    AIE_VARIANT = 1
+    AIE_VARIANT = args["AIE_VARIANT"]
     return fn_validate_num_inputs(dual_ip, AIE_VARIANT)
 
 def vmc_validate_out_ports(args):
-	num_outputs = args["num_outputs"]
+	num_outputs = fn_get_num_outputs(args)
 	interp_poly = args["interp_poly"]
 	dual_ip = args["dual_ip"]
-	AIE_VARIANT = 1
+	AIE_VARIANT = args["AIE_VARIANT"]
 	return fn_validate_num_outputs(interp_poly, dual_ip, num_outputs, AIE_VARIANT)
 
 #### VMC graph generator ####
@@ -99,12 +100,13 @@ def vmc_generate_graph(name, args):
     casc_length = args["casc_length"]
     tmpargs["TP_CASC_LEN"] = casc_length
     tmpargs["TP_USE_COEF_RELOAD"] = 1 if args["use_coeff_reload"] else 0
-    tmpargs["TP_NUM_OUTPUTS"] = 2 if args["num_outputs"] else 1
+    tmpargs["TP_NUM_OUTPUTS"] = fn_get_num_outputs(args)
     tmpargs["TP_DUAL_IP"] = 1 if args["dual_ip"] else 0
     tmpargs["TP_API"] = 1
     tmpargs["TP_SSR"] = args["ssr"]
     tmpargs["coeff"] = args["coeff"]
     tmpargs["TP_UPSHIFT_CT"] = args["upshift_ct"]
     tmpargs["TP_PARA_INTERP_POLY"] = args["interp_poly"]
+    tmpargs["TP_SAT"] = args["sat_mode"]
    
     return generate_graph(name, tmpargs)

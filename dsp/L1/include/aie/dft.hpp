@@ -40,7 +40,7 @@ included in aie graph level compilation.
 
 #include "dft_traits.hpp"
 #include "fir_utils.hpp"
-
+#include "aie_api/aie.hpp"
 #ifndef _DSPLIB_DFT_HPP_DEBUG_
 // #define _DSPLIB_DFT_HPP_DEBUG_
 #endif //_DSPLIB_DFT_HPP_DEBUG_
@@ -53,10 +53,22 @@ namespace dft {
 
 struct no_port {};
 template <typename T_A, typename T_B>
+#ifdef __SUPPORTS_ACC64__
+struct accType {
+    using type = cacc64;
+};
+template <>
+struct accType<cint16, cint16> {
+    using type = cacc64;
+};
+template <>
+struct accType<cint32, cint16> {
+    using type = cacc64;
+};
+#else
 struct accType {
     using type = cacc48;
 };
-
 template <>
 struct accType<cint16, cint16> {
     using type = cacc48;
@@ -68,7 +80,8 @@ struct accType<cint32, cint16> {
 template <>
 struct accType<cfloat, cfloat> {
     using type = caccfloat;
-}; // cfloat?
+};
+#endif //__SUPPORTS_ACC64__
 
 template <typename T_D, typename T_T>
 using accType_t = typename accType<T_D, T_T>::type;
@@ -117,7 +130,9 @@ template <typename TT_DATA,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_KERNEL_POSITION,
           bool TP_CASC_IN = CASC_IN_FALSE,
-          bool TP_CASC_OUT = CASC_OUT_FALSE>
+          bool TP_CASC_OUT = CASC_OUT_FALSE,
+          unsigned int TP_RND = 0,
+          unsigned int TP_SAT = 1>
 class kernelDFTClass {
    private:
     // Parameter value defensive and legality checks
@@ -129,6 +144,9 @@ class kernelDFTClass {
     static_assert(fnCheckShift<TP_SHIFT>(), "ERROR: TP_SHIFT is out of range (0 to 60)");
     static_assert(fnCheckShiftFloat<TT_DATA, TP_SHIFT>(),
                   "ERROR: TP_SHIFT is ignored for data type cfloat so must be set to 0");
+    static_assert(TP_RND >= ROUND_MIN && TP_RND <= ROUND_MAX, "ERROR: TP_RND is out of the supported range.");
+    static_assert(TP_SAT >= SAT_MODE_MIN && TP_SAT <= SAT_MODE_MAX, "ERROR: TP_SAT is out of supported range");
+    static_assert(TP_SAT != 2, "ERROR: TP_SAT is invalid. Valid values of TP_SAT are 0, 1, and 3");
 
     typedef typename std::conditional_t<
         std::is_same<TT_DATA, int16>::value,
@@ -138,14 +156,18 @@ class kernelDFTClass {
                            std::conditional_t<std::is_same<TT_DATA, float>::value, cfloat, TT_DATA> > >
         T_outDataType;
 
-    static constexpr int kSamplesInVectOutData = 256 / 8 / sizeof(T_outDataType);
+#ifdef __SUPPORTS_ACC64__
+    static constexpr int kSamplesInVectData = 8;
+#else
     static constexpr int kSamplesInVectData = 256 / 8 / sizeof(TT_DATA);
-    static constexpr int kSamplesInVectTwiddle = kSamplesInVectOutData;
+#endif //__SUPPORTS_ACC64__
 
-    static constexpr int paddedDataSize = CEIL(TP_POINT_SIZE, kSamplesInVectOutData);
+    static constexpr int kSamplesInVectTwiddle = kSamplesInVectData;
+
+    static constexpr int paddedDataSize = CEIL(TP_POINT_SIZE, kSamplesInVectData);
     static constexpr int paddedCoeffSize = CEIL(TP_POINT_SIZE, kSamplesInVectTwiddle);
 
-    static constexpr int paddedFrameSize = CEIL(paddedDataSize, (kSamplesInVectOutData * TP_CASC_LEN));
+    static constexpr int paddedFrameSize = CEIL(paddedDataSize, (kSamplesInVectData * TP_CASC_LEN));
     static constexpr int paddedWindowSize = TP_NUM_FRAMES * paddedFrameSize;
 
     static constexpr int cascWindowSize = paddedWindowSize / TP_CASC_LEN;
@@ -154,10 +176,12 @@ class kernelDFTClass {
     static constexpr int stepSize =
         (TP_KERNEL_POSITION < (TP_POINT_SIZE % TP_CASC_LEN)) + (TP_POINT_SIZE / TP_CASC_LEN);
 
-    // static constexpr int kTotalCoeffSize = paddedCoeffSize*cascFrameSize;
     static constexpr int kTotalCoeffSize = paddedCoeffSize * stepSize;
     static constexpr int kVecInCoeff = paddedCoeffSize / kSamplesInVectData;
+    static constexpr int kPairsInCoeff = kVecInCoeff / 2;
+    static constexpr int singleAccRequired = kVecInCoeff % 2;
     static constexpr int kVecInFrame = cascFrameSize / kSamplesInVectData;
+    static constexpr int shift = TP_SHIFT + 15;
 
    public:
     // Constructor
@@ -173,8 +197,8 @@ class kernelDFTClass {
 // Cascade layer class and specializations
 
 //-----------------------------------------------------------------------------------------------------
-// This is the main declaration of the matrix_mult class, and is also used for the Standalone kernel specialization with
-// no cascade ports, a single input and no reload
+// This is the main declaration of the dft class, and is also used for the Standalone kernel specialization with no
+// cascade ports, a single input and no reload
 
 template <typename TT_DATA,
           typename TT_TWIDDLE,
@@ -185,7 +209,9 @@ template <typename TT_DATA,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_KERNEL_POSITION,
           bool TP_CASC_IN = CASC_IN_FALSE,
-          bool TP_CASC_OUT = CASC_OUT_FALSE>
+          bool TP_CASC_OUT = CASC_OUT_FALSE,
+          unsigned int TP_RND = 0,
+          unsigned int TP_SAT = 1>
 class dft {
    private:
     kernelDFTClass<TT_DATA,
@@ -195,8 +221,11 @@ class dft {
                    TP_SHIFT,
                    TP_CASC_LEN,
                    TP_NUM_FRAMES,
+                   TP_KERNEL_POSITION,
                    TP_CASC_IN,
-                   TP_CASC_OUT>
+                   TP_CASC_OUT,
+                   TP_RND,
+                   TP_SAT>
         m_dftKernel;
     typedef typename std::conditional_t<
         std::is_same<TT_DATA, int16>::value,
@@ -205,17 +234,18 @@ class dft {
                            cint32,
                            std::conditional_t<std::is_same<TT_DATA, float>::value, cfloat, TT_DATA> > >
         T_outDataType;
-    static constexpr int kSamplesInVectOutData = 256 / 8 / sizeof(T_outDataType);
-    static constexpr int kSamplesInVectTwiddle = kSamplesInVectOutData;
-    // static constexpr int paddedDataSize  = CEIL(TP_POINT_SIZE, kSamplesInVectOutData);
-    static constexpr int paddedCoeffSize = CEIL(TP_POINT_SIZE, kSamplesInVectTwiddle);
-    // static constexpr int paddedFrameSize = CEIL(paddedDataSize, (kSamplesInVectOutData*TP_CASC_LEN));
 
-    // static constexpr int cascFrameSize = paddedFrameSize/TP_CASC_LEN;
+#ifdef __SUPPORTS_ACC64__
+    static constexpr int kSamplesInVectData = 8;
+#else
+    static constexpr int kSamplesInVectData = 256 / 8 / sizeof(TT_DATA);
+#endif //__SUPPORTS_ACC64__
+
+    static constexpr int kSamplesInVectTwiddle = kSamplesInVectData;
+    static constexpr int paddedCoeffSize = CEIL(TP_POINT_SIZE, kSamplesInVectTwiddle);
+
     static constexpr int stepSize =
         (TP_KERNEL_POSITION < (TP_POINT_SIZE % TP_CASC_LEN)) + (TP_POINT_SIZE / TP_CASC_LEN);
-
-    // static constexpr int kTotalCoeffSize = paddedCoeffSize*cascFrameSize;
     static constexpr int kTotalCoeffSize = paddedCoeffSize * stepSize;
 
    public:
@@ -242,7 +272,9 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_CASC_LEN,
           unsigned int TP_NUM_FRAMES,
-          unsigned int TP_KERNEL_POSITION>
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 class dft<TT_DATA,
           TT_TWIDDLE,
           TP_POINT_SIZE,
@@ -252,7 +284,9 @@ class dft<TT_DATA,
           TP_NUM_FRAMES,
           TP_KERNEL_POSITION,
           CASC_IN_FALSE,
-          CASC_OUT_TRUE> {
+          CASC_OUT_TRUE,
+          TP_RND,
+          TP_SAT> {
    private:
     kernelDFTClass<TT_DATA,
                    TT_TWIDDLE,
@@ -263,7 +297,9 @@ class dft<TT_DATA,
                    TP_NUM_FRAMES,
                    TP_KERNEL_POSITION,
                    CASC_IN_FALSE,
-                   CASC_OUT_TRUE>
+                   CASC_OUT_TRUE,
+                   TP_RND,
+                   TP_SAT>
         m_dftKernel;
     typedef typename std::conditional_t<
         std::is_same<TT_DATA, int16>::value,
@@ -272,16 +308,18 @@ class dft<TT_DATA,
                            cint32,
                            std::conditional_t<std::is_same<TT_DATA, float>::value, cfloat, TT_DATA> > >
         T_outDataType;
-    static constexpr int kSamplesInVectOutData = 256 / 8 / sizeof(T_outDataType);
-    static constexpr int kSamplesInVectTwiddle = kSamplesInVectOutData;
-    // static constexpr int paddedDataSize  = CEIL(TP_POINT_SIZE, kSamplesInVectOutData);
+
+#ifdef __SUPPORTS_ACC64__
+    static constexpr int kSamplesInVectData = 8;
+#else
+    static constexpr int kSamplesInVectData = 256 / 8 / sizeof(TT_DATA);
+#endif //__SUPPORTS_ACC64__
+
+    static constexpr int kSamplesInVectTwiddle = kSamplesInVectData;
     static constexpr int paddedCoeffSize = CEIL(TP_POINT_SIZE, kSamplesInVectTwiddle);
-    // static constexpr int paddedFrameSize = CEIL(paddedDataSize, (kSamplesInVectOutData*TP_CASC_LEN));
-    // static constexpr int cascFrameSize = paddedFrameSize/TP_CASC_LEN;
 
     static constexpr int stepSize =
         (TP_KERNEL_POSITION < (TP_POINT_SIZE % TP_CASC_LEN)) + (TP_POINT_SIZE / TP_CASC_LEN);
-    // static constexpr int kTotalCoeffSize = paddedCoeffSize*cascFrameSize;
     static constexpr int kTotalCoeffSize = paddedCoeffSize * stepSize;
 
    public:
@@ -308,7 +346,9 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_CASC_LEN,
           unsigned int TP_NUM_FRAMES,
-          unsigned int TP_KERNEL_POSITION>
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 class dft<TT_DATA,
           TT_TWIDDLE,
           TP_POINT_SIZE,
@@ -318,7 +358,9 @@ class dft<TT_DATA,
           TP_NUM_FRAMES,
           TP_KERNEL_POSITION,
           CASC_IN_TRUE,
-          CASC_OUT_TRUE> {
+          CASC_OUT_TRUE,
+          TP_RND,
+          TP_SAT> {
    private:
     // kernelDFTClass <TT_DATA, TT_TWIDDLE, TP_POINT_SIZE, TP_FFT_NIFFT, TP_SHIFT, CASC_IN_TRUE, CASC_OUT_TRUE>
     // m_dftKernel;
@@ -331,7 +373,9 @@ class dft<TT_DATA,
                    TP_NUM_FRAMES,
                    TP_KERNEL_POSITION,
                    CASC_IN_TRUE,
-                   CASC_OUT_TRUE>
+                   CASC_OUT_TRUE,
+                   TP_RND,
+                   TP_SAT>
         m_dftKernel;
     typedef typename std::conditional_t<
         std::is_same<TT_DATA, int16>::value,
@@ -340,16 +384,18 @@ class dft<TT_DATA,
                            cint32,
                            std::conditional_t<std::is_same<TT_DATA, float>::value, cfloat, TT_DATA> > >
         T_outDataType;
-    static constexpr int kSamplesInVectOutData = 256 / 8 / sizeof(T_outDataType);
-    static constexpr int kSamplesInVectTwiddle = kSamplesInVectOutData;
-    // static constexpr int paddedDataSize  = CEIL(TP_POINT_SIZE, kSamplesInVectOutData);
+
+#ifdef __SUPPORTS_ACC64__
+    static constexpr int kSamplesInVectData = 8;
+#else
+    static constexpr int kSamplesInVectData = 256 / 8 / sizeof(TT_DATA);
+#endif //__SUPPORTS_ACC64__
+
+    static constexpr int kSamplesInVectTwiddle = kSamplesInVectData;
     static constexpr int paddedCoeffSize = CEIL(TP_POINT_SIZE, kSamplesInVectTwiddle);
-    // static constexpr int paddedFrameSize = CEIL(paddedDataSize, (kSamplesInVectOutData*TP_CASC_LEN));
-    // static constexpr int cascFrameSize = paddedFrameSize/TP_CASC_LEN;
 
     static constexpr int stepSize =
         (TP_KERNEL_POSITION < (TP_POINT_SIZE % TP_CASC_LEN)) + (TP_POINT_SIZE / TP_CASC_LEN);
-    // static constexpr int kTotalCoeffSize = paddedCoeffSize*cascFrameSize;
     static constexpr int kTotalCoeffSize = paddedCoeffSize * stepSize;
 
    public:
@@ -377,7 +423,9 @@ template <typename TT_DATA,
           unsigned int TP_SHIFT,
           unsigned int TP_CASC_LEN,
           unsigned int TP_NUM_FRAMES,
-          unsigned int TP_KERNEL_POSITION>
+          unsigned int TP_KERNEL_POSITION,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 class dft<TT_DATA,
           TT_TWIDDLE,
           TP_POINT_SIZE,
@@ -387,7 +435,9 @@ class dft<TT_DATA,
           TP_NUM_FRAMES,
           TP_KERNEL_POSITION,
           CASC_IN_TRUE,
-          CASC_OUT_FALSE> {
+          CASC_OUT_FALSE,
+          TP_RND,
+          TP_SAT> {
    private:
     kernelDFTClass<TT_DATA,
                    TT_TWIDDLE,
@@ -398,7 +448,9 @@ class dft<TT_DATA,
                    TP_NUM_FRAMES,
                    TP_KERNEL_POSITION,
                    CASC_IN_TRUE,
-                   CASC_OUT_FALSE>
+                   CASC_OUT_FALSE,
+                   TP_RND,
+                   TP_SAT>
         m_dftKernel;
     typedef typename std::conditional_t<
         std::is_same<TT_DATA, int16>::value,
@@ -407,16 +459,18 @@ class dft<TT_DATA,
                            cint32,
                            std::conditional_t<std::is_same<TT_DATA, float>::value, cfloat, TT_DATA> > >
         T_outDataType;
-    static constexpr int kSamplesInVectOutData = 256 / 8 / sizeof(T_outDataType);
-    static constexpr int kSamplesInVectTwiddle = kSamplesInVectOutData;
-    // static constexpr int paddedDataSize  = CEIL(TP_POINT_SIZE, kSamplesInVectOutData);
+
+#ifdef __SUPPORTS_ACC64__
+    static constexpr int kSamplesInVectData = 8;
+#else
+    static constexpr int kSamplesInVectData = 256 / 8 / sizeof(TT_DATA);
+#endif //__SUPPORTS_ACC64__
+
+    static constexpr int kSamplesInVectTwiddle = kSamplesInVectData;
     static constexpr int paddedCoeffSize = CEIL(TP_POINT_SIZE, kSamplesInVectTwiddle);
-    // static constexpr int paddedFrameSize = CEIL(paddedDataSize, (kSamplesInVectOutData*TP_CASC_LEN));
-    // static constexpr int cascFrameSize = paddedFrameSize/TP_CASC_LEN;
 
     static constexpr int stepSize =
         (TP_KERNEL_POSITION < (TP_POINT_SIZE % TP_CASC_LEN)) + (TP_POINT_SIZE / TP_CASC_LEN);
-    // static constexpr int kTotalCoeffSize = paddedCoeffSize*cascFrameSize;
     static constexpr int kTotalCoeffSize = paddedCoeffSize * stepSize;
 
    public:

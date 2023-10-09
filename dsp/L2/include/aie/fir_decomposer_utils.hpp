@@ -208,6 +208,8 @@ class polyphase_decomposer {
                   "TP_FIR_LEN must be a mutliple of TP_PARA_INTERP_POLY. Pad coefficients to nearest multiple.");
     static_assert(p::BTP_FIR_LEN % TP_PARA_DECI_POLY == 0,
                   "TP_FIR_LEN must be a mutliple of TP_PARA_DECI_POLY. Pad coefficients to nearest multiple.");
+    static_assert(p::BTP_FIR_LEN % (TP_PARA_DECI_POLY * TP_PARA_INTERP_POLY) == 0,
+                  "TP_FIR_LEN must be a mutliple of TP_PARA_DECI_POLY. Pad coefficients to nearest multiple.");
 
     // Flattened order with deciPoly being the inner dim - arbitrary choice,
     // hopefully consitent with other ports and net definitions

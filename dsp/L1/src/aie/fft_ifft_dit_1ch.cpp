@@ -16,7 +16,7 @@
  */
 /*
 FFT/IFFT DIT single channel kernal code.
-This file captures the body of run-time code for the kernel class.
+This file captures the body of run-time code for the kernal class.
 
 Coding conventions
   TT_      template type suffix
@@ -475,16 +475,25 @@ INLINE_DECL void stockhamStages<TT_DATA,
 
     } // end of float/integer handling
 
-    if ((1 << ptSizePwr) < TP_POINT_SIZE) {
-        using outVectType = ::aie::vector<TT_OUT_DATA, 32 / sizeof(TT_OUT_DATA)>;
-        outVectType zerosOut = ::aie::zeros<TT_OUT_DATA, 32 / sizeof(TT_OUT_DATA)>();
-        outVectType* outFillPtr = (outVectType*)obuff;
-        outFillPtr += (1 << ptSizePwr) * sizeof(TT_OUT_DATA) / 32;
-        int fillCycles = (TP_POINT_SIZE - (1 << ptSizePwr)) * sizeof(TT_OUT_DATA) / 32;
-        for (int i = 0; i < fillCycles; i++) {
-            *outFillPtr++ = zerosOut;
-        }
+    constexpr int koutVSize = 32/sizeof(TT_OUT_DATA);
+    //chess_memory_fence();
+
+    if ((1<<ptSizePwr) < TP_POINT_SIZE) {
+      using outVectType = ::aie::vector<TT_OUT_DATA,koutVSize> ;
+      outVectType zerosOut = ::aie::zeros<TT_OUT_DATA,koutVSize>();
+      outVectType* outFillPtr = (outVectType*)obuff;
+      outFillPtr += (1<<ptSizePwr)/koutVSize;
+      int fillCycles = (TP_POINT_SIZE-(1<<ptSizePwr))/koutVSize;
+      #ifdef  _DSPLIB_FFT_IFFT_DIT_1CH_HPP_DEBUG_
+      if constexpr (TP_END_RANK==7) {
+        printf("fill cycles = %d for pwr = %d and ptsize = %d, end rank = %d\n", fillCycles, ptSizePwr, TP_POINT_SIZE, TP_END_RANK);
+      }
+      #endif //_DSPLIB_FFT_IFFT_DIT_1CH_HPP_DEBUG_
+      for (int i = 0; i < fillCycles; i++) {
+        *outFillPtr++ = zerosOut;
+      }
     }
+    chess_memory_fence();
 };
 
 // FFT/iFFT DIT single channel function - base of specialization .
@@ -1873,7 +1882,9 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_IN_API,
           unsigned int TP_OUT_API,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TT_OUT_DATA,
                                     TT_TWIDDLE,
@@ -1886,13 +1897,15 @@ NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TP_WINDOW_VSIZE,
                                     TP_IN_API,
                                     TP_OUT_API,
-                                    TP_ORIG_PAR_POWER>::fftMain(input_buffer<TT_DATA>& __restrict inWindow,
-                                                                output_buffer<TT_OUT_DATA>& __restrict outWindow) {
+                                    TP_ORIG_PAR_POWER,
+                                    TP_RND,
+                                    TP_SAT>::fftMain(input_buffer<TT_DATA>& __restrict inWindow,
+                                                     output_buffer<TT_OUT_DATA>& __restrict outWindow) {
     TT_DATA* inptr = (TT_DATA*)inWindow.data();
     TT_OUT_DATA* outptr = (TT_OUT_DATA*)outWindow.data();
 
-    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
-    set_sat();            // do saturate.
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     m_fftKernel.kernelFFT(inptr, outptr);
 };
@@ -1909,7 +1922,9 @@ template <typename TT_DATA,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TT_OUT_DATA,
                                     TT_TWIDDLE,
@@ -1922,14 +1937,16 @@ NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TP_WINDOW_VSIZE,
                                     kStreamAPI,
                                     kWindowAPI,
-                                    TP_ORIG_PAR_POWER>::fftMain(input_stream<TT_DATA>* __restrict inStream0,
-                                                                input_stream<TT_DATA>* __restrict inStream1,
-                                                                output_buffer<TT_OUT_DATA>& __restrict outWindow) {
+                                    TP_ORIG_PAR_POWER,
+                                    TP_RND,
+                                    TP_SAT>::fftMain(input_stream<TT_DATA>* __restrict inStream0,
+                                                     input_stream<TT_DATA>* __restrict inStream1,
+                                                     output_buffer<TT_OUT_DATA>& __restrict outWindow) {
     TT_DATA* __restrict inPtr = &inBuff[0];
     TT_OUT_DATA* __restrict outPtr = (TT_OUT_DATA*)outWindow.data();
 
-    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
-    set_sat();            // do saturate.
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     readStreamIn<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(inStream0, inStream1, inPtr);
     chess_memory_fence();
@@ -1948,7 +1965,9 @@ template <typename TT_DATA,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TT_OUT_DATA,
                                     TT_TWIDDLE,
@@ -1961,13 +1980,15 @@ NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TP_WINDOW_VSIZE,
                                     kStreamAPI,
                                     kWindowAPI,
-                                    TP_ORIG_PAR_POWER>::fftMain(input_stream<TT_DATA>* __restrict inStream0,
-                                                                output_buffer<TT_OUT_DATA>& __restrict outWindow) {
+                                    TP_ORIG_PAR_POWER,
+                                    TP_RND,
+                                    TP_SAT>::fftMain(input_stream<TT_DATA>* __restrict inStream0,
+                                                     output_buffer<TT_OUT_DATA>& __restrict outWindow) {
     TT_DATA* __restrict inPtr = &inBuff[0];
     TT_OUT_DATA* __restrict outPtr = (TT_OUT_DATA*)outWindow.data();
 
-    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
-    set_sat();            // do saturate.
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     readStreamIn<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(inStream0, inPtr);
     chess_memory_fence();
@@ -1987,7 +2008,9 @@ template <typename TT_DATA,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TT_OUT_DATA,
                                     TT_TWIDDLE,
@@ -2000,14 +2023,16 @@ NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TP_WINDOW_VSIZE,
                                     kWindowAPI,
                                     kStreamAPI,
-                                    TP_ORIG_PAR_POWER>::fftMain(input_buffer<TT_DATA>& __restrict inWindow,
-                                                                output_stream<TT_OUT_DATA>* __restrict outStream0,
-                                                                output_stream<TT_OUT_DATA>* __restrict outStream1) {
+                                    TP_ORIG_PAR_POWER,
+                                    TP_RND,
+                                    TP_SAT>::fftMain(input_buffer<TT_DATA>& __restrict inWindow,
+                                                     output_stream<TT_OUT_DATA>* __restrict outStream0,
+                                                     output_stream<TT_OUT_DATA>* __restrict outStream1) {
     TT_DATA* __restrict inPtr = (TT_DATA*)inWindow.data();
     TT_OUT_DATA* __restrict outPtr = &outBuff[0];
 
-    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
-    set_sat();            // do saturate.
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     m_fftKernel.kernelFFT(inPtr, outPtr);
     chess_memory_fence();
@@ -2026,7 +2051,9 @@ template <typename TT_DATA,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TT_OUT_DATA,
                                     TT_TWIDDLE,
@@ -2039,13 +2066,15 @@ NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TP_WINDOW_VSIZE,
                                     kWindowAPI,
                                     kStreamAPI,
-                                    TP_ORIG_PAR_POWER>::fftMain(input_buffer<TT_DATA>& __restrict inWindow,
-                                                                output_stream<TT_OUT_DATA>* __restrict outStream0) {
+                                    TP_ORIG_PAR_POWER,
+                                    TP_RND,
+                                    TP_SAT>::fftMain(input_buffer<TT_DATA>& __restrict inWindow,
+                                                     output_stream<TT_OUT_DATA>* __restrict outStream0) {
     TT_DATA* __restrict inPtr = (TT_DATA*)inWindow.data();
     TT_OUT_DATA* __restrict outPtr = &outBuff[0];
 
-    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
-    set_sat();            // do saturate.
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     m_fftKernel.kernelFFT(inPtr, outPtr);
     chess_memory_fence();
@@ -2065,7 +2094,9 @@ template <typename TT_DATA,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TT_OUT_DATA,
                                     TT_TWIDDLE,
@@ -2078,15 +2109,17 @@ NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TP_WINDOW_VSIZE,
                                     kStreamAPI,
                                     kStreamAPI,
-                                    TP_ORIG_PAR_POWER>::fftMain(input_stream<TT_DATA>* __restrict inStream0,
-                                                                input_stream<TT_DATA>* __restrict inStream1,
-                                                                output_stream<TT_OUT_DATA>* __restrict outStream0,
-                                                                output_stream<TT_OUT_DATA>* __restrict outStream1) {
+                                    TP_ORIG_PAR_POWER,
+                                    TP_RND,
+                                    TP_SAT>::fftMain(input_stream<TT_DATA>* __restrict inStream0,
+                                                     input_stream<TT_DATA>* __restrict inStream1,
+                                                     output_stream<TT_OUT_DATA>* __restrict outStream0,
+                                                     output_stream<TT_OUT_DATA>* __restrict outStream1) {
     TT_DATA* __restrict inPtr = &inBuff[0];
     TT_OUT_DATA* __restrict outPtr = &outBuff[0];
 
-    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
-    set_sat();            // do saturate.
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     readStreamIn<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(inStream0, inStream1, inPtr);
     chess_memory_fence();
@@ -2107,7 +2140,9 @@ template <typename TT_DATA,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TT_OUT_DATA,
                                     TT_TWIDDLE,
@@ -2120,13 +2155,15 @@ NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TP_WINDOW_VSIZE,
                                     kStreamAPI,
                                     kStreamAPI,
-                                    TP_ORIG_PAR_POWER>::fftMain(input_stream<TT_DATA>* __restrict inStream0,
-                                                                output_stream<TT_OUT_DATA>* __restrict outStream0) {
+                                    TP_ORIG_PAR_POWER,
+                                    TP_RND,
+                                    TP_SAT>::fftMain(input_stream<TT_DATA>* __restrict inStream0,
+                                                     output_stream<TT_OUT_DATA>* __restrict outStream0) {
     TT_DATA* __restrict inPtr = &inBuff[0];
     TT_OUT_DATA* __restrict outPtr = &outBuff[0];
 
-    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
-    set_sat();            // do saturate.
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     readStreamIn<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(inStream0, inPtr);
     chess_memory_fence();
@@ -2147,7 +2184,9 @@ template <typename TT_DATA,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TT_OUT_DATA,
                                     TT_TWIDDLE,
@@ -2160,14 +2199,16 @@ NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TP_WINDOW_VSIZE,
                                     kStreamAPI,
                                     kCascStreamAPI,
-                                    TP_ORIG_PAR_POWER>::fftMain(input_stream<TT_DATA>* __restrict inStream0,
-                                                                output_stream_cacc64* __restrict outStream0, // Cascade
-                                                                output_stream<TT_OUT_DATA>* __restrict outStream1) {
+                                    TP_ORIG_PAR_POWER,
+                                    TP_RND,
+                                    TP_SAT>::fftMain(input_stream<TT_DATA>* __restrict inStream0,
+                                                     output_stream_cacc64* __restrict outStream0, // Cascade
+                                                     output_stream<TT_OUT_DATA>* __restrict outStream1) {
     TT_DATA* __restrict inPtr = &inBuff[0];
     TT_OUT_DATA* __restrict outPtr = &outBuff[0];
 
-    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
-    set_sat();            // do saturate.
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     readStreamIn<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(inStream0, inPtr);
     chess_memory_fence();
@@ -2187,7 +2228,9 @@ template <typename TT_DATA,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TT_OUT_DATA,
                                     TT_TWIDDLE,
@@ -2200,14 +2243,16 @@ NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TP_WINDOW_VSIZE,
                                     kWindowAPI,
                                     kCascStreamAPI,
-                                    TP_ORIG_PAR_POWER>::fftMain(input_buffer<TT_DATA>& __restrict inWindow0,
-                                                                output_stream_cacc64* __restrict outStream0, // Cascade
-                                                                output_stream<TT_OUT_DATA>* __restrict outStream1) {
+                                    TP_ORIG_PAR_POWER,
+                                    TP_RND,
+                                    TP_SAT>::fftMain(input_buffer<TT_DATA>& __restrict inWindow0,
+                                                     output_stream_cacc64* __restrict outStream0, // Cascade
+                                                     output_stream<TT_OUT_DATA>* __restrict outStream1) {
     TT_DATA* __restrict inPtr = (TT_DATA*)inWindow0.data();
     TT_OUT_DATA* __restrict outPtr = &outBuff[0];
 
-    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
-    set_sat();            // do saturate.
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     m_fftKernel.kernelFFT(inPtr, outPtr);
     chess_memory_fence();
@@ -2225,7 +2270,9 @@ template <typename TT_DATA,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TT_OUT_DATA,
                                     TT_TWIDDLE,
@@ -2238,15 +2285,17 @@ NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TP_WINDOW_VSIZE,
                                     kStreamAPI,
                                     kStreamCascAPI,
-                                    TP_ORIG_PAR_POWER>::fftMain(input_stream<TT_DATA>* __restrict inStream0,
-                                                                output_stream<TT_OUT_DATA>* __restrict outStream0,
-                                                                output_stream_cacc64* __restrict outStream1 // Cascade
-                                                                ) {
+                                    TP_ORIG_PAR_POWER,
+                                    TP_RND,
+                                    TP_SAT>::fftMain(input_stream<TT_DATA>* __restrict inStream0,
+                                                     output_stream<TT_OUT_DATA>* __restrict outStream0,
+                                                     output_stream_cacc64* __restrict outStream1 // Cascade
+                                                     ) {
     TT_DATA* __restrict inPtr = &inBuff[0];
     TT_OUT_DATA* __restrict outPtr = &outBuff[0];
 
-    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
-    set_sat();            // do saturate.
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     readStreamIn<TT_DATA, TP_DYN_PT_SIZE, TP_WINDOW_VSIZE>(inStream0, inPtr);
     chess_memory_fence();
@@ -2266,7 +2315,9 @@ template <typename TT_DATA,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_RND,
+          unsigned int TP_SAT>
 NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TT_OUT_DATA,
                                     TT_TWIDDLE,
@@ -2279,15 +2330,17 @@ NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TP_WINDOW_VSIZE,
                                     kWindowAPI,
                                     kStreamCascAPI,
-                                    TP_ORIG_PAR_POWER>::fftMain(input_buffer<TT_DATA>& __restrict inWindow0,
-                                                                output_stream<TT_OUT_DATA>* __restrict outStream0,
-                                                                output_stream_cacc64* __restrict outStream1 // Cascade
-                                                                ) {
+                                    TP_ORIG_PAR_POWER,
+                                    TP_RND,
+                                    TP_SAT>::fftMain(input_buffer<TT_DATA>& __restrict inWindow0,
+                                                     output_stream<TT_OUT_DATA>* __restrict outStream0,
+                                                     output_stream_cacc64* __restrict outStream1 // Cascade
+                                                     ) {
     TT_DATA* __restrict inPtr = (TT_DATA*)inWindow0.data();
     TT_OUT_DATA* __restrict outPtr = &outBuff[0];
 
-    set_rnd(rnd_pos_inf); // Match the twiddle round mode of Matlab.
-    set_sat();            // do saturate.
+    set_rnd_mode<TP_RND>();
+    set_sat_mode<TP_SAT>();
 
     m_fftKernel.kernelFFT(inPtr, outPtr);
     chess_memory_fence();

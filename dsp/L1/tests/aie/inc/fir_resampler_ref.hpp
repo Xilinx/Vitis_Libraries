@@ -44,7 +44,8 @@ template <typename TT_DATA,  // type of data input and output
           unsigned int TP_RND,
           unsigned int TP_INPUT_WINDOW_VSIZE,
           unsigned int TP_USE_COEFF_RELOAD = 0, // 1 = use coeff reload, 0 = don't use coeff reload
-          unsigned int TP_NUM_OUTPUTS = 1>
+          unsigned int TP_NUM_OUTPUTS = 1,
+          unsigned int TP_SAT = 1>
 class fir_resampler_ref {
    public:
     // Constructor

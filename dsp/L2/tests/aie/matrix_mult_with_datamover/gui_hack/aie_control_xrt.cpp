@@ -28,7 +28,7 @@
 
 adf::GraphConfig GraphConfigurations[] = {
     //{id, name, graphLoadElfFunc, graphInitFunc, graphDebugHalt, coreColumns, coreRows, iterMemColumns, iterMemRows,
-    // iterMemAddrs, triggered, plKernelInstanceNames, plAxiLiteModes, plDriverStartFuncs, plDriverCheckIPDoneFuncs}
+    //iterMemAddrs, triggered, plKernelInstanceNames, plAxiLiteModes, plDriverStartFuncs, plDriverCheckIPDoneFuncs}
     {
         0,
         "matMult",
@@ -53,9 +53,9 @@ const int NUM_GRAPH = 1;
 
 adf::PLIOConfig PLIOConfigurations[] = {
     //{id, name, loginal_name, shim_column, slaveOrMaster, streamId}
-    {0, "in1", "DataIn1", 24, 0, 1},
-    {1, "in2", "DataIn2", 24, 0, 4},
-    {2, "out1", "DataOut1", 25, 1, 0},
+    {0, "matMult.inA[0]", "PLIO_in_A0", 24, 0, 1},
+    {1, "matMult.inB[0]", "PLIO_in_B0", 24, 0, 4},
+    {2, "matMult.out[0]", "PLIO_out_0", 25, 1, 0},
 };
 const int NUM_PLIO = 3;
 
@@ -77,12 +77,12 @@ class InitializeAIEControlXRT {
     }
 } initAIEControlXRT;
 
-#if !defined(__CDO__)
+#if !defined(__CDO__) && !defined(__AIECONTROLCODE__)
 
 // Kernel Stub Definition
 template <>
 void xf::dsp::aie::blas::matrix_mult::
-    matrix_mult<cint16, cint16, 16, 16, 16, 20, 0, 0, 1, 0, 256, 256, false, false, 16, 16, 16, 0, 1>::matMult(
+    matrix_mult<cint16, cint16, 16, 16, 16, 20, 0, 0, 0, 1, 0, 256, 256, false, false, 16, 16, 16, 0, 1>::matMult(
         adf::io_buffer<cint16, adf::direction::in, adf::io_buffer_config<> >& __restrict,
         adf::io_buffer<cint16, adf::direction::in, adf::io_buffer_config<> >& __restrict,
         adf::io_buffer<cint16, adf::direction::out, adf::io_buffer_config<> >& __restrict) { /* Stub */

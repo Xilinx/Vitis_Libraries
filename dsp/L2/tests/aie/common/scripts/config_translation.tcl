@@ -1,5 +1,7 @@
 #
-# Copyright 2022 Xilinx, Inc.
+# Copyright (C) 2019-2022, Xilinx, Inc.
+# Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -25,6 +27,8 @@ proc get_param_map {libElement} {
             "UUT_SSR" "TP_SSR"
             "DYN_PT_SIZE" "TP_DYN_PT_SIZE"
             "AIE_VARIANT" "AIE_VARIANT"
+            "ROUND_MODE" "TP_RND"
+            "SAT_MODE" "TP_SAT"
         }
     } else {
         # Everything else can be shoved in one big map
@@ -83,6 +87,7 @@ proc get_param_map {libElement} {
             "UUT_WINDOW_VSIZE" "TP_INPUT_WINDOW_VSIZE"
             "SFDR" "TP_SFDR"
             "SAT_MODE" "TP_SAT"
+            "P_SAT_MODE" "TP_SAT"
             "DATA_OUT_TYPE" "TT_OUT_DATA"
             "IN_API" "TP_IN_API"
             "OUT_API" "TP_OUT_API"

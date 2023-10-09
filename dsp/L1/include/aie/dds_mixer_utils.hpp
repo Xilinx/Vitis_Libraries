@@ -72,7 +72,7 @@ void INLINE_DECL T_IFbase<TT_DATA, PortType>::port_writeincr(PortType* out, OutD
 
 template <unsigned int numTables, unsigned int tableRes, unsigned int lutMask, unsigned int numLanes, typename TT_DATA>
 auto INLINE_DECL computeDDSOut(unsigned int m_phaseIndex, cint32** sincosLUT) {
-    ::aie::detail::accum< ::aie::detail::AccumClass::CInt, 64, 4> ddsOutLUT;
+    ::aie::accum<cacc64, 4> ddsOutLUT;
     ::aie::vector<cint32, 4> sincosVal[numTables];
 #pragma unroll numTables
     for (int i = 0; i < numTables; i++) {
@@ -87,7 +87,7 @@ auto INLINE_DECL computeDDSOut(unsigned int m_phaseIndex, cint32** sincosLUT) {
         constexpr(numTables == 2) { return ::aie::mul(sincosVal[0], sincosVal[1]); }
     else if
         constexpr(numTables == 3) {
-            ::aie::detail::accum< ::aie::detail::AccumClass::CInt, 64, 4> ddsAccInter;
+            ::aie::accum<cacc64, 4> ddsAccInter;
             ddsAccInter = ::aie::mul(sincosVal[0], sincosVal[1]);
             ddsOutLUT = ::aie::mul(sincosVal[2], ddsAccInter.template to_vector<TT_DATA>(31));
             return ddsOutLUT;

@@ -56,9 +56,9 @@
                 "./"
             ],
         "customized_params": {
-                "params": "-Xchess=llvm.xargs=-std=c++2a -Xx86sim=-client=vmc -v -output=graph",
+                "params": "--aie.Xchess=llvm.xargs=-std=c++2a --aie.Xx86sim=-client=vmc --aie.verbose",
                 "default": {
-                    "GRAPHNAME": "FIR_Interpolation_Stream_7498103a",
+                    "GRAPHNAME": "FIR_Interpolation_Stream_57f8b2db",
                     "VMC_GRAPHDIR": "xmc_aie_lib/$(GRAPHNAME)",
                     "VMC_KERNEL": "vmc_stream_fir_interpolate_asym"
                 }
@@ -83,7 +83,7 @@
         }
     ],
     "testinfo": {
-        "disable": true,
+        "disable": false,
         "jobs": [
             {
                 "index": 0,

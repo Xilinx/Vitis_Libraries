@@ -624,7 +624,7 @@ class ssr_kernels {
 
 template <int T_FIR_LEN, int kMaxTaps>
 static constexpr unsigned int getMinCascLen() {
-    return T_FIR_LEN % kMaxTaps == 0 ? T_FIR_LEN / kMaxTaps : T_FIR_LEN / kMaxTaps + 1;
+    return T_FIR_LEN < kMaxTaps ? 1 : T_FIR_LEN % kMaxTaps == 0 ? T_FIR_LEN / kMaxTaps : T_FIR_LEN / kMaxTaps + 1;
 };
 
 template <int kMaxTaps, int kRawOptTaps, int T_FIR_LEN, int SSR = 1>

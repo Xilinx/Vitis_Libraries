@@ -1,5 +1,5 @@
 {
-    "test_0_widget_r2c_i16_c16": {
+    "test_0_tool_canary_aie":{
         "DATA_TYPE": "int16",
         "DATA_OUT_TYPE": "cint16",
         "WINDOW_VSIZE": "256",

@@ -51,7 +51,7 @@ options:
 
 ";
 
-
+my $aieVariant = 1;
 my $inFile = "";
 my $outFile = "";
 my $inRow = "";
@@ -67,6 +67,7 @@ my $help = 0;
 my $T_DATA_A = "";
 my $T_DATA_B = "";
 GetOptions (
+            "aieVariant=i"          => \$aieVariant,
             "f|file|inFile=s"       => \$inFile,  # string
             "o|outFile=s"           => \$outFile,  # string
             "r|inRow=i"             => \$inRow,
@@ -144,146 +145,161 @@ my ${DIM_A_TILE}  = 4;
 my ${DIM_AB_TILE} = 4;
 my ${DIM_B_TILE}  = 2;
 
-# CAUTION: Maintenance hazard - these definitions are duplicated in metadata and matrix_mult.hpp
-if ( ${T_DATA_A} eq "int16" ) {
-	if ( ${T_DATA_B} eq "int16" ) {
-		${DIM_A_TILE}  = 4;
-		${DIM_AB_TILE} = 4;
-		${DIM_B_TILE}  = 4;
-	}
-	
-	if ( ${T_DATA_B} eq "cint16" ) {
-		${DIM_A_TILE}  = 4;
-		${DIM_AB_TILE} = 2;
-		${DIM_B_TILE}  = 2;
-	}
 
-	if ( ${T_DATA_B} eq "int32" ) {
-		${DIM_A_TILE}  = 4;
-		${DIM_AB_TILE} = 2;
-		${DIM_B_TILE}  = 2;
-	}
-	
-	if ( ${T_DATA_B} eq "cint32" ) {
-		${DIM_A_TILE}  = 2;
-		${DIM_AB_TILE} = 4;
-		${DIM_B_TILE}  = 2;
-	}
+if ( $aieVariant eq 2) {
+    if ( (${T_DATA_A} eq "cint16") && (${T_DATA_B} eq "cint16")) {
+        ${DIM_A_TILE}  = 1;
+        ${DIM_AB_TILE} = 4;
+        ${DIM_B_TILE}  = 8;
 
+    } elsif ( (${T_DATA_A} eq "cint32") && (${T_DATA_B} eq "cint16")) {
+        ${DIM_A_TILE}  = 2;
+        ${DIM_AB_TILE} = 4;
+        ${DIM_B_TILE}  = 8;
+
+    } elsif ( (${T_DATA_A} eq "cint32") && (${T_DATA_B} eq "cint32")) {
+        ${DIM_A_TILE}  = 1;
+        ${DIM_AB_TILE} = 2;
+        ${DIM_B_TILE}  = 8;
+
+    } else {
+        ${DIM_A_TILE}  = 4;
+        ${DIM_AB_TILE} = 4;
+        ${DIM_B_TILE}  = 4;
+    }
+} else {
+
+    # CAUTION: Maintenance hazard - these definitions are duplicated in metadata and matrix_mult.hpp
+    if ( ${T_DATA_A} eq "int16" ) {
+        if ( ${T_DATA_B} eq "int16" ) {
+            ${DIM_A_TILE}  = 4;
+            ${DIM_AB_TILE} = 4;
+            ${DIM_B_TILE}  = 4;
+        }
+        if ( ${T_DATA_B} eq "cint16" ) {
+            ${DIM_A_TILE}  = 4;
+            ${DIM_AB_TILE} = 2;
+            ${DIM_B_TILE}  = 2;
+        }
+        if ( ${T_DATA_B} eq "int32" ) {
+            ${DIM_A_TILE}  = 4;
+            ${DIM_AB_TILE} = 2;
+            ${DIM_B_TILE}  = 2;
+        }
+        if ( ${T_DATA_B} eq "cint32" ) {
+            ${DIM_A_TILE}  = 2;
+            ${DIM_AB_TILE} = 4;
+            ${DIM_B_TILE}  = 2;
+        }
+    }
+    if ( ${T_DATA_A} eq "cint16" ) {
+        if ( ${T_DATA_B} eq "int16" ) {
+            ${DIM_A_TILE}  = 4;
+            ${DIM_AB_TILE} = 4;
+            ${DIM_B_TILE}  = 2;
+        }
+        
+        if ( ${T_DATA_B} eq "cint16" ) {
+            ${DIM_A_TILE}  = 4;
+            ${DIM_AB_TILE} = 4;
+            ${DIM_B_TILE}  = 2;
+        }
+
+        if ( ${T_DATA_B} eq "int32" ) {
+            ${DIM_A_TILE}  = 4;
+            ${DIM_AB_TILE} = 4;
+            ${DIM_B_TILE}  = 2;
+        }
+        
+        if ( ${T_DATA_B} eq "cint32" ) {
+            ${DIM_A_TILE}  = 2;
+            ${DIM_AB_TILE} = 2;
+            ${DIM_B_TILE}  = 2;
+        }
+
+    }
+    if ( ${T_DATA_A} eq "int32" ) {
+        if ( ${T_DATA_B} eq "int16" ) {
+            ${DIM_A_TILE}  = 4;
+            ${DIM_AB_TILE} = 4;
+            ${DIM_B_TILE}  = 2;
+        }
+        
+        if ( ${T_DATA_B} eq "cint16" ) {
+            ${DIM_A_TILE}  = 4;
+            ${DIM_AB_TILE} = 4;
+            ${DIM_B_TILE}  = 2;
+        }
+
+        if ( ${T_DATA_B} eq "int32" ) {
+            ${DIM_A_TILE}  = 4;
+            ${DIM_AB_TILE} = 4;
+            ${DIM_B_TILE}  = 2;
+        }
+        
+        if ( ${T_DATA_B} eq "cint32" ) {
+            ${DIM_A_TILE}  = 2;
+            ${DIM_AB_TILE} = 2;
+            ${DIM_B_TILE}  = 2;
+        }
+
+    }
+    if ( ${T_DATA_A} eq "cint32" ) {
+        if ( ${T_DATA_B} eq "int16" ) {
+            ${DIM_A_TILE}  = 2;
+            ${DIM_AB_TILE} = 4;
+            ${DIM_B_TILE}  = 2;
+        }
+        
+        if ( ${T_DATA_B} eq "cint16" ) {
+            ${DIM_A_TILE}  = 2;
+            ${DIM_AB_TILE} = 2;
+            ${DIM_B_TILE}  = 2;
+        }
+
+        if ( ${T_DATA_B} eq "int32" ) {
+            ${DIM_A_TILE}  = 2;
+            ${DIM_AB_TILE} = 2;
+            ${DIM_B_TILE}  = 2;
+        }
+        
+        if ( ${T_DATA_B} eq "cint32" ) {
+            ${DIM_A_TILE}  = 2;
+            ${DIM_AB_TILE} = 2;
+            ${DIM_B_TILE}  = 2;
+        }
+
+    }
+    if ( ${T_DATA_A} eq "float" ) {
+        if ( ${T_DATA_B} eq "float" ) {
+            ${DIM_A_TILE}  = 4;
+            ${DIM_AB_TILE} = 4;
+            ${DIM_B_TILE}  = 2;
+        }
+        
+        if ( ${T_DATA_B} eq "cfloat" ) {
+            ${DIM_A_TILE}  = 2;
+            ${DIM_AB_TILE} = 4;
+            ${DIM_B_TILE}  = 2;
+        }
+
+    }
+    if ( ${T_DATA_A} eq "cfloat" ) {
+        if ( ${T_DATA_B} eq "float" ) {
+            ${DIM_A_TILE}  = 2;
+            ${DIM_AB_TILE} = 4;
+            ${DIM_B_TILE}  = 2;
+        }
+        
+        if ( ${T_DATA_B} eq "cfloat" ) {
+            ${DIM_A_TILE}  = 4;
+            ${DIM_AB_TILE} = 2;
+            ${DIM_B_TILE}  = 2;
+        }
+    }
 }
 
-if ( ${T_DATA_A} eq "cint16" ) {
-	if ( ${T_DATA_B} eq "int16" ) {
-		${DIM_A_TILE}  = 4;
-		${DIM_AB_TILE} = 4;
-		${DIM_B_TILE}  = 2;
-	}
-	
-	if ( ${T_DATA_B} eq "cint16" ) {
-		${DIM_A_TILE}  = 4;
-		${DIM_AB_TILE} = 4;
-		${DIM_B_TILE}  = 2;
-	}
-
-	if ( ${T_DATA_B} eq "int32" ) {
-		${DIM_A_TILE}  = 4;
-		${DIM_AB_TILE} = 4;
-		${DIM_B_TILE}  = 2;
-	}
-	
-	if ( ${T_DATA_B} eq "cint32" ) {
-		${DIM_A_TILE}  = 2;
-		${DIM_AB_TILE} = 2;
-		${DIM_B_TILE}  = 2;
-	}
-
-}
-
-if ( ${T_DATA_A} eq "int32" ) {
-	if ( ${T_DATA_B} eq "int16" ) {
-		${DIM_A_TILE}  = 4;
-		${DIM_AB_TILE} = 4;
-		${DIM_B_TILE}  = 2;
-	}
-	
-	if ( ${T_DATA_B} eq "cint16" ) {
-		${DIM_A_TILE}  = 4;
-		${DIM_AB_TILE} = 4;
-		${DIM_B_TILE}  = 2;
-	}
-
-	if ( ${T_DATA_B} eq "int32" ) {
-		${DIM_A_TILE}  = 4;
-		${DIM_AB_TILE} = 4;
-		${DIM_B_TILE}  = 2;
-	}
-	
-	if ( ${T_DATA_B} eq "cint32" ) {
-		${DIM_A_TILE}  = 2;
-		${DIM_AB_TILE} = 2;
-		${DIM_B_TILE}  = 2;
-	}
-
-}
-
-
-if ( ${T_DATA_A} eq "cint32" ) {
-	if ( ${T_DATA_B} eq "int16" ) {
-		${DIM_A_TILE}  = 2;
-		${DIM_AB_TILE} = 4;
-		${DIM_B_TILE}  = 2;
-	}
-	
-	if ( ${T_DATA_B} eq "cint16" ) {
-		${DIM_A_TILE}  = 2;
-		${DIM_AB_TILE} = 2;
-		${DIM_B_TILE}  = 2;
-	}
-
-	if ( ${T_DATA_B} eq "int32" ) {
-		${DIM_A_TILE}  = 2;
-		${DIM_AB_TILE} = 2;
-		${DIM_B_TILE}  = 2;
-	}
-	
-	if ( ${T_DATA_B} eq "cint32" ) {
-		${DIM_A_TILE}  = 2;
-		${DIM_AB_TILE} = 2;
-		${DIM_B_TILE}  = 2;
-	}
-
-}
-
-
-if ( ${T_DATA_A} eq "float" ) {
-	if ( ${T_DATA_B} eq "float" ) {
-		${DIM_A_TILE}  = 4;
-		${DIM_AB_TILE} = 4;
-		${DIM_B_TILE}  = 2;
-	}
-	
-	if ( ${T_DATA_B} eq "cfloat" ) {
-		${DIM_A_TILE}  = 2;
-		${DIM_AB_TILE} = 4;
-		${DIM_B_TILE}  = 2;
-	}
-
-}
-
-if ( ${T_DATA_A} eq "cfloat" ) {
-	if ( ${T_DATA_B} eq "float" ) {
-		${DIM_A_TILE}  = 2;
-		${DIM_AB_TILE} = 4;
-		${DIM_B_TILE}  = 2;
-	}
-	
-	if ( ${T_DATA_B} eq "cfloat" ) {
-		${DIM_A_TILE}  = 4;
-		${DIM_AB_TILE} = 2;
-		${DIM_B_TILE}  = 2;
-	}
-
-}
+print "Tiling Dimensions are $DIM_A_TILE x $DIM_AB_TILE x $DIM_B_TILE\n";
 
 
 my $tileRow = "";
@@ -296,8 +312,21 @@ if ( $cascLen eq "" ) {
     # using output
     $tileRow = $DIM_A_TILE;
     $tileCol = $DIM_B_TILE;
-    # we only use output type to determine if int16, which only happens when both types are int16. 
-    $dataType = $T_DATA_A;
+
+    # Need to find if output dataType is cin32, or cfloat
+    if ($T_DATA_A eq "cfloat" or $T_DATA_B eq "cfloat") {
+        $dataType = "cfloat"
+    } elsif ($T_DATA_A eq "cint32" or $T_DATA_B eq "cint32") {
+        $dataType = "cint32";
+    } elsif ($T_DATA_A eq "int32" and $T_DATA_B eq "cint16") {
+        $dataType = "cint32";
+    } elsif ($T_DATA_A eq "cint16" and $T_DATA_B eq "int32") {
+        $dataType = "cint32";    
+    } elsif ($T_DATA_A eq "int16" and $T_DATA_B eq "int16") {
+        $dataType = "int16";
+    } else {
+        $dataType = $T_DATA_A;
+    }
 
 } elsif ( $splitRows ) {
     # using B
@@ -315,6 +344,7 @@ if ( $cascLen eq "" ) {
 }
 
 
+print "Data Type is $dataType\n";
 # get component parts of input/output filenames
 (my $inFileName, my $inFileDir, my $inFileExt) = fileparse($inFile, '\..*');
 
@@ -333,11 +363,12 @@ if ($outFile ne "" ) {
 print "Reading $inFile. \n";
 print "isTiled is $isTiled\n";
 
-
-
 my @resOutFiles;
 
 my @inText;
+if ($dataType eq "cint32" or $dataType eq "cfloat") {
+    doSamplePerLine($inFile);
+}
 if ( $cascLen eq "" ) { 
     # in this case, output is stil tiled and needs detiling. 
     if ( ! $isTiled ) { 
@@ -358,7 +389,6 @@ if ( $cascLen eq "" ) {
 
         tile_matrix($inFile);
     }
-
 } else { 
     
     if ($dataType eq "int16") {
@@ -403,6 +433,15 @@ if ( $cascLen eq "" ) {
             tile_matrix($fileForTile);
         } 
     }
+    if ($dataType eq "cint32" or $dataType eq "cfloat") {
+        # undoSamplePerLine($inFile);
+        for my $fileForTile (@resOutFiles) { 
+            undoSamplePerLine($fileForTile);
+        } 
+    }
+}
+if ($dataType eq "cint32" or $dataType eq "cfloat") {
+    undoSamplePerLine($inFile);
 }
 
 sub partition_matrix { 
@@ -523,7 +562,6 @@ sub partition_matrix {
         }
     }
 
-    
     print "Finished writing @resOutFiles .\nEnd of partitioning.\n";
 
 }
@@ -694,6 +732,7 @@ sub tile_matrix {
         int16_twoSamplesPerLine($resOutTileFile);
     }
     print "Finished writing $resOutTileFile .\nEnd of tiling.\n";
+
 }
 
 sub int16_twoSamplesPerLine { 
@@ -713,4 +752,52 @@ sub int16_twoSamplesPerLine {
         or die "couldn't close OUT";
 
 
+}
+            
+sub doSamplePerLine { 
+    my ($fileToParse) = @_ ; 
+
+    open(IN, '<' . $fileToParse) or die $!;
+    # rename($fileToParse, $fileToParse . '.plio');
+    my $samplePerLineFile = $fileToParse . ".samplePerLine";
+    open(OUT, '>' . $samplePerLineFile) or die $!;
+    my $count = 0;
+    my $line = "";
+    while (my $row = <IN>) {
+        chomp $row;
+        if ($count % 2 == 0){
+            $line = "$row";
+        } else {
+            print OUT "$line$row\n";
+        }
+        $count++;
+    }
+    close(OUT)
+        or die "couldn't close OUT";
+    close(IN)
+        or die "couldn't close IN";
+    rename($samplePerLineFile, $fileToParse);
+}
+
+
+
+
+sub undoSamplePerLine {
+    my ($fileToParse) = @_ ; 
+    open(IN, '<' . $fileToParse) or die $!;
+    my $plio32File = $fileToParse . ".plio";
+    open(OUT, '>' . $plio32File) or die $!;
+    my $line = "";
+    while (my $row = <IN>) {
+        chomp $row;
+        $line = "$row";
+        my @sample = split(' ', $row);
+        foreach my $i (@sample) {
+            print OUT "$i\n";
+        }
+
+    }
+    close(OUT)
+        or die "couldn't close OUT";    
+    rename($plio32File, $fileToParse);
 }

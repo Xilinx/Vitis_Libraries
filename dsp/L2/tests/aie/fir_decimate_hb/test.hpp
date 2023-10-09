@@ -77,7 +77,8 @@ class test_graph : public graph {
                                                       NUM_OUTPUTS,
                                                       PORT_API,
                                                       P_SSR,
-                                                      P_PARA_DECI_POLY>;
+                                                      P_PARA_DECI_POLY,
+                                                      SAT_MODE>;
 
     COEFF_TYPE m_taps[2][(FIR_LEN + 1) / 4 + 1];
     std::vector<COEFF_TYPE> m_taps_v;

@@ -77,6 +77,8 @@ INLINE_DECL void fnLoadXIpData(T_buff_1024b<TT_DATA>& buff, const unsigned int s
 
 #if (__HAS_ACCUM_PERMUTES__ == 1)
 
+#define CHESS_STORAGE_X_BUFF chess_storage(X_BUFFER)
+
 //-----------------------------------------------------------------------------------------------------
 template <typename TT_DATA>
 INLINE_DECL T_buff_512b<TT_DATA> select(const unsigned int sel,
@@ -187,6 +189,8 @@ INLINE_DECL T_buff_512b<TT_DATA> select(T_buff_1024b<TT_DATA> xbuff,
 }
 
 #else
+// clear out constraint
+#define CHESS_STORAGE_X_BUFF
 
 //-----------------------------------------------------------------------------------------------------
 template <typename TT_DATA, unsigned int Lanes, unsigned int Cols>
@@ -216,17 +220,16 @@ INLINE_DECL T_accDecAsym<TT_DATA, TT_COEFF> mulDecAsym(T_buff_1024b<TT_DATA> xbu
         constexpr(TP_DFX == kLowDF) {
             constexpr unsigned int DataStepY = TP_DECIMATE_FACTOR;
             T_accDecAsym<TT_DATA, TT_COEFF> retVal;
-            retVal.val = ::aie::sliding_mul_ops<
-                Lanes, Cols, CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
-                accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >::mul(zbuff.val, zstart,
-                                                                                            xbuff.val, xstart);
+            retVal.val =
+                ::aie::sliding_mul_ops<Lanes, Cols, CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
+                                       tAccBaseType_t<TT_DATA, TT_COEFF> >::mul(zbuff.val, zstart, xbuff.val, xstart);
             return retVal;
         }
     else if
         constexpr(TP_DFX == kHighDF) {
             using buf_type = typename T_buff_512b<TT_DATA>::v_type;
-            buf_type tmp;
-            // buf_type chess_storage(X_BUFFER) tmp;
+            // buf_type tmp;
+            buf_type CHESS_STORAGE_X_BUFF tmp;
             T_accDecAsym<TT_DATA, TT_COEFF> retVal;
             const unsigned int xoffsets = decimateOffsets;
             const unsigned int xmulstart = 0;
@@ -234,10 +237,9 @@ INLINE_DECL T_accDecAsym<TT_DATA, TT_COEFF> mulDecAsym(T_buff_1024b<TT_DATA> xbu
             T_buff_512b<TT_DATA> buff;
             buff = select<TT_DATA, Lanes, Cols>(xbuff, xstart, xoffsets, xstartUpper);
             tmp = buff.val;
-            retVal.val = ::aie::sliding_mul_ops<
-                Lanes, Cols, CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
-                accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >::mul(zbuff.val, zstart, tmp,
-                                                                                            xmulstart);
+            retVal.val =
+                ::aie::sliding_mul_ops<Lanes, Cols, CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
+                                       tAccBaseType_t<TT_DATA, TT_COEFF> >::mul(zbuff.val, zstart, tmp, xmulstart);
             return retVal;
         }
 }
@@ -260,17 +262,16 @@ INLINE_DECL T_accDecAsym<TT_DATA, TT_COEFF> macDecAsym(T_accDecAsym<TT_DATA, TT_
             constexpr unsigned int DataStepY = TP_DECIMATE_FACTOR;
 
             T_accDecAsym<TT_DATA, TT_COEFF> retVal;
-            retVal.val = ::aie::sliding_mul_ops<
-                Lanes, Cols, CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
-                accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >::mac(acc.val, zbuff.val, zstart,
-                                                                                            xbuff.val, xstart);
+            retVal.val = ::aie::sliding_mul_ops<Lanes, Cols, CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
+                                                tAccBaseType_t<TT_DATA, TT_COEFF> >::mac(acc.val, zbuff.val, zstart,
+                                                                                         xbuff.val, xstart);
             return retVal;
         }
     else if
         constexpr(TP_DFX == kHighDF) {
             using buf_type = typename T_buff_512b<TT_DATA>::v_type;
-            buf_type tmp;
-            // buf_type chess_storage(X_BUFFER) tmp;
+            // buf_type tmp;
+            buf_type CHESS_STORAGE_X_BUFF tmp;
             T_accDecAsym<TT_DATA, TT_COEFF> retVal;
             const unsigned int xoffsets = decimateOffsets;
             const unsigned int xmulstart = 0;
@@ -279,11 +280,11 @@ INLINE_DECL T_accDecAsym<TT_DATA, TT_COEFF> macDecAsym(T_accDecAsym<TT_DATA, TT_
 
             buff = select<TT_DATA, Lanes, Cols>(xbuff, xstart, xoffsets, xstartUpper);
             tmp = buff.val;
-            retVal.val = ::aie::sliding_mul_ops<
-                fnNumLanesDecAsym<TT_DATA, TT_COEFF>(), fnNumColumnsDecAsym<TT_DATA, TT_COEFF>(), CoeffStep, DataStepX,
-                DataStepY, TT_COEFF, TT_DATA,
-                accClassTag_t<fnAccClass<TT_DATA>(), fnAccSize<TT_DATA, TT_COEFF>()> >::mac(acc.val, zbuff.val, zstart,
-                                                                                            tmp, xmulstart);
+            retVal.val =
+                ::aie::sliding_mul_ops<fnNumLanesDecAsym<TT_DATA, TT_COEFF>(), fnNumColumnsDecAsym<TT_DATA, TT_COEFF>(),
+                                       CoeffStep, DataStepX, DataStepY, TT_COEFF, TT_DATA,
+                                       tAccBaseType_t<TT_DATA, TT_COEFF> >::mac(acc.val, zbuff.val, zstart, tmp,
+                                                                                xmulstart);
             return retVal;
         }
 }
@@ -356,24 +357,46 @@ INLINE_DECL void streamLoadAndDeinterleave(std::array<T_buff_1024b<TT_DATA>, TP_
 
             if
                 constexpr(std::is_same<TT_DATA, int16>::value) {
-                    // special case for int16
+                    std::array<T_buff_1024b<int32>, TP_NUM_INPUTS> sbuffArrayInt32;
+                    std::array<T_buff_256b<TT_DATA>, TP_NUM_INPUTS> streamReadData;
                     constexpr int int32Toint16Ratio = 2;
 
+#pragma unroll(TP_NUM_INPUTS)
+                    for (int j = 0; j < (TP_NUM_INPUTS); j++) {
+                        // initialize
+                        sbuffArrayInt32[j].val = ::aie::vector_cast<int32>(sbuffArray[j].val);
+                    }
+#pragma unroll(TP_NUM_INPUTS)
+                    for (int j = 0; j < (TP_NUM_INPUTS); j++) {
+                        readStream256(streamReadData[j], 0, inInterface);
+                    }
 #pragma unroll(TP_NUM_INPUTS* kSamplesInVec / int32Toint16Ratio)
                     for (int j = 0; j < (TP_NUM_INPUTS * kSamplesInVec / int32Toint16Ratio); j++) {
                         // Read scalar, as there's no efficient vector deinterleve instruction to operate on odd number
                         // of output vectors
-                        int32 readInt32 = readincr((input_stream_int32*)inInterface.inStream);
-                        int16 readSample = 0xFFFF & readInt32; // Extract bottom int16
+                        int buffIndex0 =
+                            ((2 * j / kSamplesInVec + (2 * j) * TP_NUM_INPUTS) / kSamplesInVec) % TP_NUM_INPUTS;
+                        int sampleIndex0 = (2 * j / kSamplesInVec + 2 * j * TP_NUM_INPUTS) % kSamplesInVec;
+                        int16 readSample0 = streamReadData[buffIndex0].val.get(sampleIndex0);
 
-                        unsigned int sampleIdx = (splice * kSamplesIn256b + 2 * j / TP_NUM_INPUTS) % kSamplesIn1024b;
+                        int buffIndex1 = (((2 * j + 1) / kSamplesInVec + (2 * j + 1) * TP_NUM_INPUTS) / kSamplesInVec) %
+                                         TP_NUM_INPUTS;
+                        int sampleIndex1 = ((2 * j + 1) / kSamplesInVec + (2 * j + 1) * TP_NUM_INPUTS) % kSamplesInVec;
+                        int16 readSample1 = streamReadData[buffIndex1].val.get(sampleIndex1);
 
-                        sbuffArray[(phaseOffset + (2 * j + 0)) % TP_NUM_INPUTS].val.set(readSample, sampleIdx);
-                        readSample = (readInt32 >> 16); // Extract bottom int16
+                        unsigned int writeSampleIdx =
+                            (splice * kSamplesIn256b / int32Toint16Ratio + j % (kSamplesInVec / int32Toint16Ratio)) %
+                            (kSamplesIn1024b / int32Toint16Ratio);
+                        unsigned int writeBuffIdx = (phaseOffset + (2 * j + 0)) / kSamplesInVec;
+                        int32 writeInt32Sample = (readSample1 << 16) | (0xFFFF & readSample0);
 
-                        sampleIdx = (splice * kSamplesIn256b + (2 * j + 1) / TP_NUM_INPUTS) % kSamplesIn1024b;
+                        sbuffArrayInt32[writeBuffIdx].val.set(writeInt32Sample, (writeSampleIdx));
+                    }
 
-                        sbuffArray[(phaseOffset + (2 * j + 1)) % TP_NUM_INPUTS].val.set(readSample, sampleIdx);
+#pragma unroll(TP_NUM_INPUTS)
+                    for (int j = 0; j < (TP_NUM_INPUTS); j++) {
+                        // initialize
+                        sbuffArray[j].val = ::aie::vector_cast<int16>(sbuffArrayInt32[j].val);
                     }
                 }
             else {

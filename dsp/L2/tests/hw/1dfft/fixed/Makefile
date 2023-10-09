@@ -62,7 +62,7 @@ PLATFORM := xilinx_u250_gen3x16_xdma_4_1_202210_1
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
-PLATFORM_ALLOWLIST +=  u250 vck190
+PLATFORM_ALLOWLIST +=  u250
 PLATFORM_BLOCKLIST +=  zc
 
 include ./utils.mk

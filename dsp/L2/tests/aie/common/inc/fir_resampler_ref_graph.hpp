@@ -49,7 +49,8 @@ template <typename TT_DATA,
           unsigned int TP_API = 0,
           unsigned int TP_SSR = 1,
           unsigned int TP_PARA_INTERP_POLY = 1,
-          unsigned int TP_PARA_DECI_POLY = 1>
+          unsigned int TP_PARA_DECI_POLY = 1,
+          unsigned int TP_SAT = 1>
 class fir_resampler_ref_graph : public graph {
    private:
     using in2_port = typename std::conditional<(TP_DUAL_IP == 1), port<input>, empty>::type;
@@ -79,7 +80,7 @@ class fir_resampler_ref_graph : public graph {
         // Create FIR class with static coeffs - passed at construction
         m_firKernel = kernel::create_object<
             fir_resampler_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT,
-                              TP_RND, TP_INPUT_WINDOW_VSIZE, TP_USE_COEFF_RELOAD, kNumFirKernelOutputs> >(taps);
+                              TP_RND, TP_INPUT_WINDOW_VSIZE, TP_USE_COEFF_RELOAD, kNumFirKernelOutputs, TP_SAT> >(taps);
 
         make_connections();
     };
@@ -89,7 +90,7 @@ class fir_resampler_ref_graph : public graph {
         // Create FIR class with reloadable coeffs - passed through graph's update()
         m_firKernel = kernel::create_object<
             fir_resampler_ref<TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INTERPOLATE_FACTOR, TP_DECIMATE_FACTOR, TP_SHIFT,
-                              TP_RND, TP_INPUT_WINDOW_VSIZE, TP_USE_COEFF_RELOAD, kNumFirKernelOutputs> >();
+                              TP_RND, TP_INPUT_WINDOW_VSIZE, TP_USE_COEFF_RELOAD, kNumFirKernelOutputs, TP_SAT> >();
         make_connections();
     };
     void make_connections() {

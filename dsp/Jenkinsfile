@@ -1,7 +1,7 @@
 @Library('pipeline-library')_
 
 VitisLibPipeline (branch: 'next', libname: 'xf_dsp', TARGETS: 'hls_csim:hls_csynth:hls_cosim:vitis_sw_emu:vitis_hw_emu:vitis_hw_build:vitis_hw_run:vitis_aie_sim:vitis_aie_x86sim',
-                  upstream_dependencies: 'xf_utils_hw,next,../utils; dsplib_internal_scripts,main,../dsplib_internal_scripts',
+                  upstream_dependencies: 'xf_utils_hw,next,../utils; xf_data_mover,next,../data_mover; dsplib_internal_scripts,main,../dsplib_internal_scripts',
                   devtest: 'RunDeploy.sh', TOOLVERSION: '2023.2_stable_latest',
                   email: 'uvimalku@amd.com',
                   post_launch: '../dsplib_internal_scripts/scripts/html_reporting/create_html_report.sh |& tee -a reporting_log.txt')

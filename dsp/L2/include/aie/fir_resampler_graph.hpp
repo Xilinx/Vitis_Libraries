@@ -70,7 +70,7 @@ enum IO_API { WINDOW = 0, STREAM };
  * @tparam TP_SHIFT describes power of 2 shift down applied to the accumulation of
  *         FIR terms before output. \n TP_SHIFT must be in the range 0 to 61.
  * @tparam TP_RND describes the selection of rounding to be applied during the
- *         shift down stage of processing. Although, TP_RND accepts unsignedinteger values
+ *         shift down stage of processing. Although, TP_RND accepts unsigned integer values
  *         descriptive macros are recommended where
  *         - rnd_floor      = Truncate LSB, always round down (towards negative infinity).
  *         - rnd_ceil       = Always round up (towards positive infinity).
@@ -137,11 +137,11 @@ enum IO_API { WINDOW = 0, STREAM };
   * @tparam TP_SSR specifies the number of parallel input paths where samples are interleaved between paths,
  giving an overall higher throughput.   \n
  *         An SSR of 1 means just one input path, and is the backwards compatible option.
- *         SSR Decmoposition is currently unavailable. Please set TP_SSR to 1 and use
+ *         SSR Decomposition is currently unavailable. Please set TP_SSR to 1 and use
  *         TP_PARA_INTERP_POLY/TP_PARA_DECI_POLY for Super Sample operation modes.
  * @tparam TP_PARA_INTERP_POLY sets the number of interpolator polyphases over which the coefficients will be split to
  enable parallel computation of the outputs. \n
- *         The polyphases are executed parallelly, output data is produced by each polyphase directly. \n
+ *         The polyphases are executed in parallel, output data is produced by each polyphase directly. \n
  *         TP_PARA_INTERP_POLY does not affect the number of input data paths. \n
  *         There will be TP_SSR input phases irrespective of the value of TP_PARA_INTERP_POLY. \n
  *         TP_PARA_INTERP_POLY = TP_INTERPOLATE_FACTOR will result in an interpolate factor of polyphases,
@@ -154,8 +154,15 @@ enum IO_API { WINDOW = 0, STREAM };
  * and executed in a series of pipelined cascade stages, resulting in additional input paths. \n
  *         A TP_PARA_DECI_POLY of 1 means just one input leg, and is the backwards compatible option. \n
  *         TP_PARA_DECI_POLY = TP_DECIMATE_FACTOR will result in an decimate factor of polyphases,
- * operating as independant single rate filters connected by cascades. *
+ * operating as independent single rate filters connected by cascades. *
  *         The number of AIEs used is given by TP_PARA_DECI_POLY * TP_SSR^2 * TP_CASC_LEN. \n
+ * @tparam TP_SAT describes the selection of saturation to be applied during the
+ *         shift down stage of processing. TP_SAT accepts unsigned integer values, where:
+ *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
+ *         - 1: saturate       = Default. Saturation rounds an n-bit signed value in the range [- ( 2^(n-1) ) : +2^(n-1)
+- 1 ].
+ *         - 3: symmetric      = Controls symmetric saturation. Symmetric saturation rounds an n-bit signed value in the
+range [- ( 2^(n-1) -1 ) : +2^(n-1) - 1 ]. \n
  *
 **/
 
@@ -174,7 +181,8 @@ template <typename TT_DATA,
           unsigned int TP_API = 0,
           unsigned int TP_SSR = 1,
           unsigned int TP_PARA_INTERP_POLY = 1,
-          unsigned int TP_PARA_DECI_POLY = 1>
+          unsigned int TP_PARA_DECI_POLY = 1,
+          unsigned int TP_SAT = 1>
 class fir_resampler_graph : public graph {
    private:
     static_assert(TP_CASC_LEN <= 40, "ERROR: Unsupported Cascade length");
@@ -212,7 +220,7 @@ class fir_resampler_graph : public graph {
                   "Module size of 32kB");
     // SSR is decomposition is currently unavailable
     static_assert(TP_SSR == 1,
-                  "ERROR: SSR Decmoposition is currently unavailable. Please set TP_SSR to 1 and use "
+                  "ERROR: SSR Decomposition is currently unavailable. Please set TP_SSR to 1 and use "
                   "TP_PARA_INTERP_POLY/TP_PARA_DECI_POLY for Super Sample operation modes.");
 
     static constexpr unsigned int TP_CASC_IN = 0;
@@ -249,7 +257,8 @@ class fir_resampler_graph : public graph {
                                            TP_USE_COEFF_RELOAD,
                                            TP_NUM_OUTPUTS,
                                            TP_DUAL_IP,
-                                           TP_API>;
+                                           TP_API,
+                                           TP_SAT>;
 
     /**
      * Base value FIFO Depth, in words (32-bits).
@@ -323,6 +332,7 @@ class fir_resampler_graph : public graph {
         static constexpr unsigned int BTP_COEFF_PHASES_LEN = TP_FIR_LEN;
         static constexpr unsigned int BTP_PARA_INTERP_POLY = TP_PARA_INTERP_POLY;
         static constexpr int BTP_MODIFY_MARGIN_OFFSET = 0;
+        static constexpr unsigned int BTP_SAT = TP_SAT;
     };
     static constexpr unsigned int lastSSRDim = (TP_SSR * TP_SSR) - 1;
 

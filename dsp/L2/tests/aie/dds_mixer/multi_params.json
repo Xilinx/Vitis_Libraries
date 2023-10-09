@@ -1,5 +1,5 @@
 {
-    "test_0_dds_mixer": {
+    "test_0_tool_canary_aie":{
         "DATA_TYPE": "cint16",
         "MIXER_MODE": "0",
         "INPUT_WINDOW_VSIZE": "256",
@@ -11,7 +11,9 @@
         "DIFF_TOLERANCE": "4",
         "CC_TOLERANCE": "0",
         "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0"
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
     "test_1_dds_mixer": {
         "DATA_TYPE": "cint16",
@@ -25,7 +27,9 @@
         "DIFF_TOLERANCE": "4",
         "CC_TOLERANCE": "0",
         "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0"
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
     "test_2_dds_mixer": {
         "DATA_TYPE": "cint16",
@@ -39,7 +43,9 @@
         "DIFF_TOLERANCE": "4",
         "CC_TOLERANCE": "0",
         "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0"
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
     "test_3_dds_mixer": {
         "DATA_TYPE": "cint16",
@@ -53,7 +59,9 @@
         "DIFF_TOLERANCE": "4",
         "CC_TOLERANCE": "0",
         "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0"
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
     "test_5_dds_mixer": {
         "DATA_TYPE": "cint32",
@@ -67,7 +75,9 @@
         "DIFF_TOLERANCE": "4",
         "CC_TOLERANCE": "0",
         "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0"
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     },
     "test_6_dds_mixer": {
         "DATA_TYPE": "cfloat",
@@ -81,6 +91,8 @@
         "INITIAL_DDS_OFFSET": "0",
         "DDS_PHASE_INC": "1797958314",
         "DATA_SEED": "1",
-        "DATA_STIM_TYPE": "0"
+        "DATA_STIM_TYPE": "0",
+        "ROUND_MODE":"4",
+        "SAT_MODE":"1"
     }
 }

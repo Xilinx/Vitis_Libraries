@@ -4,8 +4,7 @@
     "description": "Xilinx 1D FFT Float Reference Design",
     "flow": "vitis",
     "platform_allowlist": [
-        "u250",
-        "vck190"
+        "u250"
     ],
     "platform_blocklist": [
         "zc"
@@ -126,7 +125,7 @@
                     "vitis_hw_build": 470,
                     "vitis_hw_emu": 600,
                     "vitis_sw_emu": 60,
-                    "vitis_hw_run": 10
+                    "vitis_hw_run": 30
                 }
             }
         ],

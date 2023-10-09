@@ -76,8 +76,8 @@
     "v++": {
         "compiler": {
             "includepaths": [
-                "LIB_DIR/../utils/L1/include/hw",
-                "LIB_DIR/../utils/L2/src/sw/datamvoer",
+                "LIB_DIR/../data_mover/L1/include",
+                "LIB_DIR/../data_mover/L2/src/sw/datamover",
                 "PROJECT/kernel",
                 "PROJECT"
             ]
@@ -93,9 +93,6 @@
                 "LIB_DIR/L2/include/aie",
                 "LIB_DIR/L2/tests/aie/common/inc",
                 "./"
-            ],
-            "clflags": [
-                "-Xpreproc=\"-DUUT_GRAPH=matrix_mult_graph -DOUTPUT_FILE=./data/uut_output.txt -DINPUT_FILE_A=./data/inputA.txt -DINPUT_FILE_B=./data/inputB.txt -DT_DATA_A=cint16 -DT_DATA_B=cint16 -DP_DIM_A=16 -DP_DIM_AB=16 -DP_DIM_B=16 -DP_SHIFT=20 -DP_ROUND_MODE=0 -DP_DIM_A_LEADING=0 -DP_DIM_B_LEADING=1 -DP_DIM_OUT_LEADING=0 -DP_ADD_TILING_A=1 -DP_ADD_TILING_B=1 -DP_ADD_DETILING_OUT=1 -DP_INPUT_WINDOW_VSIZE_A=256 -DP_INPUT_WINDOW_VSIZE_B=256 -DP_CASC_LEN=1 -DSTIM_TYPE_A=0 -DSTIM_TYPE_B=0 -DNITER=16 -DUSING_UUT=1 -DUSING_PL_MOVER=1\""
             ]
         }
     },
@@ -109,7 +106,7 @@
                         "LIB_DIR/L1/src/aie/matrix_mult_tiler.cpp",
                         "LIB_DIR/L1/src/aie/matrix_mult_untiler.cpp"
                     ],
-                    "pl-freq": 1000,
+                    "config": "aie.cfg",
                     "workdir": "./Work",
                     "options": "",
                     "name": "libadf.a",
@@ -126,17 +123,17 @@
         {
             "accelerators": [
                 {
-                    "location": "LIB_DIR/../utils/L2/src/sw/datamover/mm2s.cpp",
+                    "location": "LIB_DIR/../data_mover/L2/src/sw/data_mover/mm2s.cpp",
                     "clflags": " ",
                     "name": "mm2s"
                 },
                 {
-                    "location": "LIB_DIR/../utils/L2/src/sw/datamover/bmm2s.cpp",
+                    "location": "LIB_DIR/../data_mover/L2/src/sw/data_mover/bmm2s.cpp",
                     "clflags": " ",
                     "name": "bmm2s"
                 },
                 {
-                    "location": "LIB_DIR/../utils/L2/src/sw/datamover/s2mm.cpp",
+                    "location": "LIB_DIR/../data_mover/L2/src/sw/data_mover/s2mm.cpp",
                     "clflags": " ",
                     "name": "s2mm"
                 }

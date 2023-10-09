@@ -1,5 +1,5 @@
 {
-        "test_0": {
+        "test_0_tool_canary_aie":{
             "DATA_TYPE":"int8",
             "WINDOW_VSIZE":"256",
             "DATA_STIM_TYPE":"0",
@@ -159,5 +159,5 @@
 			"MAX_DELAY":"256",
             "NITER":"16"
         }
-       
+
 }

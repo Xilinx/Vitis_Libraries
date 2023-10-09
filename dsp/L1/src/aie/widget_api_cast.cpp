@@ -388,10 +388,8 @@ INLINE_DECL void kernelClass<TT_DATA,
     constexpr int kCascVWidth = fnFFTCascVWidth<TT_DATA>();
     using t256VectorType = ::aie::vector<TT_DATA, kSamplesIn256b>;
     using t512VectorType = ::aie::vector<TT_DATA, kSamplesIn256b * 2>;
-    using accTag = typename accClassTag< ::aie::detail::AccumClass::CInt, sizeof(TT_DATA) * 8>::type;
-    using accVect_t = ::aie::detail::accum<fnAccClass<TT_DATA>(),        // int, cint, FP or CFP
-                                           fnFFTAccWidthCasc<TT_DATA>(), // acc width per sample
-                                           kCascVWidth>;                 //#samples in the casc vector;
+    using accTag = typename tFFTAccBaseType<TT_DATA>::type;
+    using accVect_t = ::aie::accum<accTag, kCascVWidth>;
     input_stream<accTag>* __restrict inCasc0 = (input_stream<accTag>*)inInterface.inStream0;
     accVect_t acc;
     t256VectorType readVal1, readVal1a, readVal1b;
@@ -453,10 +451,8 @@ INLINE_DECL void kernelClass<TT_DATA,
     constexpr int kCascVWidth = fnFFTCascVWidth<TT_DATA>();
     using t256VectorType = ::aie::vector<TT_DATA, kSamplesIn256b>;
     using t512VectorType = ::aie::vector<TT_DATA, kSamplesIn256b * 2>;
-    using accTag = typename accClassTag< ::aie::detail::AccumClass::CInt, sizeof(TT_DATA) * 8>::type;
-    using accVect_t = ::aie::detail::accum<fnAccClass<TT_DATA>(),        // int, cint, FP or CFP
-                                           fnFFTAccWidthCasc<TT_DATA>(), // acc width per sample
-                                           kCascVWidth>;                 //#samples in the casc vector;
+    using accTag = typename tFFTAccBaseType<TT_DATA>::type;
+    using accVect_t = ::aie::accum<accTag, kCascVWidth>;
     input_stream<accTag>* __restrict inCasc1 = (input_stream<accTag>*)inInterface.inStream1;
     accVect_t acc;
     t256VectorType readVal1, readVal1a, readVal1b;
@@ -523,10 +519,8 @@ INLINE_DECL void kernelClass<TT_DATA,
     t256VectorType out256a, out256b, out256a0, out256a1;
     t512VectorType out512a;
     t256VectorType* rdptr0 = (t256VectorType*)inInterface.inWindow0; //&outBuff[0];
-    using accTag = typename accClassTag< ::aie::detail::AccumClass::CInt, sizeof(TT_DATA) * 8>::type;
-    using accVect_t = ::aie::detail::accum<fnAccClass<TT_DATA>(),        // int, cint, FP or CFP
-                                           fnFFTAccWidthCasc<TT_DATA>(), // acc width per sample
-                                           kCascVWidth>;                 //#samples in the casc vector;
+    using accTag = typename tFFTAccBaseType<TT_DATA>::type;
+    using accVect_t = ::aie::accum<accTag, kCascVWidth>;
     accVect_t acc;
     output_stream<accTag>* __restrict outCasc0 = (output_stream<accTag>*)outInterface.outStream0;
 
@@ -585,10 +579,8 @@ INLINE_DECL void kernelClass<TT_DATA,
     t256VectorType out256a, out256b, out256b0, out256b1;
     t512VectorType out512b;
     t256VectorType* rdptr0 = (t256VectorType*)inInterface.inWindow0; //&outBuff[0];
-    using accTag = typename accClassTag< ::aie::detail::AccumClass::CInt, sizeof(TT_DATA) * 8>::type;
-    using accVect_t = ::aie::detail::accum<fnAccClass<TT_DATA>(),        // int, cint, FP or CFP
-                                           fnFFTAccWidthCasc<TT_DATA>(), // acc width per sample
-                                           kCascVWidth>;                 //#samples in the casc vector;
+    using accTag = typename tFFTAccBaseType<TT_DATA>::type;
+    using accVect_t = ::aie::accum<accTag, kCascVWidth>;
     accVect_t acc;
     output_stream<accTag>* __restrict outCasc1 = (output_stream<accTag>*)outInterface.outStream1;
 
