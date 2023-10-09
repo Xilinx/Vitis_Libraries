@@ -340,10 +340,11 @@
                 "target_domain": "PL",
                 "visible": false,
                 "header_file_name": [
-                    "ip_svpwm.hpp"
+                    "svpwm.hpp"
                 ],
                 "search_paths": [
-                    "L1/tests/IP_SVPWM/src"
+                    "L1/tests/IP_SVPWM/src",
+                    "L1/include/hw"
                 ],
                 "instance": "function",
                 "parameters": [],
