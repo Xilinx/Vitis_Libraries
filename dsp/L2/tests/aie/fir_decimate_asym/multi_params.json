@@ -806,5 +806,31 @@
         "DATA_STIM_TYPE": "0",
         "COEFF_STIM_TYPE": "0",
         "SAT_MODE":"1"
+    },
+    "test_11_aieml_fir_cint16_int16_stream_ssr": {
+        "DATA_TYPE": "cint16",
+        "COEFF_TYPE": "int16",
+        "FIR_LEN": "16",
+        "DECIMATE_FACTOR": "2",
+        "SHIFT": "16",
+        "INPUT_WINDOW_VSIZE": "512",
+        "PORT_API": "1",
+        "AIE_VARIANT": "2",
+        "NITER": "16",
+        "COEFF_SIZE": "2",
+        "ROUND_MODE": "0",
+        "CASC_LEN": "1",
+        "DUAL_IP": "0",
+        "USE_COEFF_RELOAD": "0",
+        "INTERPOLATE_FACTOR": "1",
+        "NUM_OUTPUTS": "1",
+        "USE_CUSTOM_CONSTRAINT": "0",
+        "UUT_SSR": "2",
+        "UUT_PARA_INTERP_POLY": "1",
+        "UUT_PARA_DECI_POLY": "1",
+        "DATA_SEED": "1",
+        "DATA_STIM_TYPE": "0",
+        "COEFF_STIM_TYPE": "0",
+        "SAT_MODE":"1"
     }
 }

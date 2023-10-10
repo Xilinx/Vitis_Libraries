@@ -93,7 +93,7 @@ Vitis |trade| AIE DSP Library provides a SSR FFT implementation targeting AIE, a
 
    Introduction <user_guide/L2/introduction.rst>
    DSP Library Functions <user_guide/L2/dsp-lib-func.rst>
-   Compiling and Simulating Using the Makefile <user_guide/L2/compiling-and-simulating.rst>
+   Compiling and Simulating <user_guide/L2/compiling-and-simulating.rst>
    Benchmark/QoR <user_guide/L2/benchmark.rst>
 
 .. toctree::

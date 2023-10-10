@@ -326,7 +326,7 @@ def fn_validate_ssr(TP_SSR, TP_INTERPOLATE_FACTOR, TP_API):
     if TP_SSR < TP_SSR_min:
 	    return isError(f"Minimum value for SSR is {TP_SSR_min}, but got {TP_SSR}.")
     ssrIPFactorCheck = fn_interp_ssr(TP_INTERPOLATE_FACTOR, TP_SSR)
-    
+
     return ssrIPFactorCheck
 
 def fn_validate_casc_len(TP_CASC_LEN):
@@ -451,8 +451,8 @@ def generate_graph(graphname, args):
   constr_args_str = f"taps" if TP_USE_COEF_RELOAD == 0 else ""
   dual_ip_declare_str = f" std::array<adf::port<input>, TP_SSR> in2;" if TP_DUAL_IP == 1 else "// No dual input"
   dual_ip_connect_str = f"adf::connect<> net_in2(in2[ssrIdx], filter.in2[ssrIdx]);" if TP_DUAL_IP == 1 else "// No dual input"
-  coeff_ip_declare_str = f"std::array<adf::port<input>, TP_SSR> coeff;" if TP_USE_COEF_RELOAD == 1 else "//No coeff port"
-  coeff_ip_connect_str = f"adf::connect<> net_coeff(coeff[ssrIdx], filter.coeff[ssrIdx]);" if TP_USE_COEF_RELOAD == 1 else "//No coeff port"
+  coeff_ip_declare_str = f"std::array<adf::port<input>, TP_SSR*TP_PARA_INTERP_POLY> coeff;" if TP_USE_COEF_RELOAD == 1 else "//No coeff port"
+  coeff_ip_connect_str = f"adf::connect<> net_coeff(coeff[outPortIdx], filter.coeff[outPortIdx]);" if TP_USE_COEF_RELOAD == 1 else "//No coeff port"
 
   dual_op_declare_str = f"std::array<adf::port<output>, TP_SSR*TP_PARA_INTERP_POLY> out2;" if TP_NUM_OUTPUTS == 2 else "// No dual output"
   dual_op_connect_str = f"adf::connect<> net_out2(filter.out2[outPortIdx], out2[outPortIdx]);" if TP_NUM_OUTPUTS == 2 else "// No dual output"
@@ -497,7 +497,6 @@ public:
     for (int ssrIdx=0; ssrIdx < TP_SSR; ssrIdx++) {{
       adf::connect<> net_in(in[ssrIdx], filter.in[ssrIdx]);
       {dual_ip_connect_str}
-      {coeff_ip_connect_str}
     }}
 
     for (int paraPolyIdx=0; paraPolyIdx < TP_PARA_INTERP_POLY; paraPolyIdx++) {{
@@ -505,6 +504,7 @@ public:
         unsigned outPortIdx = paraPolyIdx+ssrIdx*TP_PARA_INTERP_POLY;
         adf::connect<> net_out(filter.out[outPortIdx], out[outPortIdx]);
       {dual_op_connect_str}
+      {coeff_ip_connect_str}
       }}
     }}
   }}

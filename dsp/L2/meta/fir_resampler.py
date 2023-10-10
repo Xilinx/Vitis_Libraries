@@ -669,7 +669,7 @@ def fn_validate_ssr(TP_SSR, TP_API, TP_DECIMATE_FACTOR, TP_PARA_DECI_POLY, TP_IN
     if TP_SSR > TP_SSR_max:
         return isError(f"Maximum value for SSR is {TP_SSR_max}, but got {TP_SSR}.")
     if (TP_PARA_INTERP_POLY > 1 and TP_INTERPOLATE_FACTOR != TP_PARA_INTERP_POLY):
-        return isError(f"SSR decomposition is only supported when interpolation process is fully decomposed into parallel polyphases, i.e. TP_INTERPOLATE_FACTOR {TP_INTERPOLATE_FACTOR} must match TP_PARA_DECI_POLY {TP_PARA_INTERP_POLY}.")
+        return isError(f"SSR decomposition is only supported when interpolation process is fully decomposed into parallel polyphases, i.e. TP_INTERPOLATE_FACTOR {TP_INTERPOLATE_FACTOR} must match TP_PARA_INTERP_POLY {TP_PARA_INTERP_POLY}.")
     if (TP_PARA_DECI_POLY > 1 and TP_DECIMATE_FACTOR != TP_PARA_DECI_POLY):
         return isError(f"SSR decomposition is only supported when decimation process is fully decomposed into parallel polyphases, i.e. TP_DECIMATE_FACTOR {TP_DECIMATE_FACTOR} must match TP_PARA_DECI_POLY {TP_PARA_DECI_POLY}.")
     ssrPolyCheck = fn_ssr_poly(AIE_VARIANT, TP_DECIMATE_FACTOR, TP_SSR, TP_PARA_DECI_POLY)
@@ -801,8 +801,11 @@ def generate_graph(graphname, args):
 
     taps = sr_asym.fn_get_taps_vector(TT_COEF, coeff_list)
     constr_args_str = f"taps" if TP_USE_COEF_RELOAD == 0 else ""
+    dual_ip_declare_str = (
+        f"ssr_port_array<input, IN_SSR> in2;" if TP_DUAL_IP == 1 else "// No dual input"
+    )
     dual_ip_connect_str = (
-        f"connect<>(in[plioBaseIdxIn + 1], filter.in2[i]);"
+        f"connect<>(in2[i], filter.in2[i]);"
         if TP_DUAL_IP == 1
         else "// No dual input"
     )
@@ -818,15 +821,14 @@ def generate_graph(graphname, args):
         if TP_USE_COEF_RELOAD == 1
         else "//No coeff port"
     )
+    dual_op_declare_str = (
+        f"ssr_port_array<output, OUT_SSR> out2;" if TP_NUM_OUTPUTS == 2 else "// No dual output"
+    )
     dual_op_connect_str = (
-        f"connect<>(filter.out2[i], out[plioBaseIdxOut + 1].in[0]);"
+        f"connect<>(filter.out2[i], out2[i]);"
         if TP_NUM_OUTPUTS == 2
         else "// No dual output"
     )
-    if TP_DUAL_IP == 1 and TP_API == 1:
-        dual_input_samples = 1
-    else:
-        dual_input_samples = 0
 
     IN_SSR = TP_SSR * TP_PARA_DECI_POLY
     OUT_SSR = TP_SSR * TP_PARA_INTERP_POLY
@@ -840,14 +842,15 @@ public:
     static constexpr unsigned int RTP_SSR = {RTP_SSR};
     static constexpr unsigned int OUT_SSR = {OUT_SSR};
 
-    static constexpr unsigned int DUAL_INPUT_SAMPLES = {dual_input_samples};
 
     template <typename dir, unsigned int num_ports>
     using ssr_port_array = std::array<adf::port<dir>, num_ports>;
 
-    ssr_port_array<input, IN_SSR * (DUAL_INPUT_SAMPLES + 1)> in;
+    ssr_port_array<input, IN_SSR> in;
+    {dual_ip_declare_str}
     {coeff_ip_declare_str}
-    ssr_port_array<output, OUT_SSR * {TP_NUM_OUTPUTS}> out;
+    ssr_port_array<output, OUT_SSR> out;
+    {dual_op_declare_str}
 
     std::vector<{TT_COEF}> taps = {taps};
     xf::dsp::aie::fir::resampler::fir_resampler_graph<
@@ -878,14 +881,13 @@ public:
 
         for (unsigned int i = 0; i < IN_SSR; ++i) {{
             // Size of window in Bytes.
-            unsigned int plioBaseIdxIn = i * (DUAL_INPUT_SAMPLES + 1);
-            connect<>(in[plioBaseIdxIn], filter.in[i]);
+            connect<>(in[i], filter.in[i]);
             {dual_ip_connect_str}
         }}
-    
+
         for (unsigned int i = 0; i < OUT_SSR; ++i) {{
-            unsigned int plioBaseIdxOut = i * {TP_NUM_OUTPUTS};
-            connect<>(filter.out[i], out[plioBaseIdxOut]);
+            connect<>(filter.out[i], out[i]);
+            {dual_op_connect_str}
         }}
 
         {coeff_ip_connect_str}

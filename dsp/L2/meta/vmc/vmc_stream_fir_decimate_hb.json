@@ -147,6 +147,11 @@
       "enum": [0, 1, 2, 3, 4, 5, 6, 7],
       "enum_str": ["Floor", "Ceiling", "Round to positive infinity", "Round to negative infinity", "Round symmetrical to infinity", "Round symmetrical to zero", "Round convergent to even", "Round convergent to odd"],
       "default": 2,
+      "validator": {
+        "file": "vmc_stream_fir_decimate_hb.py",
+        "function": "vmc_validate_rnd_mode",
+        "args": ["AIE_VARIANT"]
+      },
       "blockgui":{
             "label": "Rounding mode:",
             "tablabel": "Main",

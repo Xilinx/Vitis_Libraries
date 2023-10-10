@@ -117,7 +117,18 @@
             "parameterType":"popup"
 		}
 	},
-    {
+	{ 
+      "key": "TP_USE_WIDGETS",
+      "name": "use_ssr_widget_kernels",
+      "type":"bool", 
+      "default": false,
+      "blockgui":{
+            "label": "Use Widget for SSR Kernels",
+            "tablabel": "Main",
+            "parameterType":"checkbox"
+		}
+	},
+	{
       "key": "TP_CASC_LEN",
       "name": "casc_length",
       "description": "The length of cascaded kernels",

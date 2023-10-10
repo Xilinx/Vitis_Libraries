@@ -1,0 +1,10 @@
+digraph G {
+data_type -> point_size;
+AIE_VARIANT -> rnd_mode;
+data_type -> twiddle_type;
+point_size -> input_window_size;
+data_type -> shift_val;
+point_size -> shift_val;
+data_type -> casc_length;
+point_size -> casc_length;
+}

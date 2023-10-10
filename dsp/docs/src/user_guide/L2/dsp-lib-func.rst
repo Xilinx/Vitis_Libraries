@@ -1,4 +1,4 @@
-.. 
+..
    Copyright (C) 2019-2022, Xilinx, Inc.
    Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
     
@@ -38,9 +38,9 @@ The DSPLib consists of the following DSP elements:
    Filters <func-fir-filtersAIE.rst>
    Matrix Multiply <func-matmul.rst>
    Matrix-Vector Multiply <func-matrix_vector_mul.rst>
+   Sample Delay <func-sample_delay.rst>
    Widget API Cast <func-widget-apicast.rst>
    Widget Real to Complex <func-widget-real2comp.rst>
-   Sample Delay <func-sample_delay.rst>
 
 .. |image1| image:: ./media/image1.png
 .. |image2| image:: ./media/image2.png

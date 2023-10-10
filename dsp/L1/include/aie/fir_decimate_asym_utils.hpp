@@ -387,7 +387,7 @@ INLINE_DECL void streamLoadAndDeinterleave(std::array<T_buff_1024b<TT_DATA>, TP_
                         unsigned int writeSampleIdx =
                             (splice * kSamplesIn256b / int32Toint16Ratio + j % (kSamplesInVec / int32Toint16Ratio)) %
                             (kSamplesIn1024b / int32Toint16Ratio);
-                        unsigned int writeBuffIdx = (phaseOffset + (2 * j + 0)) / kSamplesInVec;
+                        unsigned int writeBuffIdx = (phaseOffset + ((2 * j + 0)) / kSamplesInVec) % TP_NUM_INPUTS;
                         int32 writeInt32Sample = (readSample1 << 16) | (0xFFFF & readSample0);
 
                         sbuffArrayInt32[writeBuffIdx].val.set(writeInt32Sample, (writeSampleIdx));

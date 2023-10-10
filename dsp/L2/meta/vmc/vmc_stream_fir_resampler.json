@@ -89,7 +89,7 @@
       "validator": {
         "file": "vmc_stream_fir_resampler.py",
         "function": "vmc_validate_coeff",
-        "args": ["use_coeff_reload", "coef_type" ,"fir_length", "data_type", "casc_length", "decimate_factor", "interpolate_factor", "AIE_VARIANT"]
+        "args": ["use_coeff_reload", "coef_type" ,"fir_length", "data_type", "casc_length", "decimate_factor", "interpolate_factor", "AIE_VARIANT","deci_poly","interp_poly"]
       },
       "blockgui": {
           "label": "Filter coefficients:",
@@ -179,6 +179,11 @@
       "enum": [0, 1, 2, 3, 4, 5, 6, 7],
       "enum_str": ["Floor", "Ceiling", "Round to positive infinity", "Round to negative infinity", "Round symmetrical to infinity", "Round symmetrical to zero", "Round convergent to even", "Round convergent to odd"],
       "default": 2,
+      "validator": {
+        "file": "vmc_stream_fir_resampler.py",
+        "function": "vmc_validate_rnd_mode",
+        "args": ["AIE_VARIANT"]
+      },
       "blockgui": {
           "label": "Rounding mode:",
             "tablabel": "Main",

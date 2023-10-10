@@ -1,4 +1,4 @@
-.. 
+..
    Copyright (C) 2019-2022, Xilinx, Inc.
    Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
     
@@ -21,7 +21,7 @@ API Reference Overview
 **********************
 
 For all library elements, the recommended manner to use an instance of each library unit is to include an instance of the library element as a sub-graph of your graph.
-The graph declarations may be found in L2/include/aie/.
+The graph declarations may be found in: `L2/include/aie/`.
 This section describes the interface to each library element, i.e., configuration parameters, constructor arguments, and ports.
 
 
@@ -33,8 +33,8 @@ This section describes the interface to each library element, i.e., configuratio
 - `FIRs <../../rst/group_fir_graphs.html>`_
 - `GeMM <../../rst/group_gemm_graph.html>`_
 - `GeMV <../../rst/group_matrix_vector_mul_graph.html>`_
-- `Widgets <../../rst/group_widget_graph.html>`_
 - `Sample Delay <../../rst/group_sample_delay_graph.html>`_
+- `Widgets <../../rst/group_widget_graph.html>`_
 
 
 .. |image1| image:: ./media/image1.png

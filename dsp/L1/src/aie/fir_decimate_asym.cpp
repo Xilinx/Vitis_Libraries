@@ -1150,7 +1150,8 @@ void kernelFilterClass<TT_DATA,
         CEIL(CEIL(TP_FIR_RANGE_LEN, kParallelPhases) / kParallelPhases, m_kColumns);
     // static constexpr unsigned int  kDataMappedToPhaseOffset    = (kParallelPhases - ((m_kFirMargin -
     // m_kFirInitWinOffset)% kParallelPhases)) % kParallelPhases;
-    static constexpr unsigned int kDataMappedToPhaseOffset = 0;
+    static constexpr unsigned int kDataMappedToPhaseOffset =
+        (kParallelPhases + TP_MODIFY_MARGIN_OFFSET) % kParallelPhases;
     static constexpr std::array<unsigned int, kParallelPhases> kDataMappedToPhasestartOffset =
         fnPhaseStartOffsets<kDataMappedToPhaseOffset, kParallelPhases>();
     // static constexpr int streamInitNullAccs           = getInitNullAccs<dataOffsetNthKernel, TP_DECIMATE_FACTOR,
@@ -1164,12 +1165,12 @@ void kernelFilterClass<TT_DATA,
     // data offset = index where data is initially loaded - number of coeffs still to compute, i.e. this and downstream
     // kernels TP_FIR_RANGE_LENs.
     int startDataOffset =
-        ((marginLoadsMappedToBuff + streamInitAccs * m_kVOutSize / m_kStreamLoadVsize) * m_kStreamLoadVsize -
-         (TP_FIR_LEN - m_kFirRangeOffset) / kParallelPhases) %
+        ((marginLoadsMappedToBuff + streamInitAccs * m_kVOutSize / m_kStreamLoadVsize) * m_kStreamLoadVsize +
+         TP_MODIFY_MARGIN_OFFSET - (TP_FIR_LEN - m_kFirRangeOffset) / kParallelPhases) %
         m_kSamplesInBuff;
-    int initDataOffset =
-        ((marginLoadsMappedToBuff)*m_kStreamLoadVsize - (TP_FIR_LEN - m_kFirRangeOffset) / kParallelPhases) %
-        m_kSamplesInBuff;
+    int initDataOffset = ((marginLoadsMappedToBuff)*m_kStreamLoadVsize + TP_MODIFY_MARGIN_OFFSET -
+                          (TP_FIR_LEN - m_kFirRangeOffset) / kParallelPhases) %
+                         m_kSamplesInBuff;
 
     // Init pre-loop to deal with m_kFirInitOffset. Only generate for cascaded designs
     // if constexpr (TP_CASC_LEN > 1) {
@@ -1206,7 +1207,7 @@ void kernelFilterClass<TT_DATA,
             // Read cascade input. Do nothing if cascade input not present.
             acc[0] = readCascade(inInterface, acc[0]);
             for (int phase = 0; phase < kParallelPhases; ++phase) {
-                xstart = initDataOffset - CEIL(phase, kParallelPhases) / kParallelPhases + 1 +
+                xstart = initDataOffset - CEIL(phase + TP_MODIFY_MARGIN_OFFSET, kParallelPhases) / kParallelPhases + 1 +
                          (streamInitNullAccs + strobe) * m_kVOutSize;
                 acc[0] = sr_asym::macSrAsym<TT_DATA, TT_COEFF>(acc[0], sbuffArray[phase], xstart, coe[phase], 0);
             }
@@ -1220,8 +1221,8 @@ void kernelFilterClass<TT_DATA,
                         coe[phase] = *coeff;
                     }
                     // xstart = CEIL(m_kDataBuffXOffset, kParallelPhases)/kParallelPhases + op;
-                    xstart = initDataOffset - CEIL(phase, kParallelPhases) / kParallelPhases + 1 +
-                             (streamInitNullAccs + strobe) * m_kVOutSize + op;
+                    xstart = initDataOffset - CEIL(phase + TP_MODIFY_MARGIN_OFFSET, kParallelPhases) / kParallelPhases +
+                             1 + (streamInitNullAccs + strobe) * m_kVOutSize + op;
                     // xstart = CEIL(m_kDataBuffXOffset, kParallelPhases)/kParallelPhases - phase +
                     // kDataMappedToPhasestartOffset[phase] + op;
                     acc[0] =
@@ -1275,7 +1276,7 @@ void kernelFilterClass<TT_DATA,
                 acc[0] = readCascade(inInterface, acc[0]);
                 // Init Vector operation. VMUL if cascade not present, otherwise VMAC
                 for (int phase = 0; phase < kParallelPhases; ++phase) {
-                    xstart = dataOffset - CEIL(phase, kParallelPhases) / kParallelPhases + 1 +
+                    xstart = dataOffset - CEIL(phase + TP_MODIFY_MARGIN_OFFSET, kParallelPhases) / kParallelPhases + 1 +
                              (streamInitNullAccs + strobe) * m_kVOutSize;
                     acc[0] = sr_asym::macSrAsym<TT_DATA, TT_COEFF>(acc[0], sbuffArray[phase], xstart, coe[phase], 0);
                 }
@@ -1289,8 +1290,8 @@ void kernelFilterClass<TT_DATA,
                                  (op) / m_kCoeffRegVsize);
                             coe[phase] = *coeff;
                         }
-                        xstart = dataOffset - CEIL(phase, kParallelPhases) / kParallelPhases + 1 +
-                                 (streamInitNullAccs + strobe) * m_kVOutSize + op;
+                        xstart = dataOffset - CEIL(phase + TP_MODIFY_MARGIN_OFFSET, kParallelPhases) / kParallelPhases +
+                                 1 + (streamInitNullAccs + strobe) * m_kVOutSize + op;
                         acc[0] = sr_asym::macSrAsym(acc[0], sbuffArray[phase], xstart, coe[phase],
                                                     ((op) % m_kCoeffRegVsize));
                     }

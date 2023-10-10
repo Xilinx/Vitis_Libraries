@@ -54,6 +54,8 @@ def vmc_validate_coeff(args):
     coef_type = args["coef_type"]
     coeff = args["coeff"]
     data_type = args["data_type"]
+    deci_poly = args["deci_poly"]
+    interp_poly = args["interp_poly"]
     casc_length = args["casc_length"]
     decimate_factor = args["decimate_factor"]
     interpolate_factor = args["interpolate_factor"]
@@ -61,8 +63,23 @@ def vmc_validate_coeff(args):
     AIE_VARIANT = args["AIE_VARIANT"]
     api = 0
     fir_length = fn_get_fir_length(args)
+    tmpargs = {}
+    tmpargs["TT_COEF"] = coef_type
+    tmpargs["TP_FIR_LEN"] = fir_length
+    tmpargs["TP_DECIMATE_FACTOR"] = decimate_factor
+    tmpargs["TP_INTERPOLATE_FACTOR"] = interpolate_factor
+    tmpargs["TT_DATA"] = data_type
+    tmpargs["TP_CASC_LEN"] = casc_length
+    tmpargs["TP_USE_COEF_RELOAD"] = 1 if use_coeff_reload else 0
+    tmpargs["AIE_VARIANT"] = AIE_VARIANT
+    tmpargs["TP_DUAL_IP"] = 0
+    tmpargs["TP_API"] = api
+    tmpargs["TP_SSR"] = ssr
+    tmpargs["TP_PARA_INTERP_POLY"] = interp_poly
+    tmpargs["TP_PARA_DECI_POLY"] = deci_poly
     return fn_validate_fir_len(
-        data_type,
+        tmpargs,
+	data_type,
         coef_type,
         fir_length,
         interpolate_factor,
@@ -71,7 +88,9 @@ def vmc_validate_coeff(args):
         ssr,
         api,
         use_coeff_reload,
-        AIE_VARIANT
+        AIE_VARIANT,
+        deci_poly,
+	interp_poly
     )
 
 
@@ -112,6 +131,11 @@ def validate_num_outputs(args):
     num_outputs = args["num_outputs"]
     AIE_VARIANT = args["AIE_VARIANT"]
     return fn_validate_num_outputs(api, num_outputs, AIE_VARIANT)
+
+def vmc_validate_rnd_mode(args):
+	rnd_mode = args["rnd_mode"]
+	AIE_VARIANT = args["AIE_VARIANT"]
+	return fn_validate_roundMode(rnd_mode, AIE_VARIANT)
 
 #### VMC graph generator ####
 def vmc_generate_graph(name, args):

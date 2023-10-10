@@ -73,7 +73,7 @@ Supports AIE devices.
 
 This element adds an implementation of a delay filter for introducing delay into a time series.
 
-Supports AIE devices.
+Supports both AIE and AIE-ML devices.
 
 * **FIR Filters**
 

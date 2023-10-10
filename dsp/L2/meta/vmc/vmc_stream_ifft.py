@@ -22,5 +22,6 @@ def vmc_generate_graph(name, args):
     tmpargs["TP_FFT_NIFFT"] = 0
     tmpargs["TP_RND"] = args["rnd_mode"]
     tmpargs["TP_SAT"] = args["sat_mode"]
+    tmpargs["TP_USE_WIDGETS"] = 1 if args["use_ssr_widget_kernels"] else 0
 
     return generate_graph(name, tmpargs)

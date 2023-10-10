@@ -288,7 +288,7 @@ def generate_graph(graphname, args):
   TP_WINDOW_VSIZE = args["TP_WINDOW_VSIZE"]
   TP_API = args["TP_API"]
   TP_PARALLEL_POWER = args["TP_PARALLEL_POWER"]
-  TP_USE_WIDGETS = 0
+  TP_USE_WIDGETS = args["TP_USE_WIDGETS"]
   TP_RND = args["TP_RND"]
   TP_SAT = args["TP_SAT"]
 

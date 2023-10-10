@@ -42,8 +42,6 @@
             "name": "TP_POINT_SIZE",
             "description": "The number of samples in the transform.",
             "type": "uint",
-            "minimum": 8,
-            "maximum": 128,
             "validator": {
                 "file": "dft.py",
                 "function": "validate_TP_POINT_SIZE"
@@ -53,8 +51,6 @@
             "name": "TP_CASC_LEN",
             "description": "The length of the cascade chain.",
             "type": "uint",
-            "minimum": 1,
-            "maximum": 11,
             "validator": {
                 "file": "dft.py",
                 "function": "validate_TP_CASC_LEN",
@@ -67,23 +63,17 @@
         {
             "name": "TP_NUM_FRAMES",
             "description": "The number of frames to be processed per input window of data",
-            "type": "uint",
-            "minimum": 1,
-            "maximum": 100
+            "type": "uint"
         },
         {
             "name": "TP_FFT_NIFFT",
             "description": "Selects whether the transform to perform is an FFT (1) or IFFT (0)",
-            "type": "uint",
-            "maximum": 1,
-            "minimum": 0
+            "type": "uint"
         },
         {
             "name": "TP_SHIFT",
             "description": "The power of 2 shift down applied to the accumulation of FIR before output",
             "type": "uint",
-            "maximum": 60,
-            "minimum": 0,
             "validator": {
                 "file": "dft.py",
                 "function": "validate_TP_SHIFT",
@@ -95,16 +85,12 @@
         {
             "name": "TP_API",
             "description": "The form of IO: 0 for windows, 1 for streams",
-            "type": "uint",
-            "minimum": 0,
-            "maximum": 1
+            "type": "uint"
         },
         {
             "name": "AIE_VARIANT",
             "type": "uint",
-            "description": "specifies the device type",
-            "maximum": 2,
-            "minimum": 1
+            "description": "specifies the device type"
         },
         {
             "name": "TP_RND",

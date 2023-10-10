@@ -1,4 +1,4 @@
-.. 
+..
    Copyright (C) 2019-2022, Xilinx, Inc.
    Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
     
@@ -35,6 +35,7 @@ The graph entry point is the following:
 ~~~~~~~~~~~~~~~
 Supported Types
 ~~~~~~~~~~~~~~~
+
 The widget_real2complex supports int16, cint16, int32, cint32, float and cfloat on input. The corresponding TT_OUT_DATA must be set to the
 real or complex partner of the input type, e.g. if TT_DATA = int16, TT_OUT_DATA must be set to cint16.
 

@@ -12,6 +12,22 @@ import sys
 # static_assert(fnCheckShift<TP_SHIFT>(), "ERROR: TP_SHIFT is out of range (0 to 60)");
 # static_assert(fnCheckShiftFloat<TT_DATA,TP_SHIFT>(), "ERROR: TP_SHIFT is ignored for data type cfloat so must be set to 0");
 
+#Range for params
+TP_POINT_SIZE_min = 8
+TP_POINT_SIZE_max = 128
+TP_NUM_FRAMES_min = 1
+TP_NUM_FRAMES_max = 100
+TP_CASC_LEN_min = 1
+TP_CASC_LEN_max = 11
+TP_SHIFT_min=0
+TP_SHIFT_max=60
+#TP_API_min=0
+#TP_API_max=1
+#TP_FFT_NIFFT_min=0
+#TP_FFT_NIFFT_max=1
+#AIE_VARIANT_min=1
+#AIE_VARIANT_max=2
+
 # Validate Twiddle type 
 def fn_validate_twiddle_type(TT_DATA, TT_TWIDDLE):
   validTypeCombos = [
@@ -46,10 +62,18 @@ def validate_TP_POINT_SIZE(args):
 def validate_TP_SHIFT(args):
   TP_SHIFT = args["TP_SHIFT"]
   TT_DATA = args["TT_DATA"]
-  return fn_validate_shift(TT_DATA, TP_SHIFT)
+  return fn_validate_shift_val(TT_DATA, TP_SHIFT)
+
+def fn_validate_shift_val(TT_DATA, TP_SHIFT):
+  if TP_SHIFT< TP_SHIFT_min or TP_SHIFT > TP_SHIFT_max:
+	    return isError(f"Minimum and Maximum value for Shift is {TP_SHIFT_min} and {TP_SHIFT_max},respectively, but got {TP_SHIFT}. ")
+  return fn_float_no_shift(TT_DATA, TP_SHIFT)
+
 
 # Validate CASC_LEN
 def fn_validate_casc_len(TP_POINT_SIZE, TP_NUM_FRAMES, TP_CASC_LEN):
+  if TP_CASC_LEN < TP_CASC_LEN_min or TP_CASC_LEN > TP_CASC_LEN_max :
+        return isError(f"Minimum and maximum value for cascade length is {TP_CASC_LEN_min} and {TP_CASC_LEN_max},respectively, but got {TP_CASC_LEN}.")
   return (
     isValid if ((TP_NUM_FRAMES*TP_POINT_SIZE)/TP_CASC_LEN >= 4)
     else (
@@ -67,6 +91,15 @@ def validate_TP_SAT(args):
   TP_SAT = args["TP_SAT"]
   return fn_validate_satMode(TP_SAT)
 
+def fn_validate_numFrames(TP_NUM_FRAMES):
+  if TP_NUM_FRAMES< TP_NUM_FRAMES_min or TP_NUM_FRAMES > TP_NUM_FRAMES_max:
+	    return isError(f"Minimum and Maximum value for Num of Frames is {TP_NUM_FRAMES_min} and {TP_NUM_FRAMES_max},respectively, but got {TP_SHIFT}. ")
+  return isValid
+
+
+def validate_TP_NUM_FRAMES(args):
+  TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
+  return fn_validate_numFrames(TP_NUM_FRAMES)
 
   ######### Finished Validation ###########
 
@@ -121,11 +154,10 @@ f"""
 class {graphname} : public adf::graph {{
 public:
   // ports
-  template <typename dir>
-
-  std::array<adf::port<input>,TP_CASC_LEN> in;
-  adf::port<output> out;
-
+  //template <typename dir>
+  
+  std::array<adf::port<input>, {TP_CASC_LEN}> in;
+  std::array<adf::port<output>, 1> out;
 
   xf::dsp::aie::fft::dft::dft_graph<
     {TT_DATA}, // TT_DATA
@@ -141,10 +173,10 @@ public:
   > dft_graph;
 
   {graphname}() : dft_graph() {{
-    for (int i=0; i < TP_CASC_LEN; i++) {{
+    for (int i=0; i < {TP_CASC_LEN}; i++) {{
       adf::connect<> net_in(in[i], dft_graph.in[i]);
     }}
-    adf::connect<> net_out(dft_graph.out[TP_CASC_LEN-1], out);
+    adf::connect<> net_out(dft_graph.out[0], out[0]);
   }}
 }};
 """

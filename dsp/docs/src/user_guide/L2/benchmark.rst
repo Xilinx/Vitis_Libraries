@@ -1,4 +1,4 @@
-.. 
+..
    Copyright (C) 2019-2022, Xilinx, Inc.
    Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
     
@@ -51,7 +51,8 @@ The latency and throughput values, as reported for each library element in the t
 Following power-on, systems typically take several iterations before a stable rate is achieved. This is due to the buffers being initially empty and other such effects. The figures reported are from when the system has reached a steady state after this initial transient phase.
 
 In the case where there are multiple input ports and/or multiple output ports, the timestamps from the first of these ports are used as these are the ports that contain the first timestamped sample of each iteration.
-Furthermore, if there are no input ports included in the design (such as DDS only mode) then the throughput will be measured using the timestamped data on the output port.
+
+Furthermore, if there are no input ports included in the design (such as DDS only mode) then the throughput will be measured using the timestamped data on the output port. In such case the latency figures may be marked as invalid with value reported as ``-1``.
 
 DDS/Mixer
 ~~~~~~~~~
@@ -62,6 +63,19 @@ Following table gives results for the DDS/Mixer and DDS/Mixer LUT with a wide va
 
 .. csv-table:: DDS/Mixer benchmark
    :file: ../../csv_data_files/L2/dds_mixer_benchmark.csv
+   :align: center
+   :header-rows: 1
+   :widths: auto
+
+DFT
+~~~~~~~~
+
+Following table gives results for the DFT function with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_DFT`.
+
+:download:`dft_benchmark.csv <../../csv_data_files/L2/dft_benchmark.csv>`
+
+.. csv-table:: DFT benchmark
+   :file: ../../csv_data_files/L2/dft_benchmark.csv
    :align: center
    :header-rows: 1
    :widths: auto
@@ -121,18 +135,33 @@ Following table gives results for the Matrix Multiply function with a wide varie
    :widths: auto
 
 
-Widgets
-~~~~~~~
+Matrix Vector Multiply
+~~~~~~~~~~~~~~~~~~~~~~
 
-Following table gives results for the Widgets with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_WIDGETS`.
+Following table gives results for the Matrix Vector Multiply function with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_GEMV`.
 
-:download:`widget_benchmark.csv <../../csv_data_files/L2/widget_benchmark.csv>`
+:download:`matrix_vector_mul_benchmark.csv <../../csv_data_files/L2/matrix_vector_mul_benchmark.csv>`
 
-.. csv-table:: Widgets benchmark
-   :file: ../../csv_data_files/L2/widget_benchmark.csv
+.. csv-table:: Matrix Vector Multiply benchmark
+   :file: ../../csv_data_files/L2/matrix_vector_mul_benchmark.csv
    :align: center
    :header-rows: 1
    :widths: auto
+
+
+Mixed Radix FFT
+~~~~~~~~~~~~~~~
+
+Following table gives results for the Mixed Radix FFT function with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_MRFFT`.
+
+:download:`mixed_radix_fft_benchmark.csv <../../csv_data_files/L2/mixed_radix_fft_benchmark.csv>`
+
+.. csv-table:: Mixed Radix FFT benchmark
+   :file: ../../csv_data_files/L2/mixed_radix_fft_benchmark.csv
+   :align: center
+   :header-rows: 1
+   :widths: auto
+
 
 Sample Delay
 ~~~~~~~
@@ -147,6 +176,19 @@ Following table gives results for the Sample Delay  with a wide variety of suppo
    :header-rows: 1
    :widths: auto
 
+
+Widgets
+~~~~~~~
+
+Following table gives results for the Widgets with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_WIDGETS`.
+
+:download:`widget_benchmark.csv <../../csv_data_files/L2/widget_benchmark.csv>`
+
+.. csv-table:: Widgets benchmark
+   :file: ../../csv_data_files/L2/widget_benchmark.csv
+   :align: center
+   :header-rows: 1
+   :widths: auto
 
 
 

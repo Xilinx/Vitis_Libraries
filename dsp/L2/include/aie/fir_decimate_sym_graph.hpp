@@ -811,8 +811,9 @@ class fir_decimate_sym_graph : public graph {
                 return xf::dsp::aie::getMinCascLen<T_FIR_LEN, kMaxTaps>();
             }
         else {
-            using dec_asym_graph = decimate_asym::fir_decimate_asym_graph<T_D, T_C, T_FIR_LEN, T_DF, 0, 0, T_DF * 128,
-                                                                          TP_CASC_LEN, 0, 1, 0, 1, TP_SSR>;
+            using dec_asym_graph =
+                decimate_asym::fir_decimate_asym_graph<T_D, T_C, T_FIR_LEN, T_DF, 0, 0, T_DF * 128 * SSR, TP_CASC_LEN,
+                                                       0, 1, 0, 1, TP_SSR>;
             return dec_asym_graph::template getMinCascLen<T_FIR_LEN, T_API, T_D, T_C, T_DF, SSR>();
         }
     };
@@ -831,7 +832,8 @@ class fir_decimate_sym_graph : public graph {
         if
             constexpr(SSR == 1) { return 0; }
         else {
-            using dec_asym_graph = decimate_asym::fir_decimate_asym_graph<T_D, T_C, T_FIR_LEN, T_DF, 0, 0, T_DF * 128>;
+            using dec_asym_graph =
+                decimate_asym::fir_decimate_asym_graph<T_D, T_C, T_FIR_LEN, T_DF, 0, 0, T_DF * 128 * SSR>;
             return dec_asym_graph::template getOptCascLen<T_FIR_LEN, T_D, T_C, T_API, T_DF, SSR>();
         }
     };

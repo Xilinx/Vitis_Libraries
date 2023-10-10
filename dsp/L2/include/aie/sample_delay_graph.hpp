@@ -63,14 +63,20 @@ namespace sample_delay {
 template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_API, unsigned int TP_MAX_DELAY>
 class sample_delay_graph : public graph {
    public:
-    static_assert((std::is_same<TT_DATA, cint16>::value) || (std::is_same<TT_DATA, cint32>::value) ||
-                      (std::is_same<TT_DATA, cfloat>::value) || (std::is_same<TT_DATA, int8>::value) ||
-                      (std::is_same<TT_DATA, int16>::value) || (std::is_same<TT_DATA, int32>::value) ||
-                      (std::is_same<TT_DATA, uint8>::value) ||
-                      // (std::is_same<TT_DATA,uint16>::value ) ||
-                      // (std::is_same<TT_DATA,uint32>::value ) ||
-                      (std::is_same<TT_DATA, float>::value),
-                  "ERROR: TT_DATA is not a supported data type");
+    static constexpr int VECTOR_SIZE = 256 / 8 / sizeof(TT_DATA);
+    static_assert((std::is_same<TT_DATA, cint16>::value) || 
+                  (std::is_same<TT_DATA, cint32>::value) ||
+                  (std::is_same<TT_DATA, cfloat>::value) || 
+                  (std::is_same<TT_DATA, int8>::value) ||
+                  (std::is_same<TT_DATA, int16>::value) || 
+                  (std::is_same<TT_DATA, int32>::value) ||
+                  (std::is_same<TT_DATA, uint8>::value) ||
+                  (std::is_same<TT_DATA, float>::value),"ERROR: TT_DATA is not a supported data type");
+                  
+    static_assert(TP_MAX_DELAY % VECTOR_SIZE == 0, "TP_MAX_DELAY should be an integer multiple of VECTOR_SIZE");
+    static_assert(TP_WINDOW_VSIZE % VECTOR_SIZE == 0, "TP_WINDOW_VSIZE should be an integer multiple of VECTOR_SIZE");
+    static_assert((TP_API == 0 || TP_MAX_DELAY >= 128),"ERROR: Minimum value of TP_MAX_DELAY for stream interface is 128"); 
+    
     /**
      * Input data
      **/

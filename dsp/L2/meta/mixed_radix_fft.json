@@ -18,8 +18,7 @@
             "type": "typename",
             "enum": [
                 "cint16",
-                "cint32",
-                "cfloat"
+                "cint32"
             ]
         },
         {
@@ -27,8 +26,7 @@
             "description": "The type of twiddle factors of the transform",
             "type": "typename",
             "enum": [
-                "cint16",
-                "cfloat"
+                "cint16"
             ],
             "validator": {
                 "file": "mixed_radix_fft.py",

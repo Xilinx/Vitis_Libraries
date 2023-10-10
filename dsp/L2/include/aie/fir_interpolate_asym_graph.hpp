@@ -355,35 +355,11 @@ class fir_interpolate_asym_graph : public graph {
      **/
     port_conditional_array<output, (TP_CASC_IN == CASC_IN_TRUE), TP_SSR> casc_in;
 
-    static constexpr unsigned int OUT_SSR_INT = TP_SSR * TP_PARA_INTERP_POLY;
-
-   private:
-    /**
-     * decomposer output. Internal when widget in use, otherwise piped to output
-     **/
-    port_array<output, OUT_SSR_INT> out_int;
-
-    /**
-     * decomposer output. Internal when widget in use, otherwise piped to output
-     *
-     **/
-    port_conditional_array<output, (TP_NUM_OUTPUTS == 2), OUT_SSR_INT> out2_int;
-
-    /**
-     * @brief Connect decomposed polyphases through a widget that interleaves data onto a single output port.
-     **/
-    void connectOutput() {
-        out = out_int;
-        out2 = out2_int;
-    }
-
    public:
     /**
      * OUT_SSR defines the number of output paths, equal to ``TP_SSR * TP_PARA_INTERP_POLY``.
-     * When Polyphases are combined,
      **/
-    static constexpr unsigned int OUT_SSR =
-        (TP_API == 0 && TP_PARA_INTERP_POLY == TP_INTERPOLATE_FACTOR) ? TP_SSR : TP_SSR * TP_PARA_INTERP_POLY;
+    static constexpr unsigned int OUT_SSR = TP_SSR * TP_PARA_INTERP_POLY;
 
     /**
      * The input data to the function. This input is either a window API of
@@ -498,12 +474,8 @@ class fir_interpolate_asym_graph : public graph {
      **/
     fir_interpolate_asym_graph(const std::vector<TT_COEFF>& taps) {
         decomposer::polyphase_decomposer<ssr_params>::create(m_firKernels, taps);
-        decomposer::polyphase_decomposer<ssr_params>::create_connections(
-            m_firKernels, &in[0], in2, &out_int[0], out2_int, coeff, net, net2, casc_in, srcFileName);
-        // When IO bufer interface is used and graph is decomposed to single-rate FIR polyphases, kernels can be mapped
-        // on a single tile.
-        // To allow consistency in the interface, polyphases get combined back to single output port using a widget.
-        connectOutput();
+        decomposer::polyphase_decomposer<ssr_params>::create_connections(m_firKernels, &in[0], in2, &out[0], out2,
+                                                                         coeff, net, net2, casc_in, srcFileName);
     }
 
     /**
@@ -511,12 +483,8 @@ class fir_interpolate_asym_graph : public graph {
      **/
     fir_interpolate_asym_graph() {
         decomposer::polyphase_decomposer<ssr_params>::create(m_firKernels);
-        decomposer::polyphase_decomposer<ssr_params>::create_connections(
-            m_firKernels, &in[0], in2, &out_int[0], out2_int, coeff, net, net2, casc_in, srcFileName);
-        // When IO bufer interface is used and graph is decomposed to single-rate FIR polyphases, kernels can be mapped
-        // on a single tile.
-        // To allow consistency in the interface, polyphases get combined back to single output port using a widget.
-        connectOutput();
+        decomposer::polyphase_decomposer<ssr_params>::create_connections(m_firKernels, &in[0], in2, &out[0], out2,
+                                                                         coeff, net, net2, casc_in, srcFileName);
     }
 
     /**

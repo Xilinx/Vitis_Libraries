@@ -1,4 +1,4 @@
-.. 
+..
    Copyright (C) 2019-2022, Xilinx, Inc.
    Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
     
@@ -52,7 +52,7 @@ For guidance on configuration with some example scenarios, see :ref:`FFT_CONFIGU
 
 See also :ref:`PARAMETER_LEGALITY_NOTES` regarding legality checking of parameters.
 
-Note that window interfaces are now referred to as iobuffers. IObuffers are conceptually the same as windows. Graph connections between windows and iobuffers are supported. More details on iobuffers can be found in UG1076 and UG1079. For backwards compatibility, template parameters which refer to windows, eg. ``TP_WINDOW_VSIZE``, remain unchanged.
+.. note:: Note that window interfaces are now referred to as iobuffers. IObuffers are conceptually the same as windows. Graph connections between windows and iobuffers are supported. More details on iobuffers can be found in  `UG1079 Input and Output Buffers <https://docs.xilinx.com/r/en-US/ug1079-ai-engine-kernel-coding/Input-and-Output-Buffers>`_. For backwards compatibility, template parameters which refer to windows, eg. ``TP_WINDOW_VSIZE``, remain unchanged.
 
 ~~~~~~~~~~~~~~~~
 Access functions
@@ -198,7 +198,7 @@ In the final stage, the final values are converted to TT_DATA using TP_SHIFT, TP
    |                        |                |                 |                                 |
    +------------------------+----------------+-----------------+---------------------------------+
 Distortion caused by saturation will be possible for certain configurations of the FFT. For instance, with TT_DATA=cint32, it is possible for the sample values within
-the FFT to grow beyond the range of int32 values due to bit growth in the FFT algorithm. Saturation is applied at each stage (rank). 
+the FFT to grow beyond the range of int32 values due to bit growth in the FFT algorithm. Saturation is applied at each stage (rank).
 In the final stage when TP_SHIFT is applied, saturation is also applied according to TP_SAT. Similarly, if the FFT is configured for TT_DATA=cint16, but insufficient scaling (TP_SHIFT)
 is applied, then sample values may exceed the range of int16 and so these too will be saturated in the final stage.
 For TT_DATA=cfloat, the FFT performs no scaling, nor saturation. Any saturation effects will be due to the atomic float operations returning positive infinity, negative infinity or NaN.

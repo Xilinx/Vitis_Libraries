@@ -17,7 +17,7 @@ def validate_TP_MAX_DELAY(args):
 
 def validate_TP_WINDOW_VSIZE(args):
   TT_DATA = args["TT_DATA"]
-  TP_WINDOW_VSIZE = args["TP_MAX_DELAY"]
+  TP_MAX_DELAY = args["TP_MAX_DELAY"]
   TP_WINDOW_VSIZE = args["TP_WINDOW_VSIZE"]
   TP_API = args["TP_API"]
   VEC_SIZE = 256/8/com.fn_size_by_byte(TT_DATA)

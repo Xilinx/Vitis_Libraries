@@ -1,12 +1,23 @@
 from fft_window import *
+from aie_common import *
 import json
 
 #### VMC validators ####
 
-# Note: For stream-based Window Fn, the low level IP multipies
-# SSR*2 to get input and output port number. But for VMC
-# users, SSR = no. of in or out ports. Hence we divide it by
-# 2 here before passing on to low level IP.
+# Note: For stream-based Window Fn, the low level requires SSR as
+# number of kernels and SSR*2 is the number of input or output
+# ports. But for VMC users, SSR is the number of input or output
+# ports. Hence, we divide it by 2 here before passing on to low level
+# IP.
+
+def vmc_fn_get_ssr(args):
+  ssr = args["ssr"]
+  if ssr % 2 == 0:
+    ssr = ssr//2
+  else:
+    ssr = -1
+
+  return ssr
 
 def vmc_validate_coeff_type(args):
   data_type = args["data_type"]
@@ -32,12 +43,18 @@ def vmc_validate_ssr(args):
   data_type = args["data_type"]
   point_size = args["point_size"]
   interface_type = 1
-  ssr = args["ssr"]//2
+  ssr = vmc_fn_get_ssr(args)
+  if ssr == -1:
+    return isError(f"Invalid SSR value specified. The value must be an even number.")
+
   return fn_validate_ssr(data_type, point_size, interface_type, ssr)
   
 def vmc_validate_is_dyn_pt_size(args):
   point_size = args["point_size"]
-  ssr = args["ssr"]//2
+  ssr = vmc_fn_get_ssr(args)
+  if ssr == -1:
+    return isError(f"Invalid SSR value specified. The value must be an even number.")
+
   dyn_pt = 1 if args["is_dyn_pt_size"] else 0
   return fn_validate_dyn_pt_size(point_size, ssr, dyn_pt)
 

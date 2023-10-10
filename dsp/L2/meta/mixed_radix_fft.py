@@ -214,13 +214,11 @@ def info_ports(args):
   TP_POINT_SIZE = args["TP_POINT_SIZE"]
   TP_WINDOW_VSIZE = args["TP_WINDOW_VSIZE"]
   TP_API = args["TP_API"]
+  numPorts = TP_API + 1
 
-  if TP_API == 0:
-    in_ports = get_port_info("in", "in", TT_DATA, TP_WINDOW_VSIZE, 1, 0, 0)
-    out_ports = get_port_info("out", "out", TT_DATA, TP_WINDOW_VSIZE, 1, 0, 0)
-  else:
-    in_ports = get_port_info("in", "in", TT_DATA, TP_WINDOW_VSIZE, 2, 0, 1)
-    out_ports = get_port_info("out", "out", TT_DATA, TP_WINDOW_VSIZE, 2, 0, 1)
+  in_ports = get_port_info("in", "in", TT_DATA, TP_WINDOW_VSIZE//numPorts, numPorts, 0, TP_API)
+  out_ports = get_port_info("out", "out", TT_DATA, TP_WINDOW_VSIZE//numPorts, numPorts, 0, TP_API)
+
   return in_ports + out_ports
 
 def generate_graph(graphname, args):
@@ -245,13 +243,13 @@ f"""
 class {graphname} : public adf::graph {{
 public:
   // ports
-  template <typename dir>
+  //template <typename dir>
 
   static constexpr int kStreamsPerTile = get_input_streams_core_module(); //a device trait
-  static constexpr int m_kNumPorts = TP_API == 0 ? 1 : kStreamsPerTile; //1 for iobuffer, 2 for streams
+  static constexpr int m_kNumPorts = {TP_API} == 0 ? 1 : kStreamsPerTile; //1 for iobuffer, 2 for streams
 
   std::array<adf::port<input>,m_kNumPorts> in;
-  std::array<adf::port<input>,m_kNumPorts> out;
+  std::array<adf::port<output>,m_kNumPorts> out;
 
 
   xf::dsp::aie::fft::mixed_radix_fft::mixed_radix_fft_graph<
@@ -268,11 +266,9 @@ public:
   > mixed_radix_fft_graph;
 
   {graphname}() : mixed_radix_fft_graph() {{
-    if (TP_API == 0) {{
+    if ({TP_API} == 0) {{
       adf::connect<> net_in(in[0], mixed_radix_fft_graph.in[0]);
-      adf::dimensions(mixed_radix_fft_graph.in[0]) = {{TP_WINDOW_VSIZE}};
       adf::connect<> net_out(mixed_radix_fft_graph.out[0], out[0]);
-      adf::dimensions(mixed_radix_fft_graph.out[0]) = {{TP_WINDOW_VSIZE}};
     }} else {{
       for (int i = 0; i<m_kNumPorts ; i++) {{
         adf::connect<> net_in(in[i], mixed_radix_fft_graph.in[i]);

@@ -4,13 +4,27 @@
     "gui": false,
     "flow": "versal",
     "platform_allowlist": [
-        "vck190"
+        "vck190",
+        "vek280"
     ],
-    "data": [
-        "PROJECT/data/"
-    ],
+
     "platform_properties": {
         "vck190": {
+            "param_set": [  
+                "test_0_tool_canary_aie",
+                "test_1",
+                "test_2",
+                "test_3",
+                "test_4",
+                "test_5",
+                "test_6",
+                "test_7",
+                "test_10",
+                "test_11",
+                "test_12",
+                "test_13",
+                "test_14",
+                "test_15"],
             "v++": {
                 "compiler": {
                     "clflags": []
@@ -20,7 +34,34 @@
                 },
                 "package": {
                     "clflags": [
-                        "--package.defer_aie_run"
+                        "--config PROJECT/system.cfg"
+                    ]
+                }
+            }
+        },
+        "vek280": {
+            "param_set": [  
+                "test_0_tool_canary_aieml",
+                "test_1_aieml",
+                "test_2_aieml",
+                "test_3_aieml",
+                "test_4_aieml",
+                "test_5_aieml",
+                "test_6_aieml",
+                "test_7_aieml",
+                "test_10_aieml",
+                "test_11_aieml",
+                "test_12_aieml",
+                "test_13_aieml",
+                "test_14_aieml",
+                "test_15_aieml"],
+            "v++": {
+                "compiler": {
+                    "clflags": []
+                },
+                "linker": {
+                    "ldclflags": [
+                        "--config PROJECT/system.cfg"
                     ]
                 }
             }

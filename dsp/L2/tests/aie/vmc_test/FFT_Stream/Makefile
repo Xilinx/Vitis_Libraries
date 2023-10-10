@@ -113,7 +113,7 @@ AIE_PKG_DIR ?= Work
 
 # Setting customized_params in aiecompiler
 
-GRAPHNAME ?= FFT_Stream_374bd6c5
+GRAPHNAME ?= FFT_Stream_cc0e4fa5
 VMC_GRAPHDIR ?= xmc_aie_lib/$(GRAPHNAME)
 VMC_KERNEL ?= vmc_stream_fft
 

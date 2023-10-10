@@ -1,4 +1,4 @@
-.. 
+..
    Copyright (C) 2019-2022, Xilinx, Inc.
    Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
     
@@ -27,7 +27,7 @@ Software Platform
 
 This library is designed to work with Vitis |trade|, and therefore inherits the system requirements of Vitis |trade| and XRT.
 
-Supported operating systems are RHEL/CentOS 7.9, RHEL 8.3 and Ubuntu 18.04.4 LTS, 20.04 LTS, 22.04 LTS.
+Supported operating systems are RHEL/CentOS 7.9, RHEL 8.5 and newer, as well as Ubuntu 18.04.4 LTS, 20.04.2 LTS, 22.04 LTS.
 
 PCIE Accelerator Card
 ~~~~~~~~~~~~~~~~~~~~~

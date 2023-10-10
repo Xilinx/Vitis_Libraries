@@ -64,6 +64,8 @@ AMD |reg| documentation is organized around a set of standard design processes t
    -  :ref:`MATRIX_VECTOR_MULTIPLY`
 
    -  :ref:`WIDGETS`
+   
+   -  :ref:'SAMPLE_DELAY'
 
 -  **System Integration and Validation:** Integrating and validating the system functional performance, including timing, resource use, and power closure. Topics in this document that apply to this design process include:
 

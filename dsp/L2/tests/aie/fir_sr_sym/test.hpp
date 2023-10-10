@@ -47,11 +47,8 @@ namespace dsplib = xf::dsp::aie;
 
 class test_graph : public graph {
    private:
-#if ((P_SSR > 1) || (USING_UUT == 1 && __HAS_SYM_PREADD__ == 0))
-    static constexpr unsigned int kNumTaps = FIR_LEN;
-#else
     static constexpr unsigned int kNumTaps = (FIR_LEN + 1) / 2;
-#endif
+
     COEFF_TYPE taps[kNumTaps];
 
    public:

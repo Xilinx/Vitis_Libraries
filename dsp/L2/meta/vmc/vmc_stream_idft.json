@@ -1,0 +1,131 @@
+{
+  "low_level_file":"dft.json",
+  "ip_name": "vmc_stream_idft",
+  "block_info": {
+    "label": "IDFT Stream",
+    "description": "IDFT stream block targeted for AI Engines."
+  },
+  "parameters": [
+      {
+      "key": "TT_DATA",
+      "name": "data_type",
+      "description": "The type of individual data samples input to and output of the fft function",
+      "default": "cint16",
+      "blockgui":{
+            "label": "Input/Output data type:",
+            "tablabel": "Main",
+            "parameterType":"popup"
+      }
+    },
+    {
+      "key": "TT_TWIDDLE",
+      "name": "twiddle_type",
+      "description": "The type of individual data samples input to and output of the filter function",
+      "default": "cint16",
+      "validator": {
+        "file": "vmc_dft_common.py",
+        "function": "vmc_validate_twiddle_type",
+        "args": ["data_type"]
+      },
+      "blockgui":{
+            "label": "Twiddle factor data type:",
+            "tablabel": "Main",
+            "parameterType":"popup"
+      }
+    },
+      {
+      "key": "TP_POINT_SIZE",
+      "name": "point_size",
+      "description": "The number of samples in the transform",
+      "default": 64,
+      "validator": {
+        "file": "vmc_dft_common.py",
+        "function": "vmc_validate_point_size",
+        "args": []
+      },
+      "blockgui":{
+            "label": "IDFT size:",
+            "tablabel": "Main",
+            "parameterType":"edit"
+      }
+    },
+    {
+      "key": "TP_NUM_FRAMES",
+      "name": "num_frames",
+      "description": "The number of frames to be processed per input window of data",
+      "default": 64,
+      "blockgui":{
+            "label": "Input frame size (Number of samples):",
+            "tablabel": "Main",
+            "parameterType":"edit"
+      }
+    },
+    {
+      "key": "TP_SHIFT",
+      "name": "shift_val",
+      "description": "The power of 2 shift down applied to the accumulation of FIR before output",
+      "default": 0,
+      "validator": {
+        "file": "vmc_dft_common.py",
+        "function": "vmc_validate_shift_val",
+        "args": ["data_type"]
+      },
+      "blockgui":{
+            "label": "Scale output down by 2^:",
+            "tablabel": "Main",
+            "parameterType":"edit"
+      }
+    },
+	{
+      "key": "TP_RND",
+      "name": "rnd_mode",
+      "description": "The rounding to be applied during the shift down stage of processing.",
+      "enum": [0, 1, 2, 3, 4, 5, 6, 7],
+      "enum_str": ["Floor", "Ceiling", "Round to positive infinity", "Round to negative infinity", "Round symmetrical to infinity", "Round symmetrical to zero", "Round convergent to even", "Round convergent to odd"],
+      "default": 4,
+      "blockgui": {
+          "label": "Rounding mode:",
+            "tablabel": "Main",
+          "parameterType": "popup"
+      }
+    },
+	{
+      "key": "TP_SAT",
+	  "name": "sat_mode",
+      "description": "Saturation mode.",
+      "enum": [0, 1, 3],
+      "enum_str": ["0-None", "1-Asymmetric", "3-Symmetric"],
+	  "default": 0,
+      "validator": {
+          "file": "vmc_dft_common.py",
+          "function": "vmc_validate_sat_mode",
+		  "args": []
+		},
+      "blockgui":{
+            "label": "Saturation mode:",
+            "tablabel": "Main",
+            "parameterType":"popup"
+		}
+	},
+    {
+      "key": "TP_CASC_LEN",
+      "name": "casc_length",
+      "description": "The length of cascaded kernels",
+      "default": 1,
+       "validator": {
+        "file": "vmc_dft_common.py",
+        "function": "vmc_validate_casc_length",
+        "args": ["num_frames", "point_size"]
+      },
+      "blockgui":{
+            "label": "Number of cascade stages:",
+            "tablabel": "Main",
+            "parameterType":"edit"
+      }
+    }
+  ],
+  "generator": {
+    "file": "vmc_stream_idft.py",
+    "function": "vmc_generate_graph"
+  }
+}

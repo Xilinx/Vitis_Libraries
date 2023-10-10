@@ -69,6 +69,10 @@ def vmc_validate_dual_ip(args):
     api = 0
     return fn_validate_dual_ip(api, dual_ip)
 
+def vmc_validate_rnd_mode(args):
+	rnd_mode = args["rnd_mode"]
+	AIE_VARIANT = args["AIE_VARIANT"]
+	return fn_validate_roundMode(rnd_mode, AIE_VARIANT)
 
 #### VMC graph generator ####
 def vmc_generate_graph(name, args):
