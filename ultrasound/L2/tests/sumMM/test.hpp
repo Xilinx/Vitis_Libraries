@@ -39,7 +39,7 @@ class sumMM : public adf::graph {
         sumMMKernel = adf::kernel::create(L1::sumMM<float, LENGTH, SPACE_DIMENSION, SIMD_DEPTH>);
 
         // source kernel
-        adf::source(sumMMKernel) = "sumMM/sumMM.cpp";
+        adf::source(sumMMKernel) = "sumMM.cpp";
 
         // connections
         adf::connect(input1_sumMM.out[0], sumMMKernel.in[0]);

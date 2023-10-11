@@ -36,7 +36,7 @@ class diffMV : public adf::graph {
 
         // Kernel definition
         diffMVKernel = adf::kernel::create(L1::diffMV<float, LENGTH, INCREMENT_MATRIX, SIMD_DEPTH>);
-        adf::source(diffMVKernel) = "diffMV/diffMV.cpp";
+        adf::source(diffMVKernel) = "diffMV.cpp";
 
         // connections
         adf::connect(input1_diffMV.out[0], diffMVKernel.in[0]);

@@ -41,7 +41,7 @@ class outer : public adf::graph {
         outerKernel = adf::kernel::create(L1::outer<float, LENGTH, SPACE_DIMENSION, SPACE_DIMENSION>);
 
         // Source kernel
-        adf::source(outerKernel) = "outer/outer.cpp";
+        adf::source(outerKernel) = "outer.cpp";
 
         // Connections
         adf::connect(input1_outer.out[0], outerKernel.in[0]);

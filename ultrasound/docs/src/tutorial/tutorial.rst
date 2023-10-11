@@ -35,7 +35,7 @@ This tutorial will show how to achieve better ultrasound image quality, speed, a
 * Lab-4: L3 Graph based acceleration for ultrasound All in AIE, intergrated with PL and xrt case
 
 
-Lab-1: How does Vitis ultrasound Library work
+Lab-1: How does Vitis Ultrasound Library work
 ===============================================
 
 Vitis Ultrasound Library provides three levels of APIs, L1, L2 and L3. 

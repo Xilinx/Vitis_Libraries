@@ -38,7 +38,7 @@ class reciprocalV : public adf::graph {
 
         // Kernel definition
         reciprocalVKernel = adf::kernel::create(L1::reciprocalV<float, LENGTH, SIMD_DEPTH, SIMD_DEPTH>);
-        adf::source(reciprocalVKernel) = "reciprocalV/reciprocalV.cpp";
+        adf::source(reciprocalVKernel) = "reciprocalV.cpp";
 
         // connections
         adf::connect(input_reciprocalV.out[0], reciprocalVKernel.in[0]);

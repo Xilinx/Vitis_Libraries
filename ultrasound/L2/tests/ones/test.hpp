@@ -37,7 +37,7 @@ class ones : public adf::graph {
         onesKernel = adf::kernel::create(L1::ones<float, LENGTH, INCREMENT_VECTOR, SIMD_DEPTH>);
 
         // source kernel
-        adf::source(onesKernel) = "ones/ones.cpp";
+        adf::source(onesKernel) = "ones.cpp";
 
         // result
         adf::connect(onesKernel.out[0], output_ones.in[0]);

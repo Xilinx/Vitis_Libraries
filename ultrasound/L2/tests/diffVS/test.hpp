@@ -39,7 +39,7 @@ class diffVS : public adf::graph {
         adf::connect(diffVSKernel.out[0], output_diffVS.in[0]);
 
         // source kernel
-        adf::source(diffVSKernel) = "diffVS/diffVS.cpp";
+        adf::source(diffVSKernel) = "diffVS.cpp";
 
         // Setting kernel ratio
         adf::runtime<adf::ratio>(diffVSKernel) = KERNEL_RATIO;

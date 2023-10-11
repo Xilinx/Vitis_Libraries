@@ -38,7 +38,7 @@ class absV : public adf::graph {
 
         // kernel definition
         absVKernel = adf::kernel::create(L1::absV<float, LENGTH, INCREMENT_VECTOR, SIMD_DEPTH>);
-        adf::source(absVKernel) = "absV/absV.cpp";
+        adf::source(absVKernel) = "absV.cpp";
 
         // connections
         adf::connect(input_absV.out[0], absVKernel.in[0]);

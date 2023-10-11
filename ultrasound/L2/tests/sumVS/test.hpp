@@ -39,7 +39,7 @@ class sumVS : public adf::graph {
         sumVSKernel = adf::kernel::create(L1::sumVSStream<float, LENGTH, SIMD_DEPTH, SIMD_DEPTH>);
 
         // source kernel
-        adf::source(sumVSKernel) = "sumVS/sumVS.cpp";
+        adf::source(sumVSKernel) = "sumVS.cpp";
 
         // connections
         adf::connect(input1_sumVS.out[0], sumVSKernel.in[0]);

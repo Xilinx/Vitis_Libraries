@@ -35,7 +35,7 @@ class tileV : public adf::graph {
         tileVKernel = adf::kernel::create(L1::tileVApo<float, LENGTH, INCREMENT_VECTOR, SPACE_DIMENSION>);
 
         // source kernel
-        adf::source(tileVKernel) = "tileV/tileV.cpp";
+        adf::source(tileVKernel) = "tileV.cpp";
 
         // connections
         adf::connect(tileVKernel.out[0], output_tileV.in[0]);

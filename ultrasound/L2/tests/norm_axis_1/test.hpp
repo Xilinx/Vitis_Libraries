@@ -40,7 +40,7 @@ class normAxis1 : public adf::graph {
         adf::connect(normAxis1Kernel.out[0], output_normAxis1.in[0]);
 
         // source kernels
-        adf::source(normAxis1Kernel) = "norm_axis_1/norm_axis_1.cpp";
+        adf::source(normAxis1Kernel) = "norm_axis_1.cpp";
 
         // Setting kernel ratio
         adf::runtime<adf::ratio>(normAxis1Kernel) = KERNEL_RATIO;

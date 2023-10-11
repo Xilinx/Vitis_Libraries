@@ -23,7 +23,8 @@
     "aiecompiler": {
         "compiler": {
             "includepaths": [
-                "LIB_DIR/L1/include/"
+                "LIB_DIR/L1/include/",
+                "LIB_DIR/L1/include/sum_axis_1"
             ]
         }
     },
@@ -34,7 +35,8 @@
                     "location": "LIB_DIR/L2/tests/sum_axis_1/test.cpp",
                     "workdir": "./Work",
                     "name": "libadf.a",
-                    "config": "aie.cfg"
+                    "config": "aie.cfg",
+                    "files": ["LIB_DIR/L1/include/sum_axis_1/sum_axis_1.cpp"]
                 }
             ]
         }

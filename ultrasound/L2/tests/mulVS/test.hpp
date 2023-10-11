@@ -46,7 +46,7 @@ class mulVS : public adf::graph {
         adf::connect(mulVSKernel.out[0], output_mulVS.in[0]);
 
         // source kernel
-        adf::source(mulVSKernel) = "mulVS/mulVS.cpp";
+        adf::source(mulVSKernel) = "mulVS.cpp";
 
         // Setting kernel ratio
         adf::runtime<adf::ratio>(mulVSKernel) = KERNEL_RATIO;

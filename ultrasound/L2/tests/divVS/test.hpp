@@ -36,7 +36,7 @@ class divVS : public adf::graph {
 
         // Kernel definition
         divVSKernel = adf::kernel::create(L1::divVSSpeedOfSound<float, LENGTH, SIMD_DEPTH, SIMD_DEPTH>);
-        adf::source(divVSKernel) = "divVS/divVS.cpp";
+        adf::source(divVSKernel) = "divVS.cpp";
 
         // connections
         adf::connect(input1_divVS.out[0], divVSKernel.in[0]);

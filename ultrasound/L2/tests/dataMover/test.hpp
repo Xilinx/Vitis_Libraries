@@ -38,7 +38,7 @@ class dataMover : public adf::graph {
 
         // kernel definition
         dataMoverKernel = adf::kernel::create(L1::dataMover<float, LENGTH, SIMD_DEPTH>);
-        adf::source(dataMoverKernel) = "dataMover/dataMover.cpp";
+        adf::source(dataMoverKernel) = "dataMover.cpp";
 
         // connections
         adf::connect(input_dataMover.out[0], dataMoverKernel.in[0]);

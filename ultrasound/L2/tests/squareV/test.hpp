@@ -40,7 +40,7 @@ class squareV : public adf::graph {
         adf::connect(squareVKernel.out[0], output_squareV.in[0]);
 
         // source kernel
-        adf::source(squareVKernel) = "squareV/squareV.cpp";
+        adf::source(squareVKernel) = "squareV.cpp";
 
         // setting kernel ratio
         adf::runtime<adf::ratio>(squareVKernel) = KERNEL_RATIO;

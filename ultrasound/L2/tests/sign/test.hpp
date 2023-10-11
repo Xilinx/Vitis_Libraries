@@ -38,7 +38,7 @@ class sign : public adf::graph {
 
         // kernel definition
         signKernel = adf::kernel::create(L1::sign<float, LENGTH, INCREMENT_VECTOR, SIMD_DEPTH>);
-        adf::source(signKernel) = "sign/sign.cpp";
+        adf::source(signKernel) = "sign.cpp";
 
         // connections
         adf::connect(input_sign.out[0], signKernel.in[0]);

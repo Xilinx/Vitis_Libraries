@@ -40,7 +40,7 @@ class sqrtV : public adf::graph {
         adf::connect(sqrtVKernel.out[0], output_sqrtV.in[0]);
 
         // source kernel
-        adf::source(sqrtVKernel) = "sqrtV/sqrtV.cpp";
+        adf::source(sqrtVKernel) = "sqrtV.cpp";
 
         // setting kernel ratio
         adf::runtime<adf::ratio>(sqrtVKernel) = KERNEL_RATIO;

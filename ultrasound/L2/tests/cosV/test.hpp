@@ -37,7 +37,7 @@ class cosV : public adf::graph {
 
         // Kernel definition
         cosVKernel = adf::kernel::create(L1::cosV<float, LENGTH, INCREMENT_VECTOR, SIMD_DEPTH>);
-        adf::source(cosVKernel) = "cosV/cosV.cpp";
+        adf::source(cosVKernel) = "cosV.cpp";
 
         // connections
         adf::connect(input_cosV.out[0], cosVKernel.in[0]);

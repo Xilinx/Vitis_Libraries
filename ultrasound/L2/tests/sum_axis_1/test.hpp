@@ -41,7 +41,7 @@ class sumAxis1 : public adf::graph {
         adf::connect(sumAxis1Kernel.out[0], output_sumAxis1.in[0]);
 
         // source kernel
-        adf::source(sumAxis1Kernel) = "sum_axis_1/sum_axis_1.cpp";
+        adf::source(sumAxis1Kernel) = "sum_axis_1.cpp";
 
         // setting kernel ratio
         adf::runtime<adf::ratio>(sumAxis1Kernel) = KERNEL_RATIO;

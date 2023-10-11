@@ -36,7 +36,7 @@ class sumVV : public adf::graph {
 
         // kernel definition
         sumVVKernel = adf::kernel::create(L1::sumVV<float, LENGTH, INCREMENT_VECTOR, SIMD_DEPTH>);
-        adf::source(sumVVKernel) = "sumVV/sumVV.cpp";
+        adf::source(sumVVKernel) = "sumVV.cpp";
 
         // connections
         adf::connect(input1_sumVV.out[0], sumVVKernel.in[0]);

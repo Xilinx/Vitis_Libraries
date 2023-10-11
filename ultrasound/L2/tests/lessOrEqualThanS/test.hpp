@@ -46,7 +46,7 @@ class lessOrEqualThanS : public adf::graph {
         adf::connect(lessOrEqualThanSKernel.out[0], output_lessOrEqualThanS.in[0]);
 
         // source kernels
-        adf::source(lessOrEqualThanSKernel) = "lessOrEqualThanS/lessOrEqualThanS.cpp";
+        adf::source(lessOrEqualThanSKernel) = "lessOrEqualThanS.cpp";
 
         // Setting kernel ratio
         adf::runtime<adf::ratio>(lessOrEqualThanSKernel) = KERNEL_RATIO;

@@ -48,7 +48,7 @@ class mulMM : public adf::graph {
         adf::connect(mulMMKernel.out[0], output_mulMM.in[0]);
 
         // source kernel
-        adf::source(mulMMKernel) = "mulMM/mulMM.cpp";
+        adf::source(mulMMKernel) = "mulMM.cpp";
 
         // Setting kernel ratio
         adf::runtime<adf::ratio>(mulMMKernel) = KERNEL_RATIO;

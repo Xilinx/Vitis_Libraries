@@ -43,7 +43,7 @@ class equalS : public adf::graph {
         adf::connect(equalSKernel.out[0], output_equalS.in[0]);
 
         // source kernel
-        adf::source(equalSKernel) = "equalS/equalS.cpp";
+        adf::source(equalSKernel) = "equalS.cpp";
 
         // Setting kernel ratio
         adf::runtime<adf::ratio>(equalSKernel) = KERNEL_RATIO;
