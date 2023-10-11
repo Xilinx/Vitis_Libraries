@@ -3,6 +3,7 @@
   "description": [
     "Generated configurable multi-port mm2s_4d/s2mm_4d kernel test, using parameters."
   ],
+  "gui": false,
   "flow": "versal",
   "platform_allowlist": [
     "u200",

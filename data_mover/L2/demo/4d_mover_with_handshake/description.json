@@ -3,6 +3,7 @@
     "description": [
         "Generated configurable 4D Read/Write data mover kernel with handshake, using parameters."
     ], 
+    "gui": false, 
     "flow": "versal", 
     "platform_allowlist": [
         "vck190", 
