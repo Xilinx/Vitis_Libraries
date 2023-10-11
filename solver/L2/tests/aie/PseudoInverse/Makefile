@@ -48,11 +48,6 @@ MK_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 XF_PROJ_ROOT ?= $(shell bash -c 'export MK_PATH=$(MK_PATH); echo $${MK_PATH%/L2/*}')
 CUR_DIR := $(patsubst %/,%,$(dir $(MK_PATH)))
 XFLIB_DIR = $(XF_PROJ_ROOT)
-DSPLIB_ROOT = $(XFLIB_DIR)/../xf_dsp
-P_DIM_A := 64
-P_DIM_AB := 64
-P_DIM_B := 64
-ITER_CNT := 1
 
 # setting default value
 TARGET ?= aiesim
@@ -125,18 +120,13 @@ else
 AIETARGET := x86sim
 endif
 
-AIE_CXXFLAGS += --target=$(AIETARGET) --platform=$(XPLATFORM) --pl-freq=2000 
+AIE_CXXFLAGS += --target=$(AIETARGET) --platform=$(XPLATFORM) --config aie.cfg  
 AIE_CXXFLAGS += $(AIE_CXXFLAGS_INC)
 AIE_CONTAINER = $(TEMP_DIR)/libadf.a
 AIE_WORK_DIR = $(CUR_DIR)/Work
 AIE_PKG_DIR = $(AIE_WORK_DIR)
 
-AIE_CXXFLAGS += -I $(CUR_DIR)/aie -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L1/src/aie
-AIE_CXXFLAGS += -I $(DSPLIB_ROOT)/L1/include/aie -I $(DSPLIB_ROOT)/L1/src/aie -I $(DSPLIB_ROOT)/L1/tests/aie/inc -I $(DSPLIB_ROOT)/L1/tests/aie/src -I $(DSPLIB_ROOT)/L2/include/aie -I $(DSPLIB_ROOT)/L2/tests/aie/common/inc
-AIE_CXXFLAGS += --Xpreproc="-DP_DIM_A=$(P_DIM_A)"
-AIE_CXXFLAGS += --Xpreproc="-DP_DIM_AB=$(P_DIM_AB)"
-AIE_CXXFLAGS += --Xpreproc="-DP_DIM_B=$(P_DIM_B)"
-AIE_CXXFLAGS += --Xpreproc="-DITER_CNT=$(ITER_CNT)"
+AIE_CXXFLAGS += -I $(CUR_DIR)/aie -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L1/src/aie -I $(XFLIB_DIR)/../dsp/L1/include/aie -I $(XFLIB_DIR)/../dsp/L1/src/aie -I $(XFLIB_DIR)/../dsp/L1/tests/aie/inc -I $(XFLIB_DIR)/../dsp/L1/tests/aie/src -I $(XFLIB_DIR)/../dsp/L2/include/aie -I $(XFLIB_DIR)/../dsp/L2/tests/aie/common/inc
 
 $(AIE_WORK_DIR)/ps/c_rts/aie_control_xrt.cpp: $(AIE_CONTAINER)
 
@@ -170,16 +160,15 @@ VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include
 ######################### binary container global settings ##########################
 
 ############################## Setting Rules for AIE (Building Kernels) ##################
-$(AIE_CONTAINER): $(CUR_DIR)/aie/aie_graph.cpp  | pre_build 
+$(AIE_CONTAINER): pre_build $(CUR_DIR)/aie/aie_graph.cpp 
 	$(ECHO) "Compiling: libadf.a"
 	mkdir -p $(dir $@)
-	$(AIECXX) $(AIE_CXXFLAGS) $^
-	mv ./libadf.a $(AIE_CONTAINER)
+	$(VPP) -c --mode aie $(AIE_CXXFLAGS) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^)
 
 ############################## Setting Rules for Host (Building Host Executable) ##############################
 $(EXE_FILE): $(EXE_FILE_DEPS)
 	mkdir -p $(BUILD_DIR)
-	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
+	$(CXX) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^) $(CXXFLAGS) $(LDFLAGS)
 
 $(EMCONFIG):
 	emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
@@ -272,12 +261,12 @@ all: check_device check_vpp check_platform mkflag $(RUN_DEPS)
 run: all
 #x86sim
 ifeq ($(TARGET), x86sim)
-	$(X86SIMULATOR) --pkg-dir=$(AIE_PKG_DIR) --input-dir=$(CUR_DIR) --output-dir=$(CUR_DIR) 
+	$(X86SIMULATOR) --pkg-dir=$(AIE_PKG_DIR) --input-dir=$(CUR_DIR) --output-dir=$(CUR_DIR)
 	
 endif
 #aiesim
 ifeq ($(TARGET), aiesim)
-	$(AIESIMULATOR) --pkg-dir=$(AIE_PKG_DIR) --profile  $(AIESIMFLAGS) --input-dir=$(CUR_DIR) --output-dir=$(CUR_DIR) 
+	$(AIESIMULATOR) --pkg-dir=$(AIE_PKG_DIR) --profile --input-dir=$(CUR_DIR) --output-dir=$(CUR_DIR) $(AIESIMFLAGS)
 	
 endif
 #hw_emu
@@ -329,7 +318,7 @@ endif
 pre_build:
 	cd tv && make tv -f tv.mk
 
-.PHONY: clean cleanall emconfig gen_instances valid_params
+.PHONY: clean cleanall emconfig valid_params
 emconfig: $(EMCONFIG)
 
 .PHONY: host
@@ -346,11 +335,9 @@ else
 xclbin: check_vpp check_sysroot  pre_build $(BINARY_CONTAINERS)
 endif
 
-gen_instances: $(INSTANCE_FILES)
-	@echo "Nothing to generate."
+#################### Parameterized File Generation ##########################
 
-valid_params:
-	@echo "Nothing to validate."
+gen_instances: $(GENERATED_FILES)
 
 ############################## Cleaning Rules ##############################
 cleanh:
@@ -364,6 +351,6 @@ cleank:
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR) sd_card* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
 	-$(RMDIR) $(AIE_CONTAINER) aiesimulator_output .AIE_SIM_CMD_LINE_OPTIONS x86simulator_output $(AIE_WORK_DIR) $(AIE_PKG_DIR) $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
-	-$(RMDIR)  *.html $(INSTANCE_FILES)
+	-$(RMDIR)  *.html $(GENERATED_FILES)
 
 clean: cleanh

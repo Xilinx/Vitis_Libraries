@@ -17,7 +17,8 @@
 
 /**
  * @file cholesky_float_decomposition_graph.hpp
- * @brief This file captures the definition of the `L2` graph level class for the Cholesky Decomposition with float data type.
+ * @brief This file captures the definition of the `L2` graph level class for the Cholesky Decomposition with float data
+ *type.
  **/
 
 #ifndef __CHOLESKY_FLOAT_GRAPHS_HPP__
@@ -75,7 +76,7 @@ class CholeskyGraph : public adf::graph {
         for (int i = 0; i < NUM; i++) {
             k[i] = kernel::create(cholesky_float);
             // source file
-            source(k[i]) = "aie/cholesky_float_decomposition.cpp";
+            source(k[i]) = "cholesky_float_decomposition.cpp";
             runtime<ratio>(k[i]) = 1.0;
         }
 

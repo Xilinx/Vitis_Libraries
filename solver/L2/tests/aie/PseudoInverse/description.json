@@ -1,34 +1,46 @@
 {
-    "name": "PseudoInverse on comlex float", 
+    "name": "PseudoInverse on Complex Float",
     "description": [
         ""
     ],
     "flow": "versal",
     "keywords": [
-        "aiecompiler", 
+        "aiecompiler",
         "aiesimulator",
         "stream_connect"
-    ], 
+    ],
     "key_concepts": [
-        "AI Engine", 
-        "Adaptive Data Flow", 
+        "AI Engine",
+        "Adaptive Data Flow",
         "Graph"
     ],
     "platform_allowlist": [
         "vck190"
     ],
     "platform_blocklist": [
-
+        "vek280"
     ],
     "os": [
-        "Linux"
-    ], 
+        "rhel8"
+    ],
     "runtime": [
         "OpenCL"
     ],
-    "pre_build" : [
+    "pre_build": [
         {
             "build_cmd": "cd tv && make tv -f tv.mk"
+        }
+    ],
+    "launch": [
+        {
+            "name": "aiesim-launch",
+            "target": "aiesim",
+            "sim_options": "--input-dir=$(CUR_DIR) --output-dir=$(CUR_DIR)"
+        },
+        {
+            "name": "x86sim-launch",
+            "target": "x86sim",
+            "sim_options": "--input-dir=$(CUR_DIR) --output-dir=$(CUR_DIR)"
         }
     ],
     "aiecompiler": {
@@ -37,7 +49,13 @@
                 "./aie",
                 "LIB_DIR/L1/include/aie",
                 "LIB_DIR/L2/include/aie",
-                "LIB_DIR/L1/src/aie"
+                "LIB_DIR/L1/src/aie",
+                "LIB_DIR/../dsp/L1/include/aie",
+                "LIB_DIR/../dsp/L1/src/aie",
+                "LIB_DIR/../dsp/L1/tests/aie/inc",
+                "LIB_DIR/../dsp/L1/tests/aie/src",
+                "LIB_DIR/../dsp/L2/include/aie",
+                "LIB_DIR/../dsp/L2/tests/aie/common/inc"
             ]
         }
     },
@@ -46,15 +64,19 @@
             "accelerators": [
                 {
                     "location": "./aie/aie_graph.cpp",
-                    "pl-freq": 1000,
                     "workdir": "./Work",
                     "name": "libadf.a",
-                    "aie_kernel_files":["./aie/aie_adder.cc"]
+                    "aie_kernel_files": [
+                        "LIB_DIR/../dsp/L1/src/aie/matrix_mult.cpp",
+                        "LIB_DIR/../dsp/L1/src/aie/matrix_mult_tiler.cpp",
+                        "LIB_DIR/../dsp/L1/src/aie/matrix_mult_untiler.cpp",
+                        "LIB_DIR/../dsp/L1/src/aie/matrix_vector_mul.cpp"],
+                    "config": "aie.cfg"
                 }
             ]
         }
     ],
-    "match_makefile" : "true",
+    "match_makefile": "true",
     "testinfo": {
         "disable": false,
         "jobs": [

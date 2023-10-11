@@ -29,6 +29,14 @@ Release Note
    :hidden:
    :maxdepth: 1
 
+2023.2
+------
+
+In this release, we add two API running on AI Engine
+
+* Singular value decomposition, for complex float matrix input
+* Pseudoinverse, for complex float matrix input
+
 2023.1
 ------
 

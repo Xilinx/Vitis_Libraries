@@ -20,5 +20,6 @@
 
 const unsigned int col_num = 16;
 const unsigned int row_num = 16;
+const unsigned int k_rep = 1;
 
 #endif

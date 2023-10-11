@@ -59,6 +59,8 @@ Currently the AMD Vitis AIE Solver Library provides the following operations on 
 * Matrix decomposition
    * Cholesky decomposition for symmetric positive definite matrix
    * QR decomposition for general matrix
+   * Singular value decomposition
+   * Pseudoinverse
 
 Requirements
 ------------

@@ -1,34 +1,46 @@
 {
-    "name": "SVD on complex float", 
+    "name": "SVD on Complex Float",
     "description": [
         ""
     ],
     "flow": "versal",
     "keywords": [
-        "aiecompiler", 
+        "aiecompiler",
         "aiesimulator",
         "stream_connect"
-    ], 
+    ],
     "key_concepts": [
-        "AI Engine", 
-        "Adaptive Data Flow", 
+        "AI Engine",
+        "Adaptive Data Flow",
         "Graph"
     ],
     "platform_allowlist": [
         "vck190"
     ],
     "platform_blocklist": [
-
+        "vek280"
     ],
     "os": [
         "Linux"
-    ], 
+    ],
     "runtime": [
         "OpenCL"
     ],
-    "pre_build" : [
+    "pre_build": [
         {
             "build_cmd": "cd tv && make tv -f tv.mk"
+        }
+    ],
+    "launch": [
+        {
+            "name": "aiesim-launch",
+            "target": "aiesim",
+            "sim_options": "--input-dir=$(CUR_DIR) --output-dir=$(CUR_DIR)"
+        },
+        {
+            "name": "x86sim-launch",
+            "target": "x86sim",
+            "sim_options": "--input-dir=$(CUR_DIR) --output-dir=$(CUR_DIR)"
         }
     ],
     "aiecompiler": {
@@ -46,18 +58,20 @@
             "accelerators": [
                 {
                     "location": "./aie/aie_graph.cpp",
-                    "pl-freq": 1000,
                     "workdir": "./Work",
                     "name": "libadf.a",
-                    "aie_kernel_files":["./aie/aie_adder.cc"]
+                    "aie_kernel_files": [
+                        "LIB_DIR/L1/src/aie/svd_kernel.cpp"
+                    ],
+                    "config": "aie.cfg"
                 }
             ]
         }
     ],
-    "match_makefile" : "true",
+    "match_makefile": "true",
     "contributors": [
         {
-            "url": "http://www.xilinx.com", 
+            "url": "http://www.xilinx.com",
             "group": "Xilinx"
         }
     ],

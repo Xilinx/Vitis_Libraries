@@ -23,6 +23,7 @@
 namespace xf {
 namespace solver {
 
+template <int ROW, int COL, int KN>
 class OneSidedJacobiComplexFloat {
    public:
     OneSidedJacobiComplexFloat(int total_column, int total_row, int current_column) {

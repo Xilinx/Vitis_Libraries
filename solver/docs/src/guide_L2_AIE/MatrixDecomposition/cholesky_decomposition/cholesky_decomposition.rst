@@ -105,6 +105,9 @@ Kernel Interfaces
   *  ``output_stream<float>* matL_real``    stream of the real part of output matrix, contains the lower triangle elements of matrix, stored column-major.
   *  ``output_stream<float>* matL_imag``    stream of the imag part of output matrix, contains the lower triangle elements of matrix, stored column-major.
 
+.. note::
+   * The function assumes that the input matrix is a Hermitian positive definite matrix.
+
 .. code::
 
     void cholesky_float(input_stream<float>* __restrict matA,
@@ -117,6 +120,9 @@ Kernel Interfaces
 * Output:
 
   *  ``output_stream<float>* matL``    stream of the output matrix, contains the lower triangle elements of matrix, stored column by column.
+
+.. note::
+   * The function assumes that the input matrix is a symmetric positive definite matrix.
 
 
 Performance

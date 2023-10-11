@@ -55,7 +55,8 @@ DataType Supported
 * std::complex<ap_fixed>
 
 .. note::
-   Subnormall values are not supported. If used, the synthesized hardware will flush these to zero, and the behavior will differ versus software simulation.
+   * The function assumes that the input matrix is symmetric positive definite (Hermitian positive definite for complex-valued inputs).
+   * Subnormall values are not supported. If used, the synthesized hardware will flush these to zero, and the behavior will differ versus software simulation.
 
 Interfaces
 --------------------

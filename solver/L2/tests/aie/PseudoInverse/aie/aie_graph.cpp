@@ -19,6 +19,7 @@
 #include "aie_graph_params.h"
 using namespace adf;
 
+#define ITER_CNT 1
 #define GRAPH_ITER_CNT ((SPLIT / NUM_KERNEL) * SPLIT * ITER_CNT)
 
 xf::solver::PseudoInverseComplexFloat mygraph;
@@ -90,10 +91,11 @@ int main(int argc, char** argv) {
     }
     // compare and check
     int num = (P_DIM_A * P_DIM_B) / NUM_KERNEL;
-    int err_n = 0 ;
+    int err_n = 0;
     for (int i = 0; i < NUM_KERNEL; i++) {
         std::cout << "checking C" + std::to_string(i) + " againt Golden" << std::endl;
-        std::string GoldenDir = "aiesim_data/gemm_" + std::to_string(P_DIM_A) + 'x' + std::to_string(P_DIM_AB) + 'x' + std::to_string(P_DIM_B) + "_ioFiles/c" + std::to_string(i) + "_final_output.txt";
+        std::string GoldenDir = "aiesim_data/gemm_" + std::to_string(P_DIM_A) + 'x' + std::to_string(P_DIM_AB) + 'x' +
+                                std::to_string(P_DIM_B) + "_ioFiles/c" + std::to_string(i) + "_final_output.txt";
         int err_n0 = golden_check("data/c" + std::to_string(i) + ".txt", GoldenDir, num);
         err_n += err_n0;
     }

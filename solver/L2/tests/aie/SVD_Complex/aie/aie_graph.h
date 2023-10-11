@@ -30,16 +30,16 @@ class TopGraph : public graph {
     input_plio in_1;
     output_plio out_0;
     output_plio out_1;
-    xf::solver::SVDComplexFloat<col_num, row_num> G;
+    xf::solver::SVDComplexFloat<col_num, row_num, k_rep> G;
 
     TopGraph(std::string A_0_filename,
              std::string A_1_filename,
              std::string Res_0_filename,
              std::string Res_1_filename) {
-        in_0 = input_plio::create("in_0", plio_32_bits, A_0_filename, 1000);
-        in_1 = input_plio::create("in_1", plio_32_bits, A_1_filename, 1000);
-        out_0 = output_plio::create("out_0", plio_32_bits, Res_0_filename, 1000);
-        out_1 = output_plio::create("out_1", plio_32_bits, Res_1_filename, 1000);
+        in_0 = input_plio::create("in_0", plio_128_bits, A_0_filename, 1000);
+        in_1 = input_plio::create("in_1", plio_128_bits, A_1_filename, 1000);
+        out_0 = output_plio::create("out_0", plio_128_bits, Res_0_filename, 1000);
+        out_1 = output_plio::create("out_1", plio_128_bits, Res_1_filename, 1000);
         connect<>(in_0.out[0], G.in_0);
         connect<>(in_1.out[0], G.in_1);
         connect<>(G.out_0, out_0.in[0]);

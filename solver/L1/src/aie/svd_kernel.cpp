@@ -23,167 +23,251 @@
 namespace xf {
 namespace solver {
 
-/*
 void print(v4cfloat a) {
     aie::vector<cfloat, 4> b(a);
     aie::print(b, true, "v4cfloat = ");
 }
-*/
 
-void OneSidedJacobiComplexFloat::process(input_stream_cfloat* in_0,
-                                         input_stream_cfloat* in_1,
-                                         output_stream_cfloat* out_0,
-                                         output_stream_cfloat* out_1) {
-    // this is a systolic array style design to compute SVD of [m x n] complex float matrix
-    // SVD: A = U * S * V
-    // inputs is A followed by V, starting from the k th column to the last column,
-    // then followed by the 0 th column, to the k-1 th column.
-    // To be more specific: A[:,k], V[:,k] ... A[:,n-1], V[:,n-1], A[:,0], V[:,0] ... A[:,k-1], V[:,k-1]
-    // Inside each vector of A or V, the first two elemtns comes in in_0, the send two in_1,
-    // Then the third two elements comes in in_0, the fourth two comes in in_1...
-    //
-    // Notice: SVD need multiple sweep before converged.
-    // The number of sweep needed is not defined in this design.
-    // For the first sweep, A is original input matrix and V is identity matrix.
-    // For sweep other than the first one, A and V are result of last sweep.
-    // Thus the SVD is actually controlled by its feeder, like PL data mover.
-    // Such feeder can decide how many rounds it want to sweep for SVD.
-    // Maximum columns is 256, Maximum rows is 1024
-
-    // Processing steps:
-    // 1. Jacobi rotation of (k + 1, k), output A[:,k+1], V[:,k+1]
-    // 2. Jacobi rotation of (k + 2, k), output A[:,k+2], V[:,k+2]
-    // ...
-    // 3. pass on A[:,0], V[:,0] ... A[:,k-1], V[:, 0]
-    // 4. output A[:,k], V[:,k]
-
-    bool if_last_sweep = false;
-    v4cfloat A[1024 / 4];
-    v4cfloat B[1024 / 4];
-    v4cfloat VA[256 / 4];
-    v4cfloat VB[256 / 4];
-    v4cfloat* pa = A;
-    v4cfloat* pb = B;
-    v4cfloat* pva = VA;
-    v4cfloat* pvb = VB;
-    v4cfloat a11 = null_v4cfloat();
-    v4cfloat a12 = null_v4cfloat();
-    v4cfloat a22 = null_v4cfloat();
-    cfloat B11, B12, B22;
-
-    // 0. Load config to tell if this is last round of sweep
-    // 1. Take in A[:, k], Q[:, k]
-    pa = A;
-    pva = V;
-    for (int i = 0; i < row_num / 4; i++) chess_prepare_for_pipelining {
-            v4cfloat v0 = undef_v4cfloat();
-            v0 = upd_v(v0, 0, as_v2cfloat(READINCRW(WSS_rsrc1, in_0)));
-            v0 = upd_v(v0, 1, as_v2cfloat(READINCRW(WSS_rsrc2, in_1)));
-            *pa++ = v0;
-            a11 = fpmac_cn(a11, v0, 0, 0x3210, 0, 0x3210);
-        }
-    B11 = ext_elem(a11, 0) + ext_elem(a11, 1) + ext_elem(a11, 2) + ext_elem(a11, 3);
-    for (int i = 0; i < column_num / 4; i++) chess_prepare_for_pipelining {
-            v4cfloat v0 = undef_v4cfloat();
-            v0 = upd_v(v0, 0, as_v2cfloat(READINCRW(WSS_rsrc1, in_0)));
-            v0 = upd_v(v0, 1, as_v2cfloat(READINCRW(WSS_rsrc2, in_1)));
-            *pva++ = v0;
-        }
-
-    for (int j = k + 1; j < column_num; j++) {
-        pa = A;
-        pb = B;
-        pva = VA;
-        pva = VB;
-        for (int i = 0; i < row_num / 4; i++) chess_prepar_for_pipelining {
-                v4cfloat v0 = undef_v4cfloat();
-                v0 = upd_v(v0, 0, as_v2cfloat(READINCRW(WSS_rsrc1, in_0)));
-                v0 = upd_v(v0, 1, as_v2cfloat(READINCRW(WSS_rsrc2, in_1)));
-                v4cfloat v1 = *pa++;
-                a12 = fpmac_cn(a12, v1, v0, 0, 0x3210, 0, 0x3210);
-                a22 = fpmac_cn(a22, v1, 0, 0x3210, 0, 0x3210);
-            }
-        B12 = ext_elem(a12, 0) + ext_elem(a12, 1) + ext_elem(a12, 2) + ext_elem(a12, 3);
-        B22 = ext_elem(a22, 0) + ext_elem(a22, 1) + ext_elem(a22, 2) + ext_elem(a22, 3);
-
-        cfloat c, s;
-        cfloat tmp = aie::sqrt(4 * B12 * B12 - (B11 - B22) * (B11 - B22));
-        cfloat tmp1 = B11 + B22 - tmp;
-        cfloat tmp2 = B11 + B22 + tmp;
-        c = tmp1;
-        s = tmp2;
-
-        for (int i = 0; i < row_num / 8; i++) chess_prepare_for_pipelining {
-                v4cfloat v0 = undef_v4cfloat();
-                v0 = upd_v(v0, 0, as_v2cfloat(READINCRW(WSS_rsrc1, in_0)));
-                v0 = upd_v(v0, 1, as_v2cfloat(READINCRW(WSS_rsrc2, in_1)));
-                *ptr++ = v0;
-                a0 = fpmac_cn(a0, v0, 0, 0x3210, 0, 0x3210);
-
-                v4cfloat v1 = undef_v4cfloat();
-                v1 = upd_v(v1, 0, as_v2cfloat(READINCRW(WSS_rsrc1, in_0)));
-                v1 = upd_v(v1, 1, as_v2cfloat(READINCRW(WSS_rsrc2, in_1)));
-                *ptr++ = v1;
-                a1 = fpmac_cn(a1, v1, 0, 0x3210, 0, 0x3210);
-            }
-        a0 = fpadd(a0, a1, 0, 0x3210);
-
-        norm = ext_elem(a0, 0) + ext_elem(a0, 1) + ext_elem(a0, 2) + ext_elem(a0, 3);
-        norm_r = aie::sqrt(norm.real);
-        norm_r_inv = aie::inv(norm_r);
-
-        ptr = Q;
-        v8float scale;
-        scale = upd_elem(scale, 0, norm_r_inv);
-        for (int i = 0; i < row_num / 8; i++) chess_prepare_for_pipelining {
-                v4cfloat v0 = *ptr;
-                v4cfloat q0 = fpmul(scale, 0, 0, v0, 0, 0x3210);
-                *ptr++ = q0;
-                WRITEINCRW(WMS_rsrc1, out_0, as_v4int32(ext_v(q0, 0)));
-                WRITEINCRW(WMS_rsrc2, out_1, as_v4int32(ext_v(q0, 1)));
-
-                v4cfloat v1 = *ptr;
-                v4cfloat q1 = fpmul(scale, 0, 0, v1, 0, 0x3210);
-                *ptr++ = q1;
-                WRITEINCRW(WMS_rsrc1, out_0, as_v4int32(ext_v(q1, 0)));
-                WRITEINCRW(WMS_rsrc2, out_1, as_v4int32(ext_v(q1, 1)));
-            }
-    }
-
-    // 4. Output A[:,k], V[:,k], unify to generate S and U if it's last round of sweep.
-    if (if_last_sweep) {
-        for (int i = 0; i < row_num / 4; i++) chess_prepare_for_pipelining {
-                v4cfloat v0 = undef_v4cfloat();
-                v0 = upd_v(v0, 0, as_v2cfloat(READINCRW(WSS_rsrc1, in_0)));
-                v0 = upd_v(v0, 1, as_v2cfloat(READINCRW(WSS_rsrc2, in_1)));
-                *pa++ = v0;
-                a11 = fpmac_cn(a11, v0, 0, 0x3210, 0, 0x3210);
-            }
-        a11 = fpmac_cn(a11, v0, 0, 0x3210, 0, 0x3210);
-        B11 = ext_elem(a11, 0) + ext_elem(a11, 1) + ext_elem(a11, 2) + ext_elem(a11, 3);
-
-        for (int i = 0; i < row_num / 4; i++) chess_prepare_for_pipelining {
-                v4cfloat q0 = *pva++;
-                v4cfloat np0 = fpmsc(q0, B11, q0);
-                WRITEINCRW(WMS_rsrc1, out_0, as_v4int32(ext_v(np0, 0)));
-                WRITEINCRW(WMS_rsrc2, out_1, as_v4int32(ext_v(np0, 1)));
-            }
-
-    } else {
-        for (int i = 0; i < row_num / 4; i++) chess_prepare_for_pipelining {
-                aie::vector<int, 4> vr = READINCRW(WSS_rsrc1, in_0);
-                aie::vector<int, 4> vi = READINCRW(WSS_rsrc2, in_1);
-                WRITEINCRW(WMS_rsrc1, out_0, vr);
-                WRITEINCRW(WMS_rsrc2, out_1, vi);
-            }
-    }
-
-    for (int i = 0; i < column_num / 4; i++) chess_prepare_for_pipelining {
-            aie::vector<int, 4> vr = READINCRW(WSS_rsrc1, in_0);
-            aie::vector<int, 4> vi = READINCRW(WSS_rsrc2, in_1);
-            WRITEINCRW(WMS_rsrc1, out_0, vr);
-            WRITEINCRW(WMS_rsrc2, out_1, vi);
-        }
+void inline update(v4cfloat* array, cfloat& val, int idx) {
+    v4cfloat tmp = array[idx / 4];
+    tmp = upd_elem(tmp, idx % 4, val);
+    array[idx / 4] = tmp;
 }
+
+template <int ROW, int COL, int KN>
+void OneSidedJacobiComplexFloat<ROW, COL, KN>::process(input_stream_cfloat* __restrict in_0,
+                                                       input_stream_cfloat* __restrict in_1,
+                                                       output_stream_cfloat* __restrict out_0,
+                                                       output_stream_cfloat* __restrict out_1) {
+    v4cfloat Q[(1024 + 256) / 4];
+    v4cfloat M[(1024 + 256) / 4];
+    for (int kk = 0; kk < KN; kk++) {
+        // 1. pass processed                        :load id x (r+c),   :write id x (r + c)
+        if (column_id > 0) {
+            v4cfloat* ptr_q = Q;
+            for (int i = 0; i < (ROW + COL) / 4; i++) chess_prepare_for_pipelining {
+                    v4cfloat n0;
+                    n0 = upd_v(n0, 0, as_v2cfloat(READINCRW(WSS_rsrc1, in_0)));
+                    n0 = upd_v(n0, 1, as_v2cfloat(READINCRW(WSS_rsrc2, in_1)));
+                    *ptr_q++ = n0;
+                }
+        }
+
+        for (int j = 1; j < column_id; j++) {
+            v4cfloat* ptr_q = Q;
+            for (int i = 0; i < (ROW + COL) / 4; i++) chess_prepare_for_pipelining {
+                    v4cfloat o0, n0;
+                    o0 = *ptr_q;
+                    WRITEINCRW(WMS_rsrc1, out_0, as_v4int32(ext_v(o0, 0)));
+                    WRITEINCRW(WMS_rsrc2, out_1, as_v4int32(ext_v(o0, 1)));
+                    n0 = upd_v(n0, 0, as_v2cfloat(READINCRW(WSS_rsrc1, in_0)));
+                    n0 = upd_v(n0, 1, as_v2cfloat(READINCRW(WSS_rsrc2, in_1)));
+                    *ptr_q++ = n0;
+                }
+        }
+
+        // 2. <a_id, a_id>, norm_a_id               :load (r+c),        :write (r+c)
+        cfloat norm2, norm2_inv, norm_inv;
+
+        if (column_id > 0) {
+            v4cfloat* ptr_q = Q;
+            v4cfloat ac0 = null_v4cfloat();
+
+            for (int i = 0; i < ROW / 4; i++) chess_prepare_for_pipelining {
+                    v4cfloat o0 = *ptr_q;
+                    WRITEINCRW(WMS_rsrc1, out_0, as_v4int32(ext_v(o0, 0)));
+                    WRITEINCRW(WMS_rsrc2, out_1, as_v4int32(ext_v(o0, 1)));
+
+                    v4cfloat u0;
+                    u0 = upd_v(u0, 0, as_v2cfloat(READINCRW(WSS_rsrc1, in_0)));
+                    u0 = upd_v(u0, 1, as_v2cfloat(READINCRW(WSS_rsrc2, in_1)));
+                    *ptr_q++ = u0;
+                    ac0 = fpmac_cn(ac0, u0, 0, 0x3210, 0, 0x3210);
+                }
+
+            for (int i = 0; i < COL / 4; i++) chess_prepare_for_pipelining {
+                    v4cfloat o0 = *ptr_q;
+                    WRITEINCRW(WMS_rsrc1, out_0, as_v4int32(ext_v(o0, 0)));
+                    WRITEINCRW(WMS_rsrc2, out_1, as_v4int32(ext_v(o0, 1)));
+
+                    v4cfloat u0;
+                    u0 = upd_v(u0, 0, as_v2cfloat(READINCRW(WSS_rsrc1, in_0)));
+                    u0 = upd_v(u0, 1, as_v2cfloat(READINCRW(WSS_rsrc2, in_1)));
+                    *ptr_q++ = u0;
+                }
+
+            norm2 = aie::reduce_add(aie::vector<cfloat, 4>(ac0));
+            norm2_inv.real = aie::inv(norm2.real);
+            norm2_inv.imag = 0;
+            norm_inv.real = aie::sqrt(norm2_inv.real);
+            norm_inv.imag = 0;
+            norm2.real = aie::sqrt(norm2.real);
+            update(Q, norm2, ROW + column_id);
+
+        } else {
+            v4cfloat* ptr_q = Q;
+            v4cfloat ac0 = null_v4cfloat();
+
+            for (int i = 0; i < ROW / 4; i++) chess_prepare_for_pipelining {
+                    v4cfloat u0;
+                    u0 = upd_v(u0, 0, as_v2cfloat(READINCRW(WSS_rsrc1, in_0)));
+                    u0 = upd_v(u0, 1, as_v2cfloat(READINCRW(WSS_rsrc2, in_1)));
+                    *ptr_q++ = u0;
+                    ac0 = fpmac_cn(ac0, u0, 0, 0x3210, 0, 0x3210);
+                }
+
+            for (int i = 0; i < COL / 4; i++) chess_prepare_for_pipelining {
+                    v4cfloat u0;
+                    u0 = upd_v(u0, 0, as_v2cfloat(READINCRW(WSS_rsrc1, in_0)));
+                    u0 = upd_v(u0, 1, as_v2cfloat(READINCRW(WSS_rsrc2, in_1)));
+                    *ptr_q++ = u0;
+                }
+
+            norm2 = aie::reduce_add(aie::vector<cfloat, 4>(ac0));
+            norm2_inv.real = aie::inv(norm2.real);
+            norm2_inv.imag = 0;
+            norm_inv.real = aie::sqrt(norm2_inv.real);
+            norm_inv.imag = 0;
+            norm2.real = aie::sqrt(norm2.real);
+            update(Q, norm2, ROW + column_id);
+        }
+
+        if ((column_id + 1) >= COL) {
+            v4cfloat* ptr_q = Q;
+            v4cfloat scale;
+            scale = upd_elem(scale, 0, norm_inv);
+            scale = upd_elem(scale, 1, norm_inv);
+            scale = upd_elem(scale, 2, norm_inv);
+            scale = upd_elem(scale, 3, norm_inv);
+
+            for (int i = 0; i < ROW / 4; i++) chess_prepare_for_pipelining {
+                    v4cfloat u0 = *ptr_q;
+                    v4cfloat q0 = fpmul_cn(scale, u0);
+                    *ptr_q++ = q0;
+                    WRITEINCRW(WMS_rsrc1, out_0, as_v4int32(ext_v(q0, 0)));
+                    WRITEINCRW(WMS_rsrc2, out_1, as_v4int32(ext_v(q0, 1)));
+                }
+            for (int i = 0; i < COL / 4; i++) chess_prepare_for_pipelining {
+                    v4cfloat r0 = *ptr_q++;
+                    WRITEINCRW(WMS_rsrc1, out_0, as_v4int32(ext_v(r0, 0)));
+                    WRITEINCRW(WMS_rsrc2, out_1, as_v4int32(ext_v(r0, 1)));
+                }
+        }
+
+        // 3. <a_id + 1, a_id>                      :load (r+c),        :
+        cfloat dotp;
+        if ((column_id + 1) < COL) {
+            v4cfloat* ptr_q = Q;
+            v4cfloat* ptr_m = M;
+            v4cfloat ac0 = null_v4cfloat();
+            v4cfloat scale;
+            scale = upd_elem(scale, 0, norm_inv);
+            scale = upd_elem(scale, 1, norm_inv);
+            scale = upd_elem(scale, 2, norm_inv);
+            scale = upd_elem(scale, 3, norm_inv);
+
+            for (int i = 0; i < ROW / 4; i++) chess_prepare_for_pipelining {
+                    v4cfloat a0;
+                    a0 = upd_v(a0, 0, as_v2cfloat(READINCRW(WSS_rsrc1, in_0)));
+                    a0 = upd_v(a0, 1, as_v2cfloat(READINCRW(WSS_rsrc2, in_1)));
+                    *ptr_m++ = a0;
+
+                    v4cfloat u0 = *ptr_q++;
+                    v4cfloat q0 = fpmul_cn(scale, u0);
+                    ac0 = fpmac_cn(ac0, u0, a0);
+                    WRITEINCRW(WMS_rsrc1, out_0, as_v4int32(ext_v(q0, 0)));
+                    WRITEINCRW(WMS_rsrc2, out_1, as_v4int32(ext_v(q0, 1)));
+                }
+
+            for (int i = 0; i < COL / 4; i++) chess_prepare_for_pipelining {
+                    v4cfloat r0;
+                    r0 = upd_v(r0, 0, as_v2cfloat(READINCRW(WSS_rsrc1, in_0)));
+                    r0 = upd_v(r0, 1, as_v2cfloat(READINCRW(WSS_rsrc2, in_1)));
+                    *ptr_m++ = r0;
+
+                    v4cfloat q0 = *ptr_q++;
+                    WRITEINCRW(WMS_rsrc1, out_0, as_v4int32(ext_v(q0, 0)));
+                    WRITEINCRW(WMS_rsrc2, out_1, as_v4int32(ext_v(q0, 1)));
+                }
+
+            dotp = aie::reduce_add(aie::vector<cfloat, 4>(ac0));
+        }
+
+        // 4. <a_id + 2, a_id>, a_id+1'             :load (r+c),        :write (r+c)
+        // 5. ...                                   :load (r+c),        :write (r+c)
+        // 6. <a_c_1, a_id>, a_c_2'                 :load (r+c),        :write (r+c)
+        for (int j = column_id + 2; j < COL; j++) {
+            v4cfloat* ptr_q = Q;
+            v4cfloat* ptr_m = M;
+            v4cfloat ac0 = null_v4cfloat();
+
+            v4cfloat tmp_scale;
+            tmp_scale = upd_elem(tmp_scale, 0, dotp);
+            tmp_scale = upd_elem(tmp_scale, 1, dotp);
+            v4cfloat scale;
+            scale = upd_elem(scale, 0, norm2_inv);
+            scale = upd_elem(scale, 1, norm_inv);
+            scale = fpmul_cn(scale, tmp_scale);
+
+            cfloat res_r = ext_elem(scale, 1);
+            update(M, res_r, ROW + column_id);
+            for (int i = 0; i < ROW / 4; i++) chess_prepare_for_pipelining {
+                    v4cfloat u0 = *ptr_q++;
+                    v4cfloat new_a0;
+                    new_a0 = upd_v(new_a0, 0, as_v2cfloat(READINCRW(WSS_rsrc1, in_0)));
+                    new_a0 = upd_v(new_a0, 1, as_v2cfloat(READINCRW(WSS_rsrc2, in_1)));
+                    v4cfloat old_a0 = *ptr_m;
+                    *ptr_m++ = new_a0;
+                    ac0 = fpmac_cn(ac0, u0, new_a0);
+                    v4cfloat update_old_a0 = fpmsc(old_a0, scale, 0, 0, u0, 0, 0x3210);
+                    WRITEINCRW(WMS_rsrc1, out_0, as_v4int32(ext_v(update_old_a0, 0)));
+                    WRITEINCRW(WMS_rsrc2, out_1, as_v4int32(ext_v(update_old_a0, 1)));
+                }
+
+            for (int i = 0; i < COL / 4; i++) chess_prepare_for_pipelining {
+                    v4cfloat old_r0 = *ptr_m;
+                    WRITEINCRW(WMS_rsrc1, out_0, as_v4int32(ext_v(old_r0, 0)));
+                    WRITEINCRW(WMS_rsrc2, out_1, as_v4int32(ext_v(old_r0, 1)));
+                    v4cfloat new_r0;
+                    new_r0 = upd_v(new_r0, 0, as_v2cfloat(READINCRW(WSS_rsrc1, in_0)));
+                    new_r0 = upd_v(new_r0, 1, as_v2cfloat(READINCRW(WSS_rsrc2, in_1)));
+                    *ptr_m++ = new_r0;
+                }
+
+            dotp = aie::reduce_add(aie::vector<cfloat, 4>(ac0));
+        }
+
+        // 7. a_c_1'                                :                   :write (r+c)
+        if (column_id + 1 < COL) {
+            v4cfloat* ptr_q = Q;
+            v4cfloat* ptr_m = M;
+
+            v4cfloat tmp_scale;
+            tmp_scale = upd_elem(tmp_scale, 0, dotp);
+            tmp_scale = upd_elem(tmp_scale, 1, dotp);
+            v4cfloat scale;
+            scale = upd_elem(scale, 0, norm2_inv);
+            scale = upd_elem(scale, 1, norm_inv);
+            scale = fpmul_cn(scale, tmp_scale);
+
+            cfloat res_r = ext_elem(scale, 1);
+            update(M, res_r, ROW + column_id);
+            for (int i = 0; i < ROW / 4; i++) chess_prepare_for_pipelining {
+                    v4cfloat u0 = *ptr_q++;
+                    v4cfloat old_a0 = *ptr_m++;
+                    v4cfloat update_old_a0 = fpmsc(old_a0, scale, 0, 0, u0, 0, 0x3210);
+                    WRITEINCRW(WMS_rsrc1, out_0, as_v4int32(ext_v(update_old_a0, 0)));
+                    WRITEINCRW(WMS_rsrc2, out_1, as_v4int32(ext_v(update_old_a0, 1)));
+                }
+
+            for (int i = 0; i < COL / 4; i++) chess_prepare_for_pipelining {
+                    v4cfloat old_r0 = *ptr_m++;
+                    WRITEINCRW(WMS_rsrc1, out_0, as_v4int32(ext_v(old_r0, 0)));
+                    WRITEINCRW(WMS_rsrc2, out_1, as_v4int32(ext_v(old_r0, 1)));
+                }
+        }
+    }
+}
+
 } // namespace solver
 } // namespace xf

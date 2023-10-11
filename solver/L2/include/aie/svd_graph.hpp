@@ -25,7 +25,7 @@ namespace solver {
 
 using namespace adf;
 
-template <int column_num, int row_num>
+template <int column_num, int row_num, int k_rep>
 class SVDComplexFloat : public adf::graph {
    public:
     kernel m_k[column_num];
@@ -36,7 +36,8 @@ class SVDComplexFloat : public adf::graph {
 
     SVDComplexFloat() {
         for (int i = 0; i < column_num; i++) {
-            m_k[i] = kernel::create_object<OneSidedJacobiComplexFloat>(column_num, row_num, i);
+            m_k[i] =
+                kernel::create_object<OneSidedJacobiComplexFloat<row_num, column_num, k_rep> >(column_num, row_num, i);
             headers(m_k[i]) = {"svd_kernel.hpp"};
             source(m_k[i]) = "svd_kernel.cpp";
             runtime<ratio>(m_k[i]) = 1.0;
