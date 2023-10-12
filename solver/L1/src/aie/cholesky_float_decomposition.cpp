@@ -20,8 +20,6 @@
 #include "aie_api/aie_adf.hpp"
 #include "aie_api/adf/stream.hpp"
 
-namespace xf {
-namespace solver {
 void cholesky_float(input_stream<float>* __restrict matA, output_stream<float>* __restrict matL) {
     // For profiling only
     static unsigned cycle_num[2];
@@ -102,5 +100,3 @@ void cholesky_float(input_stream<float>* __restrict matA, output_stream<float>* 
     // #endif
 
 } // end cholesky_float
-} // namespace solver
-} // namespace xf

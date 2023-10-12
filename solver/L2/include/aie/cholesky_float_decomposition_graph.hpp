@@ -24,7 +24,7 @@
 #ifndef __CHOLESKY_FLOAT_GRAPHS_HPP__
 #define __CHOLESKY_FLOAT_GRAPHS_HPP__
 
-#include "aie/cholesky_float_decomposition.hpp"
+#include "cholesky_float_decomposition.hpp"
 
 namespace xf {
 namespace solver {
@@ -53,41 +53,32 @@ class CholeskyGraph : public adf::graph {
     /**
      * The input data to the function.
      **/
-    input_plio matA_data;
+    input_port matA_data;
     /**
      * The output data to the function.
      **/
-    output_plio matL_data;
+    output_port matL_data;
 
     /**
      * @brief This is the constructor function for the CholeskyGraph.
-     * @param[in] matA_data_name: specifies the attributes of port name
-     * @param[in] matA_data_file_name: specifies the input data file path;
-     * @param[out] matL_data_name: specifies the attributes of port name
-     * @param[out] matL_data_file_name: specifies the output data file path;
      **/
-    CholeskyGraph(std::string matA_data_name,
-                  std::string matA_data_file_name,
-                  std::string matL_data_name,
-                  std::string matL_data_file_name) {
-        matA_data = input_plio::create(matA_data_name, adf::plio_32_bits, matA_data_file_name);
-        matL_data = output_plio::create(matL_data_name, adf::plio_32_bits, matL_data_file_name);
-
+    CholeskyGraph() {
         for (int i = 0; i < NUM; i++) {
             k[i] = kernel::create(cholesky_float);
             // source file
+            headers(k[i]) = {"cholesky_float_decomposition.hpp"};
             source(k[i]) = "cholesky_float_decomposition.cpp";
             runtime<ratio>(k[i]) = 1.0;
         }
 
-        connect<stream>(matA_data.out[0], k[0].in[0]);
+        connect<stream>(matA_data, k[0].in[0]);
 
         for (int i = 0; i < NUM - 1; i++) {
             connect<stream>(k[i].out[0], k[i + 1].in[0]);
             stack_size(k[i]) = 3000;
         }
 
-        connect<stream>(k[NUM - 1].out[0], matL_data.in[0]);
+        connect<stream>(k[NUM - 1].out[0], matL_data);
         stack_size(k[NUM - 1]) = 3000;
     }
 };

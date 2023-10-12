@@ -22,12 +22,8 @@
 #include "adf/stream/streams.h"
 #include <adf.h>
 
-namespace xf {
-namespace solver {
 void cholesky_complex(input_stream<float>* __restrict matA_real,
                       input_stream<float>* __restrict matA_imag,
                       output_stream<float>* __restrict matL_real,
                       output_stream<float>* __restrict matL_imag);
-} // namespace solver
-} // namespace xf
 #endif

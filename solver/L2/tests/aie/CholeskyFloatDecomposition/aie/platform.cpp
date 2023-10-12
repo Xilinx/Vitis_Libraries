@@ -19,24 +19,9 @@
 #include <fstream>
 #include <iostream>
 
-#include "aie/cholesky_float_decomposition_graph.hpp"
-#include "ref_model/hermitian_matrix.hpp"
+#include "aie_graph.h"
 
-//#define DIM 256
-//#define DIM 128
-#define DIM 64
-//#define DIM 32
-//#define DIM 16
-//#define DIM 8
-
-std::string matA = "matA_data";
-std::string matA_file = "data/matA_" + std::to_string(DIM) + ".txt";
-std::string matL = "matL_data";
-std::string matL_file = "data/matL_" + std::to_string(DIM) + ".txt";
-std::string outMatL_file = "data/outMatL_" + std::to_string(DIM) + ".txt";
-std::string gldMatL_file = "data/gldMatL_" + std::to_string(DIM) + ".txt";
-
-xf::solver::CholeskyGraph<DIM> mygraph(matA, matA_file, matL, outMatL_file);
+TopGraph mygraph;
 
 #if defined(__AIESIM__) || defined(__X86SIM__)
 #include <iostream>

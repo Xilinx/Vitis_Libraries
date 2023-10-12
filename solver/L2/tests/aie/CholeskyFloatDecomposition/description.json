@@ -5,54 +5,18 @@
     "platform_allowlist": [
         "vck190"
     ],
-    "data": [
-        "./data"
-    ],
     "platform_blocklist": [
         "vek280"
     ],
-    "platform_properties": {
-        "vck190": {
-            "v++": {
-                "compiler": {
-                    "clflags": []
-                },
-                "linker": {
-                    "ldclflags": [
-                        "--config PROJECT/system.cfg"
-                    ]
-                },
-                "package": {
-                    "clflags": [
-                        "--package.defer_aie_run"
-                    ]
-                }
-            }
-        }
-    },
-    "launch": [
-        {
-            "name": "aiesim-launch",
-            "target": "aiesim",
-            "sim_options": "--input-dir=$(CUR_DIR) --output-dir=$(CUR_DIR)"
-        },
-        {
-            "name": "x86sim-launch",
-            "target": "x86sim",
-            "sim_options": "--input-dir=$(CUR_DIR) --output-dir=$(CUR_DIR)"
-        }
-    ],
-    "v++": {
-        "compiler": {
-            "includepaths": []
-        }
-    },
     "aiecompiler": {
         "compiler": {
             "includepaths": [
                 "LIB_DIR/L1/include",
+                "LIB_DIR/L1/include/aie",
                 "LIB_DIR/L2/include",
+                "LIB_DIR/L2/include/aie",
                 "LIB_DIR/L1/src",
+                "LIB_DIR/L1/src/aie",
                 "./"
             ]
         }
@@ -70,6 +34,72 @@
                     "config": "aie.cfg"
                 }
             ]
+        }
+    ],
+    "data": [
+        "PROJECT/data/matA_64.txt",
+        "PROJECT/data/gldMatL_64.txt"
+    ],
+    "launch": [
+        {
+            "cmd_args": "BUILD/test_harness.xclbin PROJECT/data/matA_64.txt PROJECT/data/gldMatL_64.txt",
+            "name": "generic launch for all flows"
+        },
+        {
+            "name": "aiesim-launch",
+            "target": "aiesim",
+            "sim_options": "--input-dir=$(CUR_DIR) --output-dir=$(CUR_DIR)"
+        },
+        {
+            "name": "x86sim-launch",
+            "target": "x86sim",
+            "sim_options": "--input-dir=$(CUR_DIR) --output-dir=$(CUR_DIR)"
+        }
+    ],
+    "host": {
+        "host_exe": "host.exe",
+        "compiler": {
+            "sources": [
+                "./ps/host.cpp",
+                "./Work/ps/c_rts/aie_control_xrt.cpp"
+            ],
+            "includepaths": [
+                "./ps",
+                "./aie",
+                "$(SYSROOT)/usr/include/xrt/",
+                "LIB_DIR/L1/include/aie",
+                "LIB_DIR/L2/include/aie"
+            ]
+        }
+    },
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                ".pl"
+            ]
+        },
+        "linker": {
+            "cflags": [
+                "--config PROJECT/cfg/system.cfg"
+            ]
+        },
+        "package": {
+            "cflags": [
+                "--package.defer_aie_run"
+            ]
+        }
+    },
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "name": "vck190_test_harness",
+                    "location": "./pl/test_harness.cpp",
+                    "frequency": 250.0
+                }
+            ],
+            "name": "test_harness",
+            "frequency": 250.0
         }
     ],
     "testinfo": {

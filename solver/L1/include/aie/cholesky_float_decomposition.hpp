@@ -22,9 +22,5 @@
 #include "adf/stream/streams.h"
 #include <adf.h>
 
-namespace xf {
-namespace solver {
 void cholesky_float(input_stream<float>* __restrict matA, output_stream<float>* __restrict matL);
-} // namespace solver
-} // namespace xf
 #endif

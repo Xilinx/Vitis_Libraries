@@ -3,6 +3,7 @@
     "description": [
         ""
     ],
+    "gui": false,
     "flow": "versal",
     "keywords": [
         "aiecompiler",

@@ -1,7 +1,7 @@
 {
     "name": "QR Decomposition on Complex Float",
     "description": [
-        ""
+        "QR Decomposition on Complex Float"
     ],
     "flow": "versal",
     "keywords": [
@@ -89,8 +89,7 @@
                 "$(SYSROOT)/usr/include/xrt/",
                 "LIB_DIR/L1/include/aie",
                 "LIB_DIR/L2/include/aie"
-            ],
-            "options": "--sysroot=$(SYSROOT)"
+            ]
         }
     },
     "v++": {

@@ -140,7 +140,6 @@ AIESIMFLAGS += $(EXTRA_AIESIMFLAGS)
 ifeq ($(ps_on_x86), on)
 HOST_SRCS += $(CUR_DIR)/ps/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
 CXXFLAGS +=  -I $(CUR_DIR)/ps -I $(CUR_DIR)/aie -I $(SYSROOT)/usr/include/xrt/ -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2
-CXXFLAGS += --sysroot=$(SYSROOT)
 else
 HOST_SRCS += $(CUR_DIR)/ps/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
 CXXFLAGS +=  -I $(CUR_DIR)/ps -I $(CUR_DIR)/aie -I $(SYSROOT)/usr/include/xrt/ -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2
@@ -194,6 +193,11 @@ $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 
 ############################## Setting Rules for AIE (Building Kernels) ##################
 $(AIE_CONTAINER): pre_build $(CUR_DIR)/aie/aie_graph.cpp 
+ifeq ($(ps_on_x86), on)
+	$(ECHO) "ps_on_x86: on"
+else
+	$(ECHO) "ps_on_x86: off"
+endif
 	$(ECHO) "Compiling: libadf.a"
 	mkdir -p $(dir $@)
 	$(VPP) -c --mode aie $(AIE_CXXFLAGS) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^)

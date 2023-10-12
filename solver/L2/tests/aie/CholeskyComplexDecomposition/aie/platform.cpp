@@ -20,31 +20,9 @@
 #include <iostream>
 #include <complex>
 
-#include "aie/cholesky_complex_decomposition_graph.hpp"
-#include "ref_model/hermitian_matrix.hpp"
+#include "aie_graph.h"
 
-//#define DIM 256
-//#define DIM 128
-#define DIM 64
-//#define DIM 32
-//#define DIM 16
-//#define DIM 8
-
-std::string matA_real = "matA_real_data";
-std::string matA_real_file = "data/matA_real_" + std::to_string(DIM) + ".txt";
-std::string matA_imag = "matA_imag_data";
-std::string matA_imag_file = "data/matA_imag_" + std::to_string(DIM) + ".txt";
-std::string matL_real = "matL_real_data";
-std::string matL_real_file = "data/matL_real_" + std::to_string(DIM) + ".txt";
-std::string matL_imag = "matL_imag_data";
-std::string matL_imag_file = "data/matL_imag_" + std::to_string(DIM) + ".txt";
-std::string outMatL_real_file = "data/outMatL_real_" + std::to_string(DIM) + ".txt";
-std::string outMatL_imag_file = "data/outMatL_imag_" + std::to_string(DIM) + ".txt";
-std::string gldMatL_real_file = "data/gldMatL_real_" + std::to_string(DIM) + ".txt";
-std::string gldMatL_imag_file = "data/gldMatL_imag_" + std::to_string(DIM) + ".txt";
-
-xf::solver::CholeskyGraph<DIM> mygraph(
-    matA_real, matA_real_file, matA_imag, matA_imag_file, matL_real, outMatL_real_file, matL_imag, outMatL_imag_file);
+TopGraph mygraph;
 
 #if defined(__AIESIM__) || defined(__X86SIM__)
 #include <iostream>

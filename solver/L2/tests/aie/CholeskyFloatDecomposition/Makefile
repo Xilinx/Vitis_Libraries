@@ -63,7 +63,7 @@ endif
 
 # #################### Checking if PLATFORM in whitelist ############################
 PLATFORM_ALLOWLIST +=  vck190
-PLATFORM_BLOCKLIST += 
+PLATFORM_BLOCKLIST +=  vek280
 
 include ./utils.mk
 TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)
@@ -120,13 +120,13 @@ else
 AIETARGET := x86sim
 endif
 
-AIE_CXXFLAGS += --target=$(AIETARGET) --platform=$(XPLATFORM) --config aie.cfg  
+AIE_CXXFLAGS += --target=$(AIETARGET) --platform=$(XPLATFORM) --pl-freq= 
 AIE_CXXFLAGS += $(AIE_CXXFLAGS_INC)
 AIE_CONTAINER = $(TEMP_DIR)/libadf.a
 AIE_WORK_DIR = $(CUR_DIR)/Work
 AIE_PKG_DIR = $(AIE_WORK_DIR)
 
-AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L1/src -I $(XFLIB_DIR)/L1/src/aie
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L1/src -I $(XFLIB_DIR)/L1/src/aie -I $(CUR_DIR)
 
 $(AIE_WORK_DIR)/ps/c_rts/aie_control_xrt.cpp: $(AIE_CONTAINER)
 
@@ -138,17 +138,11 @@ AIESIMFLAGS += $(EXTRA_AIESIMFLAGS)
 
 #Inclue Required Host Source Files
 ifeq ($(ps_on_x86), on)
-HOST_SRCS += ps/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
-CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L1/src -I $(CUR_DIR) -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2
-CXXFLAGS += --sysroot=$(SYSROOT)
-LDFLAGS +=  -L $(SYSROOT)/usr/lib/
-LDFLAGS += --sysroot=$(SYSROOT)
+HOST_SRCS += $(CUR_DIR)/ps/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
+CXXFLAGS +=  -I $(CUR_DIR)/ps -I $(CUR_DIR)/aie -I $(SYSROOT)/usr/include/xrt/ -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2
 else
-HOST_SRCS += ps/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
-CXXFLAGS +=  -I $(SYSROOT)/usr/include/xrt/ -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L1/src -I $(CUR_DIR) -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2
-CXXFLAGS += --sysroot=$(SYSROOT)
-LDFLAGS +=  -L $(SYSROOT)/usr/lib/
-LDFLAGS += --sysroot=$(SYSROOT)
+HOST_SRCS += $(CUR_DIR)/ps/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
+CXXFLAGS +=  -I $(CUR_DIR)/ps -I $(CUR_DIR)/aie -I $(SYSROOT)/usr/include/xrt/ -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2
 endif
 
 # workaround for opencv
@@ -156,53 +150,57 @@ ifeq (,$(findstring opencv,$(CXXFLAGS)))
 CXXFLAGS += $(XRT_CXXFLAGS)
 endif
 
-EXE_NAME := host.elf
+EXE_NAME := host.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 EXE_FILE_DEPS := $(HOST_SRCS) $(INSTANCE_FILES)  $(EXE_FILE_DEPS)
 
-########################## Kernel compiler global settings ##########################
-ifneq (,$(shell echo $(XPLATFORM) | awk '/vck190/'))
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include
-VPP_LDFLAGS +=   --config $(CUR_DIR)/system.cfg
-VPP_PACKAGE +=   --package.defer_aie_run
-
-else 
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include
-
+HOST_ARGS := $(BUILD_DIR)/test_harness.xclbin $(CUR_DIR)/data/matA_64.txt $(CUR_DIR)/data/gldMatL_64.txt
+ifneq ($(HOST_ARCH), x86)
+PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
 endif
 
+########################## Kernel compiler global settings ##########################
+VPP_FLAGS +=  -I .pl -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include
+VPP_LDFLAGS +=   --config $(CUR_DIR)/cfg/system.cfg
+VPP_PACKAGE +=   --package.defer_aie_run
+
 ######################### binary container global settings ##########################
-VPP_FLAGS_data_mover +=  
-VPP_FLAGS_data_mover += --hls.clock 250000000:data_mover
+VPP_FLAGS_vck190_test_harness += --hls.clock 250000000:vck190_test_harness
+ifneq ($(HOST_ARCH_temp), x86)
+VPP_LDFLAGS_test_harness += --clock.defaultFreqHz 250000000
+else
+VPP_LDFLAGS_test_harness += --kernel_frequency 250
+endif
 
 ifneq ($(SD_CARD_NEEDED), on)
-BINARY_CONTAINERS += $(BUILD_DIR)/kernel.xclbin
+BINARY_CONTAINERS += $(BUILD_DIR)/test_harness.xclbin
 else
-BINARY_CONTAINERS += $(BUILD_DIR)/kernel_pkg.$(LINK_TARGET_FMT)
-BINARY_CONTAINERS_PKG += $(BUILD_DIR)/kernel.xclbin
+BINARY_CONTAINERS += $(BUILD_DIR)/test_harness_pkg.$(LINK_TARGET_FMT)
+BINARY_CONTAINERS_PKG += $(BUILD_DIR)/test_harness.xclbin
 endif
 
 # ################ Setting Rules for Binary Containers (Building Kernels) ################
-$(TEMP_DIR)/data_mover.xo: pl/pl_mm2s.cpp 
-	$(ECHO) "Compiling Kernel: data_mover"
+$(TEMP_DIR)/vck190_test_harness.xo: $(CUR_DIR)/pl/test_harness.cpp 
+	$(ECHO) "Compiling Kernel: vck190_test_harness"
 	mkdir -p $(TEMP_DIR)
-	$(VPP) -c $(VPP_FLAGS_data_mover) $(VPP_FLAGS) -k data_mover -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
-BINARY_CONTAINER_kernel_OBJS += $(TEMP_DIR)/data_mover.xo
-BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_kernel_OBJS)
+	$(VPP) -c $(VPP_FLAGS_vck190_test_harness) $(VPP_FLAGS) -k vck190_test_harness -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+BINARY_CONTAINER_test_harness_OBJS += $(TEMP_DIR)/vck190_test_harness.xo
+BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_test_harness_OBJS)
 $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 	mkdir -p $(BUILD_DIR)
-	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/kernel $(VPP_LDFLAGS)  $(VPP_LDFLAGS_kernel) $(AIE_LDFLAGS)   -o $@ $^
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/test_harness $(VPP_LDFLAGS)  $(VPP_LDFLAGS_test_harness) $(AIE_LDFLAGS)   -o $@ $^
 
 ############################## Setting Rules for AIE (Building Kernels) ##################
-$(AIE_CONTAINER):  aie/platform.cpp $(XFLIB_DIR)/L1/src/aie/cholesky_float_decomposition.cpp 
+$(AIE_CONTAINER): aie/platform.cpp   
 	$(ECHO) "Compiling: libadf.a"
 	mkdir -p $(dir $@)
-	$(VPP) -c --mode aie $(AIE_CXXFLAGS) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^)
+	$(AIECXX) $(AIE_CXXFLAGS) $^
+	mv ./libadf.a $(AIE_CONTAINER)
 
 ############################## Setting Rules for Host (Building Host Executable) ##############################
 $(EXE_FILE): $(EXE_FILE_DEPS)
 	mkdir -p $(BUILD_DIR)
-	$(CXX) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^) $(CXXFLAGS) $(LDFLAGS)
+	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
 $(EMCONFIG):
 	emconfigutil --platform $(XPLATFORM) --od $(BUILD_DIR)
@@ -230,8 +228,8 @@ endif
 	@echo 'fi' >> $(RUN_SCRIPT)
 	@echo 'echo "INFO: Embedded host run completed."' >> $(RUN_SCRIPT)
 	@echo 'exit $$return_code' >> $(RUN_SCRIPT)
-DATA_FILE := $(custom_data_file)
-DATA_DIR := $(CUR_DIR)/data $(custom_data_dir)
+DATA_FILE := data/gldMatL_64.txt data/matA_64.txt $(custom_data_file)
+DATA_DIR := $(custom_data_dir)
 SD_FILES += $(RUN_SCRIPT)
 SD_FILES += $(EXE_FILE)
 SD_FILES += $(EMCONFIG)
@@ -339,7 +337,7 @@ endif
 #hw
 ifeq ($(TARGET), hw)
 ifneq (,$(findstring aws-vu9p-f1, $(PLATFORM_NAME)))
-ifeq (,$(wildcard $(BUILD_DIR)/kernel.awsxclbin))
+ifeq (,$(wildcard $(BUILD_DIR)/test_harness.awsxclbin))
 	$(ECHO) "This makefile does not directly support converting .xclbin to .awsxclbin, please refer https://github.com/aws/aws-fpga/blob/master/Vitis/README.md for next operations"
 else
 	$(ECHO) "Running HW using generated .awsxclbin"
@@ -358,7 +356,7 @@ endif
 
 ############################## Setting Targets ##############################
 
-.PHONY: clean cleanall emconfig valid_params
+.PHONY: clean cleanall emconfig gen_instances valid_params
 emconfig: $(EMCONFIG)
 
 .PHONY: host
@@ -375,9 +373,11 @@ else
 xclbin: check_vpp check_sysroot  $(BINARY_CONTAINERS)
 endif
 
-#################### Parameterized File Generation ##########################
+gen_instances: $(INSTANCE_FILES)
+	@echo "Nothing to generate."
 
-gen_instances: $(GENERATED_FILES)
+valid_params:
+	@echo "Nothing to validate."
 
 ############################## Cleaning Rules ##############################
 cleanh:
@@ -391,6 +391,6 @@ cleank:
 cleanall: cleanh cleank
 	-$(RMDIR) $(BUILD_DIR) sd_card* emconfig.json *.html $(TEMP_DIR) $(CUR_DIR)/reports *.csv *.run_summary  $(CUR_DIR)/*.raw package_*   $(BUILD_DIR)/run_script.sh .ipcache *.str
 	-$(RMDIR) $(AIE_CONTAINER) aiesimulator_output .AIE_SIM_CMD_LINE_OPTIONS x86simulator_output $(AIE_WORK_DIR) $(AIE_PKG_DIR) $(CUR_DIR)/*.xpe $(CUR_DIR)/hw.o $(CUR_DIR)/*.xsa $(CUR_DIR)/xnwOut
-	-$(RMDIR)  *.html $(GENERATED_FILES)
+	-$(RMDIR)  *.html $(INSTANCE_FILES)
 
 clean: cleanh

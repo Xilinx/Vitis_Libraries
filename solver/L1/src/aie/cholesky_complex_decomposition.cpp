@@ -20,8 +20,6 @@
 #include "aie_api/aie_adf.hpp"
 #include "aie_api/adf/stream.hpp"
 
-namespace xf {
-namespace solver {
 union DType {
     float f;
     int i;
@@ -148,5 +146,3 @@ void cholesky_complex(input_stream<float>* __restrict matA_real,
     // #endif
 
 } // end cholesky_complex
-} // namespace solver
-} // namespace xf
