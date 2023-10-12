@@ -60,15 +60,17 @@
         "host_exe": "host.exe",
         "compiler": {
             "sources": [
-                "./ps/host.cpp",
-                "./Work/ps/c_rts/aie_control_xrt.cpp"
+                "LIB_DIR/L2/tests/aie/CholeskyFloatDecomposition/ps/host.cpp"
             ],
             "includepaths": [
-                "./ps",
-                "./aie",
+                "LIB_DIR/L2/tests/aie/CholeskyFloatDecomposition/ps",
+                "LIB_DIR/L2/tests/aie/CholeskyFloatDecomposition/aie",
                 "$(SYSROOT)/usr/include/xrt/",
                 "LIB_DIR/L1/include/aie",
                 "LIB_DIR/L2/include/aie"
+            ],
+            "symbols": [
+                "__PS_ENABLE_AIE__"
             ]
         }
     },
