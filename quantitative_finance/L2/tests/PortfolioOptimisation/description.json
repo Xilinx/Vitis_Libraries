@@ -85,6 +85,7 @@
             "name": "generic launch for all flows",
             "cmd_args": "BUILD/po_kernel.xclbin",
             "ld_library_path": [
+                "$(XILINX_HLS)/lnx64/lib/csim",
                 "$(XILINX_HLS)/lnx64/tools/fpo_v7_1"
             ]
         }

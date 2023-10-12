@@ -105,6 +105,7 @@
             "name": "generic launch for all flows",
             "cmd_args": "BUILD/quanto_kernel.xclbin PROJECT/one.txt exp",
             "ld_library_path": [
+                "$(XILINX_HLS)/lnx64/lib/csim",
                 "$(XILINX_HLS)/lnx64/tools/fpo_v7_1"
             ]
         }

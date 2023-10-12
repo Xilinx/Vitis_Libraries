@@ -17,6 +17,7 @@
             "cmd_args": " BUILD/fd_heston_kernel_u250_sw_emu_m8192_double.xclbin PROJECT/data 128 64 200",
             "name": "sw_emu-launch",
             "ld_library_path": [
+                "$(XILINX_HLS)/lnx64/lib/csim",
                 "$(XILINX_HLS)/lnx64/tools/fpo_v7_1"
             ]
         },

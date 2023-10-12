@@ -60,6 +60,7 @@
             "cmd_args": " -xclbin BUILD/kernel_MCAsianAP.xclbin",
             "name": "generic launch for all flows",
             "ld_library_path": [
+                "$(XILINX_HLS)/lnx64/lib/csim",
                 "$(XILINX_HLS)/lnx64/tools/fpo_v7_1"
             ]
         }

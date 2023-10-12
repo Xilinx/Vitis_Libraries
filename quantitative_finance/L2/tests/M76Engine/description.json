@@ -49,6 +49,7 @@
             "cmd_args": " -f PROJECT/example_test_data.csv -x -b BUILD/m76.xclbin",
             "name": "generic launch for all flows",
             "ld_library_path": [
+                "$(XILINX_HLS)/lnx64/lib/csim",
                 "$(XILINX_HLS)/lnx64/tools/fpo_v7_1"
             ]
         }
