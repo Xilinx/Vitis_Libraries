@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 //#include "graph.hpp"
-//#include "/wrk/xcohdnobkup1/congt/ultrasound/cr/ultrasound/L2/tests/apodization/Work/ps/c_rts/aie_control_xrt.cpp"
 
 #include <stdio.h>
 #include <stdlib.h>
