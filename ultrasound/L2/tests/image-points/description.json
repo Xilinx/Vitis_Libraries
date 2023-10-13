@@ -27,7 +27,6 @@
             }
         }
     },
-    "gui": false,
     "data": [
         "PROJECT/data"
     ],
@@ -46,15 +45,13 @@
         "host_exe": "host.exe",
         "compiler": {
             "sources": [
-                "LIB_DIR/L2/tests/image-points/PS_host/host.cpp",
-                "./Work/ps/c_rts/aie_control_xrt.cpp"
+                "LIB_DIR/L2/tests/image-points/PS_host/host.cpp"
             ],
             "includepaths": [
                 "LIB_DIR/L1/include",
                 "LIB_DIR/L2/include",
                 "LIB_DIR/L2/tests/image-points/aie_graph"
             ],
-            "options": "-include LIB_DIR/L1/include/kernels.hpp",
             "symbols": [
                 "__PS_ENABLE_AIE__"
             ]
@@ -64,7 +61,11 @@
         "compiler": {
             "includepaths": [
                 "LIB_DIR/L1/include/",
-                "LIB_DIR/L2/include/"
+                "LIB_DIR/L2/include/",
+                "LIB_DIR/L1/include/ones",
+                "LIB_DIR/L1/include/outer",
+                "LIB_DIR/L1/include/sumMM"
+
             ]
         }
     },
@@ -75,7 +76,12 @@
                     "location": "LIB_DIR/L2/tests/image-points/aie_graph/graph.cpp",
                     "workdir": "./Work",
                     "name": "libadf.a",
-                    "config": "aie.cfg"
+                    "config": "aie.cfg",
+                    "files": [
+                        "LIB_DIR/L1/include/ones/ones.cpp",
+                        "LIB_DIR/L1/include/outer/outer.cpp",
+                        "LIB_DIR/L1/include/sumMM/sumMM.cpp"
+                    ]
                 }
             ]
         }

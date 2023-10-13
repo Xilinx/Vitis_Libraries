@@ -127,6 +127,9 @@ AIE_WORK_DIR = $(CUR_DIR)/Work
 AIE_PKG_DIR = $(AIE_WORK_DIR)
 
 AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/ -I $(XFLIB_DIR)/L2/include/
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/ones
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/outer
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/sumMM
 
 $(AIE_WORK_DIR)/ps/c_rts/aie_control_xrt.cpp: $(AIE_CONTAINER)
 

@@ -2,6 +2,7 @@
     "name": "L1 divVS Test",
     "description": "divVS Test",
     "flow": "versal",
+    "gui": false,
     "platform_allowlist": [
         "vck190"
     ],

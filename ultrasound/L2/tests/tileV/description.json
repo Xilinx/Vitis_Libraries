@@ -2,6 +2,7 @@
     "name": "L1 tileV Test",
     "description": "tileV Test",
     "flow": "versal",
+    "gui": false,
     "platform_allowlist": [
         "vck190"
     ],

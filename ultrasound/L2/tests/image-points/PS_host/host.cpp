@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 
-#include "graph.cpp"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -232,14 +230,11 @@ int main(int argc, const char** argv) {
     //////////////////////////////////////////
     // graph execution for AIE
     //////////////////////////////////////////
-    std::cout << "graph init" << std::endl;
-    d.init();
 
-    std::cout << "graph run" << std::endl;
-    d.run(1);
-
-    d.end();
-    std::cout << "graph end" << std::endl;
+    printf("xrtGraphOpen\n");
+    auto ghdl = xrtGraphOpen(dhdl, top->m_header.uuid, "d");
+    printf("xrtGraphRun\n");
+    xrtGraphRun(ghdl, 1);
 
     //////////////////////////////////////////
     // wait for mm2s1 & mm2s2 done
@@ -260,6 +255,10 @@ int main(int argc, const char** argv) {
         xrtKernelClose(s2mm_khdl_set[i]);
     }
     std::cout << "s2mm wait compete" << std::endl;
+
+    xrtGraphEnd(ghdl, 0);
+    printf("xrtGraphEnd..\n");
+    xrtGraphClose(ghdl);
 
     for (int i = 0; i < OUTPUT_RANGE; i++) {
         xrtBOSync(out_bohdl_set[i], XCL_BO_SYNC_BO_FROM_DEVICE, sizeOut[i] * sizeof(float), 0);

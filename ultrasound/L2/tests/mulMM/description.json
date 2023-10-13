@@ -2,6 +2,7 @@
     "name": "L1 mulMM Test",
     "description": "mulMM Test",
     "flow": "versal",
+    "gui": false,
     "platform_allowlist": [
         "vck190"
     ],

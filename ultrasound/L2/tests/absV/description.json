@@ -2,6 +2,7 @@
     "name": "L1 absV Test",
     "description": "absV Test",
     "flow": "versal",
+    "gui": false,
     "platform_allowlist": [
         "vck190"
     ],

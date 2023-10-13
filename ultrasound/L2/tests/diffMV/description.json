@@ -2,6 +2,7 @@
     "name": "L1 diffMV Test",
     "description": "diffMV Test",
     "flow": "versal",
+    "gui": false,
     "platform_allowlist": [
         "vck190"
     ],

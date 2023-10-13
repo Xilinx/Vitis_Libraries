@@ -14,7 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "graph.cpp"
+//#include "graph.hpp"
+//#include "/wrk/xcohdnobkup1/congt/ultrasound/cr/ultrasound/L2/tests/apodization/Work/ps/c_rts/aie_control_xrt.cpp"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -237,14 +238,11 @@ int main(int argc, const char** argv) {
     //////////////////////////////////////////
     // graph execution for AIE
     //////////////////////////////////////////
-    std::cout << "graph init" << std::endl;
-    g.init();
 
-    std::cout << "graph run" << std::endl;
-    g.run(1);
-
-    g.end();
-    std::cout << "graph end" << std::endl;
+    printf("xrtGraphOpen\n");
+    auto ghdl = xrtGraphOpen(dhdl, top->m_header.uuid, "g");
+    printf("xrtGraphRun\n");
+    xrtGraphRun(ghdl, 1);
 
     //////////////////////////////////////////
     // wait for mm2s1 & mm2s2 done
@@ -265,6 +263,10 @@ int main(int argc, const char** argv) {
         xrtKernelClose(s2mm_khdl_set[i]);
     }
     std::cout << "s2mm wait compete" << std::endl;
+
+    xrtGraphEnd(ghdl, 0);
+    printf("xrtGraphEnd..\n");
+    xrtGraphClose(ghdl);
 
     for (int i = 0; i < OUTPUT_RANGE; i++) {
         xrtBOSync(out_bohdl_set[i], XCL_BO_SYNC_BO_FROM_DEVICE, sizeOut[i] * sizeof(float), 0);

@@ -2,6 +2,7 @@
     "name": "L1 sumVV Test",
     "description": "sumVV Test",
     "flow": "versal",
+    "gui": false,
     "platform_allowlist": [
         "vck190"
     ],

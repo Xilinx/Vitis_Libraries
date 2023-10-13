@@ -2,6 +2,7 @@
     "name": "L1 outer Test",
     "description": "outer Test",
     "flow": "versal",
+    "gui": false,
     "platform_allowlist": [
         "vck190"
     ],

@@ -2,6 +2,7 @@
     "name": "L1 reciprocalV Test",
     "description": "reciprocalV Test",
     "flow": "versal",
+    "gui": false,
     "platform_allowlist": [
         "vck190"
     ],

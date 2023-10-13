@@ -2,6 +2,7 @@
     "name": "L1 diffSV Test",
     "description": "diffSV Test",
     "flow": "versal",
+    "gui": false,
     "platform_allowlist": [
         "vck190"
     ],

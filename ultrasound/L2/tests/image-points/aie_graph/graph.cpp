@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#include "imagePoints.hpp"
+#include "graph.hpp"
 
 class imagePoints : public adf::graph {
    public:

@@ -2,6 +2,7 @@
     "name": "L1 sign Test",
     "description": "sign Test",
     "flow": "versal",
+    "gui": false,
     "platform_allowlist": [
         "vck190"
     ],

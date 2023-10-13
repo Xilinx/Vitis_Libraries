@@ -2,6 +2,7 @@
     "name": "L1 ones Test",
     "description": "ones Test",
     "flow": "versal",
+    "gui": false,
     "platform_allowlist": [
         "vck190"
     ],

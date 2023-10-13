@@ -27,7 +27,6 @@
             }
         }
     },
-    "gui": false,
     "data": [
         "PROJECT/data"
     ],
@@ -46,15 +45,13 @@
         "host_exe": "host.exe",
         "compiler": {
             "sources": [
-                "LIB_DIR/L2/tests/apodization/PS_host/host.cpp",
-                "./Work/ps/c_rts/aie_control_xrt.cpp"
+                "LIB_DIR/L2/tests/apodization/PS_host/host.cpp"
             ],
             "includepaths": [
                 "LIB_DIR/L1/include",
                 "LIB_DIR/L2/include",
                 "LIB_DIR/L2/tests/apodization/aie_graph"
             ],
-            "options": "-include LIB_DIR/L1/include/kernels.hpp",
             "symbols": [
                 "__PS_ENABLE_AIE__"
             ]
@@ -64,6 +61,20 @@
         "compiler": {
             "includepaths": [
                 "LIB_DIR/L1/include/",
+                "LIB_DIR/L1/include/tileV",
+                "LIB_DIR/L1/include/diffMV",
+                "LIB_DIR/L1/include/mulMM",
+                "LIB_DIR/L1/include/sum_axis_1",
+                "LIB_DIR/L1/include/absV",
+                "LIB_DIR/L1/include/equalS",
+                "LIB_DIR/L1/include/mulVS",
+                "LIB_DIR/L1/include/sumVV",
+                "LIB_DIR/L1/include/reciprocalV",
+                "LIB_DIR/L1/include/cosV",
+                "LIB_DIR/L1/include/diffSV",
+                "LIB_DIR/L1/include/lessOrEqualThanS",
+                "LIB_DIR/L1/include/mulVV",
+                "LIB_DIR/L1/include/sumVS",
                 "LIB_DIR/L2/include/"
             ]
         }
@@ -75,7 +86,25 @@
                     "location": "LIB_DIR/L2/tests/apodization/aie_graph/graph.cpp",
                     "workdir": "./Work",
                     "name": "libadf.a",
-                    "config": "aie.cfg"
+                    "config": "aie.cfg",
+                    "files": [
+                        "LIB_DIR/L2/include/apodization.hpp",
+                        "LIB_DIR/L1/include/tileV/tileV.cpp",
+                        "LIB_DIR/L1/include/diffMV/diffMV.cpp",
+                        "LIB_DIR/L1/include/mulMM/mulMM.cpp",
+                        "LIB_DIR/L1/include/sum_axis_1/sum_axis_1.cpp",
+                        "LIB_DIR/L1/include/absV/absV.cpp",
+                        "LIB_DIR/L1/include/equalS/equalS.cpp",
+                        "LIB_DIR/L1/include/mulVS/mulVS.cpp",
+                        "LIB_DIR/L1/include/sumVV/sumVV.cpp",
+                        "LIB_DIR/L1/include/reciprocalV/reciprocalV.cpp",
+                        "LIB_DIR/L1/include/cosV/cosV.cpp",
+                        "LIB_DIR/L1/include/diffSV/diffSV.cpp",
+                        "LIB_DIR/L1/include/lessOrEqualThanS/lessOrEqualThanS.cpp",
+                        "LIB_DIR/L1/include/mulVV/mulVV.cpp",
+                        "LIB_DIR/L1/include/sumVS/sumVS.cpp",
+                        "LIB_DIR/L1/include/kernels.hpp"
+                    ]
                 }
             ]
         }

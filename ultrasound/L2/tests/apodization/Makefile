@@ -127,6 +127,20 @@ AIE_WORK_DIR = $(CUR_DIR)/Work
 AIE_PKG_DIR = $(AIE_WORK_DIR)
 
 AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/ -I $(XFLIB_DIR)/L2/include/
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/tileV
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/diffMV
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/mulMM
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/sum_axis_1
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/absV
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/equalS
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/mulVS
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/sumVV
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/reciprocalV
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/cosV
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/diffSV
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/lessOrEqualThanS
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/mulVV
+AIE_CXXFLAGS += -I $(XFLIB_DIR)/L1/include/sumVS
 
 $(AIE_WORK_DIR)/ps/c_rts/aie_control_xrt.cpp: $(AIE_CONTAINER)
 

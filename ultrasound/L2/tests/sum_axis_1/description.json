@@ -2,6 +2,7 @@
     "name": "L1 sum_axis_1 Test",
     "description": "sum_axis_1 Test",
     "flow": "versal",
+    "gui": false,
     "platform_allowlist": [
         "vck190"
     ],

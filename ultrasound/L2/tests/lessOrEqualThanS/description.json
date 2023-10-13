@@ -2,6 +2,7 @@
     "name": "L1 lessOrEqualThanS Test",
     "description": "lessOrEqualThanS Test",
     "flow": "versal",
+    "gui": false,
     "platform_allowlist": [
         "vck190"
     ],

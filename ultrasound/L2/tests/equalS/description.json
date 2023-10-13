@@ -2,6 +2,7 @@
     "name": "L1 equalS Test",
     "description": "equalS Test",
     "flow": "versal",
+    "gui": false,
     "platform_allowlist": [
         "vck190"
     ],

@@ -2,6 +2,7 @@
     "name": "L1 dataMover Test",
     "description": "dataMover Test",
     "flow": "versal",
+    "gui": false,
     "platform_allowlist": [
         "vck190"
     ],

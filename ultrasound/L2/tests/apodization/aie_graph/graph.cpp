@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#include "apodization.hpp"
+#include "graph.hpp"
 
 class apodization : public adf::graph {
    public:
