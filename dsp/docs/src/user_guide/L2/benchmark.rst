@@ -118,7 +118,7 @@ Following table gives results for FIR filter with a wide variety of supported pa
    :file: ../../csv_data_files/L2/fir_benchmark.csv
    :align: center
    :header-rows: 1
-   :widths: 10, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
+   :widths: auto
 
 
 Matrix Multiply

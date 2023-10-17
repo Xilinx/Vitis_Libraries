@@ -88,10 +88,10 @@ using namespace adf;
  * @tparam TP_SAT describes the selection of saturation to be applied during the
  *         shift down stage of processing. TP_SAT accepts unsigned integer values, where:
  *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
- *         - 1: saturate       = Default. Saturation rounds an n-bit signed value in the range [- ( 2^(n-1) ) : +2^(n-1)
- *- 1 ].
- *         - 3: symmetric      = Controls symmetric saturation. Symmetric saturation rounds an n-bit signed value in the
- *range [- ( 2^(n-1) -1 ) : +2^(n-1) - 1 ]. \n
+ *         - 1: saturate       = Default. Saturation rounds an n-bit signed value
+ *         in the range [- ( 2^(n-1) ) : +2^(n-1) - 1 ].
+ *         - 3: symmetric      = Controls symmetric saturation. Symmetric saturation rounds
+ *         an n-bit signed value in the range [- ( 2^(n-1) -1 ) : +2^(n-1) - 1 ]. \n
  **/
 template <typename TT_DATA,
           typename TT_COEFF,
@@ -188,7 +188,7 @@ class fft_window_graph : public graph {
                                                 // rate.
             // Source files
             source(m_kernels[i]) = "fft_window.cpp";
-            stack_size(m_kernels[i]) = sizeof(TT_COEFF) * kKernelWindowVsize * (1 + TP_DYN_PT_SIZE) +2048;
+            stack_size(m_kernels[i]) = sizeof(TT_COEFF) * kKernelPtSize * (1 + TP_DYN_PT_SIZE) + 2048;
 
             // make connections
             if (TP_API == 0) {

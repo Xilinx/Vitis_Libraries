@@ -113,7 +113,7 @@ The following table lists parameters for all the FIR filters.
 
 .. note:: Note that some parameters are not present on certain variants of FIR where the parameter is not applicable to that variant, e.g.: ``TP_INTERPOLATE_FACTOR`` is not present on single-rate FIRs.
 
-.. note:: ``TP_RND`` values may vary between AIE and AIE-ML for the same rounding mechanism. String macro defitions are recommended for convienience and compatibility between devices. For AIE-ML see :ref:`fir_supported_params_aieml`.
+.. note:: ``TP_RND`` values may vary between AIE and AIE-ML for the same rounding mechanism. String macro definitions are recommended for convenience and compatibility between devices. For AIE-ML see :ref:`fir_supported_params_aieml`.
 
 .. _fir_supported_params:
 
@@ -258,8 +258,8 @@ The following table lists parameters for all the FIR filters.
    |                        |                | appear on                 |                                 |
    |                        |                | the graph.                |                                 |
    |                        |                |                           |                                 |
-   |                        |                | Ports dimention           |                                 |
-   |                        |                | depends on SSR            |                                 |
+   |                        |                | Port dimensions           |                                 |
+   |                        |                | depend on SSR             |                                 |
    |                        |                | configuration,            |                                 |
    |                        |                | see                       |                                 |
    |                        |                | :ref:`COEFFS_FOR_FIRS`,   |                                 |
@@ -497,7 +497,7 @@ Latency of a window-based FIR is predominantly due to the buffering in the input
 For example, a 16 tap single-rate symmetric FIR with a `512` sample input/output window operating on ``cint16`` data with ``int16`` coefficients implemented on AIE will need around `2.56 us` (based on 1 GHz AIE clock) before first full window of output samples is available for the consumer to read.
 Subsequent iterations will produce output data with reduced latency, due to the nature of ping-pong buffering and pipelined operations.
 
-To minimize the latency, the bffer size should be set to the minimum size that meets the required throughput.
+To minimize the latency, the buffer size should be set to the minimum size that meets the required throughput.
 
 .. _FIR_MULTPILE_BUFFER_PORTS:
 
@@ -569,7 +569,7 @@ In general, stream based filters require less or no data buffering and therefore
 
 .. note:: AIE-ML devices only support single input/output port.
 
-.. note:: AIE-ML devices cannot take adtanvage of the symmetry of FIRS, therefore FIRs implementation is always based on Asymmetric design.
+.. note:: AIE-ML devices cannot take advantage of the symmetry of FIRS, therefore FIRs implementation is always based on Asymmetric design.
 
 **Asymmetric FIRs**
 
@@ -872,7 +872,7 @@ Total number of FIR computation paths can be described with the below formula
 
 FIR graph will try to split the requested FIR workload among the FIR kernels equally, which may mean that each kernel is tasked with a comparatively low computational effort.
 
-In such scenario, bandwidth will be limited by the amound of ports, but AIE tile utilization ratio (often defined as ratio of VMAC operations to cycles without VMAC operation) may be reduced.
+In such scenario, bandwidth will be limited by the amount of ports, but AIE tile utilization ratio (often defined as ratio of VMAC operations to cycles without VMAC operation) may be reduced.
 
 For example, a 32 tap Single Rate FIR operating on ``cint16`` data type and ``int16`` coefficients with ``TP_SSR`` set to 2 and cascade length ``TP_CASC_LEN`` set to 2 will perform at the bandwidth close to `2 GSa/s` (2 output stream paths). Each of the kernels will be tasked with computing only 8 coefficients. The design will use 8 FIR kernels mapped to 8 AIE tiles to achieve that.
 However, a similarly configured FIR, a 32 tap Single Rate FIR operating on ``cint16`` data type and ``int16`` coefficients with ``TP_SSR`` set to 2, but without further cascade configuration (``TP_CASC_LEN`` set to 1) would also perform at the bandwidth close to `2 GSa/s` but only consume 4 kernels to achieve that.

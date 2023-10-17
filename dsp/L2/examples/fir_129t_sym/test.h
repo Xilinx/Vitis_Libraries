@@ -43,17 +43,16 @@ class test_kernel : public graph {
             firGraph;
 
    public:
-       input_plio in;
-       output_plio out;
-
+    input_plio in;
+    output_plio out;
 
     // in = input_plio::create(plio_64_bits,"data/input.txt");
     // out = output_plio::create(plio_64_bits,"data/output.txt");
 
     // Constructor - with FIR graph class initialization
     test_kernel() : firGraph(m_taps) {
-        in = input_plio::create(plio_32_bits,"data/input.txt");
-        out = output_plio::create(plio_32_bits,"data/output.txt");
+        in = input_plio::create(plio_32_bits, "data/input.txt");
+        out = output_plio::create(plio_32_bits, "data/output.txt");
 
         // Make connections
         // Size of window in Bytes.

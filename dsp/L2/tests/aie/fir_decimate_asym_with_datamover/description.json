@@ -2,6 +2,7 @@
     "name": "Xilinx DSPLIB fir_decimate_asym with datamover",
     "description": "",
     "gui": true,
+    "match_makefile": false,
     "flow": "versal",
     "platform_allowlist": [
         "vck190"
@@ -93,6 +94,12 @@
                 "LIB_DIR/L2/include/aie",
                 "LIB_DIR/L2/tests/aie/common/inc",
                 "./"
+            ],
+            "clflags": [
+                "--Xpreproc=-DUUT_GRAPH=fir_decimate_asym_graph",
+                "--Xpreproc=-DOUTPUT_FILE=./data/uut_output.txt",
+                "--Xpreproc=-DINPUT_FILE=./data/input.txt",
+                "--Xpreproc=-DUSING_UUT=1"
             ]
         }
     },

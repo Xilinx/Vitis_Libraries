@@ -52,6 +52,7 @@ XFLIB_DIR = $(XF_PROJ_ROOT)
 # setting default value
 TARGET ?= aiesim
 HOST_ARCH ?= aarch64
+PARAMS ?= test_0_tool_canary_aie
 
 #setting PLATFORM
 ifeq ($(PLATFORM),)

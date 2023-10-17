@@ -361,7 +361,8 @@
                     },
                     {
                         "name": "TP_SAT",
-                        "type": "unsigned int"
+                        "type": "unsigned int",
+                        "description": "describes the selection of saturation to be applied during the shift down stage of processing. TP_SAT accepts unsigned integer values, where:"
                     }
                 ],
                 "ports": [
@@ -391,7 +392,7 @@
                 "schema": "vitis_libraries_api_list_schema-1.0",
                 "api_name": "xf::dsp::aie::blas::matrix_vector_mul::matrix_vector_mul_graph",
                 "display_name": "matrix_vector_mul_graph",
-                "brief": "",
+                "brief": "performs the General Matrix Vector Multiplier (GEMV) which multiplies a matrix input with a vector input of configurable data types and dimensions.",
                 "target_domain": "AIE",
                 "header_file_name": [
                     "matrix_vector_mul_graph.hpp"
@@ -405,39 +406,48 @@
                 "parameters": [
                     {
                         "name": "TT_DATA_A",
-                        "type": "typename"
+                        "type": "typename",
+                        "description": "describes the data type of the input samples of Matrix A. This is a typename and must be one of the following:"
                     },
                     {
                         "name": "TT_DATA_B",
-                        "type": "typename"
+                        "type": "typename",
+                        "description": "describes the data type of the input samples of Vector B. This is a typename and must be one of the following:"
                     },
                     {
                         "name": "TP_DIM_A",
-                        "type": "unsigned int"
+                        "type": "unsigned int",
+                        "description": "is an unsigned integer which describes the number of elements along the unique dimension (rows) of Matrix A."
                     },
                     {
                         "name": "TP_DIM_B",
-                        "type": "unsigned int"
+                        "type": "unsigned int",
+                        "description": "is an unsigned integer which describes the number of elements in Vector B and the number of columns in Matrix A."
                     },
                     {
                         "name": "TP_SHIFT",
-                        "type": "unsigned int"
+                        "type": "unsigned int",
+                        "description": "describes power of 2 shift down applied to the accumulation of FIR terms before output."
                     },
                     {
                         "name": "TP_RND",
-                        "type": "unsigned int"
+                        "type": "unsigned int",
+                        "description": "describes the selection of rounding to be applied during the shift down stage of processing. Although, TP_RND accepts unsigned integer values descriptive macros are recommended where"
                     },
                     {
                         "name": "TP_NUM_FRAMES",
-                        "type": "unsigned int"
+                        "type": "unsigned int",
+                        "description": "describes the number of batches of input data that will be processed per iteration."
                     },
                     {
                         "name": "TP_CASC_LEN",
-                        "type": "unsigned int"
+                        "type": "unsigned int",
+                        "description": "describes the number of AIE processors to split the operation over."
                     },
                     {
                         "name": "TP_SAT",
-                        "type": "unsigned int"
+                        "type": "unsigned int",
+                        "description": "describes the selection of saturation to be applied during the shift down stage of processing. TP_SAT accepts unsigned integer values, where:"
                     }
                 ],
                 "ports": [

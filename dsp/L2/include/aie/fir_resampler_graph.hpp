@@ -134,7 +134,7 @@ enum IO_API { WINDOW = 0, STREAM };
  *         - samples 4-7 to be sent over stream1 for cint16 data type. \n
  * @tparam TP_API specifies if the input/output interface should be window-based or stream-based.  \n
  *         The values supported are 0 (window API) or 1 (stream API).
-  * @tparam TP_SSR specifies the number of parallel input paths where samples are interleaved between paths,
+ * @tparam TP_SSR specifies the number of parallel input paths where samples are interleaved between paths,
  giving an overall higher throughput.   \n
  *         An SSR of 1 means just one input path, and is the backwards compatible option.
  *         SSR Decomposition is currently unavailable. Please set TP_SSR to 1 and use
@@ -150,19 +150,19 @@ enum IO_API { WINDOW = 0, STREAM };
  *          as interpolators. \n
  *         The number of AIEs used is given by TP_PARA_INTERP_POLY * TP_SSR^2 * TP_CASC_LEN. \n
  *
-  * @tparam TP_PARA_DECI_POLY specifies the number of decimator polyphases that will be split up
+ * @tparam TP_PARA_DECI_POLY specifies the number of decimator polyphases that will be split up
  * and executed in a series of pipelined cascade stages, resulting in additional input paths. \n
  *         A TP_PARA_DECI_POLY of 1 means just one input leg, and is the backwards compatible option. \n
  *         TP_PARA_DECI_POLY = TP_DECIMATE_FACTOR will result in an decimate factor of polyphases,
- * operating as independent single rate filters connected by cascades. *
+ * operating as independent single rate filters connected by cascades.
  *         The number of AIEs used is given by TP_PARA_DECI_POLY * TP_SSR^2 * TP_CASC_LEN. \n
  * @tparam TP_SAT describes the selection of saturation to be applied during the
  *         shift down stage of processing. TP_SAT accepts unsigned integer values, where:
  *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
- *         - 1: saturate       = Default. Saturation rounds an n-bit signed value in the range [- ( 2^(n-1) ) : +2^(n-1)
-- 1 ].
- *         - 3: symmetric      = Controls symmetric saturation. Symmetric saturation rounds an n-bit signed value in the
-range [- ( 2^(n-1) -1 ) : +2^(n-1) - 1 ]. \n
+ *         - 1: saturate       = Default. Saturation rounds an n-bit signed value
+ *         in the range [- ( 2^(n-1) ) : +2^(n-1) - 1 ].
+ *         - 3: symmetric      = Controls symmetric saturation. Symmetric saturation rounds
+ *         an n-bit signed value in the range [- ( 2^(n-1) -1 ) : +2^(n-1) - 1 ]. \n
  *
 **/
 

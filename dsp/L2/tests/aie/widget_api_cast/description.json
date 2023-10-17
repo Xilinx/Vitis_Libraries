@@ -141,6 +141,7 @@
     "generators": {
         "uut_config.h": {"file": "LIB_DIR/L2/tests/aie/common/scripts/tb_gen.py","function": "generate_testbench"}
     },
+    "parameter_file": "multi_params.json",
     "testinfo": {
         "disable": false,
         "jobs": [

@@ -114,7 +114,7 @@ NOINLINE_DECL // This function is the hook for QoR profiling, so must be identif
 
     // check if the sampleDelayValue is within the range (0, MAX_DELAY)
     if (sampleDelayValue > TP_MAX_DELAY) {
-        sampleDelayValueTemp = TP_MAX_DELAY -1;
+        sampleDelayValueTemp = TP_MAX_DELAY - 1;
     } else {
         sampleDelayValueTemp = sampleDelayValue;
     }
@@ -144,10 +144,10 @@ NOINLINE_DECL // This function is the hook for QoR profiling, so must be identif
     cacheRdItr0 += rdItrOffset;
     cacheRdItr0--; // points to cacheRdItr--
 
-
     for (unsigned int i = 0; i < frameSize; i++) chess_prepare_for_pipelining chess_loop_range(frameSize, ) {
             *cacheWrItr++ = readincr_v<vecSize, aie_stream_resource_in::a, TT_DATA>(inStream);
-            t_vect dataOut = ::aie::shuffle_up_fill(*cacheRdItr++, *cacheRdItr0++, rdItrOffsetV); // apply element delay offset
+            t_vect dataOut =
+                ::aie::shuffle_up_fill(*cacheRdItr++, *cacheRdItr0++, rdItrOffsetV); // apply element delay offset
             writeincr<aie_stream_resource_out::a, TT_DATA, vecSize>(outStream, dataOut);
         }
 };

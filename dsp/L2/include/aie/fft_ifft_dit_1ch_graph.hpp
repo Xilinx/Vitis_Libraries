@@ -1936,10 +1936,10 @@ class fft_ifft_dit_1ch_mono_graph<cint16,
  * @tparam TP_SAT describes the selection of saturation to be applied during the
  *         shift down stage of processing. TP_SAT accepts unsigned integer values, where:
  *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
- *         - 1: saturate       = Default. Saturation rounds an n-bit signed value in the range [- ( 2^(n-1) ) : +2^(n-1)
- *- 1 ].
- *         - 3: symmetric      = Controls symmetric saturation. Symmetric saturation rounds an n-bit signed value in the
- *range [- ( 2^(n-1) -1 ) : +2^(n-1) - 1 ]. \n
+ *         - 1: saturate       = Default. Saturation rounds an n-bit signed value
+ *         in the range [- ( 2^(n-1) ) : +2^(n-1) - 1 ].
+ *         - 3: symmetric      = Controls symmetric saturation. Symmetric saturation rounds
+ *         an n-bit signed value in the range [- ( 2^(n-1) -1 ) : +2^(n-1) - 1 ]. \n
  * @tparam TP_INDEX
  *         This parameter is for internal use regarding the recursion of the parallel power feature. It is recommended
  *         to miss this parameter from the configuration and rely instead on default values. If this parameter is set

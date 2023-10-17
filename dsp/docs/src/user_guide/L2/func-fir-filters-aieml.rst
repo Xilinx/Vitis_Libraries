@@ -86,7 +86,7 @@ Template Parameters
 
 The following table lists parameters for the FIR filters on AIE-ML.
 
-.. note:: ``TP_RND`` values may vary between AIE and AIE-ML for the same rounding mechanism. String macro defitions are recommended for convienience and compatibility between devices. For AIE, see :ref:`fir_supported_params`.
+.. note:: ``TP_RND`` values may vary between AIE and AIE-ML for the same rounding mechanism. String macro definitions are recommended for convenience and compatibility between devices. For AIE, see :ref:`fir_supported_params`.
 
 .. _fir_supported_params_aieml:
 

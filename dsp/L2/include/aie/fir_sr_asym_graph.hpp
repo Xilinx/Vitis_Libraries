@@ -85,16 +85,16 @@ using namespace adf;
  * @tparam TP_INPUT_WINDOW_VSIZE describes the number of samples processed by the graph
  *         in a single iteration run.  \n
  *         When TP_API is set to 0, samples are buffered and stored in a ping-pong window buffer mapped onto Memory
- Group banks. \n
+ *Group banks. \n
  *         As a results, maximum number of samples processed by the graph is limited by the size of Memory Group. \n
  *         When TP_API is set to 1, samples are processed directly from the stream inputs and no buffering takes place.
- \n
+ *\n
  *         In such case, maximum number of samples processed by the graph is limited to 32-bit value (4.294B samples per
- iteration).  \n
+ *iteration).  \n
  *         Note: For SSR configurations (TP_SSR>1), the input data must be split over multiple ports,
  *         where each successive sample is sent to a different input port in a round-robin fashion. \n
  *         As a results, each SSR input path will process a fraction of the frame defined by the TP_INPUT_WINDOW_VSIZE.
- \n
+ *\n
  *         Note: Margin size should not be included in TP_INPUT_WINDOW_VSIZE.
  * @tparam TP_CASC_LEN describes the number of AIE processors to split the operation
  *         over.  \n This allows resource to be traded for higher performance.
@@ -105,10 +105,10 @@ using namespace adf;
  *         - 1 = reloadable coefficients, passed as argument to runtime function. \n
  *
  *         Note: when used, async port: ``` port_conditional_array<input, (TP_USE_COEFF_RELOAD == 1), TP_SSR> coeff; ```
- will be added to the FIR. \n
+ *will be added to the FIR. \n
  *         Note: the size of the port array is equal to the total number of output paths  (TP_SSR). \n
  *         Each port should contain the same taps array content, i.e. each additional port must be a duplicate of the
- coefficient array. \n
+ *coefficient array. \n
  * @tparam TP_NUM_OUTPUTS sets the number of ports to broadcast the output to. \n
  *         Note: when used, optional port: ``` std::array<port<output>, TP_SSR> out2; ``` will be added to the FIR. \n
  *         Note: For Windows API, additional output an exact copy of the data. \n
@@ -133,11 +133,10 @@ using namespace adf;
  * @tparam TP_SAT describes the selection of saturation to be applied during the
  *         shift down stage of processing. TP_SAT accepts unsigned integer values, where:
  *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
- *         - 1: saturate       = Default. Saturation rounds an n-bit signed value in the range [- ( 2^(n-1) ) : +2^(n-1)
- - 1 ].
- *         - 3: symmetric      = Controls symmetric saturation. Symmetric saturation rounds an n-bit signed value in the
- range [- ( 2^(n-1) -1 ) : +2^(n-1) - 1 ]. \n
-
+ *         - 1: saturate       = Default. Saturation rounds an n-bit signed value
+ *         in the range [- ( 2^(n-1) ) : +2^(n-1) - 1 ].
+ *         - 3: symmetric      = Controls symmetric saturation. Symmetric saturation rounds
+ *         an n-bit signed value in the range [- ( 2^(n-1) -1 ) : +2^(n-1) - 1 ]. \n
  **/
 
 template <typename TT_DATA,

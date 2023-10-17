@@ -158,7 +158,7 @@ The Mixed Radix FFT does not contain any tool constraints such as location const
 Applying Design Constraints
 ---------------------------
 
-Location and other constraints may be applied in the parent graph which instances the FFT graph class. To apply a constraint, you will need to know the name of the kernel, which will include the hierarchial path to that kernel. The simplest way to derive names, including the hierarchial part, is to compile a design and open it in Vitis (vitis_analyser), using the graph view. The names of all kernels and memory buffers can be obtained from there. These names may then be back-annotated to the
+Location and other constraints may be applied in the parent graph which instances the FFT graph class. To apply a constraint, you will need to know the name of the kernel, which will include the hierarchial path to that kernel. The simplest way to derive names, including the hierarchial part, is to compile a design and open it in Vitis (vitis_analyzer), using the graph view. The names of all kernels and memory buffers can be obtained from there. These names may then be back-annotated to the
 parent graph to apply the necessary constraint.
 
 Code Example

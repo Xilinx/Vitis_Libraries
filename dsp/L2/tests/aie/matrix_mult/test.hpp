@@ -52,14 +52,13 @@ class test_graph : public graph {
 #ifdef USING_PL_MOVER
     port<input> inA[1];
     port<input> inB[1];
-//    port<output> out;
+// port<output> out;
 #else
     std::array<input_plio, P_CASC_LEN> inA;
     std::array<input_plio, P_CASC_LEN> inB;
-//    std::array<output_plio, 1> out;
+// std::array<output_plio, 1> out;
 #endif
     std::array<output_plio, 1> out;
-
     // Constructor
     test_graph() {
         printf("========================\n");
@@ -95,7 +94,7 @@ class test_graph : public graph {
 #ifdef USING_PL_MOVER
         connect<>(inA[0], mmultGraph.inA[0]);
         connect<>(inB[0], mmultGraph.inB[0]);
-        connect<>(mmultGraph.out, out);
+// connect<>(mmultGraph.out, out);
 #else
 #ifdef USING_UUT
         for (int i = 0; i < P_CASC_LEN; i++) {

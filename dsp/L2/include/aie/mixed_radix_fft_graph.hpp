@@ -302,7 +302,13 @@ class create_casc_kernel<1,
  *         Other modes round to the nearest integer. They differ only in how
  *         they round for values of 0.5. \n
  *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` will only be supported on AIE-ML device. \n
- * @tparam TP_SAT selects the saturation mode. 0 = unsaturated, 1 = asymmetric saturation, 3 = symmetric saturation
+ * @tparam TP_SAT describes the selection of saturation to be applied during the
+ *         shift down stage of processing. TP_SAT accepts unsigned integer values, where:
+ *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
+ *         - 1: saturate       = Default. Saturation rounds an n-bit signed value
+ *         in the range [- ( 2^(n-1) ) : +2^(n-1) - 1 ].
+ *         - 3: symmetric      = Controls symmetric saturation. Symmetric saturation rounds
+ *         an n-bit signed value in the range [- ( 2^(n-1) -1 ) : +2^(n-1) - 1 ]. \n
  * @tparam TP_WINDOW_VSIZE is an unsigned integer which describes the number of samples to be processed in each call \n
  *         to the function.  \n
  *         By default, TP_WINDOW_SIZE is set to match TP_POINT_SIZE. \n
@@ -371,7 +377,10 @@ class mixed_radix_fft_graph : public graph {
     typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
     static constexpr int m_ktwiddleTableSize = fnGetTwiddleTableSize<TT_TWIDDLE, TP_POINT_SIZE>();
 
-    // Constructor
+    /**
+     * @brief This is the constructor function for the Mixed Radix FFT graph.
+     * Constructor has no arguments.
+     **/
     mixed_radix_fft_graph() {
         std::vector<T_internalDataType> tmpBuff0;
         std::vector<T_internalDataType> tmpBuff1;

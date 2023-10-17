@@ -27,14 +27,14 @@
 #include <sstream>
 
 // This is used for the PL Kernels
-#include "xrt/xrt.h"
-#include "xrt/experimental/xrt_kernel.h"
+//#include "xrt/xrt.h"
+#include "experimental/xrt_kernel.h"
 
 // Using the Cardano API that call XRT API
 #include "adf/adf_api/XRTConfig.h"
-extern "C" {
-#include <xaiengine.h>
-}
+// extern "C" {
+//#include <xaiengine.h>
+// }
 
 xf::dsp::aie::testcase::test_graph filter;
 

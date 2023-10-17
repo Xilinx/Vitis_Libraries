@@ -89,7 +89,7 @@ The template parameters ``TP_POINT_SIZE`` and ``TP_NUM_FRAMES`` determine the nu
 Cascaded Kernels
 ----------------
 
-The DFT library element is able to split the workload into multiple kernels connected in a chain with the use of template parameter ``TP_CASC_LEN``. Required computation as well as input data buffer and twiddle table will be split and distributed betwwen number of kernels determined by ``TP_CASC_LEN``. Using multiple kernels, support for ``TP_POINT_SIZE`` is extended beyond what can be stored on a single kernel.
+The DFT library element is able to split the workload into multiple kernels connected in a chain with the use of template parameter ``TP_CASC_LEN``. Required computation as well as input data buffer and twiddle table will be split and distributed between number of kernels determined by ``TP_CASC_LEN``. Using multiple kernels, support for ``TP_POINT_SIZE`` is extended beyond what can be stored on a single kernel.
 
 Point Size and Padding
 ----------------------
@@ -104,7 +104,7 @@ On AIE-ML, the larger data memory per kernel allows for ``TP_POINT_SIZE`` suppor
 
 This can be exceeded by using a number of kernels in cascade via the template parameter ``TP_CASC_LEN``. The memory required for each frame of input and output data, and coefficient matrix will be divided across the kernels in cascade.
 
-For example, a ``TP_POINT_SIZE`` of 128 can be achieved using a ``TP_CASC_LEN`` of 2, as each kernel will only require a half the size of the input buffer that equivalent single kernel configuration would require, as well as half the memoory needed for twiddle table.
+For example, a ``TP_POINT_SIZE`` of 128 can be achieved using a ``TP_CASC_LEN`` of 2, as each kernel will only require a half the size of the input buffer that equivalent single kernel configuration would require, as well as half the memory needed for twiddle table.
 
 The DFT has optimal throughput performance with a low point size, and a higher number of frames per iobuffer.
 

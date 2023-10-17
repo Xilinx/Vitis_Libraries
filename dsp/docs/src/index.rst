@@ -108,8 +108,8 @@ Vitis |trade| AIE DSP Library provides a SSR FFT implementation targeting AIE, a
    FIRs <rst/group_fir_graphs.rst>
    GeMM <rst/group_gemm_graph.rst>
    GeMV <rst/group_matrix_vector_mul_graph.rst>
-   Widgets <rst/group_widget_graph.rst>
    Sample Delay <rst/group_sample_delay_graph.rst>
+   Widgets <rst/group_widget_graph.rst>
 
 .. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
    :ltrim:

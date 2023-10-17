@@ -240,7 +240,7 @@ For the DDS/Mixer library element, the list of configurable parameters and defau
     | ROUND_MODE             |    unsigned    |    0           | Rounding mode.                       |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SAT_MODE               | Unsigned int   | Saturation     | 0: 'none'                            |
+    | SAT_MODE               | unsigned       | Saturation     | 0: 'none'                            |
     |                        |                | mode           |                                      |
     |                        |                |                | 1: 'saturate'                        |
     |                        |                |                |                                      |
@@ -266,16 +266,16 @@ For the DFT library element the list of configurable parameters and default valu
     | TWIDDLE_TYPE           |    typename    |    cint16      | Twiddle Type.                        |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | POINT_SIZE             |    unsigned    |    1024        | FFT point size.                      |
+    | POINT_SIZE             |    unsigned    |    16          | DFT point size.                      |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SHIFT                  |    unsigned    |    17          | Acc results shift down value.        |
+    | SHIFT                  |    unsigned    |    8           | Acc results shift down value.        |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | FFT_NIFFT              |    unsigned    |    0           | Forward (1) or reverse (0) transform.|
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | NUM_FRAMES             |    unsigned    |    1           | The number of batches of input data  |
+    | NUM_FRAMES             |    unsigned    |    8           | The number of batches of input data  |
     |                        |                |                | that will be processed per iteration.|
     +------------------------+----------------+----------------+--------------------------------------+
     | CASC_LEN               |    unsigned    |    1           | Cascade length.                      |
@@ -288,7 +288,7 @@ For the DFT library element the list of configurable parameters and default valu
     |                        |                |                | 1 - stream                           |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | NITER                  |    unsigned    |    4           | Number of iterations to execute.     |
+    | NITER                  |    unsigned    |    8           | Number of iterations to execute.     |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
@@ -299,7 +299,7 @@ For the DFT library element the list of configurable parameters and default valu
     | ROUND_MODE             |    unsigned    |    0           | Rounding mode.                       |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SAT_MODE               | Unsigned int   | Saturation     | 0: 'none'                            |
+    | SAT_MODE               | unsigned       | Saturation     | 0: 'none'                            |
     |                        |                | mode           |                                      |
     |                        |                |                | 1: 'saturate'                        |
     |                        |                |                |                                      |
@@ -383,7 +383,7 @@ For the FFT/iFFT library element the list of configurable parameters and default
     | ROUND_MODE             |    unsigned    |    0           | Rounding mode.                       |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SAT_MODE               | Unsigned int   | Saturation     | 0: 'none'                            |
+    | SAT_MODE               | unsigned       | Saturation     | 0: 'none'                            |
     |                        |                | mode           |                                      |
     |                        |                |                | 1: 'saturate'                        |
     |                        |                |                |                                      |
@@ -452,7 +452,7 @@ For the FFT Window library element the list of configurable parameters and defau
     | ROUND_MODE             |    unsigned    |    0           | Rounding mode.                       |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SAT_MODE               | Unsigned int   | Saturation     | 0: 'none'                            |
+    | SAT_MODE               | unsigned       | Saturation     | 0: 'none'                            |
     |                        |                | mode           |                                      |
     |                        |                |                | 1: 'saturate'                        |
     |                        |                |                |                                      |
@@ -571,7 +571,7 @@ The list below consists of configurable parameters for FIR library elements with
     |                        |                |                | see also :ref:`FIR_CONSTRAINTS`      |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SAT_MODE               | Unsigned int   | Saturation     | 0: 'none'                            |
+    | SAT_MODE               | unsigned       | Saturation     | 0: 'none'                            |
     |                        |                | mode           |                                      |
     |                        |                |                | 1: 'saturate'                        |
     |                        |                |                |                                      |
@@ -701,22 +701,19 @@ For the Matrix Vector Multiply (GeMV) library element the list of configurable p
     +------------------------+----------------+----------------+--------------------------------------+
     |     **Name**           |    **Type**    |  **Default**   |   Description                        |
     +========================+================+================+======================================+
-    | DATA_A                 |    typename    |    cint16      | Input A Data Type.                   |
+    | DATA_A                 |    typename    |    cint16      | Input Matrix A Data Type.            |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | DATA_B                 |    typename    |    cint16      | Input B Data Type.                   |
+    | DATA_B                 |    typename    |    cint16      | Input Vector B Data Type.            |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | DIM_A                  |    unsigned    |    16          | Input A Dimension                    |
-    |                        |                |                |                                      |
+    | DIM_A                  |    unsigned    |    16          | Input Matrix A Dimension             |
+    |                        |                |                | (number of matrix rows).             |
     +------------------------+----------------+----------------+--------------------------------------+
-    | DIM_AB                 |    unsigned    |    16          | Input AB Common Dimension.           |
-    |                        |                |                |                                      |
+    | DIM_B                  |    unsigned    |    16          | Input Vector B Dimension             |
+    |                        |                |                | (number of matrix columns).          |                           
     +------------------------+----------------+----------------+--------------------------------------+
-    | DIM_B                  |    unsigned    |    16          | Input B Dimension.                   |
-    |                        |                |                |                                      |
-    +------------------------+----------------+----------------+--------------------------------------+
-    | SHIFT                  |    unsigned    |    20          | Acc results shift down value.        |
+    | SHIFT                  |    unsigned    |    16          | Acc results shift down value.        |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | ROUND_MODE             |    unsigned    |    0           | Rounding mode.                       |
@@ -766,7 +763,7 @@ For the Matrix Vector Multiply (GeMV) library element the list of configurable p
     |                        |                |                | 8 - sine wave                        |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SAT_MODE               | Unsigned int   | Saturation     | 0: 'none'                            |
+    | SAT_MODE               | unsigned       | Saturation     | 0: 'none'                            |
     |                        |                | mode           |                                      |
     |                        |                |                | 1: 'saturate'                        |
     |                        |                |                |                                      |
@@ -794,16 +791,16 @@ For the Mixed Radix library element the list of configurable parameters and defa
     | TWIDDLE_TYPE           |    typename    |    cint16      | Twiddle Type.                        |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | POINT_SIZE             |    unsigned    |    1024        | FFT point size.                      |
+    | POINT_SIZE             |    unsigned    |    48          | FFT point size.                      |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SHIFT                  |    unsigned    |    17          | Acc results shift down value.        |
+    | SHIFT                  |    unsigned    |    6           | Acc results shift down value.        |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | FFT_NIFFT              |    unsigned    |    0           | Forward (1) or reverse (0) transform.|
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | WINDOW_VSIZE           |    unsigned    |    1024        | Input/Output window size.            |
+    | WINDOW_VSIZE           |    unsigned    |    48          | Input/Output window size.            |
     |                        |                |                |                                      |
     |                        |                |                | By default, set to: $(POINT_SIZE).   |
     +------------------------+----------------+----------------+--------------------------------------+
@@ -843,7 +840,7 @@ For the Mixed Radix library element the list of configurable parameters and defa
     | ROUND_MODE             |    unsigned    |    0           | Rounding mode.                       |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | SAT_MODE               | Unsigned int   | Saturation     | 0: 'none'                            |
+    | SAT_MODE               | unsigned       | Saturation     | 0: 'none'                            |
     |                        |                | mode           |                                      |
     |                        |                |                | 1: 'saturate'                        |
     |                        |                |                |                                      |
@@ -878,10 +875,10 @@ For the Sample Delay library elements the list of configurable parameters and de
     | NITER                  |    unsigned    |    16          | Number of iterations to execute.     |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | DELAY_INI_VALUE        |    unsigned    |    0           | The delay to the input data.         |
+    | DELAY_INI_VALUE        |    unsigned    |    10          | The delay to the input data.         |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | MAX_DELAY              |    unsigned    |    0           | The maximum threshold on the delay.  |
+    | MAX_DELAY              |    unsigned    |   256          | The maximum threshold on the delay.  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | DATA_STIM_TYPE         |    unsigned    |    0           | Supported types:                     |

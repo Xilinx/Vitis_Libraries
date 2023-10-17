@@ -119,7 +119,7 @@ In the entry level graph, the following names are used to identify the various k
 Code Example
 ~~~~~~~~~~~~
 
-The following code example shows how the matrix_vector_mul_graph class may be used within a user super-graph. This example shows a 16x32 cint16 matrix multipled by a cint16 vector of length 32.
+The following code example shows how the matrix_vector_mul_graph class may be used within a user super-graph. This example shows a 16x32 cint16 matrix multiplied by a cint16 vector of length 32.
 
 .. literalinclude:: ../../../../L2/examples/docs_examples/test_matvec.hpp
     :language: cpp

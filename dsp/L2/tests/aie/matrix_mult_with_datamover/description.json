@@ -2,6 +2,7 @@
     "name": "Xilinx DSPLIB matrix mult with datamover",
     "description": "",
     "gui": true,
+    "match_makefile": false,
     "flow": "versal",
     "platform_allowlist": [
         "vck190"
@@ -63,7 +64,8 @@
             "symbols": [
                 "__PS_ENABLE_AIE__",
                 "USING_PL_MOVER=1",
-                "USING_UUT=1"
+                "USING_UUT=1",
+                "P_SAT_MODE=0"
             ]
         },
         "linker": {
@@ -93,6 +95,15 @@
                 "LIB_DIR/L2/include/aie",
                 "LIB_DIR/L2/tests/aie/common/inc",
                 "./"
+            ],
+            "clflags": [
+                "--Xpreproc=-DUUT_GRAPH=matrix_mult_graph",
+                "--Xpreproc=-DP_SAT_MODE=0",
+                "--Xpreproc=-DUSING_UUT=1",
+                "--Xpreproc=-DUSING_PL_MOVER=1",
+                "--Xpreproc=-DOUTPUT_FILE=./data/uut_output.txt",
+                "--Xpreproc=-DINPUT_FILE_A=./data/inputA.txt",
+                "--Xpreproc=-DINPUT_FILE_B=./data/inputB.txt"
             ]
         }
     },

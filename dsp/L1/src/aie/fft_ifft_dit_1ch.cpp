@@ -475,23 +475,25 @@ INLINE_DECL void stockhamStages<TT_DATA,
 
     } // end of float/integer handling
 
-    constexpr int koutVSize = 32/sizeof(TT_OUT_DATA);
-    //chess_memory_fence();
+    constexpr int koutVSize = 32 / sizeof(TT_OUT_DATA);
+    // chess_memory_fence();
 
-    if ((1<<ptSizePwr) < TP_POINT_SIZE) {
-      using outVectType = ::aie::vector<TT_OUT_DATA,koutVSize> ;
-      outVectType zerosOut = ::aie::zeros<TT_OUT_DATA,koutVSize>();
-      outVectType* outFillPtr = (outVectType*)obuff;
-      outFillPtr += (1<<ptSizePwr)/koutVSize;
-      int fillCycles = (TP_POINT_SIZE-(1<<ptSizePwr))/koutVSize;
-      #ifdef  _DSPLIB_FFT_IFFT_DIT_1CH_HPP_DEBUG_
-      if constexpr (TP_END_RANK==7) {
-        printf("fill cycles = %d for pwr = %d and ptsize = %d, end rank = %d\n", fillCycles, ptSizePwr, TP_POINT_SIZE, TP_END_RANK);
-      }
-      #endif //_DSPLIB_FFT_IFFT_DIT_1CH_HPP_DEBUG_
-      for (int i = 0; i < fillCycles; i++) {
-        *outFillPtr++ = zerosOut;
-      }
+    if ((1 << ptSizePwr) < TP_POINT_SIZE) {
+        using outVectType = ::aie::vector<TT_OUT_DATA, koutVSize>;
+        outVectType zerosOut = ::aie::zeros<TT_OUT_DATA, koutVSize>();
+        outVectType* outFillPtr = (outVectType*)obuff;
+        outFillPtr += (1 << ptSizePwr) / koutVSize;
+        int fillCycles = (TP_POINT_SIZE - (1 << ptSizePwr)) / koutVSize;
+#ifdef _DSPLIB_FFT_IFFT_DIT_1CH_HPP_DEBUG_
+        if
+            constexpr(TP_END_RANK == 7) {
+                printf("fill cycles = %d for pwr = %d and ptsize = %d, end rank = %d\n", fillCycles, ptSizePwr,
+                       TP_POINT_SIZE, TP_END_RANK);
+            }
+#endif //_DSPLIB_FFT_IFFT_DIT_1CH_HPP_DEBUG_
+        for (int i = 0; i < fillCycles; i++) {
+            *outFillPtr++ = zerosOut;
+        }
     }
     chess_memory_fence();
 };

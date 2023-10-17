@@ -47,54 +47,6 @@ namespace matrix_vector_mul {
 //--------------------------------------------------------------------------------------------------
 // matrix_vector_mul_graph template
 //--------------------------------------------------------------------------------------------------
-/**
- * @ingroup matrix_vector_mul_graph
- * @brief matrix_vector_mul performs the General Matrix Vector Multiplier (GEMV) which multiplies a matrix input
- *        with a vector input of configurable data types and dimensions.
- *
- * These are the templates to configure the matrix vector multiplier:
- * @tparam TT_DATA_A describes the data type of the input samples of Matrix A.
- *         This is a typename and must be one of the following: \n
- *         int16, cint16, int32, cint32, float, cfloat.
- * @tparam TT_DATA_B describes the data type of the input samples of Vector B.
- *         This is a typename and must be one
- *         of the following: \n
- *         int16, cint16, int32, cint32, float, cfloat.
- * @tparam TP_DIM_A is an unsigned integer which describes the number of elements
- *         along the unique dimension (rows) of Matrix A.
- * @tparam TP_DIM_B is an unsigned integer which describes the number of elements
- *          in Vector B and the number of columns in Matrix A.
- * @tparam TP_SHIFT describes power of 2 shift down applied to the accumulation of
- *         FIR terms before output. \n TP_SHIFT must be in the range 0 to 61.
- * @tparam TP_RND describes the selection of rounding to be applied during the
- *         shift down stage of processing. Although, TP_RND accepts unsigned integer values
- *         descriptive macros are recommended where
- *         - rnd_floor      = Truncate LSB, always round down (towards negative infinity).
- *         - rnd_ceil       = Always round up (towards positive infinity).
- *         - rnd_sym_floor  = Truncate LSB, always round towards 0.
- *         - rnd_sym_ceil   = Always round up towards infinity.
- *         - rnd_pos_inf    = Round halfway towards positive infinity.
- *         - rnd_neg_inf    = Round halfway towards negative infinity.
- *         - rnd_sym_inf    = Round halfway towards infinity (away from zero).
- *         - rnd_sym_zero   = Round halfway towards zero (away from infinity).
- *         - rnd_conv_even  = Round halfway towards nearest even number.
- *         - rnd_conv_odd   = Round halfway towards nearest odd number. \n
- *         No rounding is performed on ceil or floor mode variants. \n
- *         Other modes round to the nearest integer. They differ only in how
- *         they round for values of 0.5. \n
- *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
- * @tparam TP_NUM_FRAMES describes the number of batches of input data that will be processed per iteration. \n
- * @tparam TP_CASC_LEN describes the number of AIE processors to split the operation
- *         over.  \n This allows resource to be traded for higher performance.
- *         TP_CASC_LEN must be in the range 1 (default) to 40.
- * @tparam TP_SAT describes the selection of saturation to be applied during the
- *         shift down stage of processing. TP_SAT accepts unsigned integer values, where:
- *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
- *         - 1: saturate       = Default. Saturation rounds an n-bit signed value in the range [-(2^(n-1)) :
- *+2^(n-1)-1].
- *         - 3: symmetric      = Controls symmetric saturation. Symmetric saturation rounds an n-bit signed value in the
- *range [-( 2^(n-1) 1) : +2^(n-1)-1]. \n
- **/
 
 /**
   * @cond NOCOMMENTS
@@ -212,7 +164,54 @@ class create_casc_kernel<1,
   * @endcond
   */
 
-// TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_SHIFT, TP_RND, TP_NUM_FRAMES, TP_CASC_LEN
+/**
+ * @ingroup matrix_vector_mul_graph
+ * @brief matrix_vector_mul performs the General Matrix Vector Multiplier (GEMV) which multiplies a matrix input
+ *        with a vector input of configurable data types and dimensions.
+ *
+ * These are the templates to configure the matrix vector multiplier:
+ * @tparam TT_DATA_A describes the data type of the input samples of Matrix A.
+ *         This is a typename and must be one of the following: \n
+ *         int16, cint16, int32, cint32, float, cfloat.
+ * @tparam TT_DATA_B describes the data type of the input samples of Vector B.
+ *         This is a typename and must be one
+ *         of the following: \n
+ *         int16, cint16, int32, cint32, float, cfloat.
+ * @tparam TP_DIM_A is an unsigned integer which describes the number of elements
+ *         along the unique dimension (rows) of Matrix A.
+ * @tparam TP_DIM_B is an unsigned integer which describes the number of elements
+ *          in Vector B and the number of columns in Matrix A.
+ * @tparam TP_SHIFT describes power of 2 shift down applied to the accumulation of
+ *         FIR terms before output. \n TP_SHIFT must be in the range 0 to 61.
+ * @tparam TP_RND describes the selection of rounding to be applied during the
+ *         shift down stage of processing. Although, TP_RND accepts unsigned integer values
+ *         descriptive macros are recommended where
+ *         - rnd_floor      = Truncate LSB, always round down (towards negative infinity).
+ *         - rnd_ceil       = Always round up (towards positive infinity).
+ *         - rnd_sym_floor  = Truncate LSB, always round towards 0.
+ *         - rnd_sym_ceil   = Always round up towards infinity.
+ *         - rnd_pos_inf    = Round halfway towards positive infinity.
+ *         - rnd_neg_inf    = Round halfway towards negative infinity.
+ *         - rnd_sym_inf    = Round halfway towards infinity (away from zero).
+ *         - rnd_sym_zero   = Round halfway towards zero (away from infinity).
+ *         - rnd_conv_even  = Round halfway towards nearest even number.
+ *         - rnd_conv_odd   = Round halfway towards nearest odd number. \n
+ *         No rounding is performed on ceil or floor mode variants. \n
+ *         Other modes round to the nearest integer. They differ only in how
+ *         they round for values of 0.5. \n
+ *         Note: Rounding modes ``rnd_sym_floor`` and ``rnd_sym_ceil`` are only supported on AIE-ML device. \n
+ * @tparam TP_NUM_FRAMES describes the number of batches of input data that will be processed per iteration. \n
+ * @tparam TP_CASC_LEN describes the number of AIE processors to split the operation
+ *         over.  \n This allows resource to be traded for higher performance.
+ *         TP_CASC_LEN must be in the range 1 (default) to 40.
+ * @tparam TP_SAT describes the selection of saturation to be applied during the
+ *         shift down stage of processing. TP_SAT accepts unsigned integer values, where:
+ *         - 0: none           = No saturation is performed and the value is truncated on the MSB side.
+ *         - 1: saturate       = Default. Saturation rounds an n-bit signed value
+ *         in the range [- ( 2^(n-1) ) : +2^(n-1) - 1 ].
+ *         - 3: symmetric      = Controls symmetric saturation. Symmetric saturation rounds
+ *         an n-bit signed value in the range [- ( 2^(n-1) -1 ) : +2^(n-1) - 1 ]. \n
+ **/
 template <typename TT_DATA_A,
           typename TT_DATA_B,
           unsigned int TP_DIM_A,
@@ -266,6 +265,10 @@ class matrix_vector_mul_graph : public graph {
      **/
     port<output> out[1];
 
+    /**
+     * @brief This is the constructor function for the Matrix Vector Multiply graph.
+     * Constructor has no arguments.
+     **/
     matrix_vector_mul_graph() {
         // Create kernel classes
         create_casc_kernel<TP_CASC_LEN, TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_SHIFT, TP_RND, TP_SAT,

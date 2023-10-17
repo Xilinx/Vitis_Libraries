@@ -596,7 +596,7 @@ void fft_ifft_dit_1ch_ref<TT_DATA,
                 //#if __FFT_R4_IMPL__ == 0
                 r4StageIntSpoof(samplesA, twiddles, twiddles, ptSize, ptSize >> 2, stageShift, rank, samplesB, ptSize,
                                 inv); //<TT_DATA,TT_TWIDDLE,TP_POINT_SIZE,TP_FFT_NIFFT>, but not required because this
-                                      //is a member function.
+                                      // is a member function.
                 //#else //if __FFT_R4_IMPL__ == 1
                 // r4StageIntTrue(samplesA, twiddles, tw3s, ptSize, ptSize>>2, stageShift, rank, samplesB, ptSize,
                 // inv);//<TT_DATA,TT_TWIDDLE,TP_POINT_SIZE,TP_FFT_NIFFT>, but not required because this is a member
