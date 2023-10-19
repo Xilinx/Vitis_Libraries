@@ -55,7 +55,7 @@ As it is shown in the above pictures, the entire SVPWM have 3 functions. PWM_GEN
 
 * stt_pwm_cycle: this parameter is to monitor the status of pwm_cycle length, which is supposed to be clk_freq/pwm_freq.
 
-* sampling ii: flag "[-ii <sampling II>]". The ii (iteration interval) determines the sampling rate of the input. The default value is 1. 
+* sampling ii: flag "[-ii <sampling II>]". The ii (initiation interval) determines the sampling rate of the input. The default value is 1. 
 
 Profiling 
 ============

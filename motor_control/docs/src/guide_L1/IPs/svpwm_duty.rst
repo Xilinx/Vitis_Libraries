@@ -55,7 +55,7 @@ As it is shown in the aboved pictures, the entire SVPWM_DUTY have five configura
 
 * dead_cycles: flag "[-dead <dead cycles>]". The dead_cycles determines the transit time between the switch on/off. The switches pair shall not simultaneously be switching on and off, in terms of the danger of overloaded transient currents on the bridge. It may incur the systematic turbulence and cause serious problem. The default value of dead_cycles is 10.  
 
-* sampling ii: flag "[-ii <sampling II>]". The ii (iteration interval) determines the sampling rate of the input. The default value is 1. 
+* sampling ii: flag "[-ii <sampling II>]". The ii (initiation interval) determines the sampling rate of the input. The default value is 1. 
 
 
 Profiling 
