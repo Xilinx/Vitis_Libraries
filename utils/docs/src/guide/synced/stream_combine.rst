@@ -44,7 +44,7 @@ These padding bits are added with zeros, as illustrated below:
    :width: 80%
    :align: center
 
-Internally, this module is implemented with a simple loop which iteration
+Internally, this module is implemented with a simple loop which initiation
 interval (II) is equal to 1.
 This means that in each cycle, a vector is yielded using a set of elements.
 
