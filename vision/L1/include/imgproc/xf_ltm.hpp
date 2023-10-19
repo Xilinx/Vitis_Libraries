@@ -218,6 +218,26 @@ class LTM {
 
     LTM() { assert(!is_floating_point<OUT_TYPE>::value); }
 
+    LTM(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& in,
+        XF_CTUNAME(IN_TYPE, NPC) omin_r[MinMaxVArrSize][MinMaxHArrSize],
+        XF_CTUNAME(IN_TYPE, NPC) omax_r[MinMaxVArrSize][MinMaxHArrSize],
+        XF_CTUNAME(IN_TYPE, NPC) omin_w[MinMaxVArrSize][MinMaxHArrSize],
+        XF_CTUNAME(IN_TYPE, NPC) omax_w[MinMaxVArrSize][MinMaxHArrSize],
+        xf::cv::Mat<OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& out) {
+        process(in, omin_r, omax_r, omin_w, omax_w, out);
+    }
+
+    LTM(xf::cv::Mat<IN_TYPE, ROWS, COLS, NPC, XFCVDEPTH_IN_1>& in,
+        int block_rows,
+        int block_cols,
+        XF_CTUNAME(IN_TYPE, NPC) omin_r[MinMaxVArrSize][MinMaxHArrSize],
+        XF_CTUNAME(IN_TYPE, NPC) omax_r[MinMaxVArrSize][MinMaxHArrSize],
+        XF_CTUNAME(IN_TYPE, NPC) omin_w[MinMaxVArrSize][MinMaxHArrSize],
+        XF_CTUNAME(IN_TYPE, NPC) omax_w[MinMaxVArrSize][MinMaxHArrSize],
+        xf::cv::Mat<OUT_TYPE, ROWS, COLS, NPC, XFCVDEPTH_OUT_1>& out) {
+        process(in, block_rows, block_cols, omin_r, omax_r, omin_w, omax_w, out);
+    }
+
     // Limit implementation SFINAE principal [[
     template <int T = IN_TYPE, typename std::enable_if<!is_floating_point<T>::value>::type* = nullptr>
     static constexpr XF_CTUNAME(IN_TYPE, NPC) LOW() {

@@ -13,8 +13,10 @@ Release notes
 
 The below section explains the new features added and also changes in the existing library along with the known issues.
 
+
 -  `New features and functions <#pl-new>`_
 -  `Known issues <#known-issues>`_
+
 
 .. _pl-new:
 
@@ -23,11 +25,6 @@ New features and functions
 
 **PL additions/enhancements**:
 	
-	• New functions:
-		• Added 24 bits-per-channel L3 ISP pipeline	
-		• Added all-in-one L3 ISP pipeline
-		• Pin-cushion, Barrel distortion support added in L1, L2 Remap testbench.
-
 	• Updates:
 		• Added reference functions for extractExposureFrames, autoexposurecorrection_sin, LTM, bgr2yuyv.
 		• Added reference function for all-in-one L3 ISP pipeline.
