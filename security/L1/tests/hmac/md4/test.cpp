@@ -184,7 +184,7 @@ int main() {
         unsigned int len = i % 128 + 80;
         unsigned int klen = KEYL;
         char k[128] = {0};
-        char m[128] = {0};
+        char m[208] = {0};
         if (len != 0) {
             memcpy(k, key, klen);
             memcpy(m, message, len);
