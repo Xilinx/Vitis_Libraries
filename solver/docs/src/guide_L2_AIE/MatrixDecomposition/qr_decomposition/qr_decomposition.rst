@@ -48,7 +48,7 @@ Template Parameters
 ---------------------
 * `column_num`: the number of columns;
 * `row_num`: the number of rows;
-* `k_rep`: the number of input matrix;
+* `k_rep`: the number of input matrixs that are processed by one graph call.
 
 To access more details, see :ref:`AIE APIs Overview`.
 
