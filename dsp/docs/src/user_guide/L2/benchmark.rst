@@ -58,7 +58,7 @@ DDS/Mixer
 
 Following table gives results for the DDS/Mixer and DDS/Mixer LUT with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_DDS_MIXER`.
 
-:download:`dds_mixer_benchmark.csv <../../csv_data_files/L2/dds_mixer_benchmark.csv>`
+:download:`dds_mixer_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/tree/2023.1/dsp/docs/src/csv_data_files/L2/dds_mixer_benchmark.csv>`
 
 .. csv-table:: DDS/Mixer benchmark
    :file: ../../csv_data_files/L2/dds_mixer_benchmark.csv
@@ -71,7 +71,7 @@ FFT IFFT
 
 Following table gives results for the FFT/IFFT function with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_FFT`.
 
-:download:`fft_ifft_benchmark.csv <../../csv_data_files/L2/fft_ifft_benchmark.csv>`
+:download:`fft_ifft_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/tree/2023.1/dsp/docs/src/csv_data_files/L2/fft_ifft_benchmark.csv>`
 
 .. csv-table:: FFT IFFT benchmark
    :file: ../../csv_data_files/L2/fft_ifft_benchmark.csv
@@ -85,7 +85,7 @@ FFT Window
 
 Following table gives results for the FFT Window function with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_FFT`.
 
-:download:`fft_window_benchmark.csv <../../csv_data_files/L2/fft_window_benchmark.csv>`
+:download:`fft_window_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/tree/2023.1/dsp/docs/src/csv_data_files/L2/fft_window_benchmark.csv>`
 
 .. csv-table:: FFT Window benchmark
    :file: ../../csv_data_files/L2/fft_window_benchmark.csv
@@ -98,7 +98,7 @@ Filters
 
 Following table gives results for FIR filter with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_FILTERS`
 
-:download:`fir_benchmark.csv <../../csv_data_files/L2/fir_benchmark.csv>`
+:download:`fir_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/tree/2023.1/dsp/docs/src/csv_data_files/L2/fir_benchmark.csv>`
 
 .. csv-table:: FIR benchmark
    :file: ../../csv_data_files/L2/fir_benchmark.csv
@@ -112,7 +112,7 @@ Matrix Multiply
 
 Following table gives results for the Matrix Multiply function with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_GEMM`.
 
-:download:`matrix_mult_benchmark.csv <../../csv_data_files/L2/matrix_mult_benchmark.csv>`
+:download:`matrix_mult_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/tree/2023.1/dsp/docs/src/csv_data_files/L2/matrix_mult_benchmark.csv>`
 
 .. csv-table:: Matrix Multiply benchmark
    :file: ../../csv_data_files/L2/matrix_mult_benchmark.csv
@@ -126,7 +126,7 @@ Widgets
 
 Following table gives results for the Widgets with a wide variety of supported parameters, which are defined in: :ref:`CONFIGURATION_PARAMETERS_WIDGETS`.
 
-:download:`widget_benchmark.csv <../../csv_data_files/L2/widget_benchmark.csv>`
+:download:`widget_benchmark.csv <https://github.com/Xilinx/Vitis_Libraries/tree/2023.1/dsp/docs/src/csv_data_files/L2/widget_benchmark.csv>`
 
 .. csv-table:: Widgets benchmark
    :file: ../../csv_data_files/L2/widget_benchmark.csv
