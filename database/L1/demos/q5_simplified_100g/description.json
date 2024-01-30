@@ -1,33 +1,15 @@
 {
     "name": "Xilinx Q5 Simplified 100g Demo",
     "description": "Xilinx Q5 Simplified 100g Demo",
-    "flow": "vitis",
+    "flow": "system",
     "platform_type": "pcie",
     "platform_allowlist": [
-        "u280",
-        "u250",
-        "u200"
+        "u250"
     ],
     "platform_blocklist": [
         "zc"
     ],
     "platform_properties": {
-        "u280": {
-            "host": {
-                "compiler": {
-                    "symbols": [
-                        "USE_HBM"
-                    ]
-                }
-            },
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u280.cfg"
-                    ]
-                }
-            }
-        },
         "u250": {
             "host": {
                 "compiler": {
@@ -40,22 +22,6 @@
                 "compiler": {
                     "clflags": [
                         "--config PROJECT/conn_u250.cfg"
-                    ]
-                }
-            }
-        },
-        "u200": {
-            "host": {
-                "compiler": {
-                    "symbols": [
-                        "USE_DDR"
-                    ]
-                }
-            },
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u200.cfg"
                     ]
                 }
             }

@@ -1,18 +1,6 @@
-.. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+.. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: Vitis, Database, Vitis Database Library, Alveo
@@ -26,44 +14,37 @@
 Vitis Database Library Tutorial
 ================================
 
-
 Relational Database and Hardware Acceleration
 ==============================================
 
-Relational databases are based on relational model of data which is powerful and used for a wide variety of information.
-Users only need to specify the result they want with a query language like SQL.
-DBMS converts a query into an execution plan which is a tree of operators, based on certain set of rules and cost functions.
-Execution of the plan is that data flows from the leaves towards the root and the root node produce the final result.
-Query execution performances depend on both execution plan and performance of operator nodes.
+Relational databases are based on the relational model of data which is powerful and used for a wide variety of information. You only need to specify the result you want with a query language like SQL. DBMS converts a query into an execution plan which is a tree of operators, based on certain set of rules and cost functions. Execution of the plan is that data flows from the leaves towards the root, and the root node produces the final result. Query execution performances depend on both the execution plan and performance of operator nodes.
 
 .. image:: /images/exe_plan.png
    :alt: Execution Plan 
    :scale: 20%
    :align: center
 
-Xilinx Alveo card can help improve operator performance in following ways: 
+The AMD Alveo™ card can help improve operator performance in following ways: 
 
 (1) Instruction parallelism by creating a customized and long pipeline.
 (2) Data parallelism by processing multiple rows at the same time.
-(3) Customizable memory hierarchy of BRAM/URAM/HBM, providing high bandwidth of memory access to help operators like bloom filter and hash join.
+(3) Customizable memory hierarchy of block RAM/URAM/HBM, providing high bandwidth of memory access to help operators like bloom filter and hash join.
 
-How Vitis Database Library Works
+How the Vitis Database Library Works
 ==================================
 
-Vitis database library targets to help SQL engine developers to accelerate query execution.
-It provides three layers of APIs, namely L1 / L2 / L3. Each tackles different parts of the whole processing.
+The Vitis database library targets to help SQL engine developers to accelerate query execution. It provides three layers of APIs, namely L1/L2/L3. Each tackles different parts of the whole processing.
 
 * L3 provide pure software APIs for:
 
-(1) Define data structures to describe input table / output table / operation types and parameters.
-(2) Provide combination of operations for acceleration. These combinations are commonly used and easy to fit into the whole execution plan.
-(3) Manage multiple FPGA cards automatically, including initialization of OpenCL context, command queue, kernels and buffers.
-(4) Break down incoming job, distributing sub jobs among all FPGA cards, pipeline data transfers and kernel executions.
+(1) Define data structures to describe input table/output table/operation types and parameters.
+(2) Provide a combination of operations for acceleration. These combinations are commonly used and are easy to fit into the whole execution plan.
+(3) Manage multiple FPGA cards automatically, including initialization of OpenCL|trade| context, command queue, kernels, and buffers.
+(4) Break down incoming job, distributing sub jobs among all FPGA cards, pipeline data transfers, and kernel executions.
 
-* L2 APIs are kernels running on FPGA cards. Each time called, they will finish certain processing according to input configs. L2 APIs are combinations of multiple processing units, each unit consists of multiple processing stages. In this way, kernels could both process multiple data at the same time and apply multiple operations to the same data. L2 API design is subject to resource constraints and may differs according to FPGA cards.
+* L2 APIs are kernels running on FPGA cards. Each time called, they will finish certain processing according to input configs. L2 APIs are combinations of multiple processing units, each unit consists of multiple processing stages. In this way, kernels could both process multiple data at the same time and apply multiple operations to the same data. L2 API design is subject to resource constraints and can differ according to FPGA cards.
 
-* L1 APIs are basic operators in processing, like filter, aggregator / bloom filter / hash join. They're all highly optimize HLS design, providing optimal performance. They're all template design, make them easier to scale and fit into different resource constraint.
-
+* L1 APIs are basic operators in processing, like filter and aggregator/bloom filter/hash join. They are all highly optimized HLS designs providing optimal performance. They are all template designs which make them easier to scale and fit into different resource constraints.
 
 L3 API -- General Query Engine
 ===============================
@@ -71,22 +52,21 @@ L3 API -- General Query Engine
 Target Audience and Major Features
 ------------------------------------
 
-Target audience of L3 API (General Query Engine, GQE) are users who just want to link a shared library and call the API to accelerate part of execution plan on FPGA cards.
+The target audience of the L3 API (General Query Engine, GQE) are users who want to link a shared library and call the API to accelerate part of an execution plan on FPGA cards.
 
 The major feature of L3 API are:
 
-(1) Generalized query execution. L3 API pre-defined operator combinations like "scan + filter + aggregation + write", "scan + filter + bloom filter + write", "scan + filter + hash-join + write", "scan + filter + aggregation + write". Filter condition support comparision between 4 input columns and 2 constants. Aggregation support max / min / sum / count / mean / variance / norm_L1 / norm_L2. In this way, L3 API could support a generalized query operators.
-(2) Automatic card management. As soon as program created an instance of GQE, it will scan the machine and find all qualified Xilinx FPGA cards by their shell name. It will load the cards with the xclbins, create context / command queue / kernel / host buffer / device buffer / job queue for each card. It will keep alive until user call release() functions. This will finish all the initialization automatically and save the overhead to repeat such setup each time user call GQE API.
+(1) Generalized query execution. L3 API pre-defined operator combinations like "scan + filter + aggregation + write", "scan + filter + bloom filter + write", "scan + filter + hash-join + write", and  "scan + filter + aggregation + write" with filter condition support comparision between four input columns and two constants. Aggregation support max/min/sum/count/mean/variance/norm_L1/norm_L2. In this way, L3 APIs could support a generalized query operators.
+(2) Automatic card management. As soon as program created an instance of GQE, it will scan the machine and find all qualified AMD FPGA cards by their shell name. It will load the cards with the xclbins, create context/command queue/kernel/host buffer/device buffer/ job queue for each card. It will keep alive until you call the release() functions. This will finish all the initialization automatically and save the overhead to repeat such setup each time you call the GQE API.
 
 .. image:: /images/card_mng.png
    :alt: Card Management
    :scale: 40%
    :align: center
 
-(3) Light weight memory management. The input and output of GQE are data structure call "TableSection". It only contains pointers to memories which user allocated. In such way, GQE won't do memory allocation related to input / output. This will make it easier for customer to integrate since it won't impact original DBMS's memory pool managment.
-(4) Asynchronous API call. Input for processing will be cut into multiple section of rows. GQE API requries customer to provide an std::future type argument for each row, to indicate readiness of input. GQE also requires an std::promise type argument for each output section, to notify the caller thread that result is ready. GQE API will push all input arguments into an internal job queue and return immediately. Actual processing won't begin until the corresponding std::future arguments for input is ready. This will seperate input preparing from actual GQE processing. GQE could start processing the ready sections ahead even if not all input sections are ready. It will help pipeline the "preparing" and "processing" and improve system performance.
+(3) Light weight memory management. The input and output of GQE are data structure call "TableSection". It only contains pointers to memories which are user allocated. In such way, GQE will not do memory allocation related to input/output. This will make it easier for you to integrate because it wil not impact the original DBMS's memory pool managment.
+(4) Asynchronous API call. Input for processing will be cut into multiple sections of rows. The GQE API requries you to provide a std::future type argument for each row, to indicate the readiness of the input. GQE also requires a std::promise type argument for each output section, to notify the caller thread that the result is ready. GQE API will push all input arguments into an internal job queue and return immediately. Actual processing will not begin until the corresponding std::future arguments for input is ready. This will separate input preparing from the actual GQE processing. GQE could start processing the ready sections ahead even if not all input sections are ready. It will help pipeline the "preparing" and "processing" and improve system performance.
 (5) Column-oriented. Columnar DBMS will benefit from only accessing subset of columns and more options for data compression.
-
 
 Example Usage
 ---------------
@@ -151,26 +131,26 @@ Example Usage
     wksp.release();
 
 
-L2 API -- GQE kernels
+L2 API -- GQE Kernels
 ======================
 
 Target Audience and Major Features
 ------------------------------------
 
-The target audience of L2 API are users who have a certain understanding of HLS and programming on FPGA and want to make modifications on kernels, including:
+The target audience of L2 API are users who have a certain understanding of HLS and programming on FPGAs and want to make modifications on kernels including:
 
-(1) Operator combinations in the kernel, like the number of operators or operator pipeline. Most L1 APIs and glue logics inside L2 kernels are connected with streams. Users could add more operators into kernels to increase its performance as long as it is not bounded by other factors like logic resource and memory bandwidth. 
-(2) Add more pre-processing and post-processing to kernel, like compression / decompression. Certain DBMS might store its data in compressed format to save the memory space and bandwidth to transfer. Adding decompression module to build longer processing pipeline will save the time to decompress the data and increase system performance.
-(3) Kernel combination to be built on single cards. People might be interested in adjusting the kernel combination to accelerate the execution plan with different weights.
-(4) Building configs to improve frequency or migrate to other Xilinx FPGA device.
-(5) Test correctness in sw-emu, hw-emu and on-board.
+(1) Operator combinations in the kernel, such as the number of operators or operator pipeline. Most L1 APIs and glue logics inside L2 kernels are connected with streams. You could add more operators into kernels to increase its performance as long as it is not bounded by other factors like logic resource and memory bandwidth. 
+(2) Add more pre-processing and post-processing to kernel, such as compression/decompression. Certain DBMS might store its data in a compressed format to save the memory space and bandwidth to transfer. Adding a decompression module to build longer processing pipeline will save the time to decompress the data and increase system performance.
+(3) Kernel combination to be built on single cards. You might be interested in adjusting the kernel combination to accelerate the execution plan with different weights.
+(4) Building configs to improve frequency or migrate to other AMD FPGA devices.
+(5) Test correctness in sw-emu, hw-emu, and on-board.
 
 .. image:: /images/3in1_gqe_structure.png
    :alt: Kernel Structure
    :scale: 80%
    :align: center
 
-Command to Run L2 cases
+Command to Run L2 Cases
 -------------------------
 
 .. code-block:: shell
@@ -183,14 +163,13 @@ Command to Run L2 cases
     # delete generated files
     make cleanall
 
-Here, ``TARGET`` decides the FPGA binary type
+Here, ``TARGET`` decides the FPGA binary type.
 
-* ``sw_emu`` is for software emulation
-* ``hw_emu`` is for hardware emulation
-* ``hw`` is for deployment on physical card. (Compilation to hardware binary often takes hours.)
+* ``sw_emu`` is for software emulation.
+* ``hw_emu`` is for hardware emulation.
+* ``hw`` is for deployment on physical card. (Compilation to the hardware binary often takes hours)
 
-Besides ``run``, the Vitis case makefile also allows ``host`` and ``xclbin`` as build target.
-
+Besides ``run``, the Vitis case makefile also allows ``host`` and ``xclbin`` as the build target.
 
 L1 API
 =======
@@ -198,15 +177,13 @@ L1 API
 Target Audience and Major Features
 ------------------------------------
 
-Target audience of L1 API are users who is familiar with HLS programming and want to test / profile / modify operators or add new operator.
-With the HLS test project provided in L1 layer, user could get:
+The target audience of L1 APIs are users who are familiar with HLS programming and want to test/profile/modify operators or add a new operator. With the HLS test project provided in L1 layer, you could get:
 
-(1) Function correctness tests, both in c-simulation and co-simulation
-(2) Performance profiling from HLS synthesis report and co-simulaiton
-(3) Resource and timing from Vivado synthesis.
+(1) Function correctness tests, both in c-simulation and co-simulation.
+(2) Performance profiling from the HLS synthesis report and co-simulaiton.
+(3) Resource and timing from AMD Vivado™ synthesis.
 
-
-Command to Run L1 cases
+Command to Run L1 Cases
 -------------------------
 
 .. code-block:: shell
@@ -216,7 +193,7 @@ Command to Run L1 cases
     make run CSIM=1 CSYNTH=0 COSIM=0 VIVADO_SYN=0 VIVADO_IMPL=0 \
         PLATFORM=/path/to/xilinx_u50_gen3x16_xdma_5_202210_1.xpfm
 
-Test control variables are:
+The test control variables are:
 
 * ``CSIM`` for high level simulation.
 * ``CSYNTH`` for high level synthesis to RTL.
@@ -224,6 +201,4 @@ Test control variables are:
 * ``VIVADO_SYN`` for synthesis by Vivado.
 * ``VIVADO_IMPL`` for implementation by Vivado.
 
-For all these variables, setting to ``1`` indicates execution while ``0`` for skipping.
-The default value of all these control variables are ``0``, so they can be omitted from command line
-if the corresponding step is not wanted.
+For all these variables, setting to ``1`` indicates execution while ``0`` for skipping. The default value of all these control variables are ``0``, so they can be omitted from command line if the corresponding step is not wanted.

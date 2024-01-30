@@ -1,35 +1,26 @@
 {
     "name": "Xilinx gqeBloomfilter Kernel Test",
     "description": "Xilinx gqeBloomfilter Kernel Test",
-    "flow": "vitis",
+    "flow": "system",
     "gui": false,
     "platform_type": "pcie",
     "platform_allowlist": [
-        "u50",
         "u55c"
     ],
     "platform_blocklist": [
         "other"
     ],
     "platform_properties": {
-        "u50": {
-            "containers": [
-                {
-                    "name": "gqe_filter",
-                    "ldclflags": "--config PROJECT/conn_u50.cfg --config PROJECT/opts_u50.cfg"
-                }
-            ]
-        },
         "u55c": {
             "containers": [
                 {
                     "name": "gqe_filter",
                     "ldclflags": "--config PROJECT/conn_u55c.cfg --config PROJECT/opts_u55c.cfg",
                     "accelerators": [
-                       {
-                          "name": "gqeKernel",
-                          "frequency": 200
-                       }
+                        {
+                            "name": "gqeKernel",
+                            "frequency": 200
+                        }
                     ],
                     "frequency": 150
                 }
@@ -78,7 +69,7 @@
                 "LIB_DIR/../utils/L1/include"
             ],
             "clflags": [
-				"--config PROJECT/hls_pre.cfg -D PART_FLOW=0"
+                "--config PROJECT/hls_pre.cfg -D PART_FLOW=0"
             ],
             "hls_jobs": 16
         },

@@ -1,25 +1,16 @@
 {
     "name": "Xilinx Hash Join V4 Benchmark",
     "description": "Xilinx Hash Join V4 Benchmark",
-    "flow": "vitis",
+    "flow": "system",
     "gui": true,
     "platform_type": "pcie",
     "platform_allowlist": [
-        "u280",
         "u50"
     ],
     "platform_blocklist": [
         "zc"
     ],
     "platform_properties": {
-        "u280": {
-            "containers": [
-                {
-                    "name": "join_kernel",
-                    "ldclflags": "--config PROJECT/conn_u280.cfg"
-                }
-            ]
-        },
         "u50": {
             "containers": [
                 {

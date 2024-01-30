@@ -1,18 +1,6 @@
-.. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+.. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _l1_hash_semi_join:
 
@@ -20,9 +8,7 @@
 Hash Semi-Join
 ==============
 
-Hash Semi-Join resides in ``L1/benchmarks/hash_semi_join`` directory.
-This project shows FPGA performance of the following query with random-generated data,
-implemented with `hashSemiJoin` primitive.
+Hash Semi-Join resides in the ``L1/benchmarks/hash_semi_join`` directory. This project shows the FPGA performance of the following query with random-generated data implemented with the `hashSemiJoin` primitive.
 
 .. code-block:: bash
 
@@ -44,30 +30,27 @@ implemented with `hashSemiJoin` primitive.
      )
    ;
 
-Here ``Orders`` is a self-made table filled with random data, which contains 2 columns named ``o_orderkey`` and ``o_orderdate``;
-     ``Lineitem`` is also a table, which contains 3 columns named ``l_orderkey``, ``l_extendedprice`` and ``l_discount``.
-
+Here ``Orders`` is a self-made table filled with random data, which contains two columns named ``o_orderkey`` and ``o_orderdate``; ``Lineitem`` is also a table, which contains three columns named ``l_orderkey``, ``l_extendedprice``, and ``l_discount``.
 
 Dataset
 =======
 
-This project uses 32-bit data for numeric fields.
-To benchmark 64-bit performance, edit `host/table_dt.h` and make `TPCH_INT` an `int64_t`.
+This project uses 32-bit data for numeric fields. To benchmark 64-bit performance, edit `host/table_dt.h`, and make `TPCH_INT` an `int64_t`.
 
 Executable Usage
 ===============
 
-* **Work Directory(Step 1)**
+* **Work Directory- (Step 1)**
 
-The steps for library download and environment setup can be found in :ref:`l2_vitis_database`. For getting the design,
+The steps for library download and environment setup can be found in :ref:`l2_vitis_database`. For getting the design:
 
 .. code-block:: bash
 
    cd L1/benchmarks/hash_semi_join
 
-* **Build kernel(Step 2)**
+* **Build Kernel (Step 2)**
 
-Run the following make command to build your XCLBIN and host binary targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
+Run the following make command to build your XCLBIN and host binary targeting a specific device. This process will take a long time, maybe couple of hours.
 
 .. code-block:: bash
 
@@ -75,7 +58,7 @@ Run the following make command to build your XCLBIN and host binary targeting a 
 
 * **Run kernel(Step 3)**
 
-To get the benchmark results, please run the following command.
+To get the benchmark results, run the following command:
 
 .. code-block:: bash
 
@@ -88,7 +71,7 @@ Hash Semi-Join Input Arguments:
    Usage: test_join.exe -xclbin
           -xclbin:      the kernel name
 
-Note: Default arguments are set in Makefile, you can use other platforms to build and run.
+.. note:: The default arguments are set in the Makefile; you can use other platforms to build and run.
 
 * **Example output(Step 4)** 
 
@@ -114,12 +97,10 @@ Note: Default arguments are set in Makefile, you can use other platforms to buil
    Average execution per run: 18914 usec
    ---------------------------------------------
 
-
 Profiling
 =========
 
-The hash semi-join design is validated on Alveo U280 board at 274 MHz frequency. 
-The hardware resource utilizations are listed in the following table.
+The hash semi-join design is validated on an AMD Alveo™ U280 board at a 274 MHz frequency. The hardware resource utilizations are listed in the following table.
 
 .. table:: Table 1 Hardware resources for hash semi-join
     :align: center
@@ -136,11 +117,7 @@ The hardware resource utilizations are listed in the following table.
     |   Percentage   |     5.73%     |    6.62%  |    6.67%   |   0.03% |
     +----------------+---------------+-----------+------------+---------+
 
-The performance is shown below.
-   In above test, table ``Lineitem`` has 3 columns and 6001215 rows and ``Orders`` does 2 column and 1500000 rows.
-   This means that the design takes 18.914ms to process 80.12MB data, so it achieves 4.14GB/s throughput.
-
+The performance is as follows. In the above test, table ``Lineitem`` has three columns and 6001215 rows, and ``Orders`` has two columns and 1500000 rows. This means that the design takes 18.914 ms to process 80.12 MB data, so it achieves 4.14 Gb/s throughput.
 
 .. toctree::
    :maxdepth: 1
-

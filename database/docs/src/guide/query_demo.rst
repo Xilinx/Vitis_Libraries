@@ -1,17 +1,6 @@
-.. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+.. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: Vitis Database Library, acceleration, demo
@@ -24,7 +13,7 @@
 Query-Specific Acceleration Demo
 ================================
 
-The following application acceleration demos are shipped within this library in ``demo_app_accel`` folder.
+The following application acceleration demos are shipped within this library in the ``demo_app_accel`` folder.
 
 .. contents:: List of Demos
    :local:
@@ -33,8 +22,7 @@ The following application acceleration demos are shipped within this library in 
 TPC-H Query 5 Simplified
 ------------------------
 
-This demo in ``demo_app_accel/q5_simplified_100g`` directory
-implements the following query using TPC-H test data.
+This demo in the ``demo_app_accel/q5_simplified_100g`` directory implements the following query using TPC-H test data.
 
 .. code-block:: sql
 
@@ -50,12 +38,10 @@ implements the following query using TPC-H test data.
    ;
 
 
-
 TPC-H Query 5
 -------------
 
-This demo in ``demo_app_accel/q5`` directory implements TPC-H Query 5 with scale factor 1 data. 
-The SQL being implemented is
+This demo in the ``demo_app_accel/q5`` directory implements TPC-H Query 5 with scale factor 1 data. The SQL being implemented is:
 
 .. code-block:: sql
 
@@ -89,8 +75,7 @@ The SQL being implemented is
 TPC-H Query 6 Modified
 ----------------------
 
-This demo in ``demo_app_accel/q6_mod`` directory implements TPC-H Query 6 modified with
-extra conditions. The SQL being implemented is
+This demo in the ``demo_app_accel/q6_mod`` directory implements TPC-H Query 6 modified with extra conditions. The SQL being implemented is:
 
 .. code-block:: sql
 
@@ -104,5 +89,3 @@ extra conditions. The SQL being implemented is
    	and l_quantity < 24
    	and l_shipdate > l_commitdate;
    ;
-
-.

@@ -1,18 +1,6 @@
-.. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+.. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: Vitis, Database, Vitis Database Library, Alveo
@@ -30,15 +18,14 @@
 Design Flows
 ------------
 
-The common tool and library pre-requisites that apply across all design flows are documented
-in the requirements section above.
+The common tool and library prerequisites that apply across all design flows are documented in the requirements section above.
 
-Recommended design flows are described as follows:
+The recommended design flows are described as follows:
 
 Shell Environment
 ~~~~~~~~~~~~~~~~~
 
-Setup the build environment using the Vitis and XRT scripts.
+Set up the build environment using AMD Vitis™ and XRT scripts.
 
 .. code-block:: shell
 
@@ -47,12 +34,9 @@ Setup the build environment using the Vitis and XRT scripts.
     export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 
 
-For ``csh`` users, please look for corresponding scripts with ``.csh`` suffix and adjust the variable setting command
-accordingly.
+For ``csh`` users, look for corresponding scripts with the ``.csh`` suffix, and adjust the variable setting command accordingly.
 
-Setting `PLATFORM_REPO_PATHS` to the installation folder of platform files can enable makefiles
-in this library to use `PLATFORM` variable as a pattern.
-Otherwise, full path to .xpfm file needs to be provided via `PLATFORM` variable.
+Setting `PLATFORM_REPO_PATHS` to the installation folder of platform files can enable makefiles in this library to use the `PLATFORM` variable as a pattern. Otherwise, the full path to .xpfm file needs to be provided via `PLATFORM` variable.
 
 HLS Cases Command Line Flow
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -67,14 +51,12 @@ HLS Cases Command Line Flow
 Test control variables are:
 
 * ``CSIM`` for high level simulation.
-* ``CSYNTH`` for high level synthesis to RTL.
+* ``CSYNTH`` for high level synthesis to register transfer level (RTL).
 * ``COSIM`` for co-simulation between software test bench and generated RTL.
-* ``VIVADO_SYN`` for synthesis by Vivado.
+* ``VIVADO_SYN`` for synthesis by AMD Vivado™.
 * ``VIVADO_IMPL`` for implementation by Vivado.
 
-For all these variables, setting to ``1`` indicates execution while ``0`` for skipping.
-The default value of all these control variables are ``0``, so they can be omitted from command line
-if the corresponding step is not wanted.
+For all these variables, setting to ``1`` indicates execution while ``0`` for skipping. The default value of all these control variables are ``0``, so they can be omitted from command line if the corresponding step is not wanted.
 
 Vitis Cases Command Line Flow
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -90,10 +72,10 @@ Vitis Cases Command Line Flow
     make cleanall
 
 
-Here, ``TARGET`` decides the FPGA binary type
+Here, ``TARGET`` decides the FPGA binary type.
 
-* ``sw_emu`` is for software emulation
-* ``hw_emu`` is for hardware emulation
+* ``sw_emu`` is for software emulation.
+* ``hw_emu`` is for hardware emulation.
 * ``hw`` is for deployment on physical card. (Compilation to hardware binary often takes hours.)
 
-Besides ``run``, the Vitis case makefile also allows ``host`` and ``xclbin`` as build target.
+Besides ``run``, the Vitis case makefile also allows ``host`` and ``xclbin`` as the build target.

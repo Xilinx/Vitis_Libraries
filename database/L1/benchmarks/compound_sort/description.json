@@ -1,48 +1,21 @@
 {
     "name": "Xilinx Compound Sort Benchmark",
     "description": "Xilinx Compound Sort Benchmark",
-    "flow": "vitis",
+    "flow": "system",
     "gui": true,
     "platform_type": "pcie",
     "platform_allowlist": [
-        "u280",
-        "u250",
-        "u200",
-        "u50"
+        "u250"
     ],
     "platform_blocklist": [
         "zc"
     ],
     "platform_properties": {
-        "u280": {
-            "containers": [
-                {
-                    "name": "SortKernel",
-                    "ldclflags": "--config PROJECT/conn_u280.cfg"
-                }
-            ]
-        },
         "u250": {
             "containers": [
                 {
                     "name": "SortKernel",
                     "ldclflags": "--config PROJECT/conn_u250.cfg"
-                }
-            ]
-        },
-        "u200": {
-            "containers": [
-                {
-                    "name": "SortKernel",
-                    "ldclflags": "--config PROJECT/conn_u200.cfg"
-                }
-            ]
-        },
-        "u50": {
-            "containers": [
-                {
-                    "name": "SortKernel",
-                    "ldclflags": "--config PROJECT/conn_u50.cfg"
                 }
             ]
         }

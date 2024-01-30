@@ -1,30 +1,21 @@
 {
     "name": "Xilinx Hash Group Aggregate Benchmark",
     "description": "Xilinx Hash Group Aggregate Benchmark",
-    "flow": "vitis",
+    "flow": "system",
     "gui": false,
     "platform_type": "pcie",
     "platform_allowlist": [
-        "u280",
         "u50"
     ],
     "platform_blocklist": [
         "zc"
     ],
     "platform_properties": {
-        "u280": {
-            "containers": [
-                {
-                    "name": "hash_aggr_kernel",
-	        		"ldclflags": "--config PROJECT/conn_u280.cfg --config PROJECT/opts.cfg"
-                }
-            ]
-        },
         "u50": {
             "containers": [
                 {
                     "name": "hash_aggr_kernel",
-	        		"ldclflags": "--config PROJECT/conn_u50.cfg --config PROJECT/opts.cfg"
+                    "ldclflags": "--config PROJECT/conn_u50.cfg --config PROJECT/opts.cfg"
                 }
             ]
         }

@@ -1,25 +1,16 @@
 {
     "name": "Xilinx gqeAggr Kernel Test",
     "description": "Xilinx gqeAggr Kernel Test",
-    "flow": "vitis",
+    "flow": "system",
     "gui": false,
     "platform_type": "pcie",
     "platform_allowlist": [
-        "u280",
         "u50"
     ],
     "platform_blocklist": [
         "other"
     ],
     "platform_properties": {
-        "u280": {
-            "containers": [
-                {
-                    "name": "gqe_aggr_v2",
-                    "ldclflags": "--config PROJECT/conn_u280.cfg --config PROJECT/opts.cfg --vivado.prop run.impl_1.STEPS.OPT_DESIGN.TCL.POST=PROJECT/post_opt.tcl"
-                }
-            ]
-        },
         "u50": {
             "containers": [
                 {
@@ -70,8 +61,8 @@
                 "LIB_DIR/L1/include/hw",
                 "LIB_DIR/L2/include/hw",
                 "LIB_DIR/../utils/L1/include"
-	    ]
-	}
+            ]
+        }
     },
     "containers": [
         {

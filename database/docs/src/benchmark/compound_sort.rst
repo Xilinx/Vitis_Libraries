@@ -1,19 +1,6 @@
-.. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+.. Copyright © 2019–2023 Advanced Micro Devices, Inc
 
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _l1_componentsort:
 
@@ -21,34 +8,34 @@
 Compound Sort
 =============
 
-Compound Sort example resides in ``L1/benchmarks/compound_sort`` directory.
+The compound sort example resides in the ``L1/benchmarks/compound_sort`` directory.
 
-This benchmark tests the performance of `compoundSort` primitive with an array of integer keys. This primitive is named as compound sort, as it combines `insertSort` and `mergeSort`, to balance storage and compute resource usage. 
+This benchmark tests the performance of the `compoundSort` primitive with an array of integer keys. This primitive is named as compound sort, as it combines `insertSort` and `mergeSort`, to balance storage and compute resource usage. 
 
-The tutorial provides a step-by-step guide that covers commands for building and running kernel.
+The tutorial provides a step-by-step guide that covers commands for building and running the kernel.
 
 Executable Usage
 ================
 
-* **Work Directory(Step 1)**
+* **Work Directory (Step 1)**
 
-The steps for library download and environment setup can be found in :ref:`l2_vitis_database`. For getting the design,
+   The steps for library download and environment setup can be found in :ref:`l2_vitis_database`. For getting the design:
 
 .. code-block:: bash
 
    cd L1/benchmarks/compound_sort
 
-* **Build kernel(Step 2)**
+* **Build Kernel (Step 2)**
 
-Run the following make command to build your XCLBIN and host binary targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
+   Run the following make command to build your XCLBIN and host binary targeting a specific device. This process will take a long time, maybe couple of hours.
 
 .. code-block:: bash
 
    make run TARGET=hw PLATFORM=xilinx_u280_xdma_201920_3
 
-* **Run kernel(Step 3)**
+* **Run Kernel (Step 3)**
 
-To get the benchmark results, please run the following command.
+To get the benchmark results, run the following command.
 
 .. code-block:: bash
 
@@ -61,9 +48,9 @@ Compound Sort Input Arguments:
    Usage: host.exe -xclbin
           -xclbin     compound sort binary
 
-Note: Default arguments are set in Makefile, you can use other platforms to build and run.
+.. note:: Default arguments are set in the Makefile; you can use other platforms to build and run.
 
-* **Example output(Step 4)** 
+* **Example Output (Step 4)** 
 
 .. code-block:: bash
    
@@ -87,10 +74,9 @@ Note: Default arguments are set in Makefile, you can use other platforms to buil
 Profiling 
 =========
 
-The compound sort design is validated on Alveo U280 board at 287 MHz frequency. 
-The hardware resource utilizations are listed in the following table.
+The compound sort design is validated on an AMD Alveo™ U280 board at a 287 MHz frequency. The hardware resource utilizations are listed in the following table.
 
-.. table:: Table 1 Hardware resources for compound sort
+.. table:: Table 1 Hardware Resources for Compound Sort
     :align: center
 
     +------------+--------------+-----------+----------+--------+
@@ -106,9 +92,7 @@ The hardware resource utilizations are listed in the following table.
     +------------+--------------+-----------+----------+--------+
 
 
-The performance is shown below.
-   This design takes 1.130ms to process 0.5MB data, so it achieves 442.56MB/s throughput.
-
+The performance is as follows. This design takes 1.130 ms to process 0.5 MB data, so it achieves 442.56 Mb/s throughput.
 
 .. toctree::
     :maxdepth: 1

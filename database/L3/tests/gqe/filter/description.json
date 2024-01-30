@@ -1,7 +1,7 @@
 {
     "name": "Xilinx GQE Filter L3 Test",
     "description": "Xilinx GQE Filter L3 Test",
-    "flow": "vitis",
+    "flow": "system",
     "gui": false,
     "platform_type": "pcie",
     "platform_allowlist": [
