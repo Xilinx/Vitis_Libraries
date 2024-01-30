@@ -2,7 +2,7 @@
     "gui": false,
     "name": "JXL ACC_TOKINIT Demo",
     "description": "This example is based on Google's PIK, which was chosen as the base framework for JPEG XL. The pikEnc is based on the 'fast mode' of PIK which can provide better encoding efficnty than most of other still image encoding methods. The pikEnc is based on Xilinx HLS design methodology and optimized for FPGA arthitecture. It can proved higher throughput and lower latency compared to software-based solutions",
-    "flow": "vitis",
+    "flow": "system",
     "platform_allowlist": [
         "u50"
     ],

@@ -2,7 +2,7 @@
     "gui": false,
     "name": "Xilinx JPEG Decoder (SC) Test", 
     "description": "This example is a SystemCompiler example for decoder supports the 'Sequential DCT-based mode' of ISO/IEC 10918-1 standard. It is a high-performance implementation based-on Xilinx HLS design methodolygy. It can process 1 Huffman token and create up to 8 DCT coeffiects within one cycle. It is also an easy-to-use decoder as it can direct parser the JPEG file header without help of software functions", 
-    "flow": "vitis", 
+    "flow": "system", 
     "platform_allowlist": [
         "u50"
     ], 

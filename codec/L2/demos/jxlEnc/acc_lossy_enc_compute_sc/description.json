@@ -2,7 +2,7 @@
     "gui": false,
     "name": "Xilinx JXL ACC LOSSY ENC Demo (SC)",
     "description": "",
-    "flow": "vitis",
+    "flow": "system",
     "platform_allowlist": [
         "u50"
     ],

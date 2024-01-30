@@ -2,43 +2,26 @@
     "gui": true,
     "name": "Xilinx JPEG Decoder Test",
     "description": "This example is decoder supports the 'Sequential DCT-based mode' of ISO/IEC 10918-1 standard. It is a high-performance implementation based-on Xilinx HLS design methodolygy. It can process 1 Huffman token and create up to 8 DCT coeffiects within one cycle. It is also an easy-to-use decoder as it can direct parser the JPEG file header without help of software functions",
-    "flow": "vitis",
+    "flow": "system",
     "platform_allowlist": [
-        "u200",
-        "u280"
+        "u200"
     ],
     "platform_blocklist": [
         "zc"
     ],
-    "data":[
+    "data": [
         "PROJECT/images"
     ],
     "platform_properties": {
         "u200": {
-	    "v++": {
-	        "compiler": {
-		    "clflags": [
-		        "--config PROJECT/conn_u200.cfg"
-		    ]
-		}
-	    }
-	},
-        "u280": {
-	    "host": {
-	        "compiler": {
-		    "symbols": [
-		        "USE_HBM"
-		    ]
-		}
-	    },
-	    "v++": {
-	        "compiler": {
-		    "clflags": [
-		        "--config PROJECT/conn_u50_u280.cfg"
-		    ]
-		}
-	    }
-	}
+            "v++": {
+                "compiler": {
+                    "clflags": [
+                        "--config PROJECT/conn_u200.cfg"
+                    ]
+                }
+            }
+        }
     },
     "launch": [
         {

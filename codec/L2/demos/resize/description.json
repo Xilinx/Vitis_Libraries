@@ -2,7 +2,7 @@
     "gui": true, 
     "name": "Xilinx Resize Test", 
     "description": "An example for fast resize in codec cases", 
-    "flow": "vitis", 
+    "flow": "system", 
     "platform_allowlist": [
         "u50" 
     ], 
