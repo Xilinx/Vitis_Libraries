@@ -3,7 +3,7 @@
     "exclude": "README.md", 
     "name": "Xilinx XF_BLAS Gemm 1CU Level 2 Gui Test", 
     "description": "Test case for general matrix multiplication (C=A*B+X), 1CU build", 
-    "flow": "vitis", 
+    "flow": "system", 
     "platform_type": "pcie", 
     "platform_allowlist": [
         "u250"

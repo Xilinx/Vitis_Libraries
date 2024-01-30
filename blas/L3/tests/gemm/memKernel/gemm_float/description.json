@@ -1,7 +1,7 @@
 {
     "name": "Xilinx XF_BLAS.gemm_float", 
     "description": "", 
-    "flow": "vitis", 
+    "flow": "system", 
     "platform_allowlist": [
         "u250"
     ], 
