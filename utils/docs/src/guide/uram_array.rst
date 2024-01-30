@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _guide-class-uram_array:
 
@@ -35,8 +25,8 @@ Work Flow
 
 This module enables fast data update by creating a small history cache of
 recently written data in register beside the URAM blocks.
-Upon data read, it will lookup the address in recent writes, and forward
-the result if match is found.
+Upon data read, it looks up the address in recent writes, and forwards
+the result if the match is found.
 
 It also provides a handy interface for initializing multiple URAM blocks
 used as an array in parallel.
@@ -44,25 +34,23 @@ used as an array in parallel.
 Storage Layout
 ==============
 
-URAM blocks have fixed width of 72-bit, so our storage layout depends on how
-wide each element is.
+URAM blocks have fixed width of 72-bit, so our storage layout depends on the width of the element.
 
-When the data element has no more than 72bits, the helper class will try to
-store as many as possible within 72bits and pad zeros when space is left.
-For example, to store 20k 16-bit elements, 2 URAMs would be used,
-as each line can store 4 elements and each URAM has fixed depth of 4k.
+When the data element has no more than 72 bits, the helper class tries to
+store as many as possible within 72 bits and pad zeros when some space is left.
+For example, to store 20k 16-bit elements, two URAMs are used,
+as each line can store four elements and each URAM has a fixed depth of 4k.
 
-When the data element has more than 72bits, the helper class will use line of
-multiple URAM blocks to store each element. This ensures that each cycle
-we can initiate an element access.
-So to store 10k 128-bit elements, 6 URAM blocks are required.
+When the data element has more than 72 bits, the helper class uses a line of
+multiple URAM blocks to store each element. This ensures that that we can initiate an element access during each cycle.
+Hence, six URAM blocks are required to store 10k 128-bit elements.
 
 
 Resources
 =========
 
-The hardware resources for 10k elements in post-Vivado report are listed in
-table below:
+The hardware resources for 10k elements in the post- AMD Vivado |trade|  report are listed in the following
+table:
 
 .. table:: Hardware resources for URAM
     :align: center
@@ -74,4 +62,10 @@ table below:
     +-------------+----------+----------+-----------+-----------+-------------+
     |      128    |     6    |   4000   |   2457    |   10243   |    2.046    |
     +-------------+----------+----------+-----------+-----------+-------------+
+
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:
 

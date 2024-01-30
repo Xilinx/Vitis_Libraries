@@ -1,5 +1,5 @@
 .. 
-   Copyright 2019-2021 Xilinx, Inc.
+   Copyright 2019-2023 Advanced Micro Devices, Inc
   
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ Recommended design flows are described as follows:
 Shell Environment
 ~~~~~~~~~~~~~~~~~
 
-Setup the build environment using the Vitis and XRT scripts.
+Setup the build environment using the AMD Vitis |trade| and XRT scripts.
 
 .. code-block:: shell
 
@@ -42,7 +42,7 @@ Setup the build environment using the Vitis and XRT scripts.
     export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 
 
-For ``csh`` users, please look for corresponding scripts with ``.csh`` suffix and adjust the variable setting command
+For ``csh`` users, look for corresponding scripts with ``.csh`` suffix and adjust the variable setting command
 accordingly.
 
 Setting `PLATFORM_REPO_PATHS` to the installation folder of platform files can enable makefiles
@@ -64,10 +64,15 @@ Test control variables are:
 * ``CSIM`` for high level simulation.
 * ``CSYNTH`` for high level synthesis to RTL.
 * ``COSIM`` for co-simulation between software test bench and generated RTL.
-* ``VIVADO_SYN`` for synthesis by Vivado.
+* ``VIVADO_SYN`` for synthesis by AMD Vivado |trade|.
 * ``VIVADO_IMPL`` for implementation by Vivado.
 
 For all these variables, setting to ``1`` indicates execution while ``0`` for skipping.
 The default value of all these control variables are ``0``, so they can be omitted from command line
 if the corresponding step is not wanted.
 
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

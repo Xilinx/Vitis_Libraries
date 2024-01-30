@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _guide-axi_to_stream:
 
@@ -35,15 +25,14 @@ The axiToStream for aligned data implement is a lightweight primitive for aligne
 is positive integer multiple of alignment width and the stream's width just equals the aligned width. Both AXI port
 and alignment width are assumed to be multiple of 8-bit char.
 
-The axiToStream for general data is relatively universal compared with the axiToStream for aligned data,
-so it causes more resource. The data length should be in number of 8-bit char. The data width cloud be unaligned or aligned,
-e.g. compressed binary files. AXI port is assumed to have width as multiple of 8-bit char.
+The axiToStream for general data is relatively universal compared to the axiToStream for aligned data,
+so it causes more resource. The data length should be in number of 8-bit char. The data width could be unaligned or aligned. For exapmple, compressed binary files. AXI port is assumed to have width as multiple of 8-bit char.
 
 .. CAUTION::
    Applicable conditions:
 
    When input data pointer width is less than AXI port width, the AXI port bandwidth
-   will not be fully used. So, AXI port width should be minimized while meeting
+   is not fully used. So, AXI port width should be minimized while meeting
    performance requirements of application.
 
 This primitive performs axiToStream in two modules working simultaneously.

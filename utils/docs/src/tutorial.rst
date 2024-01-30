@@ -1,5 +1,5 @@
 .. 
-   Copyright 2019-2020 Xilinx, Inc.
+   Copyright 2019-2023 Advanced Micro Devices, Inc
   
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -29,23 +29,23 @@ Vitis Utils Library Tutorial
 How Vitis Utils Library Works
 ==================================
 
-Vitis utils library does not contain any acceleration applications, but utility functions that help Vitis design. It comes in two parts: HLS hardware utilities, Software utilities.
+AMD Vitis |trade| utils library does not contain any acceleration applications, but consists of utility functions that help the Vitis design. It comes in two parts, HLS hardware utilities and Software utilities.
 
-* HLS hardware utilities are most commonly used HLS design pattern, like Memory Access by AXI, Low latency URAM, Stream combine and merge. Utils library provide standard and optimized design to help avoid re-invent the wheels. They're in L1/include/xf_utils_hw.
-* Software utilities are commonly used functions in Vitis host design. They are pure C++ design and contains log and error printing functions which help unify testing. They're in L1/include/xf_utils_sw.
+* HLS hardware utilities are most commonly used HLS design pattern, like Memory Access by AXI, Low latency URAM, Stream combine, and merge. Utils library provides a standard and optimized design to help avoid re-invent the wheels. They are in L1/include/xf_utils_hw.
+* Software utilities are commonly used functions in Vitis host design. They are pure C++ design and contains log and error printing functions that help unify testing. They are in L1/include/xf_utils_sw.
 
-HLS hardware utiliy API
+HLS Hardware Utiliy API
 =========================
 
 Target Audience and Major Features
 ------------------------------------
 
 Target audience of L1 API are users who are familiar with HLS programming and want to test / profile / modify utility functions.
-With the HLS test project provided in L1 layer, user could get:
+With the HLS test project provided in L1 layer, you could get:
 
 (1) Function correctness tests, both in c-simulation and co-simulation
-(2) Performance profiling from HLS synthesis report and co-simulaiton
-(3) Resource and timing from Vivado synthesis.
+(2) Performance profiling from HLS synthesis report and co-simulation
+(3) Resource and timing from AMD Vivado |trade| synthesis.
 
 Command to Run cases
 -------------------------
@@ -69,3 +69,8 @@ For all these variables, setting to ``1`` indicates execution while ``0`` for sk
 The default value of all these control variables is ``0``, so it can be omitted from command line
 if the corresponding step is not wanted.
 
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

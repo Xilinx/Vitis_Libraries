@@ -31,12 +31,12 @@ The data-mover APIs are migrated to xf_data_mover library.
 ------
 
 The data-mover APIs are promoted as a new top-level library.
-They will be removed from this library in future release.
+They will be removed from this library in the future release.
 
 2022.2
 ------
 
-In this release, we add 4D data-mover to support AIE application. 4D Data-mover will take a queue of 9x64bits descriptors as input to describe 4D access pattern. It will read the 4D cuboid with the pattern desired and finish descriptors one by one.
+In this release, we add 4D data-mover to support AIE application. 4D Data-mover will take a queue of 9x64bits descriptors as input to describe the 4D access pattern. It will read the 4D cuboid with the pattern desired and finish descriptors one by one.
 
 * read4D
 * write4D
@@ -52,19 +52,19 @@ In the 2021.2 release, add two Data-Mover implementation for debugging hw issue.
 ------
 
 In the 2021.1 release, Data-Mover is added into this library. Unlike other C++ based APIs, this addition
-is targeting people less experienced in HLS based kernel design and just wants to test their stream-based designs.
+is targeting less-experienced people in HLS-based kernel design and just wants to test their stream-based designs.
 The Data-Mover is actually a kernel source code generator, creating a list of common helper kernels to drive
 or valdiate designs, like those on AIE devices.
 
 2020.2
 ------
 
-In the 2020.2 release the following APIs has been added
+In the 2020.2 release, the following APIs have been added:
 
-* **Argument parser**: this (experimental) implementation parses the options and flags passed from command line,
+* **Argument parser**: This (experimental) implementation parses the options and flags passed from command line,
   and offers automatic help information generation. It should help the developers to create unified experience on test
   cases and user applications.
-* **FIFO multiplexer**: this module wraps around a FIFO (implemented through hls::stream) to enable passing data
+* **FIFO multiplexer**: This module wraps around a FIFO (implemented through hls::stream) to enable passing data
   of different type through the same hardware resource. When the data is too wide, it will automatically be transferred
   using multiple cycles. This module is expected to make the dataflow code more compact and readable.
 
@@ -88,5 +88,5 @@ This release adds the following API to this library:
 The 2019.2 release provides a range of HLS primitives for:
 
 * Work distribution and result collection in different algorithms.
-* Stream manipulation, including combination, duplication, synchronization, shuffle, etc.
+* Stream manipulation, including combination, duplication, synchronization, shuffle, and so on.
 * Updating URAM array in higher frequency.

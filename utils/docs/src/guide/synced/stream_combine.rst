@@ -1,17 +1,8 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+ 
+.. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _guide-stream_combine:
 
@@ -27,11 +18,11 @@ The :ref:`streamCombine <cid-xf::common::utils_hw::streamCombine>` function
 is designed for packing multiple elements of same width into a vector.
 
 This module offers two static configurations: using the data from LSB or MSB.
-With LSB option, the element at LSB is obtained from input stream with 0 index,
-while with MSB option, the element at MSB is set using input with 0 index.
+With an LSB option, the element at LSB is obtained from input stream with 0 index,
+while with an MSB option, the element at MSB is set using input with 0 index.
 
 As some storage structures in FPGA are bounded to fixed width or width of power
-of two, paddings may be necessary sometimes in the combined vector.
+of two, paddings might be necessary in the combined vector.
 These padding bits are added with zeros, as illustrated below:
 
 .. image:: /images/stream_combine_lsb.png

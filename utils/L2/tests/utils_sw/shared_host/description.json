@@ -1,114 +1,86 @@
 {
-    "name": "Xilinx Shared Host Utility Test", 
-    "description": "Xilinx Shared Host Utility Test", 
-    "flow": "vitis", 
-    "gui": true, 
+    "name": "Xilinx Shared Host Utility Test",
+    "description": "Xilinx Shared Host Utility Test",
+    "flow": "system",
+    "gui": true,
     "platform_allowlist": [
-        "u280", 
-        "u200", 
-        "u250", 
-        "u50", 
-        "aws-vu9p-f1", 
-        "vck190"
-    ], 
+        "u250",
+        "vck190",
+        "aws-vu9p-f1"
+    ],
     "platform_blocklist": [
         "other"
-    ], 
-    "platform_properties": {
-        "u280": {
-            "host": {
-                "compiler": {
-                    "symbols": []
-                }
-            }, 
-            "v++": {
-                "compiler": {
-                    "clflags": []
-                }
-            }
-        }, 
-        "u50": {
-            "host": {
-                "compiler": {
-                    "symbols": []
-                }
-            }, 
-            "v++": {
-                "compiler": {
-                    "clflags": []
-                }
-            }
-        }
-    }, 
+    ],
+    "platform_properties": {},
     "launch": [
         {
-            "name": "generic launch for sw_emu flows", 
-            "target": "sw_emu", 
+            "name": "generic launch for sw_emu flows",
+            "target": "sw_emu",
             "cmd_args": ""
         }
-    ], 
+    ],
     "host": {
-        "host_exe": "test.exe", 
+        "host_exe": "test.exe",
         "compiler": {
             "sources": [
-                "test.cpp", 
+                "test.cpp",
                 "xcl2/xcl2.cpp"
-            ], 
+            ],
             "includepaths": [
-                "LIB_DIR/L1/include", 
+                "LIB_DIR/L1/include",
                 "xcl2"
-            ], 
+            ],
             "options": "-g -O3 -D XDEVICE=$(XDEVICE)"
         }
-    }, 
+    },
     "v++": {
         "compiler": {
             "includepaths": [
                 "LIB_DIR/L1/include"
-            ], 
+            ],
             "clflags": [
                 "-g"
-            ], 
+            ],
             "hls_jobs": 16
-        }, 
+        },
         "linker": {
-            "synth_jobs": 16, 
+            "synth_jobs": 16,
             "impl_jobs": 16
         }
-    }, 
+    },
     "containers": [
         {
-            "name": "vadd", 
+            "name": "vadd",
             "accelerators": [
                 {
-                    "name": "vadd", 
-                    "location": "vadd.cpp", 
-                    "frequency": 300, 
+                    "name": "vadd",
+                    "location": "vadd.cpp",
+                    "frequency": 300,
                     "num_compute_units": 1
                 }
-            ], 
+            ],
             "frequency": 300
         }
-    ], 
+    ],
     "testinfo": {
-        "disable": false, 
+        "disable": false,
         "jobs": [
             {
-                "index": 0, 
-                "dependency": [], 
-                "env": "", 
-                "cmd": "", 
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
                 "max_memory_MB": {
                     "vitis_sw_emu": 10240
-                }, 
+                },
                 "max_time_min": {
                     "vitis_sw_emu": 60
                 }
             }
-        ], 
+        ],
         "targets": [
             "vitis_sw_emu"
-        ], 
+        ],
         "category": "canary"
     }
 }
