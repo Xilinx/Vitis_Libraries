@@ -2,7 +2,7 @@
     "gui": false, 
     "name": "Single Source Sparse Matrix Cosine Similarity L3 Test", 
     "description": "An example for computing cosine similarity of a single vector in sparse graph", 
-    "flow": "vitis", 
+    "flow": "system", 
     "xrm": true,
     "platform_allowlist": [
         "u50"

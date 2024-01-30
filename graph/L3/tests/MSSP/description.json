@@ -2,7 +2,7 @@
     "gui": false, 
     "name": "Multi Source Shortest Path L3 Test", 
     "description": "An example for Single Source Shortest Path is based on Bellman-Ford algorithm equiped with a First-In-First-Out queue, without predecessor output", 
-    "flow": "vitis",
+    "flow": "system",
     "xrm": true, 
     "platform_allowlist": [
         "u50"

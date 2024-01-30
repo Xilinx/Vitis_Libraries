@@ -2,7 +2,7 @@
     "gui": false, 
     "name": "Convert CSC CSR L3 Test", 
     "description": "", 
-    "flow": "vitis",
+    "flow": "system",
     "xrm": true, 
     "platform_allowlist": [
         "u50"

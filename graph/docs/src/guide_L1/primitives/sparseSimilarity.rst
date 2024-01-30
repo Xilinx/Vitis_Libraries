@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 
 *************************************************
@@ -21,34 +11,34 @@ Internal Design of Sparse Similarity
 Interface
 ===========
 The input should be a directed/undirected graph in compressed sparse row (CSR) format.
-The result will return a vertex list with each vertex corresponding similarity value.
-The config contains several boolean value to control the similarityType (0:Jaccard Similarity, 1:Cosine Similarity), dataType(0:uint, 1:float).
+The result returns a vertex list with each vertex corresponding similarity value.
+The config contains several boolean values to control the similarityType (0:Jaccard Similarity, 1:Cosine Similarity), dataType(0:uint, 1:float).
 
 .. image:: /images/sparse_similarity_api.PNG
    :alt: API of Sparse Similarity
    :width: 65%
    :align: center
 
-Implemention
-============
+Implementation
+==============
 
-The detail algorithm implemention is illustrated as below:
+The detail algorithm implementation is illustrated below:
 
 .. image:: /images/sparse_similarity_internal.PNG
    :alt: Diagram of Sparse Similarity
    :width: 70%
    :align: center
 
-As it is shown in the aboved pictures, every PE directly have 3 AXI port for the input of offset, indice and weight (CSR format data) and the data should be partitioned in host side. 
+As it is shown in the preceding figures, every PE has directly three AXI ports for the input of offset, indice, and weight (CSR format data) and the data should be partitioned in the host side. 
 The internal function in the PE perform searching and matching index to find out the similarity between reference vertex and the others.
-The overall diagram of sparse similarity kernel have a insert sort module which return the top K number of similarity values.
-The maximum number of K is a template number which can be changed by rebuilding the xclbin. The default value of top K is 32.
+The overall diagram of sparse similarity kernel has a insert sort module which return the top K number of similarity values.
+The maximum number of K is a template number, which can be changed by rebuilding the xclbin. The default value of top K is 32.
 
 Profiling and Benchmarks
 ========================
 
-The Sparse Similarity Kernel is validated on Alveo U50 board at 295MHz frequency. 
-The hardware resource utilization and benchmark results are shown in the two table below.
+The Sparse Similarity Kernel is validated on an AMD Alveo |trade| U50 board at 295MHz frequency. 
+The hardware resource utilization and benchmark results are shown in the following tables.
 
 .. table:: Table 1 Hardware resources
     :align: center
@@ -109,3 +99,8 @@ The hardware resource utilization and benchmark results are shown in the two tab
 
 .. toctree::
     :maxdepth: 1
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

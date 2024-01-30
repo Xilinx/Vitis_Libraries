@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _l2_manual_louvainfast:
 
@@ -26,7 +16,7 @@ Executable Usage
 
 * **Work Directory(Step 1)**
 
-The steps for library download and environment setup can be found in :ref:`l2_vitis_graph`. For getting the design,
+The steps for library download and environment setup can be found in :ref:`l2_vitis_graph`. To get the design,
 
 .. code-block:: bash
 
@@ -34,15 +24,14 @@ The steps for library download and environment setup can be found in :ref:`l2_vi
 
 * **Build kernel(Step 2)**
 
-Run the following make command to build your XCLBIN and host binary targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
-
+Run the following make command to build your XCLBIN and host binary targeting a specific device. This process takes long.
 .. code-block:: bash
 
    make run TARGET=hw PLATFORM=xilinx_u55c_gen3x16_xdma_2_202110_1
 
 * **Run kernel(Step 3)**
 
-To get the benchmark results, please run the following command.
+To get the benchmark results, run the following command.
 
 .. code-block:: bash
 
@@ -63,7 +52,7 @@ Louvain fast Input Arguments:
          -d:           The threshold value with distance-1 vertex coloring (default value is 0.0001).
          -t:           The threshold value without coloring (default value is 0.000001).
 
-Note: Default arguments are set in Makefile, you can use other :ref:`datasets` listed in the table.
+.. Note:: Default arguments are set in Makefile, you can use other :ref:`datasets` listed in the table.
 
 * **Example output(Step 4)** 
 
@@ -107,7 +96,7 @@ Profiling
 =========
 
 The hardware resource utilizations are listed in the following table.
-Different tool versions may result slightly different resource.
+Different tool versions might result in a slightly different resource.
 
 .. table:: Table 1 Hardware resources for Louvain fast in u55c now, higher frequency and lower resources.
     :align: center
@@ -147,7 +136,12 @@ Table 3 Louvain FPGA acceleration benchmark by L2
    2. TigerGraph running on platform with Intel(R) Xeon(R) CPU E5-2640 v3 @2.60GHz, cache(20480 KB), cores(8).
    3. Parallel Louvain running on Intel(R) Xeon(R) CPU E5-2690 v4 @ 2.60GHz, cache(35840 KB), cores(14).
    4. time unit: second.
-   5. FPGA platorm is Alveo u50 for Prune kernel, Alveo u55c for 2cu opt kernel
+   5. FPGA platform is an AMD Alveo |trade| u50 for Prune kernel, Alveo u55c for 2cu opt kernel
 
 .. toctree::
     :maxdepth: 1
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

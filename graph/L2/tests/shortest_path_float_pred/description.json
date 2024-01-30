@@ -2,7 +2,7 @@
     "gui": true,
     "name": "jks.L2.shortestpathfloatpred", 
     "description": "An example for Single Source Shortest Path is based on Bellman-Ford algorithm equiped with a First-In-First-Out queue, with predecessor output", 
-    "flow": "vitis", 
+    "flow": "system", 
     "platform_allowlist": [
         "u50"
     ], 

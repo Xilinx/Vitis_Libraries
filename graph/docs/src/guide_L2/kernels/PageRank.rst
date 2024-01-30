@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 
 *************************************************
@@ -21,8 +11,7 @@ Internal Design of PageRank
 
 Overview
 ========
-PageRank (PR) is an algorithm used by Google Search to rank web pages in their search engine results. PageRank is a way of measuring the importance of website pages. PageRank works by counting the number and quality of links to a page to determine a rough estimate of how important the website is. The underlying assumption is that more important websites are likely to receive more links from other websites. Currently, PageRank is not the only algorithm used by Google to order search results, but it is the first algorithm that was used by the companies, and it is the best known.
-
+PageRank (PR) is an algorithm used by Google Search to rank web pages in their search engine results. PageRank is a way of measuring the importance of website pages. PageRank works by counting the number and quality of links to a page to determine a rough estimate of how important the website is. The underlying assumption is that more important websites are likely to receive more links from other websites. Currently, PageRank is not the only algorithm used by Google to order search results, but it is the first and best known algorithm that the companies used.
 Algorithm
 ============
 PageRank algorithm implementation:
@@ -52,7 +41,7 @@ The algorithm's pseudocode is as follows
     return PR_new
 
 
-Implemention
+Implementation
 ============
 The input matrix should ensure that the following conditions hold:
 
@@ -63,12 +52,12 @@ The input matrix should ensure that the following conditions hold:
 
 Note that this is not the "normalized" PageRank:
 
-1. The results are the same as some third-party graph databases, ex. Tigergraph
-2. The results are the same as some third-party graph databases after normalized of order 1, ex. Spark
+1. The results are the same as some third-party graph databases. For example, Tigergraph.
+2. The results are the same as some third-party graph databases after normalized of order 1. For example, Spark.
 3. In the current version, the weighted PageRank algorithm is implemented by default. 
-4. For the input unweighted graph, the user still needs to initialize the weight buffer manually to make the kernel work normally, as shown in the ./tests/host codes.
+4. For the input unweighted graph, you still need to initialize the weight buffer manually to make the kernel work normally, as shown in the ./tests/host codes.
 
-The algorithm implemention is shown as the figure below:
+The algorithm implementation is shown in the following figure:
 
 Figure 1 : PageRank calculate degree architecture on FPGA
 
@@ -105,7 +94,7 @@ Figure 4 : PageRank calConvergence architecture on FPGA
       :width: 80%
       :align: center
 
-As we can see from the figure:
+As seen from the figure:
 
 1. Module `calculate degree`: first get the vertex node's outdegree and keep them in one DDR buffer.
 2. Module `initiation`: initiate PR DDR buffers and constant value buffer.
@@ -116,7 +105,7 @@ Profiling
 =========
 
 The hardware resource utilizations are listed in the following table.
-Different tool versions may result slightly different resource.
+Different tool versions might result in a slightly different resource.
 
 Table 1 : Hardware resources for PageRank with small cache
 
@@ -141,7 +130,7 @@ Table 2 : Hardware resources for PageRank with cache
     | kernel_pagerank_0 |   216    |    224   |    42    |  124054  |  95950  |       225       |
     +-------------------+----------+----------+----------+----------+---------+-----------------+
 
-With the increase of cache depth, the acceleration ratio increases obviously, but due to the use of a lot of URAM, the frequency will drop. So the adviced cache depth is 32K for 1SLR of Alveo U50.
+With the increase of cache depth, the acceleration ratio increases, but due to the use of a lot of URAM, the frequency drops. So the suggested cache depth is 32K for 1SLR of an AMD Alveo |trade| U50.
 
 
 Table 3 : Comparison between CPU SPARK and FPGA VITIS_GRAPH
@@ -174,7 +163,7 @@ Table 3 : Comparison between CPU SPARK and FPGA VITIS_GRAPH
     +------------------+----------+----------+-----------+-----------+------------+----------+----------+------------+----------+----------+------------+----------+----------+------------+----------+----------+
 
 .. note::
-    | 1. Spark time is the execution time of funciton "pageRank.runUntilConvergence".
+    | 1. Spark time is the execution time of the function "pageRank.runUntilConvergence.""
     | 2. Spark running on platform with Intel(R) Xeon(R) CPU E5-2690 v4 @2.600GHz, 56 Threads (2 Sockets, 14 Core(s) per socket, 2 Thread(s) per core).
     | 3. time unit: second.
     | 4. "-" Indicates that the result could not be obtained due to insufficient memory.
@@ -183,3 +172,7 @@ Table 3 : Comparison between CPU SPARK and FPGA VITIS_GRAPH
 .. toctree::
    :maxdepth: 1
 
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

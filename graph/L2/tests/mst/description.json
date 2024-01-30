@@ -2,7 +2,7 @@
     "gui": true,
     "name": "jks.L2.mst", 
     "description": "", 
-    "flow": "vitis", 
+    "flow": "system", 
     "platform_allowlist": [
         "u50"
     ], 

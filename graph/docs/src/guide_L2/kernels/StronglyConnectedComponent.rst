@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 
 *************************************************
@@ -24,12 +14,12 @@ Overview
 
 In the mathematical theory of directed graphs, a graph is said to be strongly connected if every vertex is reachable from every other vertex.
 The strongly connected components of an arbitrary directed graph form a partition into subgraphs that are themselves strongly connected. (from wikipedia)
-The API will compute the strongly connected component (SCC) of each vertex and return a graph with the vertex value containing the lowest vertex id in the SCC containing that vertex.
+The API computes the strongly connected component (SCC) of each vertex and return a graph with the vertex value containing the lowest vertex id in the SCC containing that vertex.
 
 Algorithm
 =========
 
-The color-based algorithm of strongly connected components is given as following:
+The color-based algorithm of strongly connected components is given as follows:
 
 .. code::
 
@@ -88,7 +78,7 @@ The color-based algorithm of strongly connected components is given as following
             end if
         end while
         
-Here, for color-based alogrithm, each backward label process must be started from the vertex whose color is equal to its vertex ID.
+Here, for color-based algorithm, each backward label process must be started from the vertex whose color is equal to its vertex ID.
 In other words, the starting vertex must own the lowest vertex ID in the following SCC. As a result, we use one single FW-BFS process
 to find the starting vertex before each BW-label. And another FW-BFS is required to re-color using the true starting vertex if the first
 FW-BFS is started from one vertex with greater vertex ID.
@@ -98,10 +88,10 @@ Interface
 The input should be a directed graph in compressed sparse row (CSR) format.
 The result will return a vertex list with each vertex value containing the lowest vertex id in the SCC.
 
-Implemention
+Implementation
 ===========
 
-The detail algorithm implemention is shown as the figure below:
+The detail algorithm implementation is shown in the following figure:
 
 .. image:: /images/SCC_kernel.png
    :alt: Figure 1 Top Diagram of SCC
@@ -119,12 +109,12 @@ The detail algorithm implemention is shown as the figure below:
    :align: center
 
 In the SCC kernel design, FW-color and BW-Label can be dataflow by sharing some common buffers with multiple independent AXI masters.
-As a result, these two processes will be run at the same time to obtain a better performance.
+As a result, these two processes are run at the same time to obtain a better performance.
 
 Profiling and Benchmarks
 ========================
 
-The kernel is built by Vivado tools and benchmard in U250 FPGA card at 275MHz. The hardware resource utilization and benchmark performance are listed in the table below.
+The kernel is built by AMD Vivado |trade| tools and benchmark in U250 FPGA card at 275MHz. The hardware resource utilization and benchmark performance are listed in the following table.
 
 .. table:: Table 1 Hardware resources
     :align: center
@@ -158,9 +148,14 @@ The kernel is built by Vivado tools and benchmard in U250 FPGA card at 275MHz. T
     |      GEOMEAN     |         |          |         |           |   23043   |   173431   |   7.53X  |   140397   |   6.09X  |   117178   |   5.09X  |   102476   |   4.45X  |
     +------------------+---------+----------+---------+-----------+-----------+------------+----------+------------+----------+------------+----------+------------+----------+
 
-.. note::
+.. Note::
     | 1. Spark running on platform with Intel(R) Xeon(R) CPU E5-2690 v4 @2.600GHz, 56 Threads (2 Sockets, 14 Core(s) per socket, 2 Thread(s) per core)
     | 2. Time unit: ms.
 
  .. toctree::
      :maxdepth: 1
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 
 *************************************************
@@ -21,14 +11,14 @@ Internal Design of Connected Component
 Overview
 ========
 
-In graph theory, a component, sometimes called a connected component, of an undirected graph is a subgraph in which any two vertices are connected to each other by paths, and which is connected to no additional vertices in the supergraph (from wikipedia).
-The API will compute the (weakly) connected component (CC) of each vertex and return a graph with the vertex value containing the lowest vertex id in the CC containing that vertex.
+In graph theory, a component, sometimes called a connected component, of an undirected graph is a subgraph in which any two vertices are connected to each other by paths. It is connected to no additional vertices in the supergraph (from wikipedia).
+The API computes the (weakly) connected component (CC) of each vertex and returns a graph with the vertex value containing the lowest vertex id in the CC containing that vertex.
 
 Algorithm
 =========
 
-The implemented Connected Component is based on Breadth-first Search graph traversal equiped with one First-In-First-Out queue.
-The pseduo-code is shown as below:
+The implemented Connected Component is based on Breadth-first Search graph traversal equipped with one First-In-First-Out queue.
+The pseudo-code is shown below:
 
 .. code::
 
@@ -57,17 +47,17 @@ The pseduo-code is shown as below:
 
     return result
 
-Here, connected component will get all indegree and outdegree of each u when the input graph is directed. As a result, one addition csr2csc operation is required at the begining.
+Here, the connected component gets all indegree and outdegree of each u when the input graph is directed. As a result, one addition csr2csc operation is required at the beginning.
 
 Interface
 ===========
 The input should be a directed/undirected graph in compressed sparse row (CSR) format.
-The result will return a vertex list with each vertex value containing the lowest vertex id in the CC.
+The result returns a vertex list with each vertex value containing the lowest vertex id in the CC.
 
-Implemention
+Implementation
 ===========
 
-The detail algorithm implemention is illustrated as below:
+The detail algorithm implementation is illustrated below:
 
 .. image:: /images/CC_kernel.png
    :alt: Diagram of Connected Component
@@ -75,14 +65,14 @@ The detail algorithm implemention is illustrated as below:
    :align: center
 
 The overall diagram of this kernel is mostly same as BFS kernel except for extra input CSC graph and one mergeSort module.
-The mergeSort will merge and output one sorted stream for two input indegree and outdegree sorted stream. And the duplicate vertex 
-in the single sorted output stream will be removed before entering the readRes module.
+The mergeSort merges and outputs one sorted stream for two input indegree and outdegree sorted stream. And the duplicate vertex 
+in the single sorted output stream is removed before entering the readRes module.
 
 Profiling and Benchmarks
 ========================
 
-The connected component is validated on Alveo U250 board at 280MHz frequency. 
-The hardware resource utilization and benchmark results are shown in the two table below.
+The connected component is validated on an AMD Alveo |trade| U250 board at 280MHz frequency. 
+The hardware resource utilization and benchmark results are shown in the following tables.
 
 .. table:: Table 1 Hardware resources
     :align: center
@@ -129,3 +119,8 @@ The hardware resource utilization and benchmark results are shown in the two tab
 
 .. toctree::
     :maxdepth: 1
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 
 .. Project documentation master file, created by
@@ -28,7 +18,7 @@ Benchmark
 Datasets
 -----------
 
-The data is coming from https://sparse.tamu.edu/, our commonly used datasets are listed in table 1. 
+The data is coming from https://sparse.tamu.edu/, our commonly used datasets are listed in the following table. 
 
 .. table:: Table 1 Datasets for benchmark
     :align: center
@@ -58,9 +48,9 @@ The data is coming from https://sparse.tamu.edu/, our commonly used datasets are
 Performance
 -----------
 
-For representing the resource utilization in each benchmark, we separate the overall utilization into 2 parts, where P stands for the resource usage in
+To represent the resource utilization in each benchmark, separate the overall utilization into two parts, where P stands for the resource usage in
 platform, that is those instantiated in static region of the FPGA card, as well as K represents those used in kernels (dynamic region). The input is
-directed or undirected graph in compressed sparse row (CSR) format, and the target device is set to Alveo U50/U250.
+directed or undirected graph in compressed sparse row (CSR) format, and the target device is set to AMD Alveo |trade| U50/U250.
 
 .. table:: Table 2 Performance for processing sparse graph on FPGA
     :align: center
@@ -120,7 +110,7 @@ These are details for benchmark result and usage steps.
 Test Overview
 --------------
 
-Here are benchmarks of the Vitis Graph Library using the Vitis environment and comparing with Spark(v3.0.0) and Tigergraph(v2.4.0). 
+Here are benchmarks of the an AMD Vitis |trade| Graph Library using the Vitis environment and comparing with Spark(v3.0.0) and Tigergraph(v2.4.0). 
 
 
 Spark
@@ -149,10 +139,15 @@ These graph benchmarks can be downloaded from `vitis libraries <https://github.c
 
 * **Setup environment**
 
-Specifying the corresponding Vitis, XRT, and path to the platform repository by running following commands.
+Specifying the corresponding Vitis, XRT, and path to the platform repository by running the following commands.
 
 .. code-block:: bash
 
    source <intstall_path>/installs/lin64/Vitis/2022.1/settings64.sh
    source /opt/xilinx/xrt/setup.sh
    export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
+
+   .. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

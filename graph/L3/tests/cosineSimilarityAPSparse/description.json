@@ -2,7 +2,7 @@
     "gui": false, 
     "name": "All Pair Sparse Matrix Cosine Similarity L3 Test", 
     "description": "An example for computing cosine similarity of all pair vectors in sparse graph", 
-    "flow": "vitis", 
+    "flow": "system", 
     "xrm": true,
     "platform_allowlist": [
         "u50"

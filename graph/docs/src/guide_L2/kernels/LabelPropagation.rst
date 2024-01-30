@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 
 *************************************************
@@ -21,34 +11,34 @@ Internal Design of Label Propagation
 
 Overview
 ========
-Within complex networks, real networks tend to have community structure. Label propagation is an algorithm for finding communities. In comparison with other algorithms label propagation has advantages in its running time and amount of a priori information needed about the network structure (no parameter is required to be known beforehand). The disadvantage is that it produces no unique solution, but an aggregate of many solutions.(from wikipedia)
+Within complex networks, real networks tend to have community structure. Label propagation is an algorithm for finding communities. In comparison with other algorithms, label propagation has advantages in its running time and amount of a priori information needed about the network structure (no parameter is required to be known beforehand). The disadvantage is that it produces no unique solution, but an aggregate of many solutions.(from wikipedia)
 
 Algorithm 
 ==========
 
 The algorithm of Label Propagation (synchronous update) is as follows:
 
-1. Initialize the labels at all nodes in the network. For a given node :math:`x`, :math:`C_{x}\left ( 0 \right )=x`.
+1. Initialize the labels at all nodes in the network. For a given node, :math:`x`, :math:`C_{x}\left ( 0 \right )=x`.
 2. Set :math:`t = 1`.
 3. Arrange the nodes in the network in a random order and set it to :math:`X`.
 4. For each :math:`x\in X` chosen in that specific order, let :math:`C_{x}\left ( t \right )=f\left ( C_{x_{1}}\left ( t-1 \right )+\cdots  +C_{x_{k}}\left ( t-1 \right )\right )`. :math:`f` here returns the label occurring with the highest frequency among neighbors and ties are broken uniformly randomly.
-5. If every node has a label that the maximum number of their neighbors have, then stop the algorithm. Else, set :math:`t = t + 1` and go to (3).
+5. If every node has a label that the maximum number of their neighbors have, stop the algorithm. Else, set :math:`t = t + 1` and go to (3).
 
 For more details, please see https://arxiv.org/abs/0709.2938
 
-Implemention
+Implementation
 ============
 
-The algorithm implemention is shown as the figure below:
+The algorithm implementation is shown in the following figure:
 
 .. image:: /images/LabelPropagation.png
    :alt: Figure 1 LabelPropagation architecture on FPGA
    :width: 80%
    :align: center
 
-As we can see from the figure:
+As seen from the figure:
 
-1. Module `Convert_CSR_CSC`: convert compressed sparse row (CSR) format graph to compressed sparse column (CSC) format graph, When the `iterNum` is small, the module accounts for a large proportion of the total execution time of the `LP_Kernel`. the execution time of the module is reduced by increasing the cache depth.
+1. Module `Convert_CSR_CSC`: convert compressed sparse row (CSR) format graph to compressed sparse column (CSC) format graph, When the `iterNum` is small, the module accounts for a large proportion of the total execution time of the `LP_Kernel`. The execution time of the module is reduced by increasing the cache depth.
 2. Module `getLabel` and its previous module: get all labels of all neighbors of vertex `u`.
 3. Module `HashMaxFreq` and `labelSelect`: find the highest frequency label (Select a label at random if there are multiple highest frequency labels), then output to DDR.
 
@@ -72,7 +62,7 @@ The hardware resource utilizations are listed in the following table.
 Benchmark
 =========
 
-The performance is shown in the table below.
+The performance is shown in the following table.
 
 .. table:: Table 2 Comparison between CPU and FPGA (iteration=30) 
     :align: center

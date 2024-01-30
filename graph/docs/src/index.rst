@@ -1,28 +1,12 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
 
-
-.. Project documentation master file, created by
-   sphinx-quickstart on Tue Oct 30 18:39:21 2018.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 Vitis Graph Library
 ==========================
 
-Vitis Graph Library is an open-sourced Vitis library written in C++ for accelerating graph applications in a variety of use cases. It now covers a level of acceleration: the pre-defined kernel level (L2), and will evolve to offer the module level (L1) and the software API level (L3).
+An AMD Vitis |trade| Graph Library is an open-sourced Vitis library written in C++ for accelerating graph applications in a variety of use cases. It now covers a level of acceleration: the pre-defined kernel level (L2), and evolves to offer the module level (L1) and the software API level (L3).
 
 Currently, this includes the following algorithm implementation:
 
@@ -32,7 +16,7 @@ Currently, this includes the following algorithm implementation:
  - Connectivity analysis: Weakly Connected Components and Strongly Connected Components.
  - Community Detection: Louvain Modularity (From 22.1, Louvain API can support large-scale graphs), Label Propagation and Triangle Count.
  - Search: Breadth First Search and 2-Hop Search.
- - Graph Format: Renumber, Calculate Degree and Format Convertion between CSR and CSC.
+ - Graph Format: Renumber, Calculate Degree and Format Conversion between CSR and CSC.
 
 
 Shell Environment
@@ -47,7 +31,7 @@ Setup the build environment using the Vitis and XRT scripts.
         source /opt/xilinx/xrt/setup.sh
         export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 
-Setting ``PLATFORM_REPO_PATHS`` to the installation folder of platform files can enable makefiles
+Setting ``PLATFORM_REPO_PATHS`` to the installation folder of platform files can enable makefiles.
 in this library to use ``PLATFORM`` variable as a pattern.
 Otherwise, full path to .xpfm file needs to be provided via ``PLATFORM`` variable.
 
@@ -110,3 +94,8 @@ Indices and tables
 
 * :ref:`genindex`
 * :ref:`search`
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

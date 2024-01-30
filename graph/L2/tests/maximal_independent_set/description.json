@@ -2,7 +2,7 @@
     "gui": false,
     "name": "Maximal Independent Set Test",
     "description": "mis graph algorithm",
-    "flow": "vitis",
+    "flow": "system",
     "platform_allowlist": [
         "u50"
     ],

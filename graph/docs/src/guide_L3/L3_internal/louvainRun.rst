@@ -1,32 +1,22 @@
 .. 
-   Copyright 2021 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2021–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 ********************************
 Louvain Modularity Launch Demo
 ********************************
 
-To load and launch louvain Modularity for multi compute units on multi boards, we provided louvainRun API with two kernel modes which command is -kernel_mode. 
+To load and launch louvain Modularity for multi compute units on multi boards, louvainRun API is provided with two kernel modes whose command is -kernel_mode. 
 
 * LOUVAINMOD_PRUNING_KERNEL, -kernel_mode 1, launch the pre-build L2 u50 1 cu kernel on multi boards.
-* LOUVAINMOD_2CU_U55C_KERNEL, -kernel_mode 2, launch the pre-build L2 u55c 2 cu kernel on multi boards parallelly. 
+* LOUVAINMOD_2CU_U55C_KERNEL, -kernel_mode 2, launch the pre-build L2 u55c 2 cu kernel on multi boards simultaneously. 
 
 Launch u50 Flow
 #####################
 
 Ensure run the script L3/tests/pre_launch.sh to set the path of libgraphL3.so
-Ensure export the right $(PROJECTPATH) for the L2 pre-build U50 xclbin path, this xclbin may need 777 permission by xrm.
+Ensure export the right $(PROJECTPATH) for the L2 pre-build U50 xclbin path, this xclbin might need 777 permission by xrm.
 
 .. code-block:: sh
 
@@ -52,8 +42,8 @@ Louvain fast Input Arguments:
 Launch u55c Flow
 #####################
 
-Ensure run the script L3/tests/pre_launch.sh to set the path of libgraphL3.so
-Ensure export the right $(PROJECTPATH) for the L2 pre-build U55C xclbin path, this xclbin may need 777 permission by xrm.
+Ensure to run the script L3/tests/pre_launch.sh to set the path of libgraphL3.so
+Ensure to export the right $(PROJECTPATH) for the L2 pre-build U55C xclbin path, this xclbin might need 777 permission by xrm.
 
 .. code-block:: sh
 

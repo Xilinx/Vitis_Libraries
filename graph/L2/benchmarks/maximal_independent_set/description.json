@@ -2,7 +2,7 @@
     "gui": false,
     "name": "Maximal Independent Set Benchmark",
     "description": "mis graph algorithm",
-    "flow": "vitis",
+    "flow": "system",
     "platform_allowlist": [
         "u50"
     ],

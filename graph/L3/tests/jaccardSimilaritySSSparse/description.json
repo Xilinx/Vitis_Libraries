@@ -2,7 +2,7 @@
     "gui": false, 
     "name": "Single Source Sparse Matrix Jaccard Similarity L3 Test", 
     "description": "An example for computing jaccard similarity of a single vector in an sparse graph", 
-    "flow": "vitis", 
+    "flow": "system", 
     "xrm": true,
     "platform_allowlist": [
         "u50"

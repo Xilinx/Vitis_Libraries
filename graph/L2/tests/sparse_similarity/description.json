@@ -2,7 +2,7 @@
     "gui": true,
     "name": "Xilinx Sparse Similarity Test", 
     "description": "An example for Sparse graph's Similarity", 
-    "flow": "vitis", 
+    "flow": "system", 
     "platform_allowlist": [
         "u50"
     ], 

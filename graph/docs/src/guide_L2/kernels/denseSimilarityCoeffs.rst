@@ -1,17 +1,7 @@
 .. 
-   Copyright 2021 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2021–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 
 *****************************************************
@@ -21,33 +11,33 @@ Internal Design of Dense Similarity with Coefficient
 Interface
 ===========
 The input should be a set of integer vertex list with known size.
-The result will return a vertex list with each vertex corresponding similarity value.
-For optimizing the calculation of dense and integer value, the design disable neither float datatype nor sparse mode. Further more, the support for Jaccard Similarity is also removed in the kernel. So that it save lots of hardware resourse and realize a design of 2-CU instantiation to get the best performance on the platform of U55C. The design support additional coefficients for each column of weight for a better software flexibility.
+The result returns a vertex list with each vertex corresponding to a similarity value.
+To optimize the calculation of dense and integer value, the design disables neither float datatype nor sparse mode. Furthermore, the support for Jaccard Similarity is also removed in the kernel so that it saves lots of hardware resources and realizes a design of 2-CU instantiation to get the best performance on the platform of U55C. The design support additional coefficients for each column of weight for better software flexibility.
 
 .. image:: /images/dense_similarity_coefficient_formula.PNG
    :alt:  Formula of Dense Similarity with Coefficient
    :width: 65%
    :align: center
 
-Implemention
+Implementation
 ============
 
-The detail algorithm implemention is illustrated as below:
+The detailed algorithm implementation is illustrated below:
 
 .. image:: /images/dense_similarity_coefficient_internal.PNG
    :alt: Diagram of Dense Similarity
    :width: 70%
    :align: center
 
-In the calculation of dense similarity, most of internal loop size is set by the config variables, so that the reference vertex is alligned with others. The source vertex is initialized by multiplying the value of coefficient. Only integer value can be processed in the kernel, and all the calculation is using LUT arethmatics. In the integer version, the 32-bit input will be accumulated by 64-bit registers, and the output float similarity is divide result of two 64-bit integers.
-The overall diagram of dense similarity kernel have a insert sort module which return the top K number of similarity values.
-The maximum number of K is a template number which can be changed by rebuilding the xclbin. The default value of top K is 32.
+In the calculation of dense similarity, most of the internal loop size is set by the config variables, so that the reference vertex is aligned with others. The source vertex is initialized by multiplying the value of coefficient. Only integer value can be processed in the kernel, and all the calculation is using LUT arithmetics. In the integer version, the 32-bit input is accumulated by 64-bit registers, and the output float similarity is the division result of two 64-bit integers.
+The overall diagram of dense similarity kernel has a insert sort module, which returns the top K number of similarity values.
+The maximum number of K is a template number that can be changed by rebuilding the xclbin. The default value of top K is 32.
 
 Profiling and Benchmarks
 ========================
 
-The kernel is validated on Alveo U55C board at 220MHz frequency. 
-The hardware resource utilization and benchmark results are shown in the two table below.
+The kernel is validated on an AMD Alveo |trade| U55C board at 220MHz frequency. 
+The hardware resource utilization and benchmark results are shown in the following tables.
 
 .. table:: Table 1 Hardware resources
     :align: center
@@ -79,3 +69,8 @@ The hardware resource utilization and benchmark results are shown in the two tab
 
 .. toctree::
     :maxdepth: 1
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

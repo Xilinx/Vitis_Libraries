@@ -2,10 +2,8 @@
     "gui": false,
     "name": "Xilinx Strongly Connected Components Test",
     "description": "An example for the strongly connected component (SCC) of each vertex and return a graph with the vertex value containing the lowest vertex id in the SCC containing that vertex",
-    "flow": "vitis",
+    "flow": "system",
     "platform_allowlist": [
-        "u50",
-        "u200",
         "u250",
         "aws-vu9p-f1"
     ],
@@ -13,24 +11,6 @@
         "zc"
     ],
     "platform_properties": {
-        "u50": {
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u50.cfg"
-                    ]
-                }
-            }
-        },
-        "u200": {
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u200_u250.cfg"
-                    ]
-                }
-            }
-        },
         "aws-vu9p-f1": {
             "v++": {
                 "compiler": {
@@ -181,11 +161,11 @@
                 "env": "",
                 "cmd": "",
                 "max_memory_MB": {
-		    "vitis_hw_build": 49152,
-		    "vitis_hw_emu": 32768,
-		    "vitis_sw_emu": 32768,
-		    "vitis_hw_run": 32768
-		},
+                    "vitis_hw_build": 49152,
+                    "vitis_hw_emu": 32768,
+                    "vitis_sw_emu": 32768,
+                    "vitis_hw_run": 32768
+                },
                 "max_time_min": {
                     "vitis_hw_build": 470,
                     "vitis_hw_emu": 300,

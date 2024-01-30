@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 
 *************************************************
@@ -47,29 +37,29 @@ The implemented Single Source Shortest Path is based on Bellman-Ford algorithm e
 
     return distance
 
-Here, graph is a graph with a list of vertices and a list of weighted edges. source is the start vertex of the algorithm. Q is a first-in-first-out queue. And the distance is iterated during the algorithms and returned as the result.
+Here, the graph is with a list of vertices and a list of weighted edges. The source is the start vertex of the algorithm. Q is a first-in-first-out queue. And the distance is iterated during the algorithms and returned as a result.
 
 Interface
 =========
 The input should be a directed graph in compressed sparse row (CSR) format.
-The result is an array which shows the shortest distance from the source vertex to each vertex. The vertex ID can be used to index of the result array.
+The result is an array, which shows the shortest distance from the source vertex to each vertex. The vertex ID can be used to index of the result array.
 
 Implementation
 ==============
-The algorithm implemention is shown in the figure below:
+The algorithm implementation is shown in the following figure:
 
 .. image:: /images/ssspDesign.png
    :alt: SingleSourceShortestPath design
    :width: 80%
    :align: center
 
-There are 5 functional blocks as shown in the figure:
+There are five functional blocks as shown in the figure:
 
 1. QueCtrl is responsible to load the next vertex in the queue and pass it to the loadOffset.
 
 2. loadOffset load the offset value associate with current vertex from the CSR offset values and pass it to the next block.
 
-3. loadCol&Wei load the ID and weight of the next hop vertices accroding to the offset values. And pass these IDs and weights to the loadRes.
+3. loadCol&Wei load the ID and weight of the next hop vertices according to the offset values. And pass these IDs and weights to the loadRes.
 
 4. loadRes load the distance of the next hop vertices already in the result and calculate the new distance and decide whether the distance of every next hop vertex should be updated.
 

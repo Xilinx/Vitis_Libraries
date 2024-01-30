@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 
 *************************************************
@@ -20,39 +10,39 @@ Internal Design of General Similarity
 
 Interface
 ===========
-This primitive support both dense and sparse mode.
-In sparse mode, the input should be a undirected graph in compressed sparse row (CSR) format with its vertex and edge numbers.
-In desnse mode, the input should be a set of vertex list with known size.
-The result will return a vertex list with each vertex corresponding similarity value.
-The config contains several boolean value to control the graphType (0:Sparse Mode, 1:Dense Mode), similarityType (0:Jaccard Similarity, 1:Cosine Similarity), dataType (0:uint, 1:float).
+This primitive supports both dense and sparse mode.
+In sparse mode, the input should be an undirected graph in compressed sparse row (CSR) format with its vertex and edge numbers.
+In dense mode, the input should be a set of vertex list with the known size.
+The result returns a vertex list with each vertex corresponding to a similarity value.
+The config contains several boolean values to control the graphType (0:Sparse Mode, 1:Dense Mode), similarityType (0:Jaccard Similarity, 1:Cosine Similarity), dataType (0:uint, 1:float).
 
 .. image:: /images/general_similarity_api.PNG
    :alt: API of General Similarity
    :width: 65%
    :align: center
 
-Implemention
+Implementation
 ============
 
-The detail algorithm implemention is illustrated as below:
+The detail algorithm implementation is illustrated below:
 
 .. image:: /images/general_similarity_internal.PNG
    :alt: Diagram of General Similarity
    :width: 70%
    :align: center
 
-`General Similarity` contains most of modules in `Sparse Similarity` and `Dense Similarity`. It have two `DataLoader` which can process sparse and dense input by config. 
-It is shown in the aboved API picture, each PE have four AXI port to store input data. For sparse mode, each PE have 3 valid AXI input which are corresponding to offset, indice and weight, so that there is a dangling port.
-In dense mode, the partitioned weight data are stored in each AXI and it can better improve the data loading speed which can significantly impact the finnal performance.
-After `DataLoader`, the input data is transform to COO stream internally so that it can share most of calculation logic between dense and sparse mode.
-The overall diagram of general similarity kernel have a insert sort module which return the top K number of similarity values.
-The maximum number of K is a template number which can be changed by rebuilding the xclbin. The default value of top K is 32.
+`General Similarity` contains most of modules in `Sparse Similarity` and `Dense Similarity`. It has two `DataLoader`, which can process sparse and dense inputs by config. 
+It is shown in the above API picture, each PE has four AXI ports to store input data. For sparse mode, each PE has three valid AXI inputs, which are corresponding to offset, indice and weight, so that there is a dangling port.
+In dense mode, the partitioned weight data are stored in each AXI and it can improve the data loading speed, which can significantly impact the final performance.
+After `DataLoader`, the input data is transform to COO stream internally so that it can share most of the calculation logic between dense and sparse mode.
+The overall diagram of a general similarity kernel has a insert sort module, which returns the top K number of similarity values.
+The maximum number of K is a template number, which can be changed by rebuilding the xclbin. The default value of top K is 32.
 
 Profiling and Benchmarks
 ========================
 
-The General Similarity Kernel is validated on Alveo U50 board at 295MHz frequency. 
-The hardware resource utilization and benchmark results are shown in the two table below.
+The General Similarity Kernel is validated on an AMD Alveo |trade| U50 board at 295MHz frequency. 
+The hardware resource utilization and benchmark results are shown in the following tables.
 
 .. table:: Table 1 Hardware resources
     :align: center
@@ -125,3 +115,8 @@ The hardware resource utilization and benchmark results are shown in the two tab
 
 .. toctree::
     :maxdepth: 1
+
+    .. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

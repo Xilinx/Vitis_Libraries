@@ -2,7 +2,7 @@
     "gui": false, 
     "name": "PageRank L3 Test", 
     "description": "", 
-    "flow": "vitis",
+    "flow": "system",
     "xrm": true, 
     "platform_allowlist": [
         "u50"

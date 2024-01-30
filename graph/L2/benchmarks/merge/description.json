@@ -2,7 +2,7 @@
     "gui": false,
     "name": "Xilinx Merge Kernel",
     "description": "merge in graph cases",
-    "flow": "vitis",
+    "flow": "system",
     "platform_allowlist": [
         "u50"
     ],

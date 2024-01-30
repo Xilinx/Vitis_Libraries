@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _l2_manual_shortpath:   
 
@@ -26,7 +16,7 @@ Executable Usage
 
 * **Work Directory(Step 1)**
 
-The steps for library download and environment setup can be found in :ref:`l2_vitis_graph`. For getting the design,
+The steps for library download and environment setup can be found in :ref:`l2_vitis_graph`. To get the design,
 
 .. code-block:: bash
 
@@ -34,7 +24,7 @@ The steps for library download and environment setup can be found in :ref:`l2_vi
 
 * **Build kernel(Step 2)**
 
-Run the following make command to build your XCLBIN and host binary targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
+Run the following make command to build your XCLBIN and host binary targeting a specific device. This process takes long.
 
 .. code-block:: bash
 
@@ -42,7 +32,7 @@ Run the following make command to build your XCLBIN and host binary targeting a 
 
 * **Run kernel(Step 3)**
 
-To get the benchmark results, please run the following command.
+To get the benchmark results, run the following command.
 
 .. code-block:: bash
 
@@ -58,7 +48,7 @@ Single Source Shortest Path Input Arguments:
           -c           Indices File Name
           -g           Golden File Name
 
-Note: Default arguments are set in Makefile, you can use other :ref:`datasets` listed in the table.  
+.. Note:: Default arguments are set in Makefile, you can use other :ref:`datasets` listed in the table.  
 
 * **Example output(Step 4)**
 

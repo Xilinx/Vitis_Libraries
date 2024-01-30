@@ -2,10 +2,8 @@
     "gui": false,
     "name": "Xilinx Connected Component Test",
     "description": "In graph theory, a component, sometimes called a connected component, of an undirected graph is a subgraph in which any two vertices are connected to each other by paths, and which is connected to no additional vertices in the supergraph (from wikipedia)",
-    "flow": "vitis",
+    "flow": "system",
     "platform_allowlist": [
-        "u50",
-        "u200",
         "u250",
         "aws-vu9p-f1"
     ],
@@ -13,25 +11,7 @@
         "zc"
     ],
     "platform_properties": {
-        "u50": {
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u50.cfg"
-                    ]
-                }
-            }
-        },
         "aws-vu9p-f1": {
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u200_u250.cfg"
-                    ]
-                }
-            }
-        },
-        "u200": {
             "v++": {
                 "compiler": {
                     "clflags": [
@@ -109,11 +89,11 @@
                 "env": "",
                 "cmd": "",
                 "max_memory_MB": {
-		    "vitis_hw_build": 49152,
-		    "vitis_hw_emu": 32768,
-		    "vitis_sw_emu": 32768,
-		    "vitis_hw_run": 32768
-		},
+                    "vitis_hw_build": 49152,
+                    "vitis_hw_emu": 32768,
+                    "vitis_sw_emu": 32768,
+                    "vitis_hw_run": 32768
+                },
                 "max_time_min": {
                     "vitis_hw_build": 470,
                     "vitis_hw_emu": 300,

@@ -2,7 +2,7 @@
     "gui": true, 
     "name": "Xilinx Page Rank Test", 
     "description": "An example for pagerank with only 1 compute unit", 
-    "flow": "vitis", 
+    "flow": "system", 
     "platform_allowlist": [
         "u50"
     ], 

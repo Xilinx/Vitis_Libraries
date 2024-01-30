@@ -2,7 +2,7 @@
     "gui": false, 
     "name": "Single Source Sparse Matrix K-Nearest Neighbors L3 Test", 
     "description": "An example for computing K-Nearest Neighbors of a single vector in a sparse graph", 
-    "flow": "vitis", 
+    "flow": "system", 
     "xrm": true,
     "platform_allowlist": [
         "u50"

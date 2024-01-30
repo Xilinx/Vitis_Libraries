@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019-2020 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: Vitis, Database, Vitis Database Library, Alveo
@@ -31,8 +21,8 @@ Get and Run the Vitis Graph Library
 Get the Dependencies
 ------------------------------------
 
-| `Vitis <https://www.xilinx.com/products/design-tools/vitis/vitis-platform.html>`_, Instructions to install Vitis can be found `here <https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installation>`_.
-| `Alveo U50 packages <https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/alveo/u50.html>`_, Instructions to deploy Alveo U50 can be found `here <https://www.xilinx.com/support/documentation/boards_and_kits/accelerator-cards/1_8/ug1370-u50-installation.pdf>`_.
+| `Vitis <https://www.xilinx.com/products/design-tools/vitis/vitis-platform.html>`_, Instructions to install AMD Vitis |trade| can be found `here <https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Installation>`_.
+| `Alveo U50 packages <https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/alveo/u50.html>`_, Instructions to deploy AMD Alveo |trade| U50 can be found `here <https://www.xilinx.com/support/documentation/boards_and_kits/accelerator-cards/1_8/ug1370-u50-installation.pdf>`_.
 | `XRM <https://github.com/Xilinx/XRM>`_ (Optional, only for L3 use cases), Instructions to install XRM can be found `here <https://xilinx.github.io/XRM/Build.html>`_.
 
 Setup Environment
@@ -48,8 +38,8 @@ Setup Environment
    export PLATFORM=xilinx_u50_gen3x16_xdma_5_202210_1
    export TARGET=sw_emu
 
-Note: The TARGET environment variable can be set as sw_emu, hw_emu and hw according to which Vitis target is expected to run.
-sw_emu is for C level emulations. hw_emu is for RTL level emulations. hw is for real on-board test. For more information about the Vitis Target please have a look at `here <https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Build-Targets?tocId=8ijg9En3MQ_7CJBZrUFENw>`_.
+.. Note:: The TARGET environment variable can be set as sw_emu, hw_emu and hw according to which Vitis target is expected to run.
+sw_emu is for C level emulations. hw_emu is for RTL level emulations. hw is for real on-board test. For more information about the Vitis Target, have a look at `here <https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Build-Targets?tocId=8ijg9En3MQ_7CJBZrUFENw>`_.
 
 Download the Vitis Graph Library
 ------------------------------------
@@ -74,7 +64,7 @@ Run a L3 Example
    make cleanall
    
 
-For more explanation on L3 cases please have a read on :ref:`tutorial::l3`.
+For more explanation on L3 cases, refer to :ref:`tutorial::l3`.
 
 Run a L2 Example
 ------------------------------------
@@ -89,7 +79,7 @@ Run a L2 Example
    make run                               # run the entire program
    make cleanall
 
-For more explanation on L2 cases please have a read on :ref:`tutorial::l2`.
+For more explanation on L2 cases, refer to :ref:`tutorial::l2`.
 
 Run a L1 Example
 ------------------------------------
@@ -103,19 +93,19 @@ Run a L1 Example
    make run CSYNTH=1 COSIM=1              # run RTL level simulation of the HLS code
    make cleanall
 
-For more explanation on L1 cases please have a read on :ref:`tutorial::l1`.
+For more explanation on L1 cases, refer to :ref:`tutorial::l1`.
 
 How Vitis Graph Library Works
 ==============================================
-Vitis Graph Library aims to provide reference `Vitis <https://www.xilinx.com/products/design-tools/vitis/vitis-platform.html>`_ 
+AMD Vitis |trade| Graph Library aims to provide reference `Vitis <https://www.xilinx.com/products/design-tools/vitis/vitis-platform.html>`_ 
 implementations for a set of graph processing algorithms which fits the `Xilinx Alveo Series <https://www.xilinx.com/products/boards-and-kits/alveo.html>`_
 acceleration cards. The API in Vitis Graph Library has been classified into three layers, namely L1/L2/L3. Each targets to serve different audience.
 
-* L3 APIs locate at ``Vitis_Libraries/graph/L3/include``. Pure software APIs are prodived to customers who want a fast deployment of graph processing algorithms on Alveo Cards. It provides a series of software designs to efficiently make use of resources in Alveo cards and deliver high performance graph processing.
+* L3 APIs locate at ``Vitis_Libraries/graph/L3/include``. Pure software APIs are provided to customers who want a fast deployment of graph processing algorithms on Alveo Cards. It provides a series of software designs to efficiently make use of resources in Alveo cards and deliver high performance graph processing.
 
-* L2 APIs locate at ``Vitis_Libraries/graph/L2/include``. They are a number of compute-unit designs running on Alveo cards. It provides a set of compute-unit designs implemented in HLS codes. These L2 APIs needs be compiled as OpenCL kernels and will be called by OpenCL APIs.
+* L2 APIs locate at ``Vitis_Libraries/graph/L2/include``. They are a number of compute-unit designs running on Alveo cards. It provides a set of compute-unit designs implemented in HLS codes. These L2 APIs need be compiled as OpenCL kernels and are called by OpenCL APIs.
 
-* L1 APIs locate at ``Vitis_Libraries/graph/L1/include``. They are basic components that will be used to compose compute-units. The L1 APIs are all well-optimized HLS design and are able to fit into various resource constraints.
+* L1 APIs locate at ``Vitis_Libraries/graph/L1/include``. They are basic components that are used to compose compute-units. The L1 APIs are all well-optimized HLS design and are able to fit into various resource constraints.
 
 
 .. _tutorial::l3:
@@ -126,12 +116,12 @@ L3 API
 Target Audience
 ^^^^^^^^^^^^^^^^^
 
-If a fast deployment of FPGA accelerated graph processor is required, then the Vitis Graph L3 APIs would be the best choice. Pre-designed and well-optimized Vitis compute units are provided in these APIs. And efficient software management of resources is also included in these APIs. To deploy graph accelerators, all users need to do is just a simple call of these c++ L3 APIs.
+If a fast deployment of FPGA accelerated graph processor is required, the Vitis Graph L3 APIs would be the best choice. Pre-designed and well-optimized Vitis compute units are provided in these APIs. And efficient software management of resources is also included in these APIs. To deploy graph accelerators, you need to do is just a simple call of these c++ L3 APIs.
 
 Example Usage
 ^^^^^^^^^^^^^^^^^
 
-Please run the following codes to build the library (Do not forget to install XRT/XRM and setup the environment):
+Run the following codes to build the library (Do not forget to install XRT/XRM and setup the environment):
 
 .. code-block:: bash
 
@@ -140,7 +130,7 @@ Please run the following codes to build the library (Do not forget to install XR
    make libgraphL3
    export LD_LIBRARY_PATH=<PATH TO YOUR Vitis_Libraries/graph/L3/lib>:$LD_LIBRARY_PATH
 
-To make use of the L3/APIs, please include ``Vitis_Libraries/graph/L3/include`` path and link ``Vitis_Libraries/graph/L3/lib`` path when compiling the code.
+To make use of the L3/APIs, include ``Vitis_Libraries/graph/L3/include`` path and link ``Vitis_Libraries/graph/L3/lib`` path when compiling the code.
 
 The following steps are usually required to make a call of the L3 APIs:
 
@@ -185,12 +175,12 @@ L2 API
 Target Audience
 ^^^^^^^^^^^^^^^^^
 
-If a pure FPGA based graph accelerator is required, then the Vitis Graph L2 interface might be interested. The L2 APIs provide HLS function that can be directly built into a Vitis compute-unit (OpenCL kernel). The testcases of the L2 APIs can be good references to compile and run the FPGA binaries (xclbins). Simple OpenCL codes are also provided to make use of the generated FPGA binaries. To efficiently management this FPGA binaries and make use of FPGA resources, please take a look at :ref:`tutorial::l3`.
+If a pure FPGA based graph accelerator is required, the Vitis Graph L2 interface might be interested. The L2 APIs provide HLS function that can be directly built into a Vitis compute-unit (OpenCL kernel). The testcases of the L2 APIs can be good references to compile and run the FPGA binaries (xclbins). Simple OpenCL codes are also provided to make use of the generated FPGA binaries. To efficiently management this FPGA binaries and make use of FPGA resources, refer to :ref:`tutorial::l3`.
 
 Example Usage
 ^^^^^^^^^^^^^^^^^
 
-The L2 API can be found at ``Vitis_Libraries/graph/L2/include``. A typical code for calling L2 APIs may looks like this:
+The L2 API can be found at ``Vitis_Libraries/graph/L2/include``. A typical code for calling L2 APIs might look like this:
 
 .. code-block:: cpp
 
@@ -237,7 +227,7 @@ The L2 API can be found at ``Vitis_Libraries/graph/L2/include``. A typical code 
                                                             result, pred512, pred, info);
    }
 
-It is usually a wrapper function of APIs in ``Vitis_Libraries/graph/L3/lib``. Something interesting might be the following code:
+It is usually a wrapper function of APIs in ``Vitis_Libraries/graph/L3/lib``. Following might be the code:
 
 .. code-block:: cpp
 
@@ -264,14 +254,14 @@ It is usually a wrapper function of APIs in ``Vitis_Libraries/graph/L3/lib``. So
    #pragma HLS INTERFACE m_axi offset = slave latency = 32 num_write_outstanding = 32 num_read_outstanding = \
       1 max_write_burst_length = 64 max_read_burst_length = 2 bundle = gmem5 port = pred depth = depth_V*16
 
-These are the HLS pragmas of the interface. They are responsible for configuring the interface of the FPGA binaries and might be vary with Alveo board. For more information about these pragmas, pleas vitis `HLS interface pragma <https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Interfaces>`_.
+These are the HLS pragmas of the interface. They are responsible for configuring the interface of the FPGA binaries and might be vary with Alveo board. For more information about these pragmas, refer to vitis `HLS interface pragma <https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Interfaces>`_.
 
 The steps to compile the C/C++ code into FPGA binaries is in the Makefile of each testcase. It generally has the following two steps:
 
 (1) ``v++ --compile`` to compile the C/C++ code into RTL code. A .xo file is generated in this step.
 (2) ``v++ --link`` to link the .xo file into FPGA binaries. A .xclbin file is generated in this step.
 
-For more information about compiling the HLS code please visit `here <https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Building-the-Device-Binary>`_
+For more information about compiling the HLS code, refer to `here <https://docs.xilinx.com/r/en-US/ug1393-vitis-application-acceleration/Building-the-Device-Binary>`_
 
 The code to make use of the FPGA binaries is usually C/C++ code with OpenCL APIs and typically contains the following steps:
 
@@ -289,7 +279,7 @@ The code to make use of the FPGA binaries is usually C/C++ code with OpenCL APIs
     cl::Kernel shortestPath;
     shortestPath = cl::Kernel(program, "shortestPath_top", &fail);
 
-(2) Create CL::Buffers and decide which data needs to be tranfered to FPGA devices and back to host machine.
+(2) Create CL::Buffers and decide which data needs to be transferred to FPGA devices and back to host machine.
 
 .. code-block:: cpp
 
@@ -344,9 +334,15 @@ L1 API
 
 Target Audience
 ^^^^^^^^^^^^^^^^^
-Target audience of L1 API are users who is familiar with HLS programming and want to test / profile / modify operators or add new operator.
-With the HLS test project provided in L1 layer, user could get:
+Target audience of L1 API are users who are familiar with HLS programming and want to test / profile / modify operators or add new operator.
+With the HLS test project provided in L1 layer, you could get:
 
 (1) Function correctness test, both in C-simulation and Co-simulation
 (2) Performance profiling from HLS synthesis report and Co-simulaiton
-(3) Resource and timing evaluation from Vivado synthesis.
+(3) Resource and timing evaluation from AMD Vivado |trade| synthesis.
+
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

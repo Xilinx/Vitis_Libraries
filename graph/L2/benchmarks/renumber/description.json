@@ -2,7 +2,7 @@
     "gui": true, 
     "name": "Xilinx Renumber Benchmark", 
     "description": "An example for fast renumber in graph cases", 
-    "flow": "vitis", 
+    "flow": "system", 
     "platform_allowlist": [
         "u50" 
     ], 

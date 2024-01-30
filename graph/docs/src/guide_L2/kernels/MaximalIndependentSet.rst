@@ -1,17 +1,7 @@
 .. 
-   Copyright 2022 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2022–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 
 *************************************************
@@ -20,45 +10,45 @@ Internal Design of Maximal Independent Set
 
 Overview
 ========
-Maximal Independent Set is an algorithm that finds the maximal set of vertexs which has no adjacent between each others. For this vertexs set, there is no edge connecting each two, and the size of the vertex set is different by different method.
+Maximal Independent Set is an algorithm that finds the maximal set of vertices that have no adjacent between each other. For this vertices set, there is no edge connecting any of the two, and the size of the vertex set is different by different method.
 
 Algorithm
 =========
-The implemented Maximal Independent Set (MIS) is based on a iterative method. The algorithm goes serveral rounds to traverse all vertexs for selecting vertexs into MIS set. For each round, label every available vertex with a random weights. Then, if the weights of current vertex is the smallest among its' neighbours, this vertex is labeled into MIS set and unlabeled its' neighbours at the same time. By running several times of the iteration, all vertexed would be traversed and labeled vertexs are grouped into MIS set. The output is the vertex list of MIS set. 
+The implemented Maximal Independent Set (MIS) is based on an iterative method. The algorithm goes several rounds to traverse all vertices to select vertices into an MIS set. For each round, label every available vertex with a random weight. Then, if the weights of the current vertex is the smallest among its neighbours, this vertex is labeled into an MIS set and unlabeled its neighbours at the same time. By running several times of the iteration, all vertexed would be traversed and labeled vertices are grouped into an MIS set. The output is the vertex list of the MIS set. 
 
 Interface
 =========
 The input should be a directed graph in compressed sparse row (CSR) format.
-The result include MIS vertex list (res_out). 
+The result includes the MIS vertex list (res_out). 
 
 Implementation
 ==============
-The algorithm implemention is shown in the figure below:
+The algorithm implementation is shown in the following figure:
 
 .. image:: /images/MIS.png
    :alt: Figure 1 Maximal Independen Set (MIS) design
    :width: 60%
    :align: center
 
-There are 6 functional blocks as shown in the figure:
+There are six functional blocks as shown in the figure:
 
-1. Get_Unselected_V is responsible to load the next set of vertexs which are labeled as unselected and pass it to the Get_degree.
+1. Get_Unselected_V is responsible to load the next set of vertices, which are labeled as unselected and pass it to the Get_degree.
 
-2. Get_degree get all degrees for each vertex and pass them to the next module.
+2. Get_degree: get all degrees for each vertex and pass them to the next module.
 
-3. V_edge_stream extract all edges for input vertexs, and assigned random-weights to each of them.
+3. V_edge_stream: extract all edges for input vertices, and assigned random-weights to each of them.
 
-4. Check_V module check vertexs and their connecting edges, if the random-weights of current is the smallest around its' neighbours, then label it as MIS set members; if not, do nothing and move to next candidate
+4. Check_V module: check vertices and their connecting edges. If the random-weights of current is the smallest around its neighbors, label it as the MIS set members. If not,move to next candidate.
 
-5. Update_CS module check the labeled status for vertexed, if it is labeled as MIS set member, it would be removed from waiting group and also its' neighbours. 
+5. Update_CS module: check the labeled status for vertexed. If it is labeled as an MIS set member, it along with the neighbors,are removed from the waiting group. 
 
-6. Mem_sync update all vertex status for processed vertex.
+6. Mem_sync: update all vertex status for processed vertex.
 
-This processing repeat utils there is no selected vertex for current round.
+This processing repeat until there is a selected vertex for the current round.
 
 Resources
 =========
-The hardware resource utilizations are listed in the following table. The BFS kernel is validated on Alveo U250 board at 300MHz frqeuency.
+The hardware resource utilizations are listed in the following table. The BFS kernel is validated on an AMD Alveo |trade| U250 board at 300MHz frequency.
 
 .. table:: Table 1 Hardware resources
     :align: center
@@ -68,3 +58,8 @@ The hardware resource utilizations are listed in the following table. The BFS ke
     +-------------------+----------+----------+----------+---------+-----------------+
     |   mis_kernel      |    786   |    0     |    12    |   13595 |     211.9       |
     +-------------------+----------+----------+----------+---------+-----------------+
+
+    .. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

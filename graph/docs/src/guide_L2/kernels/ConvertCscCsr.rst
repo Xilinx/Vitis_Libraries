@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 
 *************************************************
@@ -21,7 +11,7 @@ Internal Design of Convert CSC CSR
 
 Overview
 ========
-ConvertCSCCSR is an algorithm used to transform CSC format input to CSR format input or CSR format input to CSC format input. The algorithm is quite easy, but due to DDR limits, we cannot get one data per clock, so in our design, we use several caches with depth ajustable to get much better performance.
+ConvertCSCCSR is an algorithm used to transform CSC format input to CSR format input or CSR format input to CSC format input. The algorithm is quite easy, but due to DDR limits, you cannot get one data per clock. So in the design, you use several caches with depth adjustable to get better performance.
 
 Algorithm
 ============
@@ -43,14 +33,14 @@ ConvertCSCCSR algorithm implementation:
         begin = end
 
 
-Implemention
+Implementation
 ============
 The input matrix should ensure that the following conditions hold:
 
 1. No duplicate edges
 2. compressed sparse column/row (CSC/CSR) format
 
-The algorithm implemention is shown as the figure below:
+The algorithm implementation is shown in the following figure:
 
 Figure 1 : convert CSC CSR architecture on FPGA
 
@@ -60,10 +50,10 @@ Figure 1 : convert CSC CSR architecture on FPGA
       :width: 80%
       :align: center
 
-As we can see from the figure:
+As seen from the figure:
 
-1. firstly call the Module `calculate degree` to generate the transfer offset array.
-2. by using the input offset and indice arrays and also the calculated new offset array, generate the new indice array
+1. Firstly, call the Module `calculate degree` to generate the transfer offset array.
+2. By using the input offset and indice arrays and also the calculated new offset array, generate the new indice array.
 
 Profiling
 =========
@@ -91,9 +81,9 @@ Figure 2 : Cache depth's influence to ConvertCSCCSR acceleration
       :align: center
 
 
-.. note::
+.. Note::
     | 1. depth 1, depth 32, depth 1k, they use LUTRAM only, in compare with resources of depth 1, only LUT and FF changes.
-    | 2. depth 4k, depth 32k, they use URAM, in compare with resources of depth 1, the URAM utilization will be the major difference.
+    | 2. depth 4k, depth 32k, they use URAM, in compare with resources of depth 1, the URAM utilization is the major difference.
     | 3. HW Frequency: depth 1 (300MHz), depth 32 (300MHz), depth 1k (275.6MHz), depth 4k (300MHz), depth 32k (275.7MHz)
 
 .. toctree::

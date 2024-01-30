@@ -98,12 +98,12 @@ similarity function for dense graph. It support both Jaccard and Cosine Similari
     *
         - EN_FLOAT_POINT
 
-        - if it is true, the primitive will support both float and int type of input. Otherwise, it only support int. Multiple channel of float input should be compacted as type of ap_uint.
+        - if it is true, the primitive supports both float and int type of input. Otherwise, it only supports int. Multiple channels of float input should be compacted as a type of ap_uint.
 
     *
         - config
 
-        - the control parameter of the primitive which contains: sourceNUM, similarityType, dataType, startID, rowNUM and colNUM of each processing unit(PU)
+        - the control parameter of the primitive, which contains: sourceNUM, similarityType, dataType, startID, rowNUM, and colNUM of each processing unit(PU)
 
     *
         - sourceWeight
@@ -113,22 +113,22 @@ similarity function for dense graph. It support both Jaccard and Cosine Similari
     *
         - strmIn0
 
-        - input muti-channel data stream for PU0
+        - input multi-channel data stream for PU0
 
     *
         - strmIn1
 
-        - input muti-channel data stream for PU1
+        - input multi-channel data stream for PU1
 
     *
         - strmIn2
 
-        - input muti-channel data stream for PU2
+        - input multi-channel data stream for PU2
 
     *
         - strmIn3
 
-        - input muti-channel data stream for PU3
+        - input multi-channel data stream for PU3
 
     *
         - rowID
@@ -179,7 +179,7 @@ denseSimilarity
 	    hls::stream <bool>& strmOutEnd
 	    )
 
-similarity function for dense graph. It support both Jaccard and Cosine Similarity.
+similarity function for dense graph. It supports both Jaccard and Cosine Similarity.
 
 
 
@@ -211,7 +211,7 @@ similarity function for dense graph. It support both Jaccard and Cosine Similari
     *
         - config
 
-        - the control parameter of the primitive which contains: sourceNUM, similarityType, dataType, startID, rowNUM and colNUM of each processing unit(PU)
+        - the control parameter of the primitive which contains: sourceNUM, similarityType, dataType, startID, rowNUM, and colNUM of each processing unit(PU)
 
     *
         - sourceWeight
@@ -221,22 +221,22 @@ similarity function for dense graph. It support both Jaccard and Cosine Similari
     *
         - strmIn0
 
-        - input muti-channel data stream for PU0
+        - input multi-channel data stream for PU0
 
     *
         - strmIn1
 
-        - input muti-channel data stream for PU1
+        - input multi-channel data stream for PU1
 
     *
         - strmIn2
 
-        - input muti-channel data stream for PU2
+        - input multi-channel data stream for PU2
 
     *
         - strmIn3
 
-        - input muti-channel data stream for PU3
+        - input multi-channel data stream for PU3
 
     *
         - rowID
@@ -291,7 +291,7 @@ generalSimilarity
 	    hls::stream <bool>& strmOutEnd
 	    )
 
-similarity function which support both dense and sparse graph. It also support both Jaccard and Cosine Similarity.
+similarity function, which supports both dense and sparse graph. It also supports both Jaccard and Cosine Similarity.
 
 
 
@@ -323,12 +323,12 @@ similarity function which support both dense and sparse graph. It also support b
     *
         - EN_FLOAT_POINT
 
-        - if it is true, the primitive will support both float and int type of input. Otherwise, it only support int. Multiple channel of float input should be compacted as type of ap_uint.
+        - if it is true, the primitive supports both float and int type of input. Otherwise, it only supports int. Multiple channels of float input should be compacted as a type of ap_uint.
 
     *
         - config
 
-        - the control parameter of the primitive which contains: sourceNUM, similarityType, graphType, dataType, startID, rowNUM and colNUM of each processing unit(PU)
+        - the control parameter of the primitive, which contains: sourceNUM, similarityType, graphType, dataType, startID, rowNUM, and colNUM of each processing unit(PU)
 
     *
         - sourceIndice
@@ -343,22 +343,22 @@ similarity function which support both dense and sparse graph. It also support b
     *
         - strmIn0
 
-        - input muti-channel data stream for PU0
+        - input multi-channel data stream for PU0
 
     *
         - strmIn1
 
-        - input muti-channel data stream for PU1
+        - input multi-channel data stream for PU1
 
     *
         - strmIn2
 
-        - input muti-channel data stream for PU2
+        - input multi-channel data stream for PU2
 
     *
         - strmIn3
 
-        - input muti-channel data stream for PU3
+        - input multi-channel data stream for PU3
 
     *
         - rowID
@@ -538,12 +538,12 @@ similarity function for sparse graph. It support both Jaccard and Cosine Similar
     *
         - EN_FLOAT_POINT
 
-        - if it is true, the primitive will support both float and int type of input. Otherwise, it only support int. Multiple channel of float input should be compacted as type of ap_uint.
+        - if it is true, the primitive supports both float and int type of input. Otherwise, it only supports int. Multiple channels of float input should be compacted as a type of ap_uint.
 
     *
         - config
 
-        - the control parameter of the primitive which contains: sourceNUM, similarityType, dataType, startID, rowNUM and colNUM of each processing unit(PU)
+        - the control parameter of the primitive, which contains: sourceNUM, similarityType, dataType, startID, rowNUM, and colNUM of each processing unit(PU)
 
     *
         - sourceIndice
@@ -558,17 +558,17 @@ similarity function for sparse graph. It support both Jaccard and Cosine Similar
     *
         - offsetCSR
 
-        - input muti-channel offset stream
+        - input multi-channel offset stream
 
     *
         - indiceCSR
 
-        - input muti-channel indice stream
+        - input multi-channel indice stream
 
     *
         - weight
 
-        - input muti-channel weight stream
+        - input multi-channel weight stream
 
     *
         - rowID

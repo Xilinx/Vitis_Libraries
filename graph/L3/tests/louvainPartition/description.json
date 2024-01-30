@@ -2,7 +2,7 @@
     "gui": false, 
     "name": "Louvain partition L3 Test", 
     "description": "With L3 partition API for louvain, we could firstly partition a huge graph to some sub-graph with suitable size for cu processing, then launch cu on board Multi-thread concurrently and merge the result of louvain", 
-    "flow": "vitis",
+    "flow": "system",
     "xrm": true,
     "platform_allowlist": [
         "u55c"

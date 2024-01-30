@@ -1,17 +1,7 @@
 .. 
-   Copyright 2022 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2022–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 =========
 Maximal Independent set 
@@ -24,7 +14,7 @@ Executable Usage
 
 * **Work Directory(Step 1)**
 
-The steps for library download and environment setup can be found in :ref:`l2_vitis_graph`. For getting the design,
+The steps for library download and environment setup can be found in :ref:`l2_vitis_graph`. To get the design,
 
 .. code-block:: bash
 
@@ -32,15 +22,14 @@ The steps for library download and environment setup can be found in :ref:`l2_vi
 
 * **Build kernel(Step 2)**
 
-Run the following make command to build your XCLBIN and host binary targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
-
+Run the following make command to build your XCLBIN and host binary targeting a specific device. This process takes long.
 .. code-block:: bash
 
    make run TARGET=hw PLATFORM=xilinx_u50_gen3x16_xdma_5_202210_1
 
 * **Run kernel(Step 3)**
 
-To get the benchmark results, please run the following command.
+To get the benchmark results, run the following command.
 
 .. code-block:: bash
 
@@ -62,7 +51,7 @@ Profiling
 =========
 
 The hardware resource utilizations are listed in the following table.
-Different tool versions may result slightly different resource.
+Different tool versions might result in a slightly different resource.
 
 .. table:: Table 1 : Hardware resources for Renumber 
     :align: center
@@ -76,7 +65,7 @@ Different tool versions may result slightly different resource.
 Benchmark
 =========
 
-The performance is shown in the table below.
+The performance is shown in the following table.
 
 .. table:: Table 2 Comparison between CPU and FPGA (iteration=30) 
     :align: center
@@ -98,6 +87,6 @@ The performance is shown in the table below.
 .. Note::
    1. Maximal independent set CPU time benchmarking is running on Intel(R) Xeon(R) CPU E5-2667 v3 @ 3.20GHz, cache(2048 KB), cores(31)
    2. time unit: ms.
-   3. This mis implementation focus on single-kernel-level design and focusing on mid-scale dataset processing. As showed in table, with the increasing of the graph vertex number, the FPGA show increasingly advantage over CPU offloading.
+   3. This mis implementation focus on single-kernel-level design and focusing on mid-scale dataset processing. As showed in table, with the increasing of the graph vertex number, the FPGA shows an increasingly advantage over CPU offloading.
    4. The performance is tested under config of "set_property -dict [list CONFIG.ECC_EN {false} CONFIG.ECC_SCRUB_EN {false}] [get_bd_cells hmss_0]"
 

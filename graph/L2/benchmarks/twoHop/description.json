@@ -2,7 +2,7 @@
     "gui": true,
     "name": "jks.L2.benchmark.twoHop", 
     "description": "The two hop path count calculate how many 2 hop paths between a given set of source and destianation pairs", 
-    "flow": "vitis", 
+    "flow": "system", 
     "platform_allowlist": [
         "u50"    
     ], 

@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 
 *************************************************
@@ -22,11 +12,11 @@ Internal Design of Louvain Modularity
 Overview
 ========
 The Louvain method for community detection is a method to extract communities from large networks created by Blondel from the University of Louvain (the source of this method's name). The method is a greedy optimization method that appears to run in time O(n \cdot log n), if n is the number of nodes in the network.
-Since we release the louvain kernel on FPGA from 21.1, the performance of 1 compute unit in this kernel is improved from 18x, to 33x, to 65x vs CPU.
-The latest design cloud achieve 2 compute units in u55c by Vitis 22.1, which means the max speed up by u55c cloud be 2*65x vs CPU.
+Since you release the louvain kernel on an FPGA from 21.1, the performance of 1 compute unit in this kernel is improved from 18x to 33x to 65x vs CPU.
+The latest design cloud achieve 2 compute units in u55c by AMD Vitis |trade| 22.1, which means the max speed up by u55c cloud be 2*65x vs CPU.
 Now the L2 API cloud achieve the entire graph louvain modularity directly. when the graph is less than 128M vertexes and 128M edges by 1 cu on u55c(64M is the limit by 1 cu on u50).
-If the graph is larger,  we should launch the L3 louvainPartition API, partition the graph to multi pieces, then run the L3 louvainRun API which cloud run louvain algorithm on multi cu on multi board by the support of xrm.
-More details cloud be find in L3 API.  
+If the graph is larger,  you should launch the L3 louvainPartition API, partition the graph to multi pieces, then run the L3 louvainRun API, which cloud run louvain algorithm on multi cu on multi board by the support of xrm.
+More details are find in the L3 API.  
 
 Algorithm
 ============
@@ -67,7 +57,7 @@ The input matrix should ensure that the following conditions hold:
 1. undirected graph
 2. compressed sparse column (COO) format
 
-The algorithm implemention is shown as the figure below:
+The algorithm implementation is shown in the following figure:
 
 Figure 1 : Louvain calculate modularity architecture on FPGA
 
@@ -80,3 +70,7 @@ Figure 1 : Louvain calculate modularity architecture on FPGA
 .. toctree::
    :maxdepth: 1
 
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

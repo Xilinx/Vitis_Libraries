@@ -2,7 +2,7 @@
     "gui": false, 
     "name": "Single Source Dense Matrix Jaccard Similarity L3 Test", 
     "description": "An example for computing Jaccard similarity of a single vector in a dense graph", 
-    "flow": "vitis",
+    "flow": "system",
     "xrm": true,
     "platform_allowlist": [
         "u50"

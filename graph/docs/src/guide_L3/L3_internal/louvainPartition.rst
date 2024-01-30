@@ -1,35 +1,25 @@
 .. 
-   Copyright 2021 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2021–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 ********************************
-Louvain Paritition Demo
+Louvain Partition Demo
 ********************************
 
-To get scalability for graph size and get high-level concurrency for multi compute units on multi boards, we provided louvainPartition API with two partition methods which no communication between subgraphs processing. 
+To get scalability for graph size and high-level concurrency for multi-compute units on multi boards, louvainPartition API with two partition methods is provided with no communication between subgraphs processing. 
 
-* Linear louvain partition mothed, simply dived vertexes linearly, and save the connection edges between subgraphs to ghost edges. So it is faster in low bandwidth graph but result more ghost edges.
-* BFS louvain partition mothed, dived vertexes by BFS method, and save the connection edges between subgraphs to ghost edges. Its performance of modularity result keeps the same level between high and low bandwidth input graph. 
+* Linear louvain partition method, simply dived vertexes linearly, and saves the connection edges between subgraphs to ghost edges. So it is faster in low bandwidth graph but results more ghost edges.
+* BFS louvain partition method, dived vertexes by BFS method, and saves the connection edges between subgraphs to ghost edges. Its performance of modularity result keeps the same level between high and low bandwidth input graph. 
 
-Linear partition achieve on the high bandwidth and low bandwidth graph is shown as the Figure 1. Linear partition is not suitable for High bandwidth graph.
+Linear partition achieve on the high bandwidth and low bandwidth graph is shown in the following figure. Linear partition is not suitable for High bandwidth graph.
 
 .. image:: /images/louvainlinearpartition.PNG
    :alt: Figure 1 Linear partition achieve on the high bandwidth and low bandwidth graph
    :width: 80%
    :align: center
 
-In this demo, two methods can be switched by corresponding commands. The comparison of input and output is shown as the table 1.
+In this demo, two methods can be switched by corresponding commands. The comparison of input and output is shown in the following table.
 
 .. table:: Table 1 input and output comparison for different partition algorithms
     :align: center
@@ -51,7 +41,7 @@ In this demo, two methods can be switched by corresponding commands. The compari
 Linear Louvain Partition Flow
 ##########################################
 
-Ensure run the script L3/tests/pre_launch.sh to set the path of libgraphL3.so
+Ensure to run the script L3/tests/pre_launch.sh to set the path of libgraphL3.so
 
 .. code-block:: sh
 
@@ -73,7 +63,7 @@ Louvain fast Input Arguments:
 BFS Louvain Partition Flow
 ##########################################
 
-Ensure run the script L3/tests/pre_launch.sh to set the path of libgraphL3.so
+Ensure to run the script L3/tests/pre_launch.sh to set the path of libgraphL3.so
 
 .. code-block:: sh
 

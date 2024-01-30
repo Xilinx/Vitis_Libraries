@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 
 *************************************************
@@ -21,7 +11,7 @@ Internal Design of PageRankMultiChannels
 
 Overview
 ========
-PageRank (PR) is an algorithm used by Google Search to rank web pages in their search engine results. PageRank is a way of measuring the importance of website pages. PageRank works by counting the number and quality of links to a page to determine a rough estimate of how important the website is. The underlying assumption is that more important websites are likely to receive more links from other websites. Currently, PageRank is not the only algorithm used by Google to order search results, but it is the first algorithm that was used by the companies, and it is the best known.
+PageRank (PR) is an algorithm used by Google Search to rank web pages in their search engine results. PageRank is a way of measuring the importance of website pages. PageRank works by counting the number and quality of links to a page to determine a rough estimate of how important the website is. The underlying assumption is that more important websites are likely to receive more links from other websites. Currently, PageRank is not the only algorithm used by Google to order search results, but it is the first and best known algorithm that was used by the companies.
 
 Algorithm
 ============
@@ -59,7 +49,7 @@ The algorithm's pseudocode is as follows
     return PR_new
 
 
-Implemention
+Implementation
 ============
 The input matrix should ensure that the following conditions hold:
 
@@ -69,8 +59,8 @@ The input matrix should ensure that the following conditions hold:
 4. Compressed sparse column (CSC) format
 5. Max 64M Vertex with 128M Edge graph for this design, still board-level scalability.
 
-In order to make the API use higher bandwidth on the board of HBM base, this optimized version for HBM is implemented
-The algorithm implemention is shown as the figure below:
+In order to make the API use higher bandwidth on the board of HBM base, this optimized version for HBM is implemented.
+The algorithm implementation is shown in the following figure:
 
 Figure 1 : PageRank calculate degree architecture on FPGA
 
@@ -107,7 +97,7 @@ Figure 4 : PageRank calConvergence architecture on FPGA
       :width: 80%
       :align: center
 
-As we can see from the figure:
+As seen from the figure:
 
 1. Module `calculate degree`: first get the vertex node's outdegree with weighted and keep them in one DDR buffer.
 2. Module `initiation`: initiate PR DDR buffers and constant value buffer.
@@ -139,7 +129,7 @@ Table 2 : Comparison between CPU tigergraph and FPGA VITIS_GRAPH
       :align: center
 
 .. note::
-    | 1. Tigergraph time is the execution time of funciton "pageRank" Developer Edition 2.4.1 .
+    | 1. Tigergraph time is the execution time of the function "pageRank" Developer Edition 2.4.1 .
     | 2. Tigergraph running on platform with Intel(R) Xeon(R) CPU E5-2640 v3 @2.600GHz, 32 Threads (16 Core(s)).
     | 3. time unit: second.
     | 4. "-" Indicates that the result could not be obtained due to insufficient memory.

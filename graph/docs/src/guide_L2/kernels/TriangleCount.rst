@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 
 ***************************************
@@ -31,7 +21,7 @@ The algorithm of Triangle Count is as follows:
 2. Calculate the intersection for each edge and find the node whose id in the intersection is greater than the id of the first two nodes.
 3. For each node, count the total number of Triangles. Note that only the Triangle Counts that meet the calculation direction are counted.
 
-Note: When calculating triangles, there must be a calculation direction (for example, starting node id <intermediate node id <destination node id).
+.. Note:: When calculating triangles, there must be a calculation direction (for example, starting node id <intermediate node id <destination node id).
 
 Assume that node A and node B are neighbors. The set of neighbors of node A is {B, C, D, E}, the set of neighbors of node B is {A, C, E, F, G}, and their intersection is {C, E} . The nodes in the intersection are the common neighbors of node A and node B, so there are two triangles {A, B, C} and {A, B, E}.
 
@@ -44,17 +34,17 @@ The input matrix should ensure that the following conditions hold:
 3. All edges are oriented (src ID is greater than dst ID for compressed sparse column (CSC) format or dst ID is greater than src ID for compressed sparse row (CSR) format).
 4. No duplicate edges.
 
-The algorithm implemention is shown as the figure below:
+The algorithm implementation is shown as the figure below:
 
 .. image:: /images/TriangleCount.png
    :alt: Figure 1 TriangleCount architecture on FPGA
    :width: 80%
    :align: center
 
-As we can see from the figure:
+As seen from the figure:
 
 1. Module `row1CopyImpl` and its previous module: first get the rows corresponding to the order of increasing columns, and then copy the rows according to the number of rows.
-2. Module `row2Impl` and its previous module: frist get the rows corresponding to the order of increasing columns, and then use the rows as columns to obtain their corresponding rows.
+2. Module `row2Impl` and its previous module: first, get the rows corresponding to the order of increasing columns, and then use the rows as columns to obtain their corresponding rows.
 3. Module `mergeImpl` and `tcAccUnit`: count the number of intersections of rows from module `row1CopyImpl` and module `row2Impl` in the order of the columns. The cumulative result is the number of triangles.
 
 Profiling
@@ -74,7 +64,7 @@ The hardware resource utilizations are listed in the following table.
 Benchmark
 =========
 
-The performance is shown in the table below.
+The performance is shown in the following table.
 
 .. table:: Table 2 Comparison between CPU and FPGA
     :align: center

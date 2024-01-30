@@ -2,7 +2,7 @@
     "gui": true, 
     "name": "jks.L2.shortestpathdoublepred", 
     "description": "An example for the implemented Single Source Shortest Path that is based on Bellman-Ford algorithm equiped with a First-In-First-Out queue", 
-    "flow": "vitis", 
+    "flow": "system", 
     "platform_allowlist": [
         "u50"
     ], 

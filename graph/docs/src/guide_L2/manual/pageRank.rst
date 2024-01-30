@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _l2_manual_pagerank:
 
@@ -26,7 +16,7 @@ Executable Usage
 
 * **Work Directory(Step 1)**
 
-The steps for library download and environment setup can be found in :ref:`l2_vitis_graph`. For getting the design,
+The steps for library download and environment setup can be found in :ref:`l2_vitis_graph`. To get the design,
 
 .. code-block:: bash
 
@@ -34,15 +24,14 @@ The steps for library download and environment setup can be found in :ref:`l2_vi
 
 * **Build kernel(Step 2)**
 
-Run the following make command to build your XCLBIN and host binary targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
-
+Run the following make command to build your XCLBIN and host binary targeting a specific device. This process might take hours.
 .. code-block:: bash
 
    make run TARGET=hw PLATFORM=xilinx_u50_gen3x16_xdma_201920_3
 
 * **Run kernel(Step 3)**
 
-To get the benchmark results, please run the following command.
+To get the benchmark results, run the following command.
 
 .. code-block:: bash
 
@@ -57,7 +46,7 @@ Pagerank Input Arguments:
           -dataSetDir:  the path point to input directory
           -refDir:      the path point to reference directory
 
-Note: Default arguments are set in Makefile, you can use other :ref:`datasets` listed in the table.
+.. Note:: Default arguments are set in Makefile, you can use other :ref:`datasets` listed in the table.
 
 * **Example output(Step 4)** 
 
@@ -90,7 +79,7 @@ Profiling
 =========
 
 The hardware resource utilizations are listed in the following table.
-Different tool versions may result slightly different resource.
+Different tool versions might result in a slightly different resource.
 
 
 .. table:: Table 1 Hardware resources for PageRank with a small cache (cache size 512bits)
@@ -112,7 +101,7 @@ Different tool versions may result slightly different resource.
     | kernel_pagerank_0 |   216    |    224   |    42    |  124054  |  95950  |       225       |
     +-------------------+----------+----------+----------+----------+---------+-----------------+
 
-With the increase of cache depth, the acceleration ratio increases obviously, but due to the use of a lot of URAM, the frequency will drop. So the adviced cache depth is 32K for 1SLR of Alveo U50.
+With the increase of cache depth, the acceleration ratio increases, but due to the use of a lot of URAM, the frequency drops. So the suggested cache depth is 32K for 1SLR of an Alveo |trade| U50.
 
 
 .. table:: Table 3 Comparison between CPU SPARK and FPGA VITIS_GRAPH
@@ -151,5 +140,8 @@ With the increase of cache depth, the acceleration ratio increases obviously, bu
     | 6. Collected on Alveo u50 platform
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 1.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:
 
