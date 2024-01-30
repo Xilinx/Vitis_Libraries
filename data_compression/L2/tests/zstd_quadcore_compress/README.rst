@@ -1,14 +1,16 @@
+.. Copyright © 2019–2024 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
 =========================================
-Xilinx ZSTD Compression
+AMD ZSTD Compression
 =========================================
 
-ZSTD example resides in ``L2/tests/zstd_quadcore_compress`` directory. 
+The ZSTD example resides in the ``L2/tests/zstd_quadcore_compress`` directory. 
 
-Follow build instructions to generate host executable and binary.
+Follow the build instructions to generate the host executable and binary.
 
-The binary host file generated is named as "**xil_zstd**" and it is present in ``./build`` directory.
-
-
+The binary host file generated is named "**xil_zstd**", and it is present in the ``./build`` directory.
 
 Results
 -------
@@ -16,7 +18,7 @@ Results
 Overall Resource Utilization 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Table below presents resource utilization of Xilinx Zstd decompress kernel supporting Window Size of 32KB. The final Fmax achieved is 284MHz.
+The following table presents the resource utilization of an AMD Zstd decompress kernel supporting a Window Size of 32 KB. The final Fmax achieved is 284 MHz.
 
 ========== ===== ====== ===== 
 Flow       LUT   BRAM   URAM  
@@ -31,16 +33,16 @@ Performance Data
 ============================  ===========================
  Topic                          Results       
 ============================  ===========================
-Compression                     1.17 GB/s                
+Compression                     1.17 Gb/s                
 Average Compression Ratio	    2.68x (Silesia Benchmark)
 ============================  ===========================
 
 Executable Usage:
 
-1. To execute single file for decompression           : ``./build_dir.<TARGET mode>.<xsa_name>/xil_zstd -xbin ./build_dir.<TARGET mode>.<xsa_name>/xilZstdCompressStream.xclbin -c <compressed file_name>``
-2. To decompress multiple files                       : ``./build_dir.<TARGET mode>.<xsa_name>/xil_zstd -xbin ./build_dir.<TARGET mode>.<xsa_name>/xilZstdCompressStream.xclbin -cfl <files.list>``
+1. To execute asingle file for decompression: ``./build_dir.<TARGET mode>.<xsa_name>/xil_zstd -xbin ./build_dir.<TARGET mode>.<xsa_name>/xilZstdCompressStream.xclbin -c <compressed file_name>``
+2. To decompress multiple files: ``./build_dir.<TARGET mode>.<xsa_name>/xil_zstd -xbin ./build_dir.<TARGET mode>.<xsa_name>/xilZstdCompressStream.xclbin -cfl <files.list>``
 
-	- ``<files.list>``: Contains various file names with current path
+	- ``<files.list>``: Contains various file names with the current path.
 
 The usage of the generated executable is as follows:
 

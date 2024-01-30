@@ -1,11 +1,12 @@
+.. Copyright © 2019–2024 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
 ===================================
 LZ4 P2P Application for Compression
 ===================================
 
-This LZ4 P2P Compress application runs with Xilinx compression and
-standard decompression flow. This application gives best kernel 
-throughput when multiple files run concurrently on both compute units.
-
+This LZ4 P2P Compress application runs with the AMD compression and standard decompression flow. This application gives best kernel throughput when multiple files run concurrently on both compute units.
 
 Results
 -------
@@ -13,9 +14,7 @@ Results
 Resource Utilization 
 ~~~~~~~~~~~~~~~~~~~~~
 
-Table below presents resource utilization of Xilinx LZ4 P2P compress
-kernel with 8 engines for single compute unit. It is possible to extend
-number of engines to achieve higher throughput.
+The following table presents the resource utilization of an AMD LZ4 P2P compress kernel with eight engines for single compute unit. It is possible to extend the number of engines to achieve higher throughput.
 
 ========== ===== ====== ===== ===== ===== 
 Flow       LUT   LUTMem REG   BRAM  URAM 
@@ -25,33 +24,30 @@ Compress   51.7K 14.2K  64.2K 58    48
 Packer     10.9K 1.8K   16.7K 16     0    
 ========== ===== ====== ===== ===== ===== 
 
-Throughput & Compression Ratio
+Throughput and Compression Ratio
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Table below presents the best end to end compress kernel execution with
-SSD write throughput achieved with two compute units during execution of
-this application.
+The following table presents the best end to end compress kernel execution with SSD write throughput achieved with two compute units during execution of this application.
 
 =========================== ========
 Topic                       Results
 =========================== ========
-Compression Throughput 1.6 GB/s
+Compression Throughput 1.6 Gb/s
 =========================== ========
 
-Note: Overall throughput can still be increased with multiple compute
-units.
+.. note:: The overall throughput can still be increased with multiple compute units.
 
 Executable Usage
 ----------------
 
-This application is present in ``L3/benchmarks/lz4_p2p_compress`` directory. Follow build instructions to generate executable and binary.
+This application is present in the ``L3/benchmarks/lz4_p2p_compress`` directory. Follow the build instructions to generate the executable and binary.
 
-The binary host file generated is named as "**xil_lz4**" and it is present in ``./build`` directory.
+The binary host file generated is named "**xil_lz4**", and it is present in the ``./build`` directory.
 
-1. To execute single file for compression   : ``./build_dir.<TARGET mode>.<xsa_name>/xil_lz4 -cx ./build_dir.<TARGET mode>.<xsa_name>/<compress.xclbin> -c <file_name>``
-2. To execute multiple files for compression        : ``./build_dir.<TARGET mode>.<xsa_name>/xil_lz4 -cx ./build_dir.<TARGET mode>.<xsa_name>/compress.xclbin -l <files.list>``
+1. To execute a single file for compression: ``./build_dir.<TARGET mode>.<xsa_name>/xil_lz4 -cx ./build_dir.<TARGET mode>.<xsa_name>/<compress.xclbin> -c <file_name>``
+2. To execute multiple files for compression: ``./build_dir.<TARGET mode>.<xsa_name>/xil_lz4 -cx ./build_dir.<TARGET mode>.<xsa_name>/compress.xclbin -l <files.list>``
 
-     - ``<files.list>``: Contains various file names with current path
+     - ``<files.list>``: Contains various file names with the current path.
 
 The usage of the generated executable is as follows:
 

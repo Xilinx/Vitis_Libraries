@@ -1,18 +1,17 @@
+.. Copyright © 2019–2024 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
 =========================================
-Xilinx LZ4 Compression and Decompression
+AMD LZ4 Compression and Decompression
 =========================================
 
-LZ4 demo resides in ``L2/demos/lz4`` directory.
+The LZ4 demo resides in the ``L2/demos/lz4`` directory.
 
-Xilinx LZ4 compression/decompression is FPGA based implementation of
-standard LZ4. Xilinx implementation of LZ4 application is aimed at
-achieving high throughput for both compression and decompression. This
-Xilinx LZ4 application is developed and tested on Xilinx Alveo U200. To
-know more about standard LZ4 application please refer
-https://github.com/lz4/lz4
+AMD LZ4 compression/decompression is a FPGA based implementation of standard LZ4. The AMD implementation of the LZ4 application is aimed at achieving high throughput for both compression and decompression. This
+AMD LZ4 application is developed and tested on AMD Alveo™ U200. To learn more about standard LZ4 application, refer https://github.com/lz4/lz4.
 
-This application is accelerated using generic hardware architecture for
-LZ based data compression algorithms.
+This application is accelerated using a generic hardware architecture for LZ based data compression algorithms.
 
 Results
 -------
@@ -20,8 +19,7 @@ Results
 Resource Utilization 
 ~~~~~~~~~~~~~~~~~~~~~
 
-Table below presents resource utilization of Xilinx LZ4 Compress/Decompress
-kernels. The final Fmax achieved is 262MHz 
+The following table presents the resource utilization of LZ4 Compress/Decompress kernels. The final Fmax achieved is 262 MHz. 
 
 ========== ===== ====== ===== ===== ===== 
 Flow       LUT   LUTMem REG   BRAM  URAM 
@@ -34,41 +32,39 @@ DeCompress 7.3K  1.1K   7K    2     4
 Performance Data
 ~~~~~~~~~~~~~~~~
 
-Table below presents kernel throughput achieved for a single compute
-unit. 
+The following table presents the kernel throughput achieved for a single compute unit. 
 
 ============================= =========================
 Topic                         Results
 ============================= =========================
-Compression Throughput        1.7 GB/s
-Decompression Throughput      443 MB/s
+Compression Throughput        1.7 Gb/s
+Decompression Throughput      443 Mb/s
 Average Compression Ratio     2.13x (Silesia Benchmark)
 ============================= =========================
 
-Note: Overall throughput can still be increased with multiple compute
-units.
+.. note:: The overall throughput can still be increased with multiple compute units.
 
-Software & Hardware
+Software and Hardware
 -------------------
 
 ::
 
-     Software: Xilinx Vitis 2022.2
-     Hardware: xilinx_u200_xdma_201830_2 (Xilinx Alveo U200)
+     Software: AMD Vitis™ 2022.2
+     Hardware: xilinx_u200_xdma_201830_2 (Alveo U200)
 
 Executable Usage
 ----------------
  
-1. To execute single file for compression             : ``./build_dir.<TARGET mode>.<xsa_name>/xil_lz4 -xbin ./build_dir.<TARGET mode>.<xsa_name>/<compress_decompress.xclbin> -c <file_name>``
-2. To execute single file for decompression           : ``./build_dir.<TARGET mode>.<xsa_name>/xil_lz4 -xbin ./build_dir.<TARGET mode>.<xsa_name>/<compress_decompress.xclbin> -d <file_name.lz4>``
-3. To validate single file (compress & decompress)    : ``./build_dir.<TARGET mode>.<xsa_name>/xil_lz4 -xbin ./build_dir.<TARGET mode>.<xsa_name>/<compress_decompress.xclbin> -t <file_name>``
-4. To execute multiple files for compression     : ``./build_dir.<TARGET mode>.<xsa_name>/xil_lz4 -xbin ./build_dir.<TARGET mode>.<xsa_name>/<compress_decompress.xclbin> -cfl <files.list>``
-5. To execute multiple files for decompression     : ``./build_dir.<TARGET mode>.<xsa_name>/xil_lz4 -xbin ./build_dir.<TARGET mode>.<xsa_name>/<compress_decompress xclbin> -dfl <compressed files.list>``
-6. To validate multiple files (compress and decompress) : ``./build_dir.<TARGET mode>.<xsa_name>/xil_lz4 -xbin ./build_dir.<TARGET mode>.<xsa_name>/<compress_decompress xclbin> -l <files.list>``  
+1. To execute single file for compression: ``./build_dir.<TARGET mode>.<xsa_name>/xil_lz4 -xbin ./build_dir.<TARGET mode>.<xsa_name>/<compress_decompress.xclbin> -c <file_name>``
+2. To execute single file for decompression: ``./build_dir.<TARGET mode>.<xsa_name>/xil_lz4 -xbin ./build_dir.<TARGET mode>.<xsa_name>/<compress_decompress.xclbin> -d <file_name.lz4>``
+3. To validate single file (compress & decompress): ``./build_dir.<TARGET mode>.<xsa_name>/xil_lz4 -xbin ./build_dir.<TARGET mode>.<xsa_name>/<compress_decompress.xclbin> -t <file_name>``
+4. To execute multiple files for compression: ``./build_dir.<TARGET mode>.<xsa_name>/xil_lz4 -xbin ./build_dir.<TARGET mode>.<xsa_name>/<compress_decompress.xclbin> -cfl <files.list>``
+5. To execute multiple files for decompression: ``./build_dir.<TARGET mode>.<xsa_name>/xil_lz4 -xbin ./build_dir.<TARGET mode>.<xsa_name>/<compress_decompress xclbin> -dfl <compressed files.list>``
+6. To validate multiple files (compress and decompress): ``./build_dir.<TARGET mode>.<xsa_name>/xil_lz4 -xbin ./build_dir.<TARGET mode>.<xsa_name>/<compress_decompress xclbin> -l <files.list>``  
            
-      - ``<files.list>``: Contains various file names with current path
+      - ``<files.list>``: Contains various file names with the current path.
 
-      - Note: Default arguments are set in Makefile
+      .. note:: The default arguments are set in the Makefile.
 
 The usage of the generated executable is as follows:
 
@@ -78,10 +74,10 @@ The usage of the generated executable is as follows:
           --help,                -h        Print Help Options
           --compress,            -c        Compress
           --decompress,          -d        Decompress
-          --test,                -t        Xilinx compress & Decompress
+          --test,                -t        Compress & Decompress
           --compress_list,       -cfl      Compress List of Input Files
-          --decompress_list,     -dfl      Decompress List of compressed Input Files
-          --test_list,           -l        Xilinx Compress & Decompress on Input Files
+          --decompress_list,     -dfl       Decompress List of compressed Input Files
+          --test_list,           -l        Compress & Decompress on Input Files
           --max_cr,              -mcr      Maximum CR                                            Default: [10]
           --xclbin,              -xbin     XCLBIN
           --device_id,           -id       Device ID                                             Default: [0]

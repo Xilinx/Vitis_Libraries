@@ -1,7 +1,11 @@
-Xilinx Adler32 Memory Mapped HLS Test
+.. Copyright © 2019–2024 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
+AMD Adler32 Memory Mapped HLS Test
 =====================================
 
-**Description:** Test Design to validate Xilinx Adler32 module
+**Description:** Test Design to validate the AMD Adler32 module.
 
 **Top Function:** hls_adler32MM
 

@@ -1,7 +1,11 @@
-Xilinx GZIP Compress Streaming 8KB AXI Test
+.. Copyright © 2019–2024 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
+AMD GZIP Compress Streaming 8 KB AXI Test
 ===========================================
 
-**Description:** Test Design to validate Streaming GZIP 8KB static compression
+**Description:** Test Design to validate Streaming GZIP 8 KB static compression.
 
 **Top Function:** gzipcMulticoreStreaming
 

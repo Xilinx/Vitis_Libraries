@@ -1,7 +1,11 @@
-Xilinx ZSTD quadcore compress HLS Test
+.. Copyright © 2019–2024 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
+AMD ZSTD Quadcore Compress HLS Test
 ======================================
 
-**Description:** Test Design to validate ZSTD compression quadcore design.
+**Description:** Test Design to validate the ZSTD compression quadcore design.
 
 **Top Function:** compressFile
 

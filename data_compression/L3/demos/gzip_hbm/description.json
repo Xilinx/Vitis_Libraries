@@ -3,7 +3,7 @@
     "description": [
         "GZip application for HBM platforms resides in `L3/demos/gzip_hbm` directory, it also supports Zlib refer the CLI options."
     ],
-    "flow": "vitis",
+    "flow": "system",
     "default_device": "u50",
     "platform_blocklist": [
         "u200",
@@ -11,8 +11,7 @@
         "vck"
     ],
     "platform_allowlist": [
-        "u50",
-        "u280"
+        "u50"
     ],
     "launch": [
         {

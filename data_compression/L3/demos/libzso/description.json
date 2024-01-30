@@ -3,7 +3,7 @@
     "description": [
         "ZLIB Shared Object demo present in `L3/demo/libzso` directory."
     ], 
-    "flow": "vitis", 
+    "flow": "system", 
     "default_device": "u50",
     "platform_blocklist": [
         "u200", 

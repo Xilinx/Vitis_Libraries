@@ -1,7 +1,11 @@
-Xilinx GZIP 32KB Compress Streaming Test
+.. Copyright © 2019–2024 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
+AMD GZIP 32 KB Compress Streaming Test
 ========================================
 
-**Description:** Test Design to validate Streaming GZIP 32KB compression
+**Description:** Test Design to validate Streaming GZIP 32 KB compression.
 
 **Top Function:** gzipcMulticoreStreaming
 

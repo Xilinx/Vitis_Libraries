@@ -3,7 +3,7 @@
     "description": [
         "[XRT Host]: GZip Decompression Multiple Bytes 8"
     ],
-    "flow": "vitis",
+    "flow": "system",
     "launch": [
         {
             "cmd_args": "-xbin BUILD/decompress.xclbin -d PROJECT/data/sample.txt.gz",
@@ -24,7 +24,6 @@
     ],
     "platform_allowlist": [
         "u250",
-        "u200",
         "vck"
     ],
     "data": [

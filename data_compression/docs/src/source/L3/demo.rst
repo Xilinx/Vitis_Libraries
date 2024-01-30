@@ -1,16 +1,16 @@
+.. Copyright © 2019–2024 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
-   :keywords: Vitis, Library, Data Compression, Xilinx, FPGA OpenCL Kernels, LZ4 Demo, ZLIB Demo
+   :keywords: Vitis, Library, Data Compression, AMD, FPGA OpenCL Kernels, LZ4 Demo, ZLIB Demo
    :description: This section provides various application demos
 
 =====
 Demos
 =====
 
-This page describes the integration of various modules from L1, L2 levels in
-combination with software APIs to derive end application that can be directly
-deployed or creation of shared library that can be integrated with external
-applications.
+This page describes the integration of various modules from L1 and L2 levels in combination with software APIs to derive an end application that can be directly deployed or creation of a shared library that can be integrated with external applications.
 
 Demo examples for **Gzip** and **Lz4** applications are available in the ``L3/demos/`` directory.
 
@@ -24,9 +24,7 @@ Demo examples for **Gzip** and **Lz4** applications are available in the ``L3/de
 Environment Setup
 =================
 
-Execute the following commands to setup the Vitis environment for building the application. These
-instructions are applicable for all the demos under this category.
-
+Execute the following commands to set up the AMD Vitis™ environment for building the application. These instructions are applicable for all the demos under this category.
 
 .. code-block:: bash
 
@@ -44,14 +42,10 @@ Execute the following command to compile and test run this application:
 
 Variable ``TARGET`` can take the following values:
 
-	- **sw_emu**	: software emulation
+	- **sw_emu**: Software emulation.
 	
-	- **hw_emu**	: hardware emulation
+	- **hw_emu**: Hardware emulation.
 	
-	- **hw**	: run on actual hardware
+	- **hw**: Run on actual hardware.
 
-
-Build instructions are common for all the applications. The generated executable
-may differ.
-
-
+Build instructions are common for all the applications. The generated executable might differ.

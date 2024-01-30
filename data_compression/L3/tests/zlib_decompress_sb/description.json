@@ -3,7 +3,7 @@
     "description": [
         "[Slave Bridge]: GZip application for slave bridge resides in `L3/tests/zlib_decompress_sb` directory."
     ],
-    "flow": "vitis",
+    "flow": "system",
     "default_device": "u50_gen3x16_nodma",
     "platform_blocklist": [
         "vck",

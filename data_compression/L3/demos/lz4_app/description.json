@@ -3,7 +3,7 @@
     "description": [
         "LZ4 Application resides in `L3/demos/lz4_app` directory."
     ],
-    "flow": "vitis",
+    "flow": "system",
     "default_device": "u200",
     "platform_blocklist": [
         "zc",
@@ -12,7 +12,6 @@
         "u280"
     ],
     "platform_allowlist": [
-        "u200",
         "u250"
     ],
     "launch": [

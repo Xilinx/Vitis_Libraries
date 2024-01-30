@@ -4,18 +4,17 @@
         "Xilinx GZip P2P Decompression Parallel Byte 8_II1"
     ],
     "config_make": "./config.mk",
-    "flow": "vitis",
+    "flow": "system",
     "default_device": "samsung_u2",
     "platform_blocklist": [
         "zc",
         "vck190_base_dfx"
     ],
     "platform_allowlist": [
-        "samsung_u2",
-        "samsung_U2",
-        "u200",
         "u250",
         "vck190",
+        "samsung_u2",
+        "samsung_U2",
         "aws-vu9p-f1"
     ],
     "launch": [

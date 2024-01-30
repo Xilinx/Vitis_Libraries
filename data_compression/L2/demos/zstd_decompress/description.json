@@ -3,14 +3,11 @@
     "description": [
         "Xilinx ZSTD Decompression for 32KB block since with 4 Byte data width"
     ],
-    "flow": "vitis",
+    "flow": "system",
     "default_device": "u200",
     "platform_blocklist": [],
     "platform_allowlist": [
-        "u200",
         "u250",
-        "u50",
-        "u280",
         "vck190",
         "aws-vu9p-f1"
     ],

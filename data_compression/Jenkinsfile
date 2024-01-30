@@ -2,4 +2,4 @@
 
 VitisLibPipeline (branch: 'next', libname: 'xf_compression', run_sw_in_pr: 'true',
 TARGETS: 'hls_csim:hls_csynth:hls_cosim:vitis_sw_emu:vitis_hw_emu',
-upstream_dependencies: 'xf_security,next,../security', devtest: 'RunDeploy.sh', TOOLVERSION: '2023.2_stable_latest')
+upstream_dependencies: 'xf_security,next,../security', devtest: 'RunDeploy.sh', TOOLVERSION: '2024.1_stable_latest')

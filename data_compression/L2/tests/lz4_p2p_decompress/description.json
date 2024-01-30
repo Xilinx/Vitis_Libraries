@@ -3,7 +3,7 @@
     "description": [
         "LZ4-Streaming P2P Decompression ParallelByte8"
     ],
-    "flow": "vitis",
+    "flow": "system",
     "launch": [
         {
             "cmd_args": "-dx BUILD/decompress_streaming.xclbin -d PROJECT/data/sample.txt.lz4",
@@ -22,11 +22,10 @@
         "zc"
     ],
     "platform_allowlist": [
-        "samsung_u2",
-        "samsung_U2",
-        "u200",
         "u250",
         "vck190",
+        "samsung_u2",
+        "samsung_U2",
         "aws-vu9p-f1"
     ],
     "data": [

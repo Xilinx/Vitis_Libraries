@@ -1,7 +1,11 @@
-Xilinx LZ4 Compress HLS Test
+.. Copyright © 2019–2024 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
+AMD LZ4 Compress HLS Test
 ============================
 
-**Description:** Test Design to validate LZ4 core compress module
+**Description:** Test Design to validate the LZ4 core compress module.
 
 **Top Function:** lz4CompressEngineRun
 

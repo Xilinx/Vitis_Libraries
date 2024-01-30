@@ -1,7 +1,11 @@
-Xilinx ZLIB 32KB Compress Streaming AXI Test
+.. Copyright © 2019–2024 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
+AMD ZLIB 32 KB Compress Streaming AXI Test
 ============================================
 
-**Description:** Test Design to validate Streaming ZLIB 32KB compression
+**Description:** Test Design to validate Streaming ZLIB 32 KB compression.
 
 **Top Function:** zlibcMulticoreStreaming
 

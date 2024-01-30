@@ -1,7 +1,11 @@
-Xilinx ZSTD Decompress HLS Test
+.. Copyright © 2019–2024 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
+AMD ZSTD Decompress HLS Test
 ===============================
 
-**Description:** Test Design to validate ZSTD decompression
+**Description:** Test Design to validate ZSTD decompression.
 
 **Top Function:** decompressFrame
 

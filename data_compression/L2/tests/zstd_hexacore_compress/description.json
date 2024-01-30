@@ -3,13 +3,11 @@
     "description": [
         "Xilinx ZSTD Compression for 32KB block with six compression engines"
     ],
-    "flow": "vitis",
+    "flow": "system",
     "default_device": "u200",
     "platform_blocklist": [],
     "platform_allowlist": [
-        "u200",
         "u250",
-        "u280",
         "vck190",
         "aws-vu9p-f1"
     ],
@@ -80,10 +78,12 @@
             ]
         }
     ],
-    "output_files": ["data/sample.txt.*"],
+    "output_files": [
+        "data/sample.txt.*"
+    ],
     "testinfo": {
         "disable": false,
-        "stacksize":16384,
+        "stacksize": 16384,
         "jobs": [
             {
                 "index": 0,

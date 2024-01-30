@@ -3,7 +3,7 @@
     "description": [
         "Xilinx Gzip Streaming Compression with optimized Datamovers"
     ],
-    "flow": "vitis",
+    "flow": "system",
     "launch": [
         {
             "cmd_args": "-xbin BUILD/compress.xclbin -c PROJECT/sample.txt",
@@ -37,8 +37,7 @@
         "vck"
     ],
     "platform_allowlist": [
-        "u250",
-        "u200"
+        "u250"
     ],
     "host": {
         "host_exe": "xil_gzip",
@@ -106,7 +105,7 @@
     ],
     "testinfo": {
         "disable": false,
-        "stacksize":16384,
+        "stacksize": 16384,
         "jobs": [
             {
                 "index": 0,

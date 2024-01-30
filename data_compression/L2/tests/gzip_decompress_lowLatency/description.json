@@ -4,7 +4,7 @@
     "description": [
         "GZip Decompression Multiple Bytes 8"
     ],
-    "flow": "vitis",
+    "flow": "system",
     "launch": [
         {
             "cmd_args": "-xbin BUILD/decompress.xclbin -d PROJECT/sample.txt.gz",
@@ -25,7 +25,6 @@
         "vck"
     ],
     "platform_allowlist": [
-        "u200",
         "u250"
     ],
     "host": {

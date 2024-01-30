@@ -3,7 +3,7 @@
     "description": [
         "Xilinx LZ4 Compress Parallel Block 1"
     ],
-    "flow": "vitis",
+    "flow": "system",
     "launch": [
         {
             "cmd_args": "-xbin BUILD/compress.xclbin -c PROJECT/data/sample.txt",
@@ -35,7 +35,6 @@
         "zc"
     ],
     "platform_allowlist": [
-        "u200",
         "u250",
         "vck190",
         "aws-vu9p-f1"

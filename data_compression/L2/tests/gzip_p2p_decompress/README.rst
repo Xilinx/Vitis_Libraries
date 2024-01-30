@@ -1,12 +1,16 @@
+.. Copyright © 2019–2024 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
 ===================================
-Xilinx GZip-Streaming Decompression
+AMD GZip-Streaming Decompression
 ===================================
 
-GZip example resides in ``L2/tests/gzip_p2p_decompress`` directory. 
+The GZip example resides in the ``L2/tests/gzip_p2p_decompress`` directory. 
 
-Follow build instructions to generate host executable and binary.
+Follow the build instructions to generate the host executable and binary.
 
-The binary host file generated is named as "**xil_gzip**" and it is present in ``./build`` directory.
+The binary host file generated is named "**xil_gzip**", and it is present in the ``./build`` directory.
 
 Results
 -------
@@ -14,8 +18,7 @@ Results
 Resource Utilization 
 ~~~~~~~~~~~~~~~~~~~~
 
-Table below presents resource utilization of Xilinx Zlib Decompress Streaming
-kernel. 
+The following table presents the resource utilization of an AMD Zlib Decompress Streaming kernel. 
 
 ========== ===== ====== ==== ===== ===== ======
 Flow       LUT   LUTMem REG  BRAM  URAM  Fmax
@@ -26,21 +29,20 @@ DeCompress 12.3K  226   8.4K   3    2    188MHz
 Performance Data
 ~~~~~~~~~~~~~~~~
 
-Table below presents best kernel throughput achieved for a single compute
-unit (Single Engine). 
+The following table presents the best kernel throughput achieved for a single compute unit (Single Engine). 
 
 ============================= =========================
 Topic                         Results
 ============================= =========================
-Best Kernel Throughput        442.48 MB/s
+Best Kernel Throughput        442.48 Mb/s
 ============================= =========================
 
-Note: Overall throughput can still be increased with multiple compute units.
+.. note:: The overall throughput can still be increased with multiple compute units.
 
 
 Executable Usage:
 
-1. To execute single file for decompression           : ``./build_dir.<TARGET>/ -dx ./build_dir.<TARGET>/xclbin_<xsa_name>_<TARGET mode>/decompress_stream.xclbin -d <compressed file_name>``
+1. To execute a single file for decompression: ``./build_dir.<TARGET>/ -dx ./build_dir.<TARGET>/xclbin_<xsa_name>_<TARGET mode>/decompress_stream.xclbin -d <compressed file_name>``
 
 The usage of the generated executable is as follows:
 

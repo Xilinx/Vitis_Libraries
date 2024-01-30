@@ -3,7 +3,7 @@
     "description": [
         "Xilinx Adler32"
     ],
-    "flow": "vitis",
+    "flow": "system",
     "launch": [
         {
             "cmd_args": "-cx BUILD/adler32.xclbin -c PROJECT/data/sample.txt",
@@ -15,7 +15,6 @@
         "zc"
     ],
     "platform_allowlist": [
-        "u200",
         "u250",
         "vck190",
         "aws-vu9p-f1"

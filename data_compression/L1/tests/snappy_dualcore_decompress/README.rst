@@ -1,7 +1,11 @@
-Xilinx Snappy Dualcore Decompress HLS Test
+.. Copyright © 2019–2024 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
+AMD Snappy Dualcore Decompress HLS Test
 ==========================================
 
-**Description:** Test Design to validate Snappy Dualcore Decompress module
+**Description:** Test Design to validate the Snappy Dualcore Decompress module.
 
 **Top Function:** snappyDecompressEngineRun
 

@@ -1,7 +1,11 @@
-Xilinx Lz4 Decompress HLS Test
+.. Copyright © 2019–2024 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
+Xilinx LZ4 Decompress HLS Test
 ==============================
 
-**Description:** Test Design to validate LZ4 core decompress module
+**Description:** Test Design to validate the LZ4 core decompress module.
 
 **Top Function:** lz4DecompressEngineRun
 

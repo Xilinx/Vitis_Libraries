@@ -1,7 +1,11 @@
-Xilinx Gzip Multibyte Dynamic Block Streaming Decompress HLS Test
+.. Copyright © 2019–2024 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
+AMD Gzip Multibyte Dynamic Block Streaming Decompress HLS Test
 =================================================================
 
-**Description:** Test Design to validate core Gzip decompress module
+**Description:** Test Design to validate the core Gzip decompress module.
 
 **Top Function:** gzipMultiByteDecompressEngineRun
 

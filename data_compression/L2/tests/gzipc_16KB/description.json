@@ -4,7 +4,7 @@
     "description": [
         "Xilinx Gzip Streaming 16KB Compression"
     ],
-    "flow": "vitis",
+    "flow": "system",
     "launch": [
         {
             "cmd_args": "-xbin BUILD/compress.xclbin -c PROJECT/data/sample.txt",
@@ -38,7 +38,6 @@
     ],
     "platform_allowlist": [
         "u250",
-        "u200",
         "vck190",
         "aws-vu9p-f1"
     ],
@@ -113,7 +112,7 @@
     ],
     "testinfo": {
         "disable": false,
-        "stacksize":16384,
+        "stacksize": 16384,
         "jobs": [
             {
                 "index": 0,

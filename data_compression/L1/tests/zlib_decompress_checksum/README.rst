@@ -1,7 +1,11 @@
-Xilinx Zlib 8Kb block size Streaming Decompress HLS Test
+.. Copyright © 2019–2024 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
+AMD Zlib 8 KB Block Size Streaming Decompress HLS Test
 ========================================================
 
-**Description:** Test Design to validate core zlib decompress module
+**Description:** Test Design to validate the core zlib decompress module.
 
 **Top Function:** zlibMultiByteDecompressEngineRun
 

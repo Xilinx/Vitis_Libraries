@@ -1,7 +1,11 @@
-Xilinx Snappy Compress HLS Test
+.. Copyright © 2019–2024 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
+AMD Snappy Compress HLS Test
 ===============================
 
-**Description:** Test Design to validate core Snappy compress module
+**Description:** Test Design to validate the core Snappy compress module.
 
 **Top Function:** snappyCompressEngineRun
 

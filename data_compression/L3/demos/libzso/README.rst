@@ -1,3 +1,7 @@
+.. Copyright © 2019–2024 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
 ====================
 Zlib (SO) Demo
 ====================
@@ -5,9 +9,8 @@ Zlib (SO) Demo
 Infrastructure
 --------------
 
-List below presents infrastructure required to build & deploy this demo.
-Mandatory requirements are marked accordingly in order to get this demo working in
-deployment environment. Vitis is required only for development.
+The following list presents the infrastructure required to build and deploy this demo. Mandatory requirements are marked accordingly to get this demo working in a
+deployment environment. AMD Vitis™ is required only for development.
 
     ``Vitis: 2022.1``
     
@@ -42,7 +45,6 @@ Application Usage
 
 **Help**           -->  ``./xzlib -h``
 
-**Regression**     --> Refer ``run.sh`` script to understand usage of various options provided with ``xzlib`` utility. 
+**Regression**     --> Refer the ``run.sh`` script to understand the usage of the various options provided with the ``xzlib`` utility. 
 
-
-Note: By default host executable is built for both compress/decompress on FPGA.
+.. note:: By default, the host executable is built for both compress/decompress on a FPGA.

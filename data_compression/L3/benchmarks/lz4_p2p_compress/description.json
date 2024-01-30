@@ -3,7 +3,7 @@
     "description": [
         "LZ4_P2P application for Compression resides in `L3/benchmarks/lz4_p2p_compress` directory."
     ],
-    "flow": "vitis",
+    "flow": "system",
     "default_device": "samsung_u2",
     "platform_blocklist": [
         "u50",
@@ -12,10 +12,9 @@
         "vck"
     ],
     "platform_allowlist": [
+        "u250",
         "samsung_u2",
-        "samsung_U2",
-        "u200",
-        "u250"
+        "samsung_U2"
     ],
     "launch": [
         {

@@ -3,15 +3,13 @@
     "description": [
         "Xilinx ZSTD Decompression for 32KB block with low latency Sequence processing"
     ],
-    "flow": "vitis",
+    "flow": "system",
     "default_device": "u200",
     "platform_blocklist": [
         "vck190"
     ],
     "platform_allowlist": [
-        "u200",
         "u250",
-        "u280",
         "aws-vu9p-f1"
     ],
     "data": [

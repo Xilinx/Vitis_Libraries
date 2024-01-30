@@ -3,7 +3,7 @@
     "description": [
         "Xilinx LZ4 Compression and Decompression memory-mapped solution"
     ],
-    "flow": "vitis",
+    "flow": "system",
     "launch": [
         {
             "cmd_args": "-xbin BUILD/compress_decompress.xclbin -t PROJECT/data/sample.txt",
@@ -36,7 +36,6 @@
         "vck190_base_dfx"
     ],
     "platform_allowlist": [
-        "u200",
         "u250",
         "vck190",
         "aws-vu9p-f1"

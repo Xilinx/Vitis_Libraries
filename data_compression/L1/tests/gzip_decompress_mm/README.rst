@@ -1,7 +1,11 @@
-Xilinx Gzip Multibyte Decompress Memory Mapped HLS Test
+.. Copyright © 2019–2024 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
+AMD Gzip Multibyte Decompress Memory Mapped HLS Test
 =======================================================
 
-**Description:** Test Design to validate core Gzip decompress module using dynamic huffman decoder
+**Description:** Test Design to validate the core Gzip decompress module using a dynamic huffman decoder.
 
 **Top Function:** gzipDecompressMM
 

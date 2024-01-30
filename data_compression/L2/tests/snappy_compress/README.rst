@@ -1,20 +1,24 @@
+.. Copyright © 2019–2024 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
 ================================
-Xlinx Snappy Compression 
+AMD Snappy Compression 
 ================================
 
-Snappy Compress Streaming example resides in ``L2/tests/snappy_compress`` directory. 
+The Snappy Compress Streaming example resides in the ``L2/tests/snappy_compress`` directory. 
 
-Follow build instructions to generate host executable and binary.
+Follow the build instructions to generate the host executable and binary.
 
-The binary host file generated is named as **xil_snappy** and it is present in ``./build`` directory.
+The binary host file generated is named **xil_snappy**, and it is present in the ``./build`` directory.
 
 Executable Usage
 ----------------
 
-1. To execute single file for compression             : ``./build_dir.<TARGET mode>.<xsa_name>/xil_snappy -xbin ./build_dir.<TARGET mode>.<xsa_name>/compress.xclbin -c <input file_name>``
-2. To execute multiple files for compression    : ``./build_dir.<TARGET mode>.<xsa_name>/xil_snappy -xbin ./build_dir.<TARGET mode>.<xsa_name>/compress.xclbin -cfl <files.list>``
+1. To execute a single file for compression: ``./build_dir.<TARGET mode>.<xsa_name>/xil_snappy -xbin ./build_dir.<TARGET mode>.<xsa_name>/compress.xclbin -c <input file_name>``
+2. To execute multiple files for compression: ``./build_dir.<TARGET mode>.<xsa_name>/xil_snappy -xbin ./build_dir.<TARGET mode>.<xsa_name>/compress.xclbin -cfl <files.list>``
 
-    - ``<files.list>``: Contains various file names with current path
+    - ``<files.list>``: Contains various file names with the current path.
 
 The usage of the generated executable is as follows:
 
@@ -32,8 +36,7 @@ The usage of the generated executable is as follows:
 Resource Utilization 
 ~~~~~~~~~~~~~~~~~~~~~
 
-Table below presents resource utilization of Xilinx Snappy Streaming Compression kernels. 
-The final Fmax achieved is 300MHz                                                                                                                   
+The following table presents the resource utilization of AMD Snappy Streaming Compression kernels. The final Fmax achieved is 300 MHz.                                                                                                                   
 
 ========== ===== ====== ===== ===== ===== 
 Flow       LUT   LUTMem REG   BRAM  URAM 
@@ -44,12 +47,11 @@ Compress   52K    10.8K  57K   48    48
 Performance Data
 ~~~~~~~~~~~~~~~~
 
-Table below presents kernel throughput achieved for a single compute
-unit. 
+The following table presents the kernel throughput achieved for a single compute unit. 
 
 ============================= =========================
 Topic                         Results
 ============================= =========================
-Compression Throughput        2.2 GB/s
+Compression Throughput        2.2 Gb/s
 Average Compression Ratio     2.13x (Silesia Benchmark)
 ============================= =========================

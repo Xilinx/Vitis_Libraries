@@ -1,20 +1,24 @@
+.. Copyright © 2019–2024 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
 ==================================
-Xlinx LZ4 Streaming Decompression 
+AMD LZ4 Streaming Decompression 
 ==================================
 
-LZ4 Compress Streaming example resides in ``L2/tests/lz4_dec_streaming_parallelByte8`` directory. 
+The LZ4 Compress Streaming example resides in the ``L2/tests/lz4_dec_streaming_parallelByte8`` directory. 
 
-Follow build instructions to generate host executable and binary.
+Follow the build instructions to generate the host executable and binary.
 
-The binary host file generated is named as **xil_lz4_decompress_streaming** and it is present in ``./build`` directory.
+The binary host file generated is named **xil_lz4_decompress_streaming**, and it is present in the ``./build`` directory.
 
 Executable Usage
 ----------------
 
-1. To execute single file for decompression             : ``./build_dir.<TARGET mode>.<xsa_name>/xil_lz4_decompress_streaming -xbin ./build_dir.<TARGET mode>.<xsa_name>/decompress_streaming.xclbin -d <input file_name>``
-2. To execute multiple files for decompression    : ``./build_dir.<TARGET mode>.<xsa_name>/xil_lz4_decompress_streaming -xbin ./build_dir.<TARGET mode>.<xsa_name>/decompress_streaming.xclbin -dfl <files.list>``
+1. To execute a single file for decompression: ``./build_dir.<TARGET mode>.<xsa_name>/xil_lz4_decompress_streaming -xbin ./build_dir.<TARGET mode>.<xsa_name>/decompress_streaming.xclbin -d <input file_name>``
+2. To execute multiple files for decompression: ``./build_dir.<TARGET mode>.<xsa_name>/xil_lz4_decompress_streaming -xbin ./build_dir.<TARGET mode>.<xsa_name>/decompress_streaming.xclbin -dfl <files.list>``
 
-    - ``<files.list>``: Contains various file names with current path
+    - ``<files.list>``: Contains various file names with the current path.
 
 The usage of the generated executable is as follows:
 
@@ -32,8 +36,7 @@ The usage of the generated executable is as follows:
 Resource Utilization 
 ~~~~~~~~~~~~~~~~~~~~~
 
-Table below presents resource utilization of Xilinx LZ4 Streaming Compression kernels. 
-The final Fmax achieved is 300MHz                                                                                                                   
+The following table presents the resource utilization of AMD LZ4 Streaming Compression kernels. The final Fmax achieved is 300 MHz.                                                                                                                   
 
 ========== ===== ====== ===== ===== ===== 
 Flow       LUT   LUTMem REG   BRAM  URAM 
@@ -46,11 +49,10 @@ Decompress 5.3K  750    4.8K   0     2
 Performance Data
 ~~~~~~~~~~~~~~~~
 
-Table below presents kernel throughput achieved for a single compute
-unit. 
+The following table presents the kernel throughput achieved for a single compute unit. 
 
 ============================= =========================
 Topic                         Results
 ============================= =========================
-Decompression Throughput       1.8 GB/s
+Decompression Throughput       1.8 Gb/s
 ============================= =========================

@@ -3,7 +3,7 @@
     "description": [
         "Snappy-Streaming P2P Decompression ParallelByte8"
     ],
-    "flow": "vitis",
+    "flow": "system",
     "launch": [
         {
             "cmd_args": "-xbin BUILD/decompress_streaming.xclbin -d PROJECT/data/sample.txt.snappy",
@@ -23,11 +23,10 @@
         "xilinx_u50_gen3x16_xdma_5_202210_1"
     ],
     "platform_allowlist": [
-        "samsung_u2",
-        "samsung_U2",
-        "u200",
         "u250",
         "vck190",
+        "samsung_u2",
+        "samsung_U2",
         "aws-vu9p-f1"
     ],
     "data": [

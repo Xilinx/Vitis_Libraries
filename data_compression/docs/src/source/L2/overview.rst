@@ -1,6 +1,9 @@
+.. Copyright © 2019–2024 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
-   :keywords: Vitis, Library, Data Compression, Xilinx, L2 Kernels, Overview    
+   :keywords: Vitis, Library, Data Compression, AMD, L2 Kernels, Overview    
    :description: This section provides various application demos
 
 ===============

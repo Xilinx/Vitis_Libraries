@@ -3,7 +3,7 @@
     "description": [
         "ZLIB Quadcore Decompression upto 8kb block with checksum"
     ],
-    "flow": "vitis",
+    "flow": "system",
     "launch": [
         {
             "cmd_args": "-xbin BUILD/decompress.xclbin -d PROJECT/data/sample.txt.zlib",
@@ -25,7 +25,6 @@
         "vck190_base_dfx"
     ],
     "platform_allowlist": [
-        "u200",
         "vck190",
         "aws-vu9p-f1"
     ],

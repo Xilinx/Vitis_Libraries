@@ -1,20 +1,24 @@
+.. Copyright © 2019–2024 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
 =====================================
-Xilinx Snappy Streaming Decompression 
+AMD Snappy Streaming Decompression 
 =====================================
 
-Snappy Compress Streaming example resides in ``L2/tests/snappy_dec_streaming_parallelByte8`` directory. 
+The Snappy Compress Streaming example resides in the ``L2/tests/snappy_dec_streaming_parallelByte8`` directory. 
 
-Follow build instructions to generate host executable and binary.
+Follow the build instructions to generate the host executable and binary.
 
-The binary host file generated is named as **xil_snappy_decompress_streaming** and it is present in ``./build`` directory.
+The binary host file generated is named **xil_snappy_decompress_streaming**, and it is present in the ``./build`` directory.
 
 Executable Usage
 ----------------
 
-1. To execute single file for decompression             : ``./build_dir.<TARGET mode>.<xsa_name>/xil_snappy_decompress_streaming  -xbin ./build_dir.<TARGET mode>.<xsa_name>/decompress_streaming.xclbin -d <input file_name>``
-2. To execute multiple files for decompression    : ``./build_dir.<TARGET mode>.<xsa_name>/xil_snappy_decompress_streaming  -xbin ./build_dir.<TARGET mode>.<xsa_name>/decompress_streaming.xclbin -dfl <files.list>``
+1. To execute a single file for decompression: ``./build_dir.<TARGET mode>.<xsa_name>/xil_snappy_decompress_streaming  -xbin ./build_dir.<TARGET mode>.<xsa_name>/decompress_streaming.xclbin -d <input file_name>``
+2. To execute multiple files for decompression: ``./build_dir.<TARGET mode>.<xsa_name>/xil_snappy_decompress_streaming  -xbin ./build_dir.<TARGET mode>.<xsa_name>/decompress_streaming.xclbin -dfl <files.list>``
 
-    - ``<files.list>``: Contains various file names with current path
+    - ``<files.list>``: Contains various file names with the current path.
 
 The usage of the generated executable is as follows:
 
@@ -32,8 +36,7 @@ The usage of the generated executable is as follows:
 Resource Utilization 
 ~~~~~~~~~~~~~~~~~~~~~
 
-Table below presents resource utilization of Xilinx Snappy Streaming Decompression kernels. 
-The final Fmax achieved is 300MHz                                                                                                                   
+The following table presents the resource utilization of Snappy Streaming Decompression kernels. The final Fmax achieved is 300 MHz.                                                                                                                   
 
 ========== ===== ====== ===== ===== ===== 
 Flow       LUT   LUTMem REG   BRAM  URAM 
@@ -44,11 +47,10 @@ Decompress 6.5K  316    5.7K   0     4
 Performance Data
 ~~~~~~~~~~~~~~~~
 
-Table below presents kernel throughput achieved for a single compute
-unit. 
+The following table presents the kernel throughput achieved for a single compute unit. 
 
 ============================= =========================
 Topic                         Results
 ============================= =========================
-Decompression Throughput       1.97 GB/s
+Decompression Throughput       1.97 Gb/s
 ============================= =========================

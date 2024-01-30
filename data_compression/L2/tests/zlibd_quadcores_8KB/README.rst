@@ -1,20 +1,24 @@
+.. Copyright © 2019–2024 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
 ====================================
-Xilinx ZLIB Streaming Decompression
+AMD ZLIB Streaming Decompression
 ====================================
 
-ZLIB example resides in ``L2/tests/zlibd_quadcores_8KB`` directory. 
+The ZLIB example resides in the ``L2/tests/zlibd_quadcores_8KB`` directory. 
 
-Follow build instructions to generate host executable and binary.
+Follow the build instructions to generate the host executable and binary.
 
-The binary host file generated is named as "**xil_zlib**" and it is present in ``./build`` directory.
+The binary host file generated is named "**xil_zlib**", and it is present in the ``./build`` directory.
 
 Executable Usage
 ----------------
 
-1. To execute single file for compression 	          : ``./build_dir.<TARGET mode>.<xsa_name>/xil_zlib -xbin ./build_dir.<TARGET mode>.<xsa_name>/decompress.xclbin  -d <file_name>``
-2. To execute multiple files for compression    : ``./build_dir.<TARGET mode>.<xsa_name>/xil_zlib -xbin ./build_dir.<TARGET mode>.<xsa_name>/decompress.xclbin  -dfl <files.list>``
+1. To execute a single file for compression: ``./build_dir.<TARGET mode>.<xsa_name>/xil_zlib -xbin ./build_dir.<TARGET mode>.<xsa_name>/decompress.xclbin  -d <file_name>``
+2. To execute multiple files for compression: ``./build_dir.<TARGET mode>.<xsa_name>/xil_zlib -xbin ./build_dir.<TARGET mode>.<xsa_name>/decompress.xclbin  -dfl <files.list>``
 
-	- ``<files.list>``: Contains various file names with current path
+	- ``<files.list>``: Contains various file names with the current path.
 
 The usage of the generated executable is as follows:
 
@@ -35,8 +39,7 @@ Results
 Resource Utilization 
 ~~~~~~~~~~~~~~~~~~~~~
 
-Table below presents resource utilization of Xilinx ZLIB Quadcore Decompress
-kernel. The final Fmax achieved is 287MHz 
+The following table presents the resource utilization of an AMD ZLIB Quadcore Decompress kernel. The final Fmax achieved is 287 MHz. 
 
 ========== ===== ====== ===== ===== ===== 
 Flow       LUT   LUTMem REG   BRAM  URAM 
@@ -48,20 +51,18 @@ GzipMM2S   1.6K   253   2.5K    2    0
 GzipS2MM   2.8K   690   4.2K    2    0
 ========== ===== ====== ===== ===== ===== 
 
-
 Performance Data
 ~~~~~~~~~~~~~~~~
 
-Table below presents kernel throughput achieved for a single compute
-unit. 
+The following table presents the kernel throughput achieved for a single compute unit. 
 
 ============================= =========================
 Topic                         Results
 ============================= =========================
-Decompression Throughput       1.15 GB/s
+Decompression Throughput       1.15 Gb/s
 ============================= =========================
 
 Standard GZip Support
 ---------------------
 
-This application is compatible with standard Gzip/Zlib application (compress/decompres).  
+This application is compatible with a standard Gzip/Zlib application (compress/decompress).  

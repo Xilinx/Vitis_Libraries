@@ -4,7 +4,7 @@
     "description": [
         "Xilinx Zlib Streaming 8KB Compression"
     ],
-    "flow": "vitis",
+    "flow": "system",
     "launch": [
         {
             "cmd_args": "-xbin BUILD/compress.xclbin -c PROJECT/sample.txt -zlib 1",
@@ -39,8 +39,7 @@
         "xilinx_u50_gen3x16_xdma_5_202210_1"
     ],
     "platform_allowlist": [
-        "u250",
-        "u200"
+        "u250"
     ],
     "host": {
         "host_exe": "xil_zlib",
@@ -111,7 +110,7 @@
     ],
     "testinfo": {
         "disable": false,
-        "stacksize":16384,
+        "stacksize": 16384,
         "jobs": [
             {
                 "index": 0,
