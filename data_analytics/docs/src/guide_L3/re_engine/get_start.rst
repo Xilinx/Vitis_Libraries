@@ -1,19 +1,6 @@
-.. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+.. Copyright © 2019–2024 Advanced Micro Devices, Inc
 
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 Regular Expression Acceleration
 ********************************
@@ -21,21 +8,15 @@ Regular Expression Acceleration
 Getting Started
 ===============
 
-In order to prepare the framework for use, it is first necessary to build it.
-As mentioned in L1 regex-VM, we re-used VM instructions and compiler from popular `Oniguruma`_ library,
-which is the foundation of current Ruby `regex implementation`_.
+To prepare the framework for use, it is first necessary to build it. As mentioned in L1 regex-VM, the VM instructions are reused and compiled from the popular `Oniguruma`_ library, which is the foundation of current Ruby `regex implementation`_.
 
 .. _`Oniguruma`: https://github.com/kkos/oniguruma.git
 
 .. _`regex implementation`: https://github.com/k-takata/Onigmo
 
-To fit the instructions into FPGA and achieve reasonable performance, we cannot simply move the original Oniguruma-like
-OPs into our implementation without optimizing it.
-Thus, the post-compiled OPs for FPGA is quite different from the one in Oniguruma.
-A software compiler which is responsible for tranforming the post-compiled OPs to our desired instructions is
-provided in ``L1/src/sw``.
+To fit the instructions into FPGA and achieve reasonable performance, you cannot simply move the original Oniguruma-like OPs into your implementation without optimizing it. Thus, the post-compiled OPs for FPGA is quite different from the one in Oniguruma. A software compiler which is responsible for tranforming the post-compiled OPs to our desired instructions is provided in ``L1/src/sw``.
 
-Builds the ``libxfcompile.so`` (the software compiler) simply by:
+It builds the ``libxfcompile.so`` (the software compiler) simply by:
 
 .. code-block:: sh
 
@@ -47,7 +28,7 @@ After the build is complete, ``libxfcompile.so`` should be available in ``L3/tes
 Limitation
 ----------
 
-We only support the ``match`` process in the hardware design, the return values should be a group of the start/end offset pairs if zero or more characters at the beginning of the string match the regular expression pattern.
+The ``match`` process is only supported in the hardware design, the return values should be a group of the start/end offset pairs if zero or more characters at the beginning of the string match the regular expression pattern.
 
 The difference between ``match`` and ``search`` can be explained as:
 
@@ -63,8 +44,7 @@ The difference between ``match`` and ``search`` can be explained as:
 Example Usage
 =============
 
-At first, you have to set up the global parameters to specify the hardware and software scale you want to build.
-Take those parameters in ``L3/tests/re_test/kernel/general_config.hpp`` as an example.
+At first, you have to set up the global parameters to specify the hardware and software scale you want to build. Take those parameters in ``L3/tests/re_test/kernel/general_config.hpp`` as an example.
 
 .. NOTE::
 
@@ -72,8 +52,7 @@ Take those parameters in ``L3/tests/re_test/kernel/general_config.hpp`` as an ex
 
     The software ones will be used to generate the L3 ``RegexEngine`` objects.
 
-Secondly, you definitely want to compile the regex pattern to see if it is a valid one and supprted by our regex-VM
-hardware before triggering the regex matching process.
+Second, you definitely want to compile the regex pattern to see if it is a valid one and supprted by the regex-VM hardware before triggering the regex matching process.
 
 .. code-block:: cpp
     
@@ -92,8 +71,7 @@ hardware before triggering the regex matching process.
         return -1;
     }
     
-Then, you should allocate memory for each buffer.
-The utilities are provided in ``L3/include/sw/xf_data_analytics/text``
+Then, you should allocate memory for each buffer. The utilities are provided in ``L3/include/sw/xf_data_analytics/text``.
 
 .. code-block:: cpp
     
@@ -123,8 +101,7 @@ The utilities are provided in ``L3/include/sw/xf_data_analytics/text``
     uint32_t* out_buff = mm.aligned_alloc<uint32_t>(MAX_OUT_DEPTH);
 
 
-Feeds each buffer according to the format provided in ``L3/tests/re_test/host/main.cpp``,
-and call the mathcing process by:
+Feeds each buffer according to the format provided in ``L3/tests/re_test/host/main.cpp``, and calls the mathcing process by:
 
 .. code-block:: cpp
 
@@ -138,5 +115,4 @@ After the matching process complete, you'll get the corresponding results in ``o
     :width: 80%
     :align: center
 
-Finally, do what you want with the results, like asserting whether a line of log is matched or extracting the captured
-sub-strings with the begin/end offsets provided in each capturing group.
+Finally, do what you want with the results, like asserting whether a line of log is matched or extracting the captured sub-strings with the begin/end offsets provided in each capturing group.

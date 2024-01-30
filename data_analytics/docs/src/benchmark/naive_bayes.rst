@@ -1,18 +1,6 @@
-.. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+.. Copyright © 2019–2024 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _l2_naive_baye:
 
@@ -20,13 +8,12 @@
 Naive Bayes
 ===========
 
-Naive Bayes resides in ``L2/benchmarks/classification/naive_bayes`` directory.
-
+Naive Bayes resides in the ``L2/benchmarks/classification/naive_bayes`` directory.
 
 Dataset
 =======
 
-There are 3 dataset used in the benchmark:
+There are three dataset used in the benchmark:
 
  1 - RCV1 (https://scikit-learn.org/0.18/datasets/rcv1.html)
 
@@ -35,7 +22,7 @@ There are 3 dataset used in the benchmark:
  3 - news20 (https://scikit-learn.org/0.19/datasets/twenty_newsgroups.html)
 
 +---------+---------+---------+----------+
-| Dataset | samples | classes | features |
+| Dataset | Examples | Classes | Features|
 +=========+=========+=========+==========+
 | RCV1    | 697614  |   2     |  47236   |
 +---------+---------+---------+----------+
@@ -44,29 +31,28 @@ There are 3 dataset used in the benchmark:
 | news20  | 19928   |   20    |  62061   |
 +---------+---------+---------+----------+
 
-
 Executable Usage
 ===============
 
-* **Work Directory(Step 1)**
+* **Work Directory (Step 1)**
 
-The steps for library download and environment setup can be found in :ref:`l2_vitis_data_analytics`. For getting the design,
+The steps for library download and environment setup can be found in :ref:`l2_vitis_data_analytics`. For getting the design:
 
 .. code-block:: bash
 
    cd L2/benchmarks/classification/naive_bayes
 
-* **Build kernel(Step 2)**
+* **Build the Kernel (Step 2)**
 
-Run the following make command to build your XCLBIN and host binary targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
+Run the following make command to build your XCLBIN and host binary targeting a specific device. This process will take a long time, maybe couple of hours.
 
 .. code-block:: bash
 
    make run TARGET=hw PLATFORM=xilinx_u200_xdma_201830_2 
 
-* **Run kernel(Step 3)**
+* **Run the Kernel (Step 3)**
 
-To get the benchmark results, please run the following command.
+To get the benchmark results, run the following command:
 
 .. code-block:: bash
 
@@ -83,9 +69,9 @@ Naive Bayes Input Arguments:
           -c     :      number of class
           -t     :      number of feature
 
-Note: Default arguments are set in Makefile, you can use other platforms to build and run.
+.. note:: Default arguments are set in the Makefile; you can use other platforms to build and run.
 
-* **Example output(Step 4)** 
+* **Example Output (Step 4)** 
 
 .. code-block:: bash
 
@@ -113,15 +99,13 @@ Note: Default arguments are set in Makefile, you can use other platforms to buil
     Check pass.
     
     ------------------------------------------------------------
-   
 
 Profiling
 =========
 
-The naive bayes design is validated on Alveo U200 board at 266 MHz frequency. 
-The hardware resource utilizations are listed in the following table.
+The Naive Bayes design is validated on an AMD Alveo™ U200 board at 266 MHz frequency. The hardware resource utilizations are listed in the following table.
 
-.. table:: Table 1 Hardware resources for naive bayes
+.. table:: Table 1 Hardware Resources for Naive Bayes
     :align: center
     
     +--------------------------+---------------+-----------+-----------+----------+
@@ -137,7 +121,7 @@ The hardware resource utilizations are listed in the following table.
     +--------------------------+---------------+-----------+-----------+----------+
 
 The performance is shown below.
-    This benchmark takes 0.519421ms to train 999 samples with 10 features, so it throughput is 73.37MB/s.
+    This benchmark takes 0.519421 ms to train 999 samples with 10 features, so the throughput is 73.37 Mb/s.
 
 
 .. toctree::

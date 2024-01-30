@@ -1,59 +1,36 @@
-.. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+.. Copyright © 2019–2024 Advanced Micro Devices, Inc
 
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 *************************
 Multinomial Naive Bayes
 *************************
 
-
 Overview
 ========
 
-In machine learning, naive Bayes classifiers are a family of simple "probabilistic classifiers" based on applying Bayes' theorem with strong (naive) independence assumptions between the features. (from wikipedia) 
-Multinomial naive bayes is one of classic naive bayes variants mostly used in document classfication. Each sample represents by the feature vector in which certain events have been counted in multinomial model.
+In machine learning, naive Bayes classifiers are a family of simple "probabilistic classifiers" based on applying Bayes' theorem with strong (naive) independence assumptions between the features (from Wikipedia). 
+Multinomial naive bayes is one of the classic naive bayes variants mostly used in document classfication. Each sample is represented by the feature vector in which certain events have been counted in a multinomial model.
 
-The two parts of multinomial navie bayes algorithm including training and prediction is given as below:
+The two parts of multinomial navie bayes algorithm including training and prediction is given as folows:
 
-1. Training Stage: count the number of times word term or feature appears across all the training samples, N\ :sub:`yi`\. And also the number of distinct features in all sample as well as the total number of all features N\ :sub:`y`\ in certain class is counted, respectively.
-The maximum likelihood probability is the ratio of N\ :sub:`yi`\ to N\ :sub:`y`\, which is one matrix. The prior probability is the ratio of the number of each class to the total number of sample, which is one vector.
-Additive Laplace smoothing would be used in real applicaton for features not present in the training sample so that zero probabilities can be prevented in the furture classfilier.
+1. Training Stage: Count the number of times a word term or feature appears across all the training samples, N\ :sub:`yi`\, and also the number of distinct features in all samples as well as the total number of all features; N\ :sub:`y`\ in certain class is counted, respectively. The maximum likelihood probability is the ratio of N\ :sub:`yi`\ to N\ :sub:`y`\, which is one matrix. The prior probability is the ratio of the number of each class to the total number of samples, which is one vector. Additive Laplace smoothing would be used in real applicaton for features not present in the training sample, so that zero probabilities can be prevented in the future classfier.
 
-2. Prediction Stage: for each test sample, the argmax function of the likelihood probability matrix multiply by its feature vector as well as the prior probability vector will get its classification result. And the matrix multiplication can be transformed into matrix addition by the logarithm pre-process.
-
+2. Prediction Stage: For each test sample, the argmax function of the likelihood probability matrix multiply by its feature vector as well as the prior probability vector will get its classification result, and the matrix multiplication can be transformed into matrix addition by the logarithm pre-process.
 
 Implemention
 ============
 
-The naive bayes training is one general primitive to acclerate multinomial naive bayes utilizing the advantage of high bandwidth in Xilinx FPGA.
-The top diagram is shown as below. Workload is distributed based on LSBs of feature value of one sample to processing data path, so that each path can work independently. 
-The dispatcher and merge module is feed by compact data format in 64-bit stream. Each 64-bit can be compounded of 12-bit class (from 0), 20-bit feature (from 1) and 32-bit count value. And the input feature vector can be sparse or dense. The end ``-1`` of each sample must be tagged in 20-bit feature slot.
+The naive bayes training is one general primitive to acclerate multinomial naive bayes utilizing the advantage of high bandwidth in AMD FPGAs. The top diagram is shown as below. Workload is distributed based on the least significant bits (LSBs) of the feature value of one sample to the processing data path, so that each path can work independently. The dispatcher and merge module is fed by a compact data format in a 64-bit stream. Each 64-bit can be compounded of 12-bit class (from 0), 20-bit feature (from 1), and 32-bit count value. And the input feature vector can be sparse or dense. The end ``-1`` of each sample must be tagged in a 20-bit feature slot.
 
-The counter module is responsible for counting the number of times feature appears across all the sample. 
-And the collect module will count the number of all feature for certain class. All statictis result in each data-path will be gather in the following module. 
-Finally, the logarithm result of likelihood and prior probability will be streamed out, respectively.
+The counter module is responsible for counting the number of times a feature appears across all the samples, and the collect module will count the number of all features for a certain class. All statistics result in each data-path will be gathered in the following module. Finally, the logarithm result of likelihood and prior probability will be streamed out, respectively.
 
 .. image:: /images/naiveBayesTrain.png
    :alt: Train Primitive
    :width: 80%
    :align: center
 
-The following figure has been shown as the top structure of naive bayes classfiler. The training model will stream in firstly before the actual prediction process.
-The whole training model will be cached on on-chip memory. Only the 32-bit count value in test sample would be streamed into the classfiler primitive. And only dense feature vector is supported. 
-The matrix multiplication would be handled in the tree cluster module. The argmax module would predict the result for each sample.
+The following figure has been shown as the top structure of naive bayes classifier. The training model will stream in before the actual prediction process. The whole training model will be cached on on-chip memory. Only the 32-bit count value in the test sample would be streamed into the classfier primitive. And only a dense feature vector is supported. The matrix multiplication would be handled in the tree cluster module. The argmax module would predict the result for each sample.
 
 .. image:: /images/naiveBayesPredict.png
    :alt: Predict Primitive
@@ -63,7 +40,7 @@ The matrix multiplication would be handled in the tree cluster module. The argma
 Resource Utilization
 ====================
 
-The hardware resource utilization of naive bayes training (8 channels) and predict (4 data-path and 8 channels) primitive is shown in the table below (synthsis at 300MHz).
+The hardware resource utilization of naive bayes training (eight channels) and predict (four datapath and eight channels) primitive is shown in the following table (synthesis at 300 MHz).
 
 +----------------+-------+---------------+--------+------+-----+
 | Primitive      |  LUT  |   Register    |  BRAM  | URAM | DSP |
@@ -76,7 +53,7 @@ The hardware resource utilization of naive bayes training (8 channels) and predi
 Benchmark Result on Board
 =========================
 
-Meanwhile, benchmark results at 267MHz frequency on Alveo U200 board with 2019.2 shell are shown as below:
+Meanwhile, the benchmark results at a 267 MHz frequency on an AMD Alveo™ U200 board with a 2019.2 shell are shown as follows:
 
 +---------+---------+---------+----------+-------------------+-------------------+--------------------+--------------------+--------------------+------------+
 | Dataset | samples | classes | features | Spark (4 threads) | Spark (8 threads) | Spark (16 threads) | Spark (32 threads) | Spark (56 threads) | FPGA (:ms) |
@@ -89,8 +66,4 @@ Meanwhile, benchmark results at 267MHz frequency on Alveo U200 board with 2019.2
 +---------+---------+---------+----------+-------------------+-------------------+--------------------+--------------------+--------------------+------------+
 
 .. ATTENTION::
-    For the training primitive, some padding-zero 64-bit data would be added into the input multi-channel data stream when the total length of feature vector
-    for all sample cannot be divided evenly by 8 including the ending ``-1`` tag. And the multiplication of the number of class and feature cannot be greater than
-    2 million so far.
-    For the predict primitive, the sampe padding-zero 32-bit data would also be added when the length of feature vector for each sample cannot be divided evenly
-    by the number of channel. And the multiplication of the number of class and feature cannot be greater than 1 million.
+    For the training primitive, some padding-zero 64-bit data would be added into the input multi-channel data stream when the total length of feature vector for all samples cannot be divided evenly by 8 including the ending ``-1`` tag. And the multiplication of the number of class and feature cannot be greater than two million so far. For the predict primitive, the sampe padding-zero 32-bit data would also be added when the length of the feature vector for each sample cannot be divided evenly by the number of channels. And the multiplication of the number of class and feature cannot be greater than one million.

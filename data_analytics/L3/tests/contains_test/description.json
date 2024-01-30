@@ -3,7 +3,7 @@
     "match_makefile": false,
     "name": "Xilinx GeoSpatial Contains with STRTree Test", 
     "description": "Xilinx GeoSpatial Contains with STRTree Test", 
-    "flow": "vitis", 
+    "flow": "system", 
     "platform_allowlist": [
         "u200"
     ], 

@@ -1,7 +1,7 @@
 Document Source Code
 =========================
 
-## Gnerating HTML Document
+## Generating HTML Document
 
 ### Environment Variables
 
@@ -12,7 +12,7 @@ to compile the document:
   installed.
 + **PATH** should include the directory with `doxyrest` binary.
 
-### Makefile targets
+### Makefile Targets
 
 The top Makefile contains the following targets, each depending on the previous
 one.
@@ -22,10 +22,3 @@ one.
 + **html**: calls `sphinx` to generate HTML files from generated reStructuredText
   files and manually written ones.
 + **install**: copies the HTML files to `$HTML_DEST_DIR`.
-
-
-## Trademark Notice
-
-Xilinx, the Xilinx logo, Artix, ISE, Kintex, Spartan, Virtex, Zynq, and other designated brands included herein
-are trademarks of Xilinx in the United States and other countries.
-All other trademarks are the property of their respective owners.

@@ -2,10 +2,9 @@
     "gui": false,
     "name": "Xilinx Naive Bayes Training",
     "description": "",
-    "flow": "vitis",
+    "flow": "system",
     "platform_allowlist": [
-        "u200",
-        "u50"
+        "u200"
     ],
     "platform_blocklist": [
         "aws-vu9p-f1"
@@ -23,22 +22,6 @@
                 "compiler": {
                     "clflags": [
                         "--config PROJECT/conn_u200_u250.cfg"
-                    ]
-                }
-            }
-        },
-        "u50": {
-            "host": {
-                "compiler": {
-                    "symbols": [
-                        "USE_HBM"
-                    ]
-                }
-            },
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u50.cfg"
                     ]
                 }
             }

@@ -1,18 +1,6 @@
-.. 
-   Copyright 2022 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+.. Copyright © 2022–2024 Advanced Micro Devices, Inc
 
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 **************
 STRTree Engine
@@ -51,12 +39,12 @@ There are n nodes (rectangles), and the center point of its i-th node is represe
 Implementation
 ==============
 
-STRTree Kernel is implemented according to the algorithm flow. Its core design is the sorting of a dataset (x, y, id). In order to realize the sorting of data (size>16M+), two sorting modules are provided here: `blockSort` and `mergeTreeSort`.
+STRTree Kernel is implemented according to the algorithm flow. Its core design is the sorting of a dataset (x, y, id). To realize the sorting of data (size>16M+), two sorting modules are provided here: `blockSort` and `mergeTreeSort`.
 
 blockSort
 ---------
 
-For input data (size = N), it divides the data into M blocks, sorts each block, and obtains M ordered blocks. The size of N depends on the capacity of the DDR, and the size of M depends on the in-chip LUT and URAM resources. Its design is show in the figure below:
+For input data (size = N), it divides the data into M blocks, sorts each block, and obtains M ordered blocks. The size of N depends on the capacity of the DDR, and the size of M depends on the in-chip LUT and URAM resources. Its design is show in the following figure:
 
 .. _my-figure3:
 .. figure:: /images/strtree_block_sort.png
@@ -68,7 +56,7 @@ For input data (size = N), it divides the data into M blocks, sorts each block, 
 mergeTreeSort
 -------------
 
-For K ordered blocks as input, it can get all data ordered output. The size of K cannot affect the frequency of the kernel, and it can also ensure that each cycle outputs a data. ts design is show in the figure below:
+For K ordered blocks as input, it can get all data ordered output. The size of K cannot affect the frequency of the kernel, and it can also ensure that each cycle outputs a data. Its design is shown in the following figure:
 
 .. _my-figure4:
 .. figure:: /images/strtree_merge_tree_sort.png
@@ -79,8 +67,7 @@ For K ordered blocks as input, it can get all data ordered output. The size of K
 Resource Utilization
 ====================
  
-The Kernel is validated on Alveo U200 card.
-The hardware resources utilization are listed in the table above (not include Platform).
+The kernel is validated on an AMD Alveo™ U200 card. The hardware resources utilization are listed in the table above (not include Platform).
 
 +------------------+---------+---------+--------+--------+-------+----------+
 |       Name       |   LUT   |   REG   |  BRAM  | URAM   | DSP   |   Freq   |

@@ -1,18 +1,6 @@
-.. 
-   Copyright 2022 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+.. Copyright © 2022–2024 Advanced Micro Devices, Inc
 
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 CSV Scanner
 ***********
@@ -20,9 +8,9 @@ CSV Scanner
 Getting Started
 ===============
 
-As we utilize the Gunzip for decompressing the compressed CSV file and CRC32C for calculating the checksum, please make sure you download the whole package of ``Vitis_Libraries``, otherwise the target will not be able to be built successfully.
+As you utilize the Gunzip for decompressing the compressed CSV file and CRC32C for calculating the checksum, make sure you download the whole package of ``Vitis_Libraries``; otherwise, the target will not be able to be built successfully.
 
-To simplify the potential users integration efforts, we created a multithreaded test environment at ``L3/tests/gunzip_csv_sc_test`` and packed the Vitis System Compiler applicatoin layer in ``L3/src/sw/gunzip_csv``, so that the users won't need to take care of the detailed scheduling works.
+To simplify the potential users integration efforts, a multithreaded test environment is created at ``L3/tests/gunzip_csv_sc_test`` and packed the Vitis System Compiler applicatoin layer in ``L3/src/sw/gunzip_csv``, so that you will not need to take care of the detailed scheduling works.
 
 Limitation
 ----------
@@ -34,13 +22,13 @@ The CSV scanner kernel can be described as:
     :width: 80%
     :align: center
 
-- `maximal number of input files`: as we have only 12 processing units (PU) inside the kernel, the maximal number of input files should be limited to 12 at one call.
+- `maximal number of input files`: As you have only 12 processing units (PU) inside the kernel, the maximal number of input files should be limited to 12 at one call.
 
-- `Data types`: 5 data types are supported currently, including: int (64-bit), string (up to 1024 chars), date, bool, and numeric (56-bit significand, 8-bit exponent).
+- `Data types`: Five data types are supported currently, including: int (64-bit), string (up to 1024 chars), date, bool, and numeric (56-bit significand, 8-bit exponent).
 
-- `CSV format`: up to 16 columns are supported, up to 8 columns post CSV parsing, and the length of one row should be less than or equal to 1024 bytes.
+- `CSV format`: Up to 16 columns are supported, up to eightS columns post CSV parsing, and the length of one row should be less than or equal to 1024 bytes.
 
-- `filter operator`: only 7 types of operator are supported, the operators are listed below:
+- `filter operator`: Only seven types of operator are supported, and the operators are listed below:
 
     +----------+-----------------------+
     | FilterOp | Description           |
@@ -63,9 +51,9 @@ The CSV scanner kernel can be described as:
 Example Usage
 =============
 
-Let's take TPC-H query-1 for example:
+Take the TPC-H query-1 for example:
 
-At first, you have to set up the schema for the input CSV files to let our engine knows the specific data type that each column is
+At first, you have to set up the schema for the input CSV files to let your engine know the specific data type that each column is:
 
 .. code-block:: cpp
 
@@ -99,7 +87,7 @@ At first, you have to set up the schema for the input CSV files to let our engin
     // give the schema to the scan description
     sd_q1.schema = schema;
 
-Secondly, you may want to specify which columns that you want to calculate the hash value by
+Second, you migth want to specify which columns that you want to calculate the hash value by:
 
 .. code-block:: cpp
 
@@ -110,7 +98,7 @@ Secondly, you may want to specify which columns that you want to calculate the h
     sd_q1.hashatt[0] = 8;
     sd_q1.hashatt[1] = 9;
 
-Then, you should choose which columns that should be given in the result buffer
+Then, you should choose which columns that should be given in the result buffer:
 
 .. code-block:: cpp
 
@@ -126,7 +114,7 @@ Then, you should choose which columns that should be given in the result buffer
     sd_q1.att[5] = 9;  // l_linestatus;
     sd_q1.att[6] = 10; // l_shipdate;
 
-For filtering the specific column, you should set up a filter like
+For filtering the specific column, you should set up a filter like:
 
 .. code-block:: cpp
 
@@ -146,7 +134,7 @@ For filtering the specific column, you should set up a filter like
     // push the filter into the scan description
     sd_q1.filter = filter;
 
-After all the setups, you may want to set callback and instantiate the multi-thread processing by
+After all the setups, you might want to set callback and instantiate the multi-thread processing by:
 
 .. code-block:: cpp
 
@@ -196,7 +184,7 @@ After all the setups, you may want to set callback and instantiate the multi-thr
         printf("output rows %d\n", scan_ctxt[i].row_nm);
     }
 
-Finally, don't forget to release the resources after the acceleration process done
+Finally, do not forget to release the resources after the acceleration process is done.
 
 .. code-block:: cpp
 

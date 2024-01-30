@@ -1,29 +1,15 @@
-.. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+.. Copyright © 2019–2024 Advanced Micro Devices, Inc
 
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 ************************************
 Regular Expression Engine (reEngine)
 ************************************
 
-
 Overview
 ========
 
-At kernel level, the L2 ``reEngineKernel`` aims to provide an ability that a huge amount of logs could be matched efficiently under a single regular expression pattern where the L1 regex-VM matched only 1 message at a time. Thus, the ``reEngineKernel`` would be very suitable for analyzing a partiuclar logs, like `Apache2 (httpd)`_, `Apache_Error`_, `Nginx`_, or `Syslogs`_.
+At the kernel level, the L2 ``reEngineKernel`` aims to provide an ability that a huge amount of logs could be matched efficiently under a single regular expression pattern where the L1 regex-VM matched only one message at a time. Thus, the ``reEngineKernel`` would be very suitable for analyzing a partiuclar logs, like `Apache2 (httpd)`_, `Apache_Error`_, `Nginx`_, or `Syslogs`_.
 
 .. _`Apache2 (httpd)`: https://docs.fluentd.org/parser/apache2
 
@@ -37,25 +23,24 @@ At kernel level, the L2 ``reEngineKernel`` aims to provide an ability that a hug
 User Guide
 ==========
 
-The limitations comes from both kernel side and regex-VM, since our ``reEngineKernel`` is built upon L1 regex-VM. We just explain the kernel side limitations here, for those derived from primitive, please kindly refer to :ref:`guide-regex-VM`.
+The limitations come from both the kernel side and regex-VM, because your ``reEngineKernel`` is built upon a L1 regex-VM. The kernel side limitations are only explained here; for those derived from the primitive,  refer to :ref:`guide-regex-VM`.
 
-As the VM approach in L1 requires a certain size of on-chip RAMs inherently, the ``reEngineKernel`` is naturally bounded by RAMs. Thus, we cannot allocate unlimited size of buffer for configuration buffer ``cfg_buff``, message buffer ``msg_buff``, length buffer ``len_buff``, or result buffer ``out_buff``.
+As the VM approach in L1 requires a certain size of on-chip RAMs inherently, the ``reEngineKernel`` is naturally bounded by RAMs. Thus, you cannot allocate an unlimited size of buffer for the ``cfg_buff`` configuration buffer, ``msg_buff`` message buffer, ``len_buff`` length buffer, or ``out_buff``result buffer.
 
-Choose the size for each buffer wisely is extremely critical for the overall throughput and XCLBIN buildability. Please find a recommendation in ``re_engine_kernel.hpp`` in path ``L2/tests/text/reEngine/kernel``. Insufficient size for these parameters will directly cause the input regular expression pattern cannot be handled by the regex-VM, and the reEngine of course.
-
+Choosing the size for each buffer wisely is extremely critical for the overall throughput and XCLBIN buildability. Find a recommendation in ``re_engine_kernel.hpp`` in path ``L2/tests/text/reEngine/kernel``. Insufficient size for these parameters will directly cause the input regular expression pattern to not be handled by the regex-VM, and the reEngine, of course.
 
 reEngine Usage
 --------------
 
-Before instantiating the reEngine, users have to pre-compile their regular expression using the software compiler provided in L1 first to check if the pattern is supported by the current implementation of hardware VM. The compiler will give an error code ``XF_UNSUPPORTED_OPCODE`` if the pattern is not supported. A pass code ``ONIG_NORMAL`` along with the configurations (including instruction list, bit-set map etc.) will be given if the input is a valid pattern. Then, user should pass these configurations, the input messages, along with its corresponding lengths in bytes under the format defined above to the ``reEngineKernel`` to trigger the matching process. The ``reEngineKernel`` will automatically be responsible for splitting them to individual inputs and feeding them into the buffers required by L1 regex-VM, also collecting the results after the matching process done and placing them into output result buffer correspondingly.
+Before instantiating the reEngine, you have to pre-compile your regular expression using the software compiler provided in L1. First, check if the pattern is supported by the current implementation of the hardware VM. The compiler will give a ``XF_UNSUPPORTED_OPCODE`` error code if the pattern is not supported. A ``ONIG_NORMAL`` pass code along with the configurations (including instruction list, bit-set map, etc.) will be given if the input is a valid pattern. Then, you should pass these configurations, the input messages, along with its corresponding lengths in bytes under the format defined above to the ``reEngineKernel`` to trigger the matching process. The ``reEngineKernel`` will automatically be responsible for splitting them to individual inputs and feeding them into the buffers required by L1 regex-VM, also collecting the results after the matching process is done and placing them into an output result buffer correspondingly.
 
-As mentioned in :ref:`guide-regex-VM`, the bit-set map, instruction buffer, message buffer, and offset buffer are needed in hardware VM, and are not handled by itself. We think it is not necessary for users to deal with the details related to L1 at L2. Thus, these buffers will be automatically allocated in ``reEngineKernel`` according to the template parameters given by users. 
+As mentioned in :ref:`guide-regex-VM`, the bit-set map, instruction buffer, message buffer, and offset buffer are needed in the hardware VM, and are not handled by itself. It is not necessary for you to deal with the details related to L1 at L2. Thus, these buffers will be automatically allocated in ``reEngineKernel`` according to the template parameters given. 
 
 **Code Example**
 
-The following section gives a usage example for using reEngine in C++ based HLS design.
+The following section gives a usage example for using reEngine in a C++ based HLS design.
 
-Firstly, let me introduce the format of three buffer as the inputs of ``reEngineKernel`` here:
+First, introduce the format of three buffer as the inputs of ``reEngineKernel`` here:
 
 **cfg_buff**
 
@@ -78,18 +63,18 @@ Firstly, let me introduce the format of three buffer as the inputs of ``reEngine
    :width: 80%
    :align: center
 
-To use the regex-VM you need to:
+To use the regex-VM, you need to:
 
-1. Compile the software regular expression compiler by running ``make`` command in path ``L1/tests/text/regex_vm/re_compile``
+1. Compile the software regular expression compiler by running the ``make`` command in path ``L1/tests/text/regex_vm/re_compile``.
 
-2. Include the ``xf_re_compile.h`` header in path ``L1/include/sw/xf_data_analytics/text`` and the ``oniguruma.h`` header in path ``L1/tests/text/regex_vm/re_compile/lib/include``
+2. Include the ``xf_re_compile.h`` header in path ``L1/include/sw/xf_data_analytics/text`` and the ``oniguruma.h`` header in path ``L1/tests/text/regex_vm/re_compile/lib/include``.
 
 .. code-block:: cpp
 
     #include "oniguruma.h"
     #include "xf_re_compile.h"
 
-3. Compile your regular expression by calling ``xf_re_compile``
+3. Compile your regular expression by calling ``xf_re_compile``.
 
 .. code-block:: cpp
 
@@ -120,7 +105,7 @@ To use the regex-VM you need to:
         printf("\n");
     }
 
-4. Check the return value to see if its a valid pattern and supported by hardware VM. ``ONIG_NORMAL`` is returned if the pattern is valid, and ``XF_UNSUPPORTED_OPCODE`` is returned if it's not supported currently.
+4. Check the return value to see if it is a valid pattern and supported by the hardware VM. ``ONIG_NORMAL`` is returned if the pattern is valid, and ``XF_UNSUPPORTED_OPCODE`` is returned if it is not supported currently.
 
 .. code-block:: cpp
 
@@ -128,7 +113,7 @@ To use the regex-VM you need to:
         // Prepare the buffers and call reEngine for acceleration here
     }
 
-5. Once the regular expression is verified as a supported pattern, you may prepare the input buffers and get the results by
+5. Once the regular expression is verified as a supported pattern, you can prepare the input buffers and get the results by:
 
 .. code-block:: cpp
     // Function for writing one line of log to the corresponding buffers
@@ -229,7 +214,7 @@ To use the regex-VM you need to:
     // Call reEngine
     reEngineKernel(reinterpret_cast<ap_uint<64>*>(cfg_buff), reinterpret_cast<ap_uint<64>*>(msg_buff), reinterpret_cast<ap_uint<16>*>(len_buff), reinterpret_cast<ap_uint<32>*>(out_buff));
     
-The match flag and offset addresses for each capturing group are presented in ``out_buff`` with the format shown in the figure below:
+The match flag and offset addresses for each capturing group are presented in ``out_buff`` with the format shown in the following figure:
 
 **out_buff**
 
@@ -242,11 +227,11 @@ The match flag and offset addresses for each capturing group are presented in ``
 Implemention
 ============
 
-Unlike common L1 primitives, the hardware regex-VM is not using a stream-based interface due to the characteristic of the virtual machine (VM) approach. Thus, the dataflow tricks utilized in kernel level cannot be like the one commonly used in L2 implementation. We will give detailed explanations here.
+Unlike common L1 primitives, the hardware regex-VM is not using a stream-based interface due to the characteristic of the virtual machine (VM) approach. Thus, the dataflow tricks utilized in the kernel level cannot be like the one commonly used in the L2 implementation. Detailed explanations are provided here.
 
-For the common stream-based dataflow, we would like the interfaces between modules are FIFOs, and this is the reason why you find that the interfaces of L1 primitives are usually defined as ``hls::stream``. By implementing the interface as FIFOs, these connected modules works as systolic array when dataflow region applied to them. A consumer in the stream-based dataflow region goes on only if the producer before it gives a data to its input FIFO. Thus, it is not necessary for us to switch the module on or off manually.
+For the common stream-based dataflow, you want the interfaces between modules as FIFOs, and this is the reason why you find that the interfaces of L1 primitives are usually defined as ``hls::stream``. By implementing the interface as FIFOs, these connected modules works as systolic array when dataflow region applied to them. A consumer in the stream-based dataflow region goes on only if the producer before it gives a data to its input FIFO. Thus, it is not necessary for you to switch the module on or off manually.
 
-However, for those primitives with buffer interfaces like regex-VM, it comes to a ping-pong buffer structure when dataflow pragma applied to it. Since we have no empty signal as FIFO provided in buffer-based dataflow region, we have to control the modules manually to avoid malfunctioning on the pipeline. This can be explained as follows, suppose we have an input log which the messages within it needs `N` rounds to be all feeded into the buffers of each PU in ``reEngineKernel``:
+However, for those primitives with buffer interfaces like regex-VM, it comes to a ping-pong buffer structure when the dataflow pragma is applied to it. Because you have no empty signal as FIFO provided in the buffer-based dataflow region, you have to control the modules manually to avoid malfunctioning on the pipeline. This can be explained as follows; suppose you have an input log which the messages within it needs `N` rounds to be all fed into the buffers of each PU in ``reEngineKernel``:
 
 +-----------------------+-----------+-----------+-----------+-------+-------------+-----------+-------------+
 | Operation             | Round 0   | Round 1   | Round 2   | ...   | Round N - 1 | Round N   | Round N + 1 |
@@ -258,16 +243,15 @@ However, for those primitives with buffer interfaces like regex-VM, it comes to 
 | Collecting results    | No        | No        | Yes       | ...   | Yes         | Yes       | Yes         |
 +-----------------------+-----------+-----------+-----------+-------+-------------+-----------+-------------+
 
-We will not have a `N + 2` round, as the whole pipeline finished right after round `N + 1`.
+You will not have a `N + 2` round, as the whole pipeline finished right after round `N + 1`.
 
 .. NOTE::
-    This kernel implementation is very similar to the working pattern of common pipelined host as we provided in the other libraries, take this as a possible dataflow solution for integrating those primitives with buffer interfaces to L2 kernels. By doing so, you may achieve a reasonable acceleration ratio on hardware with the price of sacrificing double buffer storage.
-
+    This kernel implementation is very similar to the working pattern of the common pipelined host as provided in the other libraries; take this as a possible dataflow solution for integrating those primitives with buffer interfaces to L2 kernels. By doing so, you can achieve a reasonable acceleration ratio on hardware with the price of sacrificing double buffer storage.
 
 Profiling
 =========
 
-The hardware resource utilizations of reEngine (the one given in L2 test as an example on U200) is shown in the table below (performance optimized version at **FMax = 200MHz**).
+The hardware resource utilizations of reEngine (the one given in L2 test as an example on the Alveo U200) is shown in the following table (performance optimized version at **FMax = 200 MHz**).
 
 +----------------+--------+-----------+--------+--------+--------+
 | Item           |  LUT   |   REG     |  BRAM  | URAM   | DSP    |
@@ -277,7 +261,7 @@ The hardware resource utilizations of reEngine (the one given in L2 test as an e
 | (U200)         | 54.94% |  17.27%   | 70.53% | 60.00% | 0.53%  |
 +----------------+--------+-----------+--------+--------+--------+
 
-Number of PUs on each SLR is listed in the table below:
+The number of PUs on each SLR is listed in the following table:
 
 +---------+---------------+
 | SLR     | Number of PUs |
@@ -291,4 +275,4 @@ Number of PUs on each SLR is listed in the table below:
 
 Therefore, the kernel throughput should be:
 
-**Throughput = 12 * 387 MB/s = 4.64 GB/s**
+**Throughput = 12 * 387 Mb/s = 4.64 Gb/s**

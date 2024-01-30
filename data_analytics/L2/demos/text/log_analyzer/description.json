@@ -2,7 +2,7 @@
     "gui": false,
     "name": "Xilinx Log Analyzer Demo",
     "description": "Xilinx Log Analyzer Demo",
-    "flow": "vitis",
+    "flow": "system",
     "platform_type": "pcie",
     "platform_allowlist": [
         "u200"

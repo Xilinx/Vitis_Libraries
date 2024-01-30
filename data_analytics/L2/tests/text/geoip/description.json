@@ -2,37 +2,17 @@
     "gui": false,
     "name": "Xilinx Geo IP Test",
     "description": "Geo information look up with IP",
-    "flow": "vitis",
+    "flow": "system",
     "platform_type": "pcie",
     "platform_allowlist": [
-        "u50",
-        "u200",
         "u250",
-        "aws-vu9p-f1",
-        "vck190"
+        "vck190",
+        "aws-vu9p-f1"
     ],
     "platform_blocklist": [
         "zc"
     ],
     "platform_properties": {
-        "u50": {
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u50.cfg"
-                    ]
-                }
-            }
-        },
-        "u200": {
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u200_u250.cfg"
-                    ]
-                }
-            }
-        },
         "u250": {
             "v++": {
                 "compiler": {
@@ -140,11 +120,11 @@
                     "vitis_hw_run": 10240
                 },
                 "max_time_min": {
-		    "vitis_hw_build": 300,
-		    "vitis_hw_emu": 600,
-		    "vitis_sw_emu": 300,
-		    "vitis_hw_run": 300
-		}
+                    "vitis_hw_build": 300,
+                    "vitis_hw_emu": 600,
+                    "vitis_sw_emu": 300,
+                    "vitis_hw_run": 300
+                }
             }
         ],
         "targets": [

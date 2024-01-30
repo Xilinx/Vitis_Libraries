@@ -2,7 +2,7 @@
     "gui": false, 
     "name": "Xilinx L2 Geospatial KNN (SC) Test", 
     "description": "A SystemCompiler example for geospatial knn acceleration.", 
-    "flow": "vitis", 
+    "flow": "system", 
     "platform_allowlist": [
         "u50" 
     ], 

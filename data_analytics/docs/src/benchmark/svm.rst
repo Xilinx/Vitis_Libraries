@@ -1,18 +1,6 @@
-.. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+.. Copyright © 2019–2024 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _l2_svm:
 
@@ -20,33 +8,30 @@
 Support Vector Machine
 ======================
 
-Support vector machine(svm) resides in ``L2/benchmarks/classification/svm`` directory.
-
+Support vector machine (svm) resides in the ``L2/benchmarks/classification/svm`` directory.
 
 Dataset
 =======
 
-There are 2 dataset used in the benchmark:
+There are two datasets used in the benchmark:
  1 - PUF (https://archive.ics.uci.edu/ml/datasets/Physical+Unclonable+Functions)
 
  2 - HIGGS   (https://archive.ics.uci.edu/ml/datasets/HIGGS)
 
 +---------+---------+----------+------------+
-| Dataset | samples | features | iterations |
+| Dataset | Samples | Features | Iterations |
 +=========+=========+==========+============+
 | 1       | 2000000 |    64    |     20     |
 +---------+---------+----------+------------+
 | 2       | 5000000 |    28    |     100    |
 +---------+---------+----------+------------+
 
-
-
 Executable Usage
 ===============
 
-* **Work Directory(Step 1)**
+* **Work Directory (Step 1)**
 
-The steps for library download and environment setup can be found in :ref:`l2_vitis_data_analytics`. For getting the design,
+The steps for library download and environment setup can be found in :ref:`l2_vitis_data_analytics`. For getting the design:
 
 .. code-block:: bash
 
@@ -54,21 +39,21 @@ The steps for library download and environment setup can be found in :ref:`l2_vi
 
 * **Build kernel(Step 2)**
 
-Run the following make command to build your XCLBIN and host binary targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
+Run the following make command to build your XCLBIN and host binary targeting a specific device. This process will take a long time, maybe couple of hours.
 
 .. code-block:: bash
 
    make run TARGET=hw PLATFORM=xilinx_u250_gen3x16_xdma_3_1_202020_1  
 
-* **Run kernel(Step 3)**
+* **Run the Kernel (Step 3)**
 
-To get the benchmark results, please run the following command.
+To get the benchmark results, run the following command.
 
 .. code-block:: bash
 
    ./build_dir.hw.xilinx_u250_gen3x16_xdma_3_1_202020_1/test_svm.exe -xclbin build_dir.hw.xilinx_u250_gen3x16_xdma_3_1_202020_1/svm_4krnl.xclbin -in ./ml_datasets/1000.csv -trn 999 -ten 100 -fn 64 -itrn 1 -bn 10
 
-Support vector machine Input Arguments:
+Support Vector Machine Input Arguments:
 
 .. code-block:: bash
 
@@ -81,9 +66,9 @@ Support vector machine Input Arguments:
           -itrn  :      TBD
           -bn    :      TBD
 
-Note: Default arguments are set in Makefile, you can use other platforms to build and run.
+.. note:: Default arguments are set in the Makefile; you can use other platforms to build and run.
 
-* **Example output(Step 4)** 
+* **Example Output (Step 4)** 
 
 .. code-block:: bash
 
@@ -108,15 +93,13 @@ Note: Default arguments are set in Makefile, you can use other platforms to buil
     kernel3:63: -0.047047
     
     ------------------------------------------------------------
-   
 
 Profiling
 =========
 
-The support vector machine design is validated on Alveo U250 board at 300 MHz frequency. 
-The hardware resource utilizations are listed in the following table.
+The support vector machine design is validated on an AMD Alveo™ U250 board at a 300 MHz frequency. The hardware resource utilizations are listed in the following table.
 
-.. table:: Table 1 Hardware resources for support vector machine
+.. table:: Table 1 Hardware Resources for Support Vector Machine
     :align: center
     
     +---------------------+----------+---------+---------+--------+
@@ -141,11 +124,8 @@ The hardware resource utilizations are listed in the following table.
     | Percentage          |   23.71% |  12.08% |  10.31% | 10.04% |
     +---------------------+----------+---------+---------+--------+
     
-
 The performance is shown below.
-    In above test, this design takes 0.23ms to process 999 samples with 65 features, so its throughput is 1.05GB/s.
-
+    In above test, this design takes 0.23 ms to process 999 samples with 65 features, so its throughput is 1.05 Gb/s.
 
 .. toctree::
    :maxdepth: 1
-

@@ -2,7 +2,7 @@
     "gui": false, 
     "name": "Xilinx XGradient Boosted Tree Classification Training", 
     "description": "", 
-    "flow": "vitis", 
+    "flow": "system", 
     "platform_allowlist": [
         "u250"
     ], 
