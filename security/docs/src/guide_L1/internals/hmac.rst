@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: Vitis, Security, Library, HMAC, mode
@@ -30,7 +20,7 @@ HMAC Algorithms
 HMAC is a message authentication code (MAC) using a hash function. It combines with any cryptographic hash function, for example, md5, sha1, sha256.
 Hash function is wrapped to a class as one template parameter in HMAC and the wrapper class only has a static function involving the hash function.
 HMAC uses the wrapper's hash function directly inside. The design makes combination HMAC algorithm with hash function more flexible. 
-In xf_security lib, the key width (keyW), message width (msgW), key and message length width (lenW), hash value width (hshW) and block size of each hash function are list as below.
+In xf_security lib, the key width (keyW), message width (msgW), key and message length width (lenW), hash value width (hshW) and block size of each hash function are listed below.
 
 Configuration
 =================================

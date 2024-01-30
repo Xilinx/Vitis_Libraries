@@ -2,7 +2,7 @@
     "gui": true,
     "name": "Xilinx AES256CBC Encryption Benchmark",
     "description": "AES256 CBC Mode Encryption Benchmark",
-    "flow": "vitis",
+    "flow": "system",
     "platform_type": "",
     "platform_allowlist": [
         "u250"

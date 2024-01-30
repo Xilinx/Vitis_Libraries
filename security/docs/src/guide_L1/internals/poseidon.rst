@@ -1,18 +1,7 @@
 .. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: Vitis, Security, Library, CBC, mode
@@ -33,7 +22,7 @@ Overview
 ========
 
 Poseidon is a hash algorithm work natively with GF(p) objects. 
-It’s a cryptographic hash function designed to work with integrity proof systems like SNARKs, STARKs, etc.
+It is a cryptographic hash function designed to work with integrity proof systems like SNARKs, STARKs, and so on.
 You can find detailed parameters and cryptographic analysis in `POSEIDON: A New Hash Function for Zero-Knowledge Proof Systems<https://eprint.iacr.org/2019/458.pdf>`_.
 
 Implementation on FPGA

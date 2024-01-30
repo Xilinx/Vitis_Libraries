@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: Vitis, Security, Library, OFB, mode
@@ -30,19 +20,19 @@ Overview
 ========
 
 The Output Feedback (OFB) mode is a typical block cipher mode of operation using block cipher algorithm.
-In this version, we provide Data Encryption Standard (DES) and Advanced Encryption Standard (AES) processing ability,
-the cipherkey length for DES should be 64 bits, and 128/192/256 bits for AES.
-Another limitation is that our working mode works on units of a fixed size (64 or 128 bits for 1 block),
+In this version, Data Encryption Standard (DES) and Advanced Encryption Standard (AES) processing ability are provided.
+The cipherkey length for DES should be 64 bits, and 128/192/256 bits for AES.
+Another limitation is that the working mode works on units of a fixed size (64 or 128 bits for 1 block),
 but text in the real world has a variety of lengths.
 So, the last block of the text provided to this primitive must be padded to 128 bits before encryption or decryption. 
 
 Implementation on FPGA
 ======================
 
-We support OFB-DES, OFB-AES128, OFB-AES192, and OFB-AES256 modes in this implementation.
+OFB-DES, OFB-AES128, OFB-AES192, and OFB-AES256 modes are supported in this implementation.
 
 .. ATTENTION::
-    The bit-width of the interfaces we provide is shown as follows:
+    The bit-width of the interfaces provided is shown below:
 
     +-----------+-----------+------------+-----------+----+
     |           | plaintext | ciphertext | cipherkey | IV |
@@ -57,14 +47,14 @@ We support OFB-DES, OFB-AES128, OFB-AES192, and OFB-AES256 modes in this impleme
     +-----------+-----------+------------+-----------+----+
 
 
-The algorithm flow chart is shown as follow:
+The algorithm flow chart is shown as follows:
 
 .. image:: /images/OFB_working_mode.png
    :alt: algorithm flow chart of OFB
    :width: 100%
    :align: center
 
-As we can see from the chart, both encryption and decryption part of OFB mode has dependencies,
+As seen from the chart, both encryption and decryption part of OFB mode has dependencies,
 so the input block of each iteration (except for iteration 0) needs a feedback data from its last iteration.
 Thus, the initiation interval (II) of OFB mode cannot achieve an II = 1.
 

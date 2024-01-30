@@ -1,21 +1,11 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright ©2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: Vitis, Security, Library, DES, 3DES, algorithm, Triple DES
-   :description: DES (Data Encryption Algorithm) is to encipher and decipher 64 bit data blocks using 64 bit key. 3DES (Triple DES) is an enhancement of DES. It needs 3 keys, and consists of 3 rounds of DES. 
+   :description: DES (Data Encryption Algorithm) is to encipher and decipher 64-bit data blocks using 64 bit key. 3DES (Triple DES) is an enhancement of DES. It needs three keys, and consists of three rounds of DES. 
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
 
@@ -28,13 +18,13 @@ DES and 3DES Algorithms
 .. toctree::
    :maxdepth: 1
 
-DES (Data Encryption Algorithm) is to encipher and decipher 64 bit data blocks using 64 bit key. The key is scheduled to construct 16 round keys.
+DES (Data Encryption Algorithm) is to encipher and decipher 64 bit data blocks using 64-bit key. The key is scheduled to construct 16 round keys.
 These round keys are used in encryption and decryption flow.
 
 In DES specification, data blocks and keys are composed of bits numbered
 from left to right, meaning that the left most bit is bit one.
 
-3DES (Triple DES) is an enhancement of DES. It needs 3 keys, and consists of 3 rounds of DES. 
+3DES (Triple DES) is an enhancement of DES. It needs three keys, and consists of three rounds of DES. 
 
 Algorithm Flow
 =======================
@@ -84,7 +74,7 @@ each round key. As a result, we can calculate the mapping beforehand and
 make the entire process in key schedule into direct assignments of round keys.
 
 The data block and key are using different endian approach from arbitrary
-precision data type defined in HLS, so endian convertion for original data block
+precision data type defined in HLS, so endian conversion for original data block
 and key is added before and after encryption and decryption.
 
 The implemented DES encryption/decryption flow is shown in the following figure.

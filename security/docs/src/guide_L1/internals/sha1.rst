@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: Vitis, Security, Library, SHA-1, Algorithm
@@ -30,7 +20,7 @@ SHA-1 Algorithm
 Overview
 ========
 
-The SHA-1 secure hash algorithm is a hash-based cryptographic function, it takes a message of arbitrary length as its input, produces a 160-bit digest. It has a padding and appending process before digest the message of arbitrary length.
+The SHA-1 secure hash algorithm is a hash-based cryptographic function, it takes a message of arbitrary length as its input, produces a 160-bit digest. It has a padding and appending process before digesting the message of arbitrary length.
 
 The SHA-1 algorithm is defined in `FIPS 180`_.
 
@@ -39,16 +29,16 @@ The SHA-1 algorithm is defined in `FIPS 180`_.
 Implementation on FPGA
 ======================
 
-The internal structure of SHA-1 is shown in the figure below:
+The internal structure of SHA-1 is shown in the following figure:
 
 .. image:: /images/internal_structure_of_sha1.png
    :alt: Structure of SHA-1
    :width: 100%
    :align: center
 
-As we can see from the figures, the hash calculation can be partitioned into two parts.
+As seen from the figures, the hash calculation can be partitioned into two parts.
 
-* The pre-processing part pads or splits the input message which is comprised by a stream of 32-bit words into fixed sized blocks (512-bit for each).
+* The pre-processing part pads or splits the input message, which is comprised by a stream of 32-bit words into fixed sized blocks (512-bit for each).
 
 * The digest part iteratively computes the hash values. Loop-carried dependency is enforced by the algorithm itself, thus this part cannot reach an initiation interval (II) = 1.
 

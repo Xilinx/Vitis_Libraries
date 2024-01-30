@@ -1,18 +1,7 @@
 .. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 
 .. meta::
@@ -29,9 +18,9 @@
 hmacSha1
 ========
 
-To profile performance of hmacSha1, we prepare a datapack of 512K messages, each message is 1Kbyte,
-key length is 256bits. We have 4 kernels, each kernel has 16 PUs.
-Kernel utilization and throughput is shown in table below.
+To profile performance of hmacSha1, prepare a datapack of 512K messages, each message is 1Kbyte,
+key length is 256bits. You have four kernels, each kernel has 16 PUs.
+Kernel utilization and throughput are shown in the following table.
 
 Executable Usage
 ================
@@ -46,7 +35,7 @@ The steps for library download and environment setup can be found in :ref:`l1_vi
 
 * **Build kernel(Step 2)**
 
-Run the following make command to build your XCLBIN and host binary targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
+Run the following make command to build your XCLBIN and host binary targeting a specific device. This process takes long.
 
 .. code-block:: bash
 
@@ -58,7 +47,7 @@ Run the following make command to build your XCLBIN and host binary targeting a 
 
 * **Run kernel(Step 3)**
 
-To get the benchmark results, please run the following command.
+To get the benchmark results, run the following command.
 
 .. code-block:: bash
 
@@ -90,8 +79,8 @@ Input Arguments:
 Profiling 
 =========
 
-The hmacSha1 is validated on Xilinx Alveo U250 board. 
-Its resource, frequency and throughput is shown as below.
+The hmacSha1 is validated on an AMD Alveo |trade| U250 board. 
+Its resource, frequency, and throughput are shown below.
 
 +-----------+----------------+------------------+--------------+-------+----------+-------------+
 | Frequency |      LUT       |        REG       |     BRAM     |  URAM |   DSP    | Throughput  |
@@ -102,3 +91,8 @@ Its resource, frequency and throughput is shown as below.
 
 .. toctree::
    :maxdepth: 1
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

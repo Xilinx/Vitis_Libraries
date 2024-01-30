@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: Vitis, Security, Library, RSA, Cryptography
@@ -26,18 +16,18 @@ Digital Signature Algorithm
 .. toctree::
    :maxdepth: 1
 
-Digital Signature Algorithm (DSA) is a public-key cryptosystem. It's is used to generate and verify digital signature.
+Digital Signature Algorithm (DSA) is a public-key cryptosystem. It is used to generate and verify the digital signature.
 Details of DSA could be found in FIPS.186-4, section 4.
 
 Implementation
 ==============
 
-DSA have two pair of functions: updateSigningParam and sign, updateVerifyingParam and verify. Also we have two implementation for updateSigningParam and updateVerifyingParam, a trivial one and another one with one extra arguments. The extra argument is actually 2^(2*N) mod P. If you have this arguments pre-calculated, you could call the one with this argument. Otherwise you could call the one without this arguments and we will calculate it on chip with extra resource.
+DSA has two pair of functions: updateSigningParam and sign, updateVerifyingParam and verify. You also have two implementation for updateSigningParam and updateVerifyingParam, a trivial one and one with extra arguments. The extra argument is actually 2^(2*N) mod P. If you have the arguments pre-calculated, call the one with this argument. Otherwise, call the one without the arguments and calculate it on chip with an extra resource.
 
 Optimized Implementation on FPGA
 =================================
 
-Like RSA, DSA also relies on modular exponential calculation. We adopt the same method and do the expensive modular exponential calculaiton on the Montgomery field and then convert it back to normal representation. In this way, we could eliminate most integer division and multiplication to save resource and have higher frequency.
+Like RSA, DSA also relies on modular exponential calculation. Adopt the same method and do the expensive modular exponential calculation on the Montgomery field and then convert it back to normal representation. In this way, you can eliminate most integer division and multiplication to save resource and have higher frequency.
 
 Reference
 ========

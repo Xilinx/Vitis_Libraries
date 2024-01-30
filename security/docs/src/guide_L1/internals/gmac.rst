@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: Vitis, Security, Library, GMAC, mode
@@ -30,9 +20,9 @@ Overview
 ========
 
 Galois Message Authentication Code (GMAC) is an specialization of the GCM(Galois/Counter mode) and used for authentication, as defined in `NIST800_38D`_.
-In this version, we provide Advanced Encryption Standard (AES) based processing ability,
+In this version, Advanced Encryption Standard (AES) based processing ability is provided.
 The cipherkey length for AES should be 128/192/256 bits.
-Our implementation takes a fix-sized (128 bits per block) data stream, but text in real world has a variety of lengths.
+The implementation takes a fix-sized (128 bits per block) data stream, but the text in real world has a variety of lengths.
 Thus, you need to provide the data length in bits accompany with the data.
 
 .. _`NIST800_38D`: https://csrc.nist.gov/publications/detail/sp/800-38d/final
@@ -40,17 +30,17 @@ Thus, you need to provide the data length in bits accompany with the data.
 Implementation on FPGA
 ======================
 
-The GMAC algorithm is shown as the figure below:
+The GMAC algorithm is shown in the following figure:
 
 .. image:: /images/GMAC.png
    :alt: GMAC algorithm flow chart
    :width: 100%
    :align: center
 
-We support GMAC using AES block cipher in this implementation.
+GMAC is supported using an AES block cipher in this implementation.
 
 .. ATTENTION::
-    The bit-width of the interfaces we provide is shown as follows:
+    The bit-width of the interfaces provided is shown as follows:
 
     +-----------+----------+-----------+-----------+----+----+
     |           |   data   |  lenData  | cipherkey | IV | tag|
@@ -69,14 +59,14 @@ We support GMAC using AES block cipher in this implementation.
     1. The bit-width of initialization vector must be precisely 96 as recommended in the standard 
     to promote interoperability, efficiency, and simplicity of the design.
 
-The internal structure of GMAC is shown in the figure below:
+The internal structure of GMAC is shown in the following figure:
 
 .. image:: /images/internal_structure_of_gmac.png
    :alt: Structure of GMAC
    :width: 100%
    :align: center
 
-As we can see from the chart, the GMAC can be divided into two individual parts: The preGMAC and genGMAC.
+As seen from the chart, the GMAC can be divided into two individual parts: The preGMAC and genGMAC.
 These two parts can work independently, so they are designed into parallel dataflow processes,
 connected by streams (FIFOs).
 

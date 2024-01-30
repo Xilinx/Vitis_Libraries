@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: Vitis, Security, Library, XTS, mode
@@ -31,18 +21,17 @@ Overview
 
 The XTS working mode is a typical block cipher mode of operation using block cipher algorithm.
 The acronym of XTS stands for XEX Tweakable Block Ciphertext Stealing.
-According to this "ciphertext stealing" method, XTS can encrypt or decrypt sequences of arbitrary length of data block.
-i.e., data string that is 256 bits or 257 bits.
-Therefore, in XTS mode, the input or output data may also consist of a number of blocks in 128 bits followed by a separated partial block which is not empty and less than 128 bits.
+According to this ciphertext stealing method, XTS can encrypt or decrypt sequences of arbitrary length of data block, that is, data string that is 256 bits or 257 bits.
+Therefore, in an XTS mode, the input or output data might also consist of a number of blocks in 128 bits followed by a separated partial block, which is not empty and less than 128 bits.
 By IEEE Std 1619-2007, two cipherkeys in 256 bits are required in XTS mode. They are called tweakable key and encryption key, respectively.
 
 Implementation on FPGA
 ======================
 
-We support XTS-AES128 and XTS-AES256 modes in this implementation.
+XTS-AES128 and XTS-AES256 modes are supported in this implementation.
 
 .. ATTENTION::
-    The bit-width of the interfaces we provide is shown as follows:
+    The bit-width of the interfaces provided is shown as follows:
 
     +-----------+-----------+------------+-----------+-----+-----------+
     |           | plaintext | ciphertext | cipherkey | IV  | textlength|
@@ -53,16 +42,16 @@ We support XTS-AES128 and XTS-AES256 modes in this implementation.
     +-----------+-----------+------------+-----------+-----+-----------+
 
     
-The algorithm flow chart is shown as follow:
+The algorithm flow chart is shown as follows:
 
 .. image:: /images/XTS_working_mode.png
    :alt: algorithm flow chart of XTS
    :width: 100%
    :align: center
 
-As we can see from the chart, the dependency of XTS encryption flow only exists between the first block and the second to last block. It is same as shown in XTS decryption flow.
+As seen from the chart, the dependency of XTS encryption flow only exists between the first block and the second to last block. It is same as shown in the XTS decryption flow.
 Therefore, the initiation interval (II) of XTS encryption and decryption mode can achieve 1.
-Notice that one one-word AES encryption module is instanced in XTS decryption.
+One one-word AES encryption module is instanced in XTS decryption.
 
 Profiling
 =========

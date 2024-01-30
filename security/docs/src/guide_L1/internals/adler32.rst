@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: Vitis, Security, Library, Adler
@@ -41,7 +31,7 @@ The Adler32 algorithm is defined in `RFC 1950`_ and `Wiki Adler32`_.
 Implementation on FPGA
 ======================
 
-For :math:`s1`, its calculation process is very simple and will not affect performance, so there is not explanation for implementation, please refer to the code directly for details.
+For :math:`s1`, its calculation process is simple and does not affect performance, so there is no explanation for implementation. Refer to the code directly for details.
 
 .. math::
     
@@ -62,4 +52,4 @@ In code, the process is as follows:
 3. calcute :math:`s1+=tmp[0]` and :math:`s2=s1*W+tmp[0]+tmp[i]+\cdots +tmp[W-1]`, and ensure that :math:`s1` and :math:`s2` are less than 65521.
 4. set :math:`i+=W`, if :math:`i<size`, go to step 2, otherwise end.
 
-For more information, please check out source code.
+For more information, check out source code.

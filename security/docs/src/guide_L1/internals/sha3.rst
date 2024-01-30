@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: Vitis, Security, Library, SHA-3, Algorithm
@@ -33,9 +23,9 @@ SHA-3 (Secure Hash Algorithm 3) is a set of cryptographic hash functions defined
 `FIPS 202`_: SHA-3 Standard: Permutation-Based Hash and Extendable-Output Functions.
 
 The SHA-3 family consists of six hash functions with digests (hash values) that are
-128, 224, 256, 384 or 512 bits: SHA3-224, SHA3-256, SHA3-384, SHA3-512, SHAKE128, SHAKE256.
+128, 224, 256, 384, or 512 bits: SHA3-224, SHA3-256, SHA3-384, SHA3-512, SHAKE128, SHAKE256.
 
-Currently, this library supports all of the algorithms mentioned above.
+Currently, this library supports all algorithms mentioned above.
 
 * SHA3-224
 * SHA3-256
@@ -49,7 +39,7 @@ Currently, this library supports all of the algorithms mentioned above.
 Implementation on FPGA
 ======================
 
-The internal structure of SHA-3 algorithms can be shown as the figures below:
+The internal structure of SHA-3 algorithms is seen in the following figures:
 
 .. image:: /images/internal_structure_of_sha3.png
    :alt: Structure of SHA-3 algorithms
@@ -62,7 +52,7 @@ The internal structure of SHA-3 algorithms can be shown as the figures below:
    :align: center
 
 
-As we can see from the figures, hash calculation in both SHA-3 and SHAKE is much different from SHA-1 and SHA-2.
+As seen from the figures, hash calculation in both SHA-3 and SHAKE is much different from SHA-1 and SHA-2.
 Since the internal state array is updated iteratively (by the input message) and used in the next permutation,
 it cannot be partitioned into block generation part and digest part.
 
@@ -105,7 +95,7 @@ SHA3-256
 A single instance of SHA3-256 function processes input message at the rate of
 ``136 byte / 1104 cycles`` at 306.65MHz.
 
-The hardware resource utilizations of SHA3-256 is listed in :numref:`tab1SHA3256` below:
+The hardware resource utilizations of SHA3-256 are listed in :numref:`tab1SHA3256` below:
 
 .. _tab1SHA3256:
 
@@ -124,7 +114,7 @@ SHA3-384
 A single instance of SHA3-384 function processes input message at the rate of
 ``104 byte / 1100 cycles`` at 310.75MHz.
 
-The hardware resource utilizations of SHA3-384 is listed in :numref:`tab1SHA3384` below:
+The hardware resource utilizations of SHA3-384 are listed in :numref:`tab1SHA3384` below:
 
 .. _tab1SHA3384:
 
@@ -143,7 +133,7 @@ SHA3-512
 A single instance of SHA3-512 function processes input message at the rate of
 ``72 byte / 1096 cycles`` at 316.25MHz.
 
-The hardware resource utilizations of SHA3-512 is listed in :numref:`tab1SHA3512` below:
+The hardware resource utilizations of SHA3-512 are listed in :numref:`tab1SHA3512` below:
 
 .. _tab1SHA3512:
 
@@ -162,7 +152,7 @@ SHAKE-128
 A single instance of SHAKE-128 function processes input message at the rate of
 ``168 byte / 1108 cycles`` at 306.37MHz.
 
-The hardware resource utilizations of SHAKE-128 is listed in :numref:`tab1SHAKE128` below:
+The hardware resource utilizations of SHAKE-128 are listed in :numref:`tab1SHAKE128` below:
 
 .. _tab1SHAKE128:
 
@@ -181,7 +171,7 @@ SHAKE-256
 A single instance of SHAKE-256 function processes input message at the rate of
 ``136 byte / 1104 cycles`` at 302.02MHz.
 
-The hardware resource utilizations of SHAKE-256 is listed in :numref:`tab1SHAKE256` below:
+The hardware resource utilizations of SHAKE-256 are listed in :numref:`tab1SHAKE256` below:
 
 .. _tab1SHAKE256:
 
@@ -197,6 +187,6 @@ The hardware resource utilizations of SHAKE-256 is listed in :numref:`tab1SHAKE2
 Clustering
 -----------
 
-To boost the throughput of SHA-3 primitives, multiple instance can be organized into a cluster,
+To boost the throughput of SHA-3 primitives, multiple instances can be organized into a cluster,
 and offer message level parallelism.
 

@@ -2,7 +2,7 @@
     "gui": false, 
     "name": "Xilinx Adler32 Benchmark", 
     "description": "Adler32 checksum algorithm benchmark", 
-    "flow": "vitis", 
+    "flow": "system", 
     "platform_allowlist": [
         "u50", 
         "aws-vu9p-f1"

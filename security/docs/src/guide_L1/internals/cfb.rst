@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: Vitis, Security, Library, CFB, mode
@@ -31,22 +21,22 @@ Overview
 ========
 
 The Cipher Feedback (CFB) mode is a typical block cipher mode of operation using block cipher algorithm.
-In this version, we provide Data Encryption Standard (DES) and Advanced Encryption Standard (AES) processing ability,
-the cipherkey length for DES should be 64 bits, and 128/192/256 bits for AES.
-Another limitation is that our working mode works on units of a fixed size (64 or 128 bits for 1 block),
-but text in the real world has a variety of lengths.
+In this version, Data Encryption Standard (DES) and Advanced Encryption Standard (AES) processing ability are provided.
+The cipherkey length for DES should be 64 bits, and 128/192/256 bits for AES.
+Another limitation is that the working mode works on units of a fixed size (64 or 128 bits for 1 block),
+but the text in the real world has a variety of lengths.
 So, the last block of the text provided to this primitive must be padded to 128 bits before encryption or decryption.
-Although, CFB1 and CFB8 modes share the same interface with CFB128 mode, the plaintext and ciphertext is processed bit-by-bit or byte-by-byte not block-by-block for CFB1 and CFB8 modes respectively.
+Although, CFB1 and CFB8 modes share the same interface with CFB128 mode, the plaintext and ciphertext is processed bit-by-bit or byte-by-byte not block-by-block for CFB1 and CFB8 modes, respectively.
 
 Implementation on FPGA
 ======================
 
-We support three different modes in this implementation: CFB1, CFB8, and CFB128.
+Three different modes are supported in this implementation: CFB1, CFB8, and CFB128.
 The length of the text to be processed in one iteration corresponding to specific mode.
 CFB1 is 1 bit per iteration, CFB8 is 8 bits per iteration, and CFB128 is 128 bits per iteration.
 
 .. ATTENTION::
-    The bit-width of the interfaces we provide is shown as follows:
+    The bit-width of the interfaces are shown as follows:
 
     +--------------+-----------+------------+-----------+----+
     |              | plaintext | ciphertext | cipherkey | IV |
@@ -77,14 +67,14 @@ CFB1 is 1 bit per iteration, CFB8 is 8 bits per iteration, and CFB128 is 128 bit
     +--------------+-----------+------------+-----------+----+
 
 
-The algorithm flow chart is shown as follow, and the length of the text is denoted as 's':
+The algorithm flow chart is shown as follows, and the length of the text is denoted as 's':
 
 .. image:: /images/CFB_working_mode.png
    :alt: algorithm flow chart of CFB
    :width: 100%
    :align: center
 
-As we can see from the chart, the encryption part of each CFB mode has loop-carried dependency which is enforced by the algorithm, the input block of each iteration (except for iteration 0) needs a feedback data from its last iteration.
+As seen from the chart, the encryption part of each CFB mode has loop-carried dependency, which is enforced by the algorithm, the input block of each iteration (except for iteration 0) needs a feedback data from its last iteration.
 Thus, the initiation interval (II) of each CFB encryption mode cannot achieve an II = 1.
 However, the decryption part of each CFB mode has no dependencies, so that it can achieve an II = 1.
 
