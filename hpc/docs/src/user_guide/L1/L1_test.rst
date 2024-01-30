@@ -1,18 +1,7 @@
 .. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _user_guide_test_l1:
 
@@ -24,20 +13,20 @@ All L1 primitives' implementations have been tested against implementations in p
 That is, a python based testing environment has been developed to generate random test inputs 
 for each primitive, compute the golden reference, and finally compare the golden reference 
 with the csim and cosim outputs of the primitive to verify the correctness of the implementation.
-To run the testing process of L1 primitives, please follow the steps below.
+To run the testing process of L1 primitives, follow the steps below.
 
 1. Set up Python environment
 =============================
-Please follow the instructions described in :doc:`Python environment setup guide <../../pyenvguide>` 
+Follow the instructions described in :doc:`Python environment setup guide <../../pyenvguide>` 
 to install anaconda3 and setup xf_hpc environment.
 All testing should be run under xf_hpc environment.
-Please deactivate xf_hpc environment after testing.
+Deactivate xf_hpc environment after testing.
 
 2. Set up Vitis_hls environment
 =================================
-Please navigate to directory L1/tests, and change the setting of environment variable 
-**TA_PATH** to point to the installation path of your Vitis, 
-and run following command to set up Vivado_hls environment.
+Navigate to directory L1/tests, and change the setting of environment variable 
+**TA_PATH** to point to the installation path of your AMD Vitis |trade|, 
+and run the following command to set up Vivado_hls environment.
 
 .. code-block:: bash
 
@@ -46,10 +35,10 @@ and run following command to set up Vivado_hls environment.
 
 3. Test L1 primitives
 ==============================
-To launch the testing process, please navigate to the directory **L1/tests/hw/**.
-There are three functions under testing in this direcotry. For each function,
+To launch the testing process, navigate to the directory **L1/tests/hw/**.
+There are three functions under testing in this directory. For each function,
 there are several test cases with various configurations under **./tests/** directory. 
-For each test case, please use following commands to check the Makefile usage
+For each test case, use the following commands to check the Makefile usage.
 
 .. code-block:: bash
 
@@ -63,7 +52,7 @@ Makefile usage example:
 
 Command to run the selected tasks for specified device. Valid tasks are 'CSIM', 'CSYNTH', 'COSIM', 'VIVADO_SYN', 'VIVADO_IMPL'. 
 
-'PLATFORM_REPO_PATHS' variable is used to specify the paths in which the platform files will be searched for.
+'PLATFORM_REPO_PATHS' variable is used to specify the paths in which the platform files are searched for.
 
 'PLATFORM' is case-insensitive and support awk regex. For example:
 
@@ -72,3 +61,8 @@ Command to run the selected tasks for specified device. Valid tasks are 'CSIM', 
     make run PLATFORM='u280.*xdma' COSIM=1
 
 It can also be an absolute path to a platform file. 
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

@@ -2,7 +2,7 @@
     "gui": false,
     "name": "Xilinx XF_HPC MLP FCN 1CU Level 2 Test", 
     "description": "Xilinx XF_HPC MLP Test", 
-    "flow": "vitis", 
+    "flow": "system", 
     "platform_type": "pcie", 
     "gui": false,
     "platform_allowlist": [

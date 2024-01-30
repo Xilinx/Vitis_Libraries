@@ -1,17 +1,7 @@
 .. 
-   Copyright 2019 - 2021 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: HPC, Library, MLP, RTM, Solver
@@ -32,7 +22,7 @@ Release Note
 2020.1
 ----
 
-Vitis HPC Libraray release 2020.1 introduces HLS primitives, pre-built kernles and software APIs for several HPC applications on FPGAs. These applications are: 
+AMD Vitis |trade| HPC Library release 2020.1 introduces HLS primitives, pre-built kernels and software APIs for several HPC applications on FPGAs. These applications are: 
 
 * 2D Acoustic RTM (Reverse Time Migration) based on FDTD (Finite Difference Time Domain) algorithm, including forward kernel and backward kernel
 
@@ -41,7 +31,7 @@ Vitis HPC Libraray release 2020.1 introduces HLS primitives, pre-built kernles a
 2021.1
 ----
 
-Vitis HPC Libraray 2021.2 release introduces HLS primitives, prebuild kernles and software APIs for HPC applications on FPGAs. These applications are: 
+Vitis HPC Library 2021.2 release introduces HLS primitives, prebuild kernels and software APIs for HPC applications on FPGAs. These applications are: 
 
 * 2D Acoustic RTM (Reverse Time Migration) based on FDTD (Finite Difference Time Domain) algorithm, including forward kernel and backward kernel
 
@@ -50,3 +40,8 @@ Vitis HPC Libraray 2021.2 release introduces HLS primitives, prebuild kernles an
 * MLP (Mult-Layer Perceptron) and its components including common activation functions and fully connected network kernels 
 
 * PCG (Preconditioned Conjugate Gradient) solvers for both dense and sparse matrix
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

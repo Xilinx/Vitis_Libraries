@@ -1,18 +1,7 @@
 .. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 ***************************************************************
 GEMV-based Conjugate Gradient Solver with Jacobi Preconditioner
@@ -22,14 +11,14 @@ Introduction
 ############
 
 CG solver is widely adopted to solve linear system Ax=b, where the matrix A is symmetric and positive definite. 
-Here is the benchmark for GEMV-based CG solver with the Jacobi preconditioner on Xilinx FPGA Alveo U50. 
+Here is the benchmark for GEMV-based CG solver with the Jacobi preconditioner on AMD FPGA AMD Alveo |trade| U50. 
 
 Executable Usage
 #################
 
 Environment Setup (Step 1)
 ******************************
-Please follow the page :doc:`Benchmark Overview <../../../benchmark>` to correctly setup the environment first.  
+Follow the page :doc:`Benchmark Overview <../../../benchmark>` to correctly setup the environment first.  
 
 Build Kernel (Step 2)
 ******************************
@@ -42,16 +31,16 @@ With the following commands, kernel bitstream *cgSolver.xclbin* is built under t
 
 Prepare Data (Step 3)
 ******************************
-To benchmark the kernel, there two ways to prepare the data. 
+To benchmark the kernel, there are two ways to prepare the data. 
 
 Randomly-Generated Data (Optional)
 =======================================
-You could safely skip this step as it is integrated with the one in the next step if you choose to use random data for the benchmark. 
-Here states the principle of how it works.  With the following commands with given vector size e.g. 1024,  three data files are generated under directory *./build_dir.hw.xilinx_u50_gen3x16_xdma_201920_3/data/*.  
+Safely skip this step as it is integrated with the one in the next step if you choose to use random data for the benchmark. 
+Here states the principle of how it works.  With the following commands with given vector size, for example, 1024,  three data files are generated under directory *./build_dir.hw.xilinx_u50_gen3x16_xdma_201920_3/data/*.  
 
 1.	It generates a random **SPD** matrix of size *NxN* with data type FP64 and then stores the data in a row-major to file *A.mat*.
 2.	It generates a random FP64 vector of size *N* and then compute vector *b = Ax*.
-3.	The two vectors are stored into files *x.mat* and *b.mat* respectively. 
+3.	The two vectors are stored into files *x.mat* and *b.mat*, respectively. 
 
 Matrix *A* and vector *b* are used as inputs for the solver, and vector *x* is used as the golden reference. 
 
@@ -64,12 +53,12 @@ where *N* is the vector size and must be multiple of 16.
 Users' data
 ==================
 
-Users could prepare their own data for benchmark. 
-1.	Please prepare a **SPD** matrix with double precision floating point data type.
-2.	Please prepare golden reference vector and result vector which is the product of the matrix and the golden reference.
-3.	Please make sure the matrix size is *NxN* and vector size is *N*
-4.	Please make sure*N* is multiple of 16.
-5.	Please store the matrix, golden reference vector and result vector to binary files named  *A.mat*, *x.mat* and *b.mat* respectively, and place them into a directory.
+You could prepare your data for benchmark. 
+1.	Prepare a **SPD** matrix with double precision floating point data type.
+2.	Prepare golden reference vector and result vector which is the product of the matrix and the golden reference.
+3.	Make sure the matrix size is *NxN* and vector size is *N*
+4.	Make sure*N* is multiple of 16.
+5.	Store the matrix, golden reference vector and result vector to binary files named  *A.mat*, *x.mat* and *b.mat* respectively, and place them into a directory.
 
 Run on FPGA with Example Data (Step 4)
 ******************************************
@@ -86,13 +75,13 @@ If you followed the guide and correctly setup the environment, you are able to r
 Benchmark Random Dataset
 =========================
 
-If you decide to use randomly generated data for benchmark in step 3, you could skip that step and run the following command with given vector size *N*, e.g. 1024 and maximum number of iterations for the solver e.g. 100. 
+If you decide to use randomly generated data for benchmark in step 3, you could skip that step and run the following command with given vector size *N*, for example, 1024 and maximum number of iterations for the solver, for example, 100. 
 
 .. code-block:: bash
 
     $ make run TARGET=hw PLATFORM=xilinx_u50_gen3x16_xdma_201920_3 N=1024 maxIter=100 deviceID=0
 
-Here lists the configurable parameters with the *make* command for the benchmark. 
+The following table lists the configurable parameters with the *make* command for the benchmark. 
 
 .. table:: Parameters with make command 
     :align: center
@@ -184,3 +173,7 @@ Power data could be obtained by
 
     $ xbutil top -d <PLATFORM ID>
 
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

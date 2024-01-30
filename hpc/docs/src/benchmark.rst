@@ -1,18 +1,8 @@
 .. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   
+.. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 
 ************
@@ -27,8 +17,8 @@ Performance
 Conjugate Gradient Algorithm
 ****************************
 
-Here are benchmarks of the Vitis HPC Library using the Vitis environment and comparing results on several FPGA and CPU platforms.
-It supports software and hardware emulation as well as running hardware accelerators on the Alveo U250, U280 or U50.
+Here are the benchmarks of the AMD Vitis |trade| HPC Library using the Vitis environment and comparing results on several FPGA and CPU platforms.
+It supports software and hardware emulation as well as running hardware accelerators on the AMD Alveo |trade| U250, U280, or U50.
 
 GEMV-based CG
 ^^^^^^^^^^^^^^^^^^^^
@@ -150,7 +140,7 @@ These hpc benchmarks can be downloaded from `vitis libraries <https://github.com
 
 * **Setup environment**
 
-Specifying the corresponding Vitis, XRT, and path to the platform repository by running following commands.
+Specifying the corresponding Vitis, XRT, and path to the platform repository by running the following commands.
 Set up Python environment with :doc:`Python environment setup guide <../pyenvguide>`
 
 .. code-block:: bash
@@ -159,3 +149,7 @@ Set up Python environment with :doc:`Python environment setup guide <../pyenvgui
    source /opt/xilinx/xrt/setup.sh
    export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
 
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

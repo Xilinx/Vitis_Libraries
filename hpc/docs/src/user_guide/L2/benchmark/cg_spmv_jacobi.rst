@@ -1,18 +1,7 @@
 .. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 *****************************************************************
 SPMV-based Conjugate Gradient Solver with Jacobi Preconditioner
@@ -22,14 +11,14 @@ Introduction
 ###################
 
 CG solver is widely adopted to solve linear system Ax=b, where the matrix A is symmetric and positive definite. 
-Here is the benchmark for SPMV-based CG solver with the Jacobi preconditioner on Xilinx FPGA Alveo U280. 
+Here is the benchmark for SPMV-based CG solver with the Jacobi preconditioner on AMD FPGA AMD Alveo |trade| U280. 
 
 Benchmark on Hardware
 #######################
 
 Environment Setup (Step 1)
 ******************************
-Please follow the page :doc:`Benchmark Overview <../../../benchmark>` to correctly setup the environment first.  
+Follow the page :doc:`Benchmark Overview <../../../benchmark>` to correctly setup the environment first.  
 
 Hardware Build (Step 2)
 *************************
@@ -43,7 +32,7 @@ With the following commands, kernel bitstream *cgSolver.xclbin * is built under 
 Prepare Data (Step 3)
 ***********************
 
-Here is a list of the URLs of **SPD** sparse matrices in the file *test.txt*. All these sparse matrices are from `SuiteSparse Matrix Collection<https://sparse.tamu.edu/>`. Users could add more links or trim the existing links in the file. With the following command, these matrices listed in the *test.txt* file are download from the given links and then are preprocessed. It may take some time to finish the downloading and preprocessing. 
+Here is a list of the URLs of **SPD** sparse matrices in the file *test.txt*. All these sparse matrices are from `SuiteSparse Matrix Collection<https://sparse.tamu.edu/>`. You can add more links or trim the existing links in the file. With the following command, these matrices listed in the *test.txt* file are download from the given links and then are preprocessed. It might take some time to finish the downloading and preprocessing. 
 
 .. code-block:: bash
 
@@ -64,13 +53,13 @@ If you followed the guide and correctly setup the environment, you are able to r
 Benchmark
 =============
 
-With the following command, users could benchmark the CG solver with a given matrix. 
+With the following command, you can benchmark the CG solver with a given matrix. 
 
 .. code-block:: bash
 
     $ make run TARGET=hw PLATFORM=xilinx_u280_xdma_201920_3 mtxName=ted_B
 
-Here lists the configurable parameters with the *make* command for the benchmark. 
+The following table lists the configurable parameters with the *make* command for the benchmark. 
 
 
 .. table:: Parameters with make command 
@@ -179,14 +168,19 @@ FPGA Hardware Information
 Convergence
 ******************
 
-Conjugate gradient method may suffer convergent issue for matrices with large condition number. 
+Conjugate gradient method might suffer convergent issue for matrices with large condition number. 
 Jacobi preconditioner, adopted in this kernel, is widely used and dramatically reduces the overall
 number of iterations to solve the linear system.
-For some matrices, however, the solver with Jacobi preconditioner is not able to converge. 
-For instance, the number of iterations for some matrices in the above table reached the upper limit
+However, for some matrices, the solver with Jacobi preconditioner is not able to converge. 
+For instance, the number of iterations for some matrices in the preceding table reached the upper limit
 5000 with the preset relative tolerance **10e-12**. 
 
-Although the solver, for some other matrices e.g. *ted_B_unscaled*, 
+Although the solver, for some other matrices, for example, *ted_B_unscaled*, 
 meets the preset tolerance within the preset number of iteration limit, there might still
 be some mismatches in the result vector compared to the golden reference `x`.
 The solution to this issue is to further reduce the tolerance value to such as **10e-15**. 
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:
