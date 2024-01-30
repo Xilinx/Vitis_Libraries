@@ -2,7 +2,7 @@
     "gui": true,
     "name": "Xilinx Tree Swaption Engine BK Model Benchmark",
     "description": "Tree Swaption pricing engine with Black-Karasinski Model uses trinomial tree based on 1D lattice method to calculate the pricing result.",
-    "flow": "vitis",
+    "flow": "system",
     "platform_type": "pcie",
     "platform_allowlist": [
         "u250"

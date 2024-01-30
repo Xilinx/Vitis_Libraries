@@ -3,26 +3,16 @@
     "description": [
         "L2 Garman Kohlhagen Model"
     ],
-    "flow": "vitis",
+    "flow": "system",
     "gui": false,
     "platform_type": "pcie",
     "platform_allowlist": [
-        "u250",
-        "u200"
+        "u250"
     ],
     "platform_blocklist": [
         "zc"
     ],
     "platform_properties": {
-        "u200": {
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u200.cfg"
-                    ]
-                }
-            }
-        },
         "u250": {
             "v++": {
                 "compiler": {

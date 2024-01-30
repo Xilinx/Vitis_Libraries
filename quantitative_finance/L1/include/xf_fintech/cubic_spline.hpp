@@ -53,7 +53,12 @@ class CubicSpline {
     // constructor
     CubicSpline() {
 #pragma HLS inline
-#pragma HLS array_partition variable = a_ cyclic factor = 3 dim = 1
+/* 
+ * XXX: to maintain the same QoR as HLS is utilizing 3.1 auto partition
+ * No auto-partition for small array that user touched for now
+ * #pragma HLS array_partition variable = a_ cyclic factor = 3 dim = 1
+ */
+#pragma HLS array_partition variable = a_ complete dim = 1
 #pragma HLS array_partition variable = b_ cyclic factor = 3 dim = 1
 #pragma HLS array_partition variable = c_ cyclic factor = 3 dim = 1
 #pragma HLS array_partition variable = d_ cyclic factor = 3 dim = 1

@@ -1,12 +1,11 @@
 {
     "name": "Xilinx Heston Closed Form Engine",
     "description": "L2 Heston Closed Form Solution",
-    "flow": "vitis",
+    "flow": "system",
     "gui": false,
     "platform_type": "pcie",
     "platform_allowlist": [
-        "u250",
-        "u200"
+        "u250"
     ],
     "platform_blocklist": [
         "zc"
@@ -26,24 +25,6 @@
                 "compiler": {
                     "clflags": [
                         "--config PROJECT/conn_u50.cfg"
-                    ]
-                }
-            }
-        },
-        "u200": {
-            "host": {
-                "compiler": {
-                    "symbols": [
-                        "USE_DDR",
-                        "TEST_DT=float",
-                        "DEVICE_PART=u200"
-                    ]
-                }
-            },
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u200.cfg"
                     ]
                 }
             }

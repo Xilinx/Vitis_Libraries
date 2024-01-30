@@ -2,30 +2,15 @@
     "gui": false,
     "name": "Xilinx Tree Swaption Engine ECIR Model Test",
     "description": "Tree Swaption pricing engine with Two-additive-factor Gaussian Model uses trinomial tree based on 1D lattice method to calculate the pricing result.",
-    "flow": "vitis",
+    "flow": "system",
     "platform_type": "pcie",
     "platform_allowlist": [
-        "u250",
-        "u200"
+        "u250"
     ],
     "platform_blocklist": [
         "zc"
     ],
     "platform_properties": {
-        "u200": {
-            "host": {
-                "compiler": {
-                    "symbols": []
-                }
-            },
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u200.cfg"
-                    ]
-                }
-            }
-        },
         "u250": {
             "host": {
                 "compiler": {

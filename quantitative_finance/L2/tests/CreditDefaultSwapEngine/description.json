@@ -1,25 +1,15 @@
 {
     "name": "Xilinx Credit Default Swap Engine",
     "description": "L2 Credit Default Swap",
-    "flow": "vitis",
+    "flow": "system",
     "platform_type": "pcie",
     "platform_allowlist": [
-        "u250",
-        "u200"
+        "u250"
     ],
     "platform_blocklist": [
         "zc"
     ],
     "platform_properties": {
-        "u200": {
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u200.cfg"
-                    ]
-                }
-            }
-        },
         "u250": {
             "v++": {
                 "compiler": {

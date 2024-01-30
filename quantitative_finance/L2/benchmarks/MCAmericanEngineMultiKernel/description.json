@@ -2,7 +2,7 @@
     "gui": true,
     "name": "Xilinx MC American Engine Multi Kernel Benchmark",
     "description": "The American option can be exercised at any time up until its maturity date. This early exercise feature of American Option gives the investors more freedom to exercise, compared to the European options.",
-    "flow": "vitis",
+    "flow": "system",
     "platform_type": "pcie",
     "platform_allowlist": [
         "u250"

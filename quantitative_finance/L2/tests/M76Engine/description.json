@@ -1,32 +1,15 @@
 {
     "name": "Xilinx Merton 76 Model Engine",
     "description": "L2 Merton 76 Jump Diffusion Engine",
-    "flow": "vitis",
+    "flow": "system",
     "platform_type": "pcie",
     "platform_allowlist": [
-        "u250",
-        "u200"
+        "u250"
     ],
     "platform_blocklist": [
         "zc"
     ],
     "platform_properties": {
-        "u200": {
-            "host": {
-                "compiler": {
-                    "symbols": [
-                        "USE_DDR"
-                    ]
-                }
-            },
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u200.cfg"
-                    ]
-                }
-            }
-        },
         "u250": {
             "host": {
                 "compiler": {

@@ -1,25 +1,15 @@
 {
     "name": "Xilinx Hull White Analytic Engine",
     "description": "L2 Hull White Layer 2 Analytic Engine",
-    "flow": "vitis",
+    "flow": "system",
     "platform_type": "pcie",
     "platform_allowlist": [
-        "u250",
-        "u200"
+        "u250"
     ],
     "platform_blocklist": [
         "zc"
     ],
     "platform_properties": {
-        "u200": {
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u200.cfg"
-                    ]
-                }
-            }
-        },
         "u250": {
             "v++": {
                 "compiler": {

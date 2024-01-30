@@ -3,10 +3,9 @@
     "description": [
         "L2 Quadrature and HCF engine"
     ],
-    "flow": "vitis",
+    "flow": "system",
     "platform_allowlist": [
-        "u250",
-        "u200"
+        "u250"
     ],
     "platform_blocklist": [],
     "testinfo": {

@@ -1,11 +1,10 @@
 {
     "name": "Xilinx Libor Market Model Engine With Ratchet Cap Pricing",
     "description": "L2 Libor Market Model Engine with Ratchet Cap pricing",
-    "flow": "vitis",
+    "flow": "system",
     "platform_type": "pcie",
     "platform_allowlist": [
-        "u250",
-        "u200"
+        "u250"
     ],
     "platform_blocklist": [
         "zc"
