@@ -1,17 +1,7 @@
 ..
-   Copyright 2021 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2021–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_..
 
 .. meta::
    :keywords: Cholesky_Inverse
@@ -56,7 +46,7 @@ DataType Supported
 
 .. note::
    * The function assumes that the input matrix is symmetric positive definite (Hermitian positive definite for complex-valued inputs).
-   * Subnormall values are not supported. If used, the synthesized hardware will flush these to zero, and the behavior will differ versus software simulation.
+   * Subnormal values are not supported. If used, the synthesized hardware flushes these to zero, and the behavior differs versus software simulation.
 
 Interfaces
 --------------------
@@ -79,7 +69,7 @@ Implementation Controls
 
 Specifications
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-The DATAFLOW directive is applied to the top function. User could specify the individual sub-function implementiontations using a configuration class derived from the following basic class by redefining the appropriate class member: 
+The DATAFLOW directive is applied to the top function. You can specify the individual sub-function implementations using a configuration class derived from the following basic class by redefining the appropriate class member: 
 
 .. code::
 
@@ -100,7 +90,7 @@ The DATAFLOW directive is applied to the top function. User could specify the in
            MATRIX_MULTIPLY_TRAITS;
    };
 
-The configuration class is supplied to the **xf::solver::choleskyInverse** function as a template paramter as follows.
+The configuration class is supplied to the **xf::solver::choleskyInverse** function as a template parameter as follows.
 The sub-functions are executed sequentially: Cholesky, back substitution, and matrix multiply. The implementation selected for these sub-functions determines the resource utilization and function throughput/latency of the Inverse function.
 
 .. code::

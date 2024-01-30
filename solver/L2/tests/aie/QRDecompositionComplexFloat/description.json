@@ -3,7 +3,7 @@
     "description": [
         "QR Decomposition on Complex Float"
     ],
-    "flow": "versal",
+    "flow": "aie",
     "keywords": [
         "aiecompiler",
         "aiesimulator",

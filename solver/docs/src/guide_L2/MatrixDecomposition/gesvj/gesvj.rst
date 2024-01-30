@@ -1,18 +1,9 @@
 
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   
+.. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: GESVJ, SVD, general, matrix, Decomposition, Singular
@@ -27,7 +18,7 @@ Singular Value Decomposition for general matrix (GESVJ)
 
 Overview
 ========
-One-sided Jacobi alogirhm is a classic and robust method to calculate Singular Value Decompositon (SVD), which can be applied for any dense matrix with the size of :math:`M \times N`. In this library, it is denoted as GESVJ, same as the API name used in LAPACK.
+One-sided Jacobi alogirhm is a classic and robust method to calculate Singular Value Decomposition (SVD), which can be applied to any dense matrix with the size of :math:`M \times N`. In this library, it is denoted as GESVJ, same as the API name used in LAPACK.
 
 .. math::
      A = U \Sigma V^T
@@ -39,9 +30,9 @@ Algorithm
 =========
 The calculation process of one-sided Jacobi SVD method is as follows:
 
-1. Initialize matrix V = I
+1. Initialize matrix V = I.
 
-2. Select two columns (i, j), i < j, of matrix A, namely :math:`A_i` and :math:`A_j`. Accumulate two columns of data by fomular
+2. Select two columns (i, j), i < j, of matrix A, namely :math:`A_i` and :math:`A_j`. Accumulate two columns of data by fomula
 
 .. math::
        &b_{ii} = A_i^TA_i = ||A_i||^2 \\ 
@@ -89,7 +80,7 @@ and select the max converage of all pairs (i, j).
 
 6. Repeat steps 2-4 until all pairs of (i, j) are calculated and updated.
 
-7. If the max converage among all paris of (i, j) is bigger than 1.e-8, repeat steps 2-6 again, which is also called one sweep.
+7. If the max converage among all pairs of (i, j) is bigger than 1.e-8, repeat steps 2-6, which is also called one sweep.
 
 8. When the converge is small enough, calculate the matrix U and S for each :math:`i = 1, ..., n` by
 
@@ -99,7 +90,7 @@ and select the max converage of all pairs (i, j).
 
 Architecture
 ============
-From the algorithm, we know that the core part of the computation is two columns of data read-and-accumulate, and then updating corresponding two columns of data in Matrix A and V. In this library, we implement this core module in the following architecture. 
+From the algorithm, you know that the core part of the computation is two columns of data read-and-accumulate, and then updating corresponding two columns of data in Matrix A and V. In this library, implement this core module in the following architecture. 
 
 .. figure:: /images/gesvj/gesvj_structure.png
         :width: 40%
@@ -116,17 +107,17 @@ Stage 2:
 Stage 3: 
   a. Update two columns of data in matrix A
   b. Update two columns of data in matrix V.
-  c. Meanwhile, calculate converage for current pair (i, j).
-Since operating data of matrix A and V are independent, two modules of stage 1 are running in parallel. Meanwhile, thress modules of stage 3 run in parallel. The last module of stage 3 calculates converage using :math:`2 \times 2` matrix data. This converage computing process is in read-and-accu module of stage 1 according to the algorithm. However, it requires ~60 cycles, which is also a lot after partitioning matrix A by row. Therefore, this calculation process is extracted as a submodule in stage 3.
+  c. Meanwhile, calculate converage for the current pair (i, j).
+Since operating data of matrix A and V aisre independent, two modules of stage 1 are running in parallel. Meanwhile, three modules of stage three run in parallel. The last module of stage three calculates converage using :math:`2 \times 2` matrix data. This converage computing process is in read-and-accu module of stage 1 according to the algorithm. However, it requires ~60 cycles, which is also a lot after partitioning matrix A by row. Therefore, this calculation process is extracted as a submodule in stage three.
 
-.. note::
+.. Note::
     Why updating matrix V is divided into two modules?
 
-    From the figure, we can see that there are two modules related to matrix V, preload two columns of data of V to BRAM, and updating V. In our design, matrix A and V are all saved in URAM. And for each URAM, only 2 ports of read/write are supported. Since matrix A cummulated :math:`2 \times 2` data need 100+ cycles to do SVD. We may preload two columns of V into BRAMs via 2-reading ports of URAM. And using two writting ports when updating data in V. 
+    From the figure, it is seen that there are two modules related to matrix V, preload two columns of data of V to BRAM, and updating V. In this design, matrix A and V are all saved in URAM. And for each URAM, only two ports of read/write are supported. Since matrix A cumulated :math:`2 \times 2`, the data needs 100+ cycles to do SVD. You might preload two columns of V into BRAMs via 2-reading ports of URAM. And using two writing ports when updating data in V. 
 
     Besides, in order to speed up the data reading and updating of matrix V data, the matrix V is partitioned by NCU through its row. For each CU, matrix V is read/written using 2 URAM ports.
 
-.. note::
+.. Note::
     Supported data size:
 
     The supported maximum size of matrix A that templated by NRMAX and NCMAX is 512. The partitioning number MCU and NCU can support up to 16, respectively. 

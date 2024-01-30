@@ -1,19 +1,8 @@
 .. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
+   
+.. Copyright © 2019–2023 Advanced Micro Devices, Inc
 
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 .. meta::
    :keywords: AIE, Cholesky, QRD 
    :description: Vitis Solver Library provides a collection of matrix decomposition operations on AIE.
@@ -50,8 +39,8 @@ The following figure shows the Solver Library code organization.
     **Solver Library code Organization**
 
 The directories L1 and L2 correspond to AIE kernels and AIE graphs for each library element, respectively. 
-Graph class declarations and constants that allow you to include the AIE kernel in your design are located in the `L2/include/aie/`. 
-AIE Kernels, the `.cpp` files and corresponding `.hpp` files are located in the `L1/src/aie` and `L1/include/aie` subdirectories respectively.
+Graph class declarations are constants that allow you to include the AIE kernel in your design are located in the `L2/include/aie/`. 
+AIE Kernels, the `.cpp` files and corresponding `.hpp` files are located in the `L1/src/aie` and `L1/include/aie` subdirectories, respectively.
 The test harness that demonstrate the use of the library element are located in `L2/tests/aie`.
 
 
@@ -60,7 +49,7 @@ The test harness that demonstrate the use of the library element are located in 
 Using Library Elements within Defined Graphs
 -------------------------------------------------
 
-The user entry point for each library element is a graph class(L2 level). The entry point graph class will contain one or more L1 level kernels and may contain one or more graph objects. 
+The user entry point for each library element is a graph class(L2 level). The entry point graph class contains one or more L1 level kernels and might contain one or more graph objects. 
 For instance, to use library element of cholesky decomposition, include `cholesky_complex_decomposition_graph.hpp` from the `L2/include/aie/` folder. The test harness can be used as a reference example of how to instantiate a parameterized graph. For example, see `L2/tests/aie/<library_element>/test.hpp` and `test.cpp`.
 
 

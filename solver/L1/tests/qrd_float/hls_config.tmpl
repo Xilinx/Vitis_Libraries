@@ -1,6 +1,7 @@
 [hls]
 
 clock=400MHz
+clock_uncertainty=0.1
 flow_target=vivado
 syn.file=${XF_PROJ_ROOT}/L1/tests/qrd_float/src/qrd.cpp
 syn.file_cflags=${XF_PROJ_ROOT}/L1/tests/qrd_float/src/qrd.cpp,-DQRF_A_ROWS=256 -DQRF_A_COLS=64 -I${XF_PROJ_ROOT}/L1/include

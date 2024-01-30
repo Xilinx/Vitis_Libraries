@@ -1,17 +1,7 @@
 ..
-   Copyright 2021 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2021–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: QRF
@@ -32,9 +22,9 @@ QRF is often used to solve the linear least squares problem and is the basis for
 .. math::
             A = Q R
 
-There are several methods for actually computing the QR decomposition, such as by means of the Gram-Schmidt process, Householder transformations, or Givens rotations. Each has a number of advantages and disadvantages. For more details, please refer: `QR_decomposition <https://en.wikipedia.org/wiki/QR_decomposition>`_.
+There are several methods to compute the QR decomposition, such as by means of the Gram-Schmidt process, Householder transformations, or Given rotations. Each has a number of advantages and disadvantages. For more details, refer to `QR_decomposition <https://en.wikipedia.org/wiki/QR_decomposition>`_.
 
-In our design, Given rotations is used.
+Given rotations is used in the current design.
 
 
 Implementation
@@ -47,7 +37,7 @@ DataType Supported
 * std::complex<float>
 
 .. note::
-   Subnormall values are not supported. If used, the synthesized hardware will flush these to zero, and the behavior will differ versus software simulation.
+   Subnormal values are not supported. If used, the synthesized hardware flushes these to zero, and the behavior differs versus software simulation.
 
 Interfaces
 --------------------
@@ -142,6 +132,13 @@ The following table summarizes how the key factors from the configuration class 
 .. Note::   
   * Q and R update loop pipelining: Sets the achievable initiation interval (II);   
   * Q and R update loop unrolling:  Duplicate hardware when implement loop processing, execute corresponding number of loop iterations in parallel;   
-  * Rotation loop pipelining:       Enables Vivado HLS to share resources and reduce the DSP utilization
+  * Rotation loop pipelining:       Enables AMD Vivado |trade| HLS to share resources and reduce the DSP utilization
+
+  
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:
 
 

@@ -1,7 +1,7 @@
 {
     "name": "Cholesky Float on AIE",
     "description": "Cholesky Float on AIE",
-    "flow": "versal",
+    "flow": "aie",
     "platform_allowlist": [
         "vck190"
     ],

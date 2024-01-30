@@ -2,4 +2,4 @@
 
 VitisLibPipeline (branch: 'next', libname: 'xf_solver', TARGETS: 'hls_csim:hls_csynth:hls_cosim:vitis_sw_emu:vitis_hw_emu:vitis_hw_build:vitis_aie_sim:vitis_aie_x86sim',
                   upstream_dependencies: 'xf_utils_hw,next,../utils;xf_dsp,next,../dsp',
-                  devtest: 'RunDeploy.sh', TOOLVERSION: '2023.2_stable_latest', mail_on:'daily:PR')
+                  devtest: 'RunDeploy.sh', TOOLVERSION: '2024.1_stable_latest', mail_on:'daily:PR')

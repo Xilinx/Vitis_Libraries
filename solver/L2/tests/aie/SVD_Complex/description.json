@@ -4,7 +4,7 @@
         ""
     ],
     "gui": false,
-    "flow": "versal",
+    "flow": "aie",
     "keywords": [
         "aiecompiler",
         "aiesimulator",

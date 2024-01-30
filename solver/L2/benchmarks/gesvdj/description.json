@@ -1,13 +1,11 @@
 {
     "name": "Xilinx GESVDJ",
     "description": "Symmetric Matrix Jacobi based Singular Value Decomposition",
-    "flow": "vitis",
+    "flow": "system",
     "platform_allowlist": [
-        "u50",
         "u250",
-        "u200",
-        "aws-vu9p-f1",
-        "vck190"
+        "vck190",
+        "aws-vu9p-f1"
     ],
     "platform_blocklist": [
         "zc"
@@ -25,38 +23,6 @@
                 "compiler": {
                     "clflags": [
                         "--config PROJECT/conn_u250.cfg"
-                    ]
-                }
-            }
-        },
-        "u200": {
-            "host": {
-                "compiler": {
-                    "symbols": [
-                        "USE_DDR"
-                    ]
-                }
-            },
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u200.cfg"
-                    ]
-                }
-            }
-        },
-        "u50": {
-            "host": {
-                "compiler": {
-                    "symbols": [
-                        "USE_HBM"
-                    ]
-                }
-            },
-            "v++": {
-                "compiler": {
-                    "clflags": [
-                        "--config PROJECT/conn_u50.cfg"
                     ]
                 }
             }

@@ -1,17 +1,7 @@
 .. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: Vitis, Solver, Library, Vitis Solver Library, overview, matrix, linear, eigenvalue
@@ -22,12 +12,12 @@
 Vitis Solver Library
 ====================
 
-AMD Vitis Solver Library provides a collection of matrix decomposition operations, linear solvers and eigenvalue solvers on PL and AI Engine. Users can see it as containing two sub libraries:
+AMD Vitis |trade| Solver Library provides a collection of matrix decomposition operations, linear solvers, and eigenvalue solvers on PL and AI Engine. You can see it as containing two sub libraries:
 
 PL Solver library
 -----------------
 
-Currently the AMD Vitis PL Solver library includes the following operations for dense matrix
+Currently, the Vitis PL Solver library includes the following operations for dense matrix:
  
 * Matrix decomposition
    * Cholesky decomposition for symmetric positive definite matrix
@@ -48,7 +38,7 @@ Currently the AMD Vitis PL Solver library includes the following operations for 
 AI Engine Solver library
 ------------
 
-Currently the AMD Vitis AIE Solver Library provides the following operations on AI Engine.
+Currently, the Vitis AIE Solver Library provides the following operations on AI Engine.
 
 * Matrix decomposition
    * Cholesky decomposition for symmetric positive definite matrix
@@ -78,3 +68,7 @@ Currently the AMD Vitis AIE Solver Library provides the following operations on 
    L2 AIE User Guide <guide_L2_AIE/L2_AIE.rst>
 
 
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

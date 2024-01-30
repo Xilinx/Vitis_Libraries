@@ -1,18 +1,8 @@
 .. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   
+.. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: Cholesky Decomposition
@@ -76,8 +66,8 @@ Design Notes
 * DataSize supported: input matrix size :math:`N` is the times of 4, and :math:`N` shoulb be no more than 256.
 * Description: 
     * The AIE core function calculate one column of :math:`matL` and update the rest elements of :math:`matA` 
-    * To calculate all columns of :math:`matL`, N AIE cores are used, N is the number of input matrix's row/column number. The first core's output is fed to the second core's input, and on and on, till the last column is computed;
-    * The information of matrix dimension, the target column id which will be updated, etc. are read from the head of input streams;
+    * To calculate all columns of :math:`matL`, N AIE cores are used, N is the number of input matrix's row/column number. The first core's output is fed to the second core's input, and continued till the last column is computed;
+    * The information of matrix dimension, the target column id which is updated, and so on are read from the head of input streams;
 
 Kernel Interfaces
 --------------------
@@ -92,18 +82,18 @@ Kernel Interfaces
 .. note::
 
     * As the input data type is cfloat, the input matrix datas are divided into two parts: the one stores the real part of cfloat data, and the other stores the image part of cfloat data.
-    * Accordingly, the output datas are divided into two parts as well, the one stores the real part of cfloat data, and the other stores the image part of cfloat data;
+    * Accordingly, the output data is divided into two parts as well, the first one stores the real part of cfloat data, and the other stores the image part of cfloat data;
 
 
 * Input:
 
   *  ``input_stream<float>* matA_real``    stream of the real part of input matrix, contains the lower triangle elements of matrix, stored column-major.
-  *  ``input_stream<float>* matA_imag``    stream of the imag part of input matrix, contains the lower triangle elements of matrix, stored column-major.
+  *  ``input_stream<float>* matA_imag``    stream of the image part of input matrix, contains the lower triangle elements of matrix, stored column-major.
 
 * Output:
 
   *  ``output_stream<float>* matL_real``    stream of the real part of output matrix, contains the lower triangle elements of matrix, stored column-major.
-  *  ``output_stream<float>* matL_imag``    stream of the imag part of output matrix, contains the lower triangle elements of matrix, stored column-major.
+  *  ``output_stream<float>* matL_imag``    stream of the image part of output matrix, contains the lower triangle elements of matrix, stored column-major.
 
 .. note::
    * The function assumes that the input matrix is a Hermitian positive definite matrix.
@@ -121,7 +111,7 @@ Kernel Interfaces
 
   *  ``output_stream<float>* matL``    stream of the output matrix, contains the lower triangle elements of matrix, stored column by column.
 
-.. note::
+.. Note::
    * The function assumes that the input matrix is a symmetric positive definite matrix.
 
 

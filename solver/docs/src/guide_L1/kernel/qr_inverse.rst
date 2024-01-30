@@ -1,17 +1,7 @@
 ..
-   Copyright 2021 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2021–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: QR_Inverse
@@ -25,7 +15,7 @@ QR_Inverse
 
 Overview
 ============
-QR_Inverse, matrix inversion with the usage of QR decomposition.  As matrix :math:`A` could be decomposed into a product of an orthogonal matrix :math:`Q` and an upper triangular matrix :math:`R` in the form of :math:`A = QR`, the matrix inversion should be :math:`A^{-1} = R^{-1}Q^{-1} = R^{-1}Q^T`. 
+QR_Inverse, matrix inversion with the usage of QR decomposition.  As matrix :math:`A` can be decomposed into a product of an orthogonal matrix :math:`Q` and an upper triangular matrix :math:`R` in the form of :math:`A = QR`, the matrix inversion should be :math:`A^{-1} = R^{-1}Q^{-1} = R^{-1}Q^T`. 
 
 .. math::
 
@@ -35,7 +25,7 @@ QR_Inverse, matrix inversion with the usage of QR decomposition.  As matrix :mat
 
             A^{-1} = R^{-1}Q^T
 
-As matrix :math:`R` is an upper triangular matrix, :math:`R^{-1}` is easy to compute. In this design, :math:`R^{-1}` is computed via Backwark Subsititution.
+As matrix :math:`R` is an upper triangular matrix, :math:`R^{-1}` is easy to compute. In this design, :math:`R^{-1}` is computed via Backward Substitution.
 
 Implementation
 ============
@@ -47,7 +37,7 @@ DataType Supported
 * std::complex<float>
 
 .. note::
-   Subnormall values are not supported. If used, the synthesized hardware will flush these to zero, and the behavior will differ versus software simulation.
+   Subnormal values are not supported. If used, the synthesized hardware flushes these to zero, and the behavior differs versus software simulation.
 
 Interfaces
 --------------------
@@ -69,7 +59,7 @@ Implementation Controls
 
 Specifications
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-The DATAFLOW directive is applied to the top function. User could specify the individual sub-function implementiontations using a configuration class derived from the following basic class by redefining the appropriate class member: 
+The DATAFLOW directive is applied to the top function. You can specify the individual sub-function implementations using a configuration class derived from the following basic class by redefining the appropriate class member: 
 
 .. code::
 

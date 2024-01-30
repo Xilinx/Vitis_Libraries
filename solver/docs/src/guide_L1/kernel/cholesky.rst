@@ -1,18 +1,7 @@
 ..
-   Copyright 2021 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2021–2023 Advanced Micro Devices, Inc
 
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 .. meta::
    :keywords: Cholesky
    :description: Cholesky Decomposition
@@ -44,9 +33,9 @@ DataType Supported
 * x_complex<ap_fixed>
 * std::complex<ap_fixed>
 
-.. note::
-   * The function assumes that the input matrix is symmetric positive definite (Hermitian positive definite for complex-valued inputs).
-   * Subnormall values are not supported. If used, the synthesized hardware will flush these to zero, and the behavior will differ versus software simulation.
+.. Note::
+   * The function assumes that the input matrix is a symmetric positive definite (Hermitian positive definite for complex-valued inputs).
+   * Subnormal values are not supported. If used, the synthesized hardware flushes these to zero, and the behavior differs versus software simulation.
 
 Interfaces
 --------------------
@@ -81,7 +70,7 @@ There is a configuration class derived from the base configuration class **xf::s
        static const int ARCH = SEL_ARCH;
    };
 
-The default base configuration class is as following. If the input datatype is complex or ap_fixed, please refer to **L1/include/hw/cholesky.hpp** for more details.
+The default base configuration class is as following. If the input datatype is complex or ap_fixed, refer to **L1/include/hw/cholesky.hpp** for more details.
 
 .. code::
 
@@ -108,7 +97,7 @@ The default base configuration class is as following. If the input datatype is c
    * UNROLL_DIM:      Dimension to unroll matrix
    * ARCH2_ZERO_LOOP: Additional implementation "switch" for the choleskyAlt2 architecture (2).
 
-The configuration class is supplied to the **xf::solver::cholesky** function as a template paramter as follows.
+The configuration class is supplied to the **xf::solver::cholesky** function as a template parameter as follows.
 
 .. code::
 
@@ -152,7 +141,7 @@ The following table summarizes how the key factors from the configuration class 
      * 2: Uses highest DSP and memory utilization. This value supports inner loop unrolling to improve overall throughput with a limited increase in DSP resources. This is the most flexible architecture for design exploration.
    * Inner loop pipeling
 
-     * >1: For ARCH 2, enables resource share and reduce the DSP utilization. When using complex floating-point data types, setting the value to 2 or 4 significantly reduces DSP utilization.
+     * >1: For ARCH 2, enables resource share and reduces the DSP utilization. When using complex floating-point data types, setting the value to two or four significantly reduces DSP utilization.
    * Inner loop unrolling
 
      * For ARCH 2, duplicates the hardware required to implement the loop processing by a specified factor, executes the corresponding number of loop iterations in parallel, and increases throughput but also increases DSP and memory utilization.

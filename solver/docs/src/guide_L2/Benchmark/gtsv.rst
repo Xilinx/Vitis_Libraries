@@ -1,18 +1,8 @@
 .. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   
+.. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 
 .. meta::
@@ -36,7 +26,7 @@ Executable Usage
 
 * **Work Directory(Step 1)**
 
-The steps for library download and environment setup can be found in :ref:`l2_vitis_solver`. For getting the design,
+The steps for library download and environment setup can be found in :ref:`l2_vitis_solver`. To get the design,
 
 .. code-block:: bash
 
@@ -44,7 +34,7 @@ The steps for library download and environment setup can be found in :ref:`l2_vi
 
 * **Build kernel(Step 2)**
 
-Run the following make command to build your XCLBIN and host binary targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
+Run the following make command to build your XCLBIN and host binary targeting a specific device. This process takes long.
 
 .. code-block:: bash
 
@@ -56,7 +46,7 @@ Run the following make command to build your XCLBIN and host binary targeting a 
 
 * **Run kernel(Step 3)**
 
-To get the benchmark results, please run the following command.
+To get the benchmark results, run the following command.
 
 .. code-block:: bash
 
@@ -71,7 +61,7 @@ GTSV Input Arguments:
           -runs       number of runs; 
           -M          size of input Matrix row/cloumn; 
 
-Note: Default arguments are set in Makefile. The default configs are: -runs 1 -M 16.
+.. Note:: Default arguments are set in Makefile. The default configs are: -runs 1 -M 16.
 
 * **Example output(Step 4)** 
 
@@ -96,11 +86,11 @@ Note: Default arguments are set in Makefile. The default configs are: -runs 1 -M
 Profiling 
 =========
 
-The GTSV is validated on Xilinx Alveo U250 board. 
+The GTSV is validated on an AMD Alveo |trade| U250 board. 
 
 The hardware resources and performance for double datatype is listed in :numref:`table_gtsvDouble`.
-To describe the resource utilization, we separate the overall utilization into two parts, P stands for the resource usage in platform, that is those instantiated in static region of the FPGA card, K stands for those used in kernels(dynamic region).  
-The Unroll factor means how many CUs are configured to calculate Matrix in parell.
+To describe the resource utilization, separate the overall utilization into two parts, P stands for the resource usage in platform, that is those instantiated in static region of the FPGA card, K stands for those used in kernels(dynamic region).  
+The Unroll factor means how many CUs are configured to calculate Matrix in parallel.
 
 .. _tabgtsvDouble:
 
@@ -117,8 +107,8 @@ The Unroll factor means how many CUs are configured to calculate Matrix in parel
 
 
 
-.. note:: 
-    The unroll factor is limited by 2 factors, the matrix size and URAM port. The maximum unroll factor should be less than half of matrix size, and :math:`2 \times {Unroll}^{2}` should also be less than available URAM on board. Besides, unroll factor can only be the factorization of 2.
+.. Note:: 
+    The unroll factor is limited by two factors, the matrix size and URAM port. The maximum unroll factor should be less than half of matrix size, and :math:`2 \times {Unroll}^{2}` should also be less than available URAM on board. Besides, unroll factor can only be the factorization of 2.
 
 
     +-------------+--------+------+------+-----+----------+--------+------------------+-----------------+
@@ -129,3 +119,8 @@ The Unroll factor means how many CUs are configured to calculate Matrix in parel
 
 .. toctree::
    :maxdepth: 1
+   
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

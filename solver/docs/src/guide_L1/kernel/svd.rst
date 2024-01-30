@@ -1,17 +1,7 @@
 ..
-   Copyright 2021 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2021–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: SVD 
@@ -25,14 +15,14 @@ SVD (Singular Value Decomposition)
 
 Overview
 ============
-SVD is a factorization of a real or complex matrix. It generalizes the eigendecomposition of a square normal matrix with an orthonormal eigenbasis to any :math:`m\times n` matrix. It is related to the polar decomposition. 
+SVD is a factorization of a real or complex matrix. It generalizes the eigen decomposition of a square normal matrix with an orthonormal eigenbasis to any :math:`m\times n` matrix. It is related to the polar decomposition. 
 
-the singular value decomposition of a :math: `m\times n` complex matrix :math:`M` is a factorization of the form :math:`U`:math:`\Sigma`:math:`V^*`, where :math:`U` is a :math:`m\times m` complex unitary matrix, :math:`\Sigma` is a :math:`m\times n` rectangular diagonal matrix with non-negative real numbers on the diagonal, and :math:`V` is a :math:`n\times n` complex unitary matrix. If :math:`M` is real, :math:`U` and :math:`V` can also be guaranteed to be real orthogonal matrix.
+The singular value decomposition of a :math: `m\times n` complex matrix :math:`M` is a factorization of the form :math:`U`:math:`\Sigma`:math:`V^*`, where :math:`U` is a :math:`m\times m` complex unitary matrix, :math:`\Sigma` is a :math:`m\times n` rectangular diagonal matrix with non-negative real numbers on the diagonal, and :math:`V` is a :math:`n\times n` complex unitary matrix. If :math:`M` is real, :math:`U` and :math:`V` can also be guaranteed to be real orthogonal matrix.
 
 .. math::
             M = U{\Sigma}V^* 
 
-The diagonal entries :math:`\Sigma_{ii}` of :math:`\Sigma` are known as the singular values of :math:`M`. The number of non-zero singular values is equal to the rank of :math:`M`. the Columns of :math:`U` and :math:`V` are called the left-singular vectors and right-singular vectors of :math:`M` respectively.
+The diagonal entries :math:`\Sigma_{ii}` of :math:`\Sigma` are known as the singular values of :math:`M`. The number of non-zero singular values is equal to the rank of :math:`M`. the Columns of :math:`U` and :math:`V` are called the left-singular vectors and right-singular vectors of :math:`M`, respectively.
 
 
 Implementation
@@ -42,7 +32,7 @@ The singular value decomposition of input matrix :math:`A` is computed and matri
 .. math::
            A = USV^*
 
-In this design, square matrix is supported only.
+In this design, only square matrix is supported.
 The `iterative two-sided Jacobi` method is used in this API.
 
 DataType Supported
@@ -68,9 +58,9 @@ Interfaces
     * matrixUStrm           Stream of left singular vectors input matrix
     * matrixVStrm           Stream of right singular vectors input matrix
   
-.. note::
-   * The function will throw an assertion and fail to compile or synthesize, if **RowsA != ColsA**.
-   * For floating point types, subnormal input values are not supported. If used, the synthesized hardware will flush these to zero, and behavior will differ versus software simulation.
+.. Note::
+   * The function throws an assertion and fails to compile or synthesize, if **RowsA != ColsA**.
+   * For floating point types, subnormal input values are not supported. If used, the synthesized hardware flushes these to zero, and behavior differs versus software simulation.
 
 
 Implementation Controls
@@ -111,7 +101,7 @@ The base configuration class is:
    * OFF_DIAG_II: Specify the pipelining target for the off diagonal loop. 
    * DIAG_II:     Specify the pipelining target for the diagonal loop. 
 
-The configuration class is supplied to the **xf::solver::svd** function as a template paramter as follows.
+The configuration class is supplied to the **xf::solver::svd** function as a template parameter as follows.
 
 .. code::
 
@@ -128,7 +118,7 @@ The configuration class is supplied to the **xf::solver::svd** function as a tem
 
 Key Factors
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-The following table summarizes that how the key factors which from the configuration class influence resource utilization, function throughput (initiation interval), and function latency. The values of Low, Medium, and High are relative to the other key factors.
+The following table summarizes that how the key factors from the configuration class influence resource utilization, function throughput (initiation interval), and function latency. The values of Low, Medium, and High are relative to the other key factors.
 
 .. table:: SVD Key Factor Summary  
     :align: center
@@ -151,6 +141,12 @@ The following table summarizes that how the key factors which from the configura
 .. Note::
   * Iterations: The SVD function uses the iterative two-sided Jacobi method. The default number of iterations is 10.
   * Off-diagonal loop pipelining:  the minimum achievable initiation interval (II) is 4, which satisfies the S, U, and V array requirement of four writes every iteration of the off-diagonal loop.
-  * Diagonal loop pipelining: value >1, enables Vivado HLS to resource share 
+  * Diagonal loop pipelining: value >1, enables AMD Vivado |trade| HLS to resource share 
+
+  
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:
 
 

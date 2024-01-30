@@ -1,7 +1,7 @@
 {
     "name": "Cholesky Complex on AIE",
     "description": "Cholesky Complex on AIE",
-    "flow": "versal",
+    "flow": "aie",
     "platform_allowlist": [
         "vck190"
     ],

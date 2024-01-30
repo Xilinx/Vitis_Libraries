@@ -1,17 +1,7 @@
 ..
-   Copyright 2021 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   .. Copyright © 2021–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: QRD
@@ -27,9 +17,9 @@ Overview
 ============
 QR decomposition, is a decomposition of a matrix :math:`A` into a product of an orthogonal matrix :math:`Q` and an upper triangular matrix :math:`R`. 
 
-This API shown a very high performance design of QRD in Versal device. For complex float 1024*256 matrix, this design could achieve 790+ GFLOPS on VCK190.
+This API shows a high performance design of QRD in Versal device. For complex float 1024*256 matrix, this design can achieve 790+ GFLOPS on VCK190.
 
-For DSP performance, near 100% sustained to peak performance is achieved.
+For DSP performance, nearly 100% sustained to peak performance is achieved.
 
 This design structure is highly scalable. In the smaller dimension of 256*64, resources and performance are linearly related to the case of 1024*256.
 
@@ -38,7 +28,7 @@ QRD is often used to solve the linear least squares problem and is the basis for
 .. math::
             A = Q R
 
-There are several methods for actually computing the QR decomposition, such as by means of the Gram-Schmidt process, Householder transformations, or Givens rotations. Each has a number of advantages and disadvantages. For more details, please refer: `QR_decomposition <https://en.wikipedia.org/wiki/QR_decomposition>`_.
+There are several methods for actually computing the QR decomposition, such as by means of the Gram-Schmidt process, Householder transformations, or Givens rotations. Each has a number of advantages and disadvantages. For more details, refer to `QR_decomposition <https://en.wikipedia.org/wiki/QR_decomposition>`_.
 
 In our design, Gram-Schmidt is used.
 
@@ -52,7 +42,7 @@ DataType Supported
 * x_complex<float>
 
 .. note::
-   Subnormall values are not supported. If used, the synthesized hardware will flush these to zero, and the behavior will differ versus software simulation.
+   Subnormal values are not supported. If used, the synthesized hardware flushes these to zero, and the behavior differs versus software simulation.
 
 Interfaces
 --------------------
@@ -68,12 +58,12 @@ Interfaces
 
 * Arguments:
 
-  * dataA            : Inout port, Matrix A as input and output matrix Q
+  * dataA            : Input port, Matrix A as input and output matrix Q
   * R_strm           : Output port, Matrix R, non-zero numbers in the upper triangular matrix
 
-.. note::
-   The function will fail to compile or synthesize if **RowsA < ColsA**.
-   For multi-cu design, expand Row into 2 dimensions[NCU][RowsA / NCU], NCU is related to PowNCU.
+.. Note::
+   The function fails to compile or synthesize if **RowsA < ColsA**.
+   For multi-cu design, expand Row into two dimensions[NCU][RowsA / NCU], NCU is related to PowNCU.
 
 
 Implementation Controls
@@ -116,9 +106,9 @@ There is a configuration defined the kernel implement cpp file.
    const int UnrollSize_t = 1 << (PowUnroll_t - POWFoldRow_t);
 
 So this kernel could automatically deduce the right configuration (PowUnroll_t and PowNCU_t)
-when set the appropriate input matrix rows and columns. 
+when set to appropriate input matrix rows and columns. 
 
-Users can also set a parameter list suitable for their own case according to the logical relationship of these parameters.
+You can also set a parameter list suitable for your case according to the logical relationship of these parameters.
 
 The base configuration class is:
 
@@ -129,7 +119,7 @@ The base configuration class is:
 
 Key Factors
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-The following table summarizes QRD for complex float performance and resources Summary.  
+The following table summarizes the QRD for complex float performance and resources Summary.  
 
 .. table:: QRD performance and resources Summary   
     :align: center
@@ -143,4 +133,11 @@ The following table summarizes QRD for complex float performance and resources S
     +------------------+-----------+-------------+-----------+-----------+----------------------+------------+-----------+-------+-----------+
 
 .. Note::   
-  * Estimate the dynamic power by Vivado 23.2. Confidence level is Medium in vivado power report.
+  * Estimate the dynamic power by AMD Vivado |trade| 23.2. Confidence level is Medium in Vivado power report.
+
+  
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:
