@@ -1,7 +1,7 @@
 {
     "name": "Xilinx accumulate AIE Test",
     "description": "accumulate AIE function example",
-    "flow": "versal",
+    "flow": "system",
     "platform_allowlist": [
         "vck190"
     ],

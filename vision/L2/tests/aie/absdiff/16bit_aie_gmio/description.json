@@ -1,7 +1,7 @@
 {
     "name": "Xilinx absdiff AIE Test",
     "description": "absdiff AIE function example",
-    "flow": "versal",
+    "flow": "system",
     "platform_allowlist": [
         "vck190"
     ],

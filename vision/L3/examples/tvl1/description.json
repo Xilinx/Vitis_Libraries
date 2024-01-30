@@ -1,294 +1,270 @@
 {
-    "name": "Xilinx Tvl1 L3 Test", 
+    "name": "Xilinx Tvl1 L3 Test",
     "description": [
         "Tvl1 L3 function example"
-    ], 
-    "flow": "vitis", 
+    ],
+    "flow": "system",
     "platform_allowlist": [
-        "u200", 
-        "aws-vu9p-f1", 
-        "vck190", 
-        "zcu102", 
+        "vck190",
+        "aws-vu9p-f1",
+        "zcu102",
         "u50"
-    ], 
+    ],
     "platform_blocklist": [
-        "u280", 
-        "u250", 
+        "u280",
+        "u250",
         "zcu104"
-    ], 
+    ],
     "platform_properties": {
-        "u200": {
-            "host": {
-                "compiler": {
-                    "includepaths": [
-                        "$(OPENCV_INCLUDE)"
-                    ]
-                }, 
-                "linker": {
-                    "librarypaths": [
-                        "$(OPENCV_LIB)"
-                    ],
-                    "options" : "-l opencv_optflow"
-                }
-            },
-            "v++": {
-                "linker": {
-                    "ldclflags": [
-                        "--vivado.impl.strategies Performance_Explore"
-                    ]
-                }
-
-            }
-        }, 
         "aws-vu9p-f1": {
             "host": {
                 "compiler": {
                     "includepaths": [
                         "$(OPENCV_INCLUDE)"
                     ]
-                }, 
+                },
                 "linker": {
                     "librarypaths": [
                         "$(OPENCV_LIB)"
                     ],
-                    "options" : "-l opencv_optflow"
+                    "options": "-l opencv_optflow"
                 }
             }
-        }, 
+        },
         "u50": {
             "host": {
                 "compiler": {
                     "includepaths": [
                         "$(OPENCV_INCLUDE)"
                     ]
-                }, 
+                },
                 "linker": {
                     "librarypaths": [
                         "$(OPENCV_LIB)"
                     ],
-                    "options" : "-l opencv_optflow"
+                    "options": "-l opencv_optflow"
                 }
             }
-        }, 
+        },
         "zcu102": {
             "host": {
                 "compiler": {
                     "includepaths": [
-                        "$(SYSROOT)/usr/include", 
+                        "$(SYSROOT)/usr/include",
                         "$(SYSROOT)/usr/include/opencv4"
                     ]
-                }, 
+                },
                 "linker": {
                     "librarypaths": [
-                        "$(SYSROOT)/usr/lib", 
+                        "$(SYSROOT)/usr/lib",
                         "${SYSROOT}/lib"
                     ],
-                    "options" : "-l opencv_optflow"
-                }, 
+                    "options": "-l opencv_optflow"
+                },
                 "compiler_x86": {
                     "includepaths": [
                         "$(OPENCV_INCLUDE)"
                     ]
-                }, 
+                },
                 "linker_x86": {
                     "librarypaths": [
                         "$(OPENCV_LIB)"
                     ],
-                    "options" : "-l opencv_optflow"
+                    "options": "-l opencv_optflow"
                 }
             },
-			"containers": [
-				{
-					"name": "krnl_tvl1", 
-					"accelerators": [
-						{
-							"name": "tvl1_accel", 
-							"frequency": 150.0
-						}, 
-						{
-							"name": "img_pyramid_accel", 
-							"frequency": 150.0
-						}
-					],
-					"frequency": 150.0
-				}
-			]
-        }, 
+            "containers": [
+                {
+                    "name": "krnl_tvl1",
+                    "accelerators": [
+                        {
+                            "name": "tvl1_accel",
+                            "frequency": 150.0
+                        },
+                        {
+                            "name": "img_pyramid_accel",
+                            "frequency": 150.0
+                        }
+                    ],
+                    "frequency": 150.0
+                }
+            ]
+        },
         "vck190": {
             "host": {
                 "compiler": {
                     "includepaths": [
-                        "$(SYSROOT)/usr/include", 
+                        "$(SYSROOT)/usr/include",
                         "$(SYSROOT)/usr/include/opencv4"
                     ]
-                }, 
+                },
                 "linker": {
                     "librarypaths": [
-                        "$(SYSROOT)/usr/lib", 
+                        "$(SYSROOT)/usr/lib",
                         "${SYSROOT}/lib"
                     ],
-                    "options" : "-l opencv_optflow"
-                }, 
+                    "options": "-l opencv_optflow"
+                },
                 "compiler_x86": {
                     "includepaths": [
                         "$(OPENCV_INCLUDE)"
                     ]
-                }, 
+                },
                 "linker_x86": {
                     "librarypaths": [
                         "$(OPENCV_LIB)"
                     ],
-                    "options" : "-l opencv_optflow"
+                    "options": "-l opencv_optflow"
                 }
             },
-			"containers": [
-				{
-					"name": "krnl_tvl1", 
-					"accelerators": [
-						{
-							"name": "tvl1_accel", 
-							"frequency": 150.0
-						}, 
-						{
-							"name": "img_pyramid_accel", 
-							"frequency": 150.0
-						}
-					],
-					"frequency": 150.0
-				}
-			]
+            "containers": [
+                {
+                    "name": "krnl_tvl1",
+                    "accelerators": [
+                        {
+                            "name": "tvl1_accel",
+                            "frequency": 150.0
+                        },
+                        {
+                            "name": "img_pyramid_accel",
+                            "frequency": 150.0
+                        }
+                    ],
+                    "frequency": 150.0
+                }
+            ]
         }
-    }, 
-    "gui": true, 
+    },
+    "gui": true,
     "launch": [
         {
-            "target": "sw_emu", 
-            "cmd_args": "LIB_DIR/data/tvl_left.png LIB_DIR/data/tvl_right.png ", 
-            "name": "sw_emu", 
+            "target": "sw_emu",
+            "cmd_args": "LIB_DIR/data/tvl_left.png LIB_DIR/data/tvl_right.png ",
+            "name": "sw_emu",
             "ld_library_path": [
-                "$(OPENCV_LIB)", 
-                "$(LD_LIBRARY_PATH)", 
+                "$(OPENCV_LIB)",
+                "$(LD_LIBRARY_PATH)",
                 "$(XILINX_XRT)/lib"
             ]
-        }, 
+        },
         {
-            "target": "hw_emu", 
-            "cmd_args": "LIB_DIR/data/tvl_left.png LIB_DIR/data/tvl_right.png ", 
-            "name": "hw_emu", 
+            "target": "hw_emu",
+            "cmd_args": "LIB_DIR/data/tvl_left.png LIB_DIR/data/tvl_right.png ",
+            "name": "hw_emu",
             "ld_library_path": [
-                "$(OPENCV_LIB)", 
-                "$(LD_LIBRARY_PATH)", 
+                "$(OPENCV_LIB)",
+                "$(LD_LIBRARY_PATH)",
                 "$(XILINX_XRT)/lib"
             ]
-        }, 
+        },
         {
-            "target": "hw", 
-            "cmd_args": "LIB_DIR/data/left.png LIB_DIR/data/right.png ", 
-            "name": "hardware_build", 
+            "target": "hw",
+            "cmd_args": "LIB_DIR/data/left.png LIB_DIR/data/right.png ",
+            "name": "hardware_build",
             "ld_library_path": [
-                "$(OPENCV_LIB)", 
-                "$(LD_LIBRARY_PATH)", 
+                "$(OPENCV_LIB)",
+                "$(LD_LIBRARY_PATH)",
                 "$(XILINX_XRT)/lib"
             ]
         }
-    ], 
+    ],
     "data": [
-        "LIB_DIR/data/tvl_left.png", 
-        "LIB_DIR/data/tvl_right.png", 
-        "LIB_DIR/data/left.png", 
+        "LIB_DIR/data/tvl_left.png",
+        "LIB_DIR/data/tvl_right.png",
+        "LIB_DIR/data/left.png",
         "LIB_DIR/data/right.png"
-    ], 
+    ],
     "host": {
-        "host_exe": "tvl1", 
+        "host_exe": "tvl1",
         "compiler": {
             "sources": [
-                "LIB_DIR/L3/examples/tvl1/xf_tvl1_tb.cpp", 
+                "LIB_DIR/L3/examples/tvl1/xf_tvl1_tb.cpp",
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
-            ], 
+            ],
             "includepaths": [
                 "LIB_DIR/L3/examples/tvl1/config"
-            ], 
-            "options": "-O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include", 
+            ],
+            "options": "-O3 -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include -I$(XILINX_HLS)/include",
             "symbols": [
                 "__SDSVHLS__"
             ]
         }
-    }, 
+    },
     "v++": {
         "compiler": {
-            "symbols": [], 
+            "symbols": [],
             "includepaths": [
                 "LIB_DIR/L3/examples/tvl1/config"
-            ], 
+            ],
             "clflags": []
         }
-    }, 
+    },
     "containers": [
         {
-            "name": "krnl_tvl1", 
+            "name": "krnl_tvl1",
             "accelerators": [
                 {
-                    "name": "tvl1_accel", 
+                    "name": "tvl1_accel",
                     "location": "LIB_DIR/L3/examples/tvl1/xf_tvl1_accel.cpp",
                     "frequency": 300.0
-                }, 
+                },
                 {
-                    "name": "img_pyramid_accel", 
+                    "name": "img_pyramid_accel",
                     "location": "LIB_DIR/L3/examples/tvl1/xf_img_pyramid_accel.cpp",
                     "frequency": 300.0
                 }
             ],
             "frequency": 300.0
         }
-    ], 
+    ],
     "check_env": [
         {
-            "env": "OPENCV_INCLUDE", 
+            "env": "OPENCV_INCLUDE",
             "platform": [
-                "u200", 
-                "u50", 
+                "u200",
+                "u50",
                 "aws-vu9p-f1"
-            ], 
+            ],
             "echo": "Cannot find OpenCV include path. Please set OPENCV_INCLUDE variable"
-        }, 
+        },
         {
-            "env": "OPENCV_LIB", 
+            "env": "OPENCV_LIB",
             "platform": [
-                "u200", 
-                "u50", 
+                "u200",
+                "u50",
                 "aws-vu9p-f1"
-            ], 
+            ],
             "echo": "Cannot find Opencv lib path. Please set OPENCV_LIB variable"
         }
-    ], 
+    ],
     "testinfo": {
-        "disable": false, 
+        "disable": false,
         "jobs": [
             {
-                "index": 0, 
-                "dependency": [], 
-                "env": "", 
-                "cmd": "", 
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
                 "max_memory_MB": {
-                    "vitis_hw_build": 65535, 
-                    "vitis_hw_emu": 40960, 
-                    "vitis_sw_emu": 40960, 
+                    "vitis_hw_build": 65535,
+                    "vitis_hw_emu": 40960,
+                    "vitis_sw_emu": 40960,
                     "vitis_hw_run": 10240
-                }, 
+                },
                 "max_time_min": {
-                    "vitis_hw_build": 470, 
-                    "vitis_hw_emu": 720, 
-                    "vitis_sw_emu": 470, 
+                    "vitis_hw_build": 470,
+                    "vitis_hw_emu": 720,
+                    "vitis_sw_emu": 470,
                     "vitis_hw_run": 30
                 }
             }
-        ], 
+        ],
         "targets": [
-            "vitis_sw_emu", 
-            "vitis_hw_emu", 
-            "vitis_hw_build", 
+            "vitis_sw_emu",
+            "vitis_hw_emu",
+            "vitis_hw_build",
             "vitis_hw_run"
-        ], 
+        ],
         "category": "full"
     }
 }

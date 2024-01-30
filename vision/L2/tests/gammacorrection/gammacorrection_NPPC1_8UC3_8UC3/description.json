@@ -3,9 +3,8 @@
     "description": [
         "GAMMACORRECTION L2 function example"
     ],
-    "flow": "vitis",
+    "flow": "system",
     "platform_allowlist": [
-        "u200",
         "zcu104"
     ],
     "platform_blocklist": [
@@ -14,20 +13,6 @@
         "u50"
     ],
     "platform_properties": {
-        "u200": {
-            "host": {
-                "compiler": {
-                    "includepaths": [
-                        "$(OPENCV_INCLUDE)"
-                    ]
-                },
-                "linker": {
-                    "librarypaths": [
-                        "$(OPENCV_LIB)"
-                    ]
-                }
-            }
-        },
         "zcu104": {
             "host": {
                 "compiler": {

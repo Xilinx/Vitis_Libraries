@@ -1,7 +1,7 @@
 {
     "name": "Xilinx resize AIE Test",
     "description": "resize AIE function example",
-    "flow": "versal",
+    "flow": "system",
     "platform_allowlist": [
         "vck190"
     ],

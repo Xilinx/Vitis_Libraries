@@ -52,16 +52,8 @@ int main(int argc, char** argv) {
     int roi_brx = 127;
     int roi_bry = 127;
     int stats_size = STATS_SIZE;
-    int N = 1;
-    int M = 1;
-
-    // N = 0 or M = 0 is not possible so assigning it to 1 if value is 0.
-    if (N == 0) {
-        N = 1;
-    }
-    if (M == 0) {
-        M = 1;
-    }
+    const int N = 1;
+    const int M = 1;
 
     uint32_t ind_ref_stats[N * M][3][STATS_SIZE] = {0};
     uint32_t mrg_ref_stats[N * M][3][FINAL_BINS_NUM] = {0};

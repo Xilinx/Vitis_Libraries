@@ -1,7 +1,7 @@
 {
     "name": "Xilinx convertscaleabs AIE Test",
     "description": "convertscaleabs AIE function example",
-    "flow": "versal",
+    "flow": "system",
     "platform_allowlist": [
         "vck190"
     ],

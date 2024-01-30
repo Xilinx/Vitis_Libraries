@@ -1,7 +1,7 @@
 {
     "name": "Xilinx Gaussian AIE Test",
     "description": "Gaussian AIE function example",
-    "flow": "versal",
+    "flow": "system",
     "platform_allowlist": [
         "vck190"
     ],

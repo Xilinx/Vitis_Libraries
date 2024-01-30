@@ -1,7 +1,7 @@
 {
     "name": "Xilinx laplacian AIE Test",
     "description": "laplacian AIE function example",
-    "flow": "versal",
+    "flow": "system",
     "platform_allowlist": [
         "vck190"
     ],

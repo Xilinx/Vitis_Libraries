@@ -1,7 +1,7 @@
 {
     "name": "Xilinx Preprocess AIE Test",
     "description": "Preprocess AIE function example",
-    "flow": "versal",
+    "flow": "system",
     "platform_allowlist": [
         "vck190"
     ],

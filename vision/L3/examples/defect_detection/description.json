@@ -1,48 +1,33 @@
 {
-    "name": "Xilinx Defect detection L3 Test", 
+    "name": "Xilinx Defect detection L3 Test",
     "description": [
         "Defect detection L3 function example"
-    ], 
-    "flow": "vitis", 
+    ],
+    "flow": "system",
     "platform_allowlist": [
-        "u200", 
-        "zcu102", 
-        "zcu104", 
+        "zcu104",
+        "zcu102",
         "u50"
-    ], 
+    ],
     "platform_blocklist": [
-        "u280", 
+        "u280",
         "u250"
-    ], 
+    ],
     "platform_properties": {
-        "u200": {
-            "host": {
-                "compiler": {
-                    "includepaths": [
-                        "$(OPENCV_INCLUDE)"
-                    ]
-                }, 
-                "linker": {
-                    "librarypaths": [
-                        "$(OPENCV_LIB)"
-                    ]
-                }
-            }
-        }, 
         "u50": {
             "host": {
                 "compiler": {
                     "includepaths": [
                         "$(OPENCV_INCLUDE)"
                     ]
-                }, 
+                },
                 "linker": {
                     "librarypaths": [
                         "$(OPENCV_LIB)"
                     ]
                 }
             }
-        }, 
+        },
         "zcu102": {
             "host": {
                 "compiler": {
@@ -50,10 +35,10 @@
                         "$(SYSROOT)/usr/include",
                         "$(SYSROOT)/usr/include/opencv4"
                     ]
-                }, 
+                },
                 "linker": {
                     "librarypaths": [
-                        "$(SYSROOT)/usr/lib", 
+                        "$(SYSROOT)/usr/lib",
                         "${SYSROOT}/opt/xilinx/xrt/lib"
                     ]
                 },
@@ -66,40 +51,40 @@
                     "librarypaths": [
                         "$(OPENCV_LIB)"
                     ]
-                }                                
+                }
             },
-			"containers": [
-				{
-					"name": "krnl_threshold", 
-					"accelerators": [
-						{
-							"name": "gaussian_otsu_accel", 
-							"frequency": 200.0
-						}, 
-						{
-							"name": "preprocess_accel", 
-							"frequency": 200.0
-						}, 
-						{
-							"name": "cca_custom_accel", 
-							"frequency": 200.0
-						}
-					],
-					"frequency": 200.0
-				}
-			]
-        }, 
+            "containers": [
+                {
+                    "name": "krnl_threshold",
+                    "accelerators": [
+                        {
+                            "name": "gaussian_otsu_accel",
+                            "frequency": 200.0
+                        },
+                        {
+                            "name": "preprocess_accel",
+                            "frequency": 200.0
+                        },
+                        {
+                            "name": "cca_custom_accel",
+                            "frequency": 200.0
+                        }
+                    ],
+                    "frequency": 200.0
+                }
+            ]
+        },
         "zcu104": {
             "host": {
                 "compiler": {
                     "includepaths": [
                         "$(SYSROOT)/usr/include",
-			            "$(SYSROOT)/usr/include/opencv4"
+                        "$(SYSROOT)/usr/include/opencv4"
                     ]
-                }, 
+                },
                 "linker": {
                     "librarypaths": [
-                        "$(SYSROOT)/usr/lib", 
+                        "$(SYSROOT)/usr/lib",
                         "${SYSROOT}/opt/xilinx/xrt/lib"
                     ]
                 },
@@ -112,168 +97,168 @@
                     "librarypaths": [
                         "$(OPENCV_LIB)"
                     ]
-                }                
+                }
             },
-			"containers": [
-				{
-					"name": "krnl_threshold", 
-					"accelerators": [
-						{
-							"name": "gaussian_otsu_accel", 
-							"frequency": 200.0
-						}, 
-						{
-							"name": "preprocess_accel", 
-							"frequency": 200.0
-						}, 
-						{
-							"name": "cca_custom_accel", 
-							"frequency": 200.0
-						}
-					],
-					"frequency": 200.0
-				}
-			]
+            "containers": [
+                {
+                    "name": "krnl_threshold",
+                    "accelerators": [
+                        {
+                            "name": "gaussian_otsu_accel",
+                            "frequency": 200.0
+                        },
+                        {
+                            "name": "preprocess_accel",
+                            "frequency": 200.0
+                        },
+                        {
+                            "name": "cca_custom_accel",
+                            "frequency": 200.0
+                        }
+                    ],
+                    "frequency": 200.0
+                }
+            ]
         }
-    }, 
-    "gui": true, 
+    },
+    "gui": true,
     "launch": [
         {
-            "target": "sw_emu", 
-            "cmd_args": "LIB_DIR/data/HD2.JPG ", 
-            "name": "sw_emu", 
+            "target": "sw_emu",
+            "cmd_args": "LIB_DIR/data/HD2.JPG ",
+            "name": "sw_emu",
             "ld_library_path": [
-                "$(OPENCV_LIB)", 
-                "$(LD_LIBRARY_PATH)", 
+                "$(OPENCV_LIB)",
+                "$(LD_LIBRARY_PATH)",
                 "$(XILINX_XRT)/lib"
             ]
-        }, 
+        },
         {
-            "target": "hw_emu", 
-            "cmd_args": "LIB_DIR/data/HD2.JPG  ", 
-            "name": "hw_emu", 
+            "target": "hw_emu",
+            "cmd_args": "LIB_DIR/data/HD2.JPG  ",
+            "name": "hw_emu",
             "ld_library_path": [
-                "$(OPENCV_LIB)", 
-                "$(LD_LIBRARY_PATH)", 
+                "$(OPENCV_LIB)",
+                "$(LD_LIBRARY_PATH)",
                 "$(XILINX_XRT)/lib"
             ]
-        }, 
+        },
         {
-            "target": "hw", 
-            "cmd_args": "LIB_DIR/data/HD2.JPG ", 
-            "name": "hardware_build", 
+            "target": "hw",
+            "cmd_args": "LIB_DIR/data/HD2.JPG ",
+            "name": "hardware_build",
             "ld_library_path": [
-                "$(OPENCV_LIB)", 
-                "$(LD_LIBRARY_PATH)", 
+                "$(OPENCV_LIB)",
+                "$(LD_LIBRARY_PATH)",
                 "$(XILINX_XRT)/lib"
             ]
         }
-    ], 
-    "data": [ 
+    ],
+    "data": [
         "LIB_DIR/data/HD2.JPG"
-    ], 
+    ],
     "host": {
-        "host_exe": "threshold", 
+        "host_exe": "threshold",
         "compiler": {
             "sources": [
-                "LIB_DIR/L3/examples/defect_detection/xf_threshold_tb.cpp", 
+                "LIB_DIR/L3/examples/defect_detection/xf_threshold_tb.cpp",
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
-            ], 
+            ],
             "includepaths": [
                 "LIB_DIR/L3/examples/defect_detection/config"
-            ], 
+            ],
             "options": "-O3"
         }
-    }, 
+    },
     "v++": {
         "compiler": {
-            "symbols": [], 
+            "symbols": [],
             "includepaths": [
                 "LIB_DIR/L3/examples/defect_detection/config"
-            ], 
+            ],
             "clflags": []
         }
-    }, 
+    },
     "containers": [
         {
-            "name": "krnl_threshold", 
+            "name": "krnl_threshold",
             "accelerators": [
                 {
-                    "name": "gaussian_otsu_accel", 
+                    "name": "gaussian_otsu_accel",
                     "location": "LIB_DIR/L3/examples/defect_detection/xf_gaussian_otsu_accel.cpp",
                     "frequency": 300.0
-                }, 
+                },
                 {
-                    "name": "preprocess_accel", 
+                    "name": "preprocess_accel",
                     "location": "LIB_DIR/L3/examples/defect_detection/xf_preprocess_accel.cpp",
                     "frequency": 300.0
-                }, 
+                },
                 {
-                    "name": "cca_custom_accel", 
+                    "name": "cca_custom_accel",
                     "location": "LIB_DIR/L3/examples/defect_detection/xf_cca_custom_accel.cpp",
                     "frequency": 300.0
                 }
             ],
             "frequency": 300.0
         }
-    ], 
+    ],
     "check_env": [
         {
             "env": "OPENCV_INCLUDE",
-            "platform" :[
+            "platform": [
                 "u200",
                 "u50",
-				"aws-vu9p-f1"
-            ], 
+                "aws-vu9p-f1"
+            ],
             "echo": "Cannot find OpenCV include path. Please set OPENCV_INCLUDE variable"
-        }, 
+        },
         {
             "env": "OPENCV_LIB",
-            "platform" :[
+            "platform": [
                 "u200",
                 "u50",
-				"aws-vu9p-f1"
-            ], 
+                "aws-vu9p-f1"
+            ],
             "echo": "Cannot find Opencv lib path. Please set OPENCV_LIB variable"
         },
-		{
+        {
             "env": "EDGE_COMMON_SW",
-            "platform" :[
+            "platform": [
                 "zcu102",
                 "zcu104",
-				"vck190"
-            ], 
+                "vck190"
+            ],
             "echo": "Please set EDGE_COMMON_SW variable"
         }
-    ], 
+    ],
     "testinfo": {
-        "disable": false, 
+        "disable": false,
         "jobs": [
             {
-                "index": 0, 
-                "dependency": [], 
-                "env": "", 
-                "cmd": "", 
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
                 "max_memory_MB": {
-                    "vitis_hw_build": 40960, 
-                    "vitis_hw_emu": 28672, 
-                    "vitis_sw_emu": 10240, 
+                    "vitis_hw_build": 40960,
+                    "vitis_hw_emu": 28672,
+                    "vitis_sw_emu": 10240,
                     "vitis_hw_run": 10240
-                }, 
+                },
                 "max_time_min": {
-                    "vitis_hw_build": 470, 
-                    "vitis_hw_emu": 470, 
-                    "vitis_sw_emu": 60, 
+                    "vitis_hw_build": 470,
+                    "vitis_hw_emu": 470,
+                    "vitis_sw_emu": 60,
                     "vitis_hw_run": 30
                 }
             }
-        ], 
+        ],
         "targets": [
-            "vitis_sw_emu", 
-            "vitis_hw_emu", 
-            "vitis_hw_build", 
+            "vitis_sw_emu",
+            "vitis_hw_emu",
+            "vitis_hw_build",
             "vitis_hw_run"
-        ], 
+        ],
         "category": "full"
     }
 }

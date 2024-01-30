@@ -1,7 +1,7 @@
 {
     "name": "Xilinx erode_rect_3x3 AIE Test",
     "description": "erode_rect_3x3 AIE function example",
-    "flow": "versal",
+    "flow": "system",
     "platform_allowlist": [
         "vck190"
     ],

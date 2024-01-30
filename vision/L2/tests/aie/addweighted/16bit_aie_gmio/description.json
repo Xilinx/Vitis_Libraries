@@ -1,7 +1,7 @@
 {
     "name": "Xilinx addweighted AIE Test",
     "description": "addweighted AIE function example",
-    "flow": "versal",
+    "flow": "system",
     "platform_allowlist": [
         "vck190"
     ],

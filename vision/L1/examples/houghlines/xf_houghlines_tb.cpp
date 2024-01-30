@@ -118,8 +118,8 @@ void xiHoughLinesstandard(cv::Mat& img,
     int step = (int)img.step;
     int width = img.cols;
     int height = img.rows;
-    double max_theta;
-    double min_theta;
+    double max_theta = 0.0;
+    double min_theta = 0.0;
 
     if (maxtheta > 0) max_theta = (CV_PI * maxtheta) / 180;
     if (mintheta > 0) min_theta = (CV_PI * mintheta) / 180;

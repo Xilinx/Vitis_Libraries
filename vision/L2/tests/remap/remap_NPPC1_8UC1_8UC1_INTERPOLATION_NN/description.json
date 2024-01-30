@@ -3,32 +3,17 @@
     "description": [
         "Remap L2 function example"
     ],
-    "flow": "vitis",
+    "flow": "system",
     "platform_allowlist": [
-        "u200",
-        "aws-vu9p-f1",
+        "zcu104",
         "vck190",
-        "zcu104"
+        "aws-vu9p-f1"
     ],
     "platform_blocklist": [
         "u280",
         "u250"
     ],
     "platform_properties": {
-        "u200": {
-            "host": {
-                "compiler": {
-                    "includepaths": [
-                        "$(OPENCV_INCLUDE)"
-                    ]
-                },
-                "linker": {
-                    "librarypaths": [
-                        "$(OPENCV_LIB)"
-                    ]
-                }
-            }
-        },
         "aws-vu9p-f1": {
             "host": {
                 "compiler": {

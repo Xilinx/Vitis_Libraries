@@ -1,7 +1,7 @@
 {
     "name": "Xilinx Demosaic AIE 16bit_aie_RGGB_RGBA Test",
     "description": "Demosaic AIE function example",
-    "flow": "versal",
+    "flow": "system",
     "platform_allowlist": [
         "vck190"
     ],

@@ -1,7 +1,7 @@
 {
     "name": "Xilinx pixelwise_mul AIE Test",
     "description": "pixelwise_mul AIE function example",
-    "flow": "versal",
+    "flow": "system",
     "platform_allowlist": [
         "vck190"
     ],

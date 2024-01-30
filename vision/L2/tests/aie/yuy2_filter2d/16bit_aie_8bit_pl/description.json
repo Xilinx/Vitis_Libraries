@@ -1,7 +1,7 @@
 {
     "name": "Xilinx YUY2 Filter2D AIE Test",
     "description": "YUY2 Filter2D AIE function example using PL tiler stitcher",
-    "flow": "versal",
+    "flow": "system",
     "platform_allowlist": [
         "vck190"
     ],

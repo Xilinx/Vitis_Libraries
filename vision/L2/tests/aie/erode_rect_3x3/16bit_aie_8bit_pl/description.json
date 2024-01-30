@@ -1,7 +1,7 @@
 {
     "name": "Xilinx erode AIE Test",
     "description": "erode AIE function example",
-    "flow": "versal",
+    "flow": "system",
     "platform_allowlist": [
         "vck190"
     ],

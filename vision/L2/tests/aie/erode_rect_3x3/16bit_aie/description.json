@@ -1,7 +1,7 @@
 {
     "name": "Xilinx Erosion AIE Test",
     "description": "Erosion AIE function example",
-    "flow": "versal",
+    "flow": "system",
     "platform_allowlist": [
         "vck190"
     ],

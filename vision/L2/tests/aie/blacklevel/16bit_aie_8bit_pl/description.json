@@ -1,7 +1,7 @@
 {
     "name": "Xilinx blacklevel AIE Test",
     "description": "blacklevel AIE function example",
-    "flow": "versal",
+    "flow": "system",
     "platform_allowlist": [
         "vck190"
     ],

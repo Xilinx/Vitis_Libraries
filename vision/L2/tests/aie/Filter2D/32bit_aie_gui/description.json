@@ -1,7 +1,7 @@
 {
     "name": "Xilinx Filter2D AIE Test GUI",
     "description": "Filter2D AIE function example for GUI using mm2s s2mm data mover",
-    "flow": "versal",
+    "flow": "system",
     "platform_allowlist": [
         "vck190"
     ],
