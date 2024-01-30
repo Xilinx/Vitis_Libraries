@@ -1,37 +1,36 @@
 {
     "gui": false,
-    "name": "Xilinx Validate Stream with ROM Kernel Test", 
-    "description": "Fixed kernel with static parameters", 
-    "flow": "vitis", 
+    "name": "Xilinx Validate Stream with ROM Kernel Test",
+    "description": "Fixed kernel with static parameters",
+    "flow": "system",
     "platform_allowlist": [
-        "vck190", 
-        "u200", 
+        "vck190",
         "aws-vu9p-f1"
-    ], 
-    "platform_blocklist": [], 
-    "platform_properties": {}, 
+    ],
+    "platform_blocklist": [],
+    "platform_properties": {},
     "launch": [
         {
-            "name": "generic launch for all flows", 
+            "name": "generic launch for all flows",
             "cmd_args": "--xclbin BUILD/data_mover.xclbin"
         }
-    ], 
+    ],
     "host": {
-        "host_exe": "test_mover.exe", 
+        "host_exe": "test_mover.exe",
         "compiler": {
             "sources": [
-                "host/main.cpp", 
+                "host/main.cpp",
                 "LIB_DIR/ext/xcl2/xcl2.cpp"
-            ], 
+            ],
             "includepaths": [
-                "host", 
+                "host",
                 "kernel",
                 "LIB_DIR/ext/xcl2",
                 "LIB_DIR/../utils/L1/include"
-            ], 
+            ],
             "options": "-std=c++14"
         }
-    }, 
+    },
     "v++": {
         "compiler": {
             "includepaths": [
@@ -39,50 +38,50 @@
                 "kernel"
             ]
         }
-    }, 
+    },
     "containers": [
         {
             "accelerators": [
                 {
-                    "location": "LIB_DIR/L2/src/hw/data_mover/m2s_x2.cpp", 
+                    "location": "LIB_DIR/L2/src/hw/data_mover/m2s_x2.cpp",
                     "name": "m2s_x2"
-                }, 
+                },
                 {
-                    "location": "LIB_DIR/L2/src/hw/data_mover/romCs_x2.cpp", 
+                    "location": "LIB_DIR/L2/src/hw/data_mover/romCs_x2.cpp",
                     "name": "romCs_x2"
                 }
-            ], 
-            "ldclflags": "--config PROJECT/conn.cfg", 
+            ],
+            "ldclflags": "--config PROJECT/conn.cfg",
             "name": "data_mover"
         }
-    ], 
+    ],
     "testinfo": {
-        "disable": false, 
+        "disable": false,
         "jobs": [
             {
-                "index": 0, 
-                "dependency": [], 
-                "env": "", 
-                "cmd": "", 
+                "index": 0,
+                "dependency": [],
+                "env": "",
+                "cmd": "",
                 "max_memory_MB": {
-                    "vitis_hw_build": 40960, 
-                    "vitis_hw_emu": 28672, 
-                    "vitis_sw_emu": 10240, 
+                    "vitis_hw_build": 40960,
+                    "vitis_hw_emu": 28672,
+                    "vitis_sw_emu": 10240,
                     "vitis_hw_run": 10240
-                }, 
+                },
                 "max_time_min": {
-                    "vitis_hw_build": 470, 
-                    "vitis_hw_emu": 470, 
-                    "vitis_sw_emu": 60, 
+                    "vitis_hw_build": 470,
+                    "vitis_hw_emu": 470,
+                    "vitis_sw_emu": 60,
                     "vitis_hw_run": 10
                 }
             }
-        ], 
+        ],
         "targets": [
-            "vitis_hw_emu", 
-            "vitis_hw_build", 
+            "vitis_hw_emu",
+            "vitis_hw_build",
             "vitis_hw_run"
-        ], 
+        ],
         "category": "canary"
     }
 }

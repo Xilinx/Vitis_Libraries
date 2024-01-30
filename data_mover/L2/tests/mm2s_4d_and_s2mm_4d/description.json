@@ -4,7 +4,7 @@
     "Generated configurable multi-port mm2s_4d/s2mm_4d kernel test, using parameters."
   ],
   "gui": false,
-  "flow": "versal",
+  "flow": "system",
   "platform_allowlist": [
     "u200",
     "vck190"

@@ -4,7 +4,7 @@
         "Generated configurable 4D Read/Write data mover kernel with handshake, using parameters."
     ], 
     "gui": false, 
-    "flow": "versal", 
+    "flow": "system", 
     "platform_allowlist": [
         "vck190", 
         "u200"

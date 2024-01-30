@@ -3,7 +3,7 @@
   "description": [
     "Fixed MM2S/S2MM kernel test, using parameters."
   ],
-  "flow": "versal",
+  "flow": "system",
   "platform_allowlist": [
     "u200",
     "vck190"
