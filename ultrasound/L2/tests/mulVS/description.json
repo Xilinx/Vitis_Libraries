@@ -1,7 +1,7 @@
 {
     "name": "L1 mulVS Test",
     "description": "mulVS Test",
-    "flow": "versal",
+    "flow": "aie",
     "gui": false,
     "platform_allowlist": [
         "vck190"

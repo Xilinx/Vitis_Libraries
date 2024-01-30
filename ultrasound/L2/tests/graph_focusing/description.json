@@ -1,7 +1,7 @@
 {
     "name": "L2 graph focusing Test",
     "description": "graph focusing Test",
-    "flow": "versal",
+    "flow": "aie",
     "platform_allowlist": [
         "vck190"
     ],

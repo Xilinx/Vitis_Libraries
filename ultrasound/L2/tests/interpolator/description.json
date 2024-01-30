@@ -1,7 +1,7 @@
 {
     "name": "L2 interpolator Test",
     "description": "interpolator Test",
-    "flow": "versal",
+    "flow": "system",
     "platform_allowlist": [
         "vck190"
     ],

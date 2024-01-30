@@ -1,7 +1,7 @@
 {
     "name": "Plane Wave Test",
     "description": "plane_wave example",
-    "flow": "versal",
+    "flow": "system",
     "platform_allowlist": [
         "vck190"
     ],

@@ -1,7 +1,7 @@
 {
     "name": "L2 graph delay Test",
     "description": "graph delay Test",
-    "flow": "versal",
+    "flow": "aie",
     "platform_allowlist": [
         "vck190"
     ],

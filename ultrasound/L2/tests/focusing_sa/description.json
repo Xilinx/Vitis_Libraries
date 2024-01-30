@@ -1,7 +1,7 @@
 {
     "name": "L2 focusing_sa Test",
     "description": "focusing_sa Test",
-    "flow": "versal",
+    "flow": "system",
     "platform_allowlist": [
         "vck190"
     ],

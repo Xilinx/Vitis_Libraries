@@ -1,7 +1,7 @@
 {
     "name": "Scanline All in AIE design Test",
     "description": "Full-flow scanline All in AIE design example",
-    "flow": "versal",
+    "flow": "system",
     "platform_allowlist": [
         "vck190"
     ],

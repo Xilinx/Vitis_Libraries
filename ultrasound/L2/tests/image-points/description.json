@@ -1,7 +1,7 @@
 {
     "name": "L2 image-points Test",
     "description": "image-points Test",
-    "flow": "versal",
+    "flow": "system",
     "platform_allowlist": [
         "vck190"
     ],

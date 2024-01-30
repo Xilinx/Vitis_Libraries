@@ -1,7 +1,7 @@
 {
     "name": "L1 norm_axis_1 Test",
     "description": "norm_axis_1 Test",
-    "flow": "versal",
+    "flow": "aie",
     "gui": false,
     "platform_allowlist": [
         "vck190"

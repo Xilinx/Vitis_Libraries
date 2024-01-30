@@ -1,7 +1,7 @@
 {
     "name": "Synthetic Aperture Test",
     "description": "synthetic aperture example",
-    "flow": "versal",
+    "flow": "system",
     "platform_allowlist": [
         "vck190"
     ],

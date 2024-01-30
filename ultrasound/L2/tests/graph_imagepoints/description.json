@@ -1,7 +1,7 @@
 {
     "name": "L2 graph imagepoints Test",
     "description": "graph imagepoints Test",
-    "flow": "versal",
+    "flow": "aie",
     "platform_allowlist": [
         "vck190"
     ],

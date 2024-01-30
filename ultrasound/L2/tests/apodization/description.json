@@ -1,7 +1,7 @@
 {
     "name": "L2 apodization Test",
     "description": "apodization Test",
-    "flow": "versal",
+    "flow": "system",
     "platform_allowlist": [
         "vck190"
     ],

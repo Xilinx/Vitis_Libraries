@@ -1,7 +1,7 @@
 {
     "name": "L2 samples Test",
     "description": "samples Test",
-    "flow": "versal",
+    "flow": "system",
     "platform_allowlist": [
         "vck190"
     ],

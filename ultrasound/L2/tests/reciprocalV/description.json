@@ -1,7 +1,7 @@
 {
     "name": "L1 reciprocalV Test",
     "description": "reciprocalV Test",
-    "flow": "versal",
+    "flow": "aie",
     "gui": false,
     "platform_allowlist": [
         "vck190"

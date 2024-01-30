@@ -1,7 +1,7 @@
 {
     "name": "L2 interpolator graph Test",
     "description": "interpolator graph Test",
-    "flow": "versal",
+    "flow": "aie",
     "platform_allowlist": [
         "vck190"
     ],

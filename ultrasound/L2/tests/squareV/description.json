@@ -1,7 +1,7 @@
 {
     "name": "L1 squareV Test",
     "description": "squareV Test",
-    "flow": "versal",
+    "flow": "aie",
     "gui": false,
     "platform_allowlist": [
         "vck190"

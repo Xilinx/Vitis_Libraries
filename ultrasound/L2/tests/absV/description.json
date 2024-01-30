@@ -1,7 +1,7 @@
 {
     "name": "L1 absV Test",
     "description": "absV Test",
-    "flow": "versal",
+    "flow": "aie",
     "gui": false,
     "platform_allowlist": [
         "vck190"
