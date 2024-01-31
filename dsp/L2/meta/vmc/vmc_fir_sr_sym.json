@@ -11,40 +11,34 @@
       "name": "data_type",
       "description": "The type of individual data samples input to and output of the filter function",
       "default": "cint16",
-      "blockgui":{
             "label": "Input/Output data type:",
             "tablabel": "Main",
             "parameterType":"popup"
-      }
     },
       {
-      "key": "TT_COEF",  
+      "key": "TT_COEFF",
       "name": "coef_type",
       "description": "The type of individual coefficients of the filter taps",
       "default": "int16",
       "validator": {
         "file": "vmc_fir_sr_sym.py",
-        "function": "vmc_validate_coef_type",
-        "args": ["data_type"]
+        "function": "vmc_validate_coeff_type",
+        "args": ["data_type", "AIE_VARIANT"]
       },
-      "blockgui":{
           "label": "Filter coefficients data type:",
           "tablabel": "Main",
           "parameterType":"popup"
-        }
     },
     {
       "name": "use_coeff_reload",
       "description": "Allows the user to select of runtime coefficient reloading",
       "default": false,
       "type": "bool",
-      "blockgui":{
           "label": "Specify filter coefficients via input port",
             "tablabel": "Main",
             "parameterType":"checkbox",
             "disable":"coeff",
             "enable":""
-      }
     },
     {
       "key": "TP_DUAL_IP",
@@ -52,11 +46,9 @@
       "description": "TP_DUAL_IP allows 2 stream inputs to be connected to FIR, increasing available throughput. When set to 0, single stream input will be connected to FIR kernel, when set to 1, both input stream ports will be used.",
       "default": false,
       "type": "bool",
-      "blockgui":{
           "label": "Provide second set of input ports",
             "tablabel": "Main",
             "parameterType":"checkbox"
-      }
     },
     {
       "key": "TP_NUM_OUTPUTS",
@@ -66,14 +58,12 @@
       "validator": {
         "file": "vmc_fir_sr_sym.py",
         "function": "vmc_validate_out_ports",
-        "args": ["dual_ip"]
+        "args": ["AIE_VARIANT"]
       },
       "type": "bool",
-      "blockgui":{
           "label": "Provide second set of output ports",
             "tablabel": "Main",
             "parameterType":"checkbox"
-      }
     },
       {
       "key":"coeff",
@@ -86,22 +76,18 @@
         "function": "vmc_validate_coeff",
         "args": ["use_coeff_reload", "coef_type" ,"fir_length", "data_type", "casc_length"]
       },
-      "blockgui":{
           "label": "Filter coefficients:",
             "tablabel": "Main",
             "parameterType":"edit"
-      }
     },
-    { 
+    {
       "key":"TP_FIR_LEN",
       "name": "fir_length",
       "description": "Specify fir length for coefficient reloading",
       "default": 32,
-      "blockgui":{
           "label": "Filter length:",
             "tablabel": "Main",
             "parameterType":"edit"
-      }
     },
       {
       "key":"TP_INPUT_WINDOW_VSIZE",
@@ -113,11 +99,10 @@
         "function": "vmc_validate_input_window_size",
         "args": ["data_type", "coef_type", "use_coeff_reload", "coeff", "fir_length"]
       },
-      "blockgui":{
           "label": "Input window size (Number of samples):",
             "tablabel": "Main",
             "parameterType":"edit"
-      }
+
     },
       {
       "key": "TP_SHIFT",
@@ -129,11 +114,9 @@
         "function": "vmc_validate_shift_val",
         "args": ["data_type"]
       },
-      "blockgui":{
             "label": "Scale output down by 2^:",
             "tablabel": "Main",
             "parameterType":"edit"
-      }
     },
       {
       "key": "TP_RND",
@@ -147,30 +130,26 @@
         "function": "vmc_validate_rnd_mode",
         "args": ["AIE_VARIANT"]
       },
-      "blockgui":{
             "label": "Rounding mode:",
             "tablabel": "Main",
             "parameterType":"popup"
-      }
     },
       {
       "key": "TP_SAT",
-	  "name": "sat_mode",
+      "name": "sat_mode",
       "description": "Saturation mode.",
       "enum": [0, 1, 3],
       "enum_str": ["0-None", "1-Asymmetric", "3-Symmetric"],
-	  "default": 0,
+      "default": 0,
       "validator": {
           "file": "vmc_fir_sr_asym.py",
           "function": "validate_sat_mode",
-		  "args": []
-		},
-		"blockgui":{
+          "args": []
+        },
             "label": "Saturation mode:",
             "tablabel": "Main",
             "parameterType":"popup"
-		}
-	},
+    },
       {
       "key": "TP_CASC_LEN",
       "name": "casc_length",
@@ -179,13 +158,11 @@
       "validator": {
         "file": "vmc_fir_sr_sym.py",
         "function": "vmc_validate_casc_len",
-        "args": []  
+        "args": []
       },
-      "blockgui":{
             "label": "Number of cascade stages:",
             "tablabel": "Main",
             "parameterType":"edit"
-      }
       }
   ],
   "generator": {

@@ -11,40 +11,34 @@
       "name": "data_type",
       "description": "The type of individual data samples input to and output of the filter function",
       "default": "cint16",
-      "blockgui":{
-            "label": "Input/Output data type:",
+           "label": "Input/Output data type:",
             "tablabel": "Main",
             "parameterType":"popup"
-      }
     },
     {
-      "key": "TT_COEF",  
+      "key": "TT_COEFF",
       "name": "coef_type",
       "description": "The type of individual coefficients of the filter taps",
       "default": "int16",
       "validator": {
         "file": "vmc_fir_decimate_hb.py",
-        "function": "vmc_validate_coef_type",
+        "function": "vmc_validate_coeff_type",
         "args": ["data_type", "AIE_VARIANT"]
       },
-      "blockgui":{
           "label": "Filter coefficients data type:",
             "tablabel": "Main",
             "parameterType":"popup"
-      }
     },
     {
       "name": "use_coeff_reload",
       "description": "Allows the user to select of runtime coefficient reloading",
       "default": false,
       "type": "bool",
-      "blockgui":{
           "label": "Specify filter coefficients via input port",
             "tablabel": "Main",
             "parameterType":"checkbox",
             "disable":"coeff",
             "enable":"fir_length"
-      }
     },
     {
       "key": "TP_DUAL_IP",
@@ -57,11 +51,9 @@
         "function": "vmc_validate_input_ports",
         "args": ["AIE_VARIANT"]
       },
-      "blockgui":{
           "label": "Provide second set of input ports",
             "tablabel": "Main",
             "parameterType":"checkbox"
-      }
     },
     {
       "key": "TP_NUM_OUTPUTS",
@@ -74,11 +66,9 @@
         "function": "vmc_validate_out_ports",
         "args": ["deci_poly", "dual_ip", "AIE_VARIANT"]
       },
-      "blockgui":{
           "label": "Provide second set of output ports",
             "tablabel": "Main",
             "parameterType":"checkbox"
-      }
     },
       {
       "key":"coeff",
@@ -91,23 +81,18 @@
         "function": "vmc_validate_coeff",
         "args": ["use_coeff_reload", "coef_type", "fir_length", "data_type", "casc_length", "deci_poly"]
       },
-      "blockgui":{
           "label": "Filter coefficients:",
             "tablabel": "Main",
             "parameterType":"edit"
-      }
     },
     {
       "key":"TP_FIR_LEN",
       "name": "fir_length",
       "description": "Specify fir length for coefficient reloading",
       "default": 31,
-      
-      "blockgui":{
-            "label": "Filter length:",
+       "label": "Filter length:",
             "tablabel": "Main",
             "parameterType":"edit"
-      }
     },
       {
       "key":"TP_INPUT_WINDOW_VSIZE",
@@ -119,13 +104,11 @@
         "function": "vmc_validate_input_window_size",
         "args": ["data_type", "coef_type", "use_coeff_reload", "coeff", "fir_length"]
       },
-      "blockgui":{
             "label": "Input window size (Number of samples):",
             "tablabel": "Main",
             "parameterType":"edit"
-      }
     },
-    {   
+    {
       "key": "TP_SHIFT",
       "name": "shift_val",
       "description": "The power of 2 shift down applied to the accumulation of FIR before output",
@@ -135,14 +118,12 @@
         "function": "vmc_validate_shift_val",
         "args": ["data_type"]
       },
-      "blockgui":{
             "label": "Scale output down by 2^:",
             "tablabel": "Main",
             "parameterType":"edit"
-      }
     },
       {
-      "key": "TP_RND",    
+      "key": "TP_RND",
       "name": "rnd_mode",
       "description": "The rounding to be applied during the shift down stage of processing.",
       "enum": [0, 1, 2, 3, 4, 5, 6, 7],
@@ -153,30 +134,27 @@
         "function": "vmc_validate_rnd_mode",
         "args": ["AIE_VARIANT"]
       },
-      "blockgui":{
             "label": "Rounding mode:",
             "tablabel": "Main",
             "parameterType":"popup"
-      }
     },
-	{
+    {
       "key": "TP_SAT",
-	  "name": "sat_mode",
+      "name": "sat_mode",
       "description": "Saturation mode.",
-	  "default": 0,
+      "default": 0,
       "enum": [0, 1, 3],
       "enum_str": ["0-None", "1-Asymmetric", "3-Symmetric"],
       "validator": {
           "file": "vmc_fir_decimate_hb.py",
           "function": "validate_sat_mode",
-		  "args": []
-		},
-		"blockgui":{
+          "args": []
+        },
+
             "label": "Saturation mode:",
             "tablabel": "Main",
             "parameterType":"popup"
-		}
-	},
+    },
     {
       "key": "TP_PARA_DECI_POLY",
       "name": "deci_poly",
@@ -187,11 +165,9 @@
         "function": "vmc_validate_deci_poly",
         "args": []
       },
-      "blockgui":{
         "label":"Number of decimator polyphases:",
-	    "tablabel": "Main",
+        "tablabel": "Main",
             "parameterType":"edit"
-      }
     },
     {
       "key": "TP_CASC_LEN",
@@ -203,12 +179,10 @@
         "function": "vmc_validate_casc_length",
         "args": ["use_coeff_reload", "fir_length"]
       },
-      "blockgui":{
             "label": "Number of cascade stages:",
             "tablabel": "Main",
             "parameterType":"edit"
-      }
-      }
+    }
   ],
   "generator": {
     "file": "vmc_fir_decimate_hb.py",

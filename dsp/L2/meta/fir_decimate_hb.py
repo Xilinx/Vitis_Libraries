@@ -2,25 +2,6 @@ from aie_common_fir import *
 import json
 import fir_sr_asym as sr_asym
 
-
-# fir_decimate_hb.hpp:       static_assert(TP_FIR_RANGE_LEN >= FIR_LEN_MIN,"ERROR: Illegal combination of design FIR length and cascade length, resulting in kernel FIR length below minimum required value. ");
-# fir_decimate_hb.hpp:       static_assert(((TP_FIR_LEN +1)%4) == 0,"ERROR: TP_FIR_LEN must be 4N-1 where N is a positive integer.");
-# fir_decimate_hb.hpp:       static_assert(TP_SHIFT >= SHIFT_MIN && TP_SHIFT <= SHIFT_MAX, "ERROR: TP_SHIFT is out of the supported range.");
-# fir_decimate_hb.hpp:       static_assert(TP_RND >= ROUND_MIN && TP_RND <= ROUND_MAX, "ERROR: TP_RND is out of the supported range.");
-# fir_decimate_hb.hpp:       static_assert(fnEnumType<TT_DATA>() != enumUnknownType,"ERROR: TT_DATA is not a supported type.");
-# fir_decimate_hb.hpp:       static_assert(fnEnumType<TT_COEFF>() != enumUnknownType,"ERROR: TT_COEFF is not a supported type.");
-# fir_decimate_hb.hpp:       static_assert(fnTypeCheckDataCoeffSize<TT_DATA,TT_COEFF>() != 0, "ERROR: TT_DATA type less precise than TT_COEFF is not supported.");
-# fir_decimate_hb.hpp:       static_assert(fnTypeCheckDataCoeffCmplx<TT_DATA,TT_COEFF>() != 0, "ERROR: real TT_DATA with complex TT_COEFF is not supported.");
-# fir_decimate_hb.hpp:       static_assert(fnTypeCheckDataCoeffFltInt<TT_DATA,TT_COEFF>() != 0, "ERROR: a mix of float and integer types of TT_DATA and TT_COEFF is not supported.");
-# fir_decimate_hb.hpp:       static_assert(fnUnsupportedTypeComboFirDecHb<TT_DATA,TT_COEFF>() != 0,"ERROR: The combination of TT_DATA and TT_COEFF is not supported for this class.");
-# fir_decimate_hb.hpp:       static_assert(TP_NUM_OUTPUTS >0 && TP_NUM_OUTPUTS <=2, "ERROR: only single or dual outputs are supported." );
-# fir_decimate_hb.hpp:       static_assert(!(std::is_same<TT_DATA,cfloat>::value || std::is_same<TT_DATA,float>::value) || (TP_SHIFT == 0), "ERROR: TP_SHIFT cannot be performed for TT_DATA=cfloat, so must be set to 0");
-# fir_decimate_hb.hpp:       static_assert(TP_INPUT_WINDOW_VSIZE % m_kLanes == 0, "ERROR: TP_INPUT_WINDOW_VSIZE must be an integer multiple of the number of lanes for this data type");
-# fir_decimate_hb_graph.hpp: static_assert(TP_CASC_LEN <= 40,"ERROR: Unsupported Cascade length");
-# fir_decimate_hb_graph.hpp: static_assert(TP_FIR_LEN / TP_CASC_LEN <= kMaxTapsPerKernel,"ERROR: Requested FIR length and Cascade length exceeds supported number of taps per kernel. Please increase the cascade legnth to accomodate the FIR design.");
-# fir_decimate_hb_graph.hpp: static_assert(TP_USE_COEFF_RELOAD == 0 || TP_FIR_LEN  <= kMaxTapsPerKernel,"ERROR: Exceeded maximum supported FIR length with reloadable coefficients. Please limit the FIR length or disable coefficient reload.");
-# fir_decimate_hb_graph.hpp: static_assert(TP_API != 0 || inBufferSize < kMemoryModuleSize, "ERROR: Input Window size (based on requrested window size and FIR length margin) exceeds Memory Module size of 32kB");
-
 #### naming ####
 #
 # Name functions with prefix
@@ -43,37 +24,16 @@ import fir_sr_asym as sr_asym
 # and "err_message" if "is_valid" is False.
 #
 
-TP_INPUT_WINDOW_VSIZE_min = 4
-TP_SSR_min = 1
-TP_PARA_DECI_POLY_min = 1
-TP_CASC_LEN_min = 1
-TP_CASC_LEN_max = 40
-TP_FIR_LEN_min = 4
-TP_FIR_LEN_max = 8192
-TP_SHIFT_min = 0
-TP_SHIFT_max = 61
-#TP_API_min=0
-#TP_API_max=1
-#TP_RND_min=0
-#TP_RND_max=7
-#AIE_VARIANT_min=1
-#AIE_VARIANT_max=2
-#TP_DUAL_IP_min=0
-#TP_DUAL_IP_max=1
-#TP_NUM_OUTPUTS_min=1
-#TP_NUM_OUTPUTS_max=2
-#TP_USE_COEF_RELOAD_min=0
-#TP_USE_COEF_RELOAD_max=2
 
-def fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1, TP_PARA_DECI_POLY=1):
+def fn_validate_input_window_size(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1, TP_PARA_DECI_POLY=1):
     # decimate halfband always uses 384b version of lanes.
     if TP_INPUT_WINDOW_VSIZE < TP_INPUT_WINDOW_VSIZE_min:
-	    return isError(f"Minimum value for Input window size is {TP_INPUT_WINDOW_VSIZE_min}, but got {TP_INPUT_WINDOW_VSIZE}.")
-    checkMultipleLanes =  fn_windowsize_multiple_lanes(TT_DATA, TT_COEF, TP_INPUT_WINDOW_VSIZE, TP_API, numLanes=fnNumLanes384b(TT_DATA, TT_COEF)*4)
+        return isError(f"Minimum value for Input window size is {TP_INPUT_WINDOW_VSIZE_min}, but got {TP_INPUT_WINDOW_VSIZE}.")
+    checkMultipleLanes =  fn_windowsize_multiple_lanes(TT_DATA, TT_COEFF, TP_INPUT_WINDOW_VSIZE, TP_API, numLanes=fnNumLanes384b(TT_DATA, TT_COEFF)*4)
     symApiSSR      = 0 if (TP_SSR == 1 and TP_PARA_DECI_POLY == 1) else TP_API  # Force buffer checks when not in SSR mode.
     checkMaxBuffer = fn_max_windowsize_for_buffer(TT_DATA, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, symApiSSR, TP_SSR, TP_INTERPOLATE_FACTOR=1, TP_DECIMATE_FACTOR=2)
     # Input samples are round-robin split to each SSR input paths, so total frame size must be divisable by SSR factor.
-    checkIfDivisableBySSR = fn_windowsize_divisible_by_ssr(TP_INPUT_WINDOW_VSIZE, TP_SSR * TP_PARA_DECI_POLY)
+    checkIfDivisableBySSR = fn_windowsize_divisible_by_param(TP_INPUT_WINDOW_VSIZE, TP_SSR * TP_PARA_DECI_POLY)
 
     for check in (checkMultipleLanes,checkMaxBuffer,checkIfDivisableBySSR):
       if check["is_valid"] == False :
@@ -82,9 +42,9 @@ def fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INPUT_WINDOW_
     return isValid
 
 def fn_halfband_len(TP_FIR_LEN):
-  return isValid if ((TP_FIR_LEN + 1) % 4 == 0) else isError("Filter length must be 4N-1 where N is a positive integer.")
+  return isValid if ((TP_FIR_LEN + 1) % 4 == 0) else isError("Filter length must be 4N-1 where N is a positive integer. Got TP_FIR_LEN {TP_FIR_LEN}")
 
-def fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD, TP_PARA_DECI_POLY):
+def fn_validate_fir_len(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEFF_RELOAD, TP_PARA_DECI_POLY):
     if TP_FIR_LEN < TP_FIR_LEN_min or TP_FIR_LEN > TP_FIR_LEN_max :
         return isError(f"Minimum and maximum value for Filter Length is {TP_FIR_LEN_min} and {TP_FIR_LEN_max}, respectively, but got {TP_FIR_LEN}.")
     minLenCheck =  fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR)
@@ -92,47 +52,25 @@ def fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_AP
     symFactor   = 4 # Symmetric, half-band
     symFactorSSR   = 2 if (TP_SSR != 1 ) else symFactor # SSR mode will discard the symmetry
     symApiSSR      = 0 if (TP_SSR == 1 and TP_PARA_DECI_POLY == 1) else TP_API  # Force buffer checks when not in SSR mode.
-    maxLenCheck = fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR, symApiSSR, symFactorSSR)
+    maxLenCheck = fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_SSR, symApiSSR, symFactorSSR)
     halfbandLenCheck = fn_halfband_len(TP_FIR_LEN)
     dataNeededCheck = isValid
     if TP_PARA_DECI_POLY > 1:
-      dataNeededCheck = sr_asym.fn_data_needed_within_buffer_size(TT_DATA, TT_COEF, (TP_FIR_LEN + 1)/2, TP_CASC_LEN, TP_API, TP_SSR )
+      dataNeededCheck = sr_asym.fn_data_needed_within_buffer_size(TT_DATA, TT_COEFF, (TP_FIR_LEN + 1)/2, TP_CASC_LEN, TP_API, TP_SSR )
     for check in (minLenCheck, maxLenCheck, halfbandLenCheck, dataNeededCheck):
       if check["is_valid"] == False :
         return check
 
     return isValid
 
-def fn_type_support(TT_DATA, TT_COEF, AIE_VARIANT):
-  if AIE_VARIANT == 1:
-    return isError(f"The combination of {TT_DATA} and {TT_COEF} is not supported for this class.") if (TT_DATA == "int16" and TT_COEF == "int16") else isValid
-  return isValid
-
-def fn_validate_num_outputs(TP_PARA_DECI_POLY, TP_DUAL_IP, TP_NUM_OUTPUTS, AIE_VARIANT):
-  if AIE_VARIANT == 2:
-    if TP_NUM_OUTPUTS == 2:
-      return isError(f"This device does not have dual ports on its kernel. Please set TP_NUM_OUTPUTS to 1")
-  if TP_PARA_DECI_POLY == 2 :
-    if TP_DUAL_IP == 1  and TP_NUM_OUTPUTS == 1:
-      return isError(f"When TP_PARA_DECI_POLY is set to 2, dual inputs are only allowed with dual outputs.")
-    elif TP_DUAL_IP == 0 and TP_NUM_OUTPUTS == 2:
-      return isError(f"When TP_PARA_DECI_POLY is set to 2, dual inputs are only allowed with dual outputs.")
-  return isValid
-
-def fn_validate_num_inputs(TP_DUAL_IP, AIE_VARIANT):
-  if AIE_VARIANT == 2:
-    if TP_DUAL_IP == 1:
-      return isError(f"This device does not have dual ports on its kernel. Please set TP_DUAL_IP to 0")
-  return isValid
-
 def fn_parapoly_value(TP_PARA_DECI_POLY):
     if TP_PARA_DECI_POLY != 1 and TP_PARA_DECI_POLY != 2:
-      return isError(f"TP_PARA_DECI_POLY can be only set to 1 or 2 for halfbands")
+      return isError(f"TP_PARA_DECI_POLY can be only set to 1 or 2 for halfbands. Got {TP_PARA_DECI_POLY}")
     return isValid
 
 def fn_ssr_for_para_poly(TP_PARA_DECI_POLY, TP_SSR):
   if TP_SSR > 1 and TP_PARA_DECI_POLY != 2:
-    return isError(f"SSR > 1 is only supported with TP_PARA_DECI_POLY set to 2")
+    return isError(f"SSR > 1 is only supported with TP_PARA_DECI_POLY set to 2. Got TP_SSR {TP_SSR}")
   return isValid
 
 def fn_stream_api_poly(TP_PARA_DECI_POLY, TP_API):
@@ -145,9 +83,8 @@ def fn_validate_para_deci_poly(TP_API, TP_PARA_DECI_POLY, TP_SSR):
         return isError(f"Minimum value for Decimation poly phase is {TP_PARA_DECI_POLY_min}, but got {TP_PARA_DECI_POLY}.")
     checkParaPolyVal = fn_parapoly_value(TP_PARA_DECI_POLY)
     checkSSRPoly     = fn_ssr_for_para_poly(TP_PARA_DECI_POLY, TP_SSR)
-    checkStreamsPoly = fn_stream_api_poly(TP_PARA_DECI_POLY, TP_API)
 
-    for check in (checkParaPolyVal,checkSSRPoly, checkStreamsPoly):
+    for check in (checkParaPolyVal,checkSSRPoly):
       if check["is_valid"] == False :
         return check
 
@@ -158,18 +95,13 @@ def fn_validate_casc_len(TP_CASC_LEN):
         return isError(f"Minimum and maximum value for cascade length is {TP_CASC_LEN_min} and {TP_CASC_LEN_max}, respectively, but got  {TP_CASC_LEN}.")
     return isValid
 
-def fn_validate_ssr(TP_API, TP_SSR):
-    if TP_SSR < TP_SSR_min:
-	    return isError(f"Minimum value for SSR is {TP_SSR_min}, but got {TP_SSR}.")
-    return isValid
-
 #### validation APIs ####
-def validate_TT_COEF(args):
+def validate_TT_COEFF(args):
     TT_DATA = args["TT_DATA"]
-    TT_COEF = args["TT_COEF"]
+    TT_COEFF = args["TT_COEFF"]
     AIE_VARIANT = args["AIE_VARIANT"]
-    standard_checks = fn_validate_coef_type(TT_DATA, TT_COEF)
-    typeCheck = fn_type_support(TT_DATA, TT_COEF, AIE_VARIANT)
+    standard_checks = fn_validate_coeff_type(TT_DATA, TT_COEFF)
+    typeCheck = fn_type_support(TT_DATA, TT_COEFF, AIE_VARIANT)
     for check in (standard_checks,typeCheck):
       if check["is_valid"] == False :
         return check
@@ -192,12 +124,12 @@ def validate_TP_SAT(args):
 def validate_TP_INPUT_WINDOW_VSIZE(args):
     TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
     TT_DATA = args["TT_DATA"]
-    TT_COEF = args["TT_COEF"]
+    TT_COEFF = args["TT_COEFF"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
     TP_API = args["TP_API"]
     TP_SSR = args["TP_SSR"]
     TP_PARA_DECI_POLY   = args["TP_PARA_DECI_POLY"]
-    return fn_validate_input_window_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR, TP_PARA_DECI_POLY)
+    return fn_validate_input_window_size(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR, TP_PARA_DECI_POLY)
 
 def validate_TP_CASC_LEN(args):
     TP_CASC_LEN = args["TP_CASC_LEN"]
@@ -206,27 +138,29 @@ def validate_TP_CASC_LEN(args):
 
 def validate_TP_FIR_LEN(args):
     TT_DATA = args["TT_DATA"]
-    TT_COEF = args["TT_COEF"]
+    TT_COEFF = args["TT_COEFF"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
     TP_CASC_LEN = args["TP_CASC_LEN"]
     TP_SSR = args["TP_SSR"]
     TP_API = args["TP_API"]
-    TP_USE_COEF_RELOAD = args["TP_USE_COEF_RELOAD"]
+    TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
     TP_PARA_DECI_POLY = args["TP_PARA_DECI_POLY"]
 
-    return fn_validate_fir_len(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD, TP_PARA_DECI_POLY)
+    return fn_validate_fir_len(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEFF_RELOAD, TP_PARA_DECI_POLY)
 
 def validate_TP_DUAL_IP(args):
+    TP_API = args["TP_API"]
     TP_DUAL_IP        = args["TP_DUAL_IP"]
     AIE_VARIANT       = args["AIE_VARIANT"]
-    return fn_validate_num_inputs(TP_DUAL_IP, AIE_VARIANT)
+    return fn_validate_sym_dual_ip(TP_API, TP_DUAL_IP, AIE_VARIANT)
 
 def validate_TP_NUM_OUTPUTS(args):
     TP_NUM_OUTPUTS    = args["TP_NUM_OUTPUTS"]
     TP_PARA_DECI_POLY = args["TP_PARA_DECI_POLY"]
+    TP_API        = args["TP_API"]
     TP_DUAL_IP        = args["TP_DUAL_IP"]
     AIE_VARIANT       = args["AIE_VARIANT"]
-    return fn_validate_num_outputs(TP_PARA_DECI_POLY, TP_DUAL_IP, TP_NUM_OUTPUTS, AIE_VARIANT)
+    return fn_validate_hb_num_outputs(TP_PARA_DECI_POLY, TP_DUAL_IP, TP_NUM_OUTPUTS, TP_API, AIE_VARIANT)
 
 def validate_TP_PARA_DECI_POLY(args):
     TP_PARA_DECI_POLY   = args["TP_PARA_DECI_POLY"]
@@ -237,13 +171,13 @@ def validate_TP_PARA_DECI_POLY(args):
 def validate_TP_SSR(args):
     TP_SSR              = args["TP_SSR"]
     TP_API              = args["TP_API"]
-    return fn_validate_ssr(TP_API, TP_SSR)
+    return fn_validate_hb_ssr(TP_API, TP_SSR)
 
 # Example of updater.
 #
 # Updater are functions to help GUI to hint user on parameter setting with already given parameters.
 # The return object will provide "value" which will be set in the wizard as the dependent parameter is being set.
-# The rest of keys are similar to paramster definition, but with candidates of enum or range values refined
+# The rest of keys are similar to parameter definition, but with candidates of enum or range values refined
 # based on previously set values.
 #
 # An updator function always return a dictionary,
@@ -259,14 +193,14 @@ def validate_TP_SSR(args):
 # If with given combination, no valid value can be set for the parameter being updated, the upater function
 # should set "value" to None, to indicate an error and provide error message via "err_message".
 # For example
-#  { "value": None, "err_message": "With TT_DATA as 'int' there is no valid option for TT_COEF" }
+#  { "value": None, "err_message": "With TT_DATA as 'int' there is no valid option for TT_COEFF" }
 #
-# In this example, the following is the updater for TT_COEF, with TT_DATA as the dependent paramster.
+# In this example, the following is the updater for TT_COEFF, with TT_DATA as the dependent parameter.
 # When GUI generates a wizard, TT_DATA should be required first, as it shows up in parameter list first.
-# Once user has provided value for TT_DATA, this function will be called and set the value of TT_COEF.
+# Once user has provided value for TT_DATA, this function will be called and set the value of TT_COEFF.
 # Meanwhile, the candidate shown in wizard based on enum will also be updated.
 #
-def update_TT_COEF(TT_DATA):
+def update_TT_COEFF(TT_DATA):
     return {"value": TT_DATA,
             "enum": [TT_DATA]}
 
@@ -279,7 +213,7 @@ def info_ports(args):
     Some IP has dynamic number of ports according to parameter set,
     so port information has to be implemented as a function"""
     TT_DATA = args["TT_DATA"]
-    TT_COEF = args["TT_COEF"]
+    TT_COEFF = args["TT_COEFF"]
     TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
     TP_SSR = args["TP_SSR"]
@@ -298,7 +232,7 @@ def info_ports(args):
 
     in_ports = get_port_info("in", "in", TT_DATA, in_win_size, num_poly_ssr, marginSize=margin_size, TP_API=TP_API)
     in2_ports = (get_port_info("in2", "in", TT_DATA, in_win_size, num_poly_ssr, marginSize=margin_size, TP_API=TP_API) if (TP_DUAL_IP == 1) else [])
-    coeff_ports = (get_parameter_port_info("coeff", "in", TT_COEF, TP_SSR, ((TP_FIR_LEN+1)/4+1), "async") if (args["TP_USE_COEF_RELOAD"] == 1) else [])
+    coeff_ports = (get_parameter_port_info("coeff", "in", TT_COEFF, TP_SSR, ((TP_FIR_LEN+1)/4+1), "async") if (args["TP_USE_COEFF_RELOAD"] == 1) else [])
 
     # decimate by 2 for halfband
     out_ports = get_port_info("out", "out", TT_DATA, out_win_size, num_out_ports, TP_API=args["TP_API"])
@@ -313,14 +247,14 @@ def generate_graph(graphname, args):
   if graphname == "":
     graphname = "default_graphname"
 
-  TT_COEF = args["TT_COEF"]
+  TT_COEFF = args["TT_COEFF"]
   TT_DATA = args["TT_DATA"]
   TP_FIR_LEN = args["TP_FIR_LEN"]
   TP_SHIFT = args["TP_SHIFT"]
   TP_RND = args["TP_RND"]
   TP_CASC_LEN = args["TP_CASC_LEN"]
   TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
-  TP_USE_COEF_RELOAD = args["TP_USE_COEF_RELOAD"]
+  TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
   TP_NUM_OUTPUTS = args["TP_NUM_OUTPUTS"]
   TP_DUAL_IP = args["TP_DUAL_IP"]
   TP_API = args["TP_API"]
@@ -329,12 +263,12 @@ def generate_graph(graphname, args):
   coeff_list = args["coeff"]
   TP_SAT = args["TP_SAT"]
 
-  taps = sr_asym.fn_get_taps_vector(TT_COEF, coeff_list)
-  constr_args_str = f"taps" if TP_USE_COEF_RELOAD == 0 else ""
+  taps = sr_asym.fn_get_taps_vector(TT_COEFF, coeff_list)
+  constr_args_str = f"taps" if TP_USE_COEFF_RELOAD == 0 else ""
   dual_ip_declare_str = f"ssr_in_port_array<input> in2;" if TP_DUAL_IP == 1 else "// No dual input"
   dual_ip_connect_str = f"adf::connect<> net_in2(in2[i], filter.in2[i]);" if TP_DUAL_IP == 1 else "// No dual input"
-  coeff_ip_declare_str = f"ssr_coeff_port_array<input> coeff;" if TP_USE_COEF_RELOAD == 1 else "// No coeff port"
-  coeff_ip_connect_str = f"adf::connect<> net_coeff(coeff[i], filter.coeff[i]);" if TP_USE_COEF_RELOAD == 1 else "// No coeff port"
+  coeff_ip_declare_str = f"ssr_coeff_port_array<input> coeff;" if TP_USE_COEFF_RELOAD == 1 else "// No coeff port"
+  coeff_ip_connect_str = f"adf::connect<> net_coeff(coeff[i], filter.coeff[i]);" if TP_USE_COEFF_RELOAD == 1 else "// No coeff port"
   dual_op_declare_str = f"ssr_out_port_array<output> out2;" if TP_NUM_OUTPUTS == 2 else "// No dual output"
   dual_op_connect_str = f"adf::connect<> net_out2(filter.out2[i], out2[i]);" if TP_NUM_OUTPUTS == 2 else "// No dual output"
   # Use formatted multi-line string to avoid a lot of \n and \t
@@ -357,17 +291,17 @@ public:
   ssr_out_port_array<output> out;
   {dual_op_declare_str}
 
-  std::vector<{TT_COEF}> taps = {taps};
+  std::vector<{TT_COEFF}> taps = {taps};
   xf::dsp::aie::fir::decimate_hb::fir_decimate_hb_graph<
     {TT_DATA}, //TT_DATA
-    {TT_COEF}, //TT_COEF
+    {TT_COEFF}, //TT_COEFF
     {TP_FIR_LEN}, //TP_FIR_LEN
     {TP_SHIFT}, //TP_SHIFT
     {TP_RND}, //TP_RND
     {TP_INPUT_WINDOW_VSIZE}, //TP_INPUT_WINDOW_VSIZE
     {TP_CASC_LEN}, //TP_CASC_LEN
     {TP_DUAL_IP}, //TP_DUAL_IP
-    {TP_USE_COEF_RELOAD}, //TP_USE_COEF_RELOAD
+    {TP_USE_COEFF_RELOAD}, //TP_USE_COEFF_RELOAD
     {TP_NUM_OUTPUTS}, //TP_NUM_OUTPUTS
     {TP_API}, //TP_API
     {TP_SSR}, // TP_SSR

@@ -2,7 +2,7 @@
     "name": "Xilinx DSPLIB example fir sr sym ",
     "description": "",
     "gui": false,
-    "flow": "versal",
+    "flow": "aie",
     "platform_allowlist": [
         "vck190"
     ],

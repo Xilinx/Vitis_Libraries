@@ -101,18 +101,58 @@ cfloat INLINE_DECL unitVector<cfloat>() {
     return temp;
 };
 
+template <typename TT_TWIDDLE, unsigned int T_TW_MODE = 0>
+INLINE_DECL constexpr unsigned int getTwShift() {
+    printf("Error: unexpected twiddle type\n");
+    return 0;
+}; // default error trap
+template <>
+INLINE_DECL constexpr unsigned int getTwShift<cint16, 0>() {
+    return 15;
+};
+template <>
+INLINE_DECL constexpr unsigned int getTwShift<cint16, 1>() {
+    return 14;
+};
+template <>
+INLINE_DECL constexpr unsigned int getTwShift<cint32, 0>() {
+    return 31;
+};
+template <>
+INLINE_DECL constexpr unsigned int getTwShift<cint32, 1>() {
+    return 30;
+};
+template <>
+INLINE_DECL constexpr unsigned int getTwShift<cfloat, 0>() {
+    return 0;
+};
+template <>
+INLINE_DECL constexpr unsigned int getTwShift<cfloat, 1>() {
+    return 0;
+};
+
+#define __24_1__
+
 // new FFT functions with vectorization
-template <typename TT_INPUT_DATA, typename TT_OUTPUT_DATA, typename TT_TWIDDLE, unsigned int TP_R>
+template <typename TT_INPUT_DATA,
+          typename TT_OUTPUT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_R,
+          unsigned int TP_TWIDDLE_MODE>
 void INLINE_DECL stage_radix2_dit(const TT_INPUT_DATA* x,
                                   const TT_TWIDDLE* tw,
                                   const unsigned int& n,
                                   const unsigned int& shift,
                                   TT_OUTPUT_DATA* __restrict y,
                                   const bool& inv) {
-    constexpr unsigned int kStageRadix = 2;
+    constexpr unsigned int kTwShift = getTwShift<TT_TWIDDLE, TP_TWIDDLE_MODE>();
 
-    constexpr unsigned int shift_tw = std::is_same<TT_INPUT_DATA, cfloat>::value ? 0 : 15;
-    using FFT = ::aie::fft_dit<TP_R, kStageRadix, TT_INPUT_DATA, TT_OUTPUT_DATA>; // type = cint32, stage = 0, radix = 2
+#ifdef __24_1__
+    ::aie::fft_dit_r2_stage<TP_R, TT_INPUT_DATA, TT_OUTPUT_DATA, TT_TWIDDLE>(x, tw, n, kTwShift, shift, inv, y);
+#else  // 23_2
+    constexpr unsigned int kStageRadix = 2;
+    using FFT = ::aie::fft_dit<TP_R, kStageRadix, TT_INPUT_DATA, TT_OUTPUT_DATA,
+                               TT_TWIDDLE>; // type = cint32, stage = 0, radix = 2
 
     FFT fft;
 
@@ -122,14 +162,19 @@ void INLINE_DECL stage_radix2_dit(const TT_INPUT_DATA* x,
 
     for (int j = 0; j < n / (kStageRadix * FFT::out_vector_size); ++j)
         chess_prepare_for_pipelining chess_loop_range(1, ) {
-            const auto out = fft.dit(*it_stage++, shift_tw, shift, inv);
+            const auto out = fft.dit(*it_stage++, kTwShift, shift, inv);
             *it_out0++ = out[0];
             *it_out1++ = out[1];
         }
+#endif // ifdef __24_1__
 };
 
 // Stage 0 radix 4. This is used in most internal stages.
-template <typename TT_INPUT_DATA, typename TT_OUTPUT_DATA, typename TT_TWIDDLE, unsigned int TP_R>
+template <typename TT_INPUT_DATA,
+          typename TT_OUTPUT_DATA,
+          typename TT_TWIDDLE,
+          unsigned int TP_R,
+          unsigned int TP_TWIDDLE_MODE>
 void INLINE_DECL stage_radix4_dit(const TT_INPUT_DATA* x,
                                   const TT_TWIDDLE* tw1,
                                   const TT_TWIDDLE* tw2,
@@ -138,12 +183,19 @@ void INLINE_DECL stage_radix4_dit(const TT_INPUT_DATA* x,
                                   const unsigned int& shift,
                                   TT_OUTPUT_DATA* __restrict y,
                                   const bool& inv) {
+    constexpr unsigned int kTwShift = getTwShift<TT_TWIDDLE, TP_TWIDDLE_MODE>();
+
+#ifdef __24_1__
+    ::aie::fft_dit_r4_stage<TP_R, TT_INPUT_DATA, TT_OUTPUT_DATA, TT_TWIDDLE>(x, tw1, tw2, tw3, n, kTwShift, shift, inv,
+                                                                             y);
+
+#else // 23_2
+
     const unsigned int kStockhamStage = 0;
     const unsigned int kStageRadix = 4;
     const int kIndexStep = n >> 4;
-    //  const TT_TWIDDLE* dummytw = NULL; //not used, but NULL might fire defensive trap
-    unsigned shift_tw = 15;
-    using FFT = ::aie::fft_dit<TP_R, kStageRadix, TT_INPUT_DATA, TT_OUTPUT_DATA>; // type = cint32, stage = 0, radix = 2
+    using FFT = ::aie::fft_dit<TP_R, kStageRadix, TT_INPUT_DATA, TT_OUTPUT_DATA,
+                               TT_TWIDDLE>; // type = cint32, stage = 0, radix = 2
 
     FFT fft;
 
@@ -153,7 +205,7 @@ void INLINE_DECL stage_radix4_dit(const TT_INPUT_DATA* x,
     const int block_size = n / (kStageRadix * FFT::out_vector_size);
 
     for (int j = 0; j < block_size; ++j) chess_prepare_for_pipelining chess_loop_range(1, ) {
-            auto out = fft.dit(*it_stage++, shift_tw, shift, inv);
+            auto out = fft.dit(*it_stage++, kTwShift, shift, inv);
 // in AIE1 or at least at one point the compiler failed to optimize the pointer
 // handling correctly, so two pointers interlaced were required to allow the
 // pointer arithmetic not to become an issue.
@@ -179,11 +231,12 @@ void INLINE_DECL stage_radix4_dit(const TT_INPUT_DATA* x,
             it_out0 += -3 * block_size + 1;
 #endif //__FFT_R4_IMPL__ == 1
         }
+#endif // def __24_1__
 };
 
 //---------------------------
 // r2 comb stage
-template <typename TT_DATA, typename TT_TWIDDLE>
+template <typename TT_DATA, typename TT_TWIDDLE, unsigned TP_TWIDDLE_MODE>
 void INLINE_DECL r2comb_dit(const TT_DATA* x,
                             const TT_TWIDDLE* tw,
                             unsigned int n,
@@ -193,37 +246,111 @@ void INLINE_DECL r2comb_dit(const TT_DATA* x,
                             bool inv){};
 
 template <>
-void INLINE_DECL r2comb_dit<cint16, cint16>(const cint16* x,
-                                            const cint16* tw,
-                                            unsigned int n,
-                                            unsigned int r,
-                                            unsigned int shift,
-                                            cint16* __restrict y,
-                                            bool inv) {
-    stage_radix2_dit<cint16, cint16, cint16, 1>(x, tw, n, shift, y, inv);
+void INLINE_DECL r2comb_dit<cint16, cint16, 0>(const cint16* x,
+                                               const cint16* tw,
+                                               unsigned int n,
+                                               unsigned int r,
+                                               unsigned int shift,
+                                               cint16* __restrict y,
+                                               bool inv) {
+    stage_radix2_dit<cint16, cint16, cint16, 1, 0>(x, tw, n, shift, y, inv);
+};
+template <>
+void INLINE_DECL r2comb_dit<cint16, cint16, 1>(const cint16* x,
+                                               const cint16* tw,
+                                               unsigned int n,
+                                               unsigned int r,
+                                               unsigned int shift,
+                                               cint16* __restrict y,
+                                               bool inv) {
+    stage_radix2_dit<cint16, cint16, cint16, 1, 1>(x, tw, n, shift, y, inv);
 };
 
 template <>
-void INLINE_DECL r2comb_dit<cint32, cint16>(const cint32* x,
-                                            const cint16* tw,
-                                            unsigned int n,
-                                            unsigned int r,
-                                            unsigned int shift,
-                                            cint32* __restrict y,
-                                            bool inv) {
-    stage_radix2_dit<cint32, cint32, cint16, 1>(x, tw, n, shift, y, inv);
+void INLINE_DECL r2comb_dit<cint32, cint16, 0>(const cint32* x,
+                                               const cint16* tw,
+                                               unsigned int n,
+                                               unsigned int r,
+                                               unsigned int shift,
+                                               cint32* __restrict y,
+                                               bool inv) {
+    stage_radix2_dit<cint32, cint32, cint16, 1, 0>(x, tw, n, shift, y, inv);
 };
+template <>
+void INLINE_DECL r2comb_dit<cint32, cint16, 1>(const cint32* x,
+                                               const cint16* tw,
+                                               unsigned int n,
+                                               unsigned int r,
+                                               unsigned int shift,
+                                               cint32* __restrict y,
+                                               bool inv) {
+    stage_radix2_dit<cint32, cint32, cint16, 1, 1>(x, tw, n, shift, y, inv);
+};
+
+template <>
+void INLINE_DECL r2comb_dit<cint16, cint32, 0>(const cint16* x,
+                                               const cint32* tw,
+                                               unsigned int n,
+                                               unsigned int r,
+                                               unsigned int shift,
+                                               cint16* __restrict y,
+                                               bool inv){
+    // stage_radix2_dit <cint16, cint16, cint32, 1, 0>(x, tw, n, shift, y, inv); //Not supported in 23.2
+};
+template <>
+void INLINE_DECL r2comb_dit<cint16, cint32, 1>(const cint16* x,
+                                               const cint32* tw,
+                                               unsigned int n,
+                                               unsigned int r,
+                                               unsigned int shift,
+                                               cint16* __restrict y,
+                                               bool inv){
+    // stage_radix2_dit <cint16, cint16, cint32, 1, 1>(x, tw, n, shift, y, inv); //Not supported in 23.2
+};
+
+#if __SUPPORTS_32B_TW__ == 1
+template <>
+void INLINE_DECL r2comb_dit<cint32, cint32, 0>(const cint32* x,
+                                               const cint32* tw,
+                                               unsigned int n,
+                                               unsigned int r,
+                                               unsigned int shift,
+                                               cint32* __restrict y,
+                                               bool inv) {
+    stage_radix2_dit<cint32, cint32, cint32, 1, 0>(x, tw, n, shift, y, inv);
+};
+template <>
+void INLINE_DECL r2comb_dit<cint32, cint32, 1>(const cint32* x,
+                                               const cint32* tw,
+                                               unsigned int n,
+                                               unsigned int r,
+                                               unsigned int shift,
+                                               cint32* __restrict y,
+                                               bool inv) {
+    stage_radix2_dit<cint32, cint32, cint32, 1, 1>(x, tw, n, shift, y, inv);
+};
+#endif //__SUPPORTS_32B_TW__ == 1
 
 #if __SUPPORTS_CFLOAT__ == 1
 template <>
-void INLINE_DECL r2comb_dit<cfloat, cfloat>(const cfloat* x,
-                                            const cfloat* tw,
-                                            unsigned int n,
-                                            unsigned int r,
-                                            unsigned int shift,
-                                            cfloat* __restrict y,
-                                            bool inv) {
-    stage_radix2_dit<cfloat, cfloat, cfloat, 1>(x, tw, n, shift, y, inv);
+void INLINE_DECL r2comb_dit<cfloat, cfloat, 0>(const cfloat* x,
+                                               const cfloat* tw,
+                                               unsigned int n,
+                                               unsigned int r,
+                                               unsigned int shift,
+                                               cfloat* __restrict y,
+                                               bool inv) {
+    stage_radix2_dit<cfloat, cfloat, cfloat, 1, 0>(x, tw, n, shift, y, inv);
+};
+template <>
+void INLINE_DECL r2comb_dit<cfloat, cfloat, 1>(const cfloat* x,
+                                               const cfloat* tw,
+                                               unsigned int n,
+                                               unsigned int r,
+                                               unsigned int shift,
+                                               cfloat* __restrict y,
+                                               bool inv) {
+    stage_radix2_dit<cfloat, cfloat, cfloat, 1, 1>(x, tw, n, shift, y, inv);
 };
 #endif //__SUPPORTS_CFLOAT__
 
@@ -231,6 +358,7 @@ void INLINE_DECL r2comb_dit<cfloat, cfloat>(const cfloat* x,
 // Unroll_for replacement functions.
 // Function to optionally call a rank if it lies within the remit of this kernel
 // static float stage handling
+// NOte opt_cfloat_stage does not take TP_TWIDDLE_MODE because that is an integer consideration.
 template <int stage, int TP_POINT_SIZE, int TP_START_RANK, int TP_END_RANK>
 void INLINE_DECL opt_cfloat_stage(
     cfloat* xbuff, cfloat* obuff, cfloat** tmp_bufs, cfloat** tw_table, unsigned int& pingPong, bool& inv) {
@@ -238,7 +366,7 @@ void INLINE_DECL opt_cfloat_stage(
         constexpr(stage >= TP_START_RANK && stage < TP_END_RANK) {
             cfloat* outptr = (stage == TP_END_RANK - 1) ? obuff : tmp_bufs[1 - pingPong];
             cfloat* inptr = (stage == TP_START_RANK) ? xbuff : tmp_bufs[pingPong];
-            stage_radix2_dit<cfloat, cfloat, cfloat, (TP_POINT_SIZE >> (1 + stage))>(
+            stage_radix2_dit<cfloat, cfloat, cfloat, (TP_POINT_SIZE >> (1 + stage)), 0 /*TP_TWIDDLE_MODE*/>(
                 (cfloat*)inptr, (cfloat*)tw_table[stage], TP_POINT_SIZE, 0, (cfloat*)outptr, inv);
             pingPong = 1 - pingPong;
         }
@@ -260,7 +388,7 @@ void INLINE_DECL opt_cfloat_dyn_stage(cfloat* xbuff,
                 cfloat* outptr = (stage == TP_END_RANK - 1) ? (cfloat*)obuff : (cfloat*)tmp_bufs[1 - pingPong];
                 cfloat* inptr =
                     (stage == TP_START_RANK) || (stage == firstRank) ? (cfloat*)xbuff : (cfloat*)tmp_bufs[pingPong];
-                stage_radix2_dit<cfloat, cfloat, cfloat, (TP_POINT_SIZE >> (1 + stage))>(
+                stage_radix2_dit<cfloat, cfloat, cfloat, (TP_POINT_SIZE >> (1 + stage)), 0 /*TP_TWIDDLE_MODE*/>(
                     (cfloat*)inptr, (cfloat*)tw_table[stage - firstRank], (1 << ptSizePwr), 0, (cfloat*)outptr, inv);
                 pingPong = 1 - pingPong;
             }
@@ -272,6 +400,7 @@ template <typename TT_DATA,
           typename TT_INTERNAL_DATA,
           typename TT_OUT_DATA,
           typename TT_TWIDDLE,
+          int TP_TWIDDLE_MODE,
           int stage,
           int TP_POINT_SIZE,
           int TP_SHIFT,
@@ -286,6 +415,7 @@ void INLINE_DECL opt_int_stage(TT_DATA* xbuff,
                                TT_TWIDDLE** tw_table,
                                unsigned int& pingPong,
                                bool& inv) {
+    constexpr unsigned int kTwShift = getTwShift<TT_TWIDDLE, TP_TWIDDLE_MODE>();
     //  printf("stage = %d, TP_START_RANK = %d, TP_END_RANK = %d, firstRank = %d, kPointSizePowerCeiled = %d\n", stage,
     //  TP_START_RANK, TP_END_RANK, firstRank, kPointSizePowerCeiled);
     if
@@ -299,24 +429,25 @@ void INLINE_DECL opt_int_stage(TT_DATA* xbuff,
                                 constexpr(stage + 2 == kPointSizePowerCeiled) { // Not possible?
                                     TT_OUT_DATA* outptr = obuff;
                                     stage_radix4_dit<TT_DATA, TT_OUT_DATA, TT_TWIDDLE,
-                                                     (kPointSizeCeiled >> (2 + stage))>(
+                                                     (kPointSizeCeiled >> (2 + stage)), TP_TWIDDLE_MODE>(
                                         inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1],
-                                        tw_table[12 + stage - firstRank], TP_POINT_SIZE, FFT_SHIFT15 + TP_SHIFT, outptr,
+                                        tw_table[12 + stage - firstRank], TP_POINT_SIZE, kTwShift + TP_SHIFT, outptr,
                                         inv);
                                 }
                             else {
                                 TT_INTERNAL_DATA* outptr = (TT_INTERNAL_DATA*)obuff;
                                 stage_radix4_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE,
-                                                 (kPointSizeCeiled >> (2 + stage))>(
+                                                 (kPointSizeCeiled >> (2 + stage)), TP_TWIDDLE_MODE>(
                                     inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1],
-                                    tw_table[12 + stage - firstRank], TP_POINT_SIZE, FFT_SHIFT15, outptr, inv);
+                                    tw_table[12 + stage - firstRank], TP_POINT_SIZE, kTwShift, outptr, inv);
                             }
                         }
                     else {
                         TT_INTERNAL_DATA* outptr = (TT_INTERNAL_DATA*)tmp_bufs[1 - pingPong];
-                        stage_radix4_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE, (kPointSizeCeiled >> (2 + stage))>(
+                        stage_radix4_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE, (kPointSizeCeiled >> (2 + stage)),
+                                         TP_TWIDDLE_MODE>(
                             inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1],
-                            tw_table[12 + stage - firstRank], TP_POINT_SIZE, FFT_SHIFT15, outptr, inv);
+                            tw_table[12 + stage - firstRank], TP_POINT_SIZE, kTwShift, outptr, inv);
                     }
                 }
             else if
@@ -326,13 +457,15 @@ void INLINE_DECL opt_int_stage(TT_DATA* xbuff,
                     if
                         constexpr(stage + 1 == TP_END_RANK - 1) {
                             TT_OUT_DATA* outptr = obuff;
-                            stage_radix2_dit<TT_DATA, TT_OUT_DATA, TT_TWIDDLE, (kPointSizeCeiled >> (2 + stage))>(
-                                inptr, tw_table[stage + 1 - firstRank], TP_POINT_SIZE, FFT_SHIFT15, outptr, inv);
+                            stage_radix2_dit<TT_DATA, TT_OUT_DATA, TT_TWIDDLE, (kPointSizeCeiled >> (2 + stage)),
+                                             TP_TWIDDLE_MODE>(inptr, tw_table[stage + 1 - firstRank], TP_POINT_SIZE,
+                                                              kTwShift, outptr, inv);
                         }
                     else {
                         TT_INTERNAL_DATA* outptr = (TT_INTERNAL_DATA*)tmp_bufs[1 - pingPong];
-                        stage_radix2_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE, (kPointSizeCeiled >> (2 + stage))>(
-                            inptr, tw_table[stage + 1 - firstRank], TP_POINT_SIZE, FFT_SHIFT15, outptr, inv);
+                        stage_radix2_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE, (kPointSizeCeiled >> (2 + stage)),
+                                         TP_TWIDDLE_MODE>(inptr, tw_table[stage + 1 - firstRank], TP_POINT_SIZE,
+                                                          kTwShift, outptr, inv);
                     }
                 }
             else { // not the first stage in the kernel
@@ -343,23 +476,23 @@ void INLINE_DECL opt_int_stage(TT_DATA* xbuff,
                         if
                             constexpr(stage + 2 == kPointSizePowerCeiled) {
                                 stage_radix4_dit<TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE,
-                                                 (kPointSizeCeiled >> (2 + stage))>(
+                                                 (kPointSizeCeiled >> (2 + stage)), TP_TWIDDLE_MODE>(
                                     inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1],
-                                    tw_table[12 + stage - firstRank], TP_POINT_SIZE, FFT_SHIFT15 + TP_SHIFT, outptr,
-                                    inv);
+                                    tw_table[12 + stage - firstRank], TP_POINT_SIZE, kTwShift + TP_SHIFT, outptr, inv);
                             }
                         else {
                             stage_radix4_dit<TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE,
-                                             (kPointSizeCeiled >> (2 + stage))>(
+                                             (kPointSizeCeiled >> (2 + stage)), TP_TWIDDLE_MODE>(
                                 inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1],
-                                tw_table[12 + stage - firstRank], TP_POINT_SIZE, FFT_SHIFT15, outptr, inv);
+                                tw_table[12 + stage - firstRank], TP_POINT_SIZE, kTwShift, outptr, inv);
                         }
                     }
                 else {
                     TT_INTERNAL_DATA* outptr = tmp_bufs[1 - pingPong];
-                    stage_radix4_dit<TT_INTERNAL_DATA, TT_INTERNAL_DATA, TT_TWIDDLE, (kPointSizeCeiled >> (2 + stage))>(
-                        inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1],
-                        tw_table[12 + stage - firstRank], TP_POINT_SIZE, FFT_SHIFT15, outptr, inv);
+                    stage_radix4_dit<TT_INTERNAL_DATA, TT_INTERNAL_DATA, TT_TWIDDLE, (kPointSizeCeiled >> (2 + stage)),
+                                     TP_TWIDDLE_MODE>(inptr, tw_table[stage - firstRank],
+                                                      tw_table[stage - firstRank + 1], tw_table[12 + stage - firstRank],
+                                                      TP_POINT_SIZE, kTwShift, outptr, inv);
                 }
             }
             pingPong = 1 - pingPong;
@@ -371,6 +504,7 @@ template <typename TT_DATA,
           typename TT_INTERNAL_DATA,
           typename TT_OUT_DATA,
           typename TT_TWIDDLE,
+          int TP_TWIDDLE_MODE,
           int stage,
           int TP_POINT_SIZE,
           int TP_SHIFT,
@@ -386,6 +520,7 @@ void INLINE_DECL opt_int_dyn_stage(TT_DATA* xbuff,
                                    unsigned int& pingPong,
                                    bool& inv,
                                    int ptSizePwr) {
+    constexpr unsigned int kTwShift = getTwShift<TT_TWIDDLE, TP_TWIDDLE_MODE>();
     if
         constexpr(stage >= TP_START_RANK && stage < TP_END_RANK) {
             int firstRank = kPointSizePowerCeiled - ptSizePwr;
@@ -399,18 +534,18 @@ void INLINE_DECL opt_int_dyn_stage(TT_DATA* xbuff,
                                     constexpr(stage == TP_START_RANK) { // TP_START_RANK is rounded to even number.
                                         TT_DATA* inptr = xbuff;
                                         stage_radix4_dit<TT_DATA, TT_OUT_DATA, TT_TWIDDLE,
-                                                         (kPointSizeCeiled >> (2 + stage))>(
+                                                         (kPointSizeCeiled >> (2 + stage)), TP_TWIDDLE_MODE>(
                                             inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1],
-                                            tw_table[12 + stage - firstRank], (1 << ptSizePwr), FFT_SHIFT15 + TP_SHIFT,
+                                            tw_table[12 + stage - firstRank], (1 << ptSizePwr), kTwShift + TP_SHIFT,
                                             outptr, inv);
                                     }
                                 else { // last in FFT, not start of kernel
                                     TT_INTERNAL_DATA* inptr = tmp_bufs[pingPong];
                                     stage_radix4_dit<TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE,
-                                                     (kPointSizeCeiled >> (2 + stage))>(
+                                                     (kPointSizeCeiled >> (2 + stage)), TP_TWIDDLE_MODE>(
                                         inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1],
-                                        tw_table[12 + stage - firstRank], (1 << ptSizePwr), FFT_SHIFT15 + TP_SHIFT,
-                                        outptr, inv);
+                                        tw_table[12 + stage - firstRank], (1 << ptSizePwr), kTwShift + TP_SHIFT, outptr,
+                                        inv);
                                 }
                             }
                         else { // end of kernel, not end of FFT
@@ -421,37 +556,36 @@ void INLINE_DECL opt_int_dyn_stage(TT_DATA* xbuff,
                                     if (stage + 1 == firstRank) { // radix2 stage - can't possibly be the final stage
                                                                   // overall, so no need for TT_OUT_DATA
                                         stage_radix2_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE,
-                                                         (kPointSizeCeiled >> (2 + stage))>(
-                                            inptr, tw_table[stage + 1 - firstRank], (1 << ptSizePwr), FFT_SHIFT15,
-                                            outptr, inv);
+                                                         (kPointSizeCeiled >> (2 + stage)), TP_TWIDDLE_MODE>(
+                                            inptr, tw_table[stage + 1 - firstRank], (1 << ptSizePwr), kTwShift, outptr,
+                                            inv);
                                     } else {
                                         stage_radix4_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE,
-                                                         (kPointSizeCeiled >> (2 + stage))>(
+                                                         (kPointSizeCeiled >> (2 + stage)), TP_TWIDDLE_MODE>(
                                             inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1],
-                                            tw_table[12 + stage - firstRank], (1 << ptSizePwr), FFT_SHIFT15, outptr,
-                                            inv);
+                                            tw_table[12 + stage - firstRank], (1 << ptSizePwr), kTwShift, outptr, inv);
                                     }
                                 }
                             else {                        // end of kernel, not start kernel.
                                 if (stage == firstRank) { // first stage of point size and radix4
                                     TT_DATA* inptr = xbuff;
                                     stage_radix4_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE,
-                                                     (kPointSizeCeiled >> (2 + stage))>(
+                                                     (kPointSizeCeiled >> (2 + stage)), TP_TWIDDLE_MODE>(
                                         inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1],
-                                        tw_table[12 + stage - firstRank], (1 << ptSizePwr), FFT_SHIFT15, outptr, inv);
+                                        tw_table[12 + stage - firstRank], (1 << ptSizePwr), kTwShift, outptr, inv);
                                 } else if (stage + 1 == firstRank) { // radix2 stage - can't possibly be the final stage
                                                                      // overall, so no need for TT_OUT_DATA
                                     TT_DATA* inptr = xbuff;
                                     stage_radix2_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE,
-                                                     (kPointSizeCeiled >> (2 + stage))>(
-                                        inptr, tw_table[stage + 1 - firstRank], (1 << ptSizePwr), FFT_SHIFT15, outptr,
+                                                     (kPointSizeCeiled >> (2 + stage)), TP_TWIDDLE_MODE>(
+                                        inptr, tw_table[stage + 1 - firstRank], (1 << ptSizePwr), kTwShift, outptr,
                                         inv);
                                 } else { // last in kernel, not first in kernel, not first in FFT
                                     TT_INTERNAL_DATA* inptr = tmp_bufs[pingPong];
                                     stage_radix4_dit<TT_INTERNAL_DATA, TT_INTERNAL_DATA, TT_TWIDDLE,
-                                                     (kPointSizeCeiled >> (2 + stage))>(
+                                                     (kPointSizeCeiled >> (2 + stage)), TP_TWIDDLE_MODE>(
                                         inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1],
-                                        tw_table[12 + stage - firstRank], (1 << ptSizePwr), FFT_SHIFT15, outptr, inv);
+                                        tw_table[12 + stage - firstRank], (1 << ptSizePwr), kTwShift, outptr, inv);
                                 }
                             } // if start of kernel
                         }     // if end of FFT
@@ -464,32 +598,34 @@ void INLINE_DECL opt_int_dyn_stage(TT_DATA* xbuff,
                             if (stage + 1 == firstRank) { // radix2 stage - can't possibly be the final stage overall,
                                                           // so no need for TT_OUT_DATA
                                 stage_radix2_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE,
-                                                 (kPointSizeCeiled >> (2 + stage))>(
-                                    inptr, tw_table[stage + 1 - firstRank], (1 << ptSizePwr), FFT_SHIFT15, outptr, inv);
+                                                 (kPointSizeCeiled >> (2 + stage)), TP_TWIDDLE_MODE>(
+                                    inptr, tw_table[stage + 1 - firstRank], (1 << ptSizePwr), kTwShift, outptr, inv);
                             } else {
                                 stage_radix4_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE,
-                                                 (kPointSizeCeiled >> (2 + stage))>(
+                                                 (kPointSizeCeiled >> (2 + stage)), TP_TWIDDLE_MODE>(
                                     inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1],
-                                    tw_table[12 + stage - firstRank], (1 << ptSizePwr), FFT_SHIFT15, outptr, inv);
+                                    tw_table[12 + stage - firstRank], (1 << ptSizePwr), kTwShift, outptr, inv);
                             }
                         }
                     else {                        // not last in kernel, not first in kernel.
                         if (stage == firstRank) { // first stage of point size and radix4
                             TT_DATA* inptr = xbuff;
-                            stage_radix4_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE, (kPointSizeCeiled >> (2 + stage))>(
+                            stage_radix4_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE, (kPointSizeCeiled >> (2 + stage)),
+                                             TP_TWIDDLE_MODE>(
                                 inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1],
-                                tw_table[12 + stage - firstRank], (1 << ptSizePwr), FFT_SHIFT15, outptr, inv);
+                                tw_table[12 + stage - firstRank], (1 << ptSizePwr), kTwShift, outptr, inv);
                         } else if (stage + 1 == firstRank) { // radix2 stage - can't possibly be the final stage
                                                              // overall, so no need for TT_OUT_DATA
                             TT_DATA* inptr = xbuff;
-                            stage_radix2_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE, (kPointSizeCeiled >> (2 + stage))>(
-                                inptr, tw_table[stage + 1 - firstRank], (1 << ptSizePwr), FFT_SHIFT15, outptr, inv);
+                            stage_radix2_dit<TT_DATA, TT_INTERNAL_DATA, TT_TWIDDLE, (kPointSizeCeiled >> (2 + stage)),
+                                             TP_TWIDDLE_MODE>(inptr, tw_table[stage + 1 - firstRank], (1 << ptSizePwr),
+                                                              kTwShift, outptr, inv);
                         } else { // not last in kernel, not first in kernel, not first in FFT
                             TT_INTERNAL_DATA* inptr = tmp_bufs[pingPong];
                             stage_radix4_dit<TT_INTERNAL_DATA, TT_INTERNAL_DATA, TT_TWIDDLE,
-                                             (kPointSizeCeiled >> (2 + stage))>(
+                                             (kPointSizeCeiled >> (2 + stage)), TP_TWIDDLE_MODE>(
                                 inptr, tw_table[stage - firstRank], tw_table[stage - firstRank + 1],
-                                tw_table[12 + stage - firstRank], (1 << ptSizePwr), FFT_SHIFT15, outptr, inv);
+                                tw_table[12 + stage - firstRank], (1 << ptSizePwr), kTwShift, outptr, inv);
                         }
                     } // if start of kernel
                 }     // if end of FFT

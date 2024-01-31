@@ -5,7 +5,7 @@ def validate_TP_NUM_INPUTS(args):
   TP_NUM_INPUTS = args["TP_NUM_INPUTS"]
   TP_IN_API = args["TP_IN_API"]
   if (TP_IN_API == 0 and TP_NUM_INPUTS > 1):
-    return isError(f"Only one input is supported if using an iobuffer")
+    return isError(f"Only one input is supported if using an iobuffer. Got TP_NUM_INPUTS {TP_NUM_INPUTS}")
   
   return isValid
 

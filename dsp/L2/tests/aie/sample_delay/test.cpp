@@ -39,6 +39,7 @@ int main(void) {
         sampleDelayTestHarness.init();
         delayVal = DELAY_INIT_VALUE;
         testDelay(NITER / 2, delayVal);
+        delayVal = 10;
         testDelay(NITER / 2, delayVal);
         sampleDelayTestHarness.end();
     } else { // testing

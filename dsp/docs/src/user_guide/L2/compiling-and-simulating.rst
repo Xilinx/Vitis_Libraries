@@ -1,18 +1,6 @@
-..
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-    
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-    
-       http://www.apache.org/licenses/LICENSE-2.0
-    
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+.. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _COMPILING_AND_SIMULATING:
 
@@ -28,53 +16,48 @@ Compiling and Simulating
         setenv PLATFORM_REPO_PATHS <your-platform-repo-install-path>
         source <your-XRT-install-path>/xbb/xrt/packages/xrt-2.1.0-centos/opt/xilinx/xrt/setup.csh
 
-
 Library Element Unit Test
 --------------------------
 
-Each library element category comes supplied with a test harness. It is located in the `L2/tests/aie/<library_element>` directory.
-Test harness consists of JSON, C++ files, as well as a Makefile.
+Each library element category comes supplied with a test harness. It is located in the `L2/tests/aie/<library_element>` directory. The test harness consists of JSON, C++ files, as well as a Makefile.
 
-JSON description of the test harness, defined in `L2/tests/aie/<library_element>/description.json` has been used to generate Makefile. In addition, `description.json` file defines parameters of of the test harness, e.g. list of supported platforms.
+JSON description of the test harness, defined in `L2/tests/aie/<library_element>/description.json`, has been used to generate the Makefile. In addition, the `description.json` file defines the parameters of the test harness, e.g., a list of supported platforms.
 
-Each Makefile uses a set of values for each of the library element parameters that are stored in in a JSON file, in `L2/tests/aie/<library_element>/multi_params.json`. Set of parameters are combined in a form of a named testcase, with default name being: `test_0_tool_canary_aie`.
-Set of parameters can be edited as required to configure the library element for your needs.
+Each Makefile uses a set of values for each of the library element parameters that are stored in in a JSON file in `L2/tests/aie/<library_element>/multi_params.json`. The set of parameters are combined in a form of a named testcase, with default name being: `test_0_tool_canary_aie`. The set of parameters can be edited as required to configure the library element for your needs.
 
 C++ files serve as an example of how to use the library element subgraph in the context of a super-graph. These test harnesses (graphs) can be found in the `L2/tests/aie/<library_element>/test.hpp` and `L2/tests/aie/<library_element>/test.cpp` file.
 
-Although it is recommended that only L2 (graphs) library elements are instantiated directly in user code, the kernels underlying the graphs can be found in the `L1/include/aie/<library_element>.hpp` and the `L1/src/aie/<library_element>.cpp` files.
+Although it is recommended that only L2 (graphs) library elements are instantiated directly in the user code, the kernels underlying the graphs can be found in the `L1/include/aie/<library_element>.hpp` and the `L1/src/aie/<library_element>.cpp` files.
 
-Test harness run consists of several steps that result in a simulated and validated design. These include:
+The test harness run consists of several steps that result in a simulated and validated design. These include:
 
-- input files(s) generation,
-- validate configuration with metadata (in: `L2/meta`),
-- reference model compilation & simulation, in order to produce `golden output`.
-- uut design compilation & simulation
-- output post-processing (e.g. timestamps processing to produce throughput figures).
-  The output of the reference model ( `logs/ref_output.txt` ) is verified against the output of the AIE graphs ( `logs/uut_output.txt` ).
-- status generation.
-  On completion of the make, the file `logs/status_<config_details>.txt` will contain the result of compilation, simulation and an indication of whether the reference model and AIE model outputs match.
-  Report will also contain resource utilization and performance metrics.
+- Input files(s) generation.
+- Validate configuration with metadata (in: `L2/meta`).
+- Reference model compilation and simulation, to produce the `golden output`.
+- Uut design compilation and simulation.
+- Output post-processing (e.g., timestamps processing to produce throughput figures). The output of the reference model ( `logs/ref_output.txt` ) is verified against the output of the AIE graphs (`logs/uut_output.txt`).
+- Status generation. On completion of the make, the `logs/status_<config_details>.txt` file will contain the result of compilation, simulation, and an indication of whether the reference model and AIE model outputs match. The report will also contain resource utilization and performance metrics.
 
-Compiling using Makefile
------------------------
+Compiling Using the Makefile
+----------------------------
 
-Running compilation
-///////////////////
+Running Compilation
+^^^^^^^^^^^^^^^^^^^
+
 Use the following steps to compile and simulate the reference model with the x86sim target, then to compile and simulate the library element graph as described in the above section.
 
 .. code-block::
 
         make cleanall run PLATFORM=vck190
 
-.. note:: It is recommended to run a ``cleanall`` stage before compiling design, to ensue no stale objects interfere with the compilation process.
+.. note:: It is recommended to run a ``cleanall`` stage before the compiling design, to ensure no stale objects interfere with the compilation process.
 
-.. note:: Platform information (e.g.: PLATFORM=vck190) is a requirement of a make build process. List of supported platforms can be found in `L2/tests/aie/<library_element>/description.json` in the "platform_allowlist" section.
+.. note:: Platform information (e.g., PLATFORM=vck190) is a requirement of a make build process. A list of supported platforms can be found in `L2/tests/aie/<library_element>/description.json` in the "platform_allowlist" section.
 
-Configuring testcase
-////////////////////
+Configuring the Testcase
+^^^^^^^^^^^^^^^^^^^^^^^^
 
-To overwrite the default set of parameter, please edit multi_params.json file and add a dedicated named testcase or edit one of the existing ones, e.g.:
+To overwrite the default set of parameter, edit the `multi_params.json` file, and add a dedicated named testcase or edit one of the existing ones, e.g.:
 
 .. code-block::
 
@@ -84,8 +67,7 @@ To overwrite the default set of parameter, please edit multi_params.json file an
         (...)
         }
 
-
-To run a testcase, please specify the testcase name passed to the PARAMS argument, e.g.:
+To run a testcase, specify the testcase name passed to the PARAMS argument, e.g.:
 
 .. code-block::
 
@@ -94,7 +76,7 @@ To run a testcase, please specify the testcase name passed to the PARAMS argumen
 For list of all the configurable parameters, see the :ref:`CONFIGURATION_PARAMETERS`.
 
 Selecting TARGET
-////////////////
+^^^^^^^^^^^^^^^^
 
 To perform a x86 compilation/simulation, run:
 
@@ -102,7 +84,7 @@ To perform a x86 compilation/simulation, run:
 
     make run TARGET=x86sim.
 
-List of all Makefile targets:
+List of all the Makefile targets:
 
 .. code-block::
 
@@ -119,12 +101,12 @@ List of all Makefile targets:
         Command to remove all the generated files.
 
 .. note::
-    For embedded platform the following setup steps are required:
-        a.If the platform and common-image are downloaded from Xilinx Download Center(Suggested):
-            | Run the sdk.sh script from the common-image directory to install sysroot using the command : ./sdk.sh -y -d ./ -p
-            | Unzip the rootfs file : gunzip ./rootfs.ext4.gz
+    For embedded platforms, the following setup steps are required:
+        a. If the platform and common-image are downloaded from the Download Center (Suggested):
+            | Run the `sdk.sh` script from the `common-image` directory to install sysroot using the command: ./sdk.sh -y -d ./ -p
+            | Unzip the `rootfs` file : gunzip ./rootfs.ext4.gz
             | export SYSROOT=< path-to-platform-sysroot >
-        b.User could also define SYSROOT, K_IMAGE and ROOTFS by themselves:
+        b. You could also define SYSROOT, K_IMAGE, and ROOTFS by themselves:
             .. code-block::
 
                 export SYSROOT=< path-to-platform-sysroot >
@@ -134,35 +116,26 @@ List of all Makefile targets:
 Troubleshooting Compilation
 ---------------------------
 
-Compilation arguments
-/////////////////////
+Compilation Arguments
+^^^^^^^^^^^^^^^^^^^^^
 
-The Test Harness supplied with the library allow each library unit to be compiled and simulated in isolation.
-When the library unit is instanced within your design, compilation result may differ from the result obtained with the test harness.
-This may be because compilation of your system may need arguments not present in your system.
+The test harness supplied with the library allows each library unit to be compiled and simulated in isolation. When the library unit is instanced within your design, the compilation result might differ from the result obtained with the test harness. This might be because compilation of your system might need arguments not present in your system.
 
-Please search the Makefile provided for UUT_TARGET_COMPILE_ARGS.
-For each library element there may be compile arguments used to avoid errors or to improve performance,
-e.g. specifying memories to be on separate banks to avoid wait states.
-These arguments will likely change with each release as the compile tool changes with each release.
+Search the Makefile provided for UUT_TARGET_COMPILE_ARGS. For each library element, there can be compile arguments used to avoid errors or to improve performance, that is, specifying memories to be on separate banks to avoid wait states. These arguments will likely change with each release as the compile tool changes with each release.
 
-Stack size allocation
-/////////////////////
+Stack Size Allocation
+^^^^^^^^^^^^^^^^^^^^^
 
-Similarly, the test harness provided with each library unit estimates the stack size required for a variety of cases and creates a formula to assign sufficient amount of memory for stack purposes.
-When the library unit is instanced within your design, compilation may fail with insufficient stack allocated for a specific kernel.
-Error message should suggest a minimum figure that is required.
+Similarly, the test harness provided with each library unit estimates the stack size required for a variety of cases and creates a formula to assign sufficient amount of memory for stack purposes. When the library unit is instanced within your design, compilation can fail with insufficient stack allocated for a specific kernel. The error message should suggest a minimum figure that is required.
 
-Please use compiler argument to allocate enough stack as advised by the compiler message. Alternatively, search the Makefile provided for STACK_SIZE and use the formula for the library unit to calculate sufficient stack size and allocate accordingly.
+Use the compiler argument to allocate enough stack as advised by the compiler message. Alternatively, search the Makefile provided for STACK_SIZE, and use the formula for the library unit to calculate sufficient stack size and allocate accordingly.
 
-Invalid throughput and/or latency
-/////////////////////////////////
+Invalid Throughput and/or Latency
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Throughput and latency are only reported when a stable operation has been detected.
-Complex designs may take several iterations to achieve stable state.
-When a testcase is not run for enough iterations, the status report will flag such case with throughput and latency values set to -1.
+Throughput and latency are only reported when a stable operation has been detected. Complex designs might take several iterations to achieve stable state. When a testcase is not run for enough iterations, the status report will flag such case with throughput and latency values set to -1.
 
-Please increase the number of iterations the simulation runs for to achieve a stable state and get accurate throughput and latency measurements.
+Increase the number of iterations the simulation runs for to achieve a stable state and get accurate throughput and latency measurements.
 
 .. _CONFIGURATION_PARAMETERS:
 
@@ -174,7 +147,7 @@ Library Element Configuration Parameters
 DDS/Mixer Configuration Parameters
 ----------------------------------
 
-For the DDS/Mixer library element, the list of configurable parameters and default values is presented below.
+For the DDS/Mixer library element, use the following list of configurable parameters and default values:
 
 .. table:: DDS/Mixer Configuration Parameters
 
@@ -190,18 +163,18 @@ For the DDS/Mixer library element, the list of configurable parameters and defau
     | MIXER_MODE             |    unsigned    |    2           | The mode of operation of the         |
     |                        |                |                | dds_mixer.                           |
     |                        |                |                |                                      |
-    |                        |                |                | 0 = dds only                         |
+    |                        |                |                | 0: dds only                          |
     |                        |                |                |                                      |
-    |                        |                |                | 1 = dds plus single data channel     |
+    |                        |                |                | 1: dds plus single data channel      |
     |                        |                |                | mixer                                |
     |                        |                |                |                                      |
-    |                        |                |                | 2 = dds plus two data channel        |
+    |                        |                |                | 2: dds plus two data channel         |
     |                        |                |                | mixer, for symmetrical carrier       |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | P_API                  |    unsigned    |    0           | 0 = window,                          |
+    | P_API                  |    unsigned    |    0           | 0: window,                           |
     |                        |                |                |                                      |
-    |                        |                |                | 1 = stream                           |
+    |                        |                |                | 1: stream                            |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | UUT_SSR                |    unsigned    |    1           | Super Sample Rate  SSR parameter.    |
@@ -214,7 +187,7 @@ For the DDS/Mixer library element, the list of configurable parameters and defau
     | DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
     |                        |                |                | output sample with reference model,  |
     |                        |                |                | e.g. 0.0025 for floats and cfloats.  |
-    |                        |                |                |                                      |
+    |                        |                |                |             Z                        |
     +------------------------+----------------+----------------+--------------------------------------+
     | INITIAL_DDS_OFFSET     |    unsigned    |    0           | Initial DDS offset.                  |
     |                        |                |                |                                      |
@@ -224,17 +197,17 @@ For the DDS/Mixer library element, the list of configurable parameters and defau
     +------------------------+----------------+----------------+--------------------------------------+
     | DATA_STIM_TYPE         |    unsigned    |    0           | Supported types:                     |
     |                        |                |                |                                      |
-    |                        |                |                | 0 - random                           |
+    |                        |                |                | 0: random                            |
     |                        |                |                |                                      |
-    |                        |                |                | 3 - impulse                          |
+    |                        |                |                | 3: impulse                           |
     |                        |                |                |                                      |
-    |                        |                |                | 4 - all ones                         |
+    |                        |                |                | 4: all ones                          |
     |                        |                |                |                                      |
-    |                        |                |                | 5 - incrementing pattern             |
+    |                        |                |                | 5: incrementing pattern              |
     |                        |                |                |                                      |
-    |                        |                |                | 6 - sym incrementing pattern         |
+    |                        |                |                | 6: sym incrementing pattern          |
     |                        |                |                |                                      |
-    |                        |                |                | 8 - sine wave                        |
+    |                        |                |                | 8: sine wave                         |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | ROUND_MODE             |    unsigned    |    0           | Rounding mode.                       |
@@ -250,12 +223,12 @@ For the DDS/Mixer library element, the list of configurable parameters and defau
 
 .. _CONFIGURATION_PARAMETERS_DFT:
 
-DFT configuration parameters
+DFT Configuration Parameters
 -------------------------------
 
-For the DFT library element the list of configurable parameters and default values is presented below.
+For the DFT library element, use the following list of configurable parameters and default values.
 
-.. table:: DFT configuration parameters
+.. table:: DFT Configuration Parameters
 
     +------------------------+----------------+----------------+--------------------------------------+
     |     **Name**           |    **Type**    |  **Default**   |   Description                        |
@@ -283,9 +256,9 @@ For the DFT library element the list of configurable parameters and default valu
     +------------------------+----------------+----------------+--------------------------------------+
     | API_IO                 |    unsigned    |    0           | Graph's port API.                    |
     |                        |                |                |                                      |
-    |                        |                |                | 0 - window                           |
+    |                        |                |                | 0: window                            |
     |                        |                |                |                                      |
-    |                        |                |                | 1 - stream                           |
+    |                        |                |                | 1: stream                            |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | NITER                  |    unsigned    |    8           | Number of iterations to execute.     |
@@ -293,7 +266,7 @@ For the DFT library element the list of configurable parameters and default valu
     +------------------------+----------------+----------------+--------------------------------------+
     | DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
     |                        |                |                | output sample with reference model,  |
-    |                        |                |                | e.g. 0.0025 for floats and cfloats.  |
+    |                        |                |                | e.g., 0.0025 for floats and cfloats.  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | ROUND_MODE             |    unsigned    |    0           | Rounding mode.                       |
@@ -306,17 +279,16 @@ For the DFT library element the list of configurable parameters and default valu
     |                        |                |                | 3: 'symmetric saturate'              |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
-
+.. note:: The above configurable parameters range might exceed a library element's maximum supported range, in which case, the compilation will end with a static_assert error informing about the exceeded range.
 
 .. _CONFIGURATION_PARAMETERS_FFT:
 
-FFT configuration parameters
+FFT Configuration Parameters
 -------------------------------
 
-For the FFT/iFFT library element the list of configurable parameters and default values is presented below.
+For the FFT/iFFT library element, use the following list of configurable parameters and default values.
 
-.. table:: FFT configuration parameters
+.. table:: FFT Configuration Parameters
 
     +------------------------+----------------+----------------+--------------------------------------+
     |     **Name**           |    **Type**    |  **Default**   |   Description                        |
@@ -348,9 +320,9 @@ For the FFT/iFFT library element the list of configurable parameters and default
     +------------------------+----------------+----------------+--------------------------------------+
     | API_IO                 |    unsigned    |    0           | Graph's port API.                    |
     |                        |                |                |                                      |
-    |                        |                |                | 0 - window                           |
+    |                        |                |                | 0: window                            |
     |                        |                |                |                                      |
-    |                        |                |                | 1 - stream                           |
+    |                        |                |                | 1: stream                            |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | PARALLEL_POWER         |    unsigned    |   0            | Parallelism, controlling             |
@@ -362,22 +334,22 @@ For the FFT/iFFT library element the list of configurable parameters and default
     +------------------------+----------------+----------------+--------------------------------------+
     | DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
     |                        |                |                | output sample with reference model,  |
-    |                        |                |                | e.g. 0.0025 for floats and cfloats.  |
+    |                        |                |                | e.g., 0.0025 for floats and cfloats.  |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | STIM_TYPE              |    unsigned    |    0           | Supported types:                     |
     |                        |                |                |                                      |
-    |                        |                |                | 0 - random                           |
+    |                        |                |                | 0: random                            |
     |                        |                |                |                                      |
-    |                        |                |                | 3 - impulse                          |
+    |                        |                |                | 3: impulse                           |
     |                        |                |                |                                      |
-    |                        |                |                | 4 - all ones                         |
+    |                        |                |                | 4: all ones                          |
     |                        |                |                |                                      |
-    |                        |                |                | 5 - incrementing pattern             |
+    |                        |                |                | 5: incrementing pattern              |
     |                        |                |                |                                      |
-    |                        |                |                | 6 - sym incrementing pattern         |
+    |                        |                |                | 6: sym incrementing pattern          |
     |                        |                |                |                                      |
-    |                        |                |                | 8 - sine wave                        |
+    |                        |                |                | 8: sine wave                         |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | ROUND_MODE             |    unsigned    |    0           | Rounding mode.                       |
@@ -390,16 +362,16 @@ For the FFT/iFFT library element the list of configurable parameters and default
     |                        |                |                | 3: 'symmetric saturate'              |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
+.. note:: The above configurable parameters range might exceed a library element's maximum supported range, in which case, the compilation will end with a static_assert error informing about the exceeded range.
 
 .. _CONFIGURATION_PARAMETERS_FFT_WINDOW:
 
-FFT Window configuration parameters
+FFT Window Configuration Parameters
 --------------------------------------
 
-For the FFT Window library element the list of configurable parameters and default values is presented below.
+For the FFT Window library element, use the following list of configurable parameters and default values.
 
-.. table:: FFT Window configuration parameters
+.. table:: FFT Window Configuration Parameters
 
     +------------------------+----------------+----------------+--------------------------------------+
     |     **Name**           |    **Type**    |  **Default**   |   Description                        |
@@ -425,20 +397,20 @@ For the FFT Window library element the list of configurable parameters and defau
     +------------------------+----------------+----------------+--------------------------------------+
     | API_IO                 |    unsigned    |    0           | Graph's port API.                    |
     |                        |                |                |                                      |
-    |                        |                |                | 0 - window                           |
+    |                        |                |                | 0: window                            |
     |                        |                |                |                                      |
-    |                        |                |                | 1 - stream                           |
+    |                        |                |                | 1: stream                            |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | WINDOW_CHOICE          |    unsigned    |    0           | Supported types:                     |
     |                        |                |                |                                      |
-    |                        |                |                | 0 - Hamming                          |
+    |                        |                |                | 0: Hamming                           |
     |                        |                |                |                                      |
-    |                        |                |                | 1 - Hann                             |
+    |                        |                |                | 1: Hann                              |
     |                        |                |                |                                      |
-    |                        |                |                | 2 - Blackman                         |
+    |                        |                |                | 2: Blackman                          |
     |                        |                |                |                                      |
-    |                        |                |                | 3 - Kaiser                           |
+    |                        |                |                | 3: Kaiser                            |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | NITER                  |    unsigned    |    4           | Number of iterations to execute.     |
@@ -446,7 +418,7 @@ For the FFT Window library element the list of configurable parameters and defau
     +------------------------+----------------+----------------+--------------------------------------+
     | DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
     |                        |                |                | output sample with reference model,  |
-    |                        |                |                | e.g. 0.0025 for floats and cfloats.  |
+    |                        |                |                | e.g., 0.0025 for floats and cfloats. |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | ROUND_MODE             |    unsigned    |    0           | Rounding mode.                       |
@@ -459,16 +431,16 @@ For the FFT Window library element the list of configurable parameters and defau
     |                        |                |                | 3: 'symmetric saturate'              |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
+.. note:: The above configurable parameters range might exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
 
 .. _CONFIGURATION_PARAMETERS_FILTERS:
 
-FIR configuration parameters
+FIR Configuration Parameters
 -------------------------------
 
-The list below consists of configurable parameters for FIR library elements with their default values.
+The following list consists of configurable parameters for FIR library elements with their default values.
 
-.. table:: FIR configuration parameters
+.. table:: FIR Configuration Parameters
 
     +------------------------+----------------+----------------+--------------------------------------+
     |     **Name**           |    **Type**    |  **Default**   |   Description                        |
@@ -495,27 +467,27 @@ The list below consists of configurable parameters for FIR library elements with
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | INTERPOLATE_FACTOR     |    unsigned    |    1           | Interpolation factor,                |
-    |                        |                |                | see note below                       |
+    |                        |                |                | see note below.                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | DECIMATE_FACTOR        |    unsigned    |    1           | Decimation factor,                   |
-    |                        |                |                | see note below                       |
+    |                        |                |                | see note below.                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | DUAL_IP                |    unsigned    |    0           | Dual inputs used in FIRs,            |
-    |                        |                |                | see note below                       |
+    |                        |                |                | see note below.                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | NUM_OUTPUTS            |    unsigned    |    1           | Number of output ports.              |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | USE_COEFF_RELOAD       |    unsigned    |    0           | Use 2 sets of reloadable             |
+    | USE_COEFF_RELOAD       |    unsigned    |    0           | Use two sets of reloadable           |
     |                        |                |                | coefficients, where the second set   |
     |                        |                |                | deliberately corrupts a single,      |
     |                        |                |                | randomly selected coefficient.       |
     +------------------------+----------------+----------------+--------------------------------------+
     | PORT_API               |    unsigned    |    0           | Graph's port API.                    |
     |                        |                |                |                                      |
-    |                        |                |                | 0 - window                           |
+    |                        |                |                | 0: window                            |
     |                        |                |                |                                      |
-    |                        |                |                | 1 - stream                           |
+    |                        |                |                | 1: stream                            |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | UUT_SSR                |    unsigned    |    1           | Super Sample Rate  SSR parameter.    |
@@ -533,39 +505,39 @@ The list below consists of configurable parameters for FIR library elements with
     +------------------------+----------------+----------------+--------------------------------------+
     | DATA_STIM_TYPE         |    unsigned    |    0           | Supported types:                     |
     |                        |                |                |                                      |
-    |                        |                |                | 0 - random                           |
+    |                        |                |                | 0: random                            |
     |                        |                |                |                                      |
-    |                        |                |                | 3 - impulse                          |
+    |                        |                |                | 3: impulse                           |
     |                        |                |                |                                      |
-    |                        |                |                | 4 - all ones                         |
+    |                        |                |                | 4: all ones                          |
     |                        |                |                |                                      |
-    |                        |                |                | 5 - incrementing pattern             |
+    |                        |                |                | 5: incrementing pattern              |
     |                        |                |                |                                      |
-    |                        |                |                | 6 - sym incrementing pattern         |
+    |                        |                |                | 6: sym incrementing pattern          |
     |                        |                |                |                                      |
-    |                        |                |                | 8 - sine wave                        |
+    |                        |                |                | 8: sine wave                         |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | COEFF_STIM_TYPE        |    unsigned    |    0           | Supported types:                     |
     |                        |                |                |                                      |
-    |                        |                |                | 0 - random                           |
+    |                        |                |                | 0: random                            |
     |                        |                |                |                                      |
-    |                        |                |                | 3 - impulse                          |
+    |                        |                |                | 3: impulse                           |
     |                        |                |                |                                      |
-    |                        |                |                | 4 - all ones                         |
+    |                        |                |                | 4: all ones                          | 
     |                        |                |                |                                      |
-    |                        |                |                | 5 - incrementing pattern             |
+    |                        |                |                | 5: incrementing pattern              |
     |                        |                |                |                                      |
-    |                        |                |                | 6 - sym incrementing pattern         |
+    |                        |                |                | 6: sym incrementing pattern          |
     |                        |                |                |                                      |
-    |                        |                |                | 8 - sine wave                        |
+    |                        |                |                | 8: sine wave                         |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | USE_CUSTOM_CONSTRAINT  |    unsigned    |    0           | Overwrite default or non-existent.   |
     |                        |                |                |                                      |
-    |                        |                |                | 0 - no action                        |
+    |                        |                |                | 0: no action                         |
     |                        |                |                |                                      |
-    |                        |                |                | 1 - use Graph's access functions     |
+    |                        |                |                | 1: use the Graph's access functions  |
     |                        |                |                | to set a location and                |
     |                        |                |                | overwrite a fifo_depth constraint.   |
     |                        |                |                | see also :ref:`FIR_CONSTRAINTS`      |
@@ -578,18 +550,18 @@ The list below consists of configurable parameters for FIR library elements with
     |                        |                |                | 3: 'symmetric saturate'              |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
+.. note:: The above configurable parameters range might exceed a library element's maximum supported range, in which case, the compilation will end with a static_assert error informing about the exceeded range.
 
-.. note:: Not all dsplib elements support all of the above configurable parameters. Unsupported parameters which are not used have no impact on execution, e.g., parameter `INTERPOLATE_FACTOR` is only supported by interpolation filters and will be ignored by other library elements.
+.. note:: Not all dsplib elements support all of the above configurable parameters. Unsupported parameters which are not used have no impact on execution, e.g., the `INTERPOLATE_FACTOR` parameter is only supported by interpolation filters and will be ignored by other library elements.
 
 .. _CONFIGURATION_PARAMETERS_GEMM:
 
 Matrix Multiply Configuration Parameters
 -------------------------------------------
 
-For the Matrix Multiply (GeMM) library element the list of configurable parameters and default values is presented below.
+For the Matrix Multiply (GeMM) library element, use the following list of configurable parameters and default values.
 
-.. table:: Matrix Multiply configuration parameters
+.. table:: Matrix Multiply Configuration Parameters
 
     +------------------------+----------------+----------------+--------------------------------------+
     |     **Name**           |    **Type**    |  **Default**   |   Description                        |
@@ -600,7 +572,7 @@ For the Matrix Multiply (GeMM) library element the list of configurable paramete
     | T_DATA_B               |    typename    |    cint16      | Input B Data Type.                   |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | P_DIM_A                |    unsigned    |    16          | Input A Dimension                    |
+    | P_DIM_A                |    unsigned    |    16          | Input A Dimension.                   |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | P_DIM_AB               |    unsigned    |    16          | Input AB Common Dimension.           |
@@ -647,37 +619,37 @@ For the Matrix Multiply (GeMM) library element the list of configurable paramete
     +------------------------+----------------+----------------+--------------------------------------+
     | DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
     |                        |                |                | output sample with reference model,  |
-    |                        |                |                | e.g. 0.0025 for floats and cfloats.  |
+    |                        |                |                | e.g., 0.0025 for floats and cfloats. |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | STIM_TYPE_A            |    unsigned    |    0           | Supported types:                     |
     |                        |                |                |                                      |
-    |                        |                |                | 0 - random                           |
+    |                        |                |                | 0: random                            |
     |                        |                |                |                                      |
-    |                        |                |                | 3 - impulse                          |
+    |                        |                |                | 3: impulse                           |
     |                        |                |                |                                      |
-    |                        |                |                | 4 - all ones                         |
+    |                        |                |                | 4: all ones                          |
     |                        |                |                |                                      |
-    |                        |                |                | 5 - incrementing pattern             |
+    |                        |                |                | 5: incrementing pattern              |
     |                        |                |                |                                      |
-    |                        |                |                | 6 - sym incrementing pattern         |
+    |                        |                |                | 6: sym incrementing pattern          |
     |                        |                |                |                                      |
-    |                        |                |                | 8 - sine wave                        |
+    |                        |                |                | 8: sine wave                         |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | STIM_TYPE_B            |    unsigned    |    0           | Supported types:                     |
     |                        |                |                |                                      |
-    |                        |                |                | 0 - random                           |
+    |                        |                |                | 0: random                            |
     |                        |                |                |                                      |
-    |                        |                |                | 3 - impulse                          |
+    |                        |                |                | 3: impulse                           |
     |                        |                |                |                                      |
-    |                        |                |                | 4 - all ones                         |
+    |                        |                |                | 4: all ones                          |
     |                        |                |                |                                      |
-    |                        |                |                | 5 - incrementing pattern             |
+    |                        |                |                | 5: incrementing pattern              |
     |                        |                |                |                                      |
-    |                        |                |                | 6 - sym incrementing pattern         |
+    |                        |                |                | 6: sym incrementing pattern          |
     |                        |                |                |                                      |
-    |                        |                |                | 8 - sine wave                        |
+    |                        |                |                | 8: sine wave                         |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | P_SAT_MODE             | Unsigned int   | Saturation     | 0: 'none'                            |
@@ -687,16 +659,16 @@ For the Matrix Multiply (GeMM) library element the list of configurable paramete
     |                        |                |                | 3: 'symmetric saturate'              |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
+.. note:: The above configurable parameters range might exceed a library element's maximum supported range, in which case, the compilation will end with a static_assert error informing about the exceeded range.
 
 .. _CONFIGURATION_PARAMETERS_GEMV:
 
 Matrix Vector Multiply Configuration Parameters
 -----------------------------------------------
 
-For the Matrix Vector Multiply (GeMV) library element the list of configurable parameters and default values is presented below.
+For the Matrix Vector Multiply (GeMV) library element, use the following list of configurable parameters and default values.
 
-.. table:: Matrix Vector Multiply configuration parameters
+.. table:: Matrix Vector Multiply Configuration Parameters
 
     +------------------------+----------------+----------------+--------------------------------------+
     |     **Name**           |    **Type**    |  **Default**   |   Description                        |
@@ -735,32 +707,32 @@ For the Matrix Vector Multiply (GeMV) library element the list of configurable p
     +------------------------+----------------+----------------+--------------------------------------+
     | STIM_TYPE_A            |    unsigned    |    0           | Supported types:                     |
     |                        |                |                |                                      |
-    |                        |                |                | 0 - random                           |
+    |                        |                |                | 0: random                            |
     |                        |                |                |                                      |
-    |                        |                |                | 3 - impulse                          |
+    |                        |                |                | 3:  impulse                          |
     |                        |                |                |                                      |
-    |                        |                |                | 4 - all ones                         |
+    |                        |                |                | 4: all ones                          |
     |                        |                |                |                                      |
-    |                        |                |                | 5 - incrementing pattern             |
+    |                        |                |                | 5: incrementing pattern              |
     |                        |                |                |                                      |
-    |                        |                |                | 6 - sym incrementing pattern         |
+    |                        |                |                | 6: sym incrementing pattern          |
     |                        |                |                |                                      |
-    |                        |                |                | 8 - sine wave                        |
+    |                        |                |                | 8: sine wave                         |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | STIM_TYPE_B            |    unsigned    |    0           | Supported types:                     |
     |                        |                |                |                                      |
-    |                        |                |                | 0 - random                           |
+    |                        |                |                | 0: random                            |
     |                        |                |                |                                      |
-    |                        |                |                | 3 - impulse                          |
+    |                        |                |                | 3: impulse                           |
     |                        |                |                |                                      |
-    |                        |                |                | 4 - all ones                         |
+    |                        |                |                | 4: all ones                          |
     |                        |                |                |                                      |
-    |                        |                |                | 5 - incrementing pattern             |
+    |                        |                |                | 5: incrementing pattern              |
     |                        |                |                |                                      |
-    |                        |                |                | 6 - sym incrementing pattern         |
+    |                        |                |                | 6: sym incrementing pattern          |
     |                        |                |                |                                      |
-    |                        |                |                | 8 - sine wave                        |
+    |                        |                |                | 8: sine wave                         |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | SAT_MODE               | unsigned       | Saturation     | 0: 'none'                            |
@@ -770,17 +742,17 @@ For the Matrix Vector Multiply (GeMV) library element the list of configurable p
     |                        |                |                | 3: 'symmetric saturate'              |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
+.. note:: The above configurable parameters range might exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
 
 
 .. _CONFIGURATION_PARAMETERS_MRFFT:
 
-Mixed Radix FFT configuration parameters
+Mixed Radix FFT Configuration Parameters
 ----------------------------------------
 
-For the Mixed Radix library element the list of configurable parameters and default values is presented below.
+For the Mixed Radix library element, use the following list of configurable parameters and default values.
 
-.. table:: FFT configuration parameters
+.. table:: FFT Configuration Parameters
 
     +------------------------+----------------+----------------+--------------------------------------+
     |     **Name**           |    **Type**    |  **Default**   |   Description                        |
@@ -809,9 +781,9 @@ For the Mixed Radix library element the list of configurable parameters and defa
     +------------------------+----------------+----------------+--------------------------------------+
     | API_IO                 |    unsigned    |    0           | Graph's port API.                    |
     |                        |                |                |                                      |
-    |                        |                |                | 0 - window                           |
+    |                        |                |                | 0: window                            |
     |                        |                |                |                                      |
-    |                        |                |                | 1 - stream                           |
+    |                        |                |                | 1: stream                            |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | NITER                  |    unsigned    |    4           | Number of iterations to execute.     |
@@ -824,17 +796,17 @@ For the Mixed Radix library element the list of configurable parameters and defa
     +------------------------+----------------+----------------+--------------------------------------+
     | STIM_TYPE              |    unsigned    |    0           | Supported types:                     |
     |                        |                |                |                                      |
-    |                        |                |                | 0 - random                           |
+    |                        |                |                | 0: random                            |
     |                        |                |                |                                      |
-    |                        |                |                | 3 - impulse                          |
+    |                        |                |                | 3: impulse                           |
     |                        |                |                |                                      |
-    |                        |                |                | 4 - all ones                         |
+    |                        |                |                | 4: all ones                          |
     |                        |                |                |                                      |
-    |                        |                |                | 5 - incrementing pattern             |
+    |                        |                |                | 5: incrementing pattern              |
     |                        |                |                |                                      |
-    |                        |                |                | 6 - sym incrementing pattern         |
+    |                        |                |                | 6: sym incrementing pattern          |
     |                        |                |                |                                      |
-    |                        |                |                | 8 - sine wave                        |
+    |                        |                |                | 8: sine wave                         |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | ROUND_MODE             |    unsigned    |    0           | Rounding mode.                       |
@@ -847,7 +819,7 @@ For the Mixed Radix library element the list of configurable parameters and defa
     |                        |                |                | 3: 'symmetric saturate'              |
     +------------------------+----------------+----------------+--------------------------------------+
 
-.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
+.. note:: The above configurable parameters range mmightay exceed a library element's maximum supported range, in which case, the compilation will end with a static_assert error informing about the exceeded range.
 
 
 .. _CONFIGURATION_PARAMETERS_SAMPLE_DELAY:
@@ -855,7 +827,7 @@ For the Mixed Radix library element the list of configurable parameters and defa
 Sample Delay Configuration Parameters
 -------------------------------------
 
-For the Sample Delay library elements the list of configurable parameters and default values is presented below.
+For the Sample Delay library elements, use the following list of configurable parameters and default values.
 
 .. table:: Sample Delay Configuration Parameters
 
@@ -883,17 +855,17 @@ For the Sample Delay library elements the list of configurable parameters and de
     +------------------------+----------------+----------------+--------------------------------------+
     | DATA_STIM_TYPE         |    unsigned    |    0           | Supported types:                     |
     |                        |                |                |                                      |
-    |                        |                |                | 0 - random                           |
+    |                        |                |                | 0: random                            |
     |                        |                |                |                                      |
-    |                        |                |                | 3 - impulse                          |
+    |                        |                |                | 3: impulse                           |
     |                        |                |                |                                      |
-    |                        |                |                | 4 - all ones                         |
+    |                        |                |                | 4: all ones                          |
     |                        |                |                |                                      |
-    |                        |                |                | 5 - incrementing pattern             |
+    |                        |                |                | 5: incrementing pattern              |
     |                        |                |                |                                      |
-    |                        |                |                | 6 - sym incrementing pattern         |
+    |                        |                |                | 6: sym incrementing pattern          |
     |                        |                |                |                                      |
-    |                        |                |                | 8 - sine wave                        |
+    |                        |                |                | 8: sine wave                         |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
 
@@ -903,7 +875,7 @@ For the Sample Delay library elements the list of configurable parameters and de
 Widgets Configuration Parameters
 -----------------------------------
 
-For the Widgets library elements the list of configurable parameters and default values is presented below.
+For the Widgets library elements, use the following list of configurable parameters and default values.
 
 .. table:: Widget API Casts Configuration Parameters
 
@@ -913,16 +885,16 @@ For the Widgets library elements the list of configurable parameters and default
     | DATA_TYPE              |    typename    |    cint16      | Data Type.                           |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
-    | IN_API                 |    unsigned    |    0           | 0 = window,                          |
+    | IN_API                 |    unsigned    |    0           | 0: window                            |
     |                        |                |                |                                      |
-    |                        |                |                | 1 = stream                           |
+    |                        |                |                | 1: stream                            |
     +------------------------+----------------+----------------+--------------------------------------+
-    | OUT_API                |    unsigned    |    0           | 0 = window,                          |
+    | OUT_API                |    unsigned    |    0           | 0: window,                           |
     |                        |                |                |                                      |
-    |                        |                |                | 1 = stream                           |
+    |                        |                |                | 1: stream                            |
     +------------------------+----------------+----------------+--------------------------------------+
     | NUM_INPUTS             |    unsigned    |    1           | The number of input stream           |
-    |                        |                |                | interfaces                           |
+    |                        |                |                | interfaces.                          |
     +------------------------+----------------+----------------+--------------------------------------+
     | WINDOW_VSIZE           |    unsigned    |    256         | Input/Output window size.            |
     |                        |                |                |                                      |
@@ -932,34 +904,32 @@ For the Widgets library elements the list of configurable parameters and default
     +------------------------+----------------+----------------+--------------------------------------+
     | PATTERN                |    unsigned    |    0           | The pattern of interleave            |
     |                        |                |                | by which samples from each           |
-    |                        |                |                | of 2 streams are arranged            |
-    |                        |                |                |                                      |
-    |                        |                |                | into the destination window,         |
+    |                        |                |                | of two streams are arranged          |
+    |                                                          | into the destination window,         |
     |                        |                |                | or from the input window             |
     |                        |                |                | to dual output streams.              |
-    |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | NITER                  |    unsigned    |    16          | Number of iterations to execute.     |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
     |                        |                |                | output sample with reference model,  |
-    |                        |                |                | e.g. 0.0025 for floats and cfloats.  |
+    |                        |                |                | e.g., 0.0025 for floats and cfloats. |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | DATA_STIM_TYPE         |    unsigned    |    0           | Supported types:                     |
     |                        |                |                |                                      |
-    |                        |                |                | 0 - random                           |
+    |                        |                |                | 0: random                            |
     |                        |                |                |                                      |
-    |                        |                |                | 3 - impulse                          |
+    |                        |                |                | 3: impulse                           |
     |                        |                |                |                                      |
-    |                        |                |                | 4 - all ones                         |
+    |                        |                |                | 4: all ones                          |
     |                        |                |                |                                      |
-    |                        |                |                | 5 - incrementing pattern             |
+    |                        |                |                | 5: incrementing pattern              |
     |                        |                |                |                                      |
-    |                        |                |                | 6 - sym incrementing pattern         |
+    |                        |                |                | 6: sym incrementing pattern          |
     |                        |                |                |                                      |
-    |                        |                |                | 8 - sine wave                        |
+    |                        |                |                | 8: sine wave                         |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
 
@@ -982,28 +952,27 @@ For the Widgets library elements the list of configurable parameters and default
     +------------------------+----------------+----------------+--------------------------------------+
     | DIFF_TOLERANCE         |    unsigned    |    0           | Tolerance value when comparing       |
     |                        |                |                | output sample with reference model,  |
-    |                        |                |                | e.g. 0.0025 for floats and cfloats.  |
+    |                        |                |                | e.g., 0.0025 for floats and cfloats. |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
     | DATA_STIM_TYPE         |    unsigned    |    0           | Supported types:                     |
     |                        |                |                |                                      |
-    |                        |                |                | 0 - random                           |
+    |                        |                |                | 0: random                            |
     |                        |                |                |                                      |
-    |                        |                |                | 3 - impulse                          |
+    |                        |                |                | 3: impulse                           |
     |                        |                |                |                                      |
-    |                        |                |                | 4 - all ones                         |
+    |                        |                |                | 4: all ones                          |
     |                        |                |                |                                      |
-    |                        |                |                | 5 - incrementing pattern             |
+    |                        |                |                | 5: incrementing pattern              |
     |                        |                |                |                                      |
-    |                        |                |                | 6 - sym incrementing pattern         |
+    |                        |                |                | 6: sym incrementing pattern          |
     |                        |                |                |                                      |
-    |                        |                |                | 8 - sine wave                        |
+    |                        |                |                | 8: sine wave                         |
     |                        |                |                |                                      |
     +------------------------+----------------+----------------+--------------------------------------+
 
 
-.. note:: The above configurable parameters range may exceed a library element's maximum supported range, in which case the compilation will end with a static_assert error informing about the exceeded range.
-
+.. note:: The above configurable parameters range might exceed a library element's maximum supported range, in which case, the compilation will end with a static_assert error informing about the exceeded range.
 
 .. |image1| image:: ./media/image1.png
 .. |image2| image:: ./media/image2.png
@@ -1021,5 +990,3 @@ For the Widgets library elements the list of configurable parameters and default
    :ltrim:
 .. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
    :ltrim:
-
-

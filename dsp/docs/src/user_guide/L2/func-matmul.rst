@@ -1,20 +1,6 @@
-.. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-    
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-    
-       http://www.apache.org/licenses/LICENSE-2.0
-    
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+.. Copyright © 2019–2023 Advanced Micro Devices, Inc
 
-
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _MATRIX_MULTIPLY:
 
@@ -22,9 +8,9 @@
 Matrix Multiply
 ===============
 
-The DSPLib contains one Matrix Multiply/GEMM (General Matrix Multiply) solution for AIE and AIE-ML. The GEMM has two input ports connected to two windows of data. The inputs are denoted as Matrix A (inA) and Matrix B (inB). Matrix A has a template parameter TP_DIM_A to describe the number of rows of A. The number of columns of inA must be equal to the number of rows of inB. This is denoted with the template parameter TP_DIM_AB. The number of columns of B is denoted by TP_DIM_B.
+The DSPLib contains one Matrix Multiply/GEMM (General Matrix Multiply) solution for AI Engine (AIE) and AIE-ML. The GEMM has two input ports connected to two windows of data. The inputs are denoted as Matrix A (inA) and Matrix B (inB). Matrix A has a ``TP_DIM_A`` template parameter to describe the number of rows of A. The number of columns of inA must be equal to the number of rows of inB. This is denoted with the ``TP_DIM_AB`` template parameter. The number of columns of B is denoted by ``TP_DIM_B``.
 
-An output port connects to a window, where the data for the output matrix will be stored. The output matrix will have rows = inA rows (TP_DIM_A) and columns = inB (TP_DIM_B) columns. The data type of both input matrices can be configured and the data type of the output is derived from the inputs.
+An output port connects to a window, where the data for the output matrix will be stored. The output matrix will have rows = inA rows (``TP_DIM_A``) and columns = inB (``TP_DIM_B``) columns. The data type of both input matrices can be configured, and the data type of the output is derived from the inputs.
 
 ~~~~~~~~~~~
 Entry Point
@@ -40,11 +26,9 @@ The graph entry point is the following:
 Supported Types
 ~~~~~~~~~~~~~~~
 
-The Matrix Multiply supports a matrix of elements of integer type (int16, cint16, int32 or cint32) multiplied by a matrix of elements of
-integer type. It also supports a matrix of elements of float type (float, cfloat) multiplied by a matrix of elements of float type.
-However, a mix of integer types and float types is not supported.
+The Matrix Multiply supports a matrix of elements of integer type (int16, cint16, int32, or cint32) multiplied by a matrix of elements of integer type. It also supports a matrix of elements of float type (float, cfloat) multiplied by a matrix of elements of float type. However, a mix of integer types and float types are not supported.
 
-The Matrix Multiply for AIE-ML has support of integer types (int16, int32, cint16, and cint32) but does not support floating-point types (float, cfloat).
+The Matrix Multiply for AIE-ML supports integer types (int16, int32, cint16, and cint32) but does not support floating-point types (float, cfloat).
 
 ~~~~~~~~~~~~~~~~~~~
 Template Parameters
@@ -52,33 +36,32 @@ Template Parameters
 
 To see details on the template parameters for the Matrix Multiply, see :ref:`API_REFERENCE`.
 
-NOTE: Maximum matrix dimensions per kernel.
-Maximum memory accessible by an AIE kernel is 32kB x 4 for AIE. The maximum matrix dimensions per kernel is limited by the memory requirements and how much memory is available.
+.. note:: Maximum matrix dimensions per kernel.
+
+The maximum memory accessible by an AIE kernel is 32 kB x 4 for AIE. The maximum matrix dimensions per kernel is limited by the memory requirements and how much memory is available.
 A matrix_mult design needs to allocate memory for the following:
 
-* Window Size A =  Input matrix A of size P_DIM_A x P_DIM_AB x sizeof(T_DATA_A).
+* Window Size A: Input matrix A of size P_DIM_A x P_DIM_AB x sizeof(T_DATA_A).
 
-* Window Size B =  Input matrix B of size P_DIM_B x P_DIM_AB x sizeof(T_DATA_B).
+* Window Size B: Input matrix B of size P_DIM_B x P_DIM_AB x sizeof(T_DATA_B).
 
-* Window Size Out = Output matrix of size P_DIM_A x P_DIM_B x sizeof(T_DATA_OUT).
+* Window Size Out: Output matrix of size P_DIM_A x P_DIM_B x sizeof(T_DATA_OUT).
 
+Optionally, depending on whether you use the tiling/detiling feature of the element, you need:
 
-Optionally, depending on whether we use the tiling/detiling feature of the element we have need:
+* If Matrix A needs to be tiled: Add memory of Window Size A.
 
-* If Matrix A needs to be tiled - add memory of Window Size A
+* If Matrix B needs to be tiled: Add memory of Window Size B.
 
-* If Matrix B needs to be tiled - add memory of Window Size B
+* If Output matrix needs to be detiled: Add memory of Window Size Out.
 
-* If Output matrix needs to be detiled - add memory of Window Size Out
+Further, if these buffers are ping-pong buffers, their memory requirement doubles in size. You can reduce this factor by using the single_buffer constraint on the buffer.
+Apart from these, the program also needs some system memory to run which has been empirically observed to occupy around 2.5 kB.
 
-
-Further, if these buffers are ping-pong buffers, their memory requirement doubles in size. We can reduce this factor by using the single_buffer constraint on the buffer.
-Apart from these, the program also needs some system memory to run which has been empirically observed to occupy around 2.5kB.
-
-To get around issues of memory requirements too large to fit in a single kernel, increase the value of TP_CASC_LEN to split the dimension P_DIM_AB over multiple kernels.
+To get around issues of memory requirements too large to fit in a single kernel, increase the value of ``TP_CASC_LEN`` to split the dimension P_DIM_AB over multiple kernels.
 
 ~~~~~~~~~~~~~~~~
-Access functions
+Access Functions
 ~~~~~~~~~~~~~~~~
 
 To see details on the access functions for the Matrix Multiply, see :ref:`API_REFERENCE`.
@@ -100,10 +83,9 @@ Input matrices are processed in distinct blocks. Matrix elements must be rearran
 
 The following table demonstrates how a 16x16 input matrix should be rearranged into a 4x4 tiling pattern.
 
-.. note:: Indices are quoted assuming a row major matrix. A column major matrix would be the transpose of the table below.
+.. note:: Indices are quoted assuming a row major matrix. A column major matrix would be the transpose of following the table.
 
-
-.. table:: Matrix Multiply 4x4 tiling pattern
+.. table:: Matrix Multiply 4x4 Tiling Pattern
    :align: center
 
    +------------+-------------------------------+-------------------------------+-------------------------------+-------------------------------+
@@ -148,7 +130,6 @@ This is stored contiguously in memory like:
 
 The following table demonstrates how a 16x16 input matrix should be rearranged into a 4x2 tiling pattern.
 
-
 .. table:: Matrix Multiply 4x2 tiling pattern
    :align: center
 
@@ -188,13 +169,11 @@ The following table demonstrates how a 16x16 input matrix should be rearranged i
    |            |  240  |  241  |  242  |  243  |  244  |  245  |  246  |  247  |  248  |  249  |  250  |  251  |  252  |  253  |  254  |  255  |
    +------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
 
-
 This is stored contiguously in memory like:
 
 0, 1, 16, 17, 32, 33, 48, 49, 2, 3, 18, 19, 34, 35, 50, 51, ..., 206, 207, 222, 223, 238, 239, 254, 255
 
 Multiplying a 16x16 matrix (with 4x4 tiling) with a 16x16 matrix (with 4x2 tiling) will result in a 16x16 matrix with 4x2 tiling.
-
 
 Tiling Schemes and Data Type Combinations
 -----------------------------------------
@@ -202,7 +181,7 @@ Tiling Schemes and Data Type Combinations
 The following table specifies the tiling scheme used for a given data type combination and the corresponding output data type for AIE devices:
 
 .. _table-tile-pattern-AIE:
-.. table:: Matrix Multiply tiling pattern combination for AIE
+.. table:: Matrix Multiply Tiling Pattern Combination for AIE
    :align: center
 
    +------------------------+----------------+--------------+
@@ -255,7 +234,7 @@ The following table specifies the tiling scheme used for a given data type combi
 The following table specifies the tiling scheme used for a given data type combination and the corresponding output data type for AIE-ML devices:
 
    .. _table-tile-pattern-AIE-ML:
-.. table:: Matrix Multiply tiling pattern combination for AIE-ML
+.. table:: Matrix Multiply Tiling Pattern Combination for AIE-ML
    :align: center
 
    +------------------------+----------------+--------------+
@@ -280,19 +259,18 @@ The following table specifies the tiling scheme used for a given data type combi
    |cint32   |       cint32 |   1x2  |   2x8 |   cint32     |
    +---------+--------------+--------+-------+--------------+
    
-   
 Tiling Parameters
 -----------------
    
-The parameters TP_ADD_TILING_A, TP_ADD_TILING_B, and TP_ADD_DETILING_OUT control the inclusion of an additional pre-processing / post-processing kernel to perform the required data data storage re-ordering. When used with TP_DIM_A_LEADING, TP_DIM_B_LEADING, or TP_DIM_OUT_LEADING, the matrix is also transposed in the tiling kernel.
+The parameters ``TP_ADD_TILING_A``, ``TP_ADD_TILING_B``, and ``TP_ADD_DETILING_OUT`` control the inclusion of an additional pre-processing/post-processing kernel to perform the required data storage reordering. When used with ``TP_DIM_A_LEADING``, ``TP_DIM_B_LEADING``, or ``TP_DIM_OUT_LEADING``, the matrix is also transposed in the tiling kernel.
 
 If the additional kernels are not selected, then the matrix multiply kernels assume incoming data is in the correct format, as specified above.
 
-The tiling imposes a restriction that the matrix dimensions need to be multiples of the tile dimensions. If you require dimensions that do not satisfy these requirements, please pad the matrices up to the closet multiple of the tile dimensions in table :ref:`table-tile-pattern-AIE` or :ref:`table-tile-pattern-AIE-ML` with zeros for AIE and AIE-ML respectively.
+The tiling imposes a restriction that the matrix dimensions need to be multiples of the tile dimensions. If you require dimensions that do not satisfy these requirements, pad the matrices up to the closet multiple of the tile dimensions in table :ref:`table-tile-pattern-AIE` or :ref:`table-tile-pattern-AIE-ML` with zeroes for AIE and AIE-ML respectively.
 
-Cascaded kernels
+Cascaded Kernels
 ----------------
-When using the TP_CASC_LEN parameter, the matrix multiply operation is split across TP_DIM_AB and processed in a TP_CASC_LEN number of kernels. The accumulated partial results of each kernel are passed down the cascade port to the next kernel in the cascade chain until the final kernel provides the expected output. Cascade connections are made internally to the matrix multiply graph and external interfaces to the graph remain unchanged.
+When using the ``TP_CASC_LEN`` parameter, the matrix multiply operation is split across ``TP_DIM_AB`` and processed in a ``TP_CASC_LEN`` number of kernels. The accumulated partial results of each kernel are passed down the cascade port to the next kernel in the cascade chain until the final kernel provides the expected output. Cascade connections are made internally to the matrix multiply graph and external interfaces to the graph remain unchanged.
 
 Each AI Engine kernel in the array is given a sub-matrix, so the interface to the graph is an array of ports for both A and B. The sub matrices are obtained by dividing the input matrices in their common dimension TP_DIM_AB.
 
@@ -381,7 +359,7 @@ Each AI Engine kernel in the array is given a sub-matrix, so the interface to th
    |            |            |  240  |  241  |  242  |  243  |  244  |  245  |  246  |  247  |  248  |  249  |  250  |  251  |  252  |  253  |  254  |  255  |
    +------------+------------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
 
-Find a full list of descriptions and parameters in the :ref:`API_REFERENCE`.
+You can find a full list of the descriptions and parameters in the :ref:`API_REFERENCE`.
 
 Connections to the cascade ports can be made as follows:
 
@@ -396,32 +374,27 @@ Connections to the cascade ports can be made as follows:
 Constraints
 -----------
 
-A Matrix Multiply solution can consist of a cascade of kernels for the multiply operations themselves, but also tiling kernels on each input to each member of that cascade, and a tiling kernel on the output. The tiling kernels' function is to convert between the arrangement of matrix elements in memory to a form of arrangement optimized for vector multiply, or vice versa. In the entry level graph, the following names are used to identify the various kernels as follows:
+A Matrix Multiply solution can consist of a cascade of kernels for the multiply operations themselves but also tiling kernels on each input to each member of that cascade, and a tiling kernel on the output. The tiling kernels' function is to convert between the arrangement of matrix elements in memory to a form of arrangement optimized for vector multiply, or vice versa. In the entry level graph, the following names are used to identify the various kernels as follows:
 
-'m_MatmultKernels' - This is the array of kernel pointers returned by getKernels which point to the cascade TP_CASC_LEN of matrix multiply kernels. These kernels perform the matrix multiply operations.
+'m_MatmultKernels' - This is the array of kernel pointers returned by getKernels which point to the cascade ``TP_CASC_LEN`` of matrix multiply kernels. These kernels perform the matrix multiply operations.
 
-'untiler' - This is a single kernel on on the output of the matrix multiply kernel or cascade of kernels. It performs the transformation from a tiled format to the output format.
+'untiler' - This is a single kernel on the output of the matrix multiply kernel or cascade of kernels. It performs the transformation from a tiled format to the output format.
 
-'tilerA' - This is an array of TP_CASC_LEN kernels which connect 1:1 with the A input port of the matrix multiply kernels.
+'tilerA' - This is an array of ``TP_CASC_LEN`` kernels which connect 1:1 with the A input port of the matrix multiply kernels.
 
-'tilerB' - This is an array of TP_CASC_LEN kernels which connect 1:1 with the B input port of the matrix multiply kernels.
+'tilerB' - This is an array of ``TP_CASC_LEN`` kernels which connect 1:1 with the B input port of the matrix multiply kernels.
 
-NOTE : For some combinations of template parameters, the log will give out an error message "ERROR: shouldn't be here". This combination of factors is not supported by the AIE Compiler. A possible workaround is to pad up the matrices with zeros so that their dimensions become the closest multiple of 8 for cint32 data types, 16 for cint16/int16 data types, and 32 for int16 data types.
-
-
+.. note:: For some combinations of the template parameters, the log will give out an error message "ERROR: shouldn't be here". This combination of factors is not supported by the AIE Compiler. A possible workaround is to pad up the matrices with zeroes so that their dimensions become the closest multiple of 8 for cint32 data types, 16 for cint16/int16 data types, and 32 for int16 data types.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Code Example including constraints
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The following code example shows how the matrix_multiply_graph class may be used within a user super-graph, including how to set the runtime<ratio> of internal kernels. This example shows the matrix multiplier configured to multiply a 32x16 matrix by a 16x32 matrix giving a 32x32 matrix.
+The following code example shows how the matrix_multiply_graph class can be used within a user super-graph, including how to set the runtime<ratio> of internal kernels. This example shows the matrix multiplier configured to multiply a 32x16 matrix by a 16x32 matrix giving a 32x32 matrix.
 
 .. literalinclude:: ../../../../L2/examples/docs_examples/test_matmul.hpp
     :language: cpp
     :lines: 17-75
-
-
-
 
 .. |image1| image:: ./media/image1.png
 .. |image2| image:: ./media/image2.png
@@ -439,6 +412,3 @@ The following code example shows how the matrix_multiply_graph class may be used
    :ltrim:
 .. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
    :ltrim:
-
-
-

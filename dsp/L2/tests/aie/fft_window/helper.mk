@@ -73,10 +73,15 @@ else ifeq ($(POINT_SIZE), 65536)
     LOG_POINT_SIZE := 16
 endif
 
-ifeq ($(API_IO),0)
-	NUM_PORTS := $(UUT_SSR)
+
+ifeq ($(AIE_VARIANT),1)
+	ifeq ($(API_IO),0)
+		NUM_PORTS := $(UUT_SSR)
+	else
+		NUM_PORTS := $$(( $(UUT_SSR) * 2 ))
+	endif
 else
-	NUM_PORTS := $$(( $(UUT_SSR) * 2 ))
+	NUM_PORTS := $(UUT_SSR)
 endif
 
 
@@ -87,7 +92,9 @@ else
 	DYN_PT_HEADER_MODE = 0
 endif
 
+AIE_PART = XCVC1902-VSVD1760-1LP-E-S
 PARAM_MAP = AIE_VARIANT $(AIE_VARIANT) DATA_TYPE $(DATA_TYPE) COEFF_TYPE $(COEFF_TYPE) POINT_SIZE $(POINT_SIZE) WINDOW_VSIZE $(WINDOW_VSIZE) SHIFT $(SHIFT) DYN_PT_SIZE $(DYN_PT_SIZE)  UUT_SSR $(UUT_SSR) API_IO $(API_IO) ROUND_MODE $(ROUND_MODE) SAT_MODE $(SAT_MODE)
+STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
 
 HELPER:= $(HELPER_CUR_DIR)/.HELPER
 
@@ -95,7 +102,7 @@ $(HELPER): create_input sim_ref prep_x86_out
 	make cleanall
 
 create_input:
-	@echo starting create_input
+	@echo helper.mk stage:	create_input
 	@echo NUM_PORTS $(NUM_PORTS)
 	@echo INPUT_FILE $(INPUT_FILE)
 	echo tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE) $(WINDOW_VSIZE) $(NITER) $(SEED) $(STIM_TYPE) $(DYN_PT_SIZE) $(LOG_POINT_SIZE) $(DATA_TYPE) $(API_IO) 1 0 ;\
@@ -104,9 +111,11 @@ create_input:
 	echo Input ready
 
 sim_ref:
+	@echo helper.mk stage:	sim_ref
 	make UUT_KERNEL=fft_window_ref UUT_SIM_FILE=./data/ref_output.txt run TARGET=x86sim TAG=REF
 
 prep_x86_out:
+	@echo helper.mk stage:	prep_x86_out
 	@x86_out_files=`ls $(HELPER_CUR_DIR)/x86simulator_output/data`;\
 	echo "X86 files= " $$x86_out_files;\
 	for n in $$x86_out_files; do \
@@ -114,25 +123,35 @@ prep_x86_out:
 	done
 
 prep_aie_out:
+	@echo helper.mk stage:	prep_aie_out
 	@aie_out_files=`ls $(HELPER_CUR_DIR)/aiesimulator_output/data`;\
 	echo "AIE files= " $$aie_out_files;\
 	for n in $$aie_out_files; do \
 		grep -ve '[XT]' $(HELPER_CUR_DIR)/aiesimulator_output/data/$$n > $(HELPER_CUR_DIR)/data/$$n;\
 	done
 
-check_op_ref: prep_x86_out prep_aie_out
+get_diff: prep_x86_out prep_aie_out
+	@echo helper.mk stage:	check_op_ref
 	@perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(UUT_SIM_FILE) --type $(DATA_TYPE) --ssr $(NUM_PORTS) --zip --dual 0 -k $(DYN_PT_HEADER_MODE) -w $(WINDOW_VSIZE) ;\
 	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(REF_SIM_FILE) --type $(DATA_TYPE) --ssr $(NUM_PORTS) --zip --dual 0 -k $(DYN_PT_HEADER_MODE) -w $(WINDOW_VSIZE) ;\
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE)
 
-get_status: check_op_ref
+get_status:
+	@echo helper.mk stage:	get_status
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP)
 
 get_qor:
+	@echo helper.mk stage:	get_qor
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_wgt_theoretical_min.tcl $(DATA_TYPE) $(WINDOW_VSIZE) $(STATUS_FILE) $(UUT_KERNEL) $(API_IO) $(API_IO) $(NUM_PORTS) $(NUM_PORTS)
 
 get_latency:
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output $(STATUS_FILE) $(WINDOW_VSIZE) $(NITER)
+	sh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_PART)
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output T_input_0_0.txt ./data/uut_output_0_0.txt $(STATUS_FILE) $(WINDOW_VSIZE) $(NITER)
 
 get_stats:
+	@echo helper.mk stage:	get_stats
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(WINDOW_VSIZE) 1 $(STATUS_FILE) ./aiesimulator_output "fft_window_main" $(NITER)
+
+harvest_mem:
+	@echo helper.mk stage:	harvest_mem
+	$(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts

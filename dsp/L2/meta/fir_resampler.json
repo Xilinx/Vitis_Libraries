@@ -6,10 +6,10 @@
   "search_paths": [
     "L1/include/aie",
     "L1/src/aie",
-	"L1/tests/aie/inc",
+    "L1/tests/aie/inc",
     "L1/tests/aie/src",
-	"L2/include/aie",
-	"L2/tests/aie/common/inc"
+    "L2/include/aie",
+    "L2/tests/aie/common/inc"
   ],
   "parameters": [
     {
@@ -26,7 +26,7 @@
       ]
     },
     {
-      "name": "TT_COEF",
+      "name": "TT_COEFF",
       "description": "The type of individual coefficients of the filter taps",
       "type": "typename",
       "enum": [
@@ -39,12 +39,12 @@
       ],
       "validator": {
         "file": "fir_resampler.py",
-        "function": "validate_TT_COEF",
+        "function": "validate_TT_COEFF",
         "args": ["TT_DATA", "AIE_VARIANT"]
       },
       "updater": {
         "file": "fir_resampler.py",
-        "function": "update_TT_COEF",
+        "function": "update_TT_COEFF",
         "args": ["TT_DATA"]
       }
     },
@@ -55,7 +55,7 @@
       "validator": {
         "file": "fir_resampler.py",
         "function": "validate_TP_FIR_LEN",
-        "args": ["TT_DATA", "TT_COEF", "TP_CASC_LEN", "TP_INTERPOLATE_FACTOR", "TP_DECIMATE_FACTOR", "TP_API", "TP_USE_COEF_RELOAD", "TP_SSR", "TP_PARA_DECI_POLY", "TP_PARA_INTERP_POLY", "AIE_VARIANT"]
+        "args": ["TT_DATA", "TT_COEFF", "TP_CASC_LEN", "TP_INTERPOLATE_FACTOR", "TP_DECIMATE_FACTOR", "TP_API", "TP_USE_COEFF_RELOAD", "TP_SSR", "TP_PARA_DECI_POLY", "TP_PARA_INTERP_POLY", "AIE_VARIANT"]
       }
     },
     {
@@ -75,7 +75,7 @@
       "validator": {
         "file": "fir_resampler.py",
         "function": "validate_TP_DECIMATE_FACTOR",
-        "args": ["TT_DATA", "TT_COEF", "TP_INTERPOLATE_FACTOR", "AIE_VARIANT"]
+        "args": ["TT_DATA", "TT_COEFF", "TP_INTERPOLATE_FACTOR", "AIE_VARIANT"]
       }
     },
     {
@@ -105,7 +105,7 @@
       "validator": {
         "file": "fir_resampler.py",
         "function": "validate_TP_INPUT_WINDOW_VSIZE",
-        "args": ["TT_DATA", "TT_COEF", "TP_FIR_LEN", "TP_API", "TP_INTERPOLATE_FACTOR", "TP_DECIMATE_FACTOR", "TP_PARA_INTERP_POLY", "TP_PARA_DECI_POLY", "AIE_VARIANT"]
+        "args": ["TT_DATA", "TT_COEFF", "TP_FIR_LEN", "TP_API", "TP_INTERPOLATE_FACTOR", "TP_DECIMATE_FACTOR", "TP_PARA_INTERP_POLY", "TP_PARA_DECI_POLY", "AIE_VARIANT"]
       }
     },
     {
@@ -119,12 +119,12 @@
       }
     },
     {
-      "name": "TP_USE_COEF_RELOAD",
+      "name": "TP_USE_COEFF_RELOAD",
       "description": "Selects Coefficient Reload Mode: 0 - no reload, 1 - RTP port based, 2 - Stream Header based.",
       "type": "uint",
       "validator": {
         "file": "aie_common_fir.py",
-        "function": "validate_TP_USE_COEF_RELOAD_NON_SSR",
+        "function": "validate_TP_USE_COEFF_RELOAD_NON_SSR",
         "args": ["TP_API"]
         }
     },
@@ -204,7 +204,7 @@
     {
       "name": "coeff",
       "description": "The filter coefficients.",
-      "element_type": "TT_COEF",
+      "element_type": "TT_COEFF",
       "type": "vector"
     },
     {

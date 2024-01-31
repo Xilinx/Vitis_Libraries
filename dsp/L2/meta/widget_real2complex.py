@@ -16,7 +16,7 @@ def fn_validate_out_data(TT_DATA, TT_OUT_DATA):
   return (
     isValid if ((TT_DATA,TT_OUT_DATA) in validTypeCombos)
     else (
-        isError(f"Invalid Data in to Data out type combination ({TT_DATA},{TT_OUT_DATA}). ")
+        isError(f"Invalid Data in to Data out type combination ({TT_DATA},{TT_OUT_DATA}). Supported combinations are cint16/int16, cint32/int32, cfloat/float, int16/cint16, int32/cint32, float/cfloat")
     )
   )
 def validate_TT_OUT_DATA(args):

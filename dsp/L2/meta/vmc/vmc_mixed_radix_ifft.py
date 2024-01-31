@@ -20,7 +20,7 @@ def vmc_validate_casc_length(args):
     point_size = args["point_size"]
     casc_length = args["casc_length"]
     return fn_validate_casc_len(point_size, casc_length)
-	
+
 def vmc_validate_TP_RND(args):
   rnd_mode = args["rnd_mode"]
   return fn_validate_rnd(rnd_mode)

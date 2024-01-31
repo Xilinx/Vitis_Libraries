@@ -21,6 +21,7 @@
 #include "fft_com_inc.h"
 #include "device_defs.h"
 
+//------------------------------------------------------
 // Inter-rank temporary storage buffers
 
 #ifdef __X86SIM__
@@ -68,47 +69,182 @@ alignas(32) extern cint32_t fft_4096_tmp2[FFT4096_SIZE];
 // This is an optimization possible because in a radix4 unit, the second rank butterflies use the same
 // twiddle just 90 degrees (minus j) rotated. Minus J rotation is supported by hw, so only the first
 // quadrant need be stores - the other quadrant can be extracted by minus j rotation.
-alignas(32) extern const cint16_t fft_lut_tw1_half[1];
-alignas(32) extern const cint16_t fft_lut_tw2_half[1];
-alignas(32) extern const cint16_t fft_lut_tw4_half[2];
-alignas(32) extern const cint16_t fft_lut_tw8_half[4];
-alignas(32) extern const cint16_t fft_lut_tw16_half[FFT_16 / 2];
-alignas(32) extern const cint16_t fft_lut_tw32_half[FFT_32 / 2];
-alignas(32) extern const cint16_t fft_lut_tw64_half[FFT_64 / 2];
-alignas(32) extern const cint16_t fft_lut_tw128_half[FFT_128 / 2];
-alignas(32) extern const cint16_t fft_lut_tw256_half[FFT_256 / 2];
-alignas(32) extern const cint16_t fft_lut_tw512_half[FFT_512 / 2];
-alignas(32) extern const cint16_t fft_lut_tw1024_half[FFT_1024 / 2];
-alignas(32) extern const cint16_t fft_lut_tw2048_half[FFT_2048 / 2];
+
+//--------------------
+// cint16 tables
+alignas(32) extern const cint16_t fft_lut_tw1_cint16_half[1];
+alignas(32) extern const cint16_t fft_lut_tw2_cint16_half[1];
+alignas(32) extern const cint16_t fft_lut_tw4_cint16_half[2];
+alignas(32) extern const cint16_t fft_lut_tw8_cint16_half[4];
+alignas(32) extern const cint16_t fft_lut_tw16_cint16_half[FFT_16 / 2];
+alignas(32) extern const cint16_t fft_lut_tw32_cint16_half[FFT_32 / 2];
+alignas(32) extern const cint16_t fft_lut_tw64_cint16_half[FFT_64 / 2];
+alignas(32) extern const cint16_t fft_lut_tw128_cint16_half[FFT_128 / 2];
+alignas(32) extern const cint16_t fft_lut_tw256_cint16_half[FFT_256 / 2];
+alignas(32) extern const cint16_t fft_lut_tw512_cint16_half[FFT_512 / 2];
+alignas(32) extern const cint16_t fft_lut_tw1024_cint16_half[FFT_1024 / 2];
+alignas(32) extern const cint16_t fft_lut_tw2048_cint16_half[FFT_2048 / 2];
 
 // Full (2 quadrant) integer tables
-alignas(32) extern const cint16_t fft_lut_tw1[FFT_1];
-alignas(32) extern const cint16_t fft_lut_tw2[FFT_2];
-alignas(32) extern const cint16_t fft_lut_tw4[FFT_4];
-alignas(32) extern const cint16_t fft_lut_tw8[FFT_8];
-alignas(32) extern const cint16_t fft_lut_tw16[FFT_16];
-alignas(32) extern const cint16_t fft_lut_tw32[FFT_32];
-alignas(32) extern const cint16_t fft_lut_tw64[FFT_64];
-alignas(32) extern const cint16_t fft_lut_tw128[FFT_128];
-alignas(32) extern const cint16_t fft_lut_tw256[FFT_256];
-alignas(32) extern const cint16_t fft_lut_tw512[FFT_512];
-alignas(32) extern const cint16_t fft_lut_tw1024[FFT_1024];
-alignas(32) extern const cint16_t fft_lut_tw2048[FFT_2048];
+alignas(32) extern const cint16_t fft_lut_tw1_cint16[FFT_1];
+alignas(32) extern const cint16_t fft_lut_tw2_cint16[FFT_2];
+alignas(32) extern const cint16_t fft_lut_tw4_cint16[FFT_4];
+alignas(32) extern const cint16_t fft_lut_tw8_cint16[FFT_8];
+alignas(32) extern const cint16_t fft_lut_tw16_cint16[FFT_16];
+alignas(32) extern const cint16_t fft_lut_tw32_cint16[FFT_32];
+alignas(32) extern const cint16_t fft_lut_tw64_cint16[FFT_64];
+alignas(32) extern const cint16_t fft_lut_tw128_cint16[FFT_128];
+alignas(32) extern const cint16_t fft_lut_tw256_cint16[FFT_256];
+alignas(32) extern const cint16_t fft_lut_tw512_cint16[FFT_512];
+alignas(32) extern const cint16_t fft_lut_tw1024_cint16[FFT_1024];
+alignas(32) extern const cint16_t fft_lut_tw2048_cint16[FFT_2048];
 
 #ifdef __FFT_TRUE_R4__
-alignas(32) extern const cint16 fft_lut_r4_1_2[8];
-alignas(32) extern const cint16 fft_lut_r4_2_4[8];
-alignas(32) extern const cint16 fft_lut_r4_4_8[8];
-alignas(32) extern const cint16 fft_lut_r4_8_16[8];
-alignas(32) extern const cint16 fft_lut_r4_16_32[16];
-alignas(32) extern const cint16 fft_lut_r4_32_64[32];
-alignas(32) extern const cint16 fft_lut_r4_64_128[64];
-alignas(32) extern const cint16 fft_lut_r4_128_256[128];
-alignas(32) extern const cint16 fft_lut_r4_256_512[256];
-alignas(32) extern const cint16 fft_lut_r4_512_1024[512];
-alignas(32) extern const cint16 fft_lut_r4_1024_2048[1024];
+alignas(32) extern const cint16 fft_lut_cint16_r4_1_2[8];
+alignas(32) extern const cint16 fft_lut_cint16_r4_2_4[8];
+alignas(32) extern const cint16 fft_lut_cint16_r4_4_8[8];
+alignas(32) extern const cint16 fft_lut_cint16_r4_8_16[8];
+alignas(32) extern const cint16 fft_lut_cint16_r4_16_32[16];
+alignas(32) extern const cint16 fft_lut_cint16_r4_32_64[32];
+alignas(32) extern const cint16 fft_lut_cint16_r4_64_128[64];
+alignas(32) extern const cint16 fft_lut_cint16_r4_128_256[128];
+alignas(32) extern const cint16 fft_lut_cint16_r4_256_512[256];
+alignas(32) extern const cint16 fft_lut_cint16_r4_512_1024[512];
+alignas(32) extern const cint16 fft_lut_cint16_r4_1024_2048[1024];
 #endif
 
+//--------------------
+// cint15 tables
+alignas(32) extern const cint16_t fft_lut_tw1_cint15_half[1];
+alignas(32) extern const cint16_t fft_lut_tw2_cint15_half[1];
+alignas(32) extern const cint16_t fft_lut_tw4_cint15_half[2];
+alignas(32) extern const cint16_t fft_lut_tw8_cint15_half[4];
+alignas(32) extern const cint16_t fft_lut_tw16_cint15_half[FFT_16 / 2];
+alignas(32) extern const cint16_t fft_lut_tw32_cint15_half[FFT_32 / 2];
+alignas(32) extern const cint16_t fft_lut_tw64_cint15_half[FFT_64 / 2];
+alignas(32) extern const cint16_t fft_lut_tw128_cint15_half[FFT_128 / 2];
+alignas(32) extern const cint16_t fft_lut_tw256_cint15_half[FFT_256 / 2];
+alignas(32) extern const cint16_t fft_lut_tw512_cint15_half[FFT_512 / 2];
+alignas(32) extern const cint16_t fft_lut_tw1024_cint15_half[FFT_1024 / 2];
+alignas(32) extern const cint16_t fft_lut_tw2048_cint15_half[FFT_2048 / 2];
+
+// Full (2 quadrant) integer tables
+alignas(32) extern const cint16_t fft_lut_tw1_cint15[FFT_1];
+alignas(32) extern const cint16_t fft_lut_tw2_cint15[FFT_2];
+alignas(32) extern const cint16_t fft_lut_tw4_cint15[FFT_4];
+alignas(32) extern const cint16_t fft_lut_tw8_cint15[FFT_8];
+alignas(32) extern const cint16_t fft_lut_tw16_cint15[FFT_16];
+alignas(32) extern const cint16_t fft_lut_tw32_cint15[FFT_32];
+alignas(32) extern const cint16_t fft_lut_tw64_cint15[FFT_64];
+alignas(32) extern const cint16_t fft_lut_tw128_cint15[FFT_128];
+alignas(32) extern const cint16_t fft_lut_tw256_cint15[FFT_256];
+alignas(32) extern const cint16_t fft_lut_tw512_cint15[FFT_512];
+alignas(32) extern const cint16_t fft_lut_tw1024_cint15[FFT_1024];
+alignas(32) extern const cint16_t fft_lut_tw2048_cint15[FFT_2048];
+
+#ifdef __FFT_TRUE_R4__
+alignas(32) extern const cint16 fft_lut_cint15_r4_1_2[8];
+alignas(32) extern const cint16 fft_lut_cint15_r4_2_4[8];
+alignas(32) extern const cint16 fft_lut_cint15_r4_4_8[8];
+alignas(32) extern const cint16 fft_lut_cint15_r4_8_16[8];
+alignas(32) extern const cint16 fft_lut_cint15_r4_16_32[16];
+alignas(32) extern const cint16 fft_lut_cint15_r4_32_64[32];
+alignas(32) extern const cint16 fft_lut_cint15_r4_64_128[64];
+alignas(32) extern const cint16 fft_lut_cint15_r4_128_256[128];
+alignas(32) extern const cint16 fft_lut_cint15_r4_256_512[256];
+alignas(32) extern const cint16 fft_lut_cint15_r4_512_1024[512];
+alignas(32) extern const cint16 fft_lut_cint15_r4_1024_2048[1024];
+#endif
+
+//-------------------------------
+// cint32 tables
+// half (1 quadrant)
+alignas(32) extern const cint32_t fft_lut_tw1_cint32_half[1];
+alignas(32) extern const cint32_t fft_lut_tw2_cint32_half[1];
+alignas(32) extern const cint32_t fft_lut_tw4_cint32_half[2];
+alignas(32) extern const cint32_t fft_lut_tw8_cint32_half[4];
+alignas(32) extern const cint32_t fft_lut_tw16_cint32_half[FFT_16 / 2];
+alignas(32) extern const cint32_t fft_lut_tw32_cint32_half[FFT_32 / 2];
+alignas(32) extern const cint32_t fft_lut_tw64_cint32_half[FFT_64 / 2];
+alignas(32) extern const cint32_t fft_lut_tw128_cint32_half[FFT_128 / 2];
+alignas(32) extern const cint32_t fft_lut_tw256_cint32_half[FFT_256 / 2];
+alignas(32) extern const cint32_t fft_lut_tw512_cint32_half[FFT_512 / 2];
+alignas(32) extern const cint32_t fft_lut_tw1024_cint32_half[FFT_1024 / 2];
+alignas(32) extern const cint32_t fft_lut_tw2048_cint32_half[FFT_2048 / 2];
+
+// cint32 Full (2 quadrant) integer tables
+alignas(32) extern const cint32_t fft_lut_tw1_cint32[FFT_1];
+alignas(32) extern const cint32_t fft_lut_tw2_cint32[FFT_2];
+alignas(32) extern const cint32_t fft_lut_tw4_cint32[FFT_4];
+alignas(32) extern const cint32_t fft_lut_tw8_cint32[FFT_8];
+alignas(32) extern const cint32_t fft_lut_tw16_cint32[FFT_16];
+alignas(32) extern const cint32_t fft_lut_tw32_cint32[FFT_32];
+alignas(32) extern const cint32_t fft_lut_tw64_cint32[FFT_64];
+alignas(32) extern const cint32_t fft_lut_tw128_cint32[FFT_128];
+alignas(32) extern const cint32_t fft_lut_tw256_cint32[FFT_256];
+alignas(32) extern const cint32_t fft_lut_tw512_cint32[FFT_512];
+alignas(32) extern const cint32_t fft_lut_tw1024_cint32[FFT_1024];
+alignas(32) extern const cint32_t fft_lut_tw2048_cint32[FFT_2048];
+
+#ifdef __FFT_TRUE_R4__
+alignas(32) extern const cint16 fft_lut_cint32_r4_1_2[8];
+alignas(32) extern const cint16 fft_lut_cint32_r4_2_4[8];
+alignas(32) extern const cint16 fft_lut_cint32_r4_4_8[8];
+alignas(32) extern const cint16 fft_lut_cint32_r4_8_16[8];
+alignas(32) extern const cint16 fft_lut_cint32_r4_16_32[16];
+alignas(32) extern const cint16 fft_lut_cint32_r4_32_64[32];
+alignas(32) extern const cint16 fft_lut_cint32_r4_64_128[64];
+alignas(32) extern const cint16 fft_lut_cint32_r4_128_256[128];
+alignas(32) extern const cint16 fft_lut_cint32_r4_256_512[256];
+alignas(32) extern const cint16 fft_lut_cint32_r4_512_1024[512];
+alignas(32) extern const cint16 fft_lut_cint32_r4_1024_2048[1024];
+#endif
+
+//--------------
+// cint31 tables
+// half (1 quadrant)
+alignas(32) extern const cint32_t fft_lut_tw1_cint31_half[1];
+alignas(32) extern const cint32_t fft_lut_tw2_cint31_half[1];
+alignas(32) extern const cint32_t fft_lut_tw4_cint31_half[2];
+alignas(32) extern const cint32_t fft_lut_tw8_cint31_half[4];
+alignas(32) extern const cint32_t fft_lut_tw16_cint31_half[FFT_16 / 2];
+alignas(32) extern const cint32_t fft_lut_tw32_cint31_half[FFT_32 / 2];
+alignas(32) extern const cint32_t fft_lut_tw64_cint31_half[FFT_64 / 2];
+alignas(32) extern const cint32_t fft_lut_tw128_cint31_half[FFT_128 / 2];
+alignas(32) extern const cint32_t fft_lut_tw256_cint31_half[FFT_256 / 2];
+alignas(32) extern const cint32_t fft_lut_tw512_cint31_half[FFT_512 / 2];
+alignas(32) extern const cint32_t fft_lut_tw1024_cint31_half[FFT_1024 / 2];
+alignas(32) extern const cint32_t fft_lut_tw2048_cint31_half[FFT_2048 / 2];
+
+// Full (2 quadrant) integer tables
+alignas(32) extern const cint32_t fft_lut_tw1_cint31[FFT_1];
+alignas(32) extern const cint32_t fft_lut_tw2_cint31[FFT_2];
+alignas(32) extern const cint32_t fft_lut_tw4_cint31[FFT_4];
+alignas(32) extern const cint32_t fft_lut_tw8_cint31[FFT_8];
+alignas(32) extern const cint32_t fft_lut_tw16_cint31[FFT_16];
+alignas(32) extern const cint32_t fft_lut_tw32_cint31[FFT_32];
+alignas(32) extern const cint32_t fft_lut_tw64_cint31[FFT_64];
+alignas(32) extern const cint32_t fft_lut_tw128_cint31[FFT_128];
+alignas(32) extern const cint32_t fft_lut_tw256_cint31[FFT_256];
+alignas(32) extern const cint32_t fft_lut_tw512_cint31[FFT_512];
+alignas(32) extern const cint32_t fft_lut_tw1024_cint31[FFT_1024];
+alignas(32) extern const cint32_t fft_lut_tw2048_cint31[FFT_2048];
+
+#ifdef __FFT_TRUE_R4__
+alignas(32) extern const cint16 fft_lut_cint31_r4_1_2[8];
+alignas(32) extern const cint16 fft_lut_cint31_r4_2_4[8];
+alignas(32) extern const cint16 fft_lut_cint31_r4_4_8[8];
+alignas(32) extern const cint16 fft_lut_cint31_r4_8_16[8];
+alignas(32) extern const cint16 fft_lut_cint31_r4_16_32[16];
+alignas(32) extern const cint16 fft_lut_cint31_r4_32_64[32];
+alignas(32) extern const cint16 fft_lut_cint31_r4_64_128[64];
+alignas(32) extern const cint16 fft_lut_cint31_r4_128_256[128];
+alignas(32) extern const cint16 fft_lut_cint31_r4_256_512[256];
+alignas(32) extern const cint16 fft_lut_cint31_r4_512_1024[512];
+alignas(32) extern const cint16 fft_lut_cint31_r4_1024_2048[1024];
+#endif
+
+// cfloat tables
 // Full (2 quadrant) float tables.
 // Float cannot use the one quadrant trick because float cannot use radix4 functions.
 // Why? The result of a butterfly for ints is an acc register, but in float it is a float reg.

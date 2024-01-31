@@ -140,6 +140,7 @@ if ( $verbose ) {
 }
 
 
+
 # Default to sensible value
 my ${DIM_A_TILE}  = 4;
 my ${DIM_AB_TILE} = 4;
@@ -322,8 +323,10 @@ if ( $cascLen eq "" ) {
         $dataType = "cint32";
     } elsif ($T_DATA_A eq "cint16" and $T_DATA_B eq "int32") {
         $dataType = "cint32";    
-    } elsif ($T_DATA_A eq "int16" and $T_DATA_B eq "int16") {
-        $dataType = "int16";
+    } elsif ($T_DATA_A eq "int32" and $T_DATA_B eq "int16") {
+        $dataType = "int32";
+    } elsif ($T_DATA_A eq "int16" and $T_DATA_B eq "int32") {
+        $dataType = "int32";
     } else {
         $dataType = $T_DATA_A;
     }
@@ -778,9 +781,6 @@ sub doSamplePerLine {
         or die "couldn't close IN";
     rename($samplePerLineFile, $fileToParse);
 }
-
-
-
 
 sub undoSamplePerLine {
     my ($fileToParse) = @_ ; 

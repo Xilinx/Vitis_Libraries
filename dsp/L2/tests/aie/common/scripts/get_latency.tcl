@@ -14,49 +14,83 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-set OUT_DIR                 [lindex $argv 0]
-set STATUS_FILE             [lindex $argv 1]
-set NUM_OF_SAMPLES          [lindex $argv 2]
-set NITER                   [lindex $argv 3]
-if { [llength $argv] > 4 } {
-    set stabilityThreshold           [lindex $argv 4]
-} else {
-    set stabilityThreshold 3
-}
+set AIESIM_OUT_DIR          [lindex $argv 0]
+set T_IN_FILE               [lindex $argv 1]
+set T_OUT_FILE              [lindex $argv 2]
+set STATUS_FILE             [lindex $argv 3]
+set NUM_OF_SAMPLES          [lindex $argv 4]
+set NITER                   [lindex $argv 5]
+
+# percentage threshold for detecting stability in latency (set optional argv 6 to overwrite)
+set stabilityThreshold 5  
+# Add "USE_OUTPUTS_IF_NO_INPUTS" as final argument to script to ignore warnings if no input file exists, 
+# and calculate throughput from only the output file timestamps. 
+# If input exists, latency and throughput will be calculated as normal
+set USE_OUTPUTS_IF_NO_INPUTS 0  
+if {[llength $argv] >= 7} {  
+    set arg7 [lindex $argv 6]  
+    if {$arg7 == "USE_OUTPUTS_IF_NO_INPUTS"} {  
+        set USE_OUTPUTS_IF_NO_INPUTS 1  
+    } else {  
+        set stabilityThreshold $arg7  
+    }  
+}   
+# Check if a "USE_OUTPUTS_IF_NO_INPUTS" argument was passed as the optional eighth argument  
+if {[llength $argv] == 8} {  
+    set arg8 [lindex $argv 7]  
+    if {$arg8 == "USE_OUTPUTS_IF_NO_INPUTS"} {  
+        set USE_OUTPUTS_IF_NO_INPUTS 1  
+    }  
+} 
+
 
 set statusFile              [open $STATUS_FILE a]
-set logFile                 [open "./logs/iterationStats.txt" w]
+set logFile                 [open "./logs/performance_log.txt" w]
 
-
-set fileIn  [glob -nocomplain -directory $OUT_DIR -- "T_input_0_0.txt"]
-set fileOut [glob -nocomplain -directory $OUT_DIR -- "data/uut_output_0_0.txt"]
-# If above files not found, check for files in following format (occurs for matrix_mult)
-if {![llength $fileIn] && ![llength $fileOut]} {
-    set fileIn  [glob -nocomplain -directory $OUT_DIR -- "T_inputA_0.txt"]
-    set fileOut [glob -nocomplain -directory $OUT_DIR -- "data/uut_output.txt"]
-} 
-set fileOutNew "$OUT_DIR/data/new_uut_output_0_0.txt"
+set fileIn  [glob -nocomplain -directory $AIESIM_OUT_DIR -- $T_IN_FILE]
+set fileOut [glob -nocomplain -directory $AIESIM_OUT_DIR -- $T_OUT_FILE]
+set fileOutTemp "$AIESIM_OUT_DIR/data/T_uut_output.txt"
 
 # Latency during first few iterations typically not stable
 set minNumberOfIterations 4
 # if no stable latency or throughput determined:
 set stableLatency -1
 set stableThroughout -1
+# When USE_OUTPUTS_IF_NO_INPUTS is 1, and no output exists, throughput will be calculated from output timestamps
+set OUTPUTS_ONLY 0
 
 # Open files if exist
 set fexist1 [file exist $fileIn]
 set fexist2 [file exist $fileOut]
+
+# Input file exists -> calculate latency and throughput as normal
+# Input file does not exist but USE_OUTPUTS_IF_NO_INPUTS is set -> calculate throughput from output file timestamps
+# Input file does not exist and USE_OUTPUTS_IF_NO_INPUTS is NOT set -> give error message, exit script
 if {$fexist1} {
-    set inputsFile [open $fileIn r]        
+    set inputsFile [open $fileIn r]   
+    puts $fileIn     
+} elseif {$USE_OUTPUTS_IF_NO_INPUTS} {
+    set OUTPUTS_ONLY 1
+    puts "Calculating throught from output file timestamps. No inputs exist"
+} else {
+    puts "Cannot find timestamped input file $T_IN_FILE. This should be located at $AIESIM_OUT_DIR/$T_IN_FILE"
+    puts "Please check arguments to the get_latency.tcl file"
+    puts "get_latency.tcl ./aiesimulator_output T_input_0_0.txt data/uut_output_0_0.txt ./logs/NAME_OF_STATUS_FILE.txt  NUMBER_OF_SAMPLES_PER_ITERATION NUMBER_OF_ITERATIONS"
+    exit 1
 }
 if {$fexist2} {
     # remove lines containing "TLAST" from output file, create new output file
-    exec sed {/TLAST/d} $fileOut > $fileOutNew    
-    set outputsFileNew [open $fileOutNew r]    
+    exec sed {/TLAST/d} $fileOut > $fileOutTemp    
+    set outputsFileNew [open $fileOutTemp r]    
+} else {
+    puts "Cannot find timestamped input file $T_OUT_FILE. This should be located at $AIESIM_OUT_DIR/$T_OUT_FILE"
+    puts "Please check arguments to the get_latency.tcl file"
+    puts "get_latency.tcl ./aiesimulator_output T_input_0_0.txt data/uut_output_0_0.txt ./logs/NAME_OF_STATUS_FILE.txt  NUMBER_OF_SAMPLES_PER_ITERATION NUMBER_OF_ITERATIONS"
+    exit 1
 }
 
 # Both input and output file are present
-if {$fexist1 && $fexist2} {
+if {$OUTPUTS_ONLY == 0} {
     set tsIn {}
     set tsOut {}
     set latencyValues {}
@@ -65,12 +99,11 @@ if {$fexist1 && $fexist2} {
 
     # get number of lines for in/out files
     set numLinesInput [lindex [exec wc -l $fileIn] 0]
-    set numLinesOutput [lindex [exec wc -l $fileOutNew] 0]
+    set numLinesOutput [lindex [exec wc -l $fileOutTemp] 0]
     
     # get the number of lines in the file per each iteration
     set numLinesInputIteration [expr $numLinesInput/$NITER]
     set numLinesOutputIteration [expr $numLinesOutput/$NITER]
-
     set inLineCount 0
     set outLineCount 0
 
@@ -95,7 +128,6 @@ if {$fexist1 && $fexist2} {
             }
         }   
     }
-
     # repeat for output file
     while {[gets $outputsFileNew outLine] != -1} { 
         incr outLineCount 
@@ -120,8 +152,6 @@ if {$fexist1 && $fexist2} {
 
     # check number of timestamps for in and out file are equal
     if {[llength $tsIn] == [llength $tsOut]} {
-        
-        # Get latency values for each iteration (first ouput TS - first input TS)
         foreach outTime $tsOut inTime $tsIn {
             lappend latencyValues [expr $outTime - $inTime]
         }
@@ -129,7 +159,8 @@ if {$fexist1 && $fexist2} {
         set tempTS 0
         lappend throughputValues 0
         foreach inTime $tsIn {
-            if {$inTime != 0} {
+            # ignore first iteration as calculation requires timestamp of previous iteration
+            if {$tempTS != 0} {
                 lappend throughputValues [expr 1000* $NUM_OF_SAMPLES /($inTime - $tempTS)]
             }       
             set tempTS $inTime   
@@ -141,7 +172,6 @@ if {$fexist1 && $fexist2} {
         set tempLatency 0    
         foreach latency $latencyValues throughput $throughputValues {
             incr itNum
-
             if {$itNum >= $minNumberOfIterations} {
                 # get percentage difference between current latency value and previous
                 set latencyDiff [expr abs($latency - $tempLatency)]
@@ -160,23 +190,24 @@ if {$fexist1 && $fexist2} {
             incr itNum
             puts $logFile [format "Iteration %2d    ts_in: %5d      ts_out: %5d ns      latency: %4d ns       throughput: %4d MSa/s" $itNum $inTime $outTime $latency $throughput]
         }
-        puts $logFile "\nLatency:        $stableLatency ns\nThroughput:     $stableThroughout MSa/s"
-        puts $logFile "Stable Iterations = $stableItNum"
+        puts $logFile "\nStable Iterations (iterations with a latency within $stabilityThreshold % of the previous iteration) = $stableItNum"
+        puts $logFile "If no iterations are stable, a latency and throughput value of -1 will be reported in the status file. Please run for more iterations or increase stabilityThreshold (optional 7th argument to get_latency.tcl)"
+        puts $logFile "Reported Latency:        $stableLatency ns\nReported Throughput:     $stableThroughout MSa/s"
         close $inputsFile
         close $outputsFileNew 
 
 
     } else {
-        puts   "Number of input and output timestamps not equal"
+        puts   "Number of first samples from each iteration in input and output files not equal"
     }    
 # Only output file (no input) - such as DDS Mixer Mode 0
 # In this case, throughput is calculated using output timestamps. No latency can be measured
-} elseif {!$fexist1 && $fexist2} {
+} elseif {$OUTPUTS_ONLY == 1} {
     set tsOut {}
     set throughputValues {}
 
     # get number of lines in new output file
-    set numLinesOutput [lindex [exec wc -l $fileOutNew] 0]
+    set numLinesOutput [lindex [exec wc -l $fileOutTemp] 0]
     set numLinesOutputIteration [expr $numLinesOutput/$NITER]
 
     # repeat for output file
@@ -244,6 +275,6 @@ if {$fexist1 && $fexist2} {
 }
 
 puts $statusFile "    Latency:              $stableLatency ns\n    Throughput:           $stableThroughout MSa/s"
-
+file delete -force "$fileOutTemp"  
 close $statusFile
 close $logFile

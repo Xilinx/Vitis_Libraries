@@ -154,7 +154,7 @@
             "type": "uint",
             "validator": {
                 "file": "fft_window.py",
-                "function": "validate_TP_SAT" 
+                "function": "validate_TP_SAT"
             }
         },
         {

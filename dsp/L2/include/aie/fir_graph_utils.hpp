@@ -23,6 +23,7 @@ The file captures the definition of the graph utilities commonly used across var
 #include <adf.h>
 #include <vector>
 
+#include "device_defs.h"
 #include "fir_utils.hpp"
 #include "graph_utils.hpp"
 
@@ -114,6 +115,10 @@ class casc_kernels {
             constexpr(thisKernelClass::getFirType() == eFIRVariant::kDecAsym) {
                 firKernels[casc_params::Bdim] = kernel::create_object<thisKernelParentClass>(taps);
             }
+        else if
+            constexpr(thisKernelClass::getFirType() == eFIRVariant::kTDM) {
+                firKernels[casc_params::Bdim] = kernel::create_object<thisKernelParentClass>(taps);
+            }
         if
             constexpr(casc_params::Bdim != 0) { next_casc_kernels::create_and_recurse(firKernels, taps); }
     }
@@ -145,6 +150,10 @@ class casc_kernels {
             }
         else if
             constexpr(thisKernelClass::getFirType() == eFIRVariant::kDecAsym) {
+                firKernels[casc_params::Bdim] = kernel::create_object<thisKernelParentClass>();
+            }
+        else if
+            constexpr(thisKernelClass::getFirType() == eFIRVariant::kTDM) {
                 firKernels[casc_params::Bdim] = kernel::create_object<thisKernelParentClass>();
             }
         if
@@ -196,14 +205,14 @@ class ssr_kernels {
         // In FIFO mode, FIFO size has to be a multiple of 128 bits.
         // In FIFO mode, BD length has to be >= 128 bytes!
         // Conservative assumptions need to be made here.
-        // For an overall decimation factor, with instreasing decimation factor,
+        // For an overall decimation factor, with increasing decimation factor,
         // the amount of input stream data required to produce output samples also increases.
-        // This strains the FIFOs closer to the begining of the chain comparably more
+        // This strains the FIFOs closer to the beginning of the chain comparably more
         // than the ones closest to the output.
         //
         // Conservative assumptions need to be made here, as mapper may place multiple buffers in
         // each of the memory banks, that may introduce Memory conflicts.
-        // On top of that, the placement of input source wrt brodcast kernel inputs may introduce significant routing
+        // On top of that, the placement of input source wrt broadcast kernel inputs may introduce significant routing
         // delays.
         // which may have an adverse effect on the amount of FIFO storage available for filter design purposes.
         int fifoStep =
@@ -212,7 +221,10 @@ class ssr_kernels {
                  : (kernelPos + 1) * CEIL(TP_DECIMATE_FACTOR, TP_INTERPOLATE_FACTOR) / TP_INTERPOLATE_FACTOR);
 
         const int baseFifoDepth = 32;
-        unsigned int fifo_depth_multiple = 15;
+        // Using DMA as FIFO allows Memory Modules to be used to extend stream FIFOs, allowing greater buffering
+        // capabilities on stream connections.
+        constexpr unsigned int extendedDMAFifos = __SUPPORTS_DMA_FIFO__;
+        unsigned int fifo_depth_multiple = extendedDMAFifos == 1 ? 32 : 16;
 
         int fifoDepth = baseFifoDepth + fifo_depth_multiple * fifoStep;
         // limit size at a single memory bank - 8kB
@@ -366,6 +378,15 @@ class ssr_kernels {
         return ssrTapsRange;
     }
 
+    static std::vector<TT_COEFF> revert_taps(const std::vector<TT_COEFF>& taps) {
+        std::vector<TT_COEFF> revertedTaps; //
+        for (unsigned int i = 0; i < taps.size(); i++) {
+            unsigned int coefIndex = taps.size() - i - 1;
+            revertedTaps.push_back(taps.at(coefIndex));
+        }
+        return revertedTaps;
+    }
+
    private:
     static_assert(ssr_params::Bdim >= 0, "ERROR: ssr_params::Bdim must be a positive integer");
     // static_assert(TP_FIR_LEN %  TP_SSR == 0, "ERROR: TP_FIR_LEN must be an integer multiple of TP_SSR. Please ceil up
@@ -417,23 +438,30 @@ class ssr_kernels {
      */
 
     // Decomposed Inner Phase - takes position in the decomposed structure into account
-    static constexpr unsigned int decompInnerPhases = TP_SSR * TP_PARA_DECI_POLY;
+    static constexpr unsigned int decompInnerPhases = TP_SSR * TP_PARA_DECI_POLY; // kDF * ???
     static constexpr unsigned int decompInnerSSRPhase = dim * TP_PARA_DECI_POLY;
     static constexpr unsigned int decompInnerDeciPhase = TP_PARA_DECI_INDEX;
-    static constexpr unsigned int decompInnerInterpPhase =
-        ((TP_PARA_INTERP_INDEX * TP_PARA_DECI_INDEX * TP_PARA_DECI_POLY) /
-         (TP_INTERPOLATE_FACTOR * TP_PARA_INTERP_POLY));
-    static constexpr unsigned int decompInnerPhase =
-        (decompInnerSSRPhase + decompInnerDeciPhase + decompInnerInterpPhase) % decompInnerPhases;
+    static constexpr unsigned int decompInnerInterpPhase = 0; // uused
+    // ((TP_PARA_INTERP_INDEX * kDF * TP_PARA_DECI_POLY) / (kIF * TP_PARA_INTERP_POLY));
+    static constexpr unsigned int decompInnerPhase = 0; //  unused
+    // (decompInnerSSRPhase + decompInnerDeciPhase + decompInnerInterpPhase) % decompInnerPhases;
     static constexpr unsigned int decompInnerPhase2 =
         (dim * TP_PARA_DECI_POLY + (TP_PARA_DECI_POLY - TP_PARA_DECI_INDEX) % TP_PARA_DECI_POLY +
-         (TP_PARA_INTERP_INDEX * TP_PARA_DECI_INDEX * kDF * TP_PARA_DECI_POLY) / (kIF * TP_PARA_INTERP_POLY)) %
+         (TP_PARA_INTERP_INDEX * kDF * TP_PARA_DECI_POLY) / (kIF * TP_PARA_INTERP_POLY)) %
         decompInnerPhases;
+    // unsigned int inputDataIndex = (ssrIdx * TP_PARA_DECI_POLY +
+    //                               (TP_PARA_DECI_POLY - deciPolyIdx) %
+    //                                   (TP_PARA_DECI_POLY)
+    //                                   + (interpPolyIdx * TP_DECIMATE_FACTOR) / TP_INTERPOLATE_FACTOR )%
+    //                                   (TP_PARA_DECI_POLY * TP_SSR);
     // unsigned int inputDataIndex = ssrIdx * TP_PARA_DECI_POLY + (TP_PARA_DECI_POLY - deciPolyIdx + ((interpPolyIdx *
     // TP_DECIMATE_FACTOR) / TP_INTERPOLATE_FACTOR)) % TP_PARA_DECI_POLY;
 
     // Position of the first non-zero data sample in each SSR phase, relative to first SSR phase
-    static constexpr int posFirstDataOfPhase = (ssrOutputPath)*kDF * TP_PARA_DECI_POLY - decompInnerPhase2 * kIF;
+    static constexpr int decompOutputPath =
+        (ssrOutputPath)*kDF * TP_PARA_DECI_POLY +
+        (TP_PARA_INTERP_INDEX * kDF * TP_PARA_DECI_POLY) / (kIF * TP_PARA_INTERP_POLY) % decompInnerPhases;
+    static constexpr int posFirstDataOfPhase = decompOutputPath - decompInnerPhase2 * kIF;
     // Position of the first non-zero data sample in each Parallel Polyphase phase, relative to first polyphase
     // (TP_PARA_INTERP_INDEX, TP_PARA_DECI_INDEX = 0)
     static constexpr int dataIndexPoly =
@@ -464,7 +492,7 @@ class ssr_kernels {
         std::vector<typename ssr_params::BTT_COEFF> ssrTapsRange; //
         for (unsigned int i = 0; i < firTypeTapLenPerPhase; i++) {
             unsigned int coefIndex = i * ssr_params::BTP_SSR + coeffPhase;
-            if (coefIndex < ssr_params::BTP_FIR_LEN) {
+            if (coefIndex < (ssr_params::BTP_FIR_LEN * ssr_params::BTP_TDM_CHANNELS)) {
                 ssrTapsRange.push_back(taps.at(coefIndex));
 
             } else {

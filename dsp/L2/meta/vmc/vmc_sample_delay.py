@@ -24,10 +24,10 @@ def vmc_validate_TP_WINDOW_VSIZE(args):
 #### VMC graph generator ####
 
 def vmc_generate_graph(name, args):
-	tmpargs = {}
-	tmpargs["TT_DATA"] = args["data_type"]
-	tmpargs["TP_WINDOW_VSIZE"] = args["input_window_size"]
-	tmpargs["TP_API"] = 0
-	tmpargs["TP_MAX_DELAY"] = args["max_sample_delay"]
-   
-	return generate_graph(name, tmpargs)
+    tmpargs = {}
+    tmpargs["TT_DATA"] = args["data_type"]
+    tmpargs["TP_WINDOW_VSIZE"] = args["input_window_size"]
+    tmpargs["TP_API"] = 0
+    tmpargs["TP_MAX_DELAY"] = args["max_sample_delay"]
+
+    return generate_graph(name, tmpargs)

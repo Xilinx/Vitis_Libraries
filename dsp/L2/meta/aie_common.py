@@ -2,7 +2,7 @@
 # shortcut
 isValid = {"is_valid": True}
 def isError(msg) :
-  return {"is_valid" : False, "err_message" : msg}
+  return {"is_valid" : False, "err_message" : "ERROR: " + msg}
 
 def fn_return_first_error(validList):
     if isinstance(validList, dict):
@@ -108,32 +108,32 @@ def fn_input_window_size(TP_INPUT_WINDOW_VSIZE, TT_DATA):
 
 # These seem like FIR specific functions, but they are used generally
 #### validate coef type ####
-def fn_complex_coef(TT_DATA, TT_COEF):
-    if fn_is_complex(TT_COEF) and not fn_is_complex(TT_DATA):
-        return isError("Complex coefficients are only supported when Input/Output type is also complex.")
+def fn_complex_coef(TT_DATA, TT_COEFF):
+    if fn_is_complex(TT_COEFF) and not fn_is_complex(TT_DATA):
+        return isError("Complex coefficients are only supported when Input/Output type is also complex. Got TT_DATA {TT_DATA} and TT_COEFF {TT_COEFF}.")
     return isValid
 
-def fn_coef_32b(TT_DATA, TT_COEF):
+def fn_coeff_32b(TT_DATA, TT_COEFF):
     type32b = ["int32", "cint32"]
     # 2023.1 now allows 32-bit coeffs with 16-bit data
-    # if TT_COEF in type32b and not TT_DATA in type32b:
+    # if TT_COEFF in type32b and not TT_DATA in type32b:
         # return isError("32-bit type coefficients are only supported when Input/Output type is also a 32-bit type.")
     return isValid
 
-def fn_int_coef(TT_DATA, TT_COEF):
-    if not fn_is_integral(TT_COEF) and fn_is_integral(TT_DATA):
-        return isError("Coefficients must be an integer type if Input/Output type is an integer type.")
+def fn_int_coeff(TT_DATA, TT_COEFF):
+    if not fn_is_integral(TT_COEFF) and fn_is_integral(TT_DATA):
+        return isError("Coefficients must be an integer type if Input/Output type is an integer type. Got {TT_DATA} and {TT_COEFF}.")
     return isValid
 
-def fn_float_coef(TT_DATA, TT_COEF):
-    if not fn_is_floating_point(TT_COEF) and fn_is_floating_point(TT_DATA):
-        return isError("Coefficients must be a float type if Input/Output type is a float type.")
+def fn_float_coeff(TT_DATA, TT_COEFF):
+    if not fn_is_floating_point(TT_COEFF) and fn_is_floating_point(TT_DATA):
+        return isError("Coefficients must be a float type if Input/Output type is a float type. Got {TT_DATA} and {TT_COEFF}.")
     return isValid
 
 # Same rules apply across the board
-def fn_validate_coef_type(TT_DATA, TT_COEF):
-    for fn in (fn_complex_coef, fn_coef_32b, fn_int_coef, fn_float_coef):
-        check = fn(TT_DATA, TT_COEF)
+def fn_validate_coeff_type(TT_DATA, TT_COEFF):
+    for fn in (fn_complex_coef, fn_coeff_32b, fn_int_coeff, fn_float_coeff):
+        check = fn(TT_DATA, TT_COEFF)
         if check["is_valid"] == False:
             return check
     return isValid
@@ -141,7 +141,7 @@ def fn_validate_coef_type(TT_DATA, TT_COEF):
 ### Validate Shift ###
 def fn_float_no_shift(TT_DATA, TP_SHIFT):
     if fn_is_floating_point(TT_DATA) and (TP_SHIFT > 0):
-      return isError("Shift cannot be performed for 'cfloat' data type, so must be set to 0")
+      return isError("Shift cannot be performed for 'cfloat' data type, so must be set to 0. Got {TP_SHIFT}.")
     return isValid
 
 # most library element only need to check this to validate shift
@@ -151,18 +151,18 @@ def fn_validate_shift(TT_DATA, TP_SHIFT):
     return fn_float_no_shift(TT_DATA, TP_SHIFT)
 
 # most library element only need to check this to validate saturation modes
-def fn_validate_satMode(TP_SAT) :  
-    if (not 0 <= TP_SAT <= 3) or (TP_SAT == 2): 
-        return isError("Invalid saturation mode. Valid values for TP_SAT are 0, 1, and 3")
+def fn_validate_satMode(TP_SAT) :
+    if (not 0 <= TP_SAT <= 3) or (TP_SAT == 2):
+        return isError("Invalid saturation mode. Valid values for TP_SAT are 0, 1, and 3. Got {TP_SAT}")
     return isValid
 
 def fn_validate_roundMode(TP_RND, AIE_VARIANT):
   if AIE_VARIANT == 1:
-    if (TP_RND not in k_rnd_mode_map_aie1.values()):  
-        return isError("Invalid rounding mode. Valid values of AIE-1 TP_RND are {0, 1, 2, 3, 4, 5, 6, 7}")
+    if (TP_RND not in k_rnd_mode_map_aie1.values()):
+        return isError("Invalid rounding mode. Valid values of AIE-1 TP_RND are {0, 1, 2, 3, 4, 5, 6, 7}. Got {TP_RND}.")
   elif AIE_VARIANT == 2:
-    if (TP_RND not in k_rnd_mode_map_aie2.values()):  
-        return isError("Invalid rounding mode. Valid values of of AIE-ML TP_RND are {0, 1, 2, 3, 8, 9, 10, 11, 12, 13}")
+    if (TP_RND not in k_rnd_mode_map_aie2.values()):
+        return isError("Invalid rounding mode. Valid values of of AIE-ML TP_RND are {0, 1, 2, 3, 8, 9, 10, 11, 12, 13}. Got {TP_RND}.")
   return isValid
 
 # returns a list of port objects, vectorLength=None for no index on the portname

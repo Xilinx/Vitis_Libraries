@@ -51,15 +51,15 @@ XFLIB_DIR = $(XF_PROJ_ROOT)
 
 # setting default value
 TARGET ?= aiesim
-HOST_ARCH ?= aarch64
 PARAMS ?= test_0_tool_canary_aie
+PARAMS_FILE ?= multi_params.json 
 
 #setting PLATFORM
 ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := xilinx_vck190_base_202310_1
+PLATFORM := vck190
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
@@ -77,6 +77,7 @@ BUILD_REPORT_DIR := $(CUR_DIR)/reports/_build.$(TARGET).$(PLATFORM_NAME)
 EMCONFIG := $(BUILD_DIR)/emconfig.json
 XCLBIN_DIR := $(CUR_DIR)/$(BUILD_DIR)
 export XCL_BINDIR = $(XCLBIN_DIR)
+include params.mk
 
 EXE_FILE_DEPS :=
 BINARY_CONTAINERS_DEPS :=
@@ -115,6 +116,7 @@ AIE_PKG_DIR ?= Work
 # Setting customized_params in aiecompiler
 
 TAG ?= UUT
+AIE_VARIANT ?= 1
 UUT_KERNEL ?= dds_mixer_lut
 REF_KERNEL ?= dds_mixer_lut_ref
 UUT_GRAPH ?= dds_mixer_lut_graph
@@ -129,7 +131,6 @@ LOC_OUTPUT_FILE_X86 ?= ./x86simulator_output/data/uut_output.txt
 LOC_OUTPUT_FILE_HW ?= ./aiesimulator_output/data/uut_output.txt
 UUT_FILE_SUFFIX ?= $(UUT_KERNEL)_$(PARAMS)
 DATA_SEED ?= 1
-STATUS_FILE ?= ./logs/status_$(UUT_FILE_SUFFIX).txt
 UUT_TARGET_COMPILE_ARGS ?= --aie.Xchess=llvm.xargs="-std=c++2a" --aie.Xchess=main:backend.mist2.xargs="+NOdra"  --aie.Xchess=main:backend.mist2.pnll="off" 
 REF_TARGET_COMPILE_ARGS ?= 
 PREPROC_ARGS ?= --aie.Xpreproc=-DINPUT_FILE=$(LOC_INPUT_FILE) --aie.Xpreproc=-DINPUT_FILE2=$(LOC_INPUT_FILE2)
@@ -196,7 +197,7 @@ endif
 ######################### binary container global settings ##########################
 
 ############################## Setting Rules for AIE (Building Kernels) ##################
-$(AIE_CONTAINER): pre_build $(XFLIB_DIR)/L2/tests/aie/dds_mixer_lut/test.cpp $(XFLIB_DIR)/L1/src/aie/dds_mixer.cpp uut_config.h 
+$(AIE_CONTAINER): pre_build test.cpp $(XFLIB_DIR)/L1/src/aie/dds_mixer.cpp uut_config.h 
 	$(ECHO) "Compiling: libadf.a"
 	mkdir -p $(dir $@)
 	$(VPP) -c --mode aie $(AIE_CXXFLAGS) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^)
@@ -299,25 +300,24 @@ run: all
 ifeq ($(TARGET), x86sim)
 	$(X86SIMULATOR) --pkg-dir=$(AIE_PKG_DIR) 
 	mkdir -p logs
-	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command "make -f helper.mk ssr_zip HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) SPLIT_ZIP_FILE=$(LOC_OUTPUT_FILE_X86)")
-	$(if $(filter-out REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/uut_output.txt > ./logs/uut_output.txt)
-	$(if $(filter REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./logs/ref_output.txt)
-	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command "make -f helper.mk diff HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR)")
-	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command "tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL)" --connector " " --var "DATA_TYPE:MIXER_MODE:INPUT_WINDOW_VSIZE:P_API:UUT_SSR:SFDR:DDS_PHASE_INC:INITIAL_DDS_OFFSET")
+	$(if $(filter-out REF,$(TAG)),$(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f helper.mk ssr_zip HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) SPLIT_ZIP_FILE=$(LOC_OUTPUT_FILE_X86)")
+	$(if $(filter-out REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/uut_output.txt > ./data/uut_output.txt)
+	$(if $(filter REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./data/ref_output.txt)
+	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f helper.mk diff HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR)")
+	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f helper.mk get_status HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL)")
 	$(if $(filter-out REF,$(TAG)), tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/diff_exit.tcl ./)
 endif
 #aiesim
 ifeq ($(TARGET), aiesim)
 	$(AIESIMULATOR) --pkg-dir=$(AIE_PKG_DIR) --profile --graph-latency $(AIESIMFLAGS)
 	mkdir -p logs
-	$(VITIS_PYTHON3) paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command "make -f helper.mk ssr_zip HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) SPLIT_ZIP_FILE=$(LOC_OUTPUT_FILE_HW)"
-	grep -ve '[XT]' ./aiesimulator_output/data/uut_output.txt > ./logs/uut_output.txt
-	$(VITIS_PYTHON3) paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command "make -f helper.mk diff HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR)"
-	$(VITIS_PYTHON3) paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command "tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL)" --connector " " --var "DATA_TYPE:MIXER_MODE:INPUT_WINDOW_VSIZE:P_API:UUT_SSR:SFDR:DDS_PHASE_INC:INITIAL_DDS_OFFSET"
-	$(VITIS_PYTHON3) paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command "make -f helper.mk ssr_zip HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) STATUS_FILE=$(STATUS_FILE)"
-	$(VITIS_PYTHON3) paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command "make -f helper.mk get_stats HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) STATUS_FILE=$(STATUS_FILE)"
-	$(VITIS_PYTHON3) paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command "make -f helper.mk get_theoretical_min HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) STATUS_FILE=$(STATUS_FILE) UUT_KERNEL=$(UUT_KERNEL)"
-	$(XFLIB_DIR)/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) $(XFLIB_DIR)/L2/tests/aie/common/scripts
+	$(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f helper.mk ssr_zip HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) SPLIT_ZIP_FILE=$(LOC_OUTPUT_FILE_HW)"
+	grep -ve '[XT]' ./aiesimulator_output/data/uut_output.txt > ./data/uut_output.txt
+	$(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f helper.mk diff HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR)"
+	$(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f helper.mk get_status HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL)"
+	$(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f helper.mk get_latency HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL)"
+	$(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f helper.mk get_stats HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL)"
+	$(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f helper.mk harvest_mem HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL)"
 	tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/diff_exit.tcl ./
 endif
 #hw_emu
@@ -367,12 +367,13 @@ endif
 ############################## Setting Targets ##############################
 .PHONY: pre_build
 pre_build:
-	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command "tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL)" --connector " " --var "DATA_TYPE:MIXER_MODE:INPUT_WINDOW_VSIZE:P_API:UUT_SSR:SFDR:DDS_PHASE_INC:INITIAL_DDS_OFFSET:AIE_VARIANT:ROUND_MODE:SAT_MODE")
+	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f helper.mk get_status HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) UUT_KERNEL=$(UUT_KERNEL)")
+	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "tclsh $(XFLIB_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL)" --connector " " --var "DATA_TYPE:MIXER_MODE:INPUT_WINDOW_VSIZE:P_API:UUT_SSR:SFDR:DDS_PHASE_INC:INITIAL_DDS_OFFSET:AIE_VARIANT:ROUND_MODE:SAT_MODE")
 	$(if $(filter-out REF,$(TAG)), vitis --classic -exec ipmetadata_config_checker $(XFLIB_DIR)/L2/meta/$(UUT_KERNEL).json ./config.json -newflow)
-	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command "make -f helper.mk gen_input HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) INPUT_FILE=$(LOC_INPUT_FILE) DATA_SEED=$(DATA_SEED)")
-	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command "make -f helper.mk gen_input HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) INPUT_FILE=$(LOC_INPUT_FILE2) DATA_SEED=$(DATA_SEED)")
-	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command "make -f helper.mk ssr_split HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) SPLIT_ZIP_FILE=$(LOC_INPUT_FILE)")
-	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command "make -f helper.mk ssr_split HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) SPLIT_ZIP_FILE=$(LOC_INPUT_FILE2)")
+	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f helper.mk gen_input HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) INPUT_FILE=$(LOC_INPUT_FILE) DATA_SEED=$(DATA_SEED)")
+	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f helper.mk gen_input HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) INPUT_FILE=$(LOC_INPUT_FILE2) DATA_SEED=$(DATA_SEED)")
+	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f helper.mk ssr_split HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) SPLIT_ZIP_FILE=$(LOC_INPUT_FILE)")
+	$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command "make -f helper.mk ssr_split HELPER_CUR_DIR=$(CUR_DIR) HELPER_ROOT_DIR=$(XFLIB_DIR) SPLIT_ZIP_FILE=$(LOC_INPUT_FILE2)")
 	$(if $(filter-out REF,$(TAG)), make run TARGET=x86sim TAG=REF)
 	$(if $(filter-out REF,$(TAG)), make cleanall)
 
@@ -397,7 +398,7 @@ endif
 
 GENERATED_FILES += uut_config.h
 uut_config.h: $(XFLIB_DIR)/L2/tests/aie/common/scripts/tb_gen.py 
-	$(VITIS_PYTHON3) $(XFLIB_DIR)/scripts/instance_generator.py -o uut_config.h --param-set $(PARAMS) --param-file multi_params.json --file "$(XFLIB_DIR)/L2/tests/aie/common/scripts/tb_gen.py" --func "generate_testbench"
+	$(VITIS_PYTHON3) $(XFLIB_DIR)/scripts/instance_generator.py -o uut_config.h --param-set $(PARAMS) --param-file $(PARAMS_FILE) --file "$(XFLIB_DIR)/L2/tests/aie/common/scripts/tb_gen.py" --func "generate_testbench"
 
 .PHONY: valid_params gen_instances
 

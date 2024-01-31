@@ -405,10 +405,16 @@ class polyphase_decomposer {
                 for (unsigned int ssrIdx = 0; ssrIdx < TP_SSR; ssrIdx++) {
                     // Data goes in reverse direction vs taps polyphases. for para_deci_poly=3:
                     // data0 -> poly0, data2 -> poly3, data1 -> poly2
-                    unsigned int inputDataIndex = ssrIdx * TP_PARA_DECI_POLY +
-                                                  (TP_PARA_DECI_POLY - deciPolyIdx +
-                                                   ((interpPolyIdx * TP_DECIMATE_FACTOR) / TP_INTERPOLATE_FACTOR)) %
-                                                      TP_PARA_DECI_POLY;
+                    unsigned int inputDataIndex =
+                        (ssrIdx * TP_PARA_DECI_POLY +
+                         (TP_PARA_DECI_POLY - deciPolyIdx + ((0 * TP_DECIMATE_FACTOR) / TP_INTERPOLATE_FACTOR)) %
+                             (TP_PARA_DECI_POLY) +
+                         (interpPolyIdx * TP_DECIMATE_FACTOR) / TP_INTERPOLATE_FACTOR) %
+                        (TP_PARA_DECI_POLY * TP_SSR);
+                    unsigned int inputDataIndexOld = ssrIdx * TP_PARA_DECI_POLY +
+                                                     (TP_PARA_DECI_POLY - deciPolyIdx +
+                                                      ((interpPolyIdx * TP_DECIMATE_FACTOR) / TP_INTERPOLATE_FACTOR)) %
+                                                         (TP_PARA_DECI_POLY);
                     connect<>(in[inputDataIndex], in_ssr[interpPolyIdx][deciPolyIdx][ssrIdx]);
                     if
                         constexpr(params::BTP_DUAL_IP == 1) {

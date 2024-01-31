@@ -3,7 +3,7 @@
     "description": "",
     "gui": true,
     "match_makefile": false,
-    "flow": "versal",
+    "flow": "system",
     "platform_allowlist": [
         "vck190"
     ],

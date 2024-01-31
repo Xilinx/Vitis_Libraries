@@ -8,7 +8,8 @@
       "TP_SHIFT" : 16,
       "TP_RND" : 0,
       "TP_NUM_FRAMES" : 1,
-      "TP_CASC_LEN" : 1
+      "TP_CASC_LEN" : 1,
+      "TP_SSR" : 1
     },
     "outdir" : "./matrix_vector_mul_generated_graph"
   }

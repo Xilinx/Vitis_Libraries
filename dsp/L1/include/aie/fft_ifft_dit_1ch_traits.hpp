@@ -164,6 +164,10 @@ template <>
 INLINE_DECL constexpr bool fnCheckTwiddleType<cint16>() {
     return true;
 };
+template <>
+INLINE_DECL constexpr bool fnCheckTwiddleType<cint32>() {
+    return true;
+};
 #if __SUPPORTS_CFLOAT__ == 1
 template <>
 INLINE_DECL constexpr bool fnCheckTwiddleType<cfloat>() {
@@ -181,6 +185,14 @@ INLINE_DECL constexpr bool fnCheckDataTwiddleType<cint16, cint16>() {
 };
 template <>
 INLINE_DECL constexpr bool fnCheckDataTwiddleType<cint32, cint16>() {
+    return true;
+};
+template <>
+INLINE_DECL constexpr bool fnCheckDataTwiddleType<cint16, cint32>() {
+    return true;
+};
+template <>
+INLINE_DECL constexpr bool fnCheckDataTwiddleType<cint32, cint32>() {
     return true;
 };
 #if __SUPPORTS_CFLOAT__ == 1

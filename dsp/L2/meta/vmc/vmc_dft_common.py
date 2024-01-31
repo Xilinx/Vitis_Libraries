@@ -16,6 +16,10 @@ def vmc_validate_point_size(args):
     point_size = args["point_size"]
     return fn_validate_point_size(point_size)
 
+def vmc_validate_num_frames(args):
+    num_frames = args["num_frames"]
+    return fn_validate_numFrames(num_frames)
+
 def vmc_validate_shift_val(args):
     data_type = args["data_type"]
     shift_val = args["shift_val"]
@@ -26,14 +30,14 @@ def vmc_validate_casc_length(args):
     point_size = args["point_size"]
     casc_length = args["casc_length"]
     return fn_validate_casc_len(point_size, num_frames, casc_length)
-	
+
 def vmc_validate_twiddle_type(args):
     data_type = args["data_type"]
     twiddle_type = args["twiddle_type"]
     return fn_validate_twiddle_type(data_type, twiddle_type)
 
-# Get twiddle types	
+# Get twiddle types
 k_twiddle_type = {"cfloat":"cfloat", "cint32":"cint16", "cint16":"cint16"}
 
 def fn_get_twiddle_type(data_type):
-	return k_twiddle_type[data_type]
+    return k_twiddle_type[data_type]

@@ -245,9 +245,9 @@ class fir_decimate_hb_graph : public graph {
     // buffers may exceed Memory Module size
     static_assert(TP_FIR_LEN / TP_CASC_LEN <= kMaxTapsPerKernel,
                   "ERROR: Requested FIR length and Cascade length exceeds supported number of taps per kernel. Please "
-                  "increase the cascade legnth to accomodate the FIR design.");
+                  "increase the cascade length to accommodate the FIR design.");
 
-    // Limit FIR length for reloadable coeffs. Reloadable coeffs need a storage space that contibutes to system memory
+    // Limit FIR length for reloadable coeffs. Reloadable coeffs need a storage space that contributes to system memory
     // exceeding Memory Module size.
     static_assert(TP_USE_COEFF_RELOAD == 0 || TP_FIR_LEN <= kMaxTapsPerKernel,
                   "ERROR: Exceeded maximum supported FIR length with reloadable coefficients. Please limit the FIR "
@@ -257,7 +257,7 @@ class fir_decimate_hb_graph : public graph {
     static constexpr unsigned int inBufferSize = ((TP_FIR_LEN + TP_INPUT_WINDOW_VSIZE / TP_SSR) * sizeof(TT_DATA));
     // Requested Input Window buffer exceeds memory module size
     static_assert(TP_API != 0 || inBufferSize < kMemoryModuleSize,
-                  "ERROR: Input Window size (based on requrested window size and FIR length margin) exceeds Memory "
+                  "ERROR: Input Window size (based on requested window size and FIR length margin) exceeds Memory "
                   "Module size of 32kB");
     static_assert(
         TP_SSR == 1 || TP_PARA_DECI_POLY == 2,
@@ -269,10 +269,10 @@ class fir_decimate_hb_graph : public graph {
     static constexpr bool TP_CASC_IN =
         TP_PARA_DECI_POLY == 2 ? CASC_IN_TRUE : CASC_IN_FALSE; // should be unsigned int if exposed on graph interface
     static constexpr unsigned int CASC_IN_PORT_POS = (TP_DUAL_IP == DUAL_IP_DUAL) ? 2 : 1;
-    static_assert(!(get_input_streams_core_module() == 1 && (TP_DUAL_IP == 1)),
-                  "This device does not have dual ports. Please set TP_DUAL_IP to 0.");
-    static_assert(!(get_input_streams_core_module() == 1 && (TP_NUM_OUTPUTS == 2)),
-                  "This device does not have dual ports. Please set TP_NUM_OUTPUTS to 1.");
+    static_assert(!(get_input_streams_core_module() == 1 && (TP_API == 1) && (TP_DUAL_IP == 1)),
+                  "Dual stream ports not supported on this device. Please set TP_DUAL_IP to 0.");
+    static_assert(!(get_input_streams_core_module() == 1 && (TP_API == 1) && (TP_NUM_OUTPUTS == 2)),
+                  "Dual stream ports not supported on this device. Please set TP_NUM_OUTPUTS to 1.");
 
     void create_connections() {
         // make input connections

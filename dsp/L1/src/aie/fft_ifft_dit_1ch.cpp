@@ -39,9 +39,14 @@ using namespace std;
 #include "kernel_api_utils.hpp"
 #include "fft_ifft_dit_1ch_utils.hpp"
 #include "fft_kernel_bufs.h"
-#include "fft_twiddle_lut_dit.h"
-#include "fft_twiddle_lut_dit_cfloat.h"
-#include "fft_r4_twiddles.h"
+//#include "fft_twiddle_lut_dit.h"
+//#include "fft_twiddle_lut_dit_cfloat.h"
+#include "fft_twiddle_lut_dit_all.h"
+//#include "fft_r4_twiddles.h"
+//#include "fft_r4_twiddles_cint32.h"
+#include "fft_r4_twiddles_all.h"
+
+//#define _DSPLIB_FFT_IFFT_DIT_1CH_HPP_DEBUG_
 
 namespace xf {
 namespace dsp {
@@ -63,7 +68,8 @@ template <typename TT_DATA,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_TWIDDLE_MODE>
 INLINE_DECL void stockhamStages<TT_DATA,
                                 TT_OUT_DATA,
                                 TT_TWIDDLE,
@@ -75,11 +81,12 @@ INLINE_DECL void stockhamStages<TT_DATA,
                                 TP_END_RANK,
                                 TP_DYN_PT_SIZE,
                                 TP_WINDOW_VSIZE,
-                                TP_ORIG_PAR_POWER>::stagePreamble(TT_TWIDDLE** tw_table,
-                                                                  TT_INTERNAL_DATA* tmp1_buf,
-                                                                  TT_INTERNAL_DATA* tmp2_buf,
-                                                                  TT_DATA* __restrict inptr,
-                                                                  TT_OUT_DATA* __restrict outptr) {
+                                TP_ORIG_PAR_POWER,
+                                TP_TWIDDLE_MODE>::stagePreamble(TT_TWIDDLE** tw_table,
+                                                                TT_INTERNAL_DATA* tmp1_buf,
+                                                                TT_INTERNAL_DATA* tmp2_buf,
+                                                                TT_DATA* __restrict inptr,
+                                                                TT_OUT_DATA* __restrict outptr) {
     typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
 
 #if __FFT_R4_IMPL__ == 0
@@ -231,8 +238,8 @@ template <typename TT_DATA,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER // irrelevant to static specialization
-          >
+          unsigned int TP_ORIG_PAR_POWER, // irrelevant to static specialization
+          unsigned int TP_TWIDDLE_MODE>
 INLINE_DECL void stockhamStages<TT_DATA,
                                 TT_OUT_DATA,
                                 TT_TWIDDLE,
@@ -244,11 +251,12 @@ INLINE_DECL void stockhamStages<TT_DATA,
                                 TP_END_RANK,
                                 TP_DYN_PT_SIZE,
                                 TP_WINDOW_VSIZE,
-                                TP_ORIG_PAR_POWER>::calc(TT_DATA* __restrict xbuff,
-                                                         TT_TWIDDLE** tw_table,
-                                                         TT_INTERNAL_DATA* tmp1_buf,
-                                                         TT_INTERNAL_DATA* tmp2_buf,
-                                                         TT_OUT_DATA* __restrict obuff) {
+                                TP_ORIG_PAR_POWER,
+                                TP_TWIDDLE_MODE>::calc(TT_DATA* __restrict xbuff,
+                                                       TT_TWIDDLE** tw_table,
+                                                       TT_INTERNAL_DATA* tmp1_buf,
+                                                       TT_INTERNAL_DATA* tmp2_buf,
+                                                       TT_OUT_DATA* __restrict obuff) {
     constexpr int kPointSizePower = fnPointSizePower<TP_POINT_SIZE>();
     bool inv = TP_FFT_NIFFT == 1 ? false : true;
 
@@ -321,60 +329,59 @@ INLINE_DECL void stockhamStages<TT_DATA,
         // The following code is a loop which is unrolled so that the loop variable is constant at compile time in each
         // iteration
         // The loop unrolls to describe the stages required for a maximum point size, rounded up to a multiple of 2 so
-        // that each pass through the loop is a radix 4 stage.
+        // that each
+        // pass through the loop is a radix 4 stage.
         // In each iteration the code considers whether or not to execute a stage, since for small point sizes, early
-        // stages with large 'r' factors are skipped.
+        // stages
+        // with large 'r' factors are skipped.
         // Also, the code has to handle the case that for odd power point sizes the first stage will be radix2, so it
-        // has to detect the first stage being one more than the current loop stage.
+        // has to
+        // detect the first stage being one more than the current loop stage.
         // Twiddles are relative to the first stage of the point size, not the first stage of the loop, hence the
-        // equation for tw index.
+        // equation for
+        // tw index.
         // Accordingly when the first stage is r2, it will be the second r2 of the radix4 in this iteration, so stage+1
-        // is necessary to describe the position.
+        // is
+        // necessary to describe the position.
         // A further complication is that data arrives as TT_DATA, is processed to internal stages as TT_INTERNAL_DATA
-        // and output as TT_OUT_DATA.
+        // and
+        // output as TT_OUT_DATA.
         // Finally, the whole operation may be split over multiple kernels, which means the input or output of this
-        // kernel may be TT_INTERNAL_DATA.
+        // kernel may
+        // be TT_INTERNAL_DATA.
         // beyond finally(!), only stages in the remit of the kernel are executed.
-        //      for (int k = 0; k<TP_POINT_SIZE; k++) {        fprintf(fOutTxt,"r1[%d] = (%d,%d), ",k,
-        //      (int)tmp_bufs[0][k].real, (int)tmp_bufs[0][k].imag);        if (k%8 == 7) fprintf(fOutTxt,"\n");      }
-        //      fprintf(fOutTxt,"\n");
-        //      for (int k = 0; k<TP_POINT_SIZE; k++) {        fprintf(fOutTxt,"r1[%d] = (%d,%d), ",k,
-        //      (int)tmp_bufs[1][k].real, (int)tmp_bufs[1][k].imag);        if (k%8 == 7) fprintf(fOutTxt,"\n");      }
-        //      fprintf(fOutTxt,"\n");
+
         if
             constexpr(TP_WINDOW_VSIZE <= 64) chess_memory_fence();
-        opt_int_stage<TT_DATA, TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE, 0, TP_POINT_SIZE, TP_SHIFT, TP_START_RANK,
-                      TP_END_RANK, firstRank, kPointSizePowerCeiled, kPointSizeCeiled>(xbuff, obuff, tmp_bufs, tw_table,
-                                                                                       pingPong, inv);
+        opt_int_stage<TT_DATA, TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE, TP_TWIDDLE_MODE, 0, TP_POINT_SIZE, TP_SHIFT,
+                      TP_START_RANK, TP_END_RANK, firstRank, kPointSizePowerCeiled, kPointSizeCeiled>(
+            xbuff, obuff, tmp_bufs, tw_table, pingPong, inv);
         if
             constexpr(TP_WINDOW_VSIZE <= 64) chess_memory_fence();
-        opt_int_stage<TT_DATA, TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE, 2, TP_POINT_SIZE, TP_SHIFT, TP_START_RANK,
-                      TP_END_RANK, firstRank, kPointSizePowerCeiled, kPointSizeCeiled>(xbuff, obuff, tmp_bufs, tw_table,
-                                                                                       pingPong, inv);
+        opt_int_stage<TT_DATA, TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE, TP_TWIDDLE_MODE, 2, TP_POINT_SIZE, TP_SHIFT,
+                      TP_START_RANK, TP_END_RANK, firstRank, kPointSizePowerCeiled, kPointSizeCeiled>(
+            xbuff, obuff, tmp_bufs, tw_table, pingPong, inv);
         if
             constexpr(TP_WINDOW_VSIZE <= 64) chess_memory_fence();
-        opt_int_stage<TT_DATA, TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE, 4, TP_POINT_SIZE, TP_SHIFT, TP_START_RANK,
-                      TP_END_RANK, firstRank, kPointSizePowerCeiled, kPointSizeCeiled>(xbuff, obuff, tmp_bufs, tw_table,
-                                                                                       pingPong, inv);
+        opt_int_stage<TT_DATA, TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE, TP_TWIDDLE_MODE, 4, TP_POINT_SIZE, TP_SHIFT,
+                      TP_START_RANK, TP_END_RANK, firstRank, kPointSizePowerCeiled, kPointSizeCeiled>(
+            xbuff, obuff, tmp_bufs, tw_table, pingPong, inv);
         if
             constexpr(TP_WINDOW_VSIZE <= 64) chess_memory_fence();
-        opt_int_stage<TT_DATA, TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE, 6, TP_POINT_SIZE, TP_SHIFT, TP_START_RANK,
-                      TP_END_RANK, firstRank, kPointSizePowerCeiled, kPointSizeCeiled>(xbuff, obuff, tmp_bufs, tw_table,
-                                                                                       pingPong, inv);
+        opt_int_stage<TT_DATA, TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE, TP_TWIDDLE_MODE, 6, TP_POINT_SIZE, TP_SHIFT,
+                      TP_START_RANK, TP_END_RANK, firstRank, kPointSizePowerCeiled, kPointSizeCeiled>(
+            xbuff, obuff, tmp_bufs, tw_table, pingPong, inv);
         if
             constexpr(TP_WINDOW_VSIZE <= 64) chess_memory_fence();
-        opt_int_stage<TT_DATA, TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE, 8, TP_POINT_SIZE, TP_SHIFT, TP_START_RANK,
-                      TP_END_RANK, firstRank, kPointSizePowerCeiled, kPointSizeCeiled>(xbuff, obuff, tmp_bufs, tw_table,
-                                                                                       pingPong, inv);
+        opt_int_stage<TT_DATA, TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE, TP_TWIDDLE_MODE, 8, TP_POINT_SIZE, TP_SHIFT,
+                      TP_START_RANK, TP_END_RANK, firstRank, kPointSizePowerCeiled, kPointSizeCeiled>(
+            xbuff, obuff, tmp_bufs, tw_table, pingPong, inv);
         if
             constexpr(TP_WINDOW_VSIZE <= 64) chess_memory_fence();
-        opt_int_stage<TT_DATA, TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE, 10, TP_POINT_SIZE, TP_SHIFT, TP_START_RANK,
-                      TP_END_RANK, firstRank, kPointSizePowerCeiled, kPointSizeCeiled>(xbuff, obuff, tmp_bufs, tw_table,
-                                                                                       pingPong, inv);
+        opt_int_stage<TT_DATA, TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE, TP_TWIDDLE_MODE, 10, TP_POINT_SIZE, TP_SHIFT,
+                      TP_START_RANK, TP_END_RANK, firstRank, kPointSizePowerCeiled, kPointSizeCeiled>(
+            xbuff, obuff, tmp_bufs, tw_table, pingPong, inv);
     } // end of if float or int handling
-    //      for (int k = 0; k<TP_POINT_SIZE; k++) {        fprintf(fOutTxt,"obuff[%d] = (%d,%d), ",k,
-    //      (int)obuff[k].real, (int)obuff[k].imag);        if (k%8 == 7) fprintf(fOutTxt,"\n");      }
-    //      fprintf(fOutTxt,"\n");
 };
 
 // stockhamStages calc body. Dynamic variant.
@@ -389,7 +396,8 @@ template <typename TT_DATA,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_TWIDDLE_MODE>
 INLINE_DECL void stockhamStages<TT_DATA,
                                 TT_OUT_DATA,
                                 TT_TWIDDLE,
@@ -401,13 +409,14 @@ INLINE_DECL void stockhamStages<TT_DATA,
                                 TP_END_RANK,
                                 TP_DYN_PT_SIZE,
                                 TP_WINDOW_VSIZE,
-                                TP_ORIG_PAR_POWER>::calc(TT_DATA* __restrict xbuff,
-                                                         TT_TWIDDLE** tw_table,
-                                                         TT_INTERNAL_DATA* tmp1_buf,
-                                                         TT_INTERNAL_DATA* tmp2_buf,
-                                                         TT_OUT_DATA* __restrict obuff,
-                                                         int ptSizePwr,
-                                                         bool inv) {
+                                TP_ORIG_PAR_POWER,
+                                TP_TWIDDLE_MODE>::calc(TT_DATA* __restrict xbuff,
+                                                       TT_TWIDDLE** tw_table,
+                                                       TT_INTERNAL_DATA* tmp1_buf,
+                                                       TT_INTERNAL_DATA* tmp2_buf,
+                                                       TT_OUT_DATA* __restrict obuff,
+                                                       int ptSizePwr,
+                                                       bool inv) {
     TT_INTERNAL_DATA* my_tmp2_buf = fnUsePingPongIntBuffer<TT_DATA>() ? tmp2_buf : (TT_INTERNAL_DATA*)xbuff;
     TT_INTERNAL_DATA* tmp_bufs[2] = {tmp1_buf, my_tmp2_buf}; // tmp2 is actually xbuff reused.
     unsigned int pingPong = 1; // use tmp_buf1 as input or tmp_buf2? Initially tmp2 is input since this is xbuff
@@ -454,29 +463,28 @@ INLINE_DECL void stockhamStages<TT_DATA,
         // cint handling, dynamic variant
         ptSize = ((unsigned int)1 << ptSizePwr); // without this, x86 zeros ptSize.
 
-        opt_int_dyn_stage<TT_DATA, TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE, 0, TP_POINT_SIZE, TP_SHIFT, TP_START_RANK,
-                          TP_END_RANK, kPointSizePower, kPointSizePowerCeiled, kPointSizeCeiled>(
-            xbuff, obuff, tmp_bufs, tw_table, pingPong, inv, ptSizePwr);
-        opt_int_dyn_stage<TT_DATA, TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE, 2, TP_POINT_SIZE, TP_SHIFT, TP_START_RANK,
-                          TP_END_RANK, kPointSizePower, kPointSizePowerCeiled, kPointSizeCeiled>(
-            xbuff, obuff, tmp_bufs, tw_table, pingPong, inv, ptSizePwr);
-        opt_int_dyn_stage<TT_DATA, TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE, 4, TP_POINT_SIZE, TP_SHIFT, TP_START_RANK,
-                          TP_END_RANK, kPointSizePower, kPointSizePowerCeiled, kPointSizeCeiled>(
-            xbuff, obuff, tmp_bufs, tw_table, pingPong, inv, ptSizePwr);
-        opt_int_dyn_stage<TT_DATA, TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE, 6, TP_POINT_SIZE, TP_SHIFT, TP_START_RANK,
-                          TP_END_RANK, kPointSizePower, kPointSizePowerCeiled, kPointSizeCeiled>(
-            xbuff, obuff, tmp_bufs, tw_table, pingPong, inv, ptSizePwr);
-        opt_int_dyn_stage<TT_DATA, TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE, 8, TP_POINT_SIZE, TP_SHIFT, TP_START_RANK,
-                          TP_END_RANK, kPointSizePower, kPointSizePowerCeiled, kPointSizeCeiled>(
-            xbuff, obuff, tmp_bufs, tw_table, pingPong, inv, ptSizePwr);
-        opt_int_dyn_stage<TT_DATA, TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE, 10, TP_POINT_SIZE, TP_SHIFT,
-                          TP_START_RANK, TP_END_RANK, kPointSizePower, kPointSizePowerCeiled, kPointSizeCeiled>(
-            xbuff, obuff, tmp_bufs, tw_table, pingPong, inv, ptSizePwr);
+        opt_int_dyn_stage<TT_DATA, TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE, TP_TWIDDLE_MODE, 0, TP_POINT_SIZE,
+                          TP_SHIFT, TP_START_RANK, TP_END_RANK, kPointSizePower, kPointSizePowerCeiled,
+                          kPointSizeCeiled>(xbuff, obuff, tmp_bufs, tw_table, pingPong, inv, ptSizePwr);
+        opt_int_dyn_stage<TT_DATA, TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE, TP_TWIDDLE_MODE, 2, TP_POINT_SIZE,
+                          TP_SHIFT, TP_START_RANK, TP_END_RANK, kPointSizePower, kPointSizePowerCeiled,
+                          kPointSizeCeiled>(xbuff, obuff, tmp_bufs, tw_table, pingPong, inv, ptSizePwr);
+        opt_int_dyn_stage<TT_DATA, TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE, TP_TWIDDLE_MODE, 4, TP_POINT_SIZE,
+                          TP_SHIFT, TP_START_RANK, TP_END_RANK, kPointSizePower, kPointSizePowerCeiled,
+                          kPointSizeCeiled>(xbuff, obuff, tmp_bufs, tw_table, pingPong, inv, ptSizePwr);
+        opt_int_dyn_stage<TT_DATA, TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE, TP_TWIDDLE_MODE, 6, TP_POINT_SIZE,
+                          TP_SHIFT, TP_START_RANK, TP_END_RANK, kPointSizePower, kPointSizePowerCeiled,
+                          kPointSizeCeiled>(xbuff, obuff, tmp_bufs, tw_table, pingPong, inv, ptSizePwr);
+        opt_int_dyn_stage<TT_DATA, TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE, TP_TWIDDLE_MODE, 8, TP_POINT_SIZE,
+                          TP_SHIFT, TP_START_RANK, TP_END_RANK, kPointSizePower, kPointSizePowerCeiled,
+                          kPointSizeCeiled>(xbuff, obuff, tmp_bufs, tw_table, pingPong, inv, ptSizePwr);
+        opt_int_dyn_stage<TT_DATA, TT_INTERNAL_DATA, TT_OUT_DATA, TT_TWIDDLE, TP_TWIDDLE_MODE, 10, TP_POINT_SIZE,
+                          TP_SHIFT, TP_START_RANK, TP_END_RANK, kPointSizePower, kPointSizePowerCeiled,
+                          kPointSizeCeiled>(xbuff, obuff, tmp_bufs, tw_table, pingPong, inv, ptSizePwr);
 
     } // end of float/integer handling
 
     constexpr int koutVSize = 32 / sizeof(TT_OUT_DATA);
-    // chess_memory_fence();
 
     if ((1 << ptSizePwr) < TP_POINT_SIZE) {
         using outVectType = ::aie::vector<TT_OUT_DATA, koutVSize>;
@@ -484,19 +492,352 @@ INLINE_DECL void stockhamStages<TT_DATA,
         outVectType* outFillPtr = (outVectType*)obuff;
         outFillPtr += (1 << ptSizePwr) / koutVSize;
         int fillCycles = (TP_POINT_SIZE - (1 << ptSizePwr)) / koutVSize;
-#ifdef _DSPLIB_FFT_IFFT_DIT_1CH_HPP_DEBUG_
-        if
-            constexpr(TP_END_RANK == 7) {
-                printf("fill cycles = %d for pwr = %d and ptsize = %d, end rank = %d\n", fillCycles, ptSizePwr,
-                       TP_POINT_SIZE, TP_END_RANK);
-            }
-#endif //_DSPLIB_FFT_IFFT_DIT_1CH_HPP_DEBUG_
         for (int i = 0; i < fillCycles; i++) {
             *outFillPtr++ = zerosOut;
         }
     }
     chess_memory_fence();
 };
+
+template <typename T_TW, int T_PT, int T_TWPT, int T_TW_MODE>
+INLINE_DECL constexpr T_TW* fnGetTwPtr() {
+    if
+        constexpr(std::is_same<T_TW, cfloat>::value) {
+            if
+                constexpr(T_TWPT == 1 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw1_cfloat;
+            else if
+                constexpr(T_TWPT == 2 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw2_cfloat;
+            else if
+                constexpr(T_TWPT == 4 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw4_cfloat;
+            else if
+                constexpr(T_TWPT == 8 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw8_cfloat;
+            else if
+                constexpr(T_TWPT == 16 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw16_cfloat;
+            else if
+                constexpr(T_TWPT == 32 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw32_cfloat;
+            else if
+                constexpr(T_TWPT == 64 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw64_cfloat;
+            else if
+                constexpr(T_TWPT == 128 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw128_cfloat;
+            else if
+                constexpr(T_TWPT == 256 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw256_cfloat;
+            else if
+                constexpr(T_TWPT == 512 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw512_cfloat;
+            else if
+                constexpr(T_TWPT == 1024 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw1024_cfloat;
+            else if
+                constexpr(T_TWPT == 2048 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw2048_cfloat;
+            else
+                return NULL;
+        }
+    if
+        constexpr(std::is_same<T_TW, cint32>::value) {
+            if
+                constexpr(T_TW_MODE == 0) {
+                    if
+                        constexpr(T_TWPT == 1 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw1_cint32;
+                    else if
+                        constexpr(T_TWPT == 2 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw2_cint32;
+                    else if
+                        constexpr(T_TWPT == 4 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw4_cint32;
+                    else if
+                        constexpr(T_TWPT == 8 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                            ? (T_TW*)fft_lut_tw8_cint32_half
+                            : (T_TW*)fft_lut_tw8_cint32;
+                    else if
+                        constexpr(T_TWPT == 16 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                            ? (T_TW*)fft_lut_tw16_cint32_half
+                            : (T_TW*)fft_lut_tw16_cint32;
+                    else if
+                        constexpr(T_TWPT == 32 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                            ? (T_TW*)fft_lut_tw32_cint32_half
+                            : (T_TW*)fft_lut_tw32_cint32;
+                    else if
+                        constexpr(T_TWPT == 64 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                            ? (T_TW*)fft_lut_tw64_cint32_half
+                            : (T_TW*)fft_lut_tw64_cint32;
+                    else if
+                        constexpr(T_TWPT == 128 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                            ? (T_TW*)fft_lut_tw128_cint32_half
+                            : (T_TW*)fft_lut_tw128_cint32;
+                    else if
+                        constexpr(T_TWPT == 256 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                            ? (T_TW*)fft_lut_tw256_cint32_half
+                            : (T_TW*)fft_lut_tw256_cint32;
+                    else if
+                        constexpr(T_TWPT == 512 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                            ? (T_TW*)fft_lut_tw512_cint32_half
+                            : (T_TW*)fft_lut_tw512_cint32;
+                    else if
+                        constexpr(T_TWPT == 1024 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                            ? (T_TW*)fft_lut_tw1024_cint32_half
+                            : (T_TW*)fft_lut_tw1024_cint32;
+                    else if
+                        constexpr(T_TWPT == 2048 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                            ? (T_TW*)fft_lut_tw2048_cint32_half
+                            : (T_TW*)fft_lut_tw2048_cint32;
+                    else
+                        return NULL;
+                }
+            else {
+                if
+                    constexpr(T_TWPT == 1 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw1_cint31;
+                else if
+                    constexpr(T_TWPT == 2 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw2_cint31;
+                else if
+                    constexpr(T_TWPT == 4 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw4_cint31;
+                else if
+                    constexpr(T_TWPT == 8 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2 ? (T_TW*)fft_lut_tw8_cint31_half
+                                                                                       : (T_TW*)fft_lut_tw8_cint31;
+                else if
+                    constexpr(T_TWPT == 16 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        ? (T_TW*)fft_lut_tw16_cint31_half
+                        : (T_TW*)fft_lut_tw16_cint31;
+                else if
+                    constexpr(T_TWPT == 32 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        ? (T_TW*)fft_lut_tw32_cint31_half
+                        : (T_TW*)fft_lut_tw32_cint31;
+                else if
+                    constexpr(T_TWPT == 64 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        ? (T_TW*)fft_lut_tw64_cint31_half
+                        : (T_TW*)fft_lut_tw64_cint31;
+                else if
+                    constexpr(T_TWPT == 128 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        ? (T_TW*)fft_lut_tw128_cint31_half
+                        : (T_TW*)fft_lut_tw128_cint31;
+                else if
+                    constexpr(T_TWPT == 256 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        ? (T_TW*)fft_lut_tw256_cint31_half
+                        : (T_TW*)fft_lut_tw256_cint31;
+                else if
+                    constexpr(T_TWPT == 512 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        ? (T_TW*)fft_lut_tw512_cint31_half
+                        : (T_TW*)fft_lut_tw512_cint31;
+                else if
+                    constexpr(T_TWPT == 1024 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        ? (T_TW*)fft_lut_tw1024_cint31_half
+                        : (T_TW*)fft_lut_tw1024_cint31;
+                else if
+                    constexpr(T_TWPT == 2048 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        ? (T_TW*)fft_lut_tw2048_cint31_half
+                        : (T_TW*)fft_lut_tw2048_cint31;
+                else
+                    return NULL;
+            }
+        }
+    if
+        constexpr(std::is_same<T_TW, cint16>::value) {
+            if
+                constexpr(T_TW_MODE == 0) {
+                    if
+                        constexpr(T_TWPT == 1 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw1_cint16;
+                    else if
+                        constexpr(T_TWPT == 2 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw2_cint16;
+                    else if
+                        constexpr(T_TWPT == 4 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw4_cint16;
+                    else if
+                        constexpr(T_TWPT == 8 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                            ? (T_TW*)fft_lut_tw8_cint16_half
+                            : (T_TW*)fft_lut_tw8_cint16;
+                    else if
+                        constexpr(T_TWPT == 16 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                            ? (T_TW*)fft_lut_tw16_cint16_half
+                            : (T_TW*)fft_lut_tw16_cint16;
+                    else if
+                        constexpr(T_TWPT == 32 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                            ? (T_TW*)fft_lut_tw32_cint16_half
+                            : (T_TW*)fft_lut_tw32_cint16;
+                    else if
+                        constexpr(T_TWPT == 64 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                            ? (T_TW*)fft_lut_tw64_cint16_half
+                            : (T_TW*)fft_lut_tw64_cint16;
+                    else if
+                        constexpr(T_TWPT == 128 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                            ? (T_TW*)fft_lut_tw128_cint16_half
+                            : (T_TW*)fft_lut_tw128_cint16;
+                    else if
+                        constexpr(T_TWPT == 256 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                            ? (T_TW*)fft_lut_tw256_cint16_half
+                            : (T_TW*)fft_lut_tw256_cint16;
+                    else if
+                        constexpr(T_TWPT == 512 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                            ? (T_TW*)fft_lut_tw512_cint16_half
+                            : (T_TW*)fft_lut_tw512_cint16;
+                    else if
+                        constexpr(T_TWPT == 1024 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                            ? (T_TW*)fft_lut_tw1024_cint16_half
+                            : (T_TW*)fft_lut_tw1024_cint16;
+                    else if
+                        constexpr(T_TWPT == 2048 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                            ? (T_TW*)fft_lut_tw2048_cint16_half
+                            : (T_TW*)fft_lut_tw2048_cint16;
+                    else
+                        return NULL;
+                }
+            else {
+                if
+                    constexpr(T_TWPT == 1 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw1_cint15;
+                else if
+                    constexpr(T_TWPT == 2 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw2_cint15;
+                else if
+                    constexpr(T_TWPT == 4 && T_TWPT <= T_PT) return (T_TW*)fft_lut_tw4_cint15;
+                else if
+                    constexpr(T_TWPT == 8 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2 ? (T_TW*)fft_lut_tw8_cint15_half
+                                                                                       : (T_TW*)fft_lut_tw8_cint15;
+                else if
+                    constexpr(T_TWPT == 16 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        ? (T_TW*)fft_lut_tw16_cint15_half
+                        : (T_TW*)fft_lut_tw16_cint15;
+                else if
+                    constexpr(T_TWPT == 32 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        ? (T_TW*)fft_lut_tw32_cint15_half
+                        : (T_TW*)fft_lut_tw32_cint15;
+                else if
+                    constexpr(T_TWPT == 64 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        ? (T_TW*)fft_lut_tw64_cint15_half
+                        : (T_TW*)fft_lut_tw64_cint15;
+                else if
+                    constexpr(T_TWPT == 128 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        ? (T_TW*)fft_lut_tw128_cint15_half
+                        : (T_TW*)fft_lut_tw128_cint15;
+                else if
+                    constexpr(T_TWPT == 256 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        ? (T_TW*)fft_lut_tw256_cint15_half
+                        : (T_TW*)fft_lut_tw256_cint15;
+                else if
+                    constexpr(T_TWPT == 512 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        ? (T_TW*)fft_lut_tw512_cint15_half
+                        : (T_TW*)fft_lut_tw512_cint15;
+                else if
+                    constexpr(T_TWPT == 1024 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        ? (T_TW*)fft_lut_tw1024_cint15_half
+                        : (T_TW*)fft_lut_tw1024_cint15;
+                else if
+                    constexpr(T_TWPT == 2048 && T_TWPT <= T_PT) return T_TWPT == T_PT / 2
+                        ? (T_TW*)fft_lut_tw2048_cint15_half
+                        : (T_TW*)fft_lut_tw2048_cint15;
+                else
+                    return NULL;
+            }
+        }
+}
+template <typename T_TW, int T_PT, int T_TWPT, int T_TW_MODE>
+INLINE_DECL constexpr T_TW* fnGetR4TwPtr() {
+    if
+        constexpr(std::is_same<T_TW, cfloat>::value) { return NULL; }
+    if
+        constexpr(std::is_same<T_TW, cint32>::value) {
+            if
+                constexpr(T_TW_MODE == 0) {
+                    if
+                        constexpr(T_TWPT == 1 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint32_r4_1_2;
+                    else if
+                        constexpr(T_TWPT == 2 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint32_r4_2_4;
+                    else if
+                        constexpr(T_TWPT == 4 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint32_r4_4_8;
+                    else if
+                        constexpr(T_TWPT == 8 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint32_r4_8_16;
+                    else if
+                        constexpr(T_TWPT == 16 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint32_r4_16_32;
+                    else if
+                        constexpr(T_TWPT == 32 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint32_r4_32_64;
+                    else if
+                        constexpr(T_TWPT == 64 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint32_r4_64_128;
+                    else if
+                        constexpr(T_TWPT == 128 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint32_r4_128_256;
+                    else if
+                        constexpr(T_TWPT == 256 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint32_r4_256_512;
+                    else if
+                        constexpr(T_TWPT == 512 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint32_r4_512_1024;
+                    else if
+                        constexpr(T_TWPT == 1024 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint32_r4_1024_2048;
+                    else
+                        return NULL;
+                }
+            else {
+                if
+                    constexpr(T_TWPT == 1 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint31_r4_1_2;
+                else if
+                    constexpr(T_TWPT == 2 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint31_r4_2_4;
+                else if
+                    constexpr(T_TWPT == 4 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint31_r4_4_8;
+                else if
+                    constexpr(T_TWPT == 8 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint31_r4_8_16;
+                else if
+                    constexpr(T_TWPT == 16 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint31_r4_16_32;
+                else if
+                    constexpr(T_TWPT == 32 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint31_r4_32_64;
+                else if
+                    constexpr(T_TWPT == 64 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint31_r4_64_128;
+                else if
+                    constexpr(T_TWPT == 128 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint31_r4_128_256;
+                else if
+                    constexpr(T_TWPT == 256 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint31_r4_256_512;
+                else if
+                    constexpr(T_TWPT == 512 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint31_r4_512_1024;
+                else if
+                    constexpr(T_TWPT == 1024 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint31_r4_1024_2048;
+                else
+                    return NULL;
+            }
+        }
+    if
+        constexpr(std::is_same<T_TW, cint16>::value) {
+            if
+                constexpr(T_TW_MODE == 0) {
+                    if
+                        constexpr(T_TWPT == 1 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint16_r4_1_2;
+                    else if
+                        constexpr(T_TWPT == 2 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint16_r4_2_4;
+                    else if
+                        constexpr(T_TWPT == 4 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint16_r4_4_8;
+                    else if
+                        constexpr(T_TWPT == 8 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint16_r4_8_16;
+                    else if
+                        constexpr(T_TWPT == 16 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint16_r4_16_32;
+                    else if
+                        constexpr(T_TWPT == 32 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint16_r4_32_64;
+                    else if
+                        constexpr(T_TWPT == 64 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint16_r4_64_128;
+                    else if
+                        constexpr(T_TWPT == 128 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint16_r4_128_256;
+                    else if
+                        constexpr(T_TWPT == 256 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint16_r4_256_512;
+                    else if
+                        constexpr(T_TWPT == 512 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint16_r4_512_1024;
+                    else if
+                        constexpr(T_TWPT == 1024 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint16_r4_1024_2048;
+                    else
+                        return NULL;
+                }
+            else {
+                if
+                    constexpr(T_TWPT == 1 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint15_r4_1_2;
+                else if
+                    constexpr(T_TWPT == 2 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint15_r4_2_4;
+                else if
+                    constexpr(T_TWPT == 4 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint15_r4_4_8;
+                else if
+                    constexpr(T_TWPT == 8 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint15_r4_8_16;
+                else if
+                    constexpr(T_TWPT == 16 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint15_r4_16_32;
+                else if
+                    constexpr(T_TWPT == 32 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint15_r4_32_64;
+                else if
+                    constexpr(T_TWPT == 64 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint15_r4_64_128;
+                else if
+                    constexpr(T_TWPT == 128 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint15_r4_128_256;
+                else if
+                    constexpr(T_TWPT == 256 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint15_r4_256_512;
+                else if
+                    constexpr(T_TWPT == 512 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint15_r4_512_1024;
+                else if
+                    constexpr(T_TWPT == 1024 && T_TWPT <= T_PT) return (T_TW*)fft_lut_cint15_r4_1024_2048;
+                else
+                    return NULL;
+            }
+        }
+}
 
 // FFT/iFFT DIT single channel function - base of specialization .
 //-----------------------------------------------------------------------------------------------------
@@ -510,7 +851,8 @@ template <typename TT_DATA,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_TWIDDLE_MODE>
 INLINE_DECL void kernelFFTClass<TT_DATA,
                                 TT_OUT_DATA,
                                 TT_TWIDDLE,
@@ -521,57 +863,22 @@ INLINE_DECL void kernelFFTClass<TT_DATA,
                                 TP_END_RANK,
                                 TP_DYN_PT_SIZE,
                                 TP_WINDOW_VSIZE,
-                                TP_ORIG_PAR_POWER>::kernelFFT(TT_DATA* __restrict inptr,
-                                                              TT_OUT_DATA* __restrict outptr){};
-
-template <typename TT_DATA,
-          typename TT_OUT_DATA,
-          typename TT_TWIDDLE,
-          unsigned int TP_FFT_NIFFT,
-          unsigned int TP_SHIFT,
-          unsigned int TP_START_RANK,
-          unsigned int TP_END_RANK,
-          unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
-INLINE_DECL void kernelFFTClass<TT_DATA,
-                                TT_OUT_DATA,
-                                TT_TWIDDLE,
-                                FFT4096_SIZE,
-                                TP_FFT_NIFFT,
-                                TP_SHIFT,
-                                TP_START_RANK,
-                                TP_END_RANK,
-                                TP_DYN_PT_SIZE,
-                                TP_WINDOW_VSIZE,
-                                TP_ORIG_PAR_POWER>::kernelFFT(TT_DATA* __restrict inptr,
-                                                              TT_OUT_DATA* __restrict outptr) {
+                                TP_ORIG_PAR_POWER,
+                                TP_TWIDDLE_MODE>::kernelFFT(TT_DATA* __restrict inptr, TT_OUT_DATA* __restrict outptr) {
     typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
 
-    static constexpr TT_TWIDDLE* __restrict tw1 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1_cfloat : (TT_TWIDDLE*)fft_lut_tw1);
-    static constexpr TT_TWIDDLE* __restrict tw2 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw2_cfloat : (TT_TWIDDLE*)fft_lut_tw2);
-    static constexpr TT_TWIDDLE* __restrict tw4 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw4_cfloat : (TT_TWIDDLE*)fft_lut_tw4);
-    static constexpr TT_TWIDDLE* __restrict tw8 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw8_cfloat : (TT_TWIDDLE*)fft_lut_tw8);
-    static constexpr TT_TWIDDLE* __restrict tw16 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw16_cfloat : (TT_TWIDDLE*)fft_lut_tw16);
-    static constexpr TT_TWIDDLE* __restrict tw32 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw32_cfloat : (TT_TWIDDLE*)fft_lut_tw32);
-    static constexpr TT_TWIDDLE* __restrict tw64 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw64_cfloat : (TT_TWIDDLE*)fft_lut_tw64);
-    static constexpr TT_TWIDDLE* __restrict tw128 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw128_cfloat : (TT_TWIDDLE*)fft_lut_tw128);
-    static constexpr TT_TWIDDLE* __restrict tw256 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw256_cfloat : (TT_TWIDDLE*)fft_lut_tw256);
-    static constexpr TT_TWIDDLE* __restrict tw512 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw512_cfloat : (TT_TWIDDLE*)fft_lut_tw512);
-    static constexpr TT_TWIDDLE* __restrict tw1024 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1024_cfloat : (TT_TWIDDLE*)fft_lut_tw1024);
-    static constexpr TT_TWIDDLE* __restrict tw2048 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw2048_cfloat : (TT_TWIDDLE*)fft_lut_tw2048_half);
+    static constexpr TT_TWIDDLE* __restrict tw1 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 1, TP_TWIDDLE_MODE>();
+    static constexpr TT_TWIDDLE* __restrict tw2 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 2, TP_TWIDDLE_MODE>();
+    static constexpr TT_TWIDDLE* __restrict tw4 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 4, TP_TWIDDLE_MODE>();
+    static constexpr TT_TWIDDLE* __restrict tw8 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 8, TP_TWIDDLE_MODE>();
+    static constexpr TT_TWIDDLE* __restrict tw16 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 16, TP_TWIDDLE_MODE>();
+    static constexpr TT_TWIDDLE* __restrict tw32 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 32, TP_TWIDDLE_MODE>();
+    static constexpr TT_TWIDDLE* __restrict tw64 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 64, TP_TWIDDLE_MODE>();
+    static constexpr TT_TWIDDLE* __restrict tw128 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 128, TP_TWIDDLE_MODE>();
+    static constexpr TT_TWIDDLE* __restrict tw256 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 256, TP_TWIDDLE_MODE>();
+    static constexpr TT_TWIDDLE* __restrict tw512 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 512, TP_TWIDDLE_MODE>();
+    static constexpr TT_TWIDDLE* __restrict tw1024 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 1024, TP_TWIDDLE_MODE>();
+    static constexpr TT_TWIDDLE* __restrict tw2048 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 2048, TP_TWIDDLE_MODE>();
 
 #if __FFT_R4_IMPL__ == 0
     static constexpr TT_TWIDDLE* __restrict tw1_2 = NULL;
@@ -588,111 +895,72 @@ INLINE_DECL void kernelFFTClass<TT_DATA,
 #endif //__FFT_R4_IMPL__ == 0
 #if __FFT_R4_IMPL__ == 1
     static constexpr TT_TWIDDLE* __restrict tw1_2 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_1_2;
+        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 1, TP_TWIDDLE_MODE>(); //(TT_TWIDDLE*)fft_lut_r4_1_2;
     static constexpr TT_TWIDDLE* __restrict tw2_4 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_2_4;
+        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 2, TP_TWIDDLE_MODE>(); //(TT_TWIDDLE*)fft_lut_r4_2_4;
     static constexpr TT_TWIDDLE* __restrict tw4_8 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_4_8;
+        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 4, TP_TWIDDLE_MODE>(); //(TT_TWIDDLE*)fft_lut_r4_4_8;
     static constexpr TT_TWIDDLE* __restrict tw8_16 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_8_16;
+        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 8, TP_TWIDDLE_MODE>(); //(TT_TWIDDLE*)fft_lut_r4_8_16;
     static constexpr TT_TWIDDLE* __restrict tw16_32 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_16_32;
+        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 16, TP_TWIDDLE_MODE>(); //(TT_TWIDDLE*)fft_lut_r4_16_32;
     static constexpr TT_TWIDDLE* __restrict tw32_64 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_32_64;
+        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 32, TP_TWIDDLE_MODE>(); //(TT_TWIDDLE*)fft_lut_r4_32_64;
     static constexpr TT_TWIDDLE* __restrict tw64_128 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_64_128;
+        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 64, TP_TWIDDLE_MODE>(); //(TT_TWIDDLE*)fft_lut_r4_64_128;
     static constexpr TT_TWIDDLE* __restrict tw128_256 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_128_256;
+        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 128, TP_TWIDDLE_MODE>(); //(TT_TWIDDLE*)fft_lut_r4_128_256;
     static constexpr TT_TWIDDLE* __restrict tw256_512 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_256_512;
+        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 256, TP_TWIDDLE_MODE>(); //(TT_TWIDDLE*)fft_lut_r4_256_512;
     static constexpr TT_TWIDDLE* __restrict tw512_1024 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_512_1024;
+        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 512, TP_TWIDDLE_MODE>(); //(TT_TWIDDLE*)fft_lut_r4_512_1024;
     static constexpr TT_TWIDDLE* __restrict tw1024_2048 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_1024_2048;
-#endif //__FFT_R4_IMPL__ == 1
+        fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 1024, TP_TWIDDLE_MODE>(); //(TT_TWIDDLE*)fft_lut_r4_1024_2048;
+#endif                                                                    //__FFT_R4_IMPL__ == 1
 
     alignas(32) static TT_TWIDDLE* tw_table[kMaxPointLog * 2] = {
         tw1,   tw2,   tw4,   tw8,    tw16,    tw32,    tw64,     tw128,     tw256,     tw512,      tw1024,      tw2048,
         tw1_2, tw2_4, tw4_8, tw8_16, tw16_32, tw32_64, tw64_128, tw128_256, tw256_512, tw512_1024, tw1024_2048, NULL};
 
     TT_DATA* xbuff = inptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_4096_tmp1;
-    T_internalDataType* tmp2_buf = (T_internalDataType*)xbuff;
+    T_internalDataType* tmp1_buf = NULL;
+    T_internalDataType* tmp2_buf = NULL;
 
-    stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inptr, outptr);
-};
+    // assign tmp1_buf
+    if
+        constexpr(TP_POINT_SIZE == 4096) { tmp1_buf = (T_internalDataType*)fft_4096_tmp1; }
+    else if
+        constexpr(TP_POINT_SIZE == 2048) { tmp1_buf = (T_internalDataType*)fft_2048_tmp1; }
+    else if
+        constexpr(TP_POINT_SIZE == 1024) { tmp1_buf = (T_internalDataType*)fft_1024_tmp1; }
+    else if
+        constexpr(TP_POINT_SIZE == 512) { tmp1_buf = (T_internalDataType*)fft_512_tmp1; }
+    else if
+        constexpr(TP_POINT_SIZE == 256) { tmp1_buf = (T_internalDataType*)fft_256_tmp1; }
+    else {
+        tmp1_buf = (T_internalDataType*)fft_128_tmp1;
+    }
 
-template <typename TT_OUT_DATA,
-          unsigned int TP_FFT_NIFFT,
-          unsigned int TP_SHIFT,
-          unsigned int TP_START_RANK,
-          unsigned int TP_END_RANK,
-          unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
-INLINE_DECL void kernelFFTClass<cint16,
-                                TT_OUT_DATA,
-                                cint16,
-                                FFT4096_SIZE,
-                                TP_FFT_NIFFT,
-                                TP_SHIFT,
-                                TP_START_RANK,
-                                TP_END_RANK,
-                                TP_DYN_PT_SIZE,
-                                TP_WINDOW_VSIZE,
-                                TP_ORIG_PAR_POWER>::kernelFFT(cint16* __restrict inptr,
-                                                              TT_OUT_DATA* __restrict outptr) {
-    typedef cint16 TT_DATA;              // essentially a constant for thie specialization
-    typedef cint16 TT_TWIDDLE;           // essentially a constant for thie specialization
-    typedef cint32_t T_internalDataType; // essentially a constant for thie specialization
-    static constexpr cint16* __restrict tw1 = (cint16*)fft_lut_tw1;
-    static constexpr cint16* __restrict tw2 = (cint16*)fft_lut_tw2;
-    static constexpr cint16* __restrict tw4 = (cint16*)fft_lut_tw4;
-    static constexpr cint16* __restrict tw8 = (cint16*)fft_lut_tw8;
-    static constexpr cint16* __restrict tw16 = (cint16*)fft_lut_tw16;
-    static constexpr cint16* __restrict tw32 = (cint16*)fft_lut_tw32;
-    static constexpr cint16* __restrict tw64 = (cint16*)fft_lut_tw64;
-    static constexpr cint16* __restrict tw128 = (cint16*)fft_lut_tw128;
-    static constexpr cint16* __restrict tw256 = (cint16*)fft_lut_tw256;
-    static constexpr cint16* __restrict tw512 = (cint16*)fft_lut_tw512;
-    static constexpr cint16* __restrict tw1024 = (cint16*)fft_lut_tw1024;
-    static constexpr cint16* __restrict tw2048 = (cint16*)fft_lut_tw2048_half;
-
-#if __FFT_R4_IMPL__ == 0
-    static constexpr TT_TWIDDLE* __restrict tw1_2 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw16_32 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw32_64 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw64_128 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw128_256 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw256_512 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw512_1024 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw1024_2048 = NULL;
-#endif //__FFT_R4_IMPL__ == 0
-#if __FFT_R4_IMPL__ == 1
-    static constexpr TT_TWIDDLE* __restrict tw1_2 = (TT_TWIDDLE*)fft_lut_r4_1_2;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 = (TT_TWIDDLE*)fft_lut_r4_2_4;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 = (TT_TWIDDLE*)fft_lut_r4_4_8;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 = (TT_TWIDDLE*)fft_lut_r4_8_16;
-    static constexpr TT_TWIDDLE* __restrict tw16_32 = (TT_TWIDDLE*)fft_lut_r4_16_32;
-    static constexpr TT_TWIDDLE* __restrict tw32_64 = (TT_TWIDDLE*)fft_lut_r4_32_64;
-    static constexpr TT_TWIDDLE* __restrict tw64_128 = (TT_TWIDDLE*)fft_lut_r4_64_128;
-    static constexpr TT_TWIDDLE* __restrict tw128_256 = (TT_TWIDDLE*)fft_lut_r4_128_256;
-    static constexpr TT_TWIDDLE* __restrict tw256_512 = (TT_TWIDDLE*)fft_lut_r4_256_512;
-    static constexpr TT_TWIDDLE* __restrict tw512_1024 = (TT_TWIDDLE*)fft_lut_r4_512_1024;
-    static constexpr TT_TWIDDLE* __restrict tw1024_2048 = (TT_TWIDDLE*)fft_lut_r4_1024_2048;
-#endif //__FFT_R4_IMPL__ == 1
-
-    alignas(32) static cint16* tw_table[kMaxPointLog * 2] = {
-        tw1,   tw2,   tw4,   tw8,    tw16,    tw32,    tw64,     tw128,     tw256,     tw512,      tw1024,      tw2048,
-        tw1_2, tw2_4, tw4_8, tw8_16, tw16_32, tw32_64, tw64_128, tw128_256, tw256_512, tw512_1024, tw1024_2048, NULL};
-
-    TT_OUT_DATA* obuff = outptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_4096_tmp1;
-    T_internalDataType* tmp2_buf = (T_internalDataType*)fft_4096_tmp2;
-
+    // assign tmp2_buf
+    if
+        constexpr(std::is_same<TT_DATA, cint16>::value) {
+            if
+                constexpr(TP_POINT_SIZE == 4096) { tmp2_buf = (T_internalDataType*)fft_4096_tmp2; }
+            else if
+                constexpr(TP_POINT_SIZE == 2048) { tmp2_buf = (T_internalDataType*)fft_2048_tmp2; }
+            else if
+                constexpr(TP_POINT_SIZE == 1024) { tmp2_buf = (T_internalDataType*)fft_1024_tmp2; }
+            else if
+                constexpr(TP_POINT_SIZE == 512) { tmp2_buf = (T_internalDataType*)fft_512_tmp2; }
+            else if
+                constexpr(TP_POINT_SIZE == 256) { tmp2_buf = (T_internalDataType*)fft_256_tmp2; }
+            else {
+                tmp2_buf = (T_internalDataType*)fft_128_tmp2;
+            }
+        }
+    else {
+        tmp2_buf = (T_internalDataType*)xbuff;
+    }
     stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inptr, outptr);
 };
 
@@ -705,1021 +973,8 @@ template <typename TT_DATA,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
-INLINE_DECL void kernelFFTClass<TT_DATA,
-                                TT_OUT_DATA,
-                                TT_TWIDDLE,
-                                FFT2048_SIZE,
-                                TP_FFT_NIFFT,
-                                TP_SHIFT,
-                                TP_START_RANK,
-                                TP_END_RANK,
-                                TP_DYN_PT_SIZE,
-                                TP_WINDOW_VSIZE,
-                                TP_ORIG_PAR_POWER>::kernelFFT(TT_DATA* __restrict inptr,
-                                                              TT_OUT_DATA* __restrict outptr) {
-    typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
-    static constexpr TT_TWIDDLE* __restrict tw1 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1_cfloat : (TT_TWIDDLE*)fft_lut_tw1);
-    static constexpr TT_TWIDDLE* __restrict tw2 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw2_cfloat : (TT_TWIDDLE*)fft_lut_tw2);
-    static constexpr TT_TWIDDLE* __restrict tw4 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw4_cfloat : (TT_TWIDDLE*)fft_lut_tw4);
-    static constexpr TT_TWIDDLE* __restrict tw8 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw8_cfloat : (TT_TWIDDLE*)fft_lut_tw8);
-    static constexpr TT_TWIDDLE* __restrict tw16 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw16_cfloat : (TT_TWIDDLE*)fft_lut_tw16);
-    static constexpr TT_TWIDDLE* __restrict tw32 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw32_cfloat : (TT_TWIDDLE*)fft_lut_tw32);
-    static constexpr TT_TWIDDLE* __restrict tw64 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw64_cfloat : (TT_TWIDDLE*)fft_lut_tw64);
-    static constexpr TT_TWIDDLE* __restrict tw128 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw128_cfloat : (TT_TWIDDLE*)fft_lut_tw128);
-    static constexpr TT_TWIDDLE* __restrict tw256 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw256_cfloat : (TT_TWIDDLE*)fft_lut_tw256);
-    static constexpr TT_TWIDDLE* __restrict tw512 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw512_cfloat : (TT_TWIDDLE*)fft_lut_tw512);
-    static constexpr TT_TWIDDLE* __restrict tw1024 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1024_cfloat : (TT_TWIDDLE*)fft_lut_tw1024_half);
-
-#if __FFT_R4_IMPL__ == 0
-    static constexpr TT_TWIDDLE* __restrict tw1_2 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw16_32 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw32_64 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw64_128 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw128_256 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw256_512 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw512_1024 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw1024_2048 = NULL;
-#endif //__FFT_R4_IMPL__ == 0
-#if __FFT_R4_IMPL__ == 1
-    static constexpr TT_TWIDDLE* __restrict tw1_2 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_1_2;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_2_4;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_4_8;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_8_16;
-    static constexpr TT_TWIDDLE* __restrict tw16_32 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_16_32;
-    static constexpr TT_TWIDDLE* __restrict tw32_64 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_32_64;
-    static constexpr TT_TWIDDLE* __restrict tw64_128 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_64_128;
-    static constexpr TT_TWIDDLE* __restrict tw128_256 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_128_256;
-    static constexpr TT_TWIDDLE* __restrict tw256_512 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_256_512;
-    static constexpr TT_TWIDDLE* __restrict tw512_1024 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_512_1024;
-    static constexpr TT_TWIDDLE* __restrict tw1024_2048 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_1024_2048;
-#endif //__FFT_R4_IMPL__ == 1
-
-    alignas(32) static TT_TWIDDLE* tw_table[kMaxPointLog * 2] = {
-        tw1,   tw2,   tw4,   tw8,    tw16,    tw32,    tw64,     tw128,     tw256,     tw512,      tw1024,      NULL,
-        tw1_2, tw2_4, tw4_8, tw8_16, tw16_32, tw32_64, tw64_128, tw128_256, tw256_512, tw512_1024, tw1024_2048, NULL};
-
-    TT_DATA* xbuff = inptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_2048_tmp1;
-    T_internalDataType* tmp2_buf = (T_internalDataType*)xbuff;
-
-    stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inptr, outptr);
-};
-
-template <typename TT_OUT_DATA,
-          unsigned int TP_FFT_NIFFT,
-          unsigned int TP_SHIFT,
-          unsigned int TP_START_RANK,
-          unsigned int TP_END_RANK,
-          unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
-INLINE_DECL void kernelFFTClass<cint16,
-                                TT_OUT_DATA,
-                                cint16,
-                                FFT2048_SIZE,
-                                TP_FFT_NIFFT,
-                                TP_SHIFT,
-                                TP_START_RANK,
-                                TP_END_RANK,
-                                TP_DYN_PT_SIZE,
-                                TP_WINDOW_VSIZE,
-                                TP_ORIG_PAR_POWER>::kernelFFT(cint16* __restrict inptr,
-                                                              TT_OUT_DATA* __restrict outptr) {
-    typedef cint16 TT_DATA;
-    typedef cint16 TT_TWIDDLE; // essentially a constant for thie specialization
-    typedef cint32_t T_internalDataType;
-    static constexpr cint16* __restrict tw1 = (cint16*)fft_lut_tw1;
-    static constexpr cint16* __restrict tw2 = (cint16*)fft_lut_tw2;
-    static constexpr cint16* __restrict tw4 = (cint16*)fft_lut_tw4;
-    static constexpr cint16* __restrict tw8 = (cint16*)fft_lut_tw8;
-    static constexpr cint16* __restrict tw16 = (cint16*)fft_lut_tw16;
-    static constexpr cint16* __restrict tw32 = (cint16*)fft_lut_tw32;
-    static constexpr cint16* __restrict tw64 = (cint16*)fft_lut_tw64;
-    static constexpr cint16* __restrict tw128 = (cint16*)fft_lut_tw128;
-    static constexpr cint16* __restrict tw256 = (cint16*)fft_lut_tw256;
-    static constexpr cint16* __restrict tw512 = (cint16*)fft_lut_tw512;
-    static constexpr cint16* __restrict tw1024 = (cint16*)fft_lut_tw1024_half;
-
-#if __FFT_R4_IMPL__ == 0
-    static constexpr TT_TWIDDLE* __restrict tw1_2 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw16_32 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw32_64 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw64_128 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw128_256 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw256_512 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw512_1024 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw1024_2048 = NULL;
-#endif //__FFT_R4_IMPL__ == 0
-#if __FFT_R4_IMPL__ == 1
-    static constexpr TT_TWIDDLE* __restrict tw1_2 = (TT_TWIDDLE*)fft_lut_r4_1_2;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 = (TT_TWIDDLE*)fft_lut_r4_2_4;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 = (TT_TWIDDLE*)fft_lut_r4_4_8;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 = (TT_TWIDDLE*)fft_lut_r4_8_16;
-    static constexpr TT_TWIDDLE* __restrict tw16_32 = (TT_TWIDDLE*)fft_lut_r4_16_32;
-    static constexpr TT_TWIDDLE* __restrict tw32_64 = (TT_TWIDDLE*)fft_lut_r4_32_64;
-    static constexpr TT_TWIDDLE* __restrict tw64_128 = (TT_TWIDDLE*)fft_lut_r4_64_128;
-    static constexpr TT_TWIDDLE* __restrict tw128_256 = (TT_TWIDDLE*)fft_lut_r4_128_256;
-    static constexpr TT_TWIDDLE* __restrict tw256_512 = (TT_TWIDDLE*)fft_lut_r4_256_512;
-    static constexpr TT_TWIDDLE* __restrict tw512_1024 = (TT_TWIDDLE*)fft_lut_r4_512_1024;
-    static constexpr TT_TWIDDLE* __restrict tw1024_2048 = (TT_TWIDDLE*)fft_lut_r4_1024_2048;
-#endif //__FFT_R4_IMPL__ == 1
-    alignas(32) static cint16* tw_table[kMaxPointLog * 2] = {
-        tw1,   tw2,   tw4,   tw8,    tw16,    tw32,    tw64,     tw128,     tw256,     tw512,      tw1024,      NULL,
-        tw1_2, tw2_4, tw4_8, tw8_16, tw16_32, tw32_64, tw64_128, tw128_256, tw256_512, tw512_1024, tw1024_2048, NULL};
-
-    TT_OUT_DATA* obuff = outptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_2048_tmp1;
-    T_internalDataType* tmp2_buf = (T_internalDataType*)fft_2048_tmp2;
-
-    stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inptr, outptr);
-};
-
-template <typename TT_DATA,
-          typename TT_OUT_DATA,
-          typename TT_TWIDDLE,
-          unsigned int TP_FFT_NIFFT,
-          unsigned int TP_SHIFT,
-          unsigned int TP_START_RANK,
-          unsigned int TP_END_RANK,
-          unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
-INLINE_DECL void kernelFFTClass<TT_DATA,
-                                TT_OUT_DATA,
-                                TT_TWIDDLE,
-                                FFT1024_SIZE,
-                                TP_FFT_NIFFT,
-                                TP_SHIFT,
-                                TP_START_RANK,
-                                TP_END_RANK,
-                                TP_DYN_PT_SIZE,
-                                TP_WINDOW_VSIZE,
-                                TP_ORIG_PAR_POWER>::kernelFFT(TT_DATA* __restrict inptr,
-                                                              TT_OUT_DATA* __restrict outptr) {
-    typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
-    static constexpr TT_TWIDDLE* __restrict tw1 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1_cfloat : (TT_TWIDDLE*)fft_lut_tw1);
-    static constexpr TT_TWIDDLE* __restrict tw2 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw2_cfloat : (TT_TWIDDLE*)fft_lut_tw2);
-    static constexpr TT_TWIDDLE* __restrict tw4 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw4_cfloat : (TT_TWIDDLE*)fft_lut_tw4);
-    static constexpr TT_TWIDDLE* __restrict tw8 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw8_cfloat : (TT_TWIDDLE*)fft_lut_tw8);
-    static constexpr TT_TWIDDLE* __restrict tw16 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw16_cfloat : (TT_TWIDDLE*)fft_lut_tw16);
-    static constexpr TT_TWIDDLE* __restrict tw32 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw32_cfloat : (TT_TWIDDLE*)fft_lut_tw32);
-    static constexpr TT_TWIDDLE* __restrict tw64 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw64_cfloat : (TT_TWIDDLE*)fft_lut_tw64);
-    static constexpr TT_TWIDDLE* __restrict tw128 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw128_cfloat : (TT_TWIDDLE*)fft_lut_tw128);
-    static constexpr TT_TWIDDLE* __restrict tw256 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw256_cfloat : (TT_TWIDDLE*)fft_lut_tw256);
-    static constexpr TT_TWIDDLE* __restrict tw512 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw512_cfloat : (TT_TWIDDLE*)fft_lut_tw512_half);
-
-#if __FFT_R4_IMPL__ == 0
-    static constexpr TT_TWIDDLE* __restrict tw1_2 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw16_32 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw32_64 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw64_128 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw128_256 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw256_512 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw512_1024 = NULL;
-#endif //__FFT_R4_IMPL__ == 0
-#if __FFT_R4_IMPL__ == 1
-    static constexpr TT_TWIDDLE* __restrict tw1_2 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_1_2;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_2_4;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_4_8;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_8_16;
-    static constexpr TT_TWIDDLE* __restrict tw16_32 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_16_32;
-    static constexpr TT_TWIDDLE* __restrict tw32_64 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_32_64;
-    static constexpr TT_TWIDDLE* __restrict tw64_128 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_64_128;
-    static constexpr TT_TWIDDLE* __restrict tw128_256 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_128_256;
-    static constexpr TT_TWIDDLE* __restrict tw256_512 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_256_512;
-    static constexpr TT_TWIDDLE* __restrict tw512_1024 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_512_1024;
-#endif //__FFT_R4_IMPL__ == 1
-    alignas(32) static TT_TWIDDLE* tw_table[kMaxPointLog * 2] = {
-        tw1,   tw2,   tw4,   tw8,    tw16,    tw32,    tw64,     tw128,     tw256,     tw512,      NULL, NULL,
-        tw1_2, tw2_4, tw4_8, tw8_16, tw16_32, tw32_64, tw64_128, tw128_256, tw256_512, tw512_1024, NULL, NULL};
-
-    TT_DATA* xbuff = inptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_1024_tmp1;
-    T_internalDataType* tmp2_buf = (T_internalDataType*)xbuff;
-
-    stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inptr, outptr);
-};
-
-template <typename TT_OUT_DATA,
-          unsigned int TP_FFT_NIFFT,
-          unsigned int TP_SHIFT,
-          unsigned int TP_START_RANK,
-          unsigned int TP_END_RANK,
-          unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
-INLINE_DECL void kernelFFTClass<cint16,
-                                TT_OUT_DATA,
-                                cint16,
-                                FFT1024_SIZE,
-                                TP_FFT_NIFFT,
-                                TP_SHIFT,
-                                TP_START_RANK,
-                                TP_END_RANK,
-                                TP_DYN_PT_SIZE,
-                                TP_WINDOW_VSIZE,
-                                TP_ORIG_PAR_POWER>::kernelFFT(cint16* __restrict inptr,
-                                                              TT_OUT_DATA* __restrict outptr) {
-    typedef cint16 TT_DATA;
-    typedef cint16 TT_TWIDDLE; // essentially a constant for thie specialization
-    typedef cint32_t T_internalDataType;
-    static constexpr cint16* __restrict tw1 = (cint16*)fft_lut_tw1;
-    static constexpr cint16* __restrict tw2 = (cint16*)fft_lut_tw2;
-    static constexpr cint16* __restrict tw4 = (cint16*)fft_lut_tw4;
-    static constexpr cint16* __restrict tw8 = (cint16*)fft_lut_tw8;
-    static constexpr cint16* __restrict tw16 = (cint16*)fft_lut_tw16;
-    static constexpr cint16* __restrict tw32 = (cint16*)fft_lut_tw32;
-    static constexpr cint16* __restrict tw64 = (cint16*)fft_lut_tw64;
-    static constexpr cint16* __restrict tw128 = (cint16*)fft_lut_tw128;
-    static constexpr cint16* __restrict tw256 = (cint16*)fft_lut_tw256;
-    static constexpr cint16* __restrict tw512 = (cint16*)fft_lut_tw512_half;
-
-#if __FFT_R4_IMPL__ == 0
-    static constexpr TT_TWIDDLE* __restrict tw1_2 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw16_32 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw32_64 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw64_128 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw128_256 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw256_512 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw512_1024 = NULL;
-#endif //__FFT_R4_IMPL__ == 0
-#if __FFT_R4_IMPL__ == 1
-    static constexpr TT_TWIDDLE* __restrict tw1_2 = (TT_TWIDDLE*)fft_lut_r4_1_2;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 = (TT_TWIDDLE*)fft_lut_r4_2_4;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 = (TT_TWIDDLE*)fft_lut_r4_4_8;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 = (TT_TWIDDLE*)fft_lut_r4_8_16;
-    static constexpr TT_TWIDDLE* __restrict tw16_32 = (TT_TWIDDLE*)fft_lut_r4_16_32;
-    static constexpr TT_TWIDDLE* __restrict tw32_64 = (TT_TWIDDLE*)fft_lut_r4_32_64;
-    static constexpr TT_TWIDDLE* __restrict tw64_128 = (TT_TWIDDLE*)fft_lut_r4_64_128;
-    static constexpr TT_TWIDDLE* __restrict tw128_256 = (TT_TWIDDLE*)fft_lut_r4_128_256;
-    static constexpr TT_TWIDDLE* __restrict tw256_512 = (TT_TWIDDLE*)fft_lut_r4_256_512;
-    static constexpr TT_TWIDDLE* __restrict tw512_1024 = (TT_TWIDDLE*)fft_lut_r4_512_1024;
-#endif //__FFT_R4_IMPL__ == 1
-
-    alignas(32) static cint16* tw_table[kMaxPointLog * 2] = {
-        tw1,   tw2,   tw4,   tw8,    tw16,    tw32,    tw64,     tw128,     tw256,     tw512,      NULL, NULL,
-        tw1_2, tw2_4, tw4_8, tw8_16, tw16_32, tw32_64, tw64_128, tw128_256, tw256_512, tw512_1024, NULL, NULL};
-
-    TT_OUT_DATA* obuff = outptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_1024_tmp1;
-    T_internalDataType* tmp2_buf = (T_internalDataType*)fft_1024_tmp2;
-
-    stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inptr, outptr);
-};
-
-template <typename TT_DATA,
-          typename TT_OUT_DATA,
-          typename TT_TWIDDLE,
-          unsigned int TP_FFT_NIFFT,
-          unsigned int TP_SHIFT,
-          unsigned int TP_START_RANK,
-          unsigned int TP_END_RANK,
-          unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
-INLINE_DECL void kernelFFTClass<TT_DATA,
-                                TT_OUT_DATA,
-                                TT_TWIDDLE,
-                                FFT512_SIZE,
-                                TP_FFT_NIFFT,
-                                TP_SHIFT,
-                                TP_START_RANK,
-                                TP_END_RANK,
-                                TP_DYN_PT_SIZE,
-                                TP_WINDOW_VSIZE,
-                                TP_ORIG_PAR_POWER>::kernelFFT(TT_DATA* __restrict inptr,
-                                                              TT_OUT_DATA* __restrict outptr) {
-    typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
-    static constexpr TT_TWIDDLE* __restrict tw1 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1_cfloat : (TT_TWIDDLE*)fft_lut_tw1);
-    static constexpr TT_TWIDDLE* __restrict tw2 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw2_cfloat : (TT_TWIDDLE*)fft_lut_tw2);
-    static constexpr TT_TWIDDLE* __restrict tw4 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw4_cfloat : (TT_TWIDDLE*)fft_lut_tw4);
-    static constexpr TT_TWIDDLE* __restrict tw8 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw8_cfloat : (TT_TWIDDLE*)fft_lut_tw8);
-    static constexpr TT_TWIDDLE* __restrict tw16 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw16_cfloat : (TT_TWIDDLE*)fft_lut_tw16);
-    static constexpr TT_TWIDDLE* __restrict tw32 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw32_cfloat : (TT_TWIDDLE*)fft_lut_tw32);
-    static constexpr TT_TWIDDLE* __restrict tw64 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw64_cfloat : (TT_TWIDDLE*)fft_lut_tw64);
-    static constexpr TT_TWIDDLE* __restrict tw128 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw128_cfloat : (TT_TWIDDLE*)fft_lut_tw128);
-    static constexpr TT_TWIDDLE* __restrict tw256 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw256_cfloat : (TT_TWIDDLE*)fft_lut_tw256_half);
-
-#if __FFT_R4_IMPL__ == 0
-    static constexpr TT_TWIDDLE* __restrict tw1_2 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw16_32 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw32_64 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw64_128 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw128_256 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw256_512 = NULL;
-#endif //__FFT_R4_IMPL__ == 0
-#if __FFT_R4_IMPL__ == 1
-    static constexpr TT_TWIDDLE* __restrict tw1_2 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_1_2;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_2_4;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_4_8;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_8_16;
-    static constexpr TT_TWIDDLE* __restrict tw16_32 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_16_32;
-    static constexpr TT_TWIDDLE* __restrict tw32_64 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_32_64;
-    static constexpr TT_TWIDDLE* __restrict tw64_128 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_64_128;
-    static constexpr TT_TWIDDLE* __restrict tw128_256 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_128_256;
-    static constexpr TT_TWIDDLE* __restrict tw256_512 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_256_512;
-#endif //__FFT_R4_IMPL__ == 1
-
-    alignas(32) static TT_TWIDDLE* tw_table[kMaxPointLog * 2] = {
-        tw1,   tw2,   tw4,   tw8,    tw16,    tw32,    tw64,     tw128,     tw256,     NULL, NULL, NULL,
-        tw1_2, tw2_4, tw4_8, tw8_16, tw16_32, tw32_64, tw64_128, tw128_256, tw256_512, NULL, NULL, NULL};
-
-    TT_DATA* xbuff = inptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_512_tmp1;
-    T_internalDataType* tmp2_buf = (T_internalDataType*)xbuff;
-
-    stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inptr, outptr);
-};
-
-template <typename TT_OUT_DATA,
-          unsigned int TP_FFT_NIFFT,
-          unsigned int TP_SHIFT,
-          unsigned int TP_START_RANK,
-          unsigned int TP_END_RANK,
-          unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
-INLINE_DECL void kernelFFTClass<cint16,
-                                TT_OUT_DATA,
-                                cint16,
-                                FFT512_SIZE,
-                                TP_FFT_NIFFT,
-                                TP_SHIFT,
-                                TP_START_RANK,
-                                TP_END_RANK,
-                                TP_DYN_PT_SIZE,
-                                TP_WINDOW_VSIZE,
-                                TP_ORIG_PAR_POWER>::kernelFFT(cint16* __restrict inptr,
-                                                              TT_OUT_DATA* __restrict outptr) {
-    typedef cint16 TT_DATA;
-    typedef cint16 TT_TWIDDLE; // essentially a constant for thie specialization
-    typedef cint32_t T_internalDataType;
-    static constexpr cint16* __restrict tw1 = (cint16*)fft_lut_tw1;
-    static constexpr cint16* __restrict tw2 = (cint16*)fft_lut_tw2;
-    static constexpr cint16* __restrict tw4 = (cint16*)fft_lut_tw4;
-    static constexpr cint16* __restrict tw8 = (cint16*)fft_lut_tw8;
-    static constexpr cint16* __restrict tw16 = (cint16*)fft_lut_tw16;
-    static constexpr cint16* __restrict tw32 = (cint16*)fft_lut_tw32;
-    static constexpr cint16* __restrict tw64 = (cint16*)fft_lut_tw64;
-    static constexpr cint16* __restrict tw128 = (cint16*)fft_lut_tw128;
-    static constexpr cint16* __restrict tw256 = (cint16*)fft_lut_tw256_half;
-
-#if __FFT_R4_IMPL__ == 0
-    static constexpr TT_TWIDDLE* __restrict tw1_2 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw16_32 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw32_64 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw64_128 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw128_256 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw256_512 = NULL;
-#endif //__FFT_R4_IMPL__ == 0
-#if __FFT_R4_IMPL__ == 1
-    static constexpr TT_TWIDDLE* __restrict tw1_2 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_1_2;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_2_4;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_4_8;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_8_16;
-    static constexpr TT_TWIDDLE* __restrict tw16_32 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_16_32;
-    static constexpr TT_TWIDDLE* __restrict tw32_64 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_32_64;
-    static constexpr TT_TWIDDLE* __restrict tw64_128 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_64_128;
-    static constexpr TT_TWIDDLE* __restrict tw128_256 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_128_256;
-    static constexpr TT_TWIDDLE* __restrict tw256_512 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_256_512;
-#endif //__FFT_R4_IMPL__ == 1
-
-    alignas(32) static cint16* tw_table[kMaxPointLog * 2] = {
-        tw1,   tw2,   tw4,   tw8,    tw16,    tw32,    tw64,     tw128,     tw256,     NULL, NULL, NULL,
-        tw1_2, tw2_4, tw4_8, tw8_16, tw16_32, tw32_64, tw64_128, tw128_256, tw256_512, NULL, NULL, NULL};
-
-    TT_OUT_DATA* obuff = outptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_512_tmp1;
-    T_internalDataType* tmp2_buf = (T_internalDataType*)fft_512_tmp2;
-
-    stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inptr, outptr);
-};
-
-template <typename TT_DATA,
-          typename TT_OUT_DATA,
-          typename TT_TWIDDLE,
-          unsigned int TP_FFT_NIFFT,
-          unsigned int TP_SHIFT,
-          unsigned int TP_START_RANK,
-          unsigned int TP_END_RANK,
-          unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
-INLINE_DECL void kernelFFTClass<TT_DATA,
-                                TT_OUT_DATA,
-                                TT_TWIDDLE,
-                                FFT256_SIZE,
-                                TP_FFT_NIFFT,
-                                TP_SHIFT,
-                                TP_START_RANK,
-                                TP_END_RANK,
-                                TP_DYN_PT_SIZE,
-                                TP_WINDOW_VSIZE,
-                                TP_ORIG_PAR_POWER>::kernelFFT(TT_DATA* __restrict inptr,
-                                                              TT_OUT_DATA* __restrict outptr) {
-    typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
-    static constexpr TT_TWIDDLE* __restrict tw1 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1_cfloat : (TT_TWIDDLE*)fft_lut_tw1);
-    static constexpr TT_TWIDDLE* __restrict tw2 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw2_cfloat : (TT_TWIDDLE*)fft_lut_tw2);
-    static constexpr TT_TWIDDLE* __restrict tw4 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw4_cfloat : (TT_TWIDDLE*)fft_lut_tw4);
-    static constexpr TT_TWIDDLE* __restrict tw8 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw8_cfloat : (TT_TWIDDLE*)fft_lut_tw8);
-    static constexpr TT_TWIDDLE* __restrict tw16 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw16_cfloat : (TT_TWIDDLE*)fft_lut_tw16);
-    static constexpr TT_TWIDDLE* __restrict tw32 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw32_cfloat : (TT_TWIDDLE*)fft_lut_tw32);
-    static constexpr TT_TWIDDLE* __restrict tw64 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw64_cfloat : (TT_TWIDDLE*)fft_lut_tw64);
-    static constexpr TT_TWIDDLE* __restrict tw128 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw128_cfloat : (TT_TWIDDLE*)fft_lut_tw128_half);
-
-#if __FFT_R4_IMPL__ == 0
-    static constexpr TT_TWIDDLE* __restrict tw1_2 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw16_32 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw32_64 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw64_128 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw128_256 = NULL;
-#endif //__FFT_R4_IMPL__ == 0
-#if __FFT_R4_IMPL__ == 1
-    static constexpr TT_TWIDDLE* __restrict tw1_2 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_1_2;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_2_4;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_4_8;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_8_16;
-    static constexpr TT_TWIDDLE* __restrict tw16_32 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_16_32;
-    static constexpr TT_TWIDDLE* __restrict tw32_64 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_32_64;
-    static constexpr TT_TWIDDLE* __restrict tw64_128 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_64_128;
-    static constexpr TT_TWIDDLE* __restrict tw128_256 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_128_256;
-#endif //__FFT_R4_IMPL__ == 1
-
-    alignas(32) static TT_TWIDDLE* tw_table[kMaxPointLog * 2] = {
-        tw1,   tw2,   tw4,   tw8,    tw16,    tw32,    tw64,     tw128,     NULL, NULL, NULL, NULL,
-        tw1_2, tw2_4, tw4_8, tw8_16, tw16_32, tw32_64, tw64_128, tw128_256, NULL, NULL, NULL, NULL};
-
-    TT_DATA* xbuff = inptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_256_tmp1;
-    T_internalDataType* tmp2_buf = (T_internalDataType*)xbuff;
-
-    stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inptr, outptr);
-};
-
-template <typename TT_OUT_DATA,
-          unsigned int TP_FFT_NIFFT,
-          unsigned int TP_SHIFT,
-          unsigned int TP_START_RANK,
-          unsigned int TP_END_RANK,
-          unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
-INLINE_DECL void kernelFFTClass<cint16,
-                                TT_OUT_DATA,
-                                cint16,
-                                FFT256_SIZE,
-                                TP_FFT_NIFFT,
-                                TP_SHIFT,
-                                TP_START_RANK,
-                                TP_END_RANK,
-                                TP_DYN_PT_SIZE,
-                                TP_WINDOW_VSIZE,
-                                TP_ORIG_PAR_POWER>::kernelFFT(cint16* __restrict inptr,
-                                                              TT_OUT_DATA* __restrict outptr) {
-    typedef cint16 TT_DATA;
-    typedef cint16 TT_TWIDDLE; // essentially a constant for thie specialization
-    typedef cint32_t T_internalDataType;
-    static constexpr cint16* __restrict tw1 = (cint16*)fft_lut_tw1;
-    static constexpr cint16* __restrict tw2 = (cint16*)fft_lut_tw2;
-    static constexpr cint16* __restrict tw4 = (cint16*)fft_lut_tw4;
-    static constexpr cint16* __restrict tw8 = (cint16*)fft_lut_tw8;
-    static constexpr cint16* __restrict tw16 = (cint16*)fft_lut_tw16;
-    static constexpr cint16* __restrict tw32 = (cint16*)fft_lut_tw32;
-    static constexpr cint16* __restrict tw64 = (cint16*)fft_lut_tw64;
-    static constexpr cint16* __restrict tw128 = (cint16*)fft_lut_tw128_half;
-
-#if __FFT_R4_IMPL__ == 0
-    static constexpr TT_TWIDDLE* __restrict tw1_2 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw16_32 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw32_64 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw64_128 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw128_256 = NULL;
-#endif //__FFT_R4_IMPL__ == 0
-#if __FFT_R4_IMPL__ == 1
-    static constexpr TT_TWIDDLE* __restrict tw1_2 = (TT_TWIDDLE*)fft_lut_r4_1_2;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 = (TT_TWIDDLE*)fft_lut_r4_2_4;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 = (TT_TWIDDLE*)fft_lut_r4_4_8;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 = (TT_TWIDDLE*)fft_lut_r4_8_16;
-    static constexpr TT_TWIDDLE* __restrict tw16_32 = (TT_TWIDDLE*)fft_lut_r4_16_32;
-    static constexpr TT_TWIDDLE* __restrict tw32_64 = (TT_TWIDDLE*)fft_lut_r4_32_64;
-    static constexpr TT_TWIDDLE* __restrict tw64_128 = (TT_TWIDDLE*)fft_lut_r4_64_128;
-    static constexpr TT_TWIDDLE* __restrict tw128_256 = (TT_TWIDDLE*)fft_lut_r4_128_256;
-#endif //__FFT_R4_IMPL__ == 1
-
-    alignas(32) static cint16* tw_table[kMaxPointLog * 2] = {
-        tw1,   tw2,   tw4,   tw8,    tw16,    tw32,    tw64,     tw128,     NULL, NULL, NULL, NULL,
-        tw1_2, tw2_4, tw4_8, tw8_16, tw16_32, tw32_64, tw64_128, tw128_256, NULL, NULL, NULL, NULL};
-
-    TT_OUT_DATA* obuff = outptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_256_tmp1;
-    T_internalDataType* tmp2_buf = (T_internalDataType*)fft_256_tmp2;
-
-    stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inptr, outptr);
-};
-
-template <typename TT_DATA,
-          typename TT_OUT_DATA,
-          typename TT_TWIDDLE,
-          unsigned int TP_FFT_NIFFT,
-          unsigned int TP_SHIFT,
-          unsigned int TP_START_RANK,
-          unsigned int TP_END_RANK,
-          unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
-INLINE_DECL void kernelFFTClass<TT_DATA,
-                                TT_OUT_DATA,
-                                TT_TWIDDLE,
-                                FFT128_SIZE,
-                                TP_FFT_NIFFT,
-                                TP_SHIFT,
-                                TP_START_RANK,
-                                TP_END_RANK,
-                                TP_DYN_PT_SIZE,
-                                TP_WINDOW_VSIZE,
-                                TP_ORIG_PAR_POWER>::kernelFFT(TT_DATA* __restrict inptr,
-                                                              TT_OUT_DATA* __restrict outptr) {
-    typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
-    static constexpr TT_TWIDDLE* __restrict tw1 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1_cfloat : (TT_TWIDDLE*)fft_lut_tw1);
-    static constexpr TT_TWIDDLE* __restrict tw2 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw2_cfloat : (TT_TWIDDLE*)fft_lut_tw2);
-    static constexpr TT_TWIDDLE* __restrict tw4 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw4_cfloat : (TT_TWIDDLE*)fft_lut_tw4);
-    static constexpr TT_TWIDDLE* __restrict tw8 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw8_cfloat : (TT_TWIDDLE*)fft_lut_tw8);
-    static constexpr TT_TWIDDLE* __restrict tw16 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw16_cfloat : (TT_TWIDDLE*)fft_lut_tw16);
-    static constexpr TT_TWIDDLE* __restrict tw32 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw32_cfloat : (TT_TWIDDLE*)fft_lut_tw32);
-    static constexpr TT_TWIDDLE* __restrict tw64 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw64_cfloat : (TT_TWIDDLE*)fft_lut_tw64_half);
-
-#if __FFT_R4_IMPL__ == 0
-    static constexpr TT_TWIDDLE* __restrict tw1_2 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw16_32 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw32_64 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw64_128 = NULL;
-#endif //__FFT_R4_IMPL__ == 0
-#if __FFT_R4_IMPL__ == 1
-    static constexpr TT_TWIDDLE* __restrict tw1_2 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_1_2;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_2_4;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_4_8;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_8_16;
-    static constexpr TT_TWIDDLE* __restrict tw16_32 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_16_32;
-    static constexpr TT_TWIDDLE* __restrict tw32_64 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_32_64;
-    static constexpr TT_TWIDDLE* __restrict tw64_128 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_64_128;
-#endif //__FFT_R4_IMPL__ == 1
-
-    alignas(32) static TT_TWIDDLE* tw_table[kMaxPointLog * 2] = {
-        tw1,   tw2,   tw4,   tw8,    tw16,    tw32,    tw64,     NULL, NULL, NULL, NULL, NULL,
-        tw1_2, tw2_4, tw4_8, tw8_16, tw16_32, tw32_64, tw64_128, NULL, NULL, NULL, NULL, NULL};
-
-    TT_DATA* xbuff = inptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_128_tmp1;
-    T_internalDataType* tmp2_buf = (T_internalDataType*)xbuff;
-
-    stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inptr, outptr);
-};
-
-template <typename TT_OUT_DATA,
-          unsigned int TP_FFT_NIFFT,
-          unsigned int TP_SHIFT,
-          unsigned int TP_START_RANK,
-          unsigned int TP_END_RANK,
-          unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
-INLINE_DECL void kernelFFTClass<cint16,
-                                TT_OUT_DATA,
-                                cint16,
-                                FFT128_SIZE,
-                                TP_FFT_NIFFT,
-                                TP_SHIFT,
-                                TP_START_RANK,
-                                TP_END_RANK,
-                                TP_DYN_PT_SIZE,
-                                TP_WINDOW_VSIZE,
-                                TP_ORIG_PAR_POWER>::kernelFFT(cint16* __restrict inptr,
-                                                              TT_OUT_DATA* __restrict outptr) {
-    typedef cint16 TT_DATA;
-    typedef cint16 TT_TWIDDLE; // essentially a constant for thie specialization
-    typedef cint32_t T_internalDataType;
-    static constexpr cint16* __restrict tw1 = (cint16*)fft_lut_tw1;
-    static constexpr cint16* __restrict tw2 = (cint16*)fft_lut_tw2;
-    static constexpr cint16* __restrict tw4 = (cint16*)fft_lut_tw4;
-    static constexpr cint16* __restrict tw8 = (cint16*)fft_lut_tw8;
-    static constexpr cint16* __restrict tw16 = (cint16*)fft_lut_tw16;
-    static constexpr cint16* __restrict tw32 = (cint16*)fft_lut_tw32;
-    static constexpr cint16* __restrict tw64 = (cint16*)fft_lut_tw64_half;
-
-#if __FFT_R4_IMPL__ == 0
-    static constexpr TT_TWIDDLE* __restrict tw1_2 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw16_32 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw32_64 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw64_128 = NULL;
-#endif //__FFT_R4_IMPL__ == 0
-#if __FFT_R4_IMPL__ == 1
-    static constexpr TT_TWIDDLE* __restrict tw1_2 = (TT_TWIDDLE*)fft_lut_r4_1_2;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 = (TT_TWIDDLE*)fft_lut_r4_2_4;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 = (TT_TWIDDLE*)fft_lut_r4_4_8;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 = (TT_TWIDDLE*)fft_lut_r4_8_16;
-    static constexpr TT_TWIDDLE* __restrict tw16_32 = (TT_TWIDDLE*)fft_lut_r4_16_32;
-    static constexpr TT_TWIDDLE* __restrict tw32_64 = (TT_TWIDDLE*)fft_lut_r4_32_64;
-    static constexpr TT_TWIDDLE* __restrict tw64_128 = (TT_TWIDDLE*)fft_lut_r4_64_128;
-#endif //__FFT_R4_IMPL__ == 1
-
-    alignas(32) static cint16* tw_table[kMaxPointLog * 2] = {
-        tw1,   tw2,   tw4,   tw8,    tw16,    tw32,    tw64,     NULL, NULL, NULL, NULL, NULL,
-        tw1_2, tw2_4, tw4_8, tw8_16, tw16_32, tw32_64, tw64_128, NULL, NULL, NULL, NULL, NULL};
-
-    TT_OUT_DATA* obuff = outptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_128_tmp1;
-    T_internalDataType* tmp2_buf = (T_internalDataType*)fft_128_tmp2;
-
-    stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inptr, outptr);
-};
-
-template <typename TT_DATA,
-          typename TT_OUT_DATA,
-          typename TT_TWIDDLE,
-          unsigned int TP_FFT_NIFFT,
-          unsigned int TP_SHIFT,
-          unsigned int TP_START_RANK,
-          unsigned int TP_END_RANK,
-          unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
-INLINE_DECL void kernelFFTClass<TT_DATA,
-                                TT_OUT_DATA,
-                                TT_TWIDDLE,
-                                FFT64_SIZE,
-                                TP_FFT_NIFFT,
-                                TP_SHIFT,
-                                TP_START_RANK,
-                                TP_END_RANK,
-                                TP_DYN_PT_SIZE,
-                                TP_WINDOW_VSIZE,
-                                TP_ORIG_PAR_POWER>::kernelFFT(TT_DATA* __restrict inptr,
-                                                              TT_OUT_DATA* __restrict outptr) {
-    typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
-    static constexpr TT_TWIDDLE* __restrict tw1 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1_cfloat : (TT_TWIDDLE*)fft_lut_tw1);
-    static constexpr TT_TWIDDLE* __restrict tw2 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw2_cfloat : (TT_TWIDDLE*)fft_lut_tw2);
-    static constexpr TT_TWIDDLE* __restrict tw4 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw4_cfloat : (TT_TWIDDLE*)fft_lut_tw4);
-    static constexpr TT_TWIDDLE* __restrict tw8 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw8_cfloat : (TT_TWIDDLE*)fft_lut_tw8);
-    static constexpr TT_TWIDDLE* __restrict tw16 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw16_cfloat : (TT_TWIDDLE*)fft_lut_tw16);
-    static constexpr TT_TWIDDLE* __restrict tw32 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw32_cfloat : (TT_TWIDDLE*)fft_lut_tw32_half);
-
-#if __FFT_R4_IMPL__ == 0
-    static constexpr TT_TWIDDLE* __restrict tw1_2 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw16_32 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw32_64 = NULL;
-#endif //__FFT_R4_IMPL__ == 0
-#if __FFT_R4_IMPL__ == 1
-    static constexpr TT_TWIDDLE* __restrict tw1_2 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_1_2;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_2_4;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_4_8;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_8_16;
-    static constexpr TT_TWIDDLE* __restrict tw16_32 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_16_32;
-    static constexpr TT_TWIDDLE* __restrict tw32_64 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_32_64;
-#endif //__FFT_R4_IMPL__ == 1
-    alignas(32) static TT_TWIDDLE* tw_table[kMaxPointLog * 2] = {
-        tw1,   tw2,   tw4,   tw8,    tw16,    tw32,    NULL, NULL, NULL, NULL, NULL, NULL,
-        tw1_2, tw2_4, tw4_8, tw8_16, tw16_32, tw32_64, NULL, NULL, NULL, NULL, NULL, NULL};
-
-    TT_DATA* xbuff = inptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_128_tmp1;
-    T_internalDataType* tmp2_buf = (T_internalDataType*)xbuff;
-
-    stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inptr, outptr);
-};
-
-template <typename TT_OUT_DATA,
-          unsigned int TP_FFT_NIFFT,
-          unsigned int TP_SHIFT,
-          unsigned int TP_START_RANK,
-          unsigned int TP_END_RANK,
-          unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
-INLINE_DECL void kernelFFTClass<cint16,
-                                TT_OUT_DATA,
-                                cint16,
-                                FFT64_SIZE,
-                                TP_FFT_NIFFT,
-                                TP_SHIFT,
-                                TP_START_RANK,
-                                TP_END_RANK,
-                                TP_DYN_PT_SIZE,
-                                TP_WINDOW_VSIZE,
-                                TP_ORIG_PAR_POWER>::kernelFFT(cint16* __restrict inptr,
-                                                              TT_OUT_DATA* __restrict outptr) {
-    typedef cint16 TT_DATA;
-    typedef cint16 TT_TWIDDLE; // essentially a constant for thie specialization
-    typedef cint32_t T_internalDataType;
-    static constexpr cint16* __restrict tw1 = (cint16*)fft_lut_tw1;
-    static constexpr cint16* __restrict tw2 = (cint16*)fft_lut_tw2;
-    static constexpr cint16* __restrict tw4 = (cint16*)fft_lut_tw4;
-    static constexpr cint16* __restrict tw8 = (cint16*)fft_lut_tw8;
-    static constexpr cint16* __restrict tw16 = (cint16*)fft_lut_tw16;
-    static constexpr cint16* __restrict tw32 = (cint16*)fft_lut_tw32_half;
-
-#if __FFT_R4_IMPL__ == 0
-    static constexpr TT_TWIDDLE* __restrict tw1_2 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw16_32 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw32_64 = NULL;
-#endif //__FFT_R4_IMPL__ == 0
-#if __FFT_R4_IMPL__ == 1
-    static constexpr TT_TWIDDLE* __restrict tw1_2 = (TT_TWIDDLE*)fft_lut_r4_1_2;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 = (TT_TWIDDLE*)fft_lut_r4_2_4;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 = (TT_TWIDDLE*)fft_lut_r4_4_8;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 = (TT_TWIDDLE*)fft_lut_r4_8_16;
-    static constexpr TT_TWIDDLE* __restrict tw16_32 = (TT_TWIDDLE*)fft_lut_r4_16_32;
-    static constexpr TT_TWIDDLE* __restrict tw32_64 = (TT_TWIDDLE*)fft_lut_r4_32_64;
-#endif //__FFT_R4_IMPL__ == 1
-
-    alignas(32) static cint16* tw_table[kMaxPointLog * 2] = {tw1,     tw2,     tw4,  tw8,  tw16,  tw32,  NULL,  NULL,
-                                                             NULL,    NULL,    NULL, NULL, tw1_2, tw2_4, tw4_8, tw8_16,
-                                                             tw16_32, tw32_64, NULL, NULL, NULL,  NULL,  NULL,  NULL};
-
-    TT_OUT_DATA* obuff = outptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_128_tmp1;
-    T_internalDataType* tmp2_buf = (T_internalDataType*)fft_128_tmp2;
-
-    stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inptr, outptr);
-};
-
-template <typename TT_DATA,
-          typename TT_OUT_DATA,
-          typename TT_TWIDDLE,
-          unsigned int TP_FFT_NIFFT,
-          unsigned int TP_SHIFT,
-          unsigned int TP_START_RANK,
-          unsigned int TP_END_RANK,
-          unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
-INLINE_DECL void kernelFFTClass<TT_DATA,
-                                TT_OUT_DATA,
-                                TT_TWIDDLE,
-                                FFT32_SIZE,
-                                TP_FFT_NIFFT,
-                                TP_SHIFT,
-                                TP_START_RANK,
-                                TP_END_RANK,
-                                TP_DYN_PT_SIZE,
-                                TP_WINDOW_VSIZE,
-                                TP_ORIG_PAR_POWER>::kernelFFT(TT_DATA* __restrict inptr,
-                                                              TT_OUT_DATA* __restrict outptr) {
-    typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
-    static constexpr TT_TWIDDLE* __restrict tw1 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1_cfloat : (TT_TWIDDLE*)fft_lut_tw1);
-    static constexpr TT_TWIDDLE* __restrict tw2 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw2_cfloat : (TT_TWIDDLE*)fft_lut_tw2);
-    static constexpr TT_TWIDDLE* __restrict tw4 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw4_cfloat : (TT_TWIDDLE*)fft_lut_tw4);
-    static constexpr TT_TWIDDLE* __restrict tw8 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw8_cfloat : (TT_TWIDDLE*)fft_lut_tw8);
-    static constexpr TT_TWIDDLE* __restrict tw16 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw16_cfloat : (TT_TWIDDLE*)fft_lut_tw16_half);
-
-#if __FFT_R4_IMPL__ == 0
-    static constexpr TT_TWIDDLE* __restrict tw1_2 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw16_32 = NULL;
-#endif //__FFT_R4_IMPL__ == 0
-#if __FFT_R4_IMPL__ == 1
-    static constexpr TT_TWIDDLE* __restrict tw1_2 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_1_2;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_2_4;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_4_8;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_8_16;
-    static constexpr TT_TWIDDLE* __restrict tw16_32 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_16_32;
-#endif //__FFT_R4_IMPL__ == 1
-
-    alignas(32) static TT_TWIDDLE* tw_table[kMaxPointLog * 2] = {tw1,     tw2,  tw4,  tw8,  tw16,  NULL,  NULL,  NULL,
-                                                                 NULL,    NULL, NULL, NULL, tw1_2, tw2_4, tw4_8, tw8_16,
-                                                                 tw16_32, NULL, NULL, NULL, NULL,  NULL,  NULL,  NULL};
-
-    TT_DATA* xbuff = inptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_128_tmp1;
-    T_internalDataType* tmp2_buf = (T_internalDataType*)xbuff;
-
-    stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inptr, outptr);
-};
-
-template <typename TT_OUT_DATA,
-          unsigned int TP_FFT_NIFFT,
-          unsigned int TP_SHIFT,
-          unsigned int TP_START_RANK,
-          unsigned int TP_END_RANK,
-          unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
-INLINE_DECL void kernelFFTClass<cint16,
-                                TT_OUT_DATA,
-                                cint16,
-                                FFT32_SIZE,
-                                TP_FFT_NIFFT,
-                                TP_SHIFT,
-                                TP_START_RANK,
-                                TP_END_RANK,
-                                TP_DYN_PT_SIZE,
-                                TP_WINDOW_VSIZE,
-                                TP_ORIG_PAR_POWER>::kernelFFT(cint16* __restrict inptr,
-                                                              TT_OUT_DATA* __restrict outptr) {
-    typedef cint16 TT_DATA;
-    typedef cint16 TT_TWIDDLE; // essentially a constant for thie specialization
-    typedef cint32_t T_internalDataType;
-    static constexpr cint16* __restrict tw1 = (cint16*)fft_lut_tw1;
-    static constexpr cint16* __restrict tw2 = (cint16*)fft_lut_tw2;
-    static constexpr cint16* __restrict tw4 = (cint16*)fft_lut_tw4;
-    static constexpr cint16* __restrict tw8 = (cint16*)fft_lut_tw8;
-    static constexpr cint16* __restrict tw16 = (cint16*)fft_lut_tw16_half;
-
-#if __FFT_R4_IMPL__ == 0
-    static constexpr TT_TWIDDLE* __restrict tw1_2 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 = NULL;
-    static constexpr TT_TWIDDLE* __restrict tw16_32 = NULL;
-#endif //__FFT_R4_IMPL__ == 0
-#if __FFT_R4_IMPL__ == 1
-    static constexpr TT_TWIDDLE* __restrict tw1_2 = (TT_TWIDDLE*)fft_lut_r4_1_2;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 = (TT_TWIDDLE*)fft_lut_r4_2_4;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 = (TT_TWIDDLE*)fft_lut_r4_4_8;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 = (TT_TWIDDLE*)fft_lut_r4_8_16;
-    static constexpr TT_TWIDDLE* __restrict tw16_32 = (TT_TWIDDLE*)fft_lut_r4_16_32;
-#endif //__FFT_R4_IMPL__ == 1
-
-    alignas(32) static cint16* tw_table[kMaxPointLog * 2] = {tw1,     tw2,  tw4,  tw8,  tw16,  NULL,  NULL,  NULL,
-                                                             NULL,    NULL, NULL, NULL, tw1_2, tw2_4, tw4_8, tw8_16,
-                                                             tw16_32, NULL, NULL, NULL, NULL,  NULL,  NULL,  NULL};
-
-    TT_OUT_DATA* obuff = outptr;
-    T_internalDataType* tmp1_buf = (T_internalDataType*)fft_128_tmp1;
-    T_internalDataType* tmp2_buf = (T_internalDataType*)fft_128_tmp2;
-
-    stages.stagePreamble(tw_table, tmp1_buf, tmp2_buf, inptr, outptr);
-};
-
-template <typename TT_DATA,
-          typename TT_OUT_DATA,
-          typename TT_TWIDDLE,
-          unsigned int TP_FFT_NIFFT,
-          unsigned int TP_SHIFT,
-          unsigned int TP_START_RANK,
-          unsigned int TP_END_RANK,
-          unsigned int TP_DYN_PT_SIZE,
-          unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_TWIDDLE_MODE>
 INLINE_DECL void kernelFFTClass<TT_DATA,
                                 TT_OUT_DATA,
                                 TT_TWIDDLE,
@@ -1730,19 +985,15 @@ INLINE_DECL void kernelFFTClass<TT_DATA,
                                 TP_END_RANK,
                                 TP_DYN_PT_SIZE,
                                 TP_WINDOW_VSIZE,
-                                TP_ORIG_PAR_POWER>::kernelFFT(TT_DATA* __restrict inptr,
-                                                              TT_OUT_DATA* __restrict outptr) {
+                                TP_ORIG_PAR_POWER,
+                                TP_TWIDDLE_MODE>::kernelFFT(TT_DATA* __restrict inptr, TT_OUT_DATA* __restrict outptr) {
     const unsigned int TP_POINT_SIZE = FFT16_SIZE;
 
     typedef typename std::conditional<std::is_same<TT_DATA, cint16>::value, cint32_t, TT_DATA>::type T_internalDataType;
-    static constexpr TT_TWIDDLE* __restrict tw1 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw1_cfloat : (TT_TWIDDLE*)fft_lut_tw1);
-    static constexpr TT_TWIDDLE* __restrict tw2 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw2_cfloat : (TT_TWIDDLE*)fft_lut_tw2);
-    static constexpr TT_TWIDDLE* __restrict tw4 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw4_cfloat : (TT_TWIDDLE*)fft_lut_tw4);
-    static constexpr TT_TWIDDLE* __restrict tw8 =
-        (std::is_same<TT_DATA, cfloat>::value ? (TT_TWIDDLE*)fft_lut_tw8_cfloat : (TT_TWIDDLE*)fft_lut_tw8_half);
+    static constexpr TT_TWIDDLE* __restrict tw1 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 1, TP_TWIDDLE_MODE>();
+    static constexpr TT_TWIDDLE* __restrict tw2 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 2, TP_TWIDDLE_MODE>();
+    static constexpr TT_TWIDDLE* __restrict tw4 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 4, TP_TWIDDLE_MODE>();
+    static constexpr TT_TWIDDLE* __restrict tw8 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 8, TP_TWIDDLE_MODE>();
 
 #if __FFT_R4_IMPL__ == 0
     static constexpr TT_TWIDDLE* __restrict tw1_2 = NULL;
@@ -1752,14 +1003,10 @@ INLINE_DECL void kernelFFTClass<TT_DATA,
     static constexpr TT_TWIDDLE* __restrict tw16_32 = NULL;
 #endif //__FFT_R4_IMPL__ == 0
 #if __FFT_R4_IMPL__ == 1
-    static constexpr TT_TWIDDLE* __restrict tw1_2 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_1_2;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_2_4;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_4_8;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 =
-        std::is_same<TT_DATA, cfloat>::value ? NULL : (TT_TWIDDLE*)fft_lut_r4_8_16;
+    static constexpr TT_TWIDDLE* __restrict tw1_2 = fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 1, TP_TWIDDLE_MODE>();
+    static constexpr TT_TWIDDLE* __restrict tw2_4 = fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 2, TP_TWIDDLE_MODE>();
+    static constexpr TT_TWIDDLE* __restrict tw4_8 = fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 4, TP_TWIDDLE_MODE>();
+    static constexpr TT_TWIDDLE* __restrict tw8_16 = fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 8, TP_TWIDDLE_MODE>();
 #endif //__FFT_R4_IMPL__ == 1
 
     alignas(32) static TT_TWIDDLE* tw_table[kMaxPointLog * 2] = {tw1,  tw2,  tw4,  tw8,  NULL,  NULL,  NULL,  NULL,
@@ -1784,14 +1031,14 @@ INLINE_DECL void kernelFFTClass<TT_DATA,
             if
                 constexpr(std::is_same<TT_DATA, cfloat>::value &&
                           (TP_END_RANK - TP_START_RANK == 4)) { // special case for uncascaded 16pt cfloat
-                    stage_radix2_dit<cfloat, cfloat, cfloat, 8>((cfloat*)xbuff, (cfloat*)tw1, FFT16_SIZE, 0,
-                                                                (cfloat*)tmp1_buf, inv);
-                    stage_radix2_dit<cfloat, cfloat, cfloat, 4>((cfloat*)tmp1_buf, (cfloat*)tw2, FFT16_SIZE, 0,
-                                                                (cfloat*)tmp2_buf, inv);
-                    stage_radix2_dit<cfloat, cfloat, cfloat, 2>((cfloat*)tmp2_buf, (cfloat*)tw4, FFT16_SIZE, 0,
-                                                                (cfloat*)tmp3_buf, inv);
-                    stage_radix2_dit<cfloat, cfloat, cfloat, 1>((cfloat*)tmp3_buf, (cfloat*)tw8, FFT16_SIZE, TP_SHIFT,
-                                                                (cfloat*)obuff, inv); // r is not used.
+                    stage_radix2_dit<cfloat, cfloat, cfloat, 8, 0 /*TP_TWIDDLE_MODE*/>(
+                        (cfloat*)xbuff, (cfloat*)tw1, FFT16_SIZE, 0, (cfloat*)tmp1_buf, inv);
+                    stage_radix2_dit<cfloat, cfloat, cfloat, 4, 0 /*TP_TWIDDLE_MODE*/>(
+                        (cfloat*)tmp1_buf, (cfloat*)tw2, FFT16_SIZE, 0, (cfloat*)tmp2_buf, inv);
+                    stage_radix2_dit<cfloat, cfloat, cfloat, 2, 0 /*TP_TWIDDLE_MODE*/>(
+                        (cfloat*)tmp2_buf, (cfloat*)tw4, FFT16_SIZE, 0, (cfloat*)tmp3_buf, inv);
+                    stage_radix2_dit<cfloat, cfloat, cfloat, 1, 0 /*TP_TWIDDLE_MODE*/>(
+                        (cfloat*)tmp3_buf, (cfloat*)tw8, FFT16_SIZE, TP_SHIFT, (cfloat*)obuff, inv); // r is not used.
                 }
             else {
                 stages.calc(xbuff, tw_table, tmp1_buf, tmp2_buf, obuff);
@@ -1808,7 +1055,8 @@ template <typename TT_OUT_DATA,
           unsigned int TP_END_RANK,
           unsigned int TP_DYN_PT_SIZE,
           unsigned int TP_WINDOW_VSIZE,
-          unsigned int TP_ORIG_PAR_POWER>
+          unsigned int TP_ORIG_PAR_POWER,
+          unsigned int TP_TWIDDLE_MODE>
 INLINE_DECL void kernelFFTClass<cint16,
                                 TT_OUT_DATA,
                                 cint16,
@@ -1819,16 +1067,16 @@ INLINE_DECL void kernelFFTClass<cint16,
                                 TP_END_RANK,
                                 TP_DYN_PT_SIZE,
                                 TP_WINDOW_VSIZE,
-                                TP_ORIG_PAR_POWER>::kernelFFT(cint16* __restrict inptr,
-                                                              TT_OUT_DATA* __restrict outptr) {
+                                TP_ORIG_PAR_POWER,
+                                TP_TWIDDLE_MODE>::kernelFFT(cint16* __restrict inptr, TT_OUT_DATA* __restrict outptr) {
     const unsigned int TP_POINT_SIZE = FFT16_SIZE;
     typedef cint16 TT_DATA;
     typedef cint16 TT_TWIDDLE; // essentially a constant for thie specialization
     typedef cint32_t T_internalDataType;
-    static constexpr cint16* __restrict tw1 = (cint16*)fft_lut_tw1;
-    static constexpr cint16* __restrict tw2 = (cint16*)fft_lut_tw2;
-    static constexpr cint16* __restrict tw4 = (cint16*)fft_lut_tw4;
-    static constexpr cint16* __restrict tw8 = (cint16*)fft_lut_tw8_half;
+    static constexpr cint16* __restrict tw1 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 1, TP_TWIDDLE_MODE>();
+    static constexpr cint16* __restrict tw2 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 2, TP_TWIDDLE_MODE>();
+    static constexpr cint16* __restrict tw4 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 4, TP_TWIDDLE_MODE>();
+    static constexpr cint16* __restrict tw8 = fnGetTwPtr<TT_TWIDDLE, TP_POINT_SIZE, 8, TP_TWIDDLE_MODE>();
 
 #if __FFT_R4_IMPL__ == 0
     static constexpr TT_TWIDDLE* __restrict tw1_2 = NULL;
@@ -1837,10 +1085,10 @@ INLINE_DECL void kernelFFTClass<cint16,
     static constexpr TT_TWIDDLE* __restrict tw8_16 = NULL;
 #endif //__FFT_R4_IMPL__ == 0
 #if __FFT_R4_IMPL__ == 1
-    static constexpr TT_TWIDDLE* __restrict tw1_2 = (TT_TWIDDLE*)fft_lut_r4_1_2;
-    static constexpr TT_TWIDDLE* __restrict tw2_4 = (TT_TWIDDLE*)fft_lut_r4_2_4;
-    static constexpr TT_TWIDDLE* __restrict tw4_8 = (TT_TWIDDLE*)fft_lut_r4_4_8;
-    static constexpr TT_TWIDDLE* __restrict tw8_16 = (TT_TWIDDLE*)fft_lut_r4_8_16;
+    static constexpr TT_TWIDDLE* __restrict tw1_2 = fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 1, TP_TWIDDLE_MODE>();
+    static constexpr TT_TWIDDLE* __restrict tw2_4 = fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 2, TP_TWIDDLE_MODE>();
+    static constexpr TT_TWIDDLE* __restrict tw4_8 = fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 4, TP_TWIDDLE_MODE>();
+    static constexpr TT_TWIDDLE* __restrict tw8_16 = fnGetR4TwPtr<TT_TWIDDLE, TP_POINT_SIZE, 8, TP_TWIDDLE_MODE>();
 #endif //__FFT_R4_IMPL__ == 1
 
     alignas(32) static cint16* tw_table[kMaxPointLog * 2] = {tw1,  tw2,  tw4,  tw8,  NULL,  NULL,  NULL,  NULL,
@@ -1886,7 +1134,8 @@ template <typename TT_DATA,
           unsigned int TP_OUT_API,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_TWIDDLE_MODE>
 NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TT_OUT_DATA,
                                     TT_TWIDDLE,
@@ -1901,8 +1150,9 @@ NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TP_OUT_API,
                                     TP_ORIG_PAR_POWER,
                                     TP_RND,
-                                    TP_SAT>::fftMain(input_buffer<TT_DATA>& __restrict inWindow,
-                                                     output_buffer<TT_OUT_DATA>& __restrict outWindow) {
+                                    TP_SAT,
+                                    TP_TWIDDLE_MODE>::fftMain(input_buffer<TT_DATA>& __restrict inWindow,
+                                                              output_buffer<TT_OUT_DATA>& __restrict outWindow) {
     TT_DATA* inptr = (TT_DATA*)inWindow.data();
     TT_OUT_DATA* outptr = (TT_OUT_DATA*)outWindow.data();
 
@@ -1926,7 +1176,8 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_TWIDDLE_MODE>
 NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TT_OUT_DATA,
                                     TT_TWIDDLE,
@@ -1941,9 +1192,10 @@ NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     kWindowAPI,
                                     TP_ORIG_PAR_POWER,
                                     TP_RND,
-                                    TP_SAT>::fftMain(input_stream<TT_DATA>* __restrict inStream0,
-                                                     input_stream<TT_DATA>* __restrict inStream1,
-                                                     output_buffer<TT_OUT_DATA>& __restrict outWindow) {
+                                    TP_SAT,
+                                    TP_TWIDDLE_MODE>::fftMain(input_stream<TT_DATA>* __restrict inStream0,
+                                                              input_stream<TT_DATA>* __restrict inStream1,
+                                                              output_buffer<TT_OUT_DATA>& __restrict outWindow) {
     TT_DATA* __restrict inPtr = &inBuff[0];
     TT_OUT_DATA* __restrict outPtr = (TT_OUT_DATA*)outWindow.data();
 
@@ -1969,7 +1221,8 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_TWIDDLE_MODE>
 NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TT_OUT_DATA,
                                     TT_TWIDDLE,
@@ -1984,8 +1237,9 @@ NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     kWindowAPI,
                                     TP_ORIG_PAR_POWER,
                                     TP_RND,
-                                    TP_SAT>::fftMain(input_stream<TT_DATA>* __restrict inStream0,
-                                                     output_buffer<TT_OUT_DATA>& __restrict outWindow) {
+                                    TP_SAT,
+                                    TP_TWIDDLE_MODE>::fftMain(input_stream<TT_DATA>* __restrict inStream0,
+                                                              output_buffer<TT_OUT_DATA>& __restrict outWindow) {
     TT_DATA* __restrict inPtr = &inBuff[0];
     TT_OUT_DATA* __restrict outPtr = (TT_OUT_DATA*)outWindow.data();
 
@@ -2012,7 +1266,8 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_TWIDDLE_MODE>
 NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TT_OUT_DATA,
                                     TT_TWIDDLE,
@@ -2027,9 +1282,10 @@ NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     kStreamAPI,
                                     TP_ORIG_PAR_POWER,
                                     TP_RND,
-                                    TP_SAT>::fftMain(input_buffer<TT_DATA>& __restrict inWindow,
-                                                     output_stream<TT_OUT_DATA>* __restrict outStream0,
-                                                     output_stream<TT_OUT_DATA>* __restrict outStream1) {
+                                    TP_SAT,
+                                    TP_TWIDDLE_MODE>::fftMain(input_buffer<TT_DATA>& __restrict inWindow,
+                                                              output_stream<TT_OUT_DATA>* __restrict outStream0,
+                                                              output_stream<TT_OUT_DATA>* __restrict outStream1) {
     TT_DATA* __restrict inPtr = (TT_DATA*)inWindow.data();
     TT_OUT_DATA* __restrict outPtr = &outBuff[0];
 
@@ -2055,7 +1311,8 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_TWIDDLE_MODE>
 NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TT_OUT_DATA,
                                     TT_TWIDDLE,
@@ -2070,8 +1327,9 @@ NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     kStreamAPI,
                                     TP_ORIG_PAR_POWER,
                                     TP_RND,
-                                    TP_SAT>::fftMain(input_buffer<TT_DATA>& __restrict inWindow,
-                                                     output_stream<TT_OUT_DATA>* __restrict outStream0) {
+                                    TP_SAT,
+                                    TP_TWIDDLE_MODE>::fftMain(input_buffer<TT_DATA>& __restrict inWindow,
+                                                              output_stream<TT_OUT_DATA>* __restrict outStream0) {
     TT_DATA* __restrict inPtr = (TT_DATA*)inWindow.data();
     TT_OUT_DATA* __restrict outPtr = &outBuff[0];
 
@@ -2098,7 +1356,8 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_TWIDDLE_MODE>
 NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TT_OUT_DATA,
                                     TT_TWIDDLE,
@@ -2113,10 +1372,11 @@ NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     kStreamAPI,
                                     TP_ORIG_PAR_POWER,
                                     TP_RND,
-                                    TP_SAT>::fftMain(input_stream<TT_DATA>* __restrict inStream0,
-                                                     input_stream<TT_DATA>* __restrict inStream1,
-                                                     output_stream<TT_OUT_DATA>* __restrict outStream0,
-                                                     output_stream<TT_OUT_DATA>* __restrict outStream1) {
+                                    TP_SAT,
+                                    TP_TWIDDLE_MODE>::fftMain(input_stream<TT_DATA>* __restrict inStream0,
+                                                              input_stream<TT_DATA>* __restrict inStream1,
+                                                              output_stream<TT_OUT_DATA>* __restrict outStream0,
+                                                              output_stream<TT_OUT_DATA>* __restrict outStream1) {
     TT_DATA* __restrict inPtr = &inBuff[0];
     TT_OUT_DATA* __restrict outPtr = &outBuff[0];
 
@@ -2144,7 +1404,8 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_TWIDDLE_MODE>
 NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TT_OUT_DATA,
                                     TT_TWIDDLE,
@@ -2159,8 +1420,9 @@ NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     kStreamAPI,
                                     TP_ORIG_PAR_POWER,
                                     TP_RND,
-                                    TP_SAT>::fftMain(input_stream<TT_DATA>* __restrict inStream0,
-                                                     output_stream<TT_OUT_DATA>* __restrict outStream0) {
+                                    TP_SAT,
+                                    TP_TWIDDLE_MODE>::fftMain(input_stream<TT_DATA>* __restrict inStream0,
+                                                              output_stream<TT_OUT_DATA>* __restrict outStream0) {
     TT_DATA* __restrict inPtr = &inBuff[0];
     TT_OUT_DATA* __restrict outPtr = &outBuff[0];
 
@@ -2188,7 +1450,8 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_TWIDDLE_MODE>
 NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TT_OUT_DATA,
                                     TT_TWIDDLE,
@@ -2203,9 +1466,10 @@ NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     kCascStreamAPI,
                                     TP_ORIG_PAR_POWER,
                                     TP_RND,
-                                    TP_SAT>::fftMain(input_stream<TT_DATA>* __restrict inStream0,
-                                                     output_stream_cacc64* __restrict outStream0, // Cascade
-                                                     output_stream<TT_OUT_DATA>* __restrict outStream1) {
+                                    TP_SAT,
+                                    TP_TWIDDLE_MODE>::fftMain(input_stream<TT_DATA>* __restrict inStream0,
+                                                              output_stream_cacc64* __restrict outStream0, // Cascade
+                                                              output_stream<TT_OUT_DATA>* __restrict outStream1) {
     TT_DATA* __restrict inPtr = &inBuff[0];
     TT_OUT_DATA* __restrict outPtr = &outBuff[0];
 
@@ -2232,7 +1496,8 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_TWIDDLE_MODE>
 NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TT_OUT_DATA,
                                     TT_TWIDDLE,
@@ -2247,9 +1512,10 @@ NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     kCascStreamAPI,
                                     TP_ORIG_PAR_POWER,
                                     TP_RND,
-                                    TP_SAT>::fftMain(input_buffer<TT_DATA>& __restrict inWindow0,
-                                                     output_stream_cacc64* __restrict outStream0, // Cascade
-                                                     output_stream<TT_OUT_DATA>* __restrict outStream1) {
+                                    TP_SAT,
+                                    TP_TWIDDLE_MODE>::fftMain(input_buffer<TT_DATA>& __restrict inWindow0,
+                                                              output_stream_cacc64* __restrict outStream0, // Cascade
+                                                              output_stream<TT_OUT_DATA>* __restrict outStream1) {
     TT_DATA* __restrict inPtr = (TT_DATA*)inWindow0.data();
     TT_OUT_DATA* __restrict outPtr = &outBuff[0];
 
@@ -2274,7 +1540,8 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_TWIDDLE_MODE>
 NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TT_OUT_DATA,
                                     TT_TWIDDLE,
@@ -2289,10 +1556,11 @@ NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     kStreamCascAPI,
                                     TP_ORIG_PAR_POWER,
                                     TP_RND,
-                                    TP_SAT>::fftMain(input_stream<TT_DATA>* __restrict inStream0,
-                                                     output_stream<TT_OUT_DATA>* __restrict outStream0,
-                                                     output_stream_cacc64* __restrict outStream1 // Cascade
-                                                     ) {
+                                    TP_SAT,
+                                    TP_TWIDDLE_MODE>::fftMain(input_stream<TT_DATA>* __restrict inStream0,
+                                                              output_stream<TT_OUT_DATA>* __restrict outStream0,
+                                                              output_stream_cacc64* __restrict outStream1 // Cascade
+                                                              ) {
     TT_DATA* __restrict inPtr = &inBuff[0];
     TT_OUT_DATA* __restrict outPtr = &outBuff[0];
 
@@ -2319,7 +1587,8 @@ template <typename TT_DATA,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_TWIDDLE_MODE>
 NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     TT_OUT_DATA,
                                     TT_TWIDDLE,
@@ -2334,10 +1603,11 @@ NOINLINE_DECL void fft_ifft_dit_1ch<TT_DATA,
                                     kStreamCascAPI,
                                     TP_ORIG_PAR_POWER,
                                     TP_RND,
-                                    TP_SAT>::fftMain(input_buffer<TT_DATA>& __restrict inWindow0,
-                                                     output_stream<TT_OUT_DATA>* __restrict outStream0,
-                                                     output_stream_cacc64* __restrict outStream1 // Cascade
-                                                     ) {
+                                    TP_SAT,
+                                    TP_TWIDDLE_MODE>::fftMain(input_buffer<TT_DATA>& __restrict inWindow0,
+                                                              output_stream<TT_OUT_DATA>* __restrict outStream0,
+                                                              output_stream_cacc64* __restrict outStream1 // Cascade
+                                                              ) {
     TT_DATA* __restrict inPtr = (TT_DATA*)inWindow0.data();
     TT_OUT_DATA* __restrict outPtr = &outBuff[0];
 

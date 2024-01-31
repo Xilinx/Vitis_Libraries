@@ -48,361 +48,38 @@ static constexpr unsigned int kSplit = 2;        // deck cutting
 // This interface is maximally sized (3) since it doesn't matter if some inputs are unused.
 template <typename T_D, unsigned int T_IN_API>
 struct T_inputIF {};
-template <>
-struct T_inputIF<int16, kWindowAPI> {
+template <typename T_D>
+struct T_inputIF<T_D, 0> {
     void* inWindow0;
     void* inWindow1;
     void* inWindow2;
+    void* inWindow3;
+    void* inWindow4;
+    void* inWindow5;
+    void* inWindow6;
+    void* inWindow7;
 };
-template <>
-struct T_inputIF<cint16, kWindowAPI> {
-    void* inWindow0;
-    void* inWindow1;
-    void* inWindow2;
-};
-template <>
-struct T_inputIF<int32, kWindowAPI> {
-    void* inWindow0;
-    void* inWindow1;
-    void* inWindow2;
-};
-template <>
-struct T_inputIF<cint32, kWindowAPI> {
-    void* inWindow0;
-    void* inWindow1;
-    void* inWindow2;
-};
-#if __SUPPORTS_CFLOAT__ == 1
-template <>
-struct T_inputIF<float, kWindowAPI> {
-    void* inWindow0;
-    void* inWindow1;
-    void* inWindow2;
-};
-template <>
-struct T_inputIF<cfloat, kWindowAPI> {
-    void* inWindow0;
-    void* inWindow1;
-    void* inWindow2;
-};
-#endif //__SUPPORTS_CFLOAT__ == 1
 
-// Stream inputs
-template <>
-struct T_inputIF<int16, kStreamAPI> {
-    input_stream<int16>* inStream0;
-    input_stream<int16>* inStream1;
-    input_stream<int16>* inStream2;
+template <typename T_D>
+struct T_inputIF<T_D, 1> {
+    input_stream<T_D>* inStream0;
+    input_stream<T_D>* inStream1;
 };
-template <>
-struct T_inputIF<cint16, kStreamAPI> {
-    input_stream<cint16>* inStream0;
-    input_stream<cint16>* inStream1;
-    input_stream<cint16>* inStream2;
-};
-template <>
-struct T_inputIF<int32, kStreamAPI> {
-    input_stream<int32>* inStream0;
-    input_stream<int32>* inStream1;
-    input_stream<int32>* inStream2;
-};
-template <>
-struct T_inputIF<cint32, kStreamAPI> {
-    input_stream<cint32>* inStream0;
-    input_stream<cint32>* inStream1;
-    input_stream<cint32>* inStream2;
-};
-#if __SUPPORTS_CFLOAT__ == 1
-template <>
-struct T_inputIF<float, kStreamAPI> {
-    input_stream<float>* inStream0;
-    input_stream<float>* inStream1;
-    input_stream<float>* inStream2;
-};
-template <>
-struct T_inputIF<cfloat, kStreamAPI> {
-    input_stream<cfloat>* inStream0;
-    input_stream<cfloat>* inStream1;
-    input_stream<cfloat>* inStream2;
-};
-#endif //__SUPPORTS_CFLOAT__ == 1
 
-// The following definitions extend the T_inputIF and T_outputIF as defined in traits.hpp
-// CascStream
-#ifdef __SUPPORTS_ACC64__
-template <>
-struct T_inputIF<int16, kCascStreamAPI> {
-    input_stream_cacc64* inStream0;
-    input_stream<int16>* inStream1;
-    input_stream<int16>* inStream2;
-};
-template <>
-struct T_inputIF<cint16, kCascStreamAPI> {
-    input_stream_cacc64* inStream0;
-    input_stream<cint16>* inStream1;
-    input_stream<cint16>* inStream2;
-};
-template <>
-struct T_inputIF<int32, kCascStreamAPI> {
-    input_stream_cacc64* inStream0;
-    input_stream<int32>* inStream1;
-    input_stream<int32>* inStream2;
-};
-template <>
-struct T_inputIF<cint32, kCascStreamAPI> {
-    input_stream_cacc64* inStream0;
-    input_stream<cint32>* inStream1;
-    input_stream<cint32>* inStream2;
-};
-#if __SUPPORTS_CFLOAT__ == 1
-template <>
-struct T_inputIF<float, kCascStreamAPI> {
-    input_stream_cacc64* inStream0;
-    input_stream<float>* inStream1;
-    input_stream<float>* inStream2;
-};
-template <>
-struct T_inputIF<cfloat, kCascStreamAPI> {
-    input_stream_cacc64* inStream0;
-    input_stream<cfloat>* inStream1;
-    input_stream<cfloat>* inStream2;
-};
-#endif //__SUPPORTS_CFLOAT__ == 1
-#endif //__SUPPORTS_ACC64__
-
-// StreamCasc
-#ifdef __SUPPORTS_ACC64__
-template <>
-struct T_inputIF<int16, kStreamCascAPI> {
-    input_stream<int16>* inStream0;
-    input_stream_cacc64* inStream1;
-    input_stream<int16>* inStream2;
-};
-template <>
-struct T_inputIF<cint16, kStreamCascAPI> {
-    input_stream<cint16>* inStream0;
-    input_stream_cacc64* inStream1;
-    input_stream<cint16>* inStream2;
-};
-template <>
-struct T_inputIF<int32, kStreamCascAPI> {
-    input_stream<int32>* inStream0;
-    input_stream_cacc64* inStream1;
-    input_stream<int32>* inStream2;
-};
-template <>
-struct T_inputIF<cint32, kStreamCascAPI> {
-    input_stream<cint32>* inStream0;
-    input_stream_cacc64* inStream1;
-    input_stream<cint32>* inStream2;
-};
-#if __SUPPORTS_CFLOAT__ == 1
-template <>
-struct T_inputIF<float, kStreamCascAPI> {
-    input_stream<float>* inStream0;
-    input_stream_cacc64* inStream1;
-    input_stream<float>* inStream2;
-};
-template <>
-struct T_inputIF<cfloat, kStreamCascAPI> {
-    input_stream<cfloat>* inStream0;
-    input_stream_cacc64* inStream1;
-    input_stream<cfloat>* inStream2;
-};
-#endif //__SUPPORTS_CFLOAT__ == 1
-#endif //__SUPPORTS_ACC64__
-
-// Outputs------------------------------
-
-// Windows
 template <typename T_D, unsigned int T_out_API>
 struct T_outputIF {};
-template <>
-struct T_outputIF<int16, kWindowAPI> {
+template <typename T_D>
+struct T_outputIF<T_D, 0> {
     void* outWindow0;
     void* outWindow1;
     void* outWindow2;
     void* outWindow3;
 };
-template <>
-struct T_outputIF<cint16, kWindowAPI> {
-    void* outWindow0;
-    void* outWindow1;
-    void* outWindow2;
-    void* outWindow3;
+template <typename T_D>
+struct T_outputIF<T_D, 1> {
+    output_stream<T_D>* outStream0;
+    output_stream<T_D>* outStream1;
 };
-template <>
-struct T_outputIF<int32, kWindowAPI> {
-    void* outWindow0;
-    void* outWindow1;
-    void* outWindow2;
-    void* outWindow3;
-};
-template <>
-struct T_outputIF<cint32, kWindowAPI> {
-    void* outWindow0;
-    void* outWindow1;
-    void* outWindow2;
-    void* outWindow3;
-};
-#if __SUPPORTS_CFLOAT__ == 1
-template <>
-struct T_outputIF<float, kWindowAPI> {
-    void* outWindow0;
-    void* outWindow1;
-    void* outWindow2;
-    void* outWindow3;
-};
-template <>
-struct T_outputIF<cfloat, kWindowAPI> {
-    void* outWindow0;
-    void* outWindow1;
-    void* outWindow2;
-    void* outWindow3;
-};
-#endif //__SUPPORTS_CFLOAT__ == 1
-
-// Streams
-template <>
-struct T_outputIF<int16, kStreamAPI> {
-    output_stream<int16>* outStream0;
-    output_stream<int16>* outStream1;
-    output_stream<int16>* outStream2;
-    output_stream<int16>* outStream3;
-};
-template <>
-struct T_outputIF<cint16, kStreamAPI> {
-    output_stream<cint16>* outStream0;
-    output_stream<cint16>* outStream1;
-    output_stream<cint16>* outStream2;
-    output_stream<cint16>* outStream3;
-};
-template <>
-struct T_outputIF<int32, kStreamAPI> {
-    output_stream<int32>* outStream0;
-    output_stream<int32>* outStream1;
-    output_stream<int32>* outStream2;
-    output_stream<int32>* outStream3;
-};
-template <>
-struct T_outputIF<cint32, kStreamAPI> {
-    output_stream<cint32>* outStream0;
-    output_stream<cint32>* outStream1;
-    output_stream<cint32>* outStream2;
-    output_stream<cint32>* outStream3;
-};
-#if __SUPPORTS_CFLOAT__ == 1
-template <>
-struct T_outputIF<float, kStreamAPI> {
-    output_stream<float>* outStream0;
-    output_stream<float>* outStream1;
-    output_stream<float>* outStream2;
-    output_stream<float>* outStream3;
-};
-template <>
-struct T_outputIF<cfloat, kStreamAPI> {
-    output_stream<cfloat>* outStream0;
-    output_stream<cfloat>* outStream1;
-    output_stream<cfloat>* outStream2;
-    output_stream<cfloat>* outStream3;
-};
-#endif //__SUPPORTS_CFLOAT__ == 1
-
-#ifdef __SUPPORTS_ACC64__
-// CascStreams
-template <>
-struct T_outputIF<int16, kCascStreamAPI> {
-    output_stream_cacc64* outStream0;
-    output_stream<int16>* outStream1;
-    output_stream<int16>* outStream2;
-    output_stream<int16>* outStream3;
-};
-template <>
-struct T_outputIF<cint16, kCascStreamAPI> {
-    output_stream_cacc64* outStream0;
-    output_stream<cint16>* outStream1;
-    output_stream<cint16>* outStream2;
-    output_stream<cint16>* outStream3;
-};
-template <>
-struct T_outputIF<int32, kCascStreamAPI> {
-    output_stream_cacc64* outStream0;
-    output_stream<int32>* outStream1;
-    output_stream<int32>* outStream2;
-    output_stream<int32>* outStream3;
-};
-template <>
-struct T_outputIF<cint32, kCascStreamAPI> {
-    output_stream_cacc64* outStream0;
-    output_stream<cint32>* outStream1;
-    output_stream<cint32>* outStream2;
-    output_stream<cint32>* outStream3;
-};
-#if __SUPPORTS_CFLOAT__ == 1
-template <>
-struct T_outputIF<float, kCascStreamAPI> {
-    output_stream_cacc64* outStream0;
-    output_stream<float>* outStream1;
-    output_stream<float>* outStream2;
-    output_stream<float>* outStream3;
-};
-template <>
-struct T_outputIF<cfloat, kCascStreamAPI> {
-    output_stream_cacc64* outStream0;
-    output_stream<cfloat>* outStream1;
-    output_stream<cfloat>* outStream2;
-    output_stream<cfloat>* outStream3;
-};
-#endif //__SUPPORTS_CFLOAT__ == 1
-#endif //__SUPPORTS_ACC64__
-
-#ifdef __SUPPORTS_ACC64__
-// StreamCascs
-template <>
-struct T_outputIF<int16, kStreamCascAPI> {
-    output_stream<int16>* outStream0;
-    output_stream_cacc64* outStream1;
-    output_stream<int16>* outStream2;
-    output_stream<int16>* outStream3;
-};
-template <>
-struct T_outputIF<cint16, kStreamCascAPI> {
-    output_stream<cint16>* outStream0;
-    output_stream_cacc64* outStream1;
-    output_stream<cint16>* outStream2;
-    output_stream<cint16>* outStream3;
-};
-template <>
-struct T_outputIF<int32, kStreamCascAPI> {
-    output_stream<int32>* outStream0;
-    output_stream_cacc64* outStream1;
-    output_stream<int32>* outStream2;
-    output_stream<int32>* outStream3;
-};
-template <>
-struct T_outputIF<cint32, kStreamCascAPI> {
-    output_stream<cint32>* outStream0;
-    output_stream_cacc64* outStream1;
-    output_stream<cint32>* outStream2;
-    output_stream<cint32>* outStream3;
-};
-#if __SUPPORTS_CFLOAT__ == 1
-template <>
-struct T_outputIF<float, kStreamCascAPI> {
-    output_stream<float>* outStream0;
-    output_stream_cacc64* outStream1;
-    output_stream<float>* outStream2;
-    output_stream<float>* outStream3;
-};
-template <>
-struct T_outputIF<cfloat, kStreamCascAPI> {
-    output_stream<cfloat>* outStream0;
-    output_stream_cacc64* outStream1;
-    output_stream<cfloat>* outStream2;
-    output_stream<cfloat>* outStream3;
-};
-#endif //__SUPPORTS_CFLOAT__ == 1
-#endif //__SUPPORTS_ACC64__
 }
 }
 }

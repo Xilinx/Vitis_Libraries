@@ -76,7 +76,8 @@ template <typename TT_DATA,
           unsigned int TP_PARALLEL_POWER,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_TWIDDLE_MODE>
 void fft_r2comb_ref<TT_DATA,
                     TT_TWIDDLE,
                     TP_POINT_SIZE,
@@ -87,11 +88,12 @@ void fft_r2comb_ref<TT_DATA,
                     TP_PARALLEL_POWER,
                     TP_ORIG_PAR_POWER,
                     TP_RND,
-                    TP_SAT>::r2StageInt(TT_DATA* samplesA,
-                                        TT_DATA* samplesB,
-                                        TT_TWIDDLE* twiddles,
-                                        int pptSize,
-                                        bool inv) {
+                    TP_SAT,
+                    TP_TWIDDLE_MODE>::r2StageInt(TT_DATA* samplesA,
+                                                 TT_DATA* samplesB,
+                                                 TT_TWIDDLE* twiddles,
+                                                 int pptSize,
+                                                 bool inv) {
     int ptSize = TP_DYN_PT_SIZE == 0 ? TP_POINT_SIZE : pptSize;
     int loopSize = (ptSize >> TP_PARALLEL_POWER) >> 1; // each loop calc 2 samples
     T_accRef<TT_DATA> csum;
@@ -102,9 +104,9 @@ void fft_r2comb_ref<TT_DATA,
     int64 presat;
     unsigned int inIndex[kRadix];
     unsigned int outIndex[kRadix];
-    cint32 tw;                     // necessary to accommodate 0,-32768 when conjugated
-    const unsigned int shift = 15; // just to compensate for binary point in cint16 twiddles
-    const unsigned int round_const = (1 << (shift + TP_SHIFT - 1));
+    cint32 tw; // necessary to accommodate 0,-32768 when conjugated
+    constexpr unsigned int kTwShift = getTwShift<TT_TWIDDLE, TP_TWIDDLE_MODE>();
+    const unsigned int round_const = (1 << (kTwShift + TP_SHIFT - 1));
     for (int op = 0; op < loopSize; op++) {
         inIndex[0] = 2 * op;
         inIndex[1] = 2 * op + 1;
@@ -112,22 +114,22 @@ void fft_r2comb_ref<TT_DATA,
         outIndex[1] = op + loopSize;
         tw.real = (int32)twiddles[op].real;
         tw.imag = inv ? -(int32)twiddles[op].imag : (int32)twiddles[op].imag;
-        sam1.real = (int64)samplesA[inIndex[0]].real << shift;
-        sam1.imag = (int64)samplesA[inIndex[0]].imag << shift;
+        sam1.real = (int64)samplesA[inIndex[0]].real << kTwShift;
+        sam1.imag = (int64)samplesA[inIndex[0]].imag << kTwShift;
         sam2.real = (int64)samplesA[inIndex[1]].real;
         sam2.imag = (int64)samplesA[inIndex[1]].imag;
         sam2rot.real = (int64)sam2.real * (int64)tw.real - (int64)sam2.imag * (int64)tw.imag;
         sam2rot.imag = (int64)sam2.real * (int64)tw.imag + (int64)sam2.imag * (int64)tw.real;
         csum.real = (int64)sam1.real + (int64)sam2rot.real;
         csum.imag = (int64)sam1.imag + (int64)sam2rot.imag;
-        roundAcc(TP_RND, shift + TP_SHIFT, csum);
+        roundAcc(TP_RND, kTwShift + TP_SHIFT, csum);
         saturateAcc(csum, TP_SAT);
         samplesB[outIndex[0]].real = (TT_BASE_DATA)csum.real;
         samplesB[outIndex[0]].imag = (TT_BASE_DATA)csum.imag;
 
         csum.real = (int64)sam1.real - (int64)sam2rot.real;
         csum.imag = (int64)sam1.imag - (int64)sam2rot.imag;
-        roundAcc(TP_RND, shift + TP_SHIFT, csum);
+        roundAcc(TP_RND, kTwShift + TP_SHIFT, csum);
         saturateAcc(csum, TP_SAT);
         samplesB[outIndex[1]].real = (TT_BASE_DATA)csum.real;
         samplesB[outIndex[1]].imag = (TT_BASE_DATA)csum.imag;
@@ -144,7 +146,8 @@ template <typename TT_DATA,
           unsigned int TP_PARALLEL_POWER,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_TWIDDLE_MODE>
 void fft_r2comb_ref<TT_DATA,
                     TT_TWIDDLE,
                     TP_POINT_SIZE,
@@ -155,11 +158,12 @@ void fft_r2comb_ref<TT_DATA,
                     TP_PARALLEL_POWER,
                     TP_ORIG_PAR_POWER,
                     TP_RND,
-                    TP_SAT>::r2StageFloat(TT_DATA* samplesA,
-                                          TT_DATA* samplesB,
-                                          TT_TWIDDLE* twiddles,
-                                          int pptSize,
-                                          bool inv) {
+                    TP_SAT,
+                    TP_TWIDDLE_MODE>::r2StageFloat(TT_DATA* samplesA,
+                                                   TT_DATA* samplesB,
+                                                   TT_TWIDDLE* twiddles,
+                                                   int pptSize,
+                                                   bool inv) {
     unsigned int rank = fnGetPointSizePower<TP_POINT_SIZE>() - 1;
     constexpr unsigned int kRadix = 2;
     int ptSize = TP_DYN_PT_SIZE == 0 ? TP_POINT_SIZE : pptSize;
@@ -200,7 +204,8 @@ template <typename TT_DATA,
           unsigned int TP_PARALLEL_POWER,
           unsigned int TP_ORIG_PAR_POWER,
           unsigned int TP_RND,
-          unsigned int TP_SAT>
+          unsigned int TP_SAT,
+          unsigned int TP_TWIDDLE_MODE>
 void fft_r2comb_ref<TT_DATA,
                     TT_TWIDDLE,
                     TP_POINT_SIZE,
@@ -211,7 +216,9 @@ void fft_r2comb_ref<TT_DATA,
                     TP_PARALLEL_POWER,
                     TP_ORIG_PAR_POWER,
                     TP_RND,
-                    TP_SAT>::fft_r2comb_ref_main(input_buffer<TT_DATA>& inWindow, output_buffer<TT_DATA>& outWindow) {
+                    TP_SAT,
+                    TP_TWIDDLE_MODE>::fft_r2comb_ref_main(input_buffer<TT_DATA>& inWindow,
+                                                          output_buffer<TT_DATA>& outWindow) {
     if
         constexpr(TP_DYN_PT_SIZE == 1) {
             constexpr int kMinPtSizePwr = 4;
@@ -224,7 +231,7 @@ void fft_r2comb_ref<TT_DATA,
                     : (kPtSizePwr % 2 == 1 ? 1 : 0); // There is one radix 2 stage if we have an odd power of 2 point
                                                      // size, but for cfloat all stages are R2.
             constexpr unsigned int kR4Stages = std::is_same<TT_DATA, cfloat>::value ? 0 : kPtSizePwr / 2;
-            constexpr unsigned int shift = 15; // unsigned weight (binary point position) of TT_TWIDDLE
+            constexpr unsigned int kTwShift = getTwShift<TT_TWIDDLE, TP_TWIDDLE_MODE>();
             unsigned int stageShift = 0;
 
             TT_DATA* headerPtr;

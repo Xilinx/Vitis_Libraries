@@ -2,7 +2,7 @@
     "name": "VMC DSPLIB FIR Resampler",
     "description": "",
     "gui": false,
-    "flow": "versal",
+    "flow": "aie",
     "platform_allowlist": [
         "vck190"
     ],

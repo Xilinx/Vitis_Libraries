@@ -11,11 +11,9 @@
       "name": "data_type",
       "description": "The type of individual data samples input to and output of the fft function",
       "default": "cint16",
-      "blockgui":{
             "label": "Input/Output data type:",
             "tablabel": "Main",
             "parameterType":"popup"
-      }
     },
     {
       "key": "TT_TWIDDLE",
@@ -27,11 +25,9 @@
         "function": "vmc_validate_twiddle_type",
         "args": ["data_type"]
       },
-      "blockgui":{
             "label": "Twiddle factor data type:",
             "tablabel": "Main",
             "parameterType":"popup"
-      }
     },
       {
       "key": "TP_POINT_SIZE",
@@ -43,22 +39,18 @@
         "function": "vmc_validate_point_size",
         "args": []
       },
-      "blockgui":{
             "label": "DFT size:",
             "tablabel": "Main",
             "parameterType":"edit"
-      }
     },
     {
       "key": "TP_NUM_FRAMES",
       "name": "num_frames",
       "description": "The number of frames to be processed per input window of data",
       "default": 64,
-      "blockgui":{
-            "label": "Input frame size (Number of samples):",
+            "label": "Number of frames per window:",
             "tablabel": "Main",
             "parameterType":"edit"
-      }
     },
     {
       "key": "TP_SHIFT",
@@ -70,43 +62,37 @@
         "function": "vmc_validate_shift_val",
         "args": ["data_type"]
       },
-      "blockgui":{
             "label": "Scale output down by 2^:",
             "tablabel": "Main",
             "parameterType":"edit"
-      }
     },
-	{
+    {
       "key": "TP_RND",
       "name": "rnd_mode",
       "description": "The rounding to be applied during the shift down stage of processing.",
       "enum": [0, 1, 2, 3, 4, 5, 6, 7],
       "enum_str": ["Floor", "Ceiling", "Round to positive infinity", "Round to negative infinity", "Round symmetrical to infinity", "Round symmetrical to zero", "Round convergent to even", "Round convergent to odd"],
       "default": 4,
-      "blockgui": {
           "label": "Rounding mode:",
             "tablabel": "Main",
           "parameterType": "popup"
-      }
     },
-	{
+    {
       "key": "TP_SAT",
-	  "name": "sat_mode",
+      "name": "sat_mode",
       "description": "Saturation mode.",
       "enum": [0, 1, 3],
       "enum_str": ["0-None", "1-Asymmetric", "3-Symmetric"],
-	  "default": 0,
+      "default": 0,
       "validator": {
           "file": "vmc_dft_common.py",
           "function": "vmc_validate_sat_mode",
-		  "args": []
-		},
-      "blockgui":{
+          "args": []
+        },
             "label": "Saturation mode:",
             "tablabel": "Main",
             "parameterType":"popup"
-		}
-	},
+    },
     {
       "key": "TP_CASC_LEN",
       "name": "casc_length",
@@ -117,11 +103,9 @@
         "function": "vmc_validate_casc_length",
         "args": ["num_frames", "point_size"]
       },
-      "blockgui":{
             "label": "Number of cascade stages:",
             "tablabel": "Main",
             "parameterType":"edit"
-      }
     }
   ],
   "generator": {

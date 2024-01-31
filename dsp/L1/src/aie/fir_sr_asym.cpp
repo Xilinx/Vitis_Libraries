@@ -1031,7 +1031,8 @@ void fir_sr_asym<TT_DATA,
            output_circular_buffer<TT_DATA>& __restrict outWindow) {
     T_inputIF<CASC_IN_FALSE, TT_DATA, TP_DUAL_IP> inInterface;
     T_outputIF<CASC_OUT_FALSE, TT_DATA> outInterface;
-    inInterface.inWindowCirc = (input_circular_buffer<TT_DATA>*)&inWindow;
+    constexpr int kdummy = 16;
+    inInterface.inWindowCirc = (input_circular_buffer<TT_DATA, extents<inherited_extent>, margin<kdummy> >*)&inWindow;
     outInterface.outWindow = (output_circular_buffer<TT_DATA>*)&outWindow;
     this->filterKernel(inInterface, outInterface);
 };

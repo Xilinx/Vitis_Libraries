@@ -40,6 +40,7 @@ struct fir_params_defaults {
     static constexpr unsigned int BTP_INPUT_WINDOW_VSIZE = 256;
     static constexpr unsigned int BTP_CASC_LEN = 1;
     static constexpr unsigned int BTP_USE_COEFF_RELOAD = 0;
+    static constexpr unsigned int BTP_TDM_CHANNELS = 1;
     static constexpr unsigned int BTP_NUM_OUTPUTS = 1;
     static constexpr unsigned int BTP_DUAL_IP = 0;
     static constexpr unsigned int BTP_API = 0;

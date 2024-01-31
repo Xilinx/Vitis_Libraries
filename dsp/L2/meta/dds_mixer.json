@@ -26,7 +26,6 @@
             "name": "TP_INPUT_WINDOW_VSIZE",
             "type": "uint",
             "description": "describes the number of samples in the input/output window API or number of samples to process per iteration.",
-            "minimum": 4,
             "validator": {
                 "file": "dds_mixer.py",
                 "function": "validate_TP_WINDOW_VSIZE",

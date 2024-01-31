@@ -90,30 +90,36 @@ INLINE_DECL void set_sat_mode() {
         constexpr(satMode == 3) { ::aie::set_saturation(::aie::saturation_mode::symmetric); }
 }
 
+#ifdef __X86SIM__
+#define __chess_behave_as_fundamental_type__
+#else
+#define __chess_behave_as_fundamental_type__ __attribute__((chess_behave_as_fundamental_type))
+#endif
+
 // T_buff structs with ::aie::vectors
 template <typename T>
-struct __attribute__((chess_behave_as_fundamental_type)) T_buff_128b {
+struct __chess_behave_as_fundamental_type__ T_buff_128b {
     using v_type = ::aie::vector<T, 128 / 8 / sizeof(T)>;
     v_type val;
     static constexpr unsigned int size = 128;
     static constexpr unsigned getLanes() { return 128 / 8 / sizeof(T); };
 };
 template <typename T>
-struct __attribute__((chess_behave_as_fundamental_type)) T_buff_256b {
+struct __chess_behave_as_fundamental_type__ T_buff_256b {
     using v_type = ::aie::vector<T, 256 / 8 / sizeof(T)>;
     v_type val;
     static constexpr unsigned int size = 256;
     static constexpr unsigned getLanes() { return 256 / 8 / sizeof(T); };
 };
 template <typename T>
-struct __attribute__((chess_behave_as_fundamental_type)) T_buff_512b {
+struct __chess_behave_as_fundamental_type__ T_buff_512b {
     using v_type = ::aie::vector<T, 512 / 8 / sizeof(T)>;
     v_type val;
     static constexpr unsigned int size = 512;
     static constexpr unsigned getLanes() { return 512 / 8 / sizeof(T); };
 };
 template <typename T>
-struct __attribute__((chess_behave_as_fundamental_type)) T_buff_1024b {
+struct __chess_behave_as_fundamental_type__ T_buff_1024b {
     using v_type = ::aie::vector<T, 1024 / 8 / sizeof(T)>;
     v_type val;
     static constexpr unsigned int size = 1024;

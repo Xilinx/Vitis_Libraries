@@ -5,8 +5,8 @@ from aie_common import fn_is_complex, fn_size_by_byte, isError,isValid, fn_valid
 
 def validate_data_type_combination(TT_DATA_A, TT_DATA_B):
   checks = [
-    com.fn_float_coef(TT_DATA_A, TT_DATA_B), 
-    com.fn_int_coef(TT_DATA_A, TT_DATA_B)
+    com.fn_float_coeff(TT_DATA_A, TT_DATA_B),
+    com.fn_int_coeff(TT_DATA_A, TT_DATA_B)
   ]
   for check in checks:
     if check["is_valid"] == False:
@@ -20,35 +20,24 @@ def validate_TT_DATA_B(args):
   return validate_data_type_combination(TT_DATA_A, TT_DATA_B)
 
 
-  
-def validate_data_type_combination(TT_DATA_A, TT_DATA_B):
-  checks = [
-    com.fn_float_coef(TT_DATA_A, TT_DATA_B), 
-    com.fn_int_coef(TT_DATA_A, TT_DATA_B)
-  ]
-  for check in checks:
-    if check["is_valid"] == False:
-      return check
-  return isValid
-
 def isMultiple(A,B):
   return (A % B == 0)
-  
 
-def getOutputType(typeA, typeB) : 
-  if (fn_size_by_byte(typeA) > fn_size_by_byte(typeB)) : 
+
+def getOutputType(typeA, typeB) :
+  if (fn_size_by_byte(typeA) > fn_size_by_byte(typeB)) :
     return typeA
-  else : 
+  else :
     return typeB
 
 
 def validate_casc(TP_DIM_B, TP_CASC_LEN):
   if (not isMultiple(TP_DIM_B, TP_CASC_LEN)):
-    return isError(f"TP_DIM_B ({TP_DIM_B}) needs to be a multiple of TP_CASC_LEN ({TP_CASC_LEN}) ")
+    return isError(f"TP_DIM_B ({TP_DIM_B}) needs to be a multiple of TP_CASC_LEN ({TP_CASC_LEN}).  ")
 
   return isValid
 
-  
+
 def validate_TP_SHIFT(args):
     TT_DATA_A = args["TT_DATA_A"]
     TP_SHIFT = args["TP_SHIFT"]
@@ -59,31 +48,31 @@ def validate_TP_SAT(args):
   return fn_validate_satMode(TP_SAT)
 
 def info_ports(args):
-   
+
     portsA = com.get_port_info(
-        portname = "inA", 
-        dir = "in", 
-        TT_DATA = args["TT_DATA_A"], 
+        portname = "inA",
+        dir = "in",
+        TT_DATA = args["TT_DATA_A"],
         windowVSize = (args["TP_NUM_FRAMES"] * args["TP_DIM_A"] * args["TP_DIM_B"]),
         vectorLength = args["TP_CASC_LEN"]
     )
     portsB = com.get_port_info(
-        portname = "inB", 
-        dir = "in", 
-        TT_DATA = args["TT_DATA_B"], 
+        portname = "inB",
+        dir = "in",
+        TT_DATA = args["TT_DATA_B"],
         windowVSize = (args["TP_NUM_FRAMES"] * args["TP_DIM_B"] / args["TP_CASC_LEN"]),
         vectorLength = args["TP_CASC_LEN"]
     )
     TT_DATA_OUT = getOutputType(args["TT_DATA_A"], args["TT_DATA_B"])
     TP_OUTPUT_WINDOW_VSIZE = (args["TP_DIM_B"] * args["TP_NUM_FRAMES"])
     portsOut = com.get_port_info(
-        portname = "out", 
-        dir = "out", 
-        TT_DATA = TT_DATA_OUT, 
+        portname = "out",
+        dir = "out",
+        TT_DATA = TT_DATA_OUT,
         windowVSize = (TP_OUTPUT_WINDOW_VSIZE),
         vectorLength = None
     )
-  # join lists of ports together and return 
+  # join lists of ports together and return
     return portsA + portsB + portsOut
 
 
@@ -122,7 +111,7 @@ public:
     {TP_SAT} // TP_SAT
 
   > matVecMul;
-  
+
   {graphname}() : matVecMul() {{
     adf::kernel *matVecMul_kernels = matVecMul.getKernels();
     for (int i=0; i < 1; i++) {{

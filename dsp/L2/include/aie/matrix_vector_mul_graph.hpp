@@ -63,17 +63,20 @@ template <int kPos,
           unsigned int TP_RND,
           unsigned int TP_SAT,
           unsigned int TP_NUM_FRAMES,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_SSR>
 class create_casc_kernel_recur {
    public:
-    static void create(kernel (&mat_vec_mulKernels)[TP_CASC_LEN]) {
+    static void create(kernel (&mat_vec_mulKernels)[TP_CASC_LEN * TP_SSR]) {
         static constexpr unsigned int TP_KERNEL_POSITION = kPos - 1;
-        mat_vec_mulKernels[kPos - 1] =
-            kernel::create_object<matrix_vector_mul<TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_SHIFT, TP_RND, TP_SAT,
-                                                    TP_NUM_FRAMES, TP_CASC_LEN, TP_KERNEL_POSITION, true, true> >();
 
+        for (int ssr = 0; ssr < TP_SSR; ssr++) {
+            mat_vec_mulKernels[kPos - 1 + ssr * TP_CASC_LEN] = kernel::create_object<
+                matrix_vector_mul<TT_DATA_A, TT_DATA_B, TP_DIM_A / TP_SSR, TP_DIM_B, TP_SHIFT, TP_RND, TP_SAT,
+                                  TP_NUM_FRAMES, TP_CASC_LEN, TP_KERNEL_POSITION, true, true> >();
+        }
         create_casc_kernel_recur<kPos - 1, TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_SHIFT, TP_RND, TP_SAT,
-                                 TP_NUM_FRAMES, TP_CASC_LEN>::create(mat_vec_mulKernels);
+                                 TP_NUM_FRAMES, TP_CASC_LEN, TP_SSR>::create(mat_vec_mulKernels);
     }
 };
 
@@ -87,7 +90,8 @@ template <typename TT_DATA_A,
           unsigned int TP_RND,
           unsigned int TP_SAT,
           unsigned int TP_NUM_FRAMES,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_SSR>
 class create_casc_kernel_recur<1,
                                TT_DATA_A,
                                TT_DATA_B,
@@ -97,13 +101,16 @@ class create_casc_kernel_recur<1,
                                TP_RND,
                                TP_SAT,
                                TP_NUM_FRAMES,
-                               TP_CASC_LEN> {
+                               TP_CASC_LEN,
+                               TP_SSR> {
    public:
-    static void create(kernel (&mat_vec_mulKernels)[TP_CASC_LEN]) {
+    static void create(kernel (&mat_vec_mulKernels)[TP_CASC_LEN * TP_SSR]) {
         static constexpr unsigned int TP_KERNEL_POSITION = 0;
-        mat_vec_mulKernels[0] =
-            kernel::create_object<matrix_vector_mul<TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_SHIFT, TP_RND, TP_SAT,
-                                                    TP_NUM_FRAMES, TP_CASC_LEN, TP_KERNEL_POSITION, false, true> >();
+        for (int ssr = 0; ssr < TP_SSR; ssr++) {
+            mat_vec_mulKernels[0 + (ssr * TP_CASC_LEN)] = kernel::create_object<
+                matrix_vector_mul<TT_DATA_A, TT_DATA_B, TP_DIM_A / TP_SSR, TP_DIM_B, TP_SHIFT, TP_RND, TP_SAT,
+                                  TP_NUM_FRAMES, TP_CASC_LEN, TP_KERNEL_POSITION, false, true> >();
+        }
     }
 };
 
@@ -117,17 +124,20 @@ template <int kPos,
           unsigned int TP_RND,
           unsigned int TP_SAT,
           unsigned int TP_NUM_FRAMES,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_SSR>
 class create_casc_kernel {
    public:
-    static void create(kernel (&mat_vec_mulKernels)[TP_CASC_LEN]) {
+    static void create(kernel (&mat_vec_mulKernels)[TP_CASC_LEN * TP_SSR]) {
         static constexpr unsigned int TP_KERNEL_POSITION = kPos - 1;
-        mat_vec_mulKernels[kPos - 1] =
-            kernel::create_object<matrix_vector_mul<TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_SHIFT, TP_RND, TP_SAT,
-                                                    TP_NUM_FRAMES, TP_CASC_LEN, TP_KERNEL_POSITION, true, false> >();
+        for (int ssr = 0; ssr < TP_SSR; ssr++) {
+            mat_vec_mulKernels[kPos - 1 + (TP_CASC_LEN * ssr)] = kernel::create_object<
+                matrix_vector_mul<TT_DATA_A, TT_DATA_B, TP_DIM_A / TP_SSR, TP_DIM_B, TP_SHIFT, TP_RND, TP_SAT,
+                                  TP_NUM_FRAMES, TP_CASC_LEN, TP_KERNEL_POSITION, true, false> >();
+        }
 
         create_casc_kernel_recur<kPos - 1, TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_SHIFT, TP_RND, TP_SAT,
-                                 TP_NUM_FRAMES, TP_CASC_LEN>::create(mat_vec_mulKernels);
+                                 TP_NUM_FRAMES, TP_CASC_LEN, TP_SSR>::create(mat_vec_mulKernels);
     }
 };
 
@@ -140,7 +150,8 @@ template <typename TT_DATA_A,
           unsigned int TP_RND,
           unsigned int TP_SAT,
           unsigned int TP_NUM_FRAMES,
-          unsigned int TP_CASC_LEN>
+          unsigned int TP_CASC_LEN,
+          unsigned int TP_SSR>
 class create_casc_kernel<1,
                          TT_DATA_A,
                          TT_DATA_B,
@@ -150,13 +161,16 @@ class create_casc_kernel<1,
                          TP_RND,
                          TP_SAT,
                          TP_NUM_FRAMES,
-                         TP_CASC_LEN> {
+                         TP_CASC_LEN,
+                         TP_SSR> {
    public:
-    static void create(kernel (&mat_vec_mulKernels)[1]) {
-        static constexpr unsigned int TP_KERNEL_POSITION = 0;
-        mat_vec_mulKernels[0] =
-            kernel::create_object<matrix_vector_mul<TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_SHIFT, TP_RND, TP_SAT,
-                                                    TP_NUM_FRAMES, TP_CASC_LEN, TP_KERNEL_POSITION, false, false> >();
+    static void create(kernel (&mat_vec_mulKernels)[TP_CASC_LEN * TP_SSR]) {
+        for (int ssr = 0; ssr < TP_SSR; ssr++) {
+            static constexpr unsigned int TP_KERNEL_POSITION = 0;
+            mat_vec_mulKernels[ssr] = kernel::create_object<
+                matrix_vector_mul<TT_DATA_A, TT_DATA_B, TP_DIM_A / TP_SSR, TP_DIM_B, TP_SHIFT, TP_RND, TP_SAT,
+                                  TP_NUM_FRAMES, TP_CASC_LEN, TP_KERNEL_POSITION, false, false> >();
+        }
     }
 };
 
@@ -220,6 +234,7 @@ template <typename TT_DATA_A,
           unsigned int TP_RND,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_CASC_LEN,
+          unsigned int TP_SSR,
           unsigned int TP_SAT>
 class matrix_vector_mul_graph : public graph {
    public:
@@ -227,7 +242,7 @@ class matrix_vector_mul_graph : public graph {
      * The chain of kernels that will be created and mapped onto AIE tiles.
      * Number of kernels (``TP_CASC_LEN``) will be connected with each other in series via a cascade interface.
      **/
-    kernel m_mat_vec_mulKernels[TP_CASC_LEN];
+    kernel m_mat_vec_mulKernels[TP_CASC_LEN * TP_SSR];
 
     /**
      * Access function to get pointer to kernel (or first kernel in a chained configuration).
@@ -244,7 +259,7 @@ class matrix_vector_mul_graph : public graph {
      * The matrix can be zero-padded to achieve this requirement. \n
      * The number of samples to the Matrix A iobuffer will be TP_DIM_A * TP_DIM_B * TP_NUM_FRAMES.
      **/
-    port<input> inA[TP_CASC_LEN];
+    port<input> inA[TP_CASC_LEN * TP_SSR];
 
     /**
      * Input to the function, Vector B.
@@ -254,7 +269,7 @@ class matrix_vector_mul_graph : public graph {
      * The vector can be zero-padded to achieve this requirement. \n
      * The number of samples to the Vector B iobuffer will be TP_DIM_B * TP_NUM_FRAMES.
      **/
-    port<input> inB[TP_CASC_LEN];
+    port<input> inB[TP_CASC_LEN * TP_SSR];
 
     /**
      * The output data of the function. For cascaded designs, this is located at the end of the cascaded kernel chain.
@@ -263,43 +278,45 @@ class matrix_vector_mul_graph : public graph {
      * The number of samples to the Output iobuffer will be TP_DIM_A * TP_NUM_FRAMES.
      *
      **/
-    port<output> out[1];
+    port<output> out[TP_SSR];
 
     /**
      * @brief This is the constructor function for the Matrix Vector Multiply graph.
      * Constructor has no arguments.
      **/
     matrix_vector_mul_graph() {
-        // Create kernel classes
         create_casc_kernel<TP_CASC_LEN, TT_DATA_A, TT_DATA_B, TP_DIM_A, TP_DIM_B, TP_SHIFT, TP_RND, TP_SAT,
-                           TP_NUM_FRAMES, TP_CASC_LEN>::create(m_mat_vec_mulKernels);
-
-        constexpr int windowSizeA = TP_NUM_FRAMES * TP_DIM_A * (TP_DIM_B / TP_CASC_LEN);
+                           TP_NUM_FRAMES, TP_CASC_LEN, TP_SSR>::create(m_mat_vec_mulKernels);
+        constexpr int windowSizeA = TP_NUM_FRAMES * (TP_DIM_A / TP_SSR) * (TP_DIM_B / TP_CASC_LEN);
         constexpr int windowSizeB = TP_NUM_FRAMES * (TP_DIM_B / TP_CASC_LEN);
-        constexpr int windowSizeOut = TP_NUM_FRAMES * TP_DIM_A;
+        constexpr int windowSizeOut = TP_NUM_FRAMES * (TP_DIM_A / TP_SSR);
+        for (int ssrRank = 0; ssrRank < TP_SSR; ssrRank++) {
+            // Create kernel classes
+            for (int cascNum = 0; cascNum < TP_CASC_LEN; cascNum++) {
+                // connect cascaded kernels
+                if (cascNum >= 1 && TP_CASC_LEN > 1) {
+                    connect<cascade>(m_mat_vec_mulKernels[(cascNum - 1) + (ssrRank * TP_CASC_LEN)].out[0],
+                                     m_mat_vec_mulKernels[cascNum + (ssrRank * TP_CASC_LEN)].in[2]);
+                }
+                // // connect input data to each kernel
+                connect(inA[cascNum + (ssrRank * TP_CASC_LEN)],
+                        m_mat_vec_mulKernels[cascNum + (ssrRank * TP_CASC_LEN)].in[0]);
+                connect(inB[cascNum + (ssrRank * TP_CASC_LEN)],
+                        m_mat_vec_mulKernels[cascNum + (ssrRank * TP_CASC_LEN)].in[1]);
+                dimensions(m_mat_vec_mulKernels[cascNum + (ssrRank * TP_CASC_LEN)].in[0]) = {windowSizeA};
+                dimensions(m_mat_vec_mulKernels[cascNum + (ssrRank * TP_CASC_LEN)].in[1]) = {windowSizeB};
 
-        // create object for each kernel in cascade
-        for (int cascNum = 0; cascNum < TP_CASC_LEN; cascNum++) {
-            // connect cascaded kernels
-            if (cascNum >= 1 && TP_CASC_LEN > 1) {
-                connect<cascade>(m_mat_vec_mulKernels[cascNum - 1].out[0], m_mat_vec_mulKernels[cascNum].in[2]);
+                // Specify mapping constraints
+                runtime<ratio>(m_mat_vec_mulKernels[cascNum + (ssrRank * TP_CASC_LEN)]) = 0.8;
+                // Source files
+                source(m_mat_vec_mulKernels[cascNum + (ssrRank * TP_CASC_LEN)]) = "matrix_vector_mul.cpp";
+                headers(m_mat_vec_mulKernels[cascNum + (ssrRank * TP_CASC_LEN)]) = {"matrix_vector_mul.hpp"};
             }
-            // // connect input data to each kernel
-            connect(inA[cascNum], m_mat_vec_mulKernels[cascNum].in[0]);
-            connect(inB[cascNum], m_mat_vec_mulKernels[cascNum].in[1]);
-            dimensions(m_mat_vec_mulKernels[cascNum].in[0]) = {windowSizeA};
-            dimensions(m_mat_vec_mulKernels[cascNum].in[1]) = {windowSizeB};
 
-            // Specify mapping constraints
-            runtime<ratio>(m_mat_vec_mulKernels[cascNum]) = 0.8;
-            // Source files
-            source(m_mat_vec_mulKernels[cascNum]) = "matrix_vector_mul.cpp";
-            headers(m_mat_vec_mulKernels[cascNum]) = {"matrix_vector_mul.hpp"};
+            // connect final kernel output to output of the graph
+            connect(m_mat_vec_mulKernels[(TP_CASC_LEN - 1) + (ssrRank * TP_CASC_LEN)].out[0], out[ssrRank]);
+            dimensions(m_mat_vec_mulKernels[(TP_CASC_LEN - 1) + (ssrRank * TP_CASC_LEN)].out[0]) = {windowSizeOut};
         }
-
-        // connect final kernel output to output of the graph
-        connect(m_mat_vec_mulKernels[(TP_CASC_LEN - 1)].out[0], out[0]);
-        dimensions(m_mat_vec_mulKernels[(TP_CASC_LEN - 1)].out[0]) = {windowSizeOut};
     };
 };
 

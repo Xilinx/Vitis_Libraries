@@ -8,47 +8,41 @@
   "parameters": [
       {
           "key": "TT_DATA",
-	  "name": "data_type",
+      "name": "data_type",
           "type": "typename",
           "description": "Data type of individual I/O data samples.",
-	  "default": "int8",
-	  "blockgui":{
+      "default": "int8",
               "label": "Input/Output data type:",
               "tablabel": "Main",
               "parameterType":"popup"
-	  }
       },
       {
           "key": "TP_WINDOW_VSIZE",
-	  "name": "input_window_size",
-	  "description": "The number of samples in the input window",
-	  "default": 256,
-	  "validator": {
+      "name": "input_window_size",
+      "description": "The number of samples in the input window",
+      "default": 256,
+      "validator": {
               "file": "vmc_sample_delay.py",
               "function": "vmc_validate_TP_WINDOW_VSIZE",
               "args": ["data_type", "max_sample_delay"]
           },
-	  "blockgui":{
               "label": "Input window size (Number of samples):",
               "tablabel": "Main",
               "parameterType":"edit"
-	  }
       },
       {
           "key": "TP_MAX_DELAY",
-	  "name": "max_sample_delay",
+      "name": "max_sample_delay",
           "description": "Upper bound of the the requested sample delay on RTP port",
-	  "default": 256,
-	  "validator": {
+      "default": 256,
+      "validator": {
               "file": "vmc_sample_delay.py",
               "function": "vmc_validate_TP_MAX_DELAY",
               "args": ["data_type"]
           },
-	  "blockgui":{
               "label": "Maximum sample delay:",
               "tablabel": "Main",
               "parameterType":"edit"
-	  }
       }
   ],
 

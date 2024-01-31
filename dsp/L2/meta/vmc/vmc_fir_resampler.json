@@ -11,57 +11,49 @@
       "name": "data_type",
       "description": "The type of individual data samples input to and output of the filter function",
       "default": "cint16",
-      "blockgui": {
           "label": "Input/Output data type:",
           "tablabel": "Main",
           "parameterType": "popup"
-      }
     },
       {
-      "key": "TT_COEF",  
+      "key": "TT_COEFF",
       "name": "coef_type",
       "description": "The type of individual coefficients of the filter taps",
       "default": "int16",
       "validator": {
         "file": "vmc_fir_resampler.py",
-        "function": "vmc_validate_coef_type",
+        "function": "vmc_validate_coeff_type",
         "args": ["data_type","AIE_VARIANT"]
       },
-      "blockgui": {
           "label": "Filter coefficients data type:",
           "tablabel": "Main",
           "parameterType": "popup"
-      }
     },
     {
       "name": "use_coeff_reload",
       "description": "Allows the user to select of runtime coefficient reloading",
       "default": false,
       "type": "bool",
-      "blockgui": {
           "label": "Specify filter coefficients via input port",
           "tablabel": "Main",
           "parameterType": "checkbox",
             "disable":"coeff",
             "enable":"fir_length"
-      }
     },
-	{
+    {
       "key": "TP_NUM_OUTPUTS",
       "name": "num_outputs",
       "description": "The number of output ports. Windows API output an exact copy of the data. Stream API interleaves the output data with a 128-bit pattern.",
       "default": false,
       "type": "bool",
-	  "validator": {
+      "validator": {
         "file": "vmc_fir_resampler.py",
         "function": "validate_num_outputs",
         "args": ["AIE_VARIANT"]
       },
-      "blockgui":{
           "label": "Provide second set of output ports",
             "tablabel": "Main",
             "parameterType":"checkbox"
-      }
     },
     {
       "key":"coeff",
@@ -74,41 +66,35 @@
         "function": "vmc_validate_coeff",
         "args": ["use_coeff_reload", "coef_type" ,"fir_length", "data_type", "casc_length", "decimate_factor", "interpolate_factor", "AIE_VARIANT","deci_poly","interp_poly"]
       },
-      "blockgui": {
           "label": "Filter coefficients:",
            "tablabel": "Main",
           "parameterType": "edit"
-      }
-    }, 
+    },
       {
       "key":"TP_FIR_LEN",
       "name": "fir_length",
       "description": "Specify fir length for coefficient reloading",
       "default": 30,
-      "blockgui": {
           "label": "Filter length:",
            "tablabel": "Main",
           "parameterType": "edit"
-      }
     },
-	{   
-      "key": "TP_INTERPOLATE_FACTOR",  
+    {
+      "key": "TP_INTERPOLATE_FACTOR",
       "name": "interpolate_factor",
       "description": "",
       "default": 3,
-	  "validator": {
+      "validator": {
         "file": "vmc_fir_resampler.py",
         "function": "vmc_validate_interpolate_factor",
         "args": ["AIE_VARIANT"]
       },
-      "blockgui": {
           "label": "Interpolation factor:",
           "tablabel": "Main",
           "parameterType": "edit"
-      }
     },
-	{   
-      "key": "TP_DECIMATE_FACTOR",  
+    {
+      "key": "TP_DECIMATE_FACTOR",
       "name": "decimate_factor",
       "description": "",
       "default": 2,
@@ -117,11 +103,9 @@
         "function": "vmc_validate_decimate_factor",
         "args": ["data_type", "coef_type", "interpolate_factor", "AIE_VARIANT"]
       },
-      "blockgui": {
           "label": "Decimation factor:",
             "tablabel": "Main",
           "parameterType": "edit"
-      }
     },
     {
       "key":"TP_INPUT_WINDOW_VSIZE",
@@ -133,11 +117,9 @@
         "function": "vmc_validate_input_window_size",
         "args": ["data_type", "coef_type", "use_coeff_reload", "coeff", "fir_length", "decimate_factor", "interpolate_factor","interp_poly","deci_poly", "AIE_VARIANT"]
       },
-      "blockgui": {
           "label": "Input window size (Number of samples):",
             "tablabel": "Main",
           "parameterType": "edit"
-      }
     },
     {
       "key": "TP_SHIFT",
@@ -149,11 +131,9 @@
         "function": "vmc_validate_shift_val",
         "args": ["data_type"]
       },
-      "blockgui": {
           "label": "Scale output down by 2^:",
             "tablabel": "Main",
           "parameterType": "edit"
-      }
     },
     {
       "key": "TP_RND",
@@ -167,32 +147,28 @@
         "function": "vmc_validate_rnd_mode",
         "args": ["AIE_VARIANT"]
       },
-      "blockgui": {
           "label": "Rounding mode:",
             "tablabel": "Main",
           "parameterType": "popup"
-      }
     },
-	{
+    {
       "key": "TP_SAT",
-	  "name": "sat_mode",
+      "name": "sat_mode",
       "description": "Saturation mode.",
       "enum": [0, 1, 3],
       "enum_str": ["0-None", "1-Asymmetric", "3-Symmetric"],
-	  "default": 0,
+      "default": 0,
       "validator": {
           "file": "vmc_fir_resampler.py",
           "function": "validate_sat_mode",
-		  "args": []
-		},
-		"blockgui":{
+          "args": []
+        },
             "label": "Saturation mode:",
             "tablabel": "Main",
             "parameterType":"popup"
-		}
-	},
-	{
-      "key": "TP_PARA_INTERP_POLY",    
+    },
+    {
+      "key": "TP_PARA_INTERP_POLY",
       "name": "interp_poly",
       "description": "The number of parallel polyphases to decompose interpolator over",
       "default": 1,
@@ -201,14 +177,12 @@
         "function": "vmc_validate_interp_poly",
         "args": ["interpolate_factor"]
       },
-      "blockgui":{
             "label": "Number of interpolator polyphases:",
-	    "tablabel": "Main",
+        "tablabel": "Main",
             "parameterType":"edit"
-      }
     },
-	{
-      "key": "TP_PARA_DECI_POLY",    
+    {
+      "key": "TP_PARA_DECI_POLY",
       "name": "deci_poly",
       "description": "The number of parallel polyphases to decompose decimator over",
       "default": 1,
@@ -217,11 +191,9 @@
         "function": "vmc_validate_deci_poly",
         "args": ["decimate_factor"]
       },
-      "blockgui":{
             "label": "Number of decimator polyphases:",
-	    "tablabel": "Main",
+        "tablabel": "Main",
             "parameterType":"edit"
-      }
     },
     {
       "key": "TP_CASC_LEN",
@@ -233,13 +205,11 @@
         "function": "vmc_validate_casc_length",
         "args": []
       },
-      "blockgui": {
           "label": "Number of cascade stages:",
             "tablabel": "Main",
           "parameterType": "edit"
-      }
     }
-    
+
   ],
   "generator": {
     "file": "vmc_fir_resampler.py",

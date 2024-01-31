@@ -23,9 +23,10 @@ HELPER_ROOT_DIR ?= ./../../../../
 PARAM_MAP = AIE_VARIANT $(AIE_VARIANT) DATA_TYPE $(DATA_TYPE) DATA_OUT_TYPE $(DATA_OUT_TYPE) WINDOW_VSIZE $(WINDOW_VSIZE)
 INPUT_WINDOW_VSIZE = $(shell echo $$(($(WINDOW_VSIZE)*$(NUM_INPUTS))))
 
-UUT_FILE_SUFFIX = $(UUT_KERNEL)_$(DATA_TYPE)_$(DATA_OUT_TYPE)_$(WINDOW_VSIZE)
-STATUS_FILE = ./logs/status_$(UUT_FILE_SUFFIX).txt
+STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
 SPLIT_ZIP_FILE ?=
+
+AIE_PART = XCVC1902-VSVD1760-1LP-E-S
 
 gen_input:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/gen_input.tcl $(INPUT_FILE) $(WINDOW_VSIZE) $(NITER) $(DATA_SEED) $(DATA_STIM_TYPE) 0 0 $(DATA_TYPE) 0 1
@@ -40,7 +41,8 @@ get_status:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP)
 
 get_latency:
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output $(STATUS_FILE) $(WINDOW_VSIZE) $(NITER)
+	sh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_PART)
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output T_input_0_0.txt ./data/uut_output_0_0.txt $(STATUS_FILE) $(WINDOW_VSIZE) $(NITER)
 
 get_stats:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(WINDOW_VSIZE) 1 $(STATUS_FILE) ./aiesimulator_output transferData $(NITER)

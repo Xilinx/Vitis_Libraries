@@ -1,19 +1,6 @@
-.. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-    
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-    
-       http://www.apache.org/licenses/LICENSE-2.0
-    
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+.. Copyright © 2019–2023 Advanced Micro Devices, Inc
 
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _WIDGETS:
 
@@ -37,8 +24,7 @@ The graph entry point is the following:
 Supported Types
 ~~~~~~~~~~~~~~~
 
-The widget API cast supports int16, cint16, int32, cint32, float and cfloat types as selected by template parameter TT_DATA. This data type is used
-by both input and output ports.
+The widget API cast supports int16, cint16, int32, cint32, float, and cfloat types as selected by the ``TT_DATA`` template parameter. This data type is used by both input and output ports.
 
 ~~~~~~~~~~~~~~~~~~~
 Template Parameters
@@ -47,7 +33,7 @@ Template Parameters
 To see details on the template parameters for the Widget API Cast, see :ref:`API_REFERENCE`.
 
 ~~~~~~~~~~~~~~~~
-Access functions
+Access Functions
 ~~~~~~~~~~~~~~~~
 
 To see details on the access functions for the Widget API Cast, see :ref:`API_REFERENCE`.
@@ -61,13 +47,13 @@ To see details on the ports for the Widget API Cast, see :ref:`API_REFERENCE`.
 Design Notes
 ~~~~~~~~~~~~
 
-The widget_api_cast library element serves multiple purposes. Firstly, it can convert from window to stream or vice versa. Secondly, it can perform limited broadcast of windows. Thirdly it can perform various patterns of interlace when there are two streams in or out.
+The widget_api_cast library element serves multiple purposes. First, it can convert from window to stream or vice versa. Second, it can perform a limited broadcast of windows. Third, it can perform various patterns of interlace when there are two streams in or out.
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Code Example including constraints
+Code Example Including Constraints
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The following code example shows how the widget_api_cast graph class may be used within a user super-graph, including how to set the runtime<ratio> of internal kernels. This example shows the widget configured to interlace two input streams on a sample-by-sample basis, with the output written to a window.
+The following code example shows how the widget_api_cast graph class can be used within a user super-graph, including how to set the runtime<ratio> of internal kernels. This example shows the widget configured to interlace two input streams on a sample-by-sample basis, with the output written to a window.
 
 .. literalinclude:: ../../../../L2/examples/docs_examples/test_widget_api_cast.hpp
     :language: cpp
@@ -92,6 +78,3 @@ The following code example shows how the widget_api_cast graph class may be used
    :ltrim:
 .. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
    :ltrim:
-
-
-

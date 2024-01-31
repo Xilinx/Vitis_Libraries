@@ -10,11 +10,9 @@
       "key": "TT_DATA",
       "name": "data_type",
       "default": "cint16",
-      "blockgui":{
             "label": "Input/Output data type:",
             "tablabel": "Main",
             "parameterType":"popup"
-      }
     },
     {
       "key": "TT_COEFF",  
@@ -25,11 +23,9 @@
         "function": "vmc_validate_coeff_type",
         "args": [ "data_type" ]
       },
-      "blockgui":{
             "label": "Function coefficient data type:",
             "tablabel": "Main",
             "parameterType":"popup"
-      }
     },
     { 
       "name": "coeff",
@@ -41,11 +37,9 @@
         "function": "vmc_validate_coeff",
         "args": ["point_size","is_dyn_pt_size"]
       },
-      "blockgui":{
             "label": "Function coefficients:",
             "tablabel": "Main",
             "parameterType":"edit"
-      }
     },
     {
       "key": "TP_POINT_SIZE",
@@ -56,11 +50,9 @@
         "function": "vmc_validate_point_size",
         "args": ["data_type"]
       },
-      "blockgui":{
             "label": "FFT/IFFT point size:",
             "tablabel": "Main",
             "parameterType":"edit"
-      }
     },
     { 
       "key": "TP_DYN_PT_SIZE",
@@ -72,11 +64,9 @@
         "function": "vmc_validate_is_dyn_pt_size",
         "args": [ "point_size" ]
       },
-      "blockgui":{
             "label": "Use dynamic point size",
             "tablabel": "Main",
             "parameterType":"checkbox"
-      }
     },
     {
       "key": "TP_WINDOW_VSIZE",
@@ -87,11 +77,9 @@
         "function": "vmc_validate_input_window_size",
         "args": [ "point_size" ]
       },
-      "blockgui":{
             "label": "Input window size (Number of Samples):",
             "tablabel": "Main",
             "parameterType":"edit"
-      }
     },
     {
       "key": "TP_SHIFT",
@@ -103,11 +91,9 @@
         "function": "vmc_validate_shift_val",
         "args": [ "data_type" ]
       },
-      "blockgui":{
             "label": "Scale output down by 2^:",
             "tablabel": "Main",
             "parameterType":"edit"
-      }
     }
     
   ],

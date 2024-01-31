@@ -37,7 +37,7 @@ namespace aie {
 namespace fft {
 namespace r2comb {
 #include "fft_ref_utils.hpp"
-#include "fft_r2comb_twiddle_lut.hpp"
+#include "fft_r2comb_twiddle_lut_all.hpp"
 
 //-----------------------------------------------------------------------------------------------------
 // FFT/iFFT R2 combiner stage reference model class
@@ -51,7 +51,8 @@ template <typename TT_DATA,    // type of data input and output
           unsigned int TP_PARALLEL_POWER = 1,
           unsigned int TP_ORIG_PAR_POWER = TP_PARALLEL_POWER,
           unsigned int TP_RND = 0,
-          unsigned int TP_SAT = 1>
+          unsigned int TP_SAT = 1,
+          unsigned int TP_TWIDDLE_MODE = 0>
 class fft_r2comb_ref {
    private:
     static constexpr unsigned int kSupportedPtSizes = 12; // 16 to 64k.
@@ -67,7 +68,7 @@ class fft_r2comb_ref {
     // There will be 4, 8 or some other N clones of this kernel all executing on different pages.
     fft_r2comb_ref(unsigned int inIdx) {
         kIndex = inIdx;
-        const TT_TWIDDLE* twiddle_master = fnGetR2TwiddleMasterBase<TT_TWIDDLE>();
+        const TT_TWIDDLE* twiddle_master = fnGetR2TwiddleMasterBase<TT_TWIDDLE, TP_TWIDDLE_MODE>();
 
         int idx;
         int stride;

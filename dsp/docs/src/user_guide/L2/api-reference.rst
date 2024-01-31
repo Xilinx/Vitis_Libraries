@@ -1,29 +1,14 @@
-..
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-    
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-    
-       http://www.apache.org/licenses/LICENSE-2.0
-    
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+.. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _API_REFERENCE:
 
-**********************
+======================
 API Reference Overview
-**********************
+======================
 
-For all library elements, the recommended manner to use an instance of each library unit is to include an instance of the library element as a sub-graph of your graph.
-The graph declarations may be found in: `L2/include/aie/`.
-This section describes the interface to each library element, i.e., configuration parameters, constructor arguments, and ports.
-
+For all library elements, the recommended manner to use an instance of each library unit is to include an instance of the library element as a sub-graph of your graph. The graph declarations can be found in: `L2/include/aie/`. This section describes the interface to each library element, i.e., configuration parameters, constructor arguments, and ports.
 
 - `DDS Mixer <../../rst/group_dds_graph.html>`_
 - `DFT <../../rst/group_dft_graph.html>`_
@@ -54,5 +39,3 @@ This section describes the interface to each library element, i.e., configuratio
    :ltrim:
 .. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
    :ltrim:
-
-

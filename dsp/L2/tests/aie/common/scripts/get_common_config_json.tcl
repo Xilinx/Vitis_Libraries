@@ -69,7 +69,7 @@ for {set i 3} { $i < [llength $argv] } { incr i 2 } {
         # Don't put a comma on the last parameter if we still have dummy constructor coeffs/weights to generate
         if { [expr ($i+1)] == [expr [llength $argv]-1] } {
             # FIRs and FFT Window both need a comma
-            if { $libElement eq "fft_ifft_dit_1ch" || $libElement eq "matrix_mult" || $libElement eq "dds_mixer" || $libElement eq "dds_mixer_lut" || $libElement eq "mixed_radix_fft" || $libElement eq "dft" || $libElement eq "matrix_vector_mul" || $libElement eq "sample_delay" || $libElement eq "widget_real2complex"  || $libElement eq "widget_api_cast"  } {
+            if { $libElement eq "fft_ifft_dit_1ch" || $libElement eq "matrix_mult" || $libElement eq "dds_mixer" || $libElement eq "dds_mixer_lut" || $libElement eq "mixed_radix_fft" || $libElement eq "dft" || $libElement eq "matrix_vector_mul" || $libElement eq "sample_delay" || $libElement eq "widget_real2complex"  || $libElement eq "widget_api_cast"  || $libElement eq "hadamard" || $libElement eq "kronecker"    } {
                 set isComma ""
             }
         }

@@ -193,10 +193,10 @@ class fir_sr_sym_graph : public graph {
     // buffers may exceed Memory Module size.
     static_assert(TP_FIR_LEN / TP_SSR / TP_CASC_LEN <= kMaxTapsPerKernel,
                   "ERROR: Requested FIR length and Cascade length exceeds supported number of taps per kernel. Please "
-                  "increase the cascade legnth to accomodate the FIR design.");
+                  "increase the cascade length to accommodate the FIR design.");
     // static_assert(!(TP_API == 0 && TP_DUAL_IP == 1),"ERROR: DUUAL_IP is only supported for streaming
     // implementations");
-    // Limit FIR length for reloadable coeffs. Reloadable coeffs need a storage space that contibutes to system memory
+    // Limit FIR length for reloadable coeffs. Reloadable coeffs need a storage space that contributes to system memory
     // exceeding Memory Module size.
     static_assert(TP_USE_COEFF_RELOAD == 0 || TP_FIR_LEN <= kMaxTapsPerKernel,
                   "ERROR: Exceeded maximum supported FIR length with reloadable coefficients. Please limit the FIR "
@@ -206,7 +206,7 @@ class fir_sr_sym_graph : public graph {
     static constexpr unsigned int bufferSize = ((TP_FIR_LEN + TP_INPUT_WINDOW_VSIZE) * sizeof(TT_DATA));
     // Requested Window buffer exceeds memory module size
     static_assert(TP_API != 0 || bufferSize < kMemoryModuleSize,
-                  "ERROR: Input Window size (based on requrested window size and FIR length margin) exceeds Memory "
+                  "ERROR: Input Window size (based on requested window size and FIR length margin) exceeds Memory "
                   "Module size of 32kB.");
 
     static_assert(!(((TP_DUAL_IP == 1 && TP_NUM_OUTPUTS == 1) || (TP_DUAL_IP == 0 && TP_NUM_OUTPUTS == 2)) &&

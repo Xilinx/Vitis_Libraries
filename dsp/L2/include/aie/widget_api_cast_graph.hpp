@@ -102,16 +102,16 @@ class widget_api_cast_graph : public graph {
                   "Error: TP_IN_API is not a supported value of 0 (window) or 1 (stream)");
     static_assert(TP_OUT_API == kStreamAPI || TP_OUT_API == kWindowAPI,
                   "Error: TP_OUT_API is not a supported value of 0 (window) or 1 (stream)");
-    static_assert(!(TP_IN_API == kWindowAPI && TP_NUM_INPUTS > 1),
-                  "Error: Only a single input is supported for an input API of Window");
-    static_assert(TP_NUM_INPUTS >= 1 && TP_NUM_INPUTS <= 2, "Error: TP_NUM_INPUTS is out of the supported range");
+    // static_assert(!(TP_IN_API == kWindowAPI && TP_NUM_INPUTS >1), "Error: Only a single input is supported for an
+    // input API of Window");
+    // static_assert(TP_NUM_INPUTS >=1 && TP_NUM_INPUTS<=2, "Error: TP_NUM_INPUTS is out of the supported range");
     static_assert(TP_NUM_OUTPUT_CLONES >= 1 && TP_NUM_OUTPUT_CLONES <= 4,
                   "Error: TP_NUM_OUTPUT_CLONES is out of the supported range");
     static_assert(TP_IN_API == 1 || TP_NUM_OUTPUT_CLONES < 4,
                   "Error: TP_NUM_OUTPUT_CLONES may only be 4 when stream input is configured.");
     static_assert(TP_IN_API != 1 || TP_OUT_API != 1, "Error: stream to stream connection is not supported");
-    static_assert(TP_IN_API != 0 || TP_OUT_API != 1 || TP_NUM_INPUTS == 1,
-                  "Error: Window to stream supports only a single connection in.");
+    // static_assert(TP_IN_API != 0 || TP_OUT_API != 1 || TP_NUM_INPUTS==1, "Error: Window to stream supports only a
+    // single connection in.");
     static_assert(TP_PATTERN >= 0 && TP_PATTERN < 3, "Error: TP_PATTERN is out of range.");
     static_assert(TP_PATTERN == 0 || (TP_IN_API == kStreamAPI && TP_NUM_INPUTS == 2) ||
                       (TP_OUT_API == kStreamAPI && TP_NUM_OUTPUT_CLONES == 2),
@@ -171,7 +171,9 @@ class widget_api_cast_graph : public graph {
                 //                connect<window<TP_WINDOW_VSIZE*sizeof(TT_DATA)+TP_HEADER_BYTES>>(m_kernel.out[i],
                 //                out[i]);
                 connect(m_kernel.out[i], out[i]);
-                dimensions(m_kernel.out[i]) = {TP_WINDOW_VSIZE + TP_HEADER_BYTES / sizeof(TT_DATA)};
+                constexpr unsigned int outWindowInterleaved =
+                    (TP_IN_API == kWindowAPI) ? TP_WINDOW_VSIZE * TP_NUM_INPUTS : TP_WINDOW_VSIZE;
+                dimensions(m_kernel.out[i]) = {outWindowInterleaved + TP_HEADER_BYTES / sizeof(TT_DATA)};
             }
         } else if (TP_OUT_API == kStreamAPI) {
             for (int i = 0; i < TP_NUM_OUTPUT_CLONES; i++) {

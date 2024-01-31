@@ -196,7 +196,8 @@ inline int64_t rounding(int rndMode, int shift, int64_t accum) {
                 break;
             case rnd_sym_ceil:
                 if (accum < 0) {
-                    break;
+                    // not addition for truncation, just lose the bits during shift.
+                    // accum += round_const;
                 } else {
                     accum += ((1 << shift) - 1);
                 }
@@ -539,9 +540,9 @@ inline void multiplyAccUct(T_accRef<cfloat>& accum, cfloat data, unsigned int sh
 #endif
 
 // function to return Margin length.
-template <size_t TP_FIR_LEN, typename TT_DATA>
+template <size_t TP_FIR_LEN, typename TT_DATA, unsigned int TP_TDM_CHANNELS = 1>
 inline constexpr unsigned int fnFirMargin() {
-    return CEIL(TP_FIR_LEN, (32 / sizeof(TT_DATA)));
+    return CEIL(((TP_FIR_LEN - 1) * (TP_TDM_CHANNELS)), (32 / sizeof(TT_DATA)));
 };
 
 //----------------------------------------------------------------------

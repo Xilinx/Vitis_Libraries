@@ -26,26 +26,6 @@ import json
 # and "err_message" if "is_valid" is False.
 #
 
-TP_INPUT_WINDOW_VSIZE_min = 4
-TP_SSR_min = 1
-TP_CASC_LEN_min = 1
-TP_CASC_LEN_max = 40
-TP_FIR_LEN_min = 4
-TP_FIR_LEN_max = 8192
-TP_SHIFT_min = 0
-TP_SHIFT_max = 61
-#TP_API_min=0
-#TP_API_max=1
-#TP_RND_min=0
-#TP_RND_max=7
-#AIE_VARIANT_min=1
-#AIE_VARIANT_max=2
-#TP_DUAL_IP_min=0
-#TP_DUAL_IP_max=1
-#TP_NUM_OUTPUTS_min=1
-#TP_NUM_OUTPUTS_max=2
-#TP_USE_COEF_RELOAD_min=0
-#TP_USE_COEF_RELOAD_max=2
 
 def fnNumLanesStream(*args):
     return fnNumLanes(*args, TP_API=1)
@@ -68,7 +48,7 @@ def fnNumColsStream(T_D, T_C):
 
 
 def fn_validate_input_window_size(
-    TT_DATA, TT_COEF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1
+    TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR=1
 ):
     # CAUTION: this constant overlaps many factors. The main need is a "strobe" concept that means we unroll until xbuff is back to starting conditions.
     streamRptFactor = 8
@@ -79,19 +59,19 @@ def fn_validate_input_window_size(
 
     # Need to take unrolloing into account
     windowSizeMultiplier = (
-        (fnNumLanes(TT_DATA, TT_COEF, TP_API))
+        (fnNumLanes(TT_DATA, TT_COEFF, TP_API))
         if TP_API == 0
-        else (fnNumLanes(TT_DATA, TT_COEF, TP_API) * streamRptFactor)
+        else (fnNumLanes(TT_DATA, TT_COEFF, TP_API) * streamRptFactor)
     )
 
     checkMultipleLanes = fn_windowsize_multiple_lanes(
-        TT_DATA, TT_COEF, TP_INPUT_WINDOW_VSIZE, TP_API, windowSizeMultiplier, TP_SSR
+        TT_DATA, TT_COEFF, TP_INPUT_WINDOW_VSIZE, TP_API, windowSizeMultiplier, TP_SSR
     )
     checkMaxBuffer = fn_max_windowsize_for_buffer(
         TT_DATA, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR
     )
     # Input samples are round-robin split to each SSR input paths, so total frame size must be divisable by SSR factor.
-    checkIfDivisableBySSR = fn_windowsize_divisible_by_ssr(
+    checkIfDivisableBySSR = fn_windowsize_divisible_by_param(
         TP_INPUT_WINDOW_VSIZE, TP_SSR
     )
 
@@ -195,11 +175,11 @@ def fn_fir_len_divisible_ssr(
 
 # This logic is copied from the kernel class.
 def fn_get_data_needed(
-    TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TP_SSR, TP_API
+    TT_DATA, TT_COEFF, TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TP_SSR, TP_API
 ):
     TT_DATA_BYTES = fn_size_by_byte(TT_DATA)
     m_kFirRangeOffset = fnFirRangeOffsetAsym(
-        TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TT_DATA, TT_COEF, TP_API
+        TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TT_DATA, TT_COEFF, TP_API
     )
     # FIR Cascade Offset for this kernel position
     m_kFirMarginOffset = fnFirMargin(TP_FIR_LEN, TT_DATA) - TP_FIR_LEN + 1
@@ -214,25 +194,25 @@ def fn_get_data_needed(
 
     TP_FIR_RANGE_LEN = (
         fnFirRangeRemAsym(
-            TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TT_DATA, TT_COEF, TP_API
+            TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TT_DATA, TT_COEFF, TP_API
         )
         if (TP_KERNEL_POSITION == (TP_CASC_LEN - 1))  # last Kernel gets remainder taps
         else fnFirRangeAsym(
-            TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TT_DATA, TT_COEF, TP_API
+            TP_FIR_LEN, TP_CASC_LEN, TP_KERNEL_POSITION, TT_DATA, TT_COEFF, TP_API
         )
     )
 
     m_kArchFirLen = TP_FIR_RANGE_LEN + m_kDataBuffXOffset
 
     m_kLanes = (
-        fnNumLanes(TT_DATA, TT_COEF)
+        fnNumLanes(TT_DATA, TT_COEFF)
         if TP_API == 0
-        else fnNumLanesStream(TT_DATA, TT_COEF)
+        else fnNumLanesStream(TT_DATA, TT_COEFF)
     )
     m_kDataLoadVsize = (
         (256 // 8 // TT_DATA_BYTES)
         if TP_API == 0
-        else (fnStreamReadWidth(TT_DATA, TT_COEF) // 8 // TT_DATA_BYTES)
+        else (fnStreamReadWidth(TT_DATA, TT_COEFF) // 8 // TT_DATA_BYTES)
     )
     m_kInitDataNeeded = m_kArchFirLen + m_kDataLoadVsize - 1
     return m_kInitDataNeeded
@@ -240,7 +220,7 @@ def fn_get_data_needed(
 
 # For streaming FIRs, all the initial data needed for a single mac needs to fit in a single buffer.
 def fn_data_needed_within_buffer_size(
-    TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN, TP_API, TP_SSR=1
+    TT_DATA, TT_COEFF, TP_FIR_LEN, TP_CASC_LEN, TP_API, TP_SSR=1
 ):
     m_kSamplesInBuff = (1024 // 8) // fn_size_by_byte(TT_DATA)
     # only do stuff for streaming
@@ -249,7 +229,7 @@ def fn_data_needed_within_buffer_size(
             # Check every kernel's init data needed (different kernels need different DataBuffXOffset)
             m_kInitDataNeeded = fn_get_data_needed(
                 TT_DATA,
-                TT_COEF,
+                TT_COEFF,
                 TP_FIR_LEN // TP_SSR,
                 TP_CASC_LEN,
                 TP_KERNEL_POSITION,
@@ -260,14 +240,14 @@ def fn_data_needed_within_buffer_size(
                 return isError(
                     f"Kernel[{TP_KERNEL_POSITION}] requires more data ({m_kInitDataNeeded} samples) "
                     f"to fit in a single buffer ({m_kSamplesInBuff} samples), due to the fir length per kernel- "
-                    f"influenced by fir length ({TP_FIR_LEN}), SSR ({TP_SSR}), cascade length ({TP_CASC_LEN}) and numLanes ({fnNumLanes(TT_DATA, TT_COEF, TP_API)}).\n"
+                    f"influenced by fir length ({TP_FIR_LEN}), SSR ({TP_SSR}), cascade length ({TP_CASC_LEN}) and numLanes ({fnNumLanes(TT_DATA, TT_COEFF, TP_API)}).\n"
                 )
 
     return isValid
 
 
 def fn_validate_fir_len(
-    TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD
+    TT_DATA, TT_COEFF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEFF_RELOAD
 ):
     if TP_FIR_LEN < TP_FIR_LEN_min or TP_FIR_LEN > TP_FIR_LEN_max:
         return isError(
@@ -275,45 +255,13 @@ def fn_validate_fir_len(
         )
     divCheck = fn_fir_len_divisible_ssr(TP_FIR_LEN, TP_SSR)
     minLenCheck = fn_min_fir_len_each_kernel(TP_FIR_LEN, TP_CASC_LEN, TP_SSR)
-    maxLenCheck = fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEF_RELOAD, TP_SSR, TP_API, 1)  # last param refers to symmetry factor
-    dataNeededCheck = fn_data_needed_within_buffer_size(TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN, TP_API, TP_SSR)
+    maxLenCheck = fn_max_fir_len_each_kernel(TT_DATA, TP_FIR_LEN, TP_CASC_LEN, TP_USE_COEFF_RELOAD, TP_SSR, TP_API, 1)  # last param refers to symmetry factor
+    dataNeededCheck = fn_data_needed_within_buffer_size(TT_DATA, TT_COEFF, TP_FIR_LEN, TP_CASC_LEN, TP_API, TP_SSR)
     for check in (divCheck, minLenCheck, maxLenCheck, dataNeededCheck):
         if check["is_valid"] == False:
             return check
 
     return isValid
-
-
-#### validate dual ip ####
-def fn_validate_dual_ip(TP_NUM_OUTPUTS, TP_API, TP_DUAL_IP):
-    if TP_DUAL_IP == 1 and TP_API == 0:
-        return isError("Dual input ports only supported when port is a stream.")
-
-    if TP_DUAL_IP == 1 and TP_NUM_OUTPUTS != 2:
-        return isError(
-            "Dual input streams only supported when number of output streams is also 2."
-        )
-
-    return isValid
-
-
-def fn_validate_num_outputs(TP_NUM_OUTPUTS, TP_API, TP_SSR):
-
-    if TP_SSR > 1 and TP_NUM_OUTPUTS > 1 and TP_API == 0:
-        return isError(
-            "Dual output ports not supported when port is a window and SSR > 1."
-        )
-
-    return isValid
-
-
-def fn_validate_ssr(TP_SSR):
-    if TP_SSR < TP_SSR_min:
-        return isError(
-            f"Minimum value for SSR is {TP_SSR_min}, but got {TP_SSR}."
-        )
-    return isValid
-
 
 def fn_validate_casc_len(TP_CASC_LEN):
     if TP_CASC_LEN < TP_CASC_LEN_min or TP_CASC_LEN > TP_CASC_LEN_max:
@@ -324,21 +272,27 @@ def fn_validate_casc_len(TP_CASC_LEN):
 
 
 #### validation APIs ####
-def validate_TT_COEF(args):
+def validate_TT_COEFF(args):
     TT_DATA = args["TT_DATA"]
-    TT_COEF = args["TT_COEF"]
-    return fn_validate_coef_type(TT_DATA, TT_COEF)
+    TT_COEFF = args["TT_COEFF"]
+    AIE_VARIANT = args["AIE_VARIANT"]
+    standard_checks = fn_validate_coeff_type(TT_DATA, TT_COEFF)
+    typeCheck = fn_type_sr_support(TT_DATA, TT_COEFF, AIE_VARIANT)
+    for check in (standard_checks,typeCheck):
+      if check["is_valid"] == False :
+        return check
+    return isValid
 
 
 def validate_TP_INPUT_WINDOW_VSIZE(args):
     TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
     TT_DATA = args["TT_DATA"]
-    TT_COEF = args["TT_COEF"]
+    TT_COEFF = args["TT_COEFF"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
     TP_API = args["TP_API"]
     TP_SSR = args["TP_SSR"]
     return fn_validate_input_window_size(
-        TT_DATA, TT_COEF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR
+        TT_DATA, TT_COEFF, TP_FIR_LEN, TP_INPUT_WINDOW_VSIZE, TP_API, TP_SSR
     )
 
 
@@ -346,14 +300,15 @@ def validate_TP_DUAL_IP(args):
     TP_NUM_OUTPUTS = args["TP_NUM_OUTPUTS"]
     TP_API = args["TP_API"]
     TP_DUAL_IP = args["TP_DUAL_IP"]
-    return fn_validate_dual_ip(TP_NUM_OUTPUTS, TP_API, TP_DUAL_IP)
+    AIE_VARIANT = args["AIE_VARIANT"]
+    return fn_validate_sr_dual_ip(TP_NUM_OUTPUTS, TP_API, TP_DUAL_IP, AIE_VARIANT)
 
 
 def validate_TP_NUM_OUTPUTS(args):
     TP_NUM_OUTPUTS = args["TP_NUM_OUTPUTS"]
     TP_API = args["TP_API"]
-    TP_SSR = args["TP_SSR"]
-    return fn_validate_num_outputs(TP_NUM_OUTPUTS, TP_API, TP_SSR)
+    AIE_VARIANT = args["AIE_VARIANT"]
+    return fn_validate_num_outputs(TP_API, TP_NUM_OUTPUTS, AIE_VARIANT)
 
 
 def validate_TP_SHIFT(args):
@@ -382,15 +337,15 @@ def validate_TP_SSR(args):
 
 def validate_TP_FIR_LEN(args):
     TT_DATA = args["TT_DATA"]
-    TT_COEF = args["TT_COEF"]
+    TT_COEFF = args["TT_COEFF"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
     TP_CASC_LEN = args["TP_CASC_LEN"]
     TP_SSR = args["TP_SSR"]
     TP_API = args["TP_API"]
-    TP_USE_COEF_RELOAD = args["TP_USE_COEF_RELOAD"]
+    TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
 
     return fn_validate_fir_len(
-        TT_DATA, TT_COEF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEF_RELOAD
+        TT_DATA, TT_COEFF, TP_FIR_LEN, TP_CASC_LEN, TP_SSR, TP_API, TP_USE_COEFF_RELOAD
     )
 
 
@@ -398,7 +353,7 @@ def validate_TP_FIR_LEN(args):
 #
 # Updater are functions to help GUI to hint user on parameter setting with already given parameters.
 # The return object will provide "value" which will be set in the wizard as the dependent parameter is being set.
-# The rest of keys are similar to paramster definition, but with candidates of enum or range values refined
+# The rest of keys are similar to parameter definition, but with candidates of enum or range values refined
 # based on previously set values.
 #
 # An updator function always return a dictionary,
@@ -414,14 +369,14 @@ def validate_TP_FIR_LEN(args):
 # If with given combination, no valid value can be set for the parameter being updated, the upater function
 # should set "value" to None, to indicate an error and provide error message via "err_message".
 # For example
-#  { "value": None, "err_message": "With TT_DATA as 'int' there is no valid option for TT_COEF" }
+#  { "value": None, "err_message": "With TT_DATA as 'int' there is no valid option for TT_COEFF" }
 #
-# In this example, the following is the updater for TT_COEF, with TT_DATA as the dependent paramster.
+# In this example, the following is the updater for TT_COEFF, with TT_DATA as the dependent parameter.
 # When GUI generates a wizard, TT_DATA should be required first, as it shows up in parameter list first.
-# Once user has provided value for TT_DATA, this function will be called and set the value of TT_COEF.
+# Once user has provided value for TT_DATA, this function will be called and set the value of TT_COEFF.
 # Meanwhile, the candidate shown in wizard based on enum will also be updated.
 #
-def update_TT_COEF(TT_DATA):
+def update_TT_COEFF(TT_DATA):
     return {"value": TT_DATA, "enum": [TT_DATA]}
 
 
@@ -443,7 +398,7 @@ def info_ports(args):
     Some IP has dynamic number of ports according to parameter set,
     so port information has to be implemented as a function"""
     TT_DATA = args["TT_DATA"]
-    TT_COEF = args["TT_COEF"]
+    TT_COEFF = args["TT_COEFF"]
     TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
     TP_SSR = args["TP_SSR"]
@@ -460,7 +415,7 @@ def info_ports(args):
 
     in_ports = get_port_info( "in", "in", TT_DATA, in_win_size, num_in_ports, marginSize=margin_size, TP_API=TP_API)
     in2_ports = (get_port_info( "in2", "in", TT_DATA, in_win_size, num_in_ports, marginSize=margin_size, TP_API=TP_API, ) if (args["TP_DUAL_IP"] == 1) else [])
-    coeff_ports = (get_parameter_port_info("coeff", "in", TT_COEF, TP_SSR, TP_FIR_LEN, "async") if (args["TP_USE_COEF_RELOAD"] == 1) else [] )
+    coeff_ports = (get_parameter_port_info("coeff", "in", TT_COEFF, TP_SSR, TP_FIR_LEN, "async") if (args["TP_USE_COEFF_RELOAD"] == 1) else [] )
 
     # decimate by 2 for halfband
     out_ports = get_port_info( "out", "out", TT_DATA, out_win_size, num_out_ports, TP_API=TP_API,)
@@ -473,9 +428,9 @@ def info_ports(args):
 #   [f"{value}{comma}} //{key}" for key, value in kwargs.iteritems() for comma in "," ]
 
 # Returns formatted string with taps
-def fn_get_taps_vector(TT_COEF, coeff_list):
+def fn_get_taps_vector(TT_COEFF, coeff_list):
 
-    cplx = fn_is_complex(TT_COEF)
+    cplx = fn_is_complex(TT_COEFF)
 
     # todo, reformat this to use list comprehension
     taps = f"{{"
@@ -499,14 +454,14 @@ def generate_graph(graphname, args):
     if graphname == "":
         graphname = "default_graphname"
 
-    TT_COEF = args["TT_COEF"]
+    TT_COEFF = args["TT_COEFF"]
     TT_DATA = args["TT_DATA"]
     TP_FIR_LEN = args["TP_FIR_LEN"]
     TP_SHIFT = args["TP_SHIFT"]
     TP_RND = args["TP_RND"]
     TP_CASC_LEN = args["TP_CASC_LEN"]
     TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
-    TP_USE_COEF_RELOAD = args["TP_USE_COEF_RELOAD"]
+    TP_USE_COEFF_RELOAD = args["TP_USE_COEFF_RELOAD"]
     TP_NUM_OUTPUTS = args["TP_NUM_OUTPUTS"]
     TP_DUAL_IP = args["TP_DUAL_IP"]
     TP_API = args["TP_API"]
@@ -514,8 +469,8 @@ def generate_graph(graphname, args):
     coeff_list = args["coeff"]
     TP_SAT = args["TP_SAT"]
 
-    taps = fn_get_taps_vector(TT_COEF, coeff_list)
-    constr_args_str = f"taps" if TP_USE_COEF_RELOAD == 0 else ""
+    taps = fn_get_taps_vector(TT_COEFF, coeff_list)
+    constr_args_str = f"taps" if TP_USE_COEFF_RELOAD == 0 else ""
     dual_ip_declare_str = (
         f"ssr_port_array<input> in2;" if TP_DUAL_IP == 1 else "// No dual input"
     )
@@ -526,12 +481,12 @@ def generate_graph(graphname, args):
     )
     coeff_ip_declare_str = (
         f"ssr_port_array<input> coeff;"
-        if TP_USE_COEF_RELOAD == 1
+        if TP_USE_COEFF_RELOAD == 1
         else "//No coeff port"
     )
     coeff_ip_connect_str = (
         f"adf::connect<> net_coeff(coeff[i], filter.coeff[i]);"
-        if TP_USE_COEF_RELOAD == 1
+        if TP_USE_COEFF_RELOAD == 1
         else "//No coeff port"
     )
     dual_op_declare_str = (
@@ -557,16 +512,16 @@ public:
   ssr_port_array<output> out;
   {dual_op_declare_str}
 
-  std::vector<{TT_COEF}> taps = {taps};
+  std::vector<{TT_COEFF}> taps = {taps};
   xf::dsp::aie::fir::sr_asym::fir_sr_asym_graph<
     {TT_DATA}, //TT_DATA
-    {TT_COEF}, //TT_COEF
+    {TT_COEFF}, //TT_COEFF
     {TP_FIR_LEN}, //TP_FIR_LEN
     {TP_SHIFT}, //TP_SHIFT
     {TP_RND}, //TP_RND
     {TP_INPUT_WINDOW_VSIZE}, //TP_INPUT_WINDOW_VSIZE
     {TP_CASC_LEN}, //TP_CASC_LEN
-    {TP_USE_COEF_RELOAD}, //TP_USE_COEF_RELOAD
+    {TP_USE_COEFF_RELOAD}, //TP_USE_COEFF_RELOAD
     {TP_NUM_OUTPUTS}, //TP_NUM_OUTPUTS
     {TP_DUAL_IP}, //TP_DUAL_IP
     {TP_API}, //TP_API

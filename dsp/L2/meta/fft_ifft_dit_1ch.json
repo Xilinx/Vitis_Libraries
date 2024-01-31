@@ -28,6 +28,7 @@
             "type": "typename",
             "enum": [
                 "cint16",
+                "cint32",
                 "cfloat"
             ],
             "validator": {
@@ -49,7 +50,8 @@
                     "TP_DYN_PT_SIZE",
                     "TT_DATA",
                     "TP_PARALLEL_POWER",
-                    "TP_API"
+                    "TP_API",
+                    "AIE_VARIANT"
                 ]
             }
         },
@@ -141,6 +143,15 @@
             "validator": {
                 "file": "fft_ifft_dit_1ch.py",
                 "function": "validate_TP_SAT" 
+            }
+        },
+        {
+            "name": "TP_TWIDDLE_MODE",
+            "description": "Twiddle amplitude mode.",
+            "type": "uint",
+            "validator": {
+                "file": "fft_ifft_dit_1ch.py",
+                "function": "validate_TP_TWIDDLE_MODE" 
             }
         },
         {

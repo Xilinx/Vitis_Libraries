@@ -47,7 +47,7 @@ def fn_validate_coeff_type(TT_DATA, TT_COEFF):
   if ((TT_DATA=="cint16" and TT_COEFF=="int16") or (TT_DATA=="cint32" and TT_COEFF=="int32") or (TT_DATA=="cfloat" and TT_COEFF=="float")):
     return isValid
   else:
-    return isError("Coefficient type must be the atomic type of data")
+    return isError("Coefficient type must be the atomic type of data, e.g. for TT_DATA=cint16 TT_COEFF must be int16. Got TT_DATA={TT_DATA} and TT_COEFF={TT_COEFF}")
 
 def fn_validate_point_size(TP_POINT_SIZE, TT_DATA):
   if TP_POINT_SIZE < TP_POINT_SIZE_min or TP_POINT_SIZE > TP_POINT_SIZE_max :
@@ -59,11 +59,11 @@ def fn_validate_point_size(TP_POINT_SIZE, TT_DATA):
 
 def fn_validate_window_vsize(TP_POINT_SIZE,TP_WINDOW_VSIZE):
   if TP_WINDOW_VSIZE < TP_WINDOW_VSIZE_min or TP_WINDOW_VSIZE > TP_WINDOW_VSIZE_max :
-	    return isError(f"Minimum and maximum value for Input size is {TP_WINDOW_VSIZE_min} and {TP_WINDOW_VSIZE_max},respectively, but got {TP_WINDOW_VSIZE}.")
+        return isError(f"Minimum and maximum value for Input size is {TP_WINDOW_VSIZE_min} and {TP_WINDOW_VSIZE_max},respectively, but got {TP_WINDOW_VSIZE}.")
   if ((TP_WINDOW_VSIZE>=TP_POINT_SIZE) and (TP_WINDOW_VSIZE%TP_POINT_SIZE==0)) :
     return isValid
   else:
-    return isError("Window size must be an integer multiple of point size")
+    return isError("Window size must be an integer multiple of point size. Got window size of {TP_WINDOW_VSIZE} and point size of {TP_POINT_SIZE}.")
 
 def fn_validate_shift_val(TT_DATA, TP_SHIFT):
   if TP_SHIFT < TP_SHIFT_min or TP_SHIFT > TP_SHIFT_max :
@@ -72,34 +72,34 @@ def fn_validate_shift_val(TT_DATA, TP_SHIFT):
     if (TP_SHIFT==0) :
       return isValid
     else:
-      return isError("Shift must be 0 for cfloat data type")
+      return isError("Shift must be 0 for cfloat data type. Got {TP_SHIFT}.")
   if (TT_DATA=="cint32"):
     if (TP_SHIFT>=0 and TP_SHIFT<61) :
       return isValid
     else:
-      return isError("Shift must be in range 0 to 61 for cint32 data type")
+      return isError("Shift must be in range 0 to 61 for cint32 data type. Got {TP_SHIFT}.")
   if (TT_DATA=="cint16"):
     if (TP_SHIFT>=0 and TP_SHIFT<32) :
       return isValid
     else:
-      return isError("Shift must be in range 0 to 31 for cint16 data type")
+      return isError("Shift must be in range 0 to 31 for cint16 data type. Got {TP_SHIFT}.")
 
 def fn_validate_ssr(TT_DATA, TP_POINT_SIZE, TP_API, TP_SSR):
   if TP_SSR < TP_SSR_min or TP_SSR > TP_SSR_max:
-	    return isError(f"Minimum and maximum value for SSR is {TP_SSR_min} and {TP_SSR_max},respectively, but got {TP_SSR}.")
+        return isError(f"Minimum and maximum value for SSR is {TP_SSR_min} and {TP_SSR_max},respectively, but got {TP_SSR}.")
   if (TP_POINT_SIZE/TP_SSR >=16 and TP_POINT_SIZE/TP_SSR<=4096) :
     if (TP_POINT_SIZE/TP_SSR<=1024 or TP_API==1) :
       return isValid
     else:
-      return isError("(Point size/SSR) must be less than 1024 for windowed configurations")
+      return isError("(Point size/SSR) must be less than 1024 for windowed configurations. Got TP_POINT_SIZE={TP_POINT_SIZE} and TP_SSR={TP_SSR}.")
   else:
-    return isError("(Point size/SSR) must be between 16 and 4096")
+    return isError("(Point size/SSR) must be between 16 and 4096. Got TP_POINT_SIZE={TP_POINT_SIZE} and TP_SSR={TP_SSR}.")
 
 def fn_validate_dyn_pt_size(TP_POINT_SIZE, TP_SSR, TP_DYN_PT_SIZE):
   if (TP_DYN_PT_SIZE==0 or TP_POINT_SIZE/TP_SSR >32) :
     return isValid
   else:
-    return isError("When dynamic point FFT is selected, (Point size/SSR) must be greater than 32")
+    return isError("When dynamic point FFT is selected, (Point size/SSR) must be greater than 32. Got TP_POINT_SIZE={TP_POINT_SIZE} and TP_SSR={TP_SSR}.")
 
 def fn_validate_weights(TP_POINT_SIZE, TP_DYN_PT_SIZE, weights_list):
   if TP_DYN_PT_SIZE == 0:
@@ -159,7 +159,7 @@ def validate_weights(args):
 #
 # Updater are functions to help GUI to hint user on parameter setting with already given parameters.
 # The return object will provide "value" which will be set in the wizard as the dependent parameter is being set.
-# The rest of keys are similar to paramster definition, but with candidates of enum or range values refined
+# The rest of keys are similar to parameter definition, but with candidates of enum or range values refined
 # based on previously set values.
 #
 # An updator function always return a dictionary,
@@ -177,7 +177,7 @@ def validate_weights(args):
 # For example
 #  { "value": None, "err_message": "With TT_DATA as 'int' there is no valid option for TT_COEFF" }
 #
-# In this example, the following is the updater for TT_COEF, with TT_DATA as the dependent parameter.
+# In this example, the following is the updater for TT_COEFF, with TT_DATA as the dependent parameter.
 # When GUI generates a wizard, TT_DATA should be required first, as it shows up in parameter list first.
 # Once user has provided value for TT_DATA, this function will be called and set the value of TT_COEFF.
 # Meanwhile, the candidate shown in wizard based on enum will also be updated.

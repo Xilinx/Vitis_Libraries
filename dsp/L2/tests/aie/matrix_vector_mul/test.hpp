@@ -48,9 +48,9 @@ namespace testcase {
 class test_graph : public graph {
    private:
    public:
-    std::array<input_plio, CASC_LEN> inA;
-    std::array<input_plio, CASC_LEN> inB;
-    std::array<output_plio, 1> out;
+    std::array<input_plio, CASC_LEN * UUT_SSR> inA;
+    std::array<input_plio, CASC_LEN * UUT_SSR> inB;
+    std::array<output_plio, UUT_SSR> out;
 
     // Constructor
     test_graph() {
@@ -78,20 +78,32 @@ class test_graph : public graph {
 
         namespace dsplib = xf::dsp::aie;
         dsplib::blas::matrix_vector_mul::UUT_GRAPH<DATA_A, DATA_B, DIM_A, DIM_B, SHIFT, ROUND_MODE, NUM_FRAMES,
-                                                   CASC_LEN, SAT_MODE>
+                                                   CASC_LEN, UUT_SSR, SAT_MODE>
             matrix_vector_mulGraph;
 #ifdef USING_UUT
-        for (int i = 0; i < CASC_LEN; i++) {
-            std::string filenameInMatrix = QUOTE(INPUT_FILE_A);
-            std::string filenameInVector = QUOTE(INPUT_FILE_B);
-            filenameInMatrix.insert(filenameInMatrix.length() - 4, ("_" + std::to_string(i)));
-            filenameInVector.insert(filenameInVector.length() - 4, ("_" + std::to_string(i)));
 
-            inA[i] = input_plio::create("PLIO_in_A" + std::to_string(i), adf::plio_32_bits, filenameInMatrix);
-            inB[i] = input_plio::create("PLIO_in_B" + std::to_string(i), adf::plio_32_bits, filenameInVector);
+        for (int ssr = 0; ssr < UUT_SSR; ssr++) {
+            for (int casc = 0; casc < CASC_LEN; casc++) {
+                std::string filenameInMatrix = QUOTE(INPUT_FILE_A);
+                filenameInMatrix.insert(filenameInMatrix.length() - 4,
+                                        ("_" + std::to_string(ssr) + "_" + std::to_string(casc)));
+                inA[casc + ssr * CASC_LEN] = input_plio::create("PLIO_in_A" + std::to_string(casc + ssr * CASC_LEN),
+                                                                adf::plio_32_bits, filenameInMatrix);
+                connect<>(inA[casc + ssr * CASC_LEN].out[0], matrix_vector_mulGraph.inA[casc + ssr * CASC_LEN]);
 
-            connect<>(inA[i].out[0], matrix_vector_mulGraph.inA[i]);
-            connect<>(inB[i].out[0], matrix_vector_mulGraph.inB[i]);
+                std::string filenameInVector = QUOTE(INPUT_FILE_B);
+                filenameInVector.insert(filenameInVector.length() - 4,
+                                        ("_" + std::to_string(ssr)) + "_" + std::to_string(casc));
+                inB[casc + ssr * CASC_LEN] = input_plio::create("PLIO_in_B" + std::to_string(casc + ssr * CASC_LEN),
+                                                                adf::plio_32_bits, filenameInVector);
+                connect<>(inB[casc + ssr * CASC_LEN].out[0], matrix_vector_mulGraph.inB[casc + ssr * CASC_LEN]);
+            }
+        }
+        for (int ssrOut = 0; ssrOut < UUT_SSR; ssrOut++) {
+            std::string filenameOut = QUOTE(OUTPUT_FILE);
+            filenameOut.insert(filenameOut.length() - 4, ("_" + std::to_string(ssrOut)));
+            out[ssrOut] = output_plio::create("PLIO_out_" + std::to_string(ssrOut), adf::plio_32_bits, filenameOut);
+            connect<>(matrix_vector_mulGraph.out[ssrOut], out[ssrOut].in[0]);
         }
 
 #else // using ref
@@ -102,12 +114,12 @@ class test_graph : public graph {
         inB[0] = input_plio::create("PLIO_in_B" + std::to_string(0), adf::plio_32_bits, filenameInVector);
         connect<>(inA[0].out[0], matrix_vector_mulGraph.inA[0]);
         connect<>(inB[0].out[0], matrix_vector_mulGraph.inB[0]);
-#endif
 
         std::string filenameOut = QUOTE(OUTPUT_FILE);
         // filenameOut.insert(filenameOut.length()-4, ("_0_0"));
         out[0] = output_plio::create("PLIO_out_" + std::to_string(0), adf::plio_32_bits, filenameOut);
         connect<>(matrix_vector_mulGraph.out[0], out[0].in[0]);
+#endif
     };
 };
 }

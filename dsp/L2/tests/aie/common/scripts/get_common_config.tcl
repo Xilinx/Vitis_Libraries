@@ -70,7 +70,7 @@ puts "    FUNC:                 $functional"
 # ----------------------------
 # --- Write to Output File ---
 # ----------------------------
-set outFile [open $outStatus a]
+set outFile [open $outStatus w]
 puts $outFile "Configuration:"
 for {set i 2} {$i < [llength $argv]} {incr i 2} {
     puts $outFile "    [lindex $argv $i]:        [lindex $argv [expr ($i+1)]]"

@@ -8,9 +8,10 @@ def vmc_validate_point_size(args):
     dyn_point_size = 0
     data_type = args["data_type"]
     parallel_power = 0
-    
+
     api = 0
-    return fn_validate_point_size(point_size, dyn_point_size, data_type, parallel_power, api)
+    AIE_VARIANT = args["AIE_VARIANT"]
+    return fn_validate_point_size(point_size, dyn_point_size, data_type, parallel_power, api, AIE_VARIANT)
 
 def vmc_validate_shift_val(args):
     data_type = args["data_type"]
@@ -29,12 +30,12 @@ def vmc_validate_casc_length(args):
     casc_length = args["casc_length"]
     parallel_power = 0
     return fn_validate_casc_len(data_type, point_size, parallel_power, casc_length)
-	
-# Get twiddle types	
+
+# Get twiddle types
 k_twiddle_type = {"cfloat":"cfloat", "cint32":"cint16", "cint16":"cint16"}
 
 def fn_get_twiddle_type(data_type):
-	return k_twiddle_type[data_type]
+    return k_twiddle_type[data_type]
 
 #### VMC graph generator ####
 def vmc_generate_graph(name, args):
@@ -53,6 +54,7 @@ def vmc_generate_graph(name, args):
     tmpargs["TP_FFT_NIFFT"] = 1
     tmpargs["TP_RND"] = args["rnd_mode"]
     tmpargs["TP_SAT"] = args["sat_mode"]
+    tmpargs["AIE_VARIANT"] = args["AIE_VARIANT"]
     tmpargs["TP_USE_WIDGETS"] = 1 if args["use_ssr_widget_kernels"] else 0
 
     return generate_graph(name, tmpargs)

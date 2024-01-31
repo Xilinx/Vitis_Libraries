@@ -18,7 +18,7 @@ TP_POINT_SIZE_max = 128
 TP_NUM_FRAMES_min = 1
 TP_NUM_FRAMES_max = 100
 TP_CASC_LEN_min = 1
-TP_CASC_LEN_max = 11
+TP_CASC_LEN_max = 16
 TP_SHIFT_min=0
 TP_SHIFT_max=60
 #TP_API_min=0
@@ -28,7 +28,7 @@ TP_SHIFT_max=60
 #AIE_VARIANT_min=1
 #AIE_VARIANT_max=2
 
-# Validate Twiddle type 
+# Validate Twiddle type
 def fn_validate_twiddle_type(TT_DATA, TT_TWIDDLE):
   validTypeCombos = [
       ("cint16", "cint16"),
@@ -38,7 +38,7 @@ def fn_validate_twiddle_type(TT_DATA, TT_TWIDDLE):
   return (
     isValid if ((TT_DATA,TT_TWIDDLE) in validTypeCombos)
     else (
-    isError(f"Invalid Data/Twiddle type combination ({TT_DATA},{TT_TWIDDLE}). ")
+    isError(f"Invalid Data/Twiddle type combination ({TT_DATA},{TT_TWIDDLE}). Valid combinations are cint16/cint16, cint32/cint16 or cfloat/cfloat")
     )
   )
 def validate_TT_TWIDDLE(args):
@@ -49,9 +49,9 @@ def validate_TT_TWIDDLE(args):
 # Validate point size
 def fn_validate_point_size(TP_POINT_SIZE):
   return (
-    isValid if (TP_POINT_SIZE >= 8 and TP_POINT_SIZE <=128)
+    isValid if (TP_POINT_SIZE >= TP_POINT_SIZE_min and TP_POINT_SIZE <=TP_POINT_SIZE_max)
     else (
-    isError(f"Invalid Point Size ({TP_POINT_SIZE}). ")
+    isError(f"Minimum and maximum values for TP_POINT_SIZE are {TP_POINT_SIZE_min} and {TP_POINT_SIZE_max}. Got ({TP_POINT_SIZE}).  ")
     )
   )
 def validate_TP_POINT_SIZE(args):
@@ -66,7 +66,7 @@ def validate_TP_SHIFT(args):
 
 def fn_validate_shift_val(TT_DATA, TP_SHIFT):
   if TP_SHIFT< TP_SHIFT_min or TP_SHIFT > TP_SHIFT_max:
-	    return isError(f"Minimum and Maximum value for Shift is {TP_SHIFT_min} and {TP_SHIFT_max},respectively, but got {TP_SHIFT}. ")
+        return isError(f"Minimum and Maximum value for Shift is {TP_SHIFT_min} and {TP_SHIFT_max},respectively, but got {TP_SHIFT}. ")
   return fn_float_no_shift(TT_DATA, TP_SHIFT)
 
 
@@ -84,7 +84,7 @@ def validate_TP_CASC_LEN(args):
   TP_POINT_SIZE = args["TP_POINT_SIZE"]
   TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
   TP_CASC_LEN = args["TP_CASC_LEN"]
-  
+
   return fn_validate_casc_len(TP_POINT_SIZE, TP_NUM_FRAMES, TP_CASC_LEN)
 
 def validate_TP_SAT(args):
@@ -93,7 +93,7 @@ def validate_TP_SAT(args):
 
 def fn_validate_numFrames(TP_NUM_FRAMES):
   if TP_NUM_FRAMES< TP_NUM_FRAMES_min or TP_NUM_FRAMES > TP_NUM_FRAMES_max:
-	    return isError(f"Minimum and Maximum value for Num of Frames is {TP_NUM_FRAMES_min} and {TP_NUM_FRAMES_max},respectively, but got {TP_SHIFT}. ")
+        return isError(f"Minimum and Maximum value for Num of Frames is {TP_NUM_FRAMES_min} and {TP_NUM_FRAMES_max},respectively, but got {TP_NUM_FRAMES}. ")
   return isValid
 
 
@@ -125,8 +125,8 @@ def info_ports(args):
   TT_DATA = args["TT_DATA"]
   TP_POINT_SIZE = args["TP_POINT_SIZE"]
   TP_CASC_LEN = args["TP_CASC_LEN"]
-  TP_NUM_FRAMES = args["TP_NUM_FRAMES"]  
-  
+  TP_NUM_FRAMES = args["TP_NUM_FRAMES"]
+
   OUT_WINDOW_VSIZE, CASC_WINDOW_VSIZE = get_window_sizes(TT_DATA,TP_POINT_SIZE,TP_NUM_FRAMES,TP_CASC_LEN)
 
 
@@ -155,7 +155,7 @@ class {graphname} : public adf::graph {{
 public:
   // ports
   //template <typename dir>
-  
+
   std::array<adf::port<input>, {TP_CASC_LEN}> in;
   std::array<adf::port<output>, 1> out;
 

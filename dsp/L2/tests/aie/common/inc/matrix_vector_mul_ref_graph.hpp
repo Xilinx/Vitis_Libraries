@@ -37,6 +37,7 @@ template <typename TT_DATA_A,
           unsigned int TP_RND,
           unsigned int TP_NUM_FRAMES,
           unsigned int TP_CASC_LEN,
+          unsigned int TP_SSR,
           unsigned int TP_SAT>
 class matrix_vector_mul_ref_graph : public graph {
    public:

@@ -29,10 +29,11 @@ def vmc_validate_point_size(args):
       return isError(f"Invalid SSR value specified. The value should be of the form 2^N between 2 and 512.")
 
     point_size = args["point_size"]
-    dyn_point_size = 0;
+    dyn_point_size = 0
     data_type = args["data_type"]
-    api = 1;
-    return fn_validate_point_size(point_size, dyn_point_size, data_type, pp, api)
+    api = 1
+    AIE_VARIANT = args["AIE_VARIANT"]
+    return fn_validate_point_size(point_size, dyn_point_size, data_type, pp, api, AIE_VARIANT)
 
 def vmc_validate_shift_val(args):
     data_type = args["data_type"]
@@ -70,12 +71,12 @@ def vmc_validate_ssr(args):
 
     if pp == -1:
       return isError(f"Invalid SSR value specified. The value should be of the form 2^N between 2 and 512.")
-	
+
     return fn_validate_parallel_power(api, pp)
-	
-# Get twiddle types	
+
+# Get twiddle types
 k_twiddle_type = {"cfloat":"cfloat", "cint32":"cint16", "cint16":"cint16"}
 
 def fn_get_twiddle_type(data_type):
-	return k_twiddle_type[data_type]
+    return k_twiddle_type[data_type]
 

@@ -2,31 +2,16 @@
     "name": "Xilinx DSPLIB fir interpolate_hb",
     "description": "",
     "gui": false,
-    "flow": "versal",
+    "flow": "aie",
     "platform_allowlist": [
         "vck190",
         "vek280"
     ],
     "platform_properties": {
         "vck190": {
-            "param_set" : [ "test_0_tool_canary_aie",
-                            "test_1_fir_15t_sym_hb_2i" ,
-                            "test_2_fir_23t_sym_hb_2i" ,
-                            "test_3_fir_27t_sym_hb_2i" ,
-                            "test_4_fir_83t_sym_hb_2i" ,
-                            "test_5_fir_47t_sym_hb_2i" ,
-                            "test_6_fir_11t_sym_hb_2i" ,
-                            "test_7_fir_71t_sym_hb_2i" ,
-                            "test_8_fir_2047t_sym_hb_2i" ,
-                            "test_9_fir_27t_reload" ,
-                            "test_10_cint32_cint32_stream_2outputs" ,
-                            "test_12_cint32_int32_ssr3_cl3" ,
-                            "test_13_cint32_int32_ssr3_cl3_reload" ,
-                            "test_14_fir_43t_int16_int32" ,
-                            "test_15_fir_83t_cint16_int32" ,
-                            "test_16_fir_31t_cint16_cint32" ,
-                            "test_17_fir_11t_float",
-                            "test_18_fir_11t_cfloat"],
+            "param_set": [
+                "*_aie1_*"
+            ],
             "v++": {
                 "compiler": {
                     "clflags": []
@@ -39,22 +24,9 @@
             }
         },
         "vek280": {
-            "param_set": [ "test_0_tool_canary_aieml",
-                           "test_1_fir_15t_sym_hb_2i_aieml",
-                           "test_2_fir_23t_sym_hb_2i_aieml",
-                           "test_3_fir_27t_sym_hb_2i_aieml",
-                           "test_4_fir_83t_sym_hb_2i_aieml",
-                           "test_5_fir_47t_sym_hb_2i_aieml",
-                           "test_6_fir_11t_sym_hb_2i_aieml",
-                           "test_8_fir_2047t_sym_hb_2i_aieml",
-                           "test_9_fir_27t_reload_aieml",
-                           "test_12_cint16_int16_ssr3_cl3_aieml",
-                           "test_13_cint16_int16_ssr2_cl3_reload_aieml",
-                           "test_14_fir_43t_int16_int16_aieml",
-                           "test_15_fir_83t_cint16_int16_aieml",
-                           "test_16_fir_31t_cint16_cint16_aieml",
-                           "test_17_fir_83t_cint16_int32_aieml",
-                           "test_18_fir_31t_cint16_cint32_aieml"],
+            "param_set": [
+                "*_aie2_*"
+            ],
             "v++": {
                 "compiler": {
                     "clflags": []
@@ -67,24 +39,27 @@
             }
         }
     },
-    "pre_build": [
+        "pre_build": [
         {
-            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"tclsh LIB_DIR/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL)\"  --connector \" \" --var \"DATA_TYPE:COEFF_TYPE:FIR_LEN:SHIFT:ROUND_MODE:INPUT_WINDOW_VSIZE:CASC_LEN:USE_COEFF_RELOAD:NUM_OUTPUTS:PORT_API:DUAL_IP:UUT_SSR:UUT_PARA_INTERP_POLY:UPSHIFT_CT:AIE_VARIANT:SAT_MODE\")"
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\")"
+        },
+        {
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"tclsh LIB_DIR/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL)\"  --connector \" \" --var \"DATA_TYPE:COEFF_TYPE:FIR_LEN:SHIFT:ROUND_MODE:INPUT_WINDOW_VSIZE:CASC_LEN:USE_COEFF_RELOAD:NUM_OUTPUTS:PORT_API:DUAL_IP:UUT_SSR:UUT_PARA_INTERP_POLY:UPSHIFT_CT:AIE_VARIANT:SAT_MODE\")"
         },
         {
             "build_cmd": "$(if $(filter-out REF,$(TAG)), vitis --classic -exec ipmetadata_config_checker LIB_DIR/L2/meta/$(UUT_KERNEL).json ./config.json -newflow)"
         },
         {
-            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk gen_input HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(LOC_INPUT_FILE)\")"
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk gen_input HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR INPUT_FILE=$(LOC_INPUT_FILE)\")"
         },
         {
-            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk ssr_split HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR SPLIT_ZIP_FILE=$(LOC_INPUT_FILE) TAG=$(TAG)\")"
+            "build_cmd": "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk ssr_split HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR SPLIT_ZIP_FILE=$(LOC_INPUT_FILE) TAG=$(TAG)\")"
         },
         {
             "build_cmd": "$(if $(filter REF,$(TAG)), cp $(LOC_INPUT_FILE)  $(REF_INPUT_FILE))"
         },
         {
-            "build_cmd": "$(if $(filter REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk ssr_split HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR SPLIT_ZIP_FILE=$(REF_INPUT_FILE) TAG=$(TAG)\")"
+            "build_cmd": "$(if $(filter REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk ssr_split HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR SPLIT_ZIP_FILE=$(REF_INPUT_FILE) TAG=$(TAG)\")"
         },
         {
             "build_cmd": "$(if $(filter-out REF,$(TAG)), make run TARGET=x86sim TAG=REF)"
@@ -98,14 +73,14 @@
             "target": "aiesim",
             "launch_cmd": [
                 "mkdir -p logs",
-                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk ssr_zip HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR SPLIT_ZIP_FILE=$(LOC_OUTPUT_FILE_HW) TAG=$(TAG)\"",
-                "grep -ve '[XT]' ./aiesimulator_output/data/uut_output.txt > ./logs/uut_output.txt",
-                "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE)",
-                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
-                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk get_latency HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
-                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk get_stats HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
-                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk get_theoretical_min HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) SYMMETRY_FACTOR=$(SYMMETRY_FACTOR)\"",
-                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk harvest_mem HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk ssr_zip HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR SPLIT_ZIP_FILE=$(LOC_OUTPUT_FILE_HW) TAG=$(TAG)\"",
+                "grep -ve '[XT]' ./aiesimulator_output/data/uut_output.txt > ./data/uut_output.txt",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk diff HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR\"",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk get_latency HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk get_stats HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk get_theoretical_min HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL) SYMMETRY_FACTOR=$(SYMMETRY_FACTOR)\"",
+                "$(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk harvest_mem HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\"",
                 "tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./"
             ]
         },
@@ -113,12 +88,12 @@
             "target": "x86sim",
             "launch_cmd": [
                 "mkdir -p logs",
-                "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk ssr_zip HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR SPLIT_ZIP_FILE=$(LOC_OUTPUT_FILE_X86) TAG=$(TAG)\")",
-                "$(if $(filter REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk ssr_zip HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR SPLIT_ZIP_FILE=$(REF_LOC_OUTPUT_FILE_X86) TAG=$(TAG)\")",
-                "$(if $(filter-out REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/uut_output.txt > ./logs/uut_output.txt)",
-                "$(if $(filter REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./logs/ref_output.txt)",
-                "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/diff.tcl ./logs/uut_output.txt ./logs/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE))",
-                "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file multi_params.json --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\")",
+                "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk ssr_zip HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR SPLIT_ZIP_FILE=$(LOC_OUTPUT_FILE_X86) TAG=$(TAG)\")",
+                "$(if $(filter REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk ssr_zip HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR SPLIT_ZIP_FILE=$(REF_LOC_OUTPUT_FILE_X86) TAG=$(TAG)\")",
+                "$(if $(filter-out REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/uut_output.txt > ./data/uut_output.txt)",
+                "$(if $(filter REF,$(TAG)), grep -ve '[XT]' ./x86simulator_output/data/ref_output.txt > ./data/ref_output.txt)",
+                "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk diff HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR\")",
+                "$(if $(filter-out REF,$(TAG)), $(VITIS_PYTHON3) LIB_DIR/L2/tests/aie/common/scripts/paramenv.py --parameter_file $(PARAMS_FILE) --instance_name $(PARAMS) --command \"make -f LIB_DIR/L2/tests/aie/common/scripts/fir_helper.mk get_status HELPER_CUR_DIR=PROJECT HELPER_ROOT_DIR=LIB_DIR UUT_KERNEL=$(UUT_KERNEL)\")",
                 "$(if $(filter-out REF,$(TAG)), tclsh LIB_DIR/L2/tests/aie/common/scripts/diff_exit.tcl ./)"
             ]
         }
@@ -150,13 +125,11 @@
                 "params": "--aie.verbose $($(TAG)_TARGET_COMPILE_ARGS) $($(TAG)_PREPROC_ARGS)",
                 "default": {
                     "TAG": "UUT",
-                    "UUT_KERNEL":"fir_interpolate_hb",
+                    "UUT_KERNEL": "fir_interpolate_hb",
                     "REF_KERNEL": "fir_interpolate_hb_ref",
                     "UUT_GRAPH": "fir_interpolate_hb_graph",
                     "REF_GRAPH": "fir_interpolate_hb_ref_graph",
                     "SYMMETRY_FACTOR": "2",
-                    "DIFF_TOLERANCE": "0",
-                    "CC_TOLERANCE": "0",
                     "LOC_OUTPUT_FILE_X86": "./x86simulator_output/data/uut_output.txt",
                     "REF_LOC_OUTPUT_FILE_X86": "./x86simulator_output/data/ref_output.txt",
                     "LOC_OUTPUT_FILE_HW": "./aiesimulator_output/data/uut_output.txt",
@@ -170,7 +143,7 @@
                     "PREPROC_ARGS": "--aie.Xpreproc=-DCOEFF_FILE=$(LOC_COEFF_FILE)",
                     "REF_PREPROC_ARGS": "--aie.Xpreproc=-DUUT_GRAPH=$(REF_GRAPH) --aie.Xpreproc=-DINPUT_FILE=$(REF_INPUT_FILE) --aie.Xpreproc=-DOUTPUT_FILE=$(REF_SIM_FILE) $(PREPROC_ARGS)",
                     "UUT_PREPROC_ARGS": "--aie.Xpreproc=-DUUT_GRAPH=$(UUT_GRAPH) --aie.Xpreproc=-DINPUT_FILE=$(LOC_INPUT_FILE) --aie.Xpreproc=-DOUTPUT_FILE=$(UUT_SIM_FILE) $(PREPROC_ARGS) --aie.Xpreproc=-DUSING_UUT=1",
-                    "UUT_TARGET_COMPILE_ARGS": "--aie.Xrouter=DMAFIFOsInFreeBankOnly --aie.stacksize=$(shell $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramset.py multi_params.json $(PARAMS))  --aie.Xchess=llvm.xargs=\"-std=c++2a\" --aie.Xchess=main:backend.mist2.xargs=\"+NOdra\" --aie.Xchess=main:backend.mist2.pnll=\"off\" "
+                    "UUT_TARGET_COMPILE_ARGS": "--aie.Xrouter=DMAFIFOsInFreeBankOnly --aie.stacksize=$(shell $(VITIS_PYTHON3) $(XFLIB_DIR)/L2/tests/aie/common/scripts/paramset.py $(PARAMS_FILE) $(PARAMS))  --aie.Xchess=llvm.xargs=\"-std=c++2a\" --aie.Xchess=main:backend.mist2.xargs=\"+NOdra\" --aie.Xchess=main:backend.mist2.pnll=\"off\" "
                 }
             }
         }
@@ -179,7 +152,7 @@
         {
             "accelerators": [
                 {
-                    "location": "LIB_DIR/L2/tests/aie/fir_interpolate_hb/test.cpp",
+                    "location": "test.cpp",
                     "files": [
                         "uut_config.h",
                         "LIB_DIR/L1/src/aie/fir_interpolate_hb.cpp"
@@ -193,8 +166,12 @@
         }
     ],
     "generators": {
-        "uut_config.h": {"file": "LIB_DIR/L2/tests/aie/common/scripts/tb_gen.py","function": "generate_testbench"}
+        "uut_config.h": {
+            "file": "LIB_DIR/L2/tests/aie/common/scripts/tb_gen.py",
+            "function": "generate_testbench"
+        }
     },
+    "config_make": "params.mk",
     "parameter_file": "multi_params.json",
     "testinfo": {
         "disable": false,
@@ -215,6 +192,16 @@
             "vitis_aie_sim",
             "vitis_aie_x86sim"
         ],
-        "category": "canary"
+        "category": "canary",
+        "param_set": {
+            "pull_req": {
+                "*_hw_daily":["vitis_aie_sim"],
+                "*_x86sim_daily":["vitis_aie_x86sim"]
+            },
+            "daily": {
+                "*_hw_qor":["vitis_aie_sim"],
+                "*_x86sim_qor":["vitis_aie_x86sim"]              
+            }
+        }
     }
 }

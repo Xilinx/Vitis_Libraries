@@ -2,7 +2,7 @@
     "gui": false,
     "name": "Xilinx 1D FFT Float Reference Design",
     "description": "Xilinx 1D FFT Float Reference Design",
-    "flow": "vitis",
+    "flow": "system",
     "platform_allowlist": [
         "u250"
     ],

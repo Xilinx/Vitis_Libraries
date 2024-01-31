@@ -67,6 +67,13 @@
 // #warning AIE Architecture does not supports cfloats
 #endif
 
+// FFT 32 bit twiddle support
+#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#define __SUPPORTS_32B_TW__ 1
+#else
+#define __SUPPORTS_32B_TW__ 0
+#endif
+
 #if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
 #define __HAS_SYM_PREADD__ 1
 #else
@@ -165,6 +172,12 @@
 #define __HAS_ACCUM_PERMUTES__ 1
 #else
 #define __HAS_ACCUM_PERMUTES__ 0
+#endif
+
+#if (__AIE_ARCH__ == 10) || (__AIEARCH__ == 10)
+#define __SUPPORTS_DMA_FIFO__ 1
+#else
+#define __SUPPORTS_DMA_FIFO__ 0
 #endif
 
 // AIE1 and 2 offer 3 saturation modes

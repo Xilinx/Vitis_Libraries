@@ -34,25 +34,25 @@ def fn_validate_ssr(TP_SSR):
 def validate_TP_WINDOW_VSIZE(args):
   TP_INPUT_WINDOW_VSIZE= args["TP_INPUT_WINDOW_VSIZE"]
   if TP_INPUT_WINDOW_VSIZE < TP_INPUT_WINDOW_VSIZE_min:
-	    return isError(f"Minimum value for Input window size is {TP_INPUT_WINDOW_VSIZE_min},respectively, but got {TP_INPUT_WINDOW_VSIZE}.")
+        return isError(f"Minimum value for Input window size is {TP_INPUT_WINDOW_VSIZE_min},respectively, but got {TP_INPUT_WINDOW_VSIZE}.")
   TT_DATA= args["TT_DATA"]
   lanes = fn_get_dds_lanes(TT_DATA)
   if (TP_INPUT_WINDOW_VSIZE % lanes != 0):
     return isError(f"Window size ({TP_INPUT_WINDOW_VSIZE}) must be a multiple of number of lanes ({lanes})")
-  
+
   return isValid
 
 def validate_TP_SSR(args):
     TP_SSR = args["TP_SSR"]
     return fn_validate_ssr(TP_SSR)
-    
+
 def validate_TP_SAT(args):
   TP_SAT = args["TP_SAT"]
   return fn_validate_satMode(TP_SAT)
 
   ######### Graph Generator ############
 
-# Used by higher layer software to figure out how to connect blocks together. 
+# Used by higher layer software to figure out how to connect blocks together.
 def info_ports(args):
   TT_DATA = args["TT_DATA"]
   TP_INPUT_WINDOW_VSIZE = args["TP_INPUT_WINDOW_VSIZE"]
@@ -65,7 +65,7 @@ def info_ports(args):
 
   return (in1_ports+in2_ports+out_ports) # concat lists
 
-def gen_ports_code(args): 
+def gen_ports_code(args):
   TP_SSR = args["TP_SSR"]
   TP_MIXER_MODE = args["TP_MIXER_MODE"]
   in1_ports = ((f"  std::array<adf::port<input>, {TP_SSR}> in1;\n") if (TP_MIXER_MODE in [1,2]) else "")
@@ -74,7 +74,7 @@ def gen_ports_code(args):
 
   return (in1_ports+in2_ports+out_ports) # concat strings
 
-def gen_ports_connections(args): 
+def gen_ports_connections(args):
   TP_SSR = args["TP_SSR"]
   TP_MIXER_MODE = args["TP_MIXER_MODE"]
   in1_ports = ((f"      adf::connect<>(in1[ssrIdx],mixer_graph.in1[ssrIdx]);\n") if (TP_MIXER_MODE in [1,2]) else "")
@@ -123,7 +123,7 @@ public:
   }}
 
 }};
-"""    
+"""
   )
   out["graph"] = code
   out["headerfile"] = "dds_mixer_graph.hpp"

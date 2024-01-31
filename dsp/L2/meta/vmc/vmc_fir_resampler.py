@@ -3,11 +3,11 @@ from aie_common import *
 from vmc_fir_utils import *
 
 #### VMC validators ####
-def vmc_validate_coef_type(args):
+def vmc_validate_coeff_type(args):
     data_type = args["data_type"]
     coef_type = args["coef_type"]
     AIE_VARIANT = args["AIE_VARIANT"]
-    standard_checks = fn_validate_coef_type(data_type, coef_type)
+    standard_checks = fn_validate_coeff_type(data_type, coef_type)
     type_check = fn_type_support(data_type, coef_type, AIE_VARIANT)
     for check in (standard_checks, type_check):
         if check["is_valid"] == False:
@@ -40,7 +40,7 @@ def vmc_validate_input_window_size(args):
         ssr,
         interp_poly,
         deci_poly,
-        AIE_VARIANT       
+        AIE_VARIANT
     )
 
 
@@ -64,13 +64,13 @@ def vmc_validate_coeff(args):
     api = 0
     fir_length = fn_get_fir_length(args)
     tmpargs = {}
-    tmpargs["TT_COEF"] = coef_type
+    tmpargs["TT_COEFF"] = coef_type
     tmpargs["TP_FIR_LEN"] = fir_length
     tmpargs["TP_DECIMATE_FACTOR"] = decimate_factor
     tmpargs["TP_INTERPOLATE_FACTOR"] = interpolate_factor
     tmpargs["TT_DATA"] = data_type
     tmpargs["TP_CASC_LEN"] = casc_length
-    tmpargs["TP_USE_COEF_RELOAD"] = 1 if use_coeff_reload else 0
+    tmpargs["TP_USE_COEFF_RELOAD"] = 1 if use_coeff_reload else 0
     tmpargs["AIE_VARIANT"] = AIE_VARIANT
     tmpargs["TP_DUAL_IP"] = 0
     tmpargs["TP_API"] = api
@@ -79,7 +79,7 @@ def vmc_validate_coeff(args):
     tmpargs["TP_PARA_DECI_POLY"] = deci_poly
     return fn_validate_fir_len(
         tmpargs,
-	data_type,
+        data_type,
         coef_type,
         fir_length,
         interpolate_factor,
@@ -90,7 +90,7 @@ def vmc_validate_coeff(args):
         use_coeff_reload,
         AIE_VARIANT,
         deci_poly,
-	interp_poly
+        interp_poly
     )
 
 
@@ -100,12 +100,12 @@ def vmc_validate_shift_val(args):
     return fn_validate_shift_val(data_type, shift_val)
 
 def vmc_validate_decimate_factor(args):
-	data_type = args["data_type"]
-	coef_type = args["coef_type"]
-	decimate_factor = args["decimate_factor"]
-	interpolate_factor = args["interpolate_factor"]
-	AIE_VARIANT = args["AIE_VARIANT"]
-	return fn_validate_decimate_factor(data_type, coef_type, interpolate_factor, decimate_factor, AIE_VARIANT)
+    data_type = args["data_type"]
+    coef_type = args["coef_type"]
+    decimate_factor = args["decimate_factor"]
+    interpolate_factor = args["interpolate_factor"]
+    AIE_VARIANT = args["AIE_VARIANT"]
+    return fn_validate_decimate_factor(data_type, coef_type, interpolate_factor, decimate_factor, AIE_VARIANT)
 
 def vmc_validate_interpolate_factor(args):
     interpolate_factor = args["interpolate_factor"]
@@ -133,9 +133,9 @@ def validate_num_outputs(args):
     return fn_validate_num_outputs(api, num_outputs, AIE_VARIANT)
 
 def vmc_validate_rnd_mode(args):
-	rnd_mode = args["rnd_mode"]
-	AIE_VARIANT = args["AIE_VARIANT"]
-	return fn_validate_roundMode(rnd_mode, AIE_VARIANT)
+    rnd_mode = args["rnd_mode"]
+    AIE_VARIANT = args["AIE_VARIANT"]
+    return fn_validate_roundMode(rnd_mode, AIE_VARIANT)
 
 #### VMC graph generator ####
 def vmc_generate_graph(name, args):
@@ -144,7 +144,7 @@ def vmc_generate_graph(name, args):
     use_coeff_reload = args["use_coeff_reload"]
     coef_type = args["coef_type"]
     coeff = args["coeff"]
-    tmpargs["TT_COEF"] = coef_type
+    tmpargs["TT_COEFF"] = coef_type
     tmpargs["TP_FIR_LEN"] = fn_get_fir_length(args)
     tmpargs["TP_DECIMATE_FACTOR"] = args["decimate_factor"]
     tmpargs["TP_INTERPOLATE_FACTOR"] = args["interpolate_factor"]
@@ -152,7 +152,7 @@ def vmc_generate_graph(name, args):
     tmpargs["TP_RND"] = args["rnd_mode"]
     tmpargs["TP_INPUT_WINDOW_VSIZE"] = args["input_window_size"]
     tmpargs["TP_CASC_LEN"] = args["casc_length"]
-    tmpargs["TP_USE_COEF_RELOAD"] = 1 if args["use_coeff_reload"] else 0
+    tmpargs["TP_USE_COEFF_RELOAD"] = 1 if args["use_coeff_reload"] else 0
     tmpargs["TP_NUM_OUTPUTS"] = fn_get_num_outputs(args)
     tmpargs["TP_DUAL_IP"] = 0
     tmpargs["TP_API"] = 0

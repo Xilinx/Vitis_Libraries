@@ -37,11 +37,9 @@ endif
 PAD_POINT_SIZE 		:=  $(shell echo $$((   (($(POINT_SIZE) + $(SAMPLES_IN_256_VECT) - 1) / $(SAMPLES_IN_256_VECT)) * $(SAMPLES_IN_256_VECT) )))
 WINDOW_VSIZE 	:= $(shell echo $$(( 	$(PAD_POINT_SIZE) * $(NUM_FRAMES)		)))
 PARAM_MAP = DATA_TYPE $(DATA_TYPE) TWIDDLE_TYPE $(TWIDDLE_TYPE) POINT_SIZE $(POINT_SIZE) CASC_LEN $(CASC_LEN) NUM_FRAMES $(NUM_FRAMES) FFT_NIFFT $(FFT_NIFFT) SHIFT $(SHIFT) API_IO $(API_IO) AIE_VARIANT $(AIE_VARIANT) ROUND_MODE $(ROUND_MODE) SAT_MODE $(SAT_MODE)
-UUT_FILE_SUFFIX = $(UUT_KERNEL)_$(DATA_TYPE)_$(TWIDDLE_TYPE)_$(POINT_SIZE)_$(FFT_NIFFT)_$(SHIFT)_$(CASC_LEN)_$(NUM_FRAMES)_$(API_IO)_$(ROUND_MODE)_$(SAT_MODE)
-LOG_FILE = ./logs/log_$(UUT_FILE_SUFFIX).txt
-STATUS_LOG_FILE = ./logs/status_$(UUT_FILE_SUFFIX).txt
-STATUS_FILE = $(STATUS_LOG_FILE)
+STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
 
+AIE_PART = XCVC1902-VSVD1760-1LP-E-S
 
 $(HELPER): create_config validate_config create_input sim_ref prep_x86_out
 	make cleanall
@@ -52,7 +50,6 @@ create_config:
 
 validate_config:
 	vitis --classic -exec ipmetadata_config_checker $(HELPER_ROOT_DIR)/L2/meta/dft.json ./config.json -newflow
-
 
 create_input:
 	@echo starting create_input
@@ -77,16 +74,17 @@ prep_aie_out:
 		grep -ve '[XT]' $(HELPER_CUR_DIR)/aiesimulator_output/data/$$n > $(HELPER_CUR_DIR)/data/$$n;\
 	done
 
-check_op_ref: prep_x86_out prep_aie_out
+get_diff: prep_x86_out prep_aie_out
 	@perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(UUT_SIM_FILE) --type $(DATA_TYPE) --ssr 1 --zip --dual 0 -k 0 -w ${WINDOW_VSIZE};\
 	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(REF_SIM_FILE) --type $(DATA_TYPE) --ssr 1 --zip --dual 0 -k 0 -w ${WINDOW_VSIZE};\
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE) PERCENT
 
-get_status: check_op_ref
+get_status:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP)
 
 get_qor:
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output $(STATUS_FILE) $(WINDOW_VSIZE) $(NITER)
+	sh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_PART)
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output T_input_0_0.txt ./data/uut_output_0_0.txt $(STATUS_FILE) $(WINDOW_VSIZE) $(NITER)
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(WINDOW_VSIZE) $(CASC_LEN) $(STATUS_FILE) ./aiesimulator_output dftMain $(NITER)
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_fft_theoretical_min.tcl $(DATA_TYPE) $(TWIDDLE_TYPE) $(WINDOW_VSIZE) $(POINT_SIZE) $(CASC_LEN) $(STATUS_FILE) $(UUT_KERNEL) 0 $(API_IO)
 	$(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/harvest_memory.sh $(STATUS_FILE) $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts

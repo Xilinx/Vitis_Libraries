@@ -96,6 +96,12 @@
             "type": "uint",
             "description": "describes the number of AIE Tiles to split the GEMV operation into.",
             "minimum": 1
+        },
+        {
+            "name": "TP_SSR",
+            "type": "uint",
+            "description": "describes the dimension of AIE Tiles to split the GEMV operation into.",
+            "minimum": 1
         }
     ],
     "ports": {

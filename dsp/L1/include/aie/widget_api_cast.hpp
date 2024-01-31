@@ -105,6 +105,7 @@ class kernelClass<TT_DATA,
 };
 
 template <typename TT_DATA,
+          unsigned int TP_NUM_INPUTS,
           unsigned int TP_WINDOW_VSIZE,
           unsigned int TP_NUM_OUTPUT_CLONES,
           unsigned int TP_PATTERN,
@@ -112,7 +113,7 @@ template <typename TT_DATA,
 class kernelClass<TT_DATA,
                   kWindowAPI,
                   kStreamAPI,
-                  1,
+                  TP_NUM_INPUTS,
                   TP_WINDOW_VSIZE,
                   TP_NUM_OUTPUT_CLONES,
                   TP_PATTERN,
@@ -123,6 +124,33 @@ class kernelClass<TT_DATA,
     kernelClass() {}
 
     void kernelClassMain(T_inputIF<TT_DATA, kWindowAPI> inInterface, T_outputIF<TT_DATA, kStreamAPI> outInterface);
+    // Multiple Window 2 Single Stream
+    void kernelClassMW2SS(T_inputIF<TT_DATA, kWindowAPI> inInterface, T_outputIF<TT_DATA, kStreamAPI> outInterface);
+};
+
+template <typename TT_DATA,
+          unsigned int TP_NUM_INPUTS,
+          unsigned int TP_WINDOW_VSIZE,
+          unsigned int TP_NUM_OUTPUT_CLONES,
+          unsigned int TP_PATTERN,
+          unsigned int TP_HEADER_BYTES>
+class kernelClass<TT_DATA,
+                  kWindowAPI,
+                  kWindowAPI,
+                  TP_NUM_INPUTS,
+                  TP_WINDOW_VSIZE,
+                  TP_NUM_OUTPUT_CLONES,
+                  TP_PATTERN,
+                  TP_HEADER_BYTES> {
+   private:
+   public:
+    // Constructor
+    kernelClass() {}
+
+    // Single Window 2 Single Window
+    void kernelClassMain(T_inputIF<TT_DATA, kWindowAPI> inInterface, T_outputIF<TT_DATA, kWindowAPI> outInterface);
+    // Multiple Window 2 Single Window
+    void kernelClassMW2SW(T_inputIF<TT_DATA, kWindowAPI> inInterface, T_outputIF<TT_DATA, kWindowAPI> outInterface);
 };
 
 template <typename TT_DATA,
@@ -471,7 +499,6 @@ class widget_api_cast<TT_DATA, kWindowAPI, kStreamAPI, 1, TP_WINDOW_VSIZE, 2, TP
                       output_stream<TT_DATA>* __restrict outStream0,
                       output_stream<TT_DATA>* __restrict outStream1);
 };
-
 #ifdef __SUPPORTS_ACC64__
 // CascStream to  window, 2 in 1 out
 template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
@@ -551,6 +578,190 @@ class widget_api_cast<TT_DATA, kWindowAPI, kStreamCascAPI, 1, TP_WINDOW_VSIZE, 2
                       output_stream_cacc64* __restrict outStream1);
 };
 #endif //__SUPPORTS_ACC64__
+
+// Window to stream 2 to 1 interleave
+template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+class widget_api_cast<TT_DATA, kWindowAPI, kStreamAPI, 2, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>
+    : public kernelClass<TT_DATA, kWindowAPI, kStreamAPI, 2, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES> {
+   public:
+    // Constructor
+    widget_api_cast()
+        : kernelClass<TT_DATA, kWindowAPI, kStreamAPI, 2, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>() {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast::transferData); }
+
+    // Main function
+    void transferData(input_buffer<TT_DATA>& __restrict inWindow0,
+                      input_buffer<TT_DATA>& __restrict inWindow1,
+                      output_stream<TT_DATA>* __restrict outStream0);
+};
+
+// Window to stream 3 to 1 interleave
+template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+class widget_api_cast<TT_DATA, kWindowAPI, kStreamAPI, 3, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>
+    : public kernelClass<TT_DATA, kWindowAPI, kStreamAPI, 3, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES> {
+   public:
+    // Constructor
+    widget_api_cast()
+        : kernelClass<TT_DATA, kWindowAPI, kStreamAPI, 3, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>() {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast::transferData); }
+
+    // Main function
+    void transferData(input_buffer<TT_DATA>& __restrict inWindow0,
+                      input_buffer<TT_DATA>& __restrict inWindow1,
+                      input_buffer<TT_DATA>& __restrict inWindow2,
+                      output_stream<TT_DATA>* __restrict outStream0);
+};
+
+// Window to window 2 to 1 interleave
+template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+class widget_api_cast<TT_DATA, kWindowAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>
+    : public kernelClass<TT_DATA, kWindowAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES> {
+   public:
+    // Constructor
+    widget_api_cast()
+        : kernelClass<TT_DATA, kWindowAPI, kWindowAPI, 2, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>() {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast::transferData); }
+
+    // Main function
+    void transferData(input_buffer<TT_DATA>& __restrict inWindow0,
+                      input_buffer<TT_DATA>& __restrict inWindow1,
+                      output_buffer<TT_DATA>& __restrict outWindow0);
+};
+
+// Window to window 3 to 1 interleave
+template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+class widget_api_cast<TT_DATA, kWindowAPI, kWindowAPI, 3, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>
+    : public kernelClass<TT_DATA, kWindowAPI, kWindowAPI, 3, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES> {
+   public:
+    // Constructor
+    widget_api_cast()
+        : kernelClass<TT_DATA, kWindowAPI, kWindowAPI, 3, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>() {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast::transferData); }
+
+    // Main function
+    void transferData(input_buffer<TT_DATA>& __restrict inWindow0,
+                      input_buffer<TT_DATA>& __restrict inWindow1,
+                      input_buffer<TT_DATA>& __restrict inWindow2,
+                      output_buffer<TT_DATA>& __restrict outWindow0);
+};
+
+// Window to window 4 to 1 interleave
+template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+class widget_api_cast<TT_DATA, kWindowAPI, kWindowAPI, 4, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>
+    : public kernelClass<TT_DATA, kWindowAPI, kWindowAPI, 4, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES> {
+   public:
+    // Constructor
+    widget_api_cast()
+        : kernelClass<TT_DATA, kWindowAPI, kWindowAPI, 4, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>() {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast::transferData); }
+
+    // Main function
+    void transferData(input_buffer<TT_DATA>& __restrict inWindow0,
+                      input_buffer<TT_DATA>& __restrict inWindow1,
+                      input_buffer<TT_DATA>& __restrict inWindow2,
+                      input_buffer<TT_DATA>& __restrict inWindow3,
+                      output_buffer<TT_DATA>& __restrict outWindow0);
+};
+
+// Window to window 5 to 1 interleave
+template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+class widget_api_cast<TT_DATA, kWindowAPI, kWindowAPI, 5, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>
+    : public kernelClass<TT_DATA, kWindowAPI, kWindowAPI, 5, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES> {
+   public:
+    // Constructor
+    widget_api_cast()
+        : kernelClass<TT_DATA, kWindowAPI, kWindowAPI, 5, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>() {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast::transferData); }
+
+    // Main function
+    void transferData(input_buffer<TT_DATA>& __restrict inWindow0,
+                      input_buffer<TT_DATA>& __restrict inWindow1,
+                      input_buffer<TT_DATA>& __restrict inWindow2,
+                      input_buffer<TT_DATA>& __restrict inWindow3,
+                      input_buffer<TT_DATA>& __restrict inWindow4,
+                      output_buffer<TT_DATA>& __restrict outWindow0);
+};
+
+// Window to window 6 to 1 interleave
+template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+class widget_api_cast<TT_DATA, kWindowAPI, kWindowAPI, 6, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>
+    : public kernelClass<TT_DATA, kWindowAPI, kWindowAPI, 6, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES> {
+   public:
+    // Constructor
+    widget_api_cast()
+        : kernelClass<TT_DATA, kWindowAPI, kWindowAPI, 6, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>() {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast::transferData); }
+
+    // Main function
+    void transferData(input_buffer<TT_DATA>& __restrict inWindow0,
+                      input_buffer<TT_DATA>& __restrict inWindow1,
+                      input_buffer<TT_DATA>& __restrict inWindow2,
+                      input_buffer<TT_DATA>& __restrict inWindow3,
+                      input_buffer<TT_DATA>& __restrict inWindow4,
+                      input_buffer<TT_DATA>& __restrict inWindow5,
+                      output_buffer<TT_DATA>& __restrict outWindow0);
+};
+
+// Window to window 7 to 1 interleave
+template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+class widget_api_cast<TT_DATA, kWindowAPI, kWindowAPI, 7, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>
+    : public kernelClass<TT_DATA, kWindowAPI, kWindowAPI, 7, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES> {
+   public:
+    // Constructor
+    widget_api_cast()
+        : kernelClass<TT_DATA, kWindowAPI, kWindowAPI, 7, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>() {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast::transferData); }
+
+    // Main function
+    void transferData(input_buffer<TT_DATA>& __restrict inWindow0,
+                      input_buffer<TT_DATA>& __restrict inWindow1,
+                      input_buffer<TT_DATA>& __restrict inWindow2,
+                      input_buffer<TT_DATA>& __restrict inWindow3,
+                      input_buffer<TT_DATA>& __restrict inWindow4,
+                      input_buffer<TT_DATA>& __restrict inWindow5,
+                      input_buffer<TT_DATA>& __restrict inWindow6,
+                      output_buffer<TT_DATA>& __restrict outWindow0);
+};
+
+// Window to window 7 to 1 interleave
+template <typename TT_DATA, unsigned int TP_WINDOW_VSIZE, unsigned int TP_PATTERN, unsigned int TP_HEADER_BYTES>
+class widget_api_cast<TT_DATA, kWindowAPI, kWindowAPI, 8, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>
+    : public kernelClass<TT_DATA, kWindowAPI, kWindowAPI, 8, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES> {
+   public:
+    // Constructor
+    widget_api_cast()
+        : kernelClass<TT_DATA, kWindowAPI, kWindowAPI, 8, TP_WINDOW_VSIZE, 1, TP_PATTERN, TP_HEADER_BYTES>() {}
+
+    // Register Kernel Class
+    static void registerKernelClass() { REGISTER_FUNCTION(widget_api_cast::transferData); }
+
+    // Main function
+    void transferData(input_buffer<TT_DATA>& __restrict inWindow0,
+                      input_buffer<TT_DATA>& __restrict inWindow1,
+                      input_buffer<TT_DATA>& __restrict inWindow2,
+                      input_buffer<TT_DATA>& __restrict inWindow3,
+                      input_buffer<TT_DATA>& __restrict inWindow4,
+                      input_buffer<TT_DATA>& __restrict inWindow5,
+                      input_buffer<TT_DATA>& __restrict inWindow6,
+                      input_buffer<TT_DATA>& __restrict inWindow7,
+                      output_buffer<TT_DATA>& __restrict outWindow0);
+};
 }
 }
 }

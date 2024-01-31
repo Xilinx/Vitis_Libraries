@@ -17,7 +17,9 @@
 #ifndef _DSPLIB_FFT_REF_UTILS_HPP_
 #define _DSPLIB_FFT_REF_UTILS_HPP_
 
-#include "fft_ifft_dit_twiddle_lut.h"
+//#include "fft_ifft_dit_twiddle_lut.h"  //for legacy cint16 tables from commslib
+#include "fft_ifft_dit_twiddle_lut_all.h" //for cint32, cint31, cint15 tables.
+//#include "fft_ifft_dit_twiddle_lut_cint32.h" //holds cint15 and cint31 tables
 #include "fir_ref_utils.hpp" //for rounding and saturation functions
 
 // Rounding modes
@@ -129,6 +131,35 @@ struct T_accfftRef<cfloat> {
 
 //---------------------------------
 // Templatized functions
+template <typename TT_TWIDDLE, unsigned int T_TW_MODE = 0>
+constexpr unsigned int getTwShift() {
+    printf("Error: unexpected twiddle type\n");
+    return 0;
+}; // default error trap
+template <>
+constexpr unsigned int getTwShift<cint16, 0>() {
+    return 15;
+};
+template <>
+constexpr unsigned int getTwShift<cint16, 1>() {
+    return 14;
+};
+template <>
+constexpr unsigned int getTwShift<cint32, 0>() {
+    return 31;
+};
+template <>
+constexpr unsigned int getTwShift<cint32, 1>() {
+    return 30;
+};
+template <>
+constexpr unsigned int getTwShift<cfloat, 0>() {
+    return 0;
+};
+template <>
+constexpr unsigned int getTwShift<cfloat, 1>() {
+    return 0;
+};
 
 // Fn to perform log2 on TP_POINT_SIZE to get number of Radix2 ranks
 template <unsigned int TP_POINT_SIZE>
@@ -160,14 +191,30 @@ inline constexpr unsigned int fnGetPointSizePower() {
                                                                                  : TP_POINT_SIZE == 65536 ? 16 : 0;
 }
 
-template <typename TT_TWIDDLE>
+template <typename TT_TWIDDLE, unsigned int TP_TWIDDLE_MODE>
 inline TT_TWIDDLE* fnGetTwiddleMasterBase(){};
 template <>
-inline cint16* fnGetTwiddleMasterBase<cint16>() {
+inline cint16* fnGetTwiddleMasterBase<cint16, 0>() {
     return (cint16*)twiddle_master_cint16;
 };
 template <>
-inline cfloat* fnGetTwiddleMasterBase<cfloat>() {
+inline cint32* fnGetTwiddleMasterBase<cint32, 0>() {
+    return (cint32*)twiddle_master_cint32;
+};
+template <>
+inline cfloat* fnGetTwiddleMasterBase<cfloat, 0>() {
+    return (cfloat*)twiddle_master_cfloat;
+};
+template <>
+inline cint16* fnGetTwiddleMasterBase<cint16, 1>() {
+    return (cint16*)twiddle_master_cint15;
+};
+template <>
+inline cint32* fnGetTwiddleMasterBase<cint32, 1>() {
+    return (cint32*)twiddle_master_cint31;
+};
+template <>
+inline cfloat* fnGetTwiddleMasterBase<cfloat, 1>() {
     return (cfloat*)twiddle_master_cfloat;
 };
 
@@ -494,6 +541,20 @@ inline cint64 cmpy<cint32, cint16>(cint32 d, cint16 tw, bool inv) {
     }
     return retVal;
 }
+// It is acknowledged that cint64 is insufficent for the return of cint32*cint32, but
+// no larger type exists and errors only occur if input data has not been pre-scaled.
+template <>
+inline cint64 cmpy<cint32, cint32>(cint32 d, cint32 tw, bool inv) {
+    cint64 retVal;
+    if (inv == true) {
+        retVal.real = (int64)d.real * (int64)tw.real + (int64)d.imag * (int64)tw.imag;
+        retVal.imag = (int64)d.imag * (int64)tw.real - (int64)d.real * (int64)tw.imag;
+    } else {
+        retVal.real = (int64)d.real * (int64)tw.real - (int64)d.imag * (int64)tw.imag;
+        retVal.imag = (int64)d.imag * (int64)tw.real + (int64)d.real * (int64)tw.imag;
+    }
+    return retVal;
+}
 
 //--------butterfly for non-bit-accurate model
 template <typename TT_DATA, typename TT_TWIDDLE>
@@ -521,6 +582,9 @@ inline void btflynonbitacc<cint16, cint16>(
 
 //-----------------------------------------------------------------
 // templatized butterfly function.
+// Twshift is passed as an argument rather than TP_TWIDDLE_MODE being passed and then
+// twshift being derived. This is simply because with an extra parameter on a templatized
+// function is much more verbose.
 template <typename TI_D, typename T_TW>
 inline void btfly(T_int_data<TI_D>& q0,
                   T_int_data<TI_D>& q1,
@@ -528,6 +592,7 @@ inline void btfly(T_int_data<TI_D>& q0,
                   T_int_data<TI_D> d1,
                   T_TW tw,
                   bool inv,
+                  unsigned int twShift,
                   unsigned int shift,
                   unsigned int t_rnd,
                   unsigned int t_sat) {
@@ -541,6 +606,7 @@ inline void btfly<cfloat, cfloat>(T_int_data<cfloat>& q0,
                                   T_int_data<cfloat> d1,
                                   cfloat tw,
                                   bool inv,
+                                  unsigned int twShift,
                                   unsigned int shift,
                                   unsigned int t_rnd,
                                   unsigned int t_sat) {
@@ -561,6 +627,7 @@ inline void btfly<cint32, cint16>(T_int_data<cint32>& q0,
                                   T_int_data<cint32> d1,
                                   cint16 tw,
                                   bool inv,
+                                  unsigned int twShift,
                                   unsigned int shift,
                                   unsigned int t_rnd,
                                   unsigned int t_sat) {
@@ -571,18 +638,17 @@ inline void btfly<cint32, cint16>(T_int_data<cint32>& q0,
     const int64 kRoundConst = ((int64)1 << (shift - 1));
     d1up.real = (int32)d1.real;
     d1up.imag = (int32)d1.imag;
-    const unsigned int shft = 15; // from cint16 for twiddle
     d1rot64 = cmpy<cint32, cint16>(d1up, tw, inv);
 
-    csum.real = ((int64)d0.real << shft) + d1rot64.real;
-    csum.imag = ((int64)d0.imag << shft) + d1rot64.imag;
+    csum.real = ((int64)d0.real << twShift) + d1rot64.real;
+    csum.imag = ((int64)d0.imag << twShift) + d1rot64.imag;
     roundAcc(t_rnd, shift, csum);
     saturateAcc(csum, t_sat);
     q0.real = (int32)csum.real;
     q0.imag = (int32)csum.imag;
 
-    csum.real = ((int64)d0.real << shft) - d1rot64.real;
-    csum.imag = ((int64)d0.imag << shft) - d1rot64.imag;
+    csum.real = ((int64)d0.real << twShift) - d1rot64.real;
+    csum.imag = ((int64)d0.imag << twShift) - d1rot64.imag;
     roundAcc(t_rnd, shift, csum);
     saturateAcc(csum, t_sat);
     q1.real = (int32)csum.real;
@@ -596,6 +662,7 @@ inline void btfly<cint16, cint16>(T_int_data<cint16>& q0,
                                   T_int_data<cint16> d1,
                                   cint16 tw,
                                   bool inv,
+                                  unsigned int twShift,
                                   unsigned int shift,
                                   unsigned int t_rnd,
                                   unsigned int t_sat) // the upshift variant
@@ -606,23 +673,95 @@ inline void btfly<cint16, cint16>(T_int_data<cint16>& q0,
     cint32 d1rot;
     T_accRef<cint32> csum; // internal data type is cint32.
     const int64 kRoundConst = ((int64)1 << (shift - 1));
-    const unsigned int shft =
-        15; // from cint16 for twiddle.Not to be confused with shift which can include scaling factor
     d0up.real = (int32)d0.real;
     d0up.imag = (int32)d0.imag;
     d1up.real = (int32)d1.real;
     d1up.imag = (int32)d1.imag;
     d1rot64 = cmpy<cint32, cint16>(d1up, tw, inv);
 
-    csum.real = ((int64)d0up.real << shft) + d1rot64.real;
-    csum.imag = ((int64)d0up.imag << shft) + d1rot64.imag;
+    csum.real = ((int64)d0up.real << twShift) + d1rot64.real;
+    csum.imag = ((int64)d0up.imag << twShift) + d1rot64.imag;
     roundAcc(t_rnd, shift, csum);
     saturateAcc(csum, t_sat);
     q0.real = (int32)csum.real;
     q0.imag = (int32)csum.imag;
 
-    csum.real = ((int64)d0up.real << shft) - d1rot64.real;
-    csum.imag = ((int64)d0up.imag << shft) - d1rot64.imag;
+    csum.real = ((int64)d0up.real << twShift) - d1rot64.real;
+    csum.imag = ((int64)d0up.imag << twShift) - d1rot64.imag;
+    roundAcc(t_rnd, shift, csum);
+    saturateAcc(csum, t_sat);
+    q1.real = (int32)csum.real;
+    q1.imag = (int32)csum.imag;
+};
+
+template <>
+inline void btfly<cint32, cint32>(T_int_data<cint32>& q0,
+                                  T_int_data<cint32>& q1,
+                                  T_int_data<cint32> d0,
+                                  T_int_data<cint32> d1,
+                                  cint32 tw,
+                                  bool inv,
+                                  unsigned int twShift,
+                                  unsigned int shift,
+                                  unsigned int t_rnd,
+                                  unsigned int t_sat) {
+    cint32 d1up;
+    cint32 d1rot;
+    cint64 d1rot64;
+    T_accRef<cint32> csum;
+    const int64 kRoundConst = ((int64)1 << (shift - 1));
+    d1up.real = (int32)d1.real;
+    d1up.imag = (int32)d1.imag;
+    d1rot64 = cmpy<cint32, cint32>(d1up, tw, inv);
+
+    csum.real = ((int64)d0.real << twShift) + d1rot64.real;
+    csum.imag = ((int64)d0.imag << twShift) + d1rot64.imag;
+    roundAcc(t_rnd, shift, csum);
+    saturateAcc(csum, t_sat);
+    q0.real = (int32)csum.real;
+    q0.imag = (int32)csum.imag;
+
+    csum.real = ((int64)d0.real << twShift) - d1rot64.real;
+    csum.imag = ((int64)d0.imag << twShift) - d1rot64.imag;
+    roundAcc(t_rnd, shift, csum);
+    saturateAcc(csum, t_sat);
+    q1.real = (int32)csum.real;
+    q1.imag = (int32)csum.imag;
+};
+
+template <>
+inline void btfly<cint16, cint32>(T_int_data<cint16>& q0,
+                                  T_int_data<cint16>& q1,
+                                  T_int_data<cint16> d0,
+                                  T_int_data<cint16> d1,
+                                  cint32 tw,
+                                  bool inv,
+                                  unsigned int twShift,
+                                  unsigned int shift,
+                                  unsigned int t_rnd,
+                                  unsigned int t_sat) // the upshift variant
+{
+    cint32 d0up;
+    cint32 d1up;
+    cint64 d1rot64;
+    cint32 d1rot;
+    T_accRef<cint32> csum; // internal data type is cint32.
+    const int64 kRoundConst = ((int64)1 << (shift - 1));
+    d0up.real = (int32)d0.real;
+    d0up.imag = (int32)d0.imag;
+    d1up.real = (int32)d1.real;
+    d1up.imag = (int32)d1.imag;
+    d1rot64 = cmpy<cint32, cint32>(d1up, tw, inv);
+
+    csum.real = ((int64)d0up.real << twShift) + d1rot64.real;
+    csum.imag = ((int64)d0up.imag << twShift) + d1rot64.imag;
+    roundAcc(t_rnd, shift, csum);
+    saturateAcc(csum, t_sat);
+    q0.real = (int32)csum.real;
+    q0.imag = (int32)csum.imag;
+
+    csum.real = ((int64)d0up.real << twShift) - d1rot64.real;
+    csum.imag = ((int64)d0up.imag << twShift) - d1rot64.imag;
     roundAcc(t_rnd, shift, csum);
     saturateAcc(csum, t_sat);
     q1.real = (int32)csum.real;

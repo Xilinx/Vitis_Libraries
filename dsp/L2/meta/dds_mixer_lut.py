@@ -55,7 +55,7 @@ def validate_TT_DATA(args):
   TP_SFDR = args["TP_SFDR"]
   
   if (TT_DATA == "cint16" and TP_SFDR > 96):
-    return isError(f"SFDR > 96dB is not possible with 16-bit data types.")
+    return isError(f"SFDR > 96dB is not possible with 16-bit data types. Got {TP_SFDR}.")
   return isValid
 
 def validate_TP_SAT(args):

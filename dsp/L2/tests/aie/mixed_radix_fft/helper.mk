@@ -34,11 +34,11 @@ CASC_LEN       ?= 1
 DYN_PT_SIZE    ?= 0
 API_IO         ?= 0
 PARALLEL_POWER ?= 0
+DIFF_MODE      ?= ABS
+DIFF_TOLERANCE ?= 4
+CC_TOLERANCE   ?= 0
 
-UUT_FILE_SUFFIX = $(UUT_KERNEL)_$(DATA_TYPE)_$(TWIDDLE_TYPE)_$(POINT_SIZE)_$(FFT_NIFFT)_$(SHIFT)_$(ROUND_MODE)_$(SAT_MODE)_$(CASC_LEN)_$(DYN_PT_SIZE)_$(WINDOW_VSIZE)_$(API_IO)_$(PARALLEL_POWER)
-LOG_FILE = ./logs/log_$(UUT_FILE_SUFFIX).txt
-STATUS_LOG_FILE = ./logs/status_$(UUT_FILE_SUFFIX).txt
-STATUS_FILE = $(STATUS_LOG_FILE)
+STATUS_FILE = ./logs/status_$(UUT_KERNEL)_$(PARAMS).txt
 PT_SIZE_PWR    = 4
 
 ifeq ($(AIE_VARIANT), 1)
@@ -76,7 +76,8 @@ HELPER:= $(HELPER_CUR_DIR)/.HELPER
 
 $(HELPER): create_config validate_config create_input sim_ref prep_x86_out
 	make cleanall
-
+	
+AIE_PART = XCVC1902-VSVD1760-1LP-E-S
 create_config:
 	echo creating configuration;\
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config_json.tcl ./config.json ./ $(UUT_KERNEL) $(PARAM_MAP);
@@ -118,14 +119,15 @@ prep_aie_out:
 		done \
 	fi
 
-check_op_ref: prep_x86_out prep_aie_out
+get_diff: prep_x86_out prep_aie_out
 	@perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(UUT_SIM_FILE) --type $(DATA_TYPE) --ssr $(NUM_OUTPUTS) --zip --dual 0 -k $(DYN_PT_SIZE) -w ${WINDOW_VSIZE} ;\
 	perl $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/ssr_split_zip.pl --file $(REF_SIM_FILE) --type $(DATA_TYPE) --ssr $(NUM_OUTPUTS) --zip --dual 0 -k $(DYN_PT_SIZE) -w ${WINDOW_VSIZE} ;\
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/diff.tcl ./data/uut_output.txt ./data/ref_output.txt ./logs/diff.txt $(DIFF_TOLERANCE) $(CC_TOLERANCE) $(DIFF_MODE)
 
 
 get_latency:
-	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output $(STATUS_FILE) $(WINDOW_VSIZE) $(NITER)
+	sh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_pwr.sh $(HELPER_CUR_DIR) $(UUT_KERNEL) $(STATUS_FILE) $(AIE_PART)
+	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_latency.tcl ./aiesimulator_output T_input_0_0.txt ./data/uut_output_0_0.txt $(STATUS_FILE) $(WINDOW_VSIZE) $(NITER)
 
 get_stats:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_stats.tcl $(WINDOW_VSIZE) $(CASC_LEN) $(STATUS_FILE) ./aiesimulator_output mixed_radix_fftMain $(NITER)
@@ -133,7 +135,7 @@ get_stats:
 get_theoretical_min:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/theoretical_minimum_scripts/get_fft_theoretical_min.tcl $(DATA_TYPE) $(TWIDDLE_TYPE) $(WINDOW_VSIZE) $(POINT_SIZE) $(CASC_LEN) $(STATUS_FILE) $(UUT_KERNEL) $(PARALLEL_POWER) $(API_IO)
 
-get_status: check_op_ref
+get_status:
 	tclsh $(HELPER_ROOT_DIR)/L2/tests/aie/common/scripts/get_common_config.tcl $(STATUS_FILE) ./ UUT_KERNEL $(UUT_KERNEL) $(PARAM_MAP)
 
 harvest_mem:

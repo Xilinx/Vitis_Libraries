@@ -57,7 +57,7 @@ def fn_validate_twiddle_type(TT_DATA, TT_TWIDDLE):
   return (
     isValid if ((TT_DATA,TT_TWIDDLE) in validTypeCombos)
     else (
-    isError(f"Invalid Data/Twiddle type combination ({TT_DATA},{TT_TWIDDLE}). ")
+    isError(f"Invalid Data/Twiddle type combination ({TT_DATA},{TT_TWIDDLE}). Supported combinations are cint16/cint16, cint32/cint16 and cfloat/cfloat. ")
     )
   )
 def validate_TT_TWIDDLE(args):
@@ -94,7 +94,7 @@ def fn_validate_fft_nifft(TP_FFT_NIFFT):
   return (
     isValid if (TP_FFT_NIFFT == 0 or  TP_FFT_NIFFT == 1)
     else (
-        isError(f"Invalid transform direction ({TP_FFT_NIFFT}). ")
+        isError(f"Invalid transform direction ({TP_FFT_NIFFT}). This must be 0 or 1. ")
     )
   )
 
@@ -108,7 +108,7 @@ def fn_validate_shift(TT_DATA, TP_SHIFT):
   return (
     isValid if (TP_SHIFT == 0 or ((TT_DATA in ("cint16","cint32")) and (TP_SHIFT >= TP_SHIFT_min) and (TP_SHIFT <= TP_SHIFT_max)))
     else
-    isError(f"TP_SHIFT must be 0 for cfloat and in the range {TP_SHIFT_min} to {TP_SHIFT_max} for integer data types")
+    isError(f"TP_SHIFT must be 0 for cfloat and in the range {TP_SHIFT_min} to {TP_SHIFT_max} for integer data types. Got {TP_SHIFT}.")
   )
 
 def validate_TP_SHIFT(args):
@@ -163,7 +163,7 @@ def fn_validate_casc_len(TP_POINT_SIZE, TP_CASC_LEN):
   return (
     isValid if (TP_CASC_LEN>=TP_CASC_LEN_min and TP_CASC_LEN<=num_stages)
     else (
-        isError(f"Invalid cascade length ({TP_CASC_LEN}), must be in the range 1 to number of stages, which is a function of TP_POINT_SIZE ")
+        isError(f"Invalid cascade length ({TP_CASC_LEN}), must be in the range 1 to num_stages, which is {num_stages} for TP_POINT_SIZE of {TP_POINT_SIZE} ")
     )
   )
 def validate_TP_CASC_LEN(args):
@@ -177,7 +177,7 @@ def fn_validate_api(TP_API):
   return (
     isValid if (TP_API>=TP_API_min and TP_API<=TP_API_max)
     else (
-        isError(f"Invalid API type. Must be in the range 0 (iobuffers) to 1 (streams) ")
+        isError(f"Invalid API type. Must be in the range 0 (iobuffers) to 1 (streams). Got {TP_API} ")
     )
   )
 def validate_TP_API(args):
@@ -190,7 +190,7 @@ def fn_validate_aie_variant(AIE_VARIANT):
   return (
     isValid if (AIE_VARIANT>=AIE_VARIANT_min and AIE_VARIANT<=AIE_VARIANT_max)
     else (
-        isError(f"Invalid AIE variant. Must be in the range 1 (AIE1) to 2 (AIE-ML) ")
+        isError(f"Invalid AIE variant. Must be in the range 1 (AIE1) to 2 (AIE-ML). Got {AIE_VARIANT}. ")
     )
   )
 def validate_AIE_VARIANT(args):

@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-#
 set usage "
 For generating random stimulus for data files.
 tclsh gen_input.tcl <filename> <numSamples> <iterations> \[<seed>\] \[<dataStimType>\]
@@ -105,6 +104,7 @@ if { $::argc > 2} {
     puts "tt_coeff          = $tt_coeff"
     puts "coeffStimType     = $coeffStimType"
     puts "firLen            = $firLen"
+    puts "------------------------------"
 
 }
 
@@ -114,17 +114,45 @@ proc srand {seed} {
     set nextSample $seed
 }
 
-proc randInt16 {seed} {
-    set nextSample [expr {($seed * 1103515245 + 12345)}]
-    return [expr (($nextSample % 65536) - 32768)]
+
+proc randInt {seed sampleType} {
+   set nextSample [expr {($seed * 1103515245 + 12345)}]
+
+   if {($sampleType eq "int8") || ($sampleType eq "cint8")} {
+      return [expr (($nextSample % 256) - 128)]
+    } elseif {$sampleType eq "uint8"} {
+        return [expr ($nextSample % 256)]
+    } elseif {($sampleType eq "int16") || ($sampleType eq "cint16")} {
+        return [expr (($nextSample % 65536) - 32768)]
+    } elseif {$sampleType eq "uint16"} {
+        return [expr ($nextSample % 65536)]
+    } elseif {($sampleType eq "int32") || ($sampleType eq "cint32")} {
+        #return [expr (int($nextSample % 4294967296) -2147483648 )]
+        return [expr (($nextSample % 65536) - 32768)]; # int32 is kept within int16 range bounds.
+    } elseif {$sampleType eq "uint32"} {
+        #return [expr abs(int($nextSample % 4294967296))]
+        return [expr ($nextSample % 65536)]; # uint32 is kept within uint16 range bounds.
+    } else {
+        return [expr (($nextSample % 65536) - 32768)]
+    }
 }
 
-proc randInt32 {seed} {
-    set nextSample [expr {($seed * 1103515245 + 12345)}]
-    return [expr (int($nextSample))]
+proc incInt {seed sampleType} {
+    set nextSample [expr {$seed +1}]
+    if {($sampleType eq "int8") || ($sampleType eq "cint8")} {
+        if {$nextSample > 127} {set nextSample -128}
+    } elseif {($sampleType eq "uint8")} {
+        if {$nextSample > 255} {set nextSample 0}
+    } elseif {($sampleType eq "int16") || ($sampleType eq "cint16")} {
+        if {$nextSample > 32767} {set nextSample -32768 }
+    } elseif {$sampleType eq "uint16"} {
+        if {$nextSample > 65535} {set nextSample 0}
+    }
+    return $nextSample
 }
 
-proc generateSample {stimType sampleSeed sample_idx  samples sampleType comp} {
+proc generateSample {stimType sampleSeed sample_idx samples sampleType comp} {
+
     # 0 = RANDOM
     # 3 = IMPULSE
     # 4 = ALL_ONES
@@ -136,7 +164,8 @@ proc generateSample {stimType sampleSeed sample_idx  samples sampleType comp} {
 
     if { $stimType == 0 } {
         # Random
-        set nextSample [randInt16 $sampleSeed]
+        set nextSample [randInt $sampleSeed $sampleType]
+
     } elseif { $stimType == 3 } {
         # Impulse
         if {$sample_idx == 0} {
@@ -149,7 +178,8 @@ proc generateSample {stimType sampleSeed sample_idx  samples sampleType comp} {
         set nextSample 1
     } elseif { $stimType == 5 } {
         # Incrementing patttern
-        set nextSample [expr ($sampleSeed+1)]
+        set nextSample [incInt $sampleSeed $sampleType]
+
         # Only increment on real part?
         # if {$comp == 0} {
         #     set nextSample [expr ($sampleSeed+1)]
@@ -189,29 +219,45 @@ proc generateSample {stimType sampleSeed sample_idx  samples sampleType comp} {
             #puts "sin = $nextSample\n"
         }
     } elseif { ($stimType == 8) } {
-        if {$comp eq 0} {
-            if {$sample_idx % 8 == 0 } {
+        #This is a horrible kludge for $cint32 and $cfloat because this script confuses $linesPerSample and $samplesPerLine
+        if {$sampleType eq "cint32" || $sampleType eq "cfloat"} {
+            set mod [expr $sample_idx % 16 ]
+            if {$mod == 0 || $mod == 5} {
                 set nextSample 8192
-            }  elseif {$sample_idx % 8 == 1 || $sample_idx % 8 == 7 } {
+            }  elseif {$mod == 2 || $mod == 3 || $mod == 7 || $mod == 14 } {
                 set nextSample 5793
-            }  elseif {$sample_idx % 8 == 2 || $sample_idx % 8 == 6 } {
+            }  elseif {$mod == 1 || $mod == 4 || $mod == 9 || $mod == 12 } {
                 set nextSample 0
-            }  elseif {$sample_idx % 8 == 3 || $sample_idx % 8 == 5 } {
+            }  elseif {$mod == 6 || $mod == 10 || $mod == 11 || $mod == 15 } {
                 set nextSample -5793
             }  else {
                 set nextSample -8192
             }
         } else {
-            if {$sample_idx % 8 == 0 | $sample_idx % 8 == 4 } {
-                set nextSample 0
-            }  elseif {$sample_idx % 8 == 1 || $sample_idx % 8 == 3 } {
-                set nextSample 5793
-            }  elseif {$sample_idx % 8 == 2 } {
-                set nextSample 8192
-            }  elseif {$sample_idx % 8 == 5 || $sample_idx % 8 == 7 } {
-                set nextSample -5793
-            }  else {
-                set nextSample -8192
+            if {$comp eq 0} {
+                if {$sample_idx % 8 == 0 } {
+                    set nextSample 8192
+                }  elseif {$sample_idx % 8 == 1 || $sample_idx % 8 == 7 } {
+                    set nextSample 5793
+                }  elseif {$sample_idx % 8 == 2 || $sample_idx % 8 == 6 } {
+                    set nextSample 0
+                }  elseif {$sample_idx % 8 == 3 || $sample_idx % 8 == 5 } {
+                    set nextSample -5793
+                }  else {
+                    set nextSample -8192
+                }
+            } else {
+                if {$sample_idx % 8 == 0 | $sample_idx % 8 == 4 } {
+                    set nextSample 0
+                }  elseif {$sample_idx % 8 == 1 || $sample_idx % 8 == 3 } {
+                    set nextSample 5793
+                }  elseif {$sample_idx % 8 == 2 } {
+                    set nextSample 8192
+                }  elseif {$sample_idx % 8 == 5 || $sample_idx % 8 == 7 } {
+                    set nextSample -5793
+                }  else {
+                    set nextSample -8192
+                }
             }
         }
     } elseif {$stimType == 9 } {
@@ -220,7 +266,7 @@ proc generateSample {stimType sampleSeed sample_idx  samples sampleType comp} {
         # Hazard for cint32 type, which has double the amount of samples, so all real get even index and all imag get odd.
     } else {
         # Unsupported default to random
-        set nextSample [randInt16 $sampleSeed]
+        set nextSample [randInt $sampleSeed $sampleType]
     }
 return $nextSample
 }
@@ -246,9 +292,14 @@ if {$using_plio_class == 1 && ($tt_data eq "cint32" || $tt_data eq "cfloat")} {
     set samplesPerFrame [expr ($samplesPerFrame) * 2]
 }
 set samplesPerLine 1
-if {$tt_data eq "int16"} {
+if {($tt_data eq "int16" || $tt_data eq "uint16")} {
     # int16s are organized in 2 samplesPerLine
     set samplesPerLine 2
+}
+
+if {($tt_data eq "int8" || $tt_data eq "uint8" || $tt_data eq "cint8")} {
+    # int8 values are organized in 4 samplesPerLine
+    set samplesPerLine 4
 }
 
 #ADF::PLIO expects data in 32-bits per text line, which for cint16 and int16 is 2 samplesPerFrame/dataPartsPerLine per line
@@ -258,8 +309,11 @@ if {$using_plio_class == 0} {
         set dataPartsPerLine 2
     }
 } else { #PLIO
-    if {$tt_data eq "cint16" || $tt_data eq "int16" } {
+    if {$tt_data eq "cint16" || $tt_data eq "int16" || $tt_data eq "uint16" } {
         set dataPartsPerLine 2
+    }
+    if {$tt_data eq "cint8" || $tt_data eq "int8" || $tt_data eq "uint8"} {
+        set dataPartsPerLine 4
     }
 }
 
@@ -283,12 +337,12 @@ for {set iter_nr 0} {$iter_nr < [expr ($iterations*$overkill)]} {incr iter_nr} {
 
     # Process FFT's dynamic Point Size Header
     if {$dyn_pt_size == 1} {
-        set headRand [randInt16 $headRand]
+        set headRand [randInt $headRand $tt_data]
         # use fields of the random number to choose FFT_NIFFT and PT_SIZE_PWR. Choose a legal size
         set fft_nifft [expr (($headRand >> 14) % 2)]
         if {!$endOfDynPt} {
             set pt_size_pwr [expr ($pt_size_pwr - 1)]
-        }        
+        }
         if {$pt_size_pwr < (4+$par_power)} {
             set pt_size_pwr $max_pt_size_pwr
             set endOfDynPt 1
@@ -454,14 +508,14 @@ for {set iter_nr 0} {$iter_nr < [expr ($iterations*$overkill)]} {incr iter_nr} {
 #    puts $dataPartsPerLine
 #    puts $dataStimType
 
-
     # Process Window (single frame or multiple frames in window)
     for {set winSplice 0} {$winSplice < $framesInWindow} {incr winSplice} {
         for {set sample_idx 0} {$sample_idx < $samplesPerFrame / $samplesPerLine} {incr sample_idx} {
             for {set comp 0} {$comp < $dataPartsPerLine} {incr comp} {
                 set nextSample [generateSample  $dataStimType $nextSample $sample_idx $samplesPerFrame $tt_data $comp]
-
-                if {$comp eq 0 && $dataPartsPerLine eq 2} {
+                if {$comp < 3 && $dataPartsPerLine eq 4} {
+                    puts -nonewline $output_file "$nextSample "
+                } elseif {$comp eq 0 && $dataPartsPerLine eq 2} {
                     puts -nonewline $output_file "$nextSample "
                 } else {
                     puts $output_file "$nextSample "

@@ -37,9 +37,7 @@
         {
             "name": "TP_API",
             "description": "The form of IO interface: 0 for IOBUFF, 1 for AXI-4 streams",
-            "type": "uint",
-            "minimum": 0,
-            "maximum": 1
+            "type": "uint"
         },
         {
             "name": "TP_MAX_DELAY",

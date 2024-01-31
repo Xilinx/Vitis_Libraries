@@ -1,0 +1,27 @@
+{
+    "test_0_tool_canary_aie": {
+        "DATA_TYPE": "cint16",
+        "COEFF_TYPE": "int16",
+        "FIR_LEN": "16",
+        "SHIFT": "0",
+        "INPUT_WINDOW_VSIZE": "256",
+        "AIE_VARIANT": "1",
+        "NITER": "4",
+        "COEFF_SIZE": "2",
+        "ROUND_MODE": "0",
+        "TDM_CHANNELS": "256",
+        "DUAL_IP": "0",
+        "PORT_API": "0",
+        "NUM_OUTPUTS": "1",
+        "USE_CUSTOM_CONSTRAINT": "0",
+        "INTERPOLATE_FACTOR": "1",
+        "DECIMATE_FACTOR": "1",
+        "UUT_SSR": "1",
+        "UUT_PARA_DECI_POLY": "1",
+        "UUT_PARA_INTERP_POLY": "1",
+        "DATA_SEED": "0",
+        "DATA_STIM_TYPE": "5",
+        "COEFF_STIM_TYPE": "5",
+        "SAT_MODE": "0"
+    }
+}

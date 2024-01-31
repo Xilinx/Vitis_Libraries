@@ -20,15 +20,3 @@
 #ifndef INPUT_WINDOW_VSIZE
 #define INPUT_WINDOW_VSIZE (POINT_SIZE)
 #endif
-
-#ifndef WINDOW_VSIZE
-#define WINDOW_VSIZE (POINT_SIZE)
-#endif
-
-#ifndef ROUND_MODE
-#define ROUND_MODE 0
-#endif
-
-#ifndef SAT_MODE
-#define SAT_MODE 1
-#endif

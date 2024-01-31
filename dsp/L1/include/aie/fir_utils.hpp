@@ -794,7 +794,8 @@ enum eFIRVariant {
     kIntAsym = 4,
     kDecAsym = 5,
     kDecSym = 6,
-    kResamp = 7
+    kResamp = 7,
+    kTDM = 8
 };
 
 inline const char* firToString(eFIRVariant fir_type) {
@@ -822,6 +823,9 @@ inline const char* firToString(eFIRVariant fir_type) {
             break;
         case kResamp:
             return "kResamp ";
+            break;
+        case kTDM:
+            return "kTDM ";
             break;
         default:
             return "[Unknown FIR type]";
@@ -986,10 +990,9 @@ INLINE_DECL constexpr unsigned int fnUnsupportedTypeCombo<int16, int16>() {
 
 // IF input type
 template <bool T_CASC_IN, typename T_D, unsigned int T_DUAL_IP = 0>
-struct T_inputIF {};
-template <typename T_D>
-struct T_inputIF<CASC_IN_FALSE, T_D, 0> {
+struct T_inputIF {
     static constexpr int kdummy = 16;
+    T_D* __restrict inWindow;
     input_async_buffer<T_D>* inWindowLin = NULL;
     input_circular_buffer<T_D, extents<inherited_extent>, margin<kdummy> >* inWindowCirc =
         NULL; // never used in this config, but referred to by client code.
@@ -997,46 +1000,14 @@ struct T_inputIF<CASC_IN_FALSE, T_D, 0> {
         NULL; // dummy, never used, but allows optional assignment
     input_stream<T_D>* __restrict inStream;
     input_stream<T_D>* __restrict inStream2;
-};
-template <typename T_D>
-struct T_inputIF<CASC_IN_TRUE, T_D, 0> {
-    input_async_buffer<T_D>* inWindowLin = NULL;
-    static constexpr int kdummy = 16;
-    input_circular_buffer<T_D, extents<inherited_extent>, margin<kdummy> >* inWindowCirc =
-        NULL; // actually a stream broadcast to all cascade
-    input_circular_buffer<T_D, extents<inherited_extent>, margin<kdummy> >* inWindowReverse =
-        NULL; // dummy, never used, but allows optional assignment
-    input_stream<T_D>* __restrict inStream;
-    input_stream<T_D>* __restrict inStream2;
-    input_stream_cacc48* inCascade;
-};
-template <typename T_D>
-struct T_inputIF<CASC_IN_FALSE, T_D, 1> {
-    static constexpr int kdummy = 16;
-    input_async_buffer<T_D>* inWindowLin = NULL;
-    input_circular_buffer<T_D, extents<inherited_extent>, margin<kdummy> >* inWindowReverse = NULL;
-    input_circular_buffer<T_D, extents<inherited_extent>, margin<kdummy> >* inWindowCirc =
-        NULL; // actually a stream broadcast to all cascade
-    input_stream<T_D>* __restrict inStream;
-    input_stream<T_D>* __restrict inStream2;
-};
-template <typename T_D>
-struct T_inputIF<CASC_IN_TRUE, T_D, 1> {
-    input_async_buffer<T_D>* inWindowLin = NULL;
-    input_async_buffer<T_D>* inWindowReverse = NULL;
-    static constexpr int kdummy = 16;
-    input_circular_buffer<T_D, extents<inherited_extent>, margin<kdummy> >* inWindowCirc =
-        NULL; // actually a stream broadcast to all cascade
-    input_stream<T_D>* __restrict inStream;
-    input_stream<T_D>* __restrict inStream2;
     input_stream_cacc48* inCascade;
 };
 
-// IF output type
 template <bool T_CASC_IN, typename T_D>
 struct T_outputIF {};
 template <typename T_D>
 struct T_outputIF<CASC_OUT_FALSE, T_D> {
+    T_D* __restrict outWindowPtr;
     output_circular_buffer<T_D>* outWindow = NULL;
     output_circular_buffer<T_D>* outWindow2 = NULL;
     output_stream<T_D>* __restrict outStream;
@@ -1044,15 +1015,16 @@ struct T_outputIF<CASC_OUT_FALSE, T_D> {
 };
 template <typename T_D>
 struct T_outputIF<CASC_OUT_TRUE, T_D> {
+    T_D* __restrict outWindowPtr;
     static constexpr int kdummy = 16;
-    input_circular_buffer<T_D, extents<inherited_extent>, margin<kdummy> >* outWindow = NULL;  // dummy
+    input_circular_buffer<T_D, extents<inherited_extent>, margin<kdummy> >* outWindow =
+        NULL; // internal buffer filled through cascade
     input_circular_buffer<T_D, extents<inherited_extent>, margin<kdummy> >* outWindow2 = NULL; // dummy
     output_stream_cacc48* outCascade;
     output_async_buffer<T_D>* broadcastWindow; // broadcastWindow can just be ignored when it's the last kernel
     output_stream<T_D>* __restrict outStream;
     output_stream<T_D>* __restrict outStream2;
 };
-
 // Handy enum for if conditions
 enum kernelPositionState {
     middle_kernel_in_chain = 0,
@@ -1162,6 +1134,12 @@ INLINE_DECL constexpr unsigned int fnFirMargin() {
     else {
         return CEIL(TP_FIR_LEN, (32 / sizeof(TT_DATA)));
     }
+};
+
+// function to return Margin length.
+template <size_t TP_FIR_LEN, typename TT_DATA, int TP_TDM_CHANNELS = 1>
+INLINE_DECL constexpr unsigned int fnTDMFirMargin() {
+    return CEIL(((TP_FIR_LEN - 1) * (TP_TDM_CHANNELS)), (32 / sizeof(TT_DATA)));
 };
 
 // Truncation. This function rounds x down to the next multiple of y (which may be x)
