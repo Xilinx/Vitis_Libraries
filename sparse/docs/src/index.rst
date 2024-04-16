@@ -1,17 +1,8 @@
 .. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   
+.. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: SPARSE, Library, Vitis SPARSE Library, linear, algebra, subroutines, vitis
@@ -23,12 +14,12 @@
 Vitis SPARSE Library
 =====================
 
-Vitis SPARSE library is a fast FPGA-accelerated implementation of the basic
+AMD Vitis |trade| SPARSE library is a fast FPGA-accelerated implementation of the basic
 linear algebra subroutines for handling sparse matrices. The library provides two types of implementations: L1 primitives and  L2 kernels. These implementations are organized in their corresponding L1 and L2 directories.
 - L1 primitives implementation can be leveraged by FPGA hardware developers.
-- L2 kernels implementation provide usage examples for system and host code developers.
+- L2 kernels implementation provides usage examples for system and host code developers.
 
-Advanced users can easily tailor, optimize or combine the kernel code as it is developed with the permissive Apache 2.0 license.
+Advanced users can easily tailor, optimize, or combine the kernel code as it is developed with the permissive Apache 2.0 license.
 
 Demos and usage examples of different level implementations are also provided
 for reference. 
@@ -57,3 +48,8 @@ Index
 -----
 
 * :ref:`genindex` 
+* 
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:
