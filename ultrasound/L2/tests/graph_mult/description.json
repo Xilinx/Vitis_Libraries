@@ -22,7 +22,7 @@
             }
         }
     },
-    "gui": false,
+    "gui": true,
     "data": [
         "PROJECT/data"
     ],
@@ -66,5 +66,8 @@
             "vitis_aie_x86sim"
         ],
         "category": "canary"
-    }
+    },
+    "aie_types": [
+        "AIE1"
+    ]
 }

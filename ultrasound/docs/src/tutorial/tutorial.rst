@@ -1,18 +1,7 @@
 .. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+  .. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. toctree::
    :hidden:
@@ -26,7 +15,7 @@ Vitis Ultrasound Library Tutorial
 
 This tutorial will show how to achieve better ultrasound image quality, speed, and accuracy using AMD technology. The tutorial includes four labs:
 
-* Lab-1: How does Vitis Ultrasound Library work
+* Lab-1: How does AMD Vitis |trade| Ultrasound Library work
 
 * Lab-2: L1/L2 Graph based algorithm acceleration and evaluation for ultrasound tool box case
 
@@ -38,7 +27,7 @@ This tutorial will show how to achieve better ultrasound image quality, speed, a
 Lab-1: How does Vitis Ultrasound Library work
 ===============================================
 
-Vitis Ultrasound Library provides three levels of APIs, L1, L2 and L3. 
+Vitis Ultrasound Library provides three levels of APIs, L1, L2, and L3. 
 
 - The APIs in L1 are 2 sets, tool box APIs and All in AIE APIs (naming with kernel_*). 
 - The APIs in L2 are 2 sets, tool box Graphs and All in AIE Graphs (naming with graph_*). 
@@ -79,10 +68,10 @@ Lab-2: L1/L2 Graph based algorithm acceleration and evaluation for ultrasound to
 
 Lab purpose
 ------------------------------------
-Before using Vitis flow to build a full-function kernel running on hardware, users may want to use a relative simple flow to
-estimate performance and resource consumption for some key modules in a complex algorithm. In this lab, users will estimate
-a easy module called 'absV ' which return a new vector composed of the absolute value corresponding to each element of the input vector.
-Users may finally get a libadf.a of module instead of a kernel can run on hardware, but it is the first step to successful design.
+Before using Vitis flow to build a full-function kernel running on hardware, you might want to use a relative simple flow to
+estimate performance and resource consumption for some key modules in a complex algorithm. In this lab, you estimate
+a easy module called 'absV,' which returns a new vector composed of the absolute value corresponding to each element of the input vector.
+You finally get a libadf.a of module instead of a kernel. It can run on hardware, but it is the first step to a successful design.
 
 Run a L1 Example
 ------------------------------------
@@ -133,7 +122,7 @@ Run a L2 graph_scanline case
 Example logs of graph_scanline
 ------------------------------------
 
-1. List for all the scanline parameters of Example 1 that defined by user.
+1. List of all the scanline parameters of Example 1 defined by you.
 
 .. code-block:: shell 
 
@@ -154,7 +143,7 @@ Example logs of graph_scanline
    : Imaging spf     = 83968       Pixel per frame
    : Imaging fps     = 1190.930    fps
 
-2. List for all the 4 sets of intermediate results of the evolution from algorithm models to hardware.
+2. List of all the four sets of intermediate results of the evolution from algorithm models to hardware.
 
    * module by module mode scanline (shown below)
 
@@ -166,9 +155,9 @@ Example logs of graph_scanline
 
    - The intermediate results of each mode are distinguished by file naming. 
    - For example, MbyM_L1_E128_S2048.int.col is the result of interpolation. 
-   - In MbyM_L1_S2048.mul.col, L1 means 1 lines result which is used for smoking test.
-   - In MbyM_L41_S2048.mul.col, L41 means 41 lines result which is used for full test to show the png.
-   - All files is column format.
+   - In MbyM_L1_S2048.mul.col, L1 means 1 line result, which is used for smoking test.
+   - In MbyM_L41_S2048.mul.col, L41 means 41 lines result, which is used for full test to show the png.
+   - All files are in a column format.
 
 .. code-block:: shell 
 
@@ -195,7 +184,7 @@ Example logs of graph_scanline
    MODEL_TEST_SCANLINE: Saving apo data in file data_model/UbyU_L1_E128_S2048.apo.col
    MODEL_TEST_SCANLINE: Saving mult data in file data_model/UbyU_L1_S2048.mul.col
 
-3. List for all for AIE graph Static Parameters to check whether the AIE hardware or design restrictions are met.
+1. List of all AIE graph Static Parameters to check whether the AIE hardware or design restrictions are met.
    For example, num_invoking is the invoking times of AIE graph.  
 
 .. code-block:: shell 
@@ -237,7 +226,7 @@ Example logs of graph_scanline
    Const: LEN_OUT_mult_t          = 2048
    Const: LEN32b_PARA_mult_t      = 8
 
-4. List for all for AIE graph RTP Parameters to check whether design restrictions are met.
+1. List of all AIE graph RTP Parameters to check whether design restrictions are met.
 
 .. code-block:: shell 
 
@@ -254,9 +243,9 @@ Example logs of graph_scanline
    RTP: para_foc_const            size = 24 Bytes
    RTP: example_1_xdc_def_pos_xz  size = 2048 Bytes
 
-1. List for the comparison result with model output.
+1. List of the comparison result with model output.
    Only values that meet both conditions of Error judgement are considered computational errors.
-   User can also open the macro #define ENABLE_DEBUGGING in L2/include/graph_scanline.hpp to generate all the intermediate results, and it will also be automatically checked. 
+   You can also open the macro #define ENABLE_DEBUGGING in L2/include/graph_scanline.hpp to generate all the intermediate results, and it is automatically checked. 
 
 .. code-block:: shell 
 
@@ -294,14 +283,14 @@ Example logs of graph_scanline
    Simulation completed successfully returning zero
          
 
-Lab-4: L3 Graph based acceleration for ultrasound All in AIE, intergrated with PL and xrt case
+Lab-4: L3 Graph based acceleration for ultrasound All in AIE, integrated with PL and xrt case
 ===============================================================================================
 
 Lab purpose
 ------------------------------------
-The user's ultrasound may be based on an open source project. This lab will show an accelerated process based on an open 
-source project, the classic Scanline mothed. Scanline mothed is not only more complex, but also involves AIE/PL/SW partition.
-Scanline mothed is all in AIE in this case.
+The ultrasound might be based on an open source project. This lab shows an accelerated process based on an open- 
+source project, the classic Scanline method. Scanline method is not only more complex, but also involves AIE/PL/SW partition.
+Scanline method is all in AIE in this case.
 To learn:
 
 - How to run L3 cases
@@ -331,9 +320,9 @@ L3 APIs Input Arguments
 Example logs of scanline_AllinAIE
 ------------------------------------
 
-1. List for all the scanline parameters of Example 1 that defined by user.
+1. List of all the scanline parameters of Example 1 defined by you.
 
-- Users can easily set or modify the parameters of their target case in L1/include/us_example_parameter.hpp
+- You can easily set or modify the parameters of their target case in L1/include/us_example_parameter.hpp
 - Then generate corresponding board-level cases through L3.
 
 
@@ -355,7 +344,7 @@ Example logs of scanline_AllinAIE
    : Imaging spf     = 83968       Pixel per frame
    : Imaging fps     = 1190.930    fps
 
-2. List for all the 4 sets of intermediate results of the evolution from algorithm models to hardware.
+2. List of all the four sets of intermediate results of the evolution from algorithm models to hardware.
 
    * module by module mode scanline (shown below)
 
@@ -367,9 +356,9 @@ Example logs of scanline_AllinAIE
 
    - The intermediate results of each mode are distinguished by file naming. 
    - For example, MbyM_L1_E128_S2048.int.col is the result of interpolation. 
-   - In MbyM_L1_S2048.mul.col, L1 means 1 lines result which is used for smoking test.
-   - In MbyM_L41_S2048.mul.col, L41 means 41 lines result which is used for full test to show the png.
-   - All files is column format.
+   - In MbyM_L1_S2048.mul.col, L1 means 1 line result, which is used for smoking test.
+   - In MbyM_L41_S2048.mul.col, L41 means 41 lines result, which is used for full test to show the png.
+   - All files are in a column format.
 
 .. code-block:: shell 
 
@@ -397,7 +386,7 @@ Example logs of scanline_AllinAIE
    MODEL_TEST_SCANLINE: Saving mult data in file data_model/MbyM_L1_S2048.mul.col
    MODEL_TEST_SCANLINE: Saving mult data in file data_model/MbyM_L41_S2048.mul.col
 
-3. List for all for AIE graph Static Parameters to check whether the AIE hardware or design restrictions are met.
+1. List of all AIE graph Static Parameters to check whether the AIE hardware or design restrictions are met.
    For example, num_invoking is the invoking times of AIE graph.  
 
 .. code-block:: shell 
@@ -439,7 +428,7 @@ Example logs of scanline_AllinAIE
    Const: LEN_OUT_mult_t          = 2048
    Const: LEN32b_PARA_mult_t      = 8
 
-4. List for all for AIE graph RTP Parameters to check whether design restrictions are met.
+1. List of all AIE graph RTP Parameters to check whether design restrictions are met.
 
 .. code-block:: shell 
 
@@ -456,9 +445,9 @@ Example logs of scanline_AllinAIE
    RTP: para_foc_const            size = 24 Bytes
    RTP: example_1_xdc_def_pos_xz  size = 2048 Bytes
 
-5. List for the md5sum of result and the comparison result with model output.
+5. List of the md5sum of result and the comparison result with model output.
    Only values that meet both conditions of Error judgement are considered computational errors.
-   Also the output of mult could be converted to png format use the command like 
+   Also, the output of mult could be converted to png format use the command like 
    "python L3/models/data2png.py L3/tests/scanline_AllinAIE/package_sw_emu/sd_card/data/xf_output_res.txt".
 
 .. code-block:: shell 
@@ -636,3 +625,8 @@ Example logs of plane_wave
    INFO: Power OFF complete.
    INFO: Test passed!
    INFO: Total time on board: 716.9993252754211
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

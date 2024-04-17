@@ -1,23 +1,13 @@
 .. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   
+.. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+`Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _introduction_L1:
 
-Introducton for Ultrasound Library Level 1  
-==========================================
+Introduction for Ultrasound Library Level 1  
+===========================================
 
 .. toctree::
    :hidden:
@@ -26,19 +16,19 @@ Introducton for Ultrasound Library Level 1
 Ultrasound Library - Level 1 (L1)
 ---------------------------------
 
-As explained in the introduction, the lowest level of the libraries is a set of APIs which are created to create a closest mapping possible between *NumPy* and the *C++* SIMD APIs of the AI Engine. The APIs resulted are a more comprehensive and easy interface for the user to create its own application using numpy-like interfaces. 
+As explained in the introduction, the lowest level of the libraries is a set of APIs, which are created to create a closest mapping possible between *NumPy* and the *C++* SIMD APIs of the AI Engine. The APIs resulted are a more comprehensive and easy interface for you to create your application using numpy-like interfaces. 
 The APIs can be divided in two main groups:
 
-1. Element-wise operations between vectors and matrices. Those operations varies between basic operations (i.e. sum, multiplication etc...) to more complex ones (i.e. reciprocal, sign etc...);
-2. Vector managing and creation. Those operations are intended to be used by the user to create or modify the dimension of the vectorial operands. Two example of those operations are *Tile* and *Ones*.
+1. Element-wise operations between vectors and matrices. Those operations vary between basic operations (that is, sum, multiplication, and so on) to more complex ones (that is, reciprocal, sign, and so on);
+2. Vector managing and creation. Those operations are intended to be used by you to create or modify the dimension of the vectorial operands. Two example of those operations are *Tile* and *Ones*.
 
-The APIs are written in a templatic way, such that the user might parametrize the length of the operands or of the SIMD operations to suites the necessities of the customers.
-Last remark, before starting with the single kernels explanation, is the nomenclature used in the kernels. The kernels are thought to be used as the user would do in NumPy, but on contrary respect to what is possible in python, in C++ the dimensionality of the operands must be known a priori to write approriate and correct operations. For common DSP and BLAS application, such as Ultrasound Imaging, it is very important to control the dimensionality of the data, in order to build appropriate applications. For this reason the kernels have been written in the following way:
+The APIs are written in a templatic way, such that you might parametrize the length of the operands or of the SIMD operations to suit the necessities of the customers.
+Before starting with the single kernels explanation is the nomenclature used in the kernels. The kernels are thought to be used as you would do in NumPy, but on the contrary, with respect to what is possible in python, in C++, the dimensionality of the operands must be known a priori to write appropriate and correct operations. For common DSP and BLAS applications, such as Ultrasound Imaging, it is important to control the dimensionality of the data to build appropriate applications. This is why the kernels have been written in the following way:
 
-The first part of the name indicates the type of operation chosen. The second and the third parts of the names of the interface are optional, depending on the number of operands of the operation. Provided that they are two, the letter S/V/M indicates their dimensionality. S stands for **Scalar**, V for **Vector** and M for **Matrix**.
-To give an example, `mulMV` is the operation which multiplies (element-wise) the rows of a Matrix (as first operand, M) with a Vector of the same dimension (as second operand, V). Another example is `diffSV` which is the operation which substract a scalar value (as first operand, S) to every element of a Vector (as second operand, V).
+The first part of the name indicates the type of operation chosen. The second and the third parts of the names of the interface are optional, depending on the number of operands of the operation. Provided that they are two, the letter S/V/M indicates their dimensionality. S stands for **Scalar**, V for **Vector**, and M for **Matrix**.
+For example, `mulMV` is the operation, which multiplies (element-wise) the rows of a Matrix (as first operand, M) with a Vector of the same dimension (as second operand, V). Another example is `diffSV`, an operation that subtracts a scalar value (as first operand, S) to every element of a Vector (as second operand, V).
 
-We now detail every L1 kernel available in the library:
+The details of the L1 kernel available in the library is as follows:
 
 kernel name: `kernel_imagepoints`
 ###################################
@@ -57,8 +47,8 @@ kernel name: `kernel_imagepoints`
 					output_buffer<T, adf::extents<LEN_OUT_img_t> >& out);
 
 
-The kernel_imagepoints kernel is used to create an array(specific coordinate direction) which represents the part of investigation made by the specific emission of the Ultrasound Probe. 
-It is dependent on the investigation depth and the incremental investigation which we want to perform (based on our sampling frquency).
+The kernel_imagepoints kernel is used to create an array(specific coordinate direction), which represents the part of investigation made by the specific emission of the Ultrasound Probe. 
+It is dependent on the investigation depth and the incremental investigation that you want to perform (based on our sampling frquency).
 
 - **Template params**:
 	- `T`: type of the operation;
@@ -71,10 +61,10 @@ It is dependent on the investigation depth and the incremental investigation whi
 	- `LEN_OUT_img_t`: number of outputdata per invoking;
 	- `LEN32b_PARA_img_t`: number of inputdata per invoking;
 - **kernel Inputs**:
-	- `para_const`: kernel_imagepoints self-used structural parameters include step(the distance between adjacent points), iter_line(record number of lines that have been processed) and so on.
-	- `para_start`: The position which we start the investigation in cartesian coordinate;
+	- `para_const`: kernel_imagepoints self-used structural parameters include step(the distance between adjacent points), iter_line(record number of lines that have been processed), and so on.
+	- `para_start`: The position that you start the investigation in cartesian coordinate;
 - **kernel Outputs**:
-	- `out`: An array which represents our points(specific coordinate direction) to analyze;
+	- `out`: An array that represents the points(specific coordinate direction) to analyze;
 
 
 
@@ -93,7 +83,7 @@ kernel name: `kernel_focusing`
 				const T (&para_xdc_def_pos_4d)[NUM_ELEMENT_t * 4],
 				output_buffer<T, adf::extents<NUM_ELEMENT_t> >& out);
 
-This kernel is used to compute the distance of our reference apodization point for the dynamic apodization with respect to the transducers position. It returns an array of values which represent the magnitude per transducer.
+This kernel is used to compute the distance of the reference apodization point for the dynamic apodization with respect to the transducers position. It returns an array of values, which represent the magnitude per transducer.
 
 - **Template params**:
 	- `T`: type of the operation;
@@ -104,10 +94,10 @@ This kernel is used to compute the distance of our reference apodization point f
 	- `VECDIM_foc_t`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
 	- `LEN32b_PARA_foc_t`: number of inputdata per invoking;
 - **kernel Inputs**:
-	- `para_const`: kernel_imagepoints self-used structural parameters include step(the distance between adjacent points), iter_line(record number of lines that have been processed) and so on.
-	- `para_xdc_def_pos_4d`: X and Y component of the vector which represent the transducer positions;
+	- `para_const`: kernel_imagepoints self-used structural parameters include step(the distance between adjacent points), iter_line(record number of lines that have been processed), and so on.
+	- `para_xdc_def_pos_4d`: X and Y components of the vector that represent the transducer positions;
 - **kernel Outputs**:
-	- `out`: An array which represents apodization distance per transducer;
+	- `out`: An array that represents apodization distance per transducer;
 
 
 
@@ -122,7 +112,7 @@ Kernel name: `kfun_apodization_preprocess`
 								adf::input_buffer<T, adf::extents<LEN_IN> >& __restrict p_points_z_in,
 								const int (&para_const)[APODI_PRE_LEN32b_PARA]);
 
-This kernel is the preprocess used to compute a dynamic Hanning Window for every transducer.
+This kernel is the preprocess that is used to compute a dynamic Hanning Window for every transducer.
 
 - **Template params**:
 	- `T`: type of the operation;
@@ -131,11 +121,11 @@ This kernel is the preprocess used to compute a dynamic Hanning Window for every
 	- `VECDIM`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
 	- `APODI_PRE_LEN32b_PARA`: number of RTP data per invoking;
 - **Kernel Inputs**:
-	- `param`: kernel_apodization_preprocess self-used structural parameters include iter_line and iter_element and so on. It's definition could be seen in L1/include/kernel_apodization_pre.hpp;
+	- `param`: kernel_apodization_preprocess self-used structural parameters include iter_line, iter_element, and so on. Its definition can be seen in L1/include/kernel_apodization_pre.hpp;
 	- `p_points_x_in`: The result of kernel_imagepoints in x-dimension;
 	- `p_points_z_in`: The result of kernel_imagepoints in z-dimension;
 - **Kernel Outputs**:
-	- `p_invD_out`: A vector which represents the distance of x&z dimension;
+	- `p_invD_out`: A vector that represents the distance of x&z dimension;
 
 
 Kernel name: `kfun_apodization_main`
@@ -159,11 +149,11 @@ This kernel is used to compute a dynamic Hanning Window for every transducer. So
 	- `VECDIM`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
 	- `APODI_PRE_LEN32b_PARA`: number of RTP data per invoking;
 - **Kernel Inputs**:
-	- `para_const`: kernel_apodization_main self-used structural parameters include iter_line and iter_element and so on. It's definition could be seen in L1/include/kernel_apodization_main.hpp;
+	- `para_const`: kernel_apodization_main self-used structural parameters include iter_line, iter_element, and so on. Its definition can be seen in L1/include/kernel_apodization_main.hpp;
 	- `p_focal_in`: Result of Focusing;
 	- `p_invD_in`: The result of kernel_apodization_preprocess output;
 - **Kernel Outputs**:
-	- `p_apodization_out`: A vector which represents our Hanning Window for the reference point chosen;
+	- `p_apodization_out`: A vector that represents our Hanning Window for the reference point chosen;
 
 Kernel name: `kernel_delay`
 ###################################
@@ -177,7 +167,7 @@ Kernel name: `kernel_delay`
 										const T (&para_const)[LEN32b_PARA_delay_t],
 										const T (&para_t_start)[NUM_LINE_t]);
 
-This kernel is used to compute the transmit delay. It returns an array of values which represent the transmission time for every incremental point of the investigation.
+This kernel is used to compute the transmit delay. It returns an array of values, which represent the transmission time for every incremental point of the investigation.
 
 - **Template params**:
 	- `T`: type of the operation;
@@ -187,12 +177,12 @@ This kernel is used to compute the transmit delay. It returns an array of values
 	- `LEN_OUT_delay_t`: number of outputdata per invoking;
 	- `LEN32b_PARA_delay_t`: number of inputdata per invoking;
 - **Kernel Inputs**:
-	- `para_const`: kernel_delay self-used structural parameters include focal coordinates 'focal_point_x' and 'focal_point_z', inverse speed of sound 'inverse_speed_of_sound' and so on. It's definition could be seen in L1/include/kernel_delay.hpp;
+	- `para_const`: kernel_delay self-used structural parameters include focal coordinates 'focal_point_x' and 'focal_point_z', inverse speed of sound 'inverse_speed_of_sound,' and so on. Its definition can be seen in L1/include/kernel_delay.hpp;
 	- `para_t_start`: Input array, where each element corresponds to the emission starting time of each scanline;
 	- `in_img_x`: The result of kernel_imagepoints in x-dimension;
 	- `in_img_z`: The result of kernel_imagepoints in z-dimension;
 - **Kernel Outputs**:
-	- `out_delay`: An array which represents our time delay per point to analyze;
+	- `out_delay`: An array that represents our time delay per point to analyze;
   
 
 Kernel name: `kernel_samples`
@@ -216,7 +206,7 @@ Kernel name: `kernel_samples`
 								const T (&para_rfdim)[NUM_LINE_t],
 								const T (&para_elem)[NUM_ELEMENT_t * 4]);
 
-This kernel is used to compute the delay in reception for every transducer. It sums also the delay in transmission to obtain the valid samples for the interpolation.
+This kernel is used to compute the delay in reception for every transducer. It also sums the delay in transmission to obtain the valid samples for the interpolation.
 
 - **Template params**:
 	- `T`: type of the operation;
@@ -227,14 +217,14 @@ This kernel is used to compute the delay in reception for every transducer. It s
 	- `LEN_OUT_sample_t`: number of outputdata per invoking;
 	- `LEN32b_PARA_sample_t`: number of inputdata per invoking;
 - **Kernel Inputs**:
-	- `para_const`: kernel_samples self-used structural parameter include sampling frequency, inverse speed of sound and so on. It's definition could be seen in L1/include/kernel_sample.hpp.
+	- `para_const`: kernel_samples self-used structural parameter include sampling frequency, inverse speed of sound, and so on. Its definition can be seen in L1/include/kernel_sample.hpp.
 	- `para_rfdim`: Input array, used to filter whether the input rf-data of each scanline is in the region of interest;
 	- `para_elem`: X-Y-Z vector which represents the positions of our transducers in the probe;
 	- `in_img_x`: The result of kernel_imagepoints in x-dimension;
 	- `in_img_z`: The result of kernel_imagepoints in z-dimension;
 	- `in_delay`: Result of kernel_delay;
 - **Kernel Outputs**:
-	- `out_sample`: A vector which represents our valid entries in the rf-data vector;
+	- `out_sample`: A vector that represents our valid entries in the rf-data vector;
 	- `out_inside`: A vector with only 0 and 1 values, which represents whether each element of our rf-data vector is in the region of interest;
 
 
@@ -260,7 +250,7 @@ Read one betch rf data and buffer them to local for resamp.
 	- `VECDIM`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
 	- `INTERP_LEN32b_PARA`: number of RTP data per invoking;
 - **Function params**:
-    - `para_const`: kernel_rfbuf self-used structural parameter include sampling frequency, inverse speed of sound and so on. It's definition could be seen in L1/include/kernel_interpolation.hpp.
+    - `para_const`: kernel_rfbuf self-used structural parameter include sampling frequency, inverse speed of sound, and so on. Its definition can be seen in L1/include/kernel_interpolation.hpp.
 	- `strm_rfdata`: elements of input stream vector.
     - `local_data`: elements of local data to temp save the input vector.
 	- `p_rfbuf_out`: elements of output vector.
@@ -290,7 +280,7 @@ Read one betch rf data and resamp, output for gen-window.
 	- `VECDIM`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
 	- `INTERP_LEN32b_PARA`: number of RTP data per invoking;
 - **Function params**:
-	- `para_const`: kernel_rfbuf self-used structural parameter include sampling frequency, inverse speed of sound and so on. It's definition could be seen in L1/include/kernel_interpolation.hpp.
+	- `para_const`: kernel_rfbuf self-used structural parameter include sampling frequency, inverse speed of sound and so on. Its definition can be seen in L1/include/kernel_interpolation.hpp.
 	- `p_rfbuf_in`: elements of input rf data vector.
     - `p_sample_in`: elements of input sample address vector.
 	- `p_inside_in`: elements of input inside(bool) vector.
@@ -310,7 +300,7 @@ Kernel name: `kfun_genwin_wrapper`
                             const int (&para_const)[INTERP_LEN32b_PARA]);
 
 
-Read one betch resamp data and generate window data, output for interpolation.
+Read one batch resamp data and generate window data output for interpolation.
 
 - **Template params**:
 	- `T`: type of the operation;
@@ -320,7 +310,7 @@ Read one betch resamp data and generate window data, output for interpolation.
 	- `VECDIM`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
 	- `INTERP_LEN32b_PARA`: number of RTP data per invoking;
 - **Function params**:
-	- `para_const`: kernel_rfbuf self-used structural parameter include sampling frequency, inverse speed of sound and so on. It's definition could be seen in L1/include/kernel_interpolation.hpp.
+	- `para_const`: kernel_rfbuf self-used structural parameter include sampling frequency, inverse speed of sound, and so on. Its definition can be seen in L1/include/kernel_interpolation.hpp.
     - `p_resamp_in`: elements of input resample vector.
 	- `p_inside_in`: elements of input inside(bool) vector.
 	- `p_vec_out`: elements of output result after resample.
@@ -348,7 +338,7 @@ Spline interpolation.
 	- `VECDIM`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
 	- `INTERP_LEN32b_PARA`: number of RTP data per invoking;
 - **Function params**:
-	- `para_const`: kfun_interpolation_wrapper self-used structural parameter include sampling frequency, inverse speed of sound and so on. It's definition could be seen in L1/include/kernel_interpolation.hpp.
+	- `para_const`: kfun_interpolation_wrapper self-used structural parameter include sampling frequency, inverse speed of sound, and so on. Its definition can be seen in L1/include/kernel_interpolation.hpp.
     - `p_vec_in`: elements of resample and window vector.
 	- `p_inside_in`: elements of input inside(bool) vector.
     - `p_interpolation`: elements of output bypassed inside(bool) vector.
@@ -375,7 +365,7 @@ kernel name: `kfun_mult_pre`
 													output_stream<accfloat>* p_out_cascade);
 
 
-This kernel is used to compute the final result. It multiply the results of apodization and the interpolation and pass the result to follow-up kfun_mult_cascade.
+This kernel is used to compute the final result. It multiplies the results of apodization and the interpolation and pass the result to follow-up kfun_mult_cascade.
 
 - **Template params**:
 	- `T`: type of the operation;
@@ -513,7 +503,7 @@ Kernel name: `diffSV`
     void diffSV(adf::input_buffer<T>& __restrict in1, adf::input_buffer<T>& __restrict in2, adf::output_buffer<T>& __restrict out);
 
 
-Element-Wise difference between a scalar and the values of a vector. For every iteration (expressed by `LEN`) we need to pass 4 times the scalar value to the stream of the scalar value.
+Element-Wise difference between a scalar and the values of a vector. For every iteration (expressed by `LEN`), pass four times the scalar value to the stream of the scalar value.
 
 - **Template params**:
 	- `T`: type of the operation;
@@ -534,12 +524,12 @@ Kernel name: `diffVS`
     void diffVS(adf::input_buffer<T>& __restrict in1, adf::input_buffer<T>& __restrict in2, adf::output_buffer<T>& __restrict out);
 
 
-Element-Wise difference between the values of a vector and a scalar. For every iteration (expressed by `LEN`) we need to pass 4 times the scalar value to the stream of the scalar value.
+Element-Wise difference between the values of a vector and a scalar. For every iteration (expressed by `LEN`), pass four times the scalar value to the stream of the scalar value.
 
 - **Template params**:
 	- `T`: type of the operation;
 	- `LEN`: number of elements to be processed in the kernel per iteration;
-	- `INCREMENT`: parameter which indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `INCREMENT`: parameter that indicates how much iterations have been performed by the SIMD with respect to the intended total length;
 	- `VECDIM`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
 - **Function params**:
 	- `in1`: elements of the array to be passed to the kernel.
@@ -555,12 +545,12 @@ Kernel name: `divVS`
     void divVSSpeedOfSound(adf::input_buffer<T>& in1, adf::output_buffer<T>& out);
 
 
-Element-Wise division between the values of a vector and a scalar (SpeedOfSound). For every iteration (expressed by `LEN`) we need to pass 4 times the scalar value to the stream of the scalar value.
+Element-Wise division between the values of a vector and a scalar (SpeedOfSound). For every iteration (expressed by `LEN`), pass four times the scalar value to the stream of the scalar value.
 
 - **Template params**:
 	- `T`: type of the operation;
 	- `LEN`: number of elements to be processed in the kernel per iteration;
-	- `INCREMENT`: parameter which indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `INCREMENT`: parameter that indicates how much iterations have been performed by the SIMD with respect to the intended total length;
 	- `VECDIM`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
 - **Function params**:
 	- `in1`: elements of the array to be passed to the kernel.
@@ -575,7 +565,7 @@ Kernel name: `equalS`
     void equalS(adf::input_buffer<T>& __restrict in1, adf::output_buffer<T>& __restrict out);
 
 
-Check whether the element of an array are equal to a specific number. An array of 0s or 1s is returned. 1 means that the element at that specific position is equal to the scalar, otherwise 0 is returned.
+Check whether the element of an array are equal to a specific number. An array of 0s or 1s is returned. 1 means that the element at that specific position is equal to the scalar; otherwise, 0 is returned.
 
 - **Template params**:
 	- `T`: type of the operation;
@@ -596,7 +586,7 @@ Kernel name: `lessOrEqualThanS`
     void lessOrEqualThanS(adf::input_buffer<T>& __restrict in1, adf::output_buffer<T>& __restrict out);
 
 
-Check whether the element of an array are less or equal to a specific number. An array of 0s or 1s is returned. 1 means that the element at that specific position is less or equal to the scalar, otherwise 0 is returned.
+Check whether the element of an array are less or equal to a specific number. An array of 0s or 1s is returned. 1 means that the element at that specific position is less or equal to the scalar. Otherwise, 0 is returned.
 
 - **Template params**:
 	- `T`: type of the operation;
@@ -638,7 +628,7 @@ Kernel name: `mulVS`
     void mulVS(adf::input_buffer<T>& __restrict in1, adf::input_buffer<T>& __restrict in2, adf::output_buffer<T>& __restrict out);
 
 
-Element-Wise multiplication between the values of a vector and a scalar. For every iteration (expressed by `LEN`) we need to pass 4 times the scalar value to the stream of the scalar value.
+Element-Wise multiplication between the values of a vector and a scalar. For every iteration (expressed by `LEN`), pass four times the scalar value to the stream of the scalar value.
 
 - **Template params**:
 	- `T`: type of the operation;
@@ -664,7 +654,7 @@ Element-Wise multiplication of two vectors. The first vector and the second one 
 - **Template params**:
 	- `T`: type of the operation;
 	- `LEN`: number of elements to be processed in the kernel per iteration;
-	- `INCREMENT`: parameter which indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `INCREMENT`: parameter that indicates how much iterations have been performed by the SIMD with respect to the intended total length;
 	- `VECDIM`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
 - **Function params**:
 	- `in1`: elements of the first vector to be passed to the kernel.
@@ -680,12 +670,12 @@ Kernel name: `norm_axis_1`
     void norm_axis_1(adf::input_buffer<T>& __restrict in1, adf::output_buffer<T>& __restrict out);
 
 
-Perform row wise the euclidean norm of a matrix of the columns. Because for every row returns a number, the result is a vector of values which represents for every row the magnitude of the euclidean norm.
+Perform row wise the euclidean norm of a matrix of the columns. Because for every row returns a number, the result is a vector of values that represent for every row the magnitude of the euclidean norm.
 
 - **Template params**:
 	- `T`: type of the operation;
 	- `LEN`: number of elements to be processed in the kernel per iteration;
-	- `INCREMENT`: parameter which indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `INCREMENT`: parameter that indicates how much iterations have been performed by the SIMD with respect to the intended total length;
 	- `VECDIM`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
 - **Function params**:
 	- `in1`: elements of the vector to be passed to the kernel.
@@ -700,12 +690,12 @@ Kernel name: `ones`
 	void ones(adf::output_buffer<T>& __restrict out);
 
 
-Return a vector of with all entry set to 1. 
+Return a vector with all entry set to 1. 
 
 - **Template params**:
 	- `T`: type of the operation;
 	- `LEN`: number of elements to be processed in the kernel per iteration;
-	- `INCREMENT`: parameter which indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `INCREMENT`: parameter that indicates how much iterations have been performed by the SIMD with respect to the intended total length;
 	- `VECDIM`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
 - **Function params**:
 	- `out`: elements of the result of the operation (vector) to be passed from the kernel.
@@ -719,12 +709,12 @@ Kernel name: `outer`
 	void outer(adf::input_buffer<T>& __restrict in1, adf::input_buffer<T>& __restrict in2, adf::output_buffer<T>& __restrict out);
 
 
-Perform the outer product (also named cross-product or vector-product) between two vectors. The result of this operation is a matrix which rows are the number of the entry of the first vector and the column the number of the entry of the second one.
+Perform the outer product (also named cross-product or vector-product) between the two vectors. The result of this operation is a matrix, which rows are the number of the entry of the first vector and the column the number of the entry of the second one.
 
 - **Template params**:
 	- `T`: type of the operation;
 	- `LEN`: number of elements to be processed in the kernel per iteration;
-	- `INCREMENT`: parameter which indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `INCREMENT`: parameter that indicates how much iterations have been performed by the SIMD with respect to the intended total length;
 	- `VECDIM`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
 - **Function params**:
 	- `in1`: elements of the first vector to be passed to the kernel.
@@ -745,7 +735,7 @@ Element-wise inverse operation of the entry of the vector.
 - **Template params**:
 	- `T`: type of the operation;
 	- `LEN`: number of elements to be processed in the kernel per iteration;
-	- `INCREMENT`: parameter which indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `INCREMENT`: parameter that indicates how much iterations have been performed by the SIMD with respect to the intended total length;
 	- `VECDIM`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
 - **Function params**:
 	- `in1`: elements of the vector to be passed to the kernel.
@@ -766,7 +756,7 @@ Element-wise square root operation of the entry of the vector.
 - **Template params**:
 	- `T`: type of the operation;
 	- `LEN`: number of elements to be processed in the kernel per iteration;
-	- `INCREMENT`: parameter which indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `INCREMENT`: parameter that indicates how much iterations have been performed by the SIMD with respect to the intended total length;
 	- `VECDIM`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
 - **Function params**:
 	- `in1`: elements of the vector to be passed to the kernel.
@@ -787,7 +777,7 @@ Element-wise square operation of the entry of the vector.
 - **Template params**:
 	- `T`: type of the operation;
 	- `LEN`: number of elements to be processed in the kernel per iteration;
-	- `INCREMENT`: parameter which indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `INCREMENT`: parameter that indicates how much iterations have been performed by the SIMD with respect to the intended total length;
 	- `VECDIM`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
 - **Function params**:
 	- `in1`: elements of the vector to be passed to the kernel.
@@ -803,12 +793,12 @@ Kernel name: `sum_axis_1`
 
 
 
-Perform row wise the reduce add of a matrix of the columns. Because for every row returns a number, the result is a vector of values which represents for every row the magnitude of the reduce add operation.
+Perform row wise the reduce add of a matrix of the columns. Because for every row returns a number, the result is a vector of values that represent the magnitude of the reduce add operation for every row.
 
 - **Template params**:
 	- `T`: type of the operation;
 	- `LEN`: number of elements to be processed in the kernel per iteration;
-	- `INCREMENT`: parameter which indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `INCREMENT`: parameter that indicates how much iterations have been performed by the SIMD with respect to the intended total length;
 	- `VECDIM`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
 - **Function params**:
 	- `in1`: elements of the vector to be passed to the kernel.
@@ -829,7 +819,7 @@ Element-Wise sum of two matrixes. The first matrix and the second one must have 
 - **Template params**:
 	- `T`: type of the operation;
 	- `LEN`: number of elements to be processed in the kernel per iteration;
-	- `INCREMENT`: parameter which indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `INCREMENT`: parameter that indicates how much iterations have been performed by the SIMD with respect to the intended total length;
 	- `VECDIM`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
 - **Function params**:
 	- `in1`: elements of the first matrix to be passed to the kernel.
@@ -845,12 +835,12 @@ Kernel name: `sumVS`
 	void sumVSStream(adf::input_buffer<T>& __restrict in1, adf::input_buffer<T>& __restrict in2, adf::output_buffer<T>& __restrict out);
 
 
-Element-Wise addition between the values of a vector and a scalar. For every iteration (expressed by `LEN`) we need to pass 4 times the scalar value to the stream of the scalar value.
+Element-Wise addition between the values of a vector and a scalar. For every iteration (expressed by `LEN`) we need to pass four times the scalar value to the stream of the scalar value.
 
 - **Template params**:
 	- `T`: type of the operation;
 	- `LEN`: number of elements to be processed in the kernel per iteration;
-	- `INCREMENT`: parameter which indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `INCREMENT`: parameter that indicates how much iterations have been performed by the SIMD with respect to the intended total length;
 	- `VECDIM`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
 - **Function params**:
 	- `in1`: elements of the array to be passed to the kernel.
@@ -871,7 +861,7 @@ Element-Wise addition of two vectors. The first vector and the second one must h
 - **Template params**:
 	- `T`: type of the operation;
 	- `LEN`: number of elements to be processed in the kernel per iteration;
-	- `INCREMENT`: parameter which indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `INCREMENT`: parameter that indicates how much iterations have been performed by the SIMD with respect to the intended total length;
 	- `VECDIM`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
 - **Function params**:
 	- `in1`: elements of the first vector to be passed to the kernel.
@@ -891,7 +881,7 @@ This kernel create a vector and returns it `LEN` times.
 - **Template params**:
 	- `T`: type of the operation;
 	- `LEN`: number of elements to be processed in the kernel per iteration;
-	- `INCREMENT`: parameter which indicates how much iterations have been performed by the SIMD with respect to the intended total length;
+	- `INCREMENT`: parameter that indicates how much iterations have been performed by the SIMD with respect to the intended total length;
 	- `VECDIM`: dimension of the SIMD to be performed. Addressed in the Xilinx UG1076, it depends on the type chosen;
 - **Function params**:
 	- `out`: elements of the result of the operation (matrix) to be passed from the kernel.

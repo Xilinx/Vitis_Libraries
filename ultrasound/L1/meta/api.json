@@ -39,7 +39,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -81,7 +85,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -123,7 +131,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -165,7 +177,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -207,7 +223,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -249,7 +269,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -291,7 +315,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -333,7 +361,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -375,7 +407,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -417,7 +453,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -459,7 +499,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -501,7 +545,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -543,7 +591,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -585,7 +637,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -627,7 +683,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -669,7 +729,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -711,7 +775,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -753,7 +821,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -795,7 +867,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -837,7 +913,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -879,7 +959,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -916,7 +1000,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -953,7 +1041,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -990,7 +1082,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -1027,7 +1123,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -1064,7 +1164,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -1101,7 +1205,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -1138,7 +1246,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -1175,7 +1287,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -1212,7 +1328,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -1249,7 +1369,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -1296,7 +1420,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -1343,7 +1471,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -1385,7 +1517,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -1427,7 +1563,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -1469,7 +1609,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -1511,7 +1655,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -1553,7 +1701,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -1595,7 +1747,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -1637,7 +1793,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -1679,7 +1839,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -1721,7 +1885,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -1763,7 +1931,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -1805,7 +1977,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -1847,7 +2023,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -1889,7 +2069,11 @@
                     }
                 ],
                 "ports": [],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         }

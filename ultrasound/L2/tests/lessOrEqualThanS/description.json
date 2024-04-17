@@ -2,7 +2,7 @@
     "name": "L1 lessOrEqualThanS Test",
     "description": "lessOrEqualThanS Test",
     "flow": "aie",
-    "gui": false,
+    "gui": true,
     "platform_allowlist": [
         "vck190"
     ],
@@ -37,7 +37,9 @@
                     "workdir": "./Work",
                     "name": "libadf.a",
                     "config": "aie.cfg",
-                    "files": ["LIB_DIR/L1/include/lessOrEqualThanS/lessOrEqualThanS.cpp"]
+                    "files": [
+                        "LIB_DIR/L1/include/lessOrEqualThanS/lessOrEqualThanS.cpp"
+                    ]
                 }
             ]
         }
@@ -59,5 +61,8 @@
             "vitis_aie_x86sim"
         ],
         "category": "canary"
-    }
+    },
+    "aie_types": [
+        "AIE1"
+    ]
 }
