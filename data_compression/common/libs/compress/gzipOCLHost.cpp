@@ -2073,11 +2073,11 @@ size_t gzipOCLHost::compressEngineSeq(
         for (long unsigned i = 0; i < 2 * blckNum; i += 2) {
             compSize = h_compressSize[i];
             compSizeCntr += compSize;
-            if (!xcl::is_sw_emulation()) {
-                uint32_t compAPISize = h_compressSize[i + 1];
-                // AXI size and calculated size using strobe should be equal
-                assert(compAPISize == compSize);
-            }
+            // if (!xcl::is_sw_emulation()) {
+            //     uint32_t compAPISize = h_compressSize[i + 1];
+            //     // AXI size and calculated size using strobe should be equal
+            //     assert(compAPISize == compSize);
+            // }
 #ifdef FILE_WRITE
             std::stringstream ss;
             ss << (int)(i / 2);

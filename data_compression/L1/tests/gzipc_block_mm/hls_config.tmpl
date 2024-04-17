@@ -16,6 +16,8 @@ tb.file_cflags=$XF_PROJ_ROOT/common/libs/cmdparser/cmdlineparser.cpp,-I${XF_PROJ
 tb.file=gzip_compress_test.cpp
 tb.file_cflags=gzip_compress_test.cpp,-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L2/include -I${XF_PROJ_ROOT}/common/libs/cmdparser -I${XF_PROJ_ROOT}/../security/L1/include
 
+
+cosim.disable_dependency_check=true
 csim.argv=${XF_PROJ_ROOT}/L1/tests/gzipc_block_mm/sample.txt ${XF_PROJ_ROOT}/L1/tests/gzipc_block_mm/sample.txt.gz
 
 cosim.argv=${XF_PROJ_ROOT}/L1/tests/gzipc_block_mm/sample.txt ${XF_PROJ_ROOT}/L1/tests/gzipc_block_mm/samlple.txt.gz

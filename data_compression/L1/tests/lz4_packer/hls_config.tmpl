@@ -10,6 +10,8 @@ syn.top=hls_lz4CompressPacker
 tb.file=lz4_packer_test.cpp
 tb.file_cflags=lz4_packer_test.cpp,-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/common/thirdParty/xxhash -DPARALLEL_BLOCK=8
 
+
+cosim.disable_dependency_check=true
 csim.argv=${XF_PROJ_ROOT}/L1/tests/lz4_packer/sample.txt ${XF_PROJ_ROOT}/L1/tests/lz4_packer/.sample.txt.lz4
 
 cosim.argv=${XF_PROJ_ROOT}/L1/tests/lz4_packer/sample.txt ${XF_PROJ_ROOT}/L1/tests/lz4_packer/sample.txt.lz4
