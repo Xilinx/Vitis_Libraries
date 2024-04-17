@@ -1,18 +1,6 @@
-.. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+.. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: BLAS, Library, Vitis BLAS Library, L2, level 2
@@ -24,41 +12,41 @@
 .. _benchmark_gemm_l2:
 
 ***********************
-L2 GEMM benchmark
+L2 GEMM Benchmark
 ***********************
 
 1. gemm_4CU
 ================
 
-This example resides in ``L2/benchmarks/memKernel/gemm_4CU`` directory. The tutorial provides a step-by-step guide that covers commands for building and running kernel. It performs the matrix-matrix multiplication (A * B = C), M is number of rows of matrix A/C, K is number of columns of matrix A/number of rows of matrix B, N is number of columns of matrix B/C
+This example resides in the ``L2/benchmarks/memKernel/gemm_4CU`` directory. The tutorial provides a step-by-step guide that covers commands for building and running the kernel. It performs the matrix-matrix multiplication (A * B = C); M is number of rows of matrix A/C, K is number of columns of matrix A/number of rows of matrix B, and N is number of columns of matrix B/C.
 
 1.1 Executable Usage
 ------------------------
 
-1.1.1 Work Directory(Step 1)
+1.1.1 Work Directory (Step 1)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The steps for library download and environment setup can be found in [here](https://github.com/Xilinx/Vitis_Libraries/tree/main/blas/L2/benchmarks#building). For getting the design,
+The steps for library download and environment setup can be found [here](https://github.com/Xilinx/Vitis_Libraries/tree/main/blas/L2/benchmarks#building). For getting the design:
 
 .. code-block:: bash 
 
    cd L2/benchmarks/memKernel/gemm_4CU
    
 
-1.1.2 Build kernel(Step 2)
+1.1.2 Build the Kernel (Step 2)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Run the following make command to build your XCLBIN and host binary targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
+Run the following make command to build your XCLBIN and host binary targeting a specific device. This process will take a long time, maybe couple of hours.
 
 .. code-block:: bash 
 
     make run TARGET=hw PLATFORM_REPO_PATHS=/opt/xilinx/platforms PLATFORM=xilinx_u250_xdma_201830_2
 
 
-1.1.3 Run kernel(Step 3)
+1.1.3 Run the Kernel (Step 3)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To get the benchmark results, please run the following command.
+To get the benchmark results, run the following command:
 
 gemm_4CU Input Arguments:
 
@@ -74,7 +62,7 @@ For example:
     build_dir.hw.xilinx_u250_xdma_201830_2/host.exe build_dir.hw.xilinx_u250_xdma_201830_2/blas.xclbin 64 64 64
 
 
-1.1.4 Example output(Step 4)
+1.1.4 Example Output (Step 4)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: bash 
@@ -123,10 +111,10 @@ For example:
 1.2 Profiling
 ----------------
 
-The xclbin could be built in 242 MHz
-The hardware resource utilization and benchmark results are shown in the two tables below.
+The xclbin could be built in 242 MHz.
+The hardware resource utilization and benchmark results are shown in the following two tables.
 
-*Table 1 Hardware resources*
+*Table 1 Hardware Resources*
 
 +------------+----------+--------+-------+--------+---------+
 |    Name    |   LUT    |  BRAM  |  URAM |   DSP  |    FF   |
@@ -134,10 +122,10 @@ The hardware resource utilization and benchmark results are shown in the two tab
 | blasKernel | 250679   | 94     | 24    | 1224   | 430512  |
 +------------+----------+--------+-------+--------+---------+
 
-*Table 2 Benchmark results*
+*Table 2 Benchmark Results*
 
 +------+------+------+------------------------------+--------------------------+-----------------+
-|  M   |  N   |  K   |  Kernel execution time [ms]  |  api execution time [ms] | Kernel Eff [%]  |  
+|  M   |  N   |  K   |  Kernel Execution Time [ms]  |  API Execution Time [ms] | Kernel Eff [%]  |  
 +======+======+======+==============================+==========================+=================+
 | 64   | 64   | 64   | 0.010905                     | 1.750123                 | 38.802577       | 
 +------+------+------+------------------------------+--------------------------+-----------------+

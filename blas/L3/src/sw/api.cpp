@@ -75,16 +75,6 @@ bool xfblasGet(void* A, unsigned int kernelIndex, unsigned int deviceIndex) {
     return true;
 }
 
-bool xfblasGetByAddress(
-    void* A, unsigned long long p_bufSize, unsigned int offset, unsigned int kernelIndex, unsigned int deviceIndex) {
-    xfblasStatus_t l_status =
-        BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->getMatByAddress(A, p_bufSize, offset);
-    if (l_status != XFBLAS_STATUS_SUCCESS) {
-        return false;
-    }
-    return true;
-}
-
 bool xfblasExecute(unsigned int kernelIndex, unsigned int deviceIndex) {
     xfblasStatus_t l_status = BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->execute();
     if (l_status != XFBLAS_STATUS_SUCCESS) {

@@ -1,18 +1,6 @@
-.. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+.. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: BLAS, Library, Vitis BLAS Library, L2, level 2
@@ -23,7 +11,7 @@
 .. _benchmark_l2:
 
 =====================
-L2 API benchmark
+L2 API Benchmark
 =====================
 
 .. toctree::
@@ -36,7 +24,7 @@ L2 API benchmark
 Benchmark Test Overview
 ============================
 
-Here are benchmarks of the Vitis BLAS library using the Vitis environment. It supports software and hardware emulation as well as running hardware accelerators on the Alveo U250.
+Here are benchmarks of the AMD Vitis™ BLAS library using the Vitis environment. It supports software and hardware emulation as well as running hardware accelerators on the AMD Alveo™ U250.
 
 1.1 Prerequisites
 ----------------------
@@ -45,18 +33,18 @@ Here are benchmarks of the Vitis BLAS library using the Vitis environment. It su
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - Alveo U250 installed and configured as per https://www.xilinx.com/products/boards-and-kits/alveo/u250.html#gettingStarted (when running hardware)
-- Xilinx runtime (XRT) installed
-- Xilinx Vitis 2022.2 installed and configured
+- XRT installed
+- Vitis 2022.2 installed and configured
 
 1.2 Building
 ----------------
 
-Taken gemm_4CU as an example to indicate how to build the application and kernel with the command line Makefile flow.
+Take gemm_4CU as an example to indicate how to build the application and kernel with the command line Makefile flow.
 
-1.2.1 Download code
+1.2.1 Download Code
 ^^^^^^^^^^^^^^^^^^^^^
 
-These blas benchmarks can be downloaded from [vitis libraries](https://github.com/Xilinx/Vitis_Libraries.git) ``main`` branch.
+These BLAS benchmarks can be downloaded from the [vitis libraries](https://github.com/Xilinx/Vitis_Libraries.git) ``main`` branch.
 
 .. code-block:: bash 
 
@@ -66,10 +54,10 @@ These blas benchmarks can be downloaded from [vitis libraries](https://github.co
    cd blas
 
    
-1.2.2 Setup environment
+1.2.2 Set Up the Environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Setup and build envrionment using the Vitis and XRT scripts:
+Set up and build the environment using the Vitis and XRT scripts:
 
 .. code-block:: bash 
 
@@ -77,19 +65,19 @@ Setup and build envrionment using the Vitis and XRT scripts:
     source /opt/xilinx/xrt/setup.sh
 
 
-1.2.3 Build and run the kernel
+1.2.3 Build and Run the Kernel
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Run Makefile command. For example:
+Run the Makefile command. For example:
 
 .. code-block:: bash 
 
     make run TARGET=hw PLATFORM_REPO_PATHS=/opt/xilinx/platforms PLATFORM=xilinx_u250_xdma_201830_2
 
     
-The Makefile supports various build target including software emulation, hw emulation and hardware (sw_emu, hw_emu, hw)
+The Makefile supports various build target including software emulation, hw emulation, and hardware (sw_emu, hw_emu, hw).
 
-The host application could be run manually using the following pattern:
+The host application can be run manually using the following pattern:
 
 .. code-block:: bash 
 
@@ -102,4 +90,3 @@ For example:
 
     build_dir.hw.xilinx_u250_xdma_201830_2/host.exe build_dir.hw.xilinx_u250_xdma_201830_2/blas.xclbin 64 64 64
 
-    

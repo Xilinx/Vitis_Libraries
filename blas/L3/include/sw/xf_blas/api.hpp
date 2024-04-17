@@ -65,8 +65,6 @@ bool xfblasGemv(int m,
                 int incy,
                 unsigned int kernelIndex,
                 unsigned int deviceIndex);
-bool xfblasGetByAddress(
-    void* A, unsigned long long p_bufSize, unsigned int offset, unsigned int kernelIndex, unsigned int deviceIndex);
 void xfblasExecuteAsync(unsigned int numkernels, unsigned int deviceIndex);
 bool xfblasExecute(unsigned int kernelIndex, unsigned int deviceIndex);
 }

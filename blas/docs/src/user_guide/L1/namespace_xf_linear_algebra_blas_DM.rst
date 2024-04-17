@@ -1,3 +1,7 @@
+.. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
+
 .. meta::
    :keywords: BLAS, Library, Vitis BLAS Library, namespace, blas, DM
    :description: Vitis BLAS library namespace xf::blas.
@@ -249,7 +253,6 @@ Detailed Documentation
 ~~~~~~~~~~~~~~~~~~~~~~
 
 
-
 Global Functions
 ----------------
 
@@ -265,7 +268,7 @@ sbmSuper2Stream
 	template  <typename t_DataType, unsigned int t_ParEntries, unsigned int t_ParBlocks = 1>
 	void sbmSuper2Stream(unsigned int p_n, unsigned int p_k, t_DataType* p_a, hls::stream<WideType<t_DataType, t_ParEntries>>& p_out)
 
-sbmSuper2Stream function that moves symmetric banded matrix with super diagonals from memory to stream
+The sbmSuper2Stream function that moves the symmetric banded matrix with super diagonals from memory to stream.
 
 
 
@@ -277,37 +280,37 @@ sbmSuper2Stream function that moves symmetric banded matrix with super diagonals
 	*
 		- t_DataType
 
-		- the data type of the matrix entries
+		- The data type of the matrix entries.
 
 	*
 		- t_ParEntries
 
-		- number of parallelly processed entries in the matrix
+		- Number of parallelly processed entries in the matrix.
 
 	*
 		- t_ParBlocks
 
-		- number of t_ParEntries, p_n must be multiple t_ParEntries * t_ParBlocks
+		- Number of t_ParEntries; p_n must be multiple t_ParEntries * t_ParBlocks.
 
 	*
 		- p_n
 
-		- number of rows/cols in a square matrix
+		- Number of rows/cols in a square matrix.
 
 	*
 		- p_k
 
-		- number of superdiagonals
+		- Number of superdiagonals.
 
 	*
 		- p_a
 
-		- a p_n x p_n symmetric banded matrix with on-chip column-major storage and corresponding 0 paddings
+		- a p_n x p_n symmetric banded matrix with on-chip column-major storage and corresponding 0 paddings.
 
 	*
 		- p_out
 
-		- output stream, which is row-aligned with 0 paddings along subdiagonals
+		- Output stream, which is row-aligned with 0 paddings along subdiagonals.
 
 sbmSub2Stream
 ##############
@@ -321,7 +324,7 @@ sbmSub2Stream
 	template  <typename t_DataType, unsigned int t_ParEntries, unsigned int t_ParBlocks = 1>
 	void sbmSub2Stream(unsigned int p_n, unsigned int p_k, t_DataType* p_a, hls::stream<WideType<t_DataType, t_ParEntries>>& p_out)
 
-sbmSub2Stream function that moves symmetric banded matrix with sub diagonals from memory to stream
+The sbmSub2Stream function that moves the symmetric banded matrix with sub diagonals from memory to stream.
 
 
 
@@ -333,37 +336,37 @@ sbmSub2Stream function that moves symmetric banded matrix with sub diagonals fro
 	*
 		- t_DataType
 
-		- the data type of the matrix entries
+		- The data type of the matrix entries.
 
 	*
 		- t_ParEntries
 
-		- number of parallelly processed entries in the matrix
+		- Number of parallelly processed entries in the matrix.
 
 	*
 		- t_ParBlocks
 
-		- number of t_ParEntries, p_n must be multiple t_ParEntries * t_ParBlocks
+		- Number of t_ParEntries; p_n must be multiple t_ParEntries * t_ParBlocks.
 
 	*
 		- p_n
 
-		- number of rows/cols in a square matrix
+		- Number of rows/cols in a square matrix.
 
 	*
 		- p_k
 
-		- number of subdiagonals
+		- Number of subdiagonals.
 
 	*
 		- p_a
 
-		- a p_n x p_n symmetric banded matrix with on-chip column-major storage and corresponding 0 paddings
+		- A p_n x p_n symmetric banded matrix with on-chip column-major storage and corresponding 0 paddings.
 
 	*
 		- p_out
 
-		- output stream, which is row-aligned with 0 paddings along subdiagonals
+		- Output stream, which is row-aligned with 0 paddings along subdiagonals.
 
 gbm2Stream
 ###########
@@ -377,7 +380,7 @@ gbm2Stream
 	template  <typename t_DataType, unsigned int t_ParEntries, unsigned int t_ParBlocks = 1>
 	void gbm2Stream(unsigned int p_n, unsigned int p_kl, unsigned int p_ku, t_DataType* p_a, hls::stream<WideType<t_DataType, t_ParEntries>>& p_out)
 
-gbm2Stream function that moves symmetric banded matrix with from memory to stream
+The gbm2Stream function that moves the symmetric banded matrix with from memory to stream.
 
 
 
@@ -389,42 +392,42 @@ gbm2Stream function that moves symmetric banded matrix with from memory to strea
 	*
 		- t_DataType
 
-		- the data type of the matrix entries
+		- The data type of the matrix entries.
 
 	*
 		- t_ParEntries
 
-		- number of parallelly processed entries in the matrix
+		- Number of parallelly processed entries in the matrix.
 
 	*
 		- t_ParBlocks
 
-		- number of t_ParEntries, p_n must be multiple t_ParEntries * t_ParBlocks
+		- Number of t_ParEntries; p_n must be multiple t_ParEntries * t_ParBlocks.
 
 	*
 		- p_n
 
-		- number of rows/cols in a square matrix
+		- Number of rows/cols in a square matrix.
 
 	*
 		- p_kl
 
-		- number of subdiagonals
+		- Number of subdiagonals.
 
 	*
 		- p_ku
 
-		- number of superdiagonals
+		- Number of superdiagonals.
 
 	*
 		- p_a
 
-		- a p_m x p_n symmetric banded matrix with on-chip column-major storage and corresponding 0 paddings
+		- A p_m x p_n symmetric banded matrix with on-chip column-major storage and corresponding 0 paddings.
 
 	*
 		- p_out
 
-		- output stream, which is row-aligned with 0 paddings along subdiagonals
+		- Output stream, which is row-aligned with 0 paddings along subdiagonals.
 
 vec2GbMatStream
 ################
@@ -438,7 +441,7 @@ vec2GbMatStream
 	template  <typename t_DataType, unsigned int t_ParEntries>
 	void vec2GbMatStream(unsigned int p_n, unsigned int p_kl, unsigned int p_ku, t_DataType* p_x, hls::stream<WideType<t_DataType, t_ParEntries>>& p_out)
 
-vec2SbMatStream function that moves vector from memory to stream that matches the sbMat2Stream outputs
+The vec2SbMatStream function that moves the vector from memory to stream that matches the sbMat2Stream outputs.
 
 
 
@@ -450,37 +453,37 @@ vec2SbMatStream function that moves vector from memory to stream that matches th
 	*
 		- t_DataType
 
-		- the data type of the matrix entries
+		- The data type of the matrix entries.
 
 	*
 		- t_ParEntries
 
-		- number of parallelly processed entries in the matrix
+		- Number of parallelly processed entries in the matrix.
 
 	*
 		- p_n
 
-		- number of rows/cols in a square matrix
+		- Number of rows/cols in a square matrix.
 
 	*
 		- p_ku
 
-		- number of superdiagonals
+		- Number of superdiagonals.
 
 	*
 		- p_kl
 
-		- number of subdiagonals
+		- Number of subdiagonals.
 
 	*
 		- p_x
 
-		- vector input
+		- Vector input.
 
 	*
 		- p_out
 
-		- output stream, which matches the outputs of gbMat2Stream or sbMat2Stream
+		- Output stream, which matches the outputs of gbMat2Stream or sbMat2Stream.
 
 tbmSuper2Stream
 ################
@@ -494,7 +497,7 @@ tbmSuper2Stream
 	template  <typename t_DataType, unsigned int t_ParEntries, unsigned int t_ParBlocks = 1>
 	void tbmSuper2Stream(unsigned int p_n, unsigned int p_k, t_DataType* p_a, hls::stream<WideType<t_DataType, t_ParEntries>>& p_out)
 
-tbmSuper2Stream function that moves triangular banded matrix with super diagonals from memory to stream
+The tbmSuper2Stream function that moves the triangular banded matrix with super diagonals from memory to stream
 
 
 
@@ -506,37 +509,37 @@ tbmSuper2Stream function that moves triangular banded matrix with super diagonal
 	*
 		- t_DataType
 
-		- the data type of the matrix entries
+		- The data type of the matrix entries.
 
 	*
 		- t_ParEntries
 
-		- number of parallelly processed entries in the matrix
+		- Number of parallelly processed entries in the matrix.
 
 	*
 		- t_ParBlocks
 
-		- number of t_ParEntries, p_n must be multiple t_ParEntries * t_ParBlocks
+		- Number of t_ParEntries, p_n must be multiple t_ParEntries * t_ParBlocks.
 
 	*
 		- p_n
 
-		- number of rows/cols in a square matrix
+		- Number of rows/cols in a square matrix.
 
 	*
 		- p_k
 
-		- number of superdiagonals
+		- Number of superdiagonals.
 
 	*
 		- p_a
 
-		- a p_n x p_n triangular banded matrix with on-chip column-major storage and corresponding 0 paddings
+		- A p_n x p_n triangular banded matrix with on-chip column-major storage and corresponding 0 paddings.
 
 	*
 		- p_out
 
-		- output stream, which is row-aligned with 0 paddings along subdiagonals
+		- Output stream, which is row-aligned with 0 paddings along subdiagonals.
 
 tbmSub2Stream
 ##############
@@ -550,7 +553,7 @@ tbmSub2Stream
 	template  <typename t_DataType, unsigned int t_ParEntries, unsigned int t_ParBlocks = 1>
 	void tbmSub2Stream(unsigned int p_n, unsigned int p_k, t_DataType* p_a, hls::stream<WideType<t_DataType, t_ParEntries>>& p_out)
 
-tbmSub2Stream function that moves triangular banded matrix with sub diagonals from memory to stream
+The tbmSub2Stream function that moves the triangular banded matrix with sub diagonals from memory to stream.
 
 
 
@@ -562,37 +565,37 @@ tbmSub2Stream function that moves triangular banded matrix with sub diagonals fr
 	*
 		- t_DataType
 
-		- the data type of the matrix entries
+		- The data type of the matrix entries.
 
 	*
 		- t_ParEntries
 
-		- number of parallelly processed entries in the matrix
+		- Number of parallelly processed entries in the matrix.
 
 	*
 		- t_ParBlocks
 
-		- number of t_ParEntries, p_n must be multiple t_ParEntries * t_ParBlocks
+		- Number of t_ParEntries; p_n must be multiple t_ParEntries * t_ParBlocks.
 
 	*
 		- p_n
 
-		- number of rows/cols in a square matrix
+		- Number of rows/cols in a square matrix.
 
 	*
 		- p_k
 
-		- number of subdiagonals
+		- Number of subdiagonals.
 
 	*
 		- p_a
 
-		- a p_n x p_n triangular banded matrix with on-chip column-major storage and corresponding 0 paddings
+		- A p_n x p_n triangular banded matrix with on-chip column-major storage and corresponding 0 paddings.
 
 	*
 		- p_out
 
-		- output stream, which is row-aligned with 0 paddings along subdiagonals
+		- Output stream, which is row-aligned with 0 paddings along subdiagonals.
 
 vec2TbUpMatStream
 ##################
@@ -606,7 +609,7 @@ vec2TbUpMatStream
 	template  <typename t_DataType, unsigned int t_ParEntries>
 	void vec2TbUpMatStream(unsigned int p_n, unsigned int p_k, t_DataType* p_x, hls::stream<WideType<t_DataType, t_ParEntries>>& p_out)
 
-vec2TbUpMatStream function that moves vector from memory to stream that matches the sbMat2Stream outputs
+The vec2TbUpMatStream function that moves the vector from memory to stream that matches the sbMat2Stream outputs.
 
 
 
@@ -618,32 +621,32 @@ vec2TbUpMatStream function that moves vector from memory to stream that matches 
 	*
 		- t_DataType
 
-		- the data type of the matrix entries
+		- The data type of the matrix entries.
 
 	*
 		- t_ParEntries
 
-		- number of parallelly processed entries in the matrix
+		- Number of parallelly processed entries in the matrix.
 
 	*
 		- p_n
 
-		- number of rows/cols in a square matrix
+		- Number of rows/cols in a square matrix.
 
 	*
 		- p_k
 
-		- number of super/sub-diagonals
+		- Number of super/sub-diagonals.
 
 	*
 		- p_x
 
-		- vector input
+		- Vector input.
 
 	*
 		- p_out
 
-		- output stream
+		- Output stream.
 
 vec2TbLoMatStream
 ##################
@@ -657,7 +660,7 @@ vec2TbLoMatStream
 	template  <typename t_DataType, unsigned int t_ParEntries>
 	void vec2TbLoMatStream(unsigned int p_n, unsigned int p_k, t_DataType* p_x, hls::stream<WideType<t_DataType, t_ParEntries>>& p_out)
 
-vec2TbLoMatStream function that moves vector from memory to stream that matches the sbMat2Stream outputs
+The vec2TbLoMatStream function that moves the vector from memory to stream that matches the sbMat2Stream outputs.
 
 
 
@@ -669,32 +672,32 @@ vec2TbLoMatStream function that moves vector from memory to stream that matches 
 	*
 		- t_DataType
 
-		- the data type of the matrix entries
+		- The data type of the matrix entries.
 
 	*
 		- t_ParEntries
 
-		- number of parallelly processed entries in the matrix
+		- Number of parallelly processed entries in the matrix.
 
 	*
 		- p_n
 
-		- number of rows/cols in a square matrix
+		- Number of rows/cols in a square matrix.
 
 	*
 		- p_k
 
-		- number of sub-diagonals
+		- Number of sub-diagonals.
 
 	*
 		- p_x
 
-		- vector input
+		- Vector input.
 
 	*
 		- p_out
 
-		- output stream
+		- Output stream.
 
 gem2Stream
 ###########
@@ -708,7 +711,7 @@ gem2Stream
 	template  <typename t_DataType, unsigned int t_ParEntries>
 	void gem2Stream(unsigned int p_m, unsigned int p_n, t_DataType* p_in, hls::stream<WideType<t_DataType, t_ParEntries>>& p_out)
 
-gem2Stream function that moves row-major matrix from memory to stream
+The gem2Stream function that moves the row-major matrix from memory to stream.
 
 
 
@@ -720,32 +723,32 @@ gem2Stream function that moves row-major matrix from memory to stream
 	*
 		- t_DataType
 
-		- the data type of the matrix entries
+		- The data type of the matrix entries.
 
 	*
 		- t_ParEntries
 
-		- number of parallelly processed entries in the matrix
+		- Number of parallelly processed entries in the matrix.
 
 	*
 		- p_m
 
-		- number of rows in a matrix
+		- Number of rows in a matrix.
 
 	*
 		- p_n
 
-		- number of cols in a matrix
+		- Number of cols in a matrix.
 
 	*
 		- p_in
 
-		- a p_m x p_n matrix with on-chip row-major storage
+		- A p_m x p_n matrix with on-chip row-major storage.
 
 	*
 		- p_out
 
-		- output stream
+		- Output stream.
 
 vec2GemStream
 ##############
@@ -759,7 +762,7 @@ vec2GemStream
 	template  <typename t_DataType, unsigned int t_ParEntries>
 	void vec2GemStream(unsigned int p_m, unsigned int p_n, t_DataType* p_in, hls::stream<WideType<t_DataType, t_ParEntries>>& p_out)
 
-vec2GemStream function that moves vector from memory to stream that matches the gem2Stream outputs
+The vec2GemStream function that moves the vector from memory to stream that matches the gem2Stream outputs.
 
 
 
@@ -771,32 +774,32 @@ vec2GemStream function that moves vector from memory to stream that matches the 
 	*
 		- t_DataType
 
-		- the data type of the matrix entries
+		- The data type of the matrix entries.
 
 	*
 		- t_ParEntries
 
-		- number of parallelly processed entries in the matrix
+		- Number of parallelly processed entries in the matrix.
 
 	*
 		- p_m
 
-		- number of rows in a matrix
+		- Number of rows in a matrix.
 
 	*
 		- p_n
 
-		- number of cols in a matrix
+		- Number of cols in a matrix.
 
 	*
 		- p_in
 
-		- vector input
+		- Vector input.
 
 	*
 		- p_out
 
-		- output stream
+		- Output stream.
 
 symUp2Stream
 #############
@@ -810,7 +813,7 @@ symUp2Stream
 	template  <typename t_DataType, unsigned int t_ParEntries>
 	void symUp2Stream(unsigned int p_n, t_DataType* p_a, hls::stream<WideType<t_DataType, t_ParEntries>>& p_out)
 
-symUp2Stream function that moves super-symmetric matrix from memory to stream
+The symUp2Stream function that moves the super-symmetric matrix from memory to stream.
 
 
 
@@ -822,27 +825,27 @@ symUp2Stream function that moves super-symmetric matrix from memory to stream
 	*
 		- t_DataType
 
-		- the data type of the matrix entries
+		- The data type of the matrix entries.
 
 	*
 		- t_ParEntries
 
-		- number of parallel processed entries in the matrix
+		- Number of parallel processed entries in the matrix.
 
 	*
 		- p_n
 
-		- number of rows/cols in a symmetric matrix
+		- Number of rows/cols in a symmetric matrix.
 
 	*
 		- p_a
 
-		- point to a p_n x p_n symmetric matrix
+		- Point to a p_n x p_n symmetric matrix.
 
 	*
 		- p_out
 
-		- output stream
+		- Output stream.
 
 symLo2Stream
 #############
@@ -856,7 +859,7 @@ symLo2Stream
 	template  <typename t_DataType, unsigned int t_ParEntries>
 	void symLo2Stream(unsigned int p_n, t_DataType* p_a, hls::stream<WideType<t_DataType, t_ParEntries>>& p_out)
 
-symLo2Stream function that moves sub-symmetric matrix from memory to stream
+The symLo2Stream function that moves the sub-symmetric matrix from memory to stream.
 
 
 
@@ -868,27 +871,27 @@ symLo2Stream function that moves sub-symmetric matrix from memory to stream
 	*
 		- t_DataType
 
-		- the data type of the matrix entries
+		- The data type of the matrix entries.
 
 	*
 		- t_ParEntries
 
-		- number of parallel processed entries in the matrix
+		- Number of parallel processed entries in the matrix.
 
 	*
 		- p_n
 
-		- number of rows/cols in a symmetric matrix
+		- Number of rows/cols in a symmetric matrix.
 
 	*
 		- p_a
 
-		- point to a p_n x p_n symmetric matrix
+		- Point to a p_n x p_n symmetric matrix.
 
 	*
 		- p_out
 
-		- output stream
+		- Output stream.
 
 spmUp2Stream
 #############
@@ -902,7 +905,7 @@ spmUp2Stream
 	template  <typename t_DataType, unsigned int t_ParEntries>
 	void spmUp2Stream(unsigned int p_n, t_DataType* p_a, hls::stream<WideType<t_DataType, t_ParEntries>>& p_out)
 
-spmUp2Stream function that moves packed super-symmetric matrix from memory to stream
+The spmUp2Stream function that moves the packed super-symmetric matrix from memory to stream.
 
 
 
@@ -914,27 +917,27 @@ spmUp2Stream function that moves packed super-symmetric matrix from memory to st
 	*
 		- t_DataType
 
-		- the data type of the matrix entries
+		- The data type of the matrix entries.
 
 	*
 		- t_ParEntries
 
-		- number of parallel processed entries in the matrix
+		- Number of parallel processed entries in the matrix.
 
 	*
 		- p_n
 
-		- number of rows/cols in a symmetric matrix
+		- Number of rows/cols in a symmetric matrix.
 
 	*
 		- p_a
 
-		- point to a p_n x p_n symmetric matrix
+		- Point to a p_n x p_n symmetric matrix.
 
 	*
 		- p_out
 
-		- output stream
+		- Output stream.
 
 spmLo2Stream
 #############
@@ -948,7 +951,7 @@ spmLo2Stream
 	template  <typename t_DataType, unsigned int t_ParEntries>
 	void spmLo2Stream(unsigned int p_n, t_DataType* p_a, hls::stream<WideType<t_DataType, t_ParEntries>>& p_out)
 
-spmLo2Stream function that moves packed sub-symmetric matrix from memory to stream
+The spmLo2Stream function that moves the packed sub-symmetric matrix from memory to stream.
 
 
 
@@ -960,27 +963,27 @@ spmLo2Stream function that moves packed sub-symmetric matrix from memory to stre
 	*
 		- t_DataType
 
-		- the data type of the matrix entries
+		- The data type of the matrix entries.
 
 	*
 		- t_ParEntries
 
-		- number of parallel processed entries in the matrix
+		- Number of parallel processed entries in the matrix.
 
 	*
 		- p_n
 
-		- number of rows/cols in a symmetric matrix
+		- Number of rows/cols in a symmetric matrix.
 
 	*
 		- p_a
 
-		- point to a p_n x p_n symmetric matrix
+		- Point to a p_n x p_n symmetric matrix.
 
 	*
 		- p_out
 
-		- output stream
+		- Output stream.
 
 vec2SymStream
 ##############
@@ -994,7 +997,7 @@ vec2SymStream
 	template  <typename t_DataType, unsigned int t_ParEntries>
 	void vec2SymStream(unsigned int p_n, t_DataType* p_x, hls::stream<WideType<t_DataType, t_ParEntries>>& p_out)
 
-vec2SymStream function that moves vector from memory to stream that matches the symatrix matrix data mover outputs
+The vec2SymStream function that moves the vector from memory to stream that matches the symatrix matrix data mover outputs.
 
 
 
@@ -1006,27 +1009,27 @@ vec2SymStream function that moves vector from memory to stream that matches the 
 	*
 		- t_DataType
 
-		- the data type of the matrix entries
+		- The data type of the matrix entries.
 
 	*
 		- t_ParEntries
 
-		- number of parallelly processed entries in the matrix
+		- Number of parallelly processed entries in the matrix.
 
 	*
 		- p_n
 
-		- number of rows/cols in a square matrix
+		- Number of rows/cols in a square matrix.
 
 	*
 		- p_x
 
-		- vector input
+		- Vector input.
 
 	*
 		- p_out
 
-		- output stream
+		- Output stream.
 
 trmUp2Stream
 #############
@@ -1040,7 +1043,7 @@ trmUp2Stream
 	template  <typename t_DataType, unsigned int t_ParEntries>
 	void trmUp2Stream(unsigned int p_n, t_DataType* p_a, hls::stream<WideType<t_DataType, t_ParEntries>>& p_out)
 
-trmUp2Stream function that read the super-triangular matrix from memory to stream
+The trmUp2Stream function that read the super-triangular matrix from memory to stream.
 
 
 
@@ -1052,27 +1055,27 @@ trmUp2Stream function that read the super-triangular matrix from memory to strea
 	*
 		- t_DataType
 
-		- the data type of the matrix entries
+		- The data type of the matrix entries.
 
 	*
 		- t_ParEntries
 
-		- the number of parallelly processed entries in the matrix
+		- The number of parallelly processed entries in the matrix
 
 	*
 		- p_n
 
-		- number of rows/cols in a symmetric matrix
+		- Number of rows/cols in a symmetric matrix.
 
 	*
 		- p_a
 
-		- memory location of a p_n x p_n symmetric matrix
+		- Memory location of a p_n x p_n symmetric matrix.
 
 	*
 		- p_out
 
-		- the streams of matrix entries
+		- The streams of matrix entries.
 
 trmLo2Stream
 #############
@@ -1086,7 +1089,7 @@ trmLo2Stream
 	template  <typename t_DataType, unsigned int t_ParEntries>
 	void trmLo2Stream(unsigned int p_n, t_DataType* p_a, hls::stream<WideType<t_DataType, t_ParEntries>>& p_out)
 
-trmLo2Stream function that read the sub-tridiagonal matrix with from memory to stream
+The trmLo2Stream function that read the sub-tridiagonal matrix with from memory to stream.
 
 
 
@@ -1098,27 +1101,27 @@ trmLo2Stream function that read the sub-tridiagonal matrix with from memory to s
 	*
 		- t_DataType
 
-		- the data type of the matrix entries
+		- The data type of the matrix entries.
 
 	*
 		- t_ParEntries
 
-		- the number of parallelly processed entries in the matrix
+		- The number of parallelly processed entries in the matrix.
 
 	*
 		- p_n
 
-		- number of rows/cols in a symmetric matrix
+		- Number of rows/cols in a symmetric matrix.
 
 	*
 		- p_a
 
-		- memory location of a p_n x p_n symmetric matrix
+		- Memory location of a p_n x p_n symmetric matrix.
 
 	*
 		- p_out
 
-		- the streams of matrix entries
+		- The streams of matrix entries.
 
 tpmUp2Stream
 #############
@@ -1132,7 +1135,7 @@ tpmUp2Stream
 	template  <typename t_DataType, unsigned int t_ParEntries>
 	void tpmUp2Stream(unsigned int p_n, t_DataType* p_a, hls::stream<WideType<t_DataType, t_ParEntries>>& p_out)
 
-tpmUp2Stream function that read the packed super-triangular matrix from memory to stream
+The tpmUp2Stream function that read the packed super-triangular matrix from memory to stream.
 
 
 
@@ -1144,27 +1147,27 @@ tpmUp2Stream function that read the packed super-triangular matrix from memory t
 	*
 		- t_DataType
 
-		- the data type of the matrix entries
+		- The data type of the matrix entries.
 
 	*
 		- t_ParEntries
 
-		- the number of parallelly processed entries in the matrix
+		- The number of parallelly processed entries in the matrix.
 
 	*
 		- p_n
 
-		- number of rows/cols in a symmetric matrix
+		- Number of rows/cols in a symmetric matrix.
 
 	*
 		- p_a
 
-		- memory location of a p_n x p_n symmetric matrix
+		- Memory location of a p_n x p_n symmetric matrix.
 
 	*
 		- p_out
 
-		- the streams of matrix entries
+		- The streams of matrix entries.
 
 tpmLo2Stream
 #############
@@ -1178,7 +1181,7 @@ tpmLo2Stream
 	template  <typename t_DataType, unsigned int t_ParEntries>
 	void tpmLo2Stream(unsigned int p_n, t_DataType* p_a, hls::stream<WideType<t_DataType, t_ParEntries>>& p_out)
 
-tpmLo2Stream function that read the packed sub-symmetric matrix with from memory to stream
+The tpmLo2Stream function that read the packed sub-symmetric matrix with from memory to stream.
 
 
 
@@ -1190,27 +1193,27 @@ tpmLo2Stream function that read the packed sub-symmetric matrix with from memory
 	*
 		- t_DataType
 
-		- the data type of the matrix entries
+		- The data type of the matrix entries.
 
 	*
 		- t_ParEntries
 
-		- the number of parallelly processed entries in the matrix
+		- The number of parallelly processed entries in the matrix.
 
 	*
 		- p_n
 
-		- number of rows/cols in a symmetric matrix
+		- Number of rows/cols in a symmetric matrix.
 
 	*
 		- p_a
 
-		- memory location of a p_n x p_n symmetric matrix
+		- Memory location of a p_n x p_n symmetric matrix.
 
 	*
 		- p_out
 
-		- the streams of matrix entries
+		- The streams of matrix entries.
 
 vec2TrmUpStream
 ################
@@ -1224,7 +1227,7 @@ vec2TrmUpStream
 	template  <typename t_DataType, unsigned int t_ParEntries>
 	void vec2TrmUpStream(unsigned int p_n, t_DataType* p_x, hls::stream<WideType<t_DataType, t_ParEntries>>& p_out)
 
-vec2TrmUpStream function that moves vector from memory to stream that matches the trmUp2Stream/tpmUp2Stream outputs
+The vec2TrmUpStream function that moves the vector from memory to stream that matches the trmUp2Stream/tpmUp2Stream outputs.
 
 
 
@@ -1236,27 +1239,27 @@ vec2TrmUpStream function that moves vector from memory to stream that matches th
 	*
 		- t_DataType
 
-		- the data type of the matrix entries
+		- The data type of the matrix entries.
 
 	*
 		- t_ParEntries
 
-		- number of parallelly processed entries in the matrix
+		- Number of parallelly processed entries in the matrix.
 
 	*
 		- p_n
 
-		- number of rows/cols in a square matrix
+		- Number of rows/cols in a square matrix.
 
 	*
 		- p_x
 
-		- vector input
+		- Vector input.
 
 	*
 		- p_out
 
-		- output stream
+		- Output stream.
 
 vec2TrmLoStream
 ################
@@ -1270,7 +1273,7 @@ vec2TrmLoStream
 	template  <typename t_DataType, unsigned int t_ParEntries>
 	void vec2TrmLoStream(unsigned int p_n, t_DataType* p_x, hls::stream<WideType<t_DataType, t_ParEntries>>& p_out)
 
-vec2TrmLoStream function that moves vector from memory to stream that matches the trmLo2Stream/tpmLo2Stream outputs
+The vec2TrmLoStream function that moves the vector from memory to stream that matches the trmLo2Stream/tpmLo2Stream outputs.
 
 
 
@@ -1282,27 +1285,27 @@ vec2TrmLoStream function that moves vector from memory to stream that matches th
 	*
 		- t_DataType
 
-		- the data type of the matrix entries
+		- The data type of the matrix entries.
 
 	*
 		- t_ParEntries
 
-		- number of parallelly processed entries in the matrix
+		- Number of parallelly processed entries in the matrix.
 
 	*
 		- p_n
 
-		- number of rows/cols in a square matrix
+		- Number of rows/cols in a square matrix.
 
 	*
 		- p_x
 
-		- vector input
+		- Vector input.
 
 	*
 		- p_out
 
-		- output stream
+		- Output stream.
 
 readVec2Stream
 ###############
@@ -1316,7 +1319,7 @@ readVec2Stream
 	template  <typename t_DataType, unsigned int t_ParEntries>
 	void readVec2Stream(t_DataType* p_in, unsigned int p_n, hls::stream<WideType<t_DataType, t_ParEntries>>& p_out)
 
-readVec2Stream function that moves vector from memory to stream
+The readVec2Stream function that moves the vector from memory to stream.
 
 
 
@@ -1328,17 +1331,17 @@ readVec2Stream function that moves vector from memory to stream
 	*
 		- t_DataType
 
-		- the data type of the matrix entries
+		- The data type of the matrix entries.
 
 	*
 		- t_ParEntries
 
-		- number of parallelly processed entries in the matrix
+		- Number of parallelly processed entries in the matrix.
 
 	*
 		- p_n
 
-		- number of entries in a vectpr
+		- Number of entries in a vector.
 
 	*
 		- p_in
@@ -1348,7 +1351,7 @@ readVec2Stream function that moves vector from memory to stream
 	*
 		- p_out
 
-		- output stream
+		- Output stream.
 
 writeStream2Vec
 ################
@@ -1362,7 +1365,7 @@ writeStream2Vec
 	template  <typename t_DataType, unsigned int t_ParEntries>
 	void writeStream2Vec(hls::stream<WideType<t_DataType, t_ParEntries>>& p_in, unsigned int p_n, t_DataType* p_out)
 
-writeStream2Vec function that moves vector from stream to vector
+The writeStream2Vec function that moves the vector from stream to vector.
 
 
 
@@ -1374,25 +1377,25 @@ writeStream2Vec function that moves vector from stream to vector
 	*
 		- t_DataType
 
-		- the data type of the matrix entries
+		- The data type of the matrix entries.
 
 	*
 		- t_ParEntries
 
-		- number of parallelly processed entries in the matrix
+		- Number of parallelly processed entries in the matrix.
 
 	*
 		- p_n
 
-		- number of entries in a vectpr
+		- Number of entries in a vector.
 
 	*
 		- p_in
 
-		- vector stream input
+		- Vector stream input.
 
 	*
 		- p_out
 
-		- vector output memory
+		- Vector output memory.
 

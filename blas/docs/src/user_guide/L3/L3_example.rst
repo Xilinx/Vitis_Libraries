@@ -1,17 +1,6 @@
-.. 
-   Copyright 2019 Xilinx, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+.. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: BLAS, Library, Vitis BLAS Library, Vitis BLAS, example, level 3
@@ -22,30 +11,31 @@
 .. _example_l3:
 
 =====================
-L3 API example
+L3 API Example
 =====================
-For example code references please follow the link below. 
 
-**1. Vitis BLAS L3 compilation**
+For example code references, use the following link.
 
-All examples provided here could be built with compilation steps similar to the following, target could be either hw or hw_emu(for testing hw emulation)
+**1. Vitis BLAS L3 Compilation**
+
+All examples provided here can be built with compilation steps similar to the following; the target can be either hw or hw_emu(for testing hw emulation).
 
 .. code-block:: bash
 
   make host TARGET=hw
   
-**2. Vitis BLAS L3 run**
+**2. Vitis BLAS L3 Run**
 
-Examples could be run with the following steps, target could be either hw or hw_emu(for testing hw emulation)
+Examples can be run with the following steps; the target can be either hw or hw_emu(for testing hw emulation).
 
 .. code-block:: bash
 
   make run TARGET=hw PLATFORM_REPO_PATHS=LOCAL_PLATFORM_PATH
 
 
-**3. Vitis BLAS L3 code example**
+**3. Vitis BLAS L3 Code Example**
 
-The following is an example of how to use Vitis BLAS API. Users always need to include header file xf_blas.hpp. 
+The following is an example of how to use the AMD Vitis™ BLAS API. You always need to include the ``xf_blas.hppheader`` file. 
 
 .. code-block:: c++
 
@@ -125,7 +115,7 @@ The following is an example of how to use Vitis BLAS API. Users always need to i
   }
 
 
-These API functions run on the first kernel by default, but they could support multi-kernels xclbin. Users will need to put numbers of kernels or index of the kernel in those functions to let the API know. The following code shows how to initialize Vitis BLAS library to support a xclbin with 2 kernels and run with the second kernel.
+These API functions run on the first kernel by default, but they could support multi-kernel xclbins. You will need to put the numbers of kernels or index of the kernel in those functions to let the API know. The following code shows how to initialize the Vitis BLAS library to support a xclbin with two kernels and run with the second kernel.
 
 .. code-block:: c++
    

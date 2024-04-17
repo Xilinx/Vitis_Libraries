@@ -1,3 +1,6 @@
+.. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: BLAS, Library, Vitis BLAS Library, namespace, bias, compute
@@ -18,15 +21,6 @@ namespace xf::blas
 Overview
 ~~~~~~~~
 
-
-
-
-
-
-
-
-
-
 .. index:: pair: function; gbmv
 .. _doxid-namespacexf_1_1blas_1abe4199bfd663b774cba0b9eb27a03e08:
 .. index:: pair: function; gemv
@@ -37,9 +31,6 @@ Overview
 .. _doxid-namespacexf_1_1blas_1ab6d6cccceb77ca9d8b8a28fc510d2021:
 .. index:: pair: function; trmv
 .. _doxid-namespacexf_1_1blas_1a97b563c3509866438a45cbde63270435:
-
-
-
 
 .. ref-code-block:: cpp
 	:class: overview-code-block
@@ -109,8 +100,6 @@ Overview
 Detailed Documentation
 ~~~~~~~~~~~~~~~~~~~~~~
 
-
-
 Global Functions
 ----------------
 
@@ -126,7 +115,7 @@ amax
 	template  <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType>
 	void amax(unsigned int p_n, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_x, t_IndexType& p_result)
 
-amax function that returns the position of the vector element that has the maximum magnitude.
+The amax function that returns the position of the vector element that has the maximum magnitude.
 
 
 
@@ -138,32 +127,32 @@ amax function that returns the position of the vector element that has the maxim
 	*
 		- t_DataType
 
-		- the data type of the vector entries
+		- The data type of the vector entries.
 
 	*
 		- t_LogParEntries
 
-		- log2 of the number of parallelly processed entries in the input vector
+		- log2 of the number of parallelly processed entries in the input vector.
 
 	*
 		- t_IndexType
 
-		- the datatype of the index
+		- The datatype of the index.
 
 	*
 		- p_n
 
-		- the number of entries in the input vector p_x, p_n % l_ParEntries == 0
+		- The number of entries in the input vector p_x, p_n % l_ParEntries == 0.
 
 	*
 		- p_x
 
-		- the input stream of packed vector entries
+		- The input stream of packed vector entries.
 
 	*
 		- p_result
 
-		- the resulting index, which is 0 if p_n <= 0
+		- The resulting index, which is 0 if p_n <= 0.
 
 amin
 #####
@@ -177,7 +166,7 @@ amin
 	template  <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType>
 	void amin(unsigned int p_n, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_x, t_IndexType& p_result)
 
-amin function that returns the position of the vector element that has the minimum magnitude.
+The amin function that returns the position of the vector element that has the minimum magnitude.
 
 
 
@@ -189,32 +178,32 @@ amin function that returns the position of the vector element that has the minim
 	*
 		- t_DataType
 
-		- the data type of the vector entries
+		- The data type of the vector entries.
 
 	*
 		- t_LogParEntries
 
-		- log2 of the number of parallelly processed entries in the input vector
+		- log2 of the number of parallelly processed entries in the input vector.
 
 	*
 		- t_IndexType
 
-		- the datatype of the index
+		- The datatype of the index.
 
 	*
 		- p_n
 
-		- the number of entries in the input vector p_x, p_n % l_ParEntries == 0
+		- The number of entries in the input vector p_x, p_n % l_ParEntries == 0.
 
 	*
 		- p_x
 
-		- the input stream of packed vector entries
+		- The input stream of packed vector entries.
 
 	*
 		- p_result
 
-		- the resulting index, which is 0 if p_n <= 0
+		- The resulting index, which is 0 if p_n <= 0.
 
 asum
 #####
@@ -228,7 +217,7 @@ asum
 	template  <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
 	void asum(unsigned int p_n, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_x, t_DataType& p_sum)
 
-asum function that returns the sum of the magnitude of vector elements.
+The asum function that returns the sum of the magnitude of vector elements.
 
 
 
@@ -240,32 +229,32 @@ asum function that returns the sum of the magnitude of vector elements.
 	*
 		- t_DataType
 
-		- the data type of the vector entries
+		- The data type of the vector entries.
 
 	*
 		- t_LogParEntries
 
-		- log2 of the number of parallelly processed entries in the input vector
+		- log2 of the number of parallelly processed entries in the input vector.
 
 	*
 		- t_IndexType
 
-		- the datatype of the index
+		- The datatype of the index.
 
 	*
 		- p_n
 
-		- the number of entries in the input vector p_x, p_n % l_ParEntries == 0
+		- The number of entries in the input vector p_x, p_n % l_ParEntries == 0.
 
 	*
 		- p_x
 
-		- the input stream of packed vector entries
+		- The input stream of packed vector entries.
 
 	*
 		- p_sum
 
-		- the sum, which is 0 if p_n <= 0
+		- The sum, which is 0 if p_n <= 0.
 
 axpy
 #####
@@ -279,7 +268,7 @@ axpy
 	template  <typename t_DataType, unsigned int t_ParEntries, typename t_IndexType = unsigned int>
 	void axpy(unsigned int p_n, const t_DataType p_alpha, hls::stream<WideType<t_DataType, t_ParEntries>>& p_x, hls::stream<WideType<t_DataType, t_ParEntries>>& p_y, hls::stream<WideType<t_DataType, t_ParEntries>>& p_r)
 
-axpy function that compute Y = alpha*X + Y.
+The axpy function that compute Y = alpha*X + Y.
 
 
 
@@ -291,37 +280,37 @@ axpy function that compute Y = alpha*X + Y.
 	*
 		- t_DataType
 
-		- the data type of the vector entries
+		- The data type of the vector entries.
 
 	*
 		- t_LogParEntries
 
-		- log2 of the number of parallelly processed entries in the input vector
+		- log2 of the number of parallelly processed entries in the input vector.
 
 	*
 		- t_IndexType
 
-		- the datatype of the index
+		- The datatype of the index.
 
 	*
 		- p_n
 
-		- the number of entries in the input vector p_x, p_n % t_ParEntries == 0
+		- The number of entries in the input vector p_x, p_n % t_ParEntries == 0.
 
 	*
 		- p_x
 
-		- the input stream of packed entries of vector X
+		- The input stream of packed entries of vector X.
 
 	*
 		- p_y
 
-		- the input stream of packed entries of vector Y
+		- The input stream of packed entries of vector Y.
 
 	*
 		- p_r
 
-		- the output stream of packed entries of result vector Y
+		- The output stream of packed entries of result vector Y.
 
 copy
 #####
@@ -335,7 +324,7 @@ copy
 	template  <typename t_DataType, unsigned int t_ParEntries, typename t_IndexType = unsigned int>
 	void copy(unsigned int p_n, hls::stream<WideType<t_DataType, t_ParEntries>>& p_x, hls::stream<WideType<t_DataType, t_ParEntries>>& p_y)
 
-copy function that compute Y = X
+The copy function that computes Y = X.
 
 
 
@@ -347,32 +336,32 @@ copy function that compute Y = X
 	*
 		- t_DataType
 
-		- the data type of the vector entries
+		- The data type of the vector entries.
 
 	*
 		- t_ParEntries
 
-		- number of parallelly processed entries in the packed input vector stream
+		- Number of parallelly processed entries in the packed input vector stream.
 
 	*
 		- t_IndexType
 
-		- the datatype of the index
+		- The datatype of the index.
 
 	*
 		- p_n
 
-		- the number of entries in vector X and Y
+		- The number of entries in vector X and Y.
 
 	*
 		- p_x
 
-		- the packed input vector stream
+		- The packed input vector stream.
 
 	*
 		- p_y
 
-		- the packed output vector stream
+		- The packed output vector stream.
 
 dot
 ####
@@ -386,7 +375,7 @@ dot
 	template  <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
 	void dot(unsigned int p_n, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_x, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_y, t_DataType& p_res)
 
-dot function that returns the dot product of vector x and y.
+The dot function that returns the dot product of vector x and y.
 
 
 
@@ -398,32 +387,32 @@ dot function that returns the dot product of vector x and y.
 	*
 		- t_DataType
 
-		- the data type of the vector entries
+		- The data type of the vector entries.
 
 	*
 		- t_LogParEntries
 
-		- log2 of the number of parallelly processed entries in the input vector
+		- log2 of the number of parallelly processed entries in the input vector.
 
 	*
 		- t_IndexType
 
-		- the datatype of the index
+		- The datatype of the index.
 
 	*
 		- p_n
 
-		- the number of entries in the input vector p_x, p_n % l_ParEntries == 0
+		- The number of entries in the input vector p_x, p_n % l_ParEntries == 0.
 
 	*
 		- p_x
 
-		- the input stream of packed vector entries
+		- The input stream of packed vector entries.
 
 	*
 		- p_res
 
-		- the dot product of x and y
+		- The dot product of x and y.
 
 gbmv
 #####
@@ -437,7 +426,7 @@ gbmv
 	template  <typename t_DataType, unsigned int t_ParEntries, unsigned int t_MaxRows, typename t_IndexType = unsigned int, typename t_MacType = t_DataType>
 	void gbmv(const unsigned int p_m, const unsigned int p_n, const unsigned int p_kl, const unsigned int p_ku, const t_DataType p_alpha, hls::stream<WideType<t_DataType, t_ParEntries>>& p_M, hls::stream<WideType<t_DataType, t_ParEntries>>& p_x, const t_DataType p_beta, hls::stream<WideType<t_DataType, t_ParEntries>>& p_y, hls::stream<WideType<t_DataType, t_ParEntries>>& p_yr)
 
-gbmv function performs general banded matrix-vector multiplication matrix and a vector y = alpha * M * x + beta * y
+The gbmv function performs general banded matrix-vector multiplication matrix and a vector y = alpha * M * x + beta * y.
 
 
 
@@ -449,32 +438,32 @@ gbmv function performs general banded matrix-vector multiplication matrix and a 
 	*
 		- t_DataType
 
-		- the data type of the vector entries
+		- The data type of the vector entries.
 
 	*
 		- t_ParEntries
 
-		- the number of parallelly processed entries in the input vector
+		- The number of parallelly processed entries in the input vector.
 
 	*
 		- t_MaxRows
 
-		- the maximum size of buffers for output vector
+		- The maximum size of buffers for output vector.
 
 	*
 		- t_IndexType
 
-		- the datatype of the index
+		- The datatype of the index.
 
 	*
 		- t_MacType
 
-		- the datatype of the output stream
+		- The datatype of the output stream.
 
 	*
 		- p_m
 
-		- the number of rows of input matrix p_M
+		- The number of rows of input matrix p_M.
 
 	*
 		- p_alpha
@@ -484,22 +473,22 @@ gbmv function performs general banded matrix-vector multiplication matrix and a 
 	*
 		- p_M
 
-		- the input stream of packed Matrix entries
+		- The input stream of packed Matrix entries.
 
 	*
 		- p_x
 
-		- the input stream of packed vector entries
+		- The input stream of packed vector entries.
 
 	*
 		- p_beta
 
-		- scalar beta
+		- Scalar beta.
 
 	*
 		- p_y
 
-		- the output vector
+		- The output vector.
 
 gemv
 #####
@@ -514,7 +503,7 @@ gemv
 	template  <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
 	void gemv(const unsigned int p_m, const unsigned int p_n, const t_DataType p_alpha, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_M, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_x, const t_DataType p_beta, hls::stream<WideType<t_DataType, 1>>& p_y, hls::stream<WideType<t_DataType, 1>>& p_yr)
 
-gemv function that returns the result vector of the multiplication of a matrix and a vector y = alpha * M * x + beta * y
+The gemv function that returns the result vector of the multiplication of a matrix and a vector y = alpha * M * x + beta * y.
 
 
 
@@ -526,42 +515,42 @@ gemv function that returns the result vector of the multiplication of a matrix a
 	*
 		- t_DataType
 
-		- the data type of the vector entries
+		- The data type of the vector entries.
 
 	*
 		- t_LogParEntries
 
-		- log2 of the number of parallelly processed entries in the input vector
+		- log2 of the number of parallelly processed entries in the input vector.
 
 	*
 		- t_IndexType
 
-		- the datatype of the index
+		- The datatype of the index.
 
 	*
 		- p_m
 
-		- the number of rows of input matrix p_M
+		- The number of rows of input matrix p_M.
 
 	*
 		- p_n
 
-		- the number of cols of input matrix p_M, as well as the number of entries in the input vector p_x, p_n % l_ParEntries == 0
+		- The number of cols of input matrix p_M, as well as the number of entries in the input vector p_x, p_n % l_ParEntries == 0.
 
 	*
 		- p_alpha
 
-		- scalar alpha
+		- Scalar alpha.
 
 	*
 		- p_M
 
-		- the input stream of packed Matrix entries
+		- The input stream of packed Matrix entries.
 
 	*
 		- p_x
 
-		- the input stream of packed vector entries
+		- The input stream of packed vector entries.
 
 	*
 		- p_beta
@@ -571,7 +560,7 @@ gemv function that returns the result vector of the multiplication of a matrix a
 	*
 		- p_y
 
-		- the output vector
+		- The output vector.
 
 nrm2
 #####
@@ -585,7 +574,7 @@ nrm2
 	template  <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
 	void nrm2(unsigned int p_n, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_x, t_DataType& p_res)
 
-nrm2 function that returns the Euclidean norm of the vector x.
+The nrm2 function that returns the Euclidean norm of the vector x.
 
 
 
@@ -597,32 +586,32 @@ nrm2 function that returns the Euclidean norm of the vector x.
 	*
 		- t_DataType
 
-		- the data type of the vector entries
+		- The data type of the vector entries.
 
 	*
 		- t_LogParEntries
 
-		- log2 of the number of parallelly processed entries in the input vector
+		- log2 of the number of parallelly processed entries in the input vector.
 
 	*
 		- t_IndexType
 
-		- the datatype of the index
+		- The datatype of the index.
 
 	*
 		- p_n
 
-		- the number of entries in the input vector p_x, p_n % (1<<l_LogParEntries) == 0
+		- The number of entries in the input vector p_x, p_n % (1<<l_LogParEntries) == 0.
 
 	*
 		- p_x
 
-		- the input stream of packed vector entries
+		- The input stream of packed vector entries.
 
 	*
 		- p_res
 
-		- the nrm2 of x
+		- The nrm2 of x.
 
 scal
 #####
@@ -636,7 +625,7 @@ scal
 	template  <typename t_DataType, unsigned int t_ParEntries, typename t_IndexType = unsigned int>
 	void scal(unsigned int p_n, t_DataType p_alpha, hls::stream<WideType<t_DataType, t_ParEntries>>& p_x, hls::stream<WideType<t_DataType, t_ParEntries>>& p_res)
 
-scal function that compute X = alpha * X
+The scal function that compute X = alpha * X.
 
 
 
@@ -648,32 +637,32 @@ scal function that compute X = alpha * X
 	*
 		- t_DataType
 
-		- the data type of the vector entries
+		- The data type of the vector entries.
 
 	*
 		- t_ParEntries
 
-		- number of parallelly processed entries in the packed input vector stream
+		- Number of parallelly processed entries in the packed input vector stream.
 
 	*
 		- t_IndexType
 
-		- the datatype of the index
+		- The datatype of the index.
 
 	*
 		- p_n
 
-		- the number of entries in vector X, p_n % t_ParEntries == 0
+		- The number of entries in vector X, p_n % t_ParEntries == 0.
 
 	*
 		- p_x
 
-		- the packed input vector stream
+		- The packed input vector stream.
 
 	*
 		- p_res
 
-		- the packed output vector stream
+		- The packed output vector stream.
 
 swap
 #####
@@ -687,7 +676,7 @@ swap
 	template  <typename t_DataType, unsigned int t_ParEntries, typename t_IndexType = unsigned int>
 	void swap(unsigned int p_n, hls::stream<WideType<t_DataType, t_ParEntries>>& p_x, hls::stream<WideType<t_DataType, t_ParEntries>>& p_y, hls::stream<WideType<t_DataType, t_ParEntries>>& p_xRes, hls::stream<WideType<t_DataType, t_ParEntries>>& p_yRes)
 
-swap function that swap vector x and y
+The swap function that swap vector x and y.
 
 
 
@@ -699,42 +688,42 @@ swap function that swap vector x and y
 	*
 		- t_DataType
 
-		- the data type of the vector entries
+		- The data type of the vector entries.
 
 	*
 		- t_ParEntries
 
-		- number of parallelly processed entries in the packed input vector stream
+		- Number of parallelly processed entries in the packed input vector stream.
 
 	*
 		- t_IndexType
 
-		- the datatype of the index
+		- The datatype of the index.
 
 	*
 		- p_n
 
-		- the number of entries in vector X and Y, p_n % t_ParEntries == 0
+		- The number of entries in vector X and Y, p_n % t_ParEntries == 0.
 
 	*
 		- p_x
 
-		- the packed input vector stream
+		- The packed input vector stream.
 
 	*
 		- p_y
 
-		- the packed input vector stream
+		- The packed input vector stream.
 
 	*
 		- p_xRes
 
-		- the packed output stream
+		- The packed output stream.
 
 	*
 		- p_yRes
 
-		- the packed output stream
+		- The packed output stream.
 
 symv
 #####
@@ -748,7 +737,7 @@ symv
 	template  <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
 	void symv(const unsigned int p_n, const t_DataType p_alpha, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_M, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_x, const t_DataType p_beta, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_y, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_yr)
 
-symv function that returns the result vector of the multiplication of a symmetric matrix and a vector y = alpha * M * x + beta * y
+The symv function that returns the result vector of the multiplication of a symmetric matrix and a vector y = alpha * M * x + beta * y.
 
 
 
@@ -760,22 +749,22 @@ symv function that returns the result vector of the multiplication of a symmetri
 	*
 		- t_DataType
 
-		- the data type of the vector entries
+		- The data type of the vector entries.
 
 	*
 		- t_LogParEntries
 
-		- log2 of the number of parallelly processed entries in the input vector
+		- log2 of the number of parallelly processed entries in the input vector.
 
 	*
 		- t_IndexType
 
-		- the datatype of the index
+		- The datatype of the index.
 
 	*
 		- p_n
 
-		- the dimention of input matrix p_M, as well as the number of entries in the input vector p_x, p_n % l_ParEntries == 0
+		- The dimension of input matrix p_M, as well as the number of entries in the input vector p_x, p_n % l_ParEntries == 0.
 
 	*
 		- p_alpha
@@ -790,12 +779,12 @@ symv function that returns the result vector of the multiplication of a symmetri
 	*
 		- p_M
 
-		- the input stream of packed Matrix entries
+		- The input stream of packed Matrix entries.
 
 	*
 		- p_x
 
-		- the input stream of packed vector entries
+		- The input stream of packed vector entries.
 
 	*
 		- p_beta
@@ -810,7 +799,7 @@ symv function that returns the result vector of the multiplication of a symmetri
 	*
 		- p_y
 
-		- the output vector
+		- The output vector.
 
 trmv
 #####
@@ -824,7 +813,7 @@ trmv
 	template  <typename t_DataType, unsigned int t_LogParEntries, typename t_IndexType = unsigned int>
 	void trmv(const bool uplo, const unsigned int p_n, const t_DataType p_alpha, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_M, hls::stream<WideType<t_DataType,(1<<t_LogParEntries)>>& p_x, const t_DataType p_beta, hls::stream<WideType<t_DataType, 1>>& p_y, hls::stream<WideType<t_DataType, 1>>& p_yr)
 
-trmv function that returns the result vector of the multiplication of a triangular matrix and a vector y = alpha * M * x + beta * y
+The trmv function that returns the result vector of the multiplication of a triangular matrix and a vector y = alpha * M * x + beta * y.
 
 
 
@@ -836,22 +825,22 @@ trmv function that returns the result vector of the multiplication of a triangul
 	*
 		- t_DataType
 
-		- the data type of the vector entries
+		- The data type of the vector entries.
 
 	*
 		- t_LogParEntries
 
-		- log2 of the number of parallelly processed entries in the input vector
+		- log2 of the number of parallelly processed entries in the input vector.
 
 	*
 		- t_IndexType
 
-		- the datatype of the index
+		- The datatype of the index.
 
 	*
 		- p_n
 
-		- the number of cols of input matrix p_M, as well as the number of entries in the input vector p_x, p_n % l_ParEntries == 0
+		- The number of cols of input matrix p_M, as well as the number of entries in the input vector p_x, p_n % l_ParEntries == 0.
 
 	*
 		- p_alpha
@@ -866,12 +855,12 @@ trmv function that returns the result vector of the multiplication of a triangul
 	*
 		- p_M
 
-		- the input stream of packed Matrix entries
+		- The input stream of packed Matrix entries.
 
 	*
 		- p_x
 
-		- the input stream of packed vector entries
+		- The input stream of packed vector entries.
 
 	*
 		- p_beta
@@ -886,5 +875,5 @@ trmv function that returns the result vector of the multiplication of a triangul
 	*
 		- p_y
 
-		- the output vector
+		- The output vector.
 

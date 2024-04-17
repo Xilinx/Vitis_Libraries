@@ -54,9 +54,6 @@ class XFBLASManager:
                 flags="C_CONTIGUOUS"), c_uint, c_uint, c_uint]
         self._lib.xfblasGemv.restype = c_bool
         self._lib.xfblasGemm.restype = c_bool
-        self._lib.xfblasGetByAddress.argtypes = [np.ctypeslib.ndpointer(
-            flags="C_CONTIGUOUS"), c_ulonglong, c_uint, c_uint, c_uint]
-        self._lib.xfblasGetByAddress.restype = c_bool
         self._lib.xfblasExecuteAsync.argtypes = [c_uint, c_uint]
         self._lib.xfblasExecute.argtypes = [c_uint, c_uint]
 
@@ -190,10 +187,6 @@ class XFBLASManager:
                 A.shape[1]), 1, A, c_uint(
                 A.shape[1]), x, 1, y, 1, idxKernel, idxDevice)
                 
-    def getMatByAddress(self, A, offset, idxKernel, idxDevice):
-        return self._lib.xfblasGetByAddress(A, c_ulonglong(
-            A.size * A.itemsize), offset, idxKernel, idxDevice)
-
     def executeAsync(self, numKernel, idxDevice):
         '''
         run number of kernels async

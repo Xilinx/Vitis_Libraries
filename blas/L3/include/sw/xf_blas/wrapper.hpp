@@ -769,30 +769,6 @@ xfblasStatus_t xfblasGetByPointer(void* A, unsigned int kernelIndex = 0, unsigne
 }
 
 /**
- * @brief This function copies a matrix in FPGA device memory to host memory by its address in device memory
- * @param A pointer to matrix A in the host memory
- * @param p_bufSize size of matrix A
- * @param offset A's address in device memory
- * @param kernelIndex index of kernel that is being used, default is 0
- * @param deviceIndex index of device that is being used, default is 0
- * @retval xfblasStatus_t 0 if the operation completed successfully
- * @retval xfblasStatus_t 1 if the library was not initialized
- * @retval xfblasStatus_t 3 if there is no FPGA device memory allocated for the matrix
- */
-xfblasStatus_t xfblasGetByAddress(void* A,
-                                  unsigned long long p_bufSize,
-                                  unsigned int offset,
-                                  unsigned int kernelIndex = 0,
-                                  unsigned int deviceIndex = 0) {
-    if (ConfigDict::instance().m_dict.find("not_initialized") != ConfigDict::instance().m_dict.end()) {
-        return XFBLAS_STATUS_NOT_INITIALIZED;
-    }
-    xfblasStatus_t l_status =
-        BLASHostHandle::instance().m_handlePtr[deviceIndex][kernelIndex]->getMatByAddress(A, p_bufSize, offset);
-    return l_status;
-}
-
-/**
  * @brief This function starts the kernel and wait until it finishes
  * @param kernelIndex index of kernel that is being used, default is 0
  * @param deviceIndex index of device that is being used, default is 0

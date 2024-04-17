@@ -1,18 +1,6 @@
-.. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+.. Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. meta::
    :keywords: BLAS, Library, Vitis BLAS Library, L2, level 2
@@ -24,41 +12,41 @@
 .. _benchmark_gemv_l2:
 
 ***********************
-L2 GEMV benchmark
+L2 GEMV Benchmark
 ***********************
 
 1. gemvStreamCh16
 =====================
 
-This example resides in ``L2/benchmarks/streamingKernel/gemvStreamCh16`` directory. The tutorial provides a step-by-step guide that covers commands for building and running kernel. It performs the matrix-vecotr multiplication, M is number of rows of matrix, N is number of columns of matrix.
+This example resides in the ``L2/benchmarks/streamingKernel/gemvStreamCh16`` directory. The tutorial provides a step-by-step guide that covers commands for building and running the kernel. It performs the matrix-vecotr multiplication; M is number of rows of matrix, and N is number of columns of matrix.
 
 1.1 Executable Usage
 ------------------------
 
-1.1.1 Work Directory(Step 1)
+1.1.1 Work Directory (Step 1)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The steps for library download and environment setup can be found in [here](https://github.com/Xilinx/Vitis_Libraries/tree/main/blas/L2/benchmarks#building). For getting the design,
+The steps for library download and environment setup can be found [here](https://github.com/Xilinx/Vitis_Libraries/tree/main/blas/L2/benchmarks#building). For getting the design:
 
 .. code-block:: bash 
 
     cd L2/benchmarks/streamingKernel/gemvStreamCh16
 
 
-1.1.2 Build kernel(Step 2)
+1.1.2 Build the Kernel (Step 2)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Run the following make command to build your XCLBIN and host binary targeting a specific device. Please be noticed that this process will take a long time, maybe couple of hours.
+Run the following make command to build your XCLBIN and host binary targeting a specific device. This process will take a long time, maybe couple of hours.
 
 .. code-block:: bash 
 
     make run TARGET=hw PLATFORM_REPO_PATHS=/opt/xilinx/platforms PLATFORM=xilinx_u280_xdma_201920_1
 
 
-1.1.3 Run kernel(Step 3)
+1.1.3 Run the Kernel (Step 3)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To get the benchmark results, please run the following command.
+To get the benchmark results, run the following command:
 
 gemvStreamCh16 Input Arguments:
 
@@ -74,7 +62,7 @@ For example:
     build_dir.hw.xilinx_u280_xdma_201920_1/host.exe build_dir.hw.xilinx_u280_xdma_201920_1/gemv.xclbin 512 256 build_dir.hw.xilinx_u280_xdma_201920_1/data/ 0
 
 
-1.1.4 Example output(Step 4)
+1.1.4 Example Output (Step 4)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: bash 
@@ -90,13 +78,13 @@ For example:
     Results verified.
 
 
-1.2 Profiling for u280
+1.2 Profiling for the Alveo U280
 -------------------------
 
-The xclbin could be built in 319 MHz
-The hardware resource utilization and benchmark results are shown in the two tables below.
+The xclbin can be built in 319 MHz.
+The hardware resource utilization and benchmark results are shown in the following two tables.
 
-*Table 1 Hardware resources*
+*Table 1 Hardware Resources*
 
 +---------------------+-------------------+------------------+-------------------+----------------+---------------+----------------+
 | Name                | LUT               | LUTAsMem         | REG               | BRAM           | URAM          | DSP            |
@@ -105,10 +93,10 @@ The hardware resource utilization and benchmark results are shown in the two tab
 | streamTimer         |     195 [  0.02%] |      0 [  0.00%] |     291 [  0.01%] |    0 [  0.00%] |   0 [  0.00%] |    0 [  0.00%] |
 +---------------------+-------------------+------------------+-------------------+----------------+---------------+----------------+
 
-*Table 2 Benchmark results* 
+*Table 2 Benchmark Results* 
 
 +-------+-------+---------------------------+-------------------------+-----------------+
-|  M    |  N    | Kernel execution time [s] | api execution time [s]  |  efficiency [%] |
+|  M    |  N    | Kernel Execution Time [s] | API Execution Time [s]  |  Efficiency [%] |
 +=======+=======+===========================+=========================+=================+
 | 512   | 256   | 1.4316e-05                | 0.00330468              | 42.9173         |
 +-------+-------+---------------------------+-------------------------+-----------------+
@@ -124,13 +112,13 @@ The hardware resource utilization and benchmark results are shown in the two tab
 +-------+-------+---------------------------+-------------------------+-----------------+
 
 
-1.3 Profiling for u50
+1.3 Profiling for the Alveo U50
 -----------------------
 
-The xclbin could be built in 333 MHz
-The hardware resource utilization and benchmark results are shown in the two tables below.
+The xclbin can be built in 333 MHz.
+The hardware resource utilization and benchmark results are shown in the following two tables.
 
-*Table 1 Hardware resources*
+*Table 1 Hardware Resources*
 
 +---------------------+------------------+------------------+-------------------+----------------+---------------+----------------+
 | Name                | LUT              | LUTAsMem         | REG               | BRAM           | URAM          | DSP            |
@@ -140,10 +128,10 @@ The hardware resource utilization and benchmark results are shown in the two tab
 | streamTimer         |    195 [  0.03%] |      0 [  0.00%] |     291 [  0.02%] |    0 [  0.00%] |   0 [  0.00%] |    0 [  0.00%] |
 +---------------------+------------------+------------------+-------------------+----------------+---------------+----------------+
 
-*Table 2 Benchmark results* 
+*Table 2 Benchmark Results* 
 
 +-------+-------+-----------------------+------------------------------+----------------------------+--------------------------+--------------+
-|  M    |  N    | hw execution time (s) | cold api execution time (s)  | hot api execution time (s) |  execution clock cycles  |  efficiency  |
+|  M    |  N    | HW Execution Time (s) | Cold API Execution Time (s)  | Hot API Execution Time (s) |  Execution Clock Cycles  |  Efficiency  |
 +=======+=======+=======================+==============================+============================+==========================+==============+
 | 512   | 256   | 1.4481e-05            | 0.000241345                  | 0.00014245                 | 4827                     | 42.428%      |
 +-------+-------+-----------------------+------------------------------+----------------------------+--------------------------+--------------+

@@ -1,19 +1,6 @@
-.. 
-   Copyright (C) 2019-2022, Xilinx, Inc.
-   Copyright (C) 2022-2023, Advanced Micro Devices, Inc.
-  
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-  
-       http://www.apache.org/licenses/LICENSE-2.0
-  
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+.. Copyright © 2019–2023 Advanced Micro Devices, Inc
 
+.. `Terms and Conditions <https://www.amd.com/en/corporate/copyright>`_.
 
 .. _module_benchmark:
 
@@ -23,17 +10,19 @@ Benchmark
 
 1. Performance
 =========================
-- Kernel execution time only includes kernel running in fpga device time
-- api execution time include Kernel execution time + memory copy between host and kernel time 
+
+- Kernel execution time only includes the kernel running in FPGA device time.
+- API execution time includes the kernel execution time + memory copy between the host and kernel time.
 
 1.1 gemv
 ----------------------
-This benchmark performs the matrix-vecotr multiplication, M is number of rows of matrix, N is number of columns of matrix
 
-*gemv with OpenCL in u280*
+This benchmark performs the matrix-vecotr multiplication; M is number of rows of matrix, and N is number of columns of matrix.
+
+*gemv with OpenCL™ in an AMD Alveo™ U280*
 
 +-------+-------+---------------------------+-------------------------+-----------------+
-|  M    |  N    | Kernel execution time [s] | api execution time [s]  |  efficiency [%] |
+|  M    |  N    | Kernel Execution Time [s] | API Execution Time [s]  |  Efficiency [%] |
 +=======+=======+===========================+=========================+=================+
 | 512   | 256   | 1.4316e-05                | 0.00330468              | 42.9173         |
 +-------+-------+---------------------------+-------------------------+-----------------+
@@ -55,15 +44,15 @@ For more details on this benchmark, see:
    
    L2 GEMV benchmark <user_guide/L2/L2_benchmark_gemv.rst>
 
-
 1.2 gemm
 ---------------
-This benchmark performs the matrix-matrix multiplication (A * B = C), M is number of rows of matrix A/C, K is number of columns of matrix A/number of rows of matrix B, N is number of columns of matrix B/C
 
-*gemm with OpenCL in u250*
+This benchmark performs the matrix-matrix multiplication (A * B = C); M is number of rows of matrix A/C, K is number of columns of matrix A/number of rows of matrix B, and N is number of columns of matrix B/C.
+
+*gemm with OpenCL in an Alveo U250*
 
 +------+------+------+------------------------------+--------------------------+-----------------+
-|  M   |  N   |  K   |  Kernel execution time [ms]  |  api execution time [ms] | Kernel Eff [%]  |  
+|  M   |  N   |  K   |  Kernel Execution Time [ms]  |  API Execution Time [ms] | Kernel Eff [%]  |  
 +======+======+======+==============================+==========================+=================+
 | 64   | 64   | 64   | 0.010905                     | 1.750123                 | 38.802577       | 
 +------+------+------+------------------------------+--------------------------+-----------------+
@@ -87,7 +76,7 @@ For more details on this benchmark, see:
    
    L2 GEMM benchmark <user_guide/L2/L2_benchmark_gemm.rst>
 
-*gemm with XRT in u250*
+*gemm with XRT in an Alveo U250*
 
 +------+------+------+----------------------------+--------------+---------------+
 |  M   |  N   |  K   |  api execution time [ms]   | api Eff [%]  |  PerfApiTops  |
@@ -105,7 +94,7 @@ For more details on this benchmark, see:
 | 8192 | 8192 | 8192 | 12695.637510               | 69.897233    | 0.346485      |
 +------+------+------+----------------------------+--------------+---------------+
 
-*gemm with XRT (one CU, streaming Kernel) in u250*
+*gemm with XRT (one CU, streaming Kernel) in an Alveo U250*
 
 +------+------+------+----------------------------+--------------+---------------+
 |  M   |  N   |  K   |  api execution time [ms]   | api Eff [%]  |  PerfApiTops  |
@@ -132,7 +121,7 @@ For more details on the benchmarks, see:
 2. Benchmark Test Overview
 ============================
 
-Here are benchmarks of the Vitis BLAS library using the Vitis environment. It supports software and hardware emulation as well as running hardware accelerators on the Alveo U250.
+Here are benchmarks of the AMD Vitis™ BLAS library using the Vitis environment. It supports software and hardware emulation as well as running hardware accelerators on the Alveo U250.
 
 2.1 Prerequisites
 ----------------------
@@ -141,16 +130,16 @@ Here are benchmarks of the Vitis BLAS library using the Vitis environment. It su
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - Alveo U250 installed and configured as per https://www.xilinx.com/products/boards-and-kits/alveo/u250.html#gettingStarted (when running hardware)
-- Xilinx runtime (XRT) installed
-- Xilinx Vitis 2021.1 installed and configured
+- XRT installed
+- Vitis 2021.1 installed and configured
 
 2.2 Building
 ----------------
 
-2.2.1 Download code
+2.2.1 Download Code
 ^^^^^^^^^^^^^^^^^^^^^
 
-These blas benchmarks can be downloaded from [vitis libraries](https://github.com/Xilinx/Vitis_Libraries.git) ``main`` branch.
+These BLAS benchmarks can be downloaded from the [vitis libraries](https://github.com/Xilinx/Vitis_Libraries.git) ``main`` branch.
 
 .. code-block:: bash 
 
@@ -160,10 +149,10 @@ These blas benchmarks can be downloaded from [vitis libraries](https://github.co
    cd blas
 
    
-2.2.2 Setup environment
+2.2.2 Set Up the Environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Setup and build envrionment using the Vitis and XRT scripts:
+Set up and build the environment using the Vitis and XRT scripts:
 
 .. code-block:: bash 
 
