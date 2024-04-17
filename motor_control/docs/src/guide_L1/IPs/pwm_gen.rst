@@ -45,22 +45,22 @@ The algorithm implemention is illustrated as below:
    :width: 60%
    :align: center
 
-As it is shown in the above pictures, the entire SVPWM have 3 functions. PWM_GEN is a stream driven sub-module. The configurable parameters are shown below:
+As it is shown in the above pictures, the entire SVPWM have three functions. PWM_GEN is a stream driven sub-module. The configurable parameters are shown below:
 
 * phase_shift: flag "[-shift_0/-shift_120]". It determines whether the input voltage streams have phase shift.  
 
 * pwm_freq: flag "[-pwm_fq <pwm frequency>]". This flag register provides a configurable entry for the pwm wave frequency. The pwm wave frequency is also the throughput at the output end.
 
-* dead_cycles: flag "[-dead <dead cycles>]". The dead_cycles determines the transit time between the switch on/off. The switches pair shall not simultaneously be switching on and off, in terms of the danger of overloaded transient currents on the bridges. It may incur the systematic turbulence and cause serious problem. The default value of dead_cycles is 10. 
+* dead_cycles: flag "[-dead <dead cycles>]". The dead_cycles determines the transit time between the switch on/off. The switches pair shall not simultaneously be switching on and off, in terms of the danger of overloaded transient currents on the bridges. It might incur the systematic turbulence and cause serious problem. The default value of dead_cycles is 10. 
 
-* stt_pwm_cycle: this parameter is to monitor the status of pwm_cycle length, which is supposed to be clk_freq/pwm_freq.
+* stt_pwm_cycle: This parameter is to monitor the status of pwm_cycle length, which is supposed to be clk_freq/pwm_freq.
 
 * sampling ii: flag "[-ii <sampling II>]". The ii (initiation interval) determines the sampling rate of the input. The default value is 1. 
 
 Profiling 
 ============
 
-The Post-Synthesis Resource usage is shown in the table 1 below.   
+The Post-Synthesis Resource usage is shown in the following table.   
 
 .. table:: Table 1 Post-Synthesis Resource usage
     :align: center

@@ -34,7 +34,7 @@ Release Note
    :hidden:
    :maxdepth: 1
 
-Motor Control Library is an open-sourced library written in C/C++ for accelerating developments of motor control applications. It now covers 4 algorithm-level L1 APIs including FOC, SVPWM_DUTY, PWM_GEN and QEI. Operator-level APIs, such as Clarke transform and its inverse transform, Park transform and its inverse transform and PID are also implemented. The use of ap_fixed data types makes the code easy to understand and further develop. A virtual motor model is provided for doing the verifications of FOC solely in the Vitis environment.
+Motor Control Library is an open-sourced library written in C/C++ for accelerating developments of motor control applications. It now covers four algorithm-level L1 APIs including FOC, SVPWM_DUTY, PWM_GEN, and QEI. Operator-level APIs, such as Clarke transform and its inverse transform, Park transform and its inverse transform, and PID are also implemented. The use of ap_fixed data types makes the code easy to understand and further develop. A virtual motor model is provided for doing the verifications of FOC solely in the AMD Vitis |trade| environment.
 
 2023.2
 -------
@@ -46,7 +46,13 @@ In 2023.2 release, the sensor-based FOC IP has been updated by adding a new cont
 
 The 2023.1 release covers a range of key algorithms, includes:
 
-1. FOC: the API is for sensor based field-orientated control (FOC).The eight control modes it supports cover basic speed and torque control modes, as well as field-weakning control.
-2. SVPWM_DUTY: the API is the front-end for Space Vector Pulse Width Modulation (SVPWM) to calculate ratios.
-3. PWM_GEN: the API is the back-end for Space Vector Pulse Width Modulation (SVPWM) to generate output signals based on ratios.
-4. QEI: the API is for quadrature encoder interface(QEI).
+1. FOC: The API is for sensor based field-orientated control (FOC).The eight control modes it supports cover basic speed and torque control modes, as well as field-weakening control.
+2. SVPWM_DUTY: The API is the front-end for Space Vector Pulse Width Modulation (SVPWM) to calculate ratios.
+3. PWM_GEN: The API is the back-end for Space Vector Pulse Width Modulation (SVPWM) to generate output signals based on ratios.
+4. QEI: The API is for quadrature encoder interface(QEI).
+
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

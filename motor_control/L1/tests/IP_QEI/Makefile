@@ -52,7 +52,11 @@ export PATH := $(XILINX_VIVADO)/bin:$(PATH)
 WORK_DIR ?= hls
 TARGET ?= csim
 CONFIG_FILE ?= $(CUR_DIR)/hls_config.cfg
+ifeq ($(TARGET), $(filter $(TARGET), csim cosim))
+CONFIG_TMPL ?= $(CUR_DIR)/hls_config_sim.tmpl
+else
 CONFIG_TMPL ?= $(CUR_DIR)/hls_config.tmpl
+endif
 
 ifneq (,$(wildcard $(XILINX_VITIS)/bin/ldlibpath.sh))
 export LD_LIBRARY_PATH := $(shell $(XILINX_VITIS)/bin/ldlibpath.sh $(XILINX_VITIS)/lib/lnx64.o):$(LD_LIBRARY_PATH)

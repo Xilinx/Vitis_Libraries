@@ -1,11 +1,11 @@
 [hls]
 
 clock=10
-set_clock_uncertainty=1.25
+clock_uncertainty=1.25
 flow_target=vivado
 syn.file=${XF_PROJ_ROOT}/L1/tests/IP_SVPWM/src/ip_svpwm.cpp
-syn.file_cflags=${XF_PROJ_ROOT}/L1/tests/IP_SVPWM/src/ip_svpwm.cpp,-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L1/tests/IP_SVPWM/src
-syn.top=hls_svpwm_duty
+syn.file_cflags=${XF_PROJ_ROOT}/L1/tests/IP_SVPWM/src/ip_svpwm.cpp,-DSIM_FINITE -I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L1/tests/IP_SVPWM/src
+syn.top=hls_pwm_gen
 tb.file=${XF_PROJ_ROOT}/L1/tests/IP_SVPWM/src/test_svpwm.cpp
 tb.file_cflags=${XF_PROJ_ROOT}/L1/tests/IP_SVPWM/src/test_svpwm.cpp,-I${XF_PROJ_ROOT}/L1/include/hw -I${XF_PROJ_ROOT}/L1/tests/IP_SVPWM/src
 

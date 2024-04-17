@@ -38,7 +38,7 @@ Executable Usage
 
 * **Work Directory(Step 1)**
 
-The steps for library download and environment setup can be found in :ref:`l1_vitis_motorcontrol`. For getting the design,
+The steps for library download and environment setup can be found in :ref:`l1_vitis_motorcontrol`. To get the design,
 
 .. code-block:: bash
 
@@ -46,7 +46,7 @@ The steps for library download and environment setup can be found in :ref:`l1_vi
 
 * **Run and Build IP(Step 2)**
 
-Run the following make command to build your IP targeting a specific device. Please be noticed that this process will take a long time, maybe couple of minutes.
+Run the following make command to build your IP targeting a specific device. This process might take long.
 
 .. code-block:: bash
 
@@ -119,7 +119,7 @@ Profiling
 =========
 
 The hardware resource utilizations are listed in the following table.
-Different tool versions may result slightly different resource.
+Different tool versions might result in slightly different resources.
 
 
 .. table:: Table 1 IP resources for SVPWM_DUTY 

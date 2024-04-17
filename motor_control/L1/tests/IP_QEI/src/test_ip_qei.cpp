@@ -101,8 +101,8 @@ unsigned int qei_inverse_new(hls::stream<ap_uint<1> >& A,
         }
     } // cycle_AB_run
 
-    printf("SIM_QEI: CLK: %ldM  CPR: %d  dir: %d  rmp: %5d  angle_start: %3.1f\t  run(%4d): %3.1f ", freq_clk / 1000000,
-           cpr, dir, rpm * (dir ? -1 : 1), angle_start, cycle_AB_run, angle_run);
+    printf("SIM_QEI: CLK: %dM  CPR: %d  dir: %d  rmp: %5d  angle_start: %3.1f\t  run(%4d): %3.1f ", freq_clk / 1000000,
+           cpr, dir, rpm * (dir == Dirction_QEI::clockwise_n ? -1 : 1), angle_start, cycle_AB_run, angle_run);
 
     angle_start = (float)start_off * 360.0 / (float)cpr;
     float time_used = (float)num_write / (float)freq_clk;
@@ -164,7 +164,7 @@ void Setting_3(hls::stream<ap_uint<1> >& strm_in_qei_A,
     total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, getDir(golden_rpms[6]), mode, start, 5,
                              abs(golden_rpms[6]), test_CPR_, test_CLK_FQ_);
     assert(TESTNUMBER > total);
-    printf("QEI_GEN total writing =%ld < %d\n", total, TESTNUMBER);
+    printf("QEI_GEN total writing =%d < %d\n", total, TESTNUMBER);
 }
 
 void Setting_4(hls::stream<ap_uint<1> >& strm_in_qei_A,
@@ -201,7 +201,7 @@ void Setting_4(hls::stream<ap_uint<1> >& strm_in_qei_A,
     total += qei_inverse_new(strm_in_qei_A, strm_in_qei_B, strm_in_qei_I, clockwise_p, A_Leading_B, start, 360, 3000,
                              test_CPR_, test_CLK_FQ_);
     assert(TESTNUMBER > total);
-    printf("QEI_GEN total writing =%ld < %d\n", total, TESTNUMBER);
+    printf("QEI_GEN total writing =%d < %d\n", total, TESTNUMBER);
 }
 
 int testBench() {
@@ -240,10 +240,10 @@ int testBench() {
     int cnt = 0;
     fprintf(fp, "No.\tspeed\tangle\tdir\terr\t\n");
 
-    int err;
-    short speed;
-    int angle;
-    int dir; // default Clockwise
+    int err = 0;
+    short speed = 0;
+    int angle = 0;
+    int dir = Dirction_QEI::clockwise_n; // Dirction_QEI::clockwise_p
 
     int err_old = err;
     int speed_old = speed;
@@ -284,7 +284,7 @@ int testBench() {
             if ((abs(err_old - err) > 0) || (abs(speed_old - speed) > 0) || (abs(dir_old - dir) > 0)) {
                 printf(
                     "SIM_QEI: ** Changed out:%5d  dir: %1d  rpm: %5d  angle_detected: %3.1f\t counter:%5d\t err =%2d\n",
-                    k, dir, speed, angle, (float)angle / (float)cpr * 360, err);
+                    k, dir, speed, (float)angle / (float)cpr * 360, angle, err);
                 if (abs(speed - golden_rpms[id]) > 100) errors++;
                 id++;
             }
@@ -321,11 +321,12 @@ int testBench() {
     else
         printf("Counter-Clockwise\n");
     printf("SIM_QEI: ** stts_err          Read    0x%8x\t ", qei_args.qei_stts_err);
-    if (qei_args.qei_stts_err & 3 == 3)
-        printf("Error: no edge detected at least for about %2.6f sec\n", (float)QEI_MAX_NO_EDGE_CYCLE / 100000000.0);
+    if ((qei_args.qei_stts_err & 3) == 3)
+        printf("Error: no edge detected at least for about %8.6f sec\n", (float)QEI_MAX_NO_EDGE_CYCLE / 100000000.0);
     else
         printf("\n");
-    printf("SIM_QEI: ** args_cnt_trip     Write   0x%8x\t  %6d cycles = %5.6f sec\n", cnt_trip, cnt_trip, cnt_trip_sec);
+    printf("SIM_QEI: ** args_cnt_trip     Write   0x%8lx\t  %6ld cycles = %11.6f sec\n", cnt_trip, cnt_trip,
+           cnt_trip_sec);
     printf(
         "SIM_QEI: "
         "*********************************************************************************************************\n");

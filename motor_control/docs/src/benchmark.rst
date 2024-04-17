@@ -71,7 +71,7 @@ These are details for benchmark result and usage steps.
 Test Overview
 --------------
 
-Here are benchmarks of the Vitis Motor Control Library using the Vitis environment. 
+Here are the benchmarks of the AMD Vitis |trade| Motor Control Library using the Vitis environment. 
 
 .. _l1_vitis_motorcontrol:
 
@@ -96,3 +96,8 @@ Specifying the corresponding Vitis, XRT, and path to the platform repository by 
    source <intstall_path>/installs/lin64/Vitis/2023.2/settings64.sh
    source /opt/xilinx/xrt/setup.sh
    export PLATFORM_REPO_PATHS=/opt/xilinx/platforms
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

@@ -4,15 +4,13 @@ clock=10
 clock_uncertainty=1.25
 flow_target=vivado
 syn.file=${CUR_DIR}/src/ip_foc.cpp
-syn.file_cflags=${CUR_DIR}/src/ip_foc.cpp,-O0 -I${XF_PROJ_ROOT}/L1/include/hw -I${CUR_DIR}/src
+syn.file_cflags=${CUR_DIR}/src/ip_foc.cpp,-DSIM_FINITE -O0 -I${XF_PROJ_ROOT}/L1/include/hw -I${CUR_DIR}/src
 syn.top=hls_foc_periodic_ap_fixed
 tb.file=${CUR_DIR}/src/test_ip_foc.cpp
 tb.file_cflags=${CUR_DIR}/src/test_ip_foc.cpp,-O0 -I${XF_PROJ_ROOT}/L1/include/hw -I${CUR_DIR}/src -I${XF_PROJ_ROOT}/L1/tests/Model -Wno-write-strings
 
-
-
-
-
+csim.ldflags=-lncurses
+cosim.ldflags=-lncurses
 vivado.flow=${VIVADO_FLOW}
 vivado.rtl=verilog
 

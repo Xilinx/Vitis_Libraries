@@ -406,7 +406,7 @@ LOOP_QEI_COUNTEDGE:
                 // interating counter
                 if (isRaising(i_i, edges_cur))
                     counter = 0;
-                else if (edges_cur.edges && 3) { // 4X mode : using any type of edges of A or B
+                else if (edges_cur.edges & 3) { // 4X mode : using any type of edges of A or B
                     if (dir)
                         counter = counter < ((int)(cpr << 2) - 1) ? counter + 1 : 0;
                     else

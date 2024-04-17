@@ -82,7 +82,9 @@ Global Variables
 
 	static short sin_table [(1000)]
 
-Lookup table for the cosine function in the Q16.16 format. CPR(COMM_MACRO_CPR) Number of encoder steps per one full revolution Important: Update this table when the encoder resolution has changed, i.e. when #CPR has changed.
+Lookup table for the cosine function in the Q16.16 format. CPR(COMM_MACRO_CPR) Number of encoder steps per one full revolution.
+
+.. Important:: Update this table when the encoder resolution has changed, that is, when #CPR has changed.
 
 Macros
 ------

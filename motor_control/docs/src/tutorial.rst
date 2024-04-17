@@ -27,7 +27,7 @@
 
 .. meta::
    :keywords: Vitis, Motor Control, Vitis Motor Control Library, Alveo
-   :description: Vitis Motor Control Library is an open-sourced Vitis library written in C++ for accelerating Motor Control applications in a variety of use cases.
+   :description: AMD Vitis |trade| Motor Control Library is an open-sourced Vitis library written in C++ for accelerating Motor Control applications in a variety of use cases.
    :xlnxdocumentclass: Document
    :xlnxdocumenttype: Tutorials
 
@@ -40,9 +40,9 @@ Vitis Motor Control Library Tutorial
 Tutorial Overview
 ----------------------------------------------
 
-Motor Control Library provides 4 algorithm-level synthesizable APIs including FOC, SVPWM_DUTY, PWM_GEN and QEI. And a simple virtual motor model is provided for verification.
+Motor Control Library provides four algorithm-level synthesizable APIs including FOC, SVPWM_DUTY, PWM_GEN and QEI. And a simple virtual motor model is provided for verification.
 
-Based on the Motor Control library with a virtual motor model, users can complete all core module verifications such as FOC, QEI, SVPWM, solely in the Vitis environment. This can be helpful to improve the efficiency of design modification and iterations. This tutorial is designed to guide users on how to conduct design verification and learn how to validate design functionality at different stages of the design process.
+Based on the Motor Control library with a virtual motor model, you can complete all core module verifications such as FOC, QEI, and SVPWM solely in the Vitis environment. This might be helpful to improve the efficiency of design modification and iterations. This tutorial is designed to guide users on how to conduct design verification and learn how to validate design functionality at different stages of the design process.
 
 Lab-1: Downloading the Library and Understanding the structure
 ---------------------------------------------------------------------------------------------
@@ -101,7 +101,7 @@ The corresponding matrix representation is shown below:
    :scale: 70%
    :align: center
 
-The datasheet below shows parameters used in motor model.
+The following datasheet shows parameters used in the motor model.
 
 +-----------------------------------------+----------+-----------+
 |              Parameter                  |   Unit   |   Value   |
@@ -201,12 +201,12 @@ Stdout explanation
       SIM_FOC_M:  SPEED ACC  : -12261.000     |  FLUX ACC: -835.707                   |  TORQUE ACC: 14277.8711       |  FW ACC: --
       SIM_FOC_M:************************************************************************************************************************************
 
-* The current test is a hybrid test of the 8 modes run serially.The first three of the the eight modes's simulation parameter and Motor parameter is shown up.
+* The current test is a hybrid test of the eight modes run serially.The first three of the the eight modes's simulation parameter and Motor parameter is shown up.
 * For example, the title of "simulation parameters" shows the setting for simulation. The first 3000 test steps
       * use MOD_SPEED_WITH_TORQUE, Speed setpoint is 10000, as we could check the "motor parameter" motor.w=1030.6429 (rad/s) is near the setting rpm 10000. (RPM = motor.w * 60 / (2 * pi) )
       * CPR = 1000 and PPR =2
-      * title of "log files" shows the log files generate for this 3000 steps. They will be used as input and golden files for the file flow test, which better simulate the actual running. 
-      * Then still apply MOD_SPEED_WITH_TORQUE for the next 3000 steps, Speed setpoint is 16000
+      * title of "log files" shows the log files generate for this 3000 steps. They are used as input and golden files for the file flow test, which better simulate the actual running. 
+      * Then still apply MOD_SPEED_WITH_TORQUE for the next 3000 steps, Speed setpoint is 16000.
 
 .. code-block:: shell
 
@@ -260,18 +260,18 @@ COSIM verification flow
       cd ./motor_control/L1/tests/IP_FOC/
       make run COSIM=1  XPART=xc7z020-clg400-1
 
-To see the waveform of signal of the foc, please add parameter -wave_debug behind cosim_design in file ./motor_control/L1/tests/IP_FOC/run_hls_sim.tcl.
+To see the waveform of signal of the foc, add parameter -wave_debug behind cosim_design in file ./motor_control/L1/tests/IP_FOC/run_hls_sim.tcl.
 
 Waveform explanation
 
-The image below shown the signals output from the AXI interface.
+The following image shows the signals output from the AXI interface.
 
 .. image:: /images/tutorial_sensor_cosim1.png
    :alt: sensor_cosim1
    :scale: 70%
    :align: center
 
-From the image below we can see signals of module hls_foc_periodic_ap_fixed (ap_fixed version) cosim with C model motor in mode MOD_SPEED_WITH_TORQUE.
+The following image shows the signals of module hls_foc_periodic_ap_fixed (ap_fixed version) cosim with C model motor in mode MOD_SPEED_WITH_TORQUE.
 
 .. image:: /images/tutorial_sensor_cosim2.png
    :alt: sensor_cosim2
@@ -311,7 +311,7 @@ CSIM verification flow
       cd L1/tests/IP_SVPWM/
       make run CSIM=1
 
-Execute the executable file with parameters follow the step below:
+Execute the executable file with parameters. Follow the step below:
 
    .. code-block:: shell
 
@@ -332,7 +332,7 @@ The stdout has shown the AXI-lite signal and inner status monitoring parameters.
 * ``args_dc_src_mode``: decides where the external source of dc_link voltage for reference is coming from. 0, the dc_link reference voltage is determined by the measured value of the ADC dc_link voltage; 1, the reference voltage is solely determined by the preset static register value for reference voltage.
 * ``args_sample_ii``: it can control the consumption rate of SVPWM_DUTY. The svpwm is producing the waveform every cycle. The default sample-ii value is 1. 
    1. In the CSIM, the fifo is assumed to be infinitely large. Thus, all of the 10 inputs are able to be stacked into the fifo and produce exactly the same number of outputs. Thus, no matter of what sample-ii value is here, the CSIM result always remains same here.
-   2. In the COSIM, since we define the fifo depth as 4, the fifo can only take in the maximum number of 4 inputs. If the sample-ii is 1 clock cycle, while the downstream of PWM_GEN is consuming the data every 1000 cycles, the input fifo is soon stuffed full of 4 inputs and other 6 inputs are discarded immediately. However, if the sample-ii is set as 1000 clock cycles, every data will consume at a rate of 1000. It can guarantee that no data is going to be discarded. The COSIM behavior complies with the CSIM.
+   2. In the COSIM, since we define the fifo depth as four, the fifo can only take in the maximum number of four inputs. If the sample-ii is 1 clock cycle, while the downstream of PWM_GEN is consuming the data every 1000 cycles, the input fifo is soon stuffed full of four inputs and other six inputs are discarded immediately. However, if the sample-ii is set as 1000 clock cycles, every data consumes at a rate of 1000. It can guarantee that no data is going to be discarded. The COSIM behavior complies with the CSIM.
 * ``dc_link_adc``: is the measured value of ADC dc_link value.
 * ``V_ref``: is rounded value of dc_link_adc
 * ``ratio_compensate``: multiply with the duty_cycle in each channel to compensate the final synthesized voltage.
@@ -371,7 +371,7 @@ Verify latency from input to output.
    :scale: 70%
    :align: center
 
-According to waveform, the measured latency is 504.750ns from sampling commands to outputting ratios (50 cycles)
+According to waveform, the measured latency is 504.750ns from sampling commands to outputting ratios (50 cycles).
 
 Verify latency of pwm_cycle 
 
@@ -402,7 +402,7 @@ Test Case [-v0] default
 
 II-sample = 1
 
-The fifo depth is 4 and each iteration latency is 93 clock cycles.  Each output is programmed to come out at an interval of 1000 clock cycles. f the sample-ii is 1, the fifo is soon filled full of the data (within 93 clock cycles) while the first output is still not coming yet.  Another 6 data are immediately discarded. The following diagram depicts that the final outcome only has 4 duty_cycles.
+The fifo depth is 4 and each iteration latency is 93 clock cycles.  Each output is programmed to come out at an interval of 1000 clock cycles. f the sample-ii is 1, the fifo is soon filled full of the data (within 93 clock cycles) while the first output is still not coming yet.  Another 6 data are immediately discarded. The following diagram depicts that the final outcome only has four duty_cycles.
 
 .. image:: /images/tutorial_svpwm_duty_cosim_iisample1.png
    :alt: svpwm_duty_cosim_iisample1
@@ -411,7 +411,7 @@ The fifo depth is 4 and each iteration latency is 93 clock cycles.  Each output 
 
 II-sample = 50
 
-The fifo depth is 4 and each iteration latency is 93 clock cycles. When ii-sample is 50, one signal is consumed and the result comes after 93. The fifo has enough space to store the next two stream-in data. Hence the output end can produce the complete ten waveform.
+The fifo depth is 4 and each iteration latency is 93 clock cycles. When ii-sample is 50, one signal is consumed and the result comes after 93. The fifo has enough space to store the next two stream-in data. Hence, the output end can produce the complete ten waveform.
 
 .. image:: /images/tutorial_svpwm_duty_cosim_iisample50.png
    :alt: svpwm_duty_cosim_iisample50
@@ -437,7 +437,7 @@ Export IP flow
       cd L1/tests/FOC/IP_SVPWM/
       make run VIVADO_IMPL=1  XPART=xc7z020-clg400-1
 
-User can get AXI address by using the command below.
+You can get an AXI address by using the following command.
 
    .. code-block:: shell
 
@@ -469,11 +469,11 @@ The stdout shown above depicts the following info:
 
 * ``stt_pwm_cycle``: the pwm_cycle is defined as the ``clock_freq / args_pwm_freq``, which is supposed to have a default value of 1000. Typically, it can help to test and verify the RTL behavior.
 * ``args_pwm_freq``: the pwm frequency is the wave frequency after the pulse width modulation. Within every pwm cycle = ``[1 / args_pwm_freq]``, the high voltage duration can be modulated as any value within the range of 0~pwm_cycle.
-* ``args_dead_cycles``: the upper and lower switches on the same bridge cannot switch simultaneously, otherwise the overloaded transient current on this branch will cause irrevertible damage to the system.  Thus, for every complementary swtich pair, the upper switch will react a dead_cycles times ahead of the lower switch.
+* ``args_dead_cycles``: the upper and lower switches on the same bridge cannot switch simultaneously, otherwise the overloaded transient current on this branch causes irrevertible damage to the system.  Thus, for every complementary swtich pair, the upper switch reacts a dead_cycles times ahead of the lower switch.
 * ``args_phase_shift``: it determines the phase_shift mode. 0, there is no phase_shift in the gating and sync. 1, there is 120-degree phase_shift in the svpwm.
 * ``args_sample_ii``: it determines the consumption rate of hls_pwm_gen. The default consumption rate is ii = 1000. 
    1. In the CSIM, the fifo is assumed to be infinitely large. Thus, all of the 10 inputs are able to be stacked into the fifo and produce exactly the same number of outputs. Thus, no matter of what sample-ii value is here, the CSIM result always remains same here.
-   2. In the COSIM, the default fifo depth is 2.  The hls_pwm_gen consumes every input and produces 1000 output, with a pipeline interval of 1 clock cycle. Hence ii > 1000 will have the previous input produce the output twice.  The COSIM -ii=2000 diagram depicts the phenomenon.
+   2. In the COSIM, the default fifo depth is 2.  The hls_pwm_gen consumes every input and produces 1000 output, with a pipeline interval of 1 clock cycle. Hence, ii > 1000 has the previous input produce the output twice.  The COSIM -ii=2000 diagram depicts the phenomenon.
 
 COSIM verification flow
 
@@ -561,9 +561,9 @@ Waveform explanation
    :scale: 70%
    :align: center
 
-First, we can check if the input signals including A, B, I are valid, and they should be same to the waveform above like high and low level interaction. Moreover, the output of qei_err_TDATA indicates whether the input signal is valid, just 0 represents valid input and 3 represents invalid input.
+First, we can check if the input signals including A, B, I are valid, and they should be same as the waveform above like high and low level interaction. Moreover, the output of qei_err_TDATA indicates whether the input signal is valid, just 0 represents valid input and 3 represents invalid input.
 
-Secondly, we should focus on the output for qei_RPM_THETA_m_TDATA, it includes speed(rpm) and angle(theta). The rpm will be a stable result like "0bb8" as shown on waveform above, and it should be equal to your setting given by user. The angle will be a increasing value like "0001 0002 ... " as shown on waveform above, and it depends on PPR of motor system.
+Secondly, we should focus on the output for qei_RPM_THETA_m_TDATA, it includes speed(rpm) and angle(theta). The rpm is a stable result like "0bb8" as shown on waveform above, and it should be equal to the setting given by you. The angle is an increasing value like "0001 0002 ... " as shown on waveform above, and it depends on PPR of motor system.
 
 Finally, the axi-lite of port should be update status value for clocks just like waveform shown above. 
 
@@ -580,7 +580,7 @@ User can get AXI address by using the command below.
 
       vim ./motor_control/L1/tests/IP_QEI/hls_qei.prj/sol1/impl/verilog/hls_qei_qei_args_s_axi.v
 
-For more information about how to analyze performance, please refer to `Application Acceleration Development (UG1393) <https://docs.xilinx.com/r/2020.2-English/ug1393-vitis-application-acceleration/Profiling-Optimizing-and-Debugging-the-Application>`_
+For more information about how to analyze performance, refer to `Application Acceleration Development (UG1393) <https://docs.xilinx.com/r/2020.2-English/ug1393-vitis-application-acceleration/Profiling-Optimizing-and-Debugging-the-Application>`_
 
 
 Tutorial Summary
@@ -593,4 +593,9 @@ Through the above tutorial labs, it can be seen that the development process bas
 
    L1 Benchmark <benchmark.rst>
 
-The tutorial will be developed to cover more Motor Contorl motheds and their combinations, more flows and more classic applications.
+The tutorial will be developed to cover more Motor Contorl motheds and their combinations, flows, and classic applications.
+
+.. |trade|  unicode:: U+02122 .. TRADEMARK SIGN
+   :ltrim:
+.. |reg|    unicode:: U+000AE .. REGISTERED TRADEMARK SIGN
+   :ltrim:

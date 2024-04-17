@@ -38,7 +38,7 @@ Executable Usage
 
 * **Work Directory(Step 1)**
 
-The steps for library download and environment setup can be found in :ref:`l1_vitis_motorcontrol`. For getting the design,
+The steps for library download and environment setup can be found in :ref:`l1_vitis_motorcontrol`. To get the design,
 
 .. code-block:: bash
 
@@ -46,21 +46,21 @@ The steps for library download and environment setup can be found in :ref:`l1_vi
 
 * **Run and Build IP(Step 2)**
 
-Run the following make command to build your IP targeting a specific device. Please be noticed that this process will take a long time, maybe couple of minutes.
+Run the following make command to build your IP targeting a specific device. This process takes long.
 
 .. code-block:: bash
 
    make run CSIM=1 CSYNTH=1 COSIM=1 XPART=xc7z010-clg400-1
 
-Command will create IP*sim.project for simulation
+The command creates IP*sim.project for simulation.
 
 .. code-block:: bash
 
    make run VIVADO_SYN=1 VIVADO_IMPL=1 XPART=xc7z010-clg400-1
 
-Command will create IP.project for export IP
+The command creates IP.project for export IP.
 
-Note: Default arguments are set in run_hls.tcl
+.. Note:: Default arguments are set in run_hls.tcl.
 
 * **Example output(Step 2)** 
 
@@ -83,15 +83,15 @@ Note: Default arguments are set in run_hls.tcl
    ...
 
 
-Note: The current test is a hybrid test of the 8 modes run serially. Each mode's simulation parameter and Motor parameter is shown up. For example: 
+.. Note:: The current test is a hybrid test of the eight modes run serially. Each mode's simulation parameter and Motor parameter is shown up. For example: 
 
-   * title of "simulation parameters" shows the setting for simulation. The first 3000 test steps use MOD_SPEED_WITH_TORQUE, Speed setpoint is 10000, as we could check the "motor parameter" motor.w=1030.652 (rad/s) is near the setting rpm 10000. (RPM = motor.w * 60 / (2 * pi) ).
+   * The title of "simulation parameters" shows the setting for simulation. The first 3000 test steps use MOD_SPEED_WITH_TORQUE, Speed setpoint is 10000, as we could check the "motor parameter" motor.w=1030.652 (rad/s) is near the setting rpm 10000. (RPM = motor.w * 60 / (2 * pi) ).
 
-   * title of "log files" shows the log files generate for this 3000 steps. They will be used as input and golden files for the file flow test, which better simulate the actual running. Then still apply MOD_SPEED_WITH_TORQUE for the next 3000 steps, Speed setpoint is -16000. That will run to another direction.
+   * The title of "log files" shows the log files generate for this 3000 steps. They are used as an input and golden files for the file flow test, which better simulate the actual running. Then still apply MOD_SPEED_WITH_TORQUE for the next 3000 steps, Speed setpoint is -16000. This runs to another direction.
 
-Now we firstly run Model Based Sim to get the input and output of FOC with Motor module, and save them to files. This sim will restart the FOC ip for every input.
+Now run the Model Based Sim to get the input and output of FOC with Motor module, and save them to files. This sim restarts the FOC ip for every input.
 
-Then we run File Based Sim to simulate the actually status when FOC IP is running. Benchmark system is shown by Figure 1:
+Then, run the File Based Sim to simulate the actually status when FOC IP is running. Benchmark system is shown in the following figure:
 
 Figure 1 : Benchmark system of field-orientated control(FOC)
 
@@ -109,7 +109,7 @@ Figure 2 : Motor speed in 8 modes in simulation
    :width: 70%
    :align: center
 
-The Motor Model parameters by default simulation and Derived Motor Configuration is setting in the commen.hpp, and are shown by table 1 and table 2:
+The Motor Model parameters by default simulation and Derived Motor Configuration is setting in the commen.hpp, and are shown in the following tables:
 
 Table 1 : Motor Model parameters by default
 
@@ -143,7 +143,7 @@ AXI-lite Parameter of FOC setting in simulation
 
 Other AXI-lite Parameter is all setting to zero in the first mode in simulation.
 
-File Based Simulation of FOC IP's result is shown blow.
+File Based Simulation of FOC IP's result is shown below.
 
 .. code-block:: bash
 
@@ -178,18 +178,18 @@ File Based Simulation of FOC IP's result is shown blow.
    SIM_FOC_F:********************************************************************************************************************************
    ...
 
-MOD_MANUAL_TORQUE_FLUX_FIXED_SPEED is a MANUAL mode for an expert, at motor start in order to get the encoder in initial calibration and alignment prior to starting a closed loop control function.
-So we simulate this mode after STOP mode. If Fixperiod_args in AXI-lite is set to 1, it will be a fixed step size in every clk/(Fixperiod_args + 1). 
+MOD_MANUAL_TORQUE_FLUX_FIXED_SPEED is a MANUAL mode for an expert, at motor start to get the encoder in initial calibration and alignment prior to starting a closed loop control function.
+So, simulate this mode after STOP mode. If Fixperiod_args in AXI-lite is set to 1, it is a fixed step size in every clk/(Fixperiod_args + 1). 
 
 After the conversion,
 
-When clk equal 100M, Fixperiod_args is 1, Theriotical RPM will be 600000.
+When clk equal 100M, Fixperiod_args is 1, Theoretical RPM is 600000.
 
-When clk equal 100M, Fixperiod_args is 3999, Theriotical RPM will be 300.
+When clk equal 100M, Fixperiod_args is 3999, Theoretical RPM is 300.
 
 (II = 5, interval cycle = (FixedPeriod+1)*II), RPM = 60/(interval cycle/freq*CPR))
 
-Note: Test summary all the result of 8 modes on the file flow.
+.. Note:: Test summary all the result of eight modes on the file flow.
 
 .. code-block:: bash
    
@@ -240,7 +240,7 @@ Profiling
 =========
 
 The hardware resource utilizations are listed in the following table.
-Different tool versions may result slightly different resource.
+Different tool versions might result in slightly different resources.
 The max throughput is 20M/s by 22.2 and 23.2 .
 
 * Important: Change the sine and cosine tables in the file foc.h accordingly when changing this CPR(COMM_MACRO_CPR) in the commen.hpp .

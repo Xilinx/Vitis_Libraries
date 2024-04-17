@@ -46,7 +46,7 @@ The steps for library download and environment setup can be found in :ref:`l1_vi
 
 * **Run and Build IP(Step 2)**
 
-Run the following make command to build your IP targeting a specific device. Please be noticed that this process will take a long time, maybe couple of minutes.
+Run the following make command to build your IP targeting a specific device. This process takes long.
 
 .. code-block:: bash
 
@@ -56,7 +56,7 @@ Run the following make command to build your IP targeting a specific device. Ple
 
    make run VIVADO_SYN=1 VIVADO_IMPL=1 XPART=xc7z010-clg400-1
 
-Note: Default arguments are set in run_hls.tcl
+.. Note:: Default arguments are set in run_hls.tcl.
 
 * **Example output(Step 2)** 
 
@@ -110,7 +110,7 @@ Profiling
 =========
 
 The hardware resource utilizations are listed in the following table.
-Different tool versions may result slightly different resource.
+Different tool versions might result in slightly different resources.
 
 
 .. table:: Table 1 IP resources for Pulse Width Modulation Generator

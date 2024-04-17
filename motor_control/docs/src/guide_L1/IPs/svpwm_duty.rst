@@ -33,19 +33,19 @@ Internal Design of SVPWM_DUTY
 Overview
 ===========
 
-This API is a front-end submodule of SVPWM function. A complete SVPWM function is composed of two components: SVPWM_DUTY and PWM_GEN. This API is the SVPWM_DUTY. It is a fully optimized implementation through the Xilinx HLS design methodology. It can produce the normalized duty ratios of the three-phase outputs. It has configurable parameters via AXI-Lite entries, include phase_shift, dclink_src, pwm_freq and dead_cycles, etc.
+This API is a front-end submodule of SVPWM function. A complete SVPWM function is composed of two components: SVPWM_DUTY and PWM_GEN. This API is the SVPWM_DUTY. It is a fully optimized implementation through the AMD HLS design methodology. It can produce the normalized duty ratios of the three-phase outputs. It has configurable parameters via AXI-Lite entries, include phase_shift, dclink_src, pwm_freq and dead_cycles, and so on.
 
 Implemention
 ============
 
-The detail algorithm implemention is illustrated as below:
+The detail algorithm implementation is illustrated as below:
 
 .. image:: /images/API_svpwm_duty.png
    :alt: design of duty cycle
    :width: 60%
    :align: center
 
-As it is shown in the aboved pictures, the entire SVPWM_DUTY have five configurable parameters.
+As it is shown in the above figures, the entire SVPWM_DUTY has five configurable parameters.
 
 * phase_shift: flag "[-shift_0/-shift_120]". It determines whether the input voltage streams have phase shift. 
 
@@ -53,7 +53,7 @@ As it is shown in the aboved pictures, the entire SVPWM_DUTY have five configura
 
 * pwm_freq: flag "[-pwm_fq <pwm frequency>]". This flag register provides a configurable entry for the pwm wave frequency. The pwm wave frequency is also the throughput at the output end.
 
-* dead_cycles: flag "[-dead <dead cycles>]". The dead_cycles determines the transit time between the switch on/off. The switches pair shall not simultaneously be switching on and off, in terms of the danger of overloaded transient currents on the bridge. It may incur the systematic turbulence and cause serious problem. The default value of dead_cycles is 10.  
+* dead_cycles: flag "[-dead <dead cycles>]". The dead_cycles determines the transit time between the switch on/off. The switches pair shall not simultaneously be switching on and off, in terms of the danger of overloaded transient currents on the bridge. It might incur the systematic turbulence and cause serious problem. The default value of dead_cycles is 10.  
 
 * sampling ii: flag "[-ii <sampling II>]". The ii (initiation interval) determines the sampling rate of the input. The default value is 1. 
 
@@ -61,7 +61,7 @@ As it is shown in the aboved pictures, the entire SVPWM_DUTY have five configura
 Profiling 
 ============
 
-The Post-Synthesis Resource usage is shown in the table 1 below.   
+The Post-Synthesis Resource usage is shown in the following table.   
 
 .. table:: Table 1 Post-Synthesis Resource usage
     :align: center

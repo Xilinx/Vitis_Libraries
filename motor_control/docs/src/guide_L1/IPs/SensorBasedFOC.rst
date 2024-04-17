@@ -35,13 +35,13 @@ Overview
 ==========
 The field-orientated control (FOC) system calculates the flux and torque references given by the current from Sensor, then calculates the corresponding voltage component references using the flux and torque. 
 
-As an independent IP, Sensor based FOC could work with SVPWM_DUTY, PWM_GEN and QEI in this library.
+As an independent IP, Sensor based FOC could work with SVPWM_DUTY, PWM_GEN, and QEI in this library.
 
 The following summarizes three types of FOC based motor control that are to be implemented. Each focuses on either controlling the torque or speed of the motor. 
 
-Torque Control - Default FOC control is focused on maximizing the torque output of a motor by optimizing the quadrature (q) vector which represents the useful motor torque and minimizing the direct (d) vector component. In this mode of operation the goal is to keep motor torque constant by adjusting motor speed.
+Torque Control - Default FOC control is focused on maximizing the torque output of a motor by optimizing the quadrature (q) vector which represents the useful motor torque and minimizing the direct (d) vector component. In this mode of operation, the goal is to keep motor torque constant by adjusting motor speed.
 Speed Control - Speed control is implemented through an additional PI control that adjusts the motor torque to the motor to maintain a constant speed. 
-Field Weakening Control - The field weakening control (call "flux control in EDDP) method trades off optimal torque in order to increase the speed of the motor. This is accomplished by adjusting the relationship of the q-vector and d-vector in FOC.
+Field Weakening Control - The field weakening control (call "flux control in EDDP) method trades off optimal torque to increase the speed of the motor. This is accomplished by adjusting the relationship of the q-vector and d-vector in FOC.
 
 Implemention
 ==============
@@ -78,14 +78,14 @@ Figure 1 : Sensor based FOC architecture top view
       :width: 60%
       :align: center
 
-There are four modes for users to set normarly:
+There are four modes to set normally:
 
     * MOD_STOPPED
     * MOD_SPEED_WITH_TORQUE
     * MOD_TORQUE_WITHOUT_SPEED
     * MOD_FLUX
 
-In the Torque control (MOD_TORQUE_WITHOUT_SPEED) implements a closed loop control focused on maintaining a specified torque value. In this mode of operation the q-vector provides the useful torque output of the motor and the d-vector the force that is parallel to the rotor. The d-vector represents non-useful force and thus any non-zero value is considered an error.
+In the Torque control, (MOD_TORQUE_WITHOUT_SPEED) implements a closed loop control focused on maintaining a specified torque value. In this mode of operation, the q-vector provides the useful torque output of the motor and the d-vector the force that is parallel to the rotor. The d-vector represents non-useful force and thus any non-zero value is considered an error.
 
 Figure 2 : Torque control mode
 
@@ -103,7 +103,7 @@ Figure 3 : Speed control mode
       :width: 80%
       :align: center
 
-The field weakening operation of control trades optimal torque for additional speed as the motor reaches its limit at which additional current to the motor does not provide additional torque. 
+The field weakening operation of control trades optimal torque for additional speed as the motor reaches its limit at which an additional current to the motor does not provide additional torque. 
 
 Figure 4 : field weakening control mode
 
