@@ -51,19 +51,18 @@ XFLIB_DIR = $(XF_PROJ_ROOT)
 
 # setting default value
 TARGET ?= aiesim
-HOST_ARCH ?= aarch64
 
 #setting PLATFORM
 ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := xilinx_vck190_base_202310_1
+PLATFORM := vck190
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
 PLATFORM_ALLOWLIST +=  vck190
-PLATFORM_BLOCKLIST += 
+PLATFORM_BLOCKLIST +=  vek280
 
 include ./utils.mk
 TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)
@@ -261,12 +260,12 @@ all: check_device check_vpp check_platform mkflag $(RUN_DEPS)
 run: all
 #x86sim
 ifeq ($(TARGET), x86sim)
-	$(X86SIMULATOR) --pkg-dir=$(AIE_PKG_DIR) --input-dir=$(CUR_DIR) --output-dir=$(CUR_DIR)
+	$(X86SIMULATOR) --pkg-dir=$(AIE_PKG_DIR) --input-dir=./ --output-dir=./
 	
 endif
 #aiesim
 ifeq ($(TARGET), aiesim)
-	$(AIESIMULATOR) --pkg-dir=$(AIE_PKG_DIR) --profile --input-dir=$(CUR_DIR) --output-dir=$(CUR_DIR) $(AIESIMFLAGS)
+	$(AIESIMULATOR) --pkg-dir=$(AIE_PKG_DIR) --profile --input-dir=./ --output-dir=./ $(AIESIMFLAGS)
 	
 endif
 #hw_emu

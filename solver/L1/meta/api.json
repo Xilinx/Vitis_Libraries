@@ -2208,7 +2208,11 @@
                         "type": "output_stream<float>* "
                     }
                 ],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -2250,7 +2254,11 @@
                         "type": "output_stream<float>* "
                     }
                 ],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -2313,7 +2321,11 @@
                         "type": "output_stream_cfloat* "
                     }
                 ],
-                "visible": false
+                "visible": false,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         }

@@ -22,7 +22,7 @@ QRF is often used to solve the linear least squares problem and is the basis for
 .. math::
             A = Q R
 
-There are several methods to compute the QR decomposition, such as by means of the Gram-Schmidt process, Householder transformations, or Given rotations. Each has a number of advantages and disadvantages. For more details, refer to `QR_decomposition <https://en.wikipedia.org/wiki/QR_decomposition>`_.
+There are several methods to compute the QR decomposition, such as by means of the Gram-Schmidt process, Householder transformations, or Given rotations. Each has a number of advantages and disadvantages.
 
 Given rotations are used in the design.
 

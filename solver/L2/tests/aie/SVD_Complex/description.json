@@ -1,9 +1,9 @@
 {
-    "name": "SVD on Complex Float",
+    "name": "SV Decomposition on Complex Float",
     "description": [
-        ""
+        "SV Decomposition on Complex Float"
     ],
-    "gui": false,
+    "gui": true,
     "flow": "aie",
     "keywords": [
         "aiecompiler",
@@ -34,14 +34,16 @@
     ],
     "launch": [
         {
-            "name": "aiesim-launch",
-            "target": "aiesim",
-            "sim_options": "--input-dir=$(CUR_DIR) --output-dir=$(CUR_DIR)"
+            "cmd_args": "BUILD/test_harness.xclbin PROJECT/data/A0.txt PROJECT/data/A1.txt PROJECT/data/Gld0.txt PROJECT/data/Gld1.txt",
+            "name": "generic launch for all flows"
         },
         {
-            "name": "x86sim-launch",
+            "target": "aiesim",
+            "sim_options": "--input-dir=./ --output-dir=./"
+        },
+        {
             "target": "x86sim",
-            "sim_options": "--input-dir=$(CUR_DIR) --output-dir=$(CUR_DIR)"
+            "sim_options": "--input-dir=./ --output-dir=./"
         }
     ],
     "aiecompiler": {
@@ -69,6 +71,66 @@
             ]
         }
     ],
+    "data": [
+        "PROJECT/data/A0.txt",
+        "PROJECT/data/A1.txt",
+        "PROJECT/data/Gld0.txt",
+        "PROJECT/data/Gld1.txt"
+    ],
+    "host": {
+        "host_exe": "host.exe",
+        "compiler": {
+            "sources": [
+                "LIB_DIR/L2/tests/aie/SVD_Complex/ps/host.cpp"
+            ],
+            "includepaths": [
+                "LIB_DIR/L2/tests/aie/SVD_Complex/ps",
+                "LIB_DIR/L2/tests/aie/SVD_Complex/aie",
+                "$(SYSROOT)/usr/include/xrt/",
+                "LIB_DIR/L1/include/aie",
+                "LIB_DIR/L2/include/aie"
+            ],
+            "symbols": [
+                "__PS_ENABLE_AIE__"
+            ]
+        }
+    },
+    "v++": {
+        "compiler": {
+            "includepaths": [
+                "./pl",
+                "LIB_DIR/L2/tests/pl/xf_data_mover"
+            ]
+        },
+        "linker": {
+            "cflags": [
+                "--config PROJECT/cfg/system.cfg"
+            ]
+        },
+        "package": {
+            "cflags": [
+                "--package.defer_aie_run"
+            ]
+        }
+    },
+    "containers": [
+        {
+            "accelerators": [
+                {
+                    "name": "biDatamover",
+                    "location": "./pl/biDatamover.cpp",
+                    "frequency": 250.0
+                },
+                {
+                    "name": "splitMerge",
+                    "location": "./pl/splitMerge.cpp",
+                    "frequency": 250.0
+                }
+            ],
+            "name": "test_harness",
+            "frequency": 250.0
+        }
+    ],
     "match_makefile": "true",
     "contributors": [
         {
@@ -93,5 +155,8 @@
             "vitis_aie_x86sim"
         ],
         "category": "canary"
-    }
+    },
+    "aie_types": [
+        "AIE1"
+    ]
 }

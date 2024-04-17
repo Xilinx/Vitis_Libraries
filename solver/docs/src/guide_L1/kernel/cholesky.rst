@@ -34,6 +34,8 @@ DataType Supported
 * std::complex<ap_fixed>
 
 .. Note::
+   * It's recommended to use floating point data types.
+   * Support of "ap_fixed", "x_complex<ap_fixed>" and "std::complex<ap_fixed>" will be deprecated in the future.
    * The function assumes that the input matrix is a symmetric positive definite (Hermitian positive definite for complex-valued inputs).
    * Subnormal values are not supported. If used, the synthesized hardware flushes these to zero, and the behavior differs versus software simulation.
 

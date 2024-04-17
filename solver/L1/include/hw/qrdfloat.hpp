@@ -432,7 +432,7 @@ LOOP_A_col:
 #pragma HLS loop_flatten
 #pragma HLS pipeline II = coreII
 
-            T tmp_rhs;
+            T tmp_rhs = 0;
             tmp_rhs = (k >= 0) ? projIn_strm.read() : tmp_rhs;
             for (int r = 0; r < UnrollSize; r++) {
                 // A[r][j] = A[r][j] - proj[0][j] * dataK0[r];

@@ -18,6 +18,13 @@ Release Note
    :hidden:
    :maxdepth: 1
 
+2024.1
+------
+
+In this release, one API running on AIE Engine is added
+
+* QRF (QR decomposition), for complex float matrix input (using Householdere transformation method)
+
 2023.2
 ------
 
@@ -31,8 +38,8 @@ In this release, two APIs running on AI Engine are added
 
 In this release, two APIs running on AI Engine are added.
 
-* QRF (QR decomposition), for float / complex float matrix input
-* Cholesky decomposition, for complex float matrix input
+* QRF (QR decomposition), for complex float matrix input (using Modified Gram-Schmidt method)
+* Cholesky decomposition, for float / complex float matrix input
 
 2022.1
 ------

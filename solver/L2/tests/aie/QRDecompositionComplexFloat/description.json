@@ -69,10 +69,12 @@
         },
         {
             "target": "aiesim",
+            "output-dir": "./",
             "sim_options": "--input-dir=./ --output-dir=./"
         },
         {
             "target": "x86sim",
+            "output-dir": "./",
             "sim_options": "--input-dir=./ --output-dir=./"
         }
     ],
@@ -148,5 +150,9 @@
             "vitis_aie_x86sim"
         ],
         "category": "canary"
-    }
+    },
+    "gui": true,
+    "aie_types": [
+        "AIE1"
+    ]
 }

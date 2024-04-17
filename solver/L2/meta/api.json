@@ -977,7 +977,11 @@
                         "data_type": "float"
                     }
                 ],
-                "visible": true
+                "visible": true,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -1034,7 +1038,11 @@
                         "data_type": "float"
                     }
                 ],
-                "visible": true
+                "visible": true,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -1102,7 +1110,11 @@
                         "data_type": "cfloat"
                     }
                 ],
-                "visible": true
+                "visible": true,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -1170,7 +1182,11 @@
                         "data_type": "cfloat"
                     }
                 ],
-                "visible": true
+                "visible": true,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -1238,7 +1254,11 @@
                         "data_type": "cfloat"
                     }
                 ],
-                "visible": true
+                "visible": true,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         },
@@ -1301,7 +1321,11 @@
                         "data_type": "cfloat"
                     }
                 ],
-                "visible": true
+                "visible": true,
+                "family": "Versal AI Core",
+                "aie_types": [
+                    "AIE1"
+                ]
             },
             "target_domain": "AIE"
         }

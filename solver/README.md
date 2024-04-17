@@ -49,3 +49,9 @@ In `L2/benchmarks`, Kernels are built into xclbins targeting Alveo U200/U250. We
   
 ## Documentations
 For more details of the Graph library, please refer to [Vitis Solver Library Documentation](https://docs.xilinx.com/r/en-US/Vitis_Libraries/solver/index.html).
+
+## License
+
+ Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+Terms and Conditions <https://www.amd.com/en/corporate/copyright>

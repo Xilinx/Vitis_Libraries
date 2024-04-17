@@ -41,7 +41,7 @@ using namespace adf;
 
 template <int NUM>
 class CholeskyGraph : public adf::graph {
-   private:
+   public:
     /**
      * kernel instance.
      * The chain of kernels that will be created and mapped on AIE tiles.
@@ -49,7 +49,6 @@ class CholeskyGraph : public adf::graph {
      **/
     kernel k[NUM];
 
-   public:
     /**
      * The input data to the function.
      **/

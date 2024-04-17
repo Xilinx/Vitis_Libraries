@@ -51,19 +51,18 @@ XFLIB_DIR = $(XF_PROJ_ROOT)
 
 # setting default value
 TARGET ?= aiesim
-HOST_ARCH ?= aarch64
 
 #setting PLATFORM
 ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := xilinx_vck190_base_202310_1
+PLATFORM := vck190
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
 PLATFORM_ALLOWLIST +=  vck190
-PLATFORM_BLOCKLIST += 
+PLATFORM_BLOCKLIST +=  vek280
 
 include ./utils.mk
 TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)
@@ -138,11 +137,13 @@ AIESIMFLAGS += $(EXTRA_AIESIMFLAGS)
 
 #Inclue Required Host Source Files
 ifeq ($(ps_on_x86), on)
-HOST_SRCS += 
-CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2
+HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie/SVD_Complex/ps/host.cpp 
+CXXFLAGS +=  -D __PS_ENABLE_AIE__
+CXXFLAGS +=  -I $(XFLIB_DIR)/L2/tests/aie/SVD_Complex/ps -I $(XFLIB_DIR)/L2/tests/aie/SVD_Complex/aie -I $(SYSROOT)/usr/include/xrt/ -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2
 else
-HOST_SRCS += 
-CXXFLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2
+HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie/SVD_Complex/ps/host.cpp 
+CXXFLAGS +=  -D __PS_ENABLE_AIE__
+CXXFLAGS +=  -I $(XFLIB_DIR)/L2/tests/aie/SVD_Complex/ps -I $(XFLIB_DIR)/L2/tests/aie/SVD_Complex/aie -I $(SYSROOT)/usr/include/xrt/ -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2
 endif
 
 # workaround for opencv
@@ -150,17 +151,54 @@ ifeq (,$(findstring opencv,$(CXXFLAGS)))
 CXXFLAGS += $(XRT_CXXFLAGS)
 endif
 
-EXE_NAME := 
+EXE_NAME := host.exe
 EXE_FILE := $(BUILD_DIR)/$(EXE_NAME)
 EXE_FILE_DEPS := $(HOST_SRCS) $(INSTANCE_FILES)  $(EXE_FILE_DEPS)
 
+HOST_ARGS := $(BUILD_DIR)/test_harness.xclbin $(CUR_DIR)/data/A0.txt $(CUR_DIR)/data/A1.txt $(CUR_DIR)/data/Gld0.txt $(CUR_DIR)/data/Gld1.txt
+ifneq ($(HOST_ARCH), x86)
+PKG_HOST_ARGS = $(foreach args,$(HOST_ARGS),$(subst $(dir $(patsubst %/,%,$(args))),,$(args)))
+endif
+
 ########################## Kernel compiler global settings ##########################
-VPP_FLAGS +=  -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include
+VPP_FLAGS +=  -I $(CUR_DIR)/pl -I $(XFLIB_DIR)/L2/tests/pl/xf_data_mover -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include
+VPP_LDFLAGS += -g --config $(CUR_DIR)/cfg/system.cfg
+VPP_PACKAGE +=   --package.defer_aie_run
 
 ######################### binary container global settings ##########################
+VPP_FLAGS_biDatamover += --hls.clock 250000000:biDatamover
+VPP_FLAGS_splitMerge += --hls.clock 250000000:splitMerge
+ifneq ($(HOST_ARCH_temp), x86)
+VPP_LDFLAGS_harness_pl += --clock.defaultFreqHz 250000000
+else
+VPP_LDFLAGS_harness_pl += --kernel_frequency 250
+endif
+
+ifneq ($(SD_CARD_NEEDED), on)
+BINARY_CONTAINERS += $(BUILD_DIR)/harness_pl.xclbin
+else
+BINARY_CONTAINERS += $(BUILD_DIR)/harness_pl_pkg.$(LINK_TARGET_FMT)
+BINARY_CONTAINERS_PKG += $(BUILD_DIR)/harness_pl.xclbin
+endif
+
+# ################ Setting Rules for Binary Containers (Building Kernels) ################
+$(TEMP_DIR)/biDatamover.xo: $(CUR_DIR)/pl/biDatamover.cpp 
+	$(ECHO) "Compiling Kernel: biDatamover"
+	mkdir -p $(TEMP_DIR)
+	$(VPP) -c $(VPP_FLAGS_biDatamover) $(VPP_FLAGS) -k biDatamover -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+BINARY_CONTAINER_harness_pl_OBJS += $(TEMP_DIR)/biDatamover.xo
+$(TEMP_DIR)/splitMerge.xo: $(CUR_DIR)/pl/splitMerge.cpp 
+	$(ECHO) "Compiling Kernel: splitMerge"
+	mkdir -p $(TEMP_DIR)
+	$(VPP) -c $(VPP_FLAGS_splitMerge) $(VPP_FLAGS) -k splitMerge -I'$(<D)' --temp_dir $(TEMP_DIR) --report_dir $(TEMP_REPORT_DIR) -o $@ $^
+BINARY_CONTAINER_harness_pl_OBJS += $(TEMP_DIR)/splitMerge.xo
+BINARY_CONTAINERS_DEPS += $(BINARY_CONTAINER_harness_pl_OBJS)
+$(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
+	mkdir -p $(BUILD_DIR)
+	$(VPP) -l $(VPP_FLAGS) --temp_dir $(TEMP_DIR) --report_dir $(BUILD_REPORT_DIR)/harness_pl $(VPP_LDFLAGS)  $(VPP_LDFLAGS_harness_pl) $(AIE_LDFLAGS)   -o $@ $^
 
 ############################## Setting Rules for AIE (Building Kernels) ##################
-$(AIE_CONTAINER): pre_build $(CUR_DIR)/aie/aie_graph.cpp 
+$(AIE_CONTAINER): $(CUR_DIR)/aie/aie_graph.cpp 
 	$(ECHO) "Compiling: libadf.a"
 	mkdir -p $(dir $@)
 	$(VPP) -c --mode aie $(AIE_CXXFLAGS) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^)
@@ -196,7 +234,7 @@ endif
 	@echo 'fi' >> $(RUN_SCRIPT)
 	@echo 'echo "INFO: Embedded host run completed."' >> $(RUN_SCRIPT)
 	@echo 'exit $$return_code' >> $(RUN_SCRIPT)
-DATA_FILE := $(custom_data_file)
+DATA_FILE := data/Gld1.txt data/Gld0.txt data/A1.txt data/A0.txt $(custom_data_file)
 DATA_DIR := $(custom_data_dir)
 SD_FILES += $(RUN_SCRIPT)
 SD_FILES += $(EXE_FILE)
@@ -261,12 +299,12 @@ all: check_device check_vpp check_platform mkflag $(RUN_DEPS)
 run: all
 #x86sim
 ifeq ($(TARGET), x86sim)
-	$(X86SIMULATOR) --pkg-dir=$(AIE_PKG_DIR) --input-dir=$(CUR_DIR) --output-dir=$(CUR_DIR)
+	$(X86SIMULATOR) --pkg-dir=$(AIE_PKG_DIR) --input-dir=./ --output-dir=./
 	
 endif
 #aiesim
 ifeq ($(TARGET), aiesim)
-	$(AIESIMULATOR) --pkg-dir=$(AIE_PKG_DIR) --profile --input-dir=$(CUR_DIR) --output-dir=$(CUR_DIR) $(AIESIMFLAGS)
+	$(AIESIMULATOR) --pkg-dir=$(AIE_PKG_DIR) --profile --input-dir=./ --output-dir=./ $(AIESIMFLAGS)
 	
 endif
 #hw_emu
@@ -304,7 +342,16 @@ endif
 endif
 #hw
 ifeq ($(TARGET), hw)
-ifeq ($(HOST_ARCH), x86)
+ifneq (,$(findstring aws-vu9p-f1, $(PLATFORM_NAME)))
+ifeq (,$(wildcard $(BUILD_DIR)/harness_pl.awsxclbin))
+	$(ECHO) "This makefile does not directly support converting .xclbin to .awsxclbin, please refer https://github.com/aws/aws-fpga/blob/master/Vitis/README.md for next operations"
+else
+	$(ECHO) "Running HW using generated .awsxclbin"
+	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
+	$(EXE_FILE) $(subst .xclbin,.awsxclbin,$(HOST_ARGS))
+	
+endif
+else ifeq ($(HOST_ARCH), x86)
 	LD_LIBRARY_PATH=$(LIBRARY_PATH):$$LD_LIBRARY_PATH \
 	$(EXE_FILE) $(HOST_ARGS)
 	

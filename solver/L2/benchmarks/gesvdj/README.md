@@ -93,3 +93,8 @@ The Unroll factor means how many CUs are configured to calculate Matrix in parel
     The unroll factor is limited by 2 factors, the matrix size and URAM port. The maximum unroll factor should be less than half of matrix size, and :math:`2 \times {Unroll}^{2}` should also be less than available URAM on board. Besides, unroll factor can only be the factorization of 2.
 ```
 
+## License
+
+ Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+Terms and Conditions <https://www.amd.com/en/corporate/copyright>

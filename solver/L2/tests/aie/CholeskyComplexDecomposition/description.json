@@ -50,12 +50,14 @@
         {
             "name": "aiesim-launch",
             "target": "aiesim",
-            "sim_options": "--input-dir=$(CUR_DIR) --output-dir=$(CUR_DIR)"
+            "output-dir": "./",
+            "sim_options": "--input-dir=./ --output-dir=./"
         },
         {
             "name": "x86sim-launch",
             "target": "x86sim",
-            "sim_options": "--input-dir=$(CUR_DIR) --output-dir=$(CUR_DIR)"
+            "output-dir": "./",
+            "sim_options": "--input-dir=./ --output-dir=./"
         }
     ],
     "host": {
@@ -129,5 +131,9 @@
             "vitis_aie_x86sim"
         ],
         "category": "canary"
-    }
+    },
+    "gui": true,
+    "aie_types": [
+        "AIE1"
+    ]
 }

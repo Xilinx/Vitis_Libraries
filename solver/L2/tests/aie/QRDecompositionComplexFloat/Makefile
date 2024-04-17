@@ -51,19 +51,18 @@ XFLIB_DIR = $(XF_PROJ_ROOT)
 
 # setting default value
 TARGET ?= aiesim
-HOST_ARCH ?= aarch64
 
 #setting PLATFORM
 ifeq ($(PLATFORM),)
 PLATFORM := $(DEVICE)
 endif
 ifeq ($(PLATFORM),)
-PLATFORM := xilinx_vck190_base_202310_1
+PLATFORM := vck190
 endif
 
 # #################### Checking if PLATFORM in whitelist ############################
 PLATFORM_ALLOWLIST +=  vck190
-PLATFORM_BLOCKLIST += 
+PLATFORM_BLOCKLIST +=  vek280
 
 include ./utils.mk
 TEMP_DIR := _x_temp.$(TARGET).$(PLATFORM_NAME)
@@ -138,12 +137,13 @@ AIESIMFLAGS += $(EXTRA_AIESIMFLAGS)
 
 #Inclue Required Host Source Files
 ifeq ($(ps_on_x86), on)
-HOST_SRCS += $(CUR_DIR)/ps/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
-CXXFLAGS +=  -I $(CUR_DIR)/ps -I $(CUR_DIR)/aie -I $(SYSROOT)/usr/include/xrt/ -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2
+HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie/QRDecompositionComplexFloat/ps/host.cpp 
+CXXFLAGS +=  -D __PS_ENABLE_AIE__
+CXXFLAGS +=  -I $(XFLIB_DIR)/L2/tests/aie/QRDecompositionComplexFloat/ps -I $(XFLIB_DIR)/L2/tests/aie/QRDecompositionComplexFloat/aie -I $(SYSROOT)/usr/include/xrt/ -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2
 else
-HOST_SRCS += $(CUR_DIR)/ps/host.cpp $(CUR_DIR)/Work/ps/c_rts/aie_control_xrt.cpp 
-CXXFLAGS +=  -I $(CUR_DIR)/ps -I $(CUR_DIR)/aie -I $(SYSROOT)/usr/include/xrt/ -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2
-CXXFLAGS += --sysroot=$(SYSROOT)
+HOST_SRCS += $(XFLIB_DIR)/L2/tests/aie/QRDecompositionComplexFloat/ps/host.cpp 
+CXXFLAGS +=  -D __PS_ENABLE_AIE__
+CXXFLAGS +=  -I $(XFLIB_DIR)/L2/tests/aie/QRDecompositionComplexFloat/ps -I $(XFLIB_DIR)/L2/tests/aie/QRDecompositionComplexFloat/aie -I $(SYSROOT)/usr/include/xrt/ -I $(XFLIB_DIR)/L1/include/aie -I $(XFLIB_DIR)/L2/include/aie -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2 -I $(XFLIB_DIR)/L1/include -I $(XFLIB_DIR)/L2/include -I $(XFLIB_DIR)/ext/xcl2
 endif
 
 # workaround for opencv
@@ -193,11 +193,6 @@ $(BINARY_CONTAINERS): $(BINARY_CONTAINERS_DEPS)
 
 ############################## Setting Rules for AIE (Building Kernels) ##################
 $(AIE_CONTAINER): pre_build $(CUR_DIR)/aie/aie_graph.cpp 
-ifeq ($(ps_on_x86), on)
-	$(ECHO) "ps_on_x86: on"
-else
-	$(ECHO) "ps_on_x86: off"
-endif
 	$(ECHO) "Compiling: libadf.a"
 	mkdir -p $(dir $@)
 	$(VPP) -c --mode aie $(AIE_CXXFLAGS) -o $@ $(filter %.s %.c %.cc %.cpp %cxx, $^)
@@ -298,12 +293,12 @@ all: check_device check_vpp check_platform mkflag $(RUN_DEPS)
 run: all
 #x86sim
 ifeq ($(TARGET), x86sim)
-	$(X86SIMULATOR) --pkg-dir=$(AIE_PKG_DIR) --input-dir=./ --output-dir=./
+	$(X86SIMULATOR) --pkg-dir=$(AIE_PKG_DIR) --input-dir=./  --output-dir=./
 	
 endif
 #aiesim
 ifeq ($(TARGET), aiesim)
-	$(AIESIMULATOR) --pkg-dir=$(AIE_PKG_DIR) --profile --input-dir=./ --output-dir=./ $(AIESIMFLAGS)
+	$(AIESIMULATOR) --pkg-dir=$(AIE_PKG_DIR) --profile --input-dir=./  --output-dir=./ $(AIESIMFLAGS)
 	
 endif
 #hw_emu

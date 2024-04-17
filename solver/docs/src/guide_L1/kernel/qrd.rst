@@ -28,7 +28,7 @@ QRD is often used to solve the linear least squares problem and is the basis for
 .. math::
             A = Q R
 
-There are several methods for actually computing the QR decomposition, such as by means of the Gram-Schmidt process, Householder transformations, or Givens rotations. Each has a number of advantages and disadvantages. For more details, refer to `QR_decomposition <https://en.wikipedia.org/wiki/QR_decomposition>`_.
+There are several methods for actually computing the QR decomposition, such as by means of the Gram-Schmidt process, Householder transformations, or Givens rotations. Each has a number of advantages and disadvantages.
 
 In our design, Gram-Schmidt is used.
 

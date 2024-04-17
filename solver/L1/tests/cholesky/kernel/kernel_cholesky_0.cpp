@@ -23,6 +23,6 @@ struct my_cholesky_traits : xf::solver::choleskyTraits<LOWER_TRIANGULAR, DIM, MA
 
 extern int kernel_cholesky_0(hls::stream<MATRIX_IN_T>& matrixAStrm, hls::stream<MATRIX_OUT_T>& matrixLStrm) {
     int ret;
-    xf::solver::cholesky<LOWER_TRIANGULAR, DIM, MATRIX_IN_T, MATRIX_OUT_T>(matrixAStrm, matrixLStrm);
+    ret = xf::solver::cholesky<LOWER_TRIANGULAR, DIM, MATRIX_IN_T, MATRIX_OUT_T>(matrixAStrm, matrixLStrm);
     return ret;
 }

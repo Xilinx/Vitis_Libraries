@@ -20,6 +20,8 @@ AIE APIs Overview
 
 .. include:: ../rst_L2_aie/class_xf_solver_QRDComplexFloat.rst
 
+.. include:: ../rst_L2_aie/class_xf_solver_QRD_Householder_Graph.rst
+
 .. include:: ../rst_L2_aie/class_xf_solver_SVDComplexFloat.rst
 
 .. include:: ../rst_L2_aie/class_xf_solver_PseudoInverseComplexFloat.rst

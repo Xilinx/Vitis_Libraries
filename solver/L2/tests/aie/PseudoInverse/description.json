@@ -3,7 +3,7 @@
     "description": [
         ""
     ],
-    "gui": false,
+    "gui": true,
     "flow": "aie",
     "keywords": [
         "aiecompiler",
@@ -36,12 +36,14 @@
         {
             "name": "aiesim-launch",
             "target": "aiesim",
-            "sim_options": "--input-dir=$(CUR_DIR) --output-dir=$(CUR_DIR)"
+            "output-dir": "./",
+            "sim_options": "--input-dir=./ --output-dir=./"
         },
         {
             "name": "x86sim-launch",
             "target": "x86sim",
-            "sim_options": "--input-dir=$(CUR_DIR) --output-dir=$(CUR_DIR)"
+            "output-dir": "./",
+            "sim_options": "--input-dir=./ --output-dir=./"
         }
     ],
     "aiecompiler": {
@@ -71,7 +73,8 @@
                         "LIB_DIR/../dsp/L1/src/aie/matrix_mult.cpp",
                         "LIB_DIR/../dsp/L1/src/aie/matrix_mult_tiler.cpp",
                         "LIB_DIR/../dsp/L1/src/aie/matrix_mult_untiler.cpp",
-                        "LIB_DIR/../dsp/L1/src/aie/matrix_vector_mul.cpp"],
+                        "LIB_DIR/../dsp/L1/src/aie/matrix_vector_mul.cpp"
+                    ],
                     "config": "aie.cfg"
                 }
             ]
@@ -95,5 +98,8 @@
             "vitis_aie_x86sim"
         ],
         "category": "canary"
-    }
+    },
+    "aie_types": [
+        "AIE1"
+    ]
 }

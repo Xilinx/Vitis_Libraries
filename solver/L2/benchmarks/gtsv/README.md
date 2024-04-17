@@ -95,3 +95,9 @@ The Unroll factor means how many CUs are configured to calculate Matrix in parel
     +-------------+--------+------+------+-----+----------+--------+------------------+-----------------+
     |  1024x1024  |   16   |  128 |  16  | 960 |  260297  | 223889 |      16.6        |      291        |
     +-------------+--------+------+------+-----+----------+--------+------------------+-----------------+
+
+## License
+
+ Copyright © 2019–2023 Advanced Micro Devices, Inc
+
+Terms and Conditions <https://www.amd.com/en/corporate/copyright>

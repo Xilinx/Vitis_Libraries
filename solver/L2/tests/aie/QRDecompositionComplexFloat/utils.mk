@@ -23,8 +23,6 @@ REPORT := no
 PROFILE := no
 DEBUG := no
 
-#Get PLATFORM_NAME by PLATFORM
-PLATFORM_NAME = $(strip $(patsubst %.xpfm, % , $(shell basename $(PLATFORM))))
 
 #'estimate' for estimate report generation
 #'system' for system report generation
@@ -115,6 +113,8 @@ endif # 3.2
 endif # 3
 endif
 XPLATFORM := $(firstword $(XPLATFORM))
+#Get PLATFORM_NAME by PLATFORM
+PLATFORM_NAME = $(strip $(patsubst %.xpfm, % , $(shell basename $(XPLATFORM))))
 
 define MSG_PLATFORM
 No platform matched pattern '$(PLATFORM)'.
