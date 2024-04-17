@@ -22,9 +22,6 @@ Release Note
 Known Issue
 ------------
 
-Benchmark cases `L1/benchmarks/aes256CbcDecrypt_sc` and `L1/benchmarks/aes256CbcEncrypt_sc` failed building on CentOS 7.9.
-It is going to be fixed in the next release.
-
 2022.2
 ------
 
